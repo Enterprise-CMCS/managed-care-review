@@ -1,4 +1,5 @@
 import { spawn } from 'child_process'
+import yargs from 'yargs'
 
 console.log('Hello we devin');
 
@@ -114,8 +115,31 @@ class LabeledProcessRunner {
 
 }
 
-const runner = new LabeledProcessRunner()
+async function run_all_locally() {
+	const runner = new LabeledProcessRunner()
 
-run_db_locally(runner)
-run_api_locally(runner)
-run_fe_locally(runner)
+	run_db_locally(runner)
+	run_api_locally(runner)
+	run_fe_locally(runner)
+}
+
+function deploy_infra() {
+	console.log("INFRA YA")
+	
+}
+
+console.log("yot")
+
+const argv = yargs(process.argv.slice(2))
+	.command('local', 'run code locally', () => {}, (argv) => {
+		run_all_locally()
+	})
+	.command('test', 'run all tests', () => {}, (argv) => {
+		console.log("TESTING")
+	})
+	.command('deploy', 'deploy infra to aws', () => {}, (argv) => {
+		deploy_infra()
+	})
+	.argv
+
+console.log("fin.")
