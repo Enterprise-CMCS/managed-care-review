@@ -22,8 +22,9 @@ async function run_api_locally(runner: LabeledProcessRunner) {
 async function run_fe_locally(runner: LabeledProcessRunner) {
 
 	await runner.run_command_and_output('fe deps', ['yarn', 'install'], 'services/ui-src')
-	await runner.run_command_and_output('local conf', ['./configureLocal.sh', 'main'], 'services/ui-src')
+	await runner.run_command_and_output('local conf', ['./env.sh', 'main'], 'services/ui-src')
 
+	runner.run_command_and_output('s3', ['serverless', '--stage', 'main', 's3', 'start'], 'services/ui')
 	runner.run_command_and_output('frontend', ['npm', 'start'], 'services/ui-src')
 	
 }
@@ -56,7 +57,7 @@ class LabeledProcessRunner {
 			}
 		}
 
-		return `\x1b[38;5;${color}m|${prefix.padEnd(maxLength)}|\x1b[0m`
+		return `\x1b[38;5;${color}m|${prefix.padStart(maxLength)}|\x1b[0m`
 	}
 
 	async run_command_and_output(prefix: string, cmd: string[], cwd: string | null) {
@@ -71,6 +72,13 @@ class LabeledProcessRunner {
 
 		// TODO: these should be set by a .env file
 		proc_opts['env']['AWS_PROFILE'] = 'dev'
+		proc_opts['env']['AMENDMENTS_TABLE_NAME'] = 'main-amendments'
+		proc_opts['env']['AMENDMENTS_TABLE_ARN'] = 'lamertable.arn'
+
+		proc_opts['env']['AMENDMENTS_COUNTER_TABLE_NAME'] = 'main-amendments-atomic-counter'
+		proc_opts['env']['AMENDMENTS_COUNTER_TABLE_ARN'] = 'lamertable.arn'
+
+
 		proc_opts['env']['DYNAMODB_URL'] = 'http://localhost:8000'
 		proc_opts['env']['API_URL'] = 'http://localhost:3030/main'
 

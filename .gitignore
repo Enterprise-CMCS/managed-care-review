@@ -5,3 +5,4 @@ node_modules
 testcafe_results
 .DS_Store
 dev.js
+services/ui/local_buckets

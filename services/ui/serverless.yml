@@ -1,7 +1,13 @@
 service: ui
 
+plugins:
+  - serverless-s3-local
+
 custom:
   stage: ${opt:stage, self:provider.stage}
+  s3:
+    directory: ./local_buckets
+    cors: ./local_cors.xml
 
 provider:
   name: aws
@@ -35,6 +41,7 @@ resources:
     S3Bucket:
       Type: AWS::S3::Bucket
       Properties:
+        BucketName: ${self:custom.stage}-attachments
         WebsiteConfiguration:
           IndexDocument: index.html
           ErrorDocument: index.html
