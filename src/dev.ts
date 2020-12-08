@@ -1,13 +1,14 @@
-import { spawn, spawnSync } from 'child_process'
-import { readFileSync, existsSync, copyFileSync } from 'fs'
+import { spawnSync } from 'child_process'
+import * as fs from 'fs'
 import yargs from 'yargs'
-import { config as dotenvconf } from 'dotenv'
+import * as dotenv from 'dotenv'
+import { LabeledProcessRunner } from './runner.js'
 
 // load .env
-dotenvconf()
+dotenv.config()
 
 // ensure_dev_deps checks that node is at the right version and yarn is installed. None of the other jobs will work without them.
-async function ensure_dev_deps(runner: LabeledProcessRunner) {
+async function ensure_dev_deps() {
 	const node_version = spawnSync('node', ['-v'])
 	let active_node_version = ''
 	if (node_version.error) {
@@ -20,7 +21,7 @@ async function ensure_dev_deps(runner: LabeledProcessRunner) {
 	}
 
 	// .nvmrc is how nvm tracks the expected version for a project
-	const expected_node_version = readFileSync('./.nvmrc').toString().trim()
+	const expected_node_version = fs.readFileSync('./.nvmrc').toString().trim()
 
 	if (expected_node_version !== active_node_version) {
 		console.log(`\n\tUh Oh! The current node version: ${active_node_version} does not match the required version: ${expected_node_version}` );
@@ -43,10 +44,10 @@ async function ensure_dev_deps(runner: LabeledProcessRunner) {
 	// Ignoring yarn version for now. If we wanted to standardize here would be a place to do it.
 
 	// if .env doesn't exist, copy .env_example into place and rerun dotenv
-	if (!existsSync('./.env')) {
+	if (!fs.existsSync('./.env')) {
 		console.log('\tConfiguring dev environment by copying over .env_example to .env\n\n')
-		copyFileSync('./.env_example', './.env')
-		dotenvconf()
+		fs.copyFileSync('./.env_example', './.env')
+		dotenv.config()
 	}
 
 }
@@ -80,94 +81,12 @@ async function run_fe_locally(runner: LabeledProcessRunner) {
 	
 }
 
-class LabeledProcessRunner {
-	private prefixColors: Record<string, string> = {}
-	private colors = ['1', '2', '3', '4', '5', '6', '9', '10', '11', '12', '13', '14']
-
-	private formattedPrefix(prefix: string): string {
-		let color: string
-
-		if (prefix !in this.prefixColors) {
-			color = this.prefixColors[prefix]
-		} else {
-			const frontColor = this.colors.shift()
-			if (frontColor != undefined) {
-				color = frontColor
-				this.colors.push(color)
-				this.prefixColors[prefix] = color
-			} else {
-				console.log("BAD NEWS BEARS")
-				throw('dev.ts programming error')
-			}
-		}
-
-		let maxLength = 0
-		for (let pre in this.prefixColors) {
-			if (pre.length > maxLength) {
-				maxLength = pre.length
-			}
-		}
-
-		return `\x1b[38;5;${color}m|${prefix.padStart(maxLength)}|\x1b[0m`
-	}
-
-	async run_command_and_output(prefix: string, cmd: string[], cwd: string | null) {
-
-		const proc_opts: Record<string, any> = {}
-
-		if (cwd) {
-			proc_opts['cwd'] = cwd
-		}
-
-		// proc_opts['env'] = Object.assign({}, process.env)
-
-		const command = cmd[0]
-		const args = cmd.slice(1)
-
-		const proc = spawn(command, args, proc_opts)
-		const startingPrefix = this.formattedPrefix(prefix)
-		process.stdout.write(`${startingPrefix} Started\n`);
-
-		proc.stdout.on('data', data => {
-			const paddedPrefix = this.formattedPrefix(prefix)
-
-			for (let line of data.toString().split('\n')) {
-				process.stdout.write(`${paddedPrefix} ${line}\n`);
-			}
-		});
-
-		proc.stderr.on('data', data => {
-			const paddedPrefix = this.formattedPrefix(prefix)
-
-			for (let line of data.toString().split('\n')) {
-				process.stdout.write(`${paddedPrefix} ${line}\n`);
-			}
-		});
-
-		return new Promise<void>((resolve, reject) => {
-			const paddedPrefix = this.formattedPrefix(prefix)
-			proc.on('error', (error) => {
-				const paddedPrefix = this.formattedPrefix(prefix)
-				process.stdout.write(`${paddedPrefix} AN ERROR: ${error}\n`)
-				reject(error)
-			})
-
-			proc.on('close', code => {
-				const paddedPrefix = this.formattedPrefix(prefix)
-				process.stdout.write(`${paddedPrefix} Exiting: ${code}\n`);
-				resolve()
-			})
-		})
-	}
-
-}
-
 // run_all_locally runs all of our services locally
 async function run_all_locally(onlyDeps: boolean) {
 	const runner = new LabeledProcessRunner()
 
 	try {
-		await ensure_dev_deps(runner)
+		await ensure_dev_deps()
 
 		if (!onlyDeps) {	
 			run_db_locally(runner)
@@ -182,7 +101,7 @@ async function run_all_locally(onlyDeps: boolean) {
 
 // The command definitons in yargs
 // All valid arguments to dev should be enumerated here, this is the entrypoint to the script
-const argv = yargs(process.argv.slice(2))
+yargs(process.argv.slice(2))
 	.command('local', 'run system locally', {
 		'only-deps': {
 			type: 'boolean',
@@ -191,7 +110,7 @@ const argv = yargs(process.argv.slice(2))
 	}, (argv) => {
 		run_all_locally(argv['only-deps'])
 	})
-	.command('test', 'run all tests', () => {}, (argv) => {
+	.command('test', 'run all tests', () => {}, () => {
 		console.log("Testing 1. 2. 3.");
 	})
 	.argv
