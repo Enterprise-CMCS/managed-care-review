@@ -6,3 +6,4 @@ testcafe_results
 .DS_Store
 dev.js
 services/ui/local_buckets
+/.env

@@ -1,9 +1,58 @@
-import { spawn } from 'child_process'
+import { spawn, spawnSync } from 'child_process'
+import { readFileSync, existsSync, copyFileSync } from 'fs'
 import yargs from 'yargs'
+import { config as dotenvconf } from 'dotenv'
 
-console.log('Hello we devin');
+// load .env
+dotenvconf()
+
+// ensure_dev_deps checks that node is at the right version and yarn is installed. None of the other jobs will work without them.
+async function ensure_dev_deps(runner: LabeledProcessRunner) {
+	const node_version = spawnSync('node', ['-v'])
+	let active_node_version = ''
+	if (node_version.error) {
+		// Assume node is not installed, but there are probably other ways this command could fail.
+		active_node_version = 'UNINSTALLED'
+	} else if (node_version.status !== 0) {
+		throw new Error(`unexpected error getting node version:\n${node_version.stdout}\n${node_version.stderr}`)
+	} else {
+		active_node_version = node_version.stdout.toString().trim()
+	}
+
+	// .nvmrc is how nvm tracks the expected version for a project
+	const expected_node_version = readFileSync('./.nvmrc').toString().trim()
+
+	if (expected_node_version !== active_node_version) {
+		console.log(`\n\tUh Oh! The current node version: ${active_node_version} does not match the required version: ${expected_node_version}` );
+		console.log(`\tIf you have installed nvm, simply running 'nvm use' in this directory should solve the problem`);
+		console.log(`\tIf you don't have nvm yet, the instructions here should get you started. https://github.com/nvm-sh/nvm#installing-and-updating`);
+		console.log(`\t** Don't forget to add the bit to your shell profile **\n`);
+
+		throw new Error('node version mismatch');
+	}
+
+	const yarn_version = spawnSync('yarn', ['-v'])
+	if (yarn_version.error) {
+		console.log(`\n\tOh dear. You don't have yarn installed. That's a requirement I'm afraid, but it's easy to fix.` );
+		console.log(`\tOn macOS, a simple 'brew install yarn' should do the trick.\n`);
+
+		throw new Error('yarn not installed');
+	} else if (yarn_version.status !== 0) {
+		throw new Error(`unexpected error getting yarn version:\n${yarn_version.stdout}\n${yarn_version.stderr}`)
+	}
+	// Ignoring yarn version for now. If we wanted to standardize here would be a place to do it.
+
+	// if .env doesn't exist, copy .env_example into place and rerun dotenv
+	if (!existsSync('./.env')) {
+		console.log('\tConfiguring dev environment by copying over .env_example to .env\n\n')
+		copyFileSync('./.env_example', './.env')
+		dotenvconf()
+	}
+
+}
 
 
+// run_db_locally runs the local db
 async function run_db_locally(runner: LabeledProcessRunner) {
 
 	await runner.run_command_and_output('dynamo yarn', ['yarn', 'install'], 'services/database')
@@ -12,6 +61,7 @@ async function run_db_locally(runner: LabeledProcessRunner) {
 
 }
 
+// run_api_locally uses the serverless-offline plugin to run the api lambdas locally
 async function run_api_locally(runner: LabeledProcessRunner) {
 
 	await runner.run_command_and_output('server yarn', ['yarn', 'install'], 'services/app-api')
@@ -19,6 +69,7 @@ async function run_api_locally(runner: LabeledProcessRunner) {
 	
 }
 
+// run_fe_locally runs the frontend and its dependencies locally
 async function run_fe_locally(runner: LabeledProcessRunner) {
 
 	await runner.run_command_and_output('fe deps', ['yarn', 'install'], 'services/ui-src')
@@ -68,28 +119,16 @@ class LabeledProcessRunner {
 			proc_opts['cwd'] = cwd
 		}
 
-		proc_opts['env'] = Object.assign({}, process.env)
-
-		// TODO: these should be set by a .env file
-		proc_opts['env']['AWS_PROFILE'] = 'dev'
-		proc_opts['env']['AMENDMENTS_TABLE_NAME'] = 'main-amendments'
-		proc_opts['env']['AMENDMENTS_TABLE_ARN'] = 'lamertable.arn'
-
-		proc_opts['env']['AMENDMENTS_COUNTER_TABLE_NAME'] = 'main-amendments-atomic-counter'
-		proc_opts['env']['AMENDMENTS_COUNTER_TABLE_ARN'] = 'lamertable.arn'
-
-
-		proc_opts['env']['DYNAMODB_URL'] = 'http://localhost:8000'
-		proc_opts['env']['API_URL'] = 'http://localhost:3030/main'
+		// proc_opts['env'] = Object.assign({}, process.env)
 
 		const command = cmd[0]
 		const args = cmd.slice(1)
 
-		const fe_yarn = spawn(command, args, proc_opts)
+		const proc = spawn(command, args, proc_opts)
 		const startingPrefix = this.formattedPrefix(prefix)
 		process.stdout.write(`${startingPrefix} Started\n`);
 
-		fe_yarn.stdout.on('data', data => {
+		proc.stdout.on('data', data => {
 			const paddedPrefix = this.formattedPrefix(prefix)
 
 			for (let line of data.toString().split('\n')) {
@@ -97,7 +136,7 @@ class LabeledProcessRunner {
 			}
 		});
 
-		fe_yarn.stderr.on('data', data => {
+		proc.stderr.on('data', data => {
 			const paddedPrefix = this.formattedPrefix(prefix)
 
 			for (let line of data.toString().split('\n')) {
@@ -107,13 +146,13 @@ class LabeledProcessRunner {
 
 		return new Promise<void>((resolve, reject) => {
 			const paddedPrefix = this.formattedPrefix(prefix)
-			fe_yarn.on('error', (error) => {
+			proc.on('error', (error) => {
 				const paddedPrefix = this.formattedPrefix(prefix)
 				process.stdout.write(`${paddedPrefix} AN ERROR: ${error}\n`)
 				reject(error)
 			})
 
-			fe_yarn.on('close', code => {
+			proc.on('close', code => {
 				const paddedPrefix = this.formattedPrefix(prefix)
 				process.stdout.write(`${paddedPrefix} Exiting: ${code}\n`);
 				resolve()
@@ -123,31 +162,36 @@ class LabeledProcessRunner {
 
 }
 
-async function run_all_locally() {
+// run_all_locally runs all of our services locally
+async function run_all_locally(onlyDeps: boolean) {
 	const runner = new LabeledProcessRunner()
 
-	run_db_locally(runner)
-	run_api_locally(runner)
-	run_fe_locally(runner)
+	try {
+		await ensure_dev_deps(runner)
+
+		if (!onlyDeps) {	
+			run_db_locally(runner)
+			run_api_locally(runner)
+			run_fe_locally(runner)
+		}
+
+	} catch (error) {
+		console.log("Error attempting to run locally: ", error)
+	}
 }
 
-function deploy_infra() {
-	console.log("INFRA YA")
-	
-}
-
-console.log("yot")
-
+// The command definitons in yargs
+// All valid arguments to dev should be enumerated here, this is the entrypoint to the script
 const argv = yargs(process.argv.slice(2))
-	.command('local', 'run code locally', () => {}, (argv) => {
-		run_all_locally()
+	.command('local', 'run system locally', {
+		'only-deps': {
+			type: 'boolean',
+			default: false
+		}
+	}, (argv) => {
+		run_all_locally(argv['only-deps'])
 	})
 	.command('test', 'run all tests', () => {}, (argv) => {
-		console.log("TESTING")
-	})
-	.command('deploy', 'deploy infra to aws', () => {}, (argv) => {
-		deploy_infra()
+		console.log("Testing 1. 2. 3.");
 	})
 	.argv
-
-console.log("fin.")
