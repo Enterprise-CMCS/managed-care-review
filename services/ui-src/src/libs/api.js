@@ -31,7 +31,6 @@ export function getAmendment(id) {
 export function createAmendment(body) {
 	const opts = requestOptions()
 	opts.body = body;
-	console.log("UPlodups", opts)
     return API.post("amendments", "/amendments", opts);
 }
 

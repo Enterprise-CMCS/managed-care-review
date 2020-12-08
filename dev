@@ -13,7 +13,10 @@ fi
 
 # check node version
 if ! diff .nvmrc <(node -v) > /dev/null ; then
-	echo "node version does not match the version in .nvmrc, follow instructions in README to match"
+	echo "Uh Oh! The current node version does not match the version required in .nvmrc"
+	echo "If you have installed nvm, simply running 'nvm use' in this directory should solve the problem"
+	echo "If you don't have nvm yet, the instructions in the README should sort you."
+	echo "** Don't forget to add the bit to your shell profile **"
 	exit 1
 fi
 
@@ -34,6 +37,11 @@ fi
 if [ "yarn.lock" -nt ".yarn_install" ]; then
 	yarn install
 	touch .yarn_install
+fi
+
+# if .env doesn't exist, copy .env_example there
+if [ ! -f .env ]; then 
+	cp .env_example .env
 fi
 
 # build and run dev.ts

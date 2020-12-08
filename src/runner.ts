@@ -28,7 +28,7 @@ export default class LabeledProcessRunner {
 			}
 		}
 
-		return `\x1b[38;5;${color}m|${prefix.padStart(maxLength)}|\x1b[0m`
+		return `\x1b[38;5;${color}m ${prefix.padStart(maxLength)}|\x1b[0m`
 	}
 
 	async run_command_and_output(prefix: string, cmd: string[], cwd: string | null) {
@@ -39,14 +39,12 @@ export default class LabeledProcessRunner {
 			proc_opts['cwd'] = cwd
 		}
 
-		// proc_opts['env'] = Object.assign({}, process.env)
-
 		const command = cmd[0]
 		const args = cmd.slice(1)
 
 		const proc = spawn(command, args, proc_opts)
 		const startingPrefix = this.formattedPrefix(prefix)
-		process.stdout.write(`${startingPrefix} Started\n`);
+		process.stdout.write(`${startingPrefix} Running: ${cmd.join(' ')}\n`);
 
 		proc.stdout.on('data', data => {
 			const paddedPrefix = this.formattedPrefix(prefix)
@@ -67,13 +65,13 @@ export default class LabeledProcessRunner {
 		return new Promise<void>((resolve, reject) => {
 			proc.on('error', (error) => {
 				const paddedPrefix = this.formattedPrefix(prefix)
-				process.stdout.write(`${paddedPrefix} AN ERROR: ${error}\n`)
+				process.stdout.write(`${paddedPrefix} A PROCESS ERROR: ${error}\n`)
 				reject(error)
 			})
 
 			proc.on('close', code => {
 				const paddedPrefix = this.formattedPrefix(prefix)
-				process.stdout.write(`${paddedPrefix} Exiting: ${code}\n`);
+				process.stdout.write(`${paddedPrefix} Exit: ${code}\n`);
 				resolve()
 			})
 		})
