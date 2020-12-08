@@ -9,3 +9,5 @@ build_dev
 tsconfig.tsbuildinfo
 services/ui/local_buckets
 /.env
+tests_output
+*.log
