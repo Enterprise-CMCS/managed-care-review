@@ -1,6 +1,6 @@
 import { spawn } from 'child_process'
 
-export class LabeledProcessRunner {
+export default class LabeledProcessRunner {
 	private prefixColors: Record<string, string> = {}
 	private colors = ['1', '2', '3', '4', '5', '6', '9', '10', '11', '12', '13', '14']
 

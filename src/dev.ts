@@ -2,7 +2,7 @@ import { spawnSync } from 'child_process'
 import * as fs from 'fs'
 import yargs from 'yargs'
 import * as dotenv from 'dotenv'
-import { LabeledProcessRunner } from './runner.js'
+import LabeledProcessRunner from './runner.js'
 
 // load .env
 dotenv.config()
