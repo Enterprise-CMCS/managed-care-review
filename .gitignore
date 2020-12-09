@@ -7,7 +7,7 @@ testcafe_results
 .DS_Store
 build_dev
 tsconfig.tsbuildinfo
-services/ui/local_buckets
+services/uploads/local_buckets
 /.env
 tests_output
 *.log
