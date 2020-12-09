@@ -26,7 +26,7 @@ async function run_api_locally(runner: LabeledProcessRunner) {
 async function run_fe_locally(runner: LabeledProcessRunner) {
 
 	// S3
-	await runner.run_command_and_output('ui svls', ['serverless', 'plugin', 'install', '--name', 'serverless-s3-local'], 'services/ui')
+	await runner.run_command_and_output('s3 yarn', ['yarn', 'install'], 'services/ui')
 	runner.run_command_and_output('s3', ['serverless', '--stage', 'local', 's3', 'start'], 'services/ui')
 
 	await runner.run_command_and_output('ui deps', ['yarn', 'install'], 'services/ui-src')
