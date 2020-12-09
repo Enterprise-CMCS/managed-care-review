@@ -47,7 +47,7 @@ function App() {
                 <Navbar fluid collapseOnSelect>
                     <Navbar.Header>
                         <Navbar.Brand>
-                            <Link to="/">APS Home</Link>
+                            <Link to="/">MCRRS Home</Link>
                         </Navbar.Brand>
                         <Navbar.Toggle />
                     </Navbar.Header>
