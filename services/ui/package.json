@@ -8,7 +8,8 @@
   },
   "author": "",
   "license": "CC0-1.0",
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
     "serverless-s3-local": "^0.6.7"
   }
 }

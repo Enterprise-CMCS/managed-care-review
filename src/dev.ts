@@ -9,7 +9,7 @@ dotenv.config()
 async function run_db_locally(runner: LabeledProcessRunner) {
 
 	await runner.run_command_and_output('db yarn', ['yarn', 'install'], 'services/database')
-	await runner.run_command_and_output('db deps', ['serverless', 'dynamodb', 'install'], 'services/database')
+	await runner.run_command_and_output('db svls', ['serverless', 'dynamodb', 'install'], 'services/database')
 	runner.run_command_and_output('db', ['serverless', '--stage', 'local', 'dynamodb', 'start', '--migrate'], 'services/database')
 
 }
@@ -25,10 +25,13 @@ async function run_api_locally(runner: LabeledProcessRunner) {
 // run_fe_locally runs the frontend and its dependencies locally
 async function run_fe_locally(runner: LabeledProcessRunner) {
 
+	// S3
+	await runner.run_command_and_output('ui svls', ['serverless', 'plugin', 'install', '--name', 'serverless-s3-local'], 'services/ui')
+	runner.run_command_and_output('s3', ['serverless', '--stage', 'local', 's3', 'start'], 'services/ui')
+
 	await runner.run_command_and_output('ui deps', ['yarn', 'install'], 'services/ui-src')
 	await runner.run_command_and_output('ui conf', ['./env.sh', 'local'], 'services/ui-src')
 
-	runner.run_command_and_output('s3', ['serverless', '--stage', 'local', 's3', 'start'], 'services/ui')
 	runner.run_command_and_output('ui', ['npm', 'start'], 'services/ui-src')
 	
 }

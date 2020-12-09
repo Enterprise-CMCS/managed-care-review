@@ -62,7 +62,7 @@ nvm use
 brew install yarn
 
 # run dev
-./dev
+./dev local
 ```
 
 ## Dependencies

@@ -2,7 +2,6 @@ service: ui
 
 plugins:
   - serverless-s3-local
-
 custom:
   stage: ${opt:stage, self:provider.stage}
   s3:
