@@ -3,11 +3,10 @@ name: Deploy
 
 on:
   push:
-    branches:
-      - '!main'
-      - '!wml-to-prod'
-      - '*'
-      - '!skipci*'
+    branches-ignore:
+      - 'main'
+      - 'wml-to-prod'
+      - 'skipci*'
 
 jobs:
   deploy:
