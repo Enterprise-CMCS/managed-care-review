@@ -102,6 +102,7 @@ jobs:
       - name: Label Deploy
         run: echo "and we made it past the first test"
       - name: set val aws keys
+        run: ./.github/build_vars.sh set_values
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.VAL_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.VAL_AWS_SECRET_ACCESS_KEY }}
