@@ -11,8 +11,6 @@ plugins:
 custom:
   stage: ${opt:stage, self:provider.stage}
   tableStreamArn: ${cf:database-${self:custom.stage}.AmendmentsTableStreamArn}
-  elasticSearchDomainEndpoint: ${cf:elasticsearch-${self:custom.stage}.ElasticSearchDomainEndpoint}
-  elasticSearchDomainArn: ${cf:elasticsearch-${self:custom.stage}.ElasticSearchDomainArn}
   emailSource: ${opt:emailSource, env:SES_SOURCE_EMAIL_ADDRESS, "admin@example.com"}
   reviewerEmail: ${opt:reviewTeamEmail, env:SES_REVIEW_TEAM_EMAIL_ADDRESS, "reviewteam@example.com"}
   iamPath: ${env:IAM_PATH, "/"}
@@ -24,19 +22,6 @@ provider:
   stage: dev
 
 functions:
-  elasticsearchIndexer:
-    handler: handlers/elasticsearchIndexer.handler
-    events:
-      - stream:
-          arn: ${self:custom.tableStreamArn}
-          startingPosition: LATEST
-          maximumRetryAttempts: 2
-    role: LambdaElasticSearchIndexerRole
-    environment:
-      ES_ENDPOINT_URL: https://${self:custom.elasticSearchDomainEndpoint}
-      INDEX: amendments
-      TYPE: json
-    maximumRetryAttempts: 2
   emailSubmitter:
     handler: handlers/emailSubmitter.handler
     events:
@@ -69,50 +54,6 @@ resources:
           - ""
           - ${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
   Resources:
-    LambdaElasticSearchIndexerRole: # Why isn't this with the function as an iamRoleStatements?  https://github.com/serverless/serverless/issues/6485
-      Type: 'AWS::IAM::Role'
-      Properties:
-        AssumeRolePolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-          - Effect: 'Allow'
-            Principal:
-              Service: 'lambda.amazonaws.com'
-            Action: 'sts:AssumeRole'
-        Path: ${self:custom.iamPath}
-        PermissionsBoundary:
-          Fn::If:
-            - CreatePermissionsBoundary
-            - Fn::Join:
-              - ''
-              -
-                - 'arn:aws:iam::'
-                - Ref: AWS::AccountId
-                - ':policy'
-                - '${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}'
-            - Ref: AWS::NoValue
-        Policies:
-          - PolicyName: 'LambdaRolePolicy'
-            PolicyDocument:
-              Version: '2012-10-17'
-              Statement:
-              - Effect: 'Allow'
-                Action:
-                - logs:CreateLogGroup
-                - logs:CreateLogStream
-                - logs:PutLogEvents
-                Resource: 'arn:aws:logs:*:*:*'
-              - Effect: 'Allow'
-                Action:
-                - dynamodb:DescribeStream
-                - dynamodb:GetRecords
-                - dynamodb:GetShardIterator
-                - dynamodb:ListStreams
-                Resource: ${self:custom.tableStreamArn}
-              - Effect: 'Allow'
-                Action:
-                - es:ESHttp*
-                Resource: ${self:custom.elasticSearchDomainArn}/*
     LambdaEmailerRole: # Why isn't this with the function as an iamRoleStatements?  https://github.com/serverless/serverless/issues/6485
       Type: 'AWS::IAM::Role'
       Properties:
