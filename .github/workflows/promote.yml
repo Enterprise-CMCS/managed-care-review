@@ -121,3 +121,25 @@ jobs:
         with:
           name: test_results
           path: tests/nightwatch/tests_output
+      - name: Label PRODN Deploy
+        run: echo "and we made it past the second test"
+      - name: set prod aws keys
+        run: ./.github/build_vars.sh set_values
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
+      - name: lock prod
+        run: echo "TODO Lock prod branch deploy"
+      - name: Deploy to prod
+        run: ./deploy.sh prod
+      - name: Run Nightwatch suite on prod
+        run: |
+          pushd services
+          export APPLICATION_ENDPOINT=`./output.sh ui CloudFrontEndpointUrl prod`
+          popd
+          ./test.sh
+      - name: Store test reults
+        uses: actions/upload-artifact@v2
+        with:
+          name: test_results
+          path: tests/nightwatch/tests_output
