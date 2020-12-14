@@ -28,7 +28,6 @@ resources:
     AttachmentsBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: ${self:custom.stage}-uploads
         # Set the CORS policy
         CorsConfiguration:
           CorsRules:
