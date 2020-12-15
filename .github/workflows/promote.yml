@@ -4,7 +4,7 @@ name: Promote
 on:
   push:
     branches:
-      - 'wml-to-prod'
+      - 'main'
 
 jobs:
   deploy:
@@ -12,8 +12,6 @@ jobs:
     steps:
       - name: set branch_name
         run: echo "branch_name=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-      - name: WE ARE ON IT
-        run: echo "this is development"
       - name: Check branch name is a legal serverless stage name
         run: |
           if [[ ! $branch_name =~ ^[a-zA-Z][a-zA-Z0-9-]*$ ]] || [[ $branch_name -gt 128 ]]; then
@@ -99,15 +97,11 @@ jobs:
         with:
           name: test_results
           path: tests/nightwatch/tests_output
-      - name: Label Deploy
-        run: echo "and we made it past the first test"
       - name: set val aws keys
         run: ./.github/build_vars.sh set_values
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.VAL_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.VAL_AWS_SECRET_ACCESS_KEY }}
-      - name: lock val
-        run: echo "TODO Lock val branch deploy"
       - name: Deploy to val
         run: ./deploy.sh val
       - name: Run Nightwatch suite on val
@@ -121,15 +115,11 @@ jobs:
         with:
           name: test_results
           path: tests/nightwatch/tests_output
-      - name: Label PRODN Deploy
-        run: echo "and we made it past the second test"
       - name: set prod aws keys
         run: ./.github/build_vars.sh set_values
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
-      - name: lock prod
-        run: echo "TODO Lock prod branch deploy"
       - name: Deploy to prod
         run: ./deploy.sh prod
       - name: Run Nightwatch suite on prod
