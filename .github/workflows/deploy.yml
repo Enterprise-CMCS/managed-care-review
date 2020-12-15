@@ -5,7 +5,6 @@ on:
   push:
     branches-ignore:
       - 'main'
-      - 'wml-to-prod'
       - 'skipci*'
 
 jobs:
