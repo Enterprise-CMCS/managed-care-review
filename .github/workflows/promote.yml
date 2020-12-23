@@ -1,11 +1,10 @@
 
-name: Deploy
+name: Promote
 
 on:
   push:
-    branches-ignore:
+    branches:
       - 'main'
-      - 'skipci*'
 
 jobs:
   deploy:
@@ -82,7 +81,7 @@ jobs:
       - name: set path
         run: |
           echo "PATH=$(pwd)/node_modules/.bin/:$PATH" >> $GITHUB_ENV
-      - name: deploy
+      - name: deploy to dev
         run: |
           # When deploying multiple copies of this quickstart to the same AWS Account (not ideal), a prefix helps prevent stepping on each other.
           # This can optionally be set as an GitHub Actions Secret
@@ -91,6 +90,42 @@ jobs:
         run: |
           pushd services
           export APPLICATION_ENDPOINT=`./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name`
+          popd
+          ./test.sh
+      - name: Store test reults
+        uses: actions/upload-artifact@v2
+        with:
+          name: test_results
+          path: tests/nightwatch/tests_output
+      - name: set val aws keys
+        run: ./.github/build_vars.sh set_values
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.VAL_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.VAL_AWS_SECRET_ACCESS_KEY }}
+      - name: Deploy to val
+        run: ./deploy.sh val
+      - name: Run Nightwatch suite on val
+        run: |
+          pushd services
+          export APPLICATION_ENDPOINT=`./output.sh ui CloudFrontEndpointUrl val`
+          popd
+          ./test.sh
+      - name: Store test reults
+        uses: actions/upload-artifact@v2
+        with:
+          name: test_results
+          path: tests/nightwatch/tests_output
+      - name: set prod aws keys
+        run: ./.github/build_vars.sh set_values
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
+      - name: Deploy to prod
+        run: ./deploy.sh prod
+      - name: Run Nightwatch suite on prod
+        run: |
+          pushd services
+          export APPLICATION_ENDPOINT=`./output.sh ui CloudFrontEndpointUrl prod`
           popd
           ./test.sh
       - name: Store test reults
