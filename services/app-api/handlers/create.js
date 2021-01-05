@@ -3,16 +3,19 @@ import handler from "./../libs/handler-lib";
 import dynamoDb from "./../libs/dynamodb-lib";
 
 export const main = handler(async (event, context) => {
+  const logger = context.logger;
+
   // If this invokation is a prewarm, do nothing and return.
   if(event.source == "serverless-plugin-warmup" ) {
-    console.log("Warmed up!");
+    logger.addKey('is_warmup', true);
     return null;
   }
+
   const data = JSON.parse(event.body);
 
   const nextValue = await dynamoDb.increment(data.territory).done(function (value) {
   }).fail(function (error) {
-    console.log(error);
+    logger.addError('FAILED_INCREMENT', error);
   });
 
   const params = {
@@ -34,6 +37,8 @@ export const main = handler(async (event, context) => {
   };
 
   await dynamoDb.put(params);
+
+  logger.addKey('state', data.territory);
 
   return params.Item;
 });
