@@ -2,11 +2,16 @@ import handler from "./../libs/handler-lib";
 import dynamoDb from "./../libs/dynamodb-lib";
 
 export const main = handler(async (event, context) => {
+  const logger = context.logger;
+
   // If this invokation is a prewarm, do nothing and return.
   if(event.source == "serverless-plugin-warmup" ) {
-    console.log("Warmed up!");
+    logger.addKey('is_warmup', true);
     return null;
   }
+
+  logger.addKey('user_id', event.requestContext.identity.cognitoIdentityId);
+  logger.addKey('amendment_id', event.pathParameters.id);
 
   const params = {
     TableName: process.env.tableName,

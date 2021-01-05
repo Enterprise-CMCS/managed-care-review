@@ -1,4 +1,5 @@
 import * as debug from "./debug-lib";
+import { RequestLogger } from "./logger-lib";
 
 export default function handler(lambda) {
   return async function (event, context) {
@@ -6,6 +7,13 @@ export default function handler(lambda) {
 
     // Start debugger
     debug.init(event, context);
+    const logger = new RequestLogger();
+
+    logger.addKey('function', context.functionName);
+    logger.addKey('path', event.path);
+    logger.addKey('method', event.httpMethod);
+
+    context.logger = logger;
 
     try {
       // Run the Lambda
@@ -15,9 +23,15 @@ export default function handler(lambda) {
       // Print debug messages
       debug.flush(e);
 
+      logger.addError('UNEXPECTED_ERROR', e.message);
+
       body = { error: e.message };
       statusCode = 500;
     }
+
+    logger.addKey('status_code', statusCode);
+
+    logger.writeLog();
 
     // Return HTTP response
     return {
