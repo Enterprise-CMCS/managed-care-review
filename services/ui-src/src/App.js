@@ -7,6 +7,7 @@ import Routes from "./Routes";
 import { AppContext } from "./libs/contextLib";
 import { Auth } from "aws-amplify";
 import { onError } from "./libs/errorLib";
+import { logEvent } from "./libs/logLib.js";
 
 function App() {
     const [isAuthenticating, setIsAuthenticating] = useState(true);
@@ -20,6 +21,8 @@ function App() {
 
     async function onLoad() {
         try {
+            logEvent('onLoad', {'success': 'true'});
+
             await Auth.currentSession();
             userHasAuthenticated(true);
             const userInfo = await Auth.currentUserInfo();
