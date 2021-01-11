@@ -9,9 +9,10 @@ export default function handler(lambda) {
     debug.init(event, context);
     const logger = new RequestLogger();
 
-    logger.addKey('function', context.functionName);
-    logger.addKey('path', event.path);
-    logger.addKey('method', event.httpMethod);
+    logger.addKey('name', context.functionName);
+    logger.addKey('http.path', event.path);
+    logger.addKey('http.method', event.httpMethod);
+    //TODO add date
 
     context.logger = logger;
 
@@ -29,7 +30,7 @@ export default function handler(lambda) {
       statusCode = 500;
     }
 
-    logger.addKey('status_code', statusCode);
+    logger.addKey('http.status_code', statusCode);
 
     logger.writeLog();
 

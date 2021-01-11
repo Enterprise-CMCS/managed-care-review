@@ -2,7 +2,7 @@ export class RequestLogger {
 
 	constructor() {
 		this.logPairs= {};
-		this.requestBegan = new Date();
+		this.logPairs['start'] = new Date();
 	}
 
 	addKey(key, value) {
@@ -15,8 +15,8 @@ export class RequestLogger {
 	}
 
 	writeLog() {
-		let requestFinished = new Date();
-		let duration_ms = requestFinished - this.requestBegan;
+		this.logPairs['end'] = new Date();
+		let duration_ms = this.logPairs['end'] - this.logPairs['start'];
 		this.logPairs['duration_ms'] = duration_ms;
 
 		console.log(JSON.stringify(this.logPairs));
