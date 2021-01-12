@@ -1,4 +1,5 @@
 export function main(event, context) {
+	console.log("HELLO LOTTING EVENT");
 
 	console.log(event.body);
 

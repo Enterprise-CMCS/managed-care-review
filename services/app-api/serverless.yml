@@ -110,7 +110,6 @@ functions:
           path: log_event
           method: post
           cors: true
-          authorizer: aws_iam
 
 resources:
   Conditions:
