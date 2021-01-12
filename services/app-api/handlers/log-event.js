@@ -1,10 +1,11 @@
-export function main(event, context) {
+export async function main(event, context) {
 	console.log("HELLO LOTTING EVENT");
 
 	console.log(event.body);
 
 	return {
       statusCode: 200,
+      body: 'logged',
       headers: {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Credentials": true,
