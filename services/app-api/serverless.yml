@@ -102,6 +102,15 @@ functions:
           cors: true
           authorizer: aws_iam
 
+  log_event:
+    handler: handlers/log-event.main
+    role: LambdaApiRole
+    events:
+      - http:
+          path: log_event
+          method: post
+          cors: true
+
 resources:
   Conditions:
     CreatePermissionsBoundary:

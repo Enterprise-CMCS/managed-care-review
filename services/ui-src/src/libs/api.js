@@ -44,3 +44,9 @@ export function deleteAmendment(id) {
 	const opts = requestOptions()
 	return API.del("amendments", `/amendments/${id}`, opts);
 }
+
+export function logEventCall(body) {
+	const opts = requestOptions()
+	opts.body = body;
+	return API.post("amendments", '/log_event', opts);
+}
