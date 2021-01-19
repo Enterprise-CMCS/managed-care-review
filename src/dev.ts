@@ -34,7 +34,7 @@ async function run_s3_locally(runner: LabeledProcessRunner) {
 async function run_web_locally(runner: LabeledProcessRunner) {
 
 	await runner.run_command_and_output('web deps', ['yarn', 'install'], 'services/app-web')
-	// await runner.run_command_and_output('ui conf', ['./env.sh', 'local'], 'services/app-web')
+	await runner.run_command_and_output('web conf', ['./env.sh', 'local'], 'services/app-web')
 
 	runner.run_command_and_output('web', ['yarn', 'start'], 'services/app-web')
 	

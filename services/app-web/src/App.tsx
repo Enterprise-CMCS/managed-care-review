@@ -1,6 +1,7 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+import config from './config';
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
         <p>
           Edit <code>src/App.tsx</code> and save to reload. HI HANA
         </p>
+        <p>The API is at: {config.apiGateway.URL}</p>
         <a
           className="App-link"
           href="https://reactjs.org"

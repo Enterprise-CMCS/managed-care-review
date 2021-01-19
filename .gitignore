@@ -7,7 +7,10 @@ testcafe_results
 .DS_Store
 build_dev
 tsconfig.tsbuildinfo
-services/uploads/local_buckets
+.eslintcache
 /.env
 tests_output
 *.log
+
+services/app-web/public/env-config.js
+services/uploads/local_buckets
