@@ -1,4 +1,4 @@
-export default {
+const config = {
     MAX_ATTACHMENT_SIZE: 5000000,
     LOCAL_LOGIN: window._env_.LOCAL_LOGIN,
     s3: {
@@ -17,3 +17,5 @@ export default {
         IDENTITY_POOL_ID: window._env_.COGNITO_IDENTITY_POOL_ID
     }
 };
+
+export default config;
