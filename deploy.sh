@@ -12,7 +12,7 @@ services=(
   'stream-functions'
   'ui-auth'
   'ui'
-  'ui-src'
+  'app-web'
 )
 
 install_deps() {
