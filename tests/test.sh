@@ -8,6 +8,8 @@ install_deps() {
       yarn install --frozen-lockfile
     fi
   else # We're not in a CI system, let's yarn install
+    # Locally, set the APPLICATION_ENDPOINT to where `yarn start` runs
+    export APPLICATION_ENDPOINT=http://localhost:3000
     yarn install
   fi
 }
