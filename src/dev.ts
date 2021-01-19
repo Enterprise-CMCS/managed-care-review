@@ -31,12 +31,12 @@ async function run_s3_locally(runner: LabeledProcessRunner) {
 }
 
 // run_fe_locally runs the frontend and its dependencies locally
-async function run_fe_locally(runner: LabeledProcessRunner) {
+async function run_web_locally(runner: LabeledProcessRunner) {
 
-	await runner.run_command_and_output('ui deps', ['yarn', 'install'], 'services/ui-src')
-	await runner.run_command_and_output('ui conf', ['./env.sh', 'local'], 'services/ui-src')
+	await runner.run_command_and_output('web deps', ['yarn', 'install'], 'services/app-web')
+	await runner.run_command_and_output('web conf', ['./env.sh', 'local'], 'services/app-web')
 
-	runner.run_command_and_output('ui', ['npm', 'start'], 'services/ui-src')
+	runner.run_command_and_output('web', ['yarn', 'start'], 'services/app-web')
 	
 }
 
@@ -47,7 +47,7 @@ async function run_all_locally() {
 	run_db_locally(runner)
 	run_s3_locally(runner)
 	run_api_locally(runner)
-	run_fe_locally(runner)
+	run_web_locally(runner)
 }
 
 // The command definitons in yargs
