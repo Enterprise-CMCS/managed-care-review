@@ -1,6 +1,6 @@
 import { Header as ReactUSWDSHeader, Title } from '@trussworks/react-uswds'
 
-export const CMSHeader = () => {
+export const CMSHeader = (): React.ReactElement => {
     return (
         <ReactUSWDSHeader basic>
             <div className="usa-nav-container">
