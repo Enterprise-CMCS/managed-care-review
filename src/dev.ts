@@ -50,14 +50,19 @@ async function run_all_locally() {
 	run_web_locally(runner)
 }
 
-// The command definitons in yargs
+async function run_all_tests() {
+	const runner = new LabeledProcessRunner()
+	runner.run_command_and_output('web tests', ['yarn', 'testOnce'], 'services/app-web')
+}
+
+// The command definitions in yargs
 // All valid arguments to dev should be enumerated here, this is the entrypoint to the script
 yargs(process.argv.slice(2))
 	.command('local', 'run system locally', {}, () => {
 		run_all_locally()
 	})
 	.command('test', 'run all tests', () => {}, () => {
-		console.log("Testing 1. 2. 3.");
+		run_all_tests()
 	})
 	.demandCommand(1, '') // this prints out the help if you don't call a subcommand
 	.argv

@@ -1,9 +1,9 @@
 import config from './config';
 
 
-export function logEvent(name: string, data: object) {
+export function logEvent(name: string, data: Record<string, unknown>): void {
 
-	const ev: Record<string, any> = Object.assign({}, data)
+	const ev: Record<string, unknown> = Object.assign({}, data)
 	ev['name'] = name
 	ev['timestamp'] = new Date()
 

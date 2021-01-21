@@ -33,7 +33,7 @@ Want to deploy from your Mac?
 - sh deploy.sh
 
 Building the app locally
-- todo
+- To mock auth locally you will need to add a `userKey` to your local storage.  
 
 Running tests locally
 - todo
@@ -42,7 +42,7 @@ Running tests locally
 
 Node - we enforce using a specific version of node, specified in the file `.nvmrc`. This version matches the Lambda runtime. We recommend managing node versions using [NVM](https://github.com/nvm-sh/nvm#installing-and-updating).
 
-Serverless - Get help installing it here: [Serverless Getting Started page](https://www.serverless.com/framework/docs/providers/aws/guide/installation/)
+Serverless - Get help installing it here: [Serverless Getting Started page](https://www.serverless.com/framework/docs/providers/aws/guide/installation/). Learn more about serverless from the [Serverless Stack tutorial](https://serverless-stack.com/).  
 
 Yarn - in order to install dependencies, you need to [install yarn](https://classic.yarnpkg.com/en/docs/install/). 
 
@@ -64,10 +64,6 @@ brew install yarn
 # run dev
 ./dev local
 ```
-
-## Dependencies
-
-None.
 
 ## Examples
 
