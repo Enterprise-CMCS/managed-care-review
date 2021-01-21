@@ -1,10 +1,10 @@
 module.exports = {
-  'My first test case' (browser){
+  'Header is present' (browser){
       console.log(process.env.APPLICATION_ENDPOINT);
       browser
         .url (`${process.env.APPLICATION_ENDPOINT}`)
-        .waitForElementVisible('.testcase')
-        .assert.containsText(".testcase" , "Hello.")
-        .saveScreenshot('tests_output/My_first_test_case_screenshot.png')
+        .waitForElementVisible('.App')
+        .assert.containsText('.usa-header' , 'State Submission Project')
+        .saveScreenshot('tests_output/header_is_present_screenshot.png')
   }
 }
