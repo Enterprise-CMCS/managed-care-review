@@ -4,12 +4,11 @@ package:
   individually: true
 
 plugins:
-  - serverless-plugin-typescript
   - serverless-bundle
   - serverless-dotenv-plugin
+  - serverless-plugin-warmup
   - serverless-plugin-scripts
   - serverless-offline
-
 custom:
   stage: ${opt:stage, self:provider.stage}
   tableName: ${env:AMENDMENTS_TABLE_NAME, cf:database-${self:custom.stage}.AmendmentsTableName}
@@ -17,6 +16,30 @@ custom:
   atomicCounterTableName: ${env:AMENDMENTS_COUNTER_TABLE_NAME, cf:database-${self:custom.stage}.AmendmentsAtomicCounterTableName}
   atomicCounterTableArn: ${env:AMENDMENTS_COUNTER_TABLE_ARN, cf:database-${self:custom.stage}.AmendmentsAtomicCounterTableArn}
   iamPath: ${env:IAM_PATH, "/"}
+  warmupEnabled:
+    production: true
+    development: false
+  warmup:
+    enabled: ${self:custom.warmupEnabled.${env:INFRASTRUCTURE_TYPE, "development"}}
+    role: LambdaWarmupRole
+    vpc: false
+    events:
+      - schedule: rate(4 minutes)
+    timeout: 20
+    prewarm: true
+    concurrency: 5
+    folderName: node_modules/serverless-bundle/src/_warmup
+    cleanFolder: false
+  scripts:
+    hooks:
+      package:setupProviderConfiguration: |
+        # Remove the timestamp line from the warmup handler so a new function is uploaded
+        #   only if a configuration has truly changed.
+        set -e
+        if [ -d "node_modules/serverless-bundle/src/_warmup" ]; then
+          cd node_modules/serverless-bundle/src/_warmup
+          sed '/Generated/d' index.js > index.js.sub && mv -f index.js.sub index.js
+        fi
 
 provider:
   name: aws
@@ -29,8 +52,58 @@ provider:
     atomicCounterTableName: ${self:custom.atomicCounterTableName}
 
 functions:
+  create:
+    handler: handlers/create.main
+    role: LambdaApiRole
+    events:
+      - http:
+          path: amendments
+          method: post
+          cors: true
+          authorizer: aws_iam
+
+  get:
+    handler: handlers/get.main
+    role: LambdaApiRole
+    events:
+      - http:
+          path: amendments/{id}
+          method: get
+          cors: true
+          authorizer: aws_iam
+
+  list:
+    handler: handlers/list.main
+    role: LambdaApiRole
+    events:
+      - http:
+          path: amendments
+          method: get
+          cors: true
+          authorizer: aws_iam
+
+  update:
+    handler: handlers/update.main
+    role: LambdaApiRole
+    events:
+      - http:
+          path: amendments/{id}
+          method: put
+          cors: true
+          authorizer: aws_iam
+
+  delete:
+    handler: handlers/delete.main
+    role: LambdaApiRole
+    events:
+      - http:
+          path: amendments/{id}
+          method: delete
+          cors: true
+          authorizer: aws_iam
+
   log_event:
-    handler: handlers/log_event.main
+    handler: handlers/log-event.main
     role: LambdaApiRole
     events:
       - http:
@@ -102,6 +175,43 @@ resources:
                     - "/"
                     -
                       - Fn::Join: [":", ["arn:aws:execute-api", {"Ref": "AWS::Region"}, {"Ref":"AWS::AccountId"}, {"Ref": "ApiGatewayRestApi"}]]
+    LambdaWarmupRole:
+      Type: 'AWS::IAM::Role'
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: 'Allow'
+              Principal:
+                Service: 'lambda.amazonaws.com'
+              Action: 'sts:AssumeRole'
+        Path: ${self:custom.iamPath}
+        PermissionsBoundary:
+          Fn::If:
+            - CreatePermissionsBoundary
+            - Fn::Join:
+              - ''
+              -
+                - 'arn:aws:iam::'
+                - Ref: AWS::AccountId
+                - ':policy'
+                - '${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}'
+            - Ref: AWS::NoValue
+        Policies:
+          - PolicyName: 'Warmup'
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: 'Allow'
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource: 'arn:aws:logs:*:*:*'
+                - Effect: 'Allow'
+                  Action:
+                    - lambda:InvokeFunction
+                  Resource: '*'
     GatewayResponseDefault4XX:
       Type: 'AWS::ApiGateway::GatewayResponse'
       Properties:
