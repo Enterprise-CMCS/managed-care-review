@@ -4,14 +4,12 @@
   "main": "handler.js",
   "license": "MIT",
   "dependencies": {
-    "@types/aws-lambda": "^8.10.71"
+    "@types/aws-lambda": "^8.10.71",
+    "serverless": "^2.20.0"
   },
   "devDependencies": {
-    "serverless-bundle": "^4.2.0",
+    "serverless-bundle": "^3.0.0",
     "serverless-dotenv-plugin": "^3.1.0",
-    "serverless-offline": "^6.8.0",
-    "serverless-plugin-scripts": "^1.0.2",
-    "serverless-plugin-typescript": "^1.1.9",
-    "serverless-plugin-warmup": "^5.0.0"
+    "serverless-offline": "^6.8.0"
   }
 }

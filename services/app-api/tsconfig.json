@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "baseUrl": "/",
         "preserveConstEnums": true,
         "strict": true,
         "sourceMap": true,

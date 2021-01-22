@@ -1,5 +1,6 @@
 .idea/
 .build
+.webpack
 .infra
 .dynamodb
 .yarn_install
