@@ -1,12 +1,13 @@
 import React from 'react'
-import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom'
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 
 import { Header } from './components/Header/Header'
+import { Signup } from './components/Auth/Auth'
 import './App.css'
 import { logEvent } from './log_event'
 
 const Auth = (): React.ReactElement => {
-    return <div>Auth</div>
+    return <Signup />
 }
 
 const Dashboard = (): React.ReactElement => {
