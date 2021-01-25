@@ -1,17 +1,37 @@
-import React from 'react';
+import React from 'react'
+import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom'
+
 import { Header } from './components/Header/Header'
-import './App.css';
+import './App.css'
 import { logEvent } from './log_event'
 
-function App(): React.ReactElement {
+const Auth = (): React.ReactElement => {
+    return <div>Auth</div>
+}
 
-    logEvent('on_load', { 'success': true })
+const Dashboard = (): React.ReactElement => {
+    return <div>Dashboard!</div>
+}
+function App(): React.ReactElement {
+    logEvent('on_load', { success: true })
 
     return (
-        <div className="App">
-            <Header />
-            <main>Main Content</main>
-        </div>
+        <Router>
+            <div className="App">
+                <Header />
+                <main>
+                    Main Content
+                    <Switch>
+                        <Route path="/auth">
+                            <Auth />
+                        </Route>
+                        <Route path="/">
+                            <Dashboard />
+                        </Route>
+                    </Switch>
+                </main>
+            </div>
+        </Router>
     )
 }
 
