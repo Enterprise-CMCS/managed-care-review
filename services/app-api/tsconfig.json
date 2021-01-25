@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "baseUrl": "/",
+        "preserveConstEnums": true,
+        "strict": true,
+        "sourceMap": true,
+        "target": "es5",
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "noFallthroughCasesInSwitch": true,
+        "module": "esnext",
+        "moduleResolution": "node",
+        "lib": ["esnext"],
+
+    }
+}
