@@ -1,7 +1,7 @@
 import React from 'react'
 import { Header } from './components/Header/Header'
 import './App.css'
-import { logEvent } from './log_event'
+// import { logEvent } from './log_event'
 
 function App(): React.ReactElement {
     // TODO: Commenting out because right now this makes yarn test fail because of how config variables are being used.
