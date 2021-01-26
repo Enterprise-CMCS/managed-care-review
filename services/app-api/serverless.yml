@@ -9,6 +9,7 @@ plugins:
 
 custom:
   stage: ${opt:stage, self:provider.stage}
+  appVersion: ${env:APP_VERSION}
   tableName: ${env:AMENDMENTS_TABLE_NAME, cf:database-${self:custom.stage}.AmendmentsTableName}
   tableArn: ${env:AMENDMENTS_TABLE_ARN, cf:database-${self:custom.stage}.AmendmentsTableArn}
   atomicCounterTableName: ${env:AMENDMENTS_COUNTER_TABLE_NAME, cf:database-${self:custom.stage}.AmendmentsAtomicCounterTableName}
@@ -24,10 +25,21 @@ provider:
     shouldStartNameWithService: true
 
   environment:
+    stage: ${self:custom.stage}
+    appVersion: ${self:custom.appVersion}
     tableName: ${self:custom.tableName}
     atomicCounterTableName: ${self:custom.atomicCounterTableName}
 
 functions:
+  health:
+    handler: handlers/health_check.main
+    role: LambdaApiRole
+    events:
+      - http:
+          path: log_event
+          method: get
+          cors: true
+
   log_event:
     handler: handlers/log_event.main
     role: LambdaApiRole

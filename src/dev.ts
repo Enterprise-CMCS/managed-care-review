@@ -1,9 +1,7 @@
 import yargs from 'yargs'
 import * as dotenv from 'dotenv'
 import LabeledProcessRunner from './runner.js'
-
-// load .env
-dotenv.config()
+import { spawnSync } from 'child_process'
 
 // run_db_locally runs the local db
 async function run_db_locally(runner: LabeledProcessRunner) {
@@ -55,14 +53,30 @@ async function run_all_tests() {
 	runner.run_command_and_output('web tests', ['yarn', 'testOnce'], 'services/app-web')
 }
 
-// The command definitions in yargs
-// All valid arguments to dev should be enumerated here, this is the entrypoint to the script
-yargs(process.argv.slice(2))
-	.command('local', 'run system locally', {}, () => {
-		run_all_locally()
-	})
-	.command('test', 'run all tests', () => {}, () => {
-		run_all_tests()
-	})
-	.demandCommand(1, '') // this prints out the help if you don't call a subcommand
-	.argv
+function main() {
+	// load .env
+	dotenv.config()
+
+	// add git hash as APP_VERSION
+	const appVersion = spawnSync('scripts/app_version.sh')
+	process.env.APP_VERSION = appVersion.stdout.toString().trim()
+
+	// The command definitions in yargs
+	// All valid arguments to dev should be enumerated here, this is the entrypoint to the script
+	yargs(process.argv.slice(2))
+		.command('local', 'run system locally', {}, () => {
+			run_all_locally()
+		})
+		.command('test', 'run all tests', () => {}, () => {
+			run_all_tests()
+		})
+		.demandCommand(1, '') // this prints out the help if you don't call a subcommand
+		.argv
+}
+
+// I'd love for there to be a check we can do like you do in python
+// so that this is only executed if it's being run top-level, but the ones
+// I found didn't work. 
+// I still like corralling all the script in main() anyway, b/c that keeps us from 
+// scattering running code all over. 
+main()
