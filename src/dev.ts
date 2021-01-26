@@ -53,9 +53,6 @@ async function run_all_locally() {
 async function run_all_tests() {
 	const runner = new LabeledProcessRunner()
 	runner.run_command_and_output(' web - unit', ['yarn', 'test:unit'], 'services/app-web')
-	
-	// TODO: Expand test:a11y first to use sitemap and run app first
-	// runner.run_command_and_output(' web - accessibility', ['yarn', 'test:a11y'], 'services/app-web')
 }
 
 // The command definitions in yargs

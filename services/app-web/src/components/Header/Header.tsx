@@ -5,10 +5,7 @@ export const Header = (): React.ReactElement => {
         <ReactUSWDSHeader basic>
             <div className="usa-nav-container">
                 <div className="usa-navbar">
-                    <Title>
-                        State Submission Project
-                        <img src="#" />
-                    </Title>
+                    <Title>State Submission Project</Title>
                 </div>
             </div>
         </ReactUSWDSHeader>
