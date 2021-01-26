@@ -36,7 +36,7 @@ functions:
     role: LambdaApiRole
     events:
       - http:
-          path: log_event
+          path: health_check
           method: get
           cors: true
 
