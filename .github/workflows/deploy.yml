@@ -37,6 +37,8 @@ jobs:
             exit 1
           fi
       - uses: actions/checkout@v1
+      - name: set app version
+        run: echo "APP_VERSION=$(scripts/app_version.sh)" >> $GITHUB_ENV
       - name: set branch specific variable names
         run: ./.github/build_vars.sh set_names
       - name: set variable values
