@@ -15,5 +15,11 @@ module.exports = {
         },
       },
     ],
-  ]
+  ],
+  'refs': {
+    'design-system': { 
+      'title': 'ReactUSWDS', 
+      'url': 'https://trussworks.github.io/react-uswds/'
+    }
+   }
 }
