@@ -27,7 +27,6 @@ export const Header = (props: HeaderProps): React.ReactElement => {
                     alt="Medicaid.gov-Keeping America Healthy"
                 />
                 <div className="usa-navbar">
-                    <img src={icon} />
                     <Title>
                         <span>{name}</span>
                         &nbsp;State Submission Project &nbsp;
