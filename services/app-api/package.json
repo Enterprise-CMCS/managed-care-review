@@ -8,6 +8,8 @@
   },
   "dependencies": {
     "@types/aws-lambda": "^8.10.71",
+    "@types/request": "^2.48.5",
+    "request": "^2.88.2",
     "serverless": "^2.20.0"
   },
   "devDependencies": {

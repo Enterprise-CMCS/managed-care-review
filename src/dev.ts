@@ -1,7 +1,7 @@
 import yargs from 'yargs'
 import * as dotenv from 'dotenv'
+import request from 'request'
 import LabeledProcessRunner from './runner.js'
-import * as http from 'http'
 
 // load .env
 dotenv.config()
@@ -52,14 +52,13 @@ async function run_all_locally() {
 
 function check_url_is_up(url: string): Promise<boolean> {
 	return new Promise<boolean>( (resolve) =>  {
-		http.get(url, () => {
-			// if the URL resolves, we're good
+		request(url, {}, (err) => {
+			if (err) { 
+				resolve(false)
+			}
 			resolve(true)
-		}).on('error', () => {
-			// if the URL can't be reached, it's down
-			resolve(false)
 		})
-	});
+	})
 }
 
 async function run_all_tests(run_unit: boolean, run_online: boolean) {

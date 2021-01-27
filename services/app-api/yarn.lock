@@ -1854,7 +1854,7 @@
   dependencies:
     "@types/request" "*"
 
-"@types/request@*", "@types/request@^2.48.3":
+"@types/request@*", "@types/request@^2.48.3", "@types/request@^2.48.5":
   version "2.48.5"
   resolved "https://registry.yarnpkg.com/@types/request/-/request-2.48.5.tgz#019b8536b402069f6d11bee1b2c03e7f232937a0"
   integrity sha512-/LO7xRVnL3DxJ1WkPGDQrp4VTV1reX9RkC85mJ+Qzykj2Bdw+mG15aAfDahc76HtknjzE16SX/Yddn6MxVbmGQ==
