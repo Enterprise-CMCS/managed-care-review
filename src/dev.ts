@@ -51,7 +51,8 @@ async function run_all_locally() {
 
 async function run_all_tests() {
 	const runner = new LabeledProcessRunner()
-	runner.run_command_and_output(' web - unit', ['yarn', 'test:unit'], 'services/app-web')
+	await runner.run_command_and_output('web - unit', ['yarn', 'test:unit'], 'services/app-web')
+	await runner.run_command_and_output('api - unit', ['yarn', 'test'], 'services/app-api')
 }
 
 // The command definitions in yargs
