@@ -50,21 +50,46 @@ async function run_all_locally() {
 	run_web_locally(runner)
 }
 
+function check_url_is_up(url: string): Promise<boolean> {
+	return new Promise<boolean>( (resolve) =>  {
+		http.get(url, () => {
+			// if the URL resolves, we're good
+			resolve(true)
+		}).on('error', () => {
+			// if the URL can't be reached, it's down
+			resolve(false)
+		})
+	});
+}
+
 async function run_all_tests(run_unit: boolean, run_online: boolean) {
 	const runner = new LabeledProcessRunner()
-	if (run_unit) {
-		run_unit_tests(runner)
-	}
 
-	if (run_online) {
-		run_online_tests(runner)
+	try {
+		if (run_unit) {
+			await run_unit_tests(runner)
+		}
+
+		if (run_online) {
+			await run_online_tests(runner)
+		}
+	} catch (e) {
+		console.log("Testing Error", e)
+		process.exit(1)
 	}
 
 }
 
 async function run_unit_tests(runner: LabeledProcessRunner) {
-	runner.run_command_and_output('web - unit', ['yarn', 'test:unit'], 'services/app-web')
-	runner.run_command_and_output('api - unit', ['yarn', 'test'], 'services/app-api')
+	const webCode = await runner.run_command_and_output('web - unit', ['yarn', 'test:unit'], 'services/app-web')
+	if (webCode != 0) {
+		throw new Error('web - unit FAILED')
+	}
+
+	const apiCode = await runner.run_command_and_output('api - unit', ['yarn', 'test'], 'services/app-api')
+	if (apiCode != 0) {
+		throw new Error('api - unit failed')
+	}
 }
 
 async function run_online_tests(runner: LabeledProcessRunner) {
@@ -75,15 +100,20 @@ async function run_online_tests(runner: LabeledProcessRunner) {
 		return
 	}
 
-	// if the URL doesn't resolve, print an error message
-	http.get(base_url, () => {
-		runner.run_command_and_output('web - a11y', ['yarn', 'test:a11y'], 'services/app-web')
-		runner.run_command_and_output('nightwatch', ['./test.sh'], 'tests')
-	}).on('error', (err) => {
-		console.log(`The URL ${base_url} does not resolve. Make sure the service is running before running online tests.\n`)
-		console.log(err)
-		return
-	})
+	const isUp = await check_url_is_up(base_url)
+	if (!isUp) {
+		throw new Error(`the URL ${base_url} does not resolve, make sure the system is running before runnin online tests`)
+	}
+
+	const webCode = await runner.run_command_and_output('web - a11y', ['yarn', 'test:a11y'], 'services/app-web')
+	if (webCode != 0) {
+		throw new Error('web - a11y tests FAILED')
+	}
+
+	const nightCode = await runner.run_command_and_output('nightwatch', ['./test.sh'], 'tests')
+	if (nightCode != 0) {
+		throw new Error('nightwatch tests FAILED')
+	}
 
 }
 
