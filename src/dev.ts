@@ -104,10 +104,11 @@ async function run_online_tests(runner: LabeledProcessRunner) {
 		throw new Error(`the URL ${base_url} does not resolve, make sure the system is running before runnin online tests`)
 	}
 
-	const webCode = await runner.run_command_and_output('web - a11y', ['yarn', 'test:a11y'], 'services/app-web')
-	if (webCode != 0) {
-		throw new Error('web - a11y tests FAILED')
-	}
+	// TODO: Sort out how to use pa11y in CI. 
+	// const webCode = await runner.run_command_and_output('web - a11y', ['yarn', 'test:a11y'], 'services/app-web')
+	// if (webCode != 0) {
+	// 	throw new Error('web - a11y tests FAILED')
+	// }
 
 	const nightCode = await runner.run_command_and_output('nightwatch', ['./test.sh'], 'tests')
 	if (nightCode != 0) {
