@@ -15,4 +15,5 @@ tests_output
 *.log
 
 services/app-web/public/env-config.js
+services/app-web/storybook-static
 services/uploads/local_buckets
