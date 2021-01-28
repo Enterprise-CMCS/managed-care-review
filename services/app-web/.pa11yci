@@ -1,0 +1,17 @@
+{  
+    "defaults": {
+        "timeout": 1000,
+        "viewport": {
+            "width": 320,
+            "height": 480
+        },
+        "runners": ["axe"]
+    },
+   "urls": [
+    {
+      "url": "http://localhost:3000",
+      "screenCapture": "pa11y-screenshots/home.png",
+      "timeout": 8000
+    }
+  ]
+}
