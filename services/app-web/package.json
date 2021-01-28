@@ -52,7 +52,6 @@
     "@storybook/addon-links": "^6.1.15",
     "@storybook/preset-create-react-app": "^3.1.5",
     "@storybook/react": "^6.1.15",
-    "@storybook/storybook-deployer": "^2.8.7",
     "@typescript-eslint/eslint-plugin": "^4.14.0",
     "@typescript-eslint/parser": "^4.14.0",
     "eslint-config-prettier": "^7.2.0",
