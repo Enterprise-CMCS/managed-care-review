@@ -11,13 +11,15 @@ export const Header = (props: HeaderProps): React.ReactElement => {
     const { stateCode } = props
 
     // TODO: Lookup from state.json or wherever we will store this
-    const getStateInfo = (postalCode: string): any => {
+    const getStateInfo = (
+        postalCode: string
+    ): { name: string; icon: string } => {
         return postalCode === 'TN'
             ? { name: 'Tennessee', icon: '#' }
             : { name: 'DEFAULT STATE', icon: '#' }
     }
 
-    const { name, icon } = getStateInfo(stateCode)
+    const { name } = getStateInfo(stateCode)
 
     return (
         <USWDSHeader basic>
