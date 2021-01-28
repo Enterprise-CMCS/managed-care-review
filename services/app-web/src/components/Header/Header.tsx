@@ -1,15 +1,15 @@
 import { Header as USWDSHeader, Title } from '@trussworks/react-uswds'
 
 type HeaderProps = {
-    stateCode: string
+    stateCode?: string
 }
 
 /**
  * CMS Header for a logged in state user.
  */
-export const Header = (props: HeaderProps): React.ReactElement => {
-    const { stateCode } = props
-
+export const Header = ({
+    stateCode = 'MI',
+}: HeaderProps): React.ReactElement => {
     // TODO: Lookup from state.json or wherever we will store this
     const getStateInfo = (
         postalCode: string

@@ -3,13 +3,21 @@
   "version": "1.0.0",
   "main": "handler.js",
   "license": "MIT",
+  "scripts": {
+    "test": "jest"
+  },
   "dependencies": {
     "@types/aws-lambda": "^8.10.71",
+    "@types/request": "^2.48.5",
+    "request": "^2.88.2",
     "serverless": "^2.20.0"
   },
   "devDependencies": {
+    "@types/jest": "^26.0.20",
+    "jest": "^26.6.3",
     "serverless-bundle": "^3.0.0",
     "serverless-dotenv-plugin": "^3.1.0",
-    "serverless-offline": "^6.8.0"
+    "serverless-offline": "^6.8.0",
+    "ts-jest": "^26.4.4"
   }
 }
