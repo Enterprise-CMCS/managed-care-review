@@ -1,3 +1,8 @@
+/* 
+Read more about USWDS settings
+https://designsystem.digital.gov/documentation/settings/ 
+*/
+
 /* USWDS theme settings */
 @import 'uswds/src/stylesheets/theme/_uswds-theme-general.scss';
 @import 'uswds/src/stylesheets/theme/_uswds-theme-typography.scss';
@@ -6,10 +11,10 @@
 @import 'uswds/src/stylesheets/theme/_uswds-theme-utilities.scss';
 
 /* Project USWDS settings */
-@import 'styles/custom-uswds.scss';
+@import 'styles/custom-settings.scss';
 
 /* USWDS source */
 @import 'uswds';
 
 /* Project theme */
-@import 'styles/theme.scss';
+@import 'styles/custom-theme.scss';

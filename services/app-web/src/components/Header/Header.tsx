@@ -1,7 +1,7 @@
 import { NavList, Button } from '@trussworks/react-uswds'
 import './Header.scss'
-import vaIcon from '../../assets/icons/va-icon.svg'
-import mnIcon from '../../assets/icons/mn-icon.svg'
+import { ReactComponent as VaIcon } from '../../assets/icons/va-icon.svg'
+import { ReactComponent as MnIcon } from '../../assets/icons/mn-icon.svg'
 
 type HeaderProps = {
     stateCode?: string
@@ -23,36 +23,30 @@ export const Header = ({
 
     const getStateInfo = (
         postalCode: string
-    ): { stateName: string; stateIcon: string } => {
+    ): { stateName: string; StateIcon: React.FunctionComponent } => {
         switch (postalCode) {
             case 'MN':
-                return { stateName: 'Minnesota', stateIcon: mnIcon }
+                return { stateName: 'Minnesota', StateIcon: MnIcon }
             case 'Virginia':
-                return { stateName: 'Virginia', stateIcon: vaIcon }
+                return { stateName: 'Virginia', StateIcon: VaIcon }
             default:
-                return { stateName: 'STATE UNKNOWN', stateIcon: '#' }
+                return {
+                    stateName: 'STATE UNKNOWN',
+                    StateIcon: () => <span>N/A</span>,
+                }
         }
     }
 
-    const { stateName, stateIcon } = getStateInfo(stateCode)
+    const { stateName, StateIcon } = getStateInfo(stateCode)
 
     return (
         <header className="usa-header">
-            <div className="grid-row margin-x-4">
+            <div className="logo-row">
                 <div className="usa-logo">
                     <img
                         src="https://www.medicaid.gov/themes/custom/medicaid/images/headerlogo-medicaid.png"
                         alt="Medicaid.gov-Keeping America Healthy"
                     />
-                    {/* <svg
-                        className="usa-icon usa-icon--size-5 nav-state-icon"
-                        // aria-hidden
-                        // focusable="false"
-                        role="img"
-                        fill="black"
-                    >
-                        <use fill="fill" xlinkHref={stateIcon} />
-                    </svg> */}
                 </div>
             </div>
             <div className="nav-row">
@@ -71,7 +65,7 @@ export const Header = ({
                 </nav>
                 {loggedIn ? (
                     <button
-                        onClick={(event) => console.log('Menu down')}
+                        onClick={() => console.log('Menu down')}
                         className="flex-auto"
                     >
                         {mockUser.name}
@@ -80,16 +74,16 @@ export const Header = ({
                     <Button
                         type="button"
                         unstyled
-                        onClick={(event) => console.log('Login')}
+                        onClick={() => console.log('Login')}
                         className="flex-auto"
                     >
                         Login
                     </Button>
                 )}
             </div>
-            <div className="grid-row margin-x-4">
+            <div className="heading-row">
                 <div>
-                    <img src={stateIcon} alt="" aria-hidden />
+                    <StateIcon />
                 </div>
                 <h1 className="margin-0 ">
                     {stateName}

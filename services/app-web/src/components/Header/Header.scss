@@ -1,7 +1,25 @@
+@import '../../index.scss';
+
+.logo-row {
+    display: flex;
+    flex-wrap: wrap;
+    padding-left: 2rem;
+    padding-right: 2rem;
+}
 .nav-row {
+    background-color: $theme-color-primary;
+    color: 'white';
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    margin-left: 1rem;
-    margin-right: 2rem;
+    padding-left: 1rem;
+    padding-right: 2rem;
+}
+
+.heading-row {
+    background-color: $theme-color-primary-dark;
+    color: 'white';
+    display: flex;
+    flex-wrap: wrap;
+    padding-left: 2rem;
 }

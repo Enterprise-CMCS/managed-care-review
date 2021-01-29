@@ -4,8 +4,8 @@ import { render } from '@testing-library/react'
 import { Header } from './Header'
 
 describe('Header', () => {
-    it('should have no accessibility violations', async () => {
+    it('renders without errors', async () => {
         const { container } = render(<Header />)
-        expect(container).toHaveTextContent('Submission')
+        expect(container).toHaveTextContent('About')
     })
 })
