@@ -8,8 +8,8 @@ function App(): React.ReactElement {
 
     return (
         <div className="App">
-            <Header stateCode="TN" />
-            <main>Main Content</main>
+            <Header stateCode="MN" />
+            <main className="padding-x-4">Main Content</main>
         </div>
     )
 }
