@@ -33,17 +33,18 @@ custom:
       # Build the static archive and populate the config
       package:initialize: |
         set -e
+        export REACT_APP_API_URL=${self:custom.api_url}
         yarn run build
-        export API_REGION=${self:custom.api_region}
-        export API_URL=${self:custom.api_url}
-        export COGNITO_REGION=${self:custom.cognito_region}
-        export COGNITO_IDENTITY_POOL_ID=${self:custom.cognito_identity_pool_id}
-        export COGNITO_USER_POOL_ID=${self:custom.cognito_user_pool_id}
-        export COGNITO_CLIENT_ID=${self:custom.cognito_client_id}
-        export S3_ATTACHMENTS_BUCKET_REGION=${self:custom.s3_attachments_bucket_region}
-        export S3_ATTACHMENTS_BUCKET_NAME=${self:custom.s3_attachments_bucket_name}
-        ./env.sh
-        cp public/env-config.js build/env-config.js
+        # export API_REGION=${self:custom.api_region}
+        # export API_URL=${self:custom.api_url}
+        # export COGNITO_REGION=${self:custom.cognito_region}
+        # export COGNITO_IDENTITY_POOL_ID=${self:custom.cognito_identity_pool_id}
+        # export COGNITO_USER_POOL_ID=${self:custom.cognito_user_pool_id}
+        # export COGNITO_CLIENT_ID=${self:custom.cognito_client_id}
+        # export S3_ATTACHMENTS_BUCKET_REGION=${self:custom.s3_attachments_bucket_region}
+        # export S3_ATTACHMENTS_BUCKET_NAME=${self:custom.s3_attachments_bucket_name}
+        # ./env.sh
+        # cp public/env-config.js build/env-config.js
 
 # The `provider` block defines where your service will be deployed
 provider:

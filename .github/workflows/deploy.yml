@@ -37,6 +37,8 @@ jobs:
             exit 1
           fi
       - uses: actions/checkout@v1
+      - name: set app version
+        run: echo "APP_VERSION=$(scripts/app_version.sh)" >> $GITHUB_ENV
       - name: set branch specific variable names
         run: ./.github/build_vars.sh set_names
       - name: set variable values
@@ -90,12 +92,12 @@ jobs:
           # When deploying multiple copies of this quickstart to the same AWS Account (not ideal), a prefix helps prevent stepping on each other.
           # This can optionally be set as an GitHub Actions Secret
           ./deploy.sh $STAGE_PREFIX$branch_name
-      - name: Run Nightwatch suite
+      - name: Run online tests
         run: |
           pushd services
           export APPLICATION_ENDPOINT=`./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name`
           popd
-          ./test.sh
+          ./dev test --online
       - name: Store test reults
         uses: actions/upload-artifact@v2
         with:

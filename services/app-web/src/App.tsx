@@ -1,6 +1,5 @@
 import React from 'react'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
-
 import { Header } from './components/Header/Header'
 import { Signup } from './components/Auth/Auth'
 import './App.css'
@@ -13,7 +12,9 @@ const Auth = (): React.ReactElement => {
 const Dashboard = (): React.ReactElement => {
     return <div>Dashboard!</div>
 }
+
 function App(): React.ReactElement {
+  
     logEvent('on_load', { success: true })
 
     return (
@@ -21,7 +22,7 @@ function App(): React.ReactElement {
             <div className="App">
                 <Header />
                 <main>
-                    Main Content
+                    <h1>Main Content</h1>
                     <Switch>
                         <Route path="/auth">
                             <Auth />
