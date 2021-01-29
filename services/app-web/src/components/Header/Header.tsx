@@ -44,6 +44,15 @@ export const Header = ({
                         src="https://www.medicaid.gov/themes/custom/medicaid/images/headerlogo-medicaid.png"
                         alt="Medicaid.gov-Keeping America Healthy"
                     />
+                    {/* <svg
+                        className="usa-icon usa-icon--size-5 nav-state-icon"
+                        // aria-hidden
+                        // focusable="false"
+                        role="img"
+                        fill="black"
+                    >
+                        <use fill="fill" xlinkHref={stateIcon} />
+                    </svg> */}
                 </div>
             </div>
             <div className="nav-row">
