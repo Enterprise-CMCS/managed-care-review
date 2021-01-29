@@ -1,0 +1,111 @@
+// Generic
+$cms-color-white: #fff !default;
+$cms-color-base: #212121 !default;
+$cms-color-black: #000 !default;
+
+$cms-color-gray-dark: #323a45 !default;
+$cms-color-gray: #5b616b !default;
+$cms-color-gray-medium: #757575 !default;
+$cms-color-gray-light: #aeb0b5 !default;
+$cms-color-gray-lighter: #d6d7d9 !default;
+$cms-color-gray-lightest: #f1f1f1 !default;
+
+$cms-color-gray-warm-dark: #494440 !default;
+$cms-color-gray-warm-light: #e4e2e0 !default;
+$cms-color-gray-cool-light: #dce4ef !default;
+
+$cms-color-primary: #0071bc !default;
+$cms-color-primary-darker: #205493 !default;
+$cms-color-primary-darkest: #112e51 !default;
+
+$cms-color-primary-alt: #02bfe7 !default;
+$cms-color-primary-alt-dark: #00a6d2 !default;
+$cms-color-primary-alt-darkest: #046b99 !default;
+$cms-color-primary-alt-light: #9bdaf1 !default;
+$cms-color-primary-alt-lightest: #e1f3f8 !default;
+
+$cms-color-red: #e31c3d !default;
+$cms-color-red-dark: #cd2026 !default;
+$cms-color-red-darker: #b31e22 !default;
+$cms-color-red-darkest: #981b1e !default;
+$cms-color-red-light: #e59393 !default;
+$cms-color-red-lighter: #f5adb9 !default;
+$cms-color-red-lightest: #f9dede !default;
+
+$cms-color-gold: #fdb81e !default;
+$cms-color-gold-dark: #e4a61b !default;
+$cms-color-gold-darker: #ca9318 !default;
+$cms-color-gold-darkest: #b18115 !default;
+$cms-color-gold-light: #f9c642 !default;
+$cms-color-gold-lighter: #fad980 !default;
+$cms-color-gold-lightest: #fff1d2 !default;
+
+$cms-color-green: #2e8540 !default;
+$cms-color-green-dark: #2a7a3b !default;
+$cms-color-green-darker: #266e35 !default;
+$cms-color-green-darkest: #174320 !default;
+$cms-color-green-light: #4aa564 !default;
+$cms-color-green-lighter: #94bfa2 !default;
+$cms-color-green-lightest: #e7f4e4 !default;
+
+$cms-color-cool-blue: #205493 !default;
+$cms-color-cool-blue-light: #4773aa !default;
+$cms-color-cool-blue-lighter: #8ba6ca !default;
+$cms-color-cool-blue-lightest: #dce4ef !default;
+
+// Status
+$cms-color-error: $cms-color-red !default;
+$cms-color-error-dark: $cms-color-red-dark !default;
+$cms-color-error-darker: $cms-color-red-darker !default;
+$cms-color-error-darkest: $cms-color-red-darkest !default;
+$cms-color-error-light: $cms-color-red-light !default;
+$cms-color-error-lighter: $cms-color-red-lighter !default;
+$cms-color-error-lightest: $cms-color-red-lightest !default;
+
+$cms-color-warn: $cms-color-gold !default;
+$cms-color-warn-dark: $cms-color-gold-dark !default;
+$cms-color-warn-darker: $cms-color-gold-darker !default;
+$cms-color-warn-darkest: $cms-color-gold-darkest !default;
+$cms-color-warn-light: $cms-color-gold-light !default;
+$cms-color-warn-lighter: $cms-color-gold-lighter !default;
+$cms-color-warn-lightest: $cms-color-gold-lightest !default;
+
+$cms-color-success: $cms-color-green !default;
+$cms-color-success-dark: $cms-color-green-dark !default;
+$cms-color-success-darker: $cms-color-green-darker !default;
+$cms-color-success-darkest: $cms-color-green-darkest !default;
+$cms-color-success-light: $cms-color-green-light !default;
+$cms-color-success-lighter: $cms-color-green-lighter !default;
+$cms-color-success-lightest: $cms-color-green-lightest !default;
+
+// Text
+$cms-color-muted: $cms-color-gray !default;
+$cms-color-base-inverse: $cms-color-white !default;
+$cms-color-muted-inverse: #bac5cf !default;
+
+// Focus
+// Default focus styles
+$cms-color-focus: #3e94cf !default;
+$cms-color-focus-inverse: #59bcff !default;
+
+// More robust focus styles
+$cms-focus-color: #ffde11 !default;
+$cms-focus-color-inverse: #ffde11 !default;
+$cms-focus-border-inverse: #8f7c00 !default;
+$cms-focus-shadow: inset 0 0 0 1px $cms-color-base;
+$cms-focus-shadow-inverse: inset 0 0 0 1px $cms-color-base !default;
+$cms-focus-shadow-link: 0 3px $cms-color-base !default;
+$cms-focus-shadow-link-inverse: 0 3px $focus-border-inverse !default;
+
+$cms-color-visited: #4c2c92 !default;
+
+// Background
+$cms-color-background: $cms-color-white !default;
+$cms-color-background-inverse: $cms-color-primary-darkest !default;
+$cms-color-background-dialog-mask: rgba($cms-color-black, 0.5) !default;
+$cms-color-background-dialog: $cms-color-white !default;
+
+// Border
+$cms-border-color: $cms-color-gray-lighter !default;
+$cms-border-color-dark: $cms-color-gray-dark !default;
+$cms-border-color-inverse: $cms-color-white !default;
