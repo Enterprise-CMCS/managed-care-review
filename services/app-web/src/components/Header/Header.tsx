@@ -1,5 +1,7 @@
-import { NavList } from '@trussworks/react-uswds'
+import { NavList, Button } from '@trussworks/react-uswds'
 import './Header.scss'
+import vaIcon from '../../assets/icons/va-icon.svg'
+import mnIcon from '../../assets/icons/mn-icon.svg'
 
 type HeaderProps = {
     stateCode?: string
@@ -21,18 +23,18 @@ export const Header = ({
 
     const getStateInfo = (
         postalCode: string
-    ): { name: string; icon: string } => {
+    ): { stateName: string; stateIcon: string } => {
         switch (postalCode) {
             case 'MN':
-                return { name: 'Minnesota', icon: '#' }
+                return { stateName: 'Minnesota', stateIcon: mnIcon }
             case 'Virginia':
-                return { name: 'Virginia', icon: '#' }
+                return { stateName: 'Virginia', stateIcon: vaIcon }
             default:
-                return { name: 'STATE UNKNOWN', icon: '#' }
+                return { stateName: 'STATE UNKNOWN', stateIcon: '#' }
         }
     }
 
-    const { name } = getStateInfo(stateCode)
+    const { stateName, stateIcon } = getStateInfo(stateCode)
 
     return (
         <header className="usa-header">
@@ -61,22 +63,27 @@ export const Header = ({
                 {loggedIn ? (
                     <button
                         onClick={(event) => console.log('Menu down')}
-                        className="nav-user-button"
+                        className="flex-auto"
                     >
                         {mockUser.name}
                     </button>
                 ) : (
-                    <button
+                    <Button
+                        type="button"
+                        unstyled
                         onClick={(event) => console.log('Login')}
-                        className="nav-user-button"
+                        className="flex-auto"
                     >
                         Login
-                    </button>
+                    </Button>
                 )}
             </div>
             <div className="grid-row margin-x-4">
-                <h1 className="margin-x-0">
-                    {name}
+                <div>
+                    <img src={stateIcon} alt="" aria-hidden />
+                </div>
+                <h1 className="margin-0 ">
+                    {stateName}
                     <span className="font-heading-lg margin-x-2">
                         {activePage}
                     </span>
