@@ -14,7 +14,9 @@
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-scripts": "4.0.1",
+    "sass": "^1.32.5",
     "typescript": "^4.0.3",
+    "uswds": "^2.10.0",
     "web-vitals": "^0.2.4"
   },
   "scripts": {
@@ -25,7 +27,8 @@
     "format": "prettier --write src/**/*.ts{,x}",
     "lint": "tsc --noEmit && eslint src/**/*.ts{,x}",
     "test:a11y": "pa11y-ci",
-    "test:unit": "react-scripts test --watchAll=false"
+    "test:unit": "react-scripts test --watchAll=false",
+    "build-storybook": "build-storybook -s public"
   },
   "eslintConfig": {
     "extends": [
@@ -46,7 +49,11 @@
     ]
   },
   "devDependencies": {
-    "@types/jest-axe": "^3.5.1",
+    "@storybook/addon-a11y": "^6.1.15",
+    "@storybook/addon-essentials": "^6.1.15",
+    "@storybook/addon-links": "^6.1.15",
+    "@storybook/preset-create-react-app": "^3.1.5",
+    "@storybook/react": "^6.1.15",
     "@typescript-eslint/eslint-plugin": "^4.14.0",
     "@typescript-eslint/parser": "^4.14.0",
     "eslint-config-prettier": "^7.2.0",
