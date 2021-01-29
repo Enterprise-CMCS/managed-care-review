@@ -31,7 +31,7 @@ export default class LabeledProcessRunner {
 		return `\x1b[38;5;${color}m ${prefix.padStart(maxLength)}|\x1b[0m`
 	}
 
-	async run_command_and_output(prefix: string, cmd: string[], cwd: string | null) {
+	async run_command_and_output(prefix: string, cmd: string[], cwd: string | null): Promise<number> {
 
 		const proc_opts: Record<string, any> = {}
 
@@ -62,17 +62,17 @@ export default class LabeledProcessRunner {
 			}
 		});
 
-		return new Promise<void>((resolve, reject) => {
+		return new Promise<number>((resolve, reject) => {
 			proc.on('error', (error) => {
 				const paddedPrefix = this.formattedPrefix(prefix)
 				process.stdout.write(`${paddedPrefix} A PROCESS ERROR: ${error}\n`)
 				reject(error)
 			})
 
-			proc.on('close', code => {
+			proc.on('close', (code: number) => {
 				const paddedPrefix = this.formattedPrefix(prefix)
 				process.stdout.write(`${paddedPrefix} Exit: ${code}\n`);
-				resolve()
+				resolve(code)
 			})
 		})
 	}
