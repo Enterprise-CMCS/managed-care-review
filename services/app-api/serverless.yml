@@ -49,6 +49,16 @@ functions:
           method: post
           cors: true
 
+  hello:
+    handler: handlers/hello.main
+    role: LambdaApiRole
+    events:
+      - http:
+          path: hello
+          method: get
+          cors: true
+          authorizer: aws_iam
+
 resources:
   Conditions:
     CreatePermissionsBoundary:
