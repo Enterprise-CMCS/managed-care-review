@@ -11,7 +11,7 @@ export const main: APIGatewayProxyHandler = async () => {
     console.log({"name": "hello"}) // eslint-disable-line no-console
 
     return {
-        statusCode: 403,
+        statusCode: 200,
         body: JSON.stringify(hello) + '\n',
         headers: {
             "Access-Control-Allow-Origin": "*",
