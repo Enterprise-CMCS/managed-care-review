@@ -3,23 +3,41 @@
 .logo-row {
     display: flex;
     flex-wrap: wrap;
-    padding-left: 2rem;
-    padding-right: 2rem;
+    padding: 0 2rem;
 }
 .nav-row {
     background-color: $theme-color-primary;
-    color: 'white';
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    padding-left: 1rem;
-    padding-right: 2rem;
+    padding: 1rem 2rem 1rem 0;
+
+    & ul {
+        list-style-type: none;
+        margin: 0;
+        display: flex;
+        > li {
+            padding: 1rem 1rem 1rem 0;
+        }
+    }
+    & a {
+        color: $cms-color-white;
+    }
+    & button {
+        color: $cms-color-white;
+    }
 }
 
 .heading-row {
     background-color: $theme-color-primary-dark;
-    color: 'white';
+    color: $cms-color-white;
     display: flex;
     flex-wrap: wrap;
-    padding-left: 2rem;
+    align-self: baseline;
+    padding: 0.5rem 2rem;
+
+    & span {
+        vertical-align: center;
+        padding: 0 0.5rem;
+    }
 }

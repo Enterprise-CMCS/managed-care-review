@@ -1,10 +1,32 @@
-import { NavList, Button } from '@trussworks/react-uswds'
+import { Button } from '@trussworks/react-uswds'
+
 import './Header.scss'
+import medicaidLogo from '../../assets/images/headerlogo-medicaid.png'
 import { ReactComponent as VaIcon } from '../../assets/icons/va-icon.svg'
 import { ReactComponent as MnIcon } from '../../assets/icons/mn-icon.svg'
 
-type HeaderProps = {
-    stateCode?: string
+const getStateInfo = (
+    stateAbbrev: SupportedStateCodes
+): { stateName: string; StateIcon: React.FunctionComponent } => {
+    switch (stateAbbrev) {
+        case 'MN':
+            return { stateName: 'Minnesota', StateIcon: MnIcon }
+        case 'VA':
+            return { stateName: 'Virginia', StateIcon: VaIcon }
+        default:
+            return {
+                stateName: 'STATE UNKNOWN',
+                StateIcon: () => <span></span>,
+            }
+    }
+}
+
+enum SupportedStateCodes {
+    MN = 'MN',
+    VA = 'VA',
+}
+export type HeaderProps = {
+    stateCode?: SupportedStateCodes
     activePage?: string
     loggedIn?: boolean
 }
@@ -13,28 +35,12 @@ type HeaderProps = {
  * CMS Header
  */
 export const Header = ({
-    stateCode = 'MN',
+    stateCode = SupportedStateCodes.MN,
     activePage = 'Managed Care Dashboard',
     loggedIn = false,
 }: HeaderProps): React.ReactElement => {
     const mockUser = {
         name: 'Mickey Mouse',
-    }
-
-    const getStateInfo = (
-        postalCode: string
-    ): { stateName: string; StateIcon: React.FunctionComponent } => {
-        switch (postalCode) {
-            case 'MN':
-                return { stateName: 'Minnesota', StateIcon: MnIcon }
-            case 'Virginia':
-                return { stateName: 'Virginia', StateIcon: VaIcon }
-            default:
-                return {
-                    stateName: 'STATE UNKNOWN',
-                    StateIcon: () => <span>N/A</span>,
-                }
-        }
     }
 
     const { stateName, StateIcon } = getStateInfo(stateCode)
@@ -44,38 +50,37 @@ export const Header = ({
             <div className="logo-row">
                 <div className="usa-logo">
                     <img
-                        src="https://www.medicaid.gov/themes/custom/medicaid/images/headerlogo-medicaid.png"
+                        src={medicaidLogo}
                         alt="Medicaid.gov-Keeping America Healthy"
                     />
                 </div>
             </div>
             <div className="nav-row">
-                <nav className="usa-nav">
-                    <NavList
-                        type="primary"
-                        items={[
-                            <a href="#about" key="one">
-                                About
-                            </a>,
-                            <a href="#dashboard" key="two">
-                                Dashboard
-                            </a>,
-                        ]}
-                    />
+                <nav role="navigation">
+                    <ul className="text-light">
+                        <li>
+                            <a href="#about">About</a>
+                        </li>
+                        <li>
+                            <a href="#dashboard">Dashboard</a>
+                        </li>
+                    </ul>
                 </nav>
                 {loggedIn ? (
-                    <button
+                    <Button
+                        type="button"
+                        unstyled
                         onClick={() => console.log('Menu down')}
-                        className="flex-auto"
+                        className="flex-auto text-light"
                     >
                         {mockUser.name}
-                    </button>
+                    </Button>
                 ) : (
                     <Button
                         type="button"
                         unstyled
                         onClick={() => console.log('Login')}
-                        className="flex-auto"
+                        className="flex-auto text-light"
                     >
                         Login
                     </Button>
@@ -85,9 +90,9 @@ export const Header = ({
                 <div>
                     <StateIcon />
                 </div>
-                <h1 className="margin-0 ">
-                    {stateName}
-                    <span className="font-heading-lg margin-x-2">
+                <h1 className="margin-0">
+                    <span>{stateName}</span>
+                    <span className="font-heading-lg text-light">
                         {activePage}
                     </span>
                 </h1>

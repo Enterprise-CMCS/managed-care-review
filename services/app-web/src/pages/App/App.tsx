@@ -8,7 +8,7 @@ function App(): React.ReactElement {
 
     return (
         <div className="App">
-            <Header stateCode="MN" />
+            <Header />
             <main className="padding-x-4">Main Content</main>
         </div>
     )
