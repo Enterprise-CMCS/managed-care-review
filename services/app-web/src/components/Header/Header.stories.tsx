@@ -13,4 +13,9 @@ export const StateUserHeader = Template.bind({})
 
 StateUserHeader.args = {
     loggedIn: true,
+    stateCode: 'MN',
+    user: {
+        name: 'Bob test user',
+        email: 'bob@dmas.virginia.gov',
+    },
 }

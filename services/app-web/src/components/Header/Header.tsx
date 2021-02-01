@@ -21,28 +21,30 @@ const getStateInfo = (
     }
 }
 
-enum SupportedStateCodes {
-    MN = 'MN',
-    VA = 'VA',
-}
+const StateCodes = {
+    MN: 'MN',
+    VA: 'VA',
+} as const
+type SupportedStateCodes = typeof StateCodes[keyof typeof StateCodes]
 export type HeaderProps = {
-    stateCode?: SupportedStateCodes
+    stateCode: SupportedStateCodes
     activePage?: string
-    loggedIn?: boolean
+    loggedIn: boolean
+    user: {
+        name: string
+        email: string
+    }
 }
 
 /**
  * CMS Header
  */
 export const Header = ({
-    stateCode = SupportedStateCodes.MN,
+    stateCode,
     activePage = 'Managed Care Dashboard',
-    loggedIn = false,
+    loggedIn,
+    user,
 }: HeaderProps): React.ReactElement => {
-    const mockUser = {
-        name: 'Mickey Mouse',
-    }
-
     const { stateName, StateIcon } = getStateInfo(stateCode)
 
     return (
@@ -73,7 +75,7 @@ export const Header = ({
                         onClick={() => console.log('Menu down')}
                         className="flex-auto text-light"
                     >
-                        {mockUser.name}
+                        {user.email}
                     </Button>
                 ) : (
                     <Button

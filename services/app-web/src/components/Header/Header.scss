@@ -3,21 +3,23 @@
 .logo-row {
     display: flex;
     flex-wrap: wrap;
-    padding: 0 2rem;
+    padding: 0.7rem 2rem;
 }
+
 .nav-row {
     background-color: $theme-color-primary;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    padding: 1rem 2rem 1rem 0;
-
+    padding: 1rem 2rem;
     & ul {
+        display: flex;
         list-style-type: none;
         margin: 0;
-        display: flex;
+        padding: 0;
+
         > li {
-            padding: 1rem 1rem 1rem 0;
+            padding: 1rem;
         }
     }
     & a {
@@ -25,6 +27,7 @@
     }
     & button {
         color: $cms-color-white;
+        padding: 1rem;
     }
 }
 
@@ -33,11 +36,14 @@
     color: $cms-color-white;
     display: flex;
     flex-wrap: wrap;
-    align-self: baseline;
     padding: 0.5rem 2rem;
-
-    & span {
-        vertical-align: center;
-        padding: 0 0.5rem;
+    & h1 {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        > span {
+            padding: 0 0.5rem;
+            font-family: inherit;
+        }
     }
 }
