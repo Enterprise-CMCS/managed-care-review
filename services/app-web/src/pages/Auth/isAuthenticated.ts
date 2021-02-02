@@ -2,7 +2,7 @@ import { API } from "aws-amplify";
 
 export async function isAuthenticated(): Promise<boolean> {
 
-	const helloURL = process.env.REACT_APP_API_URL + '/hello'
+	const helloURL = '/hello'
 
 	try {
 		const result = await API.get('api', helloURL, {response: true})
