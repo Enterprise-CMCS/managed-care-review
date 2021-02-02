@@ -14,6 +14,15 @@ Amplify.configure({
         identityPoolId: process.env.REACT_APP_COGNITO_ID_POOL_ID,
         userPoolWebClientId: process.env.REACT_APP_COGNITO_USER_POOL_CLIENT_ID,
     },
+    API: {
+        endpoints: [
+            {
+                name: "api",
+                endpoint: process.env.REACT_APP_API_URL,
+                // region: process.env.REACT_APP_API_REGION,
+            },
+        ]
+    }
 })
 
 ReactDOM.render(
