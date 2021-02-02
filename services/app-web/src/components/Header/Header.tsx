@@ -1,40 +1,104 @@
-import { Header as USWDSHeader, Title } from '@trussworks/react-uswds'
+import { Button } from '@trussworks/react-uswds'
 
-type HeaderProps = {
-    stateCode?: string
+import './Header.scss'
+import medicaidLogo from '../../assets/images/headerlogo-medicaid.png'
+import { ReactComponent as VaIcon } from '../../assets/icons/va-icon.svg'
+import { ReactComponent as MnIcon } from '../../assets/icons/mn-icon.svg'
+
+const getStateInfo = (
+    stateAbbrev: SupportedStateCodes
+): { stateName: string; StateIcon: React.FunctionComponent } => {
+    switch (stateAbbrev) {
+        case 'MN':
+            return { stateName: 'Minnesota', StateIcon: MnIcon }
+        case 'VA':
+            return { stateName: 'Virginia', StateIcon: VaIcon }
+        default:
+            return {
+                stateName: 'STATE UNKNOWN',
+                StateIcon: () => <span></span>,
+            }
+    }
+}
+
+const StateCodes = {
+    MN: 'MN',
+    VA: 'VA',
+} as const
+type SupportedStateCodes = typeof StateCodes[keyof typeof StateCodes]
+export type HeaderProps = {
+    stateCode: SupportedStateCodes
+    activePage?: string
+    loggedIn: boolean
+    user: {
+        name: string
+        email: string
+    }
 }
 
 /**
- * CMS Header for a logged in state user.
+ * CMS Header
  */
 export const Header = ({
-    stateCode = 'MI',
+    stateCode,
+    activePage = 'Managed Care Dashboard',
+    loggedIn,
+    user,
 }: HeaderProps): React.ReactElement => {
-    // TODO: Lookup from state.json or wherever we will store this
-    const getStateInfo = (
-        postalCode: string
-    ): { name: string; icon: string } => {
-        return postalCode === 'TN'
-            ? { name: 'Tennessee', icon: '#' }
-            : { name: 'DEFAULT STATE', icon: '#' }
-    }
-
-    const { name } = getStateInfo(stateCode)
+    const { stateName, StateIcon } = getStateInfo(stateCode)
 
     return (
-        <USWDSHeader basic>
-            <div className="usa-nav-container">
-                <img
-                    src="https://www.medicaid.gov/themes/custom/medicaid/images/headerlogo-medicaid.png"
-                    alt="Medicaid.gov-Keeping America Healthy"
-                />
-                <div className="usa-navbar">
-                    <Title>
-                        <span>{name}</span>
-                        &nbsp;State Submission Project &nbsp;
-                    </Title>
+        <header className="usa-header">
+            <div className="logo-row">
+                <div className="usa-logo">
+                    <img
+                        src={medicaidLogo}
+                        alt="Medicaid.gov-Keeping America Healthy"
+                    />
                 </div>
             </div>
-        </USWDSHeader>
+            <div className="nav-row">
+                <nav role="navigation">
+                    <ul className="text-light">
+                        <li>
+                            <a href="#about">About</a>
+                        </li>
+                        <li>
+                            <a href="#dashboard">Dashboard</a>
+                        </li>
+                    </ul>
+                </nav>
+                {loggedIn ? (
+                    <Button
+                        type="button"
+                        unstyled
+                        onClick={() => console.log('Menu down')}
+                        className="flex-auto text-light"
+                    >
+                        {user.email}
+                    </Button>
+                ) : (
+                    <Button
+                        type="button"
+                        unstyled
+                        onClick={() => console.log('Login')}
+                        className="flex-auto text-light"
+                    >
+                        Login
+                    </Button>
+                )}
+            </div>
+            <div className="heading-row">
+                <div>
+                    <StateIcon />
+                </div>
+                <h1 className="margin-0">
+                    <span>{stateName}</span>
+                    <span className="font-heading-lg text-light">
+                        {activePage}
+                    </span>
+                </h1>
+            </div>
+        </header>
     )
 }

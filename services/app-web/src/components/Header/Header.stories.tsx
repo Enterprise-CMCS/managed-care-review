@@ -1,12 +1,21 @@
 import React from 'react'
-
-import { Header } from './Header'
+import { Story } from '@storybook/react'
+import { Header, HeaderProps } from './Header'
 
 export default {
     title: 'Components/Header',
     component: Header,
 }
 
-export const StateUserHeader = (): React.ReactElement => (
-    <Header stateCode="TN" />
-)
+const Template: Story<HeaderProps> = (args) => <Header {...args} />
+
+export const StateUserHeader = Template.bind({})
+
+StateUserHeader.args = {
+    loggedIn: true,
+    stateCode: 'MN',
+    user: {
+        name: 'Bob test user',
+        email: 'bob@dmas.mn.gov',
+    },
+}
