@@ -16,6 +16,6 @@ StateUserHeader.args = {
     stateCode: 'MN',
     user: {
         name: 'Bob test user',
-        email: 'bob@dmas.virginia.gov',
+        email: 'bob@dmas.mn.gov',
     },
 }
