@@ -17,14 +17,22 @@ custom:
   s3_attachments_bucket_name: ${cf:uploads-${self:custom.stage}.AttachmentsBucketName}
   ui_s3_bucket_name: ${cf:ui-${self:custom.stage}.S3BucketName}
   ui_cloudfront_distribution_id: ${cf:ui-${self:custom.stage}.CloudFrontDistributionId}
+  storybook_s3_bucket_name: ${cf:storybook-${self:custom.stage}.S3BucketName}
+  storybook_cloudfront_distribution_id: ${cf:storybook-${self:custom.stage}.CloudFrontDistributionId}
 
   s3Sync:
     - bucketName: ${self:custom.ui_s3_bucket_name}
       localDir: ./build
       deleteRemoved: true
+    - bucketName: ${self:custom.storybook_s3_bucket_name}
+      localDir: ./storybook-static
+      deleteRemoved: true
 
   cloudfrontInvalidate:
     - distributionId: ${self:custom.ui_cloudfront_distribution_id}
+      items:
+        - "/*"
+    - distributionId: ${self:custom.storybook_cloudfront_distribution_id}
       items:
         - "/*"
 
@@ -35,6 +43,7 @@ custom:
         set -e
         export REACT_APP_API_URL=${self:custom.api_url}
         yarn run build
+        yarn build-storybook
         # export API_REGION=${self:custom.api_region}
         # export API_URL=${self:custom.api_url}
         # export COGNITO_REGION=${self:custom.cognito_region}

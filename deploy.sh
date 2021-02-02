@@ -12,6 +12,7 @@ services=(
   'stream-functions'
   'ui-auth'
   'ui'
+  'storybook'
   'app-web'
 )
 
@@ -46,6 +47,7 @@ echo """
 ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------
 Application endpoint:  `./output.sh ui CloudFrontEndpointUrl $stage`
+Storybook endpoint:  `./output.sh storybook CloudFrontEndpointUrl $stage`
 ------------------------------------------------------------------------------------------------
 """
 popd
