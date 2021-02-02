@@ -1,0 +1,49 @@
+@import '../../index.scss';
+
+.logo-row {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0.7rem 2rem;
+}
+
+.nav-row {
+    background-color: $theme-color-primary;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+    & ul {
+        display: flex;
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+
+        > li {
+            padding: 1rem;
+        }
+    }
+    & a {
+        color: $cms-color-white;
+    }
+    & button {
+        color: $cms-color-white;
+        padding: 1rem;
+    }
+}
+
+.heading-row {
+    background-color: $theme-color-primary-dark;
+    color: $cms-color-white;
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0.5rem 2rem;
+    & h1 {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        > span {
+            padding: 0 0.5rem;
+            font-family: inherit;
+        }
+    }
+}

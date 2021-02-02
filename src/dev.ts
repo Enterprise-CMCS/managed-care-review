@@ -33,8 +33,8 @@ async function run_s3_locally(runner: LabeledProcessRunner) {
 async function run_web_locally(runner: LabeledProcessRunner) {
 
 	await runner.run_command_and_output('web deps', ['yarn', 'install'], 'services/app-web')
-
 	runner.run_command_and_output('web', ['yarn', 'start'], 'services/app-web')
+	runner.run_command_and_output('storybook', ['yarn', 'storybook'], 'services/app-web')
 	
 }
 
@@ -126,33 +126,33 @@ function main() {
 	// The command definitions in yargs
 	// All valid arguments to dev should be enumerated here, this is the entrypoint to the script
 	yargs(process.argv.slice(2))
-		.command('local', 'run system locally', {}, () => {
-			run_all_locally()
-		})
-		.command('test', 'run tests. If no flags are passed, runs both --unit and --online', (yargs) => {
-			return yargs.boolean('unit')
-								.boolean('online')
-		}, (args) => {
-			let run_unit = false
-			let run_online = false
+	.command('local', 'run system locally', {}, () => {
+		run_all_locally()
+	})
+	.command('test', 'run tests. If no flags are passed, runs both --unit and --online', (yargs) => {
+		return yargs.boolean('unit')
+							.boolean('online')
+	}, (args) => {
+		let run_unit = false
+		let run_online = false
 
-			// If no test flags are passed, default to running everything.
-			if (args.unit == null && args.online == null) {
+		// If no test flags are passed, default to running everything.
+		if (args.unit == null && args.online == null) {
+			run_unit = true
+			run_online = true
+		} else {
+			if (args.unit) {
 				run_unit = true
-				run_online = true
-			} else {
-				if (args.unit) {
-					run_unit = true
-				}
-				if (args.online) {
-					run_online = true
-				}
 			}
+			if (args.online) {
+				run_online = true
+			}
+		}
 
-			run_all_tests(run_unit, run_online)
-		})
-		.demandCommand(1, '') // this prints out the help if you don't call a subcommand
-		.argv
+		run_all_tests(run_unit, run_online)
+	})
+	.demandCommand(1, '') // this prints out the help if you don't call a subcommand
+	.argv
 }
 
 // I'd love for there to be a check we can do like you do in python
@@ -161,3 +161,4 @@ function main() {
 // I still like corralling all the script in main() anyway, b/c that keeps us from 
 // scattering running code all over. 
 main()
+

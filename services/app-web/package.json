@@ -31,6 +31,7 @@
     "lint": "tsc --noEmit && eslint src/**/*.ts{,x}",
     "test:a11y": "pa11y-ci",
     "test:unit": "react-scripts test --watchAll=false",
+    "storybook": "start-storybook -p 6006 -s public",
     "build-storybook": "build-storybook -s public"
   },
   "eslintConfig": {

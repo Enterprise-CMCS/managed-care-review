@@ -16,12 +16,15 @@ const Landing = (): React.ReactElement => {
 
 function App(): React.ReactElement {
     logEvent('on_load', { success: true })
-
+    const mockUser = {
+        name: 'Bob test user',
+        email: 'bob@dmas.virginia.gov',
+    }
     return (
         <Router>
             <div className="App">
-                <Header stateCode="TN" />
-                <main>
+                <Header user={mockUser} loggedIn stateCode="MN" />
+                <main className="padding-x-4">
                     <h1>Main Content</h1>
                     <Switch>
                         <Route path="/auth">

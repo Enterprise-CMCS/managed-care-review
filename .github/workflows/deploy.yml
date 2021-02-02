@@ -80,6 +80,7 @@ jobs:
             services/stream-functions/node_modules
             services/ui-auth/node_modules
             services/ui/node_modules
+            services/storybook/node_modules
             services/app-web/node_modules
             node_modules
             tests/nightwatch/node_modules

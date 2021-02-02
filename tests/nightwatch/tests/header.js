@@ -4,7 +4,8 @@ module.exports = {
       browser
         .url (`${process.env.APPLICATION_ENDPOINT}`)
         .waitForElementVisible('.App')
-        .assert.containsText('.usa-header' , 'State Submission Project')
+        .assert.elementPresent('.usa-header h1')
+        .assert.elementPresent('nav')
         .saveScreenshot('tests_output/header_is_present_screenshot.png')
   }
 }
