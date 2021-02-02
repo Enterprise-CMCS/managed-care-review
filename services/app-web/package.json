@@ -14,7 +14,6 @@
     "aws-amplify": "^3.3.15",
     "axios": "^0.21.1",
     "react": "^17.0.1",
-    "react-bootstrap": "^1.4.3",
     "react-dom": "^17.0.1",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.1",
@@ -53,12 +52,12 @@
     ]
   },
   "devDependencies": {
-    "@types/react-router-dom": "^5.1.7",
     "@storybook/addon-a11y": "^6.1.15",
     "@storybook/addon-essentials": "^6.1.15",
     "@storybook/addon-links": "^6.1.15",
     "@storybook/preset-create-react-app": "^3.1.5",
     "@storybook/react": "^6.1.15",
+    "@types/react-router-dom": "^5.1.7",
     "@typescript-eslint/eslint-plugin": "^4.14.0",
     "@typescript-eslint/parser": "^4.14.0",
     "eslint-config-prettier": "^7.2.0",

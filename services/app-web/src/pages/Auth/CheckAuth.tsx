@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
+import { Button } from '@trussworks/react-uswds'
 import { isAuthenticated } from './isAuthenticated'
 
 type AuthStatus = 'Unknown' | 'Authenticated' | 'Unauthenticated'
 
 // COMPONENTS
 export function CheckAuth(): React.ReactElement {
-
     const [isLoading, setIsLoading] = useState(false)
 
     const [authStatus, setAuthStatus] = useState<AuthStatus>('Unknown')
@@ -26,16 +26,13 @@ export function CheckAuth(): React.ReactElement {
             setAuthStatus('Unauthenticated')
         }
     }
-    
+
     return (
         <form onSubmit={handleSubmit}>
             <p>Current Auth Status: {authStatus}</p>
-            <button
-                type="submit"
-                disabled={isLoading}
-            >
+            <Button type="submit" disabled={isLoading}>
                 Check Auth
-            </button>
+            </Button>
         </form>
     )
 }

@@ -1,8 +1,11 @@
 import React, { useState, Dispatch, SetStateAction } from 'react'
 import {
+    Button,
+    Form,
     FormGroup,
-    FormControl,
-} from 'react-bootstrap'
+    Label,
+    TextInput,
+} from '@trussworks/react-uswds'
 
 import { signUp } from './cognitoAuth'
 import { CognitoUser } from 'amazon-cognito-identity-js'
@@ -20,7 +23,10 @@ type Props = {
     triggerConfirmation: () => void
 }
 
-export function Signup({ setEmail, triggerConfirmation }: Props): React.ReactElement {
+export function Signup({
+    setEmail,
+    triggerConfirmation,
+}: Props): React.ReactElement {
     const [fields, setFields] = useState({
         firstName: '',
         lastName: '',
@@ -74,59 +80,69 @@ export function Signup({ setEmail, triggerConfirmation }: Props): React.ReactEle
                 showError('That username already exists')
             } else {
                 showError('An unexpected error occured!')
-                logEvent('cognitoAuth.unexpected_error', {'err.code': err.code, 'err.message': err.message})
+                logEvent('cognitoAuth.unexpected_error', {
+                    'err.code': err.code,
+                    'err.message': err.message,
+                })
             }
         }
     }
 
     return (
-        <form onSubmit={handleSubmit}>
-            <FormGroup controlId="firstName">
-                <label htmlFor={'firstnameCon'}>First Name</label>
-                <FormControl
-                    type="firstName"
+        <Form onSubmit={handleSubmit}>
+            <FormGroup>
+                <Label htmlFor="firstName">First Name</Label>
+                <TextInput
+                    id="firstName"
+                    name="firstName"
+                    type="text"
                     value={fields.firstName}
                     onChange={onFieldChange}
                 />
             </FormGroup>
-            <FormGroup controlId="lastName">
-                <label htmlFor={'lastnameCon'}>Last Name</label>
-                <FormControl
-                    type="lastName"
+            <FormGroup>
+                <Label htmlFor="lastName">Last Name</Label>
+                <TextInput
+                    id="lastName"
+                    name="lastName"
+                    type="text"
                     value={fields.lastName}
                     onChange={onFieldChange}
                 />
             </FormGroup>
-            <FormGroup controlId="email">
-                <label htmlFor={'emailCon'}>Email</label>
-                <FormControl
+            <FormGroup>
+                <Label htmlFor="email">Email</Label>
+                <TextInput
+                    id="email"
+                    name="email"
                     type="email"
                     value={fields.email}
                     onChange={onFieldChange}
                 />
             </FormGroup>
-            <FormGroup controlId="password">
-                <label htmlFor={'pwcon'}>Password</label>
-                <FormControl
+            <FormGroup>
+                <Label htmlFor="password">Password</Label>
+                <TextInput
+                    id="password"
+                    name="password"
                     type="password"
                     value={fields.password}
                     onChange={onFieldChange}
                 />
             </FormGroup>
-            <FormGroup controlId="confirmPassword">
-                <label htmlFor={'pwconfcon'}>Confirm Password</label>
-                <FormControl
+            <FormGroup>
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <TextInput
+                    id="confirmPassword"
+                    name="confirmPassword"
                     type="password"
                     onChange={onFieldChange}
                     value={fields.confirmPassword}
                 />
             </FormGroup>
-            <button
-                type="submit"
-                disabled={!validateForm() || isLoading}
-            >
+            <Button type="submit" disabled={!validateForm() || isLoading}>
                 Signup
-            </button>
-        </form>
+            </Button>
+        </Form>
     )
 }

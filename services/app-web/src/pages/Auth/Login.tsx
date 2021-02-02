@@ -1,9 +1,12 @@
 import React, { useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import {
+    Button,
+    Form,
     FormGroup,
-    FormControl,
-} from 'react-bootstrap'
+    Label,
+    TextInput,
+} from '@trussworks/react-uswds'
 // import { useAppContext } from '../libs/contextLib'
 
 import { signIn } from './cognitoAuth'
@@ -16,11 +19,10 @@ type Props = {
     defaultEmail: string
 }
 
-// COMPONENTS
 export function Login({ defaultEmail }: Props): React.ReactElement {
     const [fields, setFields] = useState({
-        email: defaultEmail,
-        password: '',
+        loginEmail: defaultEmail,
+        loginPassword: '',
     })
 
     const history = useHistory()
@@ -33,19 +35,18 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
         setFields({ ...fields, [id]: value })
     }
 
-
     function validateForm() {
-        return fields.email.length > 0 && fields.password.length > 0;
+        return fields.loginEmail.length > 0 && fields.loginPassword.length > 0
     }
 
     async function handleSumbit(event: React.FormEvent) {
         event.preventDefault()
 
-        setIsLoading(true);
-        const result = await signIn(fields.email, fields.password);
-        setIsLoading(false);
+        setIsLoading(true)
+        const result = await signIn(fields.loginEmail, fields.loginPassword)
+        setIsLoading(false)
         if (result.isOk()) {
-            console.log("SUCCESS LOGIN")    
+            console.log('SUCCESS LOGIN')
             history.push('/dashboard')
         } else {
             const err = result.error
@@ -53,43 +54,48 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
 
             if (err.code === 'UserNotConfirmedException') {
                 // the user has not been confirmed, need to display the confirmation UI
-                console.log('you need to confirm your account, enter the code below')
+                console.log(
+                    'you need to confirm your account, enter the code below'
+                )
             } else if (err.code === 'NotAuthorizedException') {
                 // the password is bad
                 console.log('bad password')
             }
-            showError(err.message);
-    
+            showError(err.message)
         }
     }
 
     return (
         <div className="Login">
-            <form onSubmit={handleSumbit}>
-                <FormGroup controlId="email">
-                    <label htmlFor={'email'}>Email</label>
-                    <FormControl
+            <Form onSubmit={handleSumbit}>
+                <FormGroup>
+                    <Label htmlFor="loginEmail">Email</Label>
+                    <TextInput
+                        id="loginEmail"
+                        name="loginEmail"
                         type="email"
-                        value={fields.email}
+                        value={fields.loginEmail}
                         onChange={onFieldChange}
                     />
                 </FormGroup>
-                <FormGroup controlId="password">
-                    <label htmlFor={'pass'}>Password</label>
-                    <FormControl
+                <FormGroup>
+                    <Label htmlFor="loginPassword">Password</Label>
+                    <TextInput
+                        id="loginPassword"
+                        name="loginPassword"
                         type="password"
-                        value={fields.password}
+                        value={fields.loginPassword}
                         onChange={onFieldChange}
                     />
                 </FormGroup>
-                <button
+                <Button
                     type="submit"
                     // isLoading={isLoading}
                     disabled={!validateForm() || isLoading}
                 >
                     Login
-                </button>
-            </form>
+                </Button>
+            </Form>
         </div>
     )
 }
