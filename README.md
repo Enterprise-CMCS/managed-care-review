@@ -65,9 +65,29 @@ brew install yarn
 ./dev local
 ```
 
-## Examples
+## Functional Programming Concepts
 
-None.
+There are two Functional Programming concepts that we use pervasively inside of guide-wire: Option and Result. If these aren't familiar to you, ask! We've got some good primers on them. 
+
+Option, we are doing in pure Typescript, but with some conventions. 
+
+// When a function can return null, make a new type: OptionalThing = Thing | null
+
+typescript will require you unwrap the optional before you do anything with it:
+
+if (optionalFoo !== null) {
+	optionalFoo.bar()
+} else {
+	// it's nothing
+}
+
+
+For Result, we are using a library called `neverthrow` any time a function can fail, instead of using promise.reject or returning a generic Error, use a Result instead.
+
+
+
+
+
 
 ## Contributing / To-Do
 

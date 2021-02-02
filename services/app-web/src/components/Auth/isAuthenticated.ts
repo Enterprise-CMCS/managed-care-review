@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-export async function checkAuth(): Promise<boolean> {
+export async function isAuthenticated(): Promise<boolean> {
 
 	const helloURL = process.env.REACT_APP_API_URL + '/hello'
 
