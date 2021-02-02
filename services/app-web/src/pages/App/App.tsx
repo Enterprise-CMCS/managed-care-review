@@ -4,9 +4,14 @@ import { Header } from '../../components/Header/Header'
 import { Auth } from '../Auth/Auth'
 import './App.scss'
 import { logEvent } from '../../log_event'
+import { CheckAuth } from '../Auth/CheckAuth'
 
 const Dashboard = (): React.ReactElement => {
     return <div>Dashboard!</div>
+}
+
+const Landing = (): React.ReactElement => {
+    return <div>Landing Page</div>
 }
 
 function App(): React.ReactElement {
@@ -22,10 +27,14 @@ function App(): React.ReactElement {
                         <Route path="/auth">
                             <Auth />
                         </Route>
-                        <Route path="/">
+                        <Route path="/dashboard">
                             <Dashboard />
                         </Route>
+                        <Route path="/">
+                            <Landing />
+                        </Route>
                     </Switch>
+                    <CheckAuth />
                 </main>
             </div>
         </Router>

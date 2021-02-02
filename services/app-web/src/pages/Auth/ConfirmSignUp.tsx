@@ -11,9 +11,14 @@ export function showError(error: string): void {
     alert(error)
 }
 
-export function ConfirmSignUp(): React.ReactElement {
+type Props = {
+    defaultEmail: string
+    displayLogin: () => void
+}
+
+export function ConfirmSignUp({ defaultEmail, displayLogin }: Props): React.ReactElement {
     const [fields, setFields] = useState({
-        email: '',
+        email: defaultEmail,
         confirmationCode: '',
     })
 
@@ -36,8 +41,7 @@ export function ConfirmSignUp(): React.ReactElement {
         const result = await confirmSignUp(fields.email, fields.confirmationCode)
 
         if (result.isOk()) {
-            // here's where we log you in if we can, or display login if not.
-
+            displayLogin()
         } else {
             if (result.error.code == 'ExpiredCodeException') {
                 // If the code was expired, we can auto-send a new one. 

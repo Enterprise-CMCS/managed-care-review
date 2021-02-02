@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-// import { useHistory } from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 import {
     FormGroup,
     FormControl,
@@ -12,12 +12,18 @@ export function showError(error: string): void {
     alert(error)
 }
 
+type Props = {
+    defaultEmail: string
+}
+
 // COMPONENTS
-export function Login(): React.ReactElement {
+export function Login({ defaultEmail }: Props): React.ReactElement {
     const [fields, setFields] = useState({
-        email: '',
+        email: defaultEmail,
         password: '',
     })
+
+    const history = useHistory()
 
     // const { userHasAuthenticated } = useAppContext()
     const [isLoading, setIsLoading] = useState(false)
@@ -40,6 +46,7 @@ export function Login(): React.ReactElement {
         setIsLoading(false);
         if (result.isOk()) {
             console.log("SUCCESS LOGIN")    
+            history.push('/dashboard')
         } else {
             const err = result.error
             console.log(err)

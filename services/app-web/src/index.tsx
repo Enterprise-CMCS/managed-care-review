@@ -19,7 +19,6 @@ Amplify.configure({
             {
                 name: "api",
                 endpoint: process.env.REACT_APP_API_URL,
-                // region: process.env.REACT_APP_API_REGION,
             },
         ]
     }

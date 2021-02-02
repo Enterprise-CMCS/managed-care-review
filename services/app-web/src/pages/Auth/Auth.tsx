@@ -1,37 +1,42 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 import { Signup } from './Signup'
 import { ConfirmSignUp } from './ConfirmSignUp'
 import { Login } from './Login'
-import { CheckAuth } from './CheckAuth'
-
-
-// This is all my own madeup UI.
-
-// STATUSES
-// NEUTRAL
-// REQUIRES_CONFIRMATION
-// 
 
 export function Auth(): React.ReactElement {
+    const [showConfirmation, setShowConfirmation] = useState(false)
+    const [enteredEmail, setEnteredEmail] = useState('')
+
+
+    function toggleConfirmationForm(event: React.FormEvent) {
+        event.preventDefault()
+        setShowConfirmation(!showConfirmation)
+    }
 
     return (
         <div>
-            <div className="Signup">
-                <Signup />
+            {!showConfirmation ?
+            <div>
+                <div className="signup">
+                    <Signup setEmail={setEnteredEmail} triggerConfirmation={() => {setShowConfirmation(true)}} />
+                </div>
+                <hr />
+                <div className="login">
+                    <Login defaultEmail={enteredEmail} />
+                </div>
+                <div>
+                    <button onClick={toggleConfirmationForm}>Enter confirmation code</button>
+                </div>
             </div>
-            <hr />
-            <div className="Login">
-                <Login />
+                :
+            <div className="confirm">
+                <ConfirmSignUp defaultEmail={enteredEmail} displayLogin={() => {setShowConfirmation(false)}} />
+                <div>
+                    <button onClick={toggleConfirmationForm}>Show Signup/Login</button>
+                </div>
             </div>
-
-            <div className="Confirm">
-                <ConfirmSignUp />
-            </div>
-
-            <div className="CheckAuth">
-                <CheckAuth />
-            </div>
+            }
         </div>
     )
 }

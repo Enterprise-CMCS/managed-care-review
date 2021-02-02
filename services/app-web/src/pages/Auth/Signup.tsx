@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, Dispatch, SetStateAction } from 'react'
 import {
     FormGroup,
     FormControl,
@@ -15,7 +15,12 @@ export function showError(error: string): void {
     alert(error)
 }
 
-export function Signup(): React.ReactElement {
+type Props = {
+    setEmail: Dispatch<SetStateAction<string>> // is there a better type signature for this?
+    triggerConfirmation: () => void
+}
+
+export function Signup({ setEmail, triggerConfirmation }: Props): React.ReactElement {
     const [fields, setFields] = useState({
         firstName: '',
         lastName: '',
@@ -60,6 +65,8 @@ export function Signup(): React.ReactElement {
         setIsLoading(false)
         if (signUpResult.isOk()) {
             console.log('got a user back.')
+            setEmail(fields.email)
+            triggerConfirmation()
             setNewUser(signUpResult.value)
         } else {
             const err = signUpResult.error
