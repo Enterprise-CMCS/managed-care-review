@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import './index.scss'
 import App from './pages/App/App'
-import { Amplify } from 'aws-amplify';
+import { Amplify } from 'aws-amplify'
 import reportWebVitals from './reportWebVitals'
 
 // We are using Amplify for communicating with Cognito, for now.
@@ -17,11 +17,11 @@ Amplify.configure({
     API: {
         endpoints: [
             {
-                name: "api",
+                name: 'api',
                 endpoint: process.env.REACT_APP_API_URL,
             },
-        ]
-    }
+        ],
+    },
 })
 
 ReactDOM.render(
