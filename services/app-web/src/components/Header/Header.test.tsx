@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, getByRole } from '@testing-library/react'
+import { render } from '@testing-library/react'
 
 import { Header } from './Header'
 
@@ -17,8 +17,8 @@ describe('Header', () => {
         )
         expect(getByRole('heading')).toBeInTheDocument()
     })
-    it('renders without errors', async () => {
-        const { container } = render(
+    it('has signout button', async () => {
+        const { getAllByRole } = render(
             <Header
                 loggedIn
                 stateCode={'MN'}
@@ -28,10 +28,10 @@ describe('Header', () => {
                 }}
             />
         )
-        expect(container).toHaveTextContent('Sign out')
+        expect(getAllByRole('button')).toHaveTextContent('Sign out')
     })
-    it('renders without errors', async () => {
-        const { container } = render(
+    it('has signin button', async () => {
+        const { getAllByRole } = render(
             <Header
                 loggedIn={false}
                 stateCode={'MN'}
@@ -41,6 +41,6 @@ describe('Header', () => {
                 }}
             />
         )
-        expect(container).toHaveTextContent('Sign In')
+        expect(getAllByRole('button')).toHaveTextContent('Sign In')
     })
 })

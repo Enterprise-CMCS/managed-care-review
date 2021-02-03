@@ -7,7 +7,12 @@ import './App.scss'
 import { logEvent } from '../../log_event'
 import { ErrorBoundary } from 'react-error-boundary'
 
-function ErrorFallback({ error }: any): React.ReactElement {
+function ErrorFallback({
+    error,
+}: {
+    error: Error
+    resetErrorBoundary?: () => void
+}): React.ReactElement {
     return (
         <div role="alert">
             <p>Something went wrong:</p>
