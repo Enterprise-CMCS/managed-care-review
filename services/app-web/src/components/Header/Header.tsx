@@ -1,5 +1,5 @@
-import { Button, GovBanner } from '@trussworks/react-uswds'
-
+import { Button } from '@trussworks/react-uswds'
+import { GovBanner } from './GovBanner'
 import './Header.scss'
 import medicaidLogo from '../../assets/images/headerlogo-medicaid.png'
 import { ReactComponent as VaIcon } from '../../assets/icons/va-icon.svg'
@@ -49,6 +49,7 @@ export const Header = ({
 
     return (
         <header className="usa-header">
+            {/* <USWDSGovBanner /> */}
             <GovBanner />
             <div className="banner-row">
                 <div className="usa-logo">
