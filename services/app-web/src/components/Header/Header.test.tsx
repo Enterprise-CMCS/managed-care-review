@@ -15,7 +15,6 @@ describe('Header', () => {
                 }}
             />
         )
-        expect(getByRole('banner')).toBeInTheDocument()
         expect(getByRole('heading')).toBeInTheDocument()
     })
     it('renders without errors', async () => {
