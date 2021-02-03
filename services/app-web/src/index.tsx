@@ -2,7 +2,27 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import './index.scss'
 import App from './pages/App/App'
+import { Amplify } from 'aws-amplify'
 import reportWebVitals from './reportWebVitals'
+
+// We are using Amplify for communicating with Cognito, for now.
+Amplify.configure({
+    Auth: {
+        mandatorySignIn: true,
+        region: process.env.REACT_APP_COGNITO_REGION,
+        userPoolId: process.env.REACT_APP_COGNITO_USER_POOL_ID,
+        identityPoolId: process.env.REACT_APP_COGNITO_ID_POOL_ID,
+        userPoolWebClientId: process.env.REACT_APP_COGNITO_USER_POOL_CLIENT_ID,
+    },
+    API: {
+        endpoints: [
+            {
+                name: 'api',
+                endpoint: process.env.REACT_APP_API_URL,
+            },
+        ],
+    },
+})
 
 ReactDOM.render(
     <React.StrictMode>
