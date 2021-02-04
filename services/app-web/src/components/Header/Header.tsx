@@ -1,5 +1,5 @@
 import { Button } from '@trussworks/react-uswds'
-
+import { GovBanner } from './GovBanner'
 import './Header.scss'
 import medicaidLogo from '../../assets/images/headerlogo-medicaid.png'
 import { ReactComponent as VaIcon } from '../../assets/icons/va-icon.svg'
@@ -49,42 +49,35 @@ export const Header = ({
 
     return (
         <header className="usa-header">
-            <div className="logo-row">
+            {/* <USWDSGovBanner /> */}
+            <GovBanner />
+            <div className="banner-row">
                 <div className="usa-logo">
                     <img
                         src={medicaidLogo}
                         alt="Medicaid.gov-Keeping America Healthy"
                     />
                 </div>
-            </div>
-            <div className="nav-row">
-                <nav role="navigation">
-                    <ul className="text-light">
-                        <li>
-                            <a href="#about">About</a>
-                        </li>
-                        <li>
-                            <a href="#dashboard">Dashboard</a>
-                        </li>
-                    </ul>
-                </nav>
                 {loggedIn ? (
-                    <Button
-                        type="button"
-                        unstyled
-                        onClick={() => console.log('Menu down')}
-                        className="flex-auto text-light"
-                    >
-                        {user.email}
-                    </Button>
+                    <div className="user-info">
+                        <span>{user.email}</span>
+                        <span className="divider">|</span>
+
+                        <Button
+                            type="button"
+                            unstyled
+                            onClick={() => console.log('Sign out')}
+                        >
+                            Sign out
+                        </Button>
+                    </div>
                 ) : (
                     <Button
                         type="button"
-                        unstyled
-                        onClick={() => console.log('Login')}
-                        className="flex-auto text-light"
+                        outline
+                        onClick={() => console.log('Sign In')}
                     >
-                        Login
+                        Sign In
                     </Button>
                 )}
             </div>

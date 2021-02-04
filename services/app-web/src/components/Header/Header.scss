@@ -1,33 +1,17 @@
 @import '../../index.scss';
 
-.logo-row {
-    display: flex;
-    flex-wrap: wrap;
-    padding: 0.7rem 2rem;
-}
-
-.nav-row {
-    background-color: $theme-color-primary;
+.banner-row {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    padding: 1rem 2rem;
-    & ul {
-        display: flex;
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-
-        > li {
-            padding: 1rem;
+    align-items: center;
+    padding: units('05') units(4);
+    & .user-info {
+        font-weight: font-weight('light');
+        padding: 0 units(1);
+        > .divider {
+            padding: 0 units(1);
         }
-    }
-    & a {
-        color: $cms-color-white;
-    }
-    & button {
-        color: $cms-color-white;
-        padding: 1rem;
     }
 }
 
@@ -36,13 +20,13 @@
     color: $cms-color-white;
     display: flex;
     flex-wrap: wrap;
-    padding: 0.5rem 2rem;
+    padding: units(1) units(4);
     & h1 {
         display: flex;
         flex-wrap: wrap;
         align-items: baseline;
         > span {
-            padding: 0 0.5rem;
+            padding: 0 units(1);
             font-family: inherit;
         }
     }

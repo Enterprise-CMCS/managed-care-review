@@ -5,7 +5,42 @@ import { Header } from './Header'
 
 describe('Header', () => {
     it('renders without errors', async () => {
-        const { container } = render(<Header />)
-        expect(container).toHaveTextContent('About')
+        const { getByRole } = render(
+            <Header
+                loggedIn
+                stateCode={'MN'}
+                user={{
+                    name: 'Bob test user',
+                    email: 'bob@dmas.mn.gov',
+                }}
+            />
+        )
+        expect(getByRole('heading')).toBeInTheDocument()
+    })
+    it('has signout button', async () => {
+        const { getAllByRole } = render(
+            <Header
+                loggedIn
+                stateCode={'MN'}
+                user={{
+                    name: 'Bob test user',
+                    email: 'bob@dmas.mn.gov',
+                }}
+            />
+        )
+        expect(getAllByRole('button')).toHaveTextContent('Sign out')
+    })
+    it('has signin button', async () => {
+        const { getAllByRole } = render(
+            <Header
+                loggedIn={false}
+                stateCode={'MN'}
+                user={{
+                    name: 'Bob test user',
+                    email: 'bob@dmas.mn.gov',
+                }}
+            />
+        )
+        expect(getAllByRole('button')).toHaveTextContent('Sign In')
     })
 })
