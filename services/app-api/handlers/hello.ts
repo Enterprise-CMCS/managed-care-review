@@ -18,7 +18,7 @@ export const main: APIGatewayProxyHandler = async (event, context) => {
                     "everythin": event.requestContext,
                 })
 
-    console.log({"name": "No", "everything else": context})
+    console.log({"name": "No", "everything else": context}) // eslint-disable-line no-console
 
     return {
         statusCode: 200,
