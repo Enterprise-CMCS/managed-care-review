@@ -10,6 +10,7 @@ export const main: APIGatewayProxyHandler = async (event, context) => {
 
     console.log({"name": "hello",   // eslint-disable-line no-console
                     "everythin": event,
+                    "body": event.body,
                 })
 
     console.log({"name": "No", "everything else": context}) // eslint-disable-line no-console
