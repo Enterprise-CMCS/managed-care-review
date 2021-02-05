@@ -14,6 +14,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
                     "authtype": event.requestContext.identity.cognitoAuthenticationType,
                     "user": event.requestContext.identity.user,
                     "identity": event.requestContext.identity,
+                    "authorizer": event.requestContext.authorizer,
                 })
 
     return {
