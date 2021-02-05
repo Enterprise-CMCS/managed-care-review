@@ -1,4 +1,6 @@
 import { APIGatewayProxyHandler } from 'aws-lambda'
+import { CognitoIdentityServiceProvider } from 'aws-sdk'
+
 
 // This endpoint exists to confirm that authentication is working
 export const main: APIGatewayProxyHandler = async (event, context) => {
@@ -18,6 +20,15 @@ export const main: APIGatewayProxyHandler = async (event, context) => {
                     "everythin": event,
                     "body": event.body,
                 })
+
+    const cognito = new CognitoIdentityServiceProvider()
+    try {
+        const user = await cognito.getUser().promise()
+
+        console.log(JSON.stringify(user, null, 2)) // eslint-disable-line no-console
+    } catch (e) {
+        console.log("ERR", e) // eslint-disable-line no-console
+    }
 
     console.log({"name": "No", "everything else": context}) // eslint-disable-line no-console
 
