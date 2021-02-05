@@ -9,13 +9,7 @@ export const main: APIGatewayProxyHandler = async (event, context) => {
     }
 
     console.log({"name": "hello",   // eslint-disable-line no-console
-                    "identityID": event.requestContext.identity.cognitoIdentityId, 
-                    "idenityProvider": event.requestContext.identity.cognitoAuthenticationProvider,
-                    "authtype": event.requestContext.identity.cognitoAuthenticationType,
-                    "user": event.requestContext.identity.user,
-                    "identity": event.requestContext.identity,
-                    "authorizer": event.requestContext.authorizer,
-                    "everythin": event.requestContext,
+                    "everythin": event,
                 })
 
     console.log({"name": "No", "everything else": context}) // eslint-disable-line no-console
