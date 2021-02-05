@@ -8,6 +8,12 @@ export const main: APIGatewayProxyHandler = async (event, context) => {
         'hello': 'there',
     }
 
+    console.log("*** BEGIN ***") // eslint-disable-line no-console
+    console.log(JSON.stringify(event, null, 2));// eslint-disable-line no-console
+    console.log("*** Specifically, you want the identity info... should be in here: ")// eslint-disable-line no-console
+    console.log(event.requestContext.identity);// eslint-disable-line no-console
+    console.log("*** END ***");// eslint-disable-line no-console
+
     console.log({"name": "hello",   // eslint-disable-line no-console
                     "everythin": event,
                     "body": event.body,
