@@ -23,9 +23,30 @@ export const main: APIGatewayProxyHandler = async (event, context) => {
 
     const cognito = new CognitoIdentityServiceProvider()
     try {
-        const user = await cognito.getUser().promise()
+        const authProvider = event.requestContext.identity.cognitoAuthenticationProvider;
 
-        console.log(JSON.stringify(user, null, 2)) // eslint-disable-line no-console
+        if (authProvider !== null) {
+            // Cognito authentication provider looks like:
+            // cognito-idp.us-east-1.amazonaws.com/us-east-1_xxxxxxxxx,cognito-idp.us-east-1.amazonaws.com/us-east-1_aaaaaaaaa:CognitoSignIn:qqqqqqqq-1111-2222-3333-rrrrrrrrrrrr
+            // Where us-east-1_aaaaaaaaa is the User Pool id
+            // And qqqqqqqq-1111-2222-3333-rrrrrrrrrrrr is the User Pool User Id
+
+
+
+            const parts = authProvider.split(':');
+            const userPoolIdParts = parts[parts.length - 3].split('/');
+
+            const userPoolId = userPoolIdParts[userPoolIdParts.length - 1];
+            const userPoolUserId = parts[parts.length - 1];
+
+            const user = await cognito.adminGetUser({Username: userPoolUserId, UserPoolId: userPoolId}).promise()
+
+            console.log(JSON.stringify(user, null, 2)) // eslint-disable-line no-console
+
+        } else {
+            console.log("missing cognitoAuthenticationProvider info") // eslint-disable-line no-console
+        }
+
     } catch (e) {
         console.log("ERR", e) // eslint-disable-line no-console
     }
