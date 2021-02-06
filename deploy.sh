@@ -13,7 +13,7 @@ services=(
   # 'ui-auth'
   # 'ui'
   # 'storybook'
-  # 'app-web'
+  'app-web'
 )
 
 install_deps() {

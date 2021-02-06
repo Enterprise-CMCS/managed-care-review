@@ -33,7 +33,14 @@ export async function signUp(
     user: newUser
 ): Promise<Result<CognitoUser, AmplifyError>> {
     try {
-        const result = await Auth.signUp(user)
+        const result = await Auth.signUp({
+            username: user.username,
+            password: user.password,
+            attributes: {
+                given_name: user.given_name,
+                family_name: user.family_name,
+            }
+        })
         return ok(result.user)
     } catch (e) {
         console.log('ERROR SIGNUP', e)
