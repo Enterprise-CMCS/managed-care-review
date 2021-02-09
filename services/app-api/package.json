@@ -10,6 +10,7 @@
     "@types/aws-lambda": "^8.10.71",
     "@types/request": "^2.48.5",
     "aws-sdk": "^2.839.0",
+    "neverthrow": "^4.0.1",
     "request": "^2.88.2",
     "serverless": "^2.20.0"
   },
