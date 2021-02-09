@@ -2,7 +2,7 @@ import { Result, ok, err } from 'neverthrow'
 import { CognitoIdentityServiceProvider } from 'aws-sdk'
 import { StateUser, User } from '../models/user'
 
-export function parseAuthProvider(authProvider: string): Result<[string, string], Error> {
+export function parseAuthProvider(authProvider: string): Result<{userId: string; poolId: string}, Error> {
         // Cognito authentication provider looks like:
         // cognito-idp.us-east-1.amazonaws.com/us-east-1_xxxxxxxxx,cognito-idp.us-east-1.amazonaws.com/us-east-1_aaaaaaaaa:CognitoSignIn:qqqqqqqq-1111-2222-3333-rrrrrrrrrrrr
         // Where us-east-1_aaaaaaaaa is the User Pool id
@@ -15,9 +15,9 @@ export function parseAuthProvider(authProvider: string): Result<[string, string]
             const userPoolId = userPoolIdParts[userPoolIdParts.length - 1];
             const userPoolUserId = parts[parts.length - 1];
 
-            return ok([userPoolUserId, userPoolId])
+            return ok({userId: userPoolUserId, poolId: userPoolId})
         } catch (e) {
-            console.log(e)
+            // console.log(e)
             return err(new Error('authProvider doesnt have enough parts'))
         }
         
@@ -47,12 +47,12 @@ export async function userFromCognitoAuthProvider(authProvider: string): Promise
             return err(parseResult.error)
         }
 
-        const [userPoolUserId, userPoolId] = parseResult.value
+        const userInfo = parseResult.value
 
         // calling a dependency so we have to try
         try {
             const cognito = new CognitoIdentityServiceProvider()
-            const userResponse = await cognito.adminGetUser({Username: userPoolUserId, UserPoolId: userPoolId}).promise()
+            const userResponse = await cognito.adminGetUser({Username: userInfo.userId, UserPoolId: userInfo.poolId}).promise()
 
             const attributes = userAttrDict(userResponse)
 

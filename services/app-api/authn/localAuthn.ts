@@ -1,10 +1,10 @@
-import { Result, ok, err } from 'neverthrow'
+import { Result, ok } from 'neverthrow'
 import { StateUser, User } from '../models/user'
 
 export async function userFromLocalAuthProvider(authProvider: string): Promise<Result<User,Error>> {
 
         const user: StateUser = {
-            email: 'local@gmail.local',
+            email: authProvider,
             name: 'mee bee',
             state: 'VA',
             role: 'STATE_USER',
