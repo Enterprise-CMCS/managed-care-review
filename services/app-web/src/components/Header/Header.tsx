@@ -1,9 +1,12 @@
-import { Button } from '@trussworks/react-uswds'
-import { GovBanner } from './GovBanner'
-import './Header.scss'
-import medicaidLogo from '../../assets/images/headerlogo-medicaid.png'
+import React from 'react'
+import { Button, GovBanner } from '@trussworks/react-uswds'
+
+import medicaidLogo from '../../assets/images/medicaidgovlogo.png'
 import { ReactComponent as VaIcon } from '../../assets/icons/va-icon.svg'
 import { ReactComponent as MnIcon } from '../../assets/icons/mn-icon.svg'
+import styles from './Header.module.scss'
+
+import { Logo } from '../Logo/Logo'
 
 const getStateInfo = (
     stateAbbrev: SupportedStateCodes
@@ -26,11 +29,12 @@ const StateCodes = {
     VA: 'VA',
 } as const
 type SupportedStateCodes = typeof StateCodes[keyof typeof StateCodes]
+
 export type HeaderProps = {
-    stateCode: SupportedStateCodes
+    stateCode?: SupportedStateCodes
     activePage?: string
     loggedIn: boolean
-    user: {
+    user?: {
         name: string
         email: string
     }
@@ -45,20 +49,19 @@ export const Header = ({
     loggedIn,
     user,
 }: HeaderProps): React.ReactElement => {
-    const { stateName, StateIcon } = getStateInfo(stateCode)
+    const { stateName, StateIcon } = stateCode
+        ? getStateInfo(stateCode)
+        : { stateName: 'STATE UNKNOWN', StateIcon: () => <span></span> }
 
     return (
-        <header className="usa-header">
-            {/* <USWDSGovBanner /> */}
+        <header>
             <GovBanner />
-            <div className="banner-row">
-                <div className="usa-logo">
-                    <img
-                        src={medicaidLogo}
-                        alt="Medicaid.gov-Keeping America Healthy"
-                    />
-                </div>
-                {loggedIn ? (
+            <div className={styles.banner}>
+                <Logo
+                    src={medicaidLogo}
+                    alt="Medicaid.gov-Keeping America Healthy"
+                />
+                {loggedIn && user ? (
                     <div className="user-info">
                         <span>{user.email}</span>
                         <span className="divider">|</span>
@@ -81,17 +84,29 @@ export const Header = ({
                     </Button>
                 )}
             </div>
-            <div className="heading-row">
-                <div>
-                    <StateIcon />
+            {loggedIn ? (
+                <div className={styles.dashboardHeading}>
+                    <div>
+                        <StateIcon />
+                    </div>
+                    <h1 className="margin-0">
+                        <span>{stateName}</span>
+                        <span className="font-heading-lg text-light">
+                            {activePage}
+                        </span>
+                    </h1>
                 </div>
-                <h1 className="margin-0">
-                    <span>{stateName}</span>
-                    <span className="font-heading-lg text-light">
-                        {activePage}
-                    </span>
-                </h1>
-            </div>
+            ) : (
+                <div className={styles.landingPageHeading}>
+                    <h1>
+                        <span>MAC-MCCRS</span>
+                        <span className="font-heading-lg">
+                            Medicaid and CHIP Managed Care Reporting and Review
+                            System
+                        </span>
+                    </h1>
+                </div>
+            )}
         </header>
     )
 }

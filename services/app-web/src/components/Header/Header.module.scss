@@ -1,6 +1,6 @@
 @import '../../index.scss';
 
-.banner-row {
+.banner {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
@@ -15,7 +15,7 @@
     }
 }
 
-.heading-row {
+.dashboardHeading {
     background-color: $theme-color-primary-dark;
     color: $cms-color-white;
     display: flex;
@@ -27,6 +27,22 @@
         align-items: baseline;
         > span {
             padding: 0 units(1);
+            font-family: inherit;
+        }
+    }
+}
+
+.landingPageHeading {
+    background-color: $theme-color-primary-dark;
+    color: $cms-color-white;
+    padding: units(2);
+    > h1 {
+        display: flex;
+        flex-flow: column;
+        text-align: center;
+        font-family: inherit;
+        font-weight: font-weight('light');
+        > span {
             font-family: inherit;
         }
     }
