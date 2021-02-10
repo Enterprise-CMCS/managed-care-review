@@ -62,9 +62,9 @@ export const Header = ({
                     alt="Medicaid.gov-Keeping America Healthy"
                 />
                 {loggedIn && user ? (
-                    <div className="user-info">
+                    <div className={styles.userInfo}>
                         <span>{user.email}</span>
-                        <span className="divider">|</span>
+                        <span className={styles.divider}>|</span>
 
                         <Button
                             type="button"

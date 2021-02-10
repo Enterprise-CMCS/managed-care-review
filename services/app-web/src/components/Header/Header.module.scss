@@ -6,13 +6,15 @@
     justify-content: space-between;
     align-items: center;
     padding: units('05') units(4);
-    & .user-info {
-        font-weight: font-weight('light');
-        padding: 0 units(1);
-        > .divider {
-            padding: 0 units(1);
-        }
-    }
+}
+
+.userInfo {
+    font-weight: font-weight('light');
+    padding: 0 units(1);
+}
+
+.divider {
+    padding: 0 units(1);
 }
 
 .dashboardHeading {
