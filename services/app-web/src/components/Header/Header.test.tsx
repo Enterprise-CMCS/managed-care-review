@@ -18,7 +18,7 @@ describe('Header', () => {
         expect(getByRole('heading')).toBeInTheDocument()
     })
     it('has signout button', async () => {
-        const { getAllByRole } = render(
+        const { getByTestId } = render(
             <Header
                 loggedIn
                 stateCode={'MN'}
@@ -28,19 +28,10 @@ describe('Header', () => {
                 }}
             />
         )
-        expect(getAllByRole('button')).toHaveTextContent('Sign out')
+        expect(getByTestId('button')).toHaveTextContent('Sign out')
     })
     it('has signin button', async () => {
-        const { getAllByRole } = render(
-            <Header
-                loggedIn={false}
-                stateCode={'MN'}
-                user={{
-                    name: 'Bob test user',
-                    email: 'bob@dmas.mn.gov',
-                }}
-            />
-        )
-        expect(getAllByRole('button')).toHaveTextContent('Sign In')
+        const { getByTestId } = render(<Header loggedIn={false} />)
+        expect(getByTestId('button')).toHaveTextContent('Sign In')
     })
 })
