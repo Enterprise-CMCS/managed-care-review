@@ -1,6 +1,6 @@
 import { Result, ok, err } from 'neverthrow'
 import { CognitoIdentityServiceProvider } from 'aws-sdk'
-import { StateUser, User } from '../models/user'
+import { StateUser, User } from '../../app-web/src/common-code/domain-models/user'
 
 export function parseAuthProvider(authProvider: string): Result<{userId: string; poolId: string}, Error> {
         // Cognito authentication provider looks like:

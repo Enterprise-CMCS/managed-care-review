@@ -39,7 +39,7 @@ export async function signUp(
             attributes: {
                 given_name: user.given_name,
                 family_name: user.family_name,
-            }
+            },
         })
         return ok(result.user)
     } catch (e) {

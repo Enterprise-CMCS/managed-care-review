@@ -24,9 +24,11 @@ Amplify.configure({
     },
 })
 
+const localLogin = process.env.REACT_APP_LOCAL_LOGIN === 'true'
+
 ReactDOM.render(
     <React.StrictMode>
-        <App />
+        <App localLogin={localLogin} />
     </React.StrictMode>,
     document.getElementById('root')
 )

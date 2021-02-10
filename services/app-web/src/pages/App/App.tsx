@@ -5,6 +5,7 @@ import { Auth } from '../Auth/Auth'
 import './App.scss'
 import { logEvent } from '../../log_event'
 import { CheckAuth } from '../Auth/CheckAuth'
+import { LocalAuth } from '../Auth/LocalAuth'
 
 const Dashboard = (): React.ReactElement => {
     return <div>Dashboard!</div>
@@ -14,7 +15,11 @@ const Landing = (): React.ReactElement => {
     return <div>Landing Page</div>
 }
 
-function App(): React.ReactElement {
+type Props = {
+    localLogin: boolean
+}
+
+function App({ localLogin }: Props): React.ReactElement {
     logEvent('on_load', { success: true })
     const mockUser = {
         name: 'Bob test user',
@@ -28,7 +33,7 @@ function App(): React.ReactElement {
                     <h1>Main Content</h1>
                     <Switch>
                         <Route path="/auth">
-                            <Auth />
+                            {localLogin ? <LocalAuth /> : <Auth />}
                         </Route>
                         <Route path="/dashboard">
                             <Dashboard />
