@@ -9,9 +9,9 @@ export default {
 
 const Template: Story<HeaderProps> = (args) => <Header {...args} />
 
-export const StateUserHeader = Template.bind({})
+export const CMSHeader = Template.bind({})
 
-StateUserHeader.args = {
+CMSHeader.args = {
     loggedIn: true,
     stateCode: 'MN',
     user: {

@@ -1,12 +1,17 @@
 import React from 'react'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
-import { Header } from '../../components/Header/Header'
-import { Auth } from '../Auth/Auth'
-import { LocalAuth } from '../Auth/LocalAuth'
-import { CheckAuth } from '../Auth/CheckAuth'
-import './App.scss'
-import { logEvent } from '../../log_event'
 import { ErrorBoundary } from 'react-error-boundary'
+import { GovBanner } from '@trussworks/react-uswds'
+
+import './App.scss'
+
+import { Auth as AuthPage } from '../Auth/Auth'
+import { CheckAuth } from '../Auth/CheckAuth'
+import { Footer } from '../../components/Footer/Footer'
+import { Header } from '../../components/Header/Header'
+import { Landing as LandingPage } from '../Landing/Landing'
+import { LocalAuth } from '../Auth/LocalAuth'
+import { logEvent } from '../../log_event'
 
 function ErrorFallback({
     error,
@@ -22,12 +27,8 @@ function ErrorFallback({
     )
 }
 
-const Dashboard = (): React.ReactElement => {
+const DashboardPage = (): React.ReactElement => {
     return <div>Dashboard!</div>
-}
-
-const Landing = (): React.ReactElement => {
-    return <div>Landing Page</div>
 }
 
 type Props = {
@@ -36,31 +37,31 @@ type Props = {
 
 function App({ localLogin }: Props): React.ReactElement {
     logEvent('on_load', { success: true })
-    const mockUser = {
-        name: 'Bob test user',
-        email: 'bob@dmas.virginia.gov',
-    }
 
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>
             <Router>
                 <div className="App">
-                    <Header user={mockUser} loggedIn stateCode="MN" />
-                    <main className="padding-x-4">
-                        <h1>Main Content</h1>
+                    <a className="usa-skipnav" href="#main-content">
+                        Skip to main content
+                    </a>
+                    <GovBanner aria-label="Official government website" />
+                    <Header loggedIn={false} />
+                    <main id="main-content">
                         <Switch>
                             <Route path="/auth">
-                                {localLogin ? <LocalAuth /> : <Auth />}
+                                {localLogin ? <LocalAuth /> : <AuthPage />}
                             </Route>
                             <Route path="/dashboard">
-                                <Dashboard />
+                                <DashboardPage />
                             </Route>
                             <Route path="/">
-                                <Landing />
+                                <LandingPage />
                             </Route>
                         </Switch>
                         <CheckAuth />
                     </main>
+                    <Footer />
                 </div>
             </Router>
         </ErrorBoundary>
