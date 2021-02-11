@@ -2,6 +2,7 @@ import React from 'react'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import { Header } from '../../components/Header/Header'
 import { Auth } from '../Auth/Auth'
+import { LocalAuth } from '../Auth/LocalAuth'
 import { CheckAuth } from '../Auth/CheckAuth'
 import './App.scss'
 import { logEvent } from '../../log_event'
@@ -29,7 +30,11 @@ const Landing = (): React.ReactElement => {
     return <div>Landing Page</div>
 }
 
-function App(): React.ReactElement {
+type Props = {
+    localLogin: boolean
+}
+
+function App({ localLogin }: Props): React.ReactElement {
     logEvent('on_load', { success: true })
     const mockUser = {
         name: 'Bob test user',
@@ -45,7 +50,7 @@ function App(): React.ReactElement {
                         <h1>Main Content</h1>
                         <Switch>
                             <Route path="/auth">
-                                <Auth />
+                                {localLogin ? <LocalAuth /> : <Auth />}
                             </Route>
                             <Route path="/dashboard">
                                 <Dashboard />
