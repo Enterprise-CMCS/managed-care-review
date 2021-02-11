@@ -1,4 +1,3 @@
-
 export { userFromAuthProvider } from './authn'
 
 export { userFromCognitoAuthProvider } from './cognitoAuthn'

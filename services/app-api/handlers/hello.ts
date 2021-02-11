@@ -1,71 +1,71 @@
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { APIGatewayProxyHandler } from 'aws-lambda'
 
 import {
     userFromAuthProvider,
     userFromCognitoAuthProvider,
     userFromLocalAuthProvider,
-} from "../authn";
+} from '../authn'
 
 // This endpoint exists to confirm that authentication is working
 export const main: APIGatewayProxyHandler = async (event) => {
-    let userFetcher: userFromAuthProvider;
+    let userFetcher: userFromAuthProvider
 
     if (process.env.REACT_APP_LOCAL_LOGIN) {
-        userFetcher = userFromLocalAuthProvider;
+        userFetcher = userFromLocalAuthProvider
     } else {
-        userFetcher = userFromCognitoAuthProvider;
+        userFetcher = userFromCognitoAuthProvider
     }
 
     const authProvider =
-        event.requestContext.identity.cognitoAuthenticationProvider;
+        event.requestContext.identity.cognitoAuthenticationProvider
     if (authProvider == undefined) {
         return {
             statusCode: 400,
             body:
                 JSON.stringify({
-                    code: "NO_AUTH_PROVIDER",
+                    code: 'NO_AUTH_PROVIDER',
                     message:
-                        "auth provider missing. This should always be taken care of by the API Gateway",
-                }) + "\n",
+                        'auth provider missing. This should always be taken care of by the API Gateway',
+                }) + '\n',
             headers: {
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Credentials": true,
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': true,
             },
-        };
+        }
     }
 
-    const userResult = await userFetcher(authProvider);
+    const userResult = await userFetcher(authProvider)
     if (userResult.isErr()) {
         return {
             statusCode: 400,
             body:
                 JSON.stringify({
-                    code: "NO_USER",
+                    code: 'NO_USER',
                     message:
                         "user didn't resolve. This may be a failure of Cognito",
                 }) +
-                "\n" +
+                '\n' +
                 userResult.error.message,
             headers: {
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Credentials": true,
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': true,
             },
-        };
+        }
     }
 
-    const user = userResult.value;
+    const user = userResult.value
 
     // says hi
     const response = {
         email: user.email,
-    };
+    }
 
     return {
         statusCode: 200,
-        body: JSON.stringify(response) + "\n",
+        body: JSON.stringify(response) + '\n',
         headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Credentials": true,
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Credentials': true,
         },
-    };
-};
+    }
+}

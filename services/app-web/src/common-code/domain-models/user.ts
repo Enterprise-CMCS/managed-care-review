@@ -2,9 +2,9 @@ type Role = 'STATE_USER' | 'ADMIN'
 
 type State = 'VA' | 'GA' | 'TN' | 'MN'
 
-export type User = StateUser
+export type UserType = StateUserType
 
-export type StateUser = {
+export type StateUserType = {
 	// typename: string = 'StateUser';
 	role: Role
 	email: string
@@ -12,7 +12,7 @@ export type StateUser = {
 	name: string
 }
 
-export function isUser(user: unknown): user is User {
+export function isUser(user: unknown): user is UserType {
 	if (user && typeof user === 'object') {
 		if ('role' in user) {
 			const roleUser = user as { role: unknown }

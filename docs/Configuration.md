@@ -34,3 +34,10 @@ Read by `app-api`
 
 These four env vars configure cognito auth from the browser. They are ignored if `REACT_APP_LOCAL_LOGIN` is set to `true` and thus are only set in deployed environments.
 
+
+### `APPLICATION_ENDPOINT`
+Read by nightwatch
+
+valid values: A URL where a running app-web can be reached
+
+This is used by nightwatch to configure where it tries to reach the app to conduct its testing. Run it locally with ./dev test

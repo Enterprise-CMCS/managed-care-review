@@ -9,14 +9,14 @@ import {
     CardFooter,
 } from '@trussworks/react-uswds'
 import { useHistory } from 'react-router-dom'
-import { User } from '../../common-code/domain-models/user'
+import { UserType } from '../../common-code/domain-models/user'
 
 import { loginLocalUser } from './localLogin'
 
 import aangAvatar from '../../assets/images/aang.png'
 import tophAvatar from '../../assets/images/toph.png'
 
-const localUsers: User[] = [
+const localUsers: UserType[] = [
     {
         email: 'aang@dhs.state.mn.us',
         name: 'Aang',
@@ -39,7 +39,7 @@ const userAvatars: { [key: string]: string } = {
 export function LocalAuth(): React.ReactElement {
     const history = useHistory()
 
-    function login(user: User) {
+    function login(user: UserType) {
         console.log('loggin ing', user)
 
         loginLocalUser(user)

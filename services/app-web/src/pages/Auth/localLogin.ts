@@ -1,9 +1,9 @@
-import { User, isUser } from '../../common-code/domain-models'
+import { UserType, isUser } from '../../common-code/domain-models'
 
 const localUserKey = 'localUser'
 
 // loginLocalUser stores a local user in local storage
-export function loginLocalUser(user: User): void {
+export function loginLocalUser(user: UserType): void {
     const store = window.localStorage
     store.setItem(localUserKey, JSON.stringify(user))
 }
@@ -14,7 +14,7 @@ export function logoutLocalUser(): void {
 }
 
 // getLoggedInUser retrieves a local user if one is logged in
-export function getLoggedInUser(): Promise<User | null> {
+export function getLoggedInUser(): Promise<UserType | null> {
     const store = window.localStorage
     const storedUserString = store.getItem(localUserKey)
 
