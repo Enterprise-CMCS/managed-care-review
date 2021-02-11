@@ -7,9 +7,9 @@ stage=${1:-dev}
 services=(
   'database'
   'uploads'
-  'uploads-scan'
+  # 'uploads-scan'
   'app-api'
-  # 'stream-functions'
+  'stream-functions'
   'ui-auth'
   'ui'
   'storybook'
