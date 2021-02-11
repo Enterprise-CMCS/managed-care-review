@@ -34,6 +34,7 @@
     "test:a11y": "pa11y-ci",
     "test:unit": "react-scripts test --watchAll=false",
     "storybook": "start-storybook -p 6006 -s public --quiet",
+    "clean": "yarn cache clean && yarn",
     "build-storybook": "build-storybook -s public --quiet"
   },
   "eslintConfig": {
