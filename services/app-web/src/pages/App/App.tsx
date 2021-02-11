@@ -1,6 +1,7 @@
 import React from 'react'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import { ErrorBoundary } from 'react-error-boundary'
+import { GovBanner } from '@trussworks/react-uswds'
 
 import './App.scss'
 
@@ -31,12 +32,17 @@ const DashboardPage = (): React.ReactElement => {
 
 function App(): React.ReactElement {
     logEvent('on_load', { success: true })
+
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>
             <Router>
                 <div className="App">
+                    <a className="usa-skipnav" href="#main-content">
+                        Skip to main content
+                    </a>
+                    <GovBanner aria-label="Official government website" />
                     <Header loggedIn={false} />
-                    <main>
+                    <main id="main-content">
                         <Switch>
                             <Route path="/auth">
                                 <AuthPage />

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button, GovBanner } from '@trussworks/react-uswds'
+import { Button } from '@trussworks/react-uswds'
 
 import medicaidLogo from '../../assets/images/medicaidgovlogo.png'
 import { ReactComponent as VaIcon } from '../../assets/icons/va-icon.svg'
@@ -55,7 +55,6 @@ export const Header = ({
 
     return (
         <header>
-            <GovBanner />
             <div className={styles.banner}>
                 <Logo
                     src={medicaidLogo}
