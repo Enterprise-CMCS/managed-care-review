@@ -9,7 +9,7 @@ services=(
   'uploads'
   'uploads-scan'
   'app-api'
-  'stream-functions'
+  # 'stream-functions'
   'ui-auth'
   'ui'
   'storybook'
