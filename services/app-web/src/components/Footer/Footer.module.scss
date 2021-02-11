@@ -1,0 +1,43 @@
+@import '../../index.scss';
+
+.logosRow {
+    background-color: $theme-color-base-lightest;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: units(1);
+    & img {
+        @include u-margin-x(2);
+        @include u-padding-x(2);
+        flex-shrink: 0;
+        height: 50px;
+        width: auto;
+    }
+}
+.cmsLogos {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.federalLogos {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    padding: units(2);
+    justify-content: flex-end;
+    > span {
+        max-width: 400px;
+    }
+}
+
+.contactRow {
+    background-color: $theme-color-primary;
+    color: $cms-color-white;
+    display: flex;
+    justify-content: space-between;
+    padding: units(3);
+    > span {
+        margin: units(1);
+    }
+}

@@ -1,8 +1,9 @@
 import yargs from 'yargs'
 import * as dotenv from 'dotenv'
 import request from 'request'
-import LabeledProcessRunner from './runner.js'
 import { spawnSync } from 'child_process'
+import LabeledProcessRunner from './runner.js'
+import { envFileMissingExamples } from './env.js' // What the WHAT? why doesn't this import right without the `.js`??
 
 // run_db_locally runs the local db
 async function run_db_locally(runner: LabeledProcessRunner) {
@@ -115,7 +116,14 @@ async function run_online_tests(runner: LabeledProcessRunner) {
 
 }
 
+
 function main() {
+	const missingExamples = envFileMissingExamples()
+	if (missingExamples.length !== 0) {
+		console.log(`ERROR: Your .env file is missing the keys: ${ missingExamples.join(', ') }\nAt least set an empty value before continuing.`)
+		process.exit(2)
+	}
+
 	// load .env
 	dotenv.config()
 

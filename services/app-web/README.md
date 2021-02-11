@@ -42,6 +42,19 @@ Instead, it will copy all the configuration files and the transitive dependencie
 
 You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
 
+## React Components
+
+- We currently use `/components` and `/pages` to organize React components.  Use nested folders named after the component.
+- List file imports in ~ alphabetical order, with sections for external imports and assets/styles listed first and local imports below.
+- Follow guidance in the engineering playbook around [implementing UI](https://github.com/trussworks/Engineering-Playbook/blob/main/web/frontend/developing-ui.md)
+
+### Styling
+
+- Use modular styles. This means creating`<component>.module.scss` files. We tend to use scss rather than css since uswds uses sass mixins, functions, and variables.  For more, read about [Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html) and [CSS modules](https://github.com/css-modules/css-modules) as well [uswds documentation](https://designsystem.digital.gov/design-tokens/).
+- Syntax: Styles should be written in camelCase. Import styles from a component's stylesheet using something like `import styles from 'InvoicePanel.module.scss'`. Access the styles with dot notation `styles.myclassname`.  If fewer than 50% of the styles are used from a stylesheet, import only the styles used (ex. `import { myclassname } from 'MyComponent.module.scss'`). 
+
+## Testing
+
 ## pa11y
 `pa11y` is a tool for accessibility testing. `pa11y-ci` is a tool to against the list of urls declared in the config file or a sitemap (if configured). To run locally, you need to global install [pa11y-ci](https://github.com/pa11y/pa11y-ci) `npm install -g pa11y-ci`. For context,  By default, pa11y uses the WCAG2AA standard.
 
