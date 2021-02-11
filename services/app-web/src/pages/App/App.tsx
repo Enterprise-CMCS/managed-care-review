@@ -10,6 +10,7 @@ import { CheckAuth } from '../Auth/CheckAuth'
 import { Footer } from '../../components/Footer/Footer'
 import { Header } from '../../components/Header/Header'
 import { Landing as LandingPage } from '../Landing/Landing'
+import { LocalAuth } from '../Auth/LocalAuth'
 import { logEvent } from '../../log_event'
 
 function ErrorFallback({
@@ -30,7 +31,11 @@ const DashboardPage = (): React.ReactElement => {
     return <div>Dashboard!</div>
 }
 
-function App(): React.ReactElement {
+type Props = {
+    localLogin: boolean
+}
+
+function App({ localLogin }: Props): React.ReactElement {
     logEvent('on_load', { success: true })
 
     return (
@@ -45,7 +50,7 @@ function App(): React.ReactElement {
                     <main id="main-content">
                         <Switch>
                             <Route path="/auth">
-                                <AuthPage />
+                                {localLogin ? <LocalAuth /> : <AuthPage />}
                             </Route>
                             <Route path="/dashboard">
                                 <DashboardPage />
