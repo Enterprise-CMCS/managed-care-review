@@ -4,8 +4,8 @@ module.exports = {
       browser
         .url (`${process.env.APPLICATION_ENDPOINT}`)
         .waitForElementVisible('.App')
-        .assert.elementPresent('.usa-header h1')
-        .assert.elementPresent('nav')
+        .assert.elementPresent('header .banner-row')
+        .assert.elementPresent('header h1')
         .saveScreenshot('tests_output/header_is_present_screenshot.png')
   }
 }

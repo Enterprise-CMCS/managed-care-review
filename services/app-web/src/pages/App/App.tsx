@@ -2,10 +2,25 @@ import React from 'react'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import { Header } from '../../components/Header/Header'
 import { Auth } from '../Auth/Auth'
+import { LocalAuth } from '../Auth/LocalAuth'
+import { CheckAuth } from '../Auth/CheckAuth'
 import './App.scss'
 import { logEvent } from '../../log_event'
-import { CheckAuth } from '../Auth/CheckAuth'
-import { LocalAuth } from '../Auth/LocalAuth'
+import { ErrorBoundary } from 'react-error-boundary'
+
+function ErrorFallback({
+    error,
+}: {
+    error: Error
+    resetErrorBoundary?: () => void
+}): React.ReactElement {
+    return (
+        <div role="alert">
+            <p>Something went wrong:</p>
+            <pre>{error.message}</pre>
+        </div>
+    )
+}
 
 const Dashboard = (): React.ReactElement => {
     return <div>Dashboard!</div>
@@ -25,27 +40,30 @@ function App({ localLogin }: Props): React.ReactElement {
         name: 'Bob test user',
         email: 'bob@dmas.virginia.gov',
     }
+
     return (
-        <Router>
-            <div className="App">
-                <Header user={mockUser} loggedIn stateCode="MN" />
-                <main className="padding-x-4">
-                    <h1>Main Content</h1>
-                    <Switch>
-                        <Route path="/auth">
-                            {localLogin ? <LocalAuth /> : <Auth />}
-                        </Route>
-                        <Route path="/dashboard">
-                            <Dashboard />
-                        </Route>
-                        <Route path="/">
-                            <Landing />
-                        </Route>
-                    </Switch>
-                    <CheckAuth />
-                </main>
-            </div>
-        </Router>
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+            <Router>
+                <div className="App">
+                    <Header user={mockUser} loggedIn stateCode="MN" />
+                    <main className="padding-x-4">
+                        <h1>Main Content</h1>
+                        <Switch>
+                            <Route path="/auth">
+                                {localLogin ? <LocalAuth /> : <Auth />}
+                            </Route>
+                            <Route path="/dashboard">
+                                <Dashboard />
+                            </Route>
+                            <Route path="/">
+                                <Landing />
+                            </Route>
+                        </Switch>
+                        <CheckAuth />
+                    </main>
+                </div>
+            </Router>
+        </ErrorBoundary>
     )
 }
 
