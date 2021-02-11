@@ -19,6 +19,11 @@ Local dev is built around the Serverless plugin [`serverless-offline`](https://g
 
 When run locally, auth bypasses Cognito. The frontend mimics login in local storage with a mock user and sends an id in the `cognito-identity-id` header on every request. `serverless-offline` expects that and sets it as the cognitoId in the requestContext for your lambdas, just like Cognito would in AWS. 
 
+## For Designers
+
+- Check that you have `yarn` and `node` installed (`yarn -v` and `node -v` should work). If not, follow the Requirements documentation here.
+- In general, you work out of `services/app-web` only. `cd services/app-web`. Check [app-web README.md](./services/app-web/README.md) for the available scripts.
+
 ## Usage
 
 See master build [here](https://github.com/CMSgov/macpro-quickstart-serverless/actions?query=branch%3Amaster)
