@@ -8,7 +8,9 @@
     }
 }
 .detailsSection {
-    padding: units(3);
+    .detailsSectionContent {
+        padding: units(4) units(15);
+    }
     & h2 {
         padding-bottom: units(2);
         text-align: center;
@@ -46,6 +48,7 @@
         color: $theme-color-primary-dark;
         display: flex;
         font-size: 1.33rem;
+        font-weight: bold;
         margin: units(1);
     }
     > li {
@@ -55,8 +58,9 @@
         background-color: $cms-color-white;
         border: $theme-summary-box-border-width $theme-color-base-lighter solid;
         display: flex;
-        padding: units(4);
+        padding: units(2);
         list-style: none;
+        text-align: center;
         > span {
             padding: units(2);
         }

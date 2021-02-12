@@ -3,8 +3,7 @@
 .logosRow {
     background-color: $theme-color-base-lightest;
     & img {
-        @include u-margin-x(2);
-        @include u-padding-x(2);
+        padding-right: units(4);
         flex-shrink: 0;
         height: 50px;
         width: auto;

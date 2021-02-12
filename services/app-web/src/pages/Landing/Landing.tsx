@@ -32,32 +32,34 @@ export const Landing = (): React.ReactElement => {
             </section>
             <section className={styles.detailsSection}>
                 <GridContainer>
-                    <h2>
-                        In this system, pilot state users can submit Managed
-                        Care contract and rate packages that meet the following
-                        criteria:
-                    </h2>
-                    <ul>
-                        <li>
-                            Contract and rate certifications are fully executed
-                        </li>
-                        <li>
-                            All documents are sent at the time of submission, in
-                            a complete package
-                        </li>
-                        <li>
-                            Populations covered are Medicaid and CHIP or
-                            Medicaid only
-                        </li>
-                    </ul>
-                    <h3>
-                        This system does not currently support the following
-                        submission types:
-                    </h3>
-                    <ul>
-                        <li>State-directed payments</li>
-                        <li>Enrollment broker contracts</li>
-                    </ul>
+                    <div className={styles.detailsSectionContent}>
+                        <h2>
+                            In this system, pilot state users can submit Managed
+                            Care contract and rate packages that meet the following
+                            criteria:
+                        </h2>
+                        <ul>
+                            <li>
+                                Contract and rate certifications are fully executed
+                            </li>
+                            <li>
+                                All documents are sent at the time of submission, in
+                                a complete package
+                            </li>
+                            <li>
+                                Populations covered are Medicaid and CHIP or
+                                Medicaid only
+                            </li>
+                        </ul>
+                        <h3>
+                            This system does not currently support the following
+                            submission types:
+                        </h3>
+                        <ul>
+                            <li>State-directed payments</li>
+                            <li>Enrollment broker contracts</li>
+                        </ul>
+                    </div>
                 </GridContainer>
             </section>
         </>
