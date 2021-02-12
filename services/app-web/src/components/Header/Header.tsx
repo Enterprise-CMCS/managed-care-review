@@ -91,7 +91,6 @@ export const Header = ({
                     </Grid>
                 </GridContainer>
             </div>
-            App
             {loggedIn ? (
                 <div className={styles.dashboardHeading}>
                     <GridContainer>

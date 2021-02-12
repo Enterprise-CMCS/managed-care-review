@@ -1,6 +1,6 @@
 import React from 'react'
 import { Story } from '@storybook/react'
-import { Router } from 'react-router-dom'
+import { BrowserRouter } from 'react-router-dom'
 import { Header, HeaderProps } from './Header'
 
 export default {
@@ -9,9 +9,9 @@ export default {
 }
 
 const Template: Story<HeaderProps> = (args) => (
-    <Router>
+    <BrowserRouter>
         <Header {...args} />
-    </Router>
+    </BrowserRouter>
 )
 
 export const CMSHeader = Template.bind({})
