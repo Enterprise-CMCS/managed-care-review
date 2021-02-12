@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button } from '@trussworks/react-uswds'
+import { Button, GridContainer, Grid } from '@trussworks/react-uswds'
 
 import medicaidLogo from '../../assets/images/medicaidgovlogo.png'
 import { ReactComponent as VaIcon } from '../../assets/icons/va-icon.svg'
@@ -55,55 +55,63 @@ export const Header = ({
 
     return (
         <header>
-            <div className={styles.banner}>
-                <Logo
-                    src={medicaidLogo}
-                    alt="Medicaid.gov-Keeping America Healthy"
-                />
-                {loggedIn && user ? (
-                    <div className={styles.userInfo}>
-                        <span>{user.email}</span>
-                        <span className={styles.divider}>|</span>
+            <GridContainer>
+                <Grid row className="flex-justify flex-align-center">
+                    <Logo
+                        src={medicaidLogo}
+                        alt="Medicaid.gov-Keeping America Healthy"
+                    />
+                    {loggedIn && user ? (
+                        <div className={styles.userInfo}>
+                            <span>{user.email}</span>
+                            <span className={styles.divider}>|</span>
 
+                            <Button
+                                type="button"
+                                unstyled
+                                onClick={() => console.log('Sign out')}
+                            >
+                                Sign out
+                            </Button>
+                        </div>
+                    ) : (
                         <Button
                             type="button"
-                            unstyled
-                            onClick={() => console.log('Sign out')}
+                            outline
+                            onClick={() => console.log('Sign In')}
                         >
-                            Sign out
+                            Sign In
                         </Button>
-                    </div>
-                ) : (
-                    <Button
-                        type="button"
-                        outline
-                        onClick={() => console.log('Sign In')}
-                    >
-                        Sign In
-                    </Button>
-                )}
-            </div>
+                    )}
+                </Grid>
+            </GridContainer>
             {loggedIn ? (
                 <div className={styles.dashboardHeading}>
-                    <div>
-                        <StateIcon />
-                    </div>
-                    <h1 className="margin-0">
-                        <span>{stateName}</span>
-                        <span className="font-heading-lg text-light">
-                            {activePage}
-                        </span>
-                    </h1>
+                    <GridContainer>
+                        <Grid row className="flex-align-center">
+                            <div>
+                                <StateIcon />
+                            </div>
+                            <h1>
+                                <span>{stateName}</span>
+                                <span className="font-heading-lg text-light">
+                                    {activePage}
+                                </span>
+                            </h1>
+                        </Grid>
+                    </GridContainer>
                 </div>
             ) : (
                 <div className={styles.landingPageHeading}>
-                    <h1>
-                        <span>MAC-MCCRS</span>
-                        <span className="font-heading-lg">
-                            Medicaid and CHIP Managed Care Reporting and Review
-                            System
-                        </span>
-                    </h1>
+                    <GridContainer>
+                        <h1>
+                            <span>MAC-MCCRS</span>
+                            <span className="font-heading-lg">
+                                Medicaid and CHIP Managed Care Reporting and
+                                Review System
+                            </span>
+                        </h1>
+                    </GridContainer>
                 </div>
             )}
         </header>

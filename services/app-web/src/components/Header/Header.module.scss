@@ -1,13 +1,5 @@
 @import '../../index.scss';
 
-.banner {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    padding: units('05') units(4);
-}
-
 .userInfo {
     font-weight: font-weight('light');
     padding: 0 units(1);
@@ -20,16 +12,12 @@
 .dashboardHeading {
     background-color: $theme-color-primary-dark;
     color: $cms-color-white;
-    display: flex;
-    flex-wrap: wrap;
-    padding: units(1) units(4);
     & h1 {
         display: flex;
         flex-wrap: wrap;
         align-items: baseline;
         > span {
             padding: 0 units(1);
-            font-family: inherit;
         }
     }
 }
@@ -37,15 +25,11 @@
 .landingPageHeading {
     background-color: $theme-color-primary-dark;
     color: $cms-color-white;
-    padding: units(2);
-    > h1 {
+    padding: units(1) 0;
+    & h1 {
         display: flex;
         flex-flow: column;
         text-align: center;
-        font-family: inherit;
         font-weight: font-weight('light');
-        > span {
-            font-family: inherit;
-        }
     }
 }
