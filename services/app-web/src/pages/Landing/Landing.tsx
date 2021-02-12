@@ -1,12 +1,12 @@
 import React from 'react'
-
+import { GridContainer } from '@trussworks/react-uswds'
 import styles from './Landing.module.scss'
 
 export const Landing = (): React.ReactElement => {
     return (
         <>
             <section className={styles.outlineSection}>
-                <div className={styles.grid}>
+                <GridContainer>
                     <h2>How it works</h2>
                     <ol className={styles.cardList}>
                         <li>
@@ -28,10 +28,10 @@ export const Landing = (): React.ReactElement => {
                             </span>
                         </li>
                     </ol>
-                </div>
+                </GridContainer>
             </section>
             <section className={styles.detailsSection}>
-                <div className={styles.grid}>
+                <GridContainer>
                     <h2>
                         In this system, pilot state users can submit Managed
                         Care contract and rate packages that meet the following
@@ -58,7 +58,7 @@ export const Landing = (): React.ReactElement => {
                         <li>State-directed payments</li>
                         <li>Enrollment broker contracts</li>
                     </ul>
-                </div>
+                </GridContainer>
             </section>
         </>
     )
