@@ -1,4 +1,4 @@
-import { Auth } from 'aws-amplify'
+import { Auth as AmplifyAuth } from 'aws-amplify'
 import { CognitoUser } from 'amazon-cognito-identity-js'
 
 import { Result, ok, err } from './result'
@@ -33,7 +33,7 @@ export async function signUp(
     user: newUser
 ): Promise<Result<CognitoUser, AmplifyError>> {
     try {
-        const result = await Auth.signUp({
+        const result = await AmplifyAuth.signUp({
             username: user.username,
             password: user.password,
             attributes: {
@@ -65,7 +65,7 @@ export async function confirmSignUp(
     code: string
 ): Promise<Result<null, AmplifyError>> {
     try {
-        await Auth.confirmSignUp(email, code)
+        await AmplifyAuth.confirmSignUp(email, code)
         return ok(null)
     } catch (e) {
         if (isAmplifyError(e)) {
@@ -85,7 +85,7 @@ export async function resendSignUp(
     email: string
 ): Promise<Result<null, AmplifyError>> {
     try {
-        await Auth.resendSignUp(email)
+        await AmplifyAuth.resendSignUp(email)
         return ok(null)
     } catch (e) {
         // no known handleable errors for this one...
@@ -99,7 +99,7 @@ export async function signIn(
     password: string
 ): Promise<Result<CognitoUser, AmplifyError>> {
     try {
-        const result = await Auth.signIn(email, password)
+        const result = await AmplifyAuth.signIn(email, password)
         return ok(result.user)
     } catch (e) {
         if (isAmplifyError(e)) {
@@ -119,5 +119,15 @@ export async function signIn(
         } else {
             throw e
         }
+    }
+}
+
+export async function signOut(): Promise<Result<CognitoUser, AmplifyError>> {
+     try {
+        const result = await AmplifyAuth.signOut()
+        return ok(result)
+    } catch (e) {
+                console.log('error signing out: ', e);
+                throw e
     }
 }

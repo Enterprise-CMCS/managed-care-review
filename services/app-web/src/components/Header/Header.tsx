@@ -1,11 +1,13 @@
 import React from 'react'
-import { Button } from '@trussworks/react-uswds'
+import { Button, Link } from '@trussworks/react-uswds'
+import { NavLink } from 'react-router-dom'
 
 import medicaidLogo from '../../assets/images/medicaidgovlogo.png'
 import { ReactComponent as VaIcon } from '../../assets/icons/va-icon.svg'
 import { ReactComponent as MnIcon } from '../../assets/icons/mn-icon.svg'
 import styles from './Header.module.scss'
 
+import { useAuth } from '../../pages/App/AuthContext'
 import { Logo } from '../Logo/Logo'
 
 const getStateInfo = (
@@ -49,6 +51,7 @@ export const Header = ({
     loggedIn,
     user,
 }: HeaderProps): React.ReactElement => {
+    const { isAuthenticated, logout } = useAuth()
     const { stateName, StateIcon } = stateCode
         ? getStateInfo(stateCode)
         : { stateName: 'STATE UNKNOWN', StateIcon: () => <span></span> }
@@ -60,27 +63,24 @@ export const Header = ({
                     src={medicaidLogo}
                     alt="Medicaid.gov-Keeping America Healthy"
                 />
-                {loggedIn && user ? (
+                {isAuthenticated && user ? (
                     <div className={styles.userInfo}>
                         <span>{user.email}</span>
                         <span className={styles.divider}>|</span>
 
-                        <Button
-                            type="button"
-                            unstyled
-                            onClick={() => console.log('Sign out')}
-                        >
+                        <Button type="button" unstyled onClick={() => logout()}>
                             Sign out
                         </Button>
                     </div>
                 ) : (
-                    <Button
-                        type="button"
-                        outline
-                        onClick={() => console.log('Sign In')}
+                    <Link
+                        asCustom={NavLink}
+                        className="usa-button usa-button--outline"
+                        variant="unstyled"
+                        to="/auth"
                     >
                         Sign In
-                    </Button>
+                    </Link>
                 )}
             </div>
             {loggedIn ? (
