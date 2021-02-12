@@ -2,10 +2,6 @@
 
 .logosRow {
     background-color: $theme-color-base-lightest;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    padding: units(1);
     & img {
         @include u-margin-x(2);
         @include u-padding-x(2);
@@ -27,16 +23,14 @@
     padding: units(2);
     justify-content: flex-end;
     > span {
-        max-width: 400px;
+        max-width: 300px;
     }
 }
 
 .contactRow {
     background-color: $theme-color-primary;
     color: $cms-color-white;
-    display: flex;
-    justify-content: space-between;
-    padding: units(3);
+    padding: units(3) 0;
     > span {
         margin: units(1);
     }
