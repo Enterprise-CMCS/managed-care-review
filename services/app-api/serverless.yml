@@ -48,6 +48,7 @@ functions:
           path: log_event
           method: post
           cors: true
+
   graphql:
     handler: handlers/apollo_gql.graphqlHandler
     events:
@@ -59,6 +60,7 @@ functions:
           path: graphql
           method: get
           cors: true
+          
   hello:
     handler: handlers/hello.main
     role: LambdaApiRole
@@ -74,8 +76,8 @@ resources:
     CreatePermissionsBoundary:
       Fn::Not:
         - Fn::Equals:
-            - ''
-            - ${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
+          - ""
+          - ${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
   Resources:
     LambdaApiRole: # Why isn't this with the function as an iamRoleStatements?  https://github.com/serverless/serverless/issues/6485
       Type: 'AWS::IAM::Role'
@@ -83,35 +85,36 @@ resources:
         AssumeRolePolicyDocument:
           Version: '2012-10-17'
           Statement:
-            - Effect: 'Allow'
-              Principal:
-                Service: 'lambda.amazonaws.com'
-              Action: 'sts:AssumeRole'
+          - Effect: 'Allow'
+            Principal:
+              Service: 'lambda.amazonaws.com'
+            Action: 'sts:AssumeRole'
         Path: ${self:custom.iamPath}
         PermissionsBoundary:
           Fn::If:
             - CreatePermissionsBoundary
             - Fn::Join:
-                - ''
-                - - 'arn:aws:iam::'
+              - ''
+              -
+                - 'arn:aws:iam::'
                 - Ref: AWS::AccountId
                 - ':policy'
                 - '${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}'
             - Ref: AWS::NoValue
         ManagedPolicyArns:
-          - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
         Policies:
           - PolicyName: 'LambdaApiRolePolicy'
             PolicyDocument:
               Version: '2012-10-17'
               Statement:
-                - Effect: 'Allow'
+              - Effect: 'Allow'
                 Action:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: 'arn:aws:logs:*:*:*'
-                - Effect: 'Allow'
+              - Effect: 'Allow'
                 Action:
                   - dynamodb:DescribeTable
                   - dynamodb:Query
@@ -123,30 +126,16 @@ resources:
                 Resource:
                   - ${self:custom.tableArn}
                   - ${self:custom.atomicCounterTableArn}
-                - Effect: 'Allow'
+              - Effect: 'Allow'
                 Action:
                   - logs:CreateLogStream
                   - logs:CreateLogGroup
                 Resource:
                   - Fn::Join:
-                      - '/'
-                      - - Fn::Join:
-                          [
-                            ':',
-                            [
-                              'arn:aws:execute-api',
-                              {
-                                'Ref': 'AWS::Region',
-                              },
-                              {
-                                'Ref': 'AWS::AccountId',
-                              },
-                              {
-                                'Ref': 'ApiGatewayRestApi',
-                              },
-                            ],
-                          ]
-                - Effect: 'Allow'
+                    - "/"
+                    -
+                      - Fn::Join: [":", ["arn:aws:execute-api", {"Ref": "AWS::Region"}, {"Ref":"AWS::AccountId"}, {"Ref": "ApiGatewayRestApi"}]]
+              - Effect: 'Allow'
                 Action:
                   - cognito-idp:AdminGetUser
                 Resource: '*'
@@ -154,8 +143,8 @@ resources:
       Type: 'AWS::ApiGateway::GatewayResponse'
       Properties:
         ResponseParameters:
-          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+           gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+           gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
         ResponseType: DEFAULT_4XX
         RestApiId:
           Ref: 'ApiGatewayRestApi'
@@ -163,8 +152,8 @@ resources:
       Type: 'AWS::ApiGateway::GatewayResponse'
       Properties:
         ResponseParameters:
-          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+           gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+           gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
         ResponseType: DEFAULT_5XX
         RestApiId:
           Ref: 'ApiGatewayRestApi'
@@ -202,8 +191,9 @@ resources:
       Properties:
         ResourceArn:
           Fn::Join:
-            - ''
-            - - 'arn:aws:apigateway:'
+            - ""
+            -
+              - 'arn:aws:apigateway:'
               - Ref: AWS::Region
               - '::/restapis/'
               - Ref: ApiGatewayRestApi
@@ -219,10 +209,10 @@ resources:
     ApiGatewayRestApiUrl:
       Value:
         Fn::Join:
-          - ''
-          - - 'https://'
+          - ""
+          - - "https://"
             - Ref: ApiGatewayRestApi
-            - '.execute-api.${self:provider.region}.amazonaws.com/${self:custom.stage}'
+            - ".execute-api.${self:provider.region}.amazonaws.com/${self:custom.stage}"
     Region:
       Value:
         Ref: AWS::Region
