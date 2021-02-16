@@ -17,10 +17,6 @@ export const Footer = (): React.ReactElement => {
                     <Grid row className="flex-justify flex-align-center">
                         <div className={styles.cmsLogos}>
                             <Logo
-                                src={macproLogo}
-                                alt="Macpro-Medicaid and CHIP Program System"
-                            />
-                            <Logo
                                 src={medicaidLogo}
                                 alt="Medicaid.gov-Keeping America Healthy"
                             />
