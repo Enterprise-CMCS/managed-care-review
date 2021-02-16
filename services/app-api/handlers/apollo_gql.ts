@@ -1,6 +1,17 @@
 // apollo_gql.js
 
-import { ApolloServer, gql } from 'apollo-server-lambda'
+import {
+	ApolloServer,
+	AuthenticationError,
+	gql,
+	IResolvers,
+} from 'apollo-server-lambda'
+
+import {
+	userFromAuthProvider,
+	userFromCognitoAuthProvider,
+	userFromLocalAuthProvider,
+} from '../authn'
 
 // Construct a schema, using GraphQL schema language
 const typeDefs = gql`
@@ -10,9 +21,37 @@ const typeDefs = gql`
 `
 
 // Provide resolver functions for your schema fields
-const resolvers = {
+const resolvers: IResolvers = {
 	Query: {
-		hello: () => 'Hello world!',
+		hello: async (parent, args, context, info) => {
+			console.log('WOAH', context, info)
+
+			let userFetcher: userFromAuthProvider
+
+			if (process.env.REACT_APP_LOCAL_LOGIN) {
+				userFetcher = userFromLocalAuthProvider
+			} else {
+				userFetcher = userFromCognitoAuthProvider
+			}
+
+			const authProvider =
+				context.event.requestContext.identity
+					.cognitoAuthenticationProvider
+			if (authProvider == undefined) {
+				throw new AuthenticationError(
+					'This should only be possible in DEV, AWS should always populate cogito values'
+				)
+			}
+
+			const userResult = await userFetcher(authProvider)
+			if (userResult.isErr()) {
+				throw new AuthenticationError(userResult.error.message)
+			}
+
+			const user = userResult.value
+
+			return `Hello ${user.email}!`
+		},
 	},
 }
 

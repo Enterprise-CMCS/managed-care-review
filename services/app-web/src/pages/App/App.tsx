@@ -2,6 +2,11 @@ import React from 'react'
 import { BrowserRouter } from 'react-router-dom'
 import { ErrorBoundary } from 'react-error-boundary'
 import { GovBanner, GridContainer } from '@trussworks/react-uswds'
+import {
+    ApolloProvider,
+    ApolloClient,
+    NormalizedCacheObject,
+} from '@apollo/client'
 
 import './App.scss'
 
@@ -28,26 +33,32 @@ function ErrorFallback({
     )
 }
 
-function App(): React.ReactElement {
+function App({
+    apolloClient,
+}: {
+    apolloClient: ApolloClient<NormalizedCacheObject>
+}): React.ReactElement {
     logEvent('on_load', { success: true })
     const auth = useAuth()
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>
             <BrowserRouter>
-                <AuthProvider>
-                    <div className="App">
-                        <a className="usa-skipnav" href="#main-content">
-                            Skip to main content
-                        </a>
-                        <GovBanner aria-label="Official government website" />
-                        <Header loggedIn={auth.isAuthenticated} />
-                        <main id="main-content">
-                            <AppRoutes />
-                            <CheckAuth />
-                        </main>
-                        <Footer />
-                    </div>
-                </AuthProvider>
+                <ApolloProvider client={apolloClient}>
+                    <AuthProvider>
+                        <div className="App">
+                            <a className="usa-skipnav" href="#main-content">
+                                Skip to main content
+                            </a>
+                            <GovBanner aria-label="Official government website" />
+                            <Header loggedIn={auth.isAuthenticated} />
+                            <main id="main-content">
+                                <AppRoutes />
+                                <CheckAuth />
+                            </main>
+                            <Footer />
+                        </div>
+                    </AuthProvider>
+                </ApolloProvider>
             </BrowserRouter>
         </ErrorBoundary>
     )
