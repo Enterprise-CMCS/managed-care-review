@@ -49,6 +49,21 @@ functions:
           method: post
           cors: true
 
+  graphql:
+     handler: handlers/apollo_gql.graphqlHandler
+     role: LambdaApiRole
+     events:
+       - http:
+           path: graphql
+           method: post
+           cors: true
+           authorizer: aws_iam
+       - http:
+           path: graphql
+           method: get
+           cors: true
+           authorizer: aws_iam
+
   hello:
     handler: handlers/hello.main
     role: LambdaApiRole
