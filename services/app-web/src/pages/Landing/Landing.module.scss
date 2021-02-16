@@ -2,14 +2,14 @@
 
 .outlineSection {
     background-color: $theme-color-base-lightest;
-    padding: units(6);
+    padding: units(2);
     & h2 {
         text-align: center;
     }
 }
 .detailsSection {
     .detailsSectionContent {
-        padding: units(4) units(15);
+        max-width: 55rem;
     }
     & h2 {
         padding-bottom: units(2);
@@ -55,6 +55,7 @@
         @include border-box-sizing;
         @include u-flex('column', 'align-center');
         @include u-margin-x($theme-card-gap / 2);
+        @include u-radius('md');
         background-color: $cms-color-white;
         border: $theme-summary-box-border-width $theme-color-base-lighter solid;
         display: flex;
