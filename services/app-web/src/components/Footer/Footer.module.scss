@@ -1,7 +1,7 @@
 @import '../../index.scss';
 
 .logosRow {
-    background-color: $theme-color-base-lightest;
+    background-color: $theme-footer-logos-background;
     & img {
         padding-right: units(4);
         flex-shrink: 0;
