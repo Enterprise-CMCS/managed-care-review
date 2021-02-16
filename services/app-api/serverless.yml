@@ -1,228 +1,228 @@
 service: app-api
 
 package:
-    individually: true
+  individually: true
 
 plugins:
-    - serverless-bundle
-    - serverless-offline
+  - serverless-bundle
+  - serverless-offline
 
 custom:
-    stage: ${opt:stage, self:provider.stage}
-    appVersion: ${env:APP_VERSION}
-    tableName: ${env:AMENDMENTS_TABLE_NAME, cf:database-${self:custom.stage}.AmendmentsTableName}
-    tableArn: ${env:AMENDMENTS_TABLE_ARN, cf:database-${self:custom.stage}.AmendmentsTableArn}
-    atomicCounterTableName: ${env:AMENDMENTS_COUNTER_TABLE_NAME, cf:database-${self:custom.stage}.AmendmentsAtomicCounterTableName}
-    atomicCounterTableArn: ${env:AMENDMENTS_COUNTER_TABLE_ARN, cf:database-${self:custom.stage}.AmendmentsAtomicCounterTableArn}
-    iamPath: ${env:IAM_PATH, "/"}
+  stage: ${opt:stage, self:provider.stage}
+  appVersion: ${env:APP_VERSION}
+  tableName: ${env:AMENDMENTS_TABLE_NAME, cf:database-${self:custom.stage}.AmendmentsTableName}
+  tableArn: ${env:AMENDMENTS_TABLE_ARN, cf:database-${self:custom.stage}.AmendmentsTableArn}
+  atomicCounterTableName: ${env:AMENDMENTS_COUNTER_TABLE_NAME, cf:database-${self:custom.stage}.AmendmentsAtomicCounterTableName}
+  atomicCounterTableArn: ${env:AMENDMENTS_COUNTER_TABLE_ARN, cf:database-${self:custom.stage}.AmendmentsAtomicCounterTableArn}
+  iamPath: ${env:IAM_PATH, "/"}
 
 provider:
-    name: aws
-    runtime: nodejs12.x
-    region: us-east-1
-    stage: dev
-    apiGateway:
-        shouldStartNameWithService: true
+  name: aws
+  runtime: nodejs12.x
+  region: us-east-1
+  stage: dev
+  apiGateway:
+    shouldStartNameWithService: true
 
-    environment:
-        stage: ${self:custom.stage}
-        appVersion: ${self:custom.appVersion}
-        tableName: ${self:custom.tableName}
-        atomicCounterTableName: ${self:custom.atomicCounterTableName}
+  environment:
+    stage: ${self:custom.stage}
+    appVersion: ${self:custom.appVersion}
+    tableName: ${self:custom.tableName}
+    atomicCounterTableName: ${self:custom.atomicCounterTableName}
 
 functions:
-    health:
-        handler: handlers/health_check.main
-        role: LambdaApiRole
-        events:
-            - http:
-                  path: health_check
-                  method: get
-                  cors: true
+  health:
+    handler: handlers/health_check.main
+    role: LambdaApiRole
+    events:
+      - http:
+          path: health_check
+          method: get
+          cors: true
 
-    log_event:
-        handler: handlers/log_event.main
-        role: LambdaApiRole
-        events:
-            - http:
-                  path: log_event
-                  method: post
-                  cors: true
-    graphql:
-        handler: handlers/apollo_gql.graphqlHandler
-        events:
-            - http:
-                  path: graphql
-                  method: post
-                  cors: true
-            - http:
-                  path: graphql
-                  method: get
-                  cors: true
-    hello:
-        handler: handlers/hello.main
-        role: LambdaApiRole
-        events:
-            - http:
-                  path: hello
-                  method: get
-                  cors: true
-                  authorizer: aws_iam
+  log_event:
+    handler: handlers/log_event.main
+    role: LambdaApiRole
+    events:
+      - http:
+          path: log_event
+          method: post
+          cors: true
+  graphql:
+    handler: handlers/apollo_gql.graphqlHandler
+    events:
+      - http:
+          path: graphql
+          method: post
+          cors: true
+      - http:
+          path: graphql
+          method: get
+          cors: true
+  hello:
+    handler: handlers/hello.main
+    role: LambdaApiRole
+    events:
+      - http:
+          path: hello
+          method: get
+          cors: true
+          authorizer: aws_iam
 
 resources:
-    Conditions:
-        CreatePermissionsBoundary:
-            Fn::Not:
-                - Fn::Equals:
-                      - ''
-                      - ${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
-    Resources:
-        LambdaApiRole: # Why isn't this with the function as an iamRoleStatements?  https://github.com/serverless/serverless/issues/6485
-            Type: 'AWS::IAM::Role'
-            Properties:
-                AssumeRolePolicyDocument:
-                    Version: '2012-10-17'
-                    Statement:
-                        - Effect: 'Allow'
-                          Principal:
-                              Service: 'lambda.amazonaws.com'
-                          Action: 'sts:AssumeRole'
-                Path: ${self:custom.iamPath}
-                PermissionsBoundary:
-                    Fn::If:
-                        - CreatePermissionsBoundary
-                        - Fn::Join:
-                              - ''
-                              - - 'arn:aws:iam::'
-                                - Ref: AWS::AccountId
-                                - ':policy'
-                                - '${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}'
-                        - Ref: AWS::NoValue
-                ManagedPolicyArns:
-                    - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
-                Policies:
-                    - PolicyName: 'LambdaApiRolePolicy'
-                      PolicyDocument:
-                          Version: '2012-10-17'
-                          Statement:
-                              - Effect: 'Allow'
-                                Action:
-                                    - logs:CreateLogGroup
-                                    - logs:CreateLogStream
-                                    - logs:PutLogEvents
-                                Resource: 'arn:aws:logs:*:*:*'
-                              - Effect: 'Allow'
-                                Action:
-                                    - dynamodb:DescribeTable
-                                    - dynamodb:Query
-                                    - dynamodb:Scan
-                                    - dynamodb:GetItem
-                                    - dynamodb:PutItem
-                                    - dynamodb:UpdateItem
-                                    - dynamodb:DeleteItem
-                                Resource:
-                                    - ${self:custom.tableArn}
-                                    - ${self:custom.atomicCounterTableArn}
-                              - Effect: 'Allow'
-                                Action:
-                                    - logs:CreateLogStream
-                                    - logs:CreateLogGroup
-                                Resource:
-                                    - Fn::Join:
-                                          - '/'
-                                          - - Fn::Join:
-                                                  [
-                                                      ':',
-                                                      [
-                                                          'arn:aws:execute-api',
-                                                          {
-                                                              'Ref': 'AWS::Region',
-                                                          },
-                                                          {
-                                                              'Ref': 'AWS::AccountId',
-                                                          },
-                                                          {
-                                                              'Ref': 'ApiGatewayRestApi',
-                                                          },
-                                                      ],
-                                                  ]
-                              - Effect: 'Allow'
-                                Action:
-                                    - cognito-idp:AdminGetUser
-                                Resource: '*'
-        GatewayResponseDefault4XX:
-            Type: 'AWS::ApiGateway::GatewayResponse'
-            Properties:
-                ResponseParameters:
-                    gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-                    gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
-                ResponseType: DEFAULT_4XX
-                RestApiId:
-                    Ref: 'ApiGatewayRestApi'
-        GatewayResponseDefault5XX:
-            Type: 'AWS::ApiGateway::GatewayResponse'
-            Properties:
-                ResponseParameters:
-                    gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-                    gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
-                ResponseType: DEFAULT_5XX
-                RestApiId:
-                    Ref: 'ApiGatewayRestApi'
-        ApiGwWebAcl:
-            Type: AWS::WAFv2::WebACL
-            Properties:
-                Name: ${self:custom.stage}-ApiGwWebAcl
-                DefaultAction:
-                    Block: {}
-                Rules:
-                    - Action:
-                          Allow: {}
-                      Name: ${self:custom.stage}-allow-usa-plus-territories
-                      Priority: 0
-                      Statement:
-                          GeoMatchStatement:
-                              CountryCodes:
-                                  - GU # Guam
-                                  - PR # Puerto Rico
-                                  - US # USA
-                                  - UM # US Minor Outlying Islands
-                                  - VI # US Virgin Islands
-                                  - MP # Northern Mariana Islands
-                      VisibilityConfig:
-                          SampledRequestsEnabled: true
-                          CloudWatchMetricsEnabled: true
-                          MetricName: WafWebAcl
-                Scope: REGIONAL
-                VisibilityConfig:
-                    CloudWatchMetricsEnabled: true
-                    SampledRequestsEnabled: true
-                    MetricName: ${self:custom.stage}-webacl
-        ApiGwWebAclAssociation:
-            Type: AWS::WAFv2::WebACLAssociation
-            Properties:
-                ResourceArn:
-                    Fn::Join:
-                        - ''
-                        - - 'arn:aws:apigateway:'
-                          - Ref: AWS::Region
-                          - '::/restapis/'
-                          - Ref: ApiGatewayRestApi
-                          - '/stages/${self:custom.stage}'
-                WebACLArn:
-                    Fn::GetAtt:
-                        - ApiGwWebAcl
-                        - Arn
-    Outputs:
-        ApiGatewayRestApiName:
-            Value:
-                Ref: ApiGatewayRestApi
-        ApiGatewayRestApiUrl:
-            Value:
-                Fn::Join:
-                    - ''
-                    - - 'https://'
-                      - Ref: ApiGatewayRestApi
-                      - '.execute-api.${self:provider.region}.amazonaws.com/${self:custom.stage}'
-        Region:
-            Value:
-                Ref: AWS::Region
+  Conditions:
+    CreatePermissionsBoundary:
+      Fn::Not:
+        - Fn::Equals:
+            - ''
+            - ${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
+  Resources:
+    LambdaApiRole: # Why isn't this with the function as an iamRoleStatements?  https://github.com/serverless/serverless/issues/6485
+      Type: 'AWS::IAM::Role'
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: 'Allow'
+              Principal:
+                Service: 'lambda.amazonaws.com'
+              Action: 'sts:AssumeRole'
+        Path: ${self:custom.iamPath}
+        PermissionsBoundary:
+          Fn::If:
+            - CreatePermissionsBoundary
+            - Fn::Join:
+                - ''
+                - - 'arn:aws:iam::'
+                - Ref: AWS::AccountId
+                - ':policy'
+                - '${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}'
+            - Ref: AWS::NoValue
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        Policies:
+          - PolicyName: 'LambdaApiRolePolicy'
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: 'Allow'
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: 'arn:aws:logs:*:*:*'
+                - Effect: 'Allow'
+                Action:
+                  - dynamodb:DescribeTable
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                Resource:
+                  - ${self:custom.tableArn}
+                  - ${self:custom.atomicCounterTableArn}
+                - Effect: 'Allow'
+                Action:
+                  - logs:CreateLogStream
+                  - logs:CreateLogGroup
+                Resource:
+                  - Fn::Join:
+                      - '/'
+                      - - Fn::Join:
+                          [
+                            ':',
+                            [
+                              'arn:aws:execute-api',
+                              {
+                                'Ref': 'AWS::Region',
+                              },
+                              {
+                                'Ref': 'AWS::AccountId',
+                              },
+                              {
+                                'Ref': 'ApiGatewayRestApi',
+                              },
+                            ],
+                          ]
+                - Effect: 'Allow'
+                Action:
+                  - cognito-idp:AdminGetUser
+                Resource: '*'
+    GatewayResponseDefault4XX:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
+    GatewayResponseDefault5XX:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_5XX
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
+    ApiGwWebAcl:
+      Type: AWS::WAFv2::WebACL
+      Properties:
+        Name: ${self:custom.stage}-ApiGwWebAcl
+        DefaultAction:
+          Block: {}
+        Rules:
+          - Action:
+              Allow: {}
+            Name: ${self:custom.stage}-allow-usa-plus-territories
+            Priority: 0
+            Statement:
+              GeoMatchStatement:
+                CountryCodes:
+                  - GU # Guam
+                  - PR # Puerto Rico
+                  - US # USA
+                  - UM # US Minor Outlying Islands
+                  - VI # US Virgin Islands
+                  - MP # Northern Mariana Islands
+            VisibilityConfig:
+              SampledRequestsEnabled: true
+              CloudWatchMetricsEnabled: true
+              MetricName: WafWebAcl
+        Scope: REGIONAL
+        VisibilityConfig:
+          CloudWatchMetricsEnabled: true
+          SampledRequestsEnabled: true
+          MetricName: ${self:custom.stage}-webacl
+    ApiGwWebAclAssociation:
+      Type: AWS::WAFv2::WebACLAssociation
+      Properties:
+        ResourceArn:
+          Fn::Join:
+            - ''
+            - - 'arn:aws:apigateway:'
+              - Ref: AWS::Region
+              - '::/restapis/'
+              - Ref: ApiGatewayRestApi
+              - '/stages/${self:custom.stage}'
+        WebACLArn:
+          Fn::GetAtt:
+            - ApiGwWebAcl
+            - Arn
+  Outputs:
+    ApiGatewayRestApiName:
+      Value:
+        Ref: ApiGatewayRestApi
+    ApiGatewayRestApiUrl:
+      Value:
+        Fn::Join:
+          - ''
+          - - 'https://'
+            - Ref: ApiGatewayRestApi
+            - '.execute-api.${self:provider.region}.amazonaws.com/${self:custom.stage}'
+    Region:
+      Value:
+        Ref: AWS::Region
