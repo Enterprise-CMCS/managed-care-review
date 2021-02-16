@@ -1,12 +1,12 @@
 import React, { useState } from 'react'
-import { Button } from '@trussworks/react-uswds'
-import { isAuthenticated } from './isAuthenticated'
+import { Button, GridContainer } from '@trussworks/react-uswds'
+import { useAuth } from '../App/AuthContext'
 
 type AuthStatus = 'Unknown' | 'Authenticated' | 'Unauthenticated'
 
 // COMPONENTS
 export function CheckAuth(): React.ReactElement {
-    const [isLoading, setIsLoading] = useState(false)
+    const { isLoading, checkAuth } = useAuth()
 
     const [authStatus, setAuthStatus] = useState<AuthStatus>('Unknown')
 
@@ -14,11 +14,7 @@ export function CheckAuth(): React.ReactElement {
         console.log('checking auth')
         event.preventDefault()
 
-        setIsLoading(true)
-
-        const isAuthed = await isAuthenticated()
-
-        setIsLoading(false)
+        const isAuthed = await checkAuth()
 
         if (isAuthed) {
             setAuthStatus('Authenticated')
@@ -28,11 +24,13 @@ export function CheckAuth(): React.ReactElement {
     }
 
     return (
-        <form onSubmit={handleSubmit}>
-            <p>Current Auth Status: {authStatus}</p>
-            <Button type="submit" disabled={isLoading}>
-                Check Auth
-            </Button>
-        </form>
+        <GridContainer>
+            <form onSubmit={handleSubmit}>
+                <p>Current Auth Status: {authStatus}</p>
+                <Button type="submit" disabled={isLoading}>
+                    Check Auth
+                </Button>
+            </form>
+        </GridContainer>
     )
 }

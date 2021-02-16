@@ -7,9 +7,8 @@ import {
     Label,
     TextInput,
 } from '@trussworks/react-uswds'
-// import { useAppContext } from '../libs/contextLib'
 
-import { signIn } from './cognitoAuth'
+import { useAuth } from '../App/AuthContext'
 
 export function showError(error: string): void {
     alert(error)
@@ -26,9 +25,7 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
     })
 
     const history = useHistory()
-
-    // const { userHasAuthenticated } = useAppContext()
-    const [isLoading, setIsLoading] = useState(false)
+    const auth = useAuth()
 
     const onFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = event.target
@@ -42,9 +39,8 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
     async function handleSumbit(event: React.FormEvent) {
         event.preventDefault()
 
-        setIsLoading(true)
-        const result = await signIn(fields.loginEmail, fields.loginPassword)
-        setIsLoading(false)
+        const result = await auth.login(fields.loginEmail, fields.loginPassword)
+
         if (result.isOk()) {
             console.log('SUCCESS LOGIN')
             history.push('/dashboard')
@@ -90,8 +86,7 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
                 </FormGroup>
                 <Button
                     type="submit"
-                    // isLoading={isLoading}
-                    disabled={!validateForm() || isLoading}
+                    disabled={!validateForm() || auth.isLoading}
                 >
                     Login
                 </Button>
