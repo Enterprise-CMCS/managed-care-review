@@ -1,6 +1,5 @@
 import React from 'react'
 
-import macproLogo from '../../assets/images/macprologo.png'
 import medicaidLogo from '../../assets/images/medicaidgovlogo.png'
 import styles from './Footer.module.scss'
 import { Logo } from '../Logo/Logo'
