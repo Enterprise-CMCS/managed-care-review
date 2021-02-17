@@ -54,16 +54,20 @@ export async function cognitoGQLFetch(
 					redirected: false,
 					type: 'basic',
 					url: apiResponse.request.url,
-					trailer: new Promise<Headers>((_resolve, reject) =>
-						reject('fake trailer')
-					),
+					// This is actually called by apollo-client
+					trailer: new Promise<Headers>((resolve) => {
+						// reject('fake trailer')
+						console.log('FAKE TRAILER')
+						resolve(apiResponse.headers)
+					}),
 
 					body: apiResponse.data,
 
+					// this appears to actually be called by apollo-client and matter
 					text: () => {
 						return new Promise<string>((accept) => {
 							console.log('FAK TEXT')
-							accept(apiResponse.data)
+							accept(JSON.stringify(apiResponse.data))
 						})
 					},
 

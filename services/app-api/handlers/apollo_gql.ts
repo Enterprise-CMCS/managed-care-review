@@ -1,4 +1,5 @@
 // apollo_gql.js
+import { APIGatewayProxyHandler } from 'aws-lambda'
 
 import {
 	ApolloServer,
@@ -73,9 +74,20 @@ const server = new ApolloServer({
 	},
 })
 
-exports.graphqlHandler = server.createHandler({
-	cors: {
-		origin: true,
-		credentials: true,
-	},
-})
+function bodyMiddleware(
+	wrapped: APIGatewayProxyHandler
+): APIGatewayProxyHandler {
+	return function (event, context, completion) {
+		console.log('BODY MIDDLEWARE', event.body)
+		return wrapped(event, context, completion)
+	}
+}
+
+exports.graphqlHandler = bodyMiddleware(
+	server.createHandler({
+		cors: {
+			origin: true,
+			credentials: true,
+		},
+	})
+)
