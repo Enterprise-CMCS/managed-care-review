@@ -31,7 +31,7 @@ export const Landing = (): React.ReactElement => {
                 </GridContainer>
             </section>
             <section className={styles.detailsSection}>
-                <GridContainer>
+                <GridContainer className={styles.detailsSectionContent}>
                     <h2>
                         In this system, pilot state users can submit Managed
                         Care contract and rate packages that meet the following
