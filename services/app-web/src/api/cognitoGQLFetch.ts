@@ -4,7 +4,7 @@ export function cognitoGQLFetch(
 	uri: string,
 	options: RequestInit
 ): Promise<Response> {
-	console.log('try to cogito')
+	console.log('try to cogito', uri, options)
 
 	return API.post('api', uri, options)
 }
