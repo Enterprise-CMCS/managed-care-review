@@ -28,7 +28,7 @@ Amplify.configure({
     },
 })
 
-const localLogin = process.env.REACT_APP_LOCAL_LOGIN === 'true'
+const localLogin: boolean = process.env.REACT_APP_LOCAL_LOGIN === 'true'
 
 const apolloClient = new ApolloClient({
     link: new HttpLink({

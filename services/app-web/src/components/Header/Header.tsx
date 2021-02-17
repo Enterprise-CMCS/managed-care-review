@@ -51,8 +51,6 @@ export const Header = ({
         ? getStateInfo(stateCode)
         : { stateName: 'STATE UNKNOWN', StateIcon: () => <span></span> }
 
-    console.log('STATE_USER', loggedIn, user)
-
     return (
         <header>
             <div className={styles.banner}>

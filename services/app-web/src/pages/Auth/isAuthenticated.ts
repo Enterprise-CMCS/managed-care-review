@@ -13,7 +13,6 @@ async function requestOptions() {
         // requestContext.identity.cognitoIdentityId. This lets us set a user locally without involving Cognito.
         try {
             const currentUser = await getLoggedInUser()
-            console.log('CURRENT: ', currentUser)
             if (currentUser) {
                 options['headers'] = {
                     'cognito-authentication-provider': JSON.stringify(
@@ -37,9 +36,7 @@ export async function isAuthenticated(): Promise<boolean> {
     try {
         // Amplify.API correctly sets the authentication headers after logging in with Cognito
         const opts = await requestOptions()
-        console.log('OPTS', helloURL, opts)
-        const result = await API.get('api', helloURL, opts)
-        console.log('RESee', result)
+        await API.get('api', helloURL, opts)
 
         return true
     } catch (e) {

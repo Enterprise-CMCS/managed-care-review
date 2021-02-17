@@ -42,6 +42,9 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
         event.preventDefault()
 
         const result = await signIn(fields.loginEmail, fields.loginPassword)
+        // TODO: try and useAuth() here, track state using the loading param there instead of awaiting something.
+        // if loading, show "redirecting" spinner or something.
+        // if loggedInUser, redirect
 
         if (result.isOk()) {
             console.log('SUCCESS LOGIN')

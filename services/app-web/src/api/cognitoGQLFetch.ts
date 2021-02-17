@@ -13,6 +13,7 @@ export async function cognitoGQLFetch(
 		throw 'unexpected GQL request'
 	}
 
+	// Tried to get some cognito info on our own but it was a dead end.
 	// try {
 	// 	const sesh = await Auth.currentSession()
 	// 	// console.log('COGUSER', cogUser)
@@ -46,6 +47,8 @@ export async function cognitoGQLFetch(
 			.then((apiResponse: AxiosResponse) => {
 				console.log('SUCCESS AT API: ', apiResponse)
 
+				// The Apollo Link wants a Response shaped response,
+				// not the axios shaped response that Amplify.API returns
 				const fakeFetchResponse: Response = {
 					headers: apiResponse.headers,
 					status: apiResponse.status,

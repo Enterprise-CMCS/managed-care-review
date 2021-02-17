@@ -20,10 +20,6 @@ export async function localGQLFetch(
 		},
 	}
 
-	// options.headers = Object.assign({}, options.headers, {
-	// 	'cognito-authentication-provider': JSON.stringify(currentUser),
-	// })
-
 	return new Promise<Response>((resolve, reject) => {
 		API.post('api', uri, apiOptions)
 			.then((apiResponse) => {
@@ -88,6 +84,4 @@ export async function localGQLFetch(
 				reject(e)
 			})
 	})
-
-	// return fetch(uri, options)
 }

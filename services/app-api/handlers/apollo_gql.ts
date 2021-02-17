@@ -25,8 +25,6 @@ const typeDefs = gql`
 const resolvers: IResolvers = {
 	Query: {
 		hello: async (parent, args, context, info) => {
-			console.log('WOAH', context, info)
-
 			let userFetcher: userFromAuthProvider
 
 			if (process.env.REACT_APP_LOCAL_LOGIN) {
@@ -78,10 +76,10 @@ function bodyMiddleware(
 	wrapped: APIGatewayProxyHandler
 ): APIGatewayProxyHandler {
 	return function (event, context, completion) {
-		// For reasons I don't understand and I no longer care about
+		// For reasons I don't understand
 		// when graphql requests are sent by the amplify library to AWS
 		// they are arriving with some escaping that is breaking apollo server.
-		// This transformation makes things work again.
+		// This transformation attempts and fails to make things work again.
 		console.log('BODY MIDDLEWARE', event.body)
 		if (event.body !== null) {
 			console.log(

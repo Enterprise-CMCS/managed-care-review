@@ -7,8 +7,6 @@ import { Dashboard } from '../Dashboard/Dashboard'
 import { Landing } from '../Landing/Landing'
 import { LocalAuth } from '../Auth/LocalAuth'
 
-// const localLogin: boolean = process.env.REACT_APP_LOCAL_LOGIN === 'true'
-
 type Props = {
     localLogin: boolean
 }
