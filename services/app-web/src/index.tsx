@@ -28,19 +28,19 @@ Amplify.configure({
     },
 })
 
+const localLogin = process.env.REACT_APP_LOCAL_LOGIN === 'true'
+
 const apolloClient = new ApolloClient({
     link: new HttpLink({
         uri: process.env.REACT_APP_API_URL + '/graphql',
-        fetch: process.env.REACT_APP_LOCAL_LOGIN
-            ? localGQLFetch
-            : cognitoGQLFetch,
+        fetch: localLogin ? localGQLFetch : cognitoGQLFetch,
     }),
     cache: new InMemoryCache(),
 })
 
 ReactDOM.render(
     <React.StrictMode>
-        <App apolloClient={apolloClient} />
+        <App localLogin={localLogin} apolloClient={apolloClient} />
     </React.StrictMode>,
     document.getElementById('root')
 )

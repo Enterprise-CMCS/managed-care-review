@@ -7,11 +7,12 @@ import { ReactComponent as VaIcon } from '../../assets/icons/va-icon.svg'
 import { ReactComponent as MnIcon } from '../../assets/icons/mn-icon.svg'
 import styles from './Header.module.scss'
 
+import { StateCode } from '../../common-code/domain-models'
 import { useAuth } from '../../pages/App/AuthContext'
 import { Logo } from '../Logo/Logo'
 
 const getStateInfo = (
-    stateAbbrev: SupportedStateCodes
+    stateAbbrev: StateCode
 ): { stateName: string; StateIcon: React.FunctionComponent } => {
     switch (stateAbbrev) {
         case 'MN':
@@ -26,14 +27,8 @@ const getStateInfo = (
     }
 }
 
-const StateCodes = {
-    MN: 'MN',
-    VA: 'VA',
-} as const
-type SupportedStateCodes = typeof StateCodes[keyof typeof StateCodes]
-
 export type HeaderProps = {
-    stateCode?: SupportedStateCodes
+    stateCode?: StateCode
     activePage?: string
     loggedIn: boolean
     user?: {
@@ -51,10 +46,12 @@ export const Header = ({
     loggedIn,
     user,
 }: HeaderProps): React.ReactElement => {
-    const { isAuthenticated, logout } = useAuth()
+    const { logout } = useAuth() // seems weird that we don't pass this in
     const { stateName, StateIcon } = stateCode
         ? getStateInfo(stateCode)
         : { stateName: 'STATE UNKNOWN', StateIcon: () => <span></span> }
+
+    console.log('STATE_USER', loggedIn, user)
 
     return (
         <header>
@@ -65,7 +62,7 @@ export const Header = ({
                             src={medicaidLogo}
                             alt="Medicaid.gov-Keeping America Healthy"
                         />
-                        {isAuthenticated && user ? (
+                        {loggedIn && user ? (
                             <div className={styles.userInfo}>
                                 <span>{user.email}</span>
                                 <span className={styles.divider}>|</span>
@@ -73,7 +70,21 @@ export const Header = ({
                                 <Button
                                     type="button"
                                     unstyled
-                                    onClick={() => logout()}
+                                    onClick={() => {
+                                        logout &&
+                                            logout()
+                                                .then(() => {
+                                                    console.log(
+                                                        'button level good.'
+                                                    )
+                                                })
+                                                .catch((e) => {
+                                                    console.log(
+                                                        'button level bad.',
+                                                        e
+                                                    )
+                                                })
+                                    }}
                                 >
                                     Sign out
                                 </Button>

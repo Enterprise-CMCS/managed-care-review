@@ -4,9 +4,8 @@ export async function localGQLFetch(
 	uri: string,
 	options: RequestInit
 ): Promise<Response> {
-	console.log('try to LOCAL')
-
 	const currentUser = await getLoggedInUser()
+	console.log('try to LOCAL', currentUser)
 
 	options.headers = Object.assign({}, options.headers, {
 		'cognito-authentication-provider': JSON.stringify(currentUser),

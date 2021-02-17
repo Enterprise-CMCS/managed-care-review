@@ -7,16 +7,20 @@ import { Dashboard } from '../Dashboard/Dashboard'
 import { Landing } from '../Landing/Landing'
 import { LocalAuth } from '../Auth/LocalAuth'
 
-const localLogin: boolean = process.env.REACT_APP_LOCAL_LOGIN === 'true'
+// const localLogin: boolean = process.env.REACT_APP_LOCAL_LOGIN === 'true'
 
-export const AppRoutes = (): React.ReactElement => {
-    const { isAuthenticated } = useAuth()
+type Props = {
+    localLogin: boolean
+}
+
+export const AppRoutes = ({ localLogin }: Props): React.ReactElement => {
+    const { loggedInUser } = useAuth()
 
     const AuthenticatedRoutes = (): React.ReactElement => {
         return (
             <>
-                {!isAuthenticated ? (
-                    <Redirect to="/landing" />
+                {!loggedInUser ? (
+                    <Redirect to="/" />
                 ) : (
                     <Route path="/dashboard" component={Dashboard} />
                     // Add other authenticated routes here

@@ -6,21 +6,33 @@ type AuthStatus = 'Unknown' | 'Authenticated' | 'Unauthenticated'
 
 // COMPONENTS
 export function CheckAuth(): React.ReactElement {
-    const { isLoading, checkAuth } = useAuth()
+    const { loggedInUser, isLoading, checkAuth } = useAuth()
 
     const [authStatus, setAuthStatus] = useState<AuthStatus>('Unknown')
+
+    console.log('Renderinmain', loggedInUser, isLoading, checkAuth, authStatus)
+
+    if (isLoading) {
+        if (authStatus != 'Unknown') {
+            setAuthStatus('Unknown')
+        }
+    } else {
+        if (loggedInUser) {
+            if (authStatus != 'Authenticated') {
+                setAuthStatus('Authenticated')
+            }
+        } else {
+            if (authStatus != 'Unauthenticated') {
+                setAuthStatus('Unauthenticated')
+            }
+        }
+    }
 
     async function handleSubmit(event: React.FormEvent) {
         console.log('checking auth')
         event.preventDefault()
 
-        const isAuthed = await checkAuth()
-
-        if (isAuthed) {
-            setAuthStatus('Authenticated')
-        } else {
-            setAuthStatus('Unauthenticated')
-        }
+        checkAuth()
     }
 
     return (

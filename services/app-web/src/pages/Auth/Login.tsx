@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useHistory } from 'react-router-dom'
+import { signIn, signOut, AmplifyError } from '../Auth/cognitoAuth'
 import {
     Button,
     Form,
@@ -37,12 +38,20 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
     }
 
     async function handleSumbit(event: React.FormEvent) {
+        console.log('Trying a signin')
         event.preventDefault()
 
-        const result = await auth.login(fields.loginEmail, fields.loginPassword)
+        const result = await signIn(fields.loginEmail, fields.loginPassword)
 
         if (result.isOk()) {
             console.log('SUCCESS LOGIN')
+
+            try {
+                await auth.checkAuth()
+            } catch (e) {
+                console.log('UNEXPECTED NOT LOGGED IN AFTETR LOGGIN', e)
+            }
+
             history.push('/dashboard')
         } else {
             const err = result.error

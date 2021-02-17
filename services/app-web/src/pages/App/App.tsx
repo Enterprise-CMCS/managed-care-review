@@ -1,7 +1,7 @@
 import React from 'react'
 import { BrowserRouter } from 'react-router-dom'
 import { ErrorBoundary } from 'react-error-boundary'
-import { GovBanner, GridContainer } from '@trussworks/react-uswds'
+import { GridContainer } from '@trussworks/react-uswds'
 import {
     ApolloProvider,
     ApolloClient,
@@ -10,12 +10,9 @@ import {
 
 import './App.scss'
 
-import { AppRoutes } from './AppRoutes'
-import { CheckAuth } from '../Auth/CheckAuth'
-import { Footer } from '../../components/Footer/Footer'
-import { Header } from '../../components/Header/Header'
+import { AppBody } from './AppBody'
 import { logEvent } from '../../log_event'
-import { AuthProvider, useAuth } from './AuthContext'
+import { AuthProvider } from './AuthContext'
 
 function ErrorFallback({
     error,
@@ -34,29 +31,20 @@ function ErrorFallback({
 }
 
 function App({
+    localLogin,
     apolloClient,
 }: {
+    localLogin: boolean
     apolloClient: ApolloClient<NormalizedCacheObject>
 }): React.ReactElement {
     logEvent('on_load', { success: true })
-    const auth = useAuth()
+
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>
             <BrowserRouter>
                 <ApolloProvider client={apolloClient}>
-                    <AuthProvider>
-                        <div className="App">
-                            <a className="usa-skipnav" href="#main-content">
-                                Skip to main content
-                            </a>
-                            <GovBanner aria-label="Official government website" />
-                            <Header loggedIn={auth.isAuthenticated} />
-                            <main id="main-content">
-                                <AppRoutes />
-                                <CheckAuth />
-                            </main>
-                            <Footer />
-                        </div>
+                    <AuthProvider localLogin={localLogin}>
+                        <AppBody localLogin={localLogin} />
                     </AuthProvider>
                 </ApolloProvider>
             </BrowserRouter>

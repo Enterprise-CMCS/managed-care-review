@@ -122,12 +122,12 @@ export async function signIn(
     }
 }
 
-export async function signOut(): Promise<Result<CognitoUser, AmplifyError>> {
-     try {
+export async function signOut(): Promise<Result<null, Error>> {
+    try {
         const result = await AmplifyAuth.signOut()
-        return ok(result)
+        return ok(null)
     } catch (e) {
-                console.log('error signing out: ', e);
-                throw e
+        console.log('error signing out: ', e)
+        throw e
     }
 }

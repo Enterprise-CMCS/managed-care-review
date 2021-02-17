@@ -16,6 +16,7 @@ import { loginLocalUser } from './localLogin'
 
 import aangAvatar from '../../assets/images/aang.png'
 import tophAvatar from '../../assets/images/toph.png'
+import { useAuth } from '../App/AuthContext'
 
 const localUsers: UserType[] = [
     {
@@ -39,11 +40,19 @@ const userAvatars: { [key: string]: string } = {
 
 export function LocalAuth(): React.ReactElement {
     const history = useHistory()
+    const { checkAuth } = useAuth()
 
-    function login(user: UserType) {
+    async function login(user: UserType) {
         console.log('loggin ing', user)
 
         loginLocalUser(user)
+
+        try {
+            await checkAuth()
+        } catch (e) {
+            console.log('Error just even checking the auth??', e)
+        }
+
         history.push('/dashboard')
     }
 

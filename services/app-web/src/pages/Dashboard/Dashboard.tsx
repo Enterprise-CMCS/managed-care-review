@@ -4,7 +4,7 @@ import { HELLO_WORLD } from '../../api'
 export const Dashboard = (): React.ReactElement => {
 	const { loading, error, data } = useQuery(HELLO_WORLD)
 
-	console.log(loading, error, data)
+	console.log('Dashboard THING', loading, error, data)
 
 	if (loading) {
 		return <div>Loading User Info</div>
