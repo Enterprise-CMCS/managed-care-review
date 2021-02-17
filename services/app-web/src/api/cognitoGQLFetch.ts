@@ -6,5 +6,24 @@ export function cognitoGQLFetch(
 ): Promise<Response> {
 	console.log('try to cogito', uri, options)
 
-	return API.post('api', uri, options)
+	if (options.method !== 'POST') {
+		throw 'unexpected GQL request'
+	}
+
+	const apiOptions = {
+		response: true,
+		body: options.body,
+	}
+
+	return new Promise<Response>((resolve, reject) => {
+		API.post('api', uri, apiOptions)
+			.then((apiResponse) => {
+				console.log('SUCCESS AT API: ', apiResponse)
+				resolve(apiResponse)
+			})
+			.catch((e) => {
+				console.log('Error at API')
+				reject(e)
+			})
+	})
 }
