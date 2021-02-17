@@ -14,7 +14,9 @@ export async function cognitoGQLFetch(
 
 	try {
 		const cogUser = await Auth.currentAuthenticatedUser()
-		const sesh = cogUser.getSession()
+		console.log('COGUSER', cogUser)
+		const sesh = await cogUser.getSession()
+		console.log('COGSEHS', sesh)
 
 		const token = sesh.getIdToken().jwtToken
 
