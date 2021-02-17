@@ -47,21 +47,23 @@ function App({ localLogin }: Props): React.ReactElement {
                     </a>
                     <GovBanner aria-label="Official government website" />
                     <Header loggedIn={false} />
-                    <main id="main-content">
-                        <Switch>
-                            <Route path="/auth">
-                                {localLogin ? <LocalAuth /> : <AuthPage />}
-                            </Route>
-                            <Route path="/dashboard">
-                                <DashboardPage />
-                            </Route>
-                            <Route path="/">
-                                <LandingPage />
-                            </Route>
-                        </Switch>
-                        <CheckAuth />
-                    </main>
-                    <Footer />
+                    <div className="page-wrapper">
+                        <main id="main-content">
+                            <Switch>
+                                <Route path="/auth">
+                                    {localLogin ? <LocalAuth /> : <AuthPage />}
+                                </Route>
+                                <Route path="/dashboard">
+                                    <DashboardPage />
+                                </Route>
+                                <Route path="/">
+                                    <LandingPage />
+                                </Route>
+                            </Switch>
+                            <CheckAuth />
+                        </main>
+                        <Footer />
+                    </div>
                 </div>
             </Router>
         </ErrorBoundary>
