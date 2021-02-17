@@ -1,10 +1,12 @@
-import { API } from 'aws-amplify'
+import { API, Cache } from 'aws-amplify'
 
 export function cognitoGQLFetch(
 	uri: string,
 	options: RequestInit
 ): Promise<Response> {
 	console.log('try to cogito', uri, options)
+
+	console.log('CACHE OPTS', Cache.getAllKeys())
 
 	if (options.method !== 'POST') {
 		throw 'unexpected GQL request'
