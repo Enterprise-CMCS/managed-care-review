@@ -58,10 +58,12 @@ export const Header = ({
             <div className={styles.banner}>
                 <GridContainer>
                     <Grid row className="flex-justify flex-align-center">
-                        <Logo
-                            src={medicaidLogo}
-                            alt="Medicaid.gov-Keeping America Healthy"
-                        />
+                        <NavLink to="/dashboard">
+                            <Logo
+                                src={medicaidLogo}
+                                alt="Medicaid.gov-Keeping America Healthy"
+                            />
+                        </NavLink>
                         {loggedIn && user ? (
                             <div className={styles.userInfo}>
                                 <span>{user.email}</span>
