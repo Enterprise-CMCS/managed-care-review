@@ -81,6 +81,8 @@ function bodyMiddleware(
 		console.log('BODY MIDDLEWARE', event.body)
 		event.body =
 			'{"operationName":"hello","variables":{},"query":"query hello {\\n  hello\\n}\\n"}'
+		console.log('AFTER MIDDLEWARE', event.body)
+		console.log('MAYBE MIDDLEWARE', JSON.stringify(JSON.parse(event.body)))
 		return wrapped(event, context, completion)
 	}
 }
