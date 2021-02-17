@@ -32,7 +32,7 @@ const localLogin = process.env.REACT_APP_LOCAL_LOGIN === 'true'
 
 const apolloClient = new ApolloClient({
     link: new HttpLink({
-        uri: '/graphql',
+        uri: process.env.REACT_APP_API_URL + '/graphql',
         fetch: localLogin ? localGQLFetch : cognitoGQLFetch,
     }),
     cache: new InMemoryCache(),
