@@ -81,10 +81,21 @@ function bodyMiddleware(
 		// For reasons I don't understand and I no longer care about
 		// when graphql requests are sent by the amplify library to AWS
 		// they are arriving with some escaping that is breaking apollo server.
-		// This transformation makes things work down the line again.
+		// This transformation makes things work again.
+		console.log('BODY MIDDLEWARE', event.body)
 		if (event.body !== null) {
+			console.log(
+				'MAYBE MIDDLEWARE',
+				JSON.stringify(JSON.parse(event.body))
+			)
 			event.body = JSON.stringify(JSON.parse(event.body))
 		}
+
+		// HACK, this string works, but the string we are sent does not.
+		event.body =
+			'{"operationName":"hello","variables":{},"query":"query hello {\\n  hello\\n}\\n"}'
+		console.log('AFTER MIDDLEWARE', event.body)
+
 		return wrapped(event, context, completion)
 	}
 }
