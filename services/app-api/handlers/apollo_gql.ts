@@ -78,7 +78,7 @@ function bodyMiddleware(
 	wrapped: APIGatewayProxyHandler
 ): APIGatewayProxyHandler {
 	return function (event, context, completion) {
-		console.log('BODY MIDDLEWARE', typeof event.body)
+		console.log('BODY MIDDLEWARE', event.body)
 		event.body =
 			'{"operationName":"hello","variables":{},"query":"query hello {\\n  hello\\n}\\n"}'
 		return wrapped(event, context, completion)
