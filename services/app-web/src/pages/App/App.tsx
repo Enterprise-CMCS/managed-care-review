@@ -3,8 +3,6 @@ import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import { ErrorBoundary } from 'react-error-boundary'
 import { GovBanner } from '@trussworks/react-uswds'
 
-import './App.scss'
-
 import { Auth as AuthPage } from '../Auth/Auth'
 import { CheckAuth } from '../Auth/CheckAuth'
 import { Footer } from '../../components/Footer/Footer'
