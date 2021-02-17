@@ -37,9 +37,9 @@ export async function isAuthenticated(): Promise<boolean> {
     try {
         // Amplify.API correctly sets the authentication headers after logging in with Cognito
         const opts = await requestOptions()
-        console.log('OPTS', opts)
+        console.log('OPTS', helloURL, opts)
         const result = await API.get('api', helloURL, opts)
-        console.log(result)
+        console.log('RESee', result)
 
         return true
     } catch (e) {
