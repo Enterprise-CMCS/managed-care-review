@@ -13,7 +13,6 @@ export function AppBody({
 	localLogin: boolean
 }): React.ReactElement {
 	const { loggedInUser } = useAuth()
-	console.log('PPOP', loggedInUser)
 	return (
 		<div className="App">
 			<a className="usa-skipnav" href="#main-content">

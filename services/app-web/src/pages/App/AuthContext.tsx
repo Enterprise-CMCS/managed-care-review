@@ -68,7 +68,7 @@ function AuthProvider({ localLogin, children }: Props): React.ReactElement {
     const checkAuth = () => {
         return new Promise<void>((resolve, reject) => {
             refetch()
-                .then((result) => {
+                .then(() => {
                     resolve()
                 })
                 .catch((e) => {

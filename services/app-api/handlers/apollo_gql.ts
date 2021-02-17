@@ -24,7 +24,7 @@ const typeDefs = gql`
 // Provide resolver functions for your schema fields
 const resolvers: IResolvers = {
 	Query: {
-		hello: async (parent, args, context, info) => {
+		hello: async (_parent, _args, context) => {
 			let userFetcher: userFromAuthProvider
 
 			if (process.env.REACT_APP_LOCAL_LOGIN) {
