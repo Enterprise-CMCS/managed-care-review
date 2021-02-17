@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useHistory } from 'react-router-dom'
-import { signIn, signOut, AmplifyError } from '../Auth/cognitoAuth'
+import { signIn } from '../Auth/cognitoAuth'
 import {
     Button,
     Form,
