@@ -18,12 +18,13 @@ export async function cognitoGQLFetch(
 		// const sesh = await cogUser.getSession()
 		console.log('COGSEHS', sesh)
 
-		const token = sesh.getIdToken().getJwtToken()
+		// const token = sesh.getIdToken().getJwtToken()
+		const otherToken = sesh.getAccessToken().getJwtToken()
 
-		console.log('TOKEN!!!', token)
+		console.log('TOKEN!!!', otherToken)
 
 		options.headers = Object.assign({}, options.headers, {
-			Authorization: token,
+			Authorization: otherToken,
 		})
 
 		return fetch(uri, options)
