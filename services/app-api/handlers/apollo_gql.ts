@@ -78,11 +78,13 @@ function bodyMiddleware(
 	wrapped: APIGatewayProxyHandler
 ): APIGatewayProxyHandler {
 	return function (event, context, completion) {
-		console.log('BODY MIDDLEWARE', event.body)
-		event.body =
-			'{"operationName":"hello","variables":{},"query":"query hello {\\n  hello\\n}\\n"}'
-		console.log('AFTER MIDDLEWARE', event.body)
-		console.log('MAYBE MIDDLEWARE', JSON.stringify(JSON.parse(event.body)))
+		// For reasons I don't understand and I no longer care about
+		// when graphql requests are sent by the amplify library to AWS
+		// they are arriving with some escaping that is breaking apollo server.
+		// This transformation makes things work down the line again.
+		if (event.body !== null) {
+			event.body = JSON.stringify(JSON.parse(event.body))
+		}
 		return wrapped(event, context, completion)
 	}
 }
