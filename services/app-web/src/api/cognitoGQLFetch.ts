@@ -34,6 +34,8 @@ export async function cognitoGQLFetch(
 	// 	throw e
 	// }
 
+	console.log('REAL BODY', options.body)
+
 	const apiOptions = {
 		response: true,
 		body: options.body,
@@ -95,7 +97,7 @@ export async function cognitoGQLFetch(
 				resolve(fakeFetchResponse)
 			})
 			.catch((e) => {
-				console.log('Error at API')
+				console.log('Error at API', e)
 				reject(e)
 			})
 	})

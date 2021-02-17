@@ -61,12 +61,16 @@ const server = new ApolloServer({
 	playground: {
 		endpoint: '/local/graphql',
 	},
-	context: ({ event, context }) => ({
-		headers: event.headers,
-		functionName: context.functionName,
-		event,
-		context,
-	}),
+	context: ({ event, context }) => {
+		console.log('CALLED ME', event, context)
+
+		return {
+			headers: event.headers,
+			functionName: context.functionName,
+			event,
+			context,
+		}
+	},
 })
 
 exports.graphqlHandler = server.createHandler({
