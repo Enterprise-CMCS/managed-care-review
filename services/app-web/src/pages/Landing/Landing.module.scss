@@ -2,13 +2,15 @@
 
 .outlineSection {
     background-color: $theme-color-base-lightest;
-    padding: units(6);
+    padding: units(2);
     & h2 {
         text-align: center;
     }
 }
 .detailsSection {
-    padding: units(3);
+    .detailsSectionContent {
+        max-width: 55rem;
+    }
     & h2 {
         padding-bottom: units(2);
         text-align: center;
@@ -46,17 +48,20 @@
         color: $theme-color-primary-dark;
         display: flex;
         font-size: 1.33rem;
+        font-weight: bold;
         margin: units(1);
     }
     > li {
         @include border-box-sizing;
         @include u-flex('column', 'align-center');
         @include u-margin-x($theme-card-gap / 2);
+        @include u-radius('md');
         background-color: $cms-color-white;
         border: $theme-summary-box-border-width $theme-color-base-lighter solid;
         display: flex;
-        padding: units(4);
+        padding: units(2);
         list-style: none;
+        text-align: center;
         > span {
             padding: units(2);
         }

@@ -1,6 +1,5 @@
 import React from 'react'
 
-import macproLogo from '../../assets/images/macprologo.png'
 import medicaidLogo from '../../assets/images/medicaidgovlogo.png'
 import styles from './Footer.module.scss'
 import { Logo } from '../Logo/Logo'
@@ -16,10 +15,6 @@ export const Footer = (): React.ReactElement => {
                 <GridContainer className="padding-bottom-4 ">
                     <Grid row className="flex-justify flex-align-center">
                         <div className={styles.cmsLogos}>
-                            <Logo
-                                src={macproLogo}
-                                alt="Macpro-Medicaid and CHIP Program System"
-                            />
                             <Logo
                                 src={medicaidLogo}
                                 alt="Medicaid.gov-Keeping America Healthy"

@@ -56,10 +56,12 @@ export const Header = ({
             <div className={styles.banner}>
                 <GridContainer>
                     <Grid row className="flex-justify flex-align-center">
-                        <Logo
-                            src={medicaidLogo}
-                            alt="Medicaid.gov-Keeping America Healthy"
-                        />
+                        <NavLink to="/dashboard">
+                            <Logo
+                                src={medicaidLogo}
+                                alt="Medicaid.gov-Keeping America Healthy"
+                            />
+                        </NavLink>
                         {loggedIn && user ? (
                             <div className={styles.userInfo}>
                                 <span>{user.email}</span>
@@ -120,7 +122,7 @@ export const Header = ({
                 <div className={styles.landingPageHeading}>
                     <GridContainer>
                         <h1>
-                            <span>MAC-MCCRS</span>
+                            <span className="text-bold">MAC-MCCRS</span>
                             <span className="font-heading-lg">
                                 Medicaid and CHIP Managed Care Reporting and
                                 Review System
