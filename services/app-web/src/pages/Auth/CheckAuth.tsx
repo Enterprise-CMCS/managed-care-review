@@ -9,7 +9,7 @@ export function CheckAuth(): React.ReactElement {
     const [isLoading, setIsLoading] = useState(false)
     const [authStatus, setAuthStatus] = useState<AuthStatus>('Unknown')
 
-    async function handleSubmit(event: React.FormEvent) {
+    async function handleClick(event: React.MouseEvent) {
         console.log('checking auth')
         event.preventDefault()
 
@@ -50,15 +50,17 @@ export function CheckAuth(): React.ReactElement {
     return (
         <GridContainer>
             <Alert
-                style={{ width: '600px' }}
+                style={{ width: '600px', marginBottom: '5px' }}
                 type={alertType()}
                 heading={alertHeading()}
             >
-                <form onSubmit={handleSubmit}>
-                    <Button type="submit" disabled={isLoading}>
-                        Check Auth
-                    </Button>
-                </form>
+                <Button
+                    type="submit"
+                    onClick={handleClick}
+                    disabled={isLoading}
+                >
+                    Check Auth
+                </Button>
             </Alert>
         </GridContainer>
     )
