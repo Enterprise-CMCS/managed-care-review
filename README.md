@@ -69,11 +69,11 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 # double check your work.
-nvm # should return a list of nvm commands
-node -v # should return v12.20.0
-node which # should return something like /Users/YOURUSER/.nvm/versions/node/v12.20.0/bin/node
+nvm    # should return a list of nvm commands
+node -v     # should return v12.20.0
+node which    # should return something like /Users/YOURUSER/.nvm/versions/node/v12.20.0/bin/node
 
-# if things aren't working you may need to manually adjust your ~/.bash_profile or ~/.zshrc. See [nvm docs(https://github.com/nvm-sh/nvm#troubleshooting-on-macos)] for more.
+# if things aren't working you may need to manually adjust your ~/.bash_profile or ~/.zshrc. See [nvm docs](https://github.com/nvm-sh/nvm#troubleshooting-on-macos) for more.
 
 # install and use the node version specified in .nvmrc
 nvm install
