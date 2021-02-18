@@ -30,13 +30,25 @@ async function run_s3_locally(runner: LabeledProcessRunner) {
 
 }
 
-// run_fe_locally runs the frontend and its dependencies locally
+// run_web_locally runs the frontend, storybook locally
 async function run_web_locally(runner: LabeledProcessRunner) {
 
 	await runner.run_command_and_output('web deps', ['yarn', 'install'], 'services/app-web')
 	runner.run_command_and_output('web', ['yarn', 'start'], 'services/app-web')
 	runner.run_command_and_output('storybook', ['yarn', 'storybook'], 'services/app-web')
 	
+}
+
+async function run_sb_locally() {
+	const runner = new LabeledProcessRunner()
+	await runner.run_command_and_output('web deps', ['yarn', 'install'], 'services/app-web')
+	runner.run_command_and_output('storybook', ['yarn', 'storybook'], 'services/app-web')	
+}
+
+
+async function run_all_clean() {
+	const runner = new LabeledProcessRunner()
+	runner.run_command_and_output('web deps', ['yarn', 'clean'], 'services/app-web')
 }
 
 // run_all_locally runs all of our services locally
@@ -134,9 +146,21 @@ function main() {
 	// The command definitions in yargs
 	// All valid arguments to dev should be enumerated here, this is the entrypoint to the script
 	yargs(process.argv.slice(2))
-	.command('local', 'run system locally', {}, () => {
-		run_all_locally()
+	.command('clean', 'clean node dependencies', {}, () => {
+		run_all_clean()
 	})
+	.command('local', 'run system locally. If no flags are passed, runs all services', (yargs) =>{
+		return yargs.boolean('storybook')
+	},(args) => {
+
+		if (args.storybook) {
+			run_sb_locally()	
+		} else {
+			run_all_locally()
+		}
+
+	})
+
 	.command('test', 'run tests. If no flags are passed, runs both --unit and --online', (yargs) => {
 		return yargs.boolean('unit')
 							.boolean('online')
