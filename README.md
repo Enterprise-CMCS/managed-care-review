@@ -40,7 +40,7 @@ Running tests locally
 
 ## Requirements
 
-Node - we enforce using a specific version of node, specified in the file `.nvmrc`. This version matches the Lambda runtime. We recommend managing node versions using [NVM](https://github.com/nvm-sh/nvm#installing-and-updating).
+Node - we enforce using a specific version of node, specified in the file `.nvmrc`. This version matches the Lambda runtime. We strongly recommend managing node versions with [NVM](https://github.com/nvm-sh/nvm#installing-and-updating).
 
 Serverless - Get help installing it here: [Serverless Getting Started page](https://www.serverless.com/framework/docs/providers/aws/guide/installation/). Learn more about serverless from the [Serverless Stack tutorial](https://serverless-stack.com/).  
 
@@ -49,19 +49,31 @@ Yarn - in order to install dependencies, you need to [install yarn](https://clas
 AWS Account:  You'll need an AWS account with appropriate IAM permissions (admin recommended) to deploy this app in Amazon.
 
 
-If you are on a Mac, you should be able to install all the dependencies like so:
+If you are on a Mac using nvm, you should be able to install all the dependencies like so:
 ```
 # install nvm
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 
-# select the version specified in .nvmrc
+# load nvm and restart terminal
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# double check your work.
+nvm # should return a list of nvm commands
+node -v # should return v12.20.0
+node which # should return something like /Users/YOURUSER/.nvm/versions/node/v12.20.0/bin/node
+
+# if things aren't working you may need to manually adjust your ~/.bash_profile or ~/.zshrc. See [nvm docs(https://github.com/nvm-sh/nvm#troubleshooting-on-macos)] for more.
+
+# install and use the node version specified in .nvmrc
 nvm install
 nvm use
 
-# install yarn
+
+# install yarn for dependency manage
 brew install yarn
 
-# run dev
+# run the app and storybook
 ./dev local
 ```
 
