@@ -8,8 +8,9 @@ import { ReactComponent as MnIcon } from '../../assets/icons/mn-icon.svg'
 import styles from './Header.module.scss'
 
 import { StateCode } from '../../common-code/domain-models'
-import { useAuth } from '../../pages/App/AuthContext'
 import { Logo } from '../Logo/Logo'
+import { useAuth } from '../../pages/App/AuthContext'
+import { useHistory } from 'react-router-dom'
 
 const getStateInfo = (
     stateAbbrev: StateCode
@@ -46,10 +47,30 @@ export const Header = ({
     loggedIn,
     user,
 }: HeaderProps): React.ReactElement => {
-    const { logout } = useAuth() // seems weird that we don't pass this in
+    const { logout } = useAuth()
+    const history = useHistory()
+
     const { stateName, StateIcon } = stateCode
         ? getStateInfo(stateCode)
         : { stateName: 'STATE UNKNOWN', StateIcon: () => <span></span> }
+
+    const handleLogout = (
+        e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    ) => {
+        if (!logout) {
+            console.log('Something went wrong ', e)
+            return
+        }
+
+        logout()
+            .then(() => {
+                console.log('Logout Success')
+            })
+            .catch((e) => {
+                console.log('Something went wrong ', e)
+            })
+        history.push('/auth')
+    }
 
     return (
         <header>
@@ -70,21 +91,7 @@ export const Header = ({
                                 <Button
                                     type="button"
                                     unstyled
-                                    onClick={() => {
-                                        logout &&
-                                            logout()
-                                                .then(() => {
-                                                    console.log(
-                                                        'button level good.'
-                                                    )
-                                                })
-                                                .catch((e) => {
-                                                    console.log(
-                                                        'button level bad.',
-                                                        e
-                                                    )
-                                                })
-                                    }}
+                                    onClick={handleLogout}
                                 >
                                     Sign out
                                 </Button>
