@@ -1,15 +1,19 @@
 import React from 'react'
-import { Button, GridContainer, Grid } from '@trussworks/react-uswds'
+import { Button, Link, GridContainer, Grid } from '@trussworks/react-uswds'
+import { NavLink } from 'react-router-dom'
 
 import medicaidLogo from '../../assets/images/medicaidgovlogo.png'
 import { ReactComponent as VaIcon } from '../../assets/icons/va-icon.svg'
 import { ReactComponent as MnIcon } from '../../assets/icons/mn-icon.svg'
 import styles from './Header.module.scss'
 
+import { StateCode } from '../../common-code/domain-models'
 import { Logo } from '../Logo/Logo'
+import { useAuth } from '../../pages/App/AuthContext'
+import { useHistory } from 'react-router-dom'
 
 const getStateInfo = (
-    stateAbbrev: SupportedStateCodes
+    stateAbbrev: StateCode
 ): { stateName: string; StateIcon: React.FunctionComponent } => {
     switch (stateAbbrev) {
         case 'MN':
@@ -24,14 +28,8 @@ const getStateInfo = (
     }
 }
 
-const StateCodes = {
-    MN: 'MN',
-    VA: 'VA',
-} as const
-type SupportedStateCodes = typeof StateCodes[keyof typeof StateCodes]
-
 export type HeaderProps = {
-    stateCode?: SupportedStateCodes
+    stateCode?: StateCode
     activePage?: string
     loggedIn: boolean
     user?: {
@@ -49,42 +47,68 @@ export const Header = ({
     loggedIn,
     user,
 }: HeaderProps): React.ReactElement => {
+    const { logout } = useAuth()
+    const history = useHistory()
+
     const { stateName, StateIcon } = stateCode
         ? getStateInfo(stateCode)
         : { stateName: 'STATE UNKNOWN', StateIcon: () => <span></span> }
 
+    const handleLogout = (
+        e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    ) => {
+        if (!logout) {
+            console.log('Something went wrong ', e)
+            return
+        }
+
+        logout()
+            .then(() => {
+                console.log('Logout Success')
+            })
+            .catch((e) => {
+                console.log('Something went wrong ', e)
+            })
+        history.push('/auth')
+    }
+
     return (
         <header>
-            <GridContainer>
-                <Grid row className="flex-justify flex-align-center">
-                    <Logo
-                        src={medicaidLogo}
-                        alt="Medicaid.gov-Keeping America Healthy"
-                    />
-                    {loggedIn && user ? (
-                        <div className={styles.userInfo}>
-                            <span>{user.email}</span>
-                            <span className={styles.divider}>|</span>
+            <div className={styles.banner}>
+                <GridContainer>
+                    <Grid row className="flex-justify flex-align-center">
+                        <NavLink to="/dashboard">
+                            <Logo
+                                src={medicaidLogo}
+                                alt="Medicaid.gov-Keeping America Healthy"
+                            />
+                        </NavLink>
+                        {loggedIn && user ? (
+                            <div className={styles.userInfo}>
+                                <span>{user.email}</span>
+                                <span className={styles.divider}>|</span>
 
-                            <Button
-                                type="button"
-                                unstyled
-                                onClick={() => console.log('Sign out')}
+                                <Button
+                                    type="button"
+                                    unstyled
+                                    onClick={handleLogout}
+                                >
+                                    Sign out
+                                </Button>
+                            </div>
+                        ) : (
+                            <Link
+                                asCustom={NavLink}
+                                className="usa-button usa-button--outline"
+                                variant="unstyled"
+                                to="/auth"
                             >
-                                Sign out
-                            </Button>
-                        </div>
-                    ) : (
-                        <Button
-                            type="button"
-                            outline
-                            onClick={() => console.log('Sign In')}
-                        >
-                            Sign In
-                        </Button>
-                    )}
-                </Grid>
-            </GridContainer>
+                                Sign In
+                            </Link>
+                        )}
+                    </Grid>
+                </GridContainer>
+            </div>
             {loggedIn ? (
                 <div className={styles.dashboardHeading}>
                     <GridContainer>
