@@ -60,6 +60,79 @@ function check_url_is_up(url: string): Promise<boolean> {
 	})
 }
 
+async function run_web_against_aws() {
+	console.log('fetching env vars for wml-apollo-server')
+
+	const opts = {
+		cwd: './services',
+		env: Object.assign({}, process.env, {AWS_PROFILE: 'dev'})
+	}
+
+	const testOpts = Object.assign({}, opts, {cwd: 'services/ui-auth'})
+
+	const test = spawnSync('serverless', ['info', '--stage', 'wml-apollo-server'], testOpts)
+	// console.log('REG', test)
+	// console.log(test.stderr.toString('utf8'))
+	// console.log(test.stdout.toString('utf8'))
+	if (test.status != 0) {
+		console.log('Likely, you do not have aws configured right. You will need tokens from cloudwatch configured as an env called "dev"')
+		process.exit(1)
+	}
+
+	const regionResult = spawnSync('./output.sh', ['ui-auth', 'Region', 'wml-apollo-server'], opts)
+	if (regionResult.status != 0) {
+		console.log(regionResult.stderr, regionResult.stdout)
+		process.exit(1)
+	}
+	const region = regionResult.stdout.toString('utf8').trim()
+
+	const idPoolResult = spawnSync('./output.sh', ['ui-auth', 'IdentityPoolId', 'wml-apollo-server'], opts)
+	if (idPoolResult.status != 0) {
+		console.log(idPoolResult.stderr, idPoolResult.stdout)
+		process.exit(1)
+	}
+	const idPool = idPoolResult.stdout.toString('utf8').trim()
+
+	const userPoolResult = spawnSync('./output.sh', ['ui-auth', 'UserPoolId', 'wml-apollo-server'], opts)
+	if (userPoolResult.status != 0) {
+		console.log(userPoolResult.stderr, userPoolResult.stdout)
+		process.exit(1)
+	}
+	const userPool = userPoolResult.stdout.toString('utf8').trim()
+
+	const userPoolClientResult = spawnSync('./output.sh', ['ui-auth', 'UserPoolClientId', 'wml-apollo-server'], opts)
+	if (userPoolClientResult.status != 0) {
+		console.log(userPoolClientResult.stderr, userPoolClientResult.stdout)
+		process.exit(1)
+	}
+	const userPoolClient = userPoolClientResult.stdout.toString('utf8').trim()
+
+
+	const apiBaseResult = spawnSync('./output.sh', ['app-api', 'ApiGatewayRestApiUrl', 'wml-apollo-server'], opts)
+	if (apiBaseResult.status != 0) {
+		console.log(apiBaseResult.stderr, apiBaseResult.stdout)
+		process.exit(1)
+	}
+	const apiBase = apiBaseResult.stdout.toString('utf8').trim()
+
+
+	console.log(region, idPool, userPool, userPoolClient, apiBase)
+	// set them
+
+	process.env.PORT = '3003'
+	process.env.REACT_APP_LOCAL_LOGIN = 'false'
+	process.env.REACT_APP_API_URL = apiBase
+	process.env.REACT_APP_COGNITO_REGION = region
+	process.env.REACT_APP_COGNITO_ID_POOL_ID = idPool
+	process.env.REACT_APP_COGNITO_USER_POOL_ID = userPool
+	process.env.REACT_APP_COGNITO_USER_POOL_CLIENT_ID = userPoolClient
+
+	// run it
+	const runner = new LabeledProcessRunner()
+	await runner.run_command_and_output('deps', ['yarn', 'install'], 'services/app-web')
+	runner.run_command_and_output('hybrid', ['yarn', 'start'], 'services/app-web')
+}
+
 async function run_all_tests(run_unit: boolean, run_online: boolean) {
 	const runner = new LabeledProcessRunner()
 
@@ -136,6 +209,9 @@ function main() {
 	yargs(process.argv.slice(2))
 	.command('local', 'run system locally', {}, () => {
 		run_all_locally()
+	})
+	.command('hybrid', 'run app-web against the review app', {}, () => {
+		run_web_against_aws()
 	})
 	.command('test', 'run tests. If no flags are passed, runs both --unit and --online', (yargs) => {
 		return yargs.boolean('unit')
