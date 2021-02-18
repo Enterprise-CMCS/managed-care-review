@@ -3,7 +3,7 @@ module.exports = {
       console.log(process.env.APPLICATION_ENDPOINT);
       browser
         .url (`${process.env.APPLICATION_ENDPOINT}`)
-        .waitForElementVisible('.App')
+        .waitForElementVisible('#App')
         .assert.elementPresent('header h1')
         .saveScreenshot('tests_output/header_is_present_screenshot.png')
   }

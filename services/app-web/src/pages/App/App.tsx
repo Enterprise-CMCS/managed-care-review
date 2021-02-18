@@ -41,7 +41,7 @@ function App({ localLogin }: Props): React.ReactElement {
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>
             <Router>
-                <div className={styles.app}>
+                <div id="App" className={styles.app}>
                     <a className="usa-skipnav" href="#main-content">
                         Skip to main content
                     </a>
