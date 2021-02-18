@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import { ErrorBoundary } from 'react-error-boundary'
 import { GovBanner } from '@trussworks/react-uswds'
 
+import styles from './App.module.scss'
+
 import { Auth as AuthPage } from '../Auth/Auth'
 import { CheckAuth } from '../Auth/CheckAuth'
 import { Footer } from '../../components/Footer/Footer'
@@ -39,13 +41,17 @@ function App({ localLogin }: Props): React.ReactElement {
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>
             <Router>
-                <div className="App">
+                <div id="App" className={styles.app}>
                     <a className="usa-skipnav" href="#main-content">
                         Skip to main content
                     </a>
                     <GovBanner aria-label="Official government website" />
                     <Header loggedIn={false} />
-                    <main id="main-content">
+                    <main
+                        id="main-content"
+                        className={styles.mainContent}
+                        role="main"
+                    >
                         <Switch>
                             <Route path="/auth">
                                 {localLogin ? <LocalAuth /> : <AuthPage />}

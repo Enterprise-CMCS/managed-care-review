@@ -105,7 +105,7 @@ export const Header = ({
                 <div className={styles.landingPageHeading}>
                     <GridContainer>
                         <h1>
-                            <span className="text-bold">MAC-MCCRS</span>
+                            <span className="text-bold">MAC-MCRRS</span>
                             <span className="font-heading-lg">
                                 Medicaid and CHIP Managed Care Reporting and
                                 Review System
