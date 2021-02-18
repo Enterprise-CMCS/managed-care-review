@@ -8,8 +8,6 @@ import {
     NormalizedCacheObject,
 } from '@apollo/client'
 
-import './App.scss'
-
 import { AppBody } from './AppBody'
 import { logEvent } from '../../log_event'
 import { AuthProvider } from './AuthContext'

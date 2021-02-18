@@ -1,5 +1,7 @@
 import { GovBanner } from '@trussworks/react-uswds'
 
+import styles from './App.module.scss'
+
 import { AppRoutes } from './AppRoutes'
 import { CheckAuth } from '../Auth/CheckAuth'
 import { Footer } from '../../components/Footer/Footer'
@@ -14,7 +16,7 @@ export function AppBody({
 }): React.ReactElement {
 	const { loggedInUser } = useAuth()
 	return (
-		<div className="App">
+		<div id="App" className={styles.app}>
 			<a className="usa-skipnav" href="#main-content">
 				Skip to main content
 			</a>
@@ -24,7 +26,7 @@ export function AppBody({
 				user={loggedInUser}
 				stateCode={loggedInUser ? loggedInUser.state : undefined}
 			/>
-			<main id="main-content">
+			<main id="main-content" className={styles.mainContent} role="main">
 				<AppRoutes localLogin={localLogin} />
 				<CheckAuth />
 			</main>

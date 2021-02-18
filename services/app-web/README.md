@@ -47,8 +47,10 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 
 ### Styling
 
-- Use modular styles. This means creating`<component>.module.scss` files. We tend to use scss rather than css since uswds uses sass mixins, functions, and variables.  For more, read about [Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html) and [CSS modules](https://github.com/css-modules/css-modules) as well [uswds documentation](https://designsystem.digital.gov/design-tokens/).
-- Syntax: Styles should be written in camelCase. Import styles from a component's stylesheet using something like `import styles from 'InvoicePanel.module.scss'`. Access the styles with dot notation `styles.myclassname`.  If fewer than 50% of the styles are used from a stylesheet, import only the styles used (ex. `import { myclassname } from 'MyComponent.module.scss'`). 
+- Use modular styles. This means creating`<component>.module.scss` or `<component>.module.css` files in your component folders.
+- We tend to use scss rather than css since uswds uses sass mixins, functions, and variables.  For more, read about [Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html) and [CSS modules](https://github.com/css-modules/css-modules) as well [uswds documentation](https://designsystem.digital.gov/design-tokens/).
+- Syntax: Sass styles should be written in camelCase. Import styles from a component's stylesheet using something like `import styles from 'InvoicePanel.module.scss'`. Access the styles with dot notation `styles.myclassname`.  If fewer than 50% of the styles are used from a stylesheet, import only the styles used (ex. `import { myclassname } from 'MyComponent.module.scss'`). 
+- If you need to reference sass variables, bring in uswds scss or project/cms scss as `@import '../../styles/uswdsImports.scss';` and `@import '../../styles/custom'` accordingly.
 
 ## Testing
 
