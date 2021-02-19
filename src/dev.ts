@@ -30,17 +30,14 @@ async function run_s3_locally(runner: LabeledProcessRunner) {
 
 }
 
-// run_web_locally runs the frontend, storybook locally
+// run_web_locally runs app-web locally
 async function run_web_locally(runner: LabeledProcessRunner) {
 
 	await runner.run_command_and_output('web deps', ['yarn', 'install'], 'services/app-web')
 	runner.run_command_and_output('web', ['yarn', 'start'], 'services/app-web')
-	runner.run_command_and_output('storybook', ['yarn', 'storybook'], 'services/app-web')
-	
 }
 
-async function run_sb_locally() {
-	const runner = new LabeledProcessRunner()
+async function run_sb_locally(runner: LabeledProcessRunner) {
 	await runner.run_command_and_output('web deps', ['yarn', 'install'], 'services/app-web')
 	runner.run_command_and_output('storybook', ['yarn', 'storybook'], 'services/app-web')	
 }
@@ -59,6 +56,7 @@ async function run_all_locally() {
 	run_s3_locally(runner)
 	run_api_locally(runner)
 	run_web_locally(runner)
+	run_sb_locally(runner)
 }
 
 function check_url_is_up(url: string): Promise<boolean> {
@@ -143,22 +141,45 @@ function main() {
 	const appVersion = spawnSync('scripts/app_version.sh')
 	process.env.APP_VERSION = appVersion.stdout.toString().trim()
 
-	// The command definitions in yargs
-	// All valid arguments to dev should be enumerated here, this is the entrypoint to the script
+	/* AVAILABLE COMMANDS
+	  The command definitions in yargs
+	  All valid arguments to dev should be enumerated here, this is the entrypoint to the script 
+	*/ 
+
 	yargs(process.argv.slice(2))
 	.command('clean', 'clean node dependencies', {}, () => {
 		run_all_clean()
 	})
-	.command('local', 'run system locally. If no flags are passed, runs all services', (yargs) =>{
-		return yargs.boolean('storybook')
-	},(args) => {
 
-		if (args.storybook) {
-			run_sb_locally()	
+	.command('local', 'run system locally. If no flags are passed, runs all services', (yargs) =>{
+		return yargs
+		.boolean('storybook')
+		.boolean('web')
+		.boolean('api')
+		.boolean('s3')
+
+	},(args) => {
+		// By default args will have 2 keys since it looks something like when run without a flag { _: [ 'local' ], '$0': 'build_dev/dev.js' }
+		// Only allow one additional flag to be used by limiting keys to 3
+		if (args && Object.keys(args).length > 3) throw new Error('You can only run ./dev local without flags (for launching all services) or with one flag at a time')
+		const runner = new LabeledProcessRunner()
+
+		if (args.storybook){
+			 run_sb_locally(runner)	
+		} 
+		else if (args.web) {
+				run_web_locally(runner)	
+			} 
+		else if (args.api){
+
+			 run_api_locally(runner)
+		}
+		else if (args.s3) {
+			run_s3_locally(runner)	
 		} else {
 			run_all_locally()
 		}
-
+	
 	})
 
 	.command('test', 'run tests. If no flags are passed, runs both --unit and --online', (yargs) => {

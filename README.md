@@ -24,7 +24,7 @@ When run locally, auth bypasses Cognito. The frontend mimics login in local stor
 Run app locally
 
 - `./dev local` to run the entire app and storybook
-- Run with flags such as `./dev local --storybook` for just storybook
+- Available flags: `--storybook`, `--web`, `--api`, `--s3` for running services individually
 
 Run tests locally
 
