@@ -1,6 +1,7 @@
 import React from 'react'
 import { Story } from '@storybook/react'
 import { BrowserRouter } from 'react-router-dom'
+
 import { Header, HeaderProps } from './Header'
 
 export default {
@@ -14,13 +15,17 @@ const Template: Story<HeaderProps> = (args) => (
     </BrowserRouter>
 )
 
-export const CMSHeader = Template.bind({})
+export const CMSHeaderLoggedIn = Template.bind({})
 
-CMSHeader.args = {
-    loggedIn: true,
+CMSHeaderLoggedIn.args = {
     stateCode: 'MN',
     user: {
         name: 'Bob test user',
         email: 'bob@dmas.mn.gov',
     },
 }
+
+// TODO
+// export const CMSHeaderLoggedOut = Template.bind({})
+
+// CMSHeaderLoggedOut.args = {}
