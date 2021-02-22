@@ -21,47 +21,69 @@ When run locally, auth bypasses Cognito. The frontend mimics login in local stor
 
 ## Usage
 
+Run app locally
+
+- `./dev local` to run the entire app and storybook
+- Available flags: `--storybook`, `--web`, `--api`, `--s3` for running services individually
+
+Run tests locally
+
+- `./dev test` with the app running in another tab for end to end tests
+- Run with flags `./dev test --unit`, `.dev test --online`, etc
+
+Clear dependencies
+
+- `./dev clean`
+  
+### Deploy
+
 See master build [here](https://github.com/CMSgov/macpro-quickstart-serverless/actions?query=branch%3Amaster)
 
-This application is built and deployed via GitHub Actions.
+This application is built and deployed via GitHub Actions. See `.github/workflows`.
 
-Want to deploy from your Mac?
+**Want to deploy from your Mac?**
+
 - Create an AWS account
 - Install/configure the AWS CLI
 - npm install -g severless
 - brew install yarn
-- sh deploy.sh
-
-Building the app locally
-- To mock auth locally you will need to add a `userKey` to your local storage.  
-
-Running tests locally
-- todo
+- sh deploy.sh## Requirements
 
 ## Requirements
 
-Node - we enforce using a specific version of node, specified in the file `.nvmrc`. This version matches the Lambda runtime. We recommend managing node versions using [NVM](https://github.com/nvm-sh/nvm#installing-and-updating).
 
 Serverless - Get help installing it here: [Serverless Getting Started page](https://www.serverless.com/framework/docs/providers/aws/guide/installation/). Learn more about serverless from the [Serverless Stack tutorial](https://serverless-stack.com/).  
 
-Yarn - in order to install dependencies, you need to [install yarn](https://classic.yarnpkg.com/en/docs/install/). 
+Yarn - In order to install dependencies, you need to [install yarn](https://classic.yarnpkg.com/en/docs/install/). 
 
 AWS Account:  You'll need an AWS account with appropriate IAM permissions (admin recommended) to deploy this app in Amazon.
 
 
-If you are on a Mac, you should be able to install all the dependencies like so:
+If you are on a Mac using nvm, you should be able to install all the dependencies like so:
 ```
 # install nvm
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 
-# select the version specified in .nvmrc
+# load nvm and restart terminal
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# double check your work.
+nvm    # should return a list of nvm commands
+node -v     # should return v12.20.0
+node which    # should return something like /Users/YOURUSER/.nvm/versions/node/v12.20.0/bin/node
+
+# if things aren't working you may need to manually adjust your ~/.bash_profile or ~/.zshrc. See [nvm docs](https://github.com/nvm-sh/nvm#troubleshooting-on-macos) for more.
+
+# install and use the node version specified in .nvmrc
 nvm install
 nvm use
 
-# install yarn
+
+# install yarn for dependency manage
 brew install yarn
 
-# run dev
+# run the app and storybook
 ./dev local
 ```
 

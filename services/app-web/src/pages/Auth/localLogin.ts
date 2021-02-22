@@ -1,4 +1,5 @@
 import { UserType, isUser } from '../../common-code/domain-models'
+import { Result, ok } from './result'
 
 const localUserKey = 'localUser'
 
@@ -8,9 +9,11 @@ export function loginLocalUser(user: UserType): void {
     store.setItem(localUserKey, JSON.stringify(user))
 }
 
-export function logoutLocalUser(): void {
+// Matching the signature for cognito signout for now.
+export async function logoutLocalUser(): Promise<Result<null, Error>> {
     const store = window.localStorage
     store.removeItem(localUserKey)
+    return ok(null)
 }
 
 // getLoggedInUser retrieves a local user if one is logged in

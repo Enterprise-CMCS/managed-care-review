@@ -1,6 +1,6 @@
 type Role = 'STATE_USER' | 'ADMIN'
 
-type State = 'VA' | 'GA' | 'TN' | 'MN'
+export type StateCode = 'VA' | 'GA' | 'TN' | 'MN'
 
 export type UserType = StateUserType
 
@@ -8,7 +8,7 @@ export type StateUserType = {
 	// typename: string = 'StateUser';
 	role: Role
 	email: string
-	state: State
+	state: StateCode
 	name: string
 }
 

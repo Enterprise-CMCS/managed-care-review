@@ -1,0 +1,82 @@
+@import '../../styles/uswdsImports.scss';
+@import '../../styles/custom';
+
+.easi-only-print {
+    display: none;
+}
+
+.easi-tabs {
+    overflow: hidden;
+
+    &__navigation {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        border-bottom: 1px solid $theme-color-base-lighter;
+    }
+
+    &__tab-list {
+        display: inline-block;
+        padding: 0;
+        margin: 0 0 -1px;
+        list-style-type: none;
+        white-space: nowrap;
+    }
+
+    &__tab {
+        display: inline-flex;
+        align-items: center;
+        height: 54px;
+        flex-shrink: 0;
+        position: relative;
+        border: 1px solid $theme-color-base-lighter;
+        border-right: 1px solid $theme-color-base-lighter;
+
+        &:after {
+            background-color: $theme-color-primary;
+            content: '';
+            height: 4px;
+            left: -1px;
+            opacity: 0;
+            position: absolute;
+            right: -1px;
+            top: -1px;
+            transform: scaleX(0);
+        }
+
+        &--selected {
+            border-bottom: 1px solid #fff;
+
+            .easi-tabs__tab-btn {
+                color: $theme-color-primary;
+            }
+
+            &:after {
+                opacity: 1;
+                transform: scaleX(1);
+            }
+        }
+    }
+
+    &__tab-btn {
+        height: 100%;
+        padding: 0;
+        background: none;
+        border: 0;
+        font-weight: bold;
+
+        &:hover {
+            cursor: pointer;
+        }
+    }
+
+    &__tab-text {
+        margin: 0 1.5em;
+    }
+
+    &__tab-panel {
+        overflow: auto;
+        border: 1px solid $theme-color-base-lighter;
+        border-top: none;
+    }
+}

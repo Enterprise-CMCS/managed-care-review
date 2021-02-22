@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useHistory } from 'react-router-dom'
+import { signIn } from '../Auth/cognitoAuth'
 import {
     Button,
     Form,
@@ -7,9 +8,8 @@ import {
     Label,
     TextInput,
 } from '@trussworks/react-uswds'
-// import { useAppContext } from '../libs/contextLib'
 
-import { signIn } from './cognitoAuth'
+import { useAuth } from '../App/AuthContext'
 
 export function showError(error: string): void {
     alert(error)
@@ -26,9 +26,7 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
     })
 
     const history = useHistory()
-
-    // const { userHasAuthenticated } = useAppContext()
-    const [isLoading, setIsLoading] = useState(false)
+    const auth = useAuth()
 
     const onFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = event.target
@@ -40,13 +38,23 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
     }
 
     async function handleSumbit(event: React.FormEvent) {
+        console.log('Trying a signin')
         event.preventDefault()
 
-        setIsLoading(true)
         const result = await signIn(fields.loginEmail, fields.loginPassword)
-        setIsLoading(false)
+        // TODO: try and useAuth() here, track state using the loading param there instead of awaiting something.
+        // if loading, show "redirecting" spinner or something.
+        // if loggedInUser, redirect
+
         if (result.isOk()) {
             console.log('SUCCESS LOGIN')
+
+            try {
+                await auth.checkAuth()
+            } catch (e) {
+                console.log('UNEXPECTED NOT LOGGED IN AFTETR LOGGIN', e)
+            }
+
             history.push('/dashboard')
         } else {
             const err = result.error
@@ -90,8 +98,7 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
                 </FormGroup>
                 <Button
                     type="submit"
-                    // isLoading={isLoading}
-                    disabled={!validateForm() || isLoading}
+                    disabled={!validateForm() || auth.isLoading}
                 >
                     Login
                 </Button>
