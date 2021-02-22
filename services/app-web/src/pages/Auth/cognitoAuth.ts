@@ -3,6 +3,7 @@ import { CognitoUser } from 'amazon-cognito-identity-js'
 
 import { Result, ok, err } from './result'
 
+// TO DO: remove result from this library, it adds extra complexity to our types. All api calls should return promise (resolve, reject)
 // This library wraps our calls to cognito
 type newUser = {
     username: string
@@ -122,10 +123,10 @@ export async function signIn(
     }
 }
 
-export async function signOut(): Promise<Result<null, Error>> {
+export async function signOut(): Promise<null> {
     try {
         await AmplifyAuth.signOut()
-        return ok(null)
+        return null
     } catch (e) {
         console.log('error signing out: ', e)
         throw e

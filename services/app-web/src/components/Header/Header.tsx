@@ -31,7 +31,6 @@ const getStateInfo = (
 export type HeaderProps = {
     stateCode?: StateCode
     activePage?: string
-    loggedIn: boolean
     user?: {
         name: string
         email: string
@@ -44,10 +43,9 @@ export type HeaderProps = {
 export const Header = ({
     stateCode,
     activePage = 'Managed Care Dashboard',
-    loggedIn,
     user,
 }: HeaderProps): React.ReactElement => {
-    const { logout } = useAuth()
+    const { logout, isAuthenticated } = useAuth()
     const history = useHistory()
 
     const { stateName, StateIcon } = stateCode
@@ -83,7 +81,7 @@ export const Header = ({
                                 alt="Medicaid.gov-Keeping America Healthy"
                             />
                         </NavLink>
-                        {loggedIn && user ? (
+                        {isAuthenticated && user ? (
                             <div className={styles.userInfo}>
                                 <span>{user.email}</span>
                                 <span className={styles.divider}>|</span>
@@ -109,7 +107,7 @@ export const Header = ({
                     </Grid>
                 </GridContainer>
             </div>
-            {loggedIn ? (
+            {isAuthenticated ? (
                 <div className={styles.dashboardHeading}>
                     <GridContainer>
                         <Grid row className="flex-align-center">

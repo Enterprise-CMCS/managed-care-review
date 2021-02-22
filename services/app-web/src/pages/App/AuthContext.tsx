@@ -2,36 +2,42 @@ import * as React from 'react'
 
 import { signOut as cognitoSignOut } from '../Auth/cognitoAuth'
 import { logoutLocalUser } from '../Auth/localLogin'
-import { Result } from '../Auth/result'
 import { UserType } from '../../common-code/domain-models'
 import { useQuery } from '@apollo/client'
 
 import { HELLO_WORLD } from '../../api'
 
-type LogoutFn = () => Promise<Result<null, Error>>
+type LogoutFn = () => Promise<null>
 
 type AuthContextType = {
     loggedInUser: UserType | undefined
+    isAuthenticated: boolean
     isLoading: boolean
     checkAuth: () => Promise<void> // this can probably be simpler, letting callers use the loading states etc instead.
     logout: undefined | (() => Promise<void>)
 }
 const AuthContext = React.createContext<AuthContextType>({
     loggedInUser: undefined,
+    isAuthenticated: false,
     isLoading: false,
     checkAuth: () => Promise.reject(),
     logout: undefined,
 })
 
-type Props = {
+export type AuthProviderProps = {
+    initialize?: { user: UserType | undefined }
     localLogin: boolean
     children?: React.ReactNode
 }
 
-function AuthProvider({ localLogin, children }: Props): React.ReactElement {
+function AuthProvider({
+    localLogin,
+    initialize,
+    children,
+}: AuthProviderProps): React.ReactElement {
     const [loggedInUser, setloggedInUser] = React.useState<
         UserType | undefined
-    >(undefined)
+    >(initialize?.user || undefined)
     const [isLoading, setIsLoading] = React.useState(true)
 
     const { loading, error, data, refetch } = useQuery(HELLO_WORLD, {
@@ -72,11 +78,13 @@ function AuthProvider({ localLogin, children }: Props): React.ReactElement {
                     resolve()
                 })
                 .catch((e) => {
-                    console.log('an error rechecking auth', e)
+                    console.log('an error checking auth', e)
                     reject(e)
                 })
         })
     }
+
+    const isAuthenticated = loggedInUser !== undefined
 
     const realLogout: LogoutFn = localLogin ? logoutLocalUser : cognitoSignOut
 
@@ -88,28 +96,11 @@ function AuthProvider({ localLogin, children }: Props): React.ReactElement {
                       // TODO: can we clear the apollo client cache so we don't have to make a second request in order to logout?
                       realLogout()
                           .then((result) => {
-                              if (result.isOk()) {
-                                  checkAuth()
-                                      .then(() => {
-                                          resolve()
-                                      })
-                                      .catch((e) => {
-                                          console.log(
-                                              "But I thought check auth couldn't Reject!",
-                                              e
-                                          )
-                                          reject(e)
-                                      })
-                              } else {
-                                  console.log('signout failed!')
-                                  reject()
-                              }
+                              console.log('Auth succeeded: ', result)
+                              checkAuth()
                           })
                           .catch((e) => {
-                              console.log(
-                                  'Errror From The Logout Result BAD',
-                                  e
-                              )
+                              console.log('Auth failed: ', e)
                               reject(e)
                           })
                   })
@@ -119,6 +110,7 @@ function AuthProvider({ localLogin, children }: Props): React.ReactElement {
         <AuthContext.Provider
             value={{
                 loggedInUser,
+                isAuthenticated,
                 isLoading,
                 logout,
                 checkAuth,

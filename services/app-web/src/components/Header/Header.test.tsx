@@ -1,38 +1,40 @@
 import React from 'react'
-import { BrowserRouter } from 'react-router-dom'
-import { render, screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-import { Header, HeaderProps } from './Header'
-import { useAuth } from '../../pages/App/AuthContext'
+import * as AuthApi from '../../pages/Auth/cognitoAuth'
+import { renderWithProviders } from '../../utils/jestUtils'
+import { Header } from './Header'
+import { UserType } from '../../common-code/domain-models'
+import { HELLO_WORLD } from '../../api'
 
-const RouterWrappedHeader = (props: HeaderProps) => {
-    return (
-        <BrowserRouter>
-            <Header {...props} />
-        </BrowserRouter>
-    )
+const loggedInAuthProps = {
+    localLogin: false,
+    initialize: {
+        user: {
+            name: 'Bob test user',
+            email: 'bob@dmas.mn.gov',
+        } as UserType,
+    },
+}
+
+const loggedOutAuthProps = {
+    localLogin: false,
 }
 
 describe('Header', () => {
     it('renders without errors', async () => {
-        const { getByRole } = render(
-            <RouterWrappedHeader
-                loggedIn
-                stateCode={'MN'}
-                user={{
-                    name: 'Bob test user',
-                    email: 'bob@dmas.mn.gov',
-                }}
-            />
-        )
-        expect(getByRole('banner')).toBeInTheDocument()
-        expect(getByRole('heading')).toBeInTheDocument()
+        renderWithProviders(<Header />, { authProvider: loggedOutAuthProps })
+
+        expect(screen.getByRole('banner')).toBeInTheDocument()
+        expect(screen.getByRole('heading')).toBeInTheDocument()
     })
 
     describe('when logged out', () => {
         it('has Medicaid logo image link that redirects to /dashboard', async () => {
-            render(<RouterWrappedHeader loggedIn={false} />)
+            renderWithProviders(<Header />, {
+                authProvider: loggedOutAuthProps,
+            })
             const logoImage = screen.getByRole('img')
             const logoLink = screen.getByRole('link', {
                 name: /Medicaid.gov-Keeping America Healthy/i,
@@ -43,7 +45,7 @@ describe('Header', () => {
         })
 
         it('has  Medicaid and CHIP Managed Care Reporting heading', () => {
-            render(<RouterWrappedHeader loggedIn={false} />)
+            renderWithProviders(<Header />, { ...loggedOutAuthProps })
 
             expect(screen.getByRole('heading')).toHaveTextContent(
                 'Medicaid and CHIP Managed Care Reporting and Review System'
@@ -51,7 +53,9 @@ describe('Header', () => {
         })
 
         it('displays signin link when logged out', async () => {
-            render(<RouterWrappedHeader loggedIn={false} />)
+            renderWithProviders(<Header />, {
+                authProvider: loggedOutAuthProps,
+            })
             expect(screen.getByRole('link', { name: /Sign In/i })).toBeVisible()
         })
         it.todo('signin link goes to /auth')
@@ -59,7 +63,7 @@ describe('Header', () => {
 
     describe('when logged in', () => {
         it('has Medicaid logo image link that redirects to /dashboard', async () => {
-            render(<RouterWrappedHeader loggedIn />)
+            renderWithProviders(<Header />, { authProvider: loggedInAuthProps })
             const logoImage = screen.getByRole('img')
             const logoLink = screen.getByRole('link', {
                 name: /Medicaid.gov-Keeping America Healthy/i,
@@ -71,36 +75,125 @@ describe('Header', () => {
 
         it('has heading with users state', () => {
             // TODO: make a loop
-            render(<RouterWrappedHeader loggedIn stateCode="MN" />)
+            renderWithProviders(<Header stateCode="MN" />, {
+                authProvider: loggedInAuthProps,
+            })
             expect(screen.getByRole('heading')).toHaveTextContent('Minnesota')
         })
 
         it.todo('has heading with the current program')
 
         it('displays sign out button', async () => {
-            render(
-                <RouterWrappedHeader
-                    loggedIn
+            renderWithProviders(
+                <Header
                     stateCode={'MN'}
                     user={{
                         name: 'Bob test user',
                         email: 'bob@dmas.mn.gov',
                     }}
-                />
+                />,
+                { authProvider: loggedInAuthProps }
             )
             expect(
                 screen.getByRole('button', { name: /Sign out/i })
             ).toHaveTextContent('Sign out')
         })
 
-        it.todo('calls logout when signout button is clicked')
+        it('calls signOut when signout button is clicked', async () => {
+            const spy = jest.spyOn(AuthApi, 'signOut').mockResolvedValue(null)
 
-        it.todo(
-            'shows signin link and redirects to auth page when signout button is clicked and logout is successful'
-        )
+            const apolloProviderMock = {
+                mocks: [
+                    {
+                        request: { query: HELLO_WORLD },
+                        result: { data: {} },
+                    },
+                ],
+            }
 
-        it.todo(
-            'displays error when signout button is clicked and logout is unsuccessful'
-        )
+            renderWithProviders(
+                <Header
+                    stateCode={'MN'}
+                    user={{
+                        name: 'Bob test user',
+                        email: 'bob@dmas.mn.gov',
+                    }}
+                />,
+                {
+                    authProvider: loggedInAuthProps,
+                    apolloProvider: apolloProviderMock,
+                }
+            )
+            userEvent.click(screen.getByRole('button', { name: /Sign out/i }))
+
+            await waitFor(() => expect(spy).toHaveBeenCalledTimes(1))
+        })
+
+        fit('shows signin link when signout button is clicked and logout is successful', async () => {
+            const spy = jest.spyOn(AuthApi, 'signOut').mockResolvedValue(null)
+
+            const apolloProviderMock = {
+                mocks: [
+                    {
+                        request: { query: HELLO_WORLD },
+                        error: new Error('Nope! You logged out'),
+                    },
+                ],
+            }
+
+            renderWithProviders(
+                <Header
+                    stateCode={'MN'}
+                    user={{
+                        name: 'Bob test user',
+                        email: 'bob@dmas.mn.gov',
+                    }}
+                />,
+                {
+                    authProvider: loggedInAuthProps,
+                    apolloProvider: apolloProviderMock,
+                }
+            )
+            userEvent.click(screen.getByRole('button', { name: /Sign out/i }))
+
+            await waitFor(() => expect(spy).toHaveBeenCalledTimes(1))
+            expect(screen.getByRole('link', { name: /Sign In/i })).toBeVisible()
+        })
+
+        it('displays error when signout button is clicked and logout is unsuccessful', async () => {
+            const spy = jest
+                .spyOn(AuthApi, 'signOut')
+                .mockRejectedValue('This test should fail!')
+
+            const apolloProviderMock = {
+                mocks: [
+                    {
+                        request: { query: HELLO_WORLD },
+                        result: { data: {} },
+                    },
+                ],
+            }
+
+            renderWithProviders(
+                <Header
+                    stateCode={'MN'}
+                    user={{
+                        name: 'Bob test user',
+                        email: 'bob@dmas.mn.gov',
+                    }}
+                />,
+                {
+                    authProvider: loggedInAuthProps,
+                    apolloProvider: apolloProviderMock,
+                }
+            )
+            userEvent.click(screen.getByRole('button', { name: /Sign out/i }))
+
+            await waitFor(() => expect(spy).toHaveBeenCalledTimes(1))
+            expect(
+                screen.getByRole('link', { name: /Sign In/i })
+            ).not.toBeVisible()
+            // expect error message
+        })
     })
 })
