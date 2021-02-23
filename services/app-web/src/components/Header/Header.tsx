@@ -65,7 +65,7 @@ export const Header = ({
                 console.log('Logout Success')
             })
             .catch((e) => {
-                console.log('Something went wrong ', e)
+                console.log('Logout failed ', e)
             })
         history.push('/auth')
     }

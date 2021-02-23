@@ -51,12 +51,22 @@ function AuthProvider({
     }
 
     if (error) {
-        // if the error is 403, then that's all gravy, just set logged in user to undefined
-        console.log('Error from logged in check: ', error)
+        const { graphQLErrors, networkError } = error
+        if (graphQLErrors)
+            graphQLErrors.forEach(({ message, locations, path }) =>
+                console.log(
+                    `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+                )
+            )
+
+        if (networkError) console.log(`[Network error]: ${networkError}`)
+
         if (loggedInUser != undefined) {
             setloggedInUser(undefined)
         }
+
         // TODO: do something different if the error is not 403
+        // if the error is 403, then that's all gravy, just set logged in user to undefined
         // lets try and record what different errors are here.
         // call a generic graphql connection etc. error here.
     } else if (data) {
