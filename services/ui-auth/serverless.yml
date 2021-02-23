@@ -238,7 +238,7 @@ resources:
          Fn::Join:
            - ''
            -
-             - urn:amazon:cognito:sp:
+             - 'urn:amazon:cognito:sp:'
              - Ref: UserPoolId
     IdentityPoolId:
       Value:
