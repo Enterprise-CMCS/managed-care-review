@@ -8,7 +8,7 @@ custom:
     stage: ${opt:stage, self:provider.stage}
     api_region: ${cf:app-api-${self:custom.stage}.Region}
     api_url: ${cf:app-api-${self:custom.stage}.ApiGatewayRestApiUrl}
-    application_endpoint_url: ${cf:app-api-${self:custom.stage}.CloudFrontEndpointUrl}
+    application_endpoint_url: ${cf:ui-${self:custom.stage}.CloudFrontEndpointUrl}
     cognito_region: ${cf:ui-auth-${self:custom.stage}.Region}
     cognito_identity_pool_id: ${cf:ui-auth-${self:custom.stage}.IdentityPoolId}
     cognito_user_pool_id: ${cf:ui-auth-${self:custom.stage}.UserPoolId}

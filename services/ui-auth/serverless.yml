@@ -11,7 +11,7 @@ custom:
   stage: ${opt:stage, self:provider.stage}
   attachments_bucket_arn: ${cf:uploads-${self:custom.stage}.AttachmentsBucketArn}
   api_gateway_rest_api_name: ${cf:app-api-${self:custom.stage}.ApiGatewayRestApiName}
-  application_endpoint_url: ${cf:app-api-${self:custom.stage}.CloudFrontEndpointUrl}
+  application_endpoint_url: ${cf:ui-${self:custom.stage}.CloudFrontEndpointUrl}
   okta_metadata_url: ${env:OKTA_METADATA_URL}
   iamPath: ${env:IAM_PATH, "/"}
 
