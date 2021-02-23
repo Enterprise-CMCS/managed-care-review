@@ -9,7 +9,7 @@ import styles from './Header.module.scss'
 
 import { StateCode } from '../../common-code/domain-models'
 import { Logo } from '../Logo/Logo'
-import { useAuth } from '../../pages/App/AuthContext'
+import { useAuth } from '../../contexts/AuthContext'
 import { useHistory } from 'react-router-dom'
 
 const getStateInfo = (

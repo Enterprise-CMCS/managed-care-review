@@ -2,7 +2,7 @@ import { MockedProvider, MockedProviderProps } from '@apollo/client/testing'
 import { BrowserRouter } from 'react-router-dom'
 import { render } from '@testing-library/react'
 
-import { AuthProvider, AuthProviderProps } from '../pages/App/AuthContext'
+import { AuthProvider, AuthProviderProps } from '../contexts/AuthContext'
 /*
  * A custom render to setup providers.
  * see: https://testing-library.com/docs/react-testing-library/setup#custom-render

@@ -1,15 +1,16 @@
 import * as React from 'react'
 
-import { signOut as cognitoSignOut } from '../Auth/cognitoAuth'
-import { logoutLocalUser } from '../Auth/localLogin'
-import { UserType } from '../../common-code/domain-models'
+import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
+import { logoutLocalUser } from '../pages/Auth/localLogin'
+import { UserType } from '../common-code/domain-models'
 import { useQuery } from '@apollo/client'
 
-import { HELLO_WORLD } from '../../api'
+import { HELLO_WORLD } from '../api'
 
 type LogoutFn = () => Promise<null>
 
 type AuthContextType = {
+    localLogin: boolean
     loggedInUser: UserType | undefined
     isAuthenticated: boolean
     isLoading: boolean
@@ -17,6 +18,7 @@ type AuthContextType = {
     logout: undefined | (() => Promise<void>)
 }
 const AuthContext = React.createContext<AuthContextType>({
+    localLogin: false,
     loggedInUser: undefined,
     isAuthenticated: false,
     isLoading: false,
@@ -109,6 +111,7 @@ function AuthProvider({
     return (
         <AuthContext.Provider
             value={{
+                localLogin,
                 loggedInUser,
                 isAuthenticated,
                 isLoading,

@@ -9,7 +9,7 @@ import {
     TextInput,
 } from '@trussworks/react-uswds'
 
-import { useAuth } from '../App/AuthContext'
+import { useAuth } from '../../contexts/AuthContext'
 
 export function showError(error: string): void {
     alert(error)

@@ -1,4 +1,4 @@
-import {AuthProvider} from '../src/pages/App/AuthContext'
+import {AuthProvider} from '../src/contexts/AuthContext'
 import { MockedProvider} from '@apollo/client/testing'
 import './storybook.scss';
 import '../src/index.scss';

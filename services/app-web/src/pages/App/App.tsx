@@ -10,7 +10,7 @@ import {
 
 import { AppBody } from './AppBody'
 import { logEvent } from '../../log_event'
-import { AuthProvider } from './AuthContext'
+import { AuthProvider } from '../../contexts/AuthContext'
 
 function ErrorFallback({
     error,
@@ -42,7 +42,7 @@ function App({
             <BrowserRouter>
                 <ApolloProvider client={apolloClient}>
                     <AuthProvider localLogin={localLogin}>
-                        <AppBody localLogin={localLogin} />
+                        <AppBody />
                     </AuthProvider>
                 </ApolloProvider>
             </BrowserRouter>

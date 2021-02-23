@@ -16,7 +16,7 @@ import { loginLocalUser } from './localLogin'
 
 import aangAvatar from '../../assets/images/aang.png'
 import tophAvatar from '../../assets/images/toph.png'
-import { useAuth } from '../App/AuthContext'
+import { useAuth } from '../../contexts/AuthContext'
 
 const localUsers: UserType[] = [
     {
