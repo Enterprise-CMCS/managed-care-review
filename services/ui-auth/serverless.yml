@@ -231,7 +231,10 @@ resources:
            - ''
            -
              - https://
-             - Ref: UserPoolClientDomain
+             - Ref: UserPoolDomain
+             - .auth.
+             - Ref: AWS::Region
+             - .amazoncognito.com
              - /saml2/idpresponse
     AudienceRestrictionURI:
        Value:
@@ -239,7 +242,7 @@ resources:
            - ''
            -
              - 'urn:amazon:cognito:sp:'
-             - Ref: UserPoolId
+             - Ref: CognitoUserPool
     IdentityPoolId:
       Value:
         Ref: CognitoIdentityPool
