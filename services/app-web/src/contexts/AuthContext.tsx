@@ -37,12 +37,12 @@ function AuthProvider({
     initialize,
     children,
 }: AuthProviderProps): React.ReactElement {
-    const [loggedInUser, setloggedInUser] = React.useState<
+    const [loggedInUser, setLoggedInUser] = React.useState<
         UserType | undefined
     >(initialize?.user || undefined)
     const [isLoading, setIsLoading] = React.useState(true)
 
-    const { loading, error, data, refetch } = useQuery(HELLO_WORLD, {
+    const { client, loading, error, data, refetch } = useQuery(HELLO_WORLD, {
         notifyOnNetworkStatusChange: true,
     })
 
@@ -51,15 +51,25 @@ function AuthProvider({
     }
 
     if (error) {
-        // if the error is 403, then that's all gravy, just set logged in user to undefined
-        console.log('Error from logged in check: ', error)
-        if (loggedInUser != undefined) {
-            setloggedInUser(undefined)
+        const { graphQLErrors, networkError } = error
+        console.log('Auth request failed')
+        if (graphQLErrors)
+            graphQLErrors.forEach(({ message, path }) =>
+                console.log(
+                    `[GraphQL error]: Message: ${message}, Path: ${path}`
+                )
+            )
+
+        if (networkError) console.log(`[Network error]: ${networkError}`)
+
+        if (loggedInUser !== undefined) {
+            setLoggedInUser(undefined)
         }
         // TODO: do something different if the error is not 403
         // lets try and record what different errors are here.
         // call a generic graphql connection etc. error here.
-    } else if (data) {
+    }
+    if (data) {
         const user: UserType = {
             email: data.hello,
             role: 'STATE_USER',
@@ -68,8 +78,7 @@ function AuthProvider({
         }
 
         if (loggedInUser == undefined || loggedInUser.email !== user.email) {
-            console.log(loggedInUser, user)
-            setloggedInUser(user)
+            setLoggedInUser(user)
         }
     }
 
@@ -95,11 +104,10 @@ function AuthProvider({
             ? undefined
             : () => {
                   return new Promise<void>((resolve, reject) => {
-                      // TODO: can we clear the apollo client cache so we don't have to make a second request in order to logout?
                       realLogout()
-                          .then((result) => {
-                              console.log('Auth succeeded: ', result)
-                              checkAuth()
+                          .then(() => {
+                              client.resetStore()
+                              resolve()
                           })
                           .catch((e) => {
                               console.log('Auth failed: ', e)
