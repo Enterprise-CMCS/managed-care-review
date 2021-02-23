@@ -16,6 +16,7 @@ type AuthContextType = {
     isLoading: boolean
     checkAuth: () => Promise<void> // this can probably be simpler, letting callers use the loading states etc instead.
     logout: undefined | (() => Promise<void>)
+    storeLoggedInUser: (user: UserType) => void
 }
 const AuthContext = React.createContext<AuthContextType>({
     localLogin: false,
@@ -24,6 +25,9 @@ const AuthContext = React.createContext<AuthContextType>({
     isLoading: false,
     checkAuth: () => Promise.reject(),
     logout: undefined,
+    storeLoggedInUser: () => {
+        console.log('store logged in user')
+    },
 })
 
 export type AuthProviderProps = {
@@ -42,17 +46,22 @@ function AuthProvider({
     >(initialize?.user || undefined)
     const [isLoading, setIsLoading] = React.useState(true)
 
-    const { client, loading, error, data, refetch } = useQuery(HELLO_WORLD, {
+    const { client, loading, error, refetch } = useQuery(HELLO_WORLD, {
         notifyOnNetworkStatusChange: true,
     })
+
+    const storeLoggedInUser = (user: UserType) => {
+        console.log('store logged in User', user)
+        setLoggedInUser(user)
+    }
 
     if (isLoading != loading) {
         setIsLoading(loading)
     }
 
     if (error) {
+        console.log('Auth request failed', loggedInUser)
         const { graphQLErrors, networkError } = error
-        console.log('Auth request failed')
         if (graphQLErrors)
             graphQLErrors.forEach(({ message, path }) =>
                 console.log(
@@ -65,21 +74,10 @@ function AuthProvider({
         if (loggedInUser !== undefined) {
             setLoggedInUser(undefined)
         }
+
         // TODO: do something different if the error is not 403
         // lets try and record what different errors are here.
         // call a generic graphql connection etc. error here.
-    }
-    if (data) {
-        const user: UserType = {
-            email: data.hello,
-            role: 'STATE_USER',
-            state: 'VA',
-            name: 'Anyone lived in a pretty How town',
-        }
-
-        if (loggedInUser == undefined || loggedInUser.email !== user.email) {
-            setLoggedInUser(user)
-        }
     }
 
     const checkAuth = () => {
@@ -106,6 +104,7 @@ function AuthProvider({
                   return new Promise<void>((resolve, reject) => {
                       realLogout()
                           .then(() => {
+                              setLoggedInUser(undefined)
                               client.resetStore()
                               resolve()
                           })
@@ -124,6 +123,7 @@ function AuthProvider({
                 isAuthenticated,
                 isLoading,
                 logout,
+                storeLoggedInUser,
                 checkAuth,
             }}
             children={children}
