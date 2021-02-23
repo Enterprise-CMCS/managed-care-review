@@ -97,12 +97,24 @@ function AuthProvider({
                   return new Promise<void>((resolve, reject) => {
                       // TODO: can we clear the apollo client cache so we don't have to make a second request in order to logout?
                       realLogout()
-                          .then((result) => {
-                              console.log('Auth succeeded: ', result)
+                          .then(() => {
                               checkAuth()
+                                  .then(() => {
+                                      resolve()
+                                  })
+                                  .catch((e) => {
+                                      console.log(
+                                          "But I thought check auth couldn't Reject!",
+                                          e
+                                      )
+                                      reject(e)
+                                  })
                           })
                           .catch((e) => {
-                              console.log('Auth failed: ', e)
+                              console.log(
+                                  'Errror From The Logout Result BAD',
+                                  e
+                              )
                               reject(e)
                           })
                   })
