@@ -17,6 +17,13 @@ Amplify.configure({
         userPoolId: process.env.REACT_APP_COGNITO_USER_POOL_ID,
         identityPoolId: process.env.REACT_APP_COGNITO_ID_POOL_ID,
         userPoolWebClientId: process.env.REACT_APP_COGNITO_USER_POOL_CLIENT_ID,
+        oauth: {
+            domain: process.env.REACT_APP_COGNITO_USER_POOL_CLIENT_DOMAIN,
+            redirectSignIn: process.env.REACT_APP_APPLICATION_ENDPOINT,
+            redirectSignOut: process.env.REACT_APP_APPLICATION_ENDPOINT,
+            scope: ['email', 'openid'],
+            responseType: 'token',
+        },
     },
     API: {
         endpoints: [

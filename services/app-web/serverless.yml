@@ -1,62 +1,65 @@
-
 service: app-web
 
 plugins:
-  - serverless-plugin-scripts
-  - serverless-s3-sync
-  - serverless-cloudfront-invalidate
+    - serverless-plugin-scripts
+    - serverless-s3-sync
+    - serverless-cloudfront-invalidate
 custom:
-  stage: ${opt:stage, self:provider.stage}
-  api_region: ${cf:app-api-${self:custom.stage}.Region}
-  api_url: ${cf:app-api-${self:custom.stage}.ApiGatewayRestApiUrl}
-  cognito_region: ${cf:ui-auth-${self:custom.stage}.Region}
-  cognito_identity_pool_id: ${cf:ui-auth-${self:custom.stage}.IdentityPoolId}
-  cognito_user_pool_id: ${cf:ui-auth-${self:custom.stage}.UserPoolId}
-  cognito_client_id: ${cf:ui-auth-${self:custom.stage}.UserPoolClientId}
-  s3_attachments_bucket_region: ${cf:uploads-${self:custom.stage}.Region}
-  s3_attachments_bucket_name: ${cf:uploads-${self:custom.stage}.AttachmentsBucketName}
-  ui_s3_bucket_name: ${cf:ui-${self:custom.stage}.S3BucketName}
-  ui_cloudfront_distribution_id: ${cf:ui-${self:custom.stage}.CloudFrontDistributionId}
-  storybook_s3_bucket_name: ${cf:storybook-${self:custom.stage}.S3BucketName}
-  storybook_cloudfront_distribution_id: ${cf:storybook-${self:custom.stage}.CloudFrontDistributionId}
+    stage: ${opt:stage, self:provider.stage}
+    api_region: ${cf:app-api-${self:custom.stage}.Region}
+    api_url: ${cf:app-api-${self:custom.stage}.ApiGatewayRestApiUrl}
+    application_endpoint_url: ${cf:app-api-${self:custom.stage}.CloudFrontEndpointUrl}
+    cognito_region: ${cf:ui-auth-${self:custom.stage}.Region}
+    cognito_identity_pool_id: ${cf:ui-auth-${self:custom.stage}.IdentityPoolId}
+    cognito_user_pool_id: ${cf:ui-auth-${self:custom.stage}.UserPoolId}
+    cognito_client_id: ${cf:ui-auth-${self:custom.stage}.UserPoolClientId}
+    cognito_user_pool_client_domain: ${cf:ui-auth-${self:custom.stage}.UserPoolClientDomain}
+    s3_attachments_bucket_region: ${cf:uploads-${self:custom.stage}.Region}
+    s3_attachments_bucket_name: ${cf:uploads-${self:custom.stage}.AttachmentsBucketName}
+    ui_s3_bucket_name: ${cf:ui-${self:custom.stage}.S3BucketName}
+    ui_cloudfront_distribution_id: ${cf:ui-${self:custom.stage}.CloudFrontDistributionId}
+    storybook_s3_bucket_name: ${cf:storybook-${self:custom.stage}.S3BucketName}
+    storybook_cloudfront_distribution_id: ${cf:storybook-${self:custom.stage}.CloudFrontDistributionId}
 
-  s3Sync:
-    - bucketName: ${self:custom.ui_s3_bucket_name}
-      localDir: ./build
-      deleteRemoved: true
-    - bucketName: ${self:custom.storybook_s3_bucket_name}
-      localDir: ./storybook-static
-      deleteRemoved: true
+    s3Sync:
+        - bucketName: ${self:custom.ui_s3_bucket_name}
+          localDir: ./build
+          deleteRemoved: true
+        - bucketName: ${self:custom.storybook_s3_bucket_name}
+          localDir: ./storybook-static
+          deleteRemoved: true
 
-  cloudfrontInvalidate:
-    - distributionId: ${self:custom.ui_cloudfront_distribution_id}
-      items:
-        - "/*"
-    - distributionId: ${self:custom.storybook_cloudfront_distribution_id}
-      items:
-        - "/*"
+    cloudfrontInvalidate:
+        - distributionId: ${self:custom.ui_cloudfront_distribution_id}
+          items:
+              - '/*'
+        - distributionId: ${self:custom.storybook_cloudfront_distribution_id}
+          items:
+              - '/*'
 
-  scripts:
-    hooks:
-      # Build the static archive and populate the config
-      package:initialize: |
-        set -e
-        export REACT_APP_API_URL=${self:custom.api_url}
-        export REACT_APP_COGNITO_REGION=${self:custom.cognito_region}
-        export REACT_APP_COGNITO_ID_POOL_ID=${self:custom.cognito_identity_pool_id}
-        export REACT_APP_COGNITO_USER_POOL_ID=${self:custom.cognito_user_pool_id}
-        export REACT_APP_COGNITO_USER_POOL_CLIENT_ID=${self:custom.cognito_client_id}
-        yarn run build
-        yarn build-storybook
-        # export API_REGION=${self:custom.api_region}
-        # export S3_ATTACHMENTS_BUCKET_REGION=${self:custom.s3_attachments_bucket_region}
-        # export S3_ATTACHMENTS_BUCKET_NAME=${self:custom.s3_attachments_bucket_name}
-        # ./env.sh
-        # cp public/env-config.js build/env-config.js
+    scripts:
+        hooks:
+            # Build the static archive and populate the config
+            package:initialize: |
+                set -e
+                export REACT_APP_API_URL=${self:custom.api_url}
+                export REACT_APP_APPLICATION_ENDPOINT=${self:custom.application_endpoint_url}
+                export REACT_APP_COGNITO_REGION=${self:custom.cognito_region}
+                export REACT_APP_COGNITO_ID_POOL_ID=${self:custom.cognito_identity_pool_id}
+                export REACT_APP_COGNITO_USER_POOL_ID=${self:custom.cognito_user_pool_id}
+                export REACT_APP_COGNITO_USER_POOL_CLIENT_ID=${self:custom.cognito_client_id}
+                export REACT_APP_COGNITO_USER_POOL_CLIENT_DOMAIN=${self:custom.cognito_user_pool_client_domain}
+                yarn run build
+                yarn build-storybook
+                # export API_REGION=${self:custom.api_region}
+                # export S3_ATTACHMENTS_BUCKET_REGION=${self:custom.s3_attachments_bucket_region}
+                # export S3_ATTACHMENTS_BUCKET_NAME=${self:custom.s3_attachments_bucket_name}
+                # ./env.sh
+                # cp public/env-config.js build/env-config.js
 
 # The `provider` block defines where your service will be deployed
 provider:
-  name: aws
-  runtime: nodejs12.x
-  region: us-east-1
-  stage: dev
+    name: aws
+    runtime: nodejs12.x
+    region: us-east-1
+    stage: dev
