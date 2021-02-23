@@ -96,31 +96,31 @@ resources:
            Ref: CognitoUserPool
         DependsOn: CognitoUserPoolIdentityProvider
 
-     UserPoolDomain:
-       Type: AWS::Cognito::UserPoolDomain
-       Properties:
-         Domain:
-           Fn::Join:
-             - ''
-             -
-               - ${self:custom.stage}-login-
-               - Ref: CognitoUserPoolClient
-         UserPoolId:
-           Ref: CognitoUserPool
+    UserPoolDomain:
+      Type: AWS::Cognito::UserPoolDomain
+      Properties:
+        Domain:
+          Fn::Join:
+            - ''
+            -
+              - ${self:custom.stage}-login-
+              - Ref: CognitoUserPoolClient
+        UserPoolId:
+          Ref: CognitoUserPool
 
-     CognitoUserPoolIdentityProvider:
-       Type: AWS::Cognito::UserPoolIdentityProvider
-       Properties:
-         AttributeMapping:
-           email: http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress
-         IdpIdentifiers:
-           - IdpIdentifier
-         ProviderDetails:
-           MetadataURL: ${self:custom.okta_metadata_url}
-         ProviderName: Okta
-         ProviderType: SAML
-         UserPoolId:
-           Ref: CognitoUserPool
+    CognitoUserPoolIdentityProvider:
+      Type: AWS::Cognito::UserPoolIdentityProvider
+      Properties:
+        AttributeMapping:
+          email: http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress
+        IdpIdentifiers:
+          - IdpIdentifier
+        ProviderDetails:
+          MetadataURL: ${self:custom.okta_metadata_url}
+        ProviderName: Okta
+        ProviderType: SAML
+        UserPoolId:
+          Ref: CognitoUserPool
 
     CognitoIdentityPool:
       Type: AWS::Cognito::IdentityPool
