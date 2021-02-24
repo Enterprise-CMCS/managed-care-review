@@ -1,15 +1,14 @@
 import React from 'react'
 
-import { GridContainer, Grid } from '@trussworks/react-uswds'
-/**
- * Wrap logo pngs in image tag and uswds classes
- */
+import { Alert } from '@trussworks/react-uswds'
+
 export const Error400 = (): React.ReactElement => {
     return (
-        <GridContainer>
-            <Grid row>
-                <h2>Oops! Something went wrong...</h2>
-            </Grid>
-        </GridContainer>
+        <Alert
+            data-testId="Error400"
+            style={{ width: '600px', marginBottom: '5px' }}
+            type="error"
+            heading="Oops! Something went wrong"
+        />
     )
 }

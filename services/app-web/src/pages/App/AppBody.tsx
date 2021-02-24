@@ -1,3 +1,4 @@
+import React from 'react'
 import { GovBanner } from '@trussworks/react-uswds'
 
 import styles from './AppBody.module.scss'
@@ -11,6 +12,8 @@ import { useAuth } from '../../contexts/AuthContext'
 // This is where it's safe to use useAuth and useQuery
 export function AppBody(): React.ReactElement {
     const { loggedInUser } = useAuth()
+    const [alert, setAlert] = React.useState<null | React.FC>(null)
+
     return (
         <div id="App" className={styles.app}>
             <a className="usa-skipnav" href="#main-content">
@@ -20,8 +23,10 @@ export function AppBody(): React.ReactElement {
             <Header
                 user={loggedInUser}
                 stateCode={loggedInUser ? loggedInUser.state : undefined}
+                setAlert={setAlert}
             />
             <main id="main-content" className={styles.mainContent} role="main">
+                {alert && alert({})}
                 <AppRoutes />
                 <CheckAuth />
             </main>

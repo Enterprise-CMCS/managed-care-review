@@ -32,6 +32,7 @@ const getStateInfo = (
 export type HeaderProps = {
     stateCode?: StateCode
     activePage?: string
+    setAlert?: React.Dispatch<React.SetStateAction<React.FC>>
     user?: {
         name: string
         email: string
@@ -44,6 +45,7 @@ export type HeaderProps = {
 export const Header = ({
     stateCode,
     activePage = 'Managed Care Dashboard',
+    setAlert,
     user,
 }: HeaderProps): React.ReactElement => {
     const { logout, isAuthenticated } = useAuth()
@@ -66,8 +68,8 @@ export const Header = ({
                 console.log('Logout Success')
             })
             .catch((e) => {
-                console.log('Logout failed ', e)
-                return Error400
+                console.log('Logout failed HERE ', e)
+                setAlert && setAlert(Error400)
             })
         history.push('/auth')
     }

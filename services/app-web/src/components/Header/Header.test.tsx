@@ -10,7 +10,7 @@ import { HELLO_WORLD } from '../../api'
 
 describe('Header', () => {
     it('renders without errors', async () => {
-        renderWithProviders(<Header />, { authProvider: loggedOutAuthProps })
+        renderWithProviders(<Header />, {})
 
         expect(screen.getByRole('banner')).toBeInTheDocument()
         expect(screen.getByRole('heading')).toBeInTheDocument()
@@ -170,10 +170,10 @@ describe('Header', () => {
             expect(screen.getByRole('link', { name: /Sign In/i })).toBeVisible()
         })
 
-        it('displays error when signout button is clicked and logout is unsuccessful', async () => {
+        it.only('displays error when signout button is clicked and logout is unsuccessful', async () => {
             const spy = jest
                 .spyOn(AuthApi, 'signOut')
-                .mockRejectedValue('This test should fail!')
+                .mockRejectedValue('This logout failed!')
 
             const apolloProviderMock = {
                 mocks: [
@@ -201,9 +201,7 @@ describe('Header', () => {
 
             await waitFor(() => expect(spy).toHaveBeenCalledTimes(1))
             expect(screen.queryByRole('link', { name: /Sign In/i })).toBeNull()
-            expect(
-                screen.queryByText('Oops! Something went wrong')
-            ).toBeInTheDocument()
+            expect(screen.getByTestId('Error400')).toBeInTheDocument()
         })
     })
 })

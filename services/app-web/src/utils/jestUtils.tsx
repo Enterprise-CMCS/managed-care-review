@@ -16,13 +16,15 @@ const renderWithProviders = (
         authProvider,
     }: {
         apolloProvider?: MockedProviderProps
-        authProvider: AuthProviderProps
+        authProvider?: AuthProviderProps
     }
 ) =>
     render(
         <MockedProvider {...apolloProvider}>
             <BrowserRouter>
-                <AuthProvider {...authProvider}>{ui}</AuthProvider>
+                <AuthProvider localLogin={false} {...authProvider}>
+                    {ui}
+                </AuthProvider>
             </BrowserRouter>
         </MockedProvider>
     )
