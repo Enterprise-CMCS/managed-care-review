@@ -49,14 +49,21 @@ const resolvers: IResolvers = {
 				)
 			}
 
-			const userResult = await userFetcher(authProvider)
-			if (userResult.isErr()) {
-				throw new AuthenticationError(userResult.error.message)
+			try { 
+				const userResult = await userFetcher(authProvider)
+	
+				if (userResult.isErr()) {
+					throw new AuthenticationError(userResult.error.message)
+				}
+	
+				return userResult.value
+
+			} 
+			catch {
+				console.log('PROBLEM YO')
 			}
 
-			const user = userResult.value
-
-			return user
+			
 		},
 	},
 }
