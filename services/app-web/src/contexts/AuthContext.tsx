@@ -46,14 +46,11 @@ function AuthProvider({
     >(initialize?.user || undefined)
     const [isLoading, setIsLoading] = React.useState(true)
 
-    const { client, loading, error, refetch } = useQuery(HELLO_WORLD, {
+    const { client, loading, data, error, refetch } = useQuery(HELLO_WORLD, {
         notifyOnNetworkStatusChange: true,
     })
 
-    const storeLoggedInUser = (user: UserType) => {
-        console.log('store logged in User', user)
-        setLoggedInUser(user)
-    }
+    const isAuthenticated = loggedInUser !== undefined
 
     if (isLoading != loading) {
         setIsLoading(loading)
@@ -70,14 +67,17 @@ function AuthProvider({
             )
 
         if (networkError) console.log(`[Network error]: ${networkError}`)
-
-        if (loggedInUser !== undefined) {
+        if (isAuthenticated) {
             setLoggedInUser(undefined)
         }
 
         // TODO: do something different if the error is not 403
         // lets try and record what different errors are here.
         // call a generic graphql connection etc. error here.
+    } else if (data) {
+        if (!isAuthenticated) {
+            setLoggedInUser(data.hello)
+        }
     }
 
     const checkAuth = () => {
@@ -92,8 +92,6 @@ function AuthProvider({
                 })
         })
     }
-
-    const isAuthenticated = loggedInUser !== undefined
 
     const realLogout: LogoutFn = localLogin ? logoutLocalUser : cognitoSignOut
 
@@ -114,6 +112,11 @@ function AuthProvider({
                           })
                   })
               }
+
+    const storeLoggedInUser = (user: UserType) => {
+        console.log('store logged in User', user)
+        setLoggedInUser(user)
+    }
 
     return (
         <AuthContext.Provider
