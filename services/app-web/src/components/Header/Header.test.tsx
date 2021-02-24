@@ -60,7 +60,15 @@ describe('Header', () => {
             })
             expect(screen.getByRole('link', { name: /Sign In/i })).toBeVisible()
         })
-        it.todo('signin link goes to /auth')
+
+        it('signin link goes to /auth', () => {
+            renderWithProviders(<Header />, {
+                authProvider: loggedOutAuthProps,
+            })
+            expect(
+                screen.getByRole('link', { name: /Sign In/i })
+            ).toHaveAttribute('href', '/auth')
+        })
     })
 
     describe('when logged in', () => {
