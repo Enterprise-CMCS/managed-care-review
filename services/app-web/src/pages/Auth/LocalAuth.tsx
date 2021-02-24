@@ -40,18 +40,13 @@ const userAvatars: { [key: string]: string } = {
 
 export function LocalAuth(): React.ReactElement {
     const history = useHistory()
-    const { checkAuth } = useAuth()
+    const { checkAuth, storeLoggedInUser } = useAuth()
 
     async function login(user: UserType) {
-        console.log('loggin ing', user)
-
         loginLocalUser(user)
+        storeLoggedInUser(user)
 
-        try {
-            await checkAuth()
-        } catch (e) {
-            console.log('Error just even checking the auth??', e)
-        }
+        await checkAuth()
 
         history.push('/dashboard')
     }

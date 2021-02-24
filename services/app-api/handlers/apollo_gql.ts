@@ -15,9 +15,16 @@ import {
 } from '../authn'
 
 // Construct a schema, using GraphQL schema language
+// TODO: add StateCode and Role
 const typeDefs = gql`
 	type Query {
-		hello: String
+		hello: User
+	}
+	type User {
+		role: String
+		email: String
+		state: String
+		name: String
 	}
 `
 
@@ -49,7 +56,7 @@ const resolvers: IResolvers = {
 
 			const user = userResult.value
 
-			return `Hello ${user.email}!`
+			return user
 		},
 	},
 }
@@ -80,7 +87,7 @@ function bodyMiddleware(
 		// when graphql requests are sent by the amplify library to AWS
 		// they are arriving with some escaping that is breaking apollo server.
 		// This transformation attempts and fails to make things work again.
-		console.log('BODY MIDDLEWARE', event.body)
+		console.log('BODY MIDDLEWARE', event.body)	
 		if (event.body !== null) {
 			console.log(
 				'MAYBE MIDDLEWARE',
@@ -91,7 +98,7 @@ function bodyMiddleware(
 
 		// HACK, this string works, but the string we are sent does not.
 		event.body =
-			'{"operationName":"hello","variables":{},"query":"query hello {\\n  hello\\n}\\n"}'
+			'{"operationName":"hello","variables":{},"query":"query hello {\\n  hello { email state role name } \\n}\\n"}'
 		console.log('AFTER MIDDLEWARE', event.body)
 
 		return wrapped(event, context, completion)

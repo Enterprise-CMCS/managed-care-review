@@ -1,18 +1,17 @@
-import { useQuery } from '@apollo/client'
-import { HELLO_WORLD } from '../../api'
 import { GridContainer } from '@trussworks/react-uswds'
+
+import { useAuth } from '../../contexts/AuthContext'
+
 export const Dashboard = (): React.ReactElement => {
-    const { loading, error, data } = useQuery(HELLO_WORLD)
+    const { isLoading, loggedInUser } = useAuth()
 
-    console.log('Dashboard THING', loading, error, data)
-
-    if (loading) {
+    if (isLoading) {
         return <div>Loading User Info</div>
     }
 
-    if (error) {
-        return <div>Donezo</div>
-    }
-
-    return <GridContainer>{data && <h1>{data.hello}</h1>}</GridContainer>
+    return (
+        <GridContainer>
+            {loggedInUser && <h1>{`Hello ${loggedInUser.name}`}</h1>}
+        </GridContainer>
+    )
 }

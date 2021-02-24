@@ -16,6 +16,7 @@ type AuthContextType = {
     isLoading: boolean
     checkAuth: () => Promise<void> // this can probably be simpler, letting callers use the loading states etc instead.
     logout: undefined | (() => Promise<void>)
+    storeLoggedInUser: (user: UserType) => void
 }
 const AuthContext = React.createContext<AuthContextType>({
     localLogin: false,
@@ -24,6 +25,9 @@ const AuthContext = React.createContext<AuthContextType>({
     isLoading: false,
     checkAuth: () => Promise.reject(),
     logout: undefined,
+    storeLoggedInUser: () => {
+        console.log('store logged in user')
+    },
 })
 
 export type AuthProviderProps = {
@@ -37,14 +41,16 @@ function AuthProvider({
     initialize,
     children,
 }: AuthProviderProps): React.ReactElement {
-    const [loggedInUser, setloggedInUser] = React.useState<
+    const [loggedInUser, setLoggedInUser] = React.useState<
         UserType | undefined
     >(initialize?.user || undefined)
     const [isLoading, setIsLoading] = React.useState(true)
 
-    const { loading, error, data, refetch } = useQuery(HELLO_WORLD, {
+    const { client, loading, data, error, refetch } = useQuery(HELLO_WORLD, {
         notifyOnNetworkStatusChange: true,
     })
+
+    const isAuthenticated = loggedInUser !== undefined
 
     if (isLoading != loading) {
         setIsLoading(loading)
@@ -60,9 +66,8 @@ function AuthProvider({
             )
 
         if (networkError) console.log(`[Network error]: ${networkError}`)
-
-        if (loggedInUser != undefined) {
-            setloggedInUser(undefined)
+        if (isAuthenticated) {
+            setLoggedInUser(undefined)
         }
 
         // TODO: do something different if the error is not 403
@@ -70,16 +75,8 @@ function AuthProvider({
         // lets try and record what different errors are here.
         // call a generic graphql connection etc. error here.
     } else if (data) {
-        const user: UserType = {
-            email: data.hello,
-            role: 'STATE_USER',
-            state: 'VA',
-            name: 'Anyone lived in a pretty How town',
-        }
-
-        if (loggedInUser == undefined || loggedInUser.email !== user.email) {
-            console.log(loggedInUser, user)
-            setloggedInUser(user)
+        if (!isAuthenticated) {
+            setLoggedInUser(data.hello)
         }
     }
 
@@ -96,8 +93,6 @@ function AuthProvider({
         })
     }
 
-    const isAuthenticated = loggedInUser !== undefined
-
     const realLogout: LogoutFn = localLogin ? logoutLocalUser : cognitoSignOut
 
     const logout =
@@ -105,20 +100,11 @@ function AuthProvider({
             ? undefined
             : () => {
                   return new Promise<void>((resolve, reject) => {
-                      // TODO: can we clear the apollo client cache so we don't have to make a second request in order to logout?
                       realLogout()
                           .then(() => {
-                              checkAuth()
-                                  .then(() => {
-                                      resolve()
-                                  })
-                                  .catch((e) => {
-                                      console.log(
-                                          "But I thought check auth couldn't Reject!",
-                                          e
-                                      )
-                                      reject(e)
-                                  })
+                              setLoggedInUser(undefined)
+                              client.resetStore()
+                              resolve()
                           })
                           .catch((e) => {
                               console.log(
@@ -130,6 +116,11 @@ function AuthProvider({
                   })
               }
 
+    const storeLoggedInUser = (user: UserType) => {
+        console.log('store logged in User', user)
+        setLoggedInUser(user)
+    }
+
     return (
         <AuthContext.Provider
             value={{
@@ -138,6 +129,7 @@ function AuthProvider({
                 isAuthenticated,
                 isLoading,
                 logout,
+                storeLoggedInUser,
                 checkAuth,
             }}
             children={children}
