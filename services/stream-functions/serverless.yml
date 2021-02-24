@@ -1,4 +1,3 @@
-
 service: stream-functions
 
 package:
@@ -51,8 +50,8 @@ resources:
     CreatePermissionsBoundary:
       Fn::Not:
         - Fn::Equals:
-          - ""
-          - ${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
+            - ''
+            - ${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
   Resources:
     LambdaEmailerRole: # Why isn't this with the function as an iamRoleStatements?  https://github.com/serverless/serverless/issues/6485
       Type: 'AWS::IAM::Role'
@@ -60,42 +59,41 @@ resources:
         AssumeRolePolicyDocument:
           Version: '2012-10-17'
           Statement:
-          - Effect: 'Allow'
-            Principal:
-              Service: 'lambda.amazonaws.com'
-            Action: 'sts:AssumeRole'
+            - Effect: 'Allow'
+              Principal:
+                Service: 'lambda.amazonaws.com'
+              Action: 'sts:AssumeRole'
         Path: ${self:custom.iamPath}
         PermissionsBoundary:
           Fn::If:
             - CreatePermissionsBoundary
             - Fn::Join:
-              - ''
-              -
-                - 'arn:aws:iam::'
-                - Ref: AWS::AccountId
-                - ':policy'
-                - '${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}'
+                - ''
+                - - 'arn:aws:iam::'
+                  - Ref: AWS::AccountId
+                  - ':policy'
+                  - '${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}'
             - Ref: AWS::NoValue
         Policies:
           - PolicyName: 'LambdaRolePolicy'
             PolicyDocument:
               Version: '2012-10-17'
               Statement:
-              - Effect: 'Allow'
-                Action:
-                - logs:CreateLogGroup
-                - logs:CreateLogStream
-                - logs:PutLogEvents
-                Resource: 'arn:aws:logs:*:*:*'
-              - Effect: 'Allow'
-                Action:
-                - dynamodb:DescribeStream
-                - dynamodb:GetRecords
-                - dynamodb:GetShardIterator
-                - dynamodb:ListStreams
-                Resource: ${self:custom.tableStreamArn}
-              - Effect: 'Allow'
-                Action:
-                - ses:SendEmail
-                - ses:SendRawEmail
-                Resource: '*'
+                - Effect: 'Allow'
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource: 'arn:aws:logs:*:*:*'
+                - Effect: 'Allow'
+                  Action:
+                    - dynamodb:DescribeStream
+                    - dynamodb:GetRecords
+                    - dynamodb:GetShardIterator
+                    - dynamodb:ListStreams
+                  Resource: ${self:custom.tableStreamArn}
+                - Effect: 'Allow'
+                  Action:
+                    - ses:SendEmail
+                    - ses:SendRawEmail
+                  Resource: '*'

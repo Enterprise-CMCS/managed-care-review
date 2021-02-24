@@ -1,33 +1,33 @@
-import React, { useState, useEffect } from "react";
-import { PageHeader, ListGroup, ListGroupItem } from "react-bootstrap";
-import { useAppContext } from "../libs/contextLib";
-import { onError } from "../libs/errorLib";
-import "./Home.css";
-import { listAmendments } from "../libs/api";
-import { LinkContainer } from "react-router-bootstrap";
+import React, { useState, useEffect } from 'react'
+import { PageHeader, ListGroup, ListGroupItem } from 'react-bootstrap'
+import { useAppContext } from '../libs/contextLib'
+import { onError } from '../libs/errorLib'
+import './Home.css'
+import { listAmendments } from '../libs/api'
+import { LinkContainer } from 'react-router-bootstrap'
 
 export default function Home() {
-    const [amendments, setAmendments] = useState([]);
-    const { isAuthenticated } = useAppContext();
-    const [isLoading, setIsLoading] = useState(true);
+    const [amendments, setAmendments] = useState([])
+    const { isAuthenticated } = useAppContext()
+    const [isLoading, setIsLoading] = useState(true)
     useEffect(() => {
         async function onLoad() {
             if (!isAuthenticated) {
-                return;
+                return
             }
 
             try {
-                const amendments = await loadAmendments();
-                setAmendments(amendments);
+                const amendments = await loadAmendments()
+                setAmendments(amendments)
             } catch (e) {
-                onError(e);
+                onError(e)
             }
 
-            setIsLoading(false);
+            setIsLoading(false)
         }
 
-        onLoad();
-    }, [isAuthenticated]);
+        onLoad()
+    }, [isAuthenticated])
 
     function loadAmendments() {
         return listAmendments()
@@ -36,30 +36,41 @@ export default function Home() {
     function renderAmendmentsList(amendments) {
         return [{}].concat(amendments).map((amendment, i) =>
             i !== 0 ? (
-                <LinkContainer key={amendment.amendmentId} to={`/amendments/${amendment.amendmentId}`}>
-                    <ListGroupItem header={amendment.transmittalNumber.trim().split("\n")[0]}>
-                        {"Created: " + new Date(amendment.createdAt).toLocaleString()}
+                <LinkContainer
+                    key={amendment.amendmentId}
+                    to={`/amendments/${amendment.amendmentId}`}
+                >
+                    <ListGroupItem
+                        header={
+                            amendment.transmittalNumber.trim().split('\n')[0]
+                        }
+                    >
+                        {'Created: ' +
+                            new Date(amendment.createdAt).toLocaleString()}
                     </ListGroupItem>
                 </LinkContainer>
             ) : (
                 <LinkContainer key="new" to="/amendments/new">
                     <ListGroupItem>
                         <h4>
-                            <b>{"\uFF0B"}</b> Submit New APS
+                            <b>{'\uFF0B'}</b> Submit New APS
                         </h4>
                     </ListGroupItem>
                 </LinkContainer>
             )
-        );
+        )
     }
 
     function renderLander() {
         return (
             <div className="lander">
                 <h1>MCRRS Submission App</h1>
-                <p>MCRRS Amendment to Planned Settlement (MCRRS) submission application</p>
+                <p>
+                    MCRRS Amendment to Planned Settlement (MCRRS) submission
+                    application
+                </p>
             </div>
-        );
+        )
     }
 
     function renderAmendments() {
@@ -70,12 +81,12 @@ export default function Home() {
                     {!isLoading && renderAmendmentsList(amendments)}
                 </ListGroup>
             </div>
-        );
+        )
     }
 
     return (
         <div className="Home">
             {isAuthenticated ? renderAmendments() : renderLander()}
         </div>
-    );
+    )
 }

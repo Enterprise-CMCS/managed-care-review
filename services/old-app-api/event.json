@@ -1,9 +1,9 @@
 {
-  "requestContext": {
-    "authorizer": {
-      "claims": {
-        "sub": "USER-SUB-1234"
-      }
+    "requestContext": {
+        "authorizer": {
+            "claims": {
+                "sub": "USER-SUB-1234"
+            }
+        }
     }
-  }
 }

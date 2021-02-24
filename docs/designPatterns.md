@@ -1,4 +1,5 @@
 # Design Patterns
+
     * Testing 
         * Unit 
             * fe/be 
@@ -43,5 +44,4 @@
         * Composition conventions 
         * Scss scoped to component using uswds design tokens  
 
-
-This maybe could be linked in the PR template, these are all things we'd want to watch for as we do reviews. 
+This maybe could be linked in the PR template, these are all things we'd want to watch for as we do reviews.

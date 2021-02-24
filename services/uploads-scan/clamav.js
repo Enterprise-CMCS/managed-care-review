@@ -1,11 +1,11 @@
-const AWS = require('aws-sdk');
-const fs = require('fs');
-const execSync = require('child_process').execSync;
-const path = require('path');
-const constants = require('./constants');
-const utils = require("./utils");
+const AWS = require('aws-sdk')
+const fs = require('fs')
+const execSync = require('child_process').execSync
+const path = require('path')
+const constants = require('./constants')
+const utils = require('./utils')
 
-const S3 = new AWS.S3();
+const S3 = new AWS.S3()
 
 /**
  * Updates the definitions using freshclam.
@@ -14,22 +14,23 @@ const S3 = new AWS.S3();
  */
 function updateAVDefinitonsWithFreshclam() {
     try {
-        let executionResult = execSync(`${constants.PATH_TO_FRESHCLAM} --config-file=${constants.FRESHCLAM_CONFIG} --datadir=${constants.FRESHCLAM_WORK_DIR}`);
+        let executionResult = execSync(
+            `${constants.PATH_TO_FRESHCLAM} --config-file=${constants.FRESHCLAM_CONFIG} --datadir=${constants.FRESHCLAM_WORK_DIR}`
+        )
 
-        utils.generateSystemMessage('Update message');
-        console.log(executionResult.toString());
+        utils.generateSystemMessage('Update message')
+        console.log(executionResult.toString())
 
-        if(executionResult.stderr) {
-            utils.generateSystemMessage('stderr');
-            console.log(executionResult.stderr.toString());
+        if (executionResult.stderr) {
+            utils.generateSystemMessage('stderr')
+            console.log(executionResult.stderr.toString())
         }
 
-        return true;
+        return true
     } catch (err) {
-        console.log(err);
-        return false;
+        console.log(err)
+        return false
     }
-
 }
 
 /**
@@ -37,67 +38,85 @@ function updateAVDefinitonsWithFreshclam() {
  * The definitions are stored on the local disk, ensure there's enough space.
  */
 async function downloadAVDefinitions() {
+    const downloadPromises = constants.CLAMAV_DEFINITIONS_FILES.map(
+        (filenameToDownload) => {
+            return new Promise((resolve, reject) => {
+                let destinationFile = path.join('/tmp/', filenameToDownload)
 
-    const downloadPromises = constants.CLAMAV_DEFINITIONS_FILES.map((filenameToDownload) => {
-       return new Promise((resolve, reject) => {
-           let destinationFile = path.join('/tmp/', filenameToDownload);
+                utils.generateSystemMessage(
+                    `Downloading ${filenameToDownload} from S3 to ${destinationFile}`
+                )
 
-           utils.generateSystemMessage(`Downloading ${filenameToDownload} from S3 to ${destinationFile}`);
+                let localFileWriteStream = fs.createWriteStream(destinationFile)
 
-           let localFileWriteStream = fs.createWriteStream(destinationFile);
+                let options = {
+                    Bucket: constants.CLAMAV_BUCKET_NAME,
+                    Key: `${constants.PATH_TO_AV_DEFINITIONS}/${filenameToDownload}`,
+                }
 
-           let options = {
-               Bucket: constants.CLAMAV_BUCKET_NAME,
-               Key   : `${constants.PATH_TO_AV_DEFINITIONS}/${filenameToDownload}`
-           };
+                let s3ReadStream = S3.getObject(options)
+                    .createReadStream()
+                    .on('end', function () {
+                        utils.generateSystemMessage(
+                            `Finished download ${filenameToDownload}`
+                        )
+                        resolve()
+                    })
+                    .on('error', function (err) {
+                        utils.generateSystemMessage(
+                            `Error downloading definition file ${filenameToDownload}`
+                        )
+                        console.log(err)
+                        reject()
+                    })
 
-           let s3ReadStream = S3.getObject(options).createReadStream().on('end', function () {
-               utils.generateSystemMessage(`Finished download ${filenameToDownload}`);
-               resolve();
-           }).on('error', function (err) {
-               utils.generateSystemMessage(`Error downloading definition file ${filenameToDownload}`);
-               console.log(err);
-               reject();
-           });
+                s3ReadStream.pipe(localFileWriteStream)
+            })
+        }
+    )
 
-           s3ReadStream.pipe(localFileWriteStream);
-       });
-    });
-
-    return await Promise.all(downloadPromises);
+    return await Promise.all(downloadPromises)
 }
 
 /**
  * Uploads the AV definitions to the S3 bucket.
  */
 async function uploadAVDefinitions() {
+    const uploadPromises = constants.CLAMAV_DEFINITIONS_FILES.map(
+        (filenameToUpload) => {
+            return new Promise((resolve, reject) => {
+                utils.generateSystemMessage(
+                    `Uploading updated definitions for file ${filenameToUpload} ---`
+                )
 
-    const uploadPromises = constants.CLAMAV_DEFINITIONS_FILES.map((filenameToUpload) => {
-        return new Promise((resolve, reject) => {
-            utils.generateSystemMessage(`Uploading updated definitions for file ${filenameToUpload} ---`);
-
-            let options = {
-                Bucket: constants.CLAMAV_BUCKET_NAME,
-                Key   : `${constants.PATH_TO_AV_DEFINITIONS}/${filenameToUpload}`,
-                Body  : fs.createReadStream(path.join('/tmp/', filenameToUpload)),
-                ACL   : 'public-read'
-            };
-
-            S3.putObject(options, function (err, data) {
-                if (err) {
-                    utils.generateSystemMessage(`--- Error uploading ${filenameToUpload} ---`);
-                    console.log(err);
-                    reject();
-                    return;
+                let options = {
+                    Bucket: constants.CLAMAV_BUCKET_NAME,
+                    Key: `${constants.PATH_TO_AV_DEFINITIONS}/${filenameToUpload}`,
+                    Body: fs.createReadStream(
+                        path.join('/tmp/', filenameToUpload)
+                    ),
+                    ACL: 'public-read',
                 }
-                resolve();
-                utils.generateSystemMessage(`--- Finished uploading ${filenameToUpload} ---`);
-            });
 
-        });
-    });
+                S3.putObject(options, function (err, data) {
+                    if (err) {
+                        utils.generateSystemMessage(
+                            `--- Error uploading ${filenameToUpload} ---`
+                        )
+                        console.log(err)
+                        reject()
+                        return
+                    }
+                    resolve()
+                    utils.generateSystemMessage(
+                        `--- Finished uploading ${filenameToUpload} ---`
+                    )
+                })
+            })
+        }
+    )
 
-    return await Promise.all(uploadPromises);
+    return await Promise.all(uploadPromises)
 }
 
 /**
@@ -113,20 +132,22 @@ async function uploadAVDefinitions() {
  */
 function scanLocalFile(pathToFile) {
     try {
-        execSync(`${constants.PATH_TO_CLAMAV} -v -a --stdout -d /tmp/ '/tmp/download/${pathToFile}'`);
+        execSync(
+            `${constants.PATH_TO_CLAMAV} -v -a --stdout -d /tmp/ '/tmp/download/${pathToFile}'`
+        )
 
-        utils.generateSystemMessage('SUCCESSFUL SCAN, FILE CLEAN');
+        utils.generateSystemMessage('SUCCESSFUL SCAN, FILE CLEAN')
 
-        return constants.STATUS_CLEAN_FILE;
-    } catch(err) {
+        return constants.STATUS_CLEAN_FILE
+    } catch (err) {
         // Error status 1 means that the file is infected.
         if (err.status === 1) {
-            utils.generateSystemMessage('SUCCESSFUL SCAN, FILE INFECTED');
-            return constants.STATUS_INFECTED_FILE;
+            utils.generateSystemMessage('SUCCESSFUL SCAN, FILE INFECTED')
+            return constants.STATUS_INFECTED_FILE
         } else {
-            utils.generateSystemMessage('-- SCAN FAILED --');
-            console.log(err);
-            return constants.STATUS_ERROR_PROCESSING_FILE;
+            utils.generateSystemMessage('-- SCAN FAILED --')
+            console.log(err)
+            return constants.STATUS_ERROR_PROCESSING_FILE
         }
     }
 }
@@ -135,5 +156,5 @@ module.exports = {
     updateAVDefinitonsWithFreshclam: updateAVDefinitonsWithFreshclam,
     downloadAVDefinitions: downloadAVDefinitions,
     uploadAVDefinitions: uploadAVDefinitions,
-    scanLocalFile: scanLocalFile
-};
+    scanLocalFile: scanLocalFile,
+}

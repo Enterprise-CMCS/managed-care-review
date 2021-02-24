@@ -1,4 +1,3 @@
-
 service: app-web
 
 plugins:
@@ -31,10 +30,10 @@ custom:
   cloudfrontInvalidate:
     - distributionId: ${self:custom.ui_cloudfront_distribution_id}
       items:
-        - "/*"
+        - '/*'
     - distributionId: ${self:custom.storybook_cloudfront_distribution_id}
       items:
-        - "/*"
+        - '/*'
 
   scripts:
     hooks:
