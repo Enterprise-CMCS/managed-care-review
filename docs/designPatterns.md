@@ -16,10 +16,9 @@
                     let value = try!(foo);
                     // Use value ...
                 }
-            
-
-
-
+    * Modules
+        * use index.ts to be explicit about what is exported to the rest of the app
+        * inside a package you can have individual files export more so that they can be more easily tested.
     * Typescript 
         * Union types versus enums 
     * Local Dev 
@@ -43,3 +42,6 @@
         * Naming conventions 
         * Composition conventions 
         * Scss scoped to component using uswds design tokens  
+
+
+This maybe could be linked in the PR template, these are all things we'd want to watch for as we do reviews. 

@@ -27,10 +27,10 @@ This is the base URL that all requests are sent to from app-web
 ### `REACT_APP_COGNITO_*`
 Read by `app-api`
 
-* REACT_APP_NOOO_COGNITO_REGION
-* REACT_APP_NOOO_COGNITO_ID_POOL_ID
-* REACT_APP_NOOO_COGNITO_USER_POOL_ID
-* REACT_APP_NOOO_COGNITO_USER_POOL_CLIENT_ID
+* REACT_APP_COGNITO_REGION
+* REACT_APP_COGNITO_ID_POOL_ID
+* REACT_APP_COGNITO_USER_POOL_ID
+* REACT_APP_COGNITO_USER_POOL_CLIENT_ID
 
 These four env vars configure cognito auth from the browser. They are ignored if `REACT_APP_LOCAL_LOGIN` is set to `true` and thus are only set in deployed environments.
 
