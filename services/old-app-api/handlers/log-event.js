@@ -1,5 +1,5 @@
 export async function main(event, context) {
-    console.log(event.body)
+    console.log(event.body);
 
     return {
         statusCode: 200,
@@ -8,5 +8,5 @@ export async function main(event, context) {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Credentials': true,
         },
-    }
+    };
 }

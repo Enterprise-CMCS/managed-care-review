@@ -1,50 +1,50 @@
-import React, { useState, useEffect } from 'react'
-import { useHistory } from 'react-router-dom'
-import { onError } from '../libs/errorLib'
-import { FormGroup, FormControl, ControlLabel } from 'react-bootstrap'
-import LoaderButton from '../components/LoaderButton'
-import './Profile.css'
-import { Auth } from 'aws-amplify'
-import PhoneInput from 'react-phone-input-2'
-import 'react-phone-input-2/lib/style.css'
+import React, { useState, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
+import { onError } from '../libs/errorLib';
+import { FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
+import LoaderButton from '../components/LoaderButton';
+import './Profile.css';
+import { Auth } from 'aws-amplify';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 
 export default function Profile() {
-    const history = useHistory()
-    const [email, setEmail] = useState('')
-    const [firstName, setFirstName] = useState('')
-    const [lastName, setLastName] = useState('')
-    const [phoneNumber, setPhoneNumber] = useState('')
-    const [isLoading, setIsLoading] = useState(false)
+    const history = useHistory();
+    const [email, setEmail] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const capitalize = (s) => {
-        if (typeof s !== 'string') return ''
-        return s.charAt(0).toUpperCase() + s.slice(1)
-    }
+        if (typeof s !== 'string') return '';
+        return s.charAt(0).toUpperCase() + s.slice(1);
+    };
 
     useEffect(() => {
         function loadProfile() {
-            return Auth.currentUserInfo()
+            return Auth.currentUserInfo();
         }
 
         async function onLoad() {
             try {
-                const userInfo = await loadProfile()
-                setEmail(userInfo.attributes.email)
-                setFirstName(capitalize(userInfo.attributes.given_name))
-                setLastName(capitalize(userInfo.attributes.family_name))
+                const userInfo = await loadProfile();
+                setEmail(userInfo.attributes.email);
+                setFirstName(capitalize(userInfo.attributes.given_name));
+                setLastName(capitalize(userInfo.attributes.family_name));
                 setPhoneNumber(
                     formatPhoneNumberForForm(userInfo.attributes.phone_number)
-                )
+                );
             } catch (e) {
-                onError(e)
+                onError(e);
             }
         }
 
-        onLoad()
-    }, [])
+        onLoad();
+    }, []);
 
     function validatePhoneNumber(phone) {
-        if (phone === '1' || phone === '') return true
-        return phone.length === 11
+        if (phone === '1' || phone === '') return true;
+        return phone.length === 11;
     }
     function validateForm() {
         return (
@@ -52,36 +52,36 @@ export default function Profile() {
             firstName.length > 0 &&
             lastName.length &&
             validatePhoneNumber(phoneNumber)
-        )
+        );
     }
 
     function saveProfile(user, userAttributes) {
-        return Auth.updateUserAttributes(user, userAttributes)
+        return Auth.updateUserAttributes(user, userAttributes);
     }
 
     function formatPhoneNumberForForm(phone) {
-        if (phone == null) return ''
-        return phone.replace('+', '')
+        if (phone == null) return '';
+        return phone.replace('+', '');
     }
 
     function formatPhoneNumberForSubmission(phone) {
-        if (phone === '1' || phone === '' || phone == null) return ''
-        return '+' + phone.replace('+', '')
+        if (phone === '1' || phone === '' || phone == null) return '';
+        return '+' + phone.replace('+', '');
     }
     async function handleSubmit(event) {
-        event.preventDefault()
-        setIsLoading(true)
-        let user = await Auth.currentAuthenticatedUser()
+        event.preventDefault();
+        setIsLoading(true);
+        let user = await Auth.currentAuthenticatedUser();
         try {
             await saveProfile(user, {
                 given_name: firstName,
                 family_name: lastName,
                 phone_number: formatPhoneNumberForSubmission(phoneNumber),
-            })
-            history.push('/')
+            });
+            history.push('/');
         } catch (e) {
-            onError(e)
-            setIsLoading(false)
+            onError(e);
+            setIsLoading(false);
         }
     }
 
@@ -129,5 +129,5 @@ export default function Profile() {
                 </LoaderButton>
             </form>
         </div>
-    )
+    );
 }

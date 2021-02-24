@@ -1,22 +1,22 @@
-import AWS from 'aws-sdk'
-import atomicCounter from 'dynamodb-atomic-counter'
+import AWS from 'aws-sdk';
+import atomicCounter from 'dynamodb-atomic-counter';
 
-const dyanmoConfig = {}
+const dyanmoConfig = {};
 
 // ugly but OK, here's where we will check the environment
-const atomicTableName = process.env.atomicCounterTableName
-const endpoint = process.env.DYNAMODB_URL
+const atomicTableName = process.env.atomicCounterTableName;
+const endpoint = process.env.DYNAMODB_URL;
 if (endpoint) {
-    dyanmoConfig.endpoint = endpoint
-    dyanmoConfig.accessKeyId = 'LOCAL_FAKE_KEY'
-    dyanmoConfig.secretAccessKey = 'LOCAL_FAKE_SECRET'
+    dyanmoConfig.endpoint = endpoint;
+    dyanmoConfig.accessKeyId = 'LOCAL_FAKE_KEY';
+    dyanmoConfig.secretAccessKey = 'LOCAL_FAKE_SECRET';
 } else {
-    dyanmoConfig['region'] = 'us-east-1'
+    dyanmoConfig['region'] = 'us-east-1';
 }
 
-const client = new AWS.DynamoDB.DocumentClient(dyanmoConfig)
+const client = new AWS.DynamoDB.DocumentClient(dyanmoConfig);
 
-atomicCounter.config.update(dyanmoConfig)
+atomicCounter.config.update(dyanmoConfig);
 
 export default {
     get: (params) => client.get(params).promise(),
@@ -26,4 +26,4 @@ export default {
     delete: (params) => client.delete(params).promise(),
     increment: (params) =>
         atomicCounter.increment(params, { tableName: atomicTableName }),
-}
+};

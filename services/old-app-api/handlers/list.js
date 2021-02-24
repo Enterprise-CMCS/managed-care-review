@@ -1,16 +1,16 @@
-import handler from './../libs/handler-lib'
-import dynamoDb from './../libs/dynamodb-lib'
+import handler from './../libs/handler-lib';
+import dynamoDb from './../libs/dynamodb-lib';
 
 export const main = handler(async (event, context) => {
-    const logger = context.logger
+    const logger = context.logger;
 
     // If this invokation is a prewarm, do nothing and return.
     if (event.source == 'serverless-plugin-warmup') {
-        logger.addKey('is_warmup', true)
-        return null
+        logger.addKey('is_warmup', true);
+        return null;
     }
 
-    logger.addKey('user_id', event.requestContext.identity.cognitoIdentityId)
+    logger.addKey('user_id', event.requestContext.identity.cognitoIdentityId);
 
     const params = {
         TableName: process.env.tableName,
@@ -24,10 +24,10 @@ export const main = handler(async (event, context) => {
         ExpressionAttributeValues: {
             ':userId': event.requestContext.identity.cognitoIdentityId,
         },
-    }
+    };
 
-    const result = await dynamoDb.query(params)
+    const result = await dynamoDb.query(params);
 
     // Return the matching list of items in response body
-    return result.Items
-})
+    return result.Items;
+});

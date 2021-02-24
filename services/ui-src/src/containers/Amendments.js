@@ -1,43 +1,43 @@
-import React, { useRef, useState, useEffect } from 'react'
-import { useParams, useHistory } from 'react-router-dom'
-import { onError } from '../libs/errorLib'
-import { FormGroup, FormControl, ControlLabel } from 'react-bootstrap'
-import LoaderButton from '../components/LoaderButton'
-import config from '../config'
-import './Amendments.css'
-import Select from 'react-select'
-import Switch from 'react-ios-switch'
-import { territoryList } from '../libs/territoryLib'
-import * as url from 'url'
-import { getAmendment, updateAmendment, deleteAmendment } from '../libs/api'
+import React, { useRef, useState, useEffect } from 'react';
+import { useParams, useHistory } from 'react-router-dom';
+import { onError } from '../libs/errorLib';
+import { FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
+import LoaderButton from '../components/LoaderButton';
+import config from '../config';
+import './Amendments.css';
+import Select from 'react-select';
+import Switch from 'react-ios-switch';
+import { territoryList } from '../libs/territoryLib';
+import * as url from 'url';
+import { getAmendment, updateAmendment, deleteAmendment } from '../libs/api';
 
 export default function Amendments({ fileUpload, fileURLResolver }) {
-    const file = useRef(null)
-    const { id } = useParams()
-    const history = useHistory()
-    const [amendment, setAmendment] = useState(null)
-    const [transmittalNumber, setTransmittalNumber] = useState('')
-    const [email, setEmail] = useState('')
-    const [firstName, setFirstName] = useState('')
-    const [lastName, setLastName] = useState('')
-    const [territory, setTerritory] = useState('')
-    const [urgent, setUrgent] = useState(false)
-    const [comments, setComments] = useState('')
-    const [isLoading, setIsLoading] = useState(false)
-    const [isDeleting, setIsDeleting] = useState(false)
+    const file = useRef(null);
+    const { id } = useParams();
+    const history = useHistory();
+    const [amendment, setAmendment] = useState(null);
+    const [transmittalNumber, setTransmittalNumber] = useState('');
+    const [email, setEmail] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [territory, setTerritory] = useState('');
+    const [urgent, setUrgent] = useState(false);
+    const [comments, setComments] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const capitalize = (s) => {
-        if (typeof s !== 'string') return ''
-        return s.charAt(0).toUpperCase() + s.slice(1)
-    }
+        if (typeof s !== 'string') return '';
+        return s.charAt(0).toUpperCase() + s.slice(1);
+    };
 
     useEffect(() => {
         function loadAmendment() {
-            return getAmendment(id)
+            return getAmendment(id);
         }
 
         async function onLoad() {
             try {
-                const amendment = await loadAmendment()
+                const amendment = await loadAmendment();
                 const {
                     email,
                     firstName,
@@ -47,27 +47,27 @@ export default function Amendments({ fileUpload, fileURLResolver }) {
                     urgent,
                     comments,
                     attachment,
-                } = amendment
+                } = amendment;
                 if (attachment) {
-                    console.log(fileURLResolver)
+                    console.log(fileURLResolver);
                     // We must await the url.  Otherwise, the attachmentURL is a Promise.
-                    amendment.attachmentURL = await fileURLResolver(attachment)
+                    amendment.attachmentURL = await fileURLResolver(attachment);
                 }
-                setEmail(email)
-                setFirstName(capitalize(firstName))
-                setLastName(capitalize(lastName))
-                setTerritory(territory)
-                setTransmittalNumber(transmittalNumber)
-                setUrgent(urgent)
-                setComments(comments)
-                setAmendment(amendment)
+                setEmail(email);
+                setFirstName(capitalize(firstName));
+                setLastName(capitalize(lastName));
+                setTerritory(territory);
+                setTransmittalNumber(transmittalNumber);
+                setUrgent(urgent);
+                setComments(comments);
+                setAmendment(amendment);
             } catch (e) {
-                onError(e)
+                onError(e);
             }
         }
 
-        onLoad()
-    }, [id, fileURLResolver])
+        onLoad();
+    }, [id, fileURLResolver]);
 
     function validateForm() {
         return (
@@ -75,40 +75,40 @@ export default function Amendments({ fileUpload, fileURLResolver }) {
             firstName.length > 0 &&
             lastName.length > 0 &&
             territory.length > 0
-        )
+        );
     }
 
     function formatFilename(str) {
-        return str.replace(/^\w+-/, '')
+        return str.replace(/^\w+-/, '');
     }
 
     function handleFileChange(event) {
-        file.current = event.target.files[0]
+        file.current = event.target.files[0];
     }
 
     function saveAmendment(amendment) {
-        return updateAmendment(id, amendment)
+        return updateAmendment(id, amendment);
     }
 
     async function handleSubmit(event) {
-        let attachment
+        let attachment;
 
-        event.preventDefault()
+        event.preventDefault();
 
         if (file.current && file.current.size > config.MAX_ATTACHMENT_SIZE) {
             alert(
                 `Please pick a file smaller than ${
                     config.MAX_ATTACHMENT_SIZE / 1000000
                 } MB.`
-            )
-            return
+            );
+            return;
         }
 
-        setIsLoading(true)
+        setIsLoading(true);
 
         try {
             if (file.current) {
-                attachment = await fileUpload(file.current)
+                attachment = await fileUpload(file.current);
             }
             await saveAmendment({
                 email,
@@ -119,59 +119,59 @@ export default function Amendments({ fileUpload, fileURLResolver }) {
                 urgent,
                 comments,
                 attachment: attachment || amendment.attachment,
-            })
-            history.push('/')
+            });
+            history.push('/');
         } catch (e) {
-            onError(e)
-            setIsLoading(false)
+            onError(e);
+            setIsLoading(false);
         }
     }
 
     async function handleDelete(event) {
-        event.preventDefault()
+        event.preventDefault();
 
         const confirmed = window.confirm(
             'Are you sure you want to delete this amendment?'
-        )
+        );
 
         if (!confirmed) {
-            return
+            return;
         }
 
-        setIsDeleting(true)
+        setIsDeleting(true);
 
         try {
-            await deleteAmendment(id)
-            history.push('/')
+            await deleteAmendment(id);
+            history.push('/');
         } catch (e) {
-            onError(e)
-            setIsDeleting(false)
+            onError(e);
+            setIsDeleting(false);
         }
     }
 
     function openAttachment(event, attachmentURL) {
-        event.preventDefault()
-        var http = require('http')
-        const uri = url.parse(attachmentURL)
+        event.preventDefault();
+        var http = require('http');
+        const uri = url.parse(attachmentURL);
         var options = {
             hostname: uri.hostname,
             port: uri.port,
             path: `${uri.pathname}${uri.search}`,
             protocol: uri.protocol,
             method: 'GET',
-        }
+        };
         var req = http.request(options, function (res) {
-            req.abort() // The presigned S3 URL is only valid for GET requests, but we only want the headers.
+            req.abort(); // The presigned S3 URL is only valid for GET requests, but we only want the headers.
             if (res.statusCode.toString() === '403') {
                 window.open(
                     process.env.PUBLIC_URL + '/scan-in-progress.html',
                     '_blank'
-                )
+                );
             } else {
-                window.open(attachmentURL, '_blank')
+                window.open(attachmentURL, '_blank');
             }
-        })
-        req.end()
+        });
+        req.end();
     }
 
     return (
@@ -226,7 +226,7 @@ export default function Amendments({ fileUpload, fileURLResolver }) {
                         <Select
                             name="form-field-name"
                             value={territoryList.filter(function (option) {
-                                return option.value === territory
+                                return option.value === territory;
                             })}
                             isDisabled={true}
                             onChange={(e) => setTerritory(e.value)}
@@ -297,5 +297,5 @@ export default function Amendments({ fileUpload, fileURLResolver }) {
                 </form>
             )}
         </div>
-    )
+    );
 }

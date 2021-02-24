@@ -1,16 +1,16 @@
-import handler from './../libs/handler-lib'
-import dynamoDb from './../libs/dynamodb-lib'
+import handler from './../libs/handler-lib';
+import dynamoDb from './../libs/dynamodb-lib';
 
 export const main = handler(async (event, context) => {
-    const logger = context.logger
+    const logger = context.logger;
 
     // If this invokation is a prewarm, do nothing and return.
     if (event.source == 'serverless-plugin-warmup') {
-        logger.addKey('is_warmup', true)
-        return null
+        logger.addKey('is_warmup', true);
+        return null;
     }
 
-    const data = JSON.parse(event.body)
+    const data = JSON.parse(event.body);
     const params = {
         TableName: process.env.tableName,
         // 'Key' defines the partition key and sort key of the item to be updated
@@ -38,9 +38,9 @@ export const main = handler(async (event, context) => {
         // where ALL_NEW returns all attributes of the item after the update; you
         // can inspect 'result' below to see how it works with different settings
         ReturnValues: 'ALL_NEW',
-    }
+    };
 
-    await dynamoDb.update(params)
+    await dynamoDb.update(params);
 
-    return { status: true }
-})
+    return { status: true };
+});

@@ -1,36 +1,36 @@
-import React, { useState, useEffect } from 'react'
-import { PageHeader, ListGroup, ListGroupItem } from 'react-bootstrap'
-import { useAppContext } from '../libs/contextLib'
-import { onError } from '../libs/errorLib'
-import './Home.css'
-import { listAmendments } from '../libs/api'
-import { LinkContainer } from 'react-router-bootstrap'
+import React, { useState, useEffect } from 'react';
+import { PageHeader, ListGroup, ListGroupItem } from 'react-bootstrap';
+import { useAppContext } from '../libs/contextLib';
+import { onError } from '../libs/errorLib';
+import './Home.css';
+import { listAmendments } from '../libs/api';
+import { LinkContainer } from 'react-router-bootstrap';
 
 export default function Home() {
-    const [amendments, setAmendments] = useState([])
-    const { isAuthenticated } = useAppContext()
-    const [isLoading, setIsLoading] = useState(true)
+    const [amendments, setAmendments] = useState([]);
+    const { isAuthenticated } = useAppContext();
+    const [isLoading, setIsLoading] = useState(true);
     useEffect(() => {
         async function onLoad() {
             if (!isAuthenticated) {
-                return
+                return;
             }
 
             try {
-                const amendments = await loadAmendments()
-                setAmendments(amendments)
+                const amendments = await loadAmendments();
+                setAmendments(amendments);
             } catch (e) {
-                onError(e)
+                onError(e);
             }
 
-            setIsLoading(false)
+            setIsLoading(false);
         }
 
-        onLoad()
-    }, [isAuthenticated])
+        onLoad();
+    }, [isAuthenticated]);
 
     function loadAmendments() {
-        return listAmendments()
+        return listAmendments();
     }
 
     function renderAmendmentsList(amendments) {
@@ -58,7 +58,7 @@ export default function Home() {
                     </ListGroupItem>
                 </LinkContainer>
             )
-        )
+        );
     }
 
     function renderLander() {
@@ -70,7 +70,7 @@ export default function Home() {
                     application
                 </p>
             </div>
-        )
+        );
     }
 
     function renderAmendments() {
@@ -81,12 +81,12 @@ export default function Home() {
                     {!isLoading && renderAmendmentsList(amendments)}
                 </ListGroup>
             </div>
-        )
+        );
     }
 
     return (
         <div className="Home">
             {isAuthenticated ? renderAmendments() : renderLander()}
         </div>
-    )
+    );
 }

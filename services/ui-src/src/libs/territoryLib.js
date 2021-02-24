@@ -235,4 +235,4 @@ export const territoryList = [
         label: 'Wyoming',
         value: 'WY',
     },
-]
+];

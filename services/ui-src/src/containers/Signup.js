@@ -1,17 +1,17 @@
-import React, { useState } from 'react'
-import { useHistory } from 'react-router-dom'
+import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import {
     HelpBlock,
     FormGroup,
     FormControl,
     ControlLabel,
-} from 'react-bootstrap'
-import LoaderButton from '../components/LoaderButton'
-import { useAppContext } from '../libs/contextLib'
-import { useFormFields } from '../libs/hooksLib'
-import { onError } from '../libs/errorLib'
-import './Signup.css'
-import { Auth } from 'aws-amplify'
+} from 'react-bootstrap';
+import LoaderButton from '../components/LoaderButton';
+import { useAppContext } from '../libs/contextLib';
+import { useFormFields } from '../libs/hooksLib';
+import { onError } from '../libs/errorLib';
+import './Signup.css';
+import { Auth } from 'aws-amplify';
 
 export default function Signup() {
     const [fields, handleFieldChange] = useFormFields({
@@ -21,11 +21,11 @@ export default function Signup() {
         password: '',
         confirmPassword: '',
         confirmationCode: '',
-    })
-    const history = useHistory()
-    const [newUser, setNewUser] = useState(null)
-    const { userHasAuthenticated } = useAppContext()
-    const [isLoading, setIsLoading] = useState(false)
+    });
+    const history = useHistory();
+    const [newUser, setNewUser] = useState(null);
+    const { userHasAuthenticated } = useAppContext();
+    const [isLoading, setIsLoading] = useState(false);
 
     function validateForm() {
         return (
@@ -34,17 +34,17 @@ export default function Signup() {
             fields.email.length > 0 &&
             fields.password.length > 0 &&
             fields.password === fields.confirmPassword
-        )
+        );
     }
 
     function validateConfirmationForm() {
-        return fields.confirmationCode.length > 0
+        return fields.confirmationCode.length > 0;
     }
 
     async function handleSubmit(event) {
-        event.preventDefault()
+        event.preventDefault();
 
-        setIsLoading(true)
+        setIsLoading(true);
 
         try {
             const newUser = await Auth.signUp({
@@ -54,29 +54,29 @@ export default function Signup() {
                     given_name: fields.firstName,
                     family_name: fields.lastName,
                 },
-            })
-            setIsLoading(false)
-            setNewUser(newUser)
+            });
+            setIsLoading(false);
+            setNewUser(newUser);
         } catch (e) {
-            onError(e)
-            setIsLoading(false)
+            onError(e);
+            setIsLoading(false);
         }
     }
 
     async function handleConfirmationSubmit(event) {
-        event.preventDefault()
+        event.preventDefault();
 
-        setIsLoading(true)
+        setIsLoading(true);
 
         try {
-            await Auth.confirmSignUp(fields.email, fields.confirmationCode)
-            await Auth.signIn(fields.email, fields.password)
+            await Auth.confirmSignUp(fields.email, fields.confirmationCode);
+            await Auth.signIn(fields.email, fields.password);
 
-            userHasAuthenticated(true)
-            history.push('/')
+            userHasAuthenticated(true);
+            history.push('/');
         } catch (e) {
-            onError(e)
-            setIsLoading(false)
+            onError(e);
+            setIsLoading(false);
         }
     }
 
@@ -103,7 +103,7 @@ export default function Signup() {
                     Verify
                 </LoaderButton>
             </form>
-        )
+        );
     }
 
     function renderForm() {
@@ -162,12 +162,12 @@ export default function Signup() {
                     Signup
                 </LoaderButton>
             </form>
-        )
+        );
     }
 
     return (
         <div className="Signup">
             {newUser === null ? renderForm() : renderConfirmationForm()}
         </div>
-    )
+    );
 }
