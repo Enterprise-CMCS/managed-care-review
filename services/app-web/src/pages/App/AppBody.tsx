@@ -12,7 +12,7 @@ import { useAuth } from '../../contexts/AuthContext'
 // This is where it's safe to use useAuth and useQuery
 export function AppBody(): React.ReactElement {
     const { loggedInUser } = useAuth()
-    const [alert, setAlert] = React.useState<null | React.FC>(null)
+    const [alert, setAlert] = React.useState(false)
 
     return (
         <div id="App" className={styles.app}>

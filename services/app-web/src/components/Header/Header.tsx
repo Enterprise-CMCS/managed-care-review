@@ -7,7 +7,6 @@ import { ReactComponent as VaIcon } from '../../assets/icons/va-icon.svg'
 import { ReactComponent as MnIcon } from '../../assets/icons/mn-icon.svg'
 import styles from './Header.module.scss'
 
-import { Error400 } from '../../pages/Errors/Error400'
 import { StateCode } from '../../common-code/domain-models'
 import { Logo } from '../Logo/Logo'
 import { useAuth } from '../../contexts/AuthContext'
@@ -32,7 +31,7 @@ const getStateInfo = (
 export type HeaderProps = {
     stateCode?: StateCode
     activePage?: string
-    setAlert?: React.Dispatch<React.SetStateAction<React.FC>>
+    setAlert?: React.Dispatch<boolean>
     user?: {
         name: string
         email: string
@@ -69,7 +68,7 @@ export const Header = ({
             })
             .catch((e) => {
                 console.log('Logout failed HERE ', e)
-                setAlert && setAlert(Error400)
+                setAlert && setAlert(true)
             })
         history.push('/auth')
     }
