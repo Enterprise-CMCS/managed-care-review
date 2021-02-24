@@ -1,5 +1,3 @@
-import { MockedProvider} from '@apollo/client/testing'
-
 import './storybook.scss';
 import '../src/index.scss';
 

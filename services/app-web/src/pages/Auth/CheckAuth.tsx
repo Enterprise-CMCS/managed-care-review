@@ -11,6 +11,7 @@ export function CheckAuth(): React.ReactElement {
     const [authStatus, setAuthStatus] = useState<AuthStatus>('Unknown')
 
     const [checkAuth, { called, loading, data }] = useLazyQuery(HELLO_WORLD, {
+        fetchPolicy: 'network-only',
         variables: { language: 'english' },
     })
 
@@ -19,7 +20,7 @@ export function CheckAuth(): React.ReactElement {
         console.log('checking auth')
 
         checkAuth()
-        if (data) {
+        if (data?.hello) {
             setAuthStatus('Authenticated')
         } else {
             setAuthStatus('Unauthenticated')

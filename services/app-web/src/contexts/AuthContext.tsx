@@ -74,7 +74,7 @@ function AuthProvider({
         // if the error is 403, then that's all gravy, just set logged in user to undefined
         // lets try and record what different errors are here.
         // call a generic graphql connection etc. error here.
-    } else if (data) {
+    } else if (data?.hello) {
         if (!isAuthenticated) {
             setLoggedInUser(data.hello)
         }
@@ -87,7 +87,7 @@ function AuthProvider({
                     resolve()
                 })
                 .catch((e) => {
-                    console.log('an error checking auth', e)
+                    console.log('Check Auth Failed.', e)
                     reject(e)
                 })
         })
@@ -102,22 +102,18 @@ function AuthProvider({
                   return new Promise<void>((resolve, reject) => {
                       realLogout()
                           .then(() => {
-                              setLoggedInUser(undefined)
                               client.resetStore()
+                              setLoggedInUser(undefined)
                               resolve()
                           })
                           .catch((e) => {
-                              console.log(
-                                  'Errror From The Logout Result BAD',
-                                  e
-                              )
+                              console.log('Logout Failed.', e)
                               reject(e)
                           })
                   })
               }
 
     const storeLoggedInUser = (user: UserType) => {
-        console.log('store logged in User', user)
         setLoggedInUser(user)
     }
 
