@@ -84,14 +84,22 @@ describe('Header', () => {
         })
 
         it('has heading with users state', () => {
-            // TODO: make a loop
+            // TODO: make a loop that goes through all states and checks icons/headings
             renderWithProviders(<Header stateCode="MN" />, {
                 authProvider: loggedInAuthProps,
             })
             expect(screen.getByRole('heading')).toHaveTextContent('Minnesota')
         })
 
-        it.todo('has heading with the current program')
+        it('has heading with the current page', () => {
+            renderWithProviders(
+                <Header stateCode="MN" activePage={'Dashboard'} />,
+                {
+                    authProvider: loggedInAuthProps,
+                }
+            )
+            expect(screen.getByRole('heading')).toHaveTextContent('Dashboard')
+        })
 
         it('displays sign out button', async () => {
             renderWithProviders(
@@ -172,14 +180,14 @@ describe('Header', () => {
             expect(mockAlert).toHaveBeenCalled()
         })
 
-        it('shows signin link when signout button is clicked and logout is successful', async () => {
+        it('shows signin link when logout is successful', async () => {
             const spy = jest.spyOn(AuthApi, 'signOut').mockResolvedValue(null)
 
             const apolloProviderMock = {
                 mocks: [
                     {
                         request: { query: HELLO_WORLD },
-                        error: new Error('Unauthorized request'),
+                        result: { data: {} },
                     },
                 ],
             }
@@ -201,39 +209,6 @@ describe('Header', () => {
 
             await waitFor(() => expect(spy).toHaveBeenCalledTimes(1))
             expect(screen.getByRole('link', { name: /Sign In/i })).toBeVisible()
-        })
-
-        it('displays as signed out when logout is unsuccessful', async () => {
-            const spy = jest
-                .spyOn(AuthApi, 'signOut')
-                .mockRejectedValue('This logout failed!')
-            const apolloProviderMock = {
-                mocks: [
-                    {
-                        request: { query: HELLO_WORLD },
-                        result: { data: {} },
-                    },
-                ],
-            }
-
-            renderWithProviders(
-                <Header
-                    user={{
-                        name: 'Bob test user',
-                        email: 'bob@dmas.mn.gov',
-                    }}
-                />,
-                {
-                    authProvider: loggedInAuthProps,
-                    apolloProvider: apolloProviderMock,
-                }
-            )
-            userEvent.click(screen.getByRole('button', { name: /Sign out/i }))
-
-            await waitFor(() => expect(spy).toHaveBeenCalledTimes(1))
-            expect(
-                screen.queryByRole('link', { name: /Sign In/i })
-            ).toBeVisible()
         })
     })
 })
