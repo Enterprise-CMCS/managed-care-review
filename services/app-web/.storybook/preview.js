@@ -1,5 +1,5 @@
-import {AuthProvider} from '../src/contexts/AuthContext'
 import { MockedProvider} from '@apollo/client/testing'
+
 import './storybook.scss';
 import '../src/index.scss';
 
@@ -8,12 +8,4 @@ export const parameters = {
   layout: 'fullscreen',
 }
 
-// TODO: add ability to customize auth context and look into apollo client/context storybook addons
-export const decorators = [
-  (Story) => (
-    <MockedProvider>
-    <AuthProvider localLogin>
-      <Story />
-    </AuthProvider>
-    </MockedProvider>
-  )]
+

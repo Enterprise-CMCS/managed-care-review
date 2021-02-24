@@ -8,20 +8,6 @@ import { Header } from './Header'
 import { UserType } from '../../common-code/domain-models'
 import { HELLO_WORLD } from '../../api'
 
-const loggedInAuthProps = {
-    localLogin: false,
-    initialize: {
-        user: {
-            name: 'Bob test user',
-            email: 'bob@dmas.mn.gov',
-        } as UserType,
-    },
-}
-
-const loggedOutAuthProps = {
-    localLogin: false,
-}
-
 describe('Header', () => {
     it('renders without errors', async () => {
         renderWithProviders(<Header />, { authProvider: loggedOutAuthProps })
@@ -31,6 +17,10 @@ describe('Header', () => {
     })
 
     describe('when logged out', () => {
+        const loggedOutAuthProps = {
+            localLogin: false,
+        }
+
         it('has Medicaid logo image link that redirects to /dashboard', async () => {
             renderWithProviders(<Header />, {
                 authProvider: loggedOutAuthProps,
@@ -72,6 +62,16 @@ describe('Header', () => {
     })
 
     describe('when logged in', () => {
+        const loggedInAuthProps = {
+            localLogin: false,
+            initialize: {
+                user: {
+                    name: 'Bob test user',
+                    email: 'bob@dmas.mn.gov',
+                } as UserType,
+            },
+        }
+
         it('has Medicaid logo image link that redirects to /dashboard', async () => {
             renderWithProviders(<Header />, { authProvider: loggedInAuthProps })
             const logoImage = screen.getByRole('img')
