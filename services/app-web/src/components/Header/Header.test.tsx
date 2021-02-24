@@ -170,9 +170,7 @@ describe('Header', () => {
             expect(screen.getByRole('link', { name: /Sign In/i })).toBeVisible()
         })
 
-        // TODO - what should happen to signin/signout button if logout fails? Where should error display?
-        // eslint-disable-next-line jest/no-disabled-tests
-        it.skip('displays error when signout button is clicked and logout is unsuccessful', async () => {
+        it('displays error when signout button is clicked and logout is unsuccessful', async () => {
             const spy = jest
                 .spyOn(AuthApi, 'signOut')
                 .mockRejectedValue('This test should fail!')
@@ -203,6 +201,9 @@ describe('Header', () => {
 
             await waitFor(() => expect(spy).toHaveBeenCalledTimes(1))
             expect(screen.queryByRole('link', { name: /Sign In/i })).toBeNull()
+            expect(
+                screen.queryByText('Oops! Something went wrong')
+            ).toBeInTheDocument()
         })
     })
 })

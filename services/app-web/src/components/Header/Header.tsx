@@ -7,6 +7,7 @@ import { ReactComponent as VaIcon } from '../../assets/icons/va-icon.svg'
 import { ReactComponent as MnIcon } from '../../assets/icons/mn-icon.svg'
 import styles from './Header.module.scss'
 
+import { Error400 } from '../../pages/Errors/Error400'
 import { StateCode } from '../../common-code/domain-models'
 import { Logo } from '../Logo/Logo'
 import { useAuth } from '../../contexts/AuthContext'
@@ -66,6 +67,7 @@ export const Header = ({
             })
             .catch((e) => {
                 console.log('Logout failed ', e)
+                return Error400
             })
         history.push('/auth')
     }
