@@ -139,6 +139,39 @@ describe('Header', () => {
             await waitFor(() => expect(spy).toHaveBeenCalledTimes(1))
         })
 
+        it('calls setAlert when logout is unsuccessful', async () => {
+            const spy = jest
+                .spyOn(AuthApi, 'signOut')
+                .mockRejectedValue('This logout failed!')
+            const mockAlert = jest.fn()
+            const apolloProviderMock = {
+                mocks: [
+                    {
+                        request: { query: HELLO_WORLD },
+                        result: { data: {} },
+                    },
+                ],
+            }
+
+            renderWithProviders(
+                <Header
+                    setAlert={mockAlert}
+                    user={{
+                        name: 'Bob test user',
+                        email: 'bob@dmas.mn.gov',
+                    }}
+                />,
+                {
+                    authProvider: loggedInAuthProps,
+                    apolloProvider: apolloProviderMock,
+                }
+            )
+            userEvent.click(screen.getByRole('button', { name: /Sign out/i }))
+
+            await waitFor(() => expect(spy).toHaveBeenCalledTimes(1))
+            expect(mockAlert).toHaveBeenCalled()
+        })
+
         it('shows signin link when signout button is clicked and logout is successful', async () => {
             const spy = jest.spyOn(AuthApi, 'signOut').mockResolvedValue(null)
 
@@ -170,11 +203,10 @@ describe('Header', () => {
             expect(screen.getByRole('link', { name: /Sign In/i })).toBeVisible()
         })
 
-        it.only('displays error when signout button is clicked and logout is unsuccessful', async () => {
+        it('displays as signed out when logout is unsuccessful', async () => {
             const spy = jest
                 .spyOn(AuthApi, 'signOut')
                 .mockRejectedValue('This logout failed!')
-
             const apolloProviderMock = {
                 mocks: [
                     {
@@ -186,7 +218,6 @@ describe('Header', () => {
 
             renderWithProviders(
                 <Header
-                    stateCode={'MN'}
                     user={{
                         name: 'Bob test user',
                         email: 'bob@dmas.mn.gov',
@@ -200,8 +231,9 @@ describe('Header', () => {
             userEvent.click(screen.getByRole('button', { name: /Sign out/i }))
 
             await waitFor(() => expect(spy).toHaveBeenCalledTimes(1))
-            expect(screen.queryByRole('link', { name: /Sign In/i })).toBeNull()
-            expect(screen.getByTestId('Error400')).toBeInTheDocument()
+            expect(
+                screen.queryByRole('link', { name: /Sign In/i })
+            ).toBeVisible()
         })
     })
 })

@@ -5,13 +5,14 @@ import styles from './AppBody.module.scss'
 
 import { AppRoutes } from './AppRoutes'
 import { CheckAuth } from '../Auth/CheckAuth'
+import { Error400 } from '../Errors/Error400'
 import { Footer } from '../../components/Footer/Footer'
 import { Header } from '../../components/Header/Header'
 import { useAuth } from '../../contexts/AuthContext'
 
-// This is where it's safe to use useAuth and useQuery
 export function AppBody(): React.ReactElement {
     const { loggedInUser } = useAuth()
+    // TODO: create an DialogContext to handle all app alerts
     const [alert, setAlert] = React.useState(false)
 
     return (
@@ -26,7 +27,7 @@ export function AppBody(): React.ReactElement {
                 setAlert={setAlert}
             />
             <main id="main-content" className={styles.mainContent} role="main">
-                {alert && alert({})}
+                {alert && Error400}
                 <AppRoutes />
                 <CheckAuth />
             </main>
