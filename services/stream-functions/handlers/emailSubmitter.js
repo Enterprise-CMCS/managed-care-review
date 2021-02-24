@@ -1,35 +1,35 @@
-var aws = require('aws-sdk')
-var ses = new aws.SES({ region: 'us-east-1' })
+var aws = require('aws-sdk');
+var ses = new aws.SES({ region: 'us-east-1' });
 
 exports.handler = function (event, context, callback) {
-    console.log('Received event:', JSON.stringify(event, null, 2))
+    console.log('Received event:', JSON.stringify(event, null, 2));
     event.Records.forEach(function (record) {
         var params = (function (eventName) {
             switch (eventName) {
                 case 'INSERT':
-                    return insertParams(record)
+                    return insertParams(record);
                 case 'MODIFY':
-                    return modifyParams(record)
+                    return modifyParams(record);
                 case 'REMOVE':
-                    return removeParams(record)
+                    return removeParams(record);
                 default:
-                    return 30
+                    return 30;
             }
-        })(record.eventName)
+        })(record.eventName);
 
         ses.sendEmail(params, function (err, data) {
-            callback(null, { err: err, data: data })
+            callback(null, { err: err, data: data });
             if (err) {
-                console.log(err)
-                context.fail(err)
+                console.log(err);
+                context.fail(err);
             } else {
-                console.log(data)
-                context.succeed(event)
+                console.log(data);
+                context.succeed(event);
             }
-        })
-    })
-    callback(null, 'message')
-}
+        });
+    });
+    callback(null, 'message');
+};
 
 function insertParams(record) {
     return {
@@ -61,7 +61,7 @@ APS Team
             },
         },
         Source: process.env.emailSource,
-    }
+    };
 }
 
 function modifyParams(record) {
@@ -94,7 +94,7 @@ APS Team
             },
         },
         Source: process.env.emailSource,
-    }
+    };
 }
 
 function removeParams(record) {
@@ -127,5 +127,5 @@ APS Team
             },
         },
         Source: process.env.emailSource,
-    }
+    };
 }

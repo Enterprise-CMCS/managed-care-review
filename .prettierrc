@@ -10,6 +10,12 @@
             "options": {
                 "tabWidth": 2
             }
+        },
+        {
+            "files": "*.js",
+            "options": {
+                "semi": true
+            }
         }
     ]
 }

@@ -1,5 +1,5 @@
-const constants = require('./constants')
-const execSync = require('child_process').execSync
+const constants = require('./constants');
+const execSync = require('child_process').execSync;
 
 /**
  * Generates the set of tags that will be used to tag the files of S3.
@@ -18,7 +18,7 @@ function generateTagSet(virusScanStatus) {
                 Value: new Date().getTime().toString(),
             },
         ],
-    }
+    };
 }
 
 /**
@@ -26,17 +26,17 @@ function generateTagSet(virusScanStatus) {
  * We need that to cleanup the /tmp/ folder after the download of the definitions.
  */
 function cleanupFolder(folderToClean) {
-    let result = execSync(`ls -l ${folderToClean}`)
+    let result = execSync(`ls -l ${folderToClean}`);
 
-    console.log('-- Folder before cleanup--')
-    console.log(result.toString())
+    console.log('-- Folder before cleanup--');
+    console.log(result.toString());
 
-    execSync(`rm -rf ${folderToClean}*`)
+    execSync(`rm -rf ${folderToClean}*`);
 
-    result = execSync(`ls -l ${folderToClean}`)
+    result = execSync(`ls -l ${folderToClean}`);
 
-    console.log('-- Folder after cleanup --')
-    console.log(result.toString())
+    console.log('-- Folder after cleanup --');
+    console.log(result.toString());
 }
 
 /**
@@ -45,13 +45,13 @@ function cleanupFolder(folderToClean) {
  * @return {string} decoded key.
  */
 function extractKeyFromS3Event(s3Event) {
-    let key = s3Event['Records'][0]['s3']['object']['key']
+    let key = s3Event['Records'][0]['s3']['object']['key'];
 
     if (!key) {
-        throw new Error('Unable to retrieve key information from the event')
+        throw new Error('Unable to retrieve key information from the event');
     }
 
-    return decodeURIComponent(key).replace(/\+/g, ' ')
+    return decodeURIComponent(key).replace(/\+/g, ' ');
 }
 
 /**
@@ -60,13 +60,13 @@ function extractKeyFromS3Event(s3Event) {
  * @return {string} Bucket
  */
 function extractBucketFromS3Event(s3Event) {
-    let bucketName = s3Event['Records'][0]['s3']['bucket']['name']
+    let bucketName = s3Event['Records'][0]['s3']['bucket']['name'];
 
     if (!bucketName) {
-        throw new Error('Unable to retrieve bucket information from the event')
+        throw new Error('Unable to retrieve bucket information from the event');
     }
 
-    return bucketName
+    return bucketName;
 }
 
 /**
@@ -75,13 +75,15 @@ function extractBucketFromS3Event(s3Event) {
  * @return {string} decoded key.
  */
 function extractKeyFromApiEvent(s3Event) {
-    let key = s3Event.s3Key
+    let key = s3Event.s3Key;
 
     if (!key) {
-        throw new Error('Unable to retrieve key information from the api event')
+        throw new Error(
+            'Unable to retrieve key information from the api event'
+        );
     }
 
-    return key.replace(/\+/g, ' ')
+    return key.replace(/\+/g, ' ');
 }
 
 /**
@@ -90,15 +92,15 @@ function extractKeyFromApiEvent(s3Event) {
  * @return {string} Bucket
  */
 function extractBucketFromApiEvent(s3Event) {
-    let bucketName = s3Event.s3Bucket
+    let bucketName = s3Event.s3Bucket;
 
     if (!bucketName) {
         throw new Error(
             'Unable to retrieve bucket information from the api event'
-        )
+        );
     }
 
-    return bucketName
+    return bucketName;
 }
 
 /**
@@ -107,9 +109,9 @@ function extractBucketFromApiEvent(s3Event) {
  * @return {string} Formatted message.
  */
 function generateSystemMessage(systemMessage) {
-    let finalMessage = `--- ${systemMessage} ---`
-    console.log(finalMessage)
-    return finalMessage
+    let finalMessage = `--- ${systemMessage} ---`;
+    console.log(finalMessage);
+    return finalMessage;
 }
 
 module.exports = {
@@ -120,4 +122,4 @@ module.exports = {
     extractKeyFromApiEvent: extractKeyFromApiEvent,
     extractBucketFromApiEvent: extractBucketFromApiEvent,
     generateSystemMessage: generateSystemMessage,
-}
+};
