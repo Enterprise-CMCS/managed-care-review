@@ -6,8 +6,6 @@ import { useAuth } from '../../contexts/AuthContext'
 import { Dashboard } from '../Dashboard/Dashboard'
 import { Landing } from '../Landing/Landing'
 import { LocalAuth } from '../Auth/LocalAuth'
-import { GenericError } from '../Errors/GenericError'
-import { Error404 } from '../Errors/Error404'
 
 export const AppRoutes = (): React.ReactElement => {
     const { loggedInUser, localLogin } = useAuth()
