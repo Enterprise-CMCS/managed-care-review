@@ -1,9 +1,11 @@
 import yargs from 'yargs'
 import * as dotenv from 'dotenv'
 import request from 'request'
-import { spawnSync } from 'child_process'
+
+import { commandMustSucceedSync } from './localProcess.js'
 import LabeledProcessRunner from './runner.js'
 import { envFileMissingExamples } from './env.js' // What the WHAT? why doesn't this import right without the `.js`??
+import { checkStageAccess, getWebAuthVars } from './serverless.js'
 
 // run_db_locally runs the local db
 async function run_db_locally(runner: LabeledProcessRunner) {
@@ -125,6 +127,82 @@ function check_url_is_up(url: string): Promise<boolean> {
     })
 }
 
+// Pulls a bunch of configuration out of a given AWS environment and sets it as env vars for app-web to run against
+// Note: The environment is made up of the _stage_ which defaults to your current git branch
+// and the AWS Account, which is determined by which AWS credentials you get out of cloudtamer (dev, val, or prod) usually dev
+async function run_web_against_aws(
+    stageNameOpt: string | undefined = undefined
+) {
+    // by default, review apps are created with the stage name set as the current branch name
+    const stageName =
+        stageNameOpt !== undefined
+            ? stageNameOpt
+            : commandMustSucceedSync('git', ['branch', '--show-current'])
+
+    if (stageName === '') {
+        console.log(
+            'Error: you do not appear to be on a git branch so we cannot auto-detect what stage to attach to.\n',
+            'Either checkout the deployed branch or specify --stage explicitly.'
+        )
+        process.exit(1)
+    }
+
+    console.log('Attempting to access stage:', stageName)
+    // Test to see if we can read info from serverless. This is likely to trip folks up who haven't
+    // configured their AWS keys correctly or if they have an invalid stage name.
+    const serverlessConnection = checkStageAccess(stageName)
+    switch (serverlessConnection) {
+        case 'AWS_TOKEN_ERROR': {
+            console.log(
+                'Error: Invalid token attempting to read AWS Cloudformation\n',
+                'Likely, you do not have aws configured right. You will need AWS tokens from cloudwatch configured\n',
+                'See the AWS Token section of the README for more details.\n\n'
+            )
+            process.exit(1)
+        }
+        case 'STAGE_ERROR': {
+            console.log(
+                `Error: stack with id ${stageName} does not exist\n`,
+                "If you didn't set one explicitly, maybe you haven't pushed this branch yet to deploy a review app?"
+            )
+            process.exit(1)
+        }
+        case 'UNKNOWN_ERROR': {
+            console.log(
+                'Unexpected Error attempting to read AWS Cloudformation.'
+            )
+            process.exit(2)
+        }
+    }
+
+    // Now, we've confirmed we are configured to pull data out of serverless x cloudformation
+    console.log('Access confirmed. Fetching config vars')
+    const { region, idPool, userPool, userPoolClient } = getWebAuthVars(
+        stageName
+    )
+
+    const apiBase = commandMustSucceedSync(
+        './output.sh',
+        ['app-api', 'ApiGatewayRestApiUrl', stageName],
+        {
+            cwd: './services',
+        }
+    )
+
+    // set them
+    process.env.PORT = '3003' // run hybrid on a different port
+    process.env.REACT_APP_LOCAL_LOGIN = 'false' // override local_login in .env
+    process.env.REACT_APP_API_URL = apiBase
+    process.env.REACT_APP_COGNITO_REGION = region
+    process.env.REACT_APP_COGNITO_ID_POOL_ID = idPool
+    process.env.REACT_APP_COGNITO_USER_POOL_ID = userPool
+    process.env.REACT_APP_COGNITO_USER_POOL_CLIENT_ID = userPoolClient
+
+    // run it
+    const runner = new LabeledProcessRunner()
+    await run_web_locally(runner)
+}
+
 async function run_all_tests(run_unit: boolean, run_online: boolean) {
     const runner = new LabeledProcessRunner()
 
@@ -208,8 +286,8 @@ function main() {
     dotenv.config()
 
     // add git hash as APP_VERSION
-    const appVersion = spawnSync('scripts/app_version.sh')
-    process.env.APP_VERSION = appVersion.stdout.toString().trim()
+    const appVersion = commandMustSucceedSync('scripts/app_version.sh')
+    process.env.APP_VERSION = appVersion
 
     /* AVAILABLE COMMANDS
       The command definitions in yargs
@@ -226,58 +304,89 @@ function main() {
             'run system locally. If no flags are passed, runs all services',
             (yargs) => {
                 return yargs
-                    .boolean('storybook')
-                    .boolean('web')
-                    .boolean('api')
-                    .boolean('s3')
+                    .option('storybook', {
+                        type: 'boolean',
+                        describe: 'run storybook locally',
+                        default: false,
+                    })
+                    .option('web', {
+                        type: 'boolean',
+                        describe: 'run web locally',
+                        default: false,
+                    })
+                    .option('api', {
+                        type: 'boolean',
+                        describe: 'run api locally',
+                        default: false,
+                    })
+                    .option('s3', {
+                        type: 'boolean',
+                        describe: 'run s3 locally',
+                        default: false,
+                    })
             },
             (args) => {
-                // By default args will have 2 keys since it looks something like when run without a flag { _: [ 'local' ], '$0': 'build_dev/dev.js' }
-                // Only allow one additional flag to be used by limiting keys to 3
-                if (args && Object.keys(args).length > 3)
-                    throw new Error(
-                        'You can only run ./dev local without flags (for launching all services) or with one flag at a time'
-                    )
                 const runner = new LabeledProcessRunner()
+
+                if (!(args.storybook || args.web || args.api || args.s3)) {
+                    // if no args were set, run everytihng.
+                    run_all_locally()
+                    return
+                }
 
                 if (args.storybook) {
                     run_sb_locally(runner)
-                } else if (args.web) {
+                }
+                if (args.web) {
                     run_web_locally(runner)
-                } else if (args.api) {
+                }
+                if (args.api) {
                     run_api_locally(runner)
-                } else if (args.s3) {
+                }
+                if (args.s3) {
                     run_s3_locally(runner)
-                } else {
-                    run_all_locally()
                 }
             }
         )
-
         .command(
-            'test',
-            'run tests. If no flags are passed, runs both --unit and --online',
+            'hybrid',
+            'run app-web locally connected to the review app deployed for this branch',
             (yargs) => {
-                return yargs.boolean('unit').boolean('online')
+                return yargs.option('stage', {
+                    type: 'string',
+                    describe:
+                        'an alternative Serverless stage in your AWS account to run against',
+                })
             },
             (args) => {
-                let run_unit = false
-                let run_online = false
-
+                run_web_against_aws(args.stage)
+            }
+        )
+        .command(
+            'test',
+            'run tests. If no flags are passed runs both --unit and --online',
+            (yargs) => {
+                return yargs
+                    .option('unit', {
+                        type: 'boolean',
+                        describe: 'run all unit tests',
+                        default: false,
+                    })
+                    .option('online', {
+                        type: 'boolean',
+                        describe:
+                            'run run all tests that run against a live instance. Confiugre with APPLICATION_ENDPOINT',
+                        default: false,
+                    })
+            },
+            (args) => {
                 // If no test flags are passed, default to running everything.
-                if (args.unit == null && args.online == null) {
-                    run_unit = true
-                    run_online = true
-                } else {
-                    if (args.unit) {
-                        run_unit = true
-                    }
-                    if (args.online) {
-                        run_online = true
-                    }
+                if (!(args.unit || args.online)) {
+                    args.unit = true
+                    args.online = true
                 }
 
-                run_all_tests(run_unit, run_online)
+                run_all_tests(args.unit, args.online)
             }
         )
         .command(
@@ -288,7 +397,9 @@ function main() {
                 run_all_lint()
             }
         )
-        .demandCommand(1, '').argv // this prints out the help if you don't call a subcommand
+        .demandCommand(1, '')
+        .help()
+        .strict().argv // this prints out the help if you don't call a subcommand
 }
 
 // I'd love for there to be a check we can do like you do in python
