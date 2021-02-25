@@ -8,7 +8,12 @@ export function commandMustSucceedSync(
 ): string {
 	const result = spawnSync(cmd, args, opts)
 	if (result.status != 0) {
-		console.log('stdout:', result.stderr, 'stderr:', result.stdout)
+		console.log(
+			'stdout:',
+			result.stderr.toString(),
+			'stderr:',
+			result.stdout.toString()
+		)
 		throw new Error(
 			`an unexpected error occured attempting to run $ ${cmd} ${
 				args ? args.join(' ') : ''

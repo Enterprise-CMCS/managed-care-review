@@ -139,6 +139,7 @@ async function run_web_against_aws(
             ? stageNameOpt
             : commandMustSucceedSync('git', ['branch', '--show-current'])
 
+    console.log('Attempting to access stage:', stageName)
     // Test to see if we can read info from serverless. This is likely to trip folks up who haven't
     // configured their AWS keys correctly or if they have an invalid stage name.
     const serverlessConnection = checkStageAccess(stageName)
@@ -167,7 +168,7 @@ async function run_web_against_aws(
     }
 
     // Now, we've confirmed we are configured to pull data out of serverless x cloudformation
-    console.log('fetching config vars for ', stageName)
+    console.log('Access confirmed. Fetching config vars')
     const { region, idPool, userPool, userPoolClient } = getWebAuthVars(
         stageName
     )
