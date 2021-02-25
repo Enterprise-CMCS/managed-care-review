@@ -296,24 +296,25 @@ function main() {
                     .boolean('s3')
             },
             (args) => {
-                // By default args will have 2 keys since it looks something like when run without a flag { _: [ 'local' ], '$0': 'build_dev/dev.js' }
-                // Only allow one additional flag to be used by limiting keys to 3
-                if (args && Object.keys(args).length > 3)
-                    throw new Error(
-                        'You can only run ./dev local without flags (for launching all services) or with one flag at a time'
-                    )
                 const runner = new LabeledProcessRunner()
+
+                if (!(args.storybook || args.web || args.api || args.s3)) {
+                    // if no args were set, run everytihng.
+                    run_all_locally()
+                    return
+                }
 
                 if (args.storybook) {
                     run_sb_locally(runner)
-                } else if (args.web) {
+                }
+                if (args.web) {
                     run_web_locally(runner)
-                } else if (args.api) {
+                }
+                if (args.api) {
                     run_api_locally(runner)
-                } else if (args.s3) {
+                }
+                if (args.s3) {
                     run_s3_locally(runner)
-                } else {
-                    run_all_locally()
                 }
             }
         )
