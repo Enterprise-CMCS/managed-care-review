@@ -50,8 +50,8 @@ export function LocalAuth(): React.ReactElement {
     }
 
     return (
-        <GridContainer>
-            <h2>Local Login</h2>
+        <>
+            <h3>Local Login</h3>
             <div>Login as one of our hard coded users:</div>
             <CardGroup>
                 {localUsers.map((user) => {
@@ -83,6 +83,6 @@ export function LocalAuth(): React.ReactElement {
                     )
                 })}
             </CardGroup>
-        </GridContainer>
+        </>
     )
 }
