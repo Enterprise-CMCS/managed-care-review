@@ -1,6 +1,4 @@
 import React from 'react'
-import { GridContainer, Grid } from '@trussworks/react-uswds'
-
 import { Tabs } from './Tabs'
 import { TabPanel } from './TabPanel'
 

@@ -9,7 +9,7 @@ import styles from './Header.module.scss'
 
 import { StateCode } from '../../common-code/domain-models'
 import { Logo } from '../Logo/Logo'
-import { useAuth } from '../../pages/App/AuthContext'
+import { useAuth } from '../../contexts/AuthContext'
 import { useHistory } from 'react-router-dom'
 
 const getStateInfo = (
@@ -31,7 +31,7 @@ const getStateInfo = (
 export type HeaderProps = {
     stateCode?: StateCode
     activePage?: string
-    loggedIn: boolean
+    setAlert?: React.Dispatch<boolean>
     user?: {
         name: string
         email: string
@@ -44,10 +44,10 @@ export type HeaderProps = {
 export const Header = ({
     stateCode,
     activePage = 'Managed Care Dashboard',
-    loggedIn,
+    setAlert,
     user,
 }: HeaderProps): React.ReactElement => {
-    const { logout } = useAuth()
+    const { logout, isAuthenticated } = useAuth()
     const history = useHistory()
 
     const { stateName, StateIcon } = stateCode
@@ -67,7 +67,8 @@ export const Header = ({
                 console.log('Logout Success')
             })
             .catch((e) => {
-                console.log('Something went wrong ', e)
+                console.log('Logout failed HERE ', e)
+                setAlert && setAlert(true)
             })
         history.push('/auth')
     }
@@ -83,7 +84,7 @@ export const Header = ({
                                 alt="Medicaid.gov-Keeping America Healthy"
                             />
                         </NavLink>
-                        {loggedIn && user ? (
+                        {isAuthenticated && user ? (
                             <div className={styles.userInfo}>
                                 <span>{user.email}</span>
                                 <span className={styles.divider}>|</span>
@@ -109,7 +110,7 @@ export const Header = ({
                     </Grid>
                 </GridContainer>
             </div>
-            {loggedIn ? (
+            {isAuthenticated ? (
                 <div className={styles.dashboardHeading}>
                     <GridContainer>
                         <Grid row className="flex-align-center">

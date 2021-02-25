@@ -2,17 +2,13 @@ import React from 'react'
 import { Switch, Route, Redirect } from 'react-router-dom'
 
 import { Auth } from '../Auth/Auth'
-import { useAuth } from './AuthContext'
+import { useAuth } from '../../contexts/AuthContext'
 import { Dashboard } from '../Dashboard/Dashboard'
 import { Landing } from '../Landing/Landing'
 import { LocalAuth } from '../Auth/LocalAuth'
 
-type Props = {
-    localLogin: boolean
-}
-
-export const AppRoutes = ({ localLogin }: Props): React.ReactElement => {
-    const { loggedInUser } = useAuth()
+export const AppRoutes = (): React.ReactElement => {
+    const { loggedInUser, localLogin } = useAuth()
 
     const AuthenticatedRoutes = (): React.ReactElement => {
         return (

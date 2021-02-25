@@ -15,10 +15,23 @@ import {
 } from '../authn'
 
 // Construct a schema, using GraphQL schema language
+// TODO: add StateCode and Role
 const typeDefs = gql`
+<<<<<<< HEAD
+	type Query {
+		hello: User
+	}
+	type User {
+		role: String
+		email: String
+		state: String
+		name: String
+	}
+=======
     type Query {
         hello: String
     }
+>>>>>>> origin
 `
 
 // Provide resolver functions for your schema fields
@@ -42,16 +55,23 @@ const resolvers: IResolvers = {
                 )
             }
 
-            const userResult = await userFetcher(authProvider)
-            if (userResult.isErr()) {
-                throw new AuthenticationError(userResult.error.message)
-            }
+			try { 
+				const userResult = await userFetcher(authProvider)
+	
+				if (userResult.isErr()) {
+					throw new AuthenticationError(userResult.error.message)
+				}
+	
+				return userResult.value
 
-            const user = userResult.value
+			} 
+			catch {
+				console.log('PROBLEM YO')
+			}
 
-            return `Hello ${user.email}!`
-        },
-    },
+			
+		},
+	},
 }
 
 const server = new ApolloServer({
@@ -75,24 +95,24 @@ const server = new ApolloServer({
 function bodyMiddleware(
     wrapped: APIGatewayProxyHandler
 ): APIGatewayProxyHandler {
-    return function (event, context, completion) {
-        // For reasons I don't understand
-        // when graphql requests are sent by the amplify library to AWS
-        // they are arriving with some escaping that is breaking apollo server.
-        // This transformation attempts and fails to make things work again.
-        console.log('BODY MIDDLEWARE', event.body)
-        if (event.body !== null) {
-            console.log(
-                'MAYBE MIDDLEWARE',
-                JSON.stringify(JSON.parse(event.body))
-            )
-            event.body = JSON.stringify(JSON.parse(event.body))
-        }
+	return function (event, context, completion) {
+		// For reasons I don't understand
+		// when graphql requests are sent by the amplify library to AWS
+		// they are arriving with some escaping that is breaking apollo server.
+		// This transformation attempts and fails to make things work again.
+		console.log('BODY MIDDLEWARE', event.body)	
+		if (event.body !== null) {
+			console.log(
+				'MAYBE MIDDLEWARE',
+				JSON.stringify(JSON.parse(event.body))
+			)
+			event.body = JSON.stringify(JSON.parse(event.body))
+		}
 
-        // HACK, this string works, but the string we are sent does not.
-        event.body =
-            '{"operationName":"hello","variables":{},"query":"query hello {\\n  hello\\n}\\n"}'
-        console.log('AFTER MIDDLEWARE', event.body)
+		// HACK, this string works, but the string we are sent does not.
+		event.body =
+			'{"operationName":"hello","variables":{},"query":"query hello {\\n  hello { email state role name } \\n}\\n"}'
+		console.log('AFTER MIDDLEWARE', event.body)
 
         return wrapped(event, context, completion)
     }
