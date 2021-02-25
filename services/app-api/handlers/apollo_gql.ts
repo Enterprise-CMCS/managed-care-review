@@ -1,6 +1,4 @@
 // apollo_gql.js
-import { APIGatewayProxyHandler } from 'aws-lambda'
-
 import {
     ApolloServer,
     AuthenticationError,
@@ -71,8 +69,6 @@ const server = new ApolloServer({
         endpoint: '/local/graphql',
     },
     context: ({ event, context }) => {
-        console.log('CALLED ME', event, context)
-
         return {
             headers: event.headers,
             functionName: context.functionName,
