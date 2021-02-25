@@ -2,21 +2,22 @@
 import { APIGatewayProxyHandler } from 'aws-lambda'
 
 import {
-	ApolloServer,
-	AuthenticationError,
-	gql,
-	IResolvers,
+    ApolloServer,
+    AuthenticationError,
+    gql,
+    IResolvers,
 } from 'apollo-server-lambda'
 
 import {
-	userFromAuthProvider,
-	userFromCognitoAuthProvider,
-	userFromLocalAuthProvider,
+    userFromAuthProvider,
+    userFromCognitoAuthProvider,
+    userFromLocalAuthProvider,
 } from '../authn'
 
 // Construct a schema, using GraphQL schema language
 // TODO: add StateCode and Role
 const typeDefs = gql`
+<<<<<<< HEAD
 	type Query {
 		hello: User
 	}
@@ -26,28 +27,33 @@ const typeDefs = gql`
 		state: String
 		name: String
 	}
+=======
+    type Query {
+        hello: String
+    }
+>>>>>>> origin
 `
 
 // Provide resolver functions for your schema fields
 const resolvers: IResolvers = {
-	Query: {
-		hello: async (_parent, _args, context) => {
-			let userFetcher: userFromAuthProvider
+    Query: {
+        hello: async (_parent, _args, context) => {
+            let userFetcher: userFromAuthProvider
 
-			if (process.env.REACT_APP_LOCAL_LOGIN) {
-				userFetcher = userFromLocalAuthProvider
-			} else {
-				userFetcher = userFromCognitoAuthProvider
-			}
+            if (process.env.REACT_APP_LOCAL_LOGIN) {
+                userFetcher = userFromLocalAuthProvider
+            } else {
+                userFetcher = userFromCognitoAuthProvider
+            }
 
-			const authProvider =
-				context.event.requestContext.identity
-					.cognitoAuthenticationProvider
-			if (authProvider == undefined) {
-				throw new AuthenticationError(
-					'This should only be possible in DEV, AWS should always populate cogito values'
-				)
-			}
+            const authProvider =
+                context.event.requestContext.identity
+                    .cognitoAuthenticationProvider
+            if (authProvider == undefined) {
+                throw new AuthenticationError(
+                    'This should only be possible in DEV, AWS should always populate cogito values'
+                )
+            }
 
 			try { 
 				const userResult = await userFetcher(authProvider)
@@ -69,25 +75,25 @@ const resolvers: IResolvers = {
 }
 
 const server = new ApolloServer({
-	typeDefs,
-	resolvers,
-	playground: {
-		endpoint: '/local/graphql',
-	},
-	context: ({ event, context }) => {
-		console.log('CALLED ME', event, context)
+    typeDefs,
+    resolvers,
+    playground: {
+        endpoint: '/local/graphql',
+    },
+    context: ({ event, context }) => {
+        console.log('CALLED ME', event, context)
 
-		return {
-			headers: event.headers,
-			functionName: context.functionName,
-			event,
-			context,
-		}
-	},
+        return {
+            headers: event.headers,
+            functionName: context.functionName,
+            event,
+            context,
+        }
+    },
 })
 
 function bodyMiddleware(
-	wrapped: APIGatewayProxyHandler
+    wrapped: APIGatewayProxyHandler
 ): APIGatewayProxyHandler {
 	return function (event, context, completion) {
 		// For reasons I don't understand
@@ -108,15 +114,15 @@ function bodyMiddleware(
 			'{"operationName":"hello","variables":{},"query":"query hello {\\n  hello { email state role name } \\n}\\n"}'
 		console.log('AFTER MIDDLEWARE', event.body)
 
-		return wrapped(event, context, completion)
-	}
+        return wrapped(event, context, completion)
+    }
 }
 
 exports.graphqlHandler = bodyMiddleware(
-	server.createHandler({
-		cors: {
-			origin: true,
-			credentials: true,
-		},
-	})
+    server.createHandler({
+        cors: {
+            origin: true,
+            credentials: true,
+        },
+    })
 )

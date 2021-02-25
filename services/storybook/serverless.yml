@@ -14,23 +14,23 @@ resources:
     CreateDnsRecord:
       Fn::And:
         - Fn::Not:
-          - Fn::Equals:
-            - ""
-            - ${env:ROUTE_53_HOSTED_ZONE_ID, ""}
+            - Fn::Equals:
+                - ''
+                - ${env:ROUTE_53_HOSTED_ZONE_ID, ""}
         - Fn::Not:
-          - Fn::Equals:
-            - ""
-            - ${env:ROUTE_53_DOMAIN_NAME, ""}
+            - Fn::Equals:
+                - ''
+                - ${env:ROUTE_53_DOMAIN_NAME, ""}
     CreateCustomCloudFrontDomain:
       Fn::And:
         - Fn::Not:
-          - Fn::Equals:
-            - ""
-            - ${env:CLOUDFRONT_CERTIFICATE_ARN, ""}
+            - Fn::Equals:
+                - ''
+                - ${env:CLOUDFRONT_CERTIFICATE_ARN, ""}
         - Fn::Not:
-          - Fn::Equals:
-            - ""
-            - ${env:CLOUDFRONT_DOMAIN_NAME, ""}
+            - Fn::Equals:
+                - ''
+                - ${env:CLOUDFRONT_DOMAIN_NAME, ""}
   Resources:
     S3Bucket:
       Type: AWS::S3::Bucket
@@ -55,8 +55,8 @@ resources:
               Principal:
                 CanonicalUser:
                   Fn::GetAtt:
-                  - CloudFrontOriginAccessIdentity
-                  - S3CanonicalUserId
+                    - CloudFrontOriginAccessIdentity
+                    - S3CanonicalUserId
         Bucket: !Ref S3Bucket
     CloudFrontWebAcl:
       Type: AWS::WAFv2::WebACL
@@ -100,28 +100,27 @@ resources:
           Aliases:
             Fn::If:
               - CreateCustomCloudFrontDomain
-              -
-                - ${env:CLOUDFRONT_DOMAIN_NAME, ""}
+              - - ${env:CLOUDFRONT_DOMAIN_NAME, ""}
               - Ref: AWS::NoValue
           Origins:
-          - DomainName:
-              Fn::GetAtt:
-                - S3Bucket
-                - DomainName
-            Id: S3Origin
-            S3OriginConfig:
-              OriginAccessIdentity:
-                Fn::Join:
-                - ''
-                - - origin-access-identity/cloudfront/
-                  - Ref: CloudFrontOriginAccessIdentity
+            - DomainName:
+                Fn::GetAtt:
+                  - S3Bucket
+                  - DomainName
+              Id: S3Origin
+              S3OriginConfig:
+                OriginAccessIdentity:
+                  Fn::Join:
+                    - ''
+                    - - origin-access-identity/cloudfront/
+                      - Ref: CloudFrontOriginAccessIdentity
           Enabled: true
           HttpVersion: 'http2'
           DefaultRootObject: index.html
           DefaultCacheBehavior:
             AllowedMethods:
-            - GET
-            - HEAD
+              - GET
+              - HEAD
             Compress: true
             TargetOriginId: S3Origin
             ForwardedValues:
@@ -160,7 +159,6 @@ resources:
           EvaluateTargetHealth: false
         Type: A
 
-
   Outputs:
     S3BucketName:
       Value:
@@ -172,8 +170,7 @@ resources:
       Value:
         Fn::Join:
           - ''
-          -
-            - https://
+          - - https://
             - Fn::GetAtt:
-              - CloudFrontDistribution
-              - DomainName
+                - CloudFrontDistribution
+                - DomainName

@@ -1,24 +1,24 @@
-{   
+{
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-     "project": ["./tsconfig.json", "./services/*/tsconfig.json"],
-     "sourceType": "module"
+        "project": ["./tsconfig.json", "./services/*/tsconfig.json"],
+        "sourceType": "module"
     },
     "plugins": ["@typescript-eslint", "jsx-a11y"],
     "extends": [
-    "eslint:recommended",
-    "plugin:jest/recommended",
-    "plugin:jsx-a11y/recommended",
-    "plugin:@typescript-eslint/recommended",
-    "prettier",
-    "prettier/react",
-    "prettier/@typescript-eslint"
+        "eslint:recommended",
+        "plugin:jest/recommended",
+        "plugin:jsx-a11y/recommended",
+        "plugin:@typescript-eslint/recommended",
+        "prettier",
+        "prettier/react",
+        "prettier/@typescript-eslint"
     ],
     "rules": {},
     "overrides": [
-      {
-        "files": ["**/*.ts?(x)"],
-        "rules": {}
-      }
+        {
+            "files": ["**/*.ts?(x)"],
+            "rules": {}
+        }
     ]
-  }
+}

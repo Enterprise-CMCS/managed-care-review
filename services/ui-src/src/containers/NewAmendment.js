@@ -1,12 +1,12 @@
-import React, { useRef, useState } from "react";
-import { useHistory } from "react-router-dom";
-import { FormGroup, FormControl, ControlLabel } from "react-bootstrap";
-import LoaderButton from "../components/LoaderButton";
-import { onError } from "../libs/errorLib";
-import config from "../config";
-import "./NewAmendment.css";
-import { createAmendment } from "../libs/api";
-import { currentUserInfo } from "../libs/user";
+import React, { useRef, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
+import LoaderButton from '../components/LoaderButton';
+import { onError } from '../libs/errorLib';
+import config from '../config';
+import './NewAmendment.css';
+import { createAmendment } from '../libs/api';
+import { currentUserInfo } from '../libs/user';
 import Select from 'react-select';
 import Switch from 'react-ios-switch';
 import { territoryList } from '../libs/territoryLib';
@@ -14,17 +14,17 @@ import { territoryList } from '../libs/territoryLib';
 export default function NewAmendment({ fileUpload }) {
     const file = useRef(null);
     const history = useHistory();
-    const [email, setEmail] = useState("");
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
-    const [territory, setTerritory] = useState("");
+    const [email, setEmail] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [territory, setTerritory] = useState('');
     const [urgent, setUrgent] = useState(false);
-    const [comments, setComments] = useState("");
+    const [comments, setComments] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const capitalize = (s) => {
-        if (typeof s !== 'string') return ''
-        return s.charAt(0).toUpperCase() + s.slice(1)
-    }
+        if (typeof s !== 'string') return '';
+        return s.charAt(0).toUpperCase() + s.slice(1);
+    };
 
     async function populateUserInfo() {
         var userInfo = await currentUserInfo();
@@ -37,7 +37,12 @@ export default function NewAmendment({ fileUpload }) {
     populateUserInfo();
 
     function validateForm() {
-        return email.length > 0 && firstName.length > 0 && lastName.length > 0 && territory.length > 0 ;
+        return (
+            email.length > 0 &&
+            firstName.length > 0 &&
+            lastName.length > 0 &&
+            territory.length > 0
+        );
     }
 
     function handleFileChange(event) {
@@ -59,9 +64,19 @@ export default function NewAmendment({ fileUpload }) {
         setIsLoading(true);
 
         try {
-            const attachment = file.current ? await fileUpload(file.current) : null;
-            await createAmendment({ email, firstName, lastName, territory, urgent, comments, attachment });
-            history.push("/");
+            const attachment = file.current
+                ? await fileUpload(file.current)
+                : null;
+            await createAmendment({
+                email,
+                firstName,
+                lastName,
+                territory,
+                urgent,
+                comments,
+                attachment,
+            });
+            history.push('/');
         } catch (e) {
             onError(e);
             setIsLoading(false);
@@ -76,7 +91,7 @@ export default function NewAmendment({ fileUpload }) {
                     <FormControl
                         value={email}
                         disabled={true}
-                        onChange={e => setEmail(e.target.value)}
+                        onChange={(e) => setEmail(e.target.value)}
                     />
                 </FormGroup>
                 <FormGroup controlId="firstName">
@@ -84,7 +99,7 @@ export default function NewAmendment({ fileUpload }) {
                     <FormControl
                         value={firstName}
                         disabled={true}
-                        onChange={e => setFirstName(e.target.value)}
+                        onChange={(e) => setFirstName(e.target.value)}
                     />
                 </FormGroup>
                 <FormGroup controlId="lastName">
@@ -92,25 +107,28 @@ export default function NewAmendment({ fileUpload }) {
                     <FormControl
                         value={lastName}
                         disabled={true}
-                        onChange={e => setLastName(e.target.value)}
+                        onChange={(e) => setLastName(e.target.value)}
                     />
                 </FormGroup>
                 <FormGroup controlId="territory">
                     <ControlLabel>State/Territory</ControlLabel>
                     <Select
                         name="form-field-name"
-                        value={territoryList.filter(function(option) {
+                        value={territoryList.filter(function (option) {
                             return option.value === territory;
                         })}
-                        onChange={e => setTerritory(e.value)}
+                        onChange={(e) => setTerritory(e.value)}
                         options={territoryList}
                     />
                 </FormGroup>
                 <FormGroup controlId="urgent">
-                    <ControlLabel>This APS is classified as urgent &nbsp;</ControlLabel>
-                    <Switch controlId="urgent"
+                    <ControlLabel>
+                        This APS is classified as urgent &nbsp;
+                    </ControlLabel>
+                    <Switch
+                        controlId="urgent"
                         checked={urgent}
-                        onChange={e => setUrgent(!urgent)}
+                        onChange={(e) => setUrgent(!urgent)}
                     />
                 </FormGroup>
                 <FormGroup controlId="file">
@@ -122,7 +140,7 @@ export default function NewAmendment({ fileUpload }) {
                         componentClass="textarea"
                         placeholder="Additional comments here"
                         value={comments}
-                        onChange={e => setComments(e.target.value)}
+                        onChange={(e) => setComments(e.target.value)}
                     />
                 </FormGroup>
                 <LoaderButton

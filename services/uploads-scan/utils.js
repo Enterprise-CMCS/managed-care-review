@@ -10,14 +10,14 @@ function generateTagSet(virusScanStatus) {
     return {
         TagSet: [
             {
-                Key  : constants.VIRUS_STATUS_STATUS_KEY,
-                Value: virusScanStatus
+                Key: constants.VIRUS_STATUS_STATUS_KEY,
+                Value: virusScanStatus,
             },
             {
-                Key  : constants.VIRUS_SCAN_TIMESTAMP_KEY,
-                Value: new Date().getTime().toString()
-            }
-        ]
+                Key: constants.VIRUS_SCAN_TIMESTAMP_KEY,
+                Value: new Date().getTime().toString(),
+            },
+        ],
     };
 }
 
@@ -28,14 +28,14 @@ function generateTagSet(virusScanStatus) {
 function cleanupFolder(folderToClean) {
     let result = execSync(`ls -l ${folderToClean}`);
 
-    console.log("-- Folder before cleanup--");
+    console.log('-- Folder before cleanup--');
     console.log(result.toString());
 
     execSync(`rm -rf ${folderToClean}*`);
 
     result = execSync(`ls -l ${folderToClean}`);
 
-    console.log("-- Folder after cleanup --");
+    console.log('-- Folder after cleanup --');
     console.log(result.toString());
 }
 
@@ -48,10 +48,10 @@ function extractKeyFromS3Event(s3Event) {
     let key = s3Event['Records'][0]['s3']['object']['key'];
 
     if (!key) {
-        throw new Error("Unable to retrieve key information from the event");
+        throw new Error('Unable to retrieve key information from the event');
     }
 
-    return decodeURIComponent(key).replace(/\+/g,' ');
+    return decodeURIComponent(key).replace(/\+/g, ' ');
 }
 
 /**
@@ -63,7 +63,7 @@ function extractBucketFromS3Event(s3Event) {
     let bucketName = s3Event['Records'][0]['s3']['bucket']['name'];
 
     if (!bucketName) {
-        throw new Error("Unable to retrieve bucket information from the event");
+        throw new Error('Unable to retrieve bucket information from the event');
     }
 
     return bucketName;
@@ -78,10 +78,12 @@ function extractKeyFromApiEvent(s3Event) {
     let key = s3Event.s3Key;
 
     if (!key) {
-        throw new Error("Unable to retrieve key information from the api event");
+        throw new Error(
+            'Unable to retrieve key information from the api event'
+        );
     }
 
-    return key.replace(/\+/g,' ');
+    return key.replace(/\+/g, ' ');
 }
 
 /**
@@ -93,7 +95,9 @@ function extractBucketFromApiEvent(s3Event) {
     let bucketName = s3Event.s3Bucket;
 
     if (!bucketName) {
-        throw new Error("Unable to retrieve bucket information from the api event");
+        throw new Error(
+            'Unable to retrieve bucket information from the api event'
+        );
     }
 
     return bucketName;
@@ -111,11 +115,11 @@ function generateSystemMessage(systemMessage) {
 }
 
 module.exports = {
-    generateTagSet          : generateTagSet,
-    cleanupFolder           : cleanupFolder,
-    extractKeyFromS3Event   : extractKeyFromS3Event,
+    generateTagSet: generateTagSet,
+    cleanupFolder: cleanupFolder,
+    extractKeyFromS3Event: extractKeyFromS3Event,
     extractBucketFromS3Event: extractBucketFromS3Event,
-    extractKeyFromApiEvent   : extractKeyFromApiEvent,
+    extractKeyFromApiEvent: extractKeyFromApiEvent,
     extractBucketFromApiEvent: extractBucketFromApiEvent,
-    generateSystemMessage   : generateSystemMessage
+    generateSystemMessage: generateSystemMessage,
 };

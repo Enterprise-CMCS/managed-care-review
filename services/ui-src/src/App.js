@@ -1,13 +1,13 @@
-import { LinkContainer } from "react-router-bootstrap";
-import React, { useState, useEffect } from "react";
-import { Link, useHistory } from "react-router-dom";
-import { Nav, Navbar, NavItem, NavDropdown } from "react-bootstrap";
-import "./App.css";
-import Routes from "./Routes";
-import { AppContext } from "./libs/contextLib";
-import { Auth } from "aws-amplify";
-import { onError } from "./libs/errorLib";
-import { logEvent } from "./libs/logLib.js";
+import { LinkContainer } from 'react-router-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Link, useHistory } from 'react-router-dom';
+import { Nav, Navbar, NavItem, NavDropdown } from 'react-bootstrap';
+import './App.css';
+import Routes from './Routes';
+import { AppContext } from './libs/contextLib';
+import { Auth } from 'aws-amplify';
+import { onError } from './libs/errorLib';
+import { logEvent } from './libs/logLib.js';
 
 function App() {
     const [isAuthenticating, setIsAuthenticating] = useState(true);
@@ -21,14 +21,13 @@ function App() {
 
     async function onLoad() {
         try {
-            logEvent('onLoad', {'success': 'true'});
+            logEvent('onLoad', { success: 'true' });
 
             await Auth.currentSession();
             userHasAuthenticated(true);
             const userInfo = await Auth.currentUserInfo();
             setEmail(userInfo.attributes.email);
-        }
-        catch(e) {
+        } catch (e) {
             if (e !== 'No current user') {
                 onError(e);
             }
@@ -42,7 +41,7 @@ function App() {
 
         userHasAuthenticated(false);
 
-        history.push("/login");
+        history.push('/login');
     }
     return (
         !isAuthenticating && (
@@ -58,13 +57,13 @@ function App() {
                         <Nav pullRight>
                             {isAuthenticated ? (
                                 <>
-                                    <NavDropdown
-                                        id="User"
-                                        title={email}  >
+                                    <NavDropdown id="User" title={email}>
                                         <LinkContainer to="/profile">
                                             <NavItem>User Profile</NavItem>
                                         </LinkContainer>
-                                        <NavItem onClick={handleLogout}>Logout</NavItem>
+                                        <NavItem onClick={handleLogout}>
+                                            Logout
+                                        </NavItem>
                                     </NavDropdown>
                                 </>
                             ) : (
