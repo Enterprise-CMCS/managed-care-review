@@ -1,6 +1,3 @@
 {
-    "eslint.workingDirectories": [
-    "services/app-web",
-    "services/app-api"
-    ]
+    "eslint.workingDirectories": ["services/app-web", "services/app-api"]
 }

@@ -1,10 +1,10 @@
 {
-  "name": "stream-functions",
-  "description": "",
-  "version": "1.0.0",
-  "dependencies": {},
-  "devDependencies": {
-    "serverless-bundle": "^3.0.0",
-    "serverless-dotenv-plugin": "^3.0.0"
-  }
+    "name": "stream-functions",
+    "description": "",
+    "version": "1.0.0",
+    "dependencies": {},
+    "devDependencies": {
+        "serverless-bundle": "^3.0.0",
+        "serverless-dotenv-plugin": "^3.0.0"
+    }
 }

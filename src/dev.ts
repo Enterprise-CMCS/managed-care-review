@@ -97,6 +97,15 @@ async function run_all_clean() {
     )
 }
 
+async function run_all_lint() {
+    const runner = new LabeledProcessRunner()
+    runner.run_command_and_output(
+        'lint',
+        ['prettier', '.', '-w', '-u', '--ignore-path', '.gitignore'],
+        '.'
+    )
+}
+
 // run_all_locally runs all of our services locally
 async function run_all_locally() {
     const runner = new LabeledProcessRunner()
@@ -269,11 +278,8 @@ function main() {
     dotenv.config()
 
     // add git hash as APP_VERSION
-    const appVersion = spawnSync('scripts/app_version.sh')
-    if (appVersion.status != 0) {
-        throw new Error('failed to run a simple git script')
-    }
-    process.env.APP_VERSION = appVersion.stdout.toString().trim()
+    const appVersion = commandMustSucceedSync('scripts/app_version.sh')
+    process.env.APP_VERSION = appVersion
 
     /* AVAILABLE COMMANDS
       The command definitions in yargs
@@ -352,6 +358,14 @@ function main() {
                 }
 
                 run_all_tests(run_unit, run_online)
+            }
+        )
+        .command(
+            'lint',
+            'run all linters. This probably will be replaced by pre-commit.',
+            {},
+            () => {
+                run_all_lint()
             }
         )
         .demandCommand(1, '').argv // this prints out the help if you don't call a subcommand

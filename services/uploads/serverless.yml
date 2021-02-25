@@ -23,9 +23,9 @@ custom:
     directory: ./local_buckets
     cors: ./local_cors.xml
     buckets:
-      - local-uploads # This is a little silly, but I've spent enough time on it. 
-                              # the serverless-s3-local plugin starts any bucket with a BucketName
-                              # the attachments bucket has no name, so we need to make one up on our own
+      - local-uploads # This is a little silly, but I've spent enough time on it.
+        # the serverless-s3-local plugin starts any bucket with a BucketName
+        # the attachments bucket has no name, so we need to make one up on our own
 
 resources:
   Resources:
@@ -35,8 +35,7 @@ resources:
         # Set the CORS policy
         CorsConfiguration:
           CorsRules:
-            -
-              AllowedOrigins:
+            - AllowedOrigins:
                 - '*'
               AllowedHeaders:
                 - '*'

@@ -25,13 +25,13 @@ resources:
     CreateEmailConfiguration:
       Fn::Not:
         - Fn::Equals:
-          - ""
-          - ${env:SES_SOURCE_EMAIL_ADDRESS, ""}
+            - ''
+            - ${env:SES_SOURCE_EMAIL_ADDRESS, ""}
     CreatePermissionsBoundary:
       Fn::Not:
         - Fn::Equals:
-          - ""
-          - ${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
+            - ''
+            - ${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
   Resources:
     CognitoUserPool:
       Type: AWS::Cognito::UserPool
@@ -48,8 +48,7 @@ resources:
               SourceArn:
                 Fn::Join:
                   - ''
-                  -
-                    - 'arn:aws:ses:us-east-1:'
+                  - - 'arn:aws:ses:us-east-1:'
                     - Ref: AWS::AccountId
                     - ':identity/'
                     - '${env:SES_SOURCE_EMAIL_ADDRESS, ""}'
@@ -87,7 +86,7 @@ resources:
           - ClientId:
               Ref: CognitoUserPoolClient
             ProviderName:
-              Fn::GetAtt: [ "CognitoUserPool", "ProviderName" ]
+              Fn::GetAtt: ['CognitoUserPool', 'ProviderName']
     CognitoIdentityPoolRoles:
       Type: AWS::Cognito::IdentityPoolRoleAttachment
       Properties:
@@ -105,12 +104,11 @@ resources:
           Fn::If:
             - CreatePermissionsBoundary
             - Fn::Join:
-              - ''
-              -
-                - 'arn:aws:iam::'
-                - Ref: AWS::AccountId
-                - ':policy'
-                - '${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}'
+                - ''
+                - - 'arn:aws:iam::'
+                  - Ref: AWS::AccountId
+                  - ':policy'
+                  - '${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}'
             - Ref: AWS::NoValue
         AssumeRolePolicyDocument:
           Version: '2012-10-17'
@@ -144,8 +142,7 @@ resources:
                   Resource:
                     Fn::Join:
                       - ''
-                      -
-                        - 'arn:aws:execute-api:'
+                      - - 'arn:aws:execute-api:'
                         - Ref: AWS::Region
                         - ':'
                         - Ref: AWS::AccountId
@@ -158,12 +155,11 @@ resources:
                     - 's3:*'
                   Resource:
                     - Fn::Join:
-                      - ''
-                      -
-                        - ${self:custom.attachments_bucket_arn}
-                        - '/private/'
-                        - '$'
-                        - '{cognito-identity.amazonaws.com:sub}/*'
+                        - ''
+                        - - ${self:custom.attachments_bucket_arn}
+                          - '/private/'
+                          - '$'
+                          - '{cognito-identity.amazonaws.com:sub}/*'
 
   Outputs:
     UserPoolId:
