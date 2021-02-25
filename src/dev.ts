@@ -1,7 +1,6 @@
 import yargs from 'yargs'
 import * as dotenv from 'dotenv'
 import request from 'request'
-import { spawnSync } from 'child_process'
 
 import { commandMustSucceedSync } from './localProcess.js'
 import LabeledProcessRunner from './runner.js'
@@ -296,10 +295,26 @@ function main() {
             'run system locally. If no flags are passed, runs all services',
             (yargs) => {
                 return yargs
-                    .boolean('storybook')
-                    .boolean('web')
-                    .boolean('api')
-                    .boolean('s3')
+                    .option('storybook', {
+                        type: 'boolean',
+                        describe: 'run storybook locally',
+                        default: false,
+                    })
+                    .option('web', {
+                        type: 'boolean',
+                        describe: 'run web locally',
+                        default: false,
+                    })
+                    .option('api', {
+                        type: 'boolean',
+                        describe: 'run api locally',
+                        default: false,
+                    })
+                    .option('s3', {
+                        type: 'boolean',
+                        describe: 'run s3 locally',
+                        default: false,
+                    })
             },
             (args) => {
                 const runner = new LabeledProcessRunner()
@@ -328,36 +343,40 @@ function main() {
             'hybrid',
             'run app-web against the review app',
             (yargs) => {
-                return yargs.string('stack-name')
+                return yargs.option('stage', {
+                    type: 'string',
+                    describe: 'the stage in your AWS account to run against',
+                })
             },
-            () => {
-                run_web_against_aws()
+            (args) => {
+                run_web_against_aws(args.stage)
             }
         )
         .command(
             'test',
-            'run tests. If no flags are passed, runs both --unit and --online',
+            'run tests. If no flags are passed runs both --unit and --online',
             (yargs) => {
-                return yargs.boolean('unit').boolean('online')
+                return yargs
+                    .option('unit', {
+                        type: 'boolean',
+                        describe: 'run all unit tests',
+                        default: false,
+                    })
+                    .option('online', {
+                        type: 'boolean',
+                        describe:
+                            'run run all tests that run against a live instance. Confiugre with APPLICATION_ENDPOINT',
+                        default: false,
+                    })
             },
             (args) => {
-                let run_unit = false
-                let run_online = false
-
                 // If no test flags are passed, default to running everything.
-                if (args.unit == null && args.online == null) {
-                    run_unit = true
-                    run_online = true
-                } else {
-                    if (args.unit) {
-                        run_unit = true
-                    }
-                    if (args.online) {
-                        run_online = true
-                    }
+                if (!(args.unit || args.online)) {
+                    args.unit = true
+                    args.online = true
                 }
 
-                run_all_tests(run_unit, run_online)
+                run_all_tests(args.unit, args.online)
             }
         )
         .command(
@@ -368,7 +387,9 @@ function main() {
                 run_all_lint()
             }
         )
-        .demandCommand(1, '').argv // this prints out the help if you don't call a subcommand
+        .demandCommand(1, '')
+        .help()
+        .strict().argv // this prints out the help if you don't call a subcommand
 }
 
 // I'd love for there to be a check we can do like you do in python
