@@ -13,7 +13,7 @@ export const Footer = (): React.ReactElement => {
     return (
         <footer>
             <div className={styles.logosRow}>
-                <GridContainer className="padding-bottom-4 ">
+                <GridContainer>
                     <Grid row className="flex-justify flex-align-center">
                         <div className={styles.cmsLogos}>
                             <Logo
