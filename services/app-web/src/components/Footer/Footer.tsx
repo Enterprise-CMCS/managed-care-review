@@ -36,7 +36,7 @@ export const Footer = (): React.ReactElement => {
                 <GridContainer>
                     <Grid row className="flex-justify flex-align-center">
                         <span>
-                            Email mcrrspilot@cms.hhs.gov for help or support
+                            Email mcrrs-team@truss.works for help or support
                         </span>
                         <span>7500 Security Boulevard Baltimore, MD 21244</span>
                     </Grid>
