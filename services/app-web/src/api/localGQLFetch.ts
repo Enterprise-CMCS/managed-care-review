@@ -12,6 +12,14 @@ export async function localGQLFetch(
         throw 'unexpected GQL request'
     }
 
+    console.log('bodytype', typeof options.body)
+
+    if (options.body && typeof options.body === 'string') {
+        // options.body = options.body.substring(1, options.body.length - 2)
+    }
+
+    console.log('REL BODZY: ', options.body)
+
     const apiOptions = {
         response: true,
         body: options.body,
