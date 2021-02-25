@@ -17,16 +17,19 @@ const utils = require('./utils');
  * @param context
  */
 async function lambdaHandleEvent(event, context) {
-    utils.generateSystemMessage(`AV definition update start time: ${new Date()}`);
+    utils.generateSystemMessage(
+        `AV definition update start time: ${new Date()}`
+    );
 
     await utils.cleanupFolder('/tmp/');
 
     if (await clamav.updateAVDefinitonsWithFreshclam()) {
-
-        utils.generateSystemMessage("Folder content after freshclam ");
+        utils.generateSystemMessage('Folder content after freshclam ');
         await clamav.uploadAVDefinitions();
 
-        utils.generateSystemMessage(`AV definition update end time: ${new Date()}`);
+        utils.generateSystemMessage(
+            `AV definition update end time: ${new Date()}`
+        );
 
         return 'DEFINITION UPDATE SUCCESS';
     } else {
@@ -36,5 +39,5 @@ async function lambdaHandleEvent(event, context) {
 
 // Export for AWS Lambda
 module.exports = {
-    lambdaHandleEvent: lambdaHandleEvent
+    lambdaHandleEvent: lambdaHandleEvent,
 };

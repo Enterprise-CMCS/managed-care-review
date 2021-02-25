@@ -1,26 +1,26 @@
-import React, { useState } from "react";
-import { useHistory } from "react-router-dom";
+import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import {
     HelpBlock,
     FormGroup,
     FormControl,
-    ControlLabel
-} from "react-bootstrap";
-import LoaderButton from "../components/LoaderButton";
-import { useAppContext } from "../libs/contextLib";
-import { useFormFields } from "../libs/hooksLib";
-import { onError } from "../libs/errorLib";
-import "./Signup.css";
-import { Auth } from "aws-amplify";
+    ControlLabel,
+} from 'react-bootstrap';
+import LoaderButton from '../components/LoaderButton';
+import { useAppContext } from '../libs/contextLib';
+import { useFormFields } from '../libs/hooksLib';
+import { onError } from '../libs/errorLib';
+import './Signup.css';
+import { Auth } from 'aws-amplify';
 
 export default function Signup() {
     const [fields, handleFieldChange] = useFormFields({
-        firstName: "",
-        lastName: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-        confirmationCode: "",
+        firstName: '',
+        lastName: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        confirmationCode: '',
     });
     const history = useHistory();
     const [newUser, setNewUser] = useState(null);
@@ -52,8 +52,8 @@ export default function Signup() {
                 password: fields.password,
                 attributes: {
                     given_name: fields.firstName,
-                    family_name: fields.lastName
-                }
+                    family_name: fields.lastName,
+                },
             });
             setIsLoading(false);
             setNewUser(newUser);
@@ -73,7 +73,7 @@ export default function Signup() {
             await Auth.signIn(fields.email, fields.password);
 
             userHasAuthenticated(true);
-            history.push("/");
+            history.push('/');
         } catch (e) {
             onError(e);
             setIsLoading(false);

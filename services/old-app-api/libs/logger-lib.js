@@ -1,25 +1,23 @@
 export class RequestLogger {
+    constructor() {
+        this.logPairs = {};
+        this.logPairs['start'] = new Date();
+    }
 
-	constructor() {
-		this.logPairs= {};
-		this.logPairs['start'] = new Date();
-	}
+    addKey(key, value) {
+        this.logPairs[key] = value;
+    }
 
-	addKey(key, value) {
-		this.logPairs[key] = value;
-	}
+    addError(code, message) {
+        this.logPairs['error_code'] = code;
+        this.logPairs['error_message'] = message;
+    }
 
-	addError(code, message) {
-		this.logPairs['error_code'] = code;
-		this.logPairs['error_message'] = message;
-	}
+    writeLog() {
+        this.logPairs['end'] = new Date();
+        let duration_ms = this.logPairs['end'] - this.logPairs['start'];
+        this.logPairs['duration_ms'] = duration_ms;
 
-	writeLog() {
-		this.logPairs['end'] = new Date();
-		let duration_ms = this.logPairs['end'] - this.logPairs['start'];
-		this.logPairs['duration_ms'] = duration_ms;
-
-		console.log(JSON.stringify(this.logPairs));
-	}
-
+        console.log(JSON.stringify(this.logPairs));
+    }
 }
