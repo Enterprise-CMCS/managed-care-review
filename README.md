@@ -12,7 +12,7 @@ Local dev is configured in typescript project in `./src`. The entrypoint is `./s
 
 Local dev is built around the Serverless plugin [`serverless-offline`](https://github.com/dherault/serverless-offline). `serverless-offline` runs an API gateway locally configured by `./services/app-api/serverless.yml` and hot reloads your lambdas on every save. The plugins [`serverless-dynamodb-local`](https://github.com/99x/serverless-dynamodb-local) and [`serverless-s3-local`](https://github.com/ar90n/serverless-s3-local) stand up the local db and local s3 in a similar fashion.
 
-When run locally (with LOCAL_LOGIN=true), auth bypasses Cognito. The frontend mimics login in local storage with a mock user and sends an id in the `cognito-identity-id` header on every request. `serverless-offline` expects that and sets it as the cognitoId in the requestContext for your lambdas, just like Cognito would in AWS.
+When run locally (with LOCAL_LOGIN=true), auth bypasses Cognito and uses [`serverless-offline`](https://github.com/dherault/serverless-offline). The frontend mimics login in local storage with mock users and sends an id in the `cognito-identity-id` header on every request. This is set as the cognito Id in the `event.requestContext.identity` for lambdas, just like Cognito would in AWS.
 
 ## Usage
 
@@ -33,7 +33,7 @@ Clear dependencies
 Run web app locally, but configure it to run against a deployed backend
 
 -   `./dev hybrid`
--   You can specify what stage you want to run against with `--stage`
+-   You can specify what stage you want to run against with `--stage`.  For local dev testing, you should push your local work to a branch with a review app, and then run with the stage name as your branch.  
 
 ## AWS Keys
 
@@ -41,7 +41,7 @@ In order to run commands against a live AWS environment you need to configure AW
 
 You can get keys out of Cloudtamer, on the VPN. Click "Cloud Access" on the account you want access to. Then the account > the access type > "Short-term access keys"
 
-From there it's up to you how to make things work locally. Either set the three envionrment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_SESSION_TOKEN` or put the values in your `~/.aws/credentials` file before invoking the command you want to invoke. I usually just throw the env vars into my .env file and everything works.
+From there it's up to you how to make things work locally. Either set the three environment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_SESSION_TOKEN` or put the values in your `~/.aws/credentials` file before invoking the command you want to invoke. I usually just throw the env vars into my .env file and everything works.
 
 ### Deploy
 
