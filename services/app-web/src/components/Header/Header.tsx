@@ -66,8 +66,7 @@ export const Header = ({
             .then(() => {
                 console.log('Logout Success')
             })
-            .catch((e) => {
-                console.log('Logout failed HERE ', e)
+            .catch(() => {
                 setAlert && setAlert(true)
             })
         history.push('/auth')

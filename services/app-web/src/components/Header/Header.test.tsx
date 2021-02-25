@@ -2,7 +2,7 @@ import React from 'react'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-import * as AuthApi from '../../pages/Auth/cognitoAuth'
+import * as CognitoAuthApi from '../../pages/Auth/cognitoAuth'
 import { renderWithProviders } from '../../utils/jestUtils'
 import { Header } from './Header'
 import { UserType } from '../../common-code/domain-models'
@@ -17,14 +17,8 @@ describe('Header', () => {
     })
 
     describe('when logged out', () => {
-        const loggedOutAuthProps = {
-            localLogin: false,
-        }
-
-        it('has Medicaid logo image link that redirects to /dashboard', async () => {
-            renderWithProviders(<Header />, {
-                authProvider: loggedOutAuthProps,
-            })
+        it('displays Medicaid logo image link that redirects to /dashboard', async () => {
+            renderWithProviders(<Header />, {})
             const logoImage = screen.getByRole('img')
             const logoLink = screen.getByRole('link', {
                 name: /Medicaid.gov-Keeping America Healthy/i,
@@ -34,30 +28,26 @@ describe('Header', () => {
             expect(logoLink).toContainElement(logoImage)
         })
 
-        it('has  Medicaid and CHIP Managed Care Reporting heading', () => {
-            renderWithProviders(<Header />, {
-                authProvider: loggedOutAuthProps,
-            })
+        it('displays Medicaid and CHIP Managed Care Reporting heading', () => {
+            renderWithProviders(<Header />, {})
 
             expect(screen.getByRole('heading')).toHaveTextContent(
                 'Medicaid and CHIP Managed Care Reporting and Review System'
             )
         })
 
-        it('displays signin link when logged out', async () => {
-            renderWithProviders(<Header />, {
-                authProvider: loggedOutAuthProps,
-            })
-            expect(screen.getByRole('link', { name: /Sign In/i })).toBeVisible()
+        it('displays signin link when logged out', () => {
+            renderWithProviders(<Header />, {})
+            const signInButton = screen.getByRole('link', { name: /Sign In/i })
+            expect(signInButton).toBeVisible()
+            expect(signInButton).toHaveAttribute('href', '/auth')
         })
 
-        it('signin link goes to /auth', () => {
-            renderWithProviders(<Header />, {
-                authProvider: loggedOutAuthProps,
-            })
-            expect(
-                screen.getByRole('link', { name: /Sign In/i })
-            ).toHaveAttribute('href', '/auth')
+        it('redirects when signin Link is clicked', () => {
+            renderWithProviders(<Header />, {})
+            const signInButton = screen.getByRole('link', { name: /Sign In/i })
+            userEvent.click(signInButton)
+            expect(signInButton).toHaveAttribute('href', '/auth')
         })
     })
 
@@ -72,7 +62,7 @@ describe('Header', () => {
             },
         }
 
-        it('has Medicaid logo image link that redirects to /dashboard', async () => {
+        it('displays Medicaid logo image link that redirects to /dashboard', async () => {
             renderWithProviders(<Header />, { authProvider: loggedInAuthProps })
             const logoImage = screen.getByRole('img')
             const logoLink = screen.getByRole('link', {
@@ -83,7 +73,7 @@ describe('Header', () => {
             expect(logoLink).toContainElement(logoImage)
         })
 
-        it('has heading with users state', () => {
+        it('displays heading with users state', () => {
             // TODO: make a loop that goes through all states and checks icons/headings
             renderWithProviders(<Header stateCode="MN" />, {
                 authProvider: loggedInAuthProps,
@@ -91,7 +81,7 @@ describe('Header', () => {
             expect(screen.getByRole('heading')).toHaveTextContent('Minnesota')
         })
 
-        it('has heading with the current page', () => {
+        it('displays heading with the current page', () => {
             renderWithProviders(
                 <Header stateCode="MN" activePage={'Dashboard'} />,
                 {
@@ -117,8 +107,10 @@ describe('Header', () => {
             ).toHaveTextContent('Sign out')
         })
 
-        it('calls signOut when signout button is clicked', async () => {
-            const spy = jest.spyOn(AuthApi, 'signOut').mockResolvedValue(null)
+        it('calls logout api when Sign Out button is clicked', async () => {
+            const spy = jest
+                .spyOn(CognitoAuthApi, 'signOut')
+                .mockResolvedValue(null)
 
             const apolloProviderMock = {
                 mocks: [
@@ -149,7 +141,7 @@ describe('Header', () => {
 
         it('calls setAlert when logout is unsuccessful', async () => {
             const spy = jest
-                .spyOn(AuthApi, 'signOut')
+                .spyOn(CognitoAuthApi, 'signOut')
                 .mockRejectedValue('This logout failed!')
             const mockAlert = jest.fn()
             const apolloProviderMock = {
@@ -181,7 +173,9 @@ describe('Header', () => {
         })
 
         it('shows signin link when logout is successful', async () => {
-            const spy = jest.spyOn(AuthApi, 'signOut').mockResolvedValue(null)
+            const spy = jest
+                .spyOn(CognitoAuthApi, 'signOut')
+                .mockResolvedValue(null)
 
             const apolloProviderMock = {
                 mocks: [
