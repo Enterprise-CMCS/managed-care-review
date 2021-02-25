@@ -5,29 +5,30 @@ import { Auth } from '../Auth/Auth'
 import { useAuth } from '../../contexts/AuthContext'
 import { Dashboard } from '../Dashboard/Dashboard'
 import { Landing } from '../Landing/Landing'
-import { LocalAuth } from '../Auth/LocalAuth'
 
 export const AppRoutes = (): React.ReactElement => {
-    const { loggedInUser, localLogin } = useAuth()
+    const { loggedInUser } = useAuth()
 
     const AuthenticatedRoutes = (): React.ReactElement => {
         return (
             <>
-                {!loggedInUser ? (
-                    <Redirect to="/" />
-                ) : (
-                    <Route path="/dashboard" component={Dashboard} />
-                    // Add other authenticated routes here
-                )}
+                <Route path="/" exact component={Dashboard} />
+                <Route path="/dashboard" component={Dashboard} />
             </>
         )
     }
 
     return (
         <Switch>
-            <Route path="/" exact component={Landing} />
-            <Route path="/auth" component={localLogin ? LocalAuth : Auth} />
-            <AuthenticatedRoutes />
+            {!loggedInUser ? (
+                <>
+                    <Route path="/" exact component={Landing} />
+                    <Route path="/auth" component={Auth} />
+                    <Redirect to="/" />
+                </>
+            ) : (
+                <AuthenticatedRoutes />
+            )}
         </Switch>
     )
 }
