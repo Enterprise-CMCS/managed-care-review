@@ -3,7 +3,8 @@
 
 .logosRow {
     background-color: $theme-footer-logos-background;
-    & img {
+    & img,
+    svg {
         padding-right: units(4);
         flex-shrink: 0;
         height: 50px;
