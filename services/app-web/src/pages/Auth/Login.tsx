@@ -75,7 +75,7 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
 
     return (
         <div className="Login">
-            <Form onSubmit={handleSumbit}>
+            <Form onSubmit={handleSumbit} name="Login">
                 <FormGroup>
                     <Label htmlFor="loginEmail">Email</Label>
                     <TextInput

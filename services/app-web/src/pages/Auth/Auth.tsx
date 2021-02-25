@@ -11,8 +11,8 @@ export const Auth = (): React.ReactElement => {
     const { localLogin } = useAuth()
 
     return (
-        <GridContainer data-testid="authPage">
-            <h1>Login</h1>
+        <GridContainer>
+            <h2>Login</h2>
             {localLogin ? <LocalAuth /> : <CognitoAuth />}
         </GridContainer>
     )

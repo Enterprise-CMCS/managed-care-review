@@ -1,12 +1,27 @@
 import React from 'react'
 import { screen, waitFor } from '@testing-library/react'
 
-import { renderWithProviders } from '../../utils/jestUtils'
+import { renderWithProviders, userClickSignIn } from '../../utils/jestUtils'
 import { AppBody } from './AppBody'
-import { UserType } from '../../common-code/domain-models'
 import { HELLO_WORLD } from '../../api'
 
-test('renders without errors', () => {
+const successfulLoginMock = {
+    request: { query: HELLO_WORLD },
+    result: {
+        data: {
+            hello: {
+                user: {
+                    state: 'VA',
+                    role: 'State User',
+                    name: 'Bob it user',
+                    email: 'bob@dmas.mn.gov',
+                },
+            },
+        },
+    },
+}
+
+test('App renders without errors', () => {
     renderWithProviders(<AppBody />, {
         authProvider: { localLogin: false },
     })
@@ -17,26 +32,10 @@ test('renders without errors', () => {
 describe('Routing', () => {
     describe('/', () => {
         it('display dashboard when logged in', async () => {
-            const apolloProviderMock = {
-                mocks: [
-                    {
-                        request: { query: HELLO_WORLD },
-                        result: { data: {} },
-                    },
-                ],
-            }
             renderWithProviders(<AppBody />, {
-                apolloProvider: apolloProviderMock,
-                authProvider: {
-                    localLogin: false,
-                    initialize: {
-                        user: {
-                            name: 'Bob it user',
-                            email: 'bob@dmas.mn.gov',
-                        } as UserType,
-                    },
-                },
+                apolloProvider: { mocks: [successfulLoginMock] },
             })
+
             expect(
                 screen.queryByRole('heading', { level: 1 })
             ).toBeInTheDocument()
@@ -47,21 +46,76 @@ describe('Routing', () => {
 
         it('display landing page when logged out', () => {
             renderWithProviders(<AppBody />, {})
-            expect(screen.queryAllByRole('heading', { level: 2 })).toHaveLength(
-                2
-            )
-            expect(screen.getByTestId('landingPage')).toBeInTheDocument()
+
+            expect(
+                screen.getByRole('heading', { name: /How it works/i, level: 2 })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('heading', {
+                    name: /In this system, pilot state users can/i,
+                    level: 2,
+                })
+            ).toBeInTheDocument()
         })
     })
 
     describe('/auth', () => {
-        it.todo('when user clicks Sign In link, redirects to /auth')
-        it.todo('display local login page when expected')
-        it.todo('display cognito login page when expected')
+        it('when app loads at /auth route, Login Page header is displayed', () => {
+            renderWithProviders(<AppBody />, {
+                routerProvider: { initialEntries: ['/auth'] },
+            })
+
+            expect(
+                screen.getByRole('heading', { name: /Login/i, level: 2 })
+            ).toBeInTheDocument()
+        })
+        it('when user clicks Sign In link, redirects to /auth', () => {
+            renderWithProviders(<AppBody />, {})
+            userClickSignIn(screen)
+
+            expect(
+                screen.getByRole('heading', { name: /Login/i, level: 2 })
+            ).toBeInTheDocument()
+        })
+
+        it('display local login page when expected', async () => {
+            renderWithProviders(<AppBody />, {
+                authProvider: { localLogin: true },
+            })
+
+            userClickSignIn(screen)
+
+            expect(
+                screen.getByRole('heading', {
+                    name: /Local Login/i,
+                    level: 3,
+                })
+            ).toBeInTheDocument()
+        })
+
+        it('display cognito login page when expected', () => {
+            renderWithProviders(<AppBody />, {})
+            userClickSignIn(screen)
+
+            expect(
+                screen.getByRole('textbox', { name: 'First Name' })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('textbox', { name: 'Last Name' })
+            ).toBeInTheDocument()
+            expect(screen.getByRole('form')).toBeInTheDocument()
+        })
     })
 
     describe('invalid routes', () => {
-        it.todo('redirect to landing page when logged out')
+        it('redirect to landing page when logged out', () => {
+            renderWithProviders(<AppBody />, {
+                routerProvider: { initialEntries: ['/not-a-real-place'] },
+            })
+            expect(
+                screen.getByRole('heading', { name: /How it works/i, level: 2 })
+            ).toBeInTheDocument()
+        })
         it.todo('display 404 error page when logged in')
     })
 })

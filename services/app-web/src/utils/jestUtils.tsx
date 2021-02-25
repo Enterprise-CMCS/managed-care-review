@@ -1,32 +1,38 @@
 import { MockedProvider, MockedProviderProps } from '@apollo/client/testing'
-import { BrowserRouter } from 'react-router-dom'
-import { render } from '@testing-library/react'
+import { MemoryRouter, MemoryRouterProps } from 'react-router-dom'
+import { render, Screen, queries } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 
 import { AuthProvider, AuthProviderProps } from '../contexts/AuthContext'
-/*
- * A custom render to setup providers.
- * see: https://testing-library.com/docs/react-testing-library/setup#custom-render
- */
 
+/* Render */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const renderWithProviders = (
     ui: React.ReactNode,
     {
+        routerProvider,
         apolloProvider,
         authProvider,
     }: {
+        routerProvider?: MemoryRouterProps
         apolloProvider?: MockedProviderProps
-        authProvider?: AuthProviderProps
+        authProvider?: Partial<AuthProviderProps>
     }
-) =>
-    render(
+) => {
+    return render(
         <MockedProvider {...apolloProvider}>
-            <BrowserRouter>
+            <MemoryRouter {...routerProvider}>
                 <AuthProvider localLogin={false} {...authProvider}>
                     {ui}
                 </AuthProvider>
-            </BrowserRouter>
+            </MemoryRouter>
         </MockedProvider>
     )
+}
 
-export { renderWithProviders }
+/* User Events */
+const userClickSignIn = (screen: Screen<typeof queries>): void => {
+    const signInButton = screen.getByRole('link', { name: /Sign In/i })
+    userEvent.click(signInButton)
+}
+export { renderWithProviders, userClickSignIn }
