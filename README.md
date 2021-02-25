@@ -8,7 +8,7 @@ Run all the services locally with the command `./dev local`
 
 See the Requirements section if the command asks for any prerequisites you don't have installed.
 
-Local dev is configured in typescript project in `./src`. The entrypoint is `./src/dev.ts`, it manages running the moving pieces locally: the API, the database, the filestore, and the frontend.
+Local dev is configured in typescript project in `./src`. The entry-point is `./src/dev.ts`, it manages running the moving pieces locally: the API, the database, the file store, and the frontend.
 
 Local dev is built around the Serverless plugin [`serverless-offline`](https://github.com/dherault/serverless-offline). `serverless-offline` runs an API gateway locally configured by `./services/app-api/serverless.yml` and hot reloads your lambdas on every save. The plugins [`serverless-dynamodb-local`](https://github.com/99x/serverless-dynamodb-local) and [`serverless-s3-local`](https://github.com/ar90n/serverless-s3-local) stand up the local db and local s3 in a similar fashion.
 
@@ -33,11 +33,12 @@ Clear dependencies
 Run web app locally, but configure it to run against a deployed backend
 
 -   `./dev hybrid`
--   You can specify what stage you want to run against with `--stage`.  For local dev testing, you should push your local work to a branch with a review app, and then run with the stage name as your branch.  
+-   For local dev testing, you should push your local branch to deploy a review app and then `./dev hybrid` will connect to that running review app by default.
+-   If you want to specify a different instance to run against, you can set the `--stage` parameter. For more info about stages/accounts take a gander at the Deploy section below.
 
 ## AWS Keys
 
-In order to run commands against a live AWS environment you need to configure AWS keys to grant you authorization to do so. You will need this for sure to run the `./dev hybrid` command, and might be nececcary to run any serverless commands directly by hand.
+In order to run commands against a live AWS environment you need to configure AWS keys to grant you authorization to do so. You will need this for sure to run the `./dev hybrid` command, and might be necessary to run any serverless commands directly by hand.
 
 You can get keys out of Cloudtamer, on the VPN. Click "Cloud Access" on the account you want access to. Then the account > the access type > "Short-term access keys"
 
@@ -45,9 +46,13 @@ From there it's up to you how to make things work locally. Either set the three 
 
 ### Deploy
 
-See master build [here](https://github.com/CMSgov/macpro-quickstart-serverless/actions?query=branch%3Amaster)
+See main build [here](https://github.com/CMSgov/guide-wire/actions?query=branch%3Amain)
 
 This application is built and deployed via GitHub Actions. See `.github/workflows`.
+
+This application is deployed into three different AWS accounts: Dev, Val, and Prod. Anytime the main branch is updated (i.e. a PR is merged) we deploy to each environment in turn. If interacting with those accounts directly, each one will require different AWS keys.
+
+In the Dev account, in addition to deploying the main branch, we deploy a full version of the app on every branch that is pushed that is not the main branch. We call these deployments "review apps" since they host all the changes for a PR in a full deployment. These review apps are differentiated by their Serverless "stack" name. This is set to the branch name and all infra ends up being prefixed with it to keep from there being any overlapping.
 
 ## Requirements
 
@@ -96,7 +101,7 @@ To contribute:
 
 -   Fork this repository
 -   Make changes in your fork
--   Open a pull request targetting this repository
+-   Open a pull request targeting this repository
 
 Pull requests are being accepted.
 

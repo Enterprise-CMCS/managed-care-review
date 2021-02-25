@@ -341,11 +341,12 @@ function main() {
         )
         .command(
             'hybrid',
-            'run app-web against the review app',
+            'run app-web locally connected to the review app deployed for this branch',
             (yargs) => {
                 return yargs.option('stage', {
                     type: 'string',
-                    describe: 'the stage in your AWS account to run against',
+                    describe:
+                        'an alternative Serverless stage in your AWS account to run against',
                 })
             },
             (args) => {
