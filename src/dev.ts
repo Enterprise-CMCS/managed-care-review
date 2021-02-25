@@ -2,8 +2,11 @@ import yargs from 'yargs'
 import * as dotenv from 'dotenv'
 import request from 'request'
 import { spawnSync } from 'child_process'
+
+import { commandMustSucceedSync } from './localProcess.js'
 import LabeledProcessRunner from './runner.js'
 import { envFileMissingExamples } from './env.js' // What the WHAT? why doesn't this import right without the `.js`??
+import { checkStageAccess, getWebAuthVars } from './serverless.js'
 
 // run_db_locally runs the local db
 async function run_db_locally(runner: LabeledProcessRunner) {
@@ -116,132 +119,61 @@ function check_url_is_up(url: string): Promise<boolean> {
     })
 }
 
+// Pulls a bunch of configuration out of a given AWS environment and sets it as env vars for app-web to run against
+// Note: The environment is made up of the _stage_ which defaults to your current git branch
+// and the AWS Account, which is determined by which AWS credentials you get out of cloudtamer (dev, val, or prod) usually dev
 async function run_web_against_aws(
-    stackNameOpt: string | undefined = undefined
+    stageNameOpt: string | undefined = undefined
 ) {
-    let stackName = stackNameOpt !== undefined ? stackNameOpt : ''
+    // by default, review apps are created with the stage name set as the current branch name
+    const stageName =
+        stageNameOpt !== undefined
+            ? stageNameOpt
+            : commandMustSucceedSync('git', ['branch', '--show-current'])
 
-    if (stackNameOpt == undefined) {
-        // Get the current branch name. allow this to be overriden with a flag
-        const branchNameProc = spawnSync('git', ['branch', '--show-current'])
-        if (branchNameProc.status != 0) {
-            console.log('failed to get the branch name out of git, whoopsie')
-            process.exit(1)
-        }
-
-        stackName = branchNameProc.stdout.toString().trim()
-    }
-
-    console.log('fetching env vars for ', stackName)
-
-    const opts = {
-        cwd: './services',
-        // env: Object.assign({}, process.env, {}),
-    }
-
-    const testOpts = Object.assign({}, opts, { cwd: 'services/ui-auth' })
-
-    const test = spawnSync(
-        'serverless',
-        ['info', '--stage', stackName],
-        testOpts
-    )
-    // console.log('REG', test)
-    // console.log(test.stderr.toString('utf8'))
-    // console.log(test.stdout.toString('utf8'))
-    if (test.status != 0) {
-        const serverlessErrorOutput = test.stdout.toString('utf8')
-
-        if (
-            serverlessErrorOutput.includes(
-                'The security token included in the request is invalid'
-            )
-        ) {
+    // Test to see if we can read info from serverless. This is likely to trip folks up who haven't
+    // configured their AWS keys correctly or if they have an invalid stage name.
+    const serverlessConnection = checkStageAccess(stageName)
+    switch (serverlessConnection) {
+        case 'AWS_TOKEN_ERROR': {
             console.log(
                 'Error: Invalid token attempting to read AWS Cloudformation\n',
                 'Likely, you do not have aws configured right. You will need AWS tokens from cloudwatch configured\n',
-                'See the README for more details.\n\n',
-                serverlessErrorOutput
+                'See the AWS Token section of the README for more details.\n\n'
             )
-
             process.exit(1)
-        } else if (
-            serverlessErrorOutput.includes('Stack with id') &&
-            serverlessErrorOutput.includes('does not exist')
-        ) {
+        }
+        case 'STAGE_ERROR': {
             console.log(
-                `Error: stack with id ${stackName} does not exist\n`,
+                `Error: stack with id ${stageName} does not exist\n`,
                 "If you didn't set one explicitly, maybe you haven't pushed this branch yet to deploy a review app?"
             )
             process.exit(1)
-        } else {
+        }
+        case 'UNKNOWN_ERROR': {
             console.log(
-                'Unexpected Error attempting to read AWS Cloudformation:',
-                serverlessErrorOutput
+                'Unexpected Error attempting to read AWS Cloudformation.'
             )
             process.exit(2)
         }
     }
 
-    const regionResult = spawnSync(
-        './output.sh',
-        ['ui-auth', 'Region', stackName],
-        opts
+    // Now, we've confirmed we are configured to pull data out of serverless x cloudformation
+    console.log('fetching config vars for ', stageName)
+    const { region, idPool, userPool, userPoolClient } = getWebAuthVars(
+        stageName
     )
-    if (regionResult.status != 0) {
-        console.log(regionResult.stderr, regionResult.stdout)
-        process.exit(1)
-    }
-    const region = regionResult.stdout.toString('utf8').trim()
 
-    const idPoolResult = spawnSync(
+    const apiBase = commandMustSucceedSync(
         './output.sh',
-        ['ui-auth', 'IdentityPoolId', stackName],
-        opts
+        ['app-api', 'ApiGatewayRestApiUrl', stageName],
+        {
+            cwd: './services',
+        }
     )
-    if (idPoolResult.status != 0) {
-        console.log(idPoolResult.stderr, idPoolResult.stdout)
-        process.exit(1)
-    }
-    const idPool = idPoolResult.stdout.toString('utf8').trim()
 
-    const userPoolResult = spawnSync(
-        './output.sh',
-        ['ui-auth', 'UserPoolId', stackName],
-        opts
-    )
-    if (userPoolResult.status != 0) {
-        console.log(userPoolResult.stderr, userPoolResult.stdout)
-        process.exit(1)
-    }
-    const userPool = userPoolResult.stdout.toString('utf8').trim()
-
-    const userPoolClientResult = spawnSync(
-        './output.sh',
-        ['ui-auth', 'UserPoolClientId', stackName],
-        opts
-    )
-    if (userPoolClientResult.status != 0) {
-        console.log(userPoolClientResult.stderr, userPoolClientResult.stdout)
-        process.exit(1)
-    }
-    const userPoolClient = userPoolClientResult.stdout.toString('utf8').trim()
-
-    const apiBaseResult = spawnSync(
-        './output.sh',
-        ['app-api', 'ApiGatewayRestApiUrl', stackName],
-        opts
-    )
-    if (apiBaseResult.status != 0) {
-        console.log(apiBaseResult.stderr, apiBaseResult.stdout)
-        process.exit(1)
-    }
-    const apiBase = apiBaseResult.stdout.toString('utf8').trim()
-
-    console.log(region, idPool, userPool, userPoolClient, apiBase)
     // set them
-
-    process.env.PORT = '3003'
+    process.env.PORT = '3003' // run hybrid on a different port
     process.env.REACT_APP_LOCAL_LOGIN = 'false' // override local_login in .env
     process.env.REACT_APP_API_URL = apiBase
     process.env.REACT_APP_COGNITO_REGION = region
@@ -251,16 +183,7 @@ async function run_web_against_aws(
 
     // run it
     const runner = new LabeledProcessRunner()
-    await runner.run_command_and_output(
-        'deps',
-        ['yarn', 'install'],
-        'services/app-web'
-    )
-    runner.run_command_and_output(
-        'hybrid',
-        ['yarn', 'start'],
-        'services/app-web'
-    )
+    await run_web_locally(runner)
 }
 
 async function run_all_tests(run_unit: boolean, run_online: boolean) {
@@ -347,6 +270,9 @@ function main() {
 
     // add git hash as APP_VERSION
     const appVersion = spawnSync('scripts/app_version.sh')
+    if (appVersion.status != 0) {
+        throw new Error('failed to run a simple git script')
+    }
     process.env.APP_VERSION = appVersion.stdout.toString().trim()
 
     /* AVAILABLE COMMANDS
