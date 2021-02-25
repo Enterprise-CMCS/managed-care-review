@@ -17,7 +17,6 @@ import {
 // Construct a schema, using GraphQL schema language
 // TODO: add StateCode and Role
 const typeDefs = gql`
-<<<<<<< HEAD
 	type Query {
 		hello: User
 	}
@@ -27,11 +26,6 @@ const typeDefs = gql`
 		state: String
 		name: String
 	}
-=======
-    type Query {
-        hello: String
-    }
->>>>>>> origin
 `
 
 // Provide resolver functions for your schema fields
