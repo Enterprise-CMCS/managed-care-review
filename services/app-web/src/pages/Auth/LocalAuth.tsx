@@ -7,7 +7,6 @@ import {
     CardGroup,
     CardBody,
     CardFooter,
-    GridContainer,
 } from '@trussworks/react-uswds'
 import { useHistory } from 'react-router-dom'
 import { UserType } from '../../common-code/domain-models/user'
