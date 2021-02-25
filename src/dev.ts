@@ -139,6 +139,14 @@ async function run_web_against_aws(
             ? stageNameOpt
             : commandMustSucceedSync('git', ['branch', '--show-current'])
 
+    if (stageName === '') {
+        console.log(
+            'Error: you do not appear to be on a git branch so we cannot auto-detect what stage to attach to.\n',
+            'Either checkout the deployed branch or specify --stage explicitly.'
+        )
+        process.exit(1)
+    }
+
     console.log('Attempting to access stage:', stageName)
     // Test to see if we can read info from serverless. This is likely to trip folks up who haven't
     // configured their AWS keys correctly or if they have an invalid stage name.
