@@ -10,21 +10,17 @@ const successfulLoginMock = {
     result: {
         data: {
             hello: {
-                user: {
-                    state: 'VA',
-                    role: 'State User',
-                    name: 'Bob it user',
-                    email: 'bob@dmas.mn.gov',
-                },
+                state: 'VA',
+                role: 'State User',
+                name: 'Bob it user',
+                email: 'bob@dmas.mn.gov',
             },
         },
     },
 }
 
 test('App renders without errors', () => {
-    renderWithProviders(<AppBody />, {
-        authProvider: { localLogin: false },
-    })
+    renderWithProviders(<AppBody />, {})
     const mainElement = screen.getByRole('main')
     expect(mainElement).toBeInTheDocument()
 })
