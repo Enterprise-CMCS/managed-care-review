@@ -19,7 +19,8 @@ When run locally (with LOCAL_LOGIN=true), auth bypasses Cognito and uses [`serve
 Run app locally
 
 -   `./dev local` to run the entire app and storybook
--   Available flags: `--storybook`, `--web`, `--api`, `--s3` for running services individually
+-   Available flags: `--storybook`, `--web`, `--api`, `--s3`, '--db' for running services individually
+-   (you can also exlcude services by using the yargs 'no' standard: `./dev local --no-db --no-storybook`)
 
 Run tests locally
 
