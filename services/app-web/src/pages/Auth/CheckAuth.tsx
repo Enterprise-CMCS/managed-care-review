@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Button, Alert, GridContainer } from '@trussworks/react-uswds'
 import { useLazyQuery } from '@apollo/client'
 
-import { HELLO_WORLD } from '../../api'
+import { CURRENT_USER } from '../../api'
 
 type AuthStatus = 'Unknown' | 'Authenticated' | 'Unauthenticated'
 
@@ -10,7 +10,7 @@ type AuthStatus = 'Unknown' | 'Authenticated' | 'Unauthenticated'
 export function CheckAuth(): React.ReactElement {
     const [authStatus, setAuthStatus] = useState<AuthStatus>('Unknown')
 
-    const [checkAuth, { called, loading, data }] = useLazyQuery(HELLO_WORLD, {
+    const [checkAuth, { called, loading, data }] = useLazyQuery(CURRENT_USER, {
         fetchPolicy: 'network-only',
         variables: { language: 'english' },
     })
@@ -20,7 +20,7 @@ export function CheckAuth(): React.ReactElement {
         console.log('checking auth')
 
         checkAuth()
-        if (data?.hello) {
+        if (data?.currentUser) {
             setAuthStatus('Authenticated')
         } else {
             setAuthStatus('Unauthenticated')

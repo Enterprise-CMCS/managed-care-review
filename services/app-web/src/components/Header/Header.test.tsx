@@ -6,7 +6,7 @@ import * as AuthApi from '../../pages/Auth/cognitoAuth'
 import { renderWithProviders } from '../../utils/jestUtils'
 import { Header } from './Header'
 import { UserType } from '../../common-code/domain-models'
-import { HELLO_WORLD } from '../../api'
+import { CURRENT_USER } from '../../api'
 
 describe('Header', () => {
     it('renders without errors', async () => {
@@ -123,7 +123,7 @@ describe('Header', () => {
             const apolloProviderMock = {
                 mocks: [
                     {
-                        request: { query: HELLO_WORLD },
+                        request: { query: CURRENT_USER },
                         result: { data: {} },
                     },
                 ],
@@ -155,7 +155,7 @@ describe('Header', () => {
             const apolloProviderMock = {
                 mocks: [
                     {
-                        request: { query: HELLO_WORLD },
+                        request: { query: CURRENT_USER },
                         result: { data: {} },
                     },
                 ],
@@ -186,7 +186,7 @@ describe('Header', () => {
             const apolloProviderMock = {
                 mocks: [
                     {
-                        request: { query: HELLO_WORLD },
+                        request: { query: CURRENT_USER },
                         result: { data: {} },
                     },
                 ],

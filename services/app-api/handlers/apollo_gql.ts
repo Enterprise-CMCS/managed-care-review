@@ -16,7 +16,7 @@ import {
 // TODO: add StateCode and Role
 const typeDefs = gql`
     type Query {
-        hello: User
+        currentUser: User
     }
     type User {
         role: String
@@ -29,7 +29,7 @@ const typeDefs = gql`
 // Provide resolver functions for your schema fields
 const resolvers: IResolvers = {
     Query: {
-        hello: async (_parent, _args, context) => {
+        currentUser: async (_parent, _args, context) => {
             let userFetcher: userFromAuthProvider
 
             if (process.env.REACT_APP_LOCAL_LOGIN) {

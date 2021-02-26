@@ -3,7 +3,7 @@ import { Story } from '@storybook/react'
 
 import ProvidersDecorator from '../../../.storybook/providersDecorator'
 import { Header, HeaderProps } from './Header'
-import { HELLO_WORLD } from '../../api'
+import { CURRENT_USER } from '../../api'
 import { UserType } from '../../common-code/domain-models'
 
 export default {
@@ -32,7 +32,7 @@ CMSHeaderLoggedIn.decorators = [
             apolloProvider: {
                 mocks: [
                     {
-                        request: { query: HELLO_WORLD },
+                        request: { query: CURRENT_USER },
                         result: { data: {} },
                     },
                 ],

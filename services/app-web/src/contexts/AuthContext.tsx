@@ -5,7 +5,7 @@ import { logoutLocalUser } from '../pages/Auth/localLogin'
 import { UserType } from '../common-code/domain-models'
 import { useQuery } from '@apollo/client'
 
-import { HELLO_WORLD } from '../api'
+import { CURRENT_USER } from '../api'
 
 type LogoutFn = () => Promise<null>
 
@@ -46,7 +46,7 @@ function AuthProvider({
     >(initialize?.user || undefined)
     const [isLoading, setIsLoading] = React.useState(true)
 
-    const { client, loading, data, error, refetch } = useQuery(HELLO_WORLD, {
+    const { client, loading, data, error, refetch } = useQuery(CURRENT_USER, {
         notifyOnNetworkStatusChange: true,
     })
 
@@ -74,9 +74,9 @@ function AuthProvider({
         // if the error is 403, then that's all gravy, just set logged in user to undefined
         // lets try and record what different errors are here.
         // call a generic graphql connection etc. error here.
-    } else if (data?.hello) {
+    } else if (data?.currentUser) {
         if (!isAuthenticated) {
-            setLoggedInUser(data.hello)
+            setLoggedInUser(data.currentUser)
         }
     }
 
