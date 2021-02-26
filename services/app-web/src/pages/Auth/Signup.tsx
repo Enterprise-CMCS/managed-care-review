@@ -8,11 +8,7 @@ import {
 } from '@trussworks/react-uswds'
 
 import { signUp } from './cognitoAuth'
-import { CognitoUser } from 'amazon-cognito-identity-js'
-
 import { logEvent } from '../../log_event'
-
-type MaybeCognitoUser = CognitoUser | null
 
 export function showError(error: string): void {
     alert(error)
@@ -35,10 +31,6 @@ export function Signup({
         confirmPassword: '',
     })
 
-    const [newUser, setNewUser] = useState<MaybeCognitoUser>(null)
-    console.log(newUser)
-
-    // const { userHasAuthenticated } = useAppContext()
     const [isLoading, setIsLoading] = useState(false)
 
     const onFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,8 +64,7 @@ export function Signup({
         if (signUpResult.isOk()) {
             console.log('got a user back.')
             setEmail(fields.email)
-            triggerConfirmation()
-            setNewUser(signUpResult.value)
+            triggerConfirmation
         } else {
             const err = signUpResult.error
             if (err.code == 'UsernameExistsException') {

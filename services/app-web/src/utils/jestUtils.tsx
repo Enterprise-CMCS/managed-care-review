@@ -1,32 +1,69 @@
 import { MockedProvider, MockedProviderProps } from '@apollo/client/testing'
-import { BrowserRouter } from 'react-router-dom'
-import { render } from '@testing-library/react'
+import { Router } from 'react-router-dom'
+import { createMemoryHistory } from 'history'
+import { render, Screen, queries, ByRoleMatcher } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 
 import { AuthProvider, AuthProviderProps } from '../contexts/AuthContext'
-/*
- * A custom render to setup providers.
- * see: https://testing-library.com/docs/react-testing-library/setup#custom-render
- */
 
+/* Render */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const renderWithProviders = (
     ui: React.ReactNode,
-    {
-        apolloProvider,
-        authProvider,
-    }: {
+    options?: {
+        routerProvider?: { route: string }
         apolloProvider?: MockedProviderProps
-        authProvider?: AuthProviderProps
+        authProvider?: Partial<AuthProviderProps>
     }
-) =>
-    render(
+) => {
+    const {
+        routerProvider = { route: {} },
+        apolloProvider = {},
+        authProvider = {},
+    } = options || {}
+    const { route } = routerProvider
+    const testHistory = createMemoryHistory()
+
+    if (route) {
+        testHistory.push(route)
+    }
+    return render(
         <MockedProvider {...apolloProvider}>
-            <BrowserRouter>
+            <Router history={testHistory}>
                 <AuthProvider localLogin={false} {...authProvider}>
                     {ui}
                 </AuthProvider>
-            </BrowserRouter>
+            </Router>
         </MockedProvider>
     )
+}
 
-export { renderWithProviders }
+/* User Events */
+
+const userClickByTestId = (
+    screen: Screen<typeof queries>,
+    text: string
+): void => {
+    const element = screen.getByTestId(text)
+    userEvent.click(element)
+}
+const userClickByRole = (
+    screen: Screen<typeof queries>,
+    text: ByRoleMatcher,
+    options?: queries.ByRoleOptions | undefined
+): void => {
+    const element = screen.getByRole(text, options)
+    userEvent.click(element)
+}
+
+const userClickSignIn = (screen: Screen<typeof queries>): void => {
+    const signInButton = screen.getByRole('link', { name: /Sign In/i })
+    userEvent.click(signInButton)
+}
+
+export {
+    renderWithProviders,
+    userClickByRole,
+    userClickByTestId,
+    userClickSignIn,
+}

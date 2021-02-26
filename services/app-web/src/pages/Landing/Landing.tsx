@@ -4,7 +4,7 @@ import styles from './Landing.module.scss'
 
 export const Landing = (): React.ReactElement => {
     return (
-        <div data-testid="landingPage">
+        <>
             <section className={styles.outlineSection}>
                 <GridContainer>
                     <h2>How it works</h2>
@@ -60,6 +60,6 @@ export const Landing = (): React.ReactElement => {
                     </ul>
                 </GridContainer>
             </section>
-        </div>
+        </>
     )
 }

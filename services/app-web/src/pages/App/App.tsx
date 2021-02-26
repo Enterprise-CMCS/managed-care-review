@@ -1,7 +1,6 @@
 import React from 'react'
 import { BrowserRouter } from 'react-router-dom'
 import { ErrorBoundary } from 'react-error-boundary'
-import { GridContainer } from '@trussworks/react-uswds'
 import {
     ApolloProvider,
     ApolloClient,
@@ -11,6 +10,7 @@ import {
 import { AppBody } from './AppBody'
 import { logEvent } from '../../log_event'
 import { AuthProvider } from '../../contexts/AuthContext'
+import { GenericError } from '../Errors/GenericError'
 
 function ErrorFallback({
     error,
@@ -18,14 +18,8 @@ function ErrorFallback({
     error: Error
     resetErrorBoundary?: () => void
 }): React.ReactElement {
-    return (
-        <GridContainer>
-            <div role="alert">
-                <p>Something went wrong:</p>
-                <pre>{error.message}</pre>
-            </div>
-        </GridContainer>
-    )
+    console.log('generic error', error)
+    return <GenericError />
 }
 
 function App({
