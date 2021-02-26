@@ -25,6 +25,10 @@ test('App renders without errors', () => {
     expect(mainElement).toBeInTheDocument()
 })
 
+test.todo(
+    'App displays ErrorBoundary fallback component when there is JS error on page'
+)
+
 describe('Routing', () => {
     describe('/', () => {
         it('display dashboard when logged in', async () => {
@@ -112,6 +116,21 @@ describe('Routing', () => {
                 screen.getByRole('heading', { name: /How it works/i, level: 2 })
             ).toBeInTheDocument()
         })
-        it.todo('display 404 error page when logged in')
+
+        it('redirects to 404 error page when logged in', async () => {
+            renderWithProviders(<AppBody />, {
+                apolloProvider: { mocks: [successfulLoginMock] },
+                routerProvider: { route: '/not-a-real-place' },
+            })
+
+            await waitFor(() =>
+                expect(
+                    screen.getByRole('heading', {
+                        name: /Page not found/i,
+                        level: 1,
+                    })
+                ).toBeInTheDocument()
+            )
+        })
     })
 })
