@@ -58,7 +58,7 @@ describe('Routing', () => {
     describe('/auth', () => {
         it('when app loads at /auth route, Login Page header is displayed', () => {
             renderWithProviders(<AppBody />, {
-                routerProvider: { initialEntries: ['/auth'] },
+                routerProvider: { route: '/auth' },
             })
 
             expect(
@@ -106,7 +106,7 @@ describe('Routing', () => {
     describe('invalid routes', () => {
         it('redirect to landing page when logged out', () => {
             renderWithProviders(<AppBody />, {
-                routerProvider: { initialEntries: ['/not-a-real-place'] },
+                routerProvider: { route: '/not-a-real-place' },
             })
             expect(
                 screen.getByRole('heading', { name: /How it works/i, level: 2 })

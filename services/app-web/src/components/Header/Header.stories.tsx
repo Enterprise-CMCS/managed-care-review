@@ -14,14 +14,17 @@ const successfulLoginMock = {
     request: { query: HELLO_WORLD },
     result: {
         data: {
-            state: 'MN',
-            role: 'State User',
-            name: 'Bob it user',
-            email: 'bob@dmas.mn.gov',
+            hello: {
+                user: {
+                    state: 'MN',
+                    role: 'State User',
+                    name: 'Bob it user',
+                    email: 'bob@dmas.mn.gov',
+                },
+            },
         },
     },
 }
-
 const Template: Story<HeaderProps> = (args) => <Header {...args} />
 
 export const CMSHeaderLoggedOut = Template.bind({})

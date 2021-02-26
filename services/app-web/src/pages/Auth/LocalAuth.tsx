@@ -72,6 +72,7 @@ export function LocalAuth(): React.ReactElement {
                             </CardBody>
                             <CardFooter>
                                 <Button
+                                    data-testid={`${user.name}Button`}
                                     type="submit"
                                     onClick={() => login(user)}
                                 >
