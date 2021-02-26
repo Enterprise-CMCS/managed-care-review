@@ -8,11 +8,7 @@ import {
 } from '@trussworks/react-uswds'
 
 import { signUp } from './cognitoAuth'
-import { CognitoUser } from 'amazon-cognito-identity-js'
-
 import { logEvent } from '../../log_event'
-
-type MaybeCognitoUser = CognitoUser | null
 
 export function showError(error: string): void {
     alert(error)
