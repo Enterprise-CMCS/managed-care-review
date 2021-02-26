@@ -20,7 +20,7 @@ const successfulLoginMock = {
 }
 
 test('App renders without errors', () => {
-    renderWithProviders(<AppBody />, {})
+    renderWithProviders(<AppBody />)
     const mainElement = screen.getByRole('main')
     expect(mainElement).toBeInTheDocument()
 })
@@ -45,7 +45,7 @@ describe('Routing', () => {
         })
 
         it('display landing page when logged out', () => {
-            renderWithProviders(<AppBody />, {})
+            renderWithProviders(<AppBody />)
 
             expect(
                 screen.getByRole('heading', { name: /How it works/i, level: 2 })
@@ -70,7 +70,7 @@ describe('Routing', () => {
             ).toBeInTheDocument()
         })
         it('when user clicks Sign In link, redirects to /auth', () => {
-            renderWithProviders(<AppBody />, {})
+            renderWithProviders(<AppBody />)
             userClickSignIn(screen)
 
             expect(
@@ -94,7 +94,7 @@ describe('Routing', () => {
         })
 
         it('display cognito login page when expected', () => {
-            renderWithProviders(<AppBody />, {})
+            renderWithProviders(<AppBody />)
             userClickSignIn(screen)
 
             expect(

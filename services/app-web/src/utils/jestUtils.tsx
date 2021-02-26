@@ -10,17 +10,18 @@ import { AuthProvider, AuthProviderProps } from '../contexts/AuthContext'
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const renderWithProviders = (
     ui: React.ReactNode,
-    {
-        routerProvider,
-        apolloProvider,
-        authProvider,
-    }: {
+    options?: {
         routerProvider?: { route: string }
         apolloProvider?: MockedProviderProps
         authProvider?: Partial<AuthProviderProps>
     }
 ) => {
-    const { route } = routerProvider ?? {}
+    const {
+        routerProvider = { route: {} },
+        apolloProvider = {},
+        authProvider = {},
+    } = options || {}
+    const { route } = routerProvider
     const testHistory = createMemoryHistory()
 
     if (route) {

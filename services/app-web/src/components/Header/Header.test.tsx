@@ -25,7 +25,7 @@ const successfulLoginMock = {
 
 describe('Header', () => {
     it('renders without errors', async () => {
-        renderWithProviders(<Header />, {})
+        renderWithProviders(<Header />)
 
         expect(screen.getByRole('banner')).toBeInTheDocument()
         expect(screen.getByRole('heading')).toBeInTheDocument()
@@ -33,7 +33,7 @@ describe('Header', () => {
 
     describe('when logged out', () => {
         it('displays Medicaid logo image link that redirects to /dashboard', async () => {
-            renderWithProviders(<Header />, {})
+            renderWithProviders(<Header />)
             const logoImage = screen.getByRole('img')
             const logoLink = screen.getByRole('link', {
                 name: /Medicaid.gov-Keeping America Healthy/i,
@@ -44,7 +44,7 @@ describe('Header', () => {
         })
 
         it('displays Medicaid and CHIP Managed Care Reporting heading', () => {
-            renderWithProviders(<Header />, {})
+            renderWithProviders(<Header />)
 
             expect(screen.getByRole('heading')).toHaveTextContent(
                 'Medicaid and CHIP Managed Care Reporting and Review System'
@@ -52,14 +52,14 @@ describe('Header', () => {
         })
 
         it('displays signin link when logged out', () => {
-            renderWithProviders(<Header />, {})
+            renderWithProviders(<Header />)
             const signInButton = screen.getByRole('link', { name: /Sign In/i })
             expect(signInButton).toBeVisible()
             expect(signInButton).toHaveAttribute('href', '/auth')
         })
 
         it('redirects when signin Link is clicked', () => {
-            renderWithProviders(<Header />, {})
+            renderWithProviders(<Header />)
             const signInButton = screen.getByRole('link', { name: /Sign In/i })
             userEvent.click(signInButton)
             expect(signInButton).toHaveAttribute('href', '/auth')
