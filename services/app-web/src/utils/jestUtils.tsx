@@ -27,7 +27,6 @@ const renderWithProviders = (
     if (route) {
         testHistory.push(route)
     }
-
     return render(
         <MockedProvider {...apolloProvider}>
             <Router history={testHistory}>
