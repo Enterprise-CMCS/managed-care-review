@@ -74,9 +74,9 @@ function AuthProvider({
         // if the error is 403, then that's all gravy, just set logged in user to undefined
         // lets try and record what different errors are here.
         // call a generic graphql connection etc. error here.
-    } else if (data?.currentUser) {
+    } else if (data?.getCurrentUser) {
         if (!isAuthenticated) {
-            setLoggedInUser(data.currentUser)
+            setLoggedInUser(data.getCurrentUser)
         }
     }
 

@@ -1,52 +1,16 @@
 // apollo_gql.js
-import {
-    ApolloServer,
-    AuthenticationError,
-    gql,
-    IResolvers,
-} from 'apollo-server-lambda'
+import { ApolloServer } from 'apollo-server-lambda'
+import { APIGatewayProxyHandler } from 'aws-lambda'
 
-import {
-    userFromAuthProvider,
-    userFromCognitoAuthProvider,
-    userFromLocalAuthProvider,
-} from '../authn'
+import { getCurrentUserResolver } from '../resolvers'
 
+import { Resolvers } from '../../app-web/src/common-code/graphql/generated/gqlServer'
 import typeDefs from '../../app-web/src/common-code/graphql/schema.graphql'
 
-// Provide resolver functions for your schema fields
-const resolvers: IResolvers = {
+// Our resolvers are defined and tested in the resolvers package
+const resolvers: Resolvers = {
     Query: {
-        currentUser: async (_parent, _args, context) => {
-            let userFetcher: userFromAuthProvider
-
-            if (process.env.REACT_APP_LOCAL_LOGIN) {
-                userFetcher = userFromLocalAuthProvider
-            } else {
-                userFetcher = userFromCognitoAuthProvider
-            }
-
-            const authProvider =
-                context.event.requestContext.identity
-                    .cognitoAuthenticationProvider
-            if (authProvider == undefined) {
-                throw new AuthenticationError(
-                    'This should only be possible in DEV, AWS should always populate cognito values'
-                )
-            }
-
-            try {
-                const userResult = await userFetcher(authProvider)
-
-                if (userResult.isErr()) {
-                    throw new AuthenticationError(userResult.error.message)
-                }
-
-                return userResult.value
-            } catch {
-                console.log('PROBLEM YO')
-            }
-        },
+        getCurrentUser: getCurrentUserResolver,
     },
 }
 
@@ -57,6 +21,8 @@ const server = new ApolloServer({
         endpoint: '/local/graphql',
     },
     context: ({ event, context }) => {
+        // TODO, let's do the auth logic right here, if we can error.
+        // or rather, let's have an auth middleware.
         return {
             headers: event.headers,
             functionName: context.functionName,
@@ -66,9 +32,42 @@ const server = new ApolloServer({
     },
 })
 
-exports.graphqlHandler = server.createHandler({
-    cors: {
-        origin: true,
-        credentials: true,
-    },
-})
+function localAuthMiddleware(
+    wrapped: APIGatewayProxyHandler
+): APIGatewayProxyHandler {
+    return function (event, context, completion) {
+        if (process.env.REACT_APP_LOCAL_LOGIN) {
+            console.log(
+                'foo',
+                event.requestContext.identity.cognitoAuthenticationProvider
+            )
+
+            const userHeader =
+                event.requestContext.identity.cognitoAuthenticationProvider
+
+            if (userHeader === 'NO_USER') {
+                console.log('NO_USER info set, returning 403')
+                return Promise.resolve({
+                    statusCode: 403,
+                    body:
+                        'No User Sent in cognitoAuthenticationProvider header\n',
+                    headers: {
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Credentials': true,
+                    },
+                })
+            }
+        }
+
+        return wrapped(event, context, completion)
+    }
+}
+
+exports.graphqlHandler = localAuthMiddleware(
+    server.createHandler({
+        cors: {
+            origin: true,
+            credentials: true,
+        },
+    })
+)
