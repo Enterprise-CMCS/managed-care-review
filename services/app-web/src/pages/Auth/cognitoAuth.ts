@@ -89,7 +89,7 @@ export async function resendSignUp(
         return null
     } catch (e) {
         // no known handleable errors for this one...
-        console.log('unknonwn err', e)
+        console.log('unknown err', e)
         throw e
     }
 }
