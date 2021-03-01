@@ -64,6 +64,7 @@ export async function userFromCognitoAuthProvider(
             })
             .promise()
 
+        // we lose type safety here...
         const attributes = userAttrDict(userResponse)
 
         if (
