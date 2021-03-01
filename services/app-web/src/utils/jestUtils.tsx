@@ -1,5 +1,5 @@
 import { MockedProvider, MockedProviderProps } from '@apollo/client/testing'
-import { Router } from 'react-router-dom'
+import { Router, RouterProps } from 'react-router-dom'
 import { createMemoryHistory } from 'history'
 import { render, Screen, queries, ByRoleMatcher } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -11,22 +11,23 @@ import { AuthProvider, AuthProviderProps } from '../contexts/AuthContext'
 const renderWithProviders = (
     ui: React.ReactNode,
     options?: {
-        routerProvider?: { route: string }
+        routerProvider?: { route?: string; routerProps?: RouterProps }
         apolloProvider?: MockedProviderProps
         authProvider?: Partial<AuthProviderProps>
     }
 ) => {
-    const {
-        routerProvider = { route: {} },
-        apolloProvider = {},
-        authProvider = {},
-    } = options || {}
-    const { route } = routerProvider
-    const testHistory = createMemoryHistory()
+    const { routerProvider = {}, apolloProvider = {}, authProvider = {} } =
+        options || {}
+
+    const { route, routerProps } = routerProvider
+    const testHistory = routerProps?.history
+        ? routerProps.history
+        : createMemoryHistory()
 
     if (route) {
         testHistory.push(route)
     }
+
     return render(
         <MockedProvider {...apolloProvider}>
             <Router history={testHistory}>
@@ -42,17 +43,17 @@ const renderWithProviders = (
 
 const userClickByTestId = (
     screen: Screen<typeof queries>,
-    text: string
+    testId: string
 ): void => {
-    const element = screen.getByTestId(text)
+    const element = screen.getByTestId(testId)
     userEvent.click(element)
 }
 const userClickByRole = (
     screen: Screen<typeof queries>,
-    text: ByRoleMatcher,
+    role: ByRoleMatcher,
     options?: queries.ByRoleOptions | undefined
 ): void => {
-    const element = screen.getByRole(text, options)
+    const element = screen.getByRole(role, options)
     userEvent.click(element)
 }
 
