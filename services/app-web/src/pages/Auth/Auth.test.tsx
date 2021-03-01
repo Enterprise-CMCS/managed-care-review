@@ -33,7 +33,13 @@ describe('Auth', () => {
         it('displays login and signup forms when logged out', () => {
             renderWithProviders(<Auth />)
 
-            expect(screen.getAllByRole('form').length).toBe(2)
+            expect(
+                screen.getByRole('form', { name: 'Login Form' })
+            ).toBeInTheDocument()
+
+            expect(
+                screen.getByRole('form', { name: 'Signup Form' })
+            ).toBeInTheDocument()
             expect(
                 screen.getByRole('button', { name: /Login/i })
             ).toBeInTheDocument()
