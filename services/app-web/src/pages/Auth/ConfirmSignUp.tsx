@@ -43,24 +43,21 @@ export function ConfirmSignUp({
 
         setIsLoading(true)
 
-        const result = await confirmSignUp(
-            fields.email,
-            fields.confirmationCode
-        )
-
-        if (result.isOk()) {
+        try {
+            await confirmSignUp(fields.email, fields.confirmationCode)
             displayLogin()
-        } else {
-            if (result.error.code == 'ExpiredCodeException') {
-                // If the code was expired, we can auto-send a new one.
-                const resendResult = await resendSignUp(fields.email)
-
-                if (resendResult.isOk()) {
-                    // display that we sent a new code.
+        } catch (error) {
+            if (error.code == 'ExpiredCodeException') {
+                try {
+                    await resendSignUp(fields.email)
                     showError(
                         'The code you submitted was expired, we just sent another one to you.'
                     )
+                } catch (err) {
+                    console.log('Error in sending confirmation code')
                 }
+            } else {
+                console.log('Signup error', error)
             }
         }
         setIsLoading(false)

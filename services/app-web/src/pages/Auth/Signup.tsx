@@ -48,29 +48,27 @@ export function Signup({
         )
     }
 
-    async function handleSubmit(event: React.FormEvent) {
-        event.preventDefault()
-
+    async function handleSubmit() {
         setIsLoading(true)
 
-        const signUpResult = await signUp({
-            username: fields.email,
-            password: fields.password,
-            given_name: fields.firstName,
-            family_name: fields.lastName,
-        })
-
-        setIsLoading(false)
-        if (signUpResult.isOk()) {
-            console.log('got a user back.')
+        try {
+            const user = await signUp({
+                username: fields.email,
+                password: fields.password,
+                given_name: fields.firstName,
+                family_name: fields.lastName,
+                state_code: 'MN',
+            })
+            setIsLoading(false)
+            console.log('got a user back', user)
             setEmail(fields.email)
             triggerConfirmation
-        } else {
-            const err = signUpResult.error
+        } catch (err) {
+            setIsLoading(false)
             if (err.code == 'UsernameExistsException') {
                 showError('That username already exists')
             } else {
-                showError('An unexpected error occured!')
+                showError('An unexpected error occurred!')
                 logEvent('cognitoAuth.unexpected_error', {
                     'err.code': err.code,
                     'err.message': err.message,

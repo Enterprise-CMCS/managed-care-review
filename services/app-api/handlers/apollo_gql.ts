@@ -59,8 +59,8 @@ const resolvers: IResolvers = {
 				return userResult.value
 
 			} 
-			catch {
-				console.log('PROBLEM YO')
+			catch (e) {
+				console.log('PROBLEM YO', e)
 			}
 
 			

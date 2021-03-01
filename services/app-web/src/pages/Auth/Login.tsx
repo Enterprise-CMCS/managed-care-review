@@ -1,6 +1,4 @@
 import React, { useState } from 'react'
-import { useHistory } from 'react-router-dom'
-import { signIn } from '../Auth/cognitoAuth'
 import {
     Button,
     Form,
@@ -8,7 +6,9 @@ import {
     Label,
     TextInput,
 } from '@trussworks/react-uswds'
+import { useHistory } from 'react-router-dom'
 
+import { signIn } from '../Auth/cognitoAuth'
 import { useAuth } from '../../contexts/AuthContext'
 
 export function showError(error: string): void {
@@ -26,7 +26,8 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
     })
 
     const history = useHistory()
-    const auth = useAuth()
+    const { isLoading, loggedInUser } = useAuth()
+    if (!isLoading && loggedInUser) history.push('/dashboard')
 
     const onFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = event.target
@@ -37,36 +38,20 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
         return fields.loginEmail.length > 0 && fields.loginPassword.length > 0
     }
 
-    async function handleSumbit(event: React.FormEvent) {
+    async function handleSubmit() {
         console.log('Trying a signin')
-        event.preventDefault()
 
-        const result = await signIn(fields.loginEmail, fields.loginPassword)
-        // TODO: try and useAuth() here, track state using the loading param there instead of awaiting something.
-        // if loading, show "redirecting" spinner or something.
-        // if loggedInUser, redirect
-
-        if (result.isOk()) {
+        try {
+            await signIn(fields.loginEmail, fields.loginPassword)
             console.log('SUCCESS LOGIN')
-
-            try {
-                await auth.checkAuth()
-            } catch (e) {
-                console.log('UNEXPECTED NOT LOGGED IN AFTETR LOGGIN', e)
-            }
-
-            history.push('/dashboard')
-        } else {
-            const err = result.error
+        } catch (err) {
             console.log(err)
 
             if (err.code === 'UserNotConfirmedException') {
-                // the user has not been confirmed, need to display the confirmation UI
                 console.log(
                     'you need to confirm your account, enter the code below'
                 )
             } else if (err.code === 'NotAuthorizedException') {
-                // the password is bad
                 console.log('bad password')
             }
             showError(err.message)
@@ -75,7 +60,7 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
 
     return (
         <div className="Login">
-            <Form onSubmit={handleSumbit} name="Login">
+            <Form onSubmit={handleSubmit} name="Login">
                 <FormGroup>
                     <Label htmlFor="loginEmail">Email</Label>
                     <TextInput
@@ -96,10 +81,7 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
                         onChange={onFieldChange}
                     />
                 </FormGroup>
-                <Button
-                    type="submit"
-                    disabled={!validateForm() || auth.isLoading}
-                >
+                <Button type="submit" disabled={!validateForm() || isLoading}>
                     Login
                 </Button>
             </Form>
