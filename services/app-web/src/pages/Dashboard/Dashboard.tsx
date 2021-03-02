@@ -10,7 +10,7 @@ export const Dashboard = (): React.ReactElement => {
     }
 
     return (
-        <GridContainer>
+        <GridContainer data-testid="dashboardPage">
             {loggedInUser && <h1>{`Hello ${loggedInUser.name}`}</h1>}
         </GridContainer>
     )

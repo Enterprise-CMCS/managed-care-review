@@ -1,33 +1,35 @@
 import React from 'react'
-import { Switch, Route, Redirect } from 'react-router-dom'
+import { Switch, Route } from 'react-router-dom'
 
 import { Auth } from '../Auth/Auth'
+import { Error404 } from '../Errors/Error404'
 import { useAuth } from '../../contexts/AuthContext'
 import { Dashboard } from '../Dashboard/Dashboard'
 import { Landing } from '../Landing/Landing'
-import { LocalAuth } from '../Auth/LocalAuth'
 
 export const AppRoutes = (): React.ReactElement => {
-    const { loggedInUser, localLogin } = useAuth()
+    const { loggedInUser } = useAuth()
 
     const AuthenticatedRoutes = (): React.ReactElement => {
         return (
             <>
-                {!loggedInUser ? (
-                    <Redirect to="/" />
-                ) : (
-                    <Route path="/dashboard" component={Dashboard} />
-                    // Add other authenticated routes here
-                )}
+                <Route path="/dashboard" component={Dashboard} />
+                <Route path="/" exact component={Dashboard} />
+                <Route path="/" component={Error404} />
             </>
         )
     }
 
     return (
         <Switch>
-            <Route path="/" exact component={Landing} />
-            <Route path="/auth" component={localLogin ? LocalAuth : Auth} />
-            <AuthenticatedRoutes />
+            {!loggedInUser ? (
+                <>
+                    <Route path="/auth" exact component={Auth} />
+                    <Route path="/" component={Landing} />
+                </>
+            ) : (
+                <AuthenticatedRoutes />
+            )}
         </Switch>
     )
 }

@@ -4,13 +4,27 @@ import { Story } from '@storybook/react'
 import ProvidersDecorator from '../../../.storybook/providersDecorator'
 import { Header, HeaderProps } from './Header'
 import { CURRENT_USER } from '../../api'
-import { UserType } from '../../common-code/domain-models'
 
 export default {
     title: 'Components/Header',
     component: Header,
 }
 
+const successfulLoginMock = {
+    request: { query: CURRENT_USER },
+    result: {
+        data: {
+            hello: {
+                user: {
+                    state: 'MN',
+                    role: 'State User',
+                    name: 'Bob it user',
+                    email: 'bob@dmas.mn.gov',
+                },
+            },
+        },
+    },
+}
 const Template: Story<HeaderProps> = (args) => <Header {...args} />
 
 export const CMSHeaderLoggedOut = Template.bind({})
@@ -29,22 +43,6 @@ CMSHeaderLoggedIn.args = {
 CMSHeaderLoggedIn.decorators = [
     (Story) =>
         ProvidersDecorator(Story, {
-            apolloProvider: {
-                mocks: [
-                    {
-                        request: { query: CURRENT_USER },
-                        result: { data: {} },
-                    },
-                ],
-            },
-            authProvider: {
-                localLogin: false,
-                initialize: {
-                    user: {
-                        name: 'Bob test user',
-                        email: 'bob@dmas.mn.gov',
-                    } as UserType,
-                },
-            },
+            apolloProvider: { mocks: [successfulLoginMock] },
         }),
 ]

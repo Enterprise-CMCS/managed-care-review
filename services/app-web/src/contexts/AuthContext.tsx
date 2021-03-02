@@ -31,19 +31,17 @@ const AuthContext = React.createContext<AuthContextType>({
 })
 
 export type AuthProviderProps = {
-    initialize?: { user: UserType | undefined }
     localLogin: boolean
     children?: React.ReactNode
 }
 
 function AuthProvider({
     localLogin,
-    initialize,
     children,
 }: AuthProviderProps): React.ReactElement {
     const [loggedInUser, setLoggedInUser] = React.useState<
         UserType | undefined
-    >(initialize?.user || undefined)
+    >(undefined)
     const [isLoading, setIsLoading] = React.useState(true)
 
     const { client, loading, data, error, refetch } = useQuery(CURRENT_USER, {
@@ -55,7 +53,6 @@ function AuthProvider({
     if (isLoading != loading) {
         setIsLoading(loading)
     }
-
     if (error) {
         const { graphQLErrors, networkError } = error
         if (graphQLErrors)
