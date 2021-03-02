@@ -18,8 +18,6 @@ export const getCurrentUserResolver: ResolverFn<
 	any,
 	{}
 > = async (_parent, _args, context) => {
-	// console.log('WEll how about it', context)
-
 	let userFetcher: userFromAuthProvider
 
 	if (process.env.REACT_APP_LOCAL_LOGIN) {
@@ -44,7 +42,3 @@ export const getCurrentUserResolver: ResolverFn<
 
 	return userResult.value
 }
-
-// export const userResolver: ResolverTypeWrapper<User> = async (something) {
-// 	console.log("REULSER RESOLVER", something)
-// }
