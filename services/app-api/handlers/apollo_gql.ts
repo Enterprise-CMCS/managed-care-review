@@ -50,7 +50,7 @@ function localAuthMiddleware(
                 return Promise.resolve({
                     statusCode: 403,
                     body:
-                        'No User Sent in cognitoAuthenticationProvider header\n',
+                        '{ "error": "No User Sent in cognitoAuthenticationProvider header"}\n',
                     headers: {
                         'Access-Control-Allow-Origin': '*',
                         'Access-Control-Allow-Credentials': true,

@@ -39,12 +39,12 @@ const userAvatars: { [key: string]: string } = {
 
 export function LocalAuth(): React.ReactElement {
     const history = useHistory()
-    const { storeLoggedInUser } = useAuth()
+    const { checkAuth } = useAuth()
 
     async function login(user: UserType) {
         loginLocalUser(user)
-        storeLoggedInUser(user)
 
+        await checkAuth()
         history.push('/dashboard')
     }
 
