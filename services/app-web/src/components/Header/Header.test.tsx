@@ -11,13 +11,11 @@ const successfulLoginMock = {
     request: { query: CURRENT_USER },
     result: {
         data: {
-            hello: {
-                user: {
-                    state: 'MN',
-                    role: 'State User',
-                    name: 'Bob it user',
-                    email: 'bob@dmas.mn.gov',
-                },
+            getCurrentUser: {
+                state: 'MN',
+                role: 'State User',
+                name: 'Bob it user',
+                email: 'bob@dmas.mn.gov',
             },
         },
     },

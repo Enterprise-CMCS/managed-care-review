@@ -29,7 +29,7 @@ describe('Auth', () => {
             request: { query: HELLO_WORLD },
             result: {
                 data: {
-                    hello: {
+                    getCurrentUser: {
                         email: 'toph@dmas.virginia.gov',
                         name: 'Toph',
                         role: 'STATE_USER',

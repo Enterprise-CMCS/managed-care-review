@@ -9,7 +9,7 @@ const successfulLoginMock = {
     request: { query: CURRENT_USER },
     result: {
         data: {
-            hello: {
+            getCurrentUser: {
                 state: 'VA',
                 role: 'State User',
                 name: 'Bob it user',
