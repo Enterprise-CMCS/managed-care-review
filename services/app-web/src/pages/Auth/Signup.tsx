@@ -80,7 +80,7 @@ export function Signup({
     }
 
     return (
-        <Form onSubmit={handleSubmit}>
+        <Form onSubmit={handleSubmit} aria-label="Signup Form">
             <FormGroup>
                 <Label htmlFor="firstName">First Name</Label>
                 <TextInput

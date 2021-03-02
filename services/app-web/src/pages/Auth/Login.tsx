@@ -16,12 +16,12 @@ export function showError(error: string): void {
 }
 
 type Props = {
-    defaultEmail: string
+    defaultEmail?: string
 }
 
 export function Login({ defaultEmail }: Props): React.ReactElement {
     const [fields, setFields] = useState({
-        loginEmail: defaultEmail,
+        loginEmail: defaultEmail || '',
         loginPassword: '',
     })
 
@@ -37,7 +37,7 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
         return fields.loginEmail.length > 0 && fields.loginPassword.length > 0
     }
 
-    async function handleSumbit(event: React.FormEvent) {
+    async function handleSubmit(event: React.FormEvent) {
         console.log('Trying a signin')
         event.preventDefault()
 
@@ -75,10 +75,11 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
 
     return (
         <div className="Login">
-            <Form onSubmit={handleSumbit} name="Login">
+            <Form onSubmit={handleSubmit} name="Login" aria-label="Login Form">
                 <FormGroup>
                     <Label htmlFor="loginEmail">Email</Label>
                     <TextInput
+                        data-testid="loginEmail"
                         id="loginEmail"
                         name="loginEmail"
                         type="email"
@@ -89,6 +90,7 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
                 <FormGroup>
                     <Label htmlFor="loginPassword">Password</Label>
                     <TextInput
+                        data-testid="loginPassword"
                         id="loginPassword"
                         name="loginPassword"
                         type="password"
