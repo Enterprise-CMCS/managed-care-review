@@ -1,9 +1,9 @@
 import { ApolloServer } from 'apollo-server-lambda'
 import { createTestClient } from 'apollo-server-testing'
 
-import { Resolvers } from '../../app-web/src/common-code/graphql/generated/gqlServer'
-import typeDefs from '../../app-web/src/common-code/graphql/schema.graphql'
-import GET_CURRENT_USER from '../../app-web/src/common-code/graphql/queries/currentUserQuery.graphql'
+import { Resolvers } from '../gen/gqlServer'
+import typeDefs from '../../app-graphql/src/schema.graphql'
+import GET_CURRENT_USER from '../../app-graphql/src/queries/currentUserQuery.graphql'
 
 import { getCurrentUserResolver } from './currentUser'
 

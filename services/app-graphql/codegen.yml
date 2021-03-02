@@ -1,0 +1,22 @@
+overwrite: true
+schema: 'src/schema.graphql'
+hooks:
+  afterAllFileWrite:
+    # Forgive me. This hook passes the edited files in as argv, so we && echo to make them harmless
+    - cp src/schema.graphql ../app-web/src/gen/ && echo "HI"
+generates:
+  ../app-api/gen/gqlServer.d.ts:
+    plugins:
+      - 'typescript'
+      - 'typescript-resolvers'
+    config: # Go ahead and prettier it
+      useIndexSignature: true # Don't forget this or Apollo will give an inscrutible error
+  ../app-web/src/gen/gqlClient.tsx:
+    documents: src/queries/*.graphql
+    plugins:
+      - 'typescript'
+      - 'typescript-operations'
+      - 'typescript-react-apollo'
+  # ./src/common-code/graphql/generated/graphql.schema.json:
+  #   plugins:
+  #     - 'introspection'

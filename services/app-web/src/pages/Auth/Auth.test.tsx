@@ -3,7 +3,7 @@ import { screen, waitFor } from '@testing-library/react'
 
 import { renderWithProviders, userClickByTestId } from '../../utils/jestUtils'
 import { Auth } from './Auth'
-import { CURRENT_USER } from '../../api'
+import { GetCurrentUserDocument } from '../../gen/gqlClient'
 
 /*  TODO: Where will we test:
     - bad internet connection
@@ -26,7 +26,7 @@ describe('Auth', () => {
         })
 
         const successfulLoginMock = {
-            request: { query: CURRENT_USER },
+            request: { query: GetCurrentUserDocument },
             result: {
                 data: {
                     getCurrentUser: {

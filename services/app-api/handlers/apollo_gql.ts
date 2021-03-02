@@ -4,8 +4,8 @@ import { APIGatewayProxyHandler } from 'aws-lambda'
 
 import { getCurrentUserResolver } from '../resolvers'
 
-import { Resolvers } from '../../app-web/src/common-code/graphql/generated/gqlServer'
-import typeDefs from '../../app-web/src/common-code/graphql/schema.graphql'
+import { Resolvers } from '../gen/gqlServer'
+import typeDefs from '../../app-graphql/src/schema.graphql'
 
 // Our resolvers are defined and tested in the resolvers package
 const resolvers: Resolvers = {

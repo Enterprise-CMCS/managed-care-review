@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Button, Alert, GridContainer } from '@trussworks/react-uswds'
 import { useLazyQuery } from '@apollo/client'
 
-import { CURRENT_USER } from '../../api'
+import { GetCurrentUserDocument } from '../../gen/gqlClient'
 
 type AuthStatus = 'Unknown' | 'Authenticated' | 'Unauthenticated'
 
@@ -10,10 +10,13 @@ type AuthStatus = 'Unknown' | 'Authenticated' | 'Unauthenticated'
 export function CheckAuth(): React.ReactElement {
     const [authStatus, setAuthStatus] = useState<AuthStatus>('Unknown')
 
-    const [checkAuth, { called, loading, data }] = useLazyQuery(CURRENT_USER, {
-        fetchPolicy: 'network-only',
-        variables: { language: 'english' },
-    })
+    const [checkAuth, { called, loading, data }] = useLazyQuery(
+        GetCurrentUserDocument,
+        {
+            fetchPolicy: 'network-only',
+            variables: { language: 'english' },
+        }
+    )
 
     async function handleClick(event: React.MouseEvent) {
         event.preventDefault()

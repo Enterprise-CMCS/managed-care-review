@@ -14,6 +14,7 @@ tsconfig.tsbuildinfo
 /.env
 tests_output
 *.log
+gen/
 
 services/app-web/public/env-config.js
 services/app-web/storybook-static

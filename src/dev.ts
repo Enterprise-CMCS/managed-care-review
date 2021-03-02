@@ -29,6 +29,8 @@ async function run_db_locally(runner: LabeledProcessRunner) {
 
 // run_api_locally uses the serverless-offline plugin to run the api lambdas locally
 async function run_api_locally(runner: LabeledProcessRunner) {
+    compile_graphql_types_once(runner)
+
     await runner.run_command_and_output(
         'api deps',
         ['yarn', 'install'],
@@ -65,8 +67,33 @@ async function run_s3_locally(runner: LabeledProcessRunner) {
     )
 }
 
+async function compile_graphql_types(runner: LabeledProcessRunner) {
+    console.log('ONCEEEE')
+    runner.run_command_and_output(
+        'gqlgen',
+        ['yarn', 'gqlgen', '--watch'],
+        'services/app-graphql'
+    )
+}
+
+// lifted from https://stackoverflow.com/questions/58083588/typescript-generic-once-function
+// once lets you wrap a function so that if you call the wrapper multiple times the
+// wrapped function is only called once. This gives us a rough dependency mechanism
+const once = <A extends any[], R, T>(
+    fn: (this: T, ...arg: A) => R
+): ((this: T, ...arg: A) => R | undefined) => {
+    let done = false
+    return function (this: T, ...args: A) {
+        return done ? void 0 : ((done = true), fn.apply(this, args))
+    }
+}
+
+const compile_graphql_types_once = once(compile_graphql_types)
+
 // run_web_locally runs app-web locally
 async function run_web_locally(runner: LabeledProcessRunner) {
+    compile_graphql_types_once(runner)
+
     await runner.run_command_and_output(
         'web deps',
         ['yarn', 'install'],

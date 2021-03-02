@@ -5,7 +5,7 @@ import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
 import { logoutLocalUser } from '../pages/Auth/localLogin'
 import { UserType } from '../common-code/domain-models'
 
-import { CURRENT_USER } from '../api'
+import { GetCurrentUserDocument } from '../gen/gqlClient'
 
 type LogoutFn = () => Promise<null>
 
@@ -40,9 +40,12 @@ function AuthProvider({
     >(undefined)
     const [isLoading, setIsLoading] = React.useState(true)
 
-    const { client, loading, data, error, refetch } = useQuery(CURRENT_USER, {
-        notifyOnNetworkStatusChange: true,
-    })
+    const { client, loading, data, error, refetch } = useQuery(
+        GetCurrentUserDocument,
+        {
+            notifyOnNetworkStatusChange: true,
+        }
+    )
 
     const isAuthenticated = loggedInUser !== undefined
 

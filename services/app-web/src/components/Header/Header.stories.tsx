@@ -3,7 +3,7 @@ import { Story } from '@storybook/react'
 
 import ProvidersDecorator from '../../../.storybook/providersDecorator'
 import { Header, HeaderProps } from './Header'
-import { CURRENT_USER } from '../../api'
+import { GetCurrentUserDocument } from '../../gen/gqlClient'
 
 export default {
     title: 'Components/Header',
@@ -11,7 +11,7 @@ export default {
 }
 
 const successfulLoginMock = {
-    request: { query: CURRENT_USER },
+    request: { query: GetCurrentUserDocument },
     result: {
         data: {
             getCurrentUser: {

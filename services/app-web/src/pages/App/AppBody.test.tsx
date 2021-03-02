@@ -3,10 +3,10 @@ import { screen, waitFor } from '@testing-library/react'
 
 import { renderWithProviders, userClickSignIn } from '../../utils/jestUtils'
 import { AppBody } from './AppBody'
-import { CURRENT_USER } from '../../api'
+import { GetCurrentUserDocument } from '../../gen/gqlClient'
 
 const successfulLoginMock = {
-    request: { query: CURRENT_USER },
+    request: { query: GetCurrentUserDocument },
     result: {
         data: {
             getCurrentUser: {
@@ -33,7 +33,9 @@ describe('Routing', () => {
     describe('/', () => {
         it('display dashboard when logged in', async () => {
             renderWithProviders(<AppBody />, {
-                apolloProvider: { mocks: [successfulLoginMock] },
+                apolloProvider: {
+                    mocks: [successfulLoginMock, successfulLoginMock],
+                },
             })
 
             expect(

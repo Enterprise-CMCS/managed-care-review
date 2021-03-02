@@ -1,9 +1,6 @@
 import { AuthenticationError } from 'apollo-server-lambda'
 
-import {
-	ResolverFn,
-	ResolversTypes,
-} from '../../app-web/src/common-code/graphql/generated/gqlServer'
+import { ResolverFn, ResolversTypes } from '../gen/gqlServer'
 
 import {
 	userFromAuthProvider,

@@ -5,10 +5,10 @@ import userEvent from '@testing-library/user-event'
 import * as CognitoAuthApi from '../../pages/Auth/cognitoAuth'
 import { renderWithProviders } from '../../utils/jestUtils'
 import { Header } from './Header'
-import { CURRENT_USER } from '../../api'
+import { GetCurrentUserDocument } from '../../gen/gqlClient'
 
 const successfulLoginMock = {
-    request: { query: CURRENT_USER },
+    request: { query: GetCurrentUserDocument },
     result: {
         data: {
             getCurrentUser: {
@@ -144,7 +144,7 @@ describe('Header', () => {
                         mocks: [
                             successfulLoginMock,
                             {
-                                request: { query: CURRENT_USER },
+                                request: { query: GetCurrentUserDocument },
                                 result: { data: {} },
                             },
                         ],
@@ -182,7 +182,7 @@ describe('Header', () => {
                         mocks: [
                             successfulLoginMock,
                             {
-                                request: { query: CURRENT_USER },
+                                request: { query: GetCurrentUserDocument },
                                 result: { data: {} },
                             },
                         ],

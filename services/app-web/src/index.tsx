@@ -10,7 +10,7 @@ import App from './pages/App/App'
 import reportWebVitals from './reportWebVitals'
 import { localGQLFetch, fakeAmplifyFetch } from './api'
 
-const gqlSchema = loader('../../app-web/src/common-code/graphql/schema.graphql')
+const gqlSchema = loader('../../app-web/src/gen/schema.graphql')
 
 // We are using Amplify for communicating with Cognito, for now.
 Amplify.configure({
