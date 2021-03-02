@@ -13,6 +13,7 @@
         justify-content: space-between;
         position: relative;
         border-bottom: 1px solid $theme-color-base-lighter;
+        background-color: color('base-lightest');
     }
 
     &__tab-list {
@@ -21,6 +22,7 @@
         margin: 0 0 -1px;
         list-style-type: none;
         white-space: nowrap;
+        background-color: $cms-color-background;
     }
 
     &__tab {

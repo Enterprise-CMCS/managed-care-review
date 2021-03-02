@@ -6,11 +6,12 @@ import styles from './Tabs.module.scss'
 type TabsProps = {
     defaultActiveTab?: string
     children: React.ReactElement[]
-}
+} & JSX.IntrinsicElements['div']
 
 export const Tabs = ({
     defaultActiveTab,
     children,
+    ...tabProps
 }: TabsProps): React.ReactElement => {
     const tabs = children.map((child) => ({
         id: child.props.id,
@@ -19,7 +20,7 @@ export const Tabs = ({
     const [activeTab, setActiveTab] = useState(defaultActiveTab || tabs[0].name)
 
     return (
-        <div className={styles['easi-tabs']} data-testid="tabs">
+        <div className={styles['easi-tabs']} data-testid="tabs" {...tabProps}>
             <div className={styles['easi-tabs__navigation']}>
                 <ul className={styles['easi-tabs__tab-list']} role="tablist">
                     {tabs.map((tab) => (

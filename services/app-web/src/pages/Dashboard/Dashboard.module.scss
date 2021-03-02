@@ -1,0 +1,19 @@
+@import '../../styles/uswdsImports.scss';
+@import '../../styles/custom';
+
+.container {
+    display: flex;
+    flex: 1 0 auto;
+    background-color: color('base-lightest');
+    padding: units(4) 0 0 0;
+    width: 100%;
+}
+
+.tabs {
+    width: 100%;
+    background-color: $cms-color-background;
+}
+
+.panel {
+    padding: units(2);
+}

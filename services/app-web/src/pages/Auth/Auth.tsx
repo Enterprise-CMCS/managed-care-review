@@ -11,7 +11,7 @@ export const Auth = (): React.ReactElement => {
     const { localLogin } = useAuth()
 
     return (
-        <GridContainer>
+        <GridContainer className="flex-fill">
             <h2>Login</h2>
             {localLogin ? <LocalAuth /> : <CognitoAuth />}
         </GridContainer>

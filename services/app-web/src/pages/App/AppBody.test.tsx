@@ -39,9 +39,14 @@ describe('Routing', () => {
             expect(
                 screen.queryByRole('heading', { level: 1 })
             ).toBeInTheDocument()
-            await waitFor(() =>
+            await waitFor(() => {
                 expect(screen.getByTestId('dashboardPage')).toBeInTheDocument()
-            )
+                expect(
+                    screen.queryByRole('heading', {
+                        name: /Page not found/i,
+                    })
+                ).toBeNull()
+            })
         })
 
         it('display landing page when logged out', () => {
@@ -68,7 +73,14 @@ describe('Routing', () => {
             expect(
                 screen.getByRole('heading', { name: /Login/i, level: 2 })
             ).toBeInTheDocument()
+            expect(
+                screen.queryByRole('heading', {
+                    name: /How it works/i,
+                    level: 2,
+                })
+            ).toBeNull()
         })
+
         it('when user clicks Sign In link, redirects to /auth', () => {
             renderWithProviders(<AppBody />)
             userClickSignIn(screen)
