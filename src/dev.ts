@@ -281,7 +281,7 @@ async function run_unit_tests(runner: LabeledProcessRunner) {
     await compile_graphql_types_once(runner)
 
     await runner.run_command_and_output(
-        'db yarn',
+        'web deps',
         ['yarn', 'install'],
         'services/app-web'
     )
@@ -296,7 +296,7 @@ async function run_unit_tests(runner: LabeledProcessRunner) {
     }
 
     await runner.run_command_and_output(
-        'db yarn',
+        'api deps',
         ['yarn', 'install'],
         'services/app-api'
     )
