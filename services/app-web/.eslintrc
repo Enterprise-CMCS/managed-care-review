@@ -14,6 +14,9 @@
         "prettier/react",
         "prettier/@typescript-eslint"
     ],
+    "ignorePatterns": [
+        "src/gen/*"
+    ],
     "rules": {},
     "overrides": [
         {
