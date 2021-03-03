@@ -81,7 +81,7 @@ export async function userFromCognitoAuthProvider(
         const user: StateUserType = {
             email: attributes.email,
             name: attributes.given_name + ' ' + attributes.family_name,
-            state: 'TN',
+            state: 'MN', // TODO: remove hard code state on backend
             role: 'STATE_USER',
         }
 
