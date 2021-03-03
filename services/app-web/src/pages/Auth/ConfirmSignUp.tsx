@@ -51,7 +51,7 @@ export function ConfirmSignUp({
         if (result.isOk()) {
             displayLogin()
         } else {
-            if (result.error.code == 'ExpiredCodeException') {
+            if (result.error.code === 'ExpiredCodeException') {
                 // If the code was expired, we can auto-send a new one.
                 const resendResult = await resendSignUp(fields.email)
 

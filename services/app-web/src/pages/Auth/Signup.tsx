@@ -64,10 +64,10 @@ export function Signup({
         if (signUpResult.isOk()) {
             console.log('got a user back.')
             setEmail(fields.email)
-            triggerConfirmation
+            triggerConfirmation()
         } else {
             const err = signUpResult.error
-            if (err.code == 'UsernameExistsException') {
+            if (err.code === 'UsernameExistsException') {
                 showError('That username already exists')
             } else {
                 showError('An unexpected error occured!')

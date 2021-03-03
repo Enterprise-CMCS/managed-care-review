@@ -1,0 +1,14 @@
+schema {
+	query: Query
+}
+
+type Query {
+	getCurrentUser: User!
+}
+
+type User {
+	role: String!
+	email: String!
+	state: String!
+	name: String!
+}

@@ -3,13 +3,13 @@ import { screen, waitFor } from '@testing-library/react'
 
 import { renderWithProviders, userClickSignIn } from '../../utils/jestUtils'
 import { AppBody } from './AppBody'
-import { HELLO_WORLD } from '../../api'
+import { GetCurrentUserDocument } from '../../gen/gqlClient'
 
 const successfulLoginMock = {
-    request: { query: HELLO_WORLD },
+    request: { query: GetCurrentUserDocument },
     result: {
         data: {
-            hello: {
+            getCurrentUser: {
                 state: 'VA',
                 role: 'State User',
                 name: 'Bob it user',

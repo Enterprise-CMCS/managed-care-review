@@ -12,24 +12,30 @@ export const AppRoutes = (): React.ReactElement => {
 
     const AuthenticatedRoutes = (): React.ReactElement => {
         return (
-            <>
+            <Switch>
                 <Route path="/dashboard" component={Dashboard} />
                 <Route path="/" exact component={Dashboard} />
                 <Route path="/" component={Error404} />
-            </>
+            </Switch>
+        )
+    }
+
+    const UnauthenticatedRoutes = (): React.ReactElement => {
+        return (
+            <Switch>
+                <Route path="/auth" exact component={Auth} />
+                <Route path="/" component={Landing} />
+            </Switch>
         )
     }
 
     return (
-        <Switch>
+        <>
             {!loggedInUser ? (
-                <>
-                    <Route path="/auth" exact component={Auth} />
-                    <Route path="/" component={Landing} />
-                </>
+                <UnauthenticatedRoutes />
             ) : (
                 <AuthenticatedRoutes />
             )}
-        </Switch>
+        </>
     )
 }

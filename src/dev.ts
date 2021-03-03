@@ -6,6 +6,8 @@ import { commandMustSucceedSync } from './localProcess.js'
 import LabeledProcessRunner from './runner.js'
 import { envFileMissingExamples } from './env.js' // What the WHAT? why doesn't this import right without the `.js`??
 import { checkStageAccess, getWebAuthVars } from './serverless.js'
+import { parseRunFlags } from './flags.js'
+import { once } from './deps.js'
 
 // run_db_locally runs the local db
 async function run_db_locally(runner: LabeledProcessRunner) {
@@ -28,6 +30,8 @@ async function run_db_locally(runner: LabeledProcessRunner) {
 
 // run_api_locally uses the serverless-offline plugin to run the api lambdas locally
 async function run_api_locally(runner: LabeledProcessRunner) {
+    compile_graphql_types_watch_once(runner)
+
     await runner.run_command_and_output(
         'api deps',
         ['yarn', 'install'],
@@ -64,8 +68,42 @@ async function run_s3_locally(runner: LabeledProcessRunner) {
     )
 }
 
+async function compile_graphql_types_watch(runner: LabeledProcessRunner) {
+    await runner.run_command_and_output(
+        'gql deps',
+        ['yarn', 'install'],
+        'services/app-graphql'
+    )
+
+    return runner.run_command_and_output(
+        'gqlgen',
+        ['yarn', 'gqlgen', '--watch'],
+        'services/app-graphql'
+    )
+}
+
+const compile_graphql_types_watch_once = once(compile_graphql_types_watch)
+
+async function compile_graphql_types(runner: LabeledProcessRunner) {
+    await runner.run_command_and_output(
+        'gql deps',
+        ['yarn', 'install'],
+        'services/app-graphql'
+    )
+
+    return runner.run_command_and_output(
+        'gqlgen',
+        ['yarn', 'gqlgen'],
+        'services/app-graphql'
+    )
+}
+
+const compile_graphql_types_once = once(compile_graphql_types)
+
 // run_web_locally runs app-web locally
 async function run_web_locally(runner: LabeledProcessRunner) {
+    compile_graphql_types_watch_once(runner)
+
     await runner.run_command_and_output(
         'web deps',
         ['yarn', 'install'],
@@ -106,14 +144,27 @@ async function run_all_lint() {
 }
 
 // run_all_locally runs all of our services locally
-async function run_all_locally() {
+type runLocalFlags = {
+    runAPI: boolean
+    runWeb: boolean
+    runDB: boolean
+    runS3: boolean
+    runStoryBook: boolean
+}
+async function run_all_locally({
+    runAPI,
+    runWeb,
+    runDB,
+    runS3,
+    runStoryBook,
+}: runLocalFlags) {
     const runner = new LabeledProcessRunner()
 
-    run_db_locally(runner)
-    run_s3_locally(runner)
-    run_api_locally(runner)
-    run_web_locally(runner)
-    run_sb_locally(runner)
+    runDB && run_db_locally(runner)
+    runS3 && run_s3_locally(runner)
+    runAPI && run_api_locally(runner)
+    runWeb && run_web_locally(runner)
+    runStoryBook && run_sb_locally(runner)
 }
 
 function check_url_is_up(url: string): Promise<boolean> {
@@ -203,15 +254,21 @@ async function run_web_against_aws(
     await run_web_locally(runner)
 }
 
-async function run_all_tests(run_unit: boolean, run_online: boolean) {
+async function run_all_tests({
+    runUnit,
+    runOnline,
+}: {
+    runUnit: boolean
+    runOnline: boolean
+}) {
     const runner = new LabeledProcessRunner()
 
     try {
-        if (run_unit) {
+        if (runUnit) {
             await run_unit_tests(runner)
         }
 
-        if (run_online) {
+        if (runOnline) {
             await run_online_tests(runner)
         }
     } catch (e) {
@@ -221,6 +278,14 @@ async function run_all_tests(run_unit: boolean, run_online: boolean) {
 }
 
 async function run_unit_tests(runner: LabeledProcessRunner) {
+    await compile_graphql_types_once(runner)
+
+    await runner.run_command_and_output(
+        'web deps',
+        ['yarn', 'install'],
+        'services/app-web'
+    )
+
     const webCode = await runner.run_command_and_output(
         'web - unit',
         ['yarn', 'test:unit'],
@@ -229,6 +294,12 @@ async function run_unit_tests(runner: LabeledProcessRunner) {
     if (webCode != 0) {
         throw new Error('web - unit FAILED')
     }
+
+    await runner.run_command_and_output(
+        'api deps',
+        ['yarn', 'install'],
+        'services/app-api'
+    )
 
     const apiCode = await runner.run_command_and_output(
         'api - unit',
@@ -307,45 +378,43 @@ function main() {
                     .option('storybook', {
                         type: 'boolean',
                         describe: 'run storybook locally',
-                        default: false,
                     })
                     .option('web', {
                         type: 'boolean',
                         describe: 'run web locally',
-                        default: false,
                     })
                     .option('api', {
                         type: 'boolean',
                         describe: 'run api locally',
-                        default: false,
                     })
                     .option('s3', {
                         type: 'boolean',
                         describe: 'run s3 locally',
-                        default: false,
+                    })
+                    .option('db', {
+                        type: 'boolean',
+                        describe: 'run database locally',
                     })
             },
             (args) => {
-                const runner = new LabeledProcessRunner()
-
-                if (!(args.storybook || args.web || args.api || args.s3)) {
-                    // if no args were set, run everytihng.
-                    run_all_locally()
-                    return
+                const inputFlags = {
+                    runAPI: args.api,
+                    runWeb: args.web,
+                    runDB: args.db,
+                    runS3: args.s3,
+                    runStoryBook: args.storybook,
                 }
 
-                if (args.storybook) {
-                    run_sb_locally(runner)
+                const parsedFlags = parseRunFlags(inputFlags)
+
+                if (parsedFlags === undefined) {
+                    console.log(
+                        "Error: Don't mix and match positive and negative boolean flags"
+                    )
+                    process.exit(1)
                 }
-                if (args.web) {
-                    run_web_locally(runner)
-                }
-                if (args.api) {
-                    run_api_locally(runner)
-                }
-                if (args.s3) {
-                    run_s3_locally(runner)
-                }
+
+                run_all_locally(parsedFlags)
             }
         )
         .command(
@@ -370,23 +439,30 @@ function main() {
                     .option('unit', {
                         type: 'boolean',
                         describe: 'run all unit tests',
-                        default: false,
                     })
                     .option('online', {
                         type: 'boolean',
                         describe:
                             'run run all tests that run against a live instance. Confiugre with APPLICATION_ENDPOINT',
-                        default: false,
                     })
             },
             (args) => {
                 // If no test flags are passed, default to running everything.
-                if (!(args.unit || args.online)) {
-                    args.unit = true
-                    args.online = true
+                const inputFlags = {
+                    runUnit: args.unit,
+                    runOnline: args.online,
                 }
 
-                run_all_tests(args.unit, args.online)
+                const parsedFlags = parseRunFlags(inputFlags)
+
+                if (parsedFlags === undefined) {
+                    console.log(
+                        "Error: Don't mix and match positive and negative boolean flags"
+                    )
+                    process.exit(1)
+                }
+
+                run_all_tests(parsedFlags)
             }
         )
         .command(
