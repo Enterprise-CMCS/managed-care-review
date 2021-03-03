@@ -65,13 +65,13 @@ describe('Routing', () => {
     })
 
     describe('/auth', () => {
-        it('when app loads at /auth route, Login Page header is displayed', () => {
+        it('when app loads at /auth route, Auth header is displayed', () => {
             renderWithProviders(<AppBody />, {
                 routerProvider: { route: '/auth' },
             })
 
             expect(
-                screen.getByRole('heading', { name: /Login/i, level: 2 })
+                screen.getByRole('heading', { name: /Auth Page/i, level: 2 })
             ).toBeInTheDocument()
             expect(
                 screen.queryByRole('heading', {
@@ -86,7 +86,7 @@ describe('Routing', () => {
             userClickSignIn(screen)
 
             expect(
-                screen.getByRole('heading', { name: /Login/i, level: 2 })
+                screen.getByRole('heading', { name: /Auth Page/i, level: 2 })
             ).toBeInTheDocument()
         })
 
@@ -105,7 +105,7 @@ describe('Routing', () => {
             ).toBeInTheDocument()
         })
 
-        it('display cognito login page when expected', () => {
+        it('display cognito signup page when expected', () => {
             renderWithProviders(<AppBody />)
             userClickSignIn(screen)
 
@@ -116,7 +116,7 @@ describe('Routing', () => {
                 screen.getByRole('textbox', { name: 'Last Name' })
             ).toBeInTheDocument()
             expect(
-                screen.getByRole('form', { name: 'Login Form' })
+                screen.getByRole('form', { name: 'Signup Form' })
             ).toBeInTheDocument()
         })
     })
