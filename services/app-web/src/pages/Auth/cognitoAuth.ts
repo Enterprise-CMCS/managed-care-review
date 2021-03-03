@@ -115,10 +115,10 @@ export async function signIn(
             } else {
                 // if amplify returns an error in a format we don't expect, let's throw it for now.
                 // might be against the spirit of never throw, but this is our boundary with a system we don't control.
-                throw e
+                return err(e) 
             }
         } else {
-            throw e
+            return e
         }
     }
 }
