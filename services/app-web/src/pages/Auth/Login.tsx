@@ -12,7 +12,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext'
 
 export function showError(error: string): void {
-    alert(error)
+    console.log('showError', error)
 }
 
 type Props = {
@@ -38,16 +38,13 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
     }
 
     async function handleSubmit(event: React.FormEvent) {
-        console.log('Trying a signin')
         event.preventDefault()
 
-        const result = await signIn(fields.loginEmail, fields.loginPassword)
-        // TODO: try and useAuth() here, track state using the loading param there instead of awaiting something.
-        // if loading, show "redirecting" spinner or something.
-        // if loggedInUser, redirect
-
-        if (result.isOk()) {
-            console.log('SUCCESS LOGIN')
+        try {
+            await signIn(fields.loginEmail, fields.loginPassword)
+            // TODO: try and useAuth() here, track state using the loading param there instead of awaiting something.
+            // if loading, show "redirecting" spinner or something.
+            // if loggedInUser, redirect
 
             try {
                 await auth.checkAuth()
@@ -56,20 +53,17 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
             }
 
             history.push('/dashboard')
-        } else {
-            const err = result.error
-            console.log(err)
-
-            if (err.code === 'UserNotConfirmedException') {
+        } catch (err) {
+            if (err?.code === 'UserNotConfirmedException') {
                 // the user has not been confirmed, need to display the confirmation UI
                 console.log(
                     'you need to confirm your account, enter the code below'
                 )
-            } else if (err.code === 'NotAuthorizedException') {
+            } else if (err?.code === 'NotAuthorizedException') {
                 // the password is bad
                 console.log('bad password')
             }
-            showError(err.message)
+            showError(err)
         }
     }
 
