@@ -74,7 +74,10 @@ export async function userFromCognitoAuthProvider(
             )
         ) {
             return err(
-                new Error('User does not have all the expected attributes')
+                new Error(
+                    'User does not have all the expected attributes: ' +
+                        JSON.stringify(attributes)
+                )
             )
         }
 
