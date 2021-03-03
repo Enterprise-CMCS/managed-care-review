@@ -1,3 +1,6 @@
+@import '../../styles/uswdsImports.scss';
+@import '../../styles/custom';
+
 .app {
     display: flex;
     min-height: 100vh;
@@ -9,4 +12,5 @@
     width: 100%;
     display: flex;
     flex-direction: column;
+    background-color: color('base-lightest');
 }

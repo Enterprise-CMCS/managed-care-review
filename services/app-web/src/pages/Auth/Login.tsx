@@ -74,37 +74,32 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
     }
 
     return (
-        <div className="Login">
-            <Form onSubmit={handleSubmit} name="Login" aria-label="Login Form">
-                <FormGroup>
-                    <Label htmlFor="loginEmail">Email</Label>
-                    <TextInput
-                        data-testid="loginEmail"
-                        id="loginEmail"
-                        name="loginEmail"
-                        type="email"
-                        value={fields.loginEmail}
-                        onChange={onFieldChange}
-                    />
-                </FormGroup>
-                <FormGroup>
-                    <Label htmlFor="loginPassword">Password</Label>
-                    <TextInput
-                        data-testid="loginPassword"
-                        id="loginPassword"
-                        name="loginPassword"
-                        type="password"
-                        value={fields.loginPassword}
-                        onChange={onFieldChange}
-                    />
-                </FormGroup>
-                <Button
-                    type="submit"
-                    disabled={!validateForm() || auth.isLoading}
-                >
-                    Login
-                </Button>
-            </Form>
-        </div>
+        <Form onSubmit={handleSubmit} name="Login" aria-label="Login Form">
+            <FormGroup>
+                <Label htmlFor="loginEmail">Email</Label>
+                <TextInput
+                    data-testid="loginEmail"
+                    id="loginEmail"
+                    name="loginEmail"
+                    type="email"
+                    value={fields.loginEmail}
+                    onChange={onFieldChange}
+                />
+            </FormGroup>
+            <FormGroup>
+                <Label htmlFor="loginPassword">Password</Label>
+                <TextInput
+                    data-testid="loginPassword"
+                    id="loginPassword"
+                    name="loginPassword"
+                    type="password"
+                    value={fields.loginPassword}
+                    onChange={onFieldChange}
+                />
+            </FormGroup>
+            <Button type="submit" disabled={!validateForm() || auth.isLoading}>
+                Login
+            </Button>
+        </Form>
     )
 }

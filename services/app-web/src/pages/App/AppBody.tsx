@@ -4,7 +4,6 @@ import { GovBanner } from '@trussworks/react-uswds'
 import styles from './AppBody.module.scss'
 
 import { AppRoutes } from './AppRoutes'
-import { CheckAuth } from '../Auth/CheckAuth'
 import { Error400 } from '../Errors/Error400'
 import { Footer } from '../../components/Footer/Footer'
 import { Header } from '../../components/Header/Header'
@@ -29,7 +28,6 @@ export function AppBody(): React.ReactElement {
             <main id="main-content" className={styles.mainContent} role="main">
                 {alert && Error400}
                 <AppRoutes />
-                <CheckAuth />
             </main>
             <Footer />
         </div>

@@ -13,9 +13,9 @@ export const AppRoutes = (): React.ReactElement => {
     const AuthenticatedRoutes = (): React.ReactElement => {
         return (
             <Switch>
-                <Route path="/dashboard" component={Dashboard} />
                 <Route path="/" exact component={Dashboard} />
-                <Route path="/" component={Error404} />
+                <Route path="/dashboard" component={Dashboard} />
+                <Route path="*" component={Error404} />
             </Switch>
         )
     }
@@ -23,12 +23,12 @@ export const AppRoutes = (): React.ReactElement => {
     const UnauthenticatedRoutes = (): React.ReactElement => {
         return (
             <Switch>
-                <Route path="/auth" exact component={Auth} />
-                <Route path="/" component={Landing} />
+                <Route path="/" exact component={Landing} />
+                <Route path="/auth" component={Auth} />
+                <Route path="*" component={Landing} />
             </Switch>
         )
     }
-
     return (
         <>
             {!loggedInUser ? (
