@@ -12,7 +12,7 @@ export const Auth = (): React.ReactElement => {
 
     return (
         <GridContainer>
-            <h2>Login</h2>
+            <h2>Auth Page</h2>
             {localLogin ? <LocalAuth /> : <CognitoAuth />}
         </GridContainer>
     )
@@ -20,50 +20,72 @@ export const Auth = (): React.ReactElement => {
 
 const CognitoAuth = (): React.ReactElement => {
     const [showConfirmation, setShowConfirmation] = useState(false)
+    const [showLogin, setShowLogin] = useState(false)
     const [enteredEmail, setEnteredEmail] = useState('')
-    const showLogin = !showConfirmation
+    const showForms = !showConfirmation
 
     const toggleConfirmationForm = (event: React.FormEvent) => {
         event.preventDefault()
-        setShowConfirmation(!showConfirmation)
+        setShowConfirmation((prev) => !prev)
     }
 
-    return showLogin ? (
+    return showForms ? (
         <>
             <Grid row>
-                <Grid col={6} className="signup">
-                    <Signup
-                        setEmail={setEnteredEmail}
-                        triggerConfirmation={() => {
-                            setShowConfirmation(true)
-                        }}
-                    />
-                </Grid>
-                <Grid col={6} className="login">
-                    <Login defaultEmail={enteredEmail} />
-                </Grid>
+                {!showLogin && (
+                    <Grid col={10} className="signup">
+                        <h3>Signup Form</h3>
+                        <Signup
+                            setEmail={setEnteredEmail}
+                            triggerConfirmation={() => {
+                                setShowConfirmation(true)
+                            }}
+                        />
+                    </Grid>
+                )}
+                {showLogin && (
+                    <Grid className="login">
+                        <h3>Login Form</h3>
+                        <Login defaultEmail={enteredEmail} />
+                    </Grid>
+                )}
             </Grid>
-            <Grid row>
-                <Grid col="fill">
-                    <Button type="button" onClick={toggleConfirmationForm}>
-                        Enter confirmation code
+            <Grid row className="padding-y-2">
+                {!showLogin && (
+                    <>
+                        <Button
+                            type="button"
+                            onClick={() => setShowLogin(true)}
+                        >
+                            Show Login Form
+                        </Button>
+
+                        <Button type="button" onClick={toggleConfirmationForm}>
+                            Enter confirmation code
+                        </Button>
+                    </>
+                )}
+                {showLogin && (
+                    <Button type="button" onClick={() => setShowLogin(false)}>
+                        Show Signup Form
                     </Button>
-                </Grid>
+                )}
             </Grid>
         </>
     ) : (
-        <Grid row className="confirm">
+        <>
+            <h3> Enter Confirmation Code</h3>
             <ConfirmSignUp
                 defaultEmail={enteredEmail}
                 displayLogin={() => {
                     setShowConfirmation(false)
                 }}
             />
-            <div>
+            <div className="padding-y-2">
                 <Button type="button" onClick={toggleConfirmationForm}>
-                    Show Signup/Login
+                    Show Signup/ Login
                 </Button>
             </div>
-        </Grid>
+        </>
     )
 }

@@ -2,13 +2,14 @@
 @import '../../styles/custom';
 
 .outlineSection {
-    background-color: $theme-color-base-lightest;
     padding: units(2);
     & h2 {
         text-align: center;
     }
 }
 .detailsSection {
+    background-color: $cms-color-background;
+    flex: 1;
     .detailsSectionContent {
         max-width: 55rem;
     }
