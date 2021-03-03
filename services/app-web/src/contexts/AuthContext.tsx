@@ -40,16 +40,13 @@ function AuthProvider({
     >(undefined)
     const [isLoading, setIsLoading] = React.useState(true)
 
-    const { client, loading, data, error, refetch } = useQuery(
-        GetCurrentUserDocument,
-        {
-            notifyOnNetworkStatusChange: true,
-        }
-    )
+    const { loading, data, error, refetch } = useQuery(GetCurrentUserDocument, {
+        notifyOnNetworkStatusChange: true,
+    })
 
     const isAuthenticated = loggedInUser !== undefined
 
-    if (isLoading != loading) {
+    if (isLoading !== loading) {
         setIsLoading(loading)
     } else {
         if (error) {
@@ -94,27 +91,25 @@ function AuthProvider({
     const realLogout: LogoutFn = localLogin ? logoutLocalUser : cognitoSignOut
 
     const logout =
-        loggedInUser == undefined
+        loggedInUser === undefined
             ? undefined
             : () => {
                   return new Promise<void>((resolve, reject) => {
                       realLogout()
                           .then(() => {
-                              client.clearStore().then(() => {
-                                  refetch()
-                                      .then(() => {
-                                          // this would actually be unexpected.
-                                          reject(
-                                              new Error(
-                                                  "Logout somehow didn't trigger a 403"
-                                              )
+                              refetch()
+                                  .then(() => {
+                                      // this would actually be unexpected.
+                                      reject(
+                                          new Error(
+                                              "Logout somehow didn't trigger a 403"
                                           )
-                                      })
-                                      .catch(() => {
-                                          // we expect this to 403, but that's all the logout caller is waiting on
-                                          resolve()
-                                      })
-                              })
+                                      )
+                                  })
+                                  .catch(() => {
+                                      // we expect this to 403, but that's all the logout caller is waiting on
+                                      resolve()
+                                  })
                           })
                           .catch((e) => {
                               console.log('Logout Failed.', e)

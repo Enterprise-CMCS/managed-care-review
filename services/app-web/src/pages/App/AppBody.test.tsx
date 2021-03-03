@@ -33,9 +33,7 @@ describe('Routing', () => {
     describe('/', () => {
         it('display dashboard when logged in', async () => {
             renderWithProviders(<AppBody />, {
-                apolloProvider: {
-                    mocks: [successfulLoginMock, successfulLoginMock],
-                },
+                apolloProvider: { mocks: [successfulLoginMock] },
             })
 
             expect(

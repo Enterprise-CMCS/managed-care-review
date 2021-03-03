@@ -20,17 +20,16 @@ TODO: Where will we test:
     - bad auth (403)
     - server error (500)
 */
-const successfulLoginMock = {
+const failedAuthMock = {
     request: { query: GetCurrentUserDocument },
     result: {
+        ok: false,
+        status: 403,
+        statusText: 'Unauthenticated',
         data: {
-            getCurrentUser: {
-                state: 'MN',
-                role: 'State User',
-                name: 'Bob it user',
-                email: 'bob@dmas.mn.gov',
-            },
+            error: 'you are not logged in',
         },
+        error: new Error('network error'),
     },
 }
 
@@ -124,13 +123,13 @@ describe('Auth', () => {
             ).toBe(2)
         })
 
-        it('when login is successful, redirect to dashboard', async () => {
+        it.only('when login is successful, redirect to dashboard', async () => {
             const history = createMemoryHistory()
 
             renderWithProviders(<Auth />, {
                 routerProvider: { routerProps: { history: history } },
                 authProvider: { localLogin: true },
-                apolloProvider: { mocks: [successfulLoginMock] },
+                apolloProvider: { mocks: [failedAuthMock] },
             })
 
             userClickByTestId(screen, 'TophButton')

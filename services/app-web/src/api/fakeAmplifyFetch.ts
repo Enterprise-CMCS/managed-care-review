@@ -40,14 +40,14 @@ function fetchResponseFromAxios(axiosResponse: AxiosResponse): Response {
 
         bodyUsed: false,
         blob: () => {
-            throw 'never call blob'
+            throw new Error('never call blob')
         },
         arrayBuffer: () => {
-            throw 'never call arrayBuffer'
+            throw new Error('never call arrayBuffer')
         },
 
         clone: () => {
-            throw 'never call clone'
+            throw new Error('never call clone')
         },
     }
 
@@ -64,7 +64,7 @@ export async function fakeAmplifyFetch(
     console.log('try to amplify', uri, options)
 
     if (options.method !== 'POST') {
-        throw 'unexpected GQL request'
+        throw new Error('unexpected GQL request')
     }
 
     let amplifyBody = {}
