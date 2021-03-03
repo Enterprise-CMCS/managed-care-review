@@ -143,6 +143,11 @@ async function run_all_lint() {
     )
 }
 
+async function run_all_generate() {
+    const runner = new LabeledProcessRunner()
+    await compile_graphql_types(runner)
+}
+
 // run_all_locally runs all of our services locally
 type runLocalFlags = {
     runAPI: boolean
@@ -471,6 +476,14 @@ function main() {
             {},
             () => {
                 run_all_lint()
+            }
+        )
+        .command(
+            'generate',
+            'generate any code required for building. For now thats just GraphQL types.',
+            {},
+            () => {
+                run_all_generate()
             }
         )
         .demandCommand(1, '')
