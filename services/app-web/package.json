@@ -39,12 +39,6 @@
         "storybook": "start-storybook -p 6006 -s public --quiet",
         "build-storybook": "build-storybook -s public --quiet"
     },
-    "eslintConfig": {
-        "extends": [
-            "react-app",
-            "react-app/jest"
-        ]
-    },
     "browserslist": {
         "production": [
             ">0.2%",
@@ -73,6 +67,7 @@
         "eslint-plugin-prettier": "^3.3.1",
         "eslint-plugin-react": "^7.22.0",
         "eslint-plugin-react-hooks": "^4.2.0",
+        "graphql.macro": "^1.4.2",
         "pa11y-ci": "^2.4.0",
         "prettier": "^2.2.1",
         "serverless-cloudfront-invalidate": "^1.5.0",

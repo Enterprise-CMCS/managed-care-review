@@ -10,6 +10,7 @@ import {
     userClickByRole,
 } from '../../utils/jestUtils'
 import { Auth } from './Auth'
+import { GetCurrentUserDocument } from '../../gen/gqlClient'
 
 /*  
 This file should only have basic user flows for auth. Form and implementation details are tested at the component level.
@@ -19,6 +20,18 @@ TODO: Where will we test:
     - bad auth (403)
     - server error (500)
 */
+const failedAuthMock = {
+    request: { query: GetCurrentUserDocument },
+    result: {
+        ok: false,
+        status: 403,
+        statusText: 'Unauthenticated',
+        data: {
+            error: 'you are not logged in',
+        },
+        error: new Error('network error'),
+    },
+}
 
 describe('Auth', () => {
     describe('Cognito Login', () => {
@@ -110,12 +123,13 @@ describe('Auth', () => {
             ).toBe(2)
         })
 
-        it('when login is successful, redirect to dashboard', async () => {
+        it.only('when login is successful, redirect to dashboard', async () => {
             const history = createMemoryHistory()
 
             renderWithProviders(<Auth />, {
                 routerProvider: { routerProps: { history: history } },
                 authProvider: { localLogin: true },
+                apolloProvider: { mocks: [failedAuthMock] },
             })
 
             userClickByTestId(screen, 'TophButton')

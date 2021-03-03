@@ -20,13 +20,22 @@ export const AppRoutes = (): React.ReactElement => {
         )
     }
 
-    return !loggedInUser ? (
-        <Switch>
-            <Route path="/" exact component={Landing} />
-            <Route path="/auth" component={Auth} />
-            <Route path="*" component={Landing} />
-        </Switch>
-    ) : (
-        <AuthenticatedRoutes />
+    const UnauthenticatedRoutes = (): React.ReactElement => {
+        return (
+            <Switch>
+                <Route path="/" exact component={Landing} />
+                <Route path="/auth" component={Auth} />
+                <Route path="*" component={Landing} />
+            </Switch>
+        )
+    }
+    return (
+        <>
+            {!loggedInUser ? (
+                <UnauthenticatedRoutes />
+            ) : (
+                <AuthenticatedRoutes />
+            )}
+        </>
     )
 }

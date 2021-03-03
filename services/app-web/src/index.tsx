@@ -2,12 +2,15 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'
 import { Amplify } from 'aws-amplify'
+import { loader } from 'graphql.macro'
 
 import './index.scss'
 
 import App from './pages/App/App'
 import reportWebVitals from './reportWebVitals'
-import { localGQLFetch, cognitoGQLFetch } from './api'
+import { localGQLFetch, fakeAmplifyFetch } from './api'
+
+const gqlSchema = loader('../../app-web/src/gen/schema.graphql')
 
 // We are using Amplify for communicating with Cognito, for now.
 Amplify.configure({
@@ -33,9 +36,10 @@ const localLogin: boolean = process.env.REACT_APP_LOCAL_LOGIN === 'true'
 const apolloClient = new ApolloClient({
     link: new HttpLink({
         uri: '/graphql',
-        fetch: localLogin ? localGQLFetch : cognitoGQLFetch,
+        fetch: localLogin ? localGQLFetch : fakeAmplifyFetch,
     }),
     cache: new InMemoryCache(),
+    typeDefs: gqlSchema,
 })
 
 ReactDOM.render(

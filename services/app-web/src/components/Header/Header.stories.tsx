@@ -3,7 +3,7 @@ import { Story } from '@storybook/react'
 
 import ProvidersDecorator from '../../../.storybook/providersDecorator'
 import { Header, HeaderProps } from './Header'
-import { HELLO_WORLD } from '../../api'
+import { GetCurrentUserDocument } from '../../gen/gqlClient'
 
 export default {
     title: 'Components/Header',
@@ -11,16 +11,14 @@ export default {
 }
 
 const successfulLoginMock = {
-    request: { query: HELLO_WORLD },
+    request: { query: GetCurrentUserDocument },
     result: {
         data: {
-            hello: {
-                user: {
-                    state: 'MN',
-                    role: 'State User',
-                    name: 'Bob it user',
-                    email: 'bob@dmas.mn.gov',
-                },
+            getCurrentUser: {
+                state: 'MN',
+                role: 'State User',
+                name: 'Bob it user',
+                email: 'bob@dmas.mn.gov',
             },
         },
     },
