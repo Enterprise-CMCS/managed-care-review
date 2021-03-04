@@ -2,6 +2,7 @@ import React from 'react'
 import { Button, Link, GridContainer, Grid } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 
+import { redirectToIDMLogin } from '../../pages/Auth/cognitoAuth'
 import medicaidLogo from '../../assets/images/medicaidgovlogo.png'
 import { ReactComponent as VaIcon } from '../../assets/icons/va-icon.svg'
 import { ReactComponent as MnIcon } from '../../assets/icons/mn-icon.svg'
@@ -54,6 +55,13 @@ export const Header = ({
         ? getStateInfo(stateCode)
         : { stateName: 'STATE UNKNOWN', StateIcon: () => <span></span> }
 
+    const handleIDMSignin = (event: React.FormEvent) => {
+        event.preventDefault()
+
+        console.log('Login WITH IdM')
+        redirectToIDMLogin()
+    }
+
     const handleLogout = (
         e: React.MouseEvent<HTMLButtonElement, MouseEvent>
     ) => {
@@ -97,14 +105,23 @@ export const Header = ({
                                 </Button>
                             </div>
                         ) : (
-                            <Link
-                                asCustom={NavLink}
-                                className="usa-button usa-button--outline"
-                                variant="unstyled"
-                                to="/auth"
-                            >
-                                Sign In
-                            </Link>
+                            <>
+                                <Button
+                                    type="button"
+                                    unstyled
+                                    onClick={handleIDMSignin}
+                                >
+                                    Sign In with IDM
+                                </Button>
+                                <Link
+                                    asCustom={NavLink}
+                                    className="usa-button usa-button--outline"
+                                    variant="unstyled"
+                                    to="/auth"
+                                >
+                                    Sign In
+                                </Link>
+                            </>
                         )}
                     </Grid>
                 </GridContainer>

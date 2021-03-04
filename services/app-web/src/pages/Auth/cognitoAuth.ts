@@ -34,6 +34,24 @@ function isAmplifyError(err: unknown): err is AmplifyError {
     return false
 }
 
+export function redirectToIDMLogin(): void {
+    const authConfig = AmplifyAuth.configure()
+    if (
+        authConfig.oauth === undefined ||
+        !('redirectSignIn' in authConfig.oauth)
+    ) {
+        throw new Error('Auth is not configured for IDM')
+    }
+    const { domain, redirectSignIn, responseType } = authConfig.oauth
+    const clientId = authConfig.userPoolWebClientId
+    const url = `https://${domain}/oauth2/authorize?identity_provider=Okta&redirect_uri=${redirectSignIn}&response_type=${responseType}&client_id=${clientId}`
+
+    // https://undefined/oauth2/authorize?identity_provider=Okta&redirect_uri=undefined&response_type=token&client_id=6is5kleap6lljtidc0n77u1tr6
+
+    console.log('GOING TO:', url)
+    window.location.assign(url)
+}
+
 export async function signUp(
     user: newUser
 ): Promise<CognitoUser | AmplifyError> {

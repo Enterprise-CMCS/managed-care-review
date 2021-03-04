@@ -8,240 +8,241 @@
 service: ui-auth
 
 custom:
-    stage: ${opt:stage, self:provider.stage}
-    attachments_bucket_arn: ${cf:uploads-${self:custom.stage}.AttachmentsBucketArn}
-    api_gateway_rest_api_name: ${cf:app-api-${self:custom.stage}.ApiGatewayRestApiName}
-    application_endpoint_url: ${cf:ui-${self:custom.stage}.CloudFrontEndpointUrl}
-    okta_metadata_url: ${env:OKTA_METADATA_URL}
-    iamPath: ${env:IAM_PATH, "/"}
+  stage: ${opt:stage, self:provider.stage}
+  attachments_bucket_arn: ${cf:uploads-${self:custom.stage}.AttachmentsBucketArn}
+  api_gateway_rest_api_name: ${cf:app-api-${self:custom.stage}.ApiGatewayRestApiName}
+  application_endpoint_url: ${cf:ui-${self:custom.stage}.CloudFrontEndpointUrl}
+  okta_metadata_url: ${env:OKTA_METADATA_URL}
+  iamPath: ${env:IAM_PATH, "/"}
 
 # The `provider` block defines where your service will be deployed
 provider:
-    name: aws
-    runtime: nodejs12.x
-    region: us-east-1
-    stage: dev
+  name: aws
+  runtime: nodejs12.x
+  region: us-east-1
+  stage: dev
 
 resources:
-    Conditions:
-        CreateEmailConfiguration:
-            Fn::Not:
-                - Fn::Equals:
-                      - ''
-                      - ${env:SES_SOURCE_EMAIL_ADDRESS, ""}
-        CreatePermissionsBoundary:
-            Fn::Not:
-                - Fn::Equals:
-                      - ''
-                      - ${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
-    Resources:
-        CognitoUserPool:
-            Type: AWS::Cognito::UserPool
-            Properties:
-                UserPoolName: ${self:custom.stage}-user-pool
-                UsernameAttributes:
-                    - email
-                AutoVerifiedAttributes:
-                    - email
-                EmailConfiguration:
-                    Fn::If:
-                        - CreateEmailConfiguration
-                        - EmailSendingAccount: DEVELOPER
-                          SourceArn:
-                              Fn::Join:
-                                  - ''
-                                  - - 'arn:aws:ses:us-east-1:'
-                                    - Ref: AWS::AccountId
-                                    - ':identity/'
-                                    - '${env:SES_SOURCE_EMAIL_ADDRESS, ""}'
-                        - Ref: AWS::NoValue
-                Schema:
-                    - Name: given_name
-                      AttributeDataType: String
-                      Mutable: true
-                      Required: false
-                    - Name: family_name
-                      AttributeDataType: String
-                      Mutable: true
-                      Required: false
-					- Name: state_code
-                      AttributeDataType: String
-                      Mutable: true
-                      Required: false
-                    - Name: phone_number
-                      AttributeDataType: String
-                      Mutable: true
-                      Required: false
+  Conditions:
+    CreateEmailConfiguration:
+      Fn::Not:
+        - Fn::Equals:
+            - ''
+            - ${env:SES_SOURCE_EMAIL_ADDRESS, ""}
+    CreatePermissionsBoundary:
+      Fn::Not:
+        - Fn::Equals:
+            - ''
+            - ${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
+  Resources:
+    CognitoUserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: ${self:custom.stage}-user-pool
+        UsernameAttributes:
+          - email
+        AutoVerifiedAttributes:
+          - email
+        EmailConfiguration:
+          Fn::If:
+            - CreateEmailConfiguration
+            - EmailSendingAccount: DEVELOPER
+              SourceArn:
+                Fn::Join:
+                  - ''
+                  - - 'arn:aws:ses:us-east-1:'
+                    - Ref: AWS::AccountId
+                    - ':identity/'
+                    - '${env:SES_SOURCE_EMAIL_ADDRESS, ""}'
+            - Ref: AWS::NoValue
+        Schema:
+          - Name: given_name
+            AttributeDataType: String
+            Mutable: true
+            Required: false
+          - Name: family_name
+            AttributeDataType: String
+            Mutable: true
+            Required: false
+          - Name: state_code
+            AttributeDataType: String
+            Mutable: true
+            Required: false
+          - Name: phone_number
+            AttributeDataType: String
+            Mutable: true
+            Required: false
 
-        CognitoUserPoolClient:
-            Type: AWS::Cognito::UserPoolClient
-            Properties:
-                ClientName: ${self:custom.stage}-user-pool-client
-                AllowedOAuthFlows:
-                    - implicit
-                AllowedOAuthFlowsUserPoolClient: true
-                AllowedOAuthScopes:
-                    - email
-                    - openid
-                CallbackURLs:
-                    - ${self:custom.application_endpoint_url}
-                    - http://localhost:3000/
-                DefaultRedirectURI: ${self:custom.application_endpoint_url}
-                ExplicitAuthFlows:
-                    - ADMIN_NO_SRP_AUTH
-                GenerateSecret: false
-                LogoutURLs:
-                    - ${self:custom.application_endpoint_url}
-                    - http://localhost:3000/
-                SupportedIdentityProviders:
-                    - Okta
-                UserPoolId:
-                    Ref: CognitoUserPool
-            DependsOn: CognitoUserPoolIdentityProvider
-
-        UserPoolDomain:
-            Type: AWS::Cognito::UserPoolDomain
-            Properties:
-                Domain:
-                    Fn::Join:
-                        - ''
-                        - - ${self:custom.stage}-login-
-                          - Ref: CognitoUserPoolClient
-                UserPoolId:
-                    Ref: CognitoUserPool
-
-        CognitoUserPoolIdentityProvider:
-            Type: AWS::Cognito::UserPoolIdentityProvider
-            Properties:
-                AttributeMapping:
-                    email: http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress
-                IdpIdentifiers:
-                    - IdpIdentifier
-                ProviderDetails:
-                    MetadataURL: ${self:custom.okta_metadata_url}
-                ProviderName: Okta
-                ProviderType: SAML
-                UserPoolId:
-                    Ref: CognitoUserPool
-
-        CognitoIdentityPool:
-            Type: AWS::Cognito::IdentityPool
-            Properties:
-                IdentityPoolName: ${self:custom.stage}IdentityPool
-                AllowUnauthenticatedIdentities: false
-                CognitoIdentityProviders:
-                    - ClientId:
-                          Ref: CognitoUserPoolClient
-                      ProviderName:
-                          Fn::GetAtt: ['CognitoUserPool', 'ProviderName']
-        CognitoIdentityPoolRoles:
-            Type: AWS::Cognito::IdentityPoolRoleAttachment
-            Properties:
-                IdentityPoolId:
-                    Ref: CognitoIdentityPool
-                Roles:
-                    authenticated:
-                        Fn::GetAtt: [CognitoAuthRole, Arn]
-
-        CognitoAuthRole:
-            Type: AWS::IAM::Role
-            Properties:
-                Path: ${self:custom.iamPath}
-                PermissionsBoundary:
-                    Fn::If:
-                        - CreatePermissionsBoundary
-                        - Fn::Join:
-                              - ''
-                              - - 'arn:aws:iam::'
-                                - Ref: AWS::AccountId
-                                - ':policy'
-                                - '${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}'
-                        - Ref: AWS::NoValue
-                AssumeRolePolicyDocument:
-                    Version: '2012-10-17'
-                    Statement:
-                        - Effect: 'Allow'
-                          Principal:
-                              Federated: 'cognito-identity.amazonaws.com'
-                          Action:
-                              - 'sts:AssumeRoleWithWebIdentity'
-                          Condition:
-                              StringEquals:
-                                  'cognito-identity.amazonaws.com:aud':
-                                      Ref: CognitoIdentityPool
-                              'ForAnyValue:StringLike':
-                                  'cognito-identity.amazonaws.com:amr': authenticated
-                Policies:
-                    - PolicyName: 'CognitoAuthorizedPolicy'
-                      PolicyDocument:
-                          Version: '2012-10-17'
-                          Statement:
-                              - Effect: 'Allow'
-                                Action:
-                                    - 'mobileanalytics:PutEvents'
-                                    - 'cognito-sync:*'
-                                    - 'cognito-identity:*'
-                                Resource: '*'
-
-                              - Effect: 'Allow'
-                                Action:
-                                    - 'execute-api:Invoke'
-                                Resource:
-                                    Fn::Join:
-                                        - ''
-                                        - - 'arn:aws:execute-api:'
-                                          - Ref: AWS::Region
-                                          - ':'
-                                          - Ref: AWS::AccountId
-                                          - ':'
-                                          - ${self:custom.api_gateway_rest_api_name}
-                                          - '/*'
-
-                              - Effect: 'Allow'
-                                Action:
-                                    - 's3:*'
-                                Resource:
-                                    - Fn::Join:
-                                          - ''
-                                          - - ${self:custom.attachments_bucket_arn}
-                                            - '/private/'
-                                            - '$'
-                                            - '{cognito-identity.amazonaws.com:sub}/*'
-
-    Outputs:
+    CognitoUserPoolClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        ClientName: ${self:custom.stage}-user-pool-client
+        AllowedOAuthFlows:
+          - implicit
+        AllowedOAuthFlowsUserPoolClient: true
+        AllowedOAuthScopes:
+          - email
+          - openid
+        CallbackURLs:
+          - ${self:custom.application_endpoint_url}
+          - http://localhost:3000/
+          - http://localhost:3003/
+        DefaultRedirectURI: ${self:custom.application_endpoint_url}
+        ExplicitAuthFlows:
+          - ADMIN_NO_SRP_AUTH
+        GenerateSecret: false
+        LogoutURLs:
+          - ${self:custom.application_endpoint_url}
+          - http://localhost:3000/
+        SupportedIdentityProviders:
+          - Okta
         UserPoolId:
-            Value:
-                Ref: CognitoUserPool
-        UserPoolClientId:
-            Value:
-                Ref: CognitoUserPoolClient
-        UserPoolClientDomain:
-            Value:
-                Fn::Join:
-                    - ''
-                    - - Ref: UserPoolDomain
-                      - .auth.
-                      - Ref: AWS::Region
-                      - .amazoncognito.com
-        UserPoolSingleSignOnURL:
-            Value:
-                Fn::Join:
-                    - ''
-                    - - https://
-                      - Ref: UserPoolDomain
-                      - .auth.
-                      - Ref: AWS::Region
-                      - .amazoncognito.com
-                      - /saml2/idpresponse
-        AudienceRestrictionURI:
-            Value:
-                Fn::Join:
-                    - ''
-                    - - 'urn:amazon:cognito:sp:'
-                      - Ref: CognitoUserPool
+          Ref: CognitoUserPool
+      DependsOn: CognitoUserPoolIdentityProvider
+
+    UserPoolDomain:
+      Type: AWS::Cognito::UserPoolDomain
+      Properties:
+        Domain:
+          Fn::Join:
+            - ''
+            - - ${self:custom.stage}-login-
+              - Ref: CognitoUserPoolClient
+        UserPoolId:
+          Ref: CognitoUserPool
+
+    CognitoUserPoolIdentityProvider:
+      Type: AWS::Cognito::UserPoolIdentityProvider
+      Properties:
+        AttributeMapping:
+          email: http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress
+        IdpIdentifiers:
+          - IdpIdentifier
+        ProviderDetails:
+          MetadataURL: ${self:custom.okta_metadata_url}
+        ProviderName: Okta
+        ProviderType: SAML
+        UserPoolId:
+          Ref: CognitoUserPool
+
+    CognitoIdentityPool:
+      Type: AWS::Cognito::IdentityPool
+      Properties:
+        IdentityPoolName: ${self:custom.stage}IdentityPool
+        AllowUnauthenticatedIdentities: false
+        CognitoIdentityProviders:
+          - ClientId:
+              Ref: CognitoUserPoolClient
+            ProviderName:
+              Fn::GetAtt: ['CognitoUserPool', 'ProviderName']
+    CognitoIdentityPoolRoles:
+      Type: AWS::Cognito::IdentityPoolRoleAttachment
+      Properties:
         IdentityPoolId:
-            Value:
-                Ref: CognitoIdentityPool
-        Region:
-            Value:
-                Ref: AWS::Region
+          Ref: CognitoIdentityPool
+        Roles:
+          authenticated:
+            Fn::GetAtt: [CognitoAuthRole, Arn]
+
+    CognitoAuthRole:
+      Type: AWS::IAM::Role
+      Properties:
+        Path: ${self:custom.iamPath}
+        PermissionsBoundary:
+          Fn::If:
+            - CreatePermissionsBoundary
+            - Fn::Join:
+                - ''
+                - - 'arn:aws:iam::'
+                  - Ref: AWS::AccountId
+                  - ':policy'
+                  - '${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}'
+            - Ref: AWS::NoValue
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: 'Allow'
+              Principal:
+                Federated: 'cognito-identity.amazonaws.com'
+              Action:
+                - 'sts:AssumeRoleWithWebIdentity'
+              Condition:
+                StringEquals:
+                  'cognito-identity.amazonaws.com:aud':
+                    Ref: CognitoIdentityPool
+                'ForAnyValue:StringLike':
+                  'cognito-identity.amazonaws.com:amr': authenticated
+        Policies:
+          - PolicyName: 'CognitoAuthorizedPolicy'
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: 'Allow'
+                  Action:
+                    - 'mobileanalytics:PutEvents'
+                    - 'cognito-sync:*'
+                    - 'cognito-identity:*'
+                  Resource: '*'
+
+                - Effect: 'Allow'
+                  Action:
+                    - 'execute-api:Invoke'
+                  Resource:
+                    Fn::Join:
+                      - ''
+                      - - 'arn:aws:execute-api:'
+                        - Ref: AWS::Region
+                        - ':'
+                        - Ref: AWS::AccountId
+                        - ':'
+                        - ${self:custom.api_gateway_rest_api_name}
+                        - '/*'
+
+                - Effect: 'Allow'
+                  Action:
+                    - 's3:*'
+                  Resource:
+                    - Fn::Join:
+                        - ''
+                        - - ${self:custom.attachments_bucket_arn}
+                          - '/private/'
+                          - '$'
+                          - '{cognito-identity.amazonaws.com:sub}/*'
+
+  Outputs:
+    UserPoolId:
+      Value:
+        Ref: CognitoUserPool
+    UserPoolClientId:
+      Value:
+        Ref: CognitoUserPoolClient
+    UserPoolClientDomain:
+      Value:
+        Fn::Join:
+          - ''
+          - - Ref: UserPoolDomain
+            - .auth.
+            - Ref: AWS::Region
+            - .amazoncognito.com
+    UserPoolSingleSignOnURL:
+      Value:
+        Fn::Join:
+          - ''
+          - - https://
+            - Ref: UserPoolDomain
+            - .auth.
+            - Ref: AWS::Region
+            - .amazoncognito.com
+            - /saml2/idpresponse
+    AudienceRestrictionURI:
+      Value:
+        Fn::Join:
+          - ''
+          - - 'urn:amazon:cognito:sp:'
+            - Ref: CognitoUserPool
+    IdentityPoolId:
+      Value:
+        Ref: CognitoIdentityPool
+    Region:
+      Value:
+        Ref: AWS::Region
