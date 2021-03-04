@@ -4,12 +4,13 @@
         "project": ["./tsconfig.json", "./services/*/tsconfig.json"],
         "sourceType": "module"
     },
-    "plugins": ["@typescript-eslint", "jsx-a11y"],
+    "plugins": ["@typescript-eslint", "jsx-a11y", "testing-library"],
     "extends": [
         "eslint:recommended",
         "plugin:jest/recommended",
         "plugin:jsx-a11y/recommended",
         "plugin:@typescript-eslint/recommended",
+        "plugin:testing-library/recommended",
         "prettier",
         "prettier/react",
         "prettier/@typescript-eslint",
@@ -21,6 +22,9 @@
     ],
     "rules": {
         "prefer-promise-reject-errors": "error",
+        "no-throw-literal": "error",
+        "jest/no-focused-tests": "error"
+    },
     "overrides": [
         {
             "files": ["**/*.ts?(x)"],
