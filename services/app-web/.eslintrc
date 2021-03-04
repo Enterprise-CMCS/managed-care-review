@@ -19,7 +19,8 @@
     "ignorePatterns": [
         "src/gen/*"
     ],
-    "rules": {},
+    "rules": {
+        "prefer-promise-reject-errors": "error",
     "overrides": [
         {
             "files": ["**/*.ts?(x)"],
