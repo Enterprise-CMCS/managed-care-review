@@ -7,6 +7,7 @@ import * as CognitoAuthApi from '../Auth/cognitoAuth'
 import { GetCurrentUserDocument } from '../../gen/gqlClient'
 import { Login } from './Login'
 import { renderWithProviders, userClickByRole } from '../../utils/jestUtils'
+import { CognitoUser, CognitoUserPool } from 'amazon-cognito-identity-js'
 
 const failedAuthMock = {
     request: { query: GetCurrentUserDocument },
@@ -87,6 +88,13 @@ describe('Cognito Login', () => {
     })
 
     it('when login is clicked, button is disabled while loading', async () => {
+        const loginSpy = jest.spyOn(CognitoAuthApi, 'signIn').mockResolvedValue(
+            new CognitoUser({
+                Username: 'foo@example.com',
+                Pool: { getClientId: () => '7' } as CognitoUserPool,
+            })
+        )
+
         renderWithProviders(<Login />, {
             apolloProvider: { mocks: [failedAuthMock, successfulAuthMock] },
         })
@@ -102,6 +110,7 @@ describe('Cognito Login', () => {
         userClickByRole(screen, 'button', { name: 'Login' })
 
         await waitFor(() => expect(loginButton).toBeDisabled())
+        await waitFor(() => expect(loginSpy).toHaveBeenCalledTimes(1))
     })
 
     it('when login is successful, redirect to dashboard', async () => {

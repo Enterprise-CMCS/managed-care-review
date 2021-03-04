@@ -47,7 +47,7 @@ export function ConfirmSignUp({
             await confirmSignUp(fields.email, fields.confirmationCode)
             displayLogin()
         } catch (error) {
-            if (error.code == 'ExpiredCodeException') {
+            if (error.code === 'ExpiredCodeException') {
                 try {
                     await resendSignUp(fields.email)
                     showError(
