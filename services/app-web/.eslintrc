@@ -23,7 +23,9 @@
     "rules": {
         "prefer-promise-reject-errors": "error",
         "no-throw-literal": "error",
-        "jest/no-focused-tests": "error"
+        "jest/no-focused-tests": "error",
+        "jest/no-identical-title": "error",
+        "@typescript-eslint/no-floating-promises": "error"
     },
     "overrides": [
         {

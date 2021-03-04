@@ -28,7 +28,7 @@ describe('localLogin', () => {
         }
 
         loginLocalUser(testUser)
-        logoutLocalUser()
+        await logoutLocalUser()
 
         await expect(getLoggedInUser()).resolves.toBeNull()
     })
