@@ -149,7 +149,6 @@ resources:
                               ]
                 - Effect: 'Allow'
                   Action:
-                    - cognito-idp:AdminGetUser
                     - cognito-idp:ListUsers
                   Resource: '*'
     GatewayResponseDefault4XX:
