@@ -63,11 +63,14 @@ export async function userFromCognitoAuthProvider(
     try {
         const cognito = new CognitoIdentityServiceProvider()
 
+        const subFilter = `sub = \"${userInfo.userId}\"`
+        console.log('SUB FIL', subFilter)
+
         // let's see what we've got
         const listUsersResponse = await cognito
             .listUsers({
                 UserPoolId: userInfo.poolId,
-                Filter: `sub = \"$userInfo.userId}\"`,
+                Filter: subFilter,
             })
             .promise()
 
