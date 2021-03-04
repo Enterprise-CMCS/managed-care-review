@@ -64,16 +64,24 @@ export async function userFromCognitoAuthProvider(
         const cognito = new CognitoIdentityServiceProvider()
 
         // let's see what we've got
-        const listUsersResponse = cognito.listUsers({
-            UserPoolId: userInfo.poolId,
-        })
+        const listUsersResponse = await cognito
+            .listUsers({
+                UserPoolId: userInfo.poolId,
+            })
+            .promise()
 
-        console.log('got Users: ', listUsersResponse)
+        const userResp: CognitoIdentityServiceProvider.ListUsersResponse = listUsersResponse
+
+        console.log('got Users: ', userResp)
+
+        console.log('got actual users: ', userResp.Users)
 
         // let's see what we've got
-        const listGroupResponse = cognito.listGroups({
-            UserPoolId: userInfo.poolId,
-        })
+        const listGroupResponse = await cognito
+            .listGroups({
+                UserPoolId: userInfo.poolId,
+            })
+            .promise()
         console.log('got Groups: ', listGroupResponse)
 
         const userResponse = await cognito
