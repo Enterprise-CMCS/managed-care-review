@@ -1,108 +1,73 @@
 // apollo_gql.js
+import { ApolloServer } from 'apollo-server-lambda'
 import { APIGatewayProxyHandler } from 'aws-lambda'
 
-import {
-	ApolloServer,
-	AuthenticationError,
-	gql,
-	IResolvers,
-} from 'apollo-server-lambda'
+import { getCurrentUserResolver, getStateResolver } from '../resolvers'
 
-import {
-	userFromAuthProvider,
-	userFromCognitoAuthProvider,
-	userFromLocalAuthProvider,
-} from '../authn'
+import { Resolvers } from '../gen/gqlServer'
+import typeDefs from '../../app-graphql/src/schema.graphql'
 
-// Construct a schema, using GraphQL schema language
-const typeDefs = gql`
-	type Query {
-		hello: String
-	}
-`
-
-// Provide resolver functions for your schema fields
-const resolvers: IResolvers = {
-	Query: {
-		hello: async (_parent, _args, context) => {
-			let userFetcher: userFromAuthProvider
-
-			if (process.env.REACT_APP_LOCAL_LOGIN) {
-				userFetcher = userFromLocalAuthProvider
-			} else {
-				userFetcher = userFromCognitoAuthProvider
-			}
-
-			const authProvider =
-				context.event.requestContext.identity
-					.cognitoAuthenticationProvider
-			if (authProvider == undefined) {
-				throw new AuthenticationError(
-					'This should only be possible in DEV, AWS should always populate cogito values'
-				)
-			}
-
-			const userResult = await userFetcher(authProvider)
-			if (userResult.isErr()) {
-				throw new AuthenticationError(userResult.error.message)
-			}
-
-			const user = userResult.value
-
-			return `Hello ${user.email}!`
-		},
-	},
+// Our resolvers are defined and tested in the resolvers package
+const resolvers: Resolvers = {
+    Query: {
+        getCurrentUser: getCurrentUserResolver,
+    },
 }
 
 const server = new ApolloServer({
-	typeDefs,
-	resolvers,
-	playground: {
-		endpoint: '/local/graphql',
-	},
-	context: ({ event, context }) => {
-		console.log('CALLED ME', event, context)
-
-		return {
-			headers: event.headers,
-			functionName: context.functionName,
-			event,
-			context,
-		}
-	},
+    typeDefs,
+    resolvers,
+    playground: {
+        endpoint: '/local/graphql',
+    },
+    context: ({ event, context }) => {
+        // TODO, let's do the auth logic right here, if we can error.
+        // or rather, let's have an auth middleware.
+        return {
+            headers: event.headers,
+            functionName: context.functionName,
+            event,
+            context,
+        }
+    },
 })
 
-function bodyMiddleware(
-	wrapped: APIGatewayProxyHandler
+function localAuthMiddleware(
+    wrapped: APIGatewayProxyHandler
 ): APIGatewayProxyHandler {
-	return function (event, context, completion) {
-		// For reasons I don't understand
-		// when graphql requests are sent by the amplify library to AWS
-		// they are arriving with some escaping that is breaking apollo server.
-		// This transformation attempts and fails to make things work again.
-		console.log('BODY MIDDLEWARE', event.body)
-		if (event.body !== null) {
-			console.log(
-				'MAYBE MIDDLEWARE',
-				JSON.stringify(JSON.parse(event.body))
-			)
-			event.body = JSON.stringify(JSON.parse(event.body))
-		}
+    return function (event, context, completion) {
+        if (process.env.REACT_APP_LOCAL_LOGIN) {
+            console.log(
+                'foo',
+                event.requestContext.identity.cognitoAuthenticationProvider
+            )
 
-		// HACK, this string works, but the string we are sent does not.
-		event.body =
-			'{"operationName":"hello","variables":{},"query":"query hello {\\n  hello\\n}\\n"}'
-		console.log('AFTER MIDDLEWARE', event.body)
+            const userHeader =
+                event.requestContext.identity.cognitoAuthenticationProvider
 
-		return wrapped(event, context, completion)
-	}
+            if (userHeader === 'NO_USER') {
+                console.log('NO_USER info set, returning 403')
+                return Promise.resolve({
+                    statusCode: 403,
+                    body:
+                        '{ "error": "No User Sent in cognitoAuthenticationProvider header"}\n',
+                    headers: {
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Credentials': true,
+                    },
+                })
+            }
+        }
+
+        return wrapped(event, context, completion)
+    }
 }
 
-exports.graphqlHandler = bodyMiddleware(
-	server.createHandler({
-		cors: {
-			origin: true,
-			credentials: true,
-		},
-	})
+exports.graphqlHandler = localAuthMiddleware(
+    server.createHandler({
+        cors: {
+            origin: true,
+            credentials: true,
+        },
+    })
 )

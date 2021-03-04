@@ -1,0 +1,27 @@
+@import '../../styles/uswdsImports.scss';
+@import '../../styles/custom';
+
+.container {
+    display: flex;
+    flex: 1 0 auto;
+    padding: units(4) 0;
+    width: 100%;
+}
+
+.tabs {
+    width: 100%;
+    background-color: $cms-color-background;
+}
+
+.panel {
+    display: flex;
+    flex-direction: column;
+    padding: units(2);
+    > div {
+        display: flex;
+        flex: 1 0 auto;
+    }
+    & .panelHeading {
+        justify-content: space-between;
+    }
+}

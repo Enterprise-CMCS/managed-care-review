@@ -1,0 +1,25 @@
+schema {
+	query: Query
+}
+
+type Query {
+	getCurrentUser: User!
+	getState: State!
+}
+
+type User {
+	role: String!
+	email: String!
+	state: String!
+	name: String!
+}
+
+type State {
+	code: String!
+	name: String!
+	programs: [Program!]!
+}
+
+type Program {
+	name: String!
+}

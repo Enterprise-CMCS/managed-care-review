@@ -1,0 +1,64 @@
+{
+	"states": [
+		{
+			"code": "FL",
+			"name": "Florida",
+			"programs": [
+				{
+					"name": "SMMC"
+				}
+			]
+		},
+		{
+			"code": "IN",
+			"name": "Indiana",
+			"programs": [
+				{
+					"name": "Hoosier Care Connect"
+				},
+				{
+					"name": "Healthy Indiana"
+				},
+				{
+					"name": "Hoosier Health Wise"
+				}
+			]
+		},
+		{
+			"code": "MN",
+			"name": "Minnesota",
+			"programs": [
+				{
+					"name": "MSHO"
+				},
+				{
+					"name": "PMAP"
+				},
+				{
+					"name": "SNBC"
+				}
+			]
+		},
+		{
+			"code": "MS",
+			"name": "Mississippi",
+			"programs": [
+				{
+					"name": "MississippiCAN"
+				}
+			]
+		},
+		{
+			"code": "VA",
+			"name": "Virginia",
+			"programs": [
+				{
+					"name": "Medallion"
+				},
+				{
+					"name": "CCC Plus"
+				}
+			]
+		}
+	]
+}

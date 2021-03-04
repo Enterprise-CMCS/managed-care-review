@@ -1,37 +1,41 @@
 import React from 'react'
-import { Switch, Route, Redirect } from 'react-router-dom'
+import { Switch, Route } from 'react-router-dom'
 
 import { Auth } from '../Auth/Auth'
-import { useAuth } from './AuthContext'
+import { Error404 } from '../Errors/Error404'
+import { useAuth } from '../../contexts/AuthContext'
 import { Dashboard } from '../Dashboard/Dashboard'
 import { Landing } from '../Landing/Landing'
-import { LocalAuth } from '../Auth/LocalAuth'
 
-type Props = {
-    localLogin: boolean
-}
-
-export const AppRoutes = ({ localLogin }: Props): React.ReactElement => {
+export const AppRoutes = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
 
     const AuthenticatedRoutes = (): React.ReactElement => {
         return (
-            <>
-                {!loggedInUser ? (
-                    <Redirect to="/" />
-                ) : (
-                    <Route path="/dashboard" component={Dashboard} />
-                    // Add other authenticated routes here
-                )}
-            </>
+            <Switch>
+                <Route path="/" exact component={Dashboard} />
+                <Route path="/dashboard" component={Dashboard} />
+                <Route path="*" component={Error404} />
+            </Switch>
         )
     }
 
+    const UnauthenticatedRoutes = (): React.ReactElement => {
+        return (
+            <Switch>
+                <Route path="/" exact component={Landing} />
+                <Route path="/auth" component={Auth} />
+                <Route path="*" component={Landing} />
+            </Switch>
+        )
+    }
     return (
-        <Switch>
-            <Route path="/" exact component={Landing} />
-            <Route path="/auth" component={localLogin ? LocalAuth : Auth} />
-            <AuthenticatedRoutes />
-        </Switch>
+        <>
+            {!loggedInUser ? (
+                <UnauthenticatedRoutes />
+            ) : (
+                <AuthenticatedRoutes />
+            )}
+        </>
     )
 }

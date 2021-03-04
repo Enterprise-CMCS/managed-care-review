@@ -1,217 +1,499 @@
 import yargs from 'yargs'
 import * as dotenv from 'dotenv'
 import request from 'request'
-import { spawnSync } from 'child_process'
+
+import { commandMustSucceedSync } from './localProcess.js'
 import LabeledProcessRunner from './runner.js'
 import { envFileMissingExamples } from './env.js' // What the WHAT? why doesn't this import right without the `.js`??
+import { checkStageAccess, getWebAuthVars } from './serverless.js'
+import { parseRunFlags } from './flags.js'
+import { once } from './deps.js'
 
 // run_db_locally runs the local db
 async function run_db_locally(runner: LabeledProcessRunner) {
-
-	await runner.run_command_and_output('db yarn', ['yarn', 'install'], 'services/database')
-	await runner.run_command_and_output('db svls', ['serverless', 'dynamodb', 'install'], 'services/database')
-	runner.run_command_and_output('db', ['serverless', '--stage', 'local', 'dynamodb', 'start', '--migrate'], 'services/database')
-
+    await runner.run_command_and_output(
+        'db yarn',
+        ['yarn', 'install'],
+        'services/database'
+    )
+    await runner.run_command_and_output(
+        'db svls',
+        ['serverless', 'dynamodb', 'install'],
+        'services/database'
+    )
+    runner.run_command_and_output(
+        'db',
+        ['serverless', '--stage', 'local', 'dynamodb', 'start', '--migrate'],
+        'services/database'
+    )
 }
 
 // run_api_locally uses the serverless-offline plugin to run the api lambdas locally
 async function run_api_locally(runner: LabeledProcessRunner) {
+    compile_graphql_types_watch_once(runner)
 
-	await runner.run_command_and_output('api deps', ['yarn', 'install'], 'services/app-api')
-	runner.run_command_and_output('api', ['serverless', '--stage', 'local', '--region', 'us-east-1', 'offline', '--httpPort', '3030', 'start'], 'services/app-api')
-	
+    await runner.run_command_and_output(
+        'api deps',
+        ['yarn', 'install'],
+        'services/app-api'
+    )
+    runner.run_command_and_output(
+        'api',
+        [
+            'serverless',
+            '--stage',
+            'local',
+            '--region',
+            'us-east-1',
+            'offline',
+            '--httpPort',
+            '3030',
+            'start',
+        ],
+        'services/app-api'
+    )
 }
 
 // run_s3_locally runs s3 locally
 async function run_s3_locally(runner: LabeledProcessRunner) {
-
-	await runner.run_command_and_output('s3 yarn', ['yarn', 'install'], 'services/uploads')
-	runner.run_command_and_output('s3', ['serverless', '--stage', 'local', 's3', 'start'], 'services/uploads')
-
+    await runner.run_command_and_output(
+        's3 yarn',
+        ['yarn', 'install'],
+        'services/uploads'
+    )
+    runner.run_command_and_output(
+        's3',
+        ['serverless', '--stage', 'local', 's3', 'start'],
+        'services/uploads'
+    )
 }
+
+async function compile_graphql_types_watch(runner: LabeledProcessRunner) {
+    await runner.run_command_and_output(
+        'gql deps',
+        ['yarn', 'install'],
+        'services/app-graphql'
+    )
+
+    return runner.run_command_and_output(
+        'gqlgen',
+        ['yarn', 'gqlgen', '--watch'],
+        'services/app-graphql'
+    )
+}
+
+const compile_graphql_types_watch_once = once(compile_graphql_types_watch)
+
+async function compile_graphql_types(runner: LabeledProcessRunner) {
+    await runner.run_command_and_output(
+        'gql deps',
+        ['yarn', 'install'],
+        'services/app-graphql'
+    )
+
+    return runner.run_command_and_output(
+        'gqlgen',
+        ['yarn', 'gqlgen'],
+        'services/app-graphql'
+    )
+}
+
+const compile_graphql_types_once = once(compile_graphql_types)
 
 // run_web_locally runs app-web locally
 async function run_web_locally(runner: LabeledProcessRunner) {
+    compile_graphql_types_watch_once(runner)
 
-	await runner.run_command_and_output('web deps', ['yarn', 'install'], 'services/app-web')
-	runner.run_command_and_output('web', ['yarn', 'start'], 'services/app-web')
+    await runner.run_command_and_output(
+        'web deps',
+        ['yarn', 'install'],
+        'services/app-web'
+    )
+    runner.run_command_and_output('web', ['yarn', 'start'], 'services/app-web')
 }
 
 async function run_sb_locally(runner: LabeledProcessRunner) {
-	await runner.run_command_and_output('web deps', ['yarn', 'install'], 'services/app-web')
-	runner.run_command_and_output('storybook', ['yarn', 'storybook'], 'services/app-web')	
+    await runner.run_command_and_output(
+        'web deps',
+        ['yarn', 'install'],
+        'services/app-web'
+    )
+    runner.run_command_and_output(
+        'storybook',
+        ['yarn', 'storybook'],
+        'services/app-web'
+    )
 }
 
-
 async function run_all_clean() {
-	const runner = new LabeledProcessRunner()
-	runner.run_command_and_output('web deps', ['yarn', 'clean'], 'services/app-web')
+    const runner = new LabeledProcessRunner()
+    runner.run_command_and_output(
+        'web deps',
+        ['yarn', 'clean'],
+        'services/app-web'
+    )
+}
+
+async function run_all_lint() {
+    const runner = new LabeledProcessRunner()
+    runner.run_command_and_output(
+        'lint',
+        ['prettier', '.', '-w', '-u', '--ignore-path', '.gitignore'],
+        '.'
+    )
+}
+
+async function run_all_generate() {
+    const runner = new LabeledProcessRunner()
+    await compile_graphql_types(runner)
 }
 
 // run_all_locally runs all of our services locally
-async function run_all_locally() {
-	const runner = new LabeledProcessRunner()
+type runLocalFlags = {
+    runAPI: boolean
+    runWeb: boolean
+    runDB: boolean
+    runS3: boolean
+    runStoryBook: boolean
+}
+async function run_all_locally({
+    runAPI,
+    runWeb,
+    runDB,
+    runS3,
+    runStoryBook,
+}: runLocalFlags) {
+    const runner = new LabeledProcessRunner()
 
-	run_db_locally(runner)
-	run_s3_locally(runner)
-	run_api_locally(runner)
-	run_web_locally(runner)
-	run_sb_locally(runner)
+    runDB && run_db_locally(runner)
+    runS3 && run_s3_locally(runner)
+    runAPI && run_api_locally(runner)
+    runWeb && run_web_locally(runner)
+    runStoryBook && run_sb_locally(runner)
 }
 
 function check_url_is_up(url: string): Promise<boolean> {
-	return new Promise<boolean>( (resolve) =>  {
-		request(url, {}, (err) => {
-			if (err) { 
-				resolve(false)
-			}
-			resolve(true)
-		})
-	})
+    return new Promise<boolean>((resolve) => {
+        request(url, {}, (err) => {
+            if (err) {
+                resolve(false)
+            }
+            resolve(true)
+        })
+    })
 }
 
-async function run_all_tests(run_unit: boolean, run_online: boolean) {
-	const runner = new LabeledProcessRunner()
+// Pulls a bunch of configuration out of a given AWS environment and sets it as env vars for app-web to run against
+// Note: The environment is made up of the _stage_ which defaults to your current git branch
+// and the AWS Account, which is determined by which AWS credentials you get out of cloudtamer (dev, val, or prod) usually dev
+async function run_web_against_aws(
+    stageNameOpt: string | undefined = undefined
+) {
+    // by default, review apps are created with the stage name set as the current branch name
+    const stageName =
+        stageNameOpt !== undefined
+            ? stageNameOpt
+            : commandMustSucceedSync('git', ['branch', '--show-current'])
 
-	try {
-		if (run_unit) {
-			await run_unit_tests(runner)
-		}
+    if (stageName === '') {
+        console.log(
+            'Error: you do not appear to be on a git branch so we cannot auto-detect what stage to attach to.\n',
+            'Either checkout the deployed branch or specify --stage explicitly.'
+        )
+        process.exit(1)
+    }
 
-		if (run_online) {
-			await run_online_tests(runner)
-		}
-	} catch (e) {
-		console.log("Testing Error", e)
-		process.exit(1)
-	}
+    console.log('Attempting to access stage:', stageName)
+    // Test to see if we can read info from serverless. This is likely to trip folks up who haven't
+    // configured their AWS keys correctly or if they have an invalid stage name.
+    const serverlessConnection = checkStageAccess(stageName)
+    switch (serverlessConnection) {
+        case 'AWS_TOKEN_ERROR': {
+            console.log(
+                'Error: Invalid token attempting to read AWS Cloudformation\n',
+                'Likely, you do not have aws configured right. You will need AWS tokens from cloudwatch configured\n',
+                'See the AWS Token section of the README for more details.\n\n'
+            )
+            process.exit(1)
+        }
+        case 'STAGE_ERROR': {
+            console.log(
+                `Error: stack with id ${stageName} does not exist\n`,
+                "If you didn't set one explicitly, maybe you haven't pushed this branch yet to deploy a review app?"
+            )
+            process.exit(1)
+        }
+        case 'UNKNOWN_ERROR': {
+            console.log(
+                'Unexpected Error attempting to read AWS Cloudformation.'
+            )
+            process.exit(2)
+        }
+    }
 
+    // Now, we've confirmed we are configured to pull data out of serverless x cloudformation
+    console.log('Access confirmed. Fetching config vars')
+    const { region, idPool, userPool, userPoolClient } = getWebAuthVars(
+        stageName
+    )
+
+    const apiBase = commandMustSucceedSync(
+        './output.sh',
+        ['app-api', 'ApiGatewayRestApiUrl', stageName],
+        {
+            cwd: './services',
+        }
+    )
+
+    // set them
+    process.env.PORT = '3003' // run hybrid on a different port
+    process.env.REACT_APP_LOCAL_LOGIN = 'false' // override local_login in .env
+    process.env.REACT_APP_API_URL = apiBase
+    process.env.REACT_APP_COGNITO_REGION = region
+    process.env.REACT_APP_COGNITO_ID_POOL_ID = idPool
+    process.env.REACT_APP_COGNITO_USER_POOL_ID = userPool
+    process.env.REACT_APP_COGNITO_USER_POOL_CLIENT_ID = userPoolClient
+
+    // run it
+    const runner = new LabeledProcessRunner()
+    await run_web_locally(runner)
+}
+
+async function run_all_tests({
+    runUnit,
+    runOnline,
+}: {
+    runUnit: boolean
+    runOnline: boolean
+}) {
+    const runner = new LabeledProcessRunner()
+
+    try {
+        if (runUnit) {
+            await run_unit_tests(runner)
+        }
+
+        if (runOnline) {
+            await run_online_tests(runner)
+        }
+    } catch (e) {
+        console.log('Testing Error', e)
+        process.exit(1)
+    }
 }
 
 async function run_unit_tests(runner: LabeledProcessRunner) {
-	const webCode = await runner.run_command_and_output('web - unit', ['yarn', 'test:unit'], 'services/app-web')
-	if (webCode != 0) {
-		throw new Error('web - unit FAILED')
-	}
+    await compile_graphql_types_once(runner)
 
-	const apiCode = await runner.run_command_and_output('api - unit', ['yarn', 'test'], 'services/app-api')
-	if (apiCode != 0) {
-		throw new Error('api - unit failed')
-	}
+    await runner.run_command_and_output(
+        'web deps',
+        ['yarn', 'install'],
+        'services/app-web'
+    )
+
+    const webCode = await runner.run_command_and_output(
+        'web - unit',
+        ['yarn', 'test:unit'],
+        'services/app-web'
+    )
+    if (webCode != 0) {
+        throw new Error('web - unit FAILED')
+    }
+
+    await runner.run_command_and_output(
+        'api deps',
+        ['yarn', 'install'],
+        'services/app-api'
+    )
+
+    const apiCode = await runner.run_command_and_output(
+        'api - unit',
+        ['yarn', 'test'],
+        'services/app-api'
+    )
+    if (apiCode != 0) {
+        throw new Error('api - unit failed')
+    }
 }
 
 async function run_online_tests(runner: LabeledProcessRunner) {
-	const base_url = process.env.APPLICATION_ENDPOINT
+    const base_url = process.env.APPLICATION_ENDPOINT
 
-	if (base_url == undefined) {
-		console.log('You must set APPLICATION_ENDPOINT to run online tests.')
-		return
-	}
+    if (base_url == undefined) {
+        console.log('You must set APPLICATION_ENDPOINT to run online tests.')
+        return
+    }
 
-	const isUp = await check_url_is_up(base_url)
-	if (!isUp) {
-		throw new Error(`the URL ${base_url} does not resolve, make sure the system is running before runnin online tests`)
-	}
+    const isUp = await check_url_is_up(base_url)
+    if (!isUp) {
+        throw new Error(
+            `the URL ${base_url} does not resolve, make sure the system is running before runnin online tests`
+        )
+    }
 
-	// TODO: Sort out how to use pa11y in CI. 
-	// const webCode = await runner.run_command_and_output('web - a11y', ['yarn', 'test:a11y'], 'services/app-web')
-	// if (webCode != 0) {
-	// 	throw new Error('web - a11y tests FAILED')
-	// }
+    // TODO: Sort out how to use pa11y in CI.
+    // const webCode = await runner.run_command_and_output('web - a11y', ['yarn', 'test:a11y'], 'services/app-web')
+    // if (webCode != 0) {
+    //  throw new Error('web - a11y tests FAILED')
+    // }
 
-	const nightCode = await runner.run_command_and_output('nightwatch', ['./test.sh'], 'tests')
-	if (nightCode != 0) {
-		throw new Error('nightwatch tests FAILED')
-	}
-
+    const nightCode = await runner.run_command_and_output(
+        'nightwatch',
+        ['./test.sh'],
+        'tests'
+    )
+    if (nightCode != 0) {
+        throw new Error('nightwatch tests FAILED')
+    }
 }
 
-
 function main() {
-	const missingExamples = envFileMissingExamples()
-	if (missingExamples.length !== 0) {
-		console.log(`ERROR: Your .env file is missing the keys: ${ missingExamples.join(', ') }\nAt least set an empty value before continuing.`)
-		process.exit(2)
-	}
+    const missingExamples = envFileMissingExamples()
+    if (missingExamples.length !== 0) {
+        console.log(
+            `ERROR: Your .env file is missing the keys: ${missingExamples.join(
+                ', '
+            )}\nAt least set an empty value before continuing.`
+        )
+        process.exit(2)
+    }
 
-	// load .env
-	dotenv.config()
+    // load .env
+    dotenv.config()
 
-	// add git hash as APP_VERSION
-	const appVersion = spawnSync('scripts/app_version.sh')
-	process.env.APP_VERSION = appVersion.stdout.toString().trim()
+    // add git hash as APP_VERSION
+    const appVersion = commandMustSucceedSync('scripts/app_version.sh')
+    process.env.APP_VERSION = appVersion
 
-	/* AVAILABLE COMMANDS
-	  The command definitions in yargs
-	  All valid arguments to dev should be enumerated here, this is the entrypoint to the script 
-	*/ 
+    /* AVAILABLE COMMANDS
+      The command definitions in yargs
+      All valid arguments to dev should be enumerated here, this is the entrypoint to the script 
+    */
 
-	yargs(process.argv.slice(2))
-	.command('clean', 'clean node dependencies', {}, () => {
-		run_all_clean()
-	})
+    yargs(process.argv.slice(2))
+        .command('clean', 'clean node dependencies', {}, () => {
+            run_all_clean()
+        })
 
-	.command('local', 'run system locally. If no flags are passed, runs all services', (yargs) =>{
-		return yargs
-		.boolean('storybook')
-		.boolean('web')
-		.boolean('api')
-		.boolean('s3')
+        .command(
+            'local',
+            'run system locally. If no flags are passed, runs all services',
+            (yargs) => {
+                return yargs
+                    .option('storybook', {
+                        type: 'boolean',
+                        describe: 'run storybook locally',
+                    })
+                    .option('web', {
+                        type: 'boolean',
+                        describe: 'run web locally',
+                    })
+                    .option('api', {
+                        type: 'boolean',
+                        describe: 'run api locally',
+                    })
+                    .option('s3', {
+                        type: 'boolean',
+                        describe: 'run s3 locally',
+                    })
+                    .option('db', {
+                        type: 'boolean',
+                        describe: 'run database locally',
+                    })
+            },
+            (args) => {
+                const inputFlags = {
+                    runAPI: args.api,
+                    runWeb: args.web,
+                    runDB: args.db,
+                    runS3: args.s3,
+                    runStoryBook: args.storybook,
+                }
 
-	},(args) => {
-		// By default args will have 2 keys since it looks something like when run without a flag { _: [ 'local' ], '$0': 'build_dev/dev.js' }
-		// Only allow one additional flag to be used by limiting keys to 3
-		if (args && Object.keys(args).length > 3) throw new Error('You can only run ./dev local without flags (for launching all services) or with one flag at a time')
-		const runner = new LabeledProcessRunner()
+                const parsedFlags = parseRunFlags(inputFlags)
 
-		if (args.storybook){
-			 run_sb_locally(runner)	
-		} 
-		else if (args.web) {
-				run_web_locally(runner)	
-			} 
-		else if (args.api){
+                if (parsedFlags === undefined) {
+                    console.log(
+                        "Error: Don't mix and match positive and negative boolean flags"
+                    )
+                    process.exit(1)
+                }
 
-			 run_api_locally(runner)
-		}
-		else if (args.s3) {
-			run_s3_locally(runner)	
-		} else {
-			run_all_locally()
-		}
-	
-	})
+                run_all_locally(parsedFlags)
+            }
+        )
+        .command(
+            'hybrid',
+            'run app-web locally connected to the review app deployed for this branch',
+            (yargs) => {
+                return yargs.option('stage', {
+                    type: 'string',
+                    describe:
+                        'an alternative Serverless stage in your AWS account to run against',
+                })
+            },
+            (args) => {
+                run_web_against_aws(args.stage)
+            }
+        )
+        .command(
+            'test',
+            'run tests. If no flags are passed runs both --unit and --online',
+            (yargs) => {
+                return yargs
+                    .option('unit', {
+                        type: 'boolean',
+                        describe: 'run all unit tests',
+                    })
+                    .option('online', {
+                        type: 'boolean',
+                        describe:
+                            'run run all tests that run against a live instance. Confiugre with APPLICATION_ENDPOINT',
+                    })
+            },
+            (args) => {
+                // If no test flags are passed, default to running everything.
+                const inputFlags = {
+                    runUnit: args.unit,
+                    runOnline: args.online,
+                }
 
-	.command('test', 'run tests. If no flags are passed, runs both --unit and --online', (yargs) => {
-		return yargs.boolean('unit')
-							.boolean('online')
-	}, (args) => {
-		let run_unit = false
-		let run_online = false
+                const parsedFlags = parseRunFlags(inputFlags)
 
-		// If no test flags are passed, default to running everything.
-		if (args.unit == null && args.online == null) {
-			run_unit = true
-			run_online = true
-		} else {
-			if (args.unit) {
-				run_unit = true
-			}
-			if (args.online) {
-				run_online = true
-			}
-		}
+                if (parsedFlags === undefined) {
+                    console.log(
+                        "Error: Don't mix and match positive and negative boolean flags"
+                    )
+                    process.exit(1)
+                }
 
-		run_all_tests(run_unit, run_online)
-	})
-	.demandCommand(1, '') // this prints out the help if you don't call a subcommand
-	.argv
+                run_all_tests(parsedFlags)
+            }
+        )
+        .command(
+            'lint',
+            'run all linters. This probably will be replaced by pre-commit.',
+            {},
+            () => {
+                run_all_lint()
+            }
+        )
+        .command(
+            'generate',
+            'generate any code required for building. For now thats just GraphQL types.',
+            {},
+            () => {
+                run_all_generate()
+            }
+        )
+        .demandCommand(1, '')
+        .help()
+        .strict().argv // this prints out the help if you don't call a subcommand
 }
 
 // I'd love for there to be a check we can do like you do in python
 // so that this is only executed if it's being run top-level, but the ones
-// I found didn't work. 
-// I still like corralling all the script in main() anyway, b/c that keeps us from 
-// scattering running code all over. 
+// I found didn't work.
+// I still like corralling all the script in main() anyway, b/c that keeps us from
+// scattering running code all over.
 main()
-

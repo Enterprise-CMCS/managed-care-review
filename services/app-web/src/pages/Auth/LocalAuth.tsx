@@ -7,7 +7,6 @@ import {
     CardGroup,
     CardBody,
     CardFooter,
-    GridContainer,
 } from '@trussworks/react-uswds'
 import { useHistory } from 'react-router-dom'
 import { UserType } from '../../common-code/domain-models/user'
@@ -16,7 +15,7 @@ import { loginLocalUser } from './localLogin'
 
 import aangAvatar from '../../assets/images/aang.png'
 import tophAvatar from '../../assets/images/toph.png'
-import { useAuth } from '../App/AuthContext'
+import { useAuth } from '../../contexts/AuthContext'
 
 const localUsers: UserType[] = [
     {
@@ -43,22 +42,15 @@ export function LocalAuth(): React.ReactElement {
     const { checkAuth } = useAuth()
 
     async function login(user: UserType) {
-        console.log('loggin ing', user)
-
         loginLocalUser(user)
 
-        try {
-            await checkAuth()
-        } catch (e) {
-            console.log('Error just even checking the auth??', e)
-        }
-
+        await checkAuth()
         history.push('/dashboard')
     }
 
     return (
-        <GridContainer>
-            <h2>Local Login</h2>
+        <>
+            <h3>Local Login</h3>
             <div>Login as one of our hard coded users:</div>
             <CardGroup>
                 {localUsers.map((user) => {
@@ -80,6 +72,7 @@ export function LocalAuth(): React.ReactElement {
                             </CardBody>
                             <CardFooter>
                                 <Button
+                                    data-testid={`${user.name}Button`}
                                     type="submit"
                                     onClick={() => login(user)}
                                 >
@@ -90,6 +83,6 @@ export function LocalAuth(): React.ReactElement {
                     )
                 })}
             </CardGroup>
-        </GridContainer>
+        </>
     )
 }

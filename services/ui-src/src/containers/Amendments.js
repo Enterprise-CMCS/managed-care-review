@@ -1,45 +1,53 @@
-import React, { useRef, useState, useEffect } from "react";
-import { useParams, useHistory } from "react-router-dom";
-import { onError } from "../libs/errorLib";
-import { FormGroup, FormControl, ControlLabel } from "react-bootstrap";
-import LoaderButton from "../components/LoaderButton";
-import config from "../config";
-import "./Amendments.css";
+import React, { useRef, useState, useEffect } from 'react';
+import { useParams, useHistory } from 'react-router-dom';
+import { onError } from '../libs/errorLib';
+import { FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
+import LoaderButton from '../components/LoaderButton';
+import config from '../config';
+import './Amendments.css';
 import Select from 'react-select';
-import Switch from "react-ios-switch";
+import Switch from 'react-ios-switch';
 import { territoryList } from '../libs/territoryLib';
 import * as url from 'url';
-import { getAmendment, updateAmendment, deleteAmendment } from "../libs/api";
-
+import { getAmendment, updateAmendment, deleteAmendment } from '../libs/api';
 
 export default function Amendments({ fileUpload, fileURLResolver }) {
     const file = useRef(null);
     const { id } = useParams();
     const history = useHistory();
     const [amendment, setAmendment] = useState(null);
-    const [transmittalNumber, setTransmittalNumber] = useState("");
-    const [email, setEmail] = useState("");
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
-    const [territory, setTerritory] = useState("");
+    const [transmittalNumber, setTransmittalNumber] = useState('');
+    const [email, setEmail] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [territory, setTerritory] = useState('');
     const [urgent, setUrgent] = useState(false);
-    const [comments, setComments] = useState("");
+    const [comments, setComments] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const capitalize = (s) => {
-        if (typeof s !== 'string') return ''
-        return s.charAt(0).toUpperCase() + s.slice(1)
-    }
+        if (typeof s !== 'string') return '';
+        return s.charAt(0).toUpperCase() + s.slice(1);
+    };
 
     useEffect(() => {
         function loadAmendment() {
-            return getAmendment(id)
+            return getAmendment(id);
         }
 
         async function onLoad() {
             try {
                 const amendment = await loadAmendment();
-                const { email, firstName, lastName, territory, transmittalNumber, urgent, comments, attachment } = amendment;
+                const {
+                    email,
+                    firstName,
+                    lastName,
+                    territory,
+                    transmittalNumber,
+                    urgent,
+                    comments,
+                    attachment,
+                } = amendment;
                 if (attachment) {
                     console.log(fileURLResolver);
                     // We must await the url.  Otherwise, the attachmentURL is a Promise.
@@ -62,11 +70,16 @@ export default function Amendments({ fileUpload, fileURLResolver }) {
     }, [id, fileURLResolver]);
 
     function validateForm() {
-        return email.length > 0 && firstName.length > 0 && lastName.length > 0 && territory.length > 0;
+        return (
+            email.length > 0 &&
+            firstName.length > 0 &&
+            lastName.length > 0 &&
+            territory.length > 0
+        );
     }
 
     function formatFilename(str) {
-        return str.replace(/^\w+-/, "");
+        return str.replace(/^\w+-/, '');
     }
 
     function handleFileChange(event) {
@@ -74,7 +87,7 @@ export default function Amendments({ fileUpload, fileURLResolver }) {
     }
 
     function saveAmendment(amendment) {
-        return updateAmendment(id, amendment)
+        return updateAmendment(id, amendment);
     }
 
     async function handleSubmit(event) {
@@ -105,9 +118,9 @@ export default function Amendments({ fileUpload, fileURLResolver }) {
                 transmittalNumber,
                 urgent,
                 comments,
-                attachment: attachment || amendment.attachment
+                attachment: attachment || amendment.attachment,
             });
-            history.push("/");
+            history.push('/');
         } catch (e) {
             onError(e);
             setIsLoading(false);
@@ -118,7 +131,7 @@ export default function Amendments({ fileUpload, fileURLResolver }) {
         event.preventDefault();
 
         const confirmed = window.confirm(
-            "Are you sure you want to delete this amendment?"
+            'Are you sure you want to delete this amendment?'
         );
 
         if (!confirmed) {
@@ -129,33 +142,36 @@ export default function Amendments({ fileUpload, fileURLResolver }) {
 
         try {
             await deleteAmendment(id);
-            history.push("/");
+            history.push('/');
         } catch (e) {
             onError(e);
             setIsDeleting(false);
         }
     }
 
-    function openAttachment(event, attachmentURL){
-      event.preventDefault();
-      var http = require('http');
-      const uri = url.parse(attachmentURL);
-      var options = {
-        hostname: uri.hostname,
-        port: uri.port,
-        path: `${uri.pathname}${uri.search}`,
-        protocol: uri.protocol,
-        method: 'GET'
-      };
-      var req = http.request(options, function(res) {
-          req.abort();  // The presigned S3 URL is only valid for GET requests, but we only want the headers.
-          if(res.statusCode.toString() === "403") {
-            window.open(process.env.PUBLIC_URL + "/scan-in-progress.html", '_blank');
-          } else {
-            window.open(attachmentURL, '_blank');
-          }
-      });
-      req.end();
+    function openAttachment(event, attachmentURL) {
+        event.preventDefault();
+        var http = require('http');
+        const uri = url.parse(attachmentURL);
+        var options = {
+            hostname: uri.hostname,
+            port: uri.port,
+            path: `${uri.pathname}${uri.search}`,
+            protocol: uri.protocol,
+            method: 'GET',
+        };
+        var req = http.request(options, function (res) {
+            req.abort(); // The presigned S3 URL is only valid for GET requests, but we only want the headers.
+            if (res.statusCode.toString() === '403') {
+                window.open(
+                    process.env.PUBLIC_URL + '/scan-in-progress.html',
+                    '_blank'
+                );
+            } else {
+                window.open(attachmentURL, '_blank');
+            }
+        });
+        req.end();
     }
 
     return (
@@ -163,11 +179,15 @@ export default function Amendments({ fileUpload, fileURLResolver }) {
             {amendment && (
                 <form onSubmit={handleSubmit}>
                     <FormGroup controlId="transmittalNumber">
-                        <ControlLabel>APS ID &nbsp;(Transmittal Number)</ControlLabel>
+                        <ControlLabel>
+                            APS ID &nbsp;(Transmittal Number)
+                        </ControlLabel>
                         <FormControl
                             disabled={true}
                             value={transmittalNumber}
-                            onChange={e => setTransmittalNumber(e.target.value)}
+                            onChange={(e) =>
+                                setTransmittalNumber(e.target.value)
+                            }
                         />
                     </FormGroup>
                     <FormGroup controlId="name">
@@ -198,43 +218,53 @@ export default function Amendments({ fileUpload, fileURLResolver }) {
                         <FormControl
                             value={email}
                             disabled={true}
-                            onChange={e => setEmail(e.target.value)}
+                            onChange={(e) => setEmail(e.target.value)}
                         />
                     </FormGroup>
                     <FormGroup controlId="territory">
                         <ControlLabel>State/Territory</ControlLabel>
                         <Select
                             name="form-field-name"
-                            value={territoryList.filter(function(option) {
+                            value={territoryList.filter(function (option) {
                                 return option.value === territory;
                             })}
                             isDisabled={true}
-                            onChange={e => setTerritory(e.value)}
+                            onChange={(e) => setTerritory(e.value)}
                             options={territoryList}
                         />
                     </FormGroup>
                     <FormGroup controlId="urgent">
-                        <ControlLabel>This APS is classified as urgent &nbsp;</ControlLabel>
-                        <Switch controlId="urgent"
-                                checked={urgent}
-                                onChange={e => setUrgent(!urgent)}
+                        <ControlLabel>
+                            This APS is classified as urgent &nbsp;
+                        </ControlLabel>
+                        <Switch
+                            controlId="urgent"
+                            checked={urgent}
+                            onChange={(e) => setUrgent(!urgent)}
                         />
                     </FormGroup>
                     {amendment.attachment && (
                         <FormGroup>
                             <ControlLabel>Attachment</ControlLabel>
                             <FormControl.Static>
-                              <button
-                                className = "link-lookalike"
-                                onClick={e => openAttachment(e, amendment.attachmentURL)}>
-                                {formatFilename(amendment.attachment)}
-                              </button>
+                                <button
+                                    className="link-lookalike"
+                                    onClick={(e) =>
+                                        openAttachment(
+                                            e,
+                                            amendment.attachmentURL
+                                        )
+                                    }
+                                >
+                                    {formatFilename(amendment.attachment)}
+                                </button>
                             </FormControl.Static>
                         </FormGroup>
-
                     )}
                     <FormGroup controlId="file">
-                        {!amendment.attachment && <ControlLabel>Attachment</ControlLabel>}
+                        {!amendment.attachment && (
+                            <ControlLabel>Attachment</ControlLabel>
+                        )}
                         <FormControl onChange={handleFileChange} type="file" />
                     </FormGroup>
                     <FormGroup controlId="comments">
@@ -242,7 +272,7 @@ export default function Amendments({ fileUpload, fileURLResolver }) {
                         <FormControl
                             componentClass="textarea"
                             value={comments}
-                            onChange={e => setComments(e.target.value)}
+                            onChange={(e) => setComments(e.target.value)}
                         />
                     </FormGroup>
                     <LoaderButton

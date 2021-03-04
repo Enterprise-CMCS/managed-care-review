@@ -9,11 +9,14 @@ testcafe_results
 .DS_Store
 build_dev
 tsconfig.tsbuildinfo
+.serverless
 .eslintcache
 /.env
 tests_output
 *.log
+gen/
 
 services/app-web/public/env-config.js
 services/app-web/storybook-static
+services/app-web/build
 services/uploads/local_buckets

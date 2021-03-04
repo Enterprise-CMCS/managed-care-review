@@ -1,6 +1,4 @@
 import React, { useState } from 'react'
-import { useHistory } from 'react-router-dom'
-import { signIn } from '../Auth/cognitoAuth'
 import {
     Button,
     Form,
@@ -8,25 +6,28 @@ import {
     Label,
     TextInput,
 } from '@trussworks/react-uswds'
+import { useHistory } from 'react-router-dom'
 
-import { useAuth } from '../App/AuthContext'
+import { signIn } from '../Auth/cognitoAuth'
+import { useAuth } from '../../contexts/AuthContext'
 
 export function showError(error: string): void {
-    alert(error)
+    console.log('showError', error)
 }
 
 type Props = {
-    defaultEmail: string
+    defaultEmail?: string
 }
 
 export function Login({ defaultEmail }: Props): React.ReactElement {
     const [fields, setFields] = useState({
-        loginEmail: defaultEmail,
+        loginEmail: defaultEmail || '',
         loginPassword: '',
     })
 
     const history = useHistory()
-    const auth = useAuth()
+    const { isLoading, loggedInUser, checkAuth } = useAuth()
+    if (!isLoading && loggedInUser) history.push('/dashboard')
 
     const onFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = event.target
@@ -37,72 +38,69 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
         return fields.loginEmail.length > 0 && fields.loginPassword.length > 0
     }
 
-    async function handleSumbit(event: React.FormEvent) {
-        console.log('Trying a signin')
+    async function handleSubmit(event: React.FormEvent) {
         event.preventDefault()
 
-        const result = await signIn(fields.loginEmail, fields.loginPassword)
-        // TODO: try and useAuth() here, track state using the loading param there instead of awaiting something.
-        // if loading, show "redirecting" spinner or something.
-        // if loggedInUser, redirect
+        try {
+            const result = await signIn(fields.loginEmail, fields.loginPassword)
+            // TODO: try and useAuth() here, track state using the loading param there instead of awaiting something.
+            // if loading, show "redirecting" spinner or something.
+            // if loggedInUser, redirect
 
-        if (result.isOk()) {
-            console.log('SUCCESS LOGIN')
+            if (result && 'code' in result) {
+                if (result.code === 'UserNotConfirmedException') {
+                    // the user has not been confirmed, need to display the confirmation UI
+                    console.log(
+                        'you need to confirm your account, enter the code below'
+                    )
+                } else if (result.code === 'NotAuthorizedException') {
+                    // the password is bad
+                    console.log('bad password')
+                } else {
+                    console.log('Unknown error from Amplify: ', result)
+                }
+                showError(result.message)
+            } else {
+                try {
+                    await checkAuth()
+                } catch (e) {
+                    console.log('UNEXPECTED NOT LOGGED IN AFTETR LOGGIN', e)
+                }
 
-            try {
-                await auth.checkAuth()
-            } catch (e) {
-                console.log('UNEXPECTED NOT LOGGED IN AFTETR LOGGIN', e)
+                history.push('/dashboard')
             }
-
-            history.push('/dashboard')
-        } else {
-            const err = result.error
-            console.log(err)
-
-            if (err.code === 'UserNotConfirmedException') {
-                // the user has not been confirmed, need to display the confirmation UI
-                console.log(
-                    'you need to confirm your account, enter the code below'
-                )
-            } else if (err.code === 'NotAuthorizedException') {
-                // the password is bad
-                console.log('bad password')
-            }
-            showError(err.message)
+        } catch (err) {
+            console.log('Unexpected error signing in:', err)
         }
     }
 
     return (
-        <div className="Login">
-            <Form onSubmit={handleSumbit}>
-                <FormGroup>
-                    <Label htmlFor="loginEmail">Email</Label>
-                    <TextInput
-                        id="loginEmail"
-                        name="loginEmail"
-                        type="email"
-                        value={fields.loginEmail}
-                        onChange={onFieldChange}
-                    />
-                </FormGroup>
-                <FormGroup>
-                    <Label htmlFor="loginPassword">Password</Label>
-                    <TextInput
-                        id="loginPassword"
-                        name="loginPassword"
-                        type="password"
-                        value={fields.loginPassword}
-                        onChange={onFieldChange}
-                    />
-                </FormGroup>
-                <Button
-                    type="submit"
-                    disabled={!validateForm() || auth.isLoading}
-                >
-                    Login
-                </Button>
-            </Form>
-        </div>
+        <Form onSubmit={handleSubmit} name="Login" aria-label="Login Form">
+            <FormGroup>
+                <Label htmlFor="loginEmail">Email</Label>
+                <TextInput
+                    data-testid="loginEmail"
+                    id="loginEmail"
+                    name="loginEmail"
+                    type="email"
+                    value={fields.loginEmail}
+                    onChange={onFieldChange}
+                />
+            </FormGroup>
+            <FormGroup>
+                <Label htmlFor="loginPassword">Password</Label>
+                <TextInput
+                    data-testid="loginPassword"
+                    id="loginPassword"
+                    name="loginPassword"
+                    type="password"
+                    value={fields.loginPassword}
+                    onChange={onFieldChange}
+                />
+            </FormGroup>
+            <Button type="submit" disabled={!validateForm() || isLoading}>
+                Login
+            </Button>
+        </Form>
     )
 }

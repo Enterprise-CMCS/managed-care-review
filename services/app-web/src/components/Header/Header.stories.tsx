@@ -1,26 +1,46 @@
 import React from 'react'
 import { Story } from '@storybook/react'
-import { BrowserRouter } from 'react-router-dom'
+
+import ProvidersDecorator from '../../../.storybook/providersDecorator'
 import { Header, HeaderProps } from './Header'
+import { GetCurrentUserDocument } from '../../gen/gqlClient'
 
 export default {
     title: 'Components/Header',
     component: Header,
 }
 
-const Template: Story<HeaderProps> = (args) => (
-    <BrowserRouter>
-        <Header {...args} />
-    </BrowserRouter>
-)
+const successfulLoginMock = {
+    request: { query: GetCurrentUserDocument },
+    result: {
+        data: {
+            getCurrentUser: {
+                state: 'MN',
+                role: 'State User',
+                name: 'Bob it user',
+                email: 'bob@dmas.mn.gov',
+            },
+        },
+    },
+}
+const Template: Story<HeaderProps> = (args) => <Header {...args} />
 
-export const CMSHeader = Template.bind({})
+export const CMSHeaderLoggedOut = Template.bind({})
+CMSHeaderLoggedOut.decorators = [(Story) => ProvidersDecorator(Story, {})]
 
-CMSHeader.args = {
-    loggedIn: true,
+export const CMSHeaderLoggedIn = Template.bind({})
+
+CMSHeaderLoggedIn.args = {
     stateCode: 'MN',
     user: {
         name: 'Bob test user',
         email: 'bob@dmas.mn.gov',
     },
 }
+
+CMSHeaderLoggedIn.decorators = [
+    (Story) =>
+        ProvidersDecorator(Story, {
+            apolloProvider: { mocks: [successfulLoginMock] },
+        }),
+]
