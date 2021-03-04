@@ -74,7 +74,7 @@ export async function userFromCognitoAuthProvider(
 
         console.log('got Users: ', userResp)
 
-        console.log('got actual users: ', userResp.Users)
+        console.log('got actual users: ', JSON.stringify(userResp.Users))
 
         // let's see what we've got
         const userResponse = await cognito
