@@ -77,13 +77,6 @@ export async function userFromCognitoAuthProvider(
         console.log('got actual users: ', userResp.Users)
 
         // let's see what we've got
-        const listGroupResponse = await cognito
-            .listGroups({
-                UserPoolId: userInfo.poolId,
-            })
-            .promise()
-        console.log('got Groups: ', listGroupResponse)
-
         const userResponse = await cognito
             .adminGetUser({
                 Username: userInfo.userId,
