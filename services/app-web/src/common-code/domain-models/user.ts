@@ -1,7 +1,6 @@
 type Role = 'STATE_USER' | 'ADMIN'
 
 export type StateCode = 'VA' | 'GA' | 'TN' | 'MN'
-
 export type UserType = StateUserType
 
 export type StateUserType = {

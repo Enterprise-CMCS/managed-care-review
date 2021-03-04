@@ -1,6 +1,7 @@
 import { Button, GridContainer } from '@trussworks/react-uswds'
 
 import styles from './Dashboard.module.scss'
+
 import { Tabs } from '../../components/Tabs/Tabs'
 import { TabPanel } from '../../components/Tabs/TabPanel'
 import { useAuth } from '../../contexts/AuthContext'
@@ -12,15 +13,12 @@ type UserProgram = {
 
 export const Dashboard = (): React.ReactElement => {
     const { isLoading, loggedInUser } = useAuth()
-
-    // TODO: replace const with dynamic data per user
-    const USER_PROGRAMS: UserProgram[] = [
-        { name: 'CCC Plus', populations: 'Medicaid only' },
-        { name: 'Medallion', populations: 'Medicaid + CHIP' },
-    ]
+    const programs: UserProgram[] = []
 
     if (isLoading || !loggedInUser) {
         return <div>Loading User Info</div>
+    } else {
+        // programs = loggedInUser.state.programs
     }
 
     const handleNewSubmissionClick = () => {
@@ -49,17 +47,24 @@ export const Dashboard = (): React.ReactElement => {
 
     return (
         <GridContainer className={styles.container} data-testid="dashboardPage">
-            <Tabs className={styles.tabs}>
-                {USER_PROGRAMS.map((program: UserProgram) => (
-                    <TabPanel
-                        key={program.name}
-                        id={program.name}
-                        tabName={program.name}
-                    >
-                        <ProgramContent key={program.name} program={program} />
-                    </TabPanel>
-                ))}
-            </Tabs>
+            {programs.length ? (
+                <Tabs className={styles.tabs}>
+                    {programs.map((program: UserProgram) => (
+                        <TabPanel
+                            key={program.name}
+                            id={program.name}
+                            tabName={program.name}
+                        >
+                            <ProgramContent
+                                key={program.name}
+                                program={program}
+                            />
+                        </TabPanel>
+                    ))}
+                </Tabs>
+            ) : (
+                <p>No programs exist</p>
+            )}
         </GridContainer>
     )
 }

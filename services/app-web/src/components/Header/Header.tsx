@@ -7,13 +7,12 @@ import { ReactComponent as VaIcon } from '../../assets/icons/va-icon.svg'
 import { ReactComponent as MnIcon } from '../../assets/icons/mn-icon.svg'
 import styles from './Header.module.scss'
 
-import { StateCode } from '../../common-code/domain-models'
 import { Logo } from '../Logo/Logo'
 import { useAuth } from '../../contexts/AuthContext'
 import { useHistory } from 'react-router-dom'
 
 const getStateInfo = (
-    stateAbbrev: StateCode
+    stateAbbrev: string
 ): { stateName: string; StateIcon: React.FunctionComponent } => {
     switch (stateAbbrev) {
         case 'MN':
@@ -29,7 +28,7 @@ const getStateInfo = (
 }
 
 export type HeaderProps = {
-    stateCode?: StateCode
+    stateCode?: string
     activePage?: string
     setAlert?: React.Dispatch<boolean>
     user?: {

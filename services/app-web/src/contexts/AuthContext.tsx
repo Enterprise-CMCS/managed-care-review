@@ -3,9 +3,7 @@ import { useQuery } from '@apollo/client'
 
 import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
 import { logoutLocalUser } from '../pages/Auth/localLogin'
-import { UserType } from '../common-code/domain-models'
-
-import { GetCurrentUserDocument } from '../gen/gqlClient'
+import { GetCurrentUserDocument, User as UserType } from '../gen/gqlClient'
 
 type LogoutFn = () => Promise<null>
 

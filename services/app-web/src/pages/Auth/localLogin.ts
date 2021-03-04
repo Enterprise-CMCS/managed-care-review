@@ -1,5 +1,5 @@
-import { UserType, isUser } from '../../common-code/domain-models'
-
+import { isUser } from '../../common-code/domain-models'
+import { User as UserType } from '../../gen/gqlClient'
 const localUserKey = 'localUser'
 
 // loginLocalUser stores a local user in local storage
