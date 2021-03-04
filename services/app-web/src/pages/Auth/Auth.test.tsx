@@ -2,6 +2,7 @@ import React from 'react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryHistory } from 'history'
 import { screen, waitFor, Screen, queries } from '@testing-library/react'
+import { CognitoUser, CognitoUserPool } from 'amazon-cognito-identity-js'
 
 import * as CognitoAuthApi from '../Auth/cognitoAuth'
 import {
@@ -97,7 +98,14 @@ describe('Auth', () => {
         })
 
         it('when login is successful, redirect to dashboard', async () => {
-            const loginSpy = jest.spyOn(CognitoAuthApi, 'signIn')
+            const loginSpy = jest
+                .spyOn(CognitoAuthApi, 'signIn')
+                .mockResolvedValue(
+                    new CognitoUser({
+                        Username: 'foo@example.com',
+                        Pool: { getClientId: () => '7' } as CognitoUserPool,
+                    })
+                )
             const history = createMemoryHistory()
 
             renderWithProviders(<Auth />, {

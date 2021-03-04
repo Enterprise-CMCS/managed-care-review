@@ -2,12 +2,12 @@ import React from 'react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryHistory } from 'history'
 import { screen, waitFor, Screen, queries } from '@testing-library/react'
+import { CognitoUser, CognitoUserPool } from 'amazon-cognito-identity-js'
 
 import * as CognitoAuthApi from '../Auth/cognitoAuth'
 import { GetCurrentUserDocument } from '../../gen/gqlClient'
 import { Login } from './Login'
 import { renderWithProviders, userClickByRole } from '../../utils/jestUtils'
-import { CognitoUser, CognitoUserPool } from 'amazon-cognito-identity-js'
 
 const failedAuthMock = {
     request: { query: GetCurrentUserDocument },

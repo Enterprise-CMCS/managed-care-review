@@ -15,6 +15,9 @@ type AmplifyErrorCodes =
     | 'ExpiredCodeException'
     | 'UserNotConfirmedException'
     | 'NotAuthorizedException'
+    | 'UserNotFoundException'
+    | 'NetworkError'
+    | 'InvalidParameterException'
 
 export interface AmplifyError {
     code: AmplifyErrorCodes
@@ -24,8 +27,11 @@ export interface AmplifyError {
 
 // typescript user defined type assertion
 function isAmplifyError(err: unknown): err is AmplifyError {
-    const ampErr = err as AmplifyError
-    return 'code' in ampErr && 'message' in ampErr && 'name' in ampErr
+    // const ampErr = err as AmplifyError
+    if (err && typeof err === 'object') {
+        return 'code' in err && 'message' in err && 'name' in err
+    }
+    return false
 }
 
 export async function signUp(
@@ -38,7 +44,7 @@ export async function signUp(
             attributes: {
                 given_name: user.given_name,
                 family_name: user.family_name,
-                state_code: user.state_code,
+                'custom:state_code': user.state_code,
             },
         })
         return result.user
@@ -49,9 +55,15 @@ export async function signUp(
             if (e.code === 'UsernameExistsException') {
                 console.log('that username already exists....')
                 return e
+            } else if (e.code === 'NetworkError') {
+                console.log(
+                    'Failed to connect correctly to Amplify on Signup??'
+                )
+                return e
             } else {
                 // if amplify returns an error in a format we don't expect, let's throw it for now.
                 // might be against the spirit of never throw, but this is our boundary with a system we don't control.
+                console.log('unexpected cognito error!')
                 throw e
             }
         } else {
@@ -111,13 +123,17 @@ export async function signIn(
             } else if (e.code === 'NotAuthorizedException') {
                 console.log('unknown user or password?')
                 return e
+            } else if (e.code === 'UserNotFoundException') {
+                console.log('user does not exist')
+                return e
             } else {
                 // if amplify returns an error in a format we don't expect, let's throw it for now.
                 // might be against the spirit of never throw, but this is our boundary with a system we don't control.
-                return e
+                throw e
             }
         } else {
-            return e
+            console.log('didnt even get an amplify error back from login')
+            throw e
         }
     }
 }
