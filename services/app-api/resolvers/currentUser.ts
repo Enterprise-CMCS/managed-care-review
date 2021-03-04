@@ -31,6 +31,8 @@ export const getCurrentUserResolver: ResolverFn<
 		)
 	}
 
+	console.log('CHECKING ON authProvider: ', authProvider)
+
 	const userResult = await userFetcher(authProvider)
 
 	if (userResult.isErr()) {

@@ -53,6 +53,7 @@ export async function userFromCognitoAuthProvider(
     }
 
     const userInfo = parseResult.value
+    console.log('it parsed!', userInfo)
 
     // calling a dependency so we have to try
     try {
@@ -92,6 +93,7 @@ export async function userFromCognitoAuthProvider(
 
         return ok(user)
     } catch (e) {
+        console.log('cognito ERR', JSON.stringify(e))
         return err(e)
     }
 }
