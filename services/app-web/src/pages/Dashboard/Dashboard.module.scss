@@ -4,24 +4,30 @@
 .container {
     display: flex;
     flex: 1 0 auto;
-    padding: units(4) 0;
+    padding-top: units(4);
     width: 100%;
 }
 
 .tabs {
     width: 100%;
-    background-color: $cms-color-background;
 }
 
 .panel {
-    display: flex;
-    flex-direction: column;
     padding: units(2);
-    > div {
+
+    & .panelHeader {
         display: flex;
-        flex: 1 0 auto;
-    }
-    & .panelHeading {
+        align-items: center;
         justify-content: space-between;
+    }
+
+    & .panelEmpty {
+        margin-top: units(8);
+
+        h3 {
+            font-weight: font-weight('normal');
+            color: color('base-light');
+            text-align: center;
+        }
     }
 }
