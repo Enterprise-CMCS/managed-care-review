@@ -2,6 +2,7 @@ import React from 'react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryHistory } from 'history'
 import { screen, waitFor, Screen, queries } from '@testing-library/react'
+import { CognitoUser, CognitoUserPool } from 'amazon-cognito-identity-js'
 
 import * as CognitoAuthApi from '../Auth/cognitoAuth'
 import {
@@ -33,64 +34,112 @@ const failedAuthMock = {
     },
 }
 
+const successfulAuthMock = {
+    request: { query: GetCurrentUserDocument },
+    result: {
+        data: {
+            getCurrentUser: {
+                state: 'MN',
+                role: 'State User',
+                name: 'Bob it user',
+                email: 'bob@dmas.mn.gov',
+            },
+        },
+    },
+}
+
 describe('Auth', () => {
     describe('Cognito Login', () => {
-        const userLogin = (screen: Screen<typeof queries>) => {
+        const userLogin = async (screen: Screen<typeof queries>) => {
+            userClickByRole(screen, 'button', { name: 'Show Login Form' })
             const loginEmail = screen.getByTestId('loginEmail')
             const loginPassword = screen.getByTestId('loginPassword')
 
             userEvent.type(loginEmail, 'countdracula@muppets.com')
             userEvent.type(loginPassword, 'passwordABC')
+            await waitFor(() =>
+                expect(
+                    screen.getByRole('button', { name: 'Login' })
+                ).not.toBeDisabled()
+            )
             userClickByRole(screen, 'button', { name: 'Login' })
         }
-        it('displays login and signup forms when logged out', () => {
-            renderWithProviders(<Auth />)
 
-            expect(
-                screen.getByRole('form', { name: 'Login Form' })
-            ).toBeInTheDocument()
+        it('displays signup form when logged out', () => {
+            renderWithProviders(<Auth />, {
+                apolloProvider: { mocks: [failedAuthMock] },
+            })
 
             expect(
                 screen.getByRole('form', { name: 'Signup Form' })
-            ).toBeInTheDocument()
-            expect(
-                screen.getByRole('button', { name: /Login/i })
             ).toBeInTheDocument()
             expect(
                 screen.getByRole('button', { name: /SignUp/i })
             ).toBeInTheDocument()
         })
 
-        it('when login is successful, redirect to dashboard', async () => {
-            const loginSpy = jest
-                .spyOn(CognitoAuthApi, 'signOut')
-                .mockResolvedValue(null)
-
-            const history = createMemoryHistory()
-
+        it('show login button displays login form', () => {
             renderWithProviders(<Auth />, {
-                routerProvider: { routerProps: { history: history } },
+                apolloProvider: { mocks: [failedAuthMock] },
             })
 
-            userLogin(screen)
-            waitFor(() => expect(loginSpy).toHaveBeenCalledTimes(1))
-            waitFor(() => expect(history.location.pathname).toBe('/dashboard'))
+            expect(
+                screen.getByRole('form', { name: 'Signup Form' })
+            ).toBeInTheDocument()
+
+            userClickByRole(screen, 'button', { name: 'Show Login Form' })
+
+            expect(
+                screen.getByRole('form', { name: 'Login Form' })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('button', { name: /Login/i })
+            ).toBeInTheDocument()
         })
 
-        it('when login fails, stay on page and display error alert', () => {
+        it('when login is successful, redirect to dashboard', async () => {
             const loginSpy = jest
-                .spyOn(CognitoAuthApi, 'signOut')
-                .mockRejectedValue('Error has occured')
-
+                .spyOn(CognitoAuthApi, 'signIn')
+                .mockResolvedValue(
+                    new CognitoUser({
+                        Username: 'foo@example.com',
+                        Pool: { getClientId: () => '7' } as CognitoUserPool,
+                    })
+                )
             const history = createMemoryHistory()
 
             renderWithProviders(<Auth />, {
+                apolloProvider: { mocks: [failedAuthMock, successfulAuthMock] },
                 routerProvider: { routerProps: { history: history } },
             })
 
-            userLogin(screen)
-            waitFor(() => expect(loginSpy).toHaveBeenCalledTimes(1))
-            waitFor(() => expect(history.location.pathname).toBe('/auth'))
+            await userLogin(screen)
+
+            await waitFor(() => expect(loginSpy).toHaveBeenCalledTimes(1))
+            await waitFor(() =>
+                expect(history.location.pathname).toBe('/dashboard')
+            )
+        })
+
+        it('when login fails, stay on page and display error alert', async () => {
+            const loginSpy = jest.spyOn(CognitoAuthApi, 'signIn')
+            const history = createMemoryHistory()
+
+            renderWithProviders(<Auth />, {
+                apolloProvider: {
+                    mocks: [failedAuthMock, failedAuthMock, failedAuthMock],
+                },
+                routerProvider: {
+                    route: '/auth',
+                    routerProps: { history: history },
+                },
+            })
+
+            await userLogin(screen)
+            await waitFor(() => {
+                expect(loginSpy).toHaveBeenCalledTimes(1)
+                expect(history.location.pathname).toBe('/auth')
+            })
         })
     })
 
@@ -101,6 +150,7 @@ describe('Auth', () => {
 
         it('displays ang and toph when logged out', () => {
             renderWithProviders(<Auth />, {
+                apolloProvider: { mocks: [failedAuthMock] },
                 authProvider: { localLogin: true },
             })
 
@@ -123,13 +173,13 @@ describe('Auth', () => {
             ).toBe(2)
         })
 
-        it.only('when login is successful, redirect to dashboard', async () => {
+        it('when login is successful, redirect to dashboard', async () => {
             const history = createMemoryHistory()
 
             renderWithProviders(<Auth />, {
                 routerProvider: { routerProps: { history: history } },
                 authProvider: { localLogin: true },
-                apolloProvider: { mocks: [failedAuthMock] },
+                apolloProvider: { mocks: [failedAuthMock, successfulAuthMock] },
             })
 
             userClickByTestId(screen, 'TophButton')
@@ -137,24 +187,24 @@ describe('Auth', () => {
             await waitFor(() => {
                 expect(history.location.pathname).toBe('/dashboard')
             })
-
-            waitFor(() =>
-                expect(screen.getByTestId('dashboardPage')).toBeInTheDocument()
-            )
         })
 
         it('when login fails, stay on page and display error alert', async () => {
             const history = createMemoryHistory()
 
             renderWithProviders(<Auth />, {
-                routerProvider: { routerProps: { history: history } },
                 authProvider: { localLogin: true },
+                apolloProvider: {
+                    mocks: [failedAuthMock, failedAuthMock],
+                },
+                routerProvider: {
+                    route: '/auth',
+                    routerProps: { history: history },
+                },
             })
 
             userClickByTestId(screen, 'TophButton')
-
-            waitFor(() => {
-                expect(history.location.pathname).not.toBe('/dashboard')
+            await waitFor(() => {
                 expect(history.location.pathname).toBe('/auth')
             })
         })

@@ -2,7 +2,7 @@
 import { ApolloServer } from 'apollo-server-lambda'
 import { APIGatewayProxyHandler } from 'aws-lambda'
 
-import { getCurrentUserResolver } from '../resolvers'
+import { getCurrentUserResolver, getStateResolver } from '../resolvers'
 
 import { Resolvers } from '../gen/gqlServer'
 import typeDefs from '../../app-graphql/src/schema.graphql'

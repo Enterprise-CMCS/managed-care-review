@@ -64,24 +64,29 @@ export async function userFromCognitoAuthProvider(
             })
             .promise()
 
+        // we lose type safety here...
         const attributes = userAttrDict(userResponse)
 
         if (
             !(
                 'email' in attributes &&
                 'given_name' in attributes &&
-                'family_name' in attributes
+                'family_name' in attributes &&
+                'custom:state_code' in attributes
             )
         ) {
             return err(
-                new Error('User does not have all the expected attributes')
+                new Error(
+                    'User does not have all the expected attributes: ' +
+                        JSON.stringify(attributes)
+                )
             )
         }
 
         const user: StateUserType = {
             email: attributes.email,
             name: attributes.given_name + ' ' + attributes.family_name,
-            state: 'TN',
+            state: attributes['custom:state_code'] as UserType['state'],
             role: 'STATE_USER',
         }
 

@@ -11,7 +11,7 @@ import { signUp } from './cognitoAuth'
 import { logEvent } from '../../log_event'
 
 export function showError(error: string): void {
-    alert(error)
+    console.log(error)
 }
 
 type Props = {
@@ -50,32 +50,34 @@ export function Signup({
 
     async function handleSubmit(event: React.FormEvent) {
         event.preventDefault()
-
         setIsLoading(true)
 
-        const signUpResult = await signUp({
-            username: fields.email,
-            password: fields.password,
-            given_name: fields.firstName,
-            family_name: fields.lastName,
-        })
+        try {
+            const result = await signUp({
+                username: fields.email,
+                password: fields.password,
+                given_name: fields.firstName,
+                family_name: fields.lastName,
+                state_code: 'MN',
+            })
+            setIsLoading(false)
 
-        setIsLoading(false)
-        if (signUpResult.isOk()) {
-            console.log('got a user back.')
-            setEmail(fields.email)
-            triggerConfirmation()
-        } else {
-            const err = signUpResult.error
-            if (err.code === 'UsernameExistsException') {
-                showError('That username already exists')
+            if ('code' in result) {
+                const err = result
+                console.log('got an error back from signup: ', err)
             } else {
-                showError('An unexpected error occured!')
-                logEvent('cognitoAuth.unexpected_error', {
-                    'err.code': err.code,
-                    'err.message': err.message,
-                })
+                const user = result
+                console.log('got a user back', user)
+                setEmail(fields.email)
+                triggerConfirmation()
             }
+        } catch (err) {
+            setIsLoading(false)
+            showError('An unexpected error occurred!')
+            logEvent('cognitoAuth.unexpected_error', {
+                'err.code': err.code,
+                'err.message': err.message,
+            })
         }
     }
 
