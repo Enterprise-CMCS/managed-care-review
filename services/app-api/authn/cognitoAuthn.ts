@@ -57,11 +57,25 @@ export async function userFromCognitoAuthProvider(
     console.log('it parsed!', userInfo)
 
     // TODO: This is different in IDM?
-    userInfo.poolId = userInfo.poolId + '_Okta'
+    // userInfo.poolId = userInfo.poolId + '_Okta'
 
     // calling a dependency so we have to try
     try {
         const cognito = new CognitoIdentityServiceProvider()
+
+        // let's see what we've got
+        const listUsersResponse = await cognito.listUsers({
+            UserPoolId: userInfo.poolId,
+        })
+
+        console.log('got Users: ', JSON.stringify(listUsersResponse))
+
+        // let's see what we've got
+        const listGroupResponse = await cognito.listGroups({
+            UserPoolId: userInfo.poolId,
+        })
+        console.log('got Groups: ', JSON.stringify(listGroupResponse))
+
         const userResponse = await cognito
             .adminGetUser({
                 Username: userInfo.userId,
