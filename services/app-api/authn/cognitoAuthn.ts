@@ -47,6 +47,7 @@ function userAttrDict(
 export async function userFromCognitoAuthProvider(
     authProvider: string
 ): Promise<Result<UserType, Error>> {
+    console.log('parsing:', authProvider)
     const parseResult = parseAuthProvider(authProvider)
     if (parseResult.isErr()) {
         return err(parseResult.error)
@@ -54,6 +55,9 @@ export async function userFromCognitoAuthProvider(
 
     const userInfo = parseResult.value
     console.log('it parsed!', userInfo)
+
+    // TODO: This is different in IDM?
+    userInfo.poolId = userInfo.poolId + '_Okta'
 
     // calling a dependency so we have to try
     try {
