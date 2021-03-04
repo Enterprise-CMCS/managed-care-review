@@ -203,7 +203,7 @@ describe('Header', () => {
             await waitFor(() => expect(mockAlert).toHaveBeenCalled())
         })
 
-        it.skip('shows signin link when logout is successful', async () => {
+        it('shows signin link when logout is successful', async () => {
             const spy = jest
                 .spyOn(CognitoAuthApi, 'signOut')
                 .mockResolvedValue(null)

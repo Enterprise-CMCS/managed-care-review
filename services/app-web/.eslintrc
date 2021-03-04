@@ -27,8 +27,12 @@
     },
     "overrides": [
         {
-            "files": ["**/*.ts?(x)"],
-            "rules": {}
-        }
+            "files": [
+              "src/**/*.stories.tsx"
+            ],
+            "rules": {
+              "import/no-anonymous-default-export": "off"
+            }
+          }
     ]
 }
