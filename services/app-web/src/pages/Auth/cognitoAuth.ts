@@ -1,15 +1,13 @@
 import { Auth as AmplifyAuth } from 'aws-amplify'
 import { CognitoUser } from 'amazon-cognito-identity-js'
+import { UserType } from '../../common-code/domain-models/user'
 
-import { Result, ok, err } from './result'
-
-// TO DO: remove result from this library, it adds extra complexity to our types. All api calls should return promise (resolve, reject)
-// This library wraps our calls to cognito
 type newUser = {
     username: string
     password: string
     given_name: string
     family_name: string
+    state_code: UserType['state']
 }
 
 type AmplifyErrorCodes =
@@ -32,7 +30,7 @@ function isAmplifyError(err: unknown): err is AmplifyError {
 
 export async function signUp(
     user: newUser
-): Promise<Result<CognitoUser, AmplifyError>> {
+): Promise<CognitoUser | AmplifyError> {
     try {
         const result = await AmplifyAuth.signUp({
             username: user.username,
@@ -40,16 +38,17 @@ export async function signUp(
             attributes: {
                 given_name: user.given_name,
                 family_name: user.family_name,
+                state_code: user.state_code,
             },
         })
-        return ok(result.user)
+        return result.user
     } catch (e) {
         console.log('ERROR SIGNUP', e)
 
         if (isAmplifyError(e)) {
             if (e.code === 'UsernameExistsException') {
                 console.log('that username already exists....')
-                return err(e)
+                return e
             } else {
                 // if amplify returns an error in a format we don't expect, let's throw it for now.
                 // might be against the spirit of never throw, but this is our boundary with a system we don't control.
@@ -64,15 +63,15 @@ export async function signUp(
 export async function confirmSignUp(
     email: string,
     code: string
-): Promise<Result<null, AmplifyError>> {
+): Promise<null | AmplifyError> {
     try {
         await AmplifyAuth.confirmSignUp(email, code)
-        return ok(null)
+        return null
     } catch (e) {
         if (isAmplifyError(e)) {
             if (e.code === 'ExpiredCodeException') {
                 console.log('your code is expired, we are sending another one.')
-                return err(e)
+                return e
             } else {
                 throw e
             }
@@ -84,13 +83,13 @@ export async function confirmSignUp(
 
 export async function resendSignUp(
     email: string
-): Promise<Result<null, AmplifyError>> {
+): Promise<null | AmplifyError> {
     try {
         await AmplifyAuth.resendSignUp(email)
-        return ok(null)
+        return null
     } catch (e) {
         // no known handleable errors for this one...
-        console.log('unknonwnd err', e)
+        console.log('unknown err', e)
         throw e
     }
 }
@@ -98,24 +97,24 @@ export async function resendSignUp(
 export async function signIn(
     email: string,
     password: string
-): Promise<Result<CognitoUser, AmplifyError>> {
+): Promise<CognitoUser | AmplifyError> {
     try {
         const result = await AmplifyAuth.signIn(email, password)
-        return ok(result.user)
+        return result.user
     } catch (e) {
         if (isAmplifyError(e)) {
             if (e.code === 'UserNotConfirmedException') {
                 console.log(
                     'you need to confirm your account, enter the code below'
                 )
-                return err(e)
+                return e
             } else if (e.code === 'NotAuthorizedException') {
                 console.log('unknown user or password?')
-                return err(e)
+                return e
             } else {
                 // if amplify returns an error in a format we don't expect, let's throw it for now.
                 // might be against the spirit of never throw, but this is our boundary with a system we don't control.
-                return err(e) 
+                return e
             }
         } else {
             return e

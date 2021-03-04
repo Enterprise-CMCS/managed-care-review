@@ -1,6 +1,4 @@
 import React, { useState } from 'react'
-import { useHistory } from 'react-router-dom'
-import { signIn } from '../Auth/cognitoAuth'
 import {
     Button,
     Form,
@@ -8,7 +6,9 @@ import {
     Label,
     TextInput,
 } from '@trussworks/react-uswds'
+import { useHistory } from 'react-router-dom'
 
+import { signIn } from '../Auth/cognitoAuth'
 import { useAuth } from '../../contexts/AuthContext'
 
 export function showError(error: string): void {
@@ -26,7 +26,8 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
     })
 
     const history = useHistory()
-    const auth = useAuth()
+    const { isLoading, loggedInUser, checkAuth } = useAuth()
+    if (!isLoading && loggedInUser) history.push('/dashboard')
 
     const onFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = event.target
@@ -47,7 +48,7 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
             // if loggedInUser, redirect
 
             try {
-                await auth.checkAuth()
+                await checkAuth()
             } catch (e) {
                 console.log('UNEXPECTED NOT LOGGED IN AFTETR LOGGIN', e)
             }
@@ -91,7 +92,7 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
                     onChange={onFieldChange}
                 />
             </FormGroup>
-            <Button type="submit" disabled={!validateForm() || auth.isLoading}>
+            <Button type="submit" disabled={!validateForm() || isLoading}>
                 Login
             </Button>
         </Form>
