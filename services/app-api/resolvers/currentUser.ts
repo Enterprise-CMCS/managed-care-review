@@ -31,6 +31,11 @@ export const getCurrentUserResolver: ResolverFn<
 		)
 	}
 
+	console.log(
+		'and the idenity',
+		context.event.requestContext.identity.cognitoIdentityId
+	)
+
 	console.log('CHECKING ON authProvider: ', authProvider)
 
 	const userResult = await userFetcher(authProvider)

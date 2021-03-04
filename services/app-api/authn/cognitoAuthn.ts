@@ -28,12 +28,12 @@ export function parseAuthProvider(
 }
 
 function userAttrDict(
-    cognitoUser: CognitoIdentityServiceProvider.AdminGetUserResponse
+    cognitoUser: CognitoIdentityServiceProvider.UserType
 ): { [key: string]: string } {
     const attributes: { [key: string]: string } = {}
 
-    if (cognitoUser.UserAttributes) {
-        cognitoUser.UserAttributes.forEach((attribute) => {
+    if (cognitoUser.Attributes) {
+        cognitoUser.Attributes.forEach((attribute) => {
             if (attribute.Value) {
                 attributes[attribute.Name] = attribute.Value
             }
@@ -67,6 +67,7 @@ export async function userFromCognitoAuthProvider(
         const listUsersResponse = await cognito
             .listUsers({
                 UserPoolId: userInfo.poolId,
+                Filter: `sub = \"$userInfo.userId}\"`,
             })
             .promise()
 
@@ -76,16 +77,15 @@ export async function userFromCognitoAuthProvider(
 
         console.log('got actual users: ', JSON.stringify(userResp.Users))
 
-        // let's see what we've got
-        const userResponse = await cognito
-            .adminGetUser({
-                Username: userInfo.userId,
-                UserPoolId: userInfo.poolId,
-            })
-            .promise()
+        if (userResp.Users === undefined || userResp.Users.length !== 1) {
+            // logerror
+            return err(new Error('No user found with this sub'))
+        }
+
+        const currentUser = userResp.Users[0]
 
         // we lose type safety here...
-        const attributes = userAttrDict(userResponse)
+        const attributes = userAttrDict(currentUser)
 
         if (
             !(
