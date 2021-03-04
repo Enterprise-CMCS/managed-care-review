@@ -1,4 +1,4 @@
-import { Button, GridContainer, Grid } from '@trussworks/react-uswds'
+import { Button, GridContainer } from '@trussworks/react-uswds'
 
 import styles from './Dashboard.module.scss'
 import { Tabs } from '../../components/Tabs/Tabs'
