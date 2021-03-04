@@ -64,17 +64,17 @@ export async function userFromCognitoAuthProvider(
         const cognito = new CognitoIdentityServiceProvider()
 
         // let's see what we've got
-        const listUsersResponse = await cognito.listUsers({
+        const listUsersResponse = cognito.listUsers({
             UserPoolId: userInfo.poolId,
         })
 
-        console.log('got Users: ', JSON.stringify(listUsersResponse))
+        console.log('got Users: ', listUsersResponse)
 
         // let's see what we've got
-        const listGroupResponse = await cognito.listGroups({
+        const listGroupResponse = cognito.listGroups({
             UserPoolId: userInfo.poolId,
         })
-        console.log('got Groups: ', JSON.stringify(listGroupResponse))
+        console.log('got Groups: ', listGroupResponse)
 
         const userResponse = await cognito
             .adminGetUser({
@@ -111,7 +111,7 @@ export async function userFromCognitoAuthProvider(
 
         return ok(user)
     } catch (e) {
-        console.log('cognito ERR', JSON.stringify(e))
+        console.log('cognito ERR', e)
         return err(e)
     }
 }
