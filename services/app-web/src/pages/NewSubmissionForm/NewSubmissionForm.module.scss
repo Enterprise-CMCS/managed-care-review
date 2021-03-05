@@ -6,12 +6,16 @@
 	margin-top: units(4);
 }
 
+.formWrapper {
+	max-width: 35rem;
+	margin: units(6) auto;
+}
+
 .formContainer {
-	min-width: 35rem;
-	margin: units(6) auto units(2) auto;
 	padding: units(4);
 	background: $cms-color-white;
 	border: 1px solid $theme-color-base-lighter;
+	margin-bottom: units(2);
 	@include u-radius('md');
 
 	h2 {
