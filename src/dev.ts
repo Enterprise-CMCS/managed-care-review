@@ -30,7 +30,7 @@ async function run_db_locally(runner: LabeledProcessRunner) {
 
 // run_api_locally uses the serverless-offline plugin to run the api lambdas locally
 async function run_api_locally(runner: LabeledProcessRunner) {
-    compile_graphql_types_watch_once(runner)
+    await compile_graphql_types_watch_once(runner)
 
     await runner.run_command_and_output(
         'api deps',
@@ -132,12 +132,31 @@ async function run_all_clean() {
         ['yarn', 'clean'],
         'services/app-web'
     )
+    runner.run_command_and_output(
+        'api deps',
+        ['yarn', 'clean'],
+        'services/app-api'
+    )
 }
 
 async function run_all_lint() {
     const runner = new LabeledProcessRunner()
-    runner.run_command_and_output(
-        'lint',
+    await runner.run_command_and_output(
+        'web lint',
+        ['yarn', 'lint'],
+        'services/app-web'
+    )
+    await runner.run_command_and_output(
+        'api lint',
+        ['yarn', 'lint'],
+        'services/app-api'
+    )
+}
+
+async function run_all_format() {
+    const runner = new LabeledProcessRunner()
+    await runner.run_command_and_output(
+        'format',
         ['prettier', '.', '-w', '-u', '--ignore-path', '.gitignore'],
         '.'
     )
@@ -470,9 +489,17 @@ function main() {
                 run_all_tests(parsedFlags)
             }
         )
+        .command( 
+            'format',
+            'run format. This will be replaced by pre-commit',
+            {},
+            () => {
+                      run_all_format()
+            }
+        )
         .command(
             'lint',
-            'run all linters. This probably will be replaced by pre-commit.',
+            'run all linters. This will be replaced by pre-commit.',
             {},
             () => {
                 run_all_lint()
