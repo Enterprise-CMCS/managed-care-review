@@ -94,6 +94,7 @@ resources:
         LogoutURLs:
           - ${self:custom.application_endpoint_url}
           - http://localhost:3000/
+          - http://localhost:3003/
         SupportedIdentityProviders:
           - Okta
         UserPoolId:
