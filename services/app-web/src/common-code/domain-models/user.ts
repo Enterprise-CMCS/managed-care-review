@@ -1,5 +1,9 @@
 import { User as UserType } from '../../gen/gqlClient'
 
+export interface StateUserType extends UserType {
+    role: 'STATE_USER';
+  }
+
 export function isUser(user: unknown): user is UserType {
     if (user && typeof user === 'object') {
         if ('role' in user) {

@@ -2,8 +2,8 @@ import { Result, ok, err } from 'neverthrow'
 import { CognitoIdentityServiceProvider } from 'aws-sdk'
 import {
     StateUserType,
-    UserType,
 } from '../../app-web/src/common-code/domain-models/user'
+import { User as UserType } from '../../app-web/src/gen/gqlClient'
 
 export function parseAuthProvider(
     authProvider: string
@@ -86,6 +86,7 @@ export async function userFromCognitoAuthProvider(
         const user: StateUserType = {
             email: attributes.email,
             name: attributes.given_name + ' ' + attributes.family_name,
+            // HELP
             state: attributes['custom:state_code'] as UserType['state'],
             role: 'STATE_USER',
         }

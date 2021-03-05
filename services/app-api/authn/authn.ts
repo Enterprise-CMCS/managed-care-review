@@ -1,5 +1,5 @@
 import { Result } from 'neverthrow'
-import { UserType } from '../../app-web/src/common-code/domain-models/user'
+import { User as UserType } from '../../app-web/src/gen/gqlClient'
 
 export type userFromAuthProvider = (
     authProvider: string
