@@ -1,6 +1,6 @@
+// import { ResolverTypeWrapper, User } from '../gen/gqlServer'
 import { AuthenticationError } from 'apollo-server-lambda'
-
-import { ResolverFn, ResolversTypes } from '../gen/gqlServer'
+import { UserResolvers } from '../gen/gqlServer'
 
 import {
 	userFromAuthProvider,
@@ -8,15 +8,11 @@ import {
 	userFromLocalAuthProvider,
 } from '../authn'
 
-import statePrograms from '../data/statePrograms.json'
-
-// export async function currentUser(_parent, _args, context) {
-export const getStateResolver: ResolverFn<
-	ResolversTypes['State'],
-	{},
-	any,
-	{}
-> = async (_parent, _args, context) => {
+export const userResolver: UserResolvers<any> = async (
+	_parent,
+	_args,
+	context
+) => {
 	let userFetcher: userFromAuthProvider
 
 	if (process.env.REACT_APP_LOCAL_LOGIN) {
@@ -39,14 +35,18 @@ export const getStateResolver: ResolverFn<
 		throw new AuthenticationError(userResult.error.message)
 	}
 
-	// we have a valid user.
-	const userState = userResult.value.state_code
-
-	const state = statePrograms.states.find((st) => st.code === userState)
-
-	if (state === undefined) {
-		throw new Error('No state data for users state: ' + userState)
+	// return userResult.value
+	const user = userResult.value
+	return {
+		role: user.role,
+		name: user.name,
+		email: user.email,
+		state: () => {
+			return {
+				name: 'Florida',
+				code: 'FL',
+				programs: [],
+			}
+		},
 	}
-
-	return state
 }

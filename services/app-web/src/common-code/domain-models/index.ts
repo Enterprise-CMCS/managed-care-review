@@ -2,3 +2,4 @@
 // CRA prevents you from importing code outside of /src
 // The fix is to use yarn workspaces to allow us to import shared packages
 export { isUser } from './user'
+export type { CognitoUserType } from './cognitoUserType'

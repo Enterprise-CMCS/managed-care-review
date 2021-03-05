@@ -1,6 +1,6 @@
 import { Result } from 'neverthrow'
-import { User as UserType } from '../../app-web/src/gen/gqlClient'
+import { CognitoUserType } from '../../app-web/src/common-code/domain-models'
 
 export type userFromAuthProvider = (
-    authProvider: string
-) => Promise<Result<UserType, Error>>
+	authProvider: string
+) => Promise<Result<CognitoUserType, Error>>

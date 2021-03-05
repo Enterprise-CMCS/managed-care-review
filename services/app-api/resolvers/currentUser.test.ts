@@ -27,7 +27,7 @@ describe('currentUser', () => {
                     requestContext: {
                         identity: {
                             cognitoAuthenticationProvider:
-                                '{ "name": "james brown", "state": "GA", "role": "STATE_USER", "email": "james@example.com" }',
+                                '{ "name": "james brown", "state_code": "FL", "role": "STATE_USER", "email": "james@example.com" }',
                         },
                     },
                 }
@@ -50,5 +50,6 @@ describe('currentUser', () => {
         expect(res.errors).toBeUndefined()
 
         expect(res.data.getCurrentUser.email).toBe('james@example.com')
+        expect(res.data.getCurrentUser.state.code).toBe('FL')
     })
 })
