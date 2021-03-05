@@ -4,6 +4,7 @@ import {
     StateUserType,
     UserType,
 } from '../../app-web/src/common-code/domain-models/user'
+import { performance } from 'perf_hooks'
 
 export function parseAuthProvider(
     authProvider: string
@@ -67,6 +68,7 @@ export async function userFromCognitoAuthProvider(
         console.log('SUB FIL', subFilter)
 
         // let's see what we've got
+        const startRequest = performance.now()
         const listUsersResponse = await cognito
             .listUsers({
                 UserPoolId: userInfo.poolId,
@@ -74,6 +76,8 @@ export async function userFromCognitoAuthProvider(
             })
             .promise()
 
+        const endRequest = performance.now()
+        console.log('listUsers takes ms:', endRequest - startRequest)
         const userResp: CognitoIdentityServiceProvider.ListUsersResponse = listUsersResponse
 
         console.log('got Users: ', userResp)
