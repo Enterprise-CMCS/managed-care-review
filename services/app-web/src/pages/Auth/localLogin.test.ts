@@ -36,7 +36,7 @@ describe('localLogin', () => {
          }
 
         loginLocalUser(testUser)
-        logoutLocalUser()
+        await logoutLocalUser()
 
         await expect(getLoggedInUser()).resolves.toBeNull()
     })
@@ -47,7 +47,7 @@ describe('localLogin', () => {
         // set non-JSON in local storage
         store.setItem('localUser', 'weofnef{{{|')
 
-       await  expect(getLoggedInUser()).rejects.toEqual(
+        await expect(getLoggedInUser()).rejects.toEqual(
             new SyntaxError('Unexpected token w in JSON at position 0')
         )
     })

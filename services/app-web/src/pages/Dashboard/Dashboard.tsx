@@ -28,13 +28,18 @@ export const Dashboard = (): React.ReactElement => {
     }): React.ReactElement => {
         return (
             <section key={program.name} className={styles.panel}>
-                <div className={styles.panelHeading}>
+                <div className={styles.panelHeader}>
                     <h2>Submissions</h2>
-                    <Button type="button" onClick={handleNewSubmissionClick}>
-                        Start new submission
-                    </Button>
+                    <div>
+                        <Button
+                            type="button"
+                            onClick={handleNewSubmissionClick}
+                        >
+                            Start new submission
+                        </Button>
+                    </div>
                 </div>
-                <div>
+                <div className={styles.panelEmpty}>
                     <h3>You have no submissions yet.</h3>
                 </div>
             </section>
@@ -51,10 +56,12 @@ export const Dashboard = (): React.ReactElement => {
                             id={program.name}
                             tabName={program.name}
                         >
-                            <ProgramContent
-                                key={program.name}
-                                program={program}
-                            />
+                            <GridContainer>
+                                <ProgramContent
+                                    key={program.name}
+                                    program={program}
+                                />
+                            </GridContainer>
                         </TabPanel>
                     ))}
                 </Tabs>

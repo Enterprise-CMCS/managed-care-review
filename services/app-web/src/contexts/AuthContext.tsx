@@ -20,7 +20,7 @@ const AuthContext = React.createContext<AuthContextType>({
     loggedInUser: undefined,
     isAuthenticated: false,
     isLoading: false,
-    checkAuth: () => Promise.reject(),
+    checkAuth: () => Promise.reject(Error('Auth context error')),
     logout: undefined,
 })
 
