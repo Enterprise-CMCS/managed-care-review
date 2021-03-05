@@ -9,26 +9,34 @@ import {
     CardFooter,
 } from '@trussworks/react-uswds'
 import { useHistory } from 'react-router-dom'
-import { UserType } from '../../common-code/domain-models/user'
 
 import { loginLocalUser } from './localLogin'
 
 import aangAvatar from '../../assets/images/aang.png'
 import tophAvatar from '../../assets/images/toph.png'
 import { useAuth } from '../../contexts/AuthContext'
+import { User as UserType } from '../../gen/gqlClient'
 
 const localUsers: UserType[] = [
     {
         email: 'aang@dhs.state.mn.us',
         name: 'Aang',
         role: 'STATE_USER',
-        state: 'MN',
+        state: {
+            name: 'Minnesota',
+            code: 'MN',
+            programs: [{ name: 'CCC Plus' }, { name: 'Medallion' }],
+        },
     },
     {
         email: 'toph@dmas.virginia.gov',
         name: 'Toph',
         role: 'STATE_USER',
-        state: 'VA',
+        state: {
+            name: 'Virginia',
+            code: 'VA',
+            programs: [{ name: 'CCC Plus' }, { name: 'Medallion' }],
+        },
     },
 ]
 
@@ -68,7 +76,7 @@ export function LocalAuth(): React.ReactElement {
                                 </h2>
                             </CardHeader>
                             <CardBody>
-                                <p>From {user.state}</p>
+                                <p>From {user.state.code}</p>
                             </CardBody>
                             <CardFooter>
                                 <Button

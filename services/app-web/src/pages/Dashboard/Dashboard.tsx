@@ -5,20 +5,16 @@ import styles from './Dashboard.module.scss'
 import { Tabs } from '../../components/Tabs/Tabs'
 import { TabPanel } from '../../components/Tabs/TabPanel'
 import { useAuth } from '../../contexts/AuthContext'
-
-type UserProgram = {
-    name: string
-    populations: string
-}
+import { Program } from '../../gen/gqlClient'
 
 export const Dashboard = (): React.ReactElement => {
     const { isLoading, loggedInUser } = useAuth()
-    const programs: UserProgram[] = []
+    let programs: Program[] = []
 
     if (isLoading || !loggedInUser) {
         return <div>Loading User Info</div>
     } else {
-        // programs = loggedInUser.state.programs
+        programs = loggedInUser.state.programs
     }
 
     const handleNewSubmissionClick = () => {
@@ -28,7 +24,7 @@ export const Dashboard = (): React.ReactElement => {
     const ProgramContent = ({
         program,
     }: {
-        program: UserProgram
+        program: Program
     }): React.ReactElement => {
         return (
             <section key={program.name} className={styles.panel}>
@@ -49,7 +45,7 @@ export const Dashboard = (): React.ReactElement => {
         <GridContainer className={styles.container} data-testid="dashboardPage">
             {programs.length ? (
                 <Tabs className={styles.tabs}>
-                    {programs.map((program: UserProgram) => (
+                    {programs.map((program: Program) => (
                         <TabPanel
                             key={program.name}
                             id={program.name}

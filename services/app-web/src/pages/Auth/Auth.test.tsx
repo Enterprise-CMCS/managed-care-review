@@ -11,8 +11,10 @@ import {
     userClickByRole,
 } from '../../utils/jestUtils'
 import { Auth } from './Auth'
-import { GetCurrentUserDocument } from '../../gen/gqlClient'
-
+import {
+    mockGetCurrentUser200,
+    mockGetCurrentUser403,
+} from '../../utils/apolloUtils'
 /*  
 This file should only have basic user flows for auth. Form and implementation details are tested at the component level.
 
@@ -21,32 +23,6 @@ TODO: Where will we test:
     - bad auth (403)
     - server error (500)
 */
-const failedAuthMock = {
-    request: { query: GetCurrentUserDocument },
-    result: {
-        ok: false,
-        status: 403,
-        statusText: 'Unauthenticated',
-        data: {
-            error: 'you are not logged in',
-        },
-        error: new Error('network error'),
-    },
-}
-
-const successfulAuthMock = {
-    request: { query: GetCurrentUserDocument },
-    result: {
-        data: {
-            getCurrentUser: {
-                state: 'MN',
-                role: 'State User',
-                name: 'Bob it user',
-                email: 'bob@dmas.mn.gov',
-            },
-        },
-    },
-}
 
 describe('Auth', () => {
     describe('Cognito Login', () => {
@@ -67,7 +43,7 @@ describe('Auth', () => {
 
         it('displays signup form when logged out', () => {
             renderWithProviders(<Auth />, {
-                apolloProvider: { mocks: [failedAuthMock] },
+                apolloProvider: { mocks: [mockGetCurrentUser403] },
             })
 
             expect(
@@ -78,9 +54,9 @@ describe('Auth', () => {
             ).toBeInTheDocument()
         })
 
-        it('show login button displays login form', () => {
+        it('show login button displays login form', async () => {
             renderWithProviders(<Auth />, {
-                apolloProvider: { mocks: [failedAuthMock] },
+                apolloProvider: { mocks: [mockGetCurrentUser403] },
             })
 
             expect(
@@ -89,12 +65,14 @@ describe('Auth', () => {
 
             userClickByRole(screen, 'button', { name: 'Show Login Form' })
 
-            expect(
-                screen.getByRole('form', { name: 'Login Form' })
-            ).toBeInTheDocument()
-            expect(
-                screen.getByRole('button', { name: /Login/i })
-            ).toBeInTheDocument()
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('form', { name: 'Login Form' })
+                ).toBeInTheDocument()
+                expect(
+                    screen.getByRole('button', { name: /Login/i })
+                ).toBeInTheDocument()
+            })
         })
 
         it('when login is successful, redirect to dashboard', async () => {
@@ -109,7 +87,9 @@ describe('Auth', () => {
             const history = createMemoryHistory()
 
             renderWithProviders(<Auth />, {
-                apolloProvider: { mocks: [failedAuthMock, successfulAuthMock] },
+                apolloProvider: {
+                    mocks: [mockGetCurrentUser403, mockGetCurrentUser200],
+                },
                 routerProvider: { routerProps: { history: history } },
             })
 
@@ -127,7 +107,11 @@ describe('Auth', () => {
 
             renderWithProviders(<Auth />, {
                 apolloProvider: {
-                    mocks: [failedAuthMock, failedAuthMock, failedAuthMock],
+                    mocks: [
+                        mockGetCurrentUser403,
+                        mockGetCurrentUser403,
+                        mockGetCurrentUser403,
+                    ],
                 },
                 routerProvider: {
                     route: '/auth',
@@ -150,7 +134,7 @@ describe('Auth', () => {
 
         it('displays ang and toph when logged out', () => {
             renderWithProviders(<Auth />, {
-                apolloProvider: { mocks: [failedAuthMock] },
+                apolloProvider: { mocks: [mockGetCurrentUser403] },
                 authProvider: { localLogin: true },
             })
 
@@ -179,7 +163,9 @@ describe('Auth', () => {
             renderWithProviders(<Auth />, {
                 routerProvider: { routerProps: { history: history } },
                 authProvider: { localLogin: true },
-                apolloProvider: { mocks: [failedAuthMock, successfulAuthMock] },
+                apolloProvider: {
+                    mocks: [mockGetCurrentUser403, mockGetCurrentUser200],
+                },
             })
 
             userClickByTestId(screen, 'TophButton')
@@ -195,7 +181,7 @@ describe('Auth', () => {
             renderWithProviders(<Auth />, {
                 authProvider: { localLogin: true },
                 apolloProvider: {
-                    mocks: [failedAuthMock, failedAuthMock],
+                    mocks: [mockGetCurrentUser403, mockGetCurrentUser403],
                 },
                 routerProvider: {
                     route: '/auth',

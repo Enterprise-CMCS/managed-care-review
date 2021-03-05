@@ -1,15 +1,4 @@
-type Role = 'STATE_USER' | 'ADMIN'
-
-export type StateCode = 'VA' | 'GA' | 'TN' | 'MN'
-export type UserType = StateUserType
-
-export type StateUserType = {
-    // typename: string = 'StateUser';
-    role: Role
-    email: string
-    state: StateCode
-    name: string
-}
+import { User as UserType } from '../../gen/gqlClient'
 
 export function isUser(user: unknown): user is UserType {
     if (user && typeof user === 'object') {

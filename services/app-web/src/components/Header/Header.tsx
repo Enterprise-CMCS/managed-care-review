@@ -11,47 +11,36 @@ import { Logo } from '../Logo/Logo'
 import { useAuth } from '../../contexts/AuthContext'
 import { useHistory } from 'react-router-dom'
 
-const getStateInfo = (
-    stateAbbrev: string
-): { stateName: string; StateIcon: React.FunctionComponent } => {
-    switch (stateAbbrev) {
+const StateIcon = ({ code }: { code: string }): React.ReactElement => {
+    switch (code) {
         case 'MN':
-            return { stateName: 'Minnesota', StateIcon: MnIcon }
+            return <MnIcon />
         case 'VA':
-            return { stateName: 'Virginia', StateIcon: VaIcon }
+            return <VaIcon />
         default:
-            return {
-                stateName: 'STATE UNKNOWN',
-                StateIcon: () => <span></span>,
-            }
+            return <span>STATE UNKNOWN</span>
     }
 }
 
 export type HeaderProps = {
-    stateCode?: string
     activePage?: string
     setAlert?: React.Dispatch<boolean>
-    user?: {
-        name: string
-        email: string
-    }
 }
 
 /**
  * CMS Header
  */
 export const Header = ({
-    stateCode,
     activePage = 'Managed Care Dashboard',
     setAlert,
-    user,
 }: HeaderProps): React.ReactElement => {
-    const { logout, isAuthenticated } = useAuth()
+    const { logout, loggedInUser, isAuthenticated } = useAuth()
     const history = useHistory()
-
-    const { stateName, StateIcon } = stateCode
-        ? getStateInfo(stateCode)
-        : { stateName: 'STATE UNKNOWN', StateIcon: () => <span></span> }
+    const {
+        state = {
+            name: 'STATE UNKNOWN',
+        },
+    } = loggedInUser || {}
 
     const handleLogout = (
         e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -82,9 +71,9 @@ export const Header = ({
                                 alt="Medicaid.gov-Keeping America Healthy"
                             />
                         </NavLink>
-                        {isAuthenticated && user ? (
+                        {isAuthenticated && loggedInUser ? (
                             <div className={styles.userInfo}>
-                                <span>{user.email}</span>
+                                <span>{loggedInUser.email}</span>
                                 <span className={styles.divider}>|</span>
 
                                 <Button
@@ -113,10 +102,12 @@ export const Header = ({
                     <GridContainer>
                         <Grid row className="flex-align-center">
                             <div>
-                                <StateIcon />
+                                <StateIcon
+                                    code={loggedInUser?.state.code || 'VA'}
+                                />
                             </div>
                             <h1>
-                                <span>{stateName}</span>
+                                <span>{state.name}</span>
                                 <span className="font-heading-lg text-light">
                                     {activePage}
                                 </span>
