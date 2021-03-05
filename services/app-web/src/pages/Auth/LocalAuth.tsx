@@ -25,7 +25,7 @@ const localUsers: UserType[] = [
         state: {
             name: 'Minnesota',
             code: 'MN',
-            programs: [{ name: 'CCC Plus' }, { name: 'Medallion' }],
+            programs: [{ name: 'MSHO' }, { name: 'PMAP' }, { name: 'SNBC' }],
         },
     },
     {

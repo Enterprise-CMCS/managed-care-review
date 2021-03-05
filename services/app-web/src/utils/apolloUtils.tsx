@@ -9,7 +9,11 @@ const mockGetCurrentUser200 = {
                 state: {
                     name: 'Minnesota',
                     code: 'MN',
-                    programs: [{ name: 'CCC Plus' }, { name: 'Medallion' }],
+                    programs: [
+                        { name: 'MSHO' },
+                        { name: 'PMAP' },
+                        { name: 'SNBC' },
+                    ],
                 },
                 role: 'State User',
                 name: 'Bob it user',
