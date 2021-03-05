@@ -47,6 +47,7 @@ export function getWebAuthVars(
 	idPool: string
 	userPool: string
 	userPoolClient: string
+	userPoolDomain: string
 } {
 	const opts = {
 		cwd: './services',
@@ -76,5 +77,11 @@ export function getWebAuthVars(
 		opts
 	)
 
-	return { region, idPool, userPool, userPoolClient }
+	const userPoolDomain = commandMustSucceedSync(
+		'./output.sh',
+		['ui-auth', 'UserPoolClientDomain', stageName],
+		opts
+	)
+
+	return { region, idPool, userPool, userPoolClient, userPoolDomain }
 }
