@@ -22,7 +22,7 @@ describe('currentUser', () => {
             playground: {
                 endpoint: '/local/graphql',
             },
-            context: ({ _event, context }) => {
+            context: ({ context }) => {
                 const event = {
                     requestContext: {
                         identity: {

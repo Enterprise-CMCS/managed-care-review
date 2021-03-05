@@ -22,7 +22,7 @@ describe('getState', () => {
             playground: {
                 endpoint: '/local/graphql',
             },
-            context: ({ _event, context }) => {
+            context: ({ context }) => {
                 const event = {
                     requestContext: {
                         identity: {
@@ -69,7 +69,7 @@ describe('getState', () => {
             playground: {
                 endpoint: '/local/graphql',
             },
-            context: ({ _event, context }) => {
+            context: ({ context }) => {
                 const event = {
                     requestContext: {
                         identity: {
@@ -91,15 +91,13 @@ describe('getState', () => {
 
         // make a mock request
         process.env.REACT_APP_LOCAL_LOGIN = 'true'
-        const res = await query({ query: GET_STATE })
+        const {errors = []} = await query({ query: GET_STATE })
 
         // confirm that we got an error
-        expect(res.errors).toBeDefined()
+        expect(errors).toBeDefined()
 
-        if (res.errors) {
-            expect(res.errors[0].message).toBe(
+            expect(errors[0].message).toBe(
                 'No state data for users state: GA'
             )
-        }
     })
 })

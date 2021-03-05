@@ -13,8 +13,11 @@ import statePrograms from '../data/statePrograms.json'
 // export async function currentUser(_parent, _args, context) {
 export const getStateResolver: ResolverFn<
 	ResolversTypes['State'],
+	// eslint-disable-next-line @typescript-eslint/ban-types
 	{},
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	any,
+	// eslint-disable-next-line @typescript-eslint/ban-types
 	{}
 > = async (_parent, _args, context) => {
 	let userFetcher: userFromAuthProvider
