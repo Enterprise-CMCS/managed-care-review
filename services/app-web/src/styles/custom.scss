@@ -1,3 +1,17 @@
 /* Order matters in this file. */
 @import 'theme/_cms';
 @import 'theme/_color';
+
+.usa-legend, .usa-label {
+	font-weight: bold;
+}
+
+.usa-form-group {
+	margin: units(4) 0;
+}
+
+.usa-button-group {
+	justify-content: flex-end;
+	margin-right: 0;
+	margin-left: 0;
+}

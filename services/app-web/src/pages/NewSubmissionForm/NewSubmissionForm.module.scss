@@ -1,0 +1,20 @@
+@import '../../styles/uswdsImports.scss';
+@import '../../styles/custom';
+
+.formHeader {
+	text-align: center;
+	margin-top: units(4);
+}
+
+.formContainer {
+	min-width: 35rem;
+	margin: units(6) auto units(2) auto;
+	padding: units(4);
+	background: $cms-color-white;
+	border: 1px solid $theme-color-base-lighter;
+	@include u-radius('md');
+
+	h2 {
+		margin-top: 0;
+	}
+}
