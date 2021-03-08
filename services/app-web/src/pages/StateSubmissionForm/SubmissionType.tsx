@@ -57,7 +57,7 @@ export const SubmissionType = (): React.ReactElement => {
                 <Link
                     variant="nav"
                     href={
-                        '/SubmissionDescExamples'
+                        '/help/submission-description-examples'
                     }
                     target={'_blank'}
                 >

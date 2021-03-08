@@ -6,6 +6,7 @@ import { Dashboard } from '../Dashboard/Dashboard'
 import { Error404 } from '../Errors/Error404'
 import { Landing } from '../Landing/Landing'
 import { StateSubmissionForm } from '../StateSubmissionForm/StateSubmissionForm'
+import { SubmissionDescriptionExamples } from '../Help/SubmissionDescriptionExamples'
 import { useAuth } from '../../contexts/AuthContext'
 
 export const AppRoutes = (): React.ReactElement => {
@@ -17,6 +18,7 @@ export const AppRoutes = (): React.ReactElement => {
                 <Route path="/" exact component={Dashboard} />
                 <Route path="/dashboard" component={Dashboard} />
                 <Route path="/new" exact component={StateSubmissionForm} />
+                <Route path="/help/submission-description-examples" component={SubmissionDescriptionExamples} />
                 <Route path="*" component={Error404} />
             </Switch>
         )
