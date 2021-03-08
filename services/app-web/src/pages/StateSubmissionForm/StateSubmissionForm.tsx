@@ -52,8 +52,8 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         onSubmit={handleSubmit}
                     >
                         <fieldset className="usa-fieldset">
-                            <legend>
-                                <h2 className={styles.formHeader}>
+                            <legend className={styles.formHeader}>
+                                <h2>
                                     {activeStep}
                                 </h2>
                             </legend>

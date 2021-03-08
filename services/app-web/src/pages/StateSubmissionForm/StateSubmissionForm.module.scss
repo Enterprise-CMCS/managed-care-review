@@ -3,7 +3,11 @@
 
 .formHeader {
 	text-align: center;
-	margin-top: units(4);
+	width: 100%;
+
+	h2 {
+		margin: units(4) 0;
+	}
 }
 
 .formWrapper {
@@ -15,7 +19,6 @@
 	padding: units(4);
 	background: $cms-color-white;
 	border: 1px solid $theme-color-base-lighter;
-	margin-bottom: units(2);
 	@include u-radius('md');
 
 	h2 {
