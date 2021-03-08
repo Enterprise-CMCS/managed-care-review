@@ -1,5 +1,5 @@
 import React from 'react'
-import { Fieldset, Radio, FormGroup, Dropdown, Label, Textarea } from '@trussworks/react-uswds'
+import { Fieldset, Radio, FormGroup, Dropdown, Label, Textarea, Link } from '@trussworks/react-uswds'
 
 import styles from './NewSubmissionForm.module.scss'
 
@@ -31,7 +31,8 @@ export const SubmissionType = (): React.ReactElement => {
 			</FormGroup>
 			<FormGroup className={styles.formGroupLast}>
 				<Label htmlFor="submission-description">Submission description</Label>
-				<span className="usa-hint">Provide a description of any major changes or updates</span>
+				<Link variant="external" href={"https://docs.google.com/document/d/1Mp0iYmSLk2G4QLGjauktRgs5-eggBrnopxikqr7RIB4/edit"} target={"_blank"}>View description examples</Link>
+				<p className="usa-hint margin-top-1">Provide a description of any major changes or updates</p>
 				<Textarea id="submission-description" name="submission-description"/>
 			</FormGroup>
 		</>
