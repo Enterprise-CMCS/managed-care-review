@@ -29,7 +29,7 @@ export const SubmissionType = (): React.ReactElement => {
                 <Label htmlFor="program">Program</Label>
                 <Field id="program" name="program" as={Dropdown}>
                     <option value="cccPlus">CCC Plus</option>
-                    <option value="medallion">Medalion</option>
+                    <option value="medallion">Medallion</option>
                 </Field>
             </FormGroup>
             <FormGroup className={styles.formGroup}>
