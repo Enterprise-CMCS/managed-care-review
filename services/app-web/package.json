@@ -16,6 +16,7 @@
         "aws-amplify": "^3.3.15",
         "axios": "^0.21.1",
         "eslint-plugin-testing-library": "^3.10.1",
+        "formik": "^2.2.6",
         "graphql": "^15.5.0",
         "react": "^17.0.1",
         "react-dom": "^17.0.1",
