@@ -13,6 +13,8 @@ import { SubmissionType } from './SubmissionType'
 import styles from './StateSubmissionForm.module.scss'
 export interface StateSubmissionFormValues {
     program: string
+    submissionDescription: string
+    submissionType: string
 }
 
 const STEPS = {
@@ -20,10 +22,13 @@ const STEPS = {
 }
 
 export const StateSubmissionForm = (): React.ReactElement => {
+    // setActiveStep will be used once there are multiple form pages
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [activeStep, setActiveStep] = React.useState(STEPS.SUBMISSION_TYPE)
     const initialValues: StateSubmissionFormValues = {
         program: '',
+        submissionDescription: '',
+        submissionType: '',
     }
 
     const handleFormSubmit = () => {
@@ -35,7 +40,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
             <Formik
                 initialValues={initialValues}
                 onSubmit={(values, actions) => {
-                    console.log({ values, actions })
+                    console.log(values)
                     handleFormSubmit()
                     actions.setSubmitting(false)
                 }}

@@ -1,52 +1,76 @@
 import React from 'react'
+import { Field, useFormikContext } from 'formik'
 import {
     Fieldset,
     Radio,
     FormGroup,
     Dropdown,
+    Link,
     Label,
     Textarea,
 } from '@trussworks/react-uswds'
 
 import styles from './StateSubmissionForm.module.scss'
 
+import { StateSubmissionFormValues } from './StateSubmissionForm'
+// import { useAuth } from '../../contexts/AuthContext'
 export const SubmissionType = (): React.ReactElement => {
+    const { values } = useFormikContext<StateSubmissionFormValues>()
+
+    // TODO: get program options from loggedInUser.state
+    // const {
+    //     loggedInUser,
+    //     //         state: { programs },
+    // } = useAuth()
+
     return (
         <>
             <FormGroup className={styles.formGroup}>
-                <Label htmlFor="programs">Program</Label>
-                <Dropdown id="programs" name="programs">
+                <Label htmlFor="program">Program</Label>
+                <Field id="program" name="program" as={Dropdown}>
                     <option value="cccPlus">CCC Plus</option>
                     <option value="medallion">Medalion</option>
-                </Dropdown>
+                </Field>
             </FormGroup>
             <FormGroup className={styles.formGroup}>
                 <Fieldset legend="Choose submission type">
-                    <Radio
-                        id="ContractOnly"
-                        name="submission-type"
+                    <Field
+                        as={Radio}
+                        id="contractOnly"
+                        name="submissionType"
                         label="Contract action only"
                         value="contractOnly"
                     />
-                    <Radio
-                        id="ContractAndRate"
-                        name="submission-type"
+                    <Field
+                        as={Radio}
+                        id="contractRate"
+                        name="submissionType"
                         label="Contract action and rate certification"
                         value="contractRate"
                     />
                 </Fieldset>
             </FormGroup>
             <FormGroup className={styles.formGroupLast}>
-                <Label htmlFor="submission-description">
+                <Label htmlFor="submissionDescription">
                     Submission description
                 </Label>
-                <Link variant="external" href={"https://docs.google.com/document/d/1Mp0iYmSLk2G4QLGjauktRgs5-eggBrnopxikqr7RIB4/edit"} target={"_blank"}>View description examples</Link>
+                <Link
+                    variant="external"
+                    href={
+                        'https://docs.google.com/document/d/1Mp0iYmSLk2G4QLGjauktRgs5-eggBrnopxikqr7RIB4/edit'
+                    }
+                    target={'_blank'}
+                >
+                    View description examples
+                </Link>
                 <p className="usa-hint margin-top-1">
                     Provide a description of any major changes or updates
                 </p>
-                <Textarea
-                    id="submission-description"
-                    name="submission-description"
+                <Field
+                    as={Textarea}
+                    id="submissionDescription"
+                    name="submissionDescription"
+                    value={values.submissionDescription}
                 />
             </FormGroup>
         </>
