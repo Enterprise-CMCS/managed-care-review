@@ -55,9 +55,9 @@ export const SubmissionType = (): React.ReactElement => {
                     Submission description
                 </Label>
                 <Link
-                    variant="external"
+                    variant="nav"
                     href={
-                        'https://docs.google.com/document/d/1Mp0iYmSLk2G4QLGjauktRgs5-eggBrnopxikqr7RIB4/edit'
+                        '/SubmissionDescExamples'
                     }
                     target={'_blank'}
                 >
