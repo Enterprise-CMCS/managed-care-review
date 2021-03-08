@@ -1,7 +1,5 @@
 import { Result, ok, err } from 'neverthrow'
 import { CognitoIdentityServiceProvider } from 'aws-sdk'
-// import { StateUserType } from '../../app-web/src/common-code/domain-models/user'
-// import { User as UserType } from '../gen/gqlServer'
 import { CognitoUserType } from '../../app-web/src/common-code/domain-models'
 
 export function parseAuthProvider(

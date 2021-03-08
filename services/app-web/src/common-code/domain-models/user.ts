@@ -1,10 +1,6 @@
-import { User as UserType } from '../../gen/gqlClient'
+import {CognitoUserType} from './cognitoUserType'
 
-export interface StateUserType extends UserType {
-    role: 'STATE_USER';
-  }
-
-export function isUser(user: unknown): user is UserType {
+export function isCognitoUser(user: unknown): user is CognitoUserType {
     if (user && typeof user === 'object') {
         if ('role' in user) {
             const roleUser = user as { role: unknown }

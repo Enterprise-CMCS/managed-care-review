@@ -8,6 +8,7 @@ import GET_CURRENT_USER from '../../app-graphql/src/queries/currentUserQuery.gra
 import { CognitoUserType } from '../../app-web/src/common-code/domain-models'
 import { getCurrentUserResolver } from './currentUser'
 import statePrograms from '../data/statePrograms.json'
+import {userResolver} from './userResolver'
 
 const isCognitoUser = (maybeUser: unknown): maybeUser is CognitoUserType => {
     if (maybeUser && typeof maybeUser === 'object'){
@@ -23,23 +24,8 @@ describe('currentUser', () => {
         const resolvers: Resolvers = {
             Query: {
                 getCurrentUser: getCurrentUserResolver
-                // getState: getStateResolver,
             },
-            User: {
-                state(parent) {
-                 
-                  if (isCognitoUser(parent)) {
-                    const userState = parent.state_code
-                    const state = statePrograms.states.find((st) => st.code === userState)
-
-                    if (state === undefined) {
-                        throw new Error('No state data for users state: ' + userState)
-                    }
-                    return state
-                  }
-                  throw new Error('help')
-                },
-            },
+            User: userResolver
         }
 
         // create an apollo server
@@ -78,5 +64,51 @@ describe('currentUser', () => {
 
         expect(res.data.getCurrentUser.email).toBe('james@example.com')
         expect(res.data.getCurrentUser.state.code).toBe('FL')
+    })
+
+    it('returns an error if the state is not in valid state list', async () => {
+        const resolvers: Resolvers = {
+            Query: {
+                getCurrentUser: getCurrentUserResolver
+            },
+            User: userResolver
+        }
+
+        // create an apollo server
+        const server = new ApolloServer({
+            typeDefs,
+            resolvers,
+            playground: {
+                endpoint: '/local/graphql',
+            },
+            context: ({ _event, context }) => {
+                const event = {
+                    requestContext: {
+                        identity: {
+                            cognitoAuthenticationProvider:
+                                '{ "name": "james brown", "state_code": "MI", "role": "STATE_USER", "email": "james@example.com" }',
+                        },
+                    },
+                }
+
+                return {
+                    event,
+                    context,
+                }
+            },
+        })
+
+        // create a mock client
+        const { query } = createTestClient(server)
+
+        // make a mock request
+        process.env.REACT_APP_LOCAL_LOGIN = 'true'
+
+        const res = await query({ query: GET_CURRENT_USER })
+ 
+
+        // confirm that we get what we got
+        expect(res.errors).not.toBeUndefined()
+        expect(res.errors && res.errors[0].message).toBe('No state data for users state: MI')
     })
 })
