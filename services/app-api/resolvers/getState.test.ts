@@ -5,13 +5,29 @@ import { Resolvers } from '../gen/gqlServer'
 import typeDefs from '../../app-graphql/src/schema.graphql'
 import GET_STATE from '../../app-graphql/src/queries/getStateQuery.graphql'
 
-import { getStateResolver } from './getState'
+// import { getStateResolver } from './getState'
 
 describe('getState', () => {
     it('returns the frozen data', async () => {
         const resolvers: Resolvers = {
             Query: {
-                getState: getStateResolver,
+                getCurrentUser() {
+                    return {
+                        role: 'a role',
+                        name: 'a name',
+                        email: 'an email',
+                    }
+                },
+                // getState: getStateResolver,
+            },
+            User: {
+                state() {
+                    return {
+                        name: 'Florida',
+                        code: 'FL',
+                        programs: [],
+                    }
+                },
             },
         }
 
@@ -58,7 +74,23 @@ describe('getState', () => {
     it('returns an error if the state is unknown', async () => {
         const resolvers: Resolvers = {
             Query: {
-                getState: getStateResolver,
+                getCurrentUser() {
+                    return {
+                        role: 'a role',
+                        name: 'a name',
+                        email: 'an email',
+                    }
+                },
+                // getState: getStateResolver,
+            },
+            User: {
+                state() {
+                    return {
+                        name: 'Florida',
+                        code: 'FL',
+                        programs: [],
+                    }
+                },
             },
         }
 

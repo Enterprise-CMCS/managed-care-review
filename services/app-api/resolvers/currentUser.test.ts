@@ -11,7 +11,21 @@ describe('currentUser', () => {
     it('returns the currentUser', async () => {
         const resolvers: Resolvers = {
             Query: {
-                getCurrentUser: getCurrentUserResolver,
+                getCurrentUser() {
+                    return {
+                        name: 'james brown', role: 'STATE_USER', email: 'james@example.com' 
+                    }
+                },
+                // getState: getStateResolver,
+            },
+            User: {
+                state() {
+                    return {
+                        name: 'Florida',
+                        code: 'FL',
+                        programs: [],
+                    }
+                },
             },
         }
 
