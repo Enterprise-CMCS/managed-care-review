@@ -32,7 +32,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
     return (
         <GridContainer>
-            <h2 className={styles.formHeader}>{activeStep}</h2>
             <Formik
                 initialValues={initialValues}
                 onSubmit={(values, actions) => {
@@ -43,26 +42,33 @@ export const StateSubmissionForm = (): React.ReactElement => {
             >
                 {({ handleSubmit }) => (
                     <UswdsForm
-                        className={styles.formWrapper}
+                        className="usa-form--large"
                         id="stateSubmissionForm"
                         onSubmit={handleSubmit}
                     >
-                        <div className={styles.formContainer}>
-                            <span>All fields are required</span>
-                            <SubmissionType />
-                        </div>
-                        <ButtonGroup
-                            type="default"
-                            className={styles.buttonGroup}
-                        >
-                            <Link
-                                href="#"
-                                className="usa-button usa-button--outline"
+                        <fieldset className="usa-fieldset">
+                            <legend>
+                                <h2 className={styles.formHeader}>
+                                    {activeStep}
+                                </h2>
+                            </legend>
+                            <div className={styles.formContainer}>
+                                <span>All fields are required</span>
+                                <SubmissionType />
+                            </div>
+                            <ButtonGroup
+                                type="default"
+                                className={styles.buttonGroup}
                             >
-                                Cancel
-                            </Link>
-                            <Button type="submit">Continue</Button>
-                        </ButtonGroup>
+                                <Link
+                                    href="#"
+                                    className="usa-button usa-button--outline"
+                                >
+                                    Cancel
+                                </Link>
+                                <Button type="submit">Continue</Button>
+                            </ButtonGroup>
+                        </fieldset>
                     </UswdsForm>
                 )}
             </Formik>
