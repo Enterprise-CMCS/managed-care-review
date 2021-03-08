@@ -1,6 +1,6 @@
 import { AuthenticationError } from 'apollo-server-lambda'
 
-import { ResolverFn, ResolversTypes } from '../gen/gqlServer'
+import { Resolver, ResolverTypeWrapper, User } from '../gen/gqlServer'
 
 import {
 	userFromAuthProvider,
@@ -9,12 +9,7 @@ import {
 } from '../authn'
 
 // export async function currentUser(_parent, _args, context) {
-export const getCurrentUserResolver: ResolverFn<
-	ResolversTypes['User'],
-	{},
-	any,
-	{}
-> = async (_parent, _args, context) => {
+export const getCurrentUserResolver:  Resolver<ResolverTypeWrapper<Partial<User>>, {}, any, {}> = async (_parent, _args, context) => {
 	let userFetcher: userFromAuthProvider
 
 	if (process.env.REACT_APP_LOCAL_LOGIN) {

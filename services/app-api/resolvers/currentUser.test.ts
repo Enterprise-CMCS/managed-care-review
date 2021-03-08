@@ -5,26 +5,39 @@ import { Resolvers } from '../gen/gqlServer'
 import typeDefs from '../../app-graphql/src/schema.graphql'
 import GET_CURRENT_USER from '../../app-graphql/src/queries/currentUserQuery.graphql'
 
+import { CognitoUserType } from '../../app-web/src/common-code/domain-models'
 import { getCurrentUserResolver } from './currentUser'
+import statePrograms from '../data/statePrograms.json'
+
+const isCognitoUser = (maybeUser: unknown): maybeUser is CognitoUserType => {
+    if (maybeUser && typeof maybeUser === 'object'){
+        if ("state_code" in maybeUser){
+            return true
+        }
+    }
+    return false
+}
 
 describe('currentUser', () => {
     it('returns the currentUser', async () => {
         const resolvers: Resolvers = {
             Query: {
-                getCurrentUser() {
-                    return {
-                        name: 'james brown', role: 'STATE_USER', email: 'james@example.com' 
-                    }
-                },
+                getCurrentUser: getCurrentUserResolver
                 // getState: getStateResolver,
             },
             User: {
-                state() {
-                    return {
-                        name: 'Florida',
-                        code: 'FL',
-                        programs: [],
+                state(parent) {
+                 
+                  if (isCognitoUser(parent)) {
+                    const userState = parent.state_code
+                    const state = statePrograms.states.find((st) => st.code === userState)
+
+                    if (state === undefined) {
+                        throw new Error('No state data for users state: ' + userState)
                     }
+                    return state
+                  }
+                  throw new Error('help')
                 },
             },
         }
