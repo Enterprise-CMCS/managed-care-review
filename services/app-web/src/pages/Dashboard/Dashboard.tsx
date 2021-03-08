@@ -1,4 +1,5 @@
-import { Button, GridContainer } from '@trussworks/react-uswds'
+import { GridContainer, Link } from '@trussworks/react-uswds'
+import { NavLink } from 'react-router-dom'
 
 import styles from './Dashboard.module.scss'
 import { Tabs } from '../../components/Tabs/Tabs'
@@ -23,10 +24,6 @@ export const Dashboard = (): React.ReactElement => {
         return <div>Loading User Info</div>
     }
 
-    const handleNewSubmissionClick = () => {
-        console.log('Implement redirect')
-    }
-
     const ProgramContent = ({
         program,
     }: {
@@ -37,9 +34,14 @@ export const Dashboard = (): React.ReactElement => {
                 <div className={styles.panelHeader}>
                     <h2>Submissions</h2>
                     <div>
-                        <Button type="button" onClick={handleNewSubmissionClick}>
+                        <Link
+                            asCustom={NavLink}
+                            className="usa-button"
+                            variant="unstyled"
+                            to="/new"
+                        >
                             Start new submission
-                        </Button>
+                        </Link>
                     </div>
                 </div>
                 <div className={styles.panelEmpty}>
@@ -59,7 +61,10 @@ export const Dashboard = (): React.ReactElement => {
                         tabName={program.name}
                     >
                         <GridContainer>
-                            <ProgramContent key={program.name} program={program} />
+                            <ProgramContent
+                                key={program.name}
+                                program={program}
+                            />
                         </GridContainer>
                     </TabPanel>
                 ))}
