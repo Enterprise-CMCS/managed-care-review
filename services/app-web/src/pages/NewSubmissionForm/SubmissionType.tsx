@@ -6,14 +6,14 @@ import styles from './NewSubmissionForm.module.scss'
 export const SubmissionType = (): React.ReactElement => {
 	return (
 		<>
-			<FormGroup>
+			<FormGroup className={styles.formGroup}>
 				<Label htmlFor="programs">Program</Label>
 				<Dropdown id="programs" name="programs">
 					<option value="cccPlus">CCC Plus</option>
 					<option value="medallion">Medalion</option>
 				</Dropdown>
 			</FormGroup>
-			<FormGroup>
+			<FormGroup className={styles.formGroup}>
 				<Fieldset legend="Choose submission type">
 					<Radio
 						id="ContractOnly"
@@ -29,7 +29,7 @@ export const SubmissionType = (): React.ReactElement => {
 					/>
 				</Fieldset>
 			</FormGroup>
-			<FormGroup>
+			<FormGroup className={styles.formGroupLast}>
 				<Label htmlFor="submission-description">Submission description</Label>
 				<span className="usa-hint">Provide a description of any major changes or updates</span>
 				<Textarea id="submission-description" name="submission-description"/>

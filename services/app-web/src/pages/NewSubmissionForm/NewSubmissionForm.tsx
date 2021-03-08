@@ -15,7 +15,7 @@ export const NewSubmissionForm = (): React.ReactElement => {
 						<SubmissionType/>
 					{/*</Form>*/}
 				</div>
-				<ButtonGroup type="default">
+				<ButtonGroup type="default" className={styles.buttonGroup}>
 					<Link href="#" className="usa-button usa-button--outline">
 					Cancel
 					</Link>

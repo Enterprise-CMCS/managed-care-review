@@ -22,3 +22,18 @@
 		margin-top: 0;
 	}
 }
+
+.formGroup {
+	margin: units(4) 0;
+}
+
+.formGroupLast {
+	composes: formGroup;
+	margin-bottom: 0;
+}
+
+.buttonGroup {
+	justify-content: flex-end;
+	margin-right: 0;
+	margin-left: 0;
+}

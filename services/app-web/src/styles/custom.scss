@@ -2,16 +2,6 @@
 @import 'theme/_cms';
 @import 'theme/_color';
 
-.usa-legend, .usa-label {
+.usa-label, .usa-legend {
 	font-weight: bold;
-}
-
-.usa-form-group {
-	margin: units(4) 0;
-}
-
-.usa-button-group {
-	justify-content: flex-end;
-	margin-right: 0;
-	margin-left: 0;
 }
