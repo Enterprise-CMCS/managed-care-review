@@ -2,7 +2,10 @@
 import { ApolloServer } from 'apollo-server-lambda'
 import { APIGatewayProxyHandler } from 'aws-lambda'
 
-import { getCurrentUserResolver, getStateResolver } from '../resolvers'
+import {
+    getCurrentUserResolver,
+    userResolver,
+} from '../resolvers'
 
 import { Resolvers } from '../gen/gqlServer'
 import typeDefs from '../../app-graphql/src/schema.graphql'
@@ -10,8 +13,9 @@ import typeDefs from '../../app-graphql/src/schema.graphql'
 // Our resolvers are defined and tested in the resolvers package
 const resolvers: Resolvers = {
     Query: {
-        getCurrentUser: getCurrentUserResolver,
+        getCurrentUser: getCurrentUserResolver
     },
+    User: userResolver
 }
 
 const server = new ApolloServer({

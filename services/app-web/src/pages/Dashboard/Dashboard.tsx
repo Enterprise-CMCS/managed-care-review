@@ -2,32 +2,26 @@ import { GridContainer, Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 
 import styles from './Dashboard.module.scss'
+
 import { Tabs } from '../../components/Tabs/Tabs'
 import { TabPanel } from '../../components/Tabs/TabPanel'
 import { useAuth } from '../../contexts/AuthContext'
-
-type UserProgram = {
-    name: string
-    populations: string
-}
+import { Program } from '../../gen/gqlClient'
 
 export const Dashboard = (): React.ReactElement => {
     const { isLoading, loggedInUser } = useAuth()
-
-    // TODO: replace const with dynamic data per user
-    const USER_PROGRAMS: UserProgram[] = [
-        { name: 'CCC Plus', populations: 'Medicaid only' },
-        { name: 'Medallion', populations: 'Medicaid + CHIP' },
-    ]
+    let programs: Program[] = []
 
     if (isLoading || !loggedInUser) {
         return <div>Loading User Info</div>
+    } else {
+        programs = loggedInUser.state.programs
     }
 
     const ProgramContent = ({
         program,
     }: {
-        program: UserProgram
+        program: Program
     }): React.ReactElement => {
         return (
             <section key={program.name} className={styles.panel}>
@@ -52,23 +46,27 @@ export const Dashboard = (): React.ReactElement => {
     }
 
     return (
-        <div className={styles.container} data-testid="dashboardPage">
-            <Tabs className={styles.tabs}>
-                {USER_PROGRAMS.map((program: UserProgram) => (
-                    <TabPanel
-                        key={program.name}
-                        id={program.name}
-                        tabName={program.name}
-                    >
-                        <GridContainer>
-                            <ProgramContent
-                                key={program.name}
-                                program={program}
-                            />
-                        </GridContainer>
-                    </TabPanel>
-                ))}
-            </Tabs>
-        </div>
+        <GridContainer className={styles.container} data-testid="dashboardPage">
+            {programs.length ? (
+                <Tabs className={styles.tabs}>
+                    {programs.map((program: Program) => (
+                        <TabPanel
+                            key={program.name}
+                            id={program.name}
+                            tabName={program.name}
+                        >
+                            <GridContainer>
+                                <ProgramContent
+                                    key={program.name}
+                                    program={program}
+                                />
+                            </GridContainer>
+                        </TabPanel>
+                    ))}
+                </Tabs>
+            ) : (
+                <p>No programs exist</p>
+            )}
+        </GridContainer>
     )
 }

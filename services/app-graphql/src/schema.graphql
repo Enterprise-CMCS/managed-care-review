@@ -1,25 +1,24 @@
 schema {
-	query: Query
+    query: Query
 }
 
 type Query {
-	getCurrentUser: User!
-	getState: State!
+    getCurrentUser: User!
 }
 
 type User {
-	role: String!
-	email: String!
-	state: String!
-	name: String!
+    role: String!
+    email: String!
+    state: State!
+    name: String!
 }
 
 type State {
-	code: String!
-	name: String!
-	programs: [Program!]!
+    code: String!
+    name: String!
+    programs: [Program!]!
 }
 
 type Program {
-	name: String!
+    name: String!
 }

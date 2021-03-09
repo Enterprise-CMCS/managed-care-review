@@ -31,7 +31,7 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
 
     const onFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = event.target
-        setFields({ ...fields, [id]: value })
+        setFields((prevFields) => ({ ...prevFields, ...fields, [id]: value }))
     }
 
     function validateForm() {
