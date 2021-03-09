@@ -11,6 +11,7 @@ import {
     userClickByRole,
 } from '../../utils/jestUtils'
 import { CognitoLogin } from './CognitoLogin'
+import { LocalLogin } from './LocalLogin'
 import { GetCurrentUserDocument } from '../../gen/gqlClient'
 
 /*  
@@ -149,9 +150,8 @@ describe('Auth', () => {
         })
 
         it('displays ang and toph when logged out', () => {
-            renderWithProviders(<CognitoLogin />, {
+            renderWithProviders(<LocalLogin />, {
                 apolloProvider: { mocks: [failedAuthMock] },
-                authProvider: { localLogin: true },
             })
 
             expect(
@@ -176,9 +176,8 @@ describe('Auth', () => {
         it('when login is successful, redirect to dashboard', async () => {
             const history = createMemoryHistory()
 
-            renderWithProviders(<CognitoLogin />, {
+            renderWithProviders(<LocalLogin />, {
                 routerProvider: { routerProps: { history: history } },
-                authProvider: { localLogin: true },
                 apolloProvider: { mocks: [failedAuthMock, successfulAuthMock] },
             })
 
@@ -192,8 +191,7 @@ describe('Auth', () => {
         it('when login fails, stay on page and display error alert', async () => {
             const history = createMemoryHistory()
 
-            renderWithProviders(<CognitoLogin />, {
-                authProvider: { localLogin: true },
+            renderWithProviders(<LocalLogin />, {
                 apolloProvider: {
                     mocks: [failedAuthMock, failedAuthMock],
                 },

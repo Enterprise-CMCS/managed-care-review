@@ -1,4 +1,4 @@
-import { loginLocalUser, getLoggedInUser, logoutLocalUser } from './localLogin'
+import { loginLocalUser, getLoggedInUser, logoutLocalUser } from './localAuth'
 import { UserType } from '../../common-code/domain-models/user'
 
 describe('localLogin', () => {
