@@ -8,20 +8,7 @@ import {
 	userFromLocalAuthProvider,
 } from '../authn'
 
-<<<<<<< HEAD
-// export async function currentUser(_parent, _args, context) {
-export const getCurrentUserResolver: ResolverFn<
-	ResolversTypes['User'],
-	// eslint-disable-next-line @typescript-eslint/ban-types
-	{},
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	any,
-	// eslint-disable-next-line @typescript-eslint/ban-types
-	{}
-> = async (_parent, _args, context) => {
-=======
 export const getCurrentUserResolver:  Resolver<ResolverTypeWrapper<Partial<User>>, {}, any, {}> = async (_parent, _args, context) => {
->>>>>>> origin/main
 	let userFetcher: userFromAuthProvider
 
 	if (process.env.REACT_APP_LOCAL_LOGIN) {
