@@ -9,26 +9,26 @@ import {
     CardFooter,
 } from '@trussworks/react-uswds'
 import { useHistory } from 'react-router-dom'
-import { UserType } from '../../common-code/domain-models/user'
 
 import { loginLocalUser } from './localLogin'
 
 import aangAvatar from '../../assets/images/aang.png'
 import tophAvatar from '../../assets/images/toph.png'
 import { useAuth } from '../../contexts/AuthContext'
+import { CognitoUserType } from '../../common-code/domain-models'
 
-const localUsers: UserType[] = [
+const localUsers: CognitoUserType[] = [
     {
         email: 'aang@dhs.state.mn.us',
         name: 'Aang',
         role: 'STATE_USER',
-        state: 'MN',
+        state_code: 'MN',
     },
     {
         email: 'toph@dmas.virginia.gov',
         name: 'Toph',
         role: 'STATE_USER',
-        state: 'VA',
+        state_code: 'VA',
     },
 ]
 
@@ -41,7 +41,7 @@ export function LocalAuth(): React.ReactElement {
     const history = useHistory()
     const { checkAuth } = useAuth()
 
-    async function login(user: UserType) {
+    async function login(user: CognitoUserType) {
         loginLocalUser(user)
 
         await checkAuth()
@@ -68,7 +68,7 @@ export function LocalAuth(): React.ReactElement {
                                 </h2>
                             </CardHeader>
                             <CardBody>
-                                <p>From {user.state}</p>
+                                <p>From {user.state_code}</p>
                             </CardBody>
                             <CardFooter>
                                 <Button

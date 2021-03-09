@@ -1,5 +1,5 @@
 import { loginLocalUser, getLoggedInUser, logoutLocalUser } from './localLogin'
-import { UserType } from '../../common-code/domain-models/user'
+import { User as UserType } from '../../gen/gqlClient'
 
 describe('localLogin', () => {
     it('returns empty on empty', async () => {
@@ -8,10 +8,14 @@ describe('localLogin', () => {
 
     it('loads as expected', async () => {
         const testUser: UserType = {
+            email: 'toph@dmas.virginia.gov',
+            name: 'Toph',
             role: 'STATE_USER',
-            name: 'foobar',
-            email: 'bar@baz.bim',
-            state: 'TN',
+            state: {
+                name: 'Virginia',
+                code: 'VA',
+                programs: [{ name: 'CCC Plus' }, { name: 'Medallion' }],
+            },
         }
 
         loginLocalUser(testUser)
@@ -21,11 +25,15 @@ describe('localLogin', () => {
 
     it('logs out correctly', async () => {
         const testUser: UserType = {
-            role: 'STATE_USER',
-            name: 'foobar',
-            email: 'bar@baz.bim',
-            state: 'TN',
-        }
+        email: 'toph@dmas.virginia.gov',
+        name: 'Toph',
+        role: 'STATE_USER',
+        state: {
+            name: 'Virginia',
+            code: 'VA',
+            programs: [{ name: 'CCC Plus' }, { name: 'Medallion' }],
+        },
+         }
 
         loginLocalUser(testUser)
         await logoutLocalUser()
@@ -49,7 +57,7 @@ describe('localLogin', () => {
         // set a non-user in local storage
         store.setItem('localUser', '{"foo": "bar"}')
 
-        await expect(getLoggedInUser()).rejects.toEqual(
+       await expect(getLoggedInUser()).rejects.toEqual(
             new Error('garbled user stored in localStorage')
         )
     })

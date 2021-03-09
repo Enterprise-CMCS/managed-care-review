@@ -1,9 +1,6 @@
 import { Result, ok, err } from 'neverthrow'
 import { CognitoIdentityServiceProvider } from 'aws-sdk'
-import {
-    StateUserType,
-    UserType,
-} from '../../app-web/src/common-code/domain-models/user'
+import { CognitoUserType } from '../../app-web/src/common-code/domain-models'
 
 export function parseAuthProvider(
     authProvider: string
@@ -46,7 +43,7 @@ function userAttrDict(
 // userFromCognitoAuthProvider hits the Cogntio API to get the information in the authProvider
 export async function userFromCognitoAuthProvider(
     authProvider: string
-): Promise<Result<UserType, Error>> {
+): Promise<Result<CognitoUserType, Error>> {
     const parseResult = parseAuthProvider(authProvider)
     if (parseResult.isErr()) {
         return err(parseResult.error)
@@ -83,10 +80,11 @@ export async function userFromCognitoAuthProvider(
             )
         }
 
-        const user: StateUserType = {
+        const user: CognitoUserType = {
             email: attributes.email,
             name: attributes.given_name + ' ' + attributes.family_name,
-            state: attributes['custom:state_code'] as UserType['state'],
+            // HELP
+            state_code: attributes['custom:state_code'],
             role: 'STATE_USER',
         }
 
