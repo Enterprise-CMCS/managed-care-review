@@ -1,6 +1,7 @@
 import React from 'react'
-import { Field, useFormikContext } from 'formik'
+import { Field, useFormikContext, FormikErrors } from 'formik'
 import {
+    ErrorMessage,
     Fieldset,
     Radio,
     FormGroup,
@@ -11,29 +12,44 @@ import {
 } from '@trussworks/react-uswds'
 
 import styles from './StateSubmissionForm.module.scss'
-
 import { StateSubmissionFormValues } from './StateSubmissionForm'
-// import { useAuth } from '../../contexts/AuthContext'
-export const SubmissionType = (): React.ReactElement => {
-    const { values } = useFormikContext<StateSubmissionFormValues>()
+import { useAuth, LoggedInAuthContext } from '../../contexts/AuthContext'
 
-    // TODO: get program options from loggedInUser.state
-    // const {
-    //     loggedInUser,
-    //     //         state: { programs },
-    // } = useAuth()
+type SubmissionTypeProps = {
+    errors: FormikErrors<StateSubmissionFormValues>
+    showValidations: boolean
+}
+
+type Error = FormikErrors<StateSubmissionFormValues>[keyof FormikErrors<StateSubmissionFormValues>]
+
+export const SubmissionType = ({
+    errors,
+    showValidations,
+}: SubmissionTypeProps): React.ReactElement => {
+    const { values } = useFormikContext<StateSubmissionFormValues>()
+    const {
+        loggedInUser: {
+            state: { programs },
+        },
+    } = useAuth() as LoggedInAuthContext
+
+    const showError = (error?: Error) => showValidations && Boolean(error)
 
     return (
         <>
             <FormGroup className={styles.formGroup}>
                 <Label htmlFor="program">Program</Label>
                 <Field id="program" name="program" as={Dropdown}>
-                    <option value="cccPlus">CCC Plus</option>
-                    <option value="medallion">Medallion</option>
+                    {programs.map((program) => (
+                        <option value={program.name}>{program.name}</option>
+                    ))}
                 </Field>
             </FormGroup>
             <FormGroup className={styles.formGroup}>
                 <Fieldset legend="Choose submission type">
+                    {showError(errors.submissionType) && (
+                        <ErrorMessage>{errors.submissionType}</ErrorMessage>
+                    )}
                     <Field
                         as={Radio}
                         id="contractOnly"
@@ -50,10 +66,14 @@ export const SubmissionType = (): React.ReactElement => {
                     />
                 </Fieldset>
             </FormGroup>
+
             <FormGroup className={styles.formGroupLast}>
                 <Label htmlFor="submissionDescription">
                     Submission description
                 </Label>
+                {showError(errors.submissionDescription) && (
+                    <ErrorMessage>{errors.submissionDescription}</ErrorMessage>
+                )}
                 <Link
                     variant="nav"
                     href={'/help/submission-description-examples'}
@@ -69,6 +89,7 @@ export const SubmissionType = (): React.ReactElement => {
                     id="submissionDescription"
                     name="submissionDescription"
                     value={values.submissionDescription}
+                    error={showError(errors.submissionDescription)}
                 />
             </FormGroup>
         </>

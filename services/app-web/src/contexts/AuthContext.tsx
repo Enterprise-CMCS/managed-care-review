@@ -15,6 +15,10 @@ type AuthContextType = {
     checkAuth: () => Promise<void> // this can probably be simpler, letting callers use the loading states etc instead.
     logout: undefined | (() => Promise<void>)
 }
+
+export type LoggedInAuthContext = Omit<AuthContextType, 'loggedInUser'> & {
+    loggedInUser: UserType
+}
 const AuthContext = React.createContext<AuthContextType>({
     localLogin: false,
     loggedInUser: undefined,
