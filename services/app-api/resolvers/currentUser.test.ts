@@ -108,7 +108,7 @@ describe('currentUser', () => {
  
 
         // confirm that we get what we got
-        expect(res.errors).not.toBeUndefined()
+        expect(res.errors).toBeDefined()
         expect(res.errors && res.errors[0].message).toBe('No state data for users state: MI')
     })
 })

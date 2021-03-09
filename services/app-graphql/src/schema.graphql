@@ -4,7 +4,6 @@ schema {
 
 type Query {
     getCurrentUser: User!
-    getState: State!
 }
 
 type User {

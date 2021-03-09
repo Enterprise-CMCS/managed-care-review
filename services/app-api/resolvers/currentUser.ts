@@ -8,7 +8,6 @@ import {
 	userFromLocalAuthProvider,
 } from '../authn'
 
-// export async function currentUser(_parent, _args, context) {
 export const getCurrentUserResolver:  Resolver<ResolverTypeWrapper<Partial<User>>, {}, any, {}> = async (_parent, _args, context) => {
 	let userFetcher: userFromAuthProvider
 
