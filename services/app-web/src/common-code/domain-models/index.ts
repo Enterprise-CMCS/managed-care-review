@@ -4,3 +4,6 @@
 
 export type { UserType, StateCode } from './user'
 export { isUser } from './user'
+
+export type { AuthModeType } from './config'
+export { assertIsAuthMode } from './config'

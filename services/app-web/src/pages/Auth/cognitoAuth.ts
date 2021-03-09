@@ -34,7 +34,7 @@ function isAmplifyError(err: unknown): err is AmplifyError {
     return false
 }
 
-export function redirectToIDMLogin(): void {
+export function idmRedirectURL(): string {
     const authConfig = AmplifyAuth.configure()
     if (
         authConfig.oauth === undefined ||
@@ -48,8 +48,7 @@ export function redirectToIDMLogin(): void {
 
     // https://undefined/oauth2/authorize?identity_provider=Okta&redirect_uri=undefined&response_type=token&client_id=6is5kleap6lljtidc0n77u1tr6
 
-    console.log('GOING TO:', url)
-    window.location.assign(url)
+    return url
 }
 
 export async function signUp(

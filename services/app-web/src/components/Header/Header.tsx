@@ -2,16 +2,17 @@ import React from 'react'
 import { Button, Link, GridContainer, Grid } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 
-import { redirectToIDMLogin } from '../../pages/Auth/cognitoAuth'
+import { idmRedirectURL } from '../../pages/Auth/cognitoAuth'
 import medicaidLogo from '../../assets/images/medicaidgovlogo.png'
 import { ReactComponent as VaIcon } from '../../assets/icons/va-icon.svg'
 import { ReactComponent as MnIcon } from '../../assets/icons/mn-icon.svg'
 import styles from './Header.module.scss'
+import { useHistory } from 'react-router-dom'
 
 import { StateCode } from '../../common-code/domain-models'
+import { AuthModeType } from '../../common-code/domain-models'
 import { Logo } from '../Logo/Logo'
 import { useAuth } from '../../contexts/AuthContext'
-import { useHistory } from 'react-router-dom'
 
 const getStateInfo = (
     stateAbbrev: StateCode
@@ -30,6 +31,7 @@ const getStateInfo = (
 }
 
 export type HeaderProps = {
+    authMode: AuthModeType
     stateCode?: StateCode
     activePage?: string
     setAlert?: React.Dispatch<boolean>
@@ -43,6 +45,7 @@ export type HeaderProps = {
  * CMS Header
  */
 export const Header = ({
+    authMode,
     stateCode,
     activePage = 'Managed Care Dashboard',
     setAlert,
@@ -54,13 +57,6 @@ export const Header = ({
     const { stateName, StateIcon } = stateCode
         ? getStateInfo(stateCode)
         : { stateName: 'STATE UNKNOWN', StateIcon: () => <span></span> }
-
-    const handleIDMSignin = (event: React.FormEvent) => {
-        event.preventDefault()
-
-        console.log('Login WITH IdM')
-        redirectToIDMLogin()
-    }
 
     const handleLogout = (
         e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -104,24 +100,23 @@ export const Header = ({
                                     Sign out
                                 </Button>
                             </div>
+                        ) : authMode === 'IDM' ? (
+                            <Link
+                                className="usa-button usa-button--outline"
+                                variant="unstyled"
+                                href={idmRedirectURL()}
+                            >
+                                Sign In
+                            </Link>
                         ) : (
-                            <>
-                                <Button
-                                    type="button"
-                                    unstyled
-                                    onClick={handleIDMSignin}
-                                >
-                                    Sign In with IDM
-                                </Button>
-                                <Link
-                                    asCustom={NavLink}
-                                    className="usa-button usa-button--outline"
-                                    variant="unstyled"
-                                    to="/auth"
-                                >
-                                    Sign In
-                                </Link>
-                            </>
+                            <Link
+                                asCustom={NavLink}
+                                className="usa-button usa-button--outline"
+                                variant="unstyled"
+                                to="/auth"
+                            >
+                                Sign In
+                            </Link>
                         )}
                     </Grid>
                 </GridContainer>

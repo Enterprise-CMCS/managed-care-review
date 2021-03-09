@@ -7,11 +7,12 @@ import {
     CardGroup,
     CardBody,
     CardFooter,
+    GridContainer,
 } from '@trussworks/react-uswds'
 import { useHistory } from 'react-router-dom'
 import { UserType } from '../../common-code/domain-models/user'
 
-import { loginLocalUser } from './localLogin'
+import { loginLocalUser } from './localAuth'
 
 import aangAvatar from '../../assets/images/aang.png'
 import tophAvatar from '../../assets/images/toph.png'
@@ -37,7 +38,7 @@ const userAvatars: { [key: string]: string } = {
     'toph@dmas.virginia.gov': tophAvatar,
 }
 
-export function LocalAuth(): React.ReactElement {
+export function LocalLogin(): React.ReactElement {
     const history = useHistory()
     const { checkAuth } = useAuth()
 
@@ -49,7 +50,8 @@ export function LocalAuth(): React.ReactElement {
     }
 
     return (
-        <>
+        <GridContainer>
+            <h2>Auth Page</h2>
             <h3>Local Login</h3>
             <div>Login as one of our hard coded users:</div>
             <CardGroup>
@@ -83,6 +85,6 @@ export function LocalAuth(): React.ReactElement {
                     )
                 })}
             </CardGroup>
-        </>
+        </GridContainer>
     )
 }

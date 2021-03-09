@@ -30,7 +30,7 @@ const renderWithProviders = (
     return render(
         <MockedProvider {...apolloProvider}>
             <Router history={testHistory}>
-                <AuthProvider localLogin={false} {...authProvider}>
+                <AuthProvider authMode={'AWS_COGNITO'} {...authProvider}>
                     {ui}
                 </AuthProvider>
             </Router>

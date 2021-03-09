@@ -10,7 +10,7 @@ import {
     userClickByTestId,
     userClickByRole,
 } from '../../utils/jestUtils'
-import { Auth } from './Auth'
+import { CognitoLogin } from './CognitoLogin'
 import { GetCurrentUserDocument } from '../../gen/gqlClient'
 
 /*  
@@ -66,7 +66,7 @@ describe('Auth', () => {
         }
 
         it('displays signup form when logged out', () => {
-            renderWithProviders(<Auth />, {
+            renderWithProviders(<CognitoLogin />, {
                 apolloProvider: { mocks: [failedAuthMock] },
             })
 
@@ -79,7 +79,7 @@ describe('Auth', () => {
         })
 
         it('show login button displays login form', () => {
-            renderWithProviders(<Auth />, {
+            renderWithProviders(<CognitoLogin />, {
                 apolloProvider: { mocks: [failedAuthMock] },
             })
 
@@ -108,7 +108,7 @@ describe('Auth', () => {
                 )
             const history = createMemoryHistory()
 
-            renderWithProviders(<Auth />, {
+            renderWithProviders(<CognitoLogin />, {
                 apolloProvider: { mocks: [failedAuthMock, successfulAuthMock] },
                 routerProvider: { routerProps: { history: history } },
             })
@@ -125,7 +125,7 @@ describe('Auth', () => {
             const loginSpy = jest.spyOn(CognitoAuthApi, 'signIn')
             const history = createMemoryHistory()
 
-            renderWithProviders(<Auth />, {
+            renderWithProviders(<CognitoLogin />, {
                 apolloProvider: {
                     mocks: [failedAuthMock, failedAuthMock, failedAuthMock],
                 },
@@ -149,7 +149,7 @@ describe('Auth', () => {
         })
 
         it('displays ang and toph when logged out', () => {
-            renderWithProviders(<Auth />, {
+            renderWithProviders(<CognitoLogin />, {
                 apolloProvider: { mocks: [failedAuthMock] },
                 authProvider: { localLogin: true },
             })
@@ -176,7 +176,7 @@ describe('Auth', () => {
         it('when login is successful, redirect to dashboard', async () => {
             const history = createMemoryHistory()
 
-            renderWithProviders(<Auth />, {
+            renderWithProviders(<CognitoLogin />, {
                 routerProvider: { routerProps: { history: history } },
                 authProvider: { localLogin: true },
                 apolloProvider: { mocks: [failedAuthMock, successfulAuthMock] },
@@ -192,7 +192,7 @@ describe('Auth', () => {
         it('when login fails, stay on page and display error alert', async () => {
             const history = createMemoryHistory()
 
-            renderWithProviders(<Auth />, {
+            renderWithProviders(<CognitoLogin />, {
                 authProvider: { localLogin: true },
                 apolloProvider: {
                     mocks: [failedAuthMock, failedAuthMock],

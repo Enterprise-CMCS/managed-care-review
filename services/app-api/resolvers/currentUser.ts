@@ -7,6 +7,7 @@ import {
 	userFromCognitoAuthProvider,
 	userFromLocalAuthProvider,
 } from '../authn'
+import { assertIsAuthMode } from '../../app-web/src/common-code/domain-models'
 
 // export async function currentUser(_parent, _args, context) {
 export const getCurrentUserResolver: ResolverFn<
@@ -17,7 +18,10 @@ export const getCurrentUserResolver: ResolverFn<
 > = async (_parent, _args, context) => {
 	let userFetcher: userFromAuthProvider
 
-	if (process.env.REACT_APP_LOCAL_LOGIN) {
+	const authMode = process.env.REACT_APP_AUTH_MODE
+	assertIsAuthMode(authMode)
+
+	if (authMode === 'LOCAL') {
 		userFetcher = userFromLocalAuthProvider
 	} else {
 		userFetcher = userFromCognitoAuthProvider

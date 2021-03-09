@@ -9,6 +9,7 @@ import './index.scss'
 import App from './pages/App/App'
 import reportWebVitals from './reportWebVitals'
 import { localGQLFetch, fakeAmplifyFetch } from './api'
+import { assertIsAuthMode } from './common-code/domain-models'
 
 const gqlSchema = loader('../../app-web/src/gen/schema.graphql')
 
@@ -38,12 +39,13 @@ Amplify.configure({
     },
 })
 
-const localLogin: boolean = process.env.REACT_APP_LOCAL_LOGIN === 'true'
+const authMode = process.env.REACT_APP_AUTH_MODE
+assertIsAuthMode(authMode)
 
 const apolloClient = new ApolloClient({
     link: new HttpLink({
         uri: '/graphql',
-        fetch: localLogin ? localGQLFetch : fakeAmplifyFetch,
+        fetch: authMode === 'LOCAL' ? localGQLFetch : fakeAmplifyFetch,
     }),
     cache: new InMemoryCache(),
     typeDefs: gqlSchema,
@@ -51,7 +53,7 @@ const apolloClient = new ApolloClient({
 
 ReactDOM.render(
     <React.StrictMode>
-        <App localLogin={localLogin} apolloClient={apolloClient} />
+        <App authMode={authMode} apolloClient={apolloClient} />
     </React.StrictMode>,
     document.getElementById('root')
 )

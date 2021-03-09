@@ -1,14 +1,42 @@
 import React from 'react'
 import { Switch, Route } from 'react-router-dom'
 
-import { Auth } from '../Auth/Auth'
+import { CognitoLogin } from '../Auth/CognitoLogin'
+import { LocalLogin } from '../Auth/LocalLogin'
 import { Error404 } from '../Errors/Error404'
 import { useAuth } from '../../contexts/AuthContext'
 import { Dashboard } from '../Dashboard/Dashboard'
 import { Landing } from '../Landing/Landing'
 
-export const AppRoutes = (): React.ReactElement => {
+import { AuthModeType } from '../../common-code/domain-models'
+
+function assertNever(x: never): never {
+    throw new Error('Unexpected object: ' + x)
+}
+
+function componentForAuthMode(
+    authMode: AuthModeType
+): (() => React.ReactElement) | undefined {
+    switch (authMode) {
+        case 'LOCAL':
+            return LocalLogin
+        case 'AWS_COGNITO':
+            return CognitoLogin
+        case 'IDM':
+            return undefined
+        default:
+            assertNever(authMode)
+    }
+}
+
+export const AppRoutes = ({
+    authMode,
+}: {
+    authMode: AuthModeType
+}): React.ReactElement => {
     const { loggedInUser } = useAuth()
+
+    const authComponent = componentForAuthMode(authMode)
 
     const AuthenticatedRoutes = (): React.ReactElement => {
         return (
@@ -24,7 +52,10 @@ export const AppRoutes = (): React.ReactElement => {
         return (
             <Switch>
                 <Route path="/" exact component={Landing} />
-                <Route path="/auth" component={Auth} />
+                {/* no /auth page for IDM auth, we just have the login redirect link */}
+                {authComponent && (
+                    <Route path="/auth" component={authComponent} />
+                )}
                 <Route path="*" component={Landing} />
             </Switch>
         )
