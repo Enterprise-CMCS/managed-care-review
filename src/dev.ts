@@ -128,12 +128,12 @@ async function run_sb_locally(runner: LabeledProcessRunner) {
 async function run_all_clean() {
     const runner = new LabeledProcessRunner()
     runner.run_command_and_output(
-        'web deps',
+        'web clean',
         ['yarn', 'clean'],
         'services/app-web'
     )
     runner.run_command_and_output(
-        'api deps',
+        'api clean',
         ['yarn', 'clean'],
         'services/app-api'
     )
