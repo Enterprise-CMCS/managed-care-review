@@ -1,3 +1,8 @@
 /* Order matters in this file. */
 @import 'theme/_cms';
 @import 'theme/_color';
+
+.usa-label,
+.usa-legend {
+    font-weight: bold;
+}

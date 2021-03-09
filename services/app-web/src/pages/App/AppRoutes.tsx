@@ -2,10 +2,12 @@ import React from 'react'
 import { Switch, Route } from 'react-router-dom'
 
 import { Auth } from '../Auth/Auth'
-import { Error404 } from '../Errors/Error404'
-import { useAuth } from '../../contexts/AuthContext'
 import { Dashboard } from '../Dashboard/Dashboard'
+import { Error404 } from '../Errors/Error404'
 import { Landing } from '../Landing/Landing'
+import { StateSubmissionForm } from '../StateSubmissionForm/StateSubmissionForm'
+import { SubmissionDescriptionExamples } from '../Help/SubmissionDescriptionExamples'
+import { useAuth } from '../../contexts/AuthContext'
 
 export const AppRoutes = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
@@ -15,6 +17,8 @@ export const AppRoutes = (): React.ReactElement => {
             <Switch>
                 <Route path="/" exact component={Dashboard} />
                 <Route path="/dashboard" component={Dashboard} />
+                <Route path="/new" exact component={StateSubmissionForm} />
+                <Route path="/help/submission-description-examples" component={SubmissionDescriptionExamples} />
                 <Route path="*" component={Error404} />
             </Switch>
         )
