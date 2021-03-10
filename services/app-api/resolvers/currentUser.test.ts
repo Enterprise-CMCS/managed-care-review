@@ -1,17 +1,32 @@
 import { ApolloServer } from 'apollo-server-lambda'
 import { createTestClient } from 'apollo-server-testing'
+import { ok } from 'neverthrow'
 
 import { Resolvers } from '../gen/gqlServer'
 import typeDefs from '../../app-graphql/src/schema.graphql'
 import GET_CURRENT_USER from '../../app-graphql/src/queries/currentUserQuery.graphql'
+import { userFromAuthProvider } from '../authn'
+
+import { UserType } from '../../app-web/src/common-code/domain-models/user'
 
 import { getCurrentUserResolver } from './currentUser'
 
 describe('currentUser', () => {
     it('returns the currentUser', async () => {
+        const mockUserFetcher: userFromAuthProvider = () => {
+            return Promise.resolve(
+                ok({
+                    role: 'STATE_USER',
+                    email: 'james@example.com',
+                    state: 'GA',
+                    name: 'james brown',
+                })
+            )
+        }
+
         const resolvers: Resolvers = {
             Query: {
-                getCurrentUser: getCurrentUserResolver,
+                getCurrentUser: getCurrentUserResolver(mockUserFetcher),
             },
         }
 

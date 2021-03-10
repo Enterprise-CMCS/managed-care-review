@@ -6,11 +6,28 @@ import { getCurrentUserResolver, getStateResolver } from '../resolvers'
 
 import { Resolvers } from '../gen/gqlServer'
 import typeDefs from '../../app-graphql/src/schema.graphql'
+import {
+    userFromLocalAuthProvider,
+    userFromCognitoAuthProvider,
+} from '../authn'
+
+import { assertIsAuthMode } from '../../app-web/src/common-code/domain-models'
+
+// Configuration:
+const authMode = process.env.REACT_APP_AUTH_MODE
+assertIsAuthMode(authMode)
+
+const userFetcher =
+    authMode === 'LOCAL'
+        ? userFromLocalAuthProvider
+        : userFromCognitoAuthProvider
+
+// End Configuration
 
 // Our resolvers are defined and tested in the resolvers package
 const resolvers: Resolvers = {
     Query: {
-        getCurrentUser: getCurrentUserResolver,
+        getCurrentUser: getCurrentUserResolver(userFetcher),
     },
 }
 
@@ -21,8 +38,6 @@ const server = new ApolloServer({
         endpoint: '/local/graphql',
     },
     context: ({ event, context }) => {
-        // TODO, let's do the auth logic right here, if we can error.
-        // or rather, let's have an auth middleware.
         return {
             headers: event.headers,
             functionName: context.functionName,
