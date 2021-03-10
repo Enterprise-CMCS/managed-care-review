@@ -30,17 +30,17 @@ export interface StateSubmissionFormValues {
     submissionType: string
 }
 
+export const StateSubmissionInitialValues: StateSubmissionFormValues = {
+    program: '',
+    submissionDescription: '',
+    submissionType: '',
+}
+
 export const StateSubmissionForm = (): React.ReactElement => {
     // setActiveStep will be used once there are multiple form pages
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [activeStep, setActiveStep] = React.useState(STEPS.SUBMISSION_TYPE)
     const [showValidations, setShowValidations] = React.useState(false)
-
-    const initialValues: StateSubmissionFormValues = {
-        program: '',
-        submissionDescription: '',
-        submissionType: '',
-    }
 
     const handleFormSubmit = (
         values: StateSubmissionFormValues,
@@ -54,7 +54,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
     return (
         <GridContainer>
             <Formik
-                initialValues={initialValues}
+                initialValues={StateSubmissionInitialValues}
                 onSubmit={handleFormSubmit}
                 validationSchema={StateSubmissionFormSchema}
             >
@@ -62,6 +62,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     <UswdsForm
                         className="usa-form--large"
                         id="stateSubmissionForm"
+                        aria-label="New Submission Form"
                         onSubmit={handleSubmit}
                     >
                         <fieldset className="usa-fieldset">
