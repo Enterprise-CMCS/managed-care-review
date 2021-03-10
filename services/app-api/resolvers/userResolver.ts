@@ -11,6 +11,7 @@ const isCognitoUser = (maybeUser: unknown): maybeUser is CognitoUserType => {
     return false
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const userResolver: UserResolvers<any, Partial<UserType>> = {
     state(parent) {
                  

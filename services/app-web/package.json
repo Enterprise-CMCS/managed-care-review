@@ -37,7 +37,7 @@
         "eject": "react-scripts eject",
         "clean": "rm -rf node_modules && yarn cache clean",
         "format": "prettier --write src/**/*.ts{,x}",
-        "lint": "tsc --noEmit && eslint src",
+        "lint": "tsc --noEmit && eslint src/",
         "test:a11y": "pa11y-ci",
         "test:unit": "react-scripts test --watchAll=false",
         "storybook": "start-storybook -p 6006 -s public --quiet",

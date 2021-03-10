@@ -4,20 +4,8 @@ import { createTestClient } from 'apollo-server-testing'
 import { Resolvers } from '../gen/gqlServer'
 import typeDefs from '../../app-graphql/src/schema.graphql'
 import GET_CURRENT_USER from '../../app-graphql/src/queries/currentUserQuery.graphql'
-
-import { CognitoUserType } from '../../app-web/src/common-code/domain-models'
 import { getCurrentUserResolver } from './currentUser'
-import statePrograms from '../data/statePrograms.json'
 import {userResolver} from './userResolver'
-
-const isCognitoUser = (maybeUser: unknown): maybeUser is CognitoUserType => {
-    if (maybeUser && typeof maybeUser === 'object'){
-        if ("state_code" in maybeUser){
-            return true
-        }
-    }
-    return false
-}
 
 describe('currentUser', () => {
     it('returns the currentUser', async () => {
@@ -35,7 +23,7 @@ describe('currentUser', () => {
             playground: {
                 endpoint: '/local/graphql',
             },
-            context: ({ _event, context }) => {
+            context: ({ context }) => {
                 const event = {
                     requestContext: {
                         identity: {
@@ -81,7 +69,7 @@ describe('currentUser', () => {
             playground: {
                 endpoint: '/local/graphql',
             },
-            context: ({ _event, context }) => {
+            context: ({  context }) => {
                 const event = {
                     requestContext: {
                         identity: {

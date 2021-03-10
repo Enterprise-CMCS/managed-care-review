@@ -11,7 +11,7 @@ describe('localLogin', () => {
             email: 'toph@dmas.virginia.gov',
             name: 'Toph',
             role: 'STATE_USER',
-            state_code: 'VA'
+            state_code: 'VA',
         }
 
         loginLocalUser(testUser)
@@ -24,8 +24,8 @@ describe('localLogin', () => {
             email: 'toph@dmas.virginia.gov',
             name: 'Toph',
             role: 'STATE_USER',
-            state_code: 'VA'
-         }
+            state_code: 'VA',
+        }
 
         loginLocalUser(testUser)
         await logoutLocalUser()
