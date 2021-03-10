@@ -46,7 +46,7 @@ export const Dashboard = (): React.ReactElement => {
     }
 
     return (
-        <GridContainer className={styles.container} data-testid="dashboardPage">
+        <div className={styles.container} data-testid="dashboardPage">
             {programs.length ? (
                 <Tabs className={styles.tabs}>
                     {programs.map((program: Program) => (
@@ -67,6 +67,6 @@ export const Dashboard = (): React.ReactElement => {
             ) : (
                 <p>No programs exist</p>
             )}
-        </GridContainer>
+        </div>
     )
 }
