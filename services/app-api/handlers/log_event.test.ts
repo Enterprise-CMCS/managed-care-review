@@ -13,11 +13,11 @@ describe('log_event', () => {
             const lambda = await main(mockEvent, mockContext, () => {}) // eslint-disable-line @typescript-eslint/no-empty-function
 
             if (lambda == null) {
-                fail()
+                new Error('no lambda')
             }
-            expect(lambda.statusCode).toBe(200)
+            expect(lambda && lambda.statusCode).toBe(200)
         } catch (e) {
-            fail(e)
+            new Error('log event failed')
         }
     })
 })

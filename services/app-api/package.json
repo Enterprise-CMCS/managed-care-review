@@ -4,7 +4,9 @@
     "main": "handler.js",
     "license": "MIT",
     "scripts": {
-        "test": "jest"
+        "test": "jest",
+        "lint": "tsc --noEmit && eslint . --ignore-path ../../.gitignore",
+        "clean": "rm -rf node_modules && yarn cache clean"
     },
     "dependencies": {
         "@types/aws-lambda": "^8.10.71",

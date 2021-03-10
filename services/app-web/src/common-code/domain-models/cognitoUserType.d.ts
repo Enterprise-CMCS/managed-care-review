@@ -6,3 +6,13 @@ export type CognitoUserType = {
 	name: string
 	state_code: string
 }
+
+
+export const isCognitoUser = (maybeUser: unknown): maybeUser is CognitoUserType => {
+    if (maybeUser && typeof maybeUser === 'object'){
+        if ("state_code" in maybeUser){
+            return true
+        }
+    }
+    return false
+}

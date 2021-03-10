@@ -1,5 +1,5 @@
 import { loginLocalUser, getLoggedInUser, logoutLocalUser } from './localLogin'
-import { User as UserType } from '../../gen/gqlClient'
+import { CognitoUserType } from '../../common-code/domain-models/cognitoUserType'
 
 describe('localLogin', () => {
     it('returns empty on empty', async () => {
@@ -7,15 +7,11 @@ describe('localLogin', () => {
     })
 
     it('loads as expected', async () => {
-        const testUser: UserType = {
+        const testUser: CognitoUserType = {
             email: 'toph@dmas.virginia.gov',
             name: 'Toph',
             role: 'STATE_USER',
-            state: {
-                name: 'Virginia',
-                code: 'VA',
-                programs: [{ name: 'CCC Plus' }, { name: 'Medallion' }],
-            },
+            state_code: 'VA',
         }
 
         loginLocalUser(testUser)
@@ -24,16 +20,12 @@ describe('localLogin', () => {
     })
 
     it('logs out correctly', async () => {
-        const testUser: UserType = {
-        email: 'toph@dmas.virginia.gov',
-        name: 'Toph',
-        role: 'STATE_USER',
-        state: {
-            name: 'Virginia',
-            code: 'VA',
-            programs: [{ name: 'CCC Plus' }, { name: 'Medallion' }],
-        },
-         }
+        const testUser: CognitoUserType = {
+            email: 'toph@dmas.virginia.gov',
+            name: 'Toph',
+            role: 'STATE_USER',
+            state_code: 'VA',
+        }
 
         loginLocalUser(testUser)
         await logoutLocalUser()
