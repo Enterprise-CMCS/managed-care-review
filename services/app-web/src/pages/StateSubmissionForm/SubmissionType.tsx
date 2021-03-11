@@ -13,7 +13,7 @@ import {
 
 import styles from './StateSubmissionForm.module.scss'
 import { StateSubmissionFormValues } from './StateSubmissionForm'
-import { useAuth, LoggedInAuthContext } from '../../contexts/AuthContext'
+import { useAuth } from '../../contexts/AuthContext'
 
 type SubmissionTypeProps = {
     errors: FormikErrors<StateSubmissionFormValues>
@@ -27,11 +27,7 @@ export const SubmissionType = ({
     showValidations,
 }: SubmissionTypeProps): React.ReactElement => {
     const { values } = useFormikContext<StateSubmissionFormValues>()
-    const {
-        loggedInUser: {
-            state: { programs },
-        },
-    } = useAuth() as LoggedInAuthContext
+    const { loggedInUser: { state: { programs = [] } = {} } = {} } = useAuth()
 
     const showError = (error?: Error) => showValidations && Boolean(error)
 
@@ -41,7 +37,9 @@ export const SubmissionType = ({
                 <Label htmlFor="program">Program</Label>
                 <Field id="program" name="program" as={Dropdown}>
                     {programs.map((program) => (
-                        <option value={program.name}>{program.name}</option>
+                        <option key={program.name} value={program.name}>
+                            {program.name}
+                        </option>
                     ))}
                 </Field>
             </FormGroup>
