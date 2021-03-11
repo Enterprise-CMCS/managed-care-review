@@ -47,10 +47,9 @@ describe('StateSubmissionForm', () => {
         )
     })
 
-    // Once we have multiple form steps, we should add tests
     describe('form steps', () => {
         describe('step 0 - SUBMISSION_TYPE', () => {
-            it('renders submission type form without errors', async () => {
+            it('renders without errors', async () => {
                 renderWithProviders(
                     <StateSubmissionForm step="SUBMISSION_TYPE" />,
                     {
@@ -65,7 +64,7 @@ describe('StateSubmissionForm', () => {
                 )
             })
 
-            it('loads at submission type step by default when no step prop passed in', async () => {
+            it('loads at step 0 by default even if no step prop passed in', async () => {
                 renderWithProviders(<StateSubmissionForm />, {
                     apolloProvider: { mocks: [mockGetCurrentUser200] },
                 })
@@ -77,7 +76,7 @@ describe('StateSubmissionForm', () => {
                 )
             })
 
-            it('does not show validations on initial load', async () => {
+            it('does not show error validations on initial load', async () => {
                 renderWithProviders(
                     <StateSubmissionForm step="SUBMISSION_TYPE" />,
                     {
@@ -134,7 +133,7 @@ describe('StateSubmissionForm', () => {
                 })
             })
 
-            it('goes to next step when form is valid and continue button is clicked', async () => {
+            it('displays step 1 when form is valid and continue button is clicked', async () => {
                 const mockWithPrograms = mockGetCurrentUser200
                 mockWithPrograms.result.data.getCurrentUser.state.programs = [
                     { name: 'Program 1' },

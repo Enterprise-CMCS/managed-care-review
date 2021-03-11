@@ -10,7 +10,7 @@ import { Formik } from 'formik'
 describe('SubmissionType', () => {
     const onInitialLoadProps = { errors: {}, showValidations: false }
 
-    it('displays programs select input', async () => {
+    it('displays programs select dropdown', async () => {
         renderWithProviders(
             <Formik
                 initialValues={StateSubmissionInitialValues}
@@ -30,7 +30,7 @@ describe('SubmissionType', () => {
         )
     })
 
-    it('displays the programs options from current user state', async () => {
+    it('displays program options based on current user state', async () => {
         const mockWithPrograms = mockGetCurrentUser200
         mockWithPrograms.result.data.getCurrentUser.state.programs = [
             { name: 'Program 1' },
@@ -107,7 +107,7 @@ describe('SubmissionType', () => {
         )
     })
 
-    it('show error messages when there are errors and showValidations is true', async () => {
+    it('shows error messages when there are validation errors and showValidations is true', async () => {
         const withErrorsProps = {
             errors: {
                 submissionDescription:

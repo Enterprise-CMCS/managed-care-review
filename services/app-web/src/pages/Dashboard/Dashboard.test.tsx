@@ -56,7 +56,7 @@ describe('Dashboard', () => {
         })
     })
 
-    it('loading with first tab active', async () => {
+    it('loads first tab active', async () => {
         renderWithProviders(<Dashboard />, {
             apolloProvider: { mocks: [mockGetCurrentUser200] },
         })
