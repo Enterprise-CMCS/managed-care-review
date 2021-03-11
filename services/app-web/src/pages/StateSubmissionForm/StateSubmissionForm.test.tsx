@@ -104,8 +104,7 @@ describe('StateSubmissionForm', () => {
                 })
             })
 
-            // TODO: make this happen conditionally on the continue button click, depending on form step
-            it('shows validations when validate button is clicked', async () => {
+            it('shows validation error messages when continue button is clicked', async () => {
                 renderWithProviders(
                     <StateSubmissionForm step="SUBMISSION_TYPE" />,
                     {
@@ -120,13 +119,10 @@ describe('StateSubmissionForm', () => {
                 })
                 userEvent.click(
                     screen.getByRole('button', {
-                        name: 'Test Validation',
+                        name: 'Continue',
                     })
                 )
                 await waitFor(() => {
-                    expect(screen.getByRole('textbox')).toHaveClass(
-                        'usa-input--error'
-                    )
                     expect(
                         screen.queryByText('You must choose a submission type')
                     ).toBeInTheDocument()
@@ -137,35 +133,52 @@ describe('StateSubmissionForm', () => {
                     ).toBeInTheDocument()
                 })
             })
-            // TODO: get this test passing
-            // it('goes to next step when continue button is clicked', async () => {
-            //     renderWithProviders(
-            //         <StateSubmissionForm step="SUBMISSION_TYPE" />,
-            //         {
-            //             apolloProvider: { mocks: [mockGetCurrentUser200] },
-            //         }
-            //     )
 
-            //     await waitFor(() => {
-            //         expect(
-            //             screen.getByRole('heading', { name: 'Submission type' })
-            //         ).toBeInTheDocument()
+            it('goes to next step when form is valid and continue button is clicked', async () => {
+                const mockWithPrograms = mockGetCurrentUser200
+                mockWithPrograms.result.data.getCurrentUser.state.programs = [
+                    { name: 'Program 1' },
+                    { name: 'Program Test' },
+                    { name: 'Program 3' },
+                ]
 
-            //         userEvent.click(
-            //             screen.getByRole('button', {
-            //                 name: 'Continue',
-            //             })
-            //         )
-            //     })
+                renderWithProviders(
+                    <StateSubmissionForm step="SUBMISSION_TYPE" />,
+                    {
+                        apolloProvider: { mocks: [mockWithPrograms] },
+                    }
+                )
 
-            //     await waitFor(() => {
-            //         expect(
-            //             screen.getByRole('heading', {
-            //                 name: 'Contract details',
-            //             })
-            //         ).toBeInTheDocument()
-            //     })
-            // })
+                await waitFor(() => {
+                    expect(
+                        screen.getByRole('heading', { name: 'Submission type' })
+                    ).toBeInTheDocument()
+
+                    // Fill in form to make valid
+                    userEvent.click(
+                        screen.getByRole('option', { name: 'Program Test' })
+                    )
+                    userEvent.click(
+                        screen.getByLabelText('Contract action only')
+                    )
+                    userEvent.type(screen.getByRole('textbox'), 'a description')
+
+                    // Click continue
+                    userEvent.click(
+                        screen.getByRole('button', {
+                            name: 'Continue',
+                        })
+                    )
+                })
+
+                await waitFor(() => {
+                    expect(
+                        screen.getByRole('heading', {
+                            name: 'Contract details',
+                        })
+                    ).toBeInTheDocument()
+                })
+            })
         })
     })
 })

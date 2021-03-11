@@ -14,7 +14,7 @@ import { SubmissionType } from './SubmissionType'
 
 // Formik setup
 const StateSubmissionFormSchema = Yup.object().shape({
-    program: Yup.string().required(),
+    program: Yup.string(),
     submissionDescription: Yup.string().required(
         'You must provide a description of any major changes or updates'
     ),
@@ -53,7 +53,6 @@ export const StateSubmissionForm = ({
         activeStep,
         setActiveStep,
     ] = React.useState<StateSubmissionFormSteps>(step || steps[0])
-
     const [showValidations, setShowValidations] = React.useState(false)
 
     const handleFormSubmit = (
@@ -88,12 +87,27 @@ export const StateSubmissionForm = ({
                 validateOnChange={showValidations}
                 validateOnBlur={showValidations}
             >
-                {({ errors, handleSubmit, validateForm }) => (
+                {({
+                    errors,
+                    handleSubmit,
+                    isSubmitting,
+                    isValidating,
+                    validateForm,
+                }) => (
                     <UswdsForm
                         className="usa-form--large"
                         id="stateSubmissionForm"
                         aria-label="New Submission Form"
-                        onSubmit={handleSubmit}
+                        onSubmit={(e) => {
+                            e.preventDefault()
+                            validateForm()
+                                .then(() => {
+                                    setShowValidations(true)
+                                })
+                                .catch(() => console.warn('Validation Error'))
+
+                            if (!isValidating) handleSubmit()
+                        }}
                     >
                         <fieldset className="usa-fieldset">
                             <legend className={styles.formHeader}>
@@ -131,7 +145,9 @@ export const StateSubmissionForm = ({
                                 >
                                     Cancel
                                 </Link>
-                                <Button type="submit">Continue</Button>
+                                <Button type="submit" disabled={isSubmitting}>
+                                    Continue
+                                </Button>
                             </ButtonGroup>
                         </fieldset>
                     </UswdsForm>
