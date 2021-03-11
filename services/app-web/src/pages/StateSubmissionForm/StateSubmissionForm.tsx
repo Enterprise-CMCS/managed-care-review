@@ -1,5 +1,5 @@
 import React from 'react'
-import { Formik, FormikHelpers } from 'formik'
+import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import {
     GridContainer,
     Form as UswdsForm,
@@ -10,13 +10,9 @@ import {
 import * as Yup from 'yup'
 
 import styles from './StateSubmissionForm.module.scss'
-
 import { SubmissionType } from './SubmissionType'
 
-const STEPS = {
-    SUBMISSION_TYPE: 'Submission type',
-}
-
+// Formik setup
 const StateSubmissionFormSchema = Yup.object().shape({
     program: Yup.string().required(),
     submissionDescription: Yup.string().required(
@@ -36,19 +32,51 @@ export const StateSubmissionInitialValues: StateSubmissionFormValues = {
     submissionType: '',
 }
 
-export const StateSubmissionForm = (): React.ReactElement => {
-    // setActiveStep will be used once there are multiple form pages
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [activeStep, setActiveStep] = React.useState(STEPS.SUBMISSION_TYPE)
+// Main component setup
+
+const steps = ['SUBMISSION_TYPE', 'CONTRACT_DETAILS'] as const
+type StateSubmissionFormSteps = typeof steps[number] // iterable union type
+
+const stepsWithName: { [K in StateSubmissionFormSteps]: string } = {
+    SUBMISSION_TYPE: 'Submission type',
+    CONTRACT_DETAILS: 'Contract details',
+}
+
+type StateSubmissionFormProps = {
+    step?: StateSubmissionFormSteps
+}
+
+export const StateSubmissionForm = ({
+    step,
+}: StateSubmissionFormProps): React.ReactElement => {
+    const [
+        activeStep,
+        setActiveStep,
+    ] = React.useState<StateSubmissionFormSteps>(step || steps[0])
+
     const [showValidations, setShowValidations] = React.useState(false)
 
     const handleFormSubmit = (
         values: StateSubmissionFormValues,
-        actions: FormikHelpers<StateSubmissionFormValues>
+        formikHelpers: FormikHelpers<StateSubmissionFormValues>
     ) => {
         console.log('mock save draft submission', values)
-        setShowValidations(true)
-        actions.setSubmitting(false)
+        formikHelpers.setSubmitting(false)
+        setActiveStep((prevStep) => steps[steps.indexOf(prevStep) + 1])
+    }
+
+    const CurrentFormStep = (props: {
+        errors: FormikErrors<StateSubmissionFormValues>
+        showValidations: boolean
+    }) => {
+        switch (activeStep) {
+            case 'SUBMISSION_TYPE':
+                return <SubmissionType {...props} />
+            case 'CONTRACT_DETAILS':
+                return <p> CONTRACT DETAILS</p>
+            default:
+                return <p> Invalid Form Step</p>
+        }
     }
 
     return (
@@ -57,6 +85,8 @@ export const StateSubmissionForm = (): React.ReactElement => {
                 initialValues={StateSubmissionInitialValues}
                 onSubmit={handleFormSubmit}
                 validationSchema={StateSubmissionFormSchema}
+                validateOnChange={showValidations}
+                validateOnBlur={showValidations}
             >
                 {({ errors, handleSubmit, validateForm }) => (
                     <UswdsForm
@@ -67,11 +97,11 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     >
                         <fieldset className="usa-fieldset">
                             <legend className={styles.formHeader}>
-                                <h2>{activeStep}</h2>
+                                <h2>{stepsWithName[activeStep]}</h2>
                             </legend>
                             <div className={styles.formContainer}>
                                 <span>All fields are required</span>
-                                <SubmissionType
+                                <CurrentFormStep
                                     errors={errors}
                                     showValidations={showValidations}
                                 />
@@ -87,9 +117,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
                                         validateForm()
                                             .then(() => {
                                                 setShowValidations(true)
-                                                console.log(
-                                                    'Validation complete'
-                                                )
                                             })
                                             .catch(() =>
                                                 console.warn('Validation Error')

@@ -20,7 +20,7 @@ type SubmissionTypeProps = {
     showValidations: boolean
 }
 
-type Error = FormikErrors<StateSubmissionFormValues>[keyof FormikErrors<StateSubmissionFormValues>]
+type FormError = FormikErrors<StateSubmissionFormValues>[keyof FormikErrors<StateSubmissionFormValues>]
 
 export const SubmissionType = ({
     errors,
@@ -29,7 +29,7 @@ export const SubmissionType = ({
     const { values } = useFormikContext<StateSubmissionFormValues>()
     const { loggedInUser: { state: { programs = [] } = {} } = {} } = useAuth()
 
-    const showError = (error?: Error) => showValidations && Boolean(error)
+    const showError = (error?: FormError) => showValidations && Boolean(error)
 
     return (
         <>
@@ -43,6 +43,7 @@ export const SubmissionType = ({
                     ))}
                 </Field>
             </FormGroup>
+
             <FormGroup className={styles.formGroup}>
                 <Fieldset legend="Choose submission type">
                     {showError(errors.submissionType) && (

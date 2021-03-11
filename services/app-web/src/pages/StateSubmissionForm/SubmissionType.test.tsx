@@ -1,5 +1,4 @@
 import React from 'react'
-// import userEvent from '@testing-library/user-event'
 import { screen, waitFor } from '@testing-library/react'
 
 import { mockGetCurrentUser200 } from '../../utils/apolloUtils'
@@ -7,23 +6,14 @@ import { renderWithProviders } from '../../utils/jestUtils'
 import { SubmissionType } from './SubmissionType'
 import { StateSubmissionInitialValues } from './StateSubmissionForm'
 import { Formik } from 'formik'
-// import { StateSubmissionFormValues } from './StateSubmissionForm'
 
 describe('SubmissionType', () => {
     const onInitialLoadProps = { errors: {}, showValidations: false }
-    const withVisibleErrorsProps = {
-        errors: { submissionDescription: 'Submission description is required' },
-        showValidations: true,
-    }
 
     it('displays programs select input', async () => {
         renderWithProviders(
             <Formik
-                initialValues={{
-                    program: '',
-                    submissionDescription: '',
-                    submissionType: '',
-                }}
+                initialValues={StateSubmissionInitialValues}
                 onSubmit={jest.fn()}
             >
                 <SubmissionType {...onInitialLoadProps} />
@@ -74,11 +64,7 @@ describe('SubmissionType', () => {
     it('displays submission type radio buttons', async () => {
         renderWithProviders(
             <Formik
-                initialValues={{
-                    program: '',
-                    submissionDescription: '',
-                    submissionType: '',
-                }}
+                initialValues={StateSubmissionInitialValues}
                 onSubmit={jest.fn()}
             >
                 <SubmissionType {...onInitialLoadProps} />
@@ -105,11 +91,7 @@ describe('SubmissionType', () => {
     it('displays submission description textarea', async () => {
         renderWithProviders(
             <Formik
-                initialValues={{
-                    program: '',
-                    submissionDescription: '',
-                    submissionType: '',
-                }}
+                initialValues={StateSubmissionInitialValues}
                 onSubmit={jest.fn()}
             >
                 <SubmissionType {...onInitialLoadProps} />
@@ -124,10 +106,68 @@ describe('SubmissionType', () => {
             ).toBeInTheDocument()
         )
     })
-    it.todo(
-        'show error messages when there are errors and showValidations is true'
-    )
-    it.todo(
-        'does not show error messages when there are errors but showVadliations is false'
-    )
+
+    it('show error messages when there are errors and showValidations is true', async () => {
+        const withErrorsProps = {
+            errors: {
+                submissionDescription:
+                    'Test - Submission description is required',
+            },
+            showValidations: true,
+        }
+        renderWithProviders(
+            <Formik
+                initialValues={StateSubmissionInitialValues}
+                onSubmit={jest.fn()}
+            >
+                <SubmissionType {...withErrorsProps} />
+            </Formik>,
+            {
+                apolloProvider: { mocks: [mockGetCurrentUser200] },
+            }
+        )
+        await waitFor(() => {
+            const textarea = screen.getByRole('textbox', {
+                name: 'Submission description',
+            })
+
+            expect(textarea).toBeInTheDocument()
+            expect(textarea).toHaveClass('usa-input--error')
+            expect(
+                screen.getByText('Test - Submission description is required')
+            ).toBeVisible()
+        })
+    })
+
+    it('do not show error messages when showValidations is false', async () => {
+        const withErrorsProps = {
+            errors: {
+                submissionDescription:
+                    'Test - Submission description is required',
+            },
+            showValidations: false,
+        }
+        renderWithProviders(
+            <Formik
+                initialValues={StateSubmissionInitialValues}
+                onSubmit={jest.fn()}
+            >
+                <SubmissionType {...withErrorsProps} />
+            </Formik>,
+            {
+                apolloProvider: { mocks: [mockGetCurrentUser200] },
+            }
+        )
+        await waitFor(() => {
+            const textarea = screen.getByRole('textbox', {
+                name: 'Submission description',
+            })
+
+            expect(textarea).toBeInTheDocument()
+            expect(textarea).not.toHaveClass('usa-input--error')
+            expect(
+                screen.queryByText('Test - Submission description is required')
+            ).toBeNull()
+        })
+    })
 })
