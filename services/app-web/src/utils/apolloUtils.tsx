@@ -25,15 +25,7 @@ const mockGetCurrentUser200 = {
 
 const mockGetCurrentUser403 = {
     request: { query: GetCurrentUserDocument },
-    result: {
-        ok: false,
-        status: 403,
-        statusText: 'Unauthenticated',
-        data: {
-            error: 'you are not logged in',
-        },
-        error: new Error('network error'),
-    },
+    error: new Error('network error'),
 }
 
 export { mockGetCurrentUser200, mockGetCurrentUser403 }

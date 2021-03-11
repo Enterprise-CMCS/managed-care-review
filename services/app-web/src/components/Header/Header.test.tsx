@@ -163,7 +163,7 @@ describe('Header', () => {
 
             renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
-                    mocks: [mockGetCurrentUser200],
+                    mocks: [mockGetCurrentUser200, mockGetCurrentUser403],
                 },
             })
 
