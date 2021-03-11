@@ -6,16 +6,18 @@ import {
     userFromLocalAuthProvider,
 } from '../authn'
 
+import { assertIsAuthMode } from '../../app-web/src/common-code/domain-models'
+
+const authMode = process.env.REACT_APP_AUTH_MODE
+assertIsAuthMode(authMode)
+
+const userFetcher =
+    authMode === 'LOCAL'
+        ? userFromLocalAuthProvider
+        : userFromCognitoAuthProvider
+
 // This endpoint exists to confirm that authentication is working
 export const main: APIGatewayProxyHandler = async (event) => {
-    let userFetcher: userFromAuthProvider
-
-    if (process.env.REACT_APP_LOCAL_LOGIN) {
-        userFetcher = userFromLocalAuthProvider
-    } else {
-        userFetcher = userFromCognitoAuthProvider
-    }
-
     const authProvider =
         event.requestContext.identity.cognitoAuthenticationProvider
     if (authProvider == undefined) {

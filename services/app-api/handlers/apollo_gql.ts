@@ -52,38 +52,33 @@ function localAuthMiddleware(
     wrapped: APIGatewayProxyHandler
 ): APIGatewayProxyHandler {
     return function (event, context, completion) {
-        if (process.env.REACT_APP_LOCAL_LOGIN) {
-            console.log(
-                'foo',
-                event.requestContext.identity.cognitoAuthenticationProvider
-            )
+        const userHeader =
+            event.requestContext.identity.cognitoAuthenticationProvider
 
-            const userHeader =
-                event.requestContext.identity.cognitoAuthenticationProvider
-
-            if (userHeader === 'NO_USER') {
-                console.log('NO_USER info set, returning 403')
-                return Promise.resolve({
-                    statusCode: 403,
-                    body:
-                        '{ "error": "No User Sent in cognitoAuthenticationProvider header"}\n',
-                    headers: {
-                        'Access-Control-Allow-Origin': '*',
-                        'Access-Control-Allow-Credentials': true,
-                    },
-                })
-            }
+        if (userHeader === 'NO_USER') {
+            console.log('NO_USER info set, returning 403')
+            return Promise.resolve({
+                statusCode: 403,
+                body:
+                    '{ "error": "No User Sent in cognitoAuthenticationProvider header"}\n',
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': true,
+                },
+            })
         }
 
         return wrapped(event, context, completion)
     }
 }
 
-exports.graphqlHandler = localAuthMiddleware(
-    server.createHandler({
-        cors: {
-            origin: true,
-            credentials: true,
-        },
-    })
-)
+const gqlHandler = server.createHandler({
+    cors: {
+        origin: true,
+        credentials: true,
+    },
+})
+
+const isLocal = authMode === 'LOCAL'
+
+exports.graphqlHandler = isLocal ? localAuthMiddleware(gqlHandler) : gqlHandler

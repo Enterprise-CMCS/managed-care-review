@@ -9,8 +9,12 @@ import { userFromAuthProvider } from '../authn'
 // eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any
 export function getCurrentUserResolver(
 	userFetcher: userFromAuthProvider
-): Resolver<ResolverTypeWrapper<Partial<User>>, {}, any, {}> {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Resolver<
+	ResolverTypeWrapper<Partial<User>>,
+	Record<string, unknown>,
+	any,
+	Record<string, unknown>
+> {
 	return async (_parent, _args, context) => {
 		const authProvider =
 			context.event.requestContext.identity.cognitoAuthenticationProvider

@@ -60,7 +60,7 @@ export async function userFromCognitoAuthProvider(
     try {
         const cognito = new CognitoIdentityServiceProvider()
 
-        const subFilter = `sub = \"${userInfo.userId}\"`
+        const subFilter = `sub = "${userInfo.userId}"`
         console.log('SUB FIL', subFilter)
 
         // let's see what we've got

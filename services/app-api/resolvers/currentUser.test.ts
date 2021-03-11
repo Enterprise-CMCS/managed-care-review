@@ -1,6 +1,5 @@
 import { ApolloServer } from 'apollo-server-lambda'
 import { createTestClient } from 'apollo-server-testing'
-import { ok } from 'neverthrow'
 
 import { Resolvers } from '../gen/gqlServer'
 import typeDefs from '../../app-graphql/src/schema.graphql'

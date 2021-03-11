@@ -42,7 +42,7 @@ Read by `app-api`
 -   REACT_APP_COGNITO_USER_POOL_CLIENT_ID
 -   REACT_APP_COGNITO_USER_POOL_CLIENT_DOMAIN
 
-These four env vars configure cognito auth from the browser. They are ignored if `REACT_APP_LOCAL_LOGIN` is set to `true` and thus are only set in deployed environments.
+These four env vars configure cognito auth from the browser. They are ignored if `REACT_APP_AUTH_MODE` is set to `LOCAL` and thus are only set in deployed environments.
 
 ### `APPLICATION_ENDPOINT`
 
