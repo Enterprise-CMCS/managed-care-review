@@ -1,18 +1,6 @@
-type Role = 'STATE_USER' | 'ADMIN'
+import { CognitoUserType } from './cognitoUserType'
 
-export type StateCode = 'VA' | 'GA' | 'TN' | 'MN'
-
-export type UserType = StateUserType
-
-export type StateUserType = {
-    // typename: string = 'StateUser';
-    role: Role
-    email: string
-    state: StateCode
-    name: string
-}
-
-export function isUser(user: unknown): user is UserType {
+export function isCognitoUser(user: unknown): user is CognitoUserType {
     if (user && typeof user === 'object') {
         if ('role' in user) {
             const roleUser = user as { role: unknown }

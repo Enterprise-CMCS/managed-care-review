@@ -1,14 +1,16 @@
 import { AuthenticationError } from 'apollo-server-lambda'
 
-import { ResolverFn, ResolversTypes } from '../gen/gqlServer'
+import { Resolver, ResolverTypeWrapper, User } from '../gen/gqlServer'
 
 import { userFromAuthProvider } from '../authn'
 
 // getCurrentUserResolver is a function that returns a configured Resover
 // you have to call it with it's dependencies to pass it into the Resover tree
+// eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any
 export function getCurrentUserResolver(
 	userFetcher: userFromAuthProvider
-): ResolverFn<ResolversTypes['User'], {}, any, {}> {
+): Resolver<ResolverTypeWrapper<Partial<User>>, {}, any, {}> {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	return async (_parent, _args, context) => {
 		const authProvider =
 			context.event.requestContext.identity.cognitoAuthenticationProvider
@@ -17,11 +19,6 @@ export function getCurrentUserResolver(
 				'This should have been caught by localAuthMiddleware'
 			)
 		}
-
-		console.log(
-			'and the idenity',
-			context.event.requestContext.identity.cognitoIdentityId
-		)
 
 		const userResult = await userFetcher(authProvider)
 

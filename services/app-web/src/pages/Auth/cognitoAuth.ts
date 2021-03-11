@@ -1,13 +1,13 @@
 import { Auth as AmplifyAuth } from 'aws-amplify'
 import { CognitoUser } from 'amazon-cognito-identity-js'
-import { UserType } from '../../common-code/domain-models/user'
+import { User as UserType } from '../../gen/gqlClient'
 
 type newUser = {
     username: string
     password: string
     given_name: string
     family_name: string
-    state_code: UserType['state']
+    state_code: UserType['state']['code']
 }
 
 type AmplifyErrorCodes =

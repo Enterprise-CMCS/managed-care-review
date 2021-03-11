@@ -1,36 +1,36 @@
 import { loginLocalUser, getLoggedInUser, logoutLocalUser } from './localAuth'
-import { UserType } from '../../common-code/domain-models/user'
+import { CognitoUserType } from '../../common-code/domain-models/cognitoUserType'
 
 describe('localLogin', () => {
     it('returns empty on empty', async () => {
-        expect(getLoggedInUser()).resolves.toBeNull()
+        await expect(getLoggedInUser()).resolves.toBeNull()
     })
 
     it('loads as expected', async () => {
-        const testUser: UserType = {
+        const testUser: CognitoUserType = {
+            email: 'toph@dmas.virginia.gov',
+            name: 'Toph',
             role: 'STATE_USER',
-            name: 'foobar',
-            email: 'bar@baz.bim',
-            state: 'TN',
+            state_code: 'VA',
         }
 
         loginLocalUser(testUser)
 
-        expect(getLoggedInUser()).resolves.toEqual(testUser)
+        await expect(getLoggedInUser()).resolves.toEqual(testUser)
     })
 
     it('logs out correctly', async () => {
-        const testUser: UserType = {
+        const testUser: CognitoUserType = {
+            email: 'toph@dmas.virginia.gov',
+            name: 'Toph',
             role: 'STATE_USER',
-            name: 'foobar',
-            email: 'bar@baz.bim',
-            state: 'TN',
+            state_code: 'VA',
         }
 
         loginLocalUser(testUser)
-        logoutLocalUser()
+        await logoutLocalUser()
 
-        expect(getLoggedInUser()).resolves.toBeNull()
+        await expect(getLoggedInUser()).resolves.toBeNull()
     })
 
     it('errors if things are garbled', async () => {
@@ -39,7 +39,7 @@ describe('localLogin', () => {
         // set non-JSON in local storage
         store.setItem('localUser', 'weofnef{{{|')
 
-        expect(getLoggedInUser()).rejects.toEqual(
+        await expect(getLoggedInUser()).rejects.toEqual(
             new SyntaxError('Unexpected token w in JSON at position 0')
         )
     })
@@ -49,7 +49,7 @@ describe('localLogin', () => {
         // set a non-user in local storage
         store.setItem('localUser', '{"foo": "bar"}')
 
-        expect(getLoggedInUser()).rejects.toEqual(
+       await expect(getLoggedInUser()).rejects.toEqual(
             new Error('garbled user stored in localStorage')
         )
     })

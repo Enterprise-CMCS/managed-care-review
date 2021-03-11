@@ -1,9 +1,0 @@
-query getState {
-	getState {
-		code
-		name
-		programs {
-			name
-		}
-	}
-}

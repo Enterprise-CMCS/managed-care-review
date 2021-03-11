@@ -7,16 +7,14 @@ import { AppRoutes } from './AppRoutes'
 import { Error400 } from '../Errors/Error400'
 import { Footer } from '../../components/Footer/Footer'
 import { Header } from '../../components/Header/Header'
-import { useAuth } from '../../contexts/AuthContext'
 
 import { AuthModeType } from '../../common-code/domain-models'
-
 export function AppBody({
+
     authMode,
 }: {
     authMode: AuthModeType
 }): React.ReactElement {
-    const { loggedInUser } = useAuth()
     // TODO: create an DialogContext to handle all app alerts
     const [alert, setAlert] = React.useState(false)
 
@@ -28,8 +26,6 @@ export function AppBody({
             <GovBanner aria-label="Official government website" />
             <Header
                 authMode={authMode}
-                user={loggedInUser}
-                stateCode={loggedInUser ? loggedInUser.state : undefined}
                 setAlert={setAlert}
             />
             <main id="main-content" className={styles.mainContent} role="main">

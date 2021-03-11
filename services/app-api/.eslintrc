@@ -4,7 +4,7 @@
         "project": "./tsconfig.json",
         "sourceType": "module"
     },
-    "plugins": ["@typescript-eslint", "jsx-a11y"],
+    "plugins": ["@typescript-eslint"],
     "extends": [
         "eslint:recommended",
         "plugin:jest/recommended",
@@ -12,11 +12,15 @@
         "prettier",
         "prettier/@typescript-eslint"
     ],
-    "rules": {},
-    "overrides": [
-        {
-            "files": ["**/*.ts?(x)"],
-            "rules": {}
-        }
-    ]
+    "ignorePatterns": [
+        "gen/*"
+    ],
+    "rules": {
+        "prefer-promise-reject-errors": "error",
+        "no-throw-literal": "error",
+        "jest/no-focused-tests": "error",
+        "jest/no-identical-title": "error",
+        "@typescript-eslint/no-floating-promises": "error"
+    },
+    "overrides": []
 }

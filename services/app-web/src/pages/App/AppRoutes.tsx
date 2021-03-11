@@ -7,6 +7,8 @@ import { Error404 } from '../Errors/Error404'
 import { useAuth } from '../../contexts/AuthContext'
 import { Dashboard } from '../Dashboard/Dashboard'
 import { Landing } from '../Landing/Landing'
+import { StateSubmissionForm } from '../StateSubmissionForm/StateSubmissionForm'
+import { SubmissionDescriptionExamples } from '../Help/SubmissionDescriptionExamples'
 
 import { AuthModeType } from '../../common-code/domain-models'
 
@@ -43,6 +45,11 @@ export const AppRoutes = ({
             <Switch>
                 <Route path="/" exact component={Dashboard} />
                 <Route path="/dashboard" component={Dashboard} />
+                <Route path="/new" exact component={StateSubmissionForm} />
+                <Route
+                    path="/help/submission-description-examples"
+                    component={SubmissionDescriptionExamples}
+                />
                 <Route path="*" component={Error404} />
             </Switch>
         )

@@ -5,7 +5,9 @@ export function logEvent(name: string, data: Record<string, unknown>): void {
 
     const logEventURL = process.env.REACT_APP_API_URL + '/log_event'
 
-    fetch(logEventURL, {
+   // TODO: decide where we will handle log event rejection
+   // eslint-disable-next-line @typescript-eslint/no-floating-promises
+   fetch(logEventURL, {
         method: 'POST',
         body: JSON.stringify(ev),
     })

@@ -3,22 +3,7 @@ import { screen, waitFor } from '@testing-library/react'
 
 import { renderWithProviders, userClickSignIn } from '../../utils/jestUtils'
 import { AppBody } from './AppBody'
-import { GetCurrentUserDocument } from '../../gen/gqlClient'
-
-const successfulLoginMock = {
-    request: { query: GetCurrentUserDocument },
-    result: {
-        data: {
-            getCurrentUser: {
-                state: 'VA',
-                role: 'State User',
-                name: 'Bob it user',
-                email: 'bob@dmas.mn.gov',
-            },
-        },
-    },
-}
-
+import { mockGetCurrentUser200 } from '../../utils/apolloUtils'
 test('App renders without errors', () => {
     renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
     const mainElement = screen.getByRole('main')
@@ -33,7 +18,7 @@ describe('Routing', () => {
     describe('/', () => {
         it('display dashboard when logged in', async () => {
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
-                apolloProvider: { mocks: [successfulLoginMock] },
+                apolloProvider: { mocks: [mockGetCurrentUser200] },
             })
 
             expect(
@@ -131,7 +116,7 @@ describe('Routing', () => {
 
         it('redirects to 404 error page when logged in', async () => {
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
-                apolloProvider: { mocks: [successfulLoginMock] },
+                apolloProvider: { mocks: [mockGetCurrentUser200] },
                 routerProvider: { route: '/not-a-real-place' },
             })
 

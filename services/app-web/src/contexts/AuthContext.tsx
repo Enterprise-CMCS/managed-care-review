@@ -2,10 +2,9 @@ import * as React from 'react'
 import { useQuery } from '@apollo/client'
 
 import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
+import { GetCurrentUserDocument, User as UserType } from '../gen/gqlClient'
 import { logoutLocalUser } from '../pages/Auth/localAuth'
-import { AuthModeType, UserType } from '../common-code/domain-models'
-
-import { GetCurrentUserDocument } from '../gen/gqlClient'
+import { AuthModeType } from '../common-code/domain-models'
 
 type LogoutFn = () => Promise<null>
 
@@ -16,11 +15,15 @@ type AuthContextType = {
     checkAuth: () => Promise<void> // this can probably be simpler, letting callers use the loading states etc instead.
     logout: undefined | (() => Promise<void>)
 }
+
+export type LoggedInAuthContext = Omit<AuthContextType, 'loggedInUser'> & {
+    loggedInUser: UserType
+}
 const AuthContext = React.createContext<AuthContextType>({
     loggedInUser: undefined,
     isAuthenticated: false,
     isLoading: false,
-    checkAuth: () => Promise.reject(),
+    checkAuth: () => Promise.reject(Error('Auth context error')),
     logout: undefined,
 })
 

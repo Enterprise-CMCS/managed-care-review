@@ -1,8 +1,14 @@
 query getCurrentUser {
-	getCurrentUser {
-		email
-		state
-		role
-		name
-	}
+    getCurrentUser {
+        email
+        state {
+            code
+            name
+            programs {
+                name
+            }
+        }
+        role
+        name
+    }
 }
