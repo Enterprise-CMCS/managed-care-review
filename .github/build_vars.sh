@@ -21,10 +21,6 @@ var_list=(
 set_value() {
   varname=${1}
   if [ -n "${!varname}" ]; then
-    if [ "$varname" = "REACT_APP_AUTH_MODE" ]; then
-      echo "${varname}=${!varname}"
-    fi
-
     echo "Setting $varname"
     echo "${varname}=${!varname}" >> "$GITHUB_ENV"
   fi
@@ -32,9 +28,6 @@ set_value() {
 
 set_name() {
   varname=${1}
-  if [ "$varname" = "REACT_APP_AUTH_MODE" ]; then
-    echo "BRANCH_SPECIFIC_VARNAME_$varname=${branch_name//-/_}_$varname"
-  fi
   echo "BRANCH_SPECIFIC_VARNAME_$varname=${branch_name//-/_}_$varname" >> "$GITHUB_ENV"
 }
 
