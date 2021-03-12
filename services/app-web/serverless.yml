@@ -43,7 +43,7 @@ custom:
       # Build the static archive and populate the config
       package:initialize: |
         set -e
-        export REACT_APP_AUTH_MODE=${self:react_app_auth_mode}
+        export REACT_APP_AUTH_MODE=${self:custom.react_app_auth_mode}
         export REACT_APP_API_URL=${self:custom.api_url}
         export REACT_APP_APPLICATION_ENDPOINT=${self:custom.application_endpoint_url}
         export REACT_APP_COGNITO_REGION=${self:custom.cognito_region}

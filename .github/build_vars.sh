@@ -21,6 +21,10 @@ var_list=(
 set_value() {
   varname=${1}
   if [ -n "${!varname}" ]; then
+    if [ "$varname" = "REACT_APP_AUTH_MODE" ]; then
+      echo "${varname}=${!varname}"
+    fi
+
     echo "Setting $varname"
     echo "${varname}=${!varname}" >> "$GITHUB_ENV"
   fi
