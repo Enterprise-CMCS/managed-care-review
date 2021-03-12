@@ -1,7 +1,6 @@
 import { APIGatewayProxyHandler } from 'aws-lambda'
 
 import {
-    userFromAuthProvider,
     userFromCognitoAuthProvider,
     userFromLocalAuthProvider,
 } from '../authn'
