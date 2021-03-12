@@ -15,6 +15,7 @@ custom:
   atomicCounterTableName: ${env:AMENDMENTS_COUNTER_TABLE_NAME, cf:database-${self:custom.stage}.AmendmentsAtomicCounterTableName}
   atomicCounterTableArn: ${env:AMENDMENTS_COUNTER_TABLE_ARN, cf:database-${self:custom.stage}.AmendmentsAtomicCounterTableArn}
   iamPath: ${env:IAM_PATH, "/"}
+  react_app_auth_mode: ${env:REACT_APP_AUTH_MODE}
   bundle:
     packager: yarn
 
@@ -31,6 +32,7 @@ provider:
     appVersion: ${self:custom.appVersion}
     tableName: ${self:custom.tableName}
     atomicCounterTableName: ${self:custom.atomicCounterTableName}
+    REACT_APP_AUTH_MODE: ${self:custom.react_app_auth_mode}
 
 functions:
   health:
