@@ -30,13 +30,6 @@ export function getCurrentUserResolver(
             throw new AuthenticationError(userResult.error.message)
         }
 
-        console.log('nonono')
-        await new Promise<void>((resolve) => {
-            setTimeout(() => {
-                resolve()
-            }, 500)
-        })
-
         return userResult.value
     }
 }

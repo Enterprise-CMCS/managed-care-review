@@ -12,10 +12,14 @@ export const userResolver: UserResolvers<any, Partial<UserType>> = {
             )
 
             if (state === undefined) {
-                throw new Error('No state data for users state: ' + userState)
+                return {
+                    name: 'This state is not part of the pilot',
+                    code: userState,
+                    programs: [],
+                }
             }
             return state
         }
-        throw new Error('help')
+        throw new Error('500: parent of a state reslovler isnt a cognito user')
     },
 }
