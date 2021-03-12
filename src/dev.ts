@@ -30,7 +30,7 @@ async function run_db_locally(runner: LabeledProcessRunner) {
 
 // run_api_locally uses the serverless-offline plugin to run the api lambdas locally
 async function run_api_locally(runner: LabeledProcessRunner) {
-    await compile_graphql_types_watch_once(runner)
+    compile_graphql_types_watch_once(runner)
 
     await runner.run_command_and_output(
         'api deps',
@@ -497,12 +497,12 @@ function main() {
                 run_all_tests(parsedFlags)
             }
         )
-        .command( 
+        .command(
             'format',
             'run format. This will be replaced by pre-commit',
             {},
             () => {
-                      run_all_format()
+                run_all_format()
             }
         )
         .command(
