@@ -41,6 +41,7 @@ Amplify.configure({
 
 const authMode = process.env.REACT_APP_AUTH_MODE
 assertIsAuthMode(authMode)
+console.log('AuthMode: ', authMode)
 
 const apolloClient = new ApolloClient({
     link: new HttpLink({
