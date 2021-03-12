@@ -8,7 +8,7 @@ services=(
   # 'database'
   # 'uploads'
   # # 'uploads-scan'
-  # 'app-api'
+  'app-api'
   # 'stream-functions'
   # 'ui'
   # 'ui-auth'
