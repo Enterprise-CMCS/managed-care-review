@@ -48,7 +48,6 @@ describe('currentUser', () => {
         const { query } = createTestClient(server)
 
         // make a mock request
-        process.env.REACT_APP_LOCAL_LOGIN = 'true'
         const res = await query({ query: GET_CURRENT_USER })
 
         // confirm that we get what we got
@@ -56,9 +55,10 @@ describe('currentUser', () => {
 
         expect(res.data.getCurrentUser.email).toBe('james@example.com')
         expect(res.data.getCurrentUser.state.code).toBe('FL')
+        expect(res.data.getCurrentUser.state.programs).toHaveLength(1)
     })
 
-    it('returns an error if the state is not in valid state list', async () => {
+    it('returns a state with no programs if the state is not in valid state list', async () => {
         const resolvers: Resolvers = {
             Query: {
                 getCurrentUser: getCurrentUserResolver(
@@ -96,14 +96,15 @@ describe('currentUser', () => {
         const { query } = createTestClient(server)
 
         // make a mock request
-        process.env.REACT_APP_LOCAL_LOGIN = 'true'
-
         const res = await query({ query: GET_CURRENT_USER })
 
         // confirm that we get what we got
-        expect(res.errors).toBeDefined()
-        expect(res.errors && res.errors[0].message).toBe(
-            'No state data for users state: MI'
+        expect(res.errors).toBeUndefined()
+
+        expect(res.data.getCurrentUser.email).toBe('james@example.com')
+        expect(res.data.getCurrentUser.state.code).toBe('MI')
+        expect(res.data.getCurrentUser.state.name).toBe(
+            'This state is not part of the pilot'
         )
     })
 })
