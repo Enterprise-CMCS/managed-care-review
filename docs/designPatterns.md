@@ -27,7 +27,7 @@ Once you've identified something as a dependency, here are some best practices f
     -   HOWEVER, in order to best inject your dependencies, those environment variables should be read once at application start up and then never again
     -   So, when an app starts up in main() or index.ts, you should read your environment variables and then configure the app in code based on what those environment variables are.
 
-2.  This should set you up to be able to write tests that where dependencies are _not_ configured with environment variables.
+2.   Write tests where dependencies are _not_ configured with environment variables.
     -   test should run the same no matter the environment
     -   tests should test the different configurations possible
     -   we want to spend the most time testing the business logic of our app, so that's why mocks let us test our code without having to test and confirm that our dependency also is working as expected, its own tests should cover that.
