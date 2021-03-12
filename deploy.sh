@@ -5,14 +5,14 @@ set -e
 stage=${1:-dev}
 
 services=(
-  'database'
-  'uploads'
-  # 'uploads-scan'
-  'app-api'
-  'stream-functions'
-  'ui'
-  'ui-auth'
-  'storybook'
+  # 'database'
+  # 'uploads'
+  # # 'uploads-scan'
+  # 'app-api'
+  # 'stream-functions'
+  # 'ui'
+  # 'ui-auth'
+  # 'storybook'
   'app-web'
 )
 
