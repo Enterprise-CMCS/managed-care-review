@@ -4,13 +4,15 @@ import { createMemoryHistory } from 'history'
 import { screen, waitFor } from '@testing-library/react'
 
 import { Dashboard } from './Dashboard'
-import { mockGetCurrentUser200 } from '../../utils/apolloUtils'
+import { getCurrentUserMock } from '../../utils/apolloUtils'
 import { renderWithProviders } from '../../utils/jestUtils'
 
 describe('Dashboard', () => {
     it('display submission heading', async () => {
         renderWithProviders(<Dashboard />, {
-            apolloProvider: { mocks: [mockGetCurrentUser200] },
+            apolloProvider: {
+                mocks: [getCurrentUserMock({ statusCode: 200 })],
+            },
         })
 
         await waitFor(() =>
@@ -25,7 +27,9 @@ describe('Dashboard', () => {
 
     it('displays new submission link', async () => {
         renderWithProviders(<Dashboard />, {
-            apolloProvider: { mocks: [mockGetCurrentUser200] },
+            apolloProvider: {
+                mocks: [getCurrentUserMock({ statusCode: 200 })],
+            },
         })
 
         await waitFor(() => {
@@ -38,14 +42,27 @@ describe('Dashboard', () => {
     })
 
     it('displays tabs for available programs based on loggedInUser state', async () => {
-        const mockWithPrograms = mockGetCurrentUser200
-        mockWithPrograms.result.data.getCurrentUser.state.programs = [
-            { name: 'Program 1' },
-            { name: 'Program 2' },
-            { name: 'Program 3' },
-        ]
+        const mockUser = {
+            role: 'State User',
+            name: 'Bob in Virginia',
+            email: 'bob@dmas.va.gov',
+            state: {
+                name: 'Virginia',
+                code: 'VA',
+                programs: [
+                    { name: 'Program 1' },
+                    { name: 'Program 2' },
+                    { name: 'Program 3' },
+                ],
+            },
+        }
+
         renderWithProviders(<Dashboard />, {
-            apolloProvider: { mocks: [mockWithPrograms] },
+            apolloProvider: {
+                mocks: [
+                    getCurrentUserMock({ statusCode: 200, user: mockUser }),
+                ],
+            },
         })
 
         await waitFor(() => {
@@ -58,7 +75,9 @@ describe('Dashboard', () => {
 
     it('loads first tab active', async () => {
         renderWithProviders(<Dashboard />, {
-            apolloProvider: { mocks: [mockGetCurrentUser200] },
+            apolloProvider: {
+                mocks: [getCurrentUserMock({ statusCode: 200 })],
+            },
         })
 
         await waitFor(() => {
@@ -75,7 +94,7 @@ describe('Dashboard', () => {
 
         renderWithProviders(<Dashboard />, {
             apolloProvider: {
-                mocks: [mockGetCurrentUser200, mockGetCurrentUser200],
+                mocks: [getCurrentUserMock({ statusCode: 200 })],
             },
             routerProvider: {
                 routerProps: { history: history },

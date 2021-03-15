@@ -1,6 +1,67 @@
-import { GetCurrentUserDocument } from '../gen/gqlClient'
+import { GetCurrentUserDocument, User as UserType } from '../gen/gqlClient'
+import { MockedResponse } from '@apollo/client/testing'
 
-/* Apollo MockedProvider Mocks */
+/* For use with Apollo MockedProvider in jest tests */
+const mockValidUser: UserType = {
+    state: {
+        name: 'Minnesota',
+        code: 'MN',
+        programs: [{ name: 'MSHO' }, { name: 'PMAP' }, { name: 'SNBC' }],
+    },
+    role: 'State User',
+    name: 'Bob it user',
+    email: 'bob@dmas.mn.gov',
+}
+
+type getCurrentUserMockProps = {
+    user?: UserType | Partial<UserType>
+    statusCode: 200 | 403 | 500
+}
+const getCurrentUserMock = ({
+    user = mockValidUser,
+    statusCode,
+}: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+getCurrentUserMockProps): MockedResponse<Record<string, any>> => {
+    switch (statusCode) {
+        case 200:
+            return {
+                request: { query: GetCurrentUserDocument },
+                result: {
+                    data: {
+                        getCurrentUser: user,
+                    },
+                },
+            }
+        case 403:
+            return {
+                request: { query: GetCurrentUserDocument },
+                result: {
+                    ok: false,
+                    status: 403,
+                    statusText: 'Unauthenticated',
+                    data: {
+                        error: 'you are not logged in',
+                    },
+                    error: new Error('network error'),
+                },
+            }
+        default:
+            return {
+                request: { query: GetCurrentUserDocument },
+                result: {
+                    ok: false,
+                    status: 500,
+                    statusText: 'Unauthenticated',
+                    data: {
+                        error: 'gql server error',
+                    },
+                    error: new Error('Network eError'),
+                },
+            }
+    }
+}
+
+// TO BE DELETED
 const mockGetCurrentUser200 = {
     request: { query: GetCurrentUserDocument },
     result: {
@@ -36,4 +97,4 @@ const mockGetCurrentUser403 = {
     },
 }
 
-export { mockGetCurrentUser200, mockGetCurrentUser403 }
+export { getCurrentUserMock, mockGetCurrentUser200, mockGetCurrentUser403 }
