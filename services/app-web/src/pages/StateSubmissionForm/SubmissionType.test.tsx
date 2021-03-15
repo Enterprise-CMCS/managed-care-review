@@ -1,7 +1,7 @@
 import React from 'react'
 import { screen, waitFor } from '@testing-library/react'
 
-import { mockGetCurrentUser200 } from '../../utils/apolloUtils'
+import { getCurrentUserMock } from '../../utils/apolloUtils'
 import { renderWithProviders } from '../../utils/jestUtils'
 import { SubmissionType } from './SubmissionType'
 import { StateSubmissionInitialValues } from './StateSubmissionForm'
@@ -19,7 +19,9 @@ describe('SubmissionType', () => {
                 <SubmissionType {...onInitialLoadProps} />
             </Formik>,
             {
-                apolloProvider: { mocks: [mockGetCurrentUser200] },
+                apolloProvider: {
+                    mocks: [getCurrentUserMock({ statusCode: 200 })],
+                },
             }
         )
 
@@ -31,13 +33,20 @@ describe('SubmissionType', () => {
     })
 
     it('displays program options based on current user state', async () => {
-        const mockWithPrograms = mockGetCurrentUser200
-        mockWithPrograms.result.data.getCurrentUser.state.programs = [
-            { name: 'Program 1' },
-            { name: 'Program Test' },
-            { name: 'Program 3' },
-        ]
-
+        const mockUser = {
+            role: 'State User',
+            name: 'Sheena in Minnesota',
+            email: 'Sheena@dmas.mn.gov',
+            state: {
+                name: 'Minnesota',
+                code: 'MN',
+                programs: [
+                    { name: 'Program 1' },
+                    { name: 'Program Test' },
+                    { name: 'Program 3' },
+                ],
+            },
+        }
         renderWithProviders(
             <Formik
                 initialValues={StateSubmissionInitialValues}
@@ -46,7 +55,11 @@ describe('SubmissionType', () => {
                 <SubmissionType {...onInitialLoadProps} />
             </Formik>,
             {
-                apolloProvider: { mocks: [mockWithPrograms] },
+                apolloProvider: {
+                    mocks: [
+                        getCurrentUserMock({ statusCode: 200, user: mockUser }),
+                    ],
+                },
             }
         )
 
@@ -70,7 +83,9 @@ describe('SubmissionType', () => {
                 <SubmissionType {...onInitialLoadProps} />
             </Formik>,
             {
-                apolloProvider: { mocks: [mockGetCurrentUser200] },
+                apolloProvider: {
+                    mocks: [getCurrentUserMock({ statusCode: 200 })],
+                },
             }
         )
 
@@ -97,7 +112,9 @@ describe('SubmissionType', () => {
                 <SubmissionType {...onInitialLoadProps} />
             </Formik>,
             {
-                apolloProvider: { mocks: [mockGetCurrentUser200] },
+                apolloProvider: {
+                    mocks: [getCurrentUserMock({ statusCode: 200 })],
+                },
             }
         )
         await waitFor(() =>
@@ -123,7 +140,9 @@ describe('SubmissionType', () => {
                 <SubmissionType {...withErrorsProps} />
             </Formik>,
             {
-                apolloProvider: { mocks: [mockGetCurrentUser200] },
+                apolloProvider: {
+                    mocks: [getCurrentUserMock({ statusCode: 200 })],
+                },
             }
         )
         await waitFor(() => {
@@ -155,7 +174,9 @@ describe('SubmissionType', () => {
                 <SubmissionType {...withErrorsProps} />
             </Formik>,
             {
-                apolloProvider: { mocks: [mockGetCurrentUser200] },
+                apolloProvider: {
+                    mocks: [getCurrentUserMock({ statusCode: 200 })],
+                },
             }
         )
         await waitFor(() => {

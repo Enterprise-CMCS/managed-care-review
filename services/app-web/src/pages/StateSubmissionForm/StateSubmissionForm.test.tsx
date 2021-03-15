@@ -2,14 +2,16 @@ import React from 'react'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-import { mockGetCurrentUser200 } from '../../utils/apolloUtils'
+import { getCurrentUserMock } from '../../utils/apolloUtils'
 import { renderWithProviders } from '../../utils/jestUtils'
 import { StateSubmissionForm } from './StateSubmissionForm'
 
 describe('StateSubmissionForm', () => {
     it('displays a cancel link', async () => {
         renderWithProviders(<StateSubmissionForm />, {
-            apolloProvider: { mocks: [mockGetCurrentUser200] },
+            apolloProvider: {
+                mocks: [getCurrentUserMock({ statusCode: 200 })],
+            },
         })
 
         await waitFor(() =>
@@ -23,7 +25,9 @@ describe('StateSubmissionForm', () => {
 
     it('displays a continue button', async () => {
         renderWithProviders(<StateSubmissionForm />, {
-            apolloProvider: { mocks: [mockGetCurrentUser200] },
+            apolloProvider: {
+                mocks: [getCurrentUserMock({ statusCode: 200 })],
+            },
         })
 
         await waitFor(() =>
@@ -37,7 +41,9 @@ describe('StateSubmissionForm', () => {
 
     it('displays a form', async () => {
         renderWithProviders(<StateSubmissionForm />, {
-            apolloProvider: { mocks: [mockGetCurrentUser200] },
+            apolloProvider: {
+                mocks: [getCurrentUserMock({ statusCode: 200 })],
+            },
         })
 
         await waitFor(() =>
@@ -53,7 +59,9 @@ describe('StateSubmissionForm', () => {
                 renderWithProviders(
                     <StateSubmissionForm step="SUBMISSION_TYPE" />,
                     {
-                        apolloProvider: { mocks: [mockGetCurrentUser200] },
+                        apolloProvider: {
+                            mocks: [getCurrentUserMock({ statusCode: 200 })],
+                        },
                     }
                 )
 
@@ -66,7 +74,9 @@ describe('StateSubmissionForm', () => {
 
             it('loads at step 0 by default even if no step prop passed in', async () => {
                 renderWithProviders(<StateSubmissionForm />, {
-                    apolloProvider: { mocks: [mockGetCurrentUser200] },
+                    apolloProvider: {
+                        mocks: [getCurrentUserMock({ statusCode: 200 })],
+                    },
                 })
 
                 await waitFor(() =>
@@ -80,7 +90,9 @@ describe('StateSubmissionForm', () => {
                 renderWithProviders(
                     <StateSubmissionForm step="SUBMISSION_TYPE" />,
                     {
-                        apolloProvider: { mocks: [mockGetCurrentUser200] },
+                        apolloProvider: {
+                            mocks: [getCurrentUserMock({ statusCode: 200 })],
+                        },
                     }
                 )
 
@@ -107,7 +119,9 @@ describe('StateSubmissionForm', () => {
                 renderWithProviders(
                     <StateSubmissionForm step="SUBMISSION_TYPE" />,
                     {
-                        apolloProvider: { mocks: [mockGetCurrentUser200] },
+                        apolloProvider: {
+                            mocks: [getCurrentUserMock({ statusCode: 200 })],
+                        },
                     }
                 )
 
@@ -134,17 +148,32 @@ describe('StateSubmissionForm', () => {
             })
 
             it('displays step 1 when form is valid and continue button is clicked', async () => {
-                const mockWithPrograms = mockGetCurrentUser200
-                mockWithPrograms.result.data.getCurrentUser.state.programs = [
-                    { name: 'Program 1' },
-                    { name: 'Program Test' },
-                    { name: 'Program 3' },
-                ]
+                const mockUser = {
+                    role: 'State User',
+                    name: 'Bob in Minnesota',
+                    email: 'bob@dmas.mn.gov',
+                    state: {
+                        name: 'Minnesota',
+                        code: 'MN',
+                        programs: [
+                            { name: 'Program 1' },
+                            { name: 'Program Test' },
+                            { name: 'Program 3' },
+                        ],
+                    },
+                }
 
                 renderWithProviders(
                     <StateSubmissionForm step="SUBMISSION_TYPE" />,
                     {
-                        apolloProvider: { mocks: [mockWithPrograms] },
+                        apolloProvider: {
+                            mocks: [
+                                getCurrentUserMock({
+                                    statusCode: 200,
+                                    user: mockUser,
+                                }),
+                            ],
+                        },
                     }
                 )
 

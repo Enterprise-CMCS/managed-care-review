@@ -1,5 +1,6 @@
 import { GetCurrentUserDocument, User as UserType } from '../gen/gqlClient'
 import { MockedResponse } from '@apollo/client/testing'
+import { GraphQLError } from 'graphql'
 
 /* For use with Apollo MockedProvider in jest tests */
 const mockValidUser: UserType = {
@@ -36,27 +37,22 @@ getCurrentUserMockProps): MockedResponse<Record<string, any>> => {
             return {
                 request: { query: GetCurrentUserDocument },
                 result: {
-                    ok: false,
-                    status: 403,
-                    statusText: 'Unauthenticated',
-                    data: {
-                        error: 'you are not logged in',
-                    },
-                    error: new Error('network error'),
+                    // Need to double check types for both cognito and local login
+                    // also double check that local login mocks 403 correctly
+                    // https://www.apollographql.com/docs/react/development-testing/testing/#defining-mocked-responses
+                    // ok: false,
+                    // status: 403,
+                    // statusText: 'Unauthenticated',
+                    // data: {
+                    //     error: 'you are not logged in',
+                    // },
+                    errors: [new GraphQLError('You are not logged in')],
                 },
             }
         default:
             return {
                 request: { query: GetCurrentUserDocument },
-                result: {
-                    ok: false,
-                    status: 500,
-                    statusText: 'Unauthenticated',
-                    data: {
-                        error: 'gql server error',
-                    },
-                    error: new Error('Network eError'),
-                },
+                error: new Error('A network error occurred'),
             }
     }
 }
