@@ -4,7 +4,7 @@
 
 Dependency injection is the way we make sure that code is configured with whatever dependencies it requires.
 
-What's a dependency you ask? The most obvious dependencies are things that make requests to other services. So in `app-web`, the graphql client is an obvious dependency. And actually, that client even has a dependency that we configure which is the fetch ApolloLink. In order to mock out auth locally, we add a header to every API request with the local user in it. So when `AUTH_MODE=LOCAL`, we pass a different link to the Apollo client, a different dependency.
+What's a dependency you ask? The most obvious dependencies are things that make requests to other services. So in `app-web`, the graphql client is a dependency. The graphql client also has an additional dependency that we configure - ApolloLink. We manage these dependencies with environment variables. When `AUTH_MODE=LOCAL`, we pass a different link to the Apollo client, injecting the graphql client with a different dependency.  The interface to graphql doesn't change in this case, only the dependency it uses changes.  This means we can use or test graphql throughout the codebase the same way, even in different environments.
 
 Another related example: in `app-api`, we get info about the current user which also needs to behave differently locally than when deployed. So we have a `userFromAuthProvider` interface that we build two implementations for. One for local, one for cognito, and at startup time we configure which one the handler is going to use. In tests, it's easy to configure our handler to use the one we want, or a mock one that meets the same interface.
 
@@ -32,9 +32,9 @@ Once you've identified something as a dependency, here are some best practices f
     -   tests should test the different configurations possible
     -   we want to spend the most time testing the business logic of our app, so that's why mocks let us test our code without having to test and confirm that our dependency also is working as expected, its own tests should cover that.
 
-### An Example:
+### Another Example:
 
-As mentioned above (and the problem that spurred these docs to be written) some of our resolvers will need to be able to fetch information about the user that is making this request. We get that data very differently locally than we do in a deployed environment. Here is the evolution of my strategy for doing this?
+As mentioned above (and the problem that spurred these docs to be written) some of our resolvers will need to be able to fetch information about the user that is making this request. We get that data very differently locally than we do in a deployed environment. Here are some examples of practices as they evolved in this application.
 
 -   bad: Calling env.process.AUTH_MODE in your handler
     -   the first pass just checked the auth mode env var and then either talked to cognito or didn't, depending.
