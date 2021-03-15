@@ -77,7 +77,14 @@ export async function userFromCognitoAuthProvider(
 
         // we lose type safety here...
         const attributes = userAttrDict(currentUser)
-        if (!('email' in attributes && 'custom:state_code' in attributes)) {
+        if (
+            !(
+                'email' in attributes &&
+                'custom:state_code' in attributes &&
+                'given_name' in attributes &&
+                'family_name' in attributes
+            )
+        ) {
             return err(
                 new Error(
                     'User does not have all the required attributes: ' +
@@ -89,13 +96,7 @@ export async function userFromCognitoAuthProvider(
         console.log('got user attr dict: ', attributes)
 
         let fullName: string
-        // the IDM connection is not providing given_name or family_name, that's just on Cognito
-        // once we know what IDM is actually going to give us we can re-work this
-        if ('given_name' in attributes && 'family_name' in attributes) {
-            fullName = attributes.given_name + ' ' + attributes.family_name
-        } else {
-            fullName = 'Unnamed IDM User'
-        }
+        fullName = attributes.given_name + ' ' + attributes.family_name
 
         const user: CognitoUserType = {
             email: attributes.email,
