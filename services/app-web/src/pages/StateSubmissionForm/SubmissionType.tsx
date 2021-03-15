@@ -13,27 +13,23 @@ import {
 
 import styles from './StateSubmissionForm.module.scss'
 import { StateSubmissionFormValues } from './StateSubmissionForm'
-import { useAuth, LoggedInAuthContext } from '../../contexts/AuthContext'
+import { useAuth } from '../../contexts/AuthContext'
 
 type SubmissionTypeProps = {
     errors: FormikErrors<StateSubmissionFormValues>
     showValidations: boolean
 }
 
-type Error = FormikErrors<StateSubmissionFormValues>[keyof FormikErrors<StateSubmissionFormValues>]
+type FormError = FormikErrors<StateSubmissionFormValues>[keyof FormikErrors<StateSubmissionFormValues>]
 
 export const SubmissionType = ({
     errors,
     showValidations,
 }: SubmissionTypeProps): React.ReactElement => {
     const { values } = useFormikContext<StateSubmissionFormValues>()
-    const {
-        loggedInUser: {
-            state: { programs },
-        },
-    } = useAuth() as LoggedInAuthContext
+    const { loggedInUser: { state: { programs = [] } = {} } = {} } = useAuth()
 
-    const showError = (error?: Error) => showValidations && Boolean(error)
+    const showError = (error?: FormError) => showValidations && Boolean(error)
 
     return (
         <>
@@ -41,10 +37,13 @@ export const SubmissionType = ({
                 <Label htmlFor="program">Program</Label>
                 <Field id="program" name="program" as={Dropdown}>
                     {programs.map((program) => (
-                        <option value={program.name}>{program.name}</option>
+                        <option key={program.name} value={program.name}>
+                            {program.name}
+                        </option>
                     ))}
                 </Field>
             </FormGroup>
+
             <FormGroup className={styles.formGroup}>
                 <Fieldset legend="Choose submission type">
                     {showError(errors.submissionType) && (
@@ -52,6 +51,7 @@ export const SubmissionType = ({
                     )}
                     <Field
                         as={Radio}
+                        checked={values.submissionType === 'contractOnly'}
                         id="contractOnly"
                         name="submissionType"
                         label="Contract action only"
@@ -59,6 +59,7 @@ export const SubmissionType = ({
                     />
                     <Field
                         as={Radio}
+                        checked={values.submissionType === 'contractRate'}
                         id="contractRate"
                         name="submissionType"
                         label="Contract action and rate certification"

@@ -16,9 +16,6 @@ type AuthContextType = {
     logout: undefined | (() => Promise<void>)
 }
 
-export type LoggedInAuthContext = Omit<AuthContextType, 'loggedInUser'> & {
-    loggedInUser: UserType
-}
 const AuthContext = React.createContext<AuthContextType>({
     loggedInUser: undefined,
     isAuthenticated: false,
