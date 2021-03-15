@@ -1,4 +1,5 @@
 import React from 'react'
+import * as Yup from 'yup'
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import {
     GridContainer,
@@ -7,7 +8,7 @@ import {
     Link,
     Button,
 } from '@trussworks/react-uswds'
-import * as Yup from 'yup'
+import { NavLink } from 'react-router-dom'
 
 import styles from './StateSubmissionForm.module.scss'
 import { SubmissionType } from './SubmissionType'
@@ -140,8 +141,10 @@ export const StateSubmissionForm = ({
                                     Test Validation
                                 </Button>
                                 <Link
-                                    href="#"
+                                    asCustom={NavLink}
                                     className="usa-button usa-button--outline"
+                                    variant="unstyled"
+                                    to="/dashboard"
                                 >
                                     Cancel
                                 </Link>

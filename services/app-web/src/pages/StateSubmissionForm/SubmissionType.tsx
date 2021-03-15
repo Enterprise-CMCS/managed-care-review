@@ -51,6 +51,7 @@ export const SubmissionType = ({
                     )}
                     <Field
                         as={Radio}
+                        checked={values.submissionType === 'contractOnly'}
                         id="contractOnly"
                         name="submissionType"
                         label="Contract action only"
@@ -58,6 +59,7 @@ export const SubmissionType = ({
                     />
                     <Field
                         as={Radio}
+                        checked={values.submissionType === 'contractRate'}
                         id="contractRate"
                         name="submissionType"
                         label="Contract action and rate certification"
