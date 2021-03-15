@@ -59,12 +59,15 @@ export async function userFromCognitoAuthProvider(
         const subFilter = `sub = "${userInfo.userId}"`
 
         // let's see what we've got
+        const startRequest = performance.now()
         const listUsersResponse = await cognito
             .listUsers({
                 UserPoolId: userInfo.poolId,
                 Filter: subFilter,
             })
             .promise()
+        const endRequest = performance.now()
+        console.log('listUsers takes ms:', endRequest - startRequest)
 
         const userResp: CognitoIdentityServiceProvider.ListUsersResponse = listUsersResponse
 
@@ -95,8 +98,7 @@ export async function userFromCognitoAuthProvider(
 
         console.log('got user attr dict: ', attributes)
 
-        let fullName: string
-        fullName = attributes.given_name + ' ' + attributes.family_name
+        const fullName = attributes.given_name + ' ' + attributes.family_name
 
         const user: CognitoUserType = {
             email: attributes.email,
