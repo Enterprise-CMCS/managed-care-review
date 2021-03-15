@@ -51,20 +51,14 @@ export async function userFromCognitoAuthProvider(
     }
 
     const userInfo = parseResult.value
-    console.log('it parsed!', userInfo)
-
-    // TODO: This is different in IDM?
-    // userInfo.poolId = userInfo.poolId + '_Okta'
 
     // calling a dependency so we have to try
     try {
         const cognito = new CognitoIdentityServiceProvider()
 
         const subFilter = `sub = "${userInfo.userId}"`
-        console.log('SUB FIL', subFilter)
 
         // let's see what we've got
-        const startRequest = performance.now()
         const listUsersResponse = await cognito
             .listUsers({
                 UserPoolId: userInfo.poolId,
@@ -72,13 +66,7 @@ export async function userFromCognitoAuthProvider(
             })
             .promise()
 
-        const endRequest = performance.now()
-        console.log('listUsers takes ms:', endRequest - startRequest)
         const userResp: CognitoIdentityServiceProvider.ListUsersResponse = listUsersResponse
-
-        console.log('got Users: ', userResp)
-
-        console.log('got actual users: ', JSON.stringify(userResp.Users))
 
         if (userResp.Users === undefined || userResp.Users.length !== 1) {
             // logerror
@@ -97,6 +85,8 @@ export async function userFromCognitoAuthProvider(
                 )
             )
         }
+
+        console.log('got user attr dict: ', attributes)
 
         let fullName: string
         // the IDM connection is not providing given_name or family_name, that's just on Cognito
