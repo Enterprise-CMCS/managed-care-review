@@ -36,18 +36,7 @@ getCurrentUserMockProps): MockedResponse<Record<string, any>> => {
         case 403:
             return {
                 request: { query: GetCurrentUserDocument },
-                result: {
-                    // Need to double check types for both cognito and local login
-                    // also double check that local login mocks 403 correctly
-                    // https://www.apollographql.com/docs/react/development-testing/testing/#defining-mocked-responses
-                    // ok: false,
-                    // status: 403,
-                    // statusText: 'Unauthenticated',
-                    // data: {
-                    //     error: 'you are not logged in',
-                    // },
-                    errors: [new GraphQLError('You are not logged in')],
-                },
+                error: new Error('You are not logged in'),
             }
         default:
             return {
