@@ -4,7 +4,7 @@
 
 Dependency injection is the way we make sure that code is configured with whatever dependencies it requires.
 
-What's a dependency you ask? The most obvious dependencies are things that make requests to other services. So in `app-web`, the graphql client is a dependency. The graphql client also has an additional dependency that we configure - ApolloLink. We manage these dependencies with environment variables. When `AUTH_MODE=LOCAL`, we pass a different link to the Apollo client, injecting the graphql client with a different dependency.  The interface to graphql doesn't change in this case, only the dependency it uses changes.  This means we can use or test graphql throughout the codebase the same way, even in different environments.
+What's a dependency you ask? The most obvious dependencies are things that make requests to other services. So in `app-web`, the graphql client is a dependency. The graphql client also has an additional dependency that we configure - ApolloLink. We manage these dependencies with environment variables. When `AUTH_MODE=LOCAL`, we pass a different link to the Apollo client, injecting the graphql client with a different dependency. The interface to graphql doesn't change in this case, only the dependency it uses changes. This means we can use or test graphql throughout the code base the same way, even in different environments.
 
 Another related example: in `app-api`, we get info about the current user which also needs to behave differently locally than when deployed. So we have a `userFromAuthProvider` interface that we build two implementations for. One for local, one for cognito, and at startup time we configure which one the handler is going to use. In tests, it's easy to configure our handler to use the one we want, or a mock one that meets the same interface.
 
@@ -27,7 +27,8 @@ Once you've identified something as a dependency, here are some best practices f
     -   HOWEVER, in order to best inject your dependencies, those environment variables should be read once at application start up and then never again
     -   So, when an app starts up in main() or index.ts, you should read your environment variables and then configure the app in code based on what those environment variables are.
 
-2.   Write tests where dependencies are _not_ configured with environment variables.
+2.  Write tests where dependencies are _not_ configured with environment variables.
+
     -   test should run the same no matter the environment
     -   tests should test the different configurations possible
     -   we want to spend the most time testing the business logic of our app, so that's why mocks let us test our code without having to test and confirm that our dependency also is working as expected, its own tests should cover that.
@@ -48,18 +49,43 @@ As mentioned above (and the problem that spurred these docs to be written) some 
 
 Lambda + Apollo server limits our options to some degree. We don't have a traditional app `main()` or `index.ts` to wire everything together in. We have to wire things on every request. There are two good options for passing down dependencies:
 
--   Option 1: Config wrapper for a type
-    -   write a wrapping function that takes dependencies as arguments and returns whatever type needs them (a function, whatever)
-    -   lets us explicitly name dependences for the types we care about
-    -   how we're passing the userFetcher to resolvers that need it
-    -   does add a layer of indirection to our resolver types, it's always easier to just have a global to check
--   Option 2: put it in the context
-    -   great place for "request scoped" dependencies.
-    -   the request logger will go here
-    -   good way to communicate with middlewares
-    -   more general, multiple resolvers can pull from the same config
-    -   we can type the context so it's required to be set
-    -   that will require setting it even for functions that don't care in tests later on.
+#### Option 1: Config wrapper for a type:
+
+Write a wrapping function that takes dependencies as arguments and returns whatever type needs them (a function, whatever)
+
+-   lets us explicitly name dependences for the types we care about
+-   how we're passing the userFetcher to resolvers that need it
+-   does add a layer of indirection to our resolver types, it's always easier to just have a global to check
+
+#### Option 2: put it in the context
+
+Use the Apollo Server context variable to pass it down to all resolvers. A request logger that is initialized in a middleware is a good example here.
+
+-   great place for "request scoped" dependencies.
+-   good way to communicate with middlewares
+-   more general, multiple resolvers can pull from the same config
+-   we can type the context so it's required to be set
+-   that will require setting it even for functions that don't care in tests later on.
+
+### Where do you inject dependencies in React?
+
+React, being a functional framework built around JSX has its own patterns around dependency injection. `index.ts` is the right place to do all your env var parsing and configure your dependencies, but since components in react are often nested quite deep, the simple rule of passing things down can be more difficult.
+
+#### Option 1: Pass it down the props
+
+The first option is just that, though. If a component needs access to something like a connection to a server or a logout function, you can always pass it down via props. You may have to pass it through several intermediate components, but that at least keeps you honest about where configuration is required. It's hard to test a higher level component well without making sure all it's children have the configuration they need
+
+-   Easy and obvious
+-   The type checker will complain if you forget a dependency
+-   Tests can again be written without ever parsing env vars
+
+#### Option 2: Use a React Context
+
+This is what Apollo Client does and is a good pattern for providing easy access to some kind of shared resource in a variety of components without having to drill props down to arbitrary depths. When you test a component that depends on a context, it won't work unless you wrap that component in a context. And that wrapper can easily be a mock.
+
+-   No more prop drilling, any component that is a child of a context can subscribe to it
+-   It's a common pattern for dependency injection in the react world already
+-   lets you wrap up your dependency in a nice reactive form, where components can simply re-render in response to changes wrapped up in the context
 
 ## Future Work
 
