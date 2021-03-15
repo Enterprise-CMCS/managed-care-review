@@ -115,7 +115,7 @@ describe('StateSubmissionForm', () => {
                 })
             })
 
-            it('shows validation error messages when continue button is clicked', async () => {
+            it('if form fields are invalid, shows validation error messages when continue button is clicked', async () => {
                 renderWithProviders(
                     <StateSubmissionForm step="SUBMISSION_TYPE" />,
                     {
@@ -147,7 +147,7 @@ describe('StateSubmissionForm', () => {
                 })
             })
 
-            it('displays step 1 when form is valid and continue button is clicked', async () => {
+            it('if form fields are valid, displays step 1 when continue button is clicked', async () => {
                 const mockUser = {
                     role: 'State User',
                     name: 'Bob in Minnesota',
