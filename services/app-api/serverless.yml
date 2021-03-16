@@ -219,6 +219,8 @@ resources:
     ApiGatewayRestApiName:
       Value:
         Ref: ApiGatewayRestApi
+    ApiAuthMode:
+      Value: ${self:custom.react_app_auth_mode}
     ApiGatewayRestApiUrl:
       Value:
         Fn::Join:
