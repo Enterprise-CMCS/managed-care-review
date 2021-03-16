@@ -1,0 +1,45 @@
+@import '../../styles/uswdsImports.scss';
+@import '../../styles/custom';
+
+.submissionList {
+    padding-left: 0;
+}
+.cardContainer {
+    border: 1px solid $theme-color-base-lighter;
+    padding: units(2);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: units(2);
+    @include u-radius('md');
+}
+
+.cardLeft {
+    width: 50%;
+
+    p {
+        margin-bottom: 0;
+        line-height: line-height('body', 3);
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+        overflow: hidden;
+
+    }
+}
+
+.cardRight {
+    text-align: right;
+}
+
+.submissionType {
+    @include u-font ('sans', '2xs');
+}
+
+.tagSuccess {
+    background: $theme-color-success;
+}
+
+.tagWarning {
+    background: $theme-color-warning-dark;
+    @include u-text('ink'); 
+}
