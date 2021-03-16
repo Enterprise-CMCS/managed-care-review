@@ -272,7 +272,7 @@ async function run_web_against_aws(
 
     // set them
     process.env.PORT = '3003' // run hybrid on a different port
-    process.env.REACT_APP_LOCAL_LOGIN = 'false' // override local_login in .env
+    process.env.REACT_APP_AUTH_MODE = 'AWS_COGNITO' // override local_login in .env
     process.env.REACT_APP_API_URL = apiBase
     process.env.REACT_APP_COGNITO_REGION = region
     process.env.REACT_APP_COGNITO_ID_POOL_ID = idPool
