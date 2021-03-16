@@ -87,6 +87,12 @@ This is what Apollo Client does and is a good pattern for providing easy access 
 -   It's a common pattern for dependency injection in the react world already
 -   lets you wrap up your dependency in a nice reactive form, where components can simply re-render in response to changes wrapped up in the context
 
+## Domain Models
+
+Domain models ar
+
+-   domain models don't import any of the rest of your code, but anything in your code can import domain models
+
 ## Future Work
 
 -   Testing
