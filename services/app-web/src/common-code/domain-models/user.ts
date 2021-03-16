@@ -1,4 +1,4 @@
-import {CognitoUserType} from './cognitoUserType'
+import { CognitoUserType } from './cognitoUserType'
 
 export function isCognitoUser(user: unknown): user is CognitoUserType {
     if (user && typeof user === 'object') {

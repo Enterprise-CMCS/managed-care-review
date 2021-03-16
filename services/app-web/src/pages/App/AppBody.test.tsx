@@ -5,7 +5,7 @@ import { renderWithProviders, userClickSignIn } from '../../utils/jestUtils'
 import { AppBody } from './AppBody'
 import { mockGetCurrentUser200 } from '../../utils/apolloUtils'
 test('App renders without errors', () => {
-    renderWithProviders(<AppBody />)
+    renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
     const mainElement = screen.getByRole('main')
     expect(mainElement).toBeInTheDocument()
 })
@@ -17,7 +17,7 @@ test.todo(
 describe('Routing', () => {
     describe('/', () => {
         it('display dashboard when logged in', async () => {
-            renderWithProviders(<AppBody />, {
+            renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
                 apolloProvider: { mocks: [mockGetCurrentUser200] },
             })
 
@@ -35,7 +35,7 @@ describe('Routing', () => {
         })
 
         it('display landing page when logged out', () => {
-            renderWithProviders(<AppBody />)
+            renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
 
             expect(
                 screen.getByRole('heading', { name: /How it works/i, level: 2 })
@@ -51,7 +51,7 @@ describe('Routing', () => {
 
     describe('/auth', () => {
         it('when app loads at /auth route, Auth header is displayed', () => {
-            renderWithProviders(<AppBody />, {
+            renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
                 routerProvider: { route: '/auth' },
             })
 
@@ -67,7 +67,7 @@ describe('Routing', () => {
         })
 
         it('when user clicks Sign In link, redirects to /auth', () => {
-            renderWithProviders(<AppBody />)
+            renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
             userClickSignIn(screen)
 
             expect(
@@ -76,9 +76,7 @@ describe('Routing', () => {
         })
 
         it('display local login page when expected', async () => {
-            renderWithProviders(<AppBody />, {
-                authProvider: { localLogin: true },
-            })
+            renderWithProviders(<AppBody authMode={'LOCAL'} />)
 
             userClickSignIn(screen)
 
@@ -91,7 +89,7 @@ describe('Routing', () => {
         })
 
         it('display cognito signup page when expected', () => {
-            renderWithProviders(<AppBody />)
+            renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
             userClickSignIn(screen)
 
             expect(
@@ -108,7 +106,7 @@ describe('Routing', () => {
 
     describe('invalid routes', () => {
         it('redirect to landing page when logged out', () => {
-            renderWithProviders(<AppBody />, {
+            renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
                 routerProvider: { route: '/not-a-real-place' },
             })
             expect(
@@ -117,7 +115,7 @@ describe('Routing', () => {
         })
 
         it('redirects to 404 error page when logged in', async () => {
-            renderWithProviders(<AppBody />, {
+            renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
                 apolloProvider: { mocks: [mockGetCurrentUser200] },
                 routerProvider: { route: '/not-a-real-place' },
             })

@@ -11,6 +11,7 @@ import { AppBody } from './AppBody'
 import { logEvent } from '../../log_event'
 import { AuthProvider } from '../../contexts/AuthContext'
 import { GenericError } from '../Errors/GenericError'
+import { AuthModeType } from '../../common-code/domain-models'
 
 function ErrorFallback({
     error,
@@ -23,10 +24,10 @@ function ErrorFallback({
 }
 
 function App({
-    localLogin,
+    authMode,
     apolloClient,
 }: {
-    localLogin: boolean
+    authMode: AuthModeType
     apolloClient: ApolloClient<NormalizedCacheObject>
 }): React.ReactElement {
     logEvent('on_load', { success: true })
@@ -35,8 +36,8 @@ function App({
         <ErrorBoundary FallbackComponent={ErrorFallback}>
             <BrowserRouter>
                 <ApolloProvider client={apolloClient}>
-                    <AuthProvider localLogin={localLogin}>
-                        <AppBody />
+                    <AuthProvider authMode={authMode}>
+                        <AppBody authMode={authMode} />
                     </AuthProvider>
                 </ApolloProvider>
             </BrowserRouter>

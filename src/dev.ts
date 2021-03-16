@@ -113,6 +113,8 @@ async function run_web_locally(runner: LabeledProcessRunner) {
 }
 
 async function run_sb_locally(runner: LabeledProcessRunner) {
+    compile_graphql_types_watch_once(runner)
+
     await runner.run_command_and_output(
         'web deps',
         ['yarn', 'install'],
@@ -252,9 +254,13 @@ async function run_web_against_aws(
 
     // Now, we've confirmed we are configured to pull data out of serverless x cloudformation
     console.log('Access confirmed. Fetching config vars')
-    const { region, idPool, userPool, userPoolClient } = getWebAuthVars(
-        stageName
-    )
+    const {
+        region,
+        idPool,
+        userPool,
+        userPoolClient,
+        userPoolDomain,
+    } = getWebAuthVars(stageName)
 
     const apiBase = commandMustSucceedSync(
         './output.sh',
@@ -272,6 +278,8 @@ async function run_web_against_aws(
     process.env.REACT_APP_COGNITO_ID_POOL_ID = idPool
     process.env.REACT_APP_COGNITO_USER_POOL_ID = userPool
     process.env.REACT_APP_COGNITO_USER_POOL_CLIENT_ID = userPoolClient
+    process.env.REACT_APP_COGNITO_USER_POOL_CLIENT_DOMAIN = userPoolDomain
+    process.env.REACT_APP_APPLICATION_ENDPOINT = 'http://localhost:3003/'
 
     // run it
     const runner = new LabeledProcessRunner()
@@ -489,12 +497,12 @@ function main() {
                 run_all_tests(parsedFlags)
             }
         )
-        .command( 
+        .command(
             'format',
             'run format. This will be replaced by pre-commit',
             {},
             () => {
-                      run_all_format()
+                run_all_format()
             }
         )
         .command(

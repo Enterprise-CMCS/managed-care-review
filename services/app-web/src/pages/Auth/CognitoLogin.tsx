@@ -3,22 +3,9 @@ import { Button, GridContainer, Grid } from '@trussworks/react-uswds'
 
 import { Signup } from './Signup'
 import { ConfirmSignUp } from './ConfirmSignUp'
-import { LocalAuth } from './LocalAuth'
 import { Login } from './Login'
-import { useAuth } from '../../contexts/AuthContext'
 
-export const Auth = (): React.ReactElement => {
-    const { localLogin } = useAuth()
-
-    return (
-        <GridContainer>
-            <h2>Auth Page</h2>
-            {localLogin ? <LocalAuth /> : <CognitoAuth />}
-        </GridContainer>
-    )
-}
-
-const CognitoAuth = (): React.ReactElement => {
+export const CognitoLogin = (): React.ReactElement => {
     const [showConfirmation, setShowConfirmation] = useState(false)
     const [showLogin, setShowLogin] = useState(false)
     const [enteredEmail, setEnteredEmail] = useState('')
@@ -30,7 +17,8 @@ const CognitoAuth = (): React.ReactElement => {
     }
 
     return showForms ? (
-        <>
+        <GridContainer>
+            <h2>Auth Page</h2>
             <Grid row>
                 {!showLogin && (
                     <Grid col={10} className="signup">
@@ -71,9 +59,10 @@ const CognitoAuth = (): React.ReactElement => {
                     </Button>
                 )}
             </Grid>
-        </>
+        </GridContainer>
     ) : (
-        <>
+        <GridContainer>
+            <h2>Auth Page</h2>
             <h3> Enter Confirmation Code</h3>
             <ConfirmSignUp
                 defaultEmail={enteredEmail}
@@ -86,6 +75,6 @@ const CognitoAuth = (): React.ReactElement => {
                     Show Signup/ Login
                 </Button>
             </div>
-        </>
+        </GridContainer>
     )
 }

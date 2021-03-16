@@ -8,7 +8,13 @@ import { Error400 } from '../Errors/Error400'
 import { Footer } from '../../components/Footer/Footer'
 import { Header } from '../../components/Header/Header'
 
-export function AppBody(): React.ReactElement {
+import { AuthModeType } from '../../common-code/domain-models'
+export function AppBody({
+
+    authMode,
+}: {
+    authMode: AuthModeType
+}): React.ReactElement {
     // TODO: create an DialogContext to handle all app alerts
     const [alert, setAlert] = React.useState(false)
 
@@ -18,10 +24,13 @@ export function AppBody(): React.ReactElement {
                 Skip to main content
             </a>
             <GovBanner aria-label="Official government website" />
-            <Header setAlert={setAlert} />
+            <Header
+                authMode={authMode}
+                setAlert={setAlert}
+            />
             <main id="main-content" className={styles.mainContent} role="main">
                 {alert && Error400}
-                <AppRoutes />
+                <AppRoutes authMode={authMode} />
             </main>
             <Footer />
         </div>

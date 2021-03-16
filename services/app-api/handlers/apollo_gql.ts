@@ -10,11 +10,28 @@ import {
 
 import { Resolvers } from '../gen/gqlServer'
 import typeDefs from '../../app-graphql/src/schema.graphql'
+import {
+    userFromLocalAuthProvider,
+    userFromCognitoAuthProvider,
+} from '../authn'
+
+import { assertIsAuthMode } from '../../app-web/src/common-code/domain-models'
+
+// Configuration:
+const authMode = process.env.REACT_APP_AUTH_MODE
+assertIsAuthMode(authMode)
+
+const userFetcher =
+    authMode === 'LOCAL'
+        ? userFromLocalAuthProvider
+        : userFromCognitoAuthProvider
+
+// End Configuration
 
 // Our resolvers are defined and tested in the resolvers package
 export const resolvers: Resolvers = {
     Query: {
-        getCurrentUser: getCurrentUserResolver
+        getCurrentUser: getCurrentUserResolver(userFetcher),
     },
     Mutation: {
         createDraftSubmission: createDraftSubmissionResolver,
@@ -29,8 +46,6 @@ const server = new ApolloServer({
         endpoint: '/local/graphql',
     },
     context: ({ event, context }) => {
-        // TODO, let's do the auth logic right here, if we can error.
-        // or rather, let's have an auth middleware.
         return {
             headers: event.headers,
             functionName: context.functionName,
@@ -44,38 +59,33 @@ function localAuthMiddleware(
     wrapped: APIGatewayProxyHandler
 ): APIGatewayProxyHandler {
     return function (event, context, completion) {
-        if (process.env.REACT_APP_LOCAL_LOGIN) {
-            console.log(
-                'foo',
-                event.requestContext.identity.cognitoAuthenticationProvider
-            )
+        const userHeader =
+            event.requestContext.identity.cognitoAuthenticationProvider
 
-            const userHeader =
-                event.requestContext.identity.cognitoAuthenticationProvider
-
-            if (userHeader === 'NO_USER') {
-                console.log('NO_USER info set, returning 403')
-                return Promise.resolve({
-                    statusCode: 403,
-                    body:
-                        '{ "error": "No User Sent in cognitoAuthenticationProvider header"}\n',
-                    headers: {
-                        'Access-Control-Allow-Origin': '*',
-                        'Access-Control-Allow-Credentials': true,
-                    },
-                })
-            }
+        if (userHeader === 'NO_USER') {
+            console.log('NO_USER info set, returning 403')
+            return Promise.resolve({
+                statusCode: 403,
+                body:
+                    '{ "error": "No User Sent in cognitoAuthenticationProvider header"}\n',
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': true,
+                },
+            })
         }
 
         return wrapped(event, context, completion)
     }
 }
 
-exports.graphqlHandler = localAuthMiddleware(
-    server.createHandler({
-        cors: {
-            origin: true,
-            credentials: true,
-        },
-    })
-)
+const gqlHandler = server.createHandler({
+    cors: {
+        origin: true,
+        credentials: true,
+    },
+})
+
+const isLocal = authMode === 'LOCAL'
+
+exports.graphqlHandler = isLocal ? localAuthMiddleware(gqlHandler) : gqlHandler
