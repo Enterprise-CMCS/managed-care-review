@@ -1,7 +1,10 @@
-mutation {
-    createDraftSubmission {
+mutation 
+    createDraftSubmission($input: CreateDraftSubmissionInput!) {
+      createDraftSubmission(input: $input) {
         draftSubmission {
-            program
+            program {
+                name
+            }
             submissionType
             submissionDescription
         }

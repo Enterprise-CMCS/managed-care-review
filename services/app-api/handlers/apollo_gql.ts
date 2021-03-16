@@ -3,6 +3,7 @@ import { ApolloServer } from 'apollo-server-lambda'
 import { APIGatewayProxyHandler } from 'aws-lambda'
 
 import {
+    createDraftSubmissionResolver,
     getCurrentUserResolver,
     userResolver,
 } from '../resolvers'
@@ -11,11 +12,14 @@ import { Resolvers } from '../gen/gqlServer'
 import typeDefs from '../../app-graphql/src/schema.graphql'
 
 // Our resolvers are defined and tested in the resolvers package
-const resolvers: Resolvers = {
+export const resolvers: Resolvers = {
     Query: {
         getCurrentUser: getCurrentUserResolver
     },
-    User: userResolver
+    Mutation: {
+        createDraftSubmission: createDraftSubmissionResolver,
+    },
+    User: userResolver,
 }
 
 const server = new ApolloServer({

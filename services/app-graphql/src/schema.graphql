@@ -8,7 +8,7 @@ type Query {
 }
 
 type Mutation {
-  createDraftSubmission(input: createDraftSubmissionInput!): CreateDraftSubmissionPayload
+  createDraftSubmission(input: CreateDraftSubmissionInput!): CreateDraftSubmissionPayload
 }
  
 type User {
@@ -43,12 +43,12 @@ type DraftSubmission {
   submissionDescription: String!
 }
 
-input createDraftSubmissionInput {
+input CreateDraftSubmissionInput {
   programId: ID!
   submissionType: SubmissionType!
   submissionDescription: String!
 }
 
 type CreateDraftSubmissionPayload {
-  draftSubmission: DraftSubmission!
+  draftSubmission: DraftSubmission
 }
