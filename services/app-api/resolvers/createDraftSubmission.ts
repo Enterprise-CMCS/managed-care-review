@@ -5,11 +5,10 @@ import {
     CreateDraftSubmissionPayload,
 } from '../gen/gqlServer'
 
-// eslint-disable-next-line @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any
 export const createDraftSubmissionResolver: Resolver<
     ResolverTypeWrapper<CreateDraftSubmissionPayload>,
-    {},
-    any,
+    Record<string, unknown>,
+    any, // eslint-disable-line  @typescript-eslint/no-explicit-any
     { input: CreateDraftSubmissionInput }
 > = async (_parent, { input }) => {
     // Query the database and validate program id is valid
@@ -18,6 +17,14 @@ export const createDraftSubmissionResolver: Resolver<
     if (!isValidProgram(input.programId))
         throw new Error('program id is not valid')
 
+    // Add draft submission to database and return draft submission.
+    const draftSubmissionFromDatabase = {
+        id: 'fake-submission-id',
+        name: 'fake-name-123',
+        submissionType: input.submissionType,
+        submissionDescription: input.submissionDescription
+    }
+    // Add a program from graphql resolver, probably remove programID if it was present
     const programFromDatabase = {
         id: 'abc123',
         name: 'California',
@@ -25,11 +32,8 @@ export const createDraftSubmissionResolver: Resolver<
 
     return {
         draftSubmission: {
-            id: 'fake-submission-id',
-            name: 'fake-name-123',
+           ...draftSubmissionFromDatabase,
             program: programFromDatabase,
-            submissionType: input.submissionType,
-            submissionDescription: input.submissionDescription,
         },
     }
 }
