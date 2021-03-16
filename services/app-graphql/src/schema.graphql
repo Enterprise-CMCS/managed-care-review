@@ -1,11 +1,16 @@
 schema {
     query: Query
+    mutation: Mutation
 }
 
 type Query {
     getCurrentUser: User!
 }
 
+type Mutation {
+  createDraftSubmission(input: createDraftSubmissionInput!): CreateDraftSubmissionPayload
+}
+ 
 type User {
     role: String!
     email: String!
@@ -20,5 +25,30 @@ type State {
 }
 
 type Program {
+    id: ID
     name: String!
+}
+
+enum SubmissionType {
+  CONTRACT_ONLY
+  CONTRACT_AND_RATES
+}
+
+
+type DraftSubmission {
+  id: ID!
+  name: String!
+  program: Program!
+  submissionType: SubmissionType!
+  submissionDescription: String!
+}
+
+input createDraftSubmissionInput {
+  programId: ID!
+  submissionType: SubmissionType!
+  submissionDescription: String!
+}
+
+type CreateDraftSubmissionPayload {
+  draftSubmission: DraftSubmission!
 }

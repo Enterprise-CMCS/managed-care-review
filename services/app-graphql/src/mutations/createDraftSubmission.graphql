@@ -1,0 +1,9 @@
+mutation {
+    createDraftSubmission {
+        draftSubmission {
+            program
+            submissionType
+            submissionDescription
+        }
+    }
+}
