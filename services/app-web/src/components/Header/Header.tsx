@@ -2,15 +2,18 @@ import React from 'react'
 import { Button, Link, GridContainer, Grid } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 
+import { idmRedirectURL } from '../../pages/Auth/cognitoAuth'
 import medicaidLogo from '../../assets/images/medicaidgovlogo.png'
 import styles from './Header.module.scss'
+import { useHistory } from 'react-router-dom'
+import { useAuth } from '../../contexts/AuthContext'
+import { AuthModeType } from '../../common-code/domain-models'
 
 import { Logo } from '../Logo/Logo'
 import { StateIcon } from './StateIcon'
-import { useAuth } from '../../contexts/AuthContext'
-import { useHistory } from 'react-router-dom'
 
 export type HeaderProps = {
+    authMode: AuthModeType
     activePage?: string
     setAlert?: React.Dispatch<boolean>
 }
@@ -19,6 +22,7 @@ export type HeaderProps = {
  * CMS Header
  */
 export const Header = ({
+    authMode,
     activePage = 'Managed Care Dashboard',
     setAlert,
 }: HeaderProps): React.ReactElement => {
@@ -44,7 +48,7 @@ export const Header = ({
     }
 
     const UserInfo = (): React.ReactElement => {
-        return loggedInUser && isAuthenticated ? (
+        return loggedInUser ? (
             <div className={styles.userInfo}>
                 <span>{loggedInUser.email}</span>
                 <span className={styles.divider}>|</span>
@@ -53,6 +57,14 @@ export const Header = ({
                     Sign out
                 </Button>
             </div>
+        ) : authMode === 'IDM' ? (
+            <Link
+                className="usa-button usa-button--outline"
+                variant="unstyled"
+                href={idmRedirectURL()}
+            >
+                Sign In
+            </Link>
         ) : (
             <Link
                 asCustom={NavLink}

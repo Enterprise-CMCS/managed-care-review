@@ -10,8 +10,8 @@ services=(
   # 'uploads-scan'
   'app-api'
   'stream-functions'
-  'ui-auth'
   'ui'
+  'ui-auth'
   'storybook'
   'app-web'
 )
@@ -48,6 +48,9 @@ echo """
 ------------------------------------------------------------------------------------------------
 Application endpoint:  `./output.sh ui CloudFrontEndpointUrl $stage`
 Storybook endpoint:  `./output.sh storybook CloudFrontEndpointUrl $stage`
+
+SSO URL: `./output.sh ui-auth UserPoolSingleSignOnURL $stage`
+AudienceRestriction: `./output.sh ui-auth AudienceRestrictionURI $stage`
 ------------------------------------------------------------------------------------------------
 """
 popd

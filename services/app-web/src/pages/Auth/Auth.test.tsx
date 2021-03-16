@@ -10,7 +10,8 @@ import {
     userClickByTestId,
     userClickByRole,
 } from '../../utils/jestUtils'
-import { Auth } from './Auth'
+import { CognitoLogin } from './CognitoLogin'
+import { LocalLogin } from './LocalLogin'
 import {
     mockGetCurrentUser200,
     mockGetCurrentUser403,
@@ -42,7 +43,7 @@ describe('Auth', () => {
         }
 
         it('displays signup form when logged out', () => {
-            renderWithProviders(<Auth />, {
+            renderWithProviders(<CognitoLogin />, {
                 apolloProvider: { mocks: [mockGetCurrentUser403] },
             })
 
@@ -55,7 +56,7 @@ describe('Auth', () => {
         })
 
         it('show login button displays login form', async () => {
-            renderWithProviders(<Auth />, {
+            renderWithProviders(<CognitoLogin />, {
                 apolloProvider: { mocks: [mockGetCurrentUser403] },
             })
 
@@ -75,6 +76,7 @@ describe('Auth', () => {
             })
         })
 
+        // TODO: this one is logging an error about updating things at the wrong time
         it('when login is successful, redirect to dashboard', async () => {
             const loginSpy = jest
                 .spyOn(CognitoAuthApi, 'signIn')
@@ -86,7 +88,7 @@ describe('Auth', () => {
                 )
             const history = createMemoryHistory()
 
-            renderWithProviders(<Auth />, {
+            renderWithProviders(<CognitoLogin />, {
                 apolloProvider: {
                     mocks: [mockGetCurrentUser403, mockGetCurrentUser200],
                 },
@@ -101,11 +103,12 @@ describe('Auth', () => {
             )
         })
 
+        // TODO: This one seems to have some other weirdness logging
         it('when login fails, stay on page and display error alert', async () => {
             const loginSpy = jest.spyOn(CognitoAuthApi, 'signIn')
             const history = createMemoryHistory()
 
-            renderWithProviders(<Auth />, {
+            renderWithProviders(<CognitoLogin />, {
                 apolloProvider: {
                     mocks: [
                         mockGetCurrentUser403,
@@ -133,9 +136,8 @@ describe('Auth', () => {
         })
 
         it('displays ang and toph when logged out', () => {
-            renderWithProviders(<Auth />, {
+            renderWithProviders(<LocalLogin />, {
                 apolloProvider: { mocks: [mockGetCurrentUser403] },
-                authProvider: { localLogin: true },
             })
 
             expect(
@@ -160,12 +162,17 @@ describe('Auth', () => {
         it('when login is successful, redirect to dashboard', async () => {
             const history = createMemoryHistory()
 
-            renderWithProviders(<Auth />, {
+            renderWithProviders(<LocalLogin />, {
                 routerProvider: { routerProps: { history: history } },
-                authProvider: { localLogin: true },
                 apolloProvider: {
                     mocks: [mockGetCurrentUser403, mockGetCurrentUser200],
                 },
+            })
+
+            const tophButton = screen.getByTestId('TophButton')
+
+            await waitFor(() => {
+                expect(tophButton).toBeEnabled()
             })
 
             userClickByTestId(screen, 'TophButton')
@@ -178,8 +185,7 @@ describe('Auth', () => {
         it('when login fails, stay on page and display error alert', async () => {
             const history = createMemoryHistory()
 
-            renderWithProviders(<Auth />, {
-                authProvider: { localLogin: true },
+            renderWithProviders(<LocalLogin />, {
                 apolloProvider: {
                     mocks: [mockGetCurrentUser403, mockGetCurrentUser403],
                 },
