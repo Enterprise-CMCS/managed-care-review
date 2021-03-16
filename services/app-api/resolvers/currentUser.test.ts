@@ -1,7 +1,7 @@
 import { createTestClient } from 'apollo-server-testing'
 import { Config } from 'apollo-server-lambda'
 
-import {constructTestServer} from '../utils/jestUtils'
+import { constructTestServer } from '../utils/jestUtils'
 import GET_CURRENT_USER from '../../app-graphql/src/queries/currentUserQuery.graphql'
 
 describe('currentUser', () => {
@@ -36,7 +36,7 @@ describe('currentUser', () => {
                 context,
             }
         }
-        const server = constructTestServer({context})
+        const server = constructTestServer({ context })
         const { query } = createTestClient(server)
 
         // make a mock request

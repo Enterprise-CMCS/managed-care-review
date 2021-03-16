@@ -8,9 +8,11 @@ type Query {
 }
 
 type Mutation {
-  createDraftSubmission(input: CreateDraftSubmissionInput!): CreateDraftSubmissionPayload
+    createDraftSubmission(
+        input: CreateDraftSubmissionInput!
+    ): CreateDraftSubmissionPayload
 }
- 
+
 type User {
     role: String!
     email: String!
@@ -30,25 +32,24 @@ type Program {
 }
 
 enum SubmissionType {
-  CONTRACT_ONLY
-  CONTRACT_AND_RATES
+    CONTRACT_ONLY
+    CONTRACT_AND_RATES
 }
 
-
 type DraftSubmission {
-  id: ID!
-  name: String!
-  program: Program!
-  submissionType: SubmissionType!
-  submissionDescription: String!
+    id: ID!
+    name: String!
+    program: Program!
+    submissionType: SubmissionType!
+    submissionDescription: String!
 }
 
 input CreateDraftSubmissionInput {
-  programId: ID!
-  submissionType: SubmissionType!
-  submissionDescription: String!
+    programId: ID!
+    submissionType: SubmissionType!
+    submissionDescription: String!
 }
 
 type CreateDraftSubmissionPayload {
-  draftSubmission: DraftSubmission
+    draftSubmission: DraftSubmission
 }
