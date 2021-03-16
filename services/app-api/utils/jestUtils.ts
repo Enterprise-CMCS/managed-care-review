@@ -1,6 +1,22 @@
 import { ApolloServer, Config } from 'apollo-server-lambda'
+
 import typeDefs from '../../app-graphql/src/schema.graphql'
-import {resolvers} from '../handlers/apollo_gql'
+import { Resolvers } from '../gen/gqlServer'
+import { getCurrentUserResolver, createDraftSubmissionResolver } from '../resolvers'
+import { userResolver } from '../resolvers/userResolver'
+import { userFromLocalAuthProvider } from '../authn'
+
+const testResolvers: Resolvers = {
+    Query: {
+        getCurrentUser: getCurrentUserResolver(
+            userFromLocalAuthProvider
+        ),
+    },
+    User: userResolver,
+    Mutation: {
+        createDraftSubmission: createDraftSubmissionResolver,
+    },
+}
 
 const defaultContext = (context: Config['context']) => {
     const event = {
@@ -17,17 +33,13 @@ const defaultContext = (context: Config['context']) => {
         context,
     }
 }
-
 const constructTestServer = ({ context = defaultContext } = {}): ApolloServer => new ApolloServer({
         typeDefs,
-        resolvers,
+        resolvers: testResolvers,
         playground: {
             endpoint: '/local/graphql',
         },
         context
     })
-
-
-
 
   export {constructTestServer}
