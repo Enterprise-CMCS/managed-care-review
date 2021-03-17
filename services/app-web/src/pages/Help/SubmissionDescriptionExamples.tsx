@@ -7,7 +7,7 @@ export const SubmissionDescriptionExamples = (): React.ReactElement => {
     return (
         <section className={styles.helpSection}>
             <GridContainer>
-                <h2>Submisison Description Examples</h2>
+                <h2>Submission Description Examples</h2>
                 <h3>Example #1</h3>
                 <p className="line-height-sans-4 measure-6">This COVID-related contract amendment adds (1) risk corridor language, (2) a telemedicine in lieu of service benefit, and (3) provisions related to enrollee access and provider relief during public health emergency period. These changes have been authorized through the state’s approved disaster relief State Plan Amendment. There was no rate change associated with this action, but an actuarial certification was submitted due to the implementation of the risk corridor. </p>
                 <h3>Example #2</h3>
