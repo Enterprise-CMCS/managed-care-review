@@ -84,13 +84,7 @@ function AuthProvider({
             // lets try and record what different errors are here.
             // call a generic graphql connection etc. error here.
         } else if (data?.getCurrentUser) {
-            console.log('got a suer')
             if (!isAuthenticated) {
-                console.log('GTOIN ')
-                // setTimeout(() => {
-                //     console.log('RELAOIDNG THAT USR')
-                //     window.location.reload()
-                // }, 2500)
                 setLoggedInUser(data.getCurrentUser)
             }
         }
