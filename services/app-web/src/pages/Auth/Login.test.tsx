@@ -114,7 +114,12 @@ describe('Cognito Login', () => {
     })
 
     it('when login is successful, redirect to dashboard', async () => {
-        const loginSpy = jest.spyOn(CognitoAuthApi, 'signIn')
+        const loginSpy = jest.spyOn(CognitoAuthApi, 'signIn').mockResolvedValue(
+            new CognitoUser({
+                Username: 'foo@example.com',
+                Pool: { getClientId: () => '7' } as CognitoUserPool,
+            })
+        )
 
         const history = createMemoryHistory()
 

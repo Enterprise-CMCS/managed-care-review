@@ -30,26 +30,36 @@ describe('Header', () => {
             expect(logoLink).toContainElement(logoImage)
         })
 
-        it('displays Medicaid and CHIP Managed Care Reporting heading', () => {
+        it('displays Medicaid and CHIP Managed Care Reporting heading', async () => {
             renderWithProviders(<Header authMode={'AWS_COGNITO'} />)
 
-            expect(screen.getByRole('heading')).toHaveTextContent(
-                'Medicaid and CHIP Managed Care Reporting and Review System'
-            )
+            await waitFor(() => {
+                expect(screen.getByRole('heading')).toHaveTextContent(
+                    'Medicaid and CHIP Managed Care Reporting and Review System'
+                )
+            })
         })
 
-        it('displays signin link when logged out', () => {
+        it('displays signin link when logged out', async () => {
             renderWithProviders(<Header authMode={'AWS_COGNITO'} />)
-            const signInButton = screen.getByRole('link', { name: /Sign In/i })
-            expect(signInButton).toBeVisible()
-            expect(signInButton).toHaveAttribute('href', '/auth')
+            await waitFor(() => {
+                const signInButton = screen.getByRole('link', {
+                    name: /Sign In/i,
+                })
+                expect(signInButton).toBeVisible()
+                expect(signInButton).toHaveAttribute('href', '/auth')
+            })
         })
 
-        it('redirects when signin Link is clicked', () => {
+        it('redirects when signin Link is clicked', async () => {
             renderWithProviders(<Header authMode={'AWS_COGNITO'} />)
-            const signInButton = screen.getByRole('link', { name: /Sign In/i })
-            userEvent.click(signInButton)
-            expect(signInButton).toHaveAttribute('href', '/auth')
+            await waitFor(() => {
+                const signInButton = screen.getByRole('link', {
+                    name: /Sign In/i,
+                })
+                userEvent.click(signInButton)
+                expect(signInButton).toHaveAttribute('href', '/auth')
+            })
         })
     })
 
