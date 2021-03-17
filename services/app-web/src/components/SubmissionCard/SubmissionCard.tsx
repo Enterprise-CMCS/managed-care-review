@@ -3,7 +3,7 @@ import { Tag } from '@trussworks/react-uswds'
 
 import styles from './SubmissionCard.module.scss'
 
-type SubmissionCardProps = {
+export type SubmissionCardProps = {
     number: string,
     description: string,
     type: string
