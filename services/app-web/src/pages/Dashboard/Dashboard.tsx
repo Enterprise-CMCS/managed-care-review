@@ -32,7 +32,7 @@ export const Dashboard = (): React.ReactElement => {
                             asCustom={NavLink}
                             className="usa-button"
                             variant="unstyled"
-                            to="/new"
+                            to="/submissions/new"
                         >
                             Start new submission
                         </Link>
