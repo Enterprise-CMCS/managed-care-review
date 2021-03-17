@@ -2,7 +2,7 @@ import { createTestClient } from 'apollo-server-testing'
 
 import { CreateDraftSubmissionInput, SubmissionType } from '../gen/gqlServer'
 import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
-import { constructTestServer } from '../utils/jestUtils'
+import { constructTestServer } from '../tests/testHelpers'
 
 describe('createDraftSubmission', () => {
     it('returns draft submission payload with a draft submission', async () => {

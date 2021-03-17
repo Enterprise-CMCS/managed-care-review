@@ -29,7 +29,7 @@ const userFetcher =
 // End Configuration
 
 // Our resolvers are defined and tested in the resolvers package
-export const resolvers: Resolvers = {
+const resolvers: Resolvers = {
     Query: {
         getCurrentUser: getCurrentUserResolver(userFetcher),
     },
