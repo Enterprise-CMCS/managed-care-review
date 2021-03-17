@@ -6,6 +6,15 @@
 			"programs": [
 				{
 					"name": "SMMC"
+				},
+				{
+					"name": "CNET"
+				},
+				{
+					"name": "Long-Term Care"
+				},
+				{
+					"name": "Managed Medical Assistance"
 				}
 			]
 		},
