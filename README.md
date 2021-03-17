@@ -39,7 +39,7 @@ Run web app locally, but configure it to run against a deployed backend
 
 ## AWS Keys
 
-In order to run commands against a live AWS environment you need to configure AWS keys to grant you authorization to do so. You will need this for sure to run the `./dev hybrid` command, and might be necessary to run any serverless commands directly by hand.
+In order to run commands against a live AWS environment you need to configure AWS keys to grant you authorization to do so. You will need this for sure to run the `./dev hybrid` command, and would be necessary to run any serverless commands directly by hand.
 
 You can get keys out of Cloudtamer, on the VPN. Click "Cloud Access" on the account you want access to. Then the account > the access type > "Short-term access keys"
 
