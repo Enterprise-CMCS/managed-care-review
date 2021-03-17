@@ -8,10 +8,13 @@ import { AuthModeType } from '../common-code/domain-models'
 
 type LogoutFn = () => Promise<null>
 
+export type LoginStatusType = 'LOADING' | 'LOGGED_OUT' | 'LOGGED_IN' | 'UNKNOWN'
+
 type AuthContextType = {
     loggedInUser: UserType | undefined
     isAuthenticated: boolean
     isLoading: boolean
+    loginStatus: LoginStatusType
     checkAuth: () => Promise<void> // this can probably be simpler, letting callers use the loading states etc instead.
     logout: undefined | (() => Promise<void>)
 }
@@ -20,6 +23,7 @@ const AuthContext = React.createContext<AuthContextType>({
     loggedInUser: undefined,
     isAuthenticated: false,
     isLoading: false,
+    loginStatus: 'LOADING',
     checkAuth: () => Promise.reject(Error('Auth context error')),
     logout: undefined,
 })
@@ -37,12 +41,25 @@ function AuthProvider({
         UserType | undefined
     >(undefined)
     const [isLoading, setIsLoading] = React.useState(true)
+    const [loginStatus, setLoginStatus] = React.useState<LoginStatusType>(
+        'UNKNOWN'
+    )
 
     const { loading, data, error, refetch } = useQuery(GetCurrentUserDocument, {
         notifyOnNetworkStatusChange: true,
     })
 
     const isAuthenticated = loggedInUser !== undefined
+
+    const computedLoginStatus: LoginStatusType = loading
+        ? 'LOADING'
+        : loggedInUser !== undefined
+        ? 'LOGGED_IN'
+        : 'LOGGED_OUT'
+
+    if (loginStatus !== computedLoginStatus) {
+        setLoginStatus(computedLoginStatus)
+    }
 
     if (isLoading !== loading) {
         setIsLoading(loading)
@@ -67,7 +84,13 @@ function AuthProvider({
             // lets try and record what different errors are here.
             // call a generic graphql connection etc. error here.
         } else if (data?.getCurrentUser) {
+            console.log('got a suer')
             if (!isAuthenticated) {
+                console.log('GTOIN ')
+                // setTimeout(() => {
+                //     console.log('RELAOIDNG THAT USR')
+                //     window.location.reload()
+                // }, 2500)
                 setLoggedInUser(data.getCurrentUser)
             }
         }
@@ -123,6 +146,7 @@ function AuthProvider({
                 loggedInUser,
                 isAuthenticated,
                 isLoading,
+                loginStatus,
                 logout,
                 checkAuth,
             }}

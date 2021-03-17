@@ -11,6 +11,7 @@ import { AuthModeType } from '../../common-code/domain-models'
 
 import { Logo } from '../Logo/Logo'
 import { StateIcon } from './StateIcon'
+import { User } from '../../gen/gqlClient'
 
 export type HeaderProps = {
     authMode: AuthModeType
@@ -26,7 +27,7 @@ export const Header = ({
     activePage = 'Managed Care Dashboard',
     setAlert,
 }: HeaderProps): React.ReactElement => {
-    const { logout, loggedInUser, isAuthenticated } = useAuth()
+    const { logout, loggedInUser, loginStatus } = useAuth()
     const history = useHistory()
 
     const handleLogout = (
@@ -47,17 +48,21 @@ export const Header = ({
         history.push('/auth')
     }
 
-    const UserInfo = (): React.ReactElement => {
-        return loggedInUser ? (
+    const LoggedInUserInfo = (user: User): React.ReactElement => {
+        return (
             <div className={styles.userInfo}>
-                <span>{loggedInUser.email}</span>
+                <span>{user.email}</span>
                 <span className={styles.divider}>|</span>
 
                 <Button type="button" unstyled onClick={handleLogout}>
                     Sign out
                 </Button>
             </div>
-        ) : authMode === 'IDM' ? (
+        )
+    }
+
+    const LoggedOutUserInfo = (authMode: AuthModeType): React.ReactElement => {
+        return authMode === 'IDM' ? (
             <Link
                 className="usa-button usa-button--outline"
                 variant="unstyled"
@@ -77,8 +82,16 @@ export const Header = ({
         )
     }
 
+    const UserInfo = (): React.ReactElement | null => {
+        return loggedInUser
+            ? LoggedInUserInfo(loggedInUser)
+            : loginStatus === 'LOADING'
+            ? null
+            : LoggedOutUserInfo(authMode)
+    }
+
     const PageHeading = (): React.ReactElement => {
-        return loggedInUser && isAuthenticated ? (
+        return loggedInUser ? (
             <div className={styles.dashboardHeading}>
                 <GridContainer>
                     <Grid row className="flex-align-center">
@@ -98,11 +111,15 @@ export const Header = ({
             <div className={styles.landingPageHeading}>
                 <GridContainer>
                     <h1>
-                        <span className="text-bold">MAC-MCRRS</span>
-                        <span className="font-heading-lg">
-                            Medicaid and CHIP Managed Care Reporting and Review
-                            System
-                        </span>
+                        {loginStatus !== 'LOADING' && (
+                            <>
+                                <span className="text-bold">MAC-MCRRS</span>
+                                <span className="font-heading-lg">
+                                    Medicaid and CHIP Managed Care Reporting and
+                                    Review System
+                                </span>
+                            </>
+                        )}
                     </h1>
                 </GridContainer>
             </div>
