@@ -10,7 +10,7 @@ describe('createDraftSubmission', () => {
         const { mutate } = createTestClient(server)
         const input: CreateDraftSubmissionInput = {
             programId: 'abc123',
-            submissionType: SubmissionType.ContractOnly,
+            submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A real submission',
         }
         const res = await mutate({
@@ -25,14 +25,15 @@ describe('createDraftSubmission', () => {
         expect(
             res.data.createDraftSubmission.draftSubmission.submissionType
         ).toBe('CONTRACT_ONLY')
+        expect(res.data.createDraftSubmission.draftSubmission.program.name).toBe('California')
     })
 
     it('returns an error if the program id is not in valid', async () => {
         const server = constructTestServer()
         const { mutate } = createTestClient(server)
         const input: CreateDraftSubmissionInput = {
-            programId: `xyz123`,
-            submissionType: SubmissionType.ContractOnly,
+            programId: 'xyz123',
+            submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A real submission',
         }
         const res = await mutate({
