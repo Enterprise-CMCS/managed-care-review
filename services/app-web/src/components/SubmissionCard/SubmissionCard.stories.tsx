@@ -1,5 +1,6 @@
 import React from 'react'
 import { Story } from '@storybook/react'
+import styles from './SubmissionCard.module.scss'
 
 import { SubmissionCard, SubmissionCardProps } from './SubmissionCard'
 
@@ -8,16 +9,18 @@ export default {
     component: SubmissionCard,
 }
 
-const Template: Story<SubmissionCardProps> = (args) => <SubmissionCard {...args}/>
+const Template: Story<SubmissionCardProps> = (args) => 
+    <ul className={styles.submissionList}>
+        <SubmissionCard {...args}/>
+    </ul>
 
 export const Draft = Template.bind({});
 
 Draft.args = {
     number: 'VA-CCCPlus-0001', 
     description: 'Rates are being adjusted to reflect revised capitation rates based on more recent data as well as benefit changes approved by the General Assembly.',
-    type: 'Contract action and rate certification',
-    submitted: false,
-    date: ""
+    contractType: 'contractOnly',
+    status: 'draft',
 };
 
 export const Submitted = Template.bind({});
@@ -25,7 +28,6 @@ export const Submitted = Template.bind({});
 Submitted.args = {
     number: 'VA-CCCPlus-0001', 
     description: 'Rates are being adjusted to reflect revised capitation rates based on more recent data as well as benefit changes approved by the General Assembly.',
-    type: 'Contract action and rate certification',
-    submitted: true,
-    date: "4/13/21"
+    contractType: 'contractAndRate',
+    status: 'submitted',
 };
