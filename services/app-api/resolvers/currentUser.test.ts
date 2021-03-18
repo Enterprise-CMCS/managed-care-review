@@ -55,7 +55,7 @@ describe('currentUser', () => {
 
         expect(res.data.getCurrentUser.email).toBe('james@example.com')
         expect(res.data.getCurrentUser.state.code).toBe('FL')
-        expect(res.data.getCurrentUser.state.programs).toHaveLength(1)
+        expect(res.data.getCurrentUser.state.programs).toHaveLength(4)
     })
 
     it('returns a state with no programs if the state is not in valid state list', async () => {
