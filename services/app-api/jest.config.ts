@@ -4,4 +4,5 @@ module.exports = {
 	transform: {
 		'\\.graphql$': 'jest-raw-loader',
 	},
+	moduleFileExtensions: ['js', 'json', 'jsx', 'd.ts', 'ts','tsx', 'node'],
 }
