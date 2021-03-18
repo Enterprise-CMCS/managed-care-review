@@ -8,18 +8,18 @@ import { AuthModeType } from '../common-code/domain-models'
 
 type LogoutFn = () => Promise<null>
 
+export type LoginStatusType = 'LOADING' | 'LOGGED_OUT' | 'LOGGED_IN'
+
 type AuthContextType = {
     loggedInUser: UserType | undefined
-    isAuthenticated: boolean
-    isLoading: boolean
+    loginStatus: LoginStatusType
     checkAuth: () => Promise<void> // this can probably be simpler, letting callers use the loading states etc instead.
     logout: undefined | (() => Promise<void>)
 }
 
 const AuthContext = React.createContext<AuthContextType>({
     loggedInUser: undefined,
-    isAuthenticated: false,
-    isLoading: false,
+    loginStatus: 'LOADING',
     checkAuth: () => Promise.reject(Error('Auth context error')),
     logout: undefined,
 })
@@ -36,7 +36,9 @@ function AuthProvider({
     const [loggedInUser, setLoggedInUser] = React.useState<
         UserType | undefined
     >(undefined)
-    const [isLoading, setIsLoading] = React.useState(true)
+    const [loginStatus, setLoginStatus] = React.useState<LoginStatusType>(
+        'LOGGED_OUT'
+    )
 
     const { loading, data, error, refetch } = useQuery(GetCurrentUserDocument, {
         notifyOnNetworkStatusChange: true,
@@ -44,9 +46,17 @@ function AuthProvider({
 
     const isAuthenticated = loggedInUser !== undefined
 
-    if (isLoading !== loading) {
-        setIsLoading(loading)
-    } else {
+    const computedLoginStatus: LoginStatusType = loading
+        ? 'LOADING'
+        : loggedInUser !== undefined
+        ? 'LOGGED_IN'
+        : 'LOGGED_OUT'
+
+    if (loginStatus !== computedLoginStatus) {
+        setLoginStatus(computedLoginStatus)
+    }
+
+    if (!loading) {
         if (error) {
             const { graphQLErrors, networkError } = error
 
@@ -60,6 +70,7 @@ function AuthProvider({
             if (networkError) console.log(`[Network error]: ${networkError}`)
             if (isAuthenticated) {
                 setLoggedInUser(undefined)
+                setLoginStatus('LOGGED_OUT')
             }
 
             // TODO: do something different if the error is not 403
@@ -69,6 +80,7 @@ function AuthProvider({
         } else if (data?.getCurrentUser) {
             if (!isAuthenticated) {
                 setLoggedInUser(data.getCurrentUser)
+                setLoginStatus('LOGGED_IN')
             }
         }
     }
@@ -121,8 +133,7 @@ function AuthProvider({
         <AuthContext.Provider
             value={{
                 loggedInUser,
-                isAuthenticated,
-                isLoading,
+                loginStatus,
                 logout,
                 checkAuth,
             }}
