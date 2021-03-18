@@ -15,6 +15,7 @@ tsconfig.tsbuildinfo
 tests_output
 *.log
 gen/
+todo.txt
 
 services/app-web/public/env-config.js
 services/app-web/storybook-static

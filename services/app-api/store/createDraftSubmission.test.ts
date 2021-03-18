@@ -8,6 +8,7 @@ import { insertDraftSubmission } from './createDraftSubmission'
 describe('insertDraftSubmission', () => {
     it('creates a new submission from scratch', async () => {
         // get a connection to the db
+        console.log('starting to test')
 
         const conn = newLocalStoreConnection('http://localhost:8000')
         // const tableName = 'local-draft-submissions'
@@ -44,13 +45,11 @@ describe('insertDraftSubmission', () => {
                 )
             } catch (dynamoErr) {
                 console.log(dynamoErr)
-                fail(dynamoErr)
-                return
+                throw new Error(dynamoErr)
             }
         } catch (createErr) {
-            console.log('CREAT ERR', createErr)
-            fail(createErr)
-            return
+            console.log('Error creating a draft submission:', createErr)
+            throw new Error(createErr)
         }
 
         ///what
@@ -63,7 +62,7 @@ describe('insertDraftSubmission', () => {
         // } catch (puErr) {
         //     console.log('NO')
         //     console.log('putere', puErr)
-        //     fail(puErr)
+        //     throw new Error(puErr)
         //     return
         // }
 
@@ -76,7 +75,7 @@ describe('insertDraftSubmission', () => {
         //     console.log(listResult)
         // } catch (dynamoErr) {
         //     console.log(dynamoErr)
-        //     fail(dynamoErr)
+        //     throw new Error(dynamoErr)
         //     return
         // }
 
@@ -90,7 +89,7 @@ describe('insertDraftSubmission', () => {
         //     console.log(listResult.Items)
         // } catch (dynamoErr) {
         //     console.log(dynamoErr)
-        //     fail(dynamoErr)
+        //     throw new Error(dynamoErr)
         //     return
         // }
 
@@ -100,16 +99,16 @@ describe('insertDraftSubmission', () => {
         //         // individual items will be yielded as the scan is performed
         //     }
         // } catch (scanErr) {
-        //     fail(scanErr)
+        //     throw new Error(scanErr)
         // }
 
         // check that there is nothing in it
 
         // insert something
-        // fail()
+        // throw new Error()
     })
 
-    // it('fails like a handler', async () => {
+    // it('throw new Errors like a handler', async () => {
     //     // get a connection to the db
     //     const conn = newLocalStoreConnection('http://localhost:8000')
     //     const tableName = 'local-draft-submissions'
@@ -144,7 +143,7 @@ describe('insertDraftSubmission', () => {
     //         console.log('inserted', insertResult)
     //     } catch (insertErr) {
     //         console.log(insertErr)
-    //         fail(insertErr)
+    //         throw new Error(insertErr)
     //         return
     //     }
 
@@ -158,7 +157,7 @@ describe('insertDraftSubmission', () => {
     //         console.log(listResult.Item)
     //     } catch (dynamoErr) {
     //         console.log(dynamoErr)
-    //         fail(dynamoErr)
+    //         throw new Error(dynamoErr)
     //         return
     //     }
 
@@ -172,14 +171,14 @@ describe('insertDraftSubmission', () => {
     //         console.log(listResult.Items)
     //     } catch (dynamoErr) {
     //         console.log(dynamoErr)
-    //         fail(dynamoErr)
+    //         throw new Error(dynamoErr)
     //         return
     //     }
 
     //     // check that there is nothing in it
 
     //     // insert something
-    //     fail()
+    //     throw new Error()
     // })
 
     it('can fetch using stateNumber', async () => {
@@ -222,13 +221,11 @@ describe('insertDraftSubmission', () => {
                 expect(subsOfID).toHaveLength(1)
             } catch (dynamoErr) {
                 console.log(dynamoErr)
-                fail(dynamoErr)
-                return
+                throw new Error(dynamoErr)
             }
         } catch (createErr) {
             console.log('CREAT ERR', createErr)
-            fail(createErr)
-            return
+            throw new Error(createErr)
         }
     })
 
@@ -303,23 +300,18 @@ describe('insertDraftSubmission', () => {
                 expect(twoIN.stateNumber).toEqual(oneIN.stateNumber + 1)
             } catch (dynamoErr) {
                 console.log(dynamoErr)
-                fail(dynamoErr)
-                return
+                throw new Error(dynamoErr)
             }
         } catch (createErr) {
             console.log('CREAT ERR', createErr)
-            fail(createErr)
-            return
+            throw new Error(createErr)
         }
     })
 
-    it('is robust gainst concurrent creations', async () => {
+    it('is robust against concurrent creations', async () => {
         // get a connection to the db
 
         const conn = newLocalStoreConnection('http://localhost:8000')
-        // const tableName = 'local-draft-submissions'
-
-        const mapper = new DataMapper({ client: conn })
 
         const inputParams = {
             stateCode: 'FL',
@@ -353,31 +345,23 @@ describe('insertDraftSubmission', () => {
             const seenStateNumbers = new Set<string>()
             sixValues.forEach((pValue) => {
                 if (pValue.stateCode) {
-                    if (seenStateNumbers.has(pValue.stateCode)) {
-                        fail(
-                            new Error(
-                                'multiple submissions got the same state code'
-                            )
-                        )
-                        return
-                    }
+                    expect(seenStateNumbers.has(pValue.stateCode)).toBeFalsy()
                     seenStateNumbers.add(pValue.stateCode)
                 }
             })
 
             if (seenStateNumbers.size == 0) {
-                fail(new Error('Not a single submission got a state code'))
+                throw new Error('Not a single submission got a state code')
             }
 
             // none of these six values should be the same
             // they can be error, but they can't be the same.
             // we should return an error if we can't insert. BAD_TIMING
 
-            fail()
+            throw new Error()
         } catch (createErr) {
             console.log('CREAT ERR', createErr)
-            fail(createErr)
-            return
+            throw new Error(createErr)
         }
     })
 })
