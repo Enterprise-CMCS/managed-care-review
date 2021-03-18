@@ -15,6 +15,7 @@ import { LocalLogin } from './LocalLogin'
 import {
     mockGetCurrentUser200,
     mockGetCurrentUser403,
+    getCurrentUserMock,
 } from '../../utils/apolloUtils'
 /*  
 This file should only have basic user flows for auth. Form and implementation details are tested at the component level.
@@ -28,7 +29,10 @@ TODO: Where will we test:
 describe('Auth', () => {
     describe('Cognito Login', () => {
         const userLogin = async (screen: Screen<typeof queries>) => {
-            userClickByRole(screen, 'button', { name: 'Show Login Form' })
+            await waitFor(() => {
+                userClickByRole(screen, 'button', { name: 'Show Login Form' })
+            })
+
             const loginEmail = screen.getByTestId('loginEmail')
             const loginPassword = screen.getByTestId('loginPassword')
 
@@ -165,7 +169,11 @@ describe('Auth', () => {
             renderWithProviders(<LocalLogin />, {
                 routerProvider: { routerProps: { history: history } },
                 apolloProvider: {
-                    mocks: [mockGetCurrentUser403, mockGetCurrentUser200],
+                    mocks: [
+                        getCurrentUserMock({ statusCode: 403 }),
+                        getCurrentUserMock({ statusCode: 200 }),
+                        getCurrentUserMock({ statusCode: 200 }),
+                    ],
                 },
             })
 

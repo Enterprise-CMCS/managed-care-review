@@ -34,12 +34,16 @@ describe('Routing', () => {
             })
         })
 
-        it('display landing page when logged out', () => {
+        it('display landing page when logged out', async () => {
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
-
-            expect(
-                screen.getByRole('heading', { name: /How it works/i, level: 2 })
-            ).toBeInTheDocument()
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', {
+                        name: /How it works/i,
+                        level: 2,
+                    })
+                ).toBeInTheDocument()
+            })
             expect(
                 screen.getByRole('heading', {
                     name: /In this system, pilot state users can/i,
@@ -50,14 +54,19 @@ describe('Routing', () => {
     })
 
     describe('/auth', () => {
-        it('when app loads at /auth route, Auth header is displayed', () => {
+        it('when app loads at /auth route, Auth header is displayed', async () => {
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
                 routerProvider: { route: '/auth' },
             })
 
-            expect(
-                screen.getByRole('heading', { name: /Auth Page/i, level: 2 })
-            ).toBeInTheDocument()
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', {
+                        name: /Auth Page/i,
+                        level: 2,
+                    })
+                ).toBeInTheDocument()
+            })
             expect(
                 screen.queryByRole('heading', {
                     name: /How it works/i,
@@ -66,9 +75,11 @@ describe('Routing', () => {
             ).toBeNull()
         })
 
-        it('when user clicks Sign In link, redirects to /auth', () => {
+        it('when user clicks Sign In link, redirects to /auth', async () => {
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
-            userClickSignIn(screen)
+            await waitFor(() => {
+                userClickSignIn(screen)
+            })
 
             expect(
                 screen.getByRole('heading', { name: /Auth Page/i, level: 2 })
@@ -78,7 +89,9 @@ describe('Routing', () => {
         it('display local login page when expected', async () => {
             renderWithProviders(<AppBody authMode={'LOCAL'} />)
 
-            userClickSignIn(screen)
+            await waitFor(() => {
+                userClickSignIn(screen)
+            })
 
             expect(
                 screen.getByRole('heading', {
@@ -88,9 +101,11 @@ describe('Routing', () => {
             ).toBeInTheDocument()
         })
 
-        it('display cognito signup page when expected', () => {
+        it('display cognito signup page when expected', async () => {
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
-            userClickSignIn(screen)
+            await waitFor(() => {
+                userClickSignIn(screen)
+            })
 
             expect(
                 screen.getByRole('textbox', { name: 'First Name' })
@@ -105,13 +120,18 @@ describe('Routing', () => {
     })
 
     describe('invalid routes', () => {
-        it('redirect to landing page when logged out', () => {
+        it('redirect to landing page when logged out', async () => {
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
                 routerProvider: { route: '/not-a-real-place' },
             })
-            expect(
-                screen.getByRole('heading', { name: /How it works/i, level: 2 })
-            ).toBeInTheDocument()
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', {
+                        name: /How it works/i,
+                        level: 2,
+                    })
+                ).toBeInTheDocument()
+            })
         })
 
         it('redirects to 404 error page when logged in', async () => {

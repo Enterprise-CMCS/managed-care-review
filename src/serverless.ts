@@ -26,6 +26,12 @@ export function checkStageAccess(stage: string): StageConnection {
 			serverlessErrorOutput.includes('does not exist')
 		) {
 			return 'STAGE_ERROR'
+		} else if (
+			serverlessErrorOutput.includes(
+				'Trying to request a non exported variable from CloudFormation'
+			)
+		) {
+			return 'STAGE_ERROR'
 		} else {
 			console.log(
 				'Stdout: ',

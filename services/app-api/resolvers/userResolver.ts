@@ -20,6 +20,6 @@ export const userResolver: UserResolvers<any, Partial<UserType>> = {
             }
             return state
         }
-        throw new Error('500: parent of a state reslovler isnt a cognito user')
+        throw new Error('500: parent of a state resolver isnt a cognito user')
     },
 }

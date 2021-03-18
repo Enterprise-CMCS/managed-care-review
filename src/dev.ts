@@ -68,6 +68,7 @@ async function run_s3_locally(runner: LabeledProcessRunner) {
     )
 }
 
+// run the graphql compiler with --watch
 async function compile_graphql_types_watch(runner: LabeledProcessRunner) {
     await runner.run_command_and_output(
         'gql deps',
@@ -239,7 +240,7 @@ async function run_web_against_aws(
         }
         case 'STAGE_ERROR': {
             console.log(
-                `Error: stack with id ${stageName} does not exist\n`,
+                `Error: stack with id ${stageName} does not exist or is not done deploying\n`,
                 "If you didn't set one explicitly, maybe you haven't pushed this branch yet to deploy a review app?"
             )
             process.exit(1)
@@ -270,9 +271,17 @@ async function run_web_against_aws(
         }
     )
 
+    const apiAuthMode = commandMustSucceedSync(
+        './output.sh',
+        ['app-api', 'ApiAuthMode', stageName],
+        {
+            cwd: './services',
+        }
+    )
+
     // set them
     process.env.PORT = '3003' // run hybrid on a different port
-    process.env.REACT_APP_LOCAL_LOGIN = 'false' // override local_login in .env
+    process.env.REACT_APP_AUTH_MODE = apiAuthMode // override local_login in .env
     process.env.REACT_APP_API_URL = apiBase
     process.env.REACT_APP_COGNITO_REGION = region
     process.env.REACT_APP_COGNITO_ID_POOL_ID = idPool
