@@ -91,7 +91,7 @@ jobs:
           echo "PATH=$(pwd)/node_modules/.bin/:$PATH" >> $GITHUB_ENV
       - name: Unit Tests
         run: |
-          ./dev local --db &
+          ./dev local --db
           ./dev test --unit
       - name: deploy
         run: |
