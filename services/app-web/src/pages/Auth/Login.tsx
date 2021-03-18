@@ -26,8 +26,8 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
     })
 
     const history = useHistory()
-    const { isLoading, loggedInUser, checkAuth } = useAuth()
-    if (!isLoading && loggedInUser) history.push('/dashboard')
+    const { loginStatus, checkAuth } = useAuth()
+    if (loginStatus === 'LOGGED_IN') history.push('/dashboard')
 
     const onFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = event.target
@@ -98,7 +98,10 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
                     onChange={onFieldChange}
                 />
             </FormGroup>
-            <Button type="submit" disabled={!validateForm() || isLoading}>
+            <Button
+                type="submit"
+                disabled={!validateForm() || loginStatus === 'LOADING'}
+            >
                 Login
             </Button>
         </Form>

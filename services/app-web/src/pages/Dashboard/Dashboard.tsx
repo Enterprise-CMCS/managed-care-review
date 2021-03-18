@@ -9,10 +9,10 @@ import { useAuth } from '../../contexts/AuthContext'
 import { Program } from '../../gen/gqlClient'
 
 export const Dashboard = (): React.ReactElement => {
-    const { isLoading, loggedInUser } = useAuth()
+    const { loginStatus, loggedInUser } = useAuth()
     let programs: Program[] = []
 
-    if (isLoading || !loggedInUser) {
+    if (loginStatus === 'LOADING' || !loggedInUser) {
         return <div>Loading User Info</div>
     } else {
         programs = loggedInUser.state.programs

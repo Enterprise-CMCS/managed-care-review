@@ -40,7 +40,7 @@ const userAvatars: { [key: string]: string } = {
 
 export function LocalLogin(): React.ReactElement {
     const history = useHistory()
-    const { checkAuth, isLoading } = useAuth()
+    const { checkAuth, loginStatus } = useAuth()
 
     async function login(user: CognitoUserType) {
         loginLocalUser(user)
@@ -76,7 +76,7 @@ export function LocalLogin(): React.ReactElement {
                                 <Button
                                     data-testid={`${user.name}Button`}
                                     type="submit"
-                                    disabled={isLoading}
+                                    disabled={loginStatus === 'LOADING'}
                                     onClick={() => login(user)}
                                 >
                                     Login
