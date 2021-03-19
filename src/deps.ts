@@ -16,7 +16,8 @@ export const once = <A extends any[], R, T>(
 export function requireBinary(checkCmd: string[], helpText: string) {
 	const result = spawnSync(checkCmd[0], checkCmd.slice(1))
 
-	if (result.status !== 1) {
-		throw new Error(helpText)
+	if (result.status !== 0) {
+		console.log(helpText)
+		process.exit(1)
 	}
 }
