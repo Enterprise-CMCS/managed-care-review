@@ -1,5 +1,9 @@
 # Guide Wire ![Build](https://github.com/CMSgov/guide-wire/workflows/Build/badge.svg?branch=main)[![latest release](https://img.shields.io/github/release/cmsgov/guide-wire.svg)](https://github.com/cmsgov/guide-wire/releases/latest)
 
+<a href="https://codeclimate.com/repos/6041539f31779a5f8d00e7e6/maintainability"><img src="https://api.codeclimate.com/v1/badges/397709446d5aca86032d/maintainability" /></a>
+
+<a href="https://codeclimate.com/repos/6041539f31779a5f8d00e7e6/test_coverage"><img src="https://api.codeclimate.com/v1/badges/397709446d5aca86032d/test_coverage" /></a>
+
 The Managed Care Rate and Review State Submission System
 
 ## Local Dev
