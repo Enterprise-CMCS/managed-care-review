@@ -4,7 +4,7 @@ import { Tag } from '@trussworks/react-uswds'
 import styles from './SubmissionCard.module.scss'
 
 export type SubmissionCardProps = {
-    number: string
+    name: string
     description: string
     contractType: 'contractOnly' | 'contractAndRate'
     status: 'draft' | 'submitted'
@@ -12,7 +12,7 @@ export type SubmissionCardProps = {
 }
 
 export const SubmissionCard = ({
-    number,
+    name,
     description,
     contractType,
     status,
@@ -21,11 +21,11 @@ export const SubmissionCard = ({
     return (
         <li className={styles.cardContainer}>
             <div className={styles.cardLeft}>
-                <a href="/">{number}</a>
+                <a href="/">{name}</a>
                 <p>{description}</p>
             </div>
             <div className={styles.cardRight}>
-                <p className={styles.submissionType}>{contractType}</p>
+                <span className={styles.submissionType}>{contractType}</span>
                 <Tag
                     className={
                         status === 'draft'
