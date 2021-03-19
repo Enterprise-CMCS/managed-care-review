@@ -2,13 +2,13 @@ import * as React from 'react'
 import { useQuery } from '@apollo/client'
 
 import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
-import { logoutLocalUser } from '../pages/Auth/localLogin'
 import { GetCurrentUserDocument, User as UserType } from '../gen/gqlClient'
+import { logoutLocalUser } from '../pages/Auth/localAuth'
+import { AuthModeType } from '../common-code/domain-models'
 
 type LogoutFn = () => Promise<null>
 
 type AuthContextType = {
-    localLogin: boolean
     loggedInUser: UserType | undefined
     isAuthenticated: boolean
     isLoading: boolean
@@ -17,7 +17,6 @@ type AuthContextType = {
 }
 
 const AuthContext = React.createContext<AuthContextType>({
-    localLogin: false,
     loggedInUser: undefined,
     isAuthenticated: false,
     isLoading: false,
@@ -26,12 +25,12 @@ const AuthContext = React.createContext<AuthContextType>({
 })
 
 export type AuthProviderProps = {
-    localLogin: boolean
+    authMode: AuthModeType
     children?: React.ReactNode
 }
 
 function AuthProvider({
-    localLogin,
+    authMode,
     children,
 }: AuthProviderProps): React.ReactElement {
     const [loggedInUser, setLoggedInUser] = React.useState<
@@ -87,7 +86,8 @@ function AuthProvider({
         })
     }
 
-    const realLogout: LogoutFn = localLogin ? logoutLocalUser : cognitoSignOut
+    const realLogout: LogoutFn =
+        authMode === 'LOCAL' ? logoutLocalUser : cognitoSignOut
 
     const logout =
         loggedInUser === undefined
@@ -120,7 +120,6 @@ function AuthProvider({
     return (
         <AuthContext.Provider
             value={{
-                localLogin,
                 loggedInUser,
                 isAuthenticated,
                 isLoading,

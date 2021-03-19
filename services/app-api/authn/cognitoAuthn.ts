@@ -1,6 +1,7 @@
 import { Result, ok, err } from 'neverthrow'
 import { CognitoIdentityServiceProvider } from 'aws-sdk'
 import { CognitoUserType } from '../../app-web/src/common-code/domain-models'
+import { performance } from 'perf_hooks'
 
 export function parseAuthProvider(
     authProvider: string
@@ -25,12 +26,12 @@ export function parseAuthProvider(
 }
 
 function userAttrDict(
-    cognitoUser: CognitoIdentityServiceProvider.AdminGetUserResponse
+    cognitoUser: CognitoIdentityServiceProvider.UserType
 ): { [key: string]: string } {
     const attributes: { [key: string]: string } = {}
 
-    if (cognitoUser.UserAttributes) {
-        cognitoUser.UserAttributes.forEach((attribute) => {
+    if (cognitoUser.Attributes) {
+        cognitoUser.Attributes.forEach((attribute) => {
             if (attribute.Value) {
                 attributes[attribute.Name] = attribute.Value
             }
@@ -54,42 +55,61 @@ export async function userFromCognitoAuthProvider(
     // calling a dependency so we have to try
     try {
         const cognito = new CognitoIdentityServiceProvider()
-        const userResponse = await cognito
-            .adminGetUser({
-                Username: userInfo.userId,
+
+        const subFilter = `sub = "${userInfo.userId}"`
+
+        // let's see what we've got
+        const startRequest = performance.now()
+        const listUsersResponse = await cognito
+            .listUsers({
                 UserPoolId: userInfo.poolId,
+                Filter: subFilter,
             })
             .promise()
+        const endRequest = performance.now()
+        console.log('listUsers takes ms:', endRequest - startRequest)
+
+        const userResp: CognitoIdentityServiceProvider.ListUsersResponse = listUsersResponse
+
+        if (userResp.Users === undefined || userResp.Users.length !== 1) {
+            // logerror
+            return err(new Error('No user found with this sub'))
+        }
+
+        const currentUser = userResp.Users[0]
 
         // we lose type safety here...
-        const attributes = userAttrDict(userResponse)
-
+        const attributes = userAttrDict(currentUser)
         if (
             !(
                 'email' in attributes &&
+                'custom:state_code' in attributes &&
                 'given_name' in attributes &&
-                'family_name' in attributes &&
-                'custom:state_code' in attributes
+                'family_name' in attributes
             )
         ) {
             return err(
                 new Error(
-                    'User does not have all the expected attributes: ' +
+                    'User does not have all the required attributes: ' +
                         JSON.stringify(attributes)
                 )
             )
         }
 
+        console.log('got user attr dict: ', attributes)
+
+        const fullName = attributes.given_name + ' ' + attributes.family_name
+
         const user: CognitoUserType = {
             email: attributes.email,
-            name: attributes.given_name + ' ' + attributes.family_name,
-            // HELP
+            name: fullName,
             state_code: attributes['custom:state_code'],
             role: 'STATE_USER',
         }
 
         return ok(user)
     } catch (e) {
+        console.log('cognito ERR', e)
         return err(e)
     }
 }

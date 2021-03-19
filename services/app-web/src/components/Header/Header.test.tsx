@@ -12,7 +12,7 @@ import { Header } from './Header'
 
 describe('Header', () => {
     it('renders without errors', async () => {
-        renderWithProviders(<Header />)
+        renderWithProviders(<Header authMode={'AWS_COGNITO'} />)
 
         expect(screen.getByRole('banner')).toBeInTheDocument()
         expect(screen.getByRole('heading')).toBeInTheDocument()
@@ -20,7 +20,7 @@ describe('Header', () => {
 
     describe('when logged out', () => {
         it('displays Medicaid logo image link that redirects to /dashboard', async () => {
-            renderWithProviders(<Header />)
+            renderWithProviders(<Header authMode={'AWS_COGNITO'} />)
             const logoImage = screen.getByRole('img')
             const logoLink = screen.getByRole('link', {
                 name: /Medicaid.gov-Keeping America Healthy/i,
@@ -31,7 +31,7 @@ describe('Header', () => {
         })
 
         it('displays Medicaid and CHIP Managed Care Reporting heading', () => {
-            renderWithProviders(<Header />)
+            renderWithProviders(<Header authMode={'AWS_COGNITO'} />)
 
             expect(screen.getByRole('heading')).toHaveTextContent(
                 'Medicaid and CHIP Managed Care Reporting and Review System'
@@ -39,14 +39,14 @@ describe('Header', () => {
         })
 
         it('displays signin link when logged out', () => {
-            renderWithProviders(<Header />)
+            renderWithProviders(<Header authMode={'AWS_COGNITO'} />)
             const signInButton = screen.getByRole('link', { name: /Sign In/i })
             expect(signInButton).toBeVisible()
             expect(signInButton).toHaveAttribute('href', '/auth')
         })
 
         it('redirects when signin Link is clicked', () => {
-            renderWithProviders(<Header />)
+            renderWithProviders(<Header authMode={'AWS_COGNITO'} />)
             const signInButton = screen.getByRole('link', { name: /Sign In/i })
             userEvent.click(signInButton)
             expect(signInButton).toHaveAttribute('href', '/auth')
@@ -55,7 +55,7 @@ describe('Header', () => {
 
     describe('when logged in', () => {
         it('displays Medicaid logo image link that redirects to /dashboard', () => {
-            renderWithProviders(<Header />, {
+            renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
                 apolloProvider: { mocks: [mockGetCurrentUser200] },
             })
             const logoImage = screen.getByRole('img')
@@ -69,7 +69,7 @@ describe('Header', () => {
 
         it('displays heading with users state', async () => {
             // TODO: make a loop that goes through all states and checks icons/headings
-            renderWithProviders(<Header />, {
+            renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
                 apolloProvider: { mocks: [mockGetCurrentUser200] },
             })
             await waitFor(() =>
@@ -80,9 +80,12 @@ describe('Header', () => {
         })
 
         it('displays heading with the current page', async () => {
-            renderWithProviders(<Header activePage={'Dashboard'} />, {
-                apolloProvider: { mocks: [mockGetCurrentUser200] },
-            })
+            renderWithProviders(
+                <Header authMode={'AWS_COGNITO'} activePage={'Dashboard'} />,
+                {
+                    apolloProvider: { mocks: [mockGetCurrentUser200] },
+                }
+            )
             await waitFor(() =>
                 expect(screen.getByRole('heading')).toHaveTextContent(
                     'Dashboard'
@@ -91,7 +94,7 @@ describe('Header', () => {
         })
 
         it('displays sign out button', async () => {
-            renderWithProviders(<Header />, {
+            renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
                 apolloProvider: { mocks: [mockGetCurrentUser200] },
             })
 
@@ -108,7 +111,7 @@ describe('Header', () => {
                 .spyOn(CognitoAuthApi, 'signOut')
                 .mockResolvedValue(null)
 
-            renderWithProviders(<Header />, {
+            renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
                     mocks: [mockGetCurrentUser200, mockGetCurrentUser403],
                 },
@@ -131,11 +134,14 @@ describe('Header', () => {
                 .mockRejectedValue('This logout failed!')
             const mockAlert = jest.fn()
 
-            renderWithProviders(<Header setAlert={mockAlert} />, {
-                apolloProvider: {
-                    mocks: [mockGetCurrentUser200, mockGetCurrentUser403],
-                },
-            })
+            renderWithProviders(
+                <Header authMode={'AWS_COGNITO'} setAlert={mockAlert} />,
+                {
+                    apolloProvider: {
+                        mocks: [mockGetCurrentUser200, mockGetCurrentUser403],
+                    },
+                }
+            )
 
             await waitFor(() => {
                 const signOutButton = screen.getByRole('button', {
@@ -155,9 +161,9 @@ describe('Header', () => {
                 .spyOn(CognitoAuthApi, 'signOut')
                 .mockResolvedValue(null)
 
-            renderWithProviders(<Header />, {
+            renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
-                    mocks: [mockGetCurrentUser200],
+                    mocks: [mockGetCurrentUser200, mockGetCurrentUser403],
                 },
             })
 

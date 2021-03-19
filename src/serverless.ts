@@ -26,6 +26,12 @@ export function checkStageAccess(stage: string): StageConnection {
 			serverlessErrorOutput.includes('does not exist')
 		) {
 			return 'STAGE_ERROR'
+		} else if (
+			serverlessErrorOutput.includes(
+				'Trying to request a non exported variable from CloudFormation'
+			)
+		) {
+			return 'STAGE_ERROR'
 		} else {
 			console.log(
 				'Stdout: ',
@@ -47,6 +53,7 @@ export function getWebAuthVars(
 	idPool: string
 	userPool: string
 	userPoolClient: string
+	userPoolDomain: string
 } {
 	const opts = {
 		cwd: './services',
@@ -76,5 +83,11 @@ export function getWebAuthVars(
 		opts
 	)
 
-	return { region, idPool, userPool, userPoolClient }
+	const userPoolDomain = commandMustSucceedSync(
+		'./output.sh',
+		['ui-auth', 'UserPoolClientDomain', stageName],
+		opts
+	)
+
+	return { region, idPool, userPool, userPoolClient, userPoolDomain }
 }
