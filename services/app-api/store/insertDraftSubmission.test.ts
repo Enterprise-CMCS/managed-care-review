@@ -3,7 +3,7 @@ import { DataMapper } from '@aws/dynamodb-data-mapper'
 
 import { DraftSubmissionStoreType } from './draftSubmissionStoreType'
 
-import { insertDraftSubmission } from './createDraftSubmission'
+import { insertDraftSubmission } from './insertDraftSubmission'
 
 describe('insertDraftSubmission', () => {
     it('creates a new submission from scratch', async () => {

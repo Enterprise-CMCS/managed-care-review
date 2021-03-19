@@ -12,8 +12,8 @@ import {
 type InsertDraftSubmissionArgsType = {
     stateCode: string
     programID: string
-    ratesType: SubmissionRatesType
-    description: string
+    submissionType: SubmissionRatesType
+    submissionDescription: string
 }
 
 export async function insertDraftSubmission(
