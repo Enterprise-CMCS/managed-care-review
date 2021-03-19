@@ -322,6 +322,9 @@ async function run_all_tests({
         console.log('Testing Error', e)
         process.exit(1)
     }
+    // if the db is running in the background it prevents the process from exiting
+    // one day we could have a cancellation to call, but this works just as well
+    process.exit(0)
 }
 
 async function run_unit_tests(runner: LabeledProcessRunner) {
