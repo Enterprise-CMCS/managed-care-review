@@ -14,12 +14,32 @@ export enum SubmissionStatus {
     submitted = 'SUBMITTED',
 }
 
+//TODO: create date/time utilities
+/**
+ * Format a date to format YYYY-MM-DD
+ *
+ * @param {string} unixTimestamp the timestamp to format
+ * @returns {string} the formatted date string
+ */
+export const formatDateFromUnixTimestamp = (unixTimestamp: number): string => {
+    const date = new Date(unixTimestamp)
+    const padZeros = (value: number, length: number): string => {
+        return `0000${value}`.slice(-length)
+    }
+
+    const month = date.getMonth() + 1
+    const day = date.getDate()
+    const year = date.getFullYear()
+
+    return [padZeros(month, 2), padZeros(day, 2), padZeros(year, 4)].join('/')
+}
+
 export type SubmissionCardProps = {
     name: string
     description: string
     contractType: SubmissionType
     status: SubmissionStatus
-    date?: Date
+    date?: number
 }
 
 export const SubmissionCard = ({
@@ -29,6 +49,8 @@ export const SubmissionCard = ({
     status,
     date,
 }: SubmissionCardProps): React.ReactElement => {
+    const submitted = status === SubmissionStatus.submitted && date
+
     return (
         <li className={styles.cardContainer}>
             <div className={styles.cardLeft}>
@@ -36,16 +58,20 @@ export const SubmissionCard = ({
                 <p>{description}</p>
             </div>
             <div className={styles.cardRight}>
-                <span className={styles.submissionType}>{contractType}</span>
+                <span className={styles.submissionType}>
+                    {contractType === SubmissionType.ContractOnly
+                        ? 'Contract only'
+                        : 'Contract and rate certification'}
+                </span>
                 <Tag
                     className={
-                        status === SubmissionStatus.draft
-                            ? styles.tagWarning
-                            : styles.tagSuccess
+                        submitted ? styles.tagSuccess : styles.tagWarning
                     }
                 >
-                    {SubmissionStatus.submitted && date
-                        ? `Submitted ${date}`
+                    {submitted
+                        ? `Submitted ${formatDateFromUnixTimestamp(
+                              date as number
+                          )}`
                         : 'Draft'}
                 </Tag>
             </div>

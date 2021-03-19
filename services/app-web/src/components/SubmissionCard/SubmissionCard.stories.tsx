@@ -12,6 +12,13 @@ import {
 export default {
     title: 'Components/SubmissionCard',
     component: SubmissionCard,
+    argTypes: {
+        date: {
+            control: {
+                type: 'date',
+            },
+        },
+    },
 }
 
 const Template: Story<SubmissionCardProps> = (args) => (
@@ -38,4 +45,5 @@ Submitted.args = {
         'Rates are being adjusted to reflect revised capitation rates based on more recent data as well as benefit changes approved by the General Assembly.',
     contractType: SubmissionType.ContractAndRates,
     status: SubmissionStatus.submitted,
+    date: new Date().getTime(),
 }

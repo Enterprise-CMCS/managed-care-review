@@ -17,7 +17,6 @@
     &:hover {
         background-color: $theme-color-base-lightest;
     }
-    
 }
 
 .cardLeft {
@@ -30,7 +29,6 @@
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 3;
         overflow: hidden;
-
     }
     a::after {
         content: '';
@@ -38,7 +36,7 @@
         left: 0;
         top: 0;
         right: 0;
-        bottom: 0
+        bottom: 0;
     }
 }
 
@@ -47,7 +45,9 @@
 }
 
 .submissionType {
-    @include u-font ('sans', '3xs');
+    @include u-font('sans', '3xs');
+    display: block;
+    margin: units(1) 0;
 }
 
 .tagSuccess {
@@ -56,5 +56,5 @@
 
 .tagWarning {
     background: $theme-color-warning-dark;
-    @include u-text('ink'); 
+    @include u-text('ink');
 }
