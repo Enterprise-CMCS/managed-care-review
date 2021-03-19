@@ -37,7 +37,7 @@ export const formatDateFromUnixTimestamp = (unixTimestamp: number): string => {
 export type SubmissionCardProps = {
     name: string
     description: string
-    contractType: SubmissionType
+    submissionType: SubmissionType
     status: SubmissionStatus
     date?: number
 }
@@ -45,7 +45,7 @@ export type SubmissionCardProps = {
 export const SubmissionCard = ({
     name,
     description,
-    contractType,
+    submissionType,
     status,
     date,
 }: SubmissionCardProps): React.ReactElement => {
@@ -59,7 +59,7 @@ export const SubmissionCard = ({
             </div>
             <div className={styles.cardRight}>
                 <span className={styles.submissionType}>
-                    {contractType === SubmissionType.ContractOnly
+                    {submissionType === SubmissionType.ContractOnly
                         ? 'Contract only'
                         : 'Contract and rate certification'}
                 </span>
