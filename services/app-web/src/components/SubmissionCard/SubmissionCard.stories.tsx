@@ -2,32 +2,40 @@ import React from 'react'
 import { Story } from '@storybook/react'
 import styles from './SubmissionCard.module.scss'
 
-import { SubmissionCard, SubmissionCardProps } from './SubmissionCard'
+import {
+    SubmissionCard,
+    SubmissionCardProps,
+    SubmissionType,
+    SubmissionStatus,
+} from './SubmissionCard'
 
 export default {
     title: 'Components/SubmissionCard',
     component: SubmissionCard,
 }
 
-const Template: Story<SubmissionCardProps> = (args) => 
+const Template: Story<SubmissionCardProps> = (args) => (
     <ul className={styles.submissionList}>
-        <SubmissionCard {...args}/>
+        <SubmissionCard {...args} />
     </ul>
+)
 
-export const Draft = Template.bind({});
+export const Draft = Template.bind({})
 
 Draft.args = {
-    number: 'VA-CCCPlus-0001', 
-    description: 'Rates are being adjusted to reflect revised capitation rates based on more recent data as well as benefit changes approved by the General Assembly.',
-    contractType: 'contractOnly',
-    status: 'draft',
-};
+    name: 'VA-CCCPlus-0001',
+    description:
+        'Rates are being adjusted to reflect revised capitation rates based on more recent data as well as benefit changes approved by the General Assembly.',
+    contractType: SubmissionType.ContractOnly,
+    status: SubmissionStatus.draft,
+}
 
-export const Submitted = Template.bind({});
+export const Submitted = Template.bind({})
 
 Submitted.args = {
-    number: 'VA-CCCPlus-0001', 
-    description: 'Rates are being adjusted to reflect revised capitation rates based on more recent data as well as benefit changes approved by the General Assembly.',
-    contractType: 'contractAndRate',
-    status: 'submitted',
-};
+    name: 'VA-CCCPlus-0001',
+    description:
+        'Rates are being adjusted to reflect revised capitation rates based on more recent data as well as benefit changes approved by the General Assembly.',
+    contractType: SubmissionType.ContractAndRates,
+    status: SubmissionStatus.submitted,
+}

@@ -3,12 +3,23 @@ import { Tag } from '@trussworks/react-uswds'
 
 import styles from './SubmissionCard.module.scss'
 
+// TODO: use gqlClient
+export enum SubmissionType {
+    ContractOnly = 'CONTRACT_ONLY',
+    ContractAndRates = 'CONTRACT_AND_RATES',
+}
+
+export enum SubmissionStatus {
+    draft = 'DRAFT',
+    submitted = 'SUBMITTED',
+}
+
 export type SubmissionCardProps = {
     name: string
     description: string
-    contractType: 'contractOnly' | 'contractAndRate'
-    status: 'draft' | 'submitted'
-    date: Date
+    contractType: SubmissionType
+    status: SubmissionStatus
+    date?: Date
 }
 
 export const SubmissionCard = ({
@@ -28,12 +39,14 @@ export const SubmissionCard = ({
                 <span className={styles.submissionType}>{contractType}</span>
                 <Tag
                     className={
-                        status === 'draft'
+                        status === SubmissionStatus.draft
                             ? styles.tagWarning
                             : styles.tagSuccess
                     }
                 >
-                    {status === 'submitted' ? `Submitted ${date}` : 'Draft'}
+                    {SubmissionStatus.submitted && date
+                        ? `Submitted ${date}`
+                        : 'Draft'}
                 </Tag>
             </div>
         </li>
