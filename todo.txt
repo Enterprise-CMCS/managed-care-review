@@ -1,0 +1,556 @@
+x push to GH
+x deploy to Dev.
+x setup C
+x run locally
+	x looks like we are deployed into impl
+	x serverless-offline does what I want
+	x create a dev script that does everything we want. 
+		x typescript
+		x build a script. 
+		x get the lang server working
+		x one command to run everything
+		x colorize output from different processes
+			x yeah, what are we doing with webpack? why wouldn't you just run it by hand?
+				x because this installs all your dependencies.
+	x get the FE up and running
+	x get the db up and running
+		x it's running
+		x gotta migrate in some tables. 
+			x migrations are stored in the goddamn service right now?
+				x yep. In database/serverless.yml
+				x fine for now. you can sorta do migrations in cloud formation.	
+	x gotta ship this working in DEV
+		x figure out how to parameterize the db
+		x figure out how to parameterize the FE
+	x write a README update
+--- 11/9 ---
+x local works without any credentials
+	x Auth?
+		x this is failing. You need credentials to do the lookup and it silently fails
+		x so we need to run auth locally
+			x stash something in a cookie or local storage to keep your login alive.
+			x how do I create a user
+			x how do we have default created users
+			x how do i log in as different users easily?
+		x The answer was headers sent in dev
+	x s3
+		x don't using Amplify to do things
+		x amplify seems like it's own way of spinning up stuff, primarly. But we are using it to communicate / authenticate 
+		x it has a way to mock things
+		x i found a way to mock S3 that ties into serverless
+			x I messed up the POST thing
+			x set up DI for picking which S3 thing to use. 
+			x of course the s3 bucket is defined on the UI service, for some reason. 
+			x this mocks s3 based on your yaml which seems good
+			x but the yaml doesn't specifiy a buket name which is bad
+			x and requires us to use a different API to talk to it than Amplify which is bad
+			x but amlify probably would require re-defining what our local buckets are?
+				x should check in on that. 
+			x amplify would require us using the amplify CLI which we are _not_ doing yet.
+		x localsave with a promise
+		x localget with a promise
+	x env.sh is kinda dumb. Not the way .env files should work.
+		x I should maybe call env.sh without calling the config thing for local dev
+	x gotta ship this working from scratch in LOCAL
+		x install npm?
+		x install NVM?
+	x fix env vars to not be set in dev.ts
+	x break out dev.ts into its own thing
+	x distributed as a minified script with all dependencies so it can boostrap itself: https://github.com/nexe/nexe
+		x this is not working, and weighs 70mb. 
+		x let's make a bash script /dev that does the minimum and then calls dev.ts
+			x check for node and yarn?
+	x update README
+	x make ./dev print the help (and -h)
+	x print out command by runner at start
+	x use local- as the stage
+--- 12/8 ---
+* deploy to val/prod
+	x lots of SES issues
+	x prod-uploads already exists?
+		x wtf was this failure, I do not see that. 
+		x confirm that this is actually running on prod. 
+	* How do we re-use the built artifact f tor pushes to val/prod using serverless?
+		* seems like it might be complicated with the fact that we pull a bunch of args during the build, might be part of 
+		* use serverless-package
+		x NOPE. it packages all the resource variables, and those include things like db url.
+		x might still work with ENV vars, but not with the current resoruce management. 
+--- 12/20 ---
+x kill elsaticsearch correctly
+	x Had to delete the resource, merge to main, then delete the service
+--- 12/20 ---
+x standup FE
+	x dev/local
+	x env vars
+	x deploy
+--- 1/19 ---
+x Standup BE
+	x compile typescript into js, use the plugin
+		x can we setup our own tsconfig?
+	x make a logging handler
+	x run it all locally
+	x call the logging handler from the FE
+----------
+* GraphQL
+	x break out the schema file into a file
+		x figure out how to import it into the server at least
+		x client does it different
+	x make a directory of resolvers
+	x merge in the stuff. 
+	x make a wrapper that 403's in local dev
+	x write a god damned test
+	* generate types from the schema file
+		* where does this live?
+		* could live at root and generate in both places at once, seems not bad.
+			* get them building as part of the build process
+		* LEAVING: we are generating separate types for client and server
+			* figure out how to use them in resolver types!
+ 	* figure out how they work in Web
+	* make this part of the context business. -- define context as a type
+	* cleanup global.d.ts for serverless, should that live somewhere else?
+	* log something on the back end
+	* make an endpoint for state info
+
+
+* IDM Integration
+	x get IDM url in env vars
+	x configure things so we have URLs to give
+	x try and initiate from our app
+		x figure out how to reconsititute the user on the server again...
+		x on the backend, if IDM, then append to the group!
+			x nope. 
+		x it's saying the user doesn't exist in the pool, even though the ID is right and the pool id is... what?
+			x need to search by sub instead of Username
+	x fix dev hybrid to be configured right for IDM
+		x need to get the IDM metadataURL -- nope.
+	x add REACT_APP_AUTH_TYPE env var local | cognito | idm
+		x make IDM a separate auth type? We probably don't want to support both?
+	x fix UI
+		x IDM: "Login" button
+		x IDM: logout function calls the right thing? -- it does
+		x IDM: no /login route
+	x get tests passing
+		x whoops, gotta refactor the tests to not be checking on env vars
+	x react app auth mode needs to be passed correctly to the API, via serverless.
+		x env vars work!
+	x configure env vars in dev/reviewapp
+		* read those from ./dev hybrid and set it right for the FE
+	* make sure header didn't break in storybook
+	--- future work ---
+	* figure out how to make test users in review apps
+	* how do we prevent regular cognito users from beingused in prod?
+		* CF conditionals, see the macstack team
+
+* DynamoDB
+	x read about what dynamodb is
+		* https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.CoreComponents.html
+		* NOSQL
+		* document store
+		* you can make indexes to avoid doing table scans
+		* what do the schemas you can put into your dynamo CloudFormation mean?
+			* key schema is about the primary key
+		* table/item/attribute
+		* indicies project data across, don'y have to have all the data in an index?
+		* CONDITIONAL WRITE gives us an error if something already exists
+	* DB TALK https://www.youtube.com/watch?v=HaEPXoXVf2k
+		* v0, v3 versioning
+		* hash key, single big, sort key, composite WA#SEA#BLACKFOOT
+		* design for access patterns, so different access paterns mean things might need to be redesigned.
+		* different primary/sort keys for different access patterns????
+		* this is for some at scale shit. We don't need this, so the gift of flexible queries is worth the cost of typing tables. 
+	x make a table for DraftSubmission
+		* id: uuid
+		* program_id
+		* description
+		* state_code
+	x insert something into it. 
+	x add draftSubmission to domain-models
+		x figure out the mapping stuff?
+	* how do we ensure that dynamodb is running when you run api tests?
+		* This is a big can of worms
+		* b/c dynamodb can be started with ./dev local
+		* or it can be started with ./dev test api?
+		* at some point, it's like, do we track what we're running different places in ./dev, does it become an app with a runloop instead of just commands? 
+		* can fake it with commands, but man, probably need a UI at some point, too
+		* let's add this to ./dev, I think. ./dev test --run-db
+			* this would be a command that starts a background process and doesn't fulfil the promise until some line is printed. 
+			* should error if the port is already taken
+			* port should be configed in .env
+				* hey there's a port going into a unit test. Welp. 
+
+	* where should business logic live?
+		* in store when it needs to be atomic
+		* outside of store otherwise?
+		* CreateDraftSubmissionxw
+			* given: state.program, contractstype, description
+			* createdAt -- db?
+			* state-num -- db?
+			* name (state_program_num) -- db? / synthesized
+			* id -- db/resolver?
+	* figure out Primary key
+		* Primary Key: ID // program name?
+		* index: statecode / id?
+		* id
+		* state_code
+		* program_id 
+		* description
+		* type: CONTRACT_ONLY | CONTRACT_AND_RATES
+		* created_at
+	* goal is to act like we'll act when we are Postgres
+		* might have to make the primary key statecodexstatenumber in order to get a unique
+		* put uuid as a secondary index, so that it's there for later. 
+		* TOMM: got so i'm inserting things, test is failing on concurrency
+			* apparently, it's hard to enforice uniq on a secondary index
+			* if we want unique statenumber, lets make it the primary
+		* in postgres
+			* id, state_code, program_id, state_number?
+			/submissions/3
+			VA_MCOS_0003
+		* error for missing keys
+		* error for duplicate pkeys
+	* make a store package
+		* draftSubmission
+			* create
+				* Types???
+					* once again, are these our domain types or something special?
+				* this talks to dynamodb, generates an ID??, saves stuff
+			* update
+		* make it work locally
+	* make a table for User
+		* this is an optimization because basically every call is going to have to get your state code.
+		* we have to hit the Cognito API to get that _once_ when you first hit our API, but we can cache it after that
+		* id
+		* state_code
+		* name? whatever?
+	* delete the existing table
+
+
+JEST CONFIGURATION
+* displayName: diffs b/w client and server
+* collectCoverage: enable code coverage
+* runner? Seems to let you configure jest to run tsc or eslint. 
+* setupFiles: seems not right, run this file before every file
+* testURL: if we need it, lets us set document.url in test env
+* 
+
+
+* FE ./dev
+	x make dev complain if something is set in example but not set in your .env
+	* make ./dev test make sense
+		x get local vars installed on every build
+			x let's use the normal CRA method here. Get rid of thier nonsense. 
+			x things are still being built in a script in serverless.yml
+		x write a test for the BE
+		x run the right tests / rerun them
+		* install dependencies if missing in Test
+		* run unit tests in CI
+		* maybe call out different unit tests as different github actions
+	x get errors gone in editors
+	x get the flag parsing right. --- Hours of fun work.....
+	* GOT to run prettier/linters
+	* ____ what about the thing ____ src/gen needs to be rm'd regularly
+	
+
+* ./dev
+	* test %WE
+		* update schmea, tests run
+		* bad schema, error shows there
+		* update file, tests run
+		* only the test you care about
+		* files don't compile, that's an error
+		* can we make jest run the schema compiler so it shows the error?
+		* sometimes things seem to be showing the previous version (FE, API)
+	* MATRIX
+		* api
+		* web
+		* dev
+		* storybook
+		* email/db/whatever the other services are
+		-------
+		* editor
+		* test
+		* local
+		* pre-commit
+		* CI
+		-------
+		* prettier
+		* schema compile fails
+		* ts compile fails
+		* linter error/warn
+		* runtime error
+		* db isn't runnining??
+		-------
+		* halt
+		* warn
+		* ignore
+	* how tf do we test this to know it's still working
+	* tests have dependencies
+		* schema compile
+		* ts compile
+		* database is running
+
+* Auth
+	x test signup with AWS
+		x get vars from tharr
+			x get stuff from cloudtamer
+			x use REACT_APP
+		x signup needs a confirm page
+		x refactor auth component
+		x make /hello API that no-ops but requires authentication
+	x test login with AWS
+	x determine what is sent in AWS
+		x it's not in the first thing, gonna see if it's in the second thing that Doug mentioned. 
+		x haha nope. Probably need to make an API call to get user info like this. Maybe dumb to rely on state info this way. 
+		x try the API Call out. 
+	x build local dev
+		* Since all auth checking is being done by Cognito, there's no reason to check anything on the server in local auth. 
+		* if LOCAL_AUTH is set, show local auth page
+			* "login" function saves a local userid
+		* FE passes user info locally but not in prod
+			* future requests send that user in a header if it exists
+	x REQUIRE LOGIN
+		* getting an error when you are logged out trying to see the dashboard. Not surprising. 
+		* or when logging in
+	x add mock users
+
+x WHY does my local dev display bigger buttons than in dev?
+	x had it zoomed
+* Make a story to label dev/staging/branch somewhere
+* Make warnings into errors in ./dev local
+* add pre-commit
+* if the server fails to compile locally, make that display big in the FE when it gets that 500000
+* add awsRequestId to Log Lines
+
+* LoginLoading
+	* add a setTimeout -> window.loctaion.reload() to get things repeatably changing.
+	* login is flickering while loading
+	* isLoding is hiding something
+	* LoginState: UNKNOWN | LOADING | LOGGED_OUT | LOGGED_IN | ERROR?? (might just be unknown)
+	* pages render
+	* routes render based on those states
+
+* testing the FE
+	* how do I turn my interaction into a loop?
+	* just a test, but one I can see? 
+	* fake mouse pointer rendered?
+		* or click effects like mousepose
+
+
+* log to Splunk
+	x log from backend
+		* restrict to known values? -- cleanup
+		* use the open telementry naming conventions for fields. https://github.com/open-telemetry/opentelemetry-specification/blob/master/specification/trace/semantic_conventions/README.md
+	* log from frontend
+		x create logging endpoint
+		x log on login
+		* log in deployed environment
+		* Log an error
+	* maybe try and setup honeycomb?
+		* i need to ask about wether honeycomb exists.
+	* log an event on deploys
+	* configure monitoring
+	* configure metrics
+* persist local login
+
+* DRAFT submission vs. SUBMITTED submission
+	* maybe these are different models, with different requirements
+	* make a new object for submitted
+	* https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/
+
+* linter errors should be link-clickable
+* watch serverless.yml to restart api.serverless
+* deploying a demo app for every branch is awesome
+	* make CI push and update to the PR for the link to the demo app
+	* how do we clean them up?
+* Build the lambdas properly once, Immutable Deploys with the artifact that is built
+	 * use serverless-package
+	x NOPE. it packages all the resource variables, and those include things like db url.
+	x might still work with ENV vars, but not with the current resoruce management. 
+
+
+DEPENDENCY INJECTION
+* funny idea: 
+	* You want a handler func that is called with all the things it cares about
+	* You want a config func that translates env vars into a call to a configured handler
+	* The funny idea might just be a fancy DI framework
+	* The config func could inspect the handler and run things based on its arguments. 
+		* Might be tricky with Typescript, but w/e
+
+
+PLANNING
+===================
+
+STORIES FOR THE DAHSBOARD PAGE V1
+* hello world FE
+	* landing page
+	* auth??
+	* tests
+	* routing
+	* logging
+	* state name?
+	* list of submissions?
+	* submit button per program?
+* Hello World BE
+	* logging end point
+	* logging framework
+	* healthcheck 
+		* return current version
+	* get aligned with the shared infra team on secret storage
+
+
+STORIES FOR AUTH
+* meet with Okta team
+	* determine what it takes to create test users, developer users, admin users, and real users
+* create users for each environment
+* figure out auth in local dev with roles
+
+* setup create-user form
+* setup login-user form
+* log user info from back end
+* setup local auth
+
+
+STORIES FOR STORYBOOK
+* deploy it
+* add CMS and USWDS components to it
+* add a simple header component
+* live code sharing with the FE
+
+
+USER DATA
+* associate user with a state
+* associate programs with a state
+* fetch state/programs on load of dashboard
+
+
+STORIES FOR THE FIRST PAGE
+**** URLS are probably bogus. We will probably want an ID?
+* Load User Info
+	* create GraphQL API Definition with load_user mutation
+	* create user table
+	* on first load_user with a new, valid user, save username and state in user table.
+	* return dummy program info? -- look up URLs
+* Start Submission
+	* when you click "new submission" hit a new_submission mutation? (gives back ID?)
+* Build Submission Type Form
+	* configure form library
+	* Validate fields
+* Save Form
+	* Create save_form mutation
+	* create Submissions table
+	* Save Form when save button clicked
+* Load Form
+	* create load_form mutation
+	* load form on form URL load
+
+
+
+
+* setup a form library
+* page with fields and save button
+* setup graphql
+	* how does graphql work with Lambdas/API Gateway????
+* setup Apollo
+* design Form graphql resource
+
+ 
+DOCUMENT UPLOAD
+* talk to MOJO about document upload virus scanning
+* user state of "this file is being scanned"
+* talk to Seth again about document uploads.
+
+16 weeks to May
+8 Sprints
+
+* Setup Repo
+
+
+EPICS
+
+Dashboard Page, login button and then start submission button
+	* hello world FE
+Design System
+--- 2 sprints
+Auth
+A11y Compliance ADR
+--- 1 sprint
+Page 1: Submission Type
+--- 2 sprints
+Page 3: Documents
+--- 2 sprints 
+Page 2: Detail
+--- 1 sprint
+Page 4: Review and Submit
+--- 1 sprint
+Send to CMS
+--- 1 sprint
+and one to grow on
+--- 1 sprint
+
+== 11 sprints (we have 8)
+
+
+SCREENS
+* no-auth / landing page
+* dashboard
+* form
+	* one - new submission
+	* two - contract info
+	* three - rates info
+	* four - uploads
+	* summary
+* program details -- punted
+
+FEATURES
+* login
+	* keep thinking about how this affects things
+	* how can we work around this?
+	* how does it work in DEV?
+* save form
+* submit
+* Validation
+	* submission errors = displayed on submission, block submission button
+* Local Testing.
+
+APIS
+* save form(section)
+* get form(section)
+* upload doc to S3
+* Submit form
+* get state info
+* set state info
+	* including PROGRAM NAME
+
+DESIGN PATTERNS
+* Testing
+	* unit
+		* fe/be
+	* end to end
+* Error handling
+	* neverthrow
+	* KnownError?
+* Logging
+	* FE Strategy for event
+	* BE strategy for requests
+* DB
+	* end-to-en
+* APIs 
+	* Api Errors
+	* Naming conventions
+
+
+INFRA
+* typescript backend
+* typescript frontend
+
+
+Design
+* URLS for everything
+
+
+
+QUESTIONS
+* how does the UI get built and uploaded?
+* What are the permission restrictions on s3? can 2 users smash eachother?
+* What is a YARN Workspace?
+* what happens when a user first auths with our app?
