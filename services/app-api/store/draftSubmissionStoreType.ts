@@ -28,7 +28,7 @@ export class DraftSubmissionStoreType {
             StateStateNumberIndex: 'HASH',
         },
     })
-    stateCode: String
+    stateCode: string
 
     @attribute({
         indexKeyConfigurations: {

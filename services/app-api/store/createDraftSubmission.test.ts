@@ -211,10 +211,8 @@ describe('insertDraftSubmission', () => {
 
             const seenStateNumbers = new Set<string>()
             sixValues.forEach((pValue) => {
-                if (pValue.stateCode) {
-                    expect(seenStateNumbers.has(pValue.stateCode)).toBeFalsy()
-                    seenStateNumbers.add(pValue.stateCode)
-                }
+                expect(seenStateNumbers.has(pValue.stateCode)).toBeFalsy()
+                seenStateNumbers.add(pValue.stateCode)
             })
 
             if (seenStateNumbers.size == 0) {

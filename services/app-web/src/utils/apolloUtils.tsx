@@ -1,6 +1,5 @@
 import { GetCurrentUserDocument, User as UserType } from '../gen/gqlClient'
 import { MockedResponse } from '@apollo/client/testing'
-import { GraphQLError } from 'graphql'
 
 /* For use with Apollo MockedProvider in jest tests */
 const mockValidUser: UserType = {

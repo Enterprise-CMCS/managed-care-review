@@ -1,6 +1,6 @@
 import DynamoDB from 'aws-sdk/clients/dynamodb'
 
-export function newLocalStoreConnection(dyanmoURL: string) {
+export function newLocalStoreConnection(dyanmoURL: string): DynamoDB {
     const config = {
         region: 'localhost',
         endpoint: dyanmoURL,
