@@ -4,14 +4,20 @@ import { Tag } from '@trussworks/react-uswds'
 import styles from './SubmissionCard.module.scss'
 
 export type SubmissionCardProps = {
-    number: string,
-    description: string,
-    contractType: 'contractOnly' | 'contractAndRate',
-    status: 'draft' | 'submitted',
+    number: string
+    description: string
+    contractType: 'contractOnly' | 'contractAndRate'
+    status: 'draft' | 'submitted'
     date: Date
 }
 
-export const SubmissionCard = ({number, description, contractType, status, date}: SubmissionCardProps): React.ReactElement => {
+export const SubmissionCard = ({
+    number,
+    description,
+    contractType,
+    status,
+    date,
+}: SubmissionCardProps): React.ReactElement => {
     return (
         <li className={styles.cardContainer}>
             <div className={styles.cardLeft}>
@@ -20,7 +26,15 @@ export const SubmissionCard = ({number, description, contractType, status, date}
             </div>
             <div className={styles.cardRight}>
                 <p className={styles.submissionType}>{contractType}</p>
-                <Tag className={status=='draft' ? styles.tagWarning : styles.tagSuccess}>{status=='submitted' ? `Submitted [date]`  : 'Draft'}</Tag>
+                <Tag
+                    className={
+                        status === 'draft'
+                            ? styles.tagWarning
+                            : styles.tagSuccess
+                    }
+                >
+                    {status === 'submitted' ? `Submitted ${date}` : 'Draft'}
+                </Tag>
             </div>
         </li>
     )
