@@ -4,8 +4,8 @@ import { Resolver, ResolverTypeWrapper, User } from '../gen/gqlServer'
 
 import { userFromAuthProvider } from '../authn'
 
-// getCurrentUserResolver is a function that returns a configured Resover
-// you have to call it with it's dependencies to pass it into the Resover tree
+// getCurrentUserResolver is a function that returns a configured Resolver
+// you have to call it with it's dependencies to pass it into the Resolver tree
 export function getCurrentUserResolver(
     userFetcher: userFromAuthProvider
 ): Resolver<

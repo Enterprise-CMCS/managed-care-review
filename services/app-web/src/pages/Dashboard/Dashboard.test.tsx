@@ -37,7 +37,7 @@ describe('Dashboard', () => {
                 name: 'Start new submission',
             })
             expect(links).toBeDefined()
-            expect(links[0]).toHaveAttribute('href', '/new')
+            expect(links[0]).toHaveAttribute('href', '/submissions/new')
         })
     })
 
@@ -89,7 +89,7 @@ describe('Dashboard', () => {
         })
     })
 
-    it('on new submission click, redirect to /new', async () => {
+    it('on new submission click, redirect to /submissions/new', async () => {
         const history = createMemoryHistory()
 
         renderWithProviders(<Dashboard />, {
@@ -110,7 +110,7 @@ describe('Dashboard', () => {
         })
 
         await waitFor(() => {
-            expect(history.location.pathname).toBe('/new')
+            expect(history.location.pathname).toBe('/submissions/new')
         })
     })
 })

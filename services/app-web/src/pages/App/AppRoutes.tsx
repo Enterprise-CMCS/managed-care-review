@@ -45,7 +45,11 @@ export const AppRoutes = ({
             <Switch>
                 <Route path="/" exact component={Dashboard} />
                 <Route path="/dashboard" component={Dashboard} />
-                <Route path="/new" exact component={StateSubmissionForm} />
+                <Route
+                    path="/submissions/new"
+                    exact
+                    component={StateSubmissionForm}
+                />
                 <Route
                     path="/help/submission-description-examples"
                     component={SubmissionDescriptionExamples}

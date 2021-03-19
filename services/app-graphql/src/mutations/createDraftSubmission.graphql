@@ -1,0 +1,11 @@
+mutation createDraftSubmission($input: CreateDraftSubmissionInput!) {
+    createDraftSubmission(input: $input) {
+        draftSubmission {
+            program {
+                name
+            }
+            submissionType
+            submissionDescription
+        }
+    }
+}

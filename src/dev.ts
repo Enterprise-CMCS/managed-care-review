@@ -68,6 +68,7 @@ async function run_s3_locally(runner: LabeledProcessRunner) {
     )
 }
 
+// run the graphql compiler with --watch
 async function compile_graphql_types_watch(runner: LabeledProcessRunner) {
     await runner.run_command_and_output(
         'gql deps',
