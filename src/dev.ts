@@ -298,11 +298,17 @@ async function run_web_against_aws(
 async function run_all_tests({
     runUnit,
     runOnline,
+    runDBInBackground,
 }: {
     runUnit: boolean
     runOnline: boolean
+    runDBInBackground: boolean
 }) {
     const runner = new LabeledProcessRunner()
+
+    if (runDBInBackground) {
+        run_db_locally(runner)
+    }
 
     try {
         if (runUnit) {
@@ -486,24 +492,35 @@ function main() {
                         describe:
                             'run run all tests that run against a live instance. Confiugre with APPLICATION_ENDPOINT',
                     })
+                    .option('run-db', {
+                        type: 'boolean',
+                        default: false,
+                        describe:
+                            'runs the ./dev local --db command before starting testing',
+                    })
             },
             (args) => {
                 // If no test flags are passed, default to running everything.
-                const inputFlags = {
+                const inputRunFlags = {
                     runUnit: args.unit,
                     runOnline: args.online,
                 }
 
-                const parsedFlags = parseRunFlags(inputFlags)
+                const runFlags = parseRunFlags(inputRunFlags)
 
-                if (parsedFlags === undefined) {
+                if (runFlags === undefined) {
                     console.log(
                         "Error: Don't mix and match positive and negative boolean flags"
                     )
                     process.exit(1)
                 }
 
-                run_all_tests(parsedFlags)
+                const testingFlags = {
+                    ...runFlags,
+                    runDBInBackground: args['run-db'],
+                }
+
+                run_all_tests(testingFlags)
             }
         )
         .command(
