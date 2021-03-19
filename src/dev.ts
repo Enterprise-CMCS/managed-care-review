@@ -7,10 +7,15 @@ import LabeledProcessRunner from './runner.js'
 import { envFileMissingExamples } from './env.js' // What the WHAT? why doesn't this import right without the `.js`??
 import { checkStageAccess, getWebAuthVars } from './serverless.js'
 import { parseRunFlags } from './flags.js'
-import { once } from './deps.js'
+import { once, requireBinary } from './deps.js'
 
 // run_db_locally runs the local db
 async function run_db_locally(runner: LabeledProcessRunner) {
+    requireBinary(
+        ['/usr/libexec/java_home'],
+        'Java is required in order to run the database locally.\nInstall Java Standard Edition (SE) here: https://www.oracle.com/java/technologies/javase-downloads.html'
+    )
+
     await runner.run_command_and_output(
         'db yarn',
         ['yarn', 'install'],
