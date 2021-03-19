@@ -12,7 +12,7 @@ import { once, requireBinary } from './deps.js'
 // run_db_locally runs the local db
 async function run_db_locally(runner: LabeledProcessRunner) {
     requireBinary(
-        ['/usr/libexec/java_home'],
+        ['java', '--version'],
         'Java is required in order to run the database locally.\nInstall Java Standard Edition (SE) here: https://www.oracle.com/java/technologies/javase-downloads.html'
     )
 
