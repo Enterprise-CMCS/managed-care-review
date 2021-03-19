@@ -24,7 +24,7 @@ checks:
   method-lines:
     enabled: true
     config:
-      threshold: 25
+      threshold: 50
   nested-control-flow:
     enabled: true
     config:
@@ -36,13 +36,19 @@ checks:
   similar-code:
     enabled: true
     config:
-      threshold: #language-specific defaults. overrides affect all languages.
+      threshold:
   identical-code:
     enabled: true
     config:
-      threshold: #language-specific defaults. overrides affect all languages.
+      threshold:
 
 plugins:
+  duplication:
+    enabled: true
+    config:
+      languages:
+        javascript:
+          count_threshold: 3
   eslint:
     enabled: true
     channel: 'eslint-6'
@@ -66,3 +72,5 @@ exclude_patterns:
   - '**/*.d.ts'
   - '**/*.test.ts*'
   - '**/*.stories.*'
+  - '**/gen/*'
+  - 'build_dev/'
