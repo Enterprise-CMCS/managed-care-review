@@ -20,8 +20,6 @@ export async function insertDraftSubmission(
     conn: DynamoDB,
     args: InsertDraftSubmissionArgsType
 ): Promise<DraftSubmissionType> {
-    console.log('creating SUBM', args)
-
     // in order to create a new draft submission, we have to do a few things in the DB.
     // * given: state.program, contractstype, description
     //   * createdAt -- now
@@ -56,7 +54,6 @@ export async function insertDraftSubmission(
             scanIndexForward: false,
         }
     )) {
-        console.log('GOT IT YEA', foo)
         biggestStateNumber.push(foo)
         // individual items with a hash key of "foo" will be yielded as the query is performed
     }
@@ -69,7 +66,6 @@ export async function insertDraftSubmission(
 
     // what do we do with these args?
     // return a DraftSubmissinoType
-    console.log('YES', args)
     try {
         const toSave = Object.assign(draft, args)
         const uniqueCondition = new FunctionExpression(
@@ -81,12 +77,9 @@ export async function insertDraftSubmission(
             condition: uniqueCondition,
         })
 
-        console.log('PUTTT', putResult)
-
         return putResult
-    } catch (puErr) {
-        console.log('NO')
-        console.log('putere', puErr)
-        throw puErr
+    } catch (err) {
+        console.log('Put Error', err)
+        throw err
     }
 }

@@ -1,5 +1,4 @@
 import DynamoDB from 'aws-sdk/clients/dynamodb'
-import { insertDraftSubmission } from './createDraftSubmission'
 
 export function newLocalStoreConnection(dyanmoURL: string) {
     const config = {

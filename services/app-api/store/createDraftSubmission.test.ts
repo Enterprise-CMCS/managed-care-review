@@ -24,7 +24,6 @@ describe('insertDraftSubmission', () => {
 
         try {
             const draftSub = await insertDraftSubmission(conn, inputParams)
-            console.log('draftQ!!', draftSub)
 
             const createdID = draftSub.id
 
@@ -34,7 +33,6 @@ describe('insertDraftSubmission', () => {
                         id: createdID,
                     })
                 )
-                console.log('GOT', getResult)
 
                 expect(getResult.id).not.toEqual('foo')
                 expect(getResult.description).toEqual('a new great submission')
@@ -51,135 +49,7 @@ describe('insertDraftSubmission', () => {
             console.log('Error creating a draft submission:', createErr)
             throw new Error(createErr)
         }
-
-        ///what
-        // console.log('YES')
-        // const toSave = Object.assign(new DraftSubmission(), inputParams)
-        // try {
-        //     const putResult = await mapper.put(toSave)
-
-        //     console.log('PUTTT', putResult)
-        // } catch (puErr) {
-        //     console.log('NO')
-        //     console.log('putere', puErr)
-        //     throw new Error(puErr)
-        //     return
-        // }
-
-        // const getParams = { id: 'foo' }
-
-        // try {
-        //     const listResult = await mapper.get(
-        //         Object.assign(new DraftSubmissionStoreType(), getParams)
-        //     )
-        //     console.log(listResult)
-        // } catch (dynamoErr) {
-        //     console.log(dynamoErr)
-        //     throw new Error(dynamoErr)
-        //     return
-        // }
-
-        // // list them?
-        // const listParams = {
-        //     TableName: tableName,
-        // }
-
-        // try {
-        //     const listResult = await conn.scan(listParams).promise()
-        //     console.log(listResult.Items)
-        // } catch (dynamoErr) {
-        //     console.log(dynamoErr)
-        //     throw new Error(dynamoErr)
-        //     return
-        // }
-
-        // try {
-        //     for await (const item of mapper.scan(DraftSubmissionStoreType)) {
-        //         console.log('go', item)
-        //         // individual items will be yielded as the scan is performed
-        //     }
-        // } catch (scanErr) {
-        //     throw new Error(scanErr)
-        // }
-
-        // check that there is nothing in it
-
-        // insert something
-        // throw new Error()
     })
-
-    // it('throw new Errors like a handler', async () => {
-    //     // get a connection to the db
-    //     const conn = newLocalStoreConnection('http://localhost:8000')
-    //     const tableName = 'local-draft-submissions'
-
-    //     const inputParams = {
-    //         stateCode: 'FL',
-    //         programID: 'MCAC',
-    //         description: 'a new good submission',
-    //         type: 'CONTRACT_ONLY',
-    //     }
-
-    //     // store
-    //     // conn.insertDraftSubmission( params ): DraftSubmission | StoreError
-
-    //     // transform inputParams into a StoreDraftSubmission type
-    //     // use mapper to get in there.
-
-    //     // conn.updateDraftSubmission(draft: DraftSubmission): DraftSubmission | Error
-
-    //     const insertParams = {
-    //         TableName: tableName,
-    //         Item: {
-    //             id: 'foo',
-    //             programID: 'OSWA',
-    //             stateCode: 'FL',
-    //             description: 'a good submission',
-    //         },
-    //     }
-
-    //     try {
-    //         const insertResult = await conn.put(insertParams).promise()
-    //         console.log('inserted', insertResult)
-    //     } catch (insertErr) {
-    //         console.log(insertErr)
-    //         throw new Error(insertErr)
-    //         return
-    //     }
-
-    //     const getParams = {
-    //         TableName: tableName,
-    //         Key: { id: 'foo' },
-    //     }
-
-    //     try {
-    //         const listResult = await conn.get(getParams).promise()
-    //         console.log(listResult.Item)
-    //     } catch (dynamoErr) {
-    //         console.log(dynamoErr)
-    //         throw new Error(dynamoErr)
-    //         return
-    //     }
-
-    //     // list them?
-    //     const listParams = {
-    //         TableName: tableName,
-    //     }
-
-    //     try {
-    //         const listResult = await conn.scan(listParams).promise()
-    //         console.log(listResult.Items)
-    //     } catch (dynamoErr) {
-    //         console.log(dynamoErr)
-    //         throw new Error(dynamoErr)
-    //         return
-    //     }
-
-    //     // check that there is nothing in it
-
-    //     // insert something
-    //     throw new Error()
-    // })
 
     it('can fetch using stateNumber', async () => {
         // get a connection to the db
@@ -198,10 +68,8 @@ describe('insertDraftSubmission', () => {
 
         try {
             const draftSub = await insertDraftSubmission(conn, inputParams)
-            console.log('draftQ!!', draftSub)
 
             const createdStateNumber = draftSub.stateNumber
-            console.log('STAWTGE VODE', createdStateNumber)
 
             try {
                 const subsOfID = []
@@ -213,7 +81,6 @@ describe('insertDraftSubmission', () => {
                     },
                     { indexName: 'StateStateNumberIndex' }
                 )) {
-                    console.log('GOT IT YEA', foo)
                     subsOfID.push(foo)
                     // individual items with a hash key of "foo" will be yielded as the query is performed
                 }
@@ -308,7 +175,7 @@ describe('insertDraftSubmission', () => {
         }
     })
 
-    it('is robust against concurrent creations', async () => {
+    it.skip('is robust against concurrent creations', async () => {
         // get a connection to the db
 
         const conn = newLocalStoreConnection('http://localhost:8000')
@@ -373,3 +240,5 @@ describe('insertDraftSubmission', () => {
 // we can update something that's there
 // create two in a row, make sure they always get different IDs
 // create three, state1, state2, state1, ensure that we get 1,1,2 state_number
+// any errors it should return?
+// * Connection Error
