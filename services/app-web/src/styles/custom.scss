@@ -6,3 +6,12 @@
 .usa-legend {
     font-weight: bold;
 }
+
+.srOnly {
+    position: absolute;
+    left: -1000px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}

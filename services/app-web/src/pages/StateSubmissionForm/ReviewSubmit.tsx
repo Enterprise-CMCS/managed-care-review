@@ -218,9 +218,12 @@ export const ReviewSubmit = ({
                     </div>
                 </div>
                 <Table bordered={false} fullWidth={true} fixed={true}>
+                    <caption className="srOnly">Documents included with this submission</caption>
                     <thead>
-                        <th>Document</th>
-                        <th>Description</th>
+                        <tr>
+                            <th scope="col">Document</th>
+                            <th scope="col">Description</th>
+                        </tr>
                     </thead>
                     <tbody>
                         <tr>
