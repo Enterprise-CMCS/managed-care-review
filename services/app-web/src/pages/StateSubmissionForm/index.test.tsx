@@ -21,12 +21,12 @@ describe('StateSubmissionForm', () => {
         )
     })
 
-    xit('loads Submission type step for /submissions/:id/submission-type', async () => {
+    it('loads Submission type step for /submissions/:id/submission-type', async () => {
         renderWithProviders(<StateSubmissionForm />, {
             apolloProvider: {
                 mocks: [getCurrentUserMock({ statusCode: 200 })],
             },
-            routerProvider: { route: '/submissions/15/submission-type' },
+            routerProvider: { route: '/submissions/15/type' },
         })
 
         await waitFor(() =>
@@ -36,7 +36,7 @@ describe('StateSubmissionForm', () => {
         )
     })
 
-    xit('loads Contract details step for /submissions/:id/contract-details', async () => {
+    it('loads Contract details step for /submissions/:id/contract-details', async () => {
         renderWithProviders(<StateSubmissionForm />, {
             apolloProvider: {
                 mocks: [getCurrentUserMock({ statusCode: 200 })],

@@ -210,9 +210,9 @@ describe('SubmissionType', () => {
             })
         })
 
-        xit('shows error messages when there are validation errors and showValidations is true', async () => {
+        it('shows error messages when there are validation errors and showValidations is true', async () => {
             renderWithProviders(
-                <SubmissionType showValidations />,
+                <SubmissionType showValidations={true} />,
 
                 {
                     apolloProvider: {
@@ -220,26 +220,27 @@ describe('SubmissionType', () => {
                     },
                 }
             )
+            const textarea = screen.getByRole('textbox', {
+                name: 'Submission description',
+            })
+
             await waitFor(() => {
-                const textarea = screen.getByRole('textbox', {
-                    name: 'Submission description',
-                })
                 expect(textarea).toBeInTheDocument()
+            })
 
-                //trigger validation
-                userEvent.type(textarea, 'something')
-                userEvent.clear(textarea)
+            //trigger validation
+            await userEvent.type(textarea, 'something')
+            await userEvent.clear(textarea)
 
+            await waitFor(() => {
                 expect(textarea).toHaveClass('usa-input--error')
                 expect(
-                    screen.getByText(
-                        'Test - Submission description is required'
-                    )
+                    screen.getByText('You must choose a submission type')
                 ).toBeVisible()
             })
         })
 
-        xit('do not show error messages when showValidations is false', async () => {
+        it('do not show error messages when showValidations is false', async () => {
             renderWithProviders(<SubmissionType showValidations={false} />, {
                 apolloProvider: {
                     mocks: [getCurrentUserMock({ statusCode: 200 })],
@@ -257,16 +258,14 @@ describe('SubmissionType', () => {
 
                 expect(textarea).not.toHaveClass('usa-input--error')
                 expect(
-                    screen.queryByText(
-                        'Test - Submission description is required'
-                    )
+                    screen.queryByText('You must choose a submission type')
                 ).toBeNull()
             })
         })
     })
 
     describe('Continue / Save Draft button', () => {
-        xit('if form fields are invalid, shows validation error messages when continue button is clicked', async () => {
+        it('if form fields are invalid, shows validation error messages when continue button is clicked', async () => {
             renderWithProviders(<SubmissionType />, {
                 apolloProvider: {
                     mocks: [getCurrentUserMock({ statusCode: 200 })],
@@ -295,7 +294,7 @@ describe('SubmissionType', () => {
             })
         })
 
-        xit('if form fields are valid, navigate to /:id/contract-details when continue button is clicked', async () => {
+        it('if form fields are valid, navigate to /:id/contract-details when continue button is clicked', async () => {
             const mockUser = {
                 role: 'State User',
                 name: 'Bob in Minnesota',
