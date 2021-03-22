@@ -1,14 +1,14 @@
-import { newLocalStoreConnection } from './store'
+import { newTestStore } from './store'
 import { DataMapper } from '@aws/dynamodb-data-mapper'
 
 import { DraftSubmissionStoreType } from './draftSubmissionStoreType'
 
-import { insertDraftSubmission, isStoreError } from './insertDraftSubmission'
+import { isStoreError } from './insertDraftSubmission'
 
 describe('insertDraftSubmission', () => {
     it('creates a new submission from scratch', async () => {
         // get a connection to the db
-        const conn = newLocalStoreConnection('http://localhost:8000')
+        const store = newTestStore('http://localhost:8000')
 
         const mapper = new DataMapper({ client: conn })
 
@@ -20,8 +20,7 @@ describe('insertDraftSubmission', () => {
         }
 
         try {
-            const draftSubResult = await insertDraftSubmission(
-                conn,
+            const draftSubResult = await store.insertDraftSubmission(
                 inputParams
             )
 
@@ -63,7 +62,7 @@ describe('insertDraftSubmission', () => {
     it('can fetch using stateNumber', async () => {
         // get a connection to the db
 
-        const conn = newLocalStoreConnection('http://localhost:8000')
+        const store = newTestStore('http://localhost:8000')
         // const tableName = 'local-draft-submissions'
 
         const mapper = new DataMapper({ client: conn })
@@ -76,8 +75,7 @@ describe('insertDraftSubmission', () => {
         }
 
         try {
-            const draftSubResult = await insertDraftSubmission(
-                conn,
+            const draftSubResult = await store.insertDraftSubmission(
                 inputParams
             )
 
@@ -117,7 +115,7 @@ describe('insertDraftSubmission', () => {
     it('makes a consecutive state ID', async () => {
         // get a connection to the db
 
-        const conn = newLocalStoreConnection('http://localhost:8000')
+        const store = newTestStore('http://localhost:8000')
         // const tableName = 'local-draft-submissions'
 
         const mapper = new DataMapper({ client: conn })
@@ -137,20 +135,16 @@ describe('insertDraftSubmission', () => {
         }
 
         try {
-            const draftSubOneResult = await insertDraftSubmission(
-                conn,
+            const draftSubOneResult = await store.insertDraftSubmission(
                 inputParams
             )
-            const draftSubINOneResult = await insertDraftSubmission(
-                conn,
+            const draftSubINOneResult = await store.insertDraftSubmission(
                 inputINParams
             )
-            const draftSubINTwoResult = await insertDraftSubmission(
-                conn,
+            const draftSubINTwoResult = await store.insertDraftSubmission(
                 inputINParams
             )
-            const draftSubTwoResult = await insertDraftSubmission(
-                conn,
+            const draftSubTwoResult = await store.insertDraftSubmission(
                 inputParams
             )
 
@@ -216,7 +210,7 @@ describe('insertDraftSubmission', () => {
     it.skip('is robust against concurrent creations', async () => {
         // get a connection to the db
 
-        const conn = newLocalStoreConnection('http://localhost:8000')
+        const store = newTestStore('http://localhost:8000')
 
         const inputParams = {
             stateCode: 'FL',
@@ -226,15 +220,14 @@ describe('insertDraftSubmission', () => {
         }
 
         try {
-            const draftSubOnePromise = insertDraftSubmission(conn, inputParams)
-            const draftSubTwoPromise = insertDraftSubmission(conn, inputParams)
-            const draftSubThreePromise = insertDraftSubmission(
-                conn,
+            const draftSubOnePromise = store.insertDraftSubmission(inputParams)
+            const draftSubTwoPromise = store.insertDraftSubmission(inputParams)
+            const draftSubThreePromise = store.insertDraftSubmission(
                 inputParams
             )
-            const draftSubFourPromise = insertDraftSubmission(conn, inputParams)
-            const draftSubFivePromise = insertDraftSubmission(conn, inputParams)
-            const draftSubSixPromise = insertDraftSubmission(conn, inputParams)
+            const draftSubFourPromise = store.insertDraftSubmission(inputParams)
+            const draftSubFivePromise = store.insertDraftSubmission(inputParams)
+            const draftSubSixPromise = store.insertDraftSubmission(inputParams)
 
             const sixValues = await Promise.all([
                 draftSubOnePromise,
@@ -275,7 +268,7 @@ describe('insertDraftSubmission', () => {
     })
 
     it('returns an error for connection errors', async () => {
-        const conn = newLocalStoreConnection('http://localhost:9394')
+        const store = newTestStore('http://localhost:9394')
 
         const inputParams = {
             stateCode: 'FL',
@@ -285,7 +278,7 @@ describe('insertDraftSubmission', () => {
         }
 
         try {
-            const insertResult = await insertDraftSubmission(conn, inputParams)
+            const insertResult = await store.insertDraftSubmission(inputParams)
 
             if (isStoreError(insertResult)) {
                 const err = insertResult

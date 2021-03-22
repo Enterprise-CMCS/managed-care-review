@@ -1,6 +1,5 @@
 import DynamoDB from 'aws-sdk/clients/dynamodb'
 import { DataMapper } from '@aws/dynamodb-data-mapper'
-import { FunctionExpression, AttributePath } from '@aws/dynamodb-expressions'
 import { v4 as uuidv4 } from 'uuid'
 
 import { DraftSubmissionStoreType } from './draftSubmissionStoreType'
@@ -9,7 +8,7 @@ import {
     SubmissionRatesType,
 } from '../../app-web/src/common-code/domain-models'
 
-type InsertDraftSubmissionArgsType = {
+export type InsertDraftSubmissionArgsType = {
     stateCode: string
     programID: string
     submissionType: SubmissionRatesType
