@@ -17,7 +17,7 @@ const ProvidersDecorator = (
 ) => (
     <MockedProvider {...apolloProvider}>
         <BrowserRouter>
-            <AuthProvider localLogin={false} {...authProvider}>
+            <AuthProvider authMode="LOCAL" {...authProvider}>
                 <Story />
             </AuthProvider>
         </BrowserRouter>

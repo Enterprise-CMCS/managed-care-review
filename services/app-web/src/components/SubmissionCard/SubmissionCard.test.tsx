@@ -11,7 +11,7 @@ describe('SubmissionCard', () => {
         name: 'VA-CCCPlus-0001',
         description:
             'Rates are being adjusted to reflect revised capitation rates based on more recent data as well as benefit changes approved by the General Assembly.',
-        contractType: SubmissionType.ContractOnly,
+        submissionType: SubmissionType.ContractOnly,
         status: SubmissionStatus.draft,
     }
 
