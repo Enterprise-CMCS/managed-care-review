@@ -17,7 +17,7 @@ const ProvidersDecorator = (
 ) => (
     <MockedProvider {...apolloProvider}>
         <BrowserRouter>
-            <AuthProvider authMode={'AWS_COGNITO'} {...authProvider}>
+            <AuthProvider authMode="LOCAL" {...authProvider}>
                 <Story />
             </AuthProvider>
         </BrowserRouter>
