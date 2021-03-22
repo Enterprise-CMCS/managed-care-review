@@ -1,6 +1,8 @@
 @import '../../styles/uswdsImports.scss';
 @import '../../styles/custom';
 
+// FORM SECTIONS
+
 .formHeader {
 	text-align: center;
 	width: 100%;
@@ -35,8 +37,70 @@
 	margin-bottom: 0;
 }
 
+.pageActions {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: units(4);
+}
+
 .buttonGroup {
 	justify-content: flex-end;
 	margin-right: 0;
 	margin-left: 0;
+}
+
+// REVIEW AND SUBMIT
+
+.reviewSectionWrapper {
+	width: 66.66%;
+}
+
+.reviewSection {
+	margin: units(2) auto;
+	background: $cms-color-white;
+	padding: units(2) units(4);
+	border: 1px solid $theme-color-base-lighter;
+	@include u-radius('md');
+
+	h3 {
+		margin: 0;
+		@include u-text('normal');
+	}
+
+	h3.submissionName {
+		@include u-text('bold');
+		font-size: size('body', 'lg');
+	}
+}
+
+.reviewSectionHeader {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: units(4);
+	padding-bottom: units(2);
+	border-bottom: 1px solid $theme-color-base-lighter;
+}
+
+.reviewDataRow {
+	margin-bottom: units(2);
+}
+
+.reviewData {
+	label {
+		font-weight: bold;
+	}
+}
+
+.contactInfo p {
+	margin: units(1) 0;
+}
+
+.documentDesc {
+	margin: 0;
+}
+
+.submitButton {
+	background: $theme-color-success;
 }
