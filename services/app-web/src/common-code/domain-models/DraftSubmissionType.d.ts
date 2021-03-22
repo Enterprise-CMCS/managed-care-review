@@ -7,7 +7,7 @@ export type DraftSubmissionType = {
 	stateCode: string
 	stateNumber: number
 	programID: string
-	description: string
-	ratesType: SubmissionRatesType
+	submissionDescription: string
+	submissionType: SubmissionRatesType
 	createdAt: Date
 }

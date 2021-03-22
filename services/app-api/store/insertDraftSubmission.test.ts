@@ -3,30 +3,35 @@ import { DataMapper } from '@aws/dynamodb-data-mapper'
 
 import { DraftSubmissionStoreType } from './draftSubmissionStoreType'
 
-import { insertDraftSubmission } from './insertDraftSubmission'
+import { insertDraftSubmission, isStoreError } from './insertDraftSubmission'
 
 describe('insertDraftSubmission', () => {
     it('creates a new submission from scratch', async () => {
         // get a connection to the db
-        console.log('starting to test')
-
         const conn = newLocalStoreConnection('http://localhost:8000')
-        // const tableName = 'local-draft-submissions'
 
         const mapper = new DataMapper({ client: conn })
 
         const inputParams = {
             stateCode: 'FL',
             programID: 'MCAC',
-            description: 'a new great submission',
-            ratesType: 'CONTRACTS_ONLY' as const,
+            submissionDescription: 'a new great submission',
+            submissionType: 'CONTRACTS_ONLY' as const,
         }
 
         try {
-            const draftSub = await insertDraftSubmission(conn, inputParams)
+            const draftSubResult = await insertDraftSubmission(
+                conn,
+                inputParams
+            )
+
+            // This nicely narrows our result
+            if (isStoreError(draftSubResult)) {
+                throw new Error('Got an error in insert test')
+            }
+            const draftSub = draftSubResult
 
             const createdID = draftSub.id
-
             try {
                 const getResult = await mapper.get(
                     Object.assign(new DraftSubmissionStoreType(), {
@@ -35,8 +40,12 @@ describe('insertDraftSubmission', () => {
                 )
 
                 expect(getResult.id).not.toEqual('foo')
-                expect(getResult.description).toEqual('a new great submission')
+                expect(getResult.submissionType).toEqual('CONTRACTS_ONLY')
+                expect(getResult.submissionDescription).toEqual(
+                    'a new great submission'
+                )
                 expect(getResult.stateCode).toEqual('FL')
+                expect(getResult.programID).toEqual('MCAC')
 
                 expect(Date.now() - getResult.createdAt.valueOf()).toBeLessThan(
                     2000
@@ -62,12 +71,21 @@ describe('insertDraftSubmission', () => {
         const inputParams = {
             stateCode: 'FL',
             programID: 'MCAC',
-            description: 'a new great submission',
-            ratesType: 'CONTRACTS_ONLY' as const,
+            submissionDescription: 'a new great submission',
+            submissionType: 'CONTRACTS_ONLY' as const,
         }
 
         try {
-            const draftSub = await insertDraftSubmission(conn, inputParams)
+            const draftSubResult = await insertDraftSubmission(
+                conn,
+                inputParams
+            )
+
+            // This nicely narrows our result
+            if (isStoreError(draftSubResult)) {
+                throw new Error('Got an error in insert test')
+            }
+            const draftSub = draftSubResult
 
             const createdStateNumber = draftSub.stateNumber
 
@@ -107,28 +125,48 @@ describe('insertDraftSubmission', () => {
         const inputParams = {
             stateCode: 'FL',
             programID: 'MCAC',
-            description: 'a new great submission',
-            ratesType: 'CONTRACTS_ONLY' as const,
+            submissionDescription: 'a new great submission',
+            submissionType: 'CONTRACTS_ONLY' as const,
         }
 
         const inputINParams = {
             stateCode: 'IN',
             programID: 'INVC',
-            description: 'a new submission is great',
-            ratesType: 'CONTRACTS_AND_RATES' as const,
+            submissionDescription: 'a new submission is great',
+            submissionType: 'CONTRACTS_AND_RATES' as const,
         }
 
         try {
-            const draftSubOne = await insertDraftSubmission(conn, inputParams)
-            const draftSubINOne = await insertDraftSubmission(
+            const draftSubOneResult = await insertDraftSubmission(
+                conn,
+                inputParams
+            )
+            const draftSubINOneResult = await insertDraftSubmission(
                 conn,
                 inputINParams
             )
-            const draftSubTwo = await insertDraftSubmission(conn, inputParams)
-            const draftSubINTwo = await insertDraftSubmission(
+            const draftSubINTwoResult = await insertDraftSubmission(
                 conn,
                 inputINParams
             )
+            const draftSubTwoResult = await insertDraftSubmission(
+                conn,
+                inputParams
+            )
+
+            // This nicely narrows our result
+            if (
+                isStoreError(draftSubOneResult) ||
+                isStoreError(draftSubINOneResult) ||
+                isStoreError(draftSubINTwoResult) ||
+                isStoreError(draftSubTwoResult)
+            ) {
+                throw new Error('Got an error inserting')
+            }
+            const draftSubOne = draftSubOneResult
+            const draftSubTwo = draftSubTwoResult
+            const draftSubINOne = draftSubINOneResult
+            const draftSubINTwo = draftSubINTwoResult
 
             // by awaiting, these should _never_ collide
 
@@ -183,8 +221,8 @@ describe('insertDraftSubmission', () => {
         const inputParams = {
             stateCode: 'FL',
             programID: 'MCAC',
-            description: 'a new great submission',
-            ratesType: 'CONTRACTS_ONLY' as const,
+            submissionDescription: 'a new great submission',
+            submissionType: 'CONTRACTS_ONLY' as const,
         }
 
         try {
@@ -210,9 +248,15 @@ describe('insertDraftSubmission', () => {
             console.log('ALL SIX VALUES', sixValues)
 
             const seenStateNumbers = new Set<string>()
-            sixValues.forEach((pValue) => {
-                expect(seenStateNumbers.has(pValue.stateCode)).toBeFalsy()
-                seenStateNumbers.add(pValue.stateCode)
+            sixValues.forEach((result) => {
+                // This nicely narrows our result
+                if (isStoreError(result)) {
+                    throw new Error('Got an error in insert test')
+                }
+                const draftSub = result
+
+                expect(seenStateNumbers.has(draftSub.stateCode)).toBeFalsy()
+                seenStateNumbers.add(draftSub.stateCode)
             })
 
             if (seenStateNumbers.size == 0) {
@@ -229,14 +273,32 @@ describe('insertDraftSubmission', () => {
             throw new Error(createErr)
         }
     })
-})
 
-// tests
-// what if we isert somthin that is already inserted? -- doesn't quite make sense. -- new ID for everyhing, but differen stateNumber
-// what how do we get the next number?
-// what we put in we get out
-// we can update something that's there
-// create two in a row, make sure they always get different IDs
-// create three, state1, state2, state1, ensure that we get 1,1,2 state_number
-// any errors it should return?
-// * Connection Error
+    it('returns an error for connection errors', async () => {
+        const conn = newLocalStoreConnection('http://localhost:9394')
+
+        const inputParams = {
+            stateCode: 'FL',
+            programID: 'MCAC',
+            submissionDescription: 'a new great submission',
+            submissionType: 'CONTRACTS_ONLY' as const,
+        }
+
+        try {
+            const insertResult = await insertDraftSubmission(conn, inputParams)
+
+            if (isStoreError(insertResult)) {
+                const err = insertResult
+                expect(err.code).toBe('CONNECTION_ERROR')
+            } else {
+                throw new Error('We Should not have been able to connect')
+            }
+        } catch (createErr) {
+            console.log(
+                'Thrown error testing connection, we should have gotten an error:',
+                createErr
+            )
+            throw new Error(createErr)
+        }
+    })
+})

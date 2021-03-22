@@ -15,13 +15,16 @@ export class DraftSubmissionStoreType {
     id: string
 
     @attribute()
-    description: string
+    submissionDescription: string
 
     @attribute()
-    ratesType: SubmissionRatesType
+    submissionType: SubmissionRatesType
 
     @attribute()
     createdAt: Date
+
+    @attribute()
+    programID: string
 
     @attribute({
         indexKeyConfigurations: {
@@ -39,10 +42,11 @@ export class DraftSubmissionStoreType {
 
     constructor() {
         this.id = ''
-        this.description = ''
-        this.ratesType = 'CONTRACTS_ONLY'
+        this.submissionDescription = ''
+        this.submissionType = 'CONTRACTS_ONLY'
         this.createdAt = new Date()
         this.stateCode = ''
+        this.programID = ''
         this.stateNumber = -1
     }
 }

@@ -16,10 +16,102 @@ type InsertDraftSubmissionArgsType = {
     submissionDescription: string
 }
 
+type DynamoError = {
+    code: string
+}
+
+function isDynamoError(err: unknown): err is DynamoError {
+    if (err && typeof err == 'object' && 'code' in err) {
+        return true
+    }
+    return false
+}
+
+const StoreErrorCodes = ['CONNECTION_ERROR', 'INSERT_ERROR'] as const
+type StoreErrorCode = typeof StoreErrorCodes[number] // iterable union type
+
+export type StoreError = {
+    code: StoreErrorCode
+    message: string
+}
+
+// Wow this seems complicated. If there are cleaner ways to do this I'd like to know it.
+export function isStoreError(err: unknown): err is StoreError {
+    if (err && typeof err == 'object') {
+        if ('code' in err && 'message' in err) {
+            // This seems ugly but neccessary in a type guard.
+            const hasCode = err as { code: unknown }
+            if (typeof hasCode.code === 'string') {
+                if (
+                    StoreErrorCodes.some((errCode) => hasCode.code === errCode)
+                ) {
+                    return true
+                }
+            }
+        }
+    }
+    return false
+}
+
+// getNextStateNumber returns the next "number" for a submission for a given state. See comments below for more.
+async function getNextStateNumber(
+    conn: DynamoDB,
+    stateCode: string
+): Promise<number | StoreError> {
+    // in order to support incrementing IDs for each state's submissions, we need to generate
+    // a new stateNumber that is one more than all previously created statNumbers
+    // this enables us to generate state names like VA_MORC_0002 where the 0002 is unique for
+    // the whole state.
+
+    // we have a secondary index that is state / stateNumber
+    // find the next number
+    try {
+        const mapper = new DataMapper({ client: conn })
+        // get all submissions for a given state in order, see the last one, add one.
+        const biggestStateNumber = []
+        for await (const foo of mapper.query(
+            DraftSubmissionStoreType,
+            {
+                stateCode: stateCode,
+            },
+            {
+                indexName: 'StateStateNumberIndex',
+                limit: 1,
+                scanIndexForward: false,
+            }
+        )) {
+            biggestStateNumber.push(foo)
+            // individual items with a hash key of "foo" will be yielded as the query is performed
+        }
+
+        if (biggestStateNumber.length == 0) {
+            return 1
+        } else {
+            return biggestStateNumber[0].stateNumber + 1
+        }
+    } catch (err) {
+        // figure out if this is an error we know about
+        if (isDynamoError(err)) {
+            if (err.code === 'UnknownEndpoint') {
+                return {
+                    code: 'CONNECTION_ERROR',
+                    message:
+                        'Failed to connect to the database when trying to generate the new State Submission Number',
+                }
+            }
+        }
+        console.log(
+            'VERY unexpected, unknown error getting state number: ',
+            err
+        )
+        throw err
+    }
+}
+
 export async function insertDraftSubmission(
     conn: DynamoDB,
     args: InsertDraftSubmissionArgsType
-): Promise<DraftSubmissionType> {
+): Promise<DraftSubmissionType | StoreError> {
     // in order to create a new draft submission, we have to do a few things in the DB.
     // * given: state.program, contractstype, description
     //   * createdAt -- now
@@ -31,55 +123,44 @@ export async function insertDraftSubmission(
     draft.id = uuidv4()
     draft.createdAt = new Date()
 
-    // in order to support incrementing IDs for each state's submissions, we need to generate
-    // a new stateNumber that is one more than all previously created statNumbers
-    // this enables us to generate state names like VA_MORC_0002 where the 0002 is unique for
-    // the whole state.
+    draft.submissionType = args.submissionType
+    draft.programID = args.programID
+    draft.submissionDescription = args.submissionDescription
+    draft.stateCode = args.stateCode
 
-    // we have a secondary index that is state / stateNumber
-    // find the next number
-    // do a conditional insert, if that number is already taken, return an errror.
+    try {
+        const stateNumberResult = await getNextStateNumber(conn, args.stateCode)
+        if (isStoreError(stateNumberResult)) {
+            return stateNumberResult
+        }
+
+        draft.stateNumber = stateNumberResult
+    } catch (err) {
+        console.log('error getting state number', err)
+        throw err
+    }
 
     const mapper = new DataMapper({ client: conn })
-    // get all submissions for a given state in order, see the last one, add one.
-    const biggestStateNumber = []
-    for await (const foo of mapper.query(
-        DraftSubmissionStoreType,
-        {
-            stateCode: 'FL',
-        },
-        {
-            indexName: 'StateStateNumberIndex',
-            limit: 1,
-            scanIndexForward: false,
-        }
-    )) {
-        biggestStateNumber.push(foo)
-        // individual items with a hash key of "foo" will be yielded as the query is performed
-    }
-
-    if (biggestStateNumber.length == 0) {
-        draft.stateNumber = 1
-    } else {
-        draft.stateNumber = biggestStateNumber[0].stateNumber + 1
-    }
-
     // what do we do with these args?
     // return a DraftSubmissinoType
     try {
-        const toSave = Object.assign(draft, args)
-        const uniqueCondition = new FunctionExpression(
-            'attribute_not_exists',
-            new AttributePath('stateNumber')
-        )
-
-        const putResult = await mapper.put(toSave, {
-            condition: uniqueCondition,
-        })
+        const putResult = await mapper.put(draft)
 
         return putResult
     } catch (err) {
-        console.log('Put Error', err)
+        if (isDynamoError(err)) {
+            if (err.code === 'UnknownEndpoint') {
+                return {
+                    code: 'CONNECTION_ERROR',
+                    message:
+                        'Failed to connect to the database when trying to insert a new Submission',
+                }
+            }
+        }
+        console.log(
+            'VERY unexpected insert a new Submission, unknown error: ',
+            err
+        )
         throw err
     }
 }
