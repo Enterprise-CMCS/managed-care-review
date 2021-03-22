@@ -1,22 +1,81 @@
 import React from 'react'
+import userEvent from '@testing-library/user-event'
+import { createMemoryHistory } from 'history'
 import { screen, waitFor } from '@testing-library/react'
 
 import { getCurrentUserMock } from '../../utils/apolloUtils'
 import { renderWithProviders } from '../../utils/jestUtils'
-import { SubmissionType } from './SubmissionType'
-import { StateSubmissionInitialValues } from './StateSubmissionForm'
+import { SubmissionType, SubmissionTypeInitialValues } from './SubmissionType'
 import { Formik } from 'formik'
 
 describe('SubmissionType', () => {
-    const onInitialLoadProps = { errors: {}, showValidations: false }
+    it('renders without errors', async () => {
+        renderWithProviders(<SubmissionType />, {
+            apolloProvider: {
+                mocks: [getCurrentUserMock({ statusCode: 200 })],
+            },
+        })
+
+        await waitFor(() =>
+            expect(
+                screen.getByRole('heading', { name: 'Submission type' })
+            ).toBeInTheDocument()
+        )
+    })
+
+    it('displays a form', async () => {
+        renderWithProviders(<SubmissionType />, {
+            apolloProvider: {
+                mocks: [getCurrentUserMock({ statusCode: 200 })],
+            },
+        })
+
+        await waitFor(() =>
+            expect(
+                screen.getByRole('form', { name: 'New Submission Form' })
+            ).toBeInTheDocument()
+        )
+    })
+
+    it('displays a cancel link', async () => {
+        renderWithProviders(<SubmissionType />, {
+            apolloProvider: {
+                mocks: [getCurrentUserMock({ statusCode: 200 })],
+            },
+        })
+
+        await waitFor(() =>
+            expect(
+                screen.getByRole('link', {
+                    name: 'Cancel',
+                })
+            ).toBeDefined()
+        )
+    })
+
+    it('displays a continue button', async () => {
+        renderWithProviders(<SubmissionType />, {
+            apolloProvider: {
+                mocks: [getCurrentUserMock({ statusCode: 200 })],
+            },
+        })
+
+        await waitFor(() =>
+            expect(
+                screen.getByRole('button', {
+                    name: 'Continue',
+                })
+            ).toBeDefined()
+        )
+    })
 
     it('displays programs select dropdown', async () => {
         renderWithProviders(
             <Formik
-                initialValues={StateSubmissionInitialValues}
+                initialValues={SubmissionTypeInitialValues}
                 onSubmit={jest.fn()}
             >
-                <SubmissionType {...onInitialLoadProps} />
+                <SubmissionType />
             </Formik>,
             {
                 apolloProvider: {
@@ -49,10 +108,10 @@ describe('SubmissionType', () => {
         }
         renderWithProviders(
             <Formik
-                initialValues={StateSubmissionInitialValues}
+                initialValues={SubmissionTypeInitialValues}
                 onSubmit={jest.fn()}
             >
-                <SubmissionType {...onInitialLoadProps} />
+                <SubmissionType />
             </Formik>,
             {
                 apolloProvider: {
@@ -77,10 +136,10 @@ describe('SubmissionType', () => {
     it('displays submission type radio buttons', async () => {
         renderWithProviders(
             <Formik
-                initialValues={StateSubmissionInitialValues}
+                initialValues={SubmissionTypeInitialValues}
                 onSubmit={jest.fn()}
             >
-                <SubmissionType {...onInitialLoadProps} />
+                <SubmissionType />
             </Formik>,
             {
                 apolloProvider: {
@@ -106,10 +165,10 @@ describe('SubmissionType', () => {
     it('displays submission description textarea', async () => {
         renderWithProviders(
             <Formik
-                initialValues={StateSubmissionInitialValues}
+                initialValues={SubmissionTypeInitialValues}
                 onSubmit={jest.fn()}
             >
-                <SubmissionType {...onInitialLoadProps} />
+                <SubmissionType />
             </Formik>,
             {
                 apolloProvider: {
@@ -124,71 +183,171 @@ describe('SubmissionType', () => {
         )
     })
 
-    it('shows error messages when there are validation errors and showValidations is true', async () => {
-        const withErrorsProps = {
-            errors: {
-                submissionDescription:
-                    'Test - Submission description is required',
-            },
-            showValidations: true,
-        }
-        renderWithProviders(
-            <Formik
-                initialValues={StateSubmissionInitialValues}
-                onSubmit={jest.fn()}
-            >
-                <SubmissionType {...withErrorsProps} />
-            </Formik>,
-            {
+    describe('validations', () => {
+        it('does not show error validations on initial load', async () => {
+            renderWithProviders(<SubmissionType />, {
                 apolloProvider: {
                     mocks: [getCurrentUserMock({ statusCode: 200 })],
                 },
-            }
-        )
-        await waitFor(() => {
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', { name: 'Submission type' })
+                ).toBeInTheDocument()
+
+                expect(screen.getByRole('textbox')).not.toHaveClass(
+                    'usa-input--error'
+                )
+                expect(
+                    screen.queryByText('You must choose a submission type')
+                ).toBeNull()
+                expect(
+                    screen.queryByText(
+                        'You must provide a description of any major changes or updates'
+                    )
+                ).toBeNull()
+            })
+        })
+
+        it('shows error messages when there are validation errors and showValidations is true', async () => {
+            renderWithProviders(
+                <SubmissionType showValidations={true} />,
+
+                {
+                    apolloProvider: {
+                        mocks: [getCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
             const textarea = screen.getByRole('textbox', {
                 name: 'Submission description',
             })
 
-            expect(textarea).toBeInTheDocument()
-            expect(textarea).toHaveClass('usa-input--error')
-            expect(
-                screen.getByText('Test - Submission description is required')
-            ).toBeVisible()
+            await waitFor(() => {
+                expect(textarea).toBeInTheDocument()
+            })
+
+            //trigger validation
+            await userEvent.type(textarea, 'something')
+            await userEvent.clear(textarea)
+
+            await waitFor(() => {
+                expect(textarea).toHaveClass('usa-input--error')
+                expect(
+                    screen.getByText('You must choose a submission type')
+                ).toBeVisible()
+            })
+        })
+
+        it('do not show error messages when showValidations is false', async () => {
+            renderWithProviders(<SubmissionType showValidations={false} />, {
+                apolloProvider: {
+                    mocks: [getCurrentUserMock({ statusCode: 200 })],
+                },
+            })
+            await waitFor(() => {
+                const textarea = screen.getByRole('textbox', {
+                    name: 'Submission description',
+                })
+                expect(textarea).toBeInTheDocument()
+
+                //trigger validation
+                userEvent.type(textarea, 'something')
+                userEvent.clear(textarea)
+
+                expect(textarea).not.toHaveClass('usa-input--error')
+                expect(
+                    screen.queryByText('You must choose a submission type')
+                ).toBeNull()
+            })
         })
     })
 
-    it('do not show error messages when showValidations is false', async () => {
-        const withErrorsProps = {
-            errors: {
-                submissionDescription:
-                    'Test - Submission description is required',
-            },
-            showValidations: false,
-        }
-        renderWithProviders(
-            <Formik
-                initialValues={StateSubmissionInitialValues}
-                onSubmit={jest.fn()}
-            >
-                <SubmissionType {...withErrorsProps} />
-            </Formik>,
-            {
+    describe('Continue / Save Draft button', () => {
+        it('if form fields are invalid, shows validation error messages when continue button is clicked', async () => {
+            renderWithProviders(<SubmissionType />, {
                 apolloProvider: {
                     mocks: [getCurrentUserMock({ statusCode: 200 })],
                 },
-            }
-        )
-        await waitFor(() => {
-            const textarea = screen.getByRole('textbox', {
-                name: 'Submission description',
             })
 
-            expect(textarea).toBeInTheDocument()
-            expect(textarea).not.toHaveClass('usa-input--error')
-            expect(
-                screen.queryByText('Test - Submission description is required')
-            ).toBeNull()
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', { name: 'Submission type' })
+                ).toBeInTheDocument()
+            })
+            userEvent.click(
+                screen.getByRole('button', {
+                    name: 'Continue',
+                })
+            )
+            await waitFor(() => {
+                expect(
+                    screen.queryByText('You must choose a submission type')
+                ).toBeInTheDocument()
+                expect(
+                    screen.queryByText(
+                        'You must provide a description of any major changes or updates'
+                    )
+                ).toBeInTheDocument()
+            })
+        })
+
+        it('if form fields are valid, navigate to /:id/contract-details when continue button is clicked', async () => {
+            const mockUser = {
+                role: 'State User',
+                name: 'Bob in Minnesota',
+                email: 'bob@dmas.mn.gov',
+                state: {
+                    name: 'Minnesota',
+                    code: 'MN',
+                    programs: [
+                        { name: 'Program 1' },
+                        { name: 'Program Test' },
+                        { name: 'Program 3' },
+                    ],
+                },
+            }
+            const history = createMemoryHistory()
+
+            renderWithProviders(<SubmissionType />, {
+                apolloProvider: {
+                    mocks: [
+                        getCurrentUserMock({
+                            statusCode: 200,
+                            user: mockUser,
+                        }),
+                    ],
+                },
+                routerProvider: { routerProps: { history: history } },
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', { name: 'Submission type' })
+                ).toBeInTheDocument()
+
+                // Fill in form to make valid
+                userEvent.click(
+                    screen.getByRole('option', { name: 'Program Test' })
+                )
+                userEvent.click(screen.getByLabelText('Contract action only'))
+                userEvent.type(screen.getByRole('textbox'), 'a description')
+
+                // Click continue
+                userEvent.click(
+                    screen.getByRole('button', {
+                        name: 'Continue',
+                    })
+                )
+            })
+
+            await waitFor(() => {
+                expect(history.location.pathname).toBe(
+                    '/submissions/1/contract-details'
+                )
+            })
         })
     })
 })
