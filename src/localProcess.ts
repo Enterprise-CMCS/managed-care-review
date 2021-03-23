@@ -7,7 +7,7 @@ export function commandMustSucceedSync(
 	opts?: SpawnSyncOptions
 ): string {
 	const result = spawnSync(cmd, args, opts)
-	if (result.status != 0) {
+	if (result.status !== 0) {
 		console.log(
 			'stdout:',
 			result.stderr.toString(),

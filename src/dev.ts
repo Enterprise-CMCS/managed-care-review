@@ -7,10 +7,15 @@ import LabeledProcessRunner from './runner.js'
 import { envFileMissingExamples } from './env.js' // What the WHAT? why doesn't this import right without the `.js`??
 import { checkStageAccess, getWebAuthVars } from './serverless.js'
 import { parseRunFlags } from './flags.js'
-import { once } from './deps.js'
+import { once, requireBinary } from './deps.js'
 
 // run_db_locally runs the local db
 async function run_db_locally(runner: LabeledProcessRunner) {
+    requireBinary(
+        ['java', '--version'],
+        'Java is required in order to run the database locally.\nInstall Java Standard Edition (SE) here: https://www.oracle.com/java/technologies/javase-downloads.html'
+    )
+
     await runner.run_command_and_output(
         'db yarn',
         ['yarn', 'install'],
@@ -298,11 +303,17 @@ async function run_web_against_aws(
 async function run_all_tests({
     runUnit,
     runOnline,
+    runDBInBackground,
 }: {
     runUnit: boolean
     runOnline: boolean
+    runDBInBackground: boolean
 }) {
     const runner = new LabeledProcessRunner()
+
+    if (runDBInBackground) {
+        run_db_locally(runner)
+    }
 
     try {
         if (runUnit) {
@@ -316,6 +327,9 @@ async function run_all_tests({
         console.log('Testing Error', e)
         process.exit(1)
     }
+    // if the db is running in the background it prevents the process from exiting
+    // one day we could have a cancellation to call, but this works just as well
+    process.exit(0)
 }
 
 async function run_unit_tests(runner: LabeledProcessRunner) {
@@ -486,24 +500,35 @@ function main() {
                         describe:
                             'run run all tests that run against a live instance. Confiugre with APPLICATION_ENDPOINT',
                     })
+                    .option('run-db', {
+                        type: 'boolean',
+                        default: false,
+                        describe:
+                            'runs the ./dev local --db command before starting testing',
+                    })
             },
             (args) => {
                 // If no test flags are passed, default to running everything.
-                const inputFlags = {
+                const inputRunFlags = {
                     runUnit: args.unit,
                     runOnline: args.online,
                 }
 
-                const parsedFlags = parseRunFlags(inputFlags)
+                const runFlags = parseRunFlags(inputRunFlags)
 
-                if (parsedFlags === undefined) {
+                if (runFlags === undefined) {
                     console.log(
                         "Error: Don't mix and match positive and negative boolean flags"
                     )
                     process.exit(1)
                 }
 
-                run_all_tests(parsedFlags)
+                const testingFlags = {
+                    ...runFlags,
+                    runDBInBackground: args['run-db'],
+                }
+
+                run_all_tests(testingFlags)
             }
         )
         .command(

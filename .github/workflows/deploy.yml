@@ -90,7 +90,7 @@ jobs:
         run: |
           echo "PATH=$(pwd)/node_modules/.bin/:$PATH" >> $GITHUB_ENV
       - name: Unit Tests
-        run: ./dev test --unit
+        run: ./dev test --unit --run-db
       - name: publish code coverage
         uses: paambaati/codeclimate-action@v2.7.5
         env:

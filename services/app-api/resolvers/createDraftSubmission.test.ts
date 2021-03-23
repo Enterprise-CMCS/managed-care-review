@@ -2,7 +2,7 @@ import { createTestClient } from 'apollo-server-testing'
 
 import { CreateDraftSubmissionInput, SubmissionType } from '../gen/gqlServer'
 import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
-import { constructTestServer } from '../tests/testHelpers'
+import { constructTestServer } from '../testHelpers/gqlHelpers'
 
 describe('createDraftSubmission', () => {
     it('returns draft submission payload with a draft submission', async () => {
@@ -25,7 +25,9 @@ describe('createDraftSubmission', () => {
         expect(
             res.data.createDraftSubmission.draftSubmission.submissionType
         ).toBe('CONTRACT_ONLY')
-        expect(res.data.createDraftSubmission.draftSubmission.program.name).toBe('California')
+        expect(
+            res.data.createDraftSubmission.draftSubmission.program.name
+        ).toBe('California')
     })
 
     it('returns an error if the program id is not in valid', async () => {

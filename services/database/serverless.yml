@@ -12,6 +12,7 @@ plugins:
 
 custom:
   stage: ${opt:stage, self:provider.stage}
+  draftSubmissionsTableName: ${self:custom.stage}-draft-submissions
   tableName: ${self:custom.stage}-amendments
   dynamodb:
     stages:
@@ -29,6 +30,33 @@ provider:
 
 resources:
   Resources:
+    DraftSubmissionsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.draftSubmissionsTableName}
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: stateCode
+            AttributeType: S
+          - AttributeName: stateNumber
+            AttributeType: N
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: StateStateNumberIndex
+            KeySchema:
+              - AttributeName: stateCode
+                KeyType: HASH
+              - AttributeName: stateNumber
+                KeyType: RANGE
+            Projection:
+              ProjectionType: KEYS_ONLY
+        # Set the capacity to auto-scale
+        BillingMode: PAY_PER_REQUEST
     AmendmentsTable:
       Type: AWS::DynamoDB::Table
       Properties:

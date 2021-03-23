@@ -16,6 +16,7 @@ tests_output
 *.log
 coverage/
 gen/
+todo.txt
 
 services/app-web/public/env-config.js
 services/app-web/storybook-static
