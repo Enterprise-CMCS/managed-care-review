@@ -1,16 +1,15 @@
-import { newTestStore } from './store'
-import { DataMapper } from '@aws/dynamodb-data-mapper'
-
 import { DraftSubmissionStoreType } from './draftSubmissionStoreType'
+import { getTestStore, getTestDynamoMapper } from '../testHelpers/storeHelpers'
+import { storeWithDynamoConfig } from './store'
 
 import { isStoreError } from './insertDraftSubmission'
 
 describe('insertDraftSubmission', () => {
     it('creates a new submission from scratch', async () => {
         // get a connection to the db
-        const store = newTestStore('http://localhost:8000')
+        const store = getTestStore()
 
-        const mapper = new DataMapper({ client: conn })
+        const mapper = getTestDynamoMapper()
 
         const inputParams = {
             stateCode: 'FL',
@@ -26,7 +25,9 @@ describe('insertDraftSubmission', () => {
 
             // This nicely narrows our result
             if (isStoreError(draftSubResult)) {
-                throw new Error('Got an error in insert test')
+                throw new Error(
+                    'Got an error in insert test' + draftSubResult.message
+                )
             }
             const draftSub = draftSubResult
 
@@ -62,10 +63,10 @@ describe('insertDraftSubmission', () => {
     it('can fetch using stateNumber', async () => {
         // get a connection to the db
 
-        const store = newTestStore('http://localhost:8000')
+        const store = getTestStore()
         // const tableName = 'local-draft-submissions'
 
-        const mapper = new DataMapper({ client: conn })
+        const mapper = getTestDynamoMapper()
 
         const inputParams = {
             stateCode: 'FL',
@@ -81,7 +82,9 @@ describe('insertDraftSubmission', () => {
 
             // This nicely narrows our result
             if (isStoreError(draftSubResult)) {
-                throw new Error('Got an error in insert test')
+                throw new Error(
+                    'Got an error in insert test' + draftSubResult.message
+                )
             }
             const draftSub = draftSubResult
 
@@ -115,10 +118,10 @@ describe('insertDraftSubmission', () => {
     it('makes a consecutive state ID', async () => {
         // get a connection to the db
 
-        const store = newTestStore('http://localhost:8000')
+        const store = getTestStore()
         // const tableName = 'local-draft-submissions'
 
-        const mapper = new DataMapper({ client: conn })
+        const mapper = getTestDynamoMapper()
 
         const inputParams = {
             stateCode: 'FL',
@@ -210,7 +213,7 @@ describe('insertDraftSubmission', () => {
     it.skip('is robust against concurrent creations', async () => {
         // get a connection to the db
 
-        const store = newTestStore('http://localhost:8000')
+        const store = getTestStore()
 
         const inputParams = {
             stateCode: 'FL',
@@ -244,7 +247,9 @@ describe('insertDraftSubmission', () => {
             sixValues.forEach((result) => {
                 // This nicely narrows our result
                 if (isStoreError(result)) {
-                    throw new Error('Got an error in insert test')
+                    throw new Error(
+                        'Got an error in insert test' + result.message
+                    )
                 }
                 const draftSub = result
 
@@ -268,7 +273,16 @@ describe('insertDraftSubmission', () => {
     })
 
     it('returns an error for connection errors', async () => {
-        const store = newTestStore('http://localhost:9394')
+        const config = {
+            region: 'localhost',
+            endpoint: 'http://localhost:8973',
+            accessKeyId: 'LOCAL_FAKE_KEY',
+            secretAccessKey: 'LOCAL_FAKE_SECRET',
+
+            maxRetries: 1,
+        }
+
+        const store = storeWithDynamoConfig(config)
 
         const inputParams = {
             stateCode: 'FL',

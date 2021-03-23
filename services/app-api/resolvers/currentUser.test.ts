@@ -1,7 +1,7 @@
 import { createTestClient } from 'apollo-server-testing'
 import { Config } from 'apollo-server-lambda'
 
-import { constructTestServer } from '../tests/testHelpers'
+import { constructTestServer } from '../testHelpers/gqlHelpers'
 import GET_CURRENT_USER from '../../app-graphql/src/queries/currentUserQuery.graphql'
 
 describe('currentUser', () => {

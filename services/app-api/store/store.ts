@@ -6,13 +6,17 @@ import {
 } from './insertDraftSubmission'
 import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
 
-type Store = {
+export type Store = {
     insertDraftSubmission: (
         args: InsertDraftSubmissionArgsType
     ) => Promise<DraftSubmissionType | StoreError>
 }
 
-function storeWithDynamoConnection(conn: DynamoDB): Store {
+export function storeWithDynamoConfig(
+    config: DynamoDB.ClientConfiguration
+): Store {
+    const conn = new DynamoDB(config)
+
     return {
         insertDraftSubmission: (args) => insertDraftSubmission(conn, args),
     }
@@ -22,9 +26,8 @@ export function newDeployedStore(region: string): Store {
     const config = {
         region,
     }
-    const conn = new DynamoDB(config)
 
-    return storeWithDynamoConnection(conn)
+    return storeWithDynamoConfig(config)
 }
 
 export function newLocalStore(dyanmoURL: string): Store {
@@ -35,22 +38,5 @@ export function newLocalStore(dyanmoURL: string): Store {
         secretAccessKey: 'LOCAL_FAKE_SECRET',
     }
 
-    const conn = new DynamoDB(config)
-
-    return storeWithDynamoConnection(conn)
-}
-
-export function newTestStore(dyanmoURL: string): Store {
-    const config = {
-        region: 'localhost',
-        endpoint: dyanmoURL,
-        accessKeyId: 'LOCAL_FAKE_KEY',
-        secretAccessKey: 'LOCAL_FAKE_SECRET',
-
-        maxRetries: 1,
-    }
-
-    const conn = new DynamoDB(config)
-
-    return storeWithDynamoConnection(conn)
+    return storeWithDynamoConfig(config)
 }
