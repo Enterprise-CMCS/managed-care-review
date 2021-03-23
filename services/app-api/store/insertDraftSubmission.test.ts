@@ -294,12 +294,11 @@ describe('insertDraftSubmission', () => {
         try {
             const insertResult = await store.insertDraftSubmission(inputParams)
 
-            if (isStoreError(insertResult)) {
-                const err = insertResult
-                expect(err.code).toBe('CONNECTION_ERROR')
-            } else {
+            if (!isStoreError(insertResult)) {
                 throw new Error('We Should not have been able to connect')
             }
+            const err = insertResult
+            expect(err.code).toBe('CONNECTION_ERROR')
         } catch (createErr) {
             console.log(
                 'Thrown error testing connection, we should have gotten an error:',
