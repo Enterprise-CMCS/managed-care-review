@@ -91,7 +91,10 @@ async function getNextStateNumber(
     } catch (err) {
         // figure out if this is an error we know about
         if (isDynamoError(err)) {
-            if (err.code === 'UnknownEndpoint') {
+            if (
+                err.code === 'UnknownEndpoint' ||
+                err.code === 'NetworkingError'
+            ) {
                 return {
                     code: 'CONNECTION_ERROR',
                     message:
@@ -148,7 +151,10 @@ export async function insertDraftSubmission(
         return putResult
     } catch (err) {
         if (isDynamoError(err)) {
-            if (err.code === 'UnknownEndpoint') {
+            if (
+                err.code === 'UnknownEndpoint' ||
+                err.code === 'NetworkingError'
+            ) {
                 return {
                     code: 'CONNECTION_ERROR',
                     message:
