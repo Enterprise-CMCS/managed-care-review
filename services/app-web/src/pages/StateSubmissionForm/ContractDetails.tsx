@@ -7,7 +7,7 @@ export const ContractDetails = ({
 }): React.ReactElement => {
     return (
         <GridContainer>
-            <h2>Contract Details</h2>
+            <h2>Contract details</h2>
         </GridContainer>
     )
 }

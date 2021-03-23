@@ -8,8 +8,6 @@ import { useAuth } from '../../contexts/AuthContext'
 import { Dashboard } from '../Dashboard/Dashboard'
 import { Landing } from '../Landing/Landing'
 import { StateSubmissionForm } from '../StateSubmissionForm/StateSubmissionForm'
-import { ContractDetails } from '../StateSubmissionForm/ContractDetails'
-import { ReviewSubmit } from '../StateSubmissionForm/ReviewSubmit'
 import { SubmissionDescriptionExamples } from '../Help/SubmissionDescriptionExamples'
 
 import { AuthModeType } from '../../common-code/domain-models'
@@ -47,26 +45,7 @@ export const AppRoutes = ({
             <Switch>
                 <Route path="/" exact component={Dashboard} />
                 <Route path="/dashboard" component={Dashboard} />
-                <Route
-                    path="/submissions/new"
-                    exact
-                    component={StateSubmissionForm}
-                />
-                <Route
-                    path="/submissions/:submission_id/type"
-                    exact
-                    component={StateSubmissionForm}
-                />
-                <Route
-                    path="/submissions/:submission_id/contract-details"
-                    exact
-                    component={ContractDetails}
-                />
-                <Route
-                    path="/submissions/:submission_id/review-and-submit"
-                    exact
-                    component={ReviewSubmit}
-                />
+                <Route path="/submissions" component={StateSubmissionForm} />
                 <Route
                     path="/help/submission-description-examples"
                     component={SubmissionDescriptionExamples}
