@@ -43,6 +43,17 @@
         "storybook": "start-storybook -p 6006 -s public --quiet",
         "build-storybook": "build-storybook -s public --quiet"
     },
+    "jest": {
+        "coverageReporters": [
+            [
+                "lcov",
+                {
+                    "projectRoot": "../../"
+                }
+            ],
+            "text"
+        ]
+    },
     "browserslist": {
         "production": [
             ">0.2%",
