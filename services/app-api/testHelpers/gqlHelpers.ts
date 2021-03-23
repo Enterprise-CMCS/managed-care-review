@@ -1,4 +1,7 @@
 import { ApolloServer, Config } from 'apollo-server-lambda'
+import {
+    newLocalStore
+} from '../store/index'
 
 import typeDefs from '../../app-graphql/src/schema.graphql'
 import { Resolvers } from '../gen/gqlServer'
@@ -9,13 +12,16 @@ import {
 import { userResolver } from '../resolvers/userResolver'
 import { userFromLocalAuthProvider } from '../authn'
 
+// TODO: should config based on environment (?)
+const store = newLocalStore(process.env.LOCAL_DYNAMO_URL || 'no db url')
+
 const testResolvers: Resolvers = {
     Query: {
         getCurrentUser: getCurrentUserResolver(userFromLocalAuthProvider),
     },
     User: userResolver,
     Mutation: {
-        createDraftSubmission: createDraftSubmissionResolver,
+        createDraftSubmission: createDraftSubmissionResolver(store),
     },
 }
 

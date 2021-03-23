@@ -1,6 +1,9 @@
 // apollo_gql.js
 import { ApolloServer } from 'apollo-server-lambda'
 import { APIGatewayProxyHandler } from 'aws-lambda'
+import {
+    newLocalStore
+} from '../store/index'
 
 import {
     createDraftSubmissionResolver,
@@ -21,6 +24,9 @@ import { assertIsAuthMode } from '../../app-web/src/common-code/domain-models'
 const authMode = process.env.REACT_APP_AUTH_MODE
 assertIsAuthMode(authMode)
 
+// TODO: config based on environment
+const store = newLocalStore(process.env.LOCAL_DYNAMO_URL || 'no db url')
+
 const userFetcher =
     authMode === 'LOCAL'
         ? userFromLocalAuthProvider
@@ -34,7 +40,7 @@ const resolvers: Resolvers = {
         getCurrentUser: getCurrentUserResolver(userFetcher),
     },
     Mutation: {
-        createDraftSubmission: createDraftSubmissionResolver,
+        createDraftSubmission: createDraftSubmissionResolver(store),
     },
     User: userResolver,
 }
