@@ -72,3 +72,13 @@
 .submitButton {
 	background: $theme-color-success;
 }
+
+@media print {
+	header, footer, .pageActions, .reviewSectionHeader a {
+		display: none;
+	}
+	.reviewSection {
+		border: none;
+		padding: 0;
+	}
+}

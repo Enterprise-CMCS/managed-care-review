@@ -5,12 +5,13 @@ import styles from './ReviewSubmit.module.scss'
 
 export type SectionHeaderProps = {
     header: string
+    submissionName?: boolean
 }
 
-export const SectionHeader = ({header}: SectionHeaderProps): React.ReactElement => {
+export const SectionHeader = ({header, submissionName}: SectionHeaderProps): React.ReactElement => {
     return(
         <div className={styles.reviewSectionHeader}>
-            <h3>{header}</h3>
+            <h3 className={submissionName ? styles.submissionName : ''}>{header}</h3>
             <div>
                 <Link href="#" className="usa-button usa-button--outline">Edit</Link>
             </div>

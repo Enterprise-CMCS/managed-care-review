@@ -14,12 +14,10 @@ export const ReviewSubmit = ({
             <Grid row>
                 <Grid col={12} tablet={{ col: 8, offset: 2 }}>
                     <section id="submissionType" className={styles.reviewSection}>
-                        <div className={styles.reviewSectionHeader}>
-                            <h3 className={styles.submissionName}>VA-CCCPlus-0001</h3>
-                            <div>
-                                <Link href="#" className="usa-button usa-button--outline">Edit</Link>
-                            </div>
-                        </div>
+                        <SectionHeader
+                            header="VA-CCCPlus-0001"
+                            submissionName={true}
+                        />
                         <DoubleColumnRow
                             left={
                                 <DataDetail 
