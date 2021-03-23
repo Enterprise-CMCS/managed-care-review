@@ -1,6 +1,6 @@
 // DraftSubmission is a draft submission.
 
-export type SubmissionRatesType = 'CONTRACTS_ONLY' | 'CONTRACTS_AND_RATES'
+export type SubmissionType = 'CONTRACT_ONLY' | 'CONTRACT_AND_RATES'
 
 export type DraftSubmissionType = {
 	id: string
@@ -8,6 +8,6 @@ export type DraftSubmissionType = {
 	stateNumber: number
 	programID: string
 	submissionDescription: string
-	submissionType: SubmissionRatesType
+	submissionType: SubmissionType
 	createdAt: Date
 }

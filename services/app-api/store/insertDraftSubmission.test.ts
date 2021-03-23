@@ -15,7 +15,7 @@ describe('insertDraftSubmission', () => {
             stateCode: 'FL',
             programID: 'MCAC',
             submissionDescription: 'a new great submission',
-            submissionType: 'CONTRACTS_ONLY' as const,
+            submissionType: 'CONTRACT_ONLY' as const,
         }
 
         try {
@@ -40,7 +40,7 @@ describe('insertDraftSubmission', () => {
                 )
 
                 expect(getResult.id).not.toEqual('foo')
-                expect(getResult.submissionType).toEqual('CONTRACTS_ONLY')
+                expect(getResult.submissionType).toEqual('CONTRACT_ONLY')
                 expect(getResult.submissionDescription).toEqual(
                     'a new great submission'
                 )
@@ -72,7 +72,7 @@ describe('insertDraftSubmission', () => {
             stateCode: 'FL',
             programID: 'MCAC',
             submissionDescription: 'a new great submission',
-            submissionType: 'CONTRACTS_ONLY' as const,
+            submissionType: 'CONTRACT_ONLY' as const,
         }
 
         try {
@@ -127,14 +127,14 @@ describe('insertDraftSubmission', () => {
             stateCode: 'FL',
             programID: 'MCAC',
             submissionDescription: 'a new great submission',
-            submissionType: 'CONTRACTS_ONLY' as const,
+            submissionType: 'CONTRACT_ONLY' as const,
         }
 
         const inputINParams = {
             stateCode: 'IN',
             programID: 'INVC',
             submissionDescription: 'a new submission is great',
-            submissionType: 'CONTRACTS_AND_RATES' as const,
+            submissionType: 'CONTRACT_AND_RATES' as const,
         }
 
         try {
@@ -219,7 +219,7 @@ describe('insertDraftSubmission', () => {
             stateCode: 'FL',
             programID: 'MCAC',
             submissionDescription: 'a new great submission',
-            submissionType: 'CONTRACTS_ONLY' as const,
+            submissionType: 'CONTRACT_ONLY' as const,
         }
 
         try {
@@ -288,7 +288,7 @@ describe('insertDraftSubmission', () => {
             stateCode: 'FL',
             programID: 'MCAC',
             submissionDescription: 'a new great submission',
-            submissionType: 'CONTRACTS_ONLY' as const,
+            submissionType: 'CONTRACT_ONLY' as const,
         }
 
         try {
