@@ -87,6 +87,20 @@ This is what Apollo Client does and is a good pattern for providing easy access 
 -   It's a common pattern for dependency injection in the react world already
 -   lets you wrap up your dependency in a nice reactive form, where components can simply re-render in response to changes wrapped up in the context
 
+## Domain Models
+
+Domain models are the internal communication protocol for different parts of our app. Just as GraphQL specifies types for communicating between the client and the server, our domain models are the lingua franca for communication between modules inside app-api and app-web respectively
+
+What that means in practice is that when code in one package need to call code in another package, any arguments and return values that are more complex than primitive types should be domain models. The first example of that is the store package. The store is wrapping up our dependency on the database, exporting functions like createDraftSubmission and fetchDraftSubmission. These methods both return the DraftSubmission domain model type as opposed to some type specific to and specified by the store package.
+
+This is another attempt to decrease the coupling of our code. By using the same simple domain models to communicate between services we are less likely to develop enmeshed dependencies on behavior specific to a service.
+
+For example:
+
+Instead of the db returning a db-ified class model called `DraftSubmission` that has `save()` and `refresh()` and `fetchUploadedFiles()` on it, we write `DraftSubmission` as a domain model.  This has only the common fields like `submissionType`, `description`, and `files` that make up the concept of a "draft submission" regardless of service.  Then, functions exported by the store package like `saveDraftSubmission`, `fetchDraftSubmission`, and `fetchUploadedFiles` can handle this domain model. A side benefit to this is that it's very obvious when code is making calls to the db, because you have to call something from the store package. No matter if you are writing to the database, checking it for the right permissions for the current user, or reporting up on how many Drafts are in progress, the DraftSubmission has the same properties. Using domain models let us define those shared properties without tying that to a specific use case.
+
+There's a kind of functional programming vs. object-oriented-programming thing going on in this pattern, for sure. It can definitely work either way. But what tips the scales for me is separating the definition of our core models away from any particular use case for them.
+
 ## Future Work
 
 -   Testing

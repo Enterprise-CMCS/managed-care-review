@@ -63,6 +63,8 @@ Yarn - In order to install dependencies, you need to [install yarn](https://clas
 
 AWS Account: You'll need an AWS account with appropriate IAM permissions (admin recommended) to deploy this app in Amazon.
 
+Java - our local database runner (which is a serverless plugin called `serverless-dynamodb-local`) requires java to run. You can install it here: https://www.oracle.com/java/technologies/javase-downloads.html
+
 If you are on a Mac using nvm, you should be able to install all the dependencies like so:
 
 ```
