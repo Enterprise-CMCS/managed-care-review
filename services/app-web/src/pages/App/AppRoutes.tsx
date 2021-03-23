@@ -9,7 +9,7 @@ import { Dashboard } from '../Dashboard/Dashboard'
 import { Landing } from '../Landing/Landing'
 import { StateSubmissionForm } from '../StateSubmissionForm/StateSubmissionForm'
 import { ContractDetails } from '../StateSubmissionForm/ContractDetails'
-import { ReviewSubmit } from '../StateSubmissionForm/ReviewSubmit'
+import { ReviewSubmit } from '../StateSubmissionForm/ReviewSubmit/ReviewSubmit'
 import { SubmissionDescriptionExamples } from '../Help/SubmissionDescriptionExamples'
 
 import { AuthModeType } from '../../common-code/domain-models'
