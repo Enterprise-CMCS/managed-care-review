@@ -19,7 +19,7 @@ import {
 import { assertIsAuthMode } from '../../app-web/src/common-code/domain-models'
 
 const getDynamoStore = () => {
-    const dynamoConnection = process.env.DYNAMO_CONNECTION || 'USE_AWS'
+    const dynamoConnection = process.env.DYNAMO_CONNECTION
 if (dynamoConnection === 'USE_AWS') {
     return newDeployedStore(process.env.AWS_DEFAULT_REGION || 'no region')
 } else {
