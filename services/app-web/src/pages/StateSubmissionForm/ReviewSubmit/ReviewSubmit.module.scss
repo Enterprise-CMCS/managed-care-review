@@ -12,12 +12,12 @@
 	border: 1px solid $theme-color-base-lighter;
 	@include u-radius('md');
 
-	h3 {
+	h2 {
 		margin: 0;
 		@include u-text('normal');
 	}
 
-	h3.submissionName {
+	h2.submissionName {
 		@include u-text('bold');
 		font-size: size('body', 'lg');
 	}

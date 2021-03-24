@@ -11,7 +11,7 @@ export type SectionHeaderProps = {
 export const SectionHeader = ({header, submissionName}: SectionHeaderProps): React.ReactElement => {
     return(
         <div className={styles.reviewSectionHeader}>
-            <h3 className={submissionName ? styles.submissionName : ''}>{header}</h3>
+            <h2 className={submissionName ? styles.submissionName : ''}>{header}</h2>
             <div>
                 <Link href="#" className="usa-button usa-button--outline">Edit</Link>
             </div>
