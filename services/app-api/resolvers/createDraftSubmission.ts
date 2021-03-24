@@ -4,6 +4,7 @@ import {
     Store
 } from '../store/index'
 
+import statePrograms from '../data/statePrograms.json'
 import {
     Resolver,
     ResolverTypeWrapper,
@@ -12,10 +13,7 @@ import {
     SubmissionType
 } from '../gen/gqlServer'
 
-// TODO: check that program Id is valid in resolver by looking up stateCode from statePrograms
-// TODO: if id is valid, pull stateCode
-// potential refactor: pull out database interactions into /datasources createDraftSubmission as per apollo server docs
-
+// TODO: potential refactor: pull out database interactions into /datasources createDraftSubmission as per apollo server docs
 export function createDraftSubmissionResolver(
     store: Store
 ): Resolver<
@@ -25,41 +23,40 @@ export function createDraftSubmissionResolver(
     { input: CreateDraftSubmissionInput }
 > { 
     return async (_parent, { input}) => {
+
+        // TODO: Add lookup from current user with input.programId
+        const stateFromCurrentUser = statePrograms.states[0]
+        const program = stateFromCurrentUser.programs.find( (program) => program.id == input.programId )
+    
+        if (program === undefined) {
+            throw new Error(`The program id ${input.programId} does not exist in state ${stateFromCurrentUser.name}`)
+        }
+    
       const dbDraftSubmission: InsertDraftSubmissionArgsType = {
-            stateCode: 'MN',
+            stateCode: stateFromCurrentUser.code,
             programID: input.programId,
             submissionDescription: input.submissionDescription,
             submissionType: input.submissionType as InsertDraftSubmissionArgsType['submissionType']
         }
-
    
         try {
             const draftSubResult = await store.insertDraftSubmission(
                dbDraftSubmission
             )
 
-            console.log(draftSubResult)
-
             if (isStoreError(draftSubResult)) {
                 throw new Error(`Issue creating a draft submission of type ${draftSubResult.code}. Message: ${draftSubResult.message}`)
             } else {
-                // Add a program from graphql resolver, probably remove programID if it was present
-                const program = {
-                    id: 'abc123',
-                    name: 'California',
-                }
-  
-                    return { draftSubmission: {
-                        id: draftSubResult.id,
-                        createdAt: draftSubResult.createdAt,
-                        submissionDescription: draftSubResult.submissionType,
-                        name: 'SOME_NAME',
-                        submissionType: draftSubResult.submissionType as SubmissionType,
-                        program
-                    }
-                       
-                    }
-                
+                    return { 
+                        draftSubmission: {
+                            id: draftSubResult.id,
+                            createdAt: draftSubResult.createdAt,
+                            submissionDescription: draftSubResult.submissionDescription,
+                            name: 'SOME_NAME',
+                            submissionType: draftSubResult.submissionType as SubmissionType,
+                            program
+                        }  
+                    } 
             }
      
         } catch (createErr) {
