@@ -24,7 +24,6 @@ export function createDraftSubmissionResolver(
 > { 
     return async (_parent, { input}) => {
 
-        // TODO: Add lookup from current user with input.programId
         const stateFromCurrentUser = statePrograms.states[0]
         const program = stateFromCurrentUser.programs.find( (program) => program.id == input.programId )
     
@@ -43,19 +42,19 @@ export function createDraftSubmissionResolver(
             const draftSubResult = await store.insertDraftSubmission(
                dbDraftSubmission
             )
-
             if (isStoreError(draftSubResult)) {
                 throw new Error(`Issue creating a draft submission of type ${draftSubResult.code}. Message: ${draftSubResult.message}`)
             } else {
+                const draftSubmission = {
+                    id: draftSubResult.id,
+                    createdAt: draftSubResult.createdAt,
+                    submissionDescription: draftSubResult.submissionDescription,
+                    name: `${draftSubResult.stateCode}-${program.name}-${draftSubResult.stateNumber}`,
+                    submissionType: draftSubResult.submissionType as SubmissionType,
+                    program
+                }
                     return { 
-                        draftSubmission: {
-                            id: draftSubResult.id,
-                            createdAt: draftSubResult.createdAt,
-                            submissionDescription: draftSubResult.submissionDescription,
-                            name: 'SOME_NAME',
-                            submissionType: draftSubResult.submissionType as SubmissionType,
-                            program
-                        }  
+                        draftSubmission
                     } 
             }
      
