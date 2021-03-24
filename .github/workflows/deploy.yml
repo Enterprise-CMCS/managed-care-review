@@ -58,6 +58,7 @@ jobs:
           IAM_PATH: ${{ secrets.IAM_PATH }}
           IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.IAM_PERMISSIONS_BOUNDARY_POLICY }}
           STAGE_PREFIX: ${{ secrets.STAGE_PREFIX }}
+          DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
       - name: lock this branch to prevent concurrent builds
         run: ./.github/github-lock.sh
         env:
