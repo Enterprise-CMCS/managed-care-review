@@ -30,7 +30,6 @@ describe('createDraftSubmission', () => {
         expect(
             res.data.createDraftSubmission.draftSubmission.program.name
         ).toBe('SMMC')
-        console.log(res.data.createDraftSubmission.draftSubmission)
         expect(
             res.data.createDraftSubmission.draftSubmission.name
         ).toContain('FL-SMMC-')
