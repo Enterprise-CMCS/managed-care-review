@@ -7,9 +7,11 @@ import { constructTestServer } from '../testHelpers/gqlHelpers'
 describe('createDraftSubmission', () => {
     it('returns draft submission payload with a draft submission', async () => {
         const server = constructTestServer()
+
         const { mutate } = createTestClient(server)
+
         const input: CreateDraftSubmissionInput = {
-            programId: 'abc123',
+            programId: 'smmc',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A real submission',
         }
@@ -27,7 +29,10 @@ describe('createDraftSubmission', () => {
         ).toBe('CONTRACT_ONLY')
         expect(
             res.data.createDraftSubmission.draftSubmission.program.name
-        ).toBe('California')
+        ).toBe('SMMC')
+        expect(
+            res.data.createDraftSubmission.draftSubmission.name
+        ).toContain('FL-SMMC-')
     })
 
     it('returns an error if the program id is not in valid', async () => {
@@ -45,7 +50,7 @@ describe('createDraftSubmission', () => {
 
         expect(res.errors).toBeDefined()
         expect(res.errors && res.errors[0].message).toBe(
-            'program id is not valid'
+            'The program id xyz123 does not exist in state Florida'
         )
     })
 })

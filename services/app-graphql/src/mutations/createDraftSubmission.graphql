@@ -1,8 +1,10 @@
 mutation createDraftSubmission($input: CreateDraftSubmissionInput!) {
     createDraftSubmission(input: $input) {
         draftSubmission {
+            name
             program {
                 name
+                id
             }
             submissionType
             submissionDescription

@@ -1,6 +1,7 @@
 // apollo_gql.js
 import { ApolloServer } from 'apollo-server-lambda'
 import { APIGatewayProxyHandler } from 'aws-lambda'
+import { newDeployedStore, newLocalStore} from '../store/index'
 
 import {
     createDraftSubmissionResolver,
@@ -17,9 +18,21 @@ import {
 
 import { assertIsAuthMode } from '../../app-web/src/common-code/domain-models'
 
+const getDynamoStore = () => {
+    const dynamoConnection = process.env.DYNAMO_CONNECTION
+if (dynamoConnection === 'USE_AWS') {
+    return newDeployedStore(process.env.AWS_DEFAULT_REGION || 'no region')
+} else {
+    return newLocalStore(process.env.DYNAMO_CONNECTION || 'no db url')
+}
+}
+
 // Configuration:
 const authMode = process.env.REACT_APP_AUTH_MODE
 assertIsAuthMode(authMode)
+const store = getDynamoStore()
+
+
 
 const userFetcher =
     authMode === 'LOCAL'
@@ -34,7 +47,7 @@ const resolvers: Resolvers = {
         getCurrentUser: getCurrentUserResolver(userFetcher),
     },
     Mutation: {
-        createDraftSubmission: createDraftSubmissionResolver,
+        createDraftSubmission: createDraftSubmissionResolver(store),
     },
     User: userResolver,
 }

@@ -9,5 +9,5 @@ export type { CognitoUserType } from './cognitoUserType'
 
 export type {
 	DraftSubmissionType,
-	SubmissionRatesType,
+	SubmissionType,
 } from './DraftSubmissionType'

@@ -2,7 +2,7 @@
 
 guide-wire is [configured using env vars](https://12factor.net/config).
 
-Different env vars can be set in different environments [local dev, review apps, dev, staging, prod] to configure things differently.
+Different env vars can be set in different environments [local dev, review apps, dev, staging, prod] to configure things differently. Environment variables are individually mapped in the `deploy` and `promote` Github workflows for use in deployments. If a new environment variable is added, it should be mapped there as well.
 
 For local dev, ./dev loads all environment variables set in the `.env` file. `.env_example` is provided (and copied as a default on first run) with settings that should work out of the box locally.
 
@@ -65,3 +65,7 @@ Read by `ui-auth`
 This is the metatdata URL configured for reaching out to Otka auth.
 
 ### `IAM_PATH`
+
+### `DYNAMO_CONNECTION`
+Read by `app-api` in configuring graphql to work with a DynamoDB store.
+Valid values are any url (most likely `http://localhost:8000`), for a local run, and `USE_AWS` for use in deployed environments.

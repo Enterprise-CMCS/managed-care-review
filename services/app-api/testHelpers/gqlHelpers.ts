@@ -1,4 +1,5 @@
 import { ApolloServer, Config } from 'apollo-server-lambda'
+import { getTestStore } from '../testHelpers/storeHelpers'
 
 import typeDefs from '../../app-graphql/src/schema.graphql'
 import { Resolvers } from '../gen/gqlServer'
@@ -9,13 +10,15 @@ import {
 import { userResolver } from '../resolvers/userResolver'
 import { userFromLocalAuthProvider } from '../authn'
 
+const store = getTestStore()
+
 const testResolvers: Resolvers = {
     Query: {
         getCurrentUser: getCurrentUserResolver(userFromLocalAuthProvider),
     },
     User: userResolver,
     Mutation: {
-        createDraftSubmission: createDraftSubmissionResolver,
+        createDraftSubmission: createDraftSubmissionResolver(store),
     },
 }
 

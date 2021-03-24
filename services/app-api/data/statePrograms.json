@@ -1,73 +1,86 @@
 {
-	"states": [
-		{
-			"code": "FL",
-			"name": "Florida",
-			"programs": [
-				{
-					"name": "SMMC"
-				},
-				{
-					"name": "CNET"
-				},
-				{
-					"name": "Long-Term Care"
-				},
-				{
-					"name": "Managed Medical Assistance"
-				}
-			]
-		},
-		{
-			"code": "IN",
-			"name": "Indiana",
-			"programs": [
-				{
-					"name": "Hoosier Care Connect"
-				},
-				{
-					"name": "Healthy Indiana"
-				},
-				{
-					"name": "Hoosier Health Wise"
-				}
-			]
-		},
-		{
-			"code": "MN",
-			"name": "Minnesota",
-			"programs": [
-				{
-					"name": "MSHO"
-				},
-				{
-					"name": "PMAP"
-				},
-				{
-					"name": "SNBC"
-				}
-			]
-		},
-		{
-			"code": "MS",
-			"name": "Mississippi",
-			"programs": [
-				{
-					"name": "MississippiCAN"
-				}
-			]
-		},
-		{
-			"code": "VA",
-			"name": "Virginia",
-			"programs": [
-				{
-					"name": "Medallion"
-				},
-				{
-					"name": "CCC Plus"
-				}
-			]
-		}
-	]
+    "states": [
+        {
+            "code": "FL",
+            "name": "Florida",
+            "programs": [
+                {
+                    "id": "smmc",
+                    "name": "SMMC"
+                },
+                {
+                    "id": "cnet",
+                    "name": "CNET"
+                },
+                {
+                    "id": "long-term-care",
+                    "name": "Long-Term Care"
+                },
+                {
+                    "id": "managed-medical-assistance",
+                    "name": "Managed Medical Assistance"
+                }
+            ]
+        },
+        {
+            "code": "IN",
+            "name": "Indiana",
+            "programs": [
+                {
+                    "id": "hoosier-care-connect",
+                    "name": "Hoosier Care Connect"
+                },
+                {
+                    "id": "healthy-indiana",
+                    "name": "Healthy Indiana"
+                },
+                {
+                    "id": "hoosier-health-wise",
+                    "name": "Hoosier Health Wise"
+                }
+            ]
+        },
+        {
+            "code": "MN",
+            "name": "Minnesota",
+            "programs": [
+                {
+                    "id": "msho",
+                    "name": "MSHO"
+                },
+                {
+                    "id": "pmap",
+                    "name": "PMAP"
+                },
+                {
+                    "id": "snbc",
+                    "name": "SNBC"
+                }
+            ]
+        },
+        {
+            "code": "MS",
+            "name": "Mississippi",
+            "programs": [
+                {
+                    "id": "mississippi-can",
+                    "name": "MississippiCAN"
+                }
+            ]
+        },
+        {
+            "code": "VA",
+            "name": "Virginia",
+            "programs": [
+                {
+                    "id": "medallion",
+                    "name": "Medallion"
+                },
+                {
+                    "id": "ccc-plus",
+                    "name": "CCC Plus"
+                }
+            ]
+        }
+    ]
 }

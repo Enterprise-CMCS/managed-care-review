@@ -4,7 +4,7 @@ import {
     table,
 } from '@aws/dynamodb-data-mapper-annotations'
 
-import { SubmissionRatesType } from '../../app-web/src/common-code/domain-models'
+import { SubmissionType } from '../../app-web/src/common-code/domain-models'
 
 // Data mapper annotations are meant to go on your domain models, and we might use them that way at some point
 // but for now, especially since we probably want to rip out all the dynamodb stuf eventually anyway, we're going to keep
@@ -18,7 +18,7 @@ export class DraftSubmissionStoreType {
     submissionDescription: string
 
     @attribute()
-    submissionType: SubmissionRatesType
+    submissionType: SubmissionType
 
     @attribute()
     createdAt: Date
@@ -43,7 +43,7 @@ export class DraftSubmissionStoreType {
     constructor() {
         this.id = ''
         this.submissionDescription = ''
-        this.submissionType = 'CONTRACTS_ONLY'
+        this.submissionType = 'CONTRACT_ONLY'
         this.createdAt = new Date()
         this.stateCode = ''
         this.programID = ''

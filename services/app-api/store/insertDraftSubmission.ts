@@ -5,13 +5,13 @@ import { v4 as uuidv4 } from 'uuid'
 import { DraftSubmissionStoreType } from './draftSubmissionStoreType'
 import {
     DraftSubmissionType,
-    SubmissionRatesType,
+    SubmissionType,
 } from '../../app-web/src/common-code/domain-models'
 
 export type InsertDraftSubmissionArgsType = {
     stateCode: string
     programID: string
-    submissionType: SubmissionRatesType
+    submissionType: SubmissionType
     submissionDescription: string
 }
 
@@ -144,7 +144,7 @@ export async function insertDraftSubmission(
 
     const mapper = new DataMapper({ client: conn })
     // what do we do with these args?
-    // return a DraftSubmissinoType
+    // return a DraftSubmissionType
     try {
         const putResult = await mapper.put(draft)
 
