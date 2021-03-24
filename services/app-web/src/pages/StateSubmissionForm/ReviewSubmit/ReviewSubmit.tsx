@@ -2,22 +2,21 @@ import { GridContainer, Button, Grid, Table, Tag, ButtonGroup, Link } from '@tru
 import { DataDetail } from './DataDetail'
 import { DoubleColumnRow } from './DoubleColumnRow'
 import { SectionHeader } from './SectionHeader'
+import { PageActions } from '../PageActions'
 import styles from './ReviewSubmit.module.scss'
 
-export const ReviewSubmit = ({
-    code,
-}: {
-    code: string
-}): React.ReactElement => {
+export const ReviewSubmit = (): React.ReactElement => {
     return (
         <GridContainer className={styles.reviewSectionWrapper}>
             <Grid row>
                 <Grid col={12} tablet={{ col: 8, offset: 2 }}>
                     <section id="submissionType" className={styles.reviewSection}>
-                        <SectionHeader
-                            header="VA-CCCPlus-0001"
-                            submissionName={true}
-                        />
+                        <div className={styles.reviewSectionHeader}>
+                            <h2 className={styles.submissionName}>VA-CCCPlus-0001</h2>
+                            <div>
+                                <Link variant="unstyled" href="#" className="usa-button usa-button--outline">Edit <span className="srOnly">Submission type</span></Link>
+                            </div>
+                        </div>
                         <DoubleColumnRow
                             left={
                                 <DataDetail 
@@ -47,6 +46,7 @@ export const ReviewSubmit = ({
                     <section id="contractDetails" className={styles.reviewSection}>
                         <SectionHeader
                             header="Contract details"
+                            href="#"
                         />
                         <DoubleColumnRow
                             left={
@@ -109,6 +109,7 @@ export const ReviewSubmit = ({
                     <section id="rateDetails" className={styles.reviewSection}>
                         <SectionHeader
                             header="Rate details"
+                            href="#"
                         />
                         <DoubleColumnRow
                             left={
@@ -139,6 +140,7 @@ export const ReviewSubmit = ({
                     <section id="contacts" className={styles.reviewSection}>
                         <SectionHeader
                             header="State contacts"
+                            href="#"
                         />
                         <DoubleColumnRow
                             left={
@@ -172,6 +174,7 @@ export const ReviewSubmit = ({
                         />
                         <SectionHeader
                             header="Actuary contacts"
+                            href="#"
                         />
                         <DoubleColumnRow
                             left={
@@ -218,6 +221,7 @@ export const ReviewSubmit = ({
                     <section id="documents" className={styles.reviewSection}>
                         <SectionHeader
                             header="Documents"
+                            href="#"
                         />
                         <Table bordered={false} fullWidth={true} fixed={true}>
                             <caption className="srOnly">Documents included with this submission</caption>
@@ -319,13 +323,10 @@ export const ReviewSubmit = ({
                             </tbody>
                         </Table>
                     </section>
-                    <div className={styles.pageActions}>
-                        <Link href="#">Save as draft</Link>
-                        <ButtonGroup type="default" className={styles.buttonGroup}>
-                            <Link href="#" className="usa-button usa-button--outline">Back</Link>
-                            <Button type="button" className={styles.submitButton}>Submit</Button>
-                        </ButtonGroup>
-                    </div>
+                    <PageActions
+                        secondaryAction="Back"
+                        primaryAction="Submit"
+                    />
                 </Grid>
             </Grid>
         </GridContainer>
