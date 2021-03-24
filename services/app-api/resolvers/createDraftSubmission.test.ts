@@ -30,9 +30,10 @@ describe('createDraftSubmission', () => {
         expect(
             res.data.createDraftSubmission.draftSubmission.program.name
         ).toBe('SMMC')
-        // expect(
-        //     res.data.createDraftSubmission.draftSubmission.name
-        // ).toContain('FL-SMMC-')
+        console.log(res.data.createDraftSubmission.draftSubmission)
+        expect(
+            res.data.createDraftSubmission.draftSubmission.name
+        ).toContain('FL-SMMC-')
     })
 
     it('returns an error if the program id is not in valid', async () => {
