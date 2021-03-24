@@ -19,7 +19,7 @@ describe('createDraftSubmission', () => {
             mutation: CREATE_DRAFT_SUBMISSION,
             variables: { input },
         })
-     
+
         expect(res.errors).toBeUndefined()
         expect(
             res.data.createDraftSubmission.draftSubmission.submissionDescription

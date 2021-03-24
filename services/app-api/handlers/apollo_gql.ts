@@ -1,9 +1,7 @@
 // apollo_gql.js
 import { ApolloServer } from 'apollo-server-lambda'
 import { APIGatewayProxyHandler } from 'aws-lambda'
-import {
-    newLocalStore
-} from '../store/index'
+import { newLocalStore } from '../store/index'
 
 import {
     createDraftSubmissionResolver,
