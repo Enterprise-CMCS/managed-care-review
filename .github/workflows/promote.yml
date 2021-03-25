@@ -6,7 +6,7 @@ on:
       - 'main'
 
 jobs:
-  deploy:
+  promote:
     runs-on: ubuntu-latest
     steps:
       - name: set branch_name
@@ -42,6 +42,7 @@ jobs:
       - name: set variable values
         run: ./.github/build_vars.sh set_values
         env:
+          REACT_APP_AUTH_MODE: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_REACT_APP_AUTH_MODE] || secrets.REACT_APP_AUTH_MODE }}
           AWS_ACCESS_KEY_ID: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_ACCESS_KEY_ID] || secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_SECRET_ACCESS_KEY] || secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_DEFAULT_REGION] || secrets.AWS_DEFAULT_REGION }}
@@ -52,9 +53,11 @@ jobs:
           ROUTE_53_DOMAIN_NAME: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_ROUTE_53_DOMAIN_NAME] }}
           CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_CLOUDFRONT_CERTIFICATE_ARN] }}
           CLOUDFRONT_DOMAIN_NAME: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_CLOUDFRONT_DOMAIN_NAME] }}
+          OKTA_METADATA_URL: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_OKTA_METADATA_URL] || secrets.OKTA_METADATA_URL }}
           IAM_PATH: ${{ secrets.IAM_PATH }}
           IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.IAM_PERMISSIONS_BOUNDARY_POLICY }}
           STAGE_PREFIX: ${{ secrets.STAGE_PREFIX }}
+          DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
       - name: lock this branch to prevent concurrent builds
         run: ./.github/github-lock.sh
         env:
@@ -85,9 +88,21 @@ jobs:
       - name: set path
         run: |
           echo "PATH=$(pwd)/node_modules/.bin/:$PATH" >> $GITHUB_ENV
-      - name: generate graphql types
-        run: |
-          ./dev generate
+      - name: Unit Tests
+        run: ./dev test --unit --run-db
+      - name: publish code coverage
+        uses: paambaati/codeclimate-action@v2.7.5
+        env:
+          CC_TEST_REPORTER_ID: 364fbdd9d65e41f3ed5f70b6a295f5f76f7288a3930e738b010cad0c218df37c
+        with:
+          debug: true
+          coverageLocations: |
+            ${{github.workspace}}/services/app-api/coverage/lcov.info:lcov
+            ${{github.workspace}}/services/app-web/coverage/lcov.info:lcov
+      - name: set dev env vars
+        run: ./.github/build_vars.sh set_values
+        env:
+          REACT_APP_AUTH_MODE: IDM
       - name: deploy to dev
         run: |
           # When deploying multiple copies of this quickstart to the same AWS Account (not ideal), a prefix helps prevent stepping on each other.

@@ -1,5 +1,9 @@
 # Guide Wire ![Build](https://github.com/CMSgov/guide-wire/workflows/Build/badge.svg?branch=main)[![latest release](https://img.shields.io/github/release/cmsgov/guide-wire.svg)](https://github.com/cmsgov/guide-wire/releases/latest)
 
+<a href="https://codeclimate.com/repos/6041539f31779a5f8d00e7e6/maintainability"><img src="https://api.codeclimate.com/v1/badges/397709446d5aca86032d/maintainability" /></a>
+
+<a href="https://codeclimate.com/repos/6041539f31779a5f8d00e7e6/test_coverage"><img src="https://api.codeclimate.com/v1/badges/397709446d5aca86032d/test_coverage" /></a>
+
 The Managed Care Rate and Review State Submission System
 
 ## Local Dev
@@ -62,6 +66,8 @@ Serverless - Get help installing it here: [Serverless Getting Started page](http
 Yarn - In order to install dependencies, you need to [install yarn](https://classic.yarnpkg.com/en/docs/install/).
 
 AWS Account: You'll need an AWS account with appropriate IAM permissions (admin recommended) to deploy this app in Amazon.
+
+Java - our local database runner (which is a serverless plugin called `serverless-dynamodb-local`) requires java to run. You can install it here: https://www.oracle.com/java/technologies/javase-downloads.html
 
 If you are on a Mac using nvm, you should be able to install all the dependencies like so:
 

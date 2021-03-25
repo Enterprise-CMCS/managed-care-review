@@ -9,8 +9,10 @@
         "clean": "rm -rf node_modules && yarn cache clean"
     },
     "dependencies": {
+        "@aws/dynamodb-data-mapper-annotations": "^0.7.3",
         "@types/aws-lambda": "^8.10.71",
         "@types/request": "^2.48.5",
+        "@types/uuid": "^8.3.0",
         "apollo-server-lambda": "^2.21.0",
         "apollo-server-testing": "^2.21.0",
         "aws-sdk": "^2.839.0",
@@ -20,7 +22,8 @@
         "graphql": "^15.5.0",
         "neverthrow": "^4.0.1",
         "request": "^2.88.2",
-        "serverless": "^2.20.0"
+        "serverless": "^2.20.0",
+        "uuid": "^8.3.2"
     },
     "devDependencies": {
         "@types/jest": "^26.0.20",

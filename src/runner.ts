@@ -30,7 +30,7 @@ export default class LabeledProcessRunner {
                 this.prefixColors[prefix] = color
             } else {
                 console.log('BAD NEWS BEARS')
-                throw 'dev.ts programming error'
+                throw new Error('dev.ts programming error')
             }
         }
 

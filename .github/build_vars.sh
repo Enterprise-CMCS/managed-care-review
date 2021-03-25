@@ -16,6 +16,7 @@ var_list=(
   'IAM_PATH'
   'IAM_PERMISSIONS_BOUNDARY_POLICY'
   'STAGE_PREFIX'
+  'DYNAMO_CONNECTION'
 )
 
 set_value() {

@@ -6,3 +6,8 @@ export { assertIsAuthMode } from './config'
 
 export { isCognitoUser } from './user'
 export type { CognitoUserType } from './cognitoUserType'
+
+export type {
+	DraftSubmissionType,
+	SubmissionType,
+} from './DraftSubmissionType'
