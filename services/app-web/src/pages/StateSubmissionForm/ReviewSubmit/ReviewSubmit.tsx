@@ -428,10 +428,10 @@ export const DataDetail = ({
     return (
         <div className={styles.reviewData}>
             <label htmlFor={id}>{label}</label>
-            <p id={id}>
+            <span id={id}>
                 {data}
                 {address}
-            </p>
+            </span>
         </div>
     )
 }
