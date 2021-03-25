@@ -102,7 +102,7 @@ describe('SubmissionType', () => {
                 programs: [
                     { name: 'Program 1' },
                     { name: 'Program Test' },
-                    { name: 'Program 3' },
+                    { id: 'third', name: 'Program 3' },
                 ],
             },
         }

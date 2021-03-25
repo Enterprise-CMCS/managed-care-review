@@ -6,7 +6,11 @@ const mockValidUser: UserType = {
     state: {
         name: 'Minnesota',
         code: 'MN',
-        programs: [{ name: 'MSHO' }, { name: 'PMAP' }, { name: 'SNBC' }],
+        programs: [
+            { id: 'msho', name: 'MSHO' },
+            { id: 'pmap', name: 'PMAP' },
+            { id: 'snbc', name: 'SNBC' },
+        ],
     },
     role: 'State User',
     name: 'Bob it user',
@@ -55,9 +59,9 @@ const mockGetCurrentUser200 = {
                     name: 'Minnesota',
                     code: 'MN',
                     programs: [
-                        { name: 'MSHO' },
-                        { name: 'PMAP' },
-                        { name: 'SNBC' },
+                        { id: 'msho', name: 'MSHO' },
+                        { id: 'pmap', name: 'PMAP' },
+                        { id: 'snbc', name: 'SNBC' },
                     ],
                 },
                 role: 'State User',
