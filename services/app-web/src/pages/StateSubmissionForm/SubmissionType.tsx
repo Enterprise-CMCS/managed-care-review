@@ -1,6 +1,7 @@
 import React from 'react'
 import * as Yup from 'yup'
 import {
+    Alert,
     Button,
     ButtonGroup,
     ErrorMessage,
@@ -14,10 +15,16 @@ import {
     Textarea,
 } from '@trussworks/react-uswds'
 import { Field, Formik, FormikHelpers, FormikErrors } from 'formik'
-import { NavLink, useHistory } from 'react-router-dom'
+import { NavLink, useHistory, useLocation } from 'react-router-dom'
+import { useMutation } from '@apollo/client'
 
 import styles from './StateSubmissionForm.module.scss'
+import {
+    CreateDraftSubmissionDocument,
+    SubmissionType as SubmissionTypeT,
+} from '../../gen/gqlClient'
 import { useAuth } from '../../contexts/AuthContext'
+import { SubmissionTypeRecord } from '../../constants/submissions'
 
 // Formik setup
 const SubmissionTypeFormSchema = Yup.object().shape({
@@ -28,12 +35,12 @@ const SubmissionTypeFormSchema = Yup.object().shape({
     submissionType: Yup.string().required('You must choose a submission type'),
 })
 export interface SubmissionTypeFormValues {
-    program: string
+    programId: string
     submissionDescription: string
     submissionType: string
 }
 export const SubmissionTypeInitialValues: SubmissionTypeFormValues = {
-    program: '',
+    programId: '',
     submissionDescription: '',
     submissionType: '',
 }
@@ -42,26 +49,67 @@ type SubmissionTypeProps = {
 }
 
 type FormError = FormikErrors<SubmissionTypeFormValues>[keyof FormikErrors<SubmissionTypeFormValues>]
-
 export const SubmissionType = ({
     showValidations = false,
 }: SubmissionTypeProps): React.ReactElement => {
+    const [showFormAlert, setShowFormAlert] = React.useState(false)
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
+
     const { loggedInUser: { state: { programs = [] } = {} } = {} } = useAuth()
     const history = useHistory()
+    const location = useLocation()
 
-    const showError = (error?: FormError) => shouldValidate && Boolean(error)
+    const [createDraftSubmission, { loading, data, error }] = useMutation(
+        CreateDraftSubmissionDocument,
+        {
+            notifyOnNetworkStatusChange: true,
+        }
+    )
 
-    const handleFormSubmit = (
+    const isNewSubmission = location.pathname === '/submissions/new'
+    const showFieldErrors = (error?: FormError) =>
+        shouldValidate && Boolean(error)
+
+    const handleFormSubmit = async (
         values: SubmissionTypeFormValues,
         formikHelpers: FormikHelpers<SubmissionTypeFormValues>
     ) => {
-        // TODO: if /new createDraftSubmission api call, if /:id/submisssion-type saveDraftSubmission
-        console.log('mock save draft submission', values)
+        if (!loading) formikHelpers.setSubmitting(false)
+        if (data) {
+            const {
+                createDraftSubmission: {
+                    draftSubmission: { id },
+                },
+            } = data
 
-        formikHelpers.setSubmitting(false)
-        // TODO: use id of draft submission
-        history.push('/submissions/1/contract-details')
+            history.push(`/submission/${id}/contract-details`)
+        }
+        if (error) {
+            setShowFormAlert(true)
+            console.log(
+                'Log: creating new submission failed with gql error',
+                error
+            )
+        }
+
+        if (isNewSubmission) {
+            console.log('VALUES', values)
+            try {
+                await createDraftSubmission({
+                    variables: { input: values },
+                })
+            } catch (serverError) {
+                setShowFormAlert(true)
+                console.log(
+                    'Log: creating new submission failed with server error',
+                    serverError
+                )
+            }
+        } else {
+            // TODO: implement saving an existing submission
+            formikHelpers.setSubmitting(false)
+            console.log('mock save draft submission', values)
+        }
     }
 
     return (
@@ -80,143 +128,165 @@ export const SubmissionType = ({
                 isValidating,
                 validateForm,
             }) => (
-                <UswdsForm
-                    className="usa-form--large"
-                    id="SubmissionTypeForm"
-                    aria-label="New Submission Form"
-                    onSubmit={(e) => {
-                        e.preventDefault()
-                        validateForm()
-                            .then(() => {
-                                setShouldValidate(true)
-                            })
-                            .catch(() => console.warn('Validation Error'))
+                <>
+                    <UswdsForm
+                        className="usa-form--large"
+                        id="SubmissionTypeForm"
+                        aria-label="New Submission Form"
+                        onSubmit={(e) => {
+                            e.preventDefault()
+                            validateForm()
+                                .then(() => {
+                                    setShouldValidate(true)
+                                })
+                                .catch(() =>
+                                    console.warn('Log: Validation Error')
+                                )
 
-                        if (!isValidating) handleSubmit()
-                    }}
-                >
-                    <fieldset className="usa-fieldset">
-                        <legend className={styles.formHeader}>
-                            <h2>Submission type</h2>
-                        </legend>
-                        <div className={styles.formContainer}>
-                            <span>All fields are required</span>
-                            <FormGroup className={styles.formGroup}>
-                                <Label htmlFor="program">Program</Label>
-                                <Field
-                                    id="program"
-                                    name="program"
-                                    as={Dropdown}
-                                >
-                                    {programs.map((program) => (
-                                        <option
-                                            key={program.name}
-                                            value={program.name}
-                                        >
-                                            {program.name}
-                                        </option>
-                                    ))}
-                                </Field>
-                            </FormGroup>
+                            if (!isValidating) handleSubmit()
+                        }}
+                    >
+                        <fieldset className="usa-fieldset">
+                            <legend className={styles.formHeader}>
+                                <h2>Submission type</h2>
+                            </legend>
+                            {showFormAlert && (
+                                <Alert type="error">Something went wrong</Alert>
+                            )}
+                            <div className={styles.formContainer}>
+                                <span>All fields are required</span>
+                                <FormGroup className={styles.formGroup}>
+                                    <Label htmlFor="program">Program</Label>
+                                    <Field
+                                        id="program"
+                                        name="programId"
+                                        as={Dropdown}
+                                    >
+                                        {programs.map((program) => (
+                                            <option
+                                                key={program.name}
+                                                value={program.id}
+                                            >
+                                                {program.name}
+                                            </option>
+                                        ))}
+                                    </Field>
+                                </FormGroup>
 
-                            <FormGroup className={styles.formGroup}>
-                                <Fieldset legend="Choose submission type">
-                                    {showError(errors.submissionType) && (
+                                <FormGroup className={styles.formGroup}>
+                                    <Fieldset legend="Choose submission type">
+                                        {showFieldErrors(
+                                            errors.submissionType
+                                        ) && (
+                                            <ErrorMessage>
+                                                {errors.submissionType}
+                                            </ErrorMessage>
+                                        )}
+                                        <Field
+                                            as={Radio}
+                                            checked={
+                                                values.submissionType ===
+                                                SubmissionTypeT.ContractOnly
+                                            }
+                                            id="contractOnly"
+                                            name="submissionType"
+                                            label={
+                                                SubmissionTypeRecord[
+                                                    SubmissionTypeT.ContractOnly
+                                                ]
+                                            }
+                                            value={SubmissionTypeT.ContractOnly}
+                                        />
+                                        <Field
+                                            as={Radio}
+                                            checked={
+                                                values.submissionType ===
+                                                SubmissionTypeT.ContractAndRates
+                                            }
+                                            id="contractRate"
+                                            name="submissionType"
+                                            label={
+                                                SubmissionTypeRecord[
+                                                    SubmissionTypeT
+                                                        .ContractAndRates
+                                                ]
+                                            }
+                                            value={
+                                                SubmissionTypeT.ContractAndRates
+                                            }
+                                        />
+                                    </Fieldset>
+                                </FormGroup>
+
+                                <FormGroup className={styles.formGroupLast}>
+                                    <Label htmlFor="submissionDescription">
+                                        Submission description
+                                    </Label>
+                                    {showFieldErrors(
+                                        errors.submissionDescription
+                                    ) && (
                                         <ErrorMessage>
-                                            {errors.submissionType}
+                                            {errors.submissionDescription}
                                         </ErrorMessage>
                                     )}
-                                    <Field
-                                        as={Radio}
-                                        checked={
-                                            values.submissionType ===
-                                            'contractOnly'
+                                    <Link
+                                        variant="nav"
+                                        href={
+                                            '/help/submission-description-examples'
                                         }
-                                        id="contractOnly"
-                                        name="submissionType"
-                                        label="Contract action only"
-                                        value="contractOnly"
-                                    />
+                                        target="_blank"
+                                    >
+                                        View description examples
+                                    </Link>
+                                    <p className="usa-hint margin-top-1">
+                                        Provide a description of any major
+                                        changes or updates
+                                    </p>
                                     <Field
-                                        as={Radio}
-                                        checked={
-                                            values.submissionType ===
-                                            'contractRate'
-                                        }
-                                        id="contractRate"
-                                        name="submissionType"
-                                        label="Contract action and rate certification"
-                                        value="contractRate"
+                                        as={Textarea}
+                                        id="submissionDescription"
+                                        name="submissionDescription"
+                                        value={values.submissionDescription}
+                                        error={showFieldErrors(
+                                            errors.submissionDescription
+                                        )}
                                     />
-                                </Fieldset>
-                            </FormGroup>
-
-                            <FormGroup className={styles.formGroupLast}>
-                                <Label htmlFor="submissionDescription">
-                                    Submission description
-                                </Label>
-                                {showError(errors.submissionDescription) && (
-                                    <ErrorMessage>
-                                        {errors.submissionDescription}
-                                    </ErrorMessage>
-                                )}
-                                <Link
-                                    variant="nav"
-                                    href={
-                                        '/help/submission-description-examples'
+                                </FormGroup>
+                            </div>
+                            <ButtonGroup
+                                type="default"
+                                className={styles.buttonGroup}
+                            >
+                                <Button
+                                    type="button"
+                                    secondary
+                                    onClick={() =>
+                                        validateForm()
+                                            .then(() => {
+                                                setShouldValidate(true)
+                                            })
+                                            .catch(() =>
+                                                console.warn('Validation Error')
+                                            )
                                     }
-                                    target={'_blank'}
                                 >
-                                    View description examples
+                                    Test Validation
+                                </Button>
+                                <Link
+                                    asCustom={NavLink}
+                                    className="usa-button usa-button--outline"
+                                    variant="unstyled"
+                                    to="/dashboard"
+                                >
+                                    Cancel
                                 </Link>
-                                <p className="usa-hint margin-top-1">
-                                    Provide a description of any major changes
-                                    or updates
-                                </p>
-                                <Field
-                                    as={Textarea}
-                                    id="submissionDescription"
-                                    name="submissionDescription"
-                                    value={values.submissionDescription}
-                                    error={showError(
-                                        errors.submissionDescription
-                                    )}
-                                />
-                            </FormGroup>
-                        </div>
-                        <ButtonGroup
-                            type="default"
-                            className={styles.buttonGroup}
-                        >
-                            <Button
-                                type="button"
-                                secondary
-                                onClick={() =>
-                                    validateForm()
-                                        .then(() => {
-                                            setShouldValidate(true)
-                                        })
-                                        .catch(() =>
-                                            console.warn('Validation Error')
-                                        )
-                                }
-                            >
-                                Test Validation
-                            </Button>
-                            <Link
-                                asCustom={NavLink}
-                                className="usa-button usa-button--outline"
-                                variant="unstyled"
-                                to="/dashboard"
-                            >
-                                Cancel
-                            </Link>
-                            <Button type="submit" disabled={isSubmitting}>
-                                Continue
-                            </Button>
-                        </ButtonGroup>
-                    </fieldset>
-                </UswdsForm>
+                                <Button type="submit" disabled={isSubmitting}>
+                                    Continue
+                                </Button>
+                            </ButtonGroup>
+                        </fieldset>
+                    </UswdsForm>
+                </>
             )}
         </Formik>
     )
