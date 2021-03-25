@@ -4,7 +4,7 @@ import { GridContainer } from '@trussworks/react-uswds'
 import { Switch, Route } from 'react-router-dom'
 
 import { ContractDetails } from './ContractDetails'
-import { ReviewSubmit } from './ReviewSubmit'
+import { ReviewSubmit } from './ReviewSubmit/ReviewSubmit'
 import { SubmissionType } from './SubmissionType'
 
 export const StateSubmissionForm = (): React.ReactElement => (
