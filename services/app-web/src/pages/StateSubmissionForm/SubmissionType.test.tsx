@@ -5,10 +5,16 @@ import { screen, waitFor } from '@testing-library/react'
 
 import { getCurrentUserMock } from '../../utils/apolloUtils'
 import { renderWithProviders } from '../../utils/jestUtils'
-import { SubmissionType, SubmissionTypeInitialValues } from './SubmissionType'
+import { SubmissionType, SubmissionTypeFormValues } from './SubmissionType'
 import { Formik } from 'formik'
 
 describe('SubmissionType', () => {
+    const SubmissionTypeInitialValues: SubmissionTypeFormValues = {
+        programId: 'ccc-plus',
+        submissionDescription: '',
+        submissionType: '',
+    }
+
     it('renders without errors', async () => {
         renderWithProviders(<SubmissionType />, {
             apolloProvider: {

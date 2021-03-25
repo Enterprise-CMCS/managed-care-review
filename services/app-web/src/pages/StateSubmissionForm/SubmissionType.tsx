@@ -21,6 +21,7 @@ import { useMutation } from '@apollo/client'
 import styles from './StateSubmissionForm.module.scss'
 import {
     CreateDraftSubmissionDocument,
+    DraftSubmission,
     SubmissionType as SubmissionTypeT,
 } from '../../gen/gqlClient'
 import { useAuth } from '../../contexts/AuthContext'
@@ -39,11 +40,6 @@ export interface SubmissionTypeFormValues {
     submissionDescription: string
     submissionType: string
 }
-export const SubmissionTypeInitialValues: SubmissionTypeFormValues = {
-    programId: '',
-    submissionDescription: '',
-    submissionType: '',
-}
 type SubmissionTypeProps = {
     showValidations?: boolean
 }
@@ -56,50 +52,49 @@ export const SubmissionType = ({
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
 
     const { loggedInUser: { state: { programs = [] } = {} } = {} } = useAuth()
+
     const history = useHistory()
     const location = useLocation()
 
-    const [createDraftSubmission, { loading, data, error }] = useMutation(
-        CreateDraftSubmissionDocument,
-        {
-            notifyOnNetworkStatusChange: true,
-        }
+    const [createDraftSubmission, { error }] = useMutation(
+        CreateDraftSubmissionDocument
     )
+
+    if (error) {
+        setShowFormAlert(true)
+        console.log('Log: creating new submission failed with gql error', error)
+    }
 
     const isNewSubmission = location.pathname === '/submissions/new'
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
+    const SubmissionTypeInitialValues: SubmissionTypeFormValues = {
+        programId: programs[0].id,
+        submissionDescription: '',
+        submissionType: '',
+    }
+
     const handleFormSubmit = async (
         values: SubmissionTypeFormValues,
         formikHelpers: FormikHelpers<SubmissionTypeFormValues>
     ) => {
-        if (!loading) formikHelpers.setSubmitting(false)
-        if (data) {
-            const {
-                createDraftSubmission: {
-                    draftSubmission: { id },
-                },
-            } = data
-
-            history.push(`/submission/${id}/contract-details`)
-        }
-        if (error) {
-            setShowFormAlert(true)
-            console.log(
-                'Log: creating new submission failed with gql error',
-                error
-            )
-        }
-
         if (isNewSubmission) {
-            console.log('VALUES', values)
             try {
-                await createDraftSubmission({
+                const result = await createDraftSubmission({
                     variables: { input: values },
                 })
+                const draftSubmission: DraftSubmission =
+                    result.data.createDraftSubmission.draftSubmission
+
+                if (draftSubmission) {
+                    history.push(
+                        `/submissions/${draftSubmission.id}/contract-details`
+                    )
+                }
             } catch (serverError) {
                 setShowFormAlert(true)
+                formikHelpers.setSubmitting(false) // unblock submit button to allow resubmit
                 console.log(
                     'Log: creating new submission failed with server error',
                     serverError
@@ -107,7 +102,6 @@ export const SubmissionType = ({
             }
         } else {
             // TODO: implement saving an existing submission
-            formikHelpers.setSubmitting(false)
             console.log('mock save draft submission', values)
         }
     }
@@ -123,6 +117,7 @@ export const SubmissionType = ({
             {({
                 values,
                 errors,
+                handleChange,
                 handleSubmit,
                 isSubmitting,
                 isValidating,
@@ -156,15 +151,17 @@ export const SubmissionType = ({
                             <div className={styles.formContainer}>
                                 <span>All fields are required</span>
                                 <FormGroup className={styles.formGroup}>
-                                    <Label htmlFor="program">Program</Label>
+                                    <Label htmlFor="programId">Program</Label>
                                     <Field
-                                        id="program"
+                                        id="programId"
                                         name="programId"
                                         as={Dropdown}
+                                        onChange={handleChange}
+                                        value={values.programId}
                                     >
                                         {programs.map((program) => (
                                             <option
-                                                key={program.name}
+                                                key={program.id}
                                                 value={program.id}
                                             >
                                                 {program.name}
