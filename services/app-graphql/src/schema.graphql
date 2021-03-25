@@ -27,7 +27,7 @@ type State {
 }
 
 type Program {
-    id: ID
+    id: ID!
     name: String!
 }
 
