@@ -1,6 +1,5 @@
-// apollo_gql.js
-import { ApolloServer } from 'apollo-server-lambda'
-import { APIGatewayProxyHandler } from 'aws-lambda'
+import { ApolloServer} from 'apollo-server-lambda'
+import { APIGatewayProxyHandler, APIGatewayProxyEvent, Context as LambdaContext} from 'aws-lambda'
 import { newDeployedStore, newLocalStore} from '../store/index'
 
 import {
@@ -18,6 +17,10 @@ import {
 
 import { assertIsAuthMode } from '../../app-web/src/common-code/domain-models'
 
+// Configuration:
+const authMode = process.env.REACT_APP_AUTH_MODE
+assertIsAuthMode(authMode)
+
 const getDynamoStore = () => {
     const dynamoConnection = process.env.DYNAMO_CONNECTION
 if (dynamoConnection === 'USE_AWS') {
@@ -26,22 +29,15 @@ if (dynamoConnection === 'USE_AWS') {
     return newLocalStore(process.env.DYNAMO_CONNECTION || 'no db url')
 }
 }
-
-// Configuration:
-const authMode = process.env.REACT_APP_AUTH_MODE
-assertIsAuthMode(authMode)
 const store = getDynamoStore()
-
-
 
 const userFetcher =
     authMode === 'LOCAL'
         ? userFromLocalAuthProvider
         : userFromCognitoAuthProvider
-
 // End Configuration
 
-// Our resolvers are defined and tested in the resolvers package
+// Resolvers are defined and tested in the resolvers package
 const resolvers: Resolvers = {
     Query: {
         getCurrentUser: getCurrentUserResolver(userFetcher),
@@ -58,12 +54,29 @@ const server = new ApolloServer({
     playground: {
         endpoint: '/local/graphql',
     },
-    context: ({ event, context }) => {
+    context: async ({event, context}: { event: APIGatewayProxyEvent, context: LambdaContext }) => {
+        const authProvider = event.requestContext.identity.cognitoAuthenticationProvider
+        if (authProvider) {
+            try {
+                const userResult = await userFetcher(authProvider)
+    
+            if (!userResult.isErr()) {
+                return {
+                    headers: event.headers,
+                    functionName: context.functionName,
+                    event,
+                    user: userResult.value
+                }
+            }
+            }catch (err) {
+                console.log('Log: placing user in gql context failed')
+            }
+        }
+
         return {
             headers: event.headers,
             functionName: context.functionName,
             event,
-            context,
         }
     },
 })

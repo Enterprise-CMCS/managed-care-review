@@ -11,6 +11,7 @@ import {
     CreateDraftSubmissionInput,
     CreateDraftSubmissionPayload,
     SubmissionType,
+    State,
 } from '../gen/gqlServer'
 
 // TODO: potential refactor: pull out database interactions into /datasources createDraftSubmission as per apollo server docs
@@ -22,20 +23,20 @@ export function createDraftSubmissionResolver(
     any, // eslint-disable-line  @typescript-eslint/no-explicit-any
     { input: CreateDraftSubmissionInput }
 > {
-    return async (_parent, { input }) => {
-        const stateFromCurrentUser = statePrograms.states[0]
-        const program = stateFromCurrentUser.programs.find(
+    return async (_parent, { input }, context) => {
+        const stateFromCurrentUser: State['code'] = context.user.state_code
+        const program = statePrograms.states.find(state => state.code === stateFromCurrentUser)?.programs.find(
             (program) => program.id == input.programId
         )
 
         if (program === undefined) {
             throw new Error(
-                `The program id ${input.programId} does not exist in state ${stateFromCurrentUser.name}`
+                `The program id ${input.programId} does not exist in state ${stateFromCurrentUser}`
             )
         }
 
         const dbDraftSubmission: InsertDraftSubmissionArgsType = {
-            stateCode: stateFromCurrentUser.code,
+            stateCode: stateFromCurrentUser,
             programID: input.programId,
             submissionDescription: input.submissionDescription,
             submissionType: input.submissionType as InsertDraftSubmissionArgsType['submissionType'],

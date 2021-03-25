@@ -5,6 +5,7 @@ query getCurrentUser {
             code
             name
             programs {
+                id
                 name
             }
         }
