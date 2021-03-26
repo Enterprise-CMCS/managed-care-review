@@ -58,6 +58,7 @@ export function createDraftSubmissionResolver(
                     name: `${draftSubResult.stateCode}-${program.name}-${draftSubResult.stateNumber}`,
                     submissionType: draftSubResult.submissionType as SubmissionType,
                     program,
+                    stateCode: draftSubResult.stateCode
                 }
                 return {
                     draftSubmission,

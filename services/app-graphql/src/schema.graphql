@@ -39,9 +39,11 @@ enum SubmissionType {
 type DraftSubmission {
     id: ID!
     name: String!
+    createdAt: String!
     program: Program!
     submissionType: SubmissionType!
     submissionDescription: String!
+    stateCode: String!
 }
 
 input CreateDraftSubmissionInput {
