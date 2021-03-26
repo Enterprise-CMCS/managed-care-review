@@ -1,7 +1,11 @@
-import { ApolloServer} from 'apollo-server-lambda'
-import { APIGatewayProxyHandler, APIGatewayProxyEvent, Context as LambdaContext} from 'aws-lambda'
-import { newDeployedStore, newLocalStore} from '../store/index'
-import { GraphQLDate } from 'graphql-scalars';
+import { ApolloServer } from 'apollo-server-lambda'
+import {
+    APIGatewayProxyHandler,
+    APIGatewayProxyEvent,
+    Context as LambdaContext,
+} from 'aws-lambda'
+import { newDeployedStore, newLocalStore } from '../store/index'
+import { GraphQLDate } from 'graphql-scalars'
 
 import {
     createDraftSubmissionResolver,
@@ -24,11 +28,11 @@ assertIsAuthMode(authMode)
 
 const getDynamoStore = () => {
     const dynamoConnection = process.env.DYNAMO_CONNECTION
-if (dynamoConnection === 'USE_AWS') {
-    return newDeployedStore(process.env.AWS_DEFAULT_REGION || 'no region')
-} else {
-    return newLocalStore(process.env.DYNAMO_CONNECTION || 'no db url')
-}
+    if (dynamoConnection === 'USE_AWS') {
+        return newDeployedStore(process.env.AWS_DEFAULT_REGION || 'no region')
+    } else {
+        return newLocalStore(process.env.DYNAMO_CONNECTION || 'no db url')
+    }
 }
 const store = getDynamoStore()
 
@@ -53,17 +57,23 @@ const resolvers: Resolvers = {
 export interface Context {
     user: CognitoUserType
 }
-const context = async ({event}: { event: APIGatewayProxyEvent, context: LambdaContext }): Promise<Context | undefined>  => {
-    const authProvider = event.requestContext.identity.cognitoAuthenticationProvider
+const context = async ({
+    event,
+}: {
+    event: APIGatewayProxyEvent
+    context: LambdaContext
+}): Promise<Context | undefined> => {
+    const authProvider =
+        event.requestContext.identity.cognitoAuthenticationProvider
     if (authProvider) {
         try {
             const userResult = await userFetcher(authProvider)
 
-        if (!userResult.isErr()) {
-            return {
-                user: userResult.value
+            if (!userResult.isErr()) {
+                return {
+                    user: userResult.value,
+                }
             }
-        }
         } catch (err) {
             throw new Error('Log: placing user in gql context failed')
         }
@@ -78,7 +88,7 @@ const server = new ApolloServer({
     playground: {
         endpoint: '/local/graphql',
     },
-    context
+    context,
 })
 
 function localAuthMiddleware(

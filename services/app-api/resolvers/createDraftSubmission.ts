@@ -5,21 +5,17 @@ import {
 } from '../store/index'
 
 import statePrograms from '../data/statePrograms.json'
-import {
-    MutationResolvers,
-    SubmissionType,
-    State,
-} from '../gen/gqlServer'
+import { MutationResolvers, SubmissionType, State } from '../gen/gqlServer'
 
 // TODO: potential refactor: pull out database interactions into /datasources createDraftSubmission as per apollo server docs
 export function createDraftSubmissionResolver(
     store: Store
-): MutationResolvers["createDraftSubmission"] {
+): MutationResolvers['createDraftSubmission'] {
     return async (_parent, { input }, context) => {
         const stateFromCurrentUser: State['code'] = context.user.state_code
-        const program = statePrograms.states.find(state => state.code === stateFromCurrentUser)?.programs.find(
-            (program) => program.id == input.programId
-        )
+        const program = statePrograms.states
+            .find((state) => state.code === stateFromCurrentUser)
+            ?.programs.find((program) => program.id == input.programId)
 
         if (program === undefined) {
             throw new Error(
@@ -43,7 +39,9 @@ export function createDraftSubmissionResolver(
                     `Issue creating a draft submission of type ${draftSubResult.code}. Message: ${draftSubResult.message}`
                 )
             } else {
-                const padNumber = draftSubResult.stateNumber.toString().padStart(4, '0');
+                const padNumber = draftSubResult.stateNumber
+                    .toString()
+                    .padStart(4, '0')
                 const draftSubmission = {
                     id: draftSubResult.id,
                     createdAt: draftSubResult.createdAt,
@@ -51,7 +49,7 @@ export function createDraftSubmissionResolver(
                     name: `${draftSubResult.stateCode}-${program.name}-${padNumber}`,
                     submissionType: draftSubResult.submissionType as SubmissionType,
                     program,
-                    stateCode: draftSubResult.stateCode
+                    stateCode: draftSubResult.stateCode,
                 }
                 return {
                     draftSubmission,

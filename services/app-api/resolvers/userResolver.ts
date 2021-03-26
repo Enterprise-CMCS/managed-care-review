@@ -1,8 +1,8 @@
-import { Resolvers} from '../gen/gqlServer'
+import { Resolvers } from '../gen/gqlServer'
 import statePrograms from '../data/statePrograms.json'
 import { isCognitoUser } from '../../app-web/src/common-code/domain-models'
 
-export const userResolver: Resolvers["User"] = {
+export const userResolver: Resolvers['User'] = {
     state(parent) {
         if (isCognitoUser(parent)) {
             const userState = parent.state_code
