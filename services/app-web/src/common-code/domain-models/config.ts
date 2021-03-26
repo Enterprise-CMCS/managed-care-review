@@ -12,3 +12,7 @@ export function assertIsAuthMode(opt: unknown): asserts opt is AuthModeType {
         throw new Error('Those are not Login Options')
     }
 }
+
+export function assertNever(x: never): never {
+    throw new Error('Unexpected object: ' + x)
+}
