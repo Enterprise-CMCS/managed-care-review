@@ -2,7 +2,7 @@ import { DraftSubmissionStoreType } from './draftSubmissionStoreType'
 import { getTestStore, getTestDynamoMapper } from '../testHelpers/storeHelpers'
 import { storeWithDynamoConfig } from './store'
 
-import { isStoreError } from './insertDraftSubmission'
+import { isStoreError } from './storeError'
 
 describe('insertDraftSubmission', () => {
     it('creates a new submission from scratch', async () => {

@@ -4,23 +4,25 @@ import {
     APIGatewayProxyEvent,
     Context as LambdaContext,
 } from 'aws-lambda'
-import { newDeployedStore, newLocalStore } from '../store/index'
 import { GraphQLDate } from 'graphql-scalars'
 
+import typeDefs from '../../app-graphql/src/schema.graphql'
+import {
+    assertIsAuthMode,
+    CognitoUserType,
+} from '../../app-web/src/common-code/domain-models'
+
+import { newDeployedStore, newLocalStore } from '../store/index'
 import {
     createDraftSubmissionResolver,
     getCurrentUserResolver,
     userResolver,
 } from '../resolvers'
-import { CognitoUserType } from '../../app-web/src/common-code/domain-models'
 import { Resolvers } from '../gen/gqlServer'
-import typeDefs from '../../app-graphql/src/schema.graphql'
 import {
     userFromLocalAuthProvider,
     userFromCognitoAuthProvider,
 } from '../authn'
-
-import { assertIsAuthMode } from '../../app-web/src/common-code/domain-models'
 
 // Configuration:
 const authMode = process.env.REACT_APP_AUTH_MODE
@@ -62,7 +64,7 @@ const context = async ({
 }: {
     event: APIGatewayProxyEvent
     context: LambdaContext
-}): Promise<Context | undefined> => {
+}): Promise<Context> => {
     const authProvider =
         event.requestContext.identity.cognitoAuthenticationProvider
     if (authProvider) {
@@ -73,6 +75,10 @@ const context = async ({
                 return {
                     user: userResult.value,
                 }
+            } else {
+                throw new Error(
+                    `Log: failed to fetch user: ${userResult.error}`
+                )
             }
         } catch (err) {
             throw new Error('Log: placing user in gql context failed')

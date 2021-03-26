@@ -1,15 +1,20 @@
 import DynamoDB from 'aws-sdk/clients/dynamodb'
 import {
-    StoreError,
     InsertDraftSubmissionArgsType,
     insertDraftSubmission,
 } from './insertDraftSubmission'
+import { findDraftSubmission } from './findDraftSubmission'
+import { StoreError } from './storeError'
 import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
+import { DraftSubmission } from '../gen/gqlServer'
 
 export type Store = {
     insertDraftSubmission: (
         args: InsertDraftSubmissionArgsType
     ) => Promise<DraftSubmissionType | StoreError>
+    findDraftSubmission: (
+        draftUUID: string
+    ) => Promise<DraftSubmissionType | undefined | StoreError>
 }
 
 export function storeWithDynamoConfig(
@@ -19,6 +24,8 @@ export function storeWithDynamoConfig(
 
     return {
         insertDraftSubmission: (args) => insertDraftSubmission(conn, args),
+        findDraftSubmission: (draftUUID) =>
+            findDraftSubmission(conn, draftUUID),
     }
 }
 
