@@ -1,5 +1,6 @@
 import { createTestClient } from 'apollo-server-testing'
-import { Config } from 'apollo-server-lambda'
+import { APIGatewayProxyEvent} from 'aws-lambda'
+import {Context} from '../handlers/apollo_gql'
 
 import { constructTestServer } from '../testHelpers/gqlHelpers'
 import GET_CURRENT_USER from '../../app-graphql/src/queries/currentUserQuery.graphql'
@@ -21,22 +22,19 @@ describe('currentUser', () => {
     })
 
     it('returns a state with no programs if the state is not in valid state list', async () => {
-        const context = (context: Config['context']) => {
-            const event = {
-                requestContext: {
-                    identity: {
-                        cognitoAuthenticationProvider:
-                            '{ "name": "james brown", "state_code": "MI", "role": "STATE_USER", "email": "james@example.com" }',
-                    },
-                },
-            }
-
-            return {
-                event,
-                context,
-            }
-        }
-        const server = constructTestServer({ context })
+        const customContext: Context = {
+            event: {
+                 requestContext: {
+                     identity: {
+                         cognitoAuthenticationProvider:
+                         '{ "name": "james brown", "state_code": "MI", "role": "STATE_USER", "email": "james@example.com" }',
+                     },
+                 }
+             }  as APIGatewayProxyEvent,
+             user: { name: "james brown", state_code: "MI", role: "STATE_USER", email: "james@example.com" }
+         }
+        
+        const server = constructTestServer({ context: customContext})
         const { query } = createTestClient(server)
 
         // make a mock request

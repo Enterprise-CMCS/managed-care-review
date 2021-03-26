@@ -50,7 +50,7 @@ describe('createDraftSubmission', () => {
 
         expect(res.errors).toBeDefined()
         expect(res.errors && res.errors[0].message).toBe(
-            'The program id xyz123 does not exist in state Florida'
+            'The program id xyz123 does not exist in state FL'
         )
     })
 })
