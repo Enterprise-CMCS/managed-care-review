@@ -42,7 +42,7 @@ const userFetcher =
 const resolvers: Resolvers = {
     Date: GraphQLDate,
     Query: {
-        getCurrentUser: getCurrentUserResolver(userFetcher),
+        getCurrentUser: getCurrentUserResolver(),
     },
     Mutation: {
         createDraftSubmission: createDraftSubmissionResolver(store),
@@ -51,7 +51,6 @@ const resolvers: Resolvers = {
 }
 
 export interface Context {
-    event: APIGatewayProxyEvent,
     user: CognitoUserType
 }
 const context = async ({event}: { event: APIGatewayProxyEvent, context: LambdaContext }): Promise<Context | undefined>  => {
@@ -62,7 +61,6 @@ const context = async ({event}: { event: APIGatewayProxyEvent, context: LambdaCo
 
         if (!userResult.isErr()) {
             return {
-                event,
                 user: userResult.value
             }
         }

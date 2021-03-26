@@ -1,5 +1,4 @@
 import { createTestClient } from 'apollo-server-testing'
-import { APIGatewayProxyEvent} from 'aws-lambda'
 import {Context} from '../handlers/apollo_gql'
 
 import { constructTestServer } from '../testHelpers/gqlHelpers'
@@ -23,14 +22,6 @@ describe('currentUser', () => {
 
     it('returns a state with no programs if the state is not in valid state list', async () => {
         const customContext: Context = {
-            event: {
-                 requestContext: {
-                     identity: {
-                         cognitoAuthenticationProvider:
-                         '{ "name": "james brown", "state_code": "MI", "role": "STATE_USER", "email": "james@example.com" }',
-                     },
-                 }
-             }  as APIGatewayProxyEvent,
              user: { name: "james brown", state_code: "MI", role: "STATE_USER", email: "james@example.com" }
          }
         
