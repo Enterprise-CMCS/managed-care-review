@@ -6,10 +6,7 @@ import {
 
 import statePrograms from '../data/statePrograms.json'
 import {
-    Resolver,
-    ResolverTypeWrapper,
-    CreateDraftSubmissionInput,
-    CreateDraftSubmissionPayload,
+    MutationResolvers,
     SubmissionType,
     State,
 } from '../gen/gqlServer'
@@ -17,12 +14,7 @@ import {
 // TODO: potential refactor: pull out database interactions into /datasources createDraftSubmission as per apollo server docs
 export function createDraftSubmissionResolver(
     store: Store
-): Resolver<
-    ResolverTypeWrapper<CreateDraftSubmissionPayload>,
-    Record<string, unknown>,
-    any, // eslint-disable-line  @typescript-eslint/no-explicit-any
-    { input: CreateDraftSubmissionInput }
-> {
+): MutationResolvers["createDraftSubmission"] {
     return async (_parent, { input }, context) => {
         const stateFromCurrentUser: State['code'] = context.user.state_code
         const program = statePrograms.states.find(state => state.code === stateFromCurrentUser)?.programs.find(

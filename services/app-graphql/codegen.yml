@@ -10,6 +10,7 @@ generates:
       - 'typescript'
       - 'typescript-resolvers'
     config: # Go ahead and prettier it
+      contextType: ../handlers/apollo_gql#Context
       defaultMapper: Partial<{T}>
       useIndexSignature: true # Don't forget this or Apollo will give an inscrutible error
   ../app-web/src/gen/gqlClient.tsx:
