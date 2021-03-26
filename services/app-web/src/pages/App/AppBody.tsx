@@ -28,7 +28,6 @@ export function AppBody({
         setShowLoading('WAITING')
         setTimeout(() => {
             setShowLoading((actualShowLoading) => {
-                console.log('ACTUAL', actualShowLoading)
                 return actualShowLoading === 'WAITING'
                     ? 'SHOW_LOADING'
                     : actualShowLoading
@@ -37,7 +36,6 @@ export function AppBody({
     }
 
     if (loginStatus !== 'LOADING' && showLoading !== 'NOT_LOADING') {
-        console.log('SET NOT')
         setShowLoading('NOT_LOADING')
     }
 

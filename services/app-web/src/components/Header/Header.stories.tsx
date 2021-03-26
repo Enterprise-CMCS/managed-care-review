@@ -3,7 +3,7 @@ import { Story } from '@storybook/react'
 
 import ProvidersDecorator from '../../../.storybook/providersDecorator'
 import { Header, HeaderProps } from './Header'
-import { mockGetCurrentUser200 } from '../../utils/apolloUtils'
+import { getCurrentUserMock } from '../../utils/apolloUtils'
 
 export default {
     title: 'Components/Header',
@@ -20,6 +20,8 @@ export const CMSHeaderLoggedIn = Template.bind({})
 CMSHeaderLoggedIn.decorators = [
     (Story) =>
         ProvidersDecorator(Story, {
-            apolloProvider: { mocks: [mockGetCurrentUser200] },
+            apolloProvider: {
+                mocks: [getCurrentUserMock({ statusCode: 200 })],
+            },
         }),
 ]

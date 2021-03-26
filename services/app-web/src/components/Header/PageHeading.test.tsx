@@ -1,7 +1,6 @@
 import React from 'react'
-import { screen, waitFor } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/jestUtils'
-import { mockGetCurrentUser200 } from '../../utils/apolloUtils'
 import { PageHeading } from './PageHeading'
 
 describe('Page Heading', () => {

@@ -38,13 +38,9 @@ export const Header = ({
             return
         }
 
-        logout()
-            .then(() => {
-                console.log('Logout Success')
-            })
-            .catch(() => {
-                setAlert && setAlert(true)
-            })
+        logout().catch(() => {
+            setAlert && setAlert(true)
+        })
         history.push('/auth')
     }
 

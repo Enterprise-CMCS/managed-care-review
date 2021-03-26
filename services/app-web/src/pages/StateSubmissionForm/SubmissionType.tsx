@@ -70,7 +70,7 @@ export const SubmissionType = ({
         shouldValidate && Boolean(error)
 
     const SubmissionTypeInitialValues: SubmissionTypeFormValues = {
-        programId: programs[0].id, // TODO: change this to be the program selected on the tab
+        programId: programs[0]?.id, // TODO: change this to be the program selected on the tab
         submissionDescription: '',
         submissionType: '',
     }
@@ -84,6 +84,7 @@ export const SubmissionType = ({
                 const result = await createDraftSubmission({
                     variables: { input: values },
                 })
+
                 const draftSubmission: DraftSubmission =
                     result.data.createDraftSubmission.draftSubmission
 

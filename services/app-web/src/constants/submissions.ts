@@ -1,4 +1,4 @@
-import {SubmissionType} from '../common-code/domain-models/DraftSubmissionType'
+import { SubmissionType } from '../common-code/domain-models/DraftSubmissionType'
 /*
     Maps submission field enums to constant strings for UI
     These are usually domain constants that are not captured in a database field and only in types.
@@ -6,7 +6,7 @@ import {SubmissionType} from '../common-code/domain-models/DraftSubmissionType'
 */
 const SubmissionTypeRecord: Record<SubmissionType, string> = {
     CONTRACT_ONLY: 'Contract action only',
-    CONTRACT_AND_RATES: 'Contract action and rate certification'
+    CONTRACT_AND_RATES: 'Contract action and rate certification',
 }
 
-export {SubmissionTypeRecord}
+export { SubmissionTypeRecord }

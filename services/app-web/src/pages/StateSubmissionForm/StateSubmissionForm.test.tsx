@@ -9,7 +9,10 @@ describe('StateSubmissionForm', () => {
     it('loads Submission type step for /submissions/new', async () => {
         renderWithProviders(<StateSubmissionForm />, {
             apolloProvider: {
-                mocks: [getCurrentUserMock({ statusCode: 200 })],
+                mocks: [
+                    getCurrentUserMock({ statusCode: 200 }),
+                    getCurrentUserMock({ statusCode: 200 }),
+                ],
             },
             routerProvider: { route: '/submissions/new' },
         })
@@ -21,7 +24,7 @@ describe('StateSubmissionForm', () => {
         )
     })
 
-    it('loads Submission type step for /submissions/:id/submission-type', async () => {
+    it('loads Submission type step for /submissions/:id/type', async () => {
         renderWithProviders(<StateSubmissionForm />, {
             apolloProvider: {
                 mocks: [getCurrentUserMock({ statusCode: 200 })],
