@@ -1,6 +1,7 @@
 import { ApolloServer} from 'apollo-server-lambda'
 import { APIGatewayProxyHandler, APIGatewayProxyEvent, Context as LambdaContext} from 'aws-lambda'
 import { newDeployedStore, newLocalStore} from '../store/index'
+import { GraphQLDate } from 'graphql-scalars';
 
 import {
     createDraftSubmissionResolver,
@@ -39,6 +40,7 @@ const userFetcher =
 
 // Resolvers are defined and tested in the resolvers package
 const resolvers: Resolvers = {
+    Date: GraphQLDate,
     Query: {
         getCurrentUser: getCurrentUserResolver(userFetcher),
     },

@@ -13,6 +13,8 @@ type Mutation {
     ): CreateDraftSubmissionPayload
 }
 
+scalar Date
+
 type User {
     role: String!
     email: String!
@@ -39,7 +41,7 @@ enum SubmissionType {
 type DraftSubmission {
     id: ID!
     name: String!
-    createdAt: String!
+    createdAt: Date!
     program: Program!
     submissionType: SubmissionType!
     submissionDescription: String!
