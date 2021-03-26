@@ -1,4 +1,5 @@
-const Routes = {
+
+const RoutesRecord: Record<string, string> =  {
     ROOT: '/',
     AUTH: '/auth',
     DASHBOARD: '/dashboard',
@@ -17,4 +18,7 @@ const PageTitlesRecord: Record<string, string> = {
     DASHBOARD: 'Managed Care Dashboard',
 }
 
-export { PageTitlesRecord, Routes }
+const getRouteByPath = (path: string): string => Object.keys(RoutesRecord).find(key => RoutesRecord[key] === path) || 'UNKNOWN';
+
+
+export {PageTitlesRecord, RoutesRecord, getRouteByPath }

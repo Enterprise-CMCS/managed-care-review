@@ -8,7 +8,7 @@ import styles from './Header.module.scss'
 import { useHistory } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { AuthModeType } from '../../common-code/domain-models'
-
+import { PageTitlesRecord, RoutesRecord } from '../../constants/routes'
 import { Logo } from '../Logo/Logo'
 import { PageHeading } from './PageHeading'
 import { User } from '../../gen/gqlClient'
@@ -18,7 +18,6 @@ export type HeaderProps = {
     activePage?: string
     setAlert?: React.Dispatch<boolean>
 }
-
 /**
  * CMS Header
  */
@@ -29,6 +28,21 @@ export const Header = ({
 }: HeaderProps): React.ReactElement => {
     const { logout, loggedInUser, loginStatus } = useAuth()
     const history = useHistory()
+    const pathname = history.location.pathname
+
+    const shouldDisplaySubmissionName = (path: string) => {
+        return [
+            RoutesRecord.SUBMISSIONS_TYPE,
+            RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
+            RoutesRecord.SUBMISSIONS_RATE_DETAILS,
+            RoutesRecord.SUBMISSIONS_DOCUMENTS,
+            RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT,
+        ].includes(path)
+    }
+
+    const pageHeading = shouldDisplaySubmissionName(pathname)
+        ? 'submisioon-123-123'
+        : PageTitlesRecord.DASHBOARD
 
     const handleLogout = (
         e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -102,7 +116,7 @@ export const Header = ({
                 </GridContainer>
             </div>
             <PageHeading
-                heading={activePage}
+                heading={pageHeading}
                 isLoading={loginStatus === 'LOADING'}
                 loggedInUser={loggedInUser}
             />

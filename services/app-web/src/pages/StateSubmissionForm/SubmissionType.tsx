@@ -15,7 +15,7 @@ import {
     Textarea,
 } from '@trussworks/react-uswds'
 import { Field, Formik, FormikHelpers, FormikErrors } from 'formik'
-import { NavLink, useHistory, useLocation } from 'react-router-dom'
+import { NavLink, useHistory } from 'react-router-dom'
 import { useMutation } from '@apollo/client'
 
 import styles from './StateSubmissionForm.module.scss'
@@ -54,7 +54,7 @@ export const SubmissionType = ({
     const { loggedInUser: { state: { programs = [] } = {} } = {} } = useAuth()
 
     const history = useHistory()
-    const location = useLocation()
+    const location = history.location
 
     const [createDraftSubmission, { error }] = useMutation(
         CreateDraftSubmissionDocument
