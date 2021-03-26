@@ -8,7 +8,7 @@ import {
     getCurrentUserResolver,
     userResolver,
 } from '../resolvers'
-
+import { CognitoUserType } from '../../app-web/src/common-code/domain-models'
 import { Resolvers } from '../gen/gqlServer'
 import typeDefs from '../../app-graphql/src/schema.graphql'
 import {
@@ -50,37 +50,37 @@ const resolvers: Resolvers = {
     User: userResolver,
 }
 
+export interface Context {
+    event: APIGatewayProxyEvent,
+    user: CognitoUserType
+}
+const context = async ({event}: { event: APIGatewayProxyEvent, context: LambdaContext }): Promise<Context | undefined>  => {
+    const authProvider = event.requestContext.identity.cognitoAuthenticationProvider
+    if (authProvider) {
+        try {
+            const userResult = await userFetcher(authProvider)
+
+        if (!userResult.isErr()) {
+            return {
+                event,
+                user: userResult.value
+            }
+        }
+        } catch (err) {
+            throw new Error('Log: placing user in gql context failed')
+        }
+    } else {
+        throw new Error('Log: no AuthProvider')
+    }
+}
+
 const server = new ApolloServer({
     typeDefs,
     resolvers,
     playground: {
         endpoint: '/local/graphql',
     },
-    context: async ({event, context}: { event: APIGatewayProxyEvent, context: LambdaContext }) => {
-        const authProvider = event.requestContext.identity.cognitoAuthenticationProvider
-        if (authProvider) {
-            try {
-                const userResult = await userFetcher(authProvider)
-    
-            if (!userResult.isErr()) {
-                return {
-                    headers: event.headers,
-                    functionName: context.functionName,
-                    event,
-                    user: userResult.value
-                }
-            }
-            }catch (err) {
-                console.log('Log: placing user in gql context failed')
-            }
-        }
-
-        return {
-            headers: event.headers,
-            functionName: context.functionName,
-            event,
-        }
-    },
+    context
 })
 
 function localAuthMiddleware(
