@@ -5,37 +5,26 @@ import {
 } from '../store/index'
 
 import statePrograms from '../data/statePrograms.json'
-import {
-    Resolver,
-    ResolverTypeWrapper,
-    CreateDraftSubmissionInput,
-    CreateDraftSubmissionPayload,
-    SubmissionType,
-} from '../gen/gqlServer'
+import { MutationResolvers, SubmissionType, State } from '../gen/gqlServer'
 
 // TODO: potential refactor: pull out database interactions into /datasources createDraftSubmission as per apollo server docs
 export function createDraftSubmissionResolver(
     store: Store
-): Resolver<
-    ResolverTypeWrapper<CreateDraftSubmissionPayload>,
-    Record<string, unknown>,
-    any, // eslint-disable-line  @typescript-eslint/no-explicit-any
-    { input: CreateDraftSubmissionInput }
-> {
-    return async (_parent, { input }) => {
-        const stateFromCurrentUser = statePrograms.states[0]
-        const program = stateFromCurrentUser.programs.find(
-            (program) => program.id == input.programId
-        )
+): MutationResolvers['createDraftSubmission'] {
+    return async (_parent, { input }, context) => {
+        const stateFromCurrentUser: State['code'] = context.user.state_code
+        const program = statePrograms.states
+            .find((state) => state.code === stateFromCurrentUser)
+            ?.programs.find((program) => program.id == input.programId)
 
         if (program === undefined) {
             throw new Error(
-                `The program id ${input.programId} does not exist in state ${stateFromCurrentUser.name}`
+                `The program id ${input.programId} does not exist in state ${stateFromCurrentUser}`
             )
         }
 
         const dbDraftSubmission: InsertDraftSubmissionArgsType = {
-            stateCode: stateFromCurrentUser.code,
+            stateCode: stateFromCurrentUser,
             programID: input.programId,
             submissionDescription: input.submissionDescription,
             submissionType: input.submissionType as InsertDraftSubmissionArgsType['submissionType'],
@@ -50,13 +39,17 @@ export function createDraftSubmissionResolver(
                     `Issue creating a draft submission of type ${draftSubResult.code}. Message: ${draftSubResult.message}`
                 )
             } else {
+                const padNumber = draftSubResult.stateNumber
+                    .toString()
+                    .padStart(4, '0')
                 const draftSubmission = {
                     id: draftSubResult.id,
                     createdAt: draftSubResult.createdAt,
                     submissionDescription: draftSubResult.submissionDescription,
-                    name: `${draftSubResult.stateCode}-${program.name}-${draftSubResult.stateNumber}`,
+                    name: `${draftSubResult.stateCode}-${program.name}-${padNumber}`,
                     submissionType: draftSubResult.submissionType as SubmissionType,
                     program,
+                    stateCode: draftSubResult.stateCode,
                 }
                 return {
                     draftSubmission,

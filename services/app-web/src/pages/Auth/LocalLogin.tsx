@@ -45,8 +45,12 @@ export function LocalLogin(): React.ReactElement {
     async function login(user: CognitoUserType) {
         loginLocalUser(user)
 
-        await checkAuth()
-        history.push('/dashboard')
+        try {
+            await checkAuth()
+            history.push('/dashboard')
+        } catch (error) {
+            console.log('Log: Server Error')
+        }
     }
 
     return (

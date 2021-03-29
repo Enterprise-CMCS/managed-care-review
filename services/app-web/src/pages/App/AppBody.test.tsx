@@ -3,7 +3,7 @@ import { screen, waitFor } from '@testing-library/react'
 
 import { renderWithProviders, userClickSignIn } from '../../utils/jestUtils'
 import { AppBody } from './AppBody'
-import { mockGetCurrentUser200 } from '../../utils/apolloUtils'
+import { getCurrentUserMock } from '../../utils/apolloUtils'
 test('App renders without errors', () => {
     renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
     const mainElement = screen.getByRole('main')
@@ -14,11 +14,13 @@ test.todo(
     'App displays ErrorBoundary fallback component when there is JS error on page'
 )
 
-describe('Routing', () => {
+describe('App Body and routes', () => {
     describe('/', () => {
         it('display dashboard when logged in', async () => {
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
-                apolloProvider: { mocks: [mockGetCurrentUser200] },
+                apolloProvider: {
+                    mocks: [getCurrentUserMock({ statusCode: 200 })],
+                },
             })
 
             expect(
@@ -136,7 +138,9 @@ describe('Routing', () => {
 
         it('redirects to 404 error page when logged in', async () => {
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
-                apolloProvider: { mocks: [mockGetCurrentUser200] },
+                apolloProvider: {
+                    mocks: [getCurrentUserMock({ statusCode: 200 })],
+                },
                 routerProvider: { route: '/not-a-real-place' },
             })
 

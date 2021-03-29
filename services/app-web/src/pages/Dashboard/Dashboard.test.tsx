@@ -50,9 +50,9 @@ describe('Dashboard', () => {
                 name: 'Virginia',
                 code: 'VA',
                 programs: [
-                    { name: 'Program 1' },
-                    { name: 'Program 2' },
-                    { name: 'Program 3' },
+                    { id: 'first', name: 'Program 1' },
+                    { id: 'second', name: 'Program 2' },
+                    { id: 'third', name: 'Program 3' },
                 ],
             },
         }

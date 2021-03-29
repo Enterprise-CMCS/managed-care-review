@@ -4,10 +4,7 @@ import userEvent from '@testing-library/user-event'
 
 import * as CognitoAuthApi from '../../pages/Auth/cognitoAuth'
 import { renderWithProviders } from '../../utils/jestUtils'
-import {
-    mockGetCurrentUser200,
-    mockGetCurrentUser403,
-} from '../../utils/apolloUtils'
+import { getCurrentUserMock } from '../../utils/apolloUtils'
 import { Header } from './Header'
 
 describe('Header', () => {
@@ -66,7 +63,9 @@ describe('Header', () => {
     describe('when logged in', () => {
         it('displays Medicaid logo image link that redirects to /dashboard', () => {
             renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
-                apolloProvider: { mocks: [mockGetCurrentUser200] },
+                apolloProvider: {
+                    mocks: [getCurrentUserMock({ statusCode: 200 })],
+                },
             })
             const logoImage = screen.getByRole('img')
             const logoLink = screen.getByRole('link', {
@@ -80,7 +79,9 @@ describe('Header', () => {
         it('displays heading with users state', async () => {
             // TODO: make a loop that goes through all states and checks icons/headings
             renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
-                apolloProvider: { mocks: [mockGetCurrentUser200] },
+                apolloProvider: {
+                    mocks: [getCurrentUserMock({ statusCode: 200 })],
+                },
             })
             await waitFor(() =>
                 expect(screen.getByRole('heading')).toHaveTextContent(
@@ -93,7 +94,9 @@ describe('Header', () => {
             renderWithProviders(
                 <Header authMode={'AWS_COGNITO'} activePage={'Dashboard'} />,
                 {
-                    apolloProvider: { mocks: [mockGetCurrentUser200] },
+                    apolloProvider: {
+                        mocks: [getCurrentUserMock({ statusCode: 200 })],
+                    },
                 }
             )
             await waitFor(() =>
@@ -105,7 +108,9 @@ describe('Header', () => {
 
         it('displays sign out button', async () => {
             renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
-                apolloProvider: { mocks: [mockGetCurrentUser200] },
+                apolloProvider: {
+                    mocks: [getCurrentUserMock({ statusCode: 200 })],
+                },
             })
 
             await waitFor(() => {
@@ -123,7 +128,10 @@ describe('Header', () => {
 
             renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
-                    mocks: [mockGetCurrentUser200, mockGetCurrentUser403],
+                    mocks: [
+                        getCurrentUserMock({ statusCode: 200 }),
+                        getCurrentUserMock({ statusCode: 403 }),
+                    ],
                 },
             })
 
@@ -148,7 +156,10 @@ describe('Header', () => {
                 <Header authMode={'AWS_COGNITO'} setAlert={mockAlert} />,
                 {
                     apolloProvider: {
-                        mocks: [mockGetCurrentUser200, mockGetCurrentUser403],
+                        mocks: [
+                            getCurrentUserMock({ statusCode: 200 }),
+                            getCurrentUserMock({ statusCode: 403 }),
+                        ],
                     },
                 }
             )
@@ -173,7 +184,10 @@ describe('Header', () => {
 
             renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
-                    mocks: [mockGetCurrentUser200, mockGetCurrentUser403],
+                    mocks: [
+                        getCurrentUserMock({ statusCode: 200 }),
+                        getCurrentUserMock({ statusCode: 403 }),
+                    ],
                 },
             })
 

@@ -1,4 +1,4 @@
-import { ApolloServer, Config } from 'apollo-server-lambda'
+import { ApolloServer } from 'apollo-server-lambda'
 import { getTestStore } from '../testHelpers/storeHelpers'
 
 import typeDefs from '../../app-graphql/src/schema.graphql'
@@ -8,13 +8,13 @@ import {
     createDraftSubmissionResolver,
 } from '../resolvers'
 import { userResolver } from '../resolvers/userResolver'
-import { userFromLocalAuthProvider } from '../authn'
+import {Context} from '../handlers/apollo_gql'
 
 const store = getTestStore()
 
 const testResolvers: Resolvers = {
     Query: {
-        getCurrentUser: getCurrentUserResolver(userFromLocalAuthProvider),
+        getCurrentUser: getCurrentUserResolver(),
     },
     User: userResolver,
     Mutation: {
@@ -22,22 +22,13 @@ const testResolvers: Resolvers = {
     },
 }
 
-const defaultContext = (context: Config['context']) => {
-    const event = {
-        requestContext: {
-            identity: {
-                cognitoAuthenticationProvider:
-                    '{ "name": "james brown", "state_code": "FL", "role": "STATE_USER", "email": "james@example.com" }',
-            },
-        },
-    }
-
+const defaultContext = (): Context =>  { 
     return {
-        event,
-        context,
-    }
+        user: { name: "james brown", state_code: "FL", role: "STATE_USER", email: "james@example.com" }
+        }
 }
-const constructTestServer = ({ context = defaultContext } = {}): ApolloServer =>
+
+const constructTestServer = ({ context } = {context: defaultContext()}): ApolloServer =>
     new ApolloServer({
         typeDefs,
         resolvers: testResolvers,

@@ -10,7 +10,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { AuthModeType } from '../../common-code/domain-models'
 
 import { Logo } from '../Logo/Logo'
-import { StateIcon } from './StateIcon'
+import { PageHeading } from './PageHeading'
 import { User } from '../../gen/gqlClient'
 
 export type HeaderProps = {
@@ -38,13 +38,9 @@ export const Header = ({
             return
         }
 
-        logout()
-            .then(() => {
-                console.log('Logout Success')
-            })
-            .catch(() => {
-                setAlert && setAlert(true)
-            })
+        logout().catch(() => {
+            setAlert && setAlert(true)
+        })
         history.push('/auth')
     }
 
@@ -90,42 +86,6 @@ export const Header = ({
             : LoggedOutUserInfo(authMode)
     }
 
-    const PageHeading = (): React.ReactElement => {
-        return loggedInUser ? (
-            <div className={styles.dashboardHeading}>
-                <GridContainer>
-                    <Grid row className="flex-align-center">
-                        <div>
-                            <StateIcon code={loggedInUser.state.code} />
-                        </div>
-                        <h1>
-                            <span>{loggedInUser.state.name}</span>
-                            <span className="font-heading-lg text-light">
-                                {activePage}
-                            </span>
-                        </h1>
-                    </Grid>
-                </GridContainer>
-            </div>
-        ) : (
-            <div className={styles.landingPageHeading}>
-                <GridContainer>
-                    <h1>
-                        {loginStatus !== 'LOADING' && (
-                            <>
-                                <span className="text-bold">MAC-MCRRS</span>
-                                <span className="font-heading-lg">
-                                    Medicaid and CHIP Managed Care Reporting and
-                                    Review System
-                                </span>
-                            </>
-                        )}
-                    </h1>
-                </GridContainer>
-            </div>
-        )
-    }
-
     return (
         <header>
             <div className={styles.banner}>
@@ -141,7 +101,11 @@ export const Header = ({
                     </Grid>
                 </GridContainer>
             </div>
-            <PageHeading />
+            <PageHeading
+                heading={activePage}
+                isLoading={loginStatus === 'LOADING'}
+                loggedInUser={loggedInUser}
+            />
         </header>
     )
 }

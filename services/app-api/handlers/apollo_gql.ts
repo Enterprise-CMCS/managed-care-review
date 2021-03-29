@@ -1,14 +1,18 @@
-// apollo_gql.js
 import { ApolloServer } from 'apollo-server-lambda'
-import { APIGatewayProxyHandler } from 'aws-lambda'
-import { newDeployedStore, newLocalStore} from '../store/index'
+import {
+    APIGatewayProxyHandler,
+    APIGatewayProxyEvent,
+    Context as LambdaContext,
+} from 'aws-lambda'
+import { newDeployedStore, newLocalStore } from '../store/index'
+import { GraphQLDate } from 'graphql-scalars'
 
 import {
     createDraftSubmissionResolver,
     getCurrentUserResolver,
     userResolver,
 } from '../resolvers'
-
+import { CognitoUserType } from '../../app-web/src/common-code/domain-models'
 import { Resolvers } from '../gen/gqlServer'
 import typeDefs from '../../app-graphql/src/schema.graphql'
 import {
@@ -18,38 +22,64 @@ import {
 
 import { assertIsAuthMode } from '../../app-web/src/common-code/domain-models'
 
-const getDynamoStore = () => {
-    const dynamoConnection = process.env.DYNAMO_CONNECTION
-if (dynamoConnection === 'USE_AWS') {
-    return newDeployedStore(process.env.AWS_DEFAULT_REGION || 'no region')
-} else {
-    return newLocalStore(process.env.DYNAMO_CONNECTION || 'no db url')
-}
-}
-
 // Configuration:
 const authMode = process.env.REACT_APP_AUTH_MODE
 assertIsAuthMode(authMode)
+
+const getDynamoStore = () => {
+    const dynamoConnection = process.env.DYNAMO_CONNECTION
+    if (dynamoConnection === 'USE_AWS') {
+        return newDeployedStore(process.env.AWS_DEFAULT_REGION || 'no region')
+    } else {
+        return newLocalStore(process.env.DYNAMO_CONNECTION || 'no db url')
+    }
+}
 const store = getDynamoStore()
-
-
 
 const userFetcher =
     authMode === 'LOCAL'
         ? userFromLocalAuthProvider
         : userFromCognitoAuthProvider
-
 // End Configuration
 
-// Our resolvers are defined and tested in the resolvers package
+// Resolvers are defined and tested in the resolvers package
 const resolvers: Resolvers = {
+    Date: GraphQLDate,
     Query: {
-        getCurrentUser: getCurrentUserResolver(userFetcher),
+        getCurrentUser: getCurrentUserResolver(),
     },
     Mutation: {
         createDraftSubmission: createDraftSubmissionResolver(store),
     },
     User: userResolver,
+}
+
+export interface Context {
+    user: CognitoUserType
+}
+const context = async ({
+    event,
+}: {
+    event: APIGatewayProxyEvent
+    context: LambdaContext
+}): Promise<Context | undefined> => {
+    const authProvider =
+        event.requestContext.identity.cognitoAuthenticationProvider
+    if (authProvider) {
+        try {
+            const userResult = await userFetcher(authProvider)
+
+            if (!userResult.isErr()) {
+                return {
+                    user: userResult.value,
+                }
+            }
+        } catch (err) {
+            throw new Error('Log: placing user in gql context failed')
+        }
+    } else {
+        throw new Error('Log: no AuthProvider')
+    }
 }
 
 const server = new ApolloServer({
@@ -58,14 +88,7 @@ const server = new ApolloServer({
     playground: {
         endpoint: '/local/graphql',
     },
-    context: ({ event, context }) => {
-        return {
-            headers: event.headers,
-            functionName: context.functionName,
-            event,
-            context,
-        }
-    },
+    context,
 })
 
 function localAuthMiddleware(
