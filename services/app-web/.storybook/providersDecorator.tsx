@@ -4,6 +4,7 @@ import { MockedProvider, MockedProviderProps } from '@apollo/client/testing'
 import { Story } from '@storybook/react'
 
 import { AuthProvider, AuthProviderProps } from '../src/contexts/AuthContext'
+import { PageProvider } from '../src/contexts/PageContext'
 
 const ProvidersDecorator = (
     Story: Story,
@@ -18,7 +19,9 @@ const ProvidersDecorator = (
     <MockedProvider {...apolloProvider}>
         <BrowserRouter>
             <AuthProvider authMode="LOCAL" {...authProvider}>
-                <Story />
+                <PageProvider>
+                    <Story />
+                </PageProvider>
             </AuthProvider>
         </BrowserRouter>
     </MockedProvider>

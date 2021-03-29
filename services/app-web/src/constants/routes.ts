@@ -29,7 +29,7 @@ const PageHeadingsRecord: Record<string, string> = {
     SUBMISSIONS_NEW: 'New submission',
 }
 
-// Page titles used in <title>.  Dynamic titles may override in page specific parent component.
+// Page titles used in <title>. 
 const PageTitlesRecord: Record<RouteT,string> = {
     ROOT: 'Home - Managed Care',
     AUTH: 'Login - Managed Care',

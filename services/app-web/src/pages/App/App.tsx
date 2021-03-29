@@ -10,6 +10,7 @@ import {
 import { AppBody } from './AppBody'
 import { logEvent } from '../../log_event'
 import { AuthProvider } from '../../contexts/AuthContext'
+import { PageProvider } from '../../contexts/PageContext'
 import { GenericError } from '../Errors/GenericError'
 import { AuthModeType } from '../../common-code/domain-models'
 
@@ -37,7 +38,9 @@ function App({
             <BrowserRouter>
                 <ApolloProvider client={apolloClient}>
                     <AuthProvider authMode={authMode}>
-                        <AppBody authMode={authMode} />
+                        <PageProvider>
+                            <AppBody authMode={authMode} />
+                        </PageProvider>
                     </AuthProvider>
                 </ApolloProvider>
             </BrowserRouter>

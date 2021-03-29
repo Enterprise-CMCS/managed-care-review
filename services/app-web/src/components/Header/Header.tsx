@@ -7,15 +7,15 @@ import medicaidLogo from '../../assets/images/medicaidgovlogo.png'
 import styles from './Header.module.scss'
 import { useHistory } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { usePage } from '../../contexts/PageContext'
 import { AuthModeType } from '../../common-code/domain-models'
-import { PageTitlesRecord, RoutesRecord } from '../../constants/routes'
 import { Logo } from '../Logo/Logo'
 import { PageHeading } from './PageHeading'
 import { User } from '../../gen/gqlClient'
+import { PageHeadingsRecord, getRouteName } from '../../constants/routes'
 
 export type HeaderProps = {
     authMode: AuthModeType
-    activePage?: string
     setAlert?: React.Dispatch<boolean>
 }
 /**
@@ -23,26 +23,27 @@ export type HeaderProps = {
  */
 export const Header = ({
     authMode,
-    activePage = 'Managed Care Dashboard',
     setAlert,
 }: HeaderProps): React.ReactElement => {
     const { logout, loggedInUser, loginStatus } = useAuth()
     const history = useHistory()
-    const pathname = history.location.pathname
+    const routeName = getRouteName(history.location.pathname)
+    const { heading } = usePage()
 
-    const shouldDisplaySubmissionName = (path: string) => {
-        return [
-            RoutesRecord.SUBMISSIONS_TYPE,
-            RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS,
-            RoutesRecord.SUBMISSIONS_RATE_DETAILS,
-            RoutesRecord.SUBMISSIONS_DOCUMENTS,
-            RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT,
-        ].includes(path)
-    }
+    /*
+        Dynamically calculate heading in priority order
+        1. If there a constant heading set up, use that
+        2. Otherwise, use whatever is in the PageContext
+        3. Fallback in case of new route
+    */
 
-    const pageHeading = shouldDisplaySubmissionName(pathname)
-        ? 'submisioon-123-123'
-        : PageTitlesRecord.DASHBOARD
+    const pageHeading =
+        routeName !== 'UNKNOWN_ROUTE' &&
+        Object.prototype.hasOwnProperty.call(PageHeadingsRecord, routeName)
+            ? PageHeadingsRecord[routeName]
+            : heading
+            ? heading
+            : 'Managed Care Review' // fallback for safety
 
     const handleLogout = (
         e: React.MouseEvent<HTMLButtonElement, MouseEvent>
