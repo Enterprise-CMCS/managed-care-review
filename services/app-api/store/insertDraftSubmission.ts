@@ -3,7 +3,7 @@ import { DataMapper } from '@aws/dynamodb-data-mapper'
 import { v4 as uuidv4 } from 'uuid'
 
 import { StoreError, isStoreError } from './storeError'
-import { DraftSubmissionStoreType } from './draftSubmissionStoreType'
+import { DraftSubmissionStoreType, isDynamoError } from './dynamoTypes'
 import {
     DraftSubmissionType,
     SubmissionType,
@@ -14,17 +14,6 @@ export type InsertDraftSubmissionArgsType = {
     programID: string
     submissionType: SubmissionType
     submissionDescription: string
-}
-
-type DynamoError = {
-    code: string
-}
-
-function isDynamoError(err: unknown): err is DynamoError {
-    if (err && typeof err == 'object' && 'code' in err) {
-        return true
-    }
-    return false
 }
 
 // getNextStateNumber returns the next "number" for a submission for a given state. See comments below for more.

@@ -3,17 +3,24 @@ import {
     InsertDraftSubmissionArgsType,
     insertDraftSubmission,
 } from './insertDraftSubmission'
-import { findDraftSubmission } from './findDraftSubmission'
+import {
+    findDraftSubmission,
+    findDraftSubmissionByStateNumber,
+} from './findDraftSubmission'
 import { StoreError } from './storeError'
 import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
-import { DraftSubmission } from '../gen/gqlServer'
 
 export type Store = {
     insertDraftSubmission: (
         args: InsertDraftSubmissionArgsType
     ) => Promise<DraftSubmissionType | StoreError>
+
     findDraftSubmission: (
         draftUUID: string
+    ) => Promise<DraftSubmissionType | undefined | StoreError>
+    findDraftSubmissionByStateNumber: (
+        stateCoder: string,
+        stateNumber: number
     ) => Promise<DraftSubmissionType | undefined | StoreError>
 }
 
@@ -26,6 +33,8 @@ export function storeWithDynamoConfig(
         insertDraftSubmission: (args) => insertDraftSubmission(conn, args),
         findDraftSubmission: (draftUUID) =>
             findDraftSubmission(conn, draftUUID),
+        findDraftSubmissionByStateNumber: (stateCode, stateNumber) =>
+            findDraftSubmissionByStateNumber(conn, stateCode, stateNumber),
     }
 }
 
