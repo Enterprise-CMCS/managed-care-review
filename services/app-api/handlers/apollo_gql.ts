@@ -14,6 +14,7 @@ import {
 
 import { newDeployedStore, newLocalStore } from '../store/index'
 import {
+    showDraftSubmissionResolver,
     createDraftSubmissionResolver,
     getCurrentUserResolver,
     userResolver,
@@ -49,6 +50,7 @@ const resolvers: Resolvers = {
     Date: GraphQLDate,
     Query: {
         getCurrentUser: getCurrentUserResolver(),
+        showDraftSubmission: showDraftSubmissionResolver(store),
     },
     Mutation: {
         createDraftSubmission: createDraftSubmissionResolver(store),

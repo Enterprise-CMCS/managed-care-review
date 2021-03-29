@@ -6,15 +6,17 @@ import { Resolvers } from '../gen/gqlServer'
 import {
     getCurrentUserResolver,
     createDraftSubmissionResolver,
+    showDraftSubmissionResolver,
 } from '../resolvers'
 import { userResolver } from '../resolvers/userResolver'
-import {Context} from '../handlers/apollo_gql'
+import { Context } from '../handlers/apollo_gql'
 
 const store = getTestStore()
 
 const testResolvers: Resolvers = {
     Query: {
         getCurrentUser: getCurrentUserResolver(),
+        showDraftSubmission: showDraftSubmissionResolver(store),
     },
     User: userResolver,
     Mutation: {
@@ -22,13 +24,20 @@ const testResolvers: Resolvers = {
     },
 }
 
-const defaultContext = (): Context =>  { 
+const defaultContext = (): Context => {
     return {
-        user: { name: "james brown", state_code: "FL", role: "STATE_USER", email: "james@example.com" }
-        }
+        user: {
+            name: 'james brown',
+            state_code: 'FL',
+            role: 'STATE_USER',
+            email: 'james@example.com',
+        },
+    }
 }
 
-const constructTestServer = ({ context } = {context: defaultContext()}): ApolloServer =>
+const constructTestServer = (
+    { context } = { context: defaultContext() }
+): ApolloServer =>
     new ApolloServer({
         typeDefs,
         resolvers: testResolvers,

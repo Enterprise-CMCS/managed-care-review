@@ -5,12 +5,33 @@ schema {
 
 type Query {
     getCurrentUser: User!
+    showDraftSubmission(
+        input: ShowDraftSubmissionInput!
+    ): ShowDraftSubmissionPayload
 }
 
 type Mutation {
     createDraftSubmission(
         input: CreateDraftSubmissionInput!
     ): CreateDraftSubmissionPayload
+}
+
+input CreateDraftSubmissionInput {
+    programId: ID!
+    submissionType: SubmissionType!
+    submissionDescription: String!
+}
+
+type CreateDraftSubmissionPayload {
+    draftSubmission: DraftSubmission!
+}
+
+input ShowDraftSubmissionInput {
+    submissionID: ID!
+}
+
+type ShowDraftSubmissionPayload {
+    draftSubmission: DraftSubmission
 }
 
 scalar Date
@@ -46,14 +67,4 @@ type DraftSubmission {
     submissionType: SubmissionType!
     submissionDescription: String!
     stateCode: String!
-}
-
-input CreateDraftSubmissionInput {
-    programId: ID!
-    submissionType: SubmissionType!
-    submissionDescription: String!
-}
-
-type CreateDraftSubmissionPayload {
-    draftSubmission: DraftSubmission
 }
