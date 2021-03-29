@@ -1,6 +1,4 @@
-import { v4 as uuidv4 } from 'uuid'
-
-import { StoreError, isStoreError } from './storeError'
+import { isStoreError } from './storeError'
 import { getTestStore } from '../testHelpers/storeHelpers'
 import { storeWithDynamoConfig } from './store'
 
@@ -8,15 +6,11 @@ describe('findDraftSubmission', () => {
     it('returns undefined if nothing is found with that ID', async () => {
         const store = getTestStore()
 
-        try {
-            const findResult = await store.findDraftSubmission(
-                '4ef98660-34d6-4656-966b-db59f3003cea'
-            )
+        const findResult = await store.findDraftSubmission(
+            '4ef98660-34d6-4656-966b-db59f3003cea'
+        )
 
-            expect(findResult).toBe(undefined)
-        } catch (e) {
-            throw e
-        }
+        expect(findResult).toBe(undefined)
     })
 
     it('returns a submission if it exists', async () => {
@@ -68,19 +62,15 @@ describe('findDraftSubmission', () => {
 
         const store = storeWithDynamoConfig(config)
 
-        try {
-            const findResult = await store.findDraftSubmission(
-                '4ef98660-34d6-4656-966b-db59f3003cea'
-            )
+        const findResult = await store.findDraftSubmission(
+            '4ef98660-34d6-4656-966b-db59f3003cea'
+        )
 
-            if (!isStoreError(findResult)) {
-                throw new Error('We Should not have been able to connect')
-            }
-            const err = findResult
-            expect(err.code).toBe('CONNECTION_ERROR')
-        } catch (e) {
-            throw e
+        if (!isStoreError(findResult)) {
+            throw new Error('We Should not have been able to connect')
         }
+        const err = findResult
+        expect(err.code).toBe('CONNECTION_ERROR')
     })
 })
 
@@ -88,16 +78,12 @@ describe('findDraftSubmissionByStateNumber', () => {
     it('returns undefined if nothing is found with that ID', async () => {
         const store = getTestStore()
 
-        try {
-            const findResult = await store.findDraftSubmissionByStateNumber(
-                'CA',
-                87364
-            )
+        const findResult = await store.findDraftSubmissionByStateNumber(
+            'CA',
+            87364
+        )
 
-            expect(findResult).toBe(undefined)
-        } catch (e) {
-            throw e
-        }
+        expect(findResult).toBe(undefined)
     })
 
     it('returns a submission if it exists', async () => {
@@ -152,19 +138,15 @@ describe('findDraftSubmissionByStateNumber', () => {
 
         const store = storeWithDynamoConfig(config)
 
-        try {
-            const findResult = await store.findDraftSubmissionByStateNumber(
-                'MI',
-                2323
-            )
+        const findResult = await store.findDraftSubmissionByStateNumber(
+            'MI',
+            2323
+        )
 
-            if (!isStoreError(findResult)) {
-                throw new Error('We Should not have been able to connect')
-            }
-            const err = findResult
-            expect(err.code).toBe('CONNECTION_ERROR')
-        } catch (e) {
-            throw e
+        if (!isStoreError(findResult)) {
+            throw new Error('We Should not have been able to connect')
         }
+        const err = findResult
+        expect(err.code).toBe('CONNECTION_ERROR')
     })
 })

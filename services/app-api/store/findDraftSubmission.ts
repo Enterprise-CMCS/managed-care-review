@@ -1,6 +1,5 @@
 import DynamoDB from 'aws-sdk/clients/dynamodb'
 import { DataMapper } from '@aws/dynamodb-data-mapper'
-import { v4 as uuidv4 } from 'uuid'
 
 import { StoreError } from './storeError'
 import {
@@ -9,10 +8,7 @@ import {
     isMapperError,
 } from './dynamoTypes'
 
-import {
-    DraftSubmissionType,
-    SubmissionType,
-} from '../../app-web/src/common-code/domain-models'
+import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
 
 export async function findDraftSubmission(
     conn: DynamoDB,
