@@ -26,7 +26,7 @@ import {
 } from '../../gen/gqlClient'
 import { useAuth } from '../../contexts/AuthContext'
 import { SubmissionTypeRecord } from '../../constants/submissions'
-
+import { usePage } from '../../contexts/PageContext'
 // Formik setup
 const SubmissionTypeFormSchema = Yup.object().shape({
     program: Yup.string(),
@@ -50,13 +50,14 @@ export const SubmissionType = ({
 }: SubmissionTypeProps): React.ReactElement => {
     const [showFormAlert, setShowFormAlert] = React.useState(false)
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
-
+    const { updateHeading } = usePage()
     const { loggedInUser: { state: { programs = [] } = {} } = {} } = useAuth()
 
     const history = useHistory()
     const location = history.location
+    const isNewSubmission = location.pathname === '/submissions/new'
 
-    const [createDraftSubmission, { error }] = useMutation(
+    const [createDraftSubmission, { data, error }] = useMutation(
         CreateDraftSubmissionDocument
     )
 
@@ -65,7 +66,16 @@ export const SubmissionType = ({
         console.log('Log: creating new submission failed with gql error', error)
     }
 
-    const isNewSubmission = location.pathname === '/submissions/new'
+    React.useEffect(() => {
+        const submissionName =
+            data && data.createDraftSubmission.draftSubmission.name
+        if (submissionName) {
+            console.log('in here', submissionName)
+            // get draft submission, pass in data to the appropriate page, and update heading
+            updateHeading(submissionName)
+        }
+    }, [data, updateHeading])
+
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
