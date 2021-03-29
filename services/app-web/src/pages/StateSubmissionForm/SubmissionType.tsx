@@ -66,12 +66,11 @@ export const SubmissionType = ({
         console.log('Log: creating new submission failed with gql error', error)
     }
 
+    // TODO: remove in favor of handling this at the StateSubmissionForm level
     React.useEffect(() => {
         const submissionName =
             data && data.createDraftSubmission.draftSubmission.name
         if (submissionName) {
-            console.log('in here', submissionName)
-            // get draft submission, pass in data to the appropriate page, and update heading
             updateHeading(submissionName)
         }
     }, [data, updateHeading])
