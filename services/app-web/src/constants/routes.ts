@@ -6,6 +6,7 @@ const Routes = {
     HELP_SUBMISSION_DESCRIPTION: '/help/submission-description-examples',
     SUBMISSIONS: '/submissions',
     SUBMISSIONS_NEW: '/submissions/new',
+    SUBMISSIONS_EDIT: '/submissions/:id',
     SUBMISSIONS_TYPE: '/submissions/:id/type',
     SUBMISSIONS_CONTRACT_DETAILS: '/submissions/:id/contract-details',
     SUBMISSIONS_RATE_DETAILS: '/submissions/:id/rate-details',

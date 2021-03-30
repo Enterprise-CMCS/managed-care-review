@@ -15,7 +15,7 @@ import {
     Textarea,
 } from '@trussworks/react-uswds'
 import { Field, Formik, FormikHelpers, FormikErrors } from 'formik'
-import { NavLink, useHistory, useLocation } from 'react-router-dom'
+import { NavLink, useHistory, useLocation, useParams } from 'react-router-dom'
 import { useMutation } from '@apollo/client'
 
 import styles from './StateSubmissionForm.module.scss'
@@ -42,11 +42,13 @@ export interface SubmissionTypeFormValues {
 }
 type SubmissionTypeProps = {
     showValidations?: boolean
+    initialValues?: DraftSubmission
 }
 
 type FormError = FormikErrors<SubmissionTypeFormValues>[keyof FormikErrors<SubmissionTypeFormValues>]
 export const SubmissionType = ({
     showValidations = false,
+    initialValues = undefined,
 }: SubmissionTypeProps): React.ReactElement => {
     const [showFormAlert, setShowFormAlert] = React.useState(false)
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
@@ -69,10 +71,19 @@ export const SubmissionType = ({
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
-    const SubmissionTypeInitialValues: SubmissionTypeFormValues = {
+    const submissionTypeInitialValues: SubmissionTypeFormValues = {
         programId: programs[0]?.id, // TODO: change this to be the program selected on the tab
         submissionDescription: '',
         submissionType: '',
+    }
+
+    // if we have initial values, we should set them.
+    if (initialValues) {
+        submissionTypeInitialValues.programId = initialValues.program.id
+        submissionTypeInitialValues.submissionDescription =
+            initialValues.submissionDescription
+        submissionTypeInitialValues.submissionType =
+            initialValues.submissionType
     }
 
     const handleFormSubmit = async (
@@ -109,7 +120,7 @@ export const SubmissionType = ({
 
     return (
         <Formik
-            initialValues={SubmissionTypeInitialValues}
+            initialValues={submissionTypeInitialValues}
             onSubmit={handleFormSubmit}
             validationSchema={SubmissionTypeFormSchema}
             validateOnChange={shouldValidate}
