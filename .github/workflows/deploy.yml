@@ -90,6 +90,9 @@ jobs:
       - name: set path
         run: |
           echo "PATH=$(pwd)/node_modules/.bin/:$PATH" >> $GITHUB_ENV
+      - name: GQL
+        run: yarn gqlgen
+        working-directory: ./services/app-graphql
       # - name: Unit Tests
       #   run: ./dev test --unit --run-db
       # - name: publish code coverage
