@@ -68,7 +68,8 @@ async function getNextStateNumber(
         const mapper = new DataMapper({ client: conn })
         // get all submissions for a given state in order, see the last one, add one.
         const biggestStateNumber = []
-        for await (const foo of mapper.query(
+        console.log('awaiting new number')
+        for await (const draft of mapper.query(
             DraftSubmissionStoreType,
             {
                 stateCode: stateCode,
@@ -79,7 +80,8 @@ async function getNextStateNumber(
                 scanIndexForward: false,
             }
         )) {
-            biggestStateNumber.push(foo)
+            console.log('back with a result', draft)
+            biggestStateNumber.push(draft)
             // individual items with a hash key of "foo" will be yielded as the query is performed
         }
 
@@ -132,6 +134,7 @@ export async function insertDraftSubmission(
 
     try {
         const stateNumberResult = await getNextStateNumber(conn, args.stateCode)
+        console.log('got number back', stateNumberResult)
         if (isStoreError(stateNumberResult)) {
             return stateNumberResult
         }
@@ -146,10 +149,13 @@ export async function insertDraftSubmission(
     // what do we do with these args?
     // return a DraftSubmissionType
     try {
+        console.log('awaitng PUT')
         const putResult = await mapper.put(draft)
+        console.log('got back from put')
 
         return putResult
     } catch (err) {
+        console.log('put erroir', err)
         if (isDynamoError(err)) {
             if (
                 err.code === 'UnknownEndpoint' ||
