@@ -10,10 +10,7 @@ plugins:
 custom:
   stage: ${opt:stage, self:provider.stage}
   appVersion: ${env:APP_VERSION}
-  tableName: ${env:AMENDMENTS_TABLE_NAME, cf:database-${self:custom.stage}.AmendmentsTableName}
-  tableArn: ${env:AMENDMENTS_TABLE_ARN, cf:database-${self:custom.stage}.AmendmentsTableArn}
-  atomicCounterTableName: ${env:AMENDMENTS_COUNTER_TABLE_NAME, cf:database-${self:custom.stage}.AmendmentsAtomicCounterTableName}
-  atomicCounterTableArn: ${env:AMENDMENTS_COUNTER_TABLE_ARN, cf:database-${self:custom.stage}.AmendmentsAtomicCounterTableArn}
+  draftSubmissionsTableArn: ${env:DRAFT_SUBMISSIONS_TABLE_ARN_NEVER, cf:database-${self:custom.stage}.DraftSubmissionsTableArn}
   iamPath: ${env:IAM_PATH, "/"}
   react_app_auth_mode: ${env:REACT_APP_AUTH_MODE}
   bundle:
@@ -30,8 +27,6 @@ provider:
   environment:
     stage: ${self:custom.stage}
     appVersion: ${self:custom.appVersion}
-    tableName: ${self:custom.tableName}
-    atomicCounterTableName: ${self:custom.atomicCounterTableName}
     REACT_APP_AUTH_MODE: ${self:custom.react_app_auth_mode}
 
 functions:
@@ -130,8 +125,7 @@ resources:
                     - dynamodb:UpdateItem
                     - dynamodb:DeleteItem
                   Resource:
-                    - ${self:custom.tableArn}
-                    - ${self:custom.atomicCounterTableArn}
+                    - ${self:custom.draftSubmissionsTableArn}
                 - Effect: 'Allow'
                   Action:
                     - logs:CreateLogStream

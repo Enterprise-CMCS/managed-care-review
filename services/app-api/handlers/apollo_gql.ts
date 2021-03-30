@@ -35,6 +35,11 @@ const getDynamoStore = () => {
         return newLocalStore(process.env.DYNAMO_CONNECTION || 'no db url')
     }
 }
+
+const stageName = process.env.stage
+const dbPrefix = stageName + '-'
+console.log('will prefix: ', dbPrefix)
+
 const store = getDynamoStore()
 
 const userFetcher =
