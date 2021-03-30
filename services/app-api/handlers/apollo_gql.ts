@@ -39,6 +39,7 @@ const getDynamoStore = () => {
 const stageName = process.env.stage
 const dbPrefix = stageName + '-'
 console.log('will prefix: ', dbPrefix)
+console.log('Did Prefox: ', process.env.DEBUG_DRAFT)
 
 const store = getDynamoStore()
 

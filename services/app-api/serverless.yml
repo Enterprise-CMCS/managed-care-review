@@ -27,6 +27,7 @@ provider:
   environment:
     stage: ${self:custom.stage}
     appVersion: ${self:custom.appVersion}
+    DEBUG_DRAFT: ${self:custom.${self:custom.appVersion}}
     REACT_APP_AUTH_MODE: ${self:custom.react_app_auth_mode}
 
 functions:
