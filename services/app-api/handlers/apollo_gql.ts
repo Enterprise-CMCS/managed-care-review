@@ -29,6 +29,7 @@ assertIsAuthMode(authMode)
 const getDynamoStore = () => {
     const dynamoConnection = process.env.DYNAMO_CONNECTION
     if (dynamoConnection === 'USE_AWS') {
+        console.log('Using DEPLOYED STORE: ', process.env.AWS_DEFAULT_REGION)
         return newDeployedStore(process.env.AWS_DEFAULT_REGION || 'no region')
     } else {
         return newLocalStore(process.env.DYNAMO_CONNECTION || 'no db url')
