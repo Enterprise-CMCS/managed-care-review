@@ -10,7 +10,8 @@ plugins:
 custom:
   stage: ${opt:stage, self:provider.stage}
   appVersion: ${env:APP_VERSION}
-  draftSubmissionsTableArn: ${env:DRAFT_SUBMISSIONS_TABLE_ARN_NEVER, cf:database-${self:custom.stage}.DraftSubmissionsTableArn}
+  draftSubmissionsTableArn: ${cf:database-${self:custom.stage}.DraftSubmissionsTableArn}
+  draftSubmissionsTableStreamArn: ${cf:database-${self:custom.stage}.DraftSubmissionsTableStreamArn}
   iamPath: ${env:IAM_PATH, "/"}
   react_app_auth_mode: ${env:REACT_APP_AUTH_MODE}
   bundle:
@@ -27,7 +28,7 @@ provider:
   environment:
     stage: ${self:custom.stage}
     appVersion: ${self:custom.appVersion}
-    DEBUG_DRAFT: ${self:custom.${self:custom.appVersion}}
+    DEBUG_DRAFT: ${self:custom.draftSubmissionsTableArn}
     REACT_APP_AUTH_MODE: ${self:custom.react_app_auth_mode}
 
 functions:
@@ -127,6 +128,7 @@ resources:
                     - dynamodb:DeleteItem
                   Resource:
                     - ${self:custom.draftSubmissionsTableArn}
+                    - ${self:custom.draftSubmissionsTableStreamArn}
                 - Effect: 'Allow'
                   Action:
                     - logs:CreateLogStream

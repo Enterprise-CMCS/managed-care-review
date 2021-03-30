@@ -90,6 +90,8 @@ resources:
   Outputs:
     DraftSubmissionsTableArn:
       Value: !GetAtt DraftSubmissionsTable.Arn
+    DraftSubmissionsTableStreamArn:
+      Value: !GetAtt DraftSubmissionsTable.StreamArn
     AmendmentsTableName:
       Value:
         Ref: AmendmentsTable
