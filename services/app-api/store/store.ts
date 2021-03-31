@@ -26,7 +26,7 @@ export function storeWithDynamoConfig(
 // allow configuration
 // try with the bare db commands to do a find and see if that returns quick.
 
-export function newDeployedStore(region: string, dbNamePrefix: string): Store {
+export function newDeployedStore(region: string): Store {
     const config = {
         region,
 
