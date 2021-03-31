@@ -141,8 +141,8 @@ export async function insertDraftSubmission(
             Item: {
                 id: 'foo-bar',
                 stateCode: 'MN',
-                stateNuber: 1,
-                name: 'testing123',
+                stateNumber: 32,
+                programID: 'testing123',
             },
         }
 
@@ -176,6 +176,10 @@ export async function insertDraftSubmission(
         )
 
         console.log('mAPTEGO:', getResult)
+
+        const putResult = await mapper.put(draft)
+
+        console.log('and a PUT', putResult)
 
         return { code: 'CONNECTION_ERROR', message: 'please get here.' }
     } catch (err) {
