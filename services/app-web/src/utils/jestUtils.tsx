@@ -6,6 +6,8 @@ import userEvent from '@testing-library/user-event'
 
 import { AuthProvider, AuthProviderProps } from '../contexts/AuthContext'
 
+import { PageProvider } from '../contexts/PageContext'
+
 /* Render */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const renderWithProviders = (
@@ -31,7 +33,7 @@ const renderWithProviders = (
         <MockedProvider {...apolloProvider}>
             <Router history={testHistory}>
                 <AuthProvider authMode={'AWS_COGNITO'} {...authProvider}>
-                    {ui}
+                    <PageProvider>{ui}</PageProvider>
                 </AuthProvider>
             </Router>
         </MockedProvider>

@@ -91,17 +91,15 @@ describe('Header', () => {
         })
 
         it('displays heading with the current page', async () => {
-            renderWithProviders(
-                <Header authMode={'AWS_COGNITO'} activePage={'Dashboard'} />,
-                {
-                    apolloProvider: {
-                        mocks: [getCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/submissions/new' },
+                apolloProvider: {
+                    mocks: [getCurrentUserMock({ statusCode: 200 })],
+                },
+            })
             await waitFor(() =>
                 expect(screen.getByRole('heading')).toHaveTextContent(
-                    'Dashboard'
+                    'Minnesota New submission'
                 )
             )
         })
