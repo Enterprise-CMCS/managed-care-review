@@ -29,7 +29,9 @@ export function storeWithDynamoConfig(
 
 export function newDeployedStore(region: string): Store {
     console.log('DEPloEd store we doing')
-    const config = {}
+    const config = {
+        region,
+    }
 
     return storeWithDynamoConfig(config)
 }

@@ -29,6 +29,7 @@ provider:
     stage: ${self:custom.stage}
     appVersion: ${self:custom.appVersion}
     DEBUG_DRAFT: ${self:custom.draftSubmissionsTableArn}
+    DYNAMO_CONNECTION: USE_AWS
     REACT_APP_AUTH_MODE: ${self:custom.react_app_auth_mode}
 
 functions:
@@ -127,7 +128,6 @@ resources:
                     - dynamodb:UpdateItem
                     - dynamodb:DeleteItem
                   Resource:
-                    - arn:aws:dynamodb:*:*:table/wml-fix-502-draft-submissions
                     - ${self:custom.draftSubmissionsTableArn}
                     - ${self:custom.draftSubmissionsTableStreamArn}
                 - Effect: 'Allow'
