@@ -127,6 +127,7 @@ resources:
                     - dynamodb:UpdateItem
                     - dynamodb:DeleteItem
                   Resource:
+                    - arn:aws:dynamodb:*:*:table/wml-fix-502-draft-submissions
                     - ${self:custom.draftSubmissionsTableArn}
                     - ${self:custom.draftSubmissionsTableStreamArn}
                 - Effect: 'Allow'
