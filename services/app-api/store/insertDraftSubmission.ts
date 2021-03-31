@@ -136,6 +136,21 @@ export async function insertDraftSubmission(
     try {
         const docker = new DynamoDB.DocumentClient()
 
+        const putParams = {
+            TableName: 'wml-fix-502-draft-submissions',
+            Item: {
+                id: 'foo-bar',
+                stateCode: 'MN',
+                stateNuber: 1,
+                name: 'testing123',
+            },
+        }
+
+        console.log('PUTTING')
+        const putresult = await docker.put(putParams).promise()
+
+        console.log('PUT', putresult)
+
         const params = {
             TableName: 'wml-fix-502-draft-submissions',
             Key: {
