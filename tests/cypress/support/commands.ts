@@ -6,7 +6,6 @@
 // ***********************************************
 import '@testing-library/cypress/add-commands';
 
-
 const LOCAL_STORAGE_MEMORY = {};
 
 Cypress.Commands.add('saveLocalStorage', () => {
@@ -20,4 +19,3 @@ Cypress.Commands.add('restoreLocalStorage', () => {
     localStorage.setItem(key, LOCAL_STORAGE_MEMORY[key]);
   });
 });
-

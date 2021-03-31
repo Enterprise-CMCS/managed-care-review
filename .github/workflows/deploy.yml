@@ -110,7 +110,7 @@ jobs:
         jobs:
          cypress-run:
           runs-on: ubuntu-16.04
-          name: Collect artifacts
+          name: Run tests and collect artifacts
           steps:
             - uses: actions/checkout@v2
             - uses: cypress-io/github-action@v2
@@ -124,8 +124,3 @@ jobs:
               with:
                 name: cypress-videos
                 path: cypress/videos
-      - name: Store test results
-        uses: actions/upload-artifact@v2
-        with:
-          name: test_results
-          path: tests/cypress/videos
