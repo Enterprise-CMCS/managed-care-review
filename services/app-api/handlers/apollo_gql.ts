@@ -26,6 +26,8 @@ import { assertIsAuthMode } from '../../app-web/src/common-code/domain-models'
 const authMode = process.env.REACT_APP_AUTH_MODE
 assertIsAuthMode(authMode)
 
+console.log('THINKKNG THE FREAKING REGION: ', process.env.AWS_DEFAULT_REGION)
+
 const getDynamoStore = () => {
     const dynamoConnection = process.env.DYNAMO_CONNECTION
     if (dynamoConnection === 'USE_AWS') {
