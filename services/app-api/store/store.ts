@@ -28,10 +28,8 @@ export function storeWithDynamoConfig(
 
 export function newDeployedStore(region: string): Store {
     const config = {
-        region,
+        // region,
         apiVersion: '2012-08-10',
-
-        maxRetries: 1, // TODO REMOVE ME
     }
 
     return storeWithDynamoConfig(config)
