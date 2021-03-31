@@ -132,6 +132,24 @@ export async function insertDraftSubmission(
     draft.submissionDescription = args.submissionDescription
     draft.stateCode = args.stateCode
 
+    // TMP try and make a basic query
+    try {
+        var params = {
+            TableName: 'wml-fix-502-draft-submissions',
+            Key: {
+                KEY_NAME: { S: 'foo-bar' },
+            },
+            ProjectionExpression: 'ATTRIBUTE_NAME',
+        }
+
+        conn.getItem(params, (err, data) => {
+            console.log('back from get item!', err, data)
+        })
+    } catch (err) {
+        console.log('error in basic', err)
+        throw err
+    }
+
     try {
         const stateNumberResult = await getNextStateNumber(conn, args.stateCode)
         console.log('got number back', stateNumberResult)
