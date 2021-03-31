@@ -16,7 +16,7 @@ export type Store = {
 
 export function storeWithDynamoConfig(
     config: DynamoDB.ClientConfiguration,
-    tablePrefix = ''
+    tablePrefix: string,
 ): Store {
     console.log('CONFIG', config)
     const conn = new DynamoDB(config)
@@ -51,5 +51,5 @@ export function newLocalStore(dyanmoURL: string): Store {
         secretAccessKey: 'LOCAL_FAKE_SECRET',
     }
 
-    return storeWithDynamoConfig(config)
+    return storeWithDynamoConfig(config, 'local-')
 }

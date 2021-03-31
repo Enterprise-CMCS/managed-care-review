@@ -282,7 +282,7 @@ describe('insertDraftSubmission', () => {
             maxRetries: 1,
         }
 
-        const store = storeWithDynamoConfig(config)
+        const store = storeWithDynamoConfig(config, 'local-')
 
         const inputParams = {
             stateCode: 'FL',

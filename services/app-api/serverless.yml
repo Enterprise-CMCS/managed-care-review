@@ -10,10 +10,11 @@ plugins:
 custom:
   stage: ${opt:stage, self:provider.stage}
   appVersion: ${env:APP_VERSION}
-  draftSubmissionsTableArn: ${cf:database-${self:custom.stage}.DraftSubmissionsTableArn}
-  draftSubmissionsTableStreamArn: ${cf:database-${self:custom.stage}.DraftSubmissionsTableStreamArn}
+  draftSubmissionsTableArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:database-${self:custom.stage}.DraftSubmissionsTableArn}
+  draftSubmissionsTableStreamArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:database-${self:custom.stage}.DraftSubmissionsTableStreamArn}
   iamPath: ${env:IAM_PATH, "/"}
   reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
+  dynamoConnection: ${env:DYNAMO_CONNECTION}
   bundle:
     packager: yarn
 
@@ -28,7 +29,7 @@ provider:
   environment:
     stage: ${self:custom.stage}
     appVersion: ${self:custom.appVersion}
-    DYNAMO_CONNECTION: USE_AWS
+    DYNAMO_CONNECTION: ${self:custom.dynamoConnection}
     REACT_APP_AUTH_MODE: ${self:custom.reactAppAuthMode}
 
 functions:
