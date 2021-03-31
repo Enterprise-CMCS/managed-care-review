@@ -16,7 +16,7 @@ export type Store = {
 
 export function storeWithDynamoConfig(
     config: DynamoDB.ClientConfiguration,
-    tablePrefix: string = ''
+    tablePrefix = ''
 ): Store {
     console.log('CONFIG', config)
     const conn = new DynamoDB(config)
