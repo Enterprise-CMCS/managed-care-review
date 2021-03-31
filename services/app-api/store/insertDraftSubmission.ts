@@ -142,9 +142,12 @@ export async function insertDraftSubmission(
             ProjectionExpression: 'ATTRIBUTE_NAME',
         }
 
-        conn.getItem(params, (err, data) => {
+        console.log('getting item')
+        const req = conn.getItem(params, (err, data) => {
             console.log('back from get item!', err, data)
         })
+
+        console.log('REQ', req)
     } catch (err) {
         console.log('error in basic', err)
         throw err

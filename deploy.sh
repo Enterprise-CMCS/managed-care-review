@@ -6,14 +6,14 @@ stage=${1:-dev}
 
 services=(
   'database'
-  'uploads'
+  # 'uploads'
   # 'uploads-scan'
   'app-api'
-  'stream-functions'
-  'ui'
-  'ui-auth'
-  'storybook'
-  'app-web'
+  # 'stream-functions'
+  # 'ui'
+  # 'ui-auth'
+  # 'storybook'
+  # 'app-web'
 )
 
 install_deps() {
