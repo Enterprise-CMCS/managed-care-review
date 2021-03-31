@@ -10,12 +10,11 @@ plugins:
 custom:
   stage: ${opt:stage, self:provider.stage}
   appVersion: ${env:APP_VERSION}
-  tableName: ${env:AMENDMENTS_TABLE_NAME, cf:database-${self:custom.stage}.AmendmentsTableName}
-  tableArn: ${env:AMENDMENTS_TABLE_ARN, cf:database-${self:custom.stage}.AmendmentsTableArn}
-  atomicCounterTableName: ${env:AMENDMENTS_COUNTER_TABLE_NAME, cf:database-${self:custom.stage}.AmendmentsAtomicCounterTableName}
-  atomicCounterTableArn: ${env:AMENDMENTS_COUNTER_TABLE_ARN, cf:database-${self:custom.stage}.AmendmentsAtomicCounterTableArn}
+  draftSubmissionsTableArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:database-${self:custom.stage}.DraftSubmissionsTableArn}
+  draftSubmissionsTableStreamArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:database-${self:custom.stage}.DraftSubmissionsTableStreamArn}
   iamPath: ${env:IAM_PATH, "/"}
-  react_app_auth_mode: ${env:REACT_APP_AUTH_MODE}
+  reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
+  dynamoConnection: ${env:DYNAMO_CONNECTION}
   bundle:
     packager: yarn
 
@@ -30,9 +29,8 @@ provider:
   environment:
     stage: ${self:custom.stage}
     appVersion: ${self:custom.appVersion}
-    tableName: ${self:custom.tableName}
-    atomicCounterTableName: ${self:custom.atomicCounterTableName}
-    REACT_APP_AUTH_MODE: ${self:custom.react_app_auth_mode}
+    DYNAMO_CONNECTION: ${self:custom.dynamoConnection}
+    REACT_APP_AUTH_MODE: ${self:custom.reactAppAuthMode}
 
 functions:
   health:
@@ -130,8 +128,9 @@ resources:
                     - dynamodb:UpdateItem
                     - dynamodb:DeleteItem
                   Resource:
-                    - ${self:custom.tableArn}
-                    - ${self:custom.atomicCounterTableArn}
+                    - ${self:custom.draftSubmissionsTableArn}
+                    - ${self:custom.draftSubmissionsTableArn}/index/*
+                    - ${self:custom.draftSubmissionsTableStreamArn}
                 - Effect: 'Allow'
                   Action:
                     - logs:CreateLogStream
@@ -220,7 +219,7 @@ resources:
       Value:
         Ref: ApiGatewayRestApi
     ApiAuthMode:
-      Value: ${self:custom.react_app_auth_mode}
+      Value: ${self:custom.reactAppAuthMode}
     ApiGatewayRestApiUrl:
       Value:
         Fn::Join:

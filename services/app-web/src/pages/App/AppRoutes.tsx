@@ -7,7 +7,7 @@ import { Error404 } from '../Errors/Error404'
 import { useAuth } from '../../contexts/AuthContext'
 import { Dashboard } from '../Dashboard/Dashboard'
 import { Landing } from '../Landing/Landing'
-import { Routes } from '../../constants/routes'
+import { RoutesRecord } from '../../constants/routes'
 import { StateSubmissionForm } from '../StateSubmissionForm/StateSubmissionForm'
 import { SubmissionDescriptionExamples } from '../Help/SubmissionDescriptionExamples'
 
@@ -41,14 +41,14 @@ export const AppRoutes = ({
     const AuthenticatedRoutes = (): React.ReactElement => {
         return (
             <Switch>
-                <Route path={Routes.ROOT} exact component={Dashboard} />
-                <Route path={Routes.DASHBOARD} component={Dashboard} />
+                <Route path={RoutesRecord.ROOT} exact component={Dashboard} />
+                <Route path={RoutesRecord.DASHBOARD} component={Dashboard} />
                 <Route
-                    path={Routes.SUBMISSIONS}
+                    path={RoutesRecord.SUBMISSIONS}
                     component={StateSubmissionForm}
                 />
                 <Route
-                    path={Routes.HELP_SUBMISSION_DESCRIPTION}
+                    path={RoutesRecord.HELP_SUBMISSION_DESCRIPTION}
                     component={SubmissionDescriptionExamples}
                 />
                 <Route path="*" component={Error404} />
@@ -59,10 +59,10 @@ export const AppRoutes = ({
     const UnauthenticatedRoutes = (): React.ReactElement => {
         return (
             <Switch>
-                <Route path={Routes.ROOT} exact component={Landing} />
+                <Route path={RoutesRecord.ROOT} exact component={Landing} />
                 {/* no /auth page for IDM auth, we just have the login redirect link */}
                 {authComponent && (
-                    <Route path={Routes.AUTH} component={authComponent} />
+                    <Route path={RoutesRecord.AUTH} component={authComponent} />
                 )}
                 <Route path="*" component={Landing} />
             </Switch>

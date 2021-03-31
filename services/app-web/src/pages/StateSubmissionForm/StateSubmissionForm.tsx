@@ -6,7 +6,7 @@ import { Switch, Route, useParams } from 'react-router-dom'
 import { ContractDetails } from './ContractDetails'
 import { ReviewSubmit } from './ReviewSubmit/ReviewSubmit'
 import { SubmissionType } from './SubmissionType'
-import { Routes } from '../../constants/routes'
+import { RoutesRecord } from '../../constants/routes'
 
 import { useShowDraftSubmissionQuery } from '../../gen/gqlClient'
 
@@ -40,20 +40,35 @@ const StateSubmissionEditingForm = (): React.ReactElement => {
         return <div>Error loading submission to edit!</div>
     }
 
+    // TODO: move handling of page heading to this level once we have more pages
+    // const { pathname } = useLocation()
+    // const { updateHeading } = usePage()
+    // const isNewSubmission = pathname === RoutesRecord.SUBMISSIONS_NEW
+
+    // React.useEffect(() => {
+    //     if (!isNewSubmission) {
+    //         // updateHeading('CUSTOM-SUBMISSION--OO1')
+    //     }
+
+    //     return function cleanup() {
+    //         updateHeading(undefined)
+    //     }
+    // })
+
     return (
         <Switch>
             <Route
-                path={Routes.SUBMISSIONS_TYPE}
+                path={RoutesRecord.SUBMISSIONS_TYPE}
                 render={(props) => (
                     <SubmissionType initialValues={draft} {...props} />
                 )}
             />
             <Route
-                path={Routes.SUBMISSIONS_CONTRACT_DETAILS}
+                path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
                 component={ContractDetails}
             />
             <Route
-                path={Routes.SUBMISSIONS_REVIEW_SUBMIT}
+                path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
                 component={ReviewSubmit}
             />
         </Switch>
@@ -69,11 +84,11 @@ export const StateSubmissionForm = (): React.ReactElement => {
         <GridContainer>
             <Switch>
                 <Route
-                    path={Routes.SUBMISSIONS_NEW}
+                    path={RoutesRecord.SUBMISSIONS_NEW}
                     component={SubmissionType}
                 />
                 <Route
-                    path={Routes.SUBMISSIONS_EDIT}
+                    path={RoutesRecord.SUBMISSIONS_EDIT}
                     component={StateSubmissionEditingForm}
                 />
             </Switch>

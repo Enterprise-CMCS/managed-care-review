@@ -1,4 +1,3 @@
-import DynamoDB from 'aws-sdk/clients/dynamodb'
 import { DataMapper } from '@aws/dynamodb-data-mapper'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -18,7 +17,7 @@ export type InsertDraftSubmissionArgsType = {
 
 // getNextStateNumber returns the next "number" for a submission for a given state. See comments below for more.
 async function getNextStateNumber(
-    conn: DynamoDB,
+    mapper: DataMapper,
     stateCode: string
 ): Promise<number | StoreError> {
     // in order to support incrementing IDs for each state's submissions, we need to generate
@@ -29,10 +28,9 @@ async function getNextStateNumber(
     // we have a secondary index that is state / stateNumber
     // find the next number
     try {
-        const mapper = new DataMapper({ client: conn })
         // get all submissions for a given state in order, see the last one, add one.
         const biggestStateNumber = []
-        for await (const foo of mapper.query(
+        for await (const draft of mapper.query(
             DraftSubmissionStoreType,
             {
                 stateCode: stateCode,
@@ -43,7 +41,7 @@ async function getNextStateNumber(
                 scanIndexForward: false,
             }
         )) {
-            biggestStateNumber.push(foo)
+            biggestStateNumber.push(draft)
             // individual items with a hash key of "foo" will be yielded as the query is performed
         }
 
@@ -75,7 +73,7 @@ async function getNextStateNumber(
 }
 
 export async function insertDraftSubmission(
-    conn: DynamoDB,
+    mapper: DataMapper,
     args: InsertDraftSubmissionArgsType
 ): Promise<DraftSubmissionType | StoreError> {
     // in order to create a new draft submission, we have to do a few things in the DB.
@@ -95,7 +93,10 @@ export async function insertDraftSubmission(
     draft.stateCode = args.stateCode
 
     try {
-        const stateNumberResult = await getNextStateNumber(conn, args.stateCode)
+        const stateNumberResult = await getNextStateNumber(
+            mapper,
+            args.stateCode
+        )
         if (isStoreError(stateNumberResult)) {
             return stateNumberResult
         }
@@ -106,7 +107,6 @@ export async function insertDraftSubmission(
         throw err
     }
 
-    const mapper = new DataMapper({ client: conn })
     // what do we do with these args?
     // return a DraftSubmissionType
     try {

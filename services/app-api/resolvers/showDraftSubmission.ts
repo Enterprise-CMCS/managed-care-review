@@ -1,10 +1,6 @@
 import { ForbiddenError } from 'apollo-server-lambda'
 
-import {
-    InsertDraftSubmissionArgsType,
-    isStoreError,
-    Store,
-} from '../store/index'
+import { isStoreError, Store } from '../store/index'
 
 import statePrograms from '../data/statePrograms.json'
 import { QueryResolvers, SubmissionType, State } from '../gen/gqlServer'

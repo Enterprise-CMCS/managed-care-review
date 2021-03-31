@@ -88,6 +88,10 @@ resources:
         # Set the capacity to auto-scale
         BillingMode: PAY_PER_REQUEST
   Outputs:
+    DraftSubmissionsTableArn:
+      Value: !GetAtt DraftSubmissionsTable.Arn
+    DraftSubmissionsTableStreamArn:
+      Value: !GetAtt DraftSubmissionsTable.StreamArn
     AmendmentsTableName:
       Value:
         Ref: AmendmentsTable

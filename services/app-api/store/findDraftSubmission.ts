@@ -1,4 +1,3 @@
-import DynamoDB from 'aws-sdk/clients/dynamodb'
 import { DataMapper } from '@aws/dynamodb-data-mapper'
 
 import { StoreError } from './storeError'
@@ -11,11 +10,9 @@ import {
 import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
 
 export async function findDraftSubmission(
-    conn: DynamoDB,
+    mapper: DataMapper,
     draftUUID: string
 ): Promise<DraftSubmissionType | undefined | StoreError> {
-    const mapper = new DataMapper({ client: conn })
-
     try {
         const getResult = await mapper.get(
             Object.assign(new DraftSubmissionStoreType(), {
@@ -50,12 +47,10 @@ export async function findDraftSubmission(
 }
 
 export async function findDraftSubmissionByStateNumber(
-    conn: DynamoDB,
+    mapper: DataMapper,
     stateCode: string,
     stateNumber: number
 ): Promise<DraftSubmissionType | undefined | StoreError> {
-    const mapper = new DataMapper({ client: conn })
-
     try {
         const getIterator = mapper.query(
             DraftSubmissionStoreType,

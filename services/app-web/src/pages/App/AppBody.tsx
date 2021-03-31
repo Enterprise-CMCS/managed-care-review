@@ -1,6 +1,6 @@
 import React from 'react'
 import { GovBanner } from '@trussworks/react-uswds'
-
+import { useLocation } from 'react-router'
 import styles from './AppBody.module.scss'
 
 import { AppRoutes } from './AppRoutes'
@@ -10,11 +10,26 @@ import { Header } from '../../components/Header/Header'
 
 import { AuthModeType } from '../../common-code/domain-models'
 import { useAuth } from '../../contexts/AuthContext'
+import { useTitle } from '../../hooks/useTitle'
+import { getRouteName, PageTitlesRecord } from '../../constants/routes'
+
 export function AppBody({
     authMode,
 }: {
     authMode: AuthModeType
 }): React.ReactElement {
+    const { pathname } = useLocation()
+    const route = getRouteName(pathname)
+
+    /*
+        Adds page titles throughout the application
+    */
+    const title =
+        route === 'UNKNOWN_ROUTE'
+            ? 'Managed Care Dashboard'
+            : PageTitlesRecord[route]
+    useTitle(title)
+
     // TODO: create an DialogContext to handle all app alerts
     const [alert, setAlert] = React.useState(false)
     const [showLoading, setShowLoading] = React.useState<

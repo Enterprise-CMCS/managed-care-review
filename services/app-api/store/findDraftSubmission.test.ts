@@ -60,7 +60,7 @@ describe('findDraftSubmission', () => {
             maxRetries: 1,
         }
 
-        const store = storeWithDynamoConfig(config)
+        const store = storeWithDynamoConfig(config, 'local-')
 
         const findResult = await store.findDraftSubmission(
             '4ef98660-34d6-4656-966b-db59f3003cea'
@@ -136,7 +136,7 @@ describe('findDraftSubmissionByStateNumber', () => {
             maxRetries: 1,
         }
 
-        const store = storeWithDynamoConfig(config)
+        const store = storeWithDynamoConfig(config, 'local-')
 
         const findResult = await store.findDraftSubmissionByStateNumber(
             'MI',
