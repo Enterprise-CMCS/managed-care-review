@@ -139,9 +139,8 @@ export async function insertDraftSubmission(
         const params = {
             TableName: 'wml-fix-502-draft-submissions',
             Key: {
-                id: { S: 'foo-bar' },
+                id: 'foo-bar',
             },
-            ProjectionExpression: 'ATTRIBUTE_NAME',
         }
 
         console.log('getting item')
