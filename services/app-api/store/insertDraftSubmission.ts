@@ -134,65 +134,66 @@ export async function insertDraftSubmission(
 
     // TMP try and make a basic query
     try {
+        const docker = new DynamoDB.DocumentClient()
+
         const params = {
             TableName: 'wml-fix-502-draft-submissions',
             Key: {
-                KEY_NAME: { S: 'foo-bar' },
+                id: { S: 'foo-bar' },
             },
             ProjectionExpression: 'ATTRIBUTE_NAME',
         }
 
         console.log('getting item')
-        const req = conn.getItem(params, (err, data) => {
-            console.log('back from get item!', err, data)
-        })
+        const result = await docker.get(params).promise()
 
-        console.log('REQ', req)
+        console.log('REQ', result)
+        return { code: 'CONNECTION_ERROR', message: 'please get here.' }
     } catch (err) {
         console.log('error in basic', err)
         throw err
     }
 
-    try {
-        const stateNumberResult = await getNextStateNumber(conn, args.stateCode)
-        console.log('got number back', stateNumberResult)
-        if (isStoreError(stateNumberResult)) {
-            return stateNumberResult
-        }
+    // try {
+    //     const stateNumberResult = await getNextStateNumber(conn, args.stateCode)
+    //     console.log('got number back', stateNumberResult)
+    //     if (isStoreError(stateNumberResult)) {
+    //         return stateNumberResult
+    //     }
 
-        draft.stateNumber = stateNumberResult
-    } catch (err) {
-        console.log('error getting state number', err)
-        throw err
-    }
+    //     draft.stateNumber = stateNumberResult
+    // } catch (err) {
+    //     console.log('error getting state number', err)
+    //     throw err
+    // }
 
-    const mapper = new DataMapper({ client: conn })
-    // what do we do with these args?
-    // return a DraftSubmissionType
-    try {
-        console.log('awaitng PUT')
-        const putResult = await mapper.put(draft)
-        console.log('got back from put')
+    // const mapper = new DataMapper({ client: conn })
+    // // what do we do with these args?
+    // // return a DraftSubmissionType
+    // try {
+    //     console.log('awaitng PUT')
+    //     const putResult = await mapper.put(draft)
+    //     console.log('got back from put')
 
-        return putResult
-    } catch (err) {
-        console.log('put erroir', err)
-        if (isDynamoError(err)) {
-            if (
-                err.code === 'UnknownEndpoint' ||
-                err.code === 'NetworkingError'
-            ) {
-                return {
-                    code: 'CONNECTION_ERROR',
-                    message:
-                        'Failed to connect to the database when trying to insert a new Submission',
-                }
-            }
-        }
-        console.log(
-            'VERY unexpected insert a new Submission, unknown error: ',
-            err
-        )
-        throw err
-    }
+    //     return putResult
+    // } catch (err) {
+    //     console.log('put erroir', err)
+    //     if (isDynamoError(err)) {
+    //         if (
+    //             err.code === 'UnknownEndpoint' ||
+    //             err.code === 'NetworkingError'
+    //         ) {
+    //             return {
+    //                 code: 'CONNECTION_ERROR',
+    //                 message:
+    //                     'Failed to connect to the database when trying to insert a new Submission',
+    //             }
+    //         }
+    //     }
+    //     console.log(
+    //         'VERY unexpected insert a new Submission, unknown error: ',
+    //         err
+    //     )
+    //     throw err
+    // }
 }
