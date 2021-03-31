@@ -16,9 +16,8 @@ export type Store = {
 
 export function storeWithDynamoConfig(
     config: DynamoDB.ClientConfiguration,
-    tablePrefix: string,
+    tablePrefix: string
 ): Store {
-    console.log('CONFIG', config)
     const conn = new DynamoDB(config)
     const mapper = new DataMapper({
         client: conn,
@@ -30,12 +29,7 @@ export function storeWithDynamoConfig(
     }
 }
 
-// TODO
-// allow configuration
-// try with the bare db commands to do a find and see if that returns quick.
-
 export function newDeployedStore(region: string, tablePrefix: string): Store {
-    console.log('DEPloEd store we doing')
     const config = {
         region,
     }

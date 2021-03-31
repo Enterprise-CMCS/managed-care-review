@@ -12,7 +12,6 @@ export function createDraftSubmissionResolver(
     store: Store
 ): MutationResolvers['createDraftSubmission'] {
     return async (_parent, { input }, context) => {
-        console.log('starting createDraftSubmission')
         const stateFromCurrentUser: State['code'] = context.user.state_code
         const program = statePrograms.states
             .find((state) => state.code === stateFromCurrentUser)
@@ -32,11 +31,9 @@ export function createDraftSubmissionResolver(
         }
 
         try {
-            console.log('awaiting the DB')
             const draftSubResult = await store.insertDraftSubmission(
                 dbDraftSubmission
             )
-            console.log('back from DB')
             if (isStoreError(draftSubResult)) {
                 throw new Error(
                     `Issue creating a draft submission of type ${draftSubResult.code}. Message: ${draftSubResult.message}`
