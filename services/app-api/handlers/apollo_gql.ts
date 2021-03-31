@@ -30,6 +30,7 @@ console.log('THINKKNG THE FREAKING REGION: ', process.env.AWS_DEFAULT_REGION)
 
 const getDynamoStore = () => {
     const dynamoConnection = process.env.DYNAMO_CONNECTION
+    console.log('DYNAMO CONN', dynamoConnection)
     if (dynamoConnection === 'USE_AWS') {
         console.log('Using DEPLOYED STORE: ', process.env.AWS_DEFAULT_REGION)
         return newDeployedStore(process.env.AWS_DEFAULT_REGION || 'no region')

@@ -15,7 +15,8 @@ export type Store = {
 export function storeWithDynamoConfig(
     config: DynamoDB.ClientConfiguration
 ): Store {
-    const conn = new DynamoDB({})
+    console.log('CONFIG', config)
+    const conn = new DynamoDB(config)
 
     return {
         insertDraftSubmission: (args) => insertDraftSubmission(conn, args),
@@ -27,10 +28,8 @@ export function storeWithDynamoConfig(
 // try with the bare db commands to do a find and see if that returns quick.
 
 export function newDeployedStore(region: string): Store {
-    const config = {
-        // region,
-        // apiVersion: '2012-08-10',
-    }
+    console.log('DEPloEd store we doing')
+    const config = {}
 
     return storeWithDynamoConfig(config)
 }
