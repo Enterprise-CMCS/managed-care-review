@@ -85,7 +85,6 @@ jobs:
             services/storybook/node_modules
             services/app-web/node_modules
             node_modules
-            tests/nightwatch/node_modules
           key: ${{ runner.os }}-${{ hashFiles('combined-yarn-lock.txt') }}
       - name: set path
         run: |
@@ -106,14 +105,27 @@ jobs:
           # When deploying multiple copies of this quickstart to the same AWS Account (not ideal), a prefix helps prevent stepping on each other.
           # This can optionally be set as an GitHub Actions Secret
           ./deploy.sh $STAGE_PREFIX$branch_name
-      - name: Run online tests
-        run: |
-          pushd services
-          export APPLICATION_ENDPOINT=`./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name`
-          popd
-          ./dev test --online
-      - name: Store test reults
+
+      - name: Run cypress tests
+        jobs:
+         cypress-run:
+          runs-on: ubuntu-16.04
+          name: Collect artifacts
+          steps:
+            - uses: actions/checkout@v2
+            - uses: cypress-io/github-action@v2
+            - uses: actions/upload-artifact@v1
+              if: failure()
+              with:
+                name: cypress-screenshots
+                path: cypress/screenshots
+            - uses: actions/upload-artifact@v1
+              if: always()
+              with:
+                name: cypress-videos
+                path: cypress/videos
+      - name: Store test results
         uses: actions/upload-artifact@v2
         with:
           name: test_results
-          path: tests/nightwatch/tests_output
+          path: tests/cypress/videos
