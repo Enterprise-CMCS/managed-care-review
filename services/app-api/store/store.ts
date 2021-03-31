@@ -1,4 +1,6 @@
 import DynamoDB from 'aws-sdk/clients/dynamodb'
+import { DataMapper } from '@aws/dynamodb-data-mapper'
+
 import {
     StoreError,
     InsertDraftSubmissionArgsType,
@@ -17,9 +19,10 @@ export function storeWithDynamoConfig(
 ): Store {
     console.log('CONFIG', config)
     const conn = new DynamoDB(config)
+    const mapper = new DataMapper({ client: conn })
 
     return {
-        insertDraftSubmission: (args) => insertDraftSubmission(conn, args),
+        insertDraftSubmission: (args) => insertDraftSubmission(mapper, args),
     }
 }
 
@@ -27,7 +30,7 @@ export function storeWithDynamoConfig(
 // allow configuration
 // try with the bare db commands to do a find and see if that returns quick.
 
-export function newDeployedStore(region: string): Store {
+export function newDeployedStore(region: string, tablePrefix: string): Store {
     console.log('DEPloEd store we doing')
     const config = {
         region,

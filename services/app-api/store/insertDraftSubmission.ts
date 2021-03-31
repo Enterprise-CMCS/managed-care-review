@@ -1,4 +1,3 @@
-import DynamoDB from 'aws-sdk/clients/dynamodb'
 import { DataMapper } from '@aws/dynamodb-data-mapper'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -54,7 +53,7 @@ export function isStoreError(err: unknown): err is StoreError {
 
 // getNextStateNumber returns the next "number" for a submission for a given state. See comments below for more.
 async function getNextStateNumber(
-    conn: DynamoDB,
+    mapper: DataMapper,
     stateCode: string
 ): Promise<number | StoreError> {
     // in order to support incrementing IDs for each state's submissions, we need to generate
@@ -65,7 +64,6 @@ async function getNextStateNumber(
     // we have a secondary index that is state / stateNumber
     // find the next number
     try {
-        const mapper = new DataMapper({ client: conn })
         // get all submissions for a given state in order, see the last one, add one.
         const biggestStateNumber = []
         console.log('awaiting new number')
@@ -113,7 +111,7 @@ async function getNextStateNumber(
 }
 
 export async function insertDraftSubmission(
-    conn: DynamoDB,
+    mapper: DataMapper,
     args: InsertDraftSubmissionArgsType
 ): Promise<DraftSubmissionType | StoreError> {
     // in order to create a new draft submission, we have to do a few things in the DB.
@@ -132,113 +130,115 @@ export async function insertDraftSubmission(
     draft.submissionDescription = args.submissionDescription
     draft.stateCode = args.stateCode
 
-    // TMP try and make a basic query
+    // // TMP try and make a basic query
+    // try {
+    //     const docker = new DynamoDB.DocumentClient()
+
+    //     const putParams = {
+    //         TableName: 'wml-fix-502-draft-submissions',
+    //         Item: {
+    //             id: 'foo-bar',
+    //             stateCode: 'MN',
+    //             stateNumber: 32,
+    //             programID: 'testing123',
+    //         },
+    //     }
+
+    //     console.log('PUTTING')
+    //     const putresult = await docker.put(putParams).promise()
+
+    //     console.log('PUT', putresult)
+
+    //     const params = {
+    //         TableName: 'wml-fix-502-draft-submissions',
+    //         Key: {
+    //             id: 'foo-bar',
+    //         },
+    //     }
+
+    //     console.log('getting item')
+    //     const result = await docker.get(params).promise()
+
+    //     console.log('REQ', result)
+
+    //     // try and get using the thing.
+
+    //     // const newConn = new DynamoDB({})
+    //     const mapper = new DataMapper({ client: conn })
+
+    //     console.log('GETTING MAPP')
+    //     const getResult = await mapper.get(
+    //         Object.assign(new DraftSubmissionStoreType(), {
+    //             id: 'foo-bar',
+    //         })
+    //     )
+
+    //     console.log('mAPTEGO:', getResult)
+
+    //     const putResult = await mapper.put(draft)
+
+    //     console.log('and a PUT', putResult)
+
+    //     for await (const foo of mapper.query(
+    //         DraftSubmissionStoreType,
+    //         {
+    //             stateCode: 'MN',
+    //             stateNumber: 32,
+    //         },
+    //         { indexName: 'StateStateNumberIndex' }
+    //     )) {
+    //         console.log('QUERY REturnED', foo)
+    //         // individual items with a hash key of "foo" will be yielded as the query is performed
+    //     }
+
+    //     return { code: 'CONNECTION_ERROR', message: 'please get here.' }
+    // } catch (err) {
+    //     console.log('error in basic', err)
+    //     throw err
+    // }
+
     try {
-        const docker = new DynamoDB.DocumentClient()
-
-        const putParams = {
-            TableName: 'wml-fix-502-draft-submissions',
-            Item: {
-                id: 'foo-bar',
-                stateCode: 'MN',
-                stateNumber: 32,
-                programID: 'testing123',
-            },
-        }
-
-        console.log('PUTTING')
-        const putresult = await docker.put(putParams).promise()
-
-        console.log('PUT', putresult)
-
-        const params = {
-            TableName: 'wml-fix-502-draft-submissions',
-            Key: {
-                id: 'foo-bar',
-            },
-        }
-
-        console.log('getting item')
-        const result = await docker.get(params).promise()
-
-        console.log('REQ', result)
-
-        // try and get using the thing.
-
-        // const newConn = new DynamoDB({})
-        const mapper = new DataMapper({ client: conn })
-
-        console.log('GETTING MAPP')
-        const getResult = await mapper.get(
-            Object.assign(new DraftSubmissionStoreType(), {
-                id: 'foo-bar',
-            })
+        const stateNumberResult = await getNextStateNumber(
+            mapper,
+            args.stateCode
         )
-
-        console.log('mAPTEGO:', getResult)
-
-        const putResult = await mapper.put(draft)
-
-        console.log('and a PUT', putResult)
-
-        for await (const foo of mapper.query(
-            DraftSubmissionStoreType,
-            {
-                stateCode: 'MN',
-                stateNumber: 32,
-            },
-            { indexName: 'StateStateNumberIndex' }
-        )) {
-            console.log('QUERY REturnED', foo)
-            // individual items with a hash key of "foo" will be yielded as the query is performed
+        console.log('got number back', stateNumberResult)
+        if (isStoreError(stateNumberResult)) {
+            return stateNumberResult
         }
 
-        return { code: 'CONNECTION_ERROR', message: 'please get here.' }
+        draft.stateNumber = stateNumberResult
     } catch (err) {
-        console.log('error in basic', err)
+        console.log('error getting state number', err)
         throw err
     }
 
-    // try {
-    //     const stateNumberResult = await getNextStateNumber(conn, args.stateCode)
-    //     console.log('got number back', stateNumberResult)
-    //     if (isStoreError(stateNumberResult)) {
-    //         return stateNumberResult
-    //     }
+    // what do we do with these args?
+    // return a DraftSubmissionType
+    try {
+        console.log('awaitng PUT')
+        const putResult = await mapper.put(draft)
+        console.log('got back from put')
 
-    //     draft.stateNumber = stateNumberResult
-    // } catch (err) {
-    //     console.log('error getting state number', err)
-    //     throw err
-    // }
-
-    // const mapper = new DataMapper({ client: conn })
-    // // what do we do with these args?
-    // // return a DraftSubmissionType
-    // try {
-    //     console.log('awaitng PUT')
-    //     const putResult = await mapper.put(draft)
-    //     console.log('got back from put')
-
-    //     return putResult
-    // } catch (err) {
-    //     console.log('put erroir', err)
-    //     if (isDynamoError(err)) {
-    //         if (
-    //             err.code === 'UnknownEndpoint' ||
-    //             err.code === 'NetworkingError'
-    //         ) {
-    //             return {
-    //                 code: 'CONNECTION_ERROR',
-    //                 message:
-    //                     'Failed to connect to the database when trying to insert a new Submission',
-    //             }
-    //         }
-    //     }
-    //     console.log(
-    //         'VERY unexpected insert a new Submission, unknown error: ',
-    //         err
-    //     )
-    //     throw err
-    // }
+        return putResult
+    } catch (err) {
+        console.log('put erroir', err)
+        if (isDynamoError(err)) {
+            if (
+                err.code === 'UnknownEndpoint' ||
+                err.code === 'NetworkingError'
+            ) {
+                return {
+                    code: 'CONNECTION_ERROR',
+                    message:
+                        'Failed to connect to the database when trying to insert a new Submission',
+                }
+            }
+        }
+        console.log(
+            'VERY unexpected insert a new Submission, unknown error: ',
+            err
+        )
+        throw err
+    }
 }
