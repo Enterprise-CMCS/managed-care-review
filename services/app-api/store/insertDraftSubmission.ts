@@ -165,8 +165,8 @@ export async function insertDraftSubmission(
 
         // try and get using the thing.
 
-        const newConn = new DynamoDB()
-        const mapper = new DataMapper({ client: newConn })
+        // const newConn = new DynamoDB()
+        const mapper = new DataMapper({ client: conn })
 
         console.log('GETTING MAPP')
         const getResult = await mapper.get(
