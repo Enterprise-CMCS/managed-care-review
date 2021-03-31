@@ -162,6 +162,21 @@ export async function insertDraftSubmission(
         const result = await docker.get(params).promise()
 
         console.log('REQ', result)
+
+        // try and get using the thing.
+
+        const newConn = new DynamoDB()
+        const mapper = new DataMapper({ client: newConn })
+
+        console.log('GETTING MAPP')
+        const getResult = await mapper.get(
+            Object.assign(new DraftSubmissionStoreType(), {
+                id: 'foo-bar',
+            })
+        )
+
+        console.log('mAPTEGO:', getResult)
+
         return { code: 'CONNECTION_ERROR', message: 'please get here.' }
     } catch (err) {
         console.log('error in basic', err)
