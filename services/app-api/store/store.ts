@@ -1,4 +1,6 @@
 import DynamoDB from 'aws-sdk/clients/dynamodb'
+import { DataMapper } from '@aws/dynamodb-data-mapper'
+
 import {
     StoreError,
     InsertDraftSubmissionArgsType,
@@ -13,21 +15,26 @@ export type Store = {
 }
 
 export function storeWithDynamoConfig(
-    config: DynamoDB.ClientConfiguration
+    config: DynamoDB.ClientConfiguration,
+    tablePrefix: string
 ): Store {
     const conn = new DynamoDB(config)
+    const mapper = new DataMapper({
+        client: conn,
+        tableNamePrefix: tablePrefix,
+    })
 
     return {
-        insertDraftSubmission: (args) => insertDraftSubmission(conn, args),
+        insertDraftSubmission: (args) => insertDraftSubmission(mapper, args),
     }
 }
 
-export function newDeployedStore(region: string): Store {
+export function newDeployedStore(region: string, tablePrefix: string): Store {
     const config = {
         region,
     }
 
-    return storeWithDynamoConfig(config)
+    return storeWithDynamoConfig(config, tablePrefix)
 }
 
 export function newLocalStore(dyanmoURL: string): Store {
@@ -38,5 +45,5 @@ export function newLocalStore(dyanmoURL: string): Store {
         secretAccessKey: 'LOCAL_FAKE_SECRET',
     }
 
-    return storeWithDynamoConfig(config)
+    return storeWithDynamoConfig(config, 'local-')
 }

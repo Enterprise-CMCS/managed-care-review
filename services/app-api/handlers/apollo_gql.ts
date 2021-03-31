@@ -28,12 +28,19 @@ assertIsAuthMode(authMode)
 
 const getDynamoStore = () => {
     const dynamoConnection = process.env.DYNAMO_CONNECTION
+    const stageName = process.env.stage
+    const dbPrefix = stageName + '-'
+
     if (dynamoConnection === 'USE_AWS') {
-        return newDeployedStore(process.env.AWS_DEFAULT_REGION || 'no region')
+        return newDeployedStore(
+            process.env.AWS_DEFAULT_REGION || 'no region',
+            dbPrefix
+        )
     } else {
         return newLocalStore(process.env.DYNAMO_CONNECTION || 'no db url')
     }
 }
+
 const store = getDynamoStore()
 
 const userFetcher =
