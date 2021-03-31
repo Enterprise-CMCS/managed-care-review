@@ -181,6 +181,18 @@ export async function insertDraftSubmission(
 
         console.log('and a PUT', putResult)
 
+        for await (const foo of mapper.query(
+            DraftSubmissionStoreType,
+            {
+                stateCode: 'MN',
+                stateNumber: 32,
+            },
+            { indexName: 'StateStateNumberIndex' }
+        )) {
+            console.log('QUERY REturnED', foo)
+            // individual items with a hash key of "foo" will be yielded as the query is performed
+        }
+
         return { code: 'CONNECTION_ERROR', message: 'please get here.' }
     } catch (err) {
         console.log('error in basic', err)
