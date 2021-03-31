@@ -15,11 +15,15 @@ export type Store = {
 }
 
 export function storeWithDynamoConfig(
-    config: DynamoDB.ClientConfiguration
+    config: DynamoDB.ClientConfiguration,
+    tablePrefix: string = ''
 ): Store {
     console.log('CONFIG', config)
     const conn = new DynamoDB(config)
-    const mapper = new DataMapper({ client: conn })
+    const mapper = new DataMapper({
+        client: conn,
+        tableNamePrefix: tablePrefix,
+    })
 
     return {
         insertDraftSubmission: (args) => insertDraftSubmission(mapper, args),
@@ -36,7 +40,7 @@ export function newDeployedStore(region: string, tablePrefix: string): Store {
         region,
     }
 
-    return storeWithDynamoConfig(config)
+    return storeWithDynamoConfig(config, tablePrefix)
 }
 
 export function newLocalStore(dyanmoURL: string): Store {

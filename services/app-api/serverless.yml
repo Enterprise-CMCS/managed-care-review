@@ -28,7 +28,6 @@ provider:
   environment:
     stage: ${self:custom.stage}
     appVersion: ${self:custom.appVersion}
-    DEBUG_DRAFT: ${self:custom.draftSubmissionsTableArn}
     DYNAMO_CONNECTION: USE_AWS
     REACT_APP_AUTH_MODE: ${self:custom.react_app_auth_mode}
 
@@ -129,6 +128,7 @@ resources:
                     - dynamodb:DeleteItem
                   Resource:
                     - ${self:custom.draftSubmissionsTableArn}
+                    - ${self:custom.draftSubmissionsTableArn}/index/*
                     - ${self:custom.draftSubmissionsTableStreamArn}
                 - Effect: 'Allow'
                   Action:
