@@ -29,7 +29,7 @@ export function storeWithDynamoConfig(
 export function newDeployedStore(region: string): Store {
     const config = {
         // region,
-        apiVersion: '2012-08-10',
+        // apiVersion: '2012-08-10',
     }
 
     return storeWithDynamoConfig(config)
