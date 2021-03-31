@@ -15,7 +15,7 @@ export type Store = {
 export function storeWithDynamoConfig(
     config: DynamoDB.ClientConfiguration
 ): Store {
-    const conn = new DynamoDB()
+    const conn = new DynamoDB(config)
 
     return {
         insertDraftSubmission: (args) => insertDraftSubmission(conn, args),
