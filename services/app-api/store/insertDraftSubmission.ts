@@ -134,7 +134,7 @@ export async function insertDraftSubmission(
 
     // TMP try and make a basic query
     try {
-        var params = {
+        const params = {
             TableName: 'wml-fix-502-draft-submissions',
             Key: {
                 KEY_NAME: { S: 'foo-bar' },
