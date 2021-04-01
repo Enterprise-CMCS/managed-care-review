@@ -106,21 +106,25 @@ jobs:
           # This can optionally be set as an GitHub Actions Secret
           ./deploy.sh $STAGE_PREFIX$branch_name
 
-      - name: Run cypress tests
-        jobs:
-         cypress-run:
-          runs-on: ubuntu-16.04
-          name: Run tests and collect artifacts
-          steps:
-            - uses: actions/checkout@v2
-            - uses: cypress-io/github-action@v2
-            - uses: actions/upload-artifact@v1
-              if: failure()
-              with:
-                name: cypress-screenshots
-                path: cypress/screenshots
-            - uses: actions/upload-artifact@v1
-              if: always()
-              with:
-                name: cypress-videos
-                path: cypress/videos
+      - name: Set application endpoint
+        run: |
+          endpoint=$(./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name)
+          echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
+
+      - name: Cypress run
+        uses: cypress-io/github-action@v2
+        with:
+          config: baseUrl=${{env.APPLICATION_ENDPOINT}}
+      - name: Upload cypress screenshots
+        uses: actions/upload-artifact@v1
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+      
+      - name: Upload cypress video
+        uses: actions/upload-artifact@v1
+        if: always()
+        with:
+          name: cypress-videos
+          path: cypress/videos

@@ -1,6 +1,6 @@
 
 set -e
-
+# This script queries serverless and searchs output for whatever Cloudformation output variable you ask for
 help='This script is run with the format  ./output.sh <target service name> <serverless output variable name> <stage name (optional, default dev)>'
 example='ex.  ./output.sh ui CloudFrontEndpointUrl'
 
