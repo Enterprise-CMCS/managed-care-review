@@ -1,4 +1,4 @@
-# Manged Care Review ![Build & Deploy](https://github.com/CMSgov/managed-care-review/actions/workflows/promote.yml/badge.svg?branch=main)
+# Managed Care Review ![Build & Deploy](https://github.com/CMSgov/managed-care-review/actions/workflows/promote.yml/badge.svg?branch=main)
 
 <a href="https://codeclimate.com/repos/6041539f31779a5f8d00e7e6/maintainability"><img src="https://api.codeclimate.com/v1/badges/397709446d5aca86032d/maintainability" /></a><a href="https://codeclimate.com/repos/6041539f31779a5f8d00e7e6/test_coverage"><img src="https://api.codeclimate.com/v1/badges/397709446d5aca86032d/test_coverage" /></a>
 
