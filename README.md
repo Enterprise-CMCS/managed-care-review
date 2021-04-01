@@ -1,10 +1,8 @@
-# Guide Wire ![Build](https://github.com/CMSgov/guide-wire/workflows/Build/badge.svg?branch=main)[![latest release](https://img.shields.io/github/release/cmsgov/guide-wire.svg)](https://github.com/cmsgov/guide-wire/releases/latest)
+# Manged Care Review ![Build & Deploy](https://github.com/CMSgov/managed-care-review/workflows/promote.yml/badge.svg?branch=main)
 
-<a href="https://codeclimate.com/repos/6041539f31779a5f8d00e7e6/maintainability"><img src="https://api.codeclimate.com/v1/badges/397709446d5aca86032d/maintainability" /></a>
+<a href="https://codeclimate.com/repos/6041539f31779a5f8d00e7e6/maintainability"><img src="https://api.codeclimate.com/v1/badges/397709446d5aca86032d/maintainability" /></a><a href="https://codeclimate.com/repos/6041539f31779a5f8d00e7e6/test_coverage"><img src="https://api.codeclimate.com/v1/badges/397709446d5aca86032d/test_coverage" /></a>
 
-<a href="https://codeclimate.com/repos/6041539f31779a5f8d00e7e6/test_coverage"><img src="https://api.codeclimate.com/v1/badges/397709446d5aca86032d/test_coverage" /></a>
-
-The Managed Care Rate and Review State Submission System
+Managed Care Review is an application that accepts Managed Care Submissions from states and formats them for review by CMS. It is still early days.
 
 ## Local Dev
 
@@ -12,13 +10,15 @@ Run all the services locally with the command `./dev local`
 
 See the Requirements section if the command asks for any prerequisites you don't have installed.
 
-Local dev is configured in typescript project in `./src`. The entry-point is `./src/dev.ts`, it manages running the moving pieces locally: the API, the database, the file store, and the frontend.
+The ./dev script is written in typescript in `./src`. The entry-point is `./src/dev.ts`, it manages running the moving pieces locally: the API, the database, the file store, and the frontend.
 
 Local dev is built around the Serverless plugin [`serverless-offline`](https://github.com/dherault/serverless-offline). `serverless-offline` runs an API gateway locally configured by `./services/app-api/serverless.yml` and hot reloads your lambdas on every save. The plugins [`serverless-dynamodb-local`](https://github.com/99x/serverless-dynamodb-local) and [`serverless-s3-local`](https://github.com/ar90n/serverless-s3-local) stand up the local db and local s3 in a similar fashion.
 
 When run locally (with LOCAL_LOGIN=true), auth bypasses Cognito and uses [`serverless-offline`](https://github.com/dherault/serverless-offline). The frontend mimics login in local storage with mock users and sends an id in the `cognito-identity-id` header on every request. This is set as the cognito Id in the `event.requestContext.identity` for lambdas, just like Cognito would in AWS.
 
-## Usage
+### ./dev Usage
+
+`./dev` is a program for doing development on Managed Care Review. It can run services locally, run tests, lint, and more. Anything you find yourself doing as a developer on this project, feel free to add to `./dev`.
 
 Run app locally
 
@@ -49,15 +49,17 @@ You can get keys out of Cloudtamer, on the VPN. Click "Cloud Access" on the acco
 
 From there it's up to you how to make things work locally. Either set the three environment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_SESSION_TOKEN` or put the values in your `~/.aws/credentials` file before invoking the command you want to invoke. I usually just throw the env vars into my .env file and everything works.
 
-### Deploy
+## Build & Deploy
 
-See main build [here](https://github.com/CMSgov/guide-wire/actions?query=branch%3Amain)
+See main build/deploy [here](https://github.com/CMSgov/managed-care-review/actions/workflows/promote.yml?query=branch%3Amain)
 
 This application is built and deployed via GitHub Actions. See `.github/workflows`.
 
 This application is deployed into three different AWS accounts: Dev, Val, and Prod. Anytime the main branch is updated (i.e. a PR is merged) we deploy to each environment in turn. If interacting with those accounts directly, each one will require different AWS keys.
 
 In the Dev account, in addition to deploying the main branch, we deploy a full version of the app on every branch that is pushed that is not the main branch. We call these deployments "review apps" since they host all the changes for a PR in a full deployment. These review apps are differentiated by their Serverless "stack" name. This is set to the branch name and all infra ends up being prefixed with it to keep from there being any overlapping.
+
+You can see the deploys for review apps [here](https://github.com/CMSgov/managed-care-review/actions/workflows/deploy.yml)
 
 ## Requirements
 
@@ -98,20 +100,6 @@ brew install yarn
 ./dev local
 ```
 
-## Contributing / To-Do
-
-See current open [issues](https://github.com/CMSgov/guide-wire/pulls/issues)
-
-Please feel free to open new issues for defects or enhancements.
-
-To contribute:
-
--   Fork this repository
--   Make changes in your fork
--   Open a pull request targeting this repository
-
-Pull requests are being accepted.
-
 ## License
 
 [![License](https://img.shields.io/badge/License-CC0--1.0--Universal-blue.svg)](https://creativecommons.org/publicdomain/zero/1.0/legalcode)
@@ -125,15 +113,3 @@ in the public domain within the United States.
 Additionally, we waive copyright and related rights in the
 work worldwide through the CC0 1.0 Universal public domain dedication.
 ```
-
-### Contributors
-
-This project made possible by the [Serverless Stack](https://serverless-stack.com/) and its authors/contributors. The extremely detailed tutorial, code examples, and serverless pattern is where this project started. I can't recommend this resource enough.
-
-| [![Mike Dial][dial_avatar]][dial_homepage]<br/>[Mike Dial][dial_homepage] | [![Seth Sacher][sacher_avatar]][sacher_homepage]<br/>[Seth Sacher][sacher_homepage] |
-| ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-
-[dial_homepage]: https://github.com/mdial89f
-[dial_avatar]: https://avatars.githubusercontent.com/mdial89f?size=150
-[sacher_homepage]: https://github.com/sethsacher
-[sacher_avatar]: https://avatars.githubusercontent.com/sethsacher?size=150
