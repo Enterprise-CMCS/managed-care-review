@@ -2,7 +2,7 @@
 
 <a href="https://codeclimate.com/repos/6041539f31779a5f8d00e7e6/maintainability"><img src="https://api.codeclimate.com/v1/badges/397709446d5aca86032d/maintainability" /></a><a href="https://codeclimate.com/repos/6041539f31779a5f8d00e7e6/test_coverage"><img src="https://api.codeclimate.com/v1/badges/397709446d5aca86032d/test_coverage" /></a>
 
-Managed Care Review is an application that accepts Managed Care Submissions from states and formats them for review by CMS. It is still early days.
+Managed Care Review is an application that accepts Managed Care contract and rate submissions from states and packages them for review by CMS. It is still early days.
 
 ## Local Dev
 
@@ -18,7 +18,7 @@ When run locally (with LOCAL_LOGIN=true), auth bypasses Cognito and uses [`serve
 
 ### ./dev Usage
 
-`./dev` is a program for doing development on Managed Care Review. It can run services locally, run tests, lint, and more. Anything you find yourself doing as a developer on this project, feel free to add to `./dev`.
+`./dev` is a program for doing development on Managed Care Review. It can run services locally, run tests, lint, and more. Discover everything it can do with `./dev --help`. Anything you find yourself doing as a developer on this project, feel free to add to `./dev`.
 
 Run app locally
 
