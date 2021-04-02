@@ -108,7 +108,8 @@ jobs:
 
       - name: Set application endpoint
         run: |
-          endpoint=$(./services/output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name)
+          cd services
+          endpoint=$(./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name)
           echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
 
       - name: Cypress run
