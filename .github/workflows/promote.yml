@@ -108,17 +108,32 @@ jobs:
           # When deploying multiple copies of this quickstart to the same AWS Account (not ideal), a prefix helps prevent stepping on each other.
           # This can optionally be set as an GitHub Actions Secret
           ./deploy.sh $STAGE_PREFIX$branch_name
-      - name: Run Nightwatch suite
+
+      - name: Set application endpoint - dev
         run: |
-          pushd services
-          export APPLICATION_ENDPOINT=`./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name`
-          popd
-          ./test.sh
-      - name: Store test reults
-        uses: actions/upload-artifact@v2
+          cd services
+          endpoint=$(./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name)
+          echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
+
+      - name: Cypress run - dev
+        uses: cypress-io/github-action@v2
         with:
-          name: test_results
-          path: tests/nightwatch/tests_output
+          config: baseUrl=${{env.APPLICATION_ENDPOINT}}
+
+      - name: Upload cypress screenshots - dev
+        uses: actions/upload-artifact@v1
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+      
+      - name: Upload cypress video - dev
+        uses: actions/upload-artifact@v1
+        if: always()
+        with:
+          name: cypress-videos
+          path: cypress/videos
+
       - name: set val aws keys
         run: ./.github/build_vars.sh set_values
         env:
@@ -126,17 +141,32 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.VAL_AWS_SECRET_ACCESS_KEY }}
       - name: Deploy to val
         run: ./deploy.sh val
-      - name: Run Nightwatch suite on val
+      
+      - name: Set application endpoint - val
         run: |
-          pushd services
-          export APPLICATION_ENDPOINT=`./output.sh ui CloudFrontEndpointUrl val`
-          popd
-          ./test.sh
-      - name: Store test reults
-        uses: actions/upload-artifact@v2
+          cd services
+          endpoint=$(./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name)
+          echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
+
+      - name: Cypress run - val
+        uses: cypress-io/github-action@v2
         with:
-          name: test_results
-          path: tests/nightwatch/tests_output
+          config: baseUrl=${{env.APPLICATION_ENDPOINT}}
+
+      - name: Upload cypress screenshots - val
+        uses: actions/upload-artifact@v1
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+      
+      - name: Upload cypress video - val
+        uses: actions/upload-artifact@v1
+        if: always()
+        with:
+          name: cypress-videos
+          path: cypress/videos
+
       - name: set prod aws keys
         run: ./.github/build_vars.sh set_values
         env:
@@ -144,14 +174,28 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
       - name: Deploy to prod
         run: ./deploy.sh prod
-      - name: Run Nightwatch suite on prod
+      
+      - name: Set application endpoint - prod
         run: |
-          pushd services
-          export APPLICATION_ENDPOINT=`./output.sh ui CloudFrontEndpointUrl prod`
-          popd
-          ./test.sh
-      - name: Store test reults
-        uses: actions/upload-artifact@v2
+          cd services
+          endpoint=$(./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name)
+          echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
+
+      - name: Cypress run - prod
+        uses: cypress-io/github-action@v2
         with:
-          name: test_results
-          path: tests/nightwatch/tests_output
+          config: baseUrl=${{env.APPLICATION_ENDPOINT}}
+
+      - name: Upload cypress screenshots - prod
+        uses: actions/upload-artifact@v1
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+      
+      - name: Upload cypress video - prod
+        uses: actions/upload-artifact@v1
+        if: always()
+        with:
+          name: cypress-videos
+          path: cypress/videos
