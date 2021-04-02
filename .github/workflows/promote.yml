@@ -125,14 +125,14 @@ jobs:
         if: failure()
         with:
           name: cypress-screenshots
-          path: cypress/screenshots
+          path: tests/cypress/screenshots
       
       - name: Upload cypress video - dev
         uses: actions/upload-artifact@v1
         if: always()
         with:
           name: cypress-videos
-          path: cypress/videos
+          path: tests/cypress/videos
 
       - name: set val aws keys
         run: ./.github/build_vars.sh set_values
@@ -158,14 +158,14 @@ jobs:
         if: failure()
         with:
           name: cypress-screenshots
-          path: cypress/screenshots
+          path: tests/cypress/screenshots
       
       - name: Upload cypress video - val
         uses: actions/upload-artifact@v1
         if: always()
         with:
           name: cypress-videos
-          path: cypress/videos
+          path: tests/cypress/videos
 
       - name: set prod aws keys
         run: ./.github/build_vars.sh set_values
@@ -191,11 +191,11 @@ jobs:
         if: failure()
         with:
           name: cypress-screenshots
-          path: cypress/screenshots
+          path: tests/cypress/screenshots
       
       - name: Upload cypress video - prod
         uses: actions/upload-artifact@v1
         if: always()
         with:
           name: cypress-videos
-          path: cypress/videos
+          path: tests/cypress/videos
