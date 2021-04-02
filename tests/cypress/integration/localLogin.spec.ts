@@ -7,7 +7,7 @@ describe('Local login', () => {
         cy.url().should('eq', 'http://localhost:3000/dashboard');
     })  
 
-    it('should display Toph user info after login', () => {
+    it('should display Toph user info after login and remove Toph user info on logout', () => {
         cy.visit('/auth')
         cy.get('#App').should('exist')
         cy.findByTestId('TophButton').click()
