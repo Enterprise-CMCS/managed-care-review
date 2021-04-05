@@ -1,5 +1,6 @@
-describe('Local login', () => {
+describe('Login', () => {
 
+    // TODO: match users between local, aws cognito, and idm logins
     // it('should display test users state', () => {
     //     cy.login()
     //     cy.findByRole('heading', {name: 'Virginia Managed Care Dashboard'}).should('exist')
