@@ -115,7 +115,7 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
-          config: baseUrl=${{env.APPLICATION_ENDPOINT}} AUTH_MODE=${{env.AUTH_MODE}}
+          config: baseUrl=${{env.APPLICATION_ENDPOINT}} AUTH_MODE=${{env.REACT_APP_AUTH_MODE}}
       - name: Upload cypress screenshots
         uses: actions/upload-artifact@v1
         if: failure()

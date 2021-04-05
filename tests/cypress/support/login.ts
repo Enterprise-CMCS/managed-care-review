@@ -10,7 +10,7 @@ Cypress.Commands.add('login', () => {
         cy.findByTestId('loginPassword').type('Test123!')
         cy.findByRole('button', {name: 'Login'}).click()
     } else {
-        console.log('IDM')
+        console.log('Auth mode is not defined or is IDM')
     }
     // cy.url().should('match', /.*dashboard$/);
   })
