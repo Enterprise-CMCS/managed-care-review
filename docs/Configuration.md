@@ -46,11 +46,9 @@ These four env vars configure cognito auth from the browser. They are ignored if
 
 ### `APPLICATION_ENDPOINT`
 
-Read by nightwatch
+Read by cypress
 
 valid values: A URL where a running app-web can be reached
-
-This is used by nightwatch to configure where it tries to reach the app to conduct its testing. Run it locally with ./dev test
 
 ### `APP_VERSION`
 

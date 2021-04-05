@@ -83,7 +83,6 @@ jobs:
             services/ui/node_modules
             services/app-web/node_modules
             node_modules
-            tests/nightwatch/node_modules
           key: ${{ runner.os }}-${{ hashFiles('combined-yarn-lock.txt') }}
       - name: set path
         run: |
