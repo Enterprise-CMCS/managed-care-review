@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 
 import { GridContainer } from '@trussworks/react-uswds'
 import { Switch, Route, useParams } from 'react-router-dom'
@@ -26,6 +26,14 @@ export const StateSubmissionForm = (): React.ReactElement => {
         },
     })
 
+    useEffect(() => {
+        // We have to updateHeading inside useEffect so that we don't update two components at the same time
+        const draft = data?.showDraftSubmission?.draftSubmission
+        if (draft) {
+            updateHeading(draft.name)
+        }
+    }, [data])
+
     if (loading) {
         return <div>Loading...</div>
     }
@@ -41,8 +49,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
         console.log('got undefined back from showDraftSubmission')
         return <div>Error loading submission to edit!</div>
     }
-
-    updateHeading(draft.name)
 
     return (
         <GridContainer>
