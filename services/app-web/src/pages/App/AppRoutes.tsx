@@ -9,6 +9,7 @@ import { Dashboard } from '../Dashboard/Dashboard'
 import { Landing } from '../Landing/Landing'
 import { RoutesRecord } from '../../constants/routes'
 import { StateSubmissionForm } from '../StateSubmissionForm/StateSubmissionForm'
+import { NewStateSubmissionForm } from '../StateSubmissionForm/NewStateSubmissionForm'
 import { SubmissionDescriptionExamples } from '../Help/SubmissionDescriptionExamples'
 
 import { AuthModeType, assertNever } from '../../common-code/domain-models'
@@ -44,7 +45,11 @@ export const AppRoutes = ({
                 <Route path={RoutesRecord.ROOT} exact component={Dashboard} />
                 <Route path={RoutesRecord.DASHBOARD} component={Dashboard} />
                 <Route
-                    path={RoutesRecord.SUBMISSIONS}
+                    path={RoutesRecord.SUBMISSIONS_NEW}
+                    component={NewStateSubmissionForm}
+                />
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_FORM}
                     component={StateSubmissionForm}
                 />
                 <Route

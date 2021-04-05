@@ -238,8 +238,8 @@ describe('SubmissionType', () => {
             })
 
             //trigger validation
-            await userEvent.type(textarea, 'something')
-            await userEvent.clear(textarea)
+            userEvent.type(textarea, 'something')
+            userEvent.clear(textarea)
 
             await waitFor(() => {
                 expect(textarea).toHaveClass('usa-input--error')
@@ -335,12 +335,12 @@ describe('SubmissionType', () => {
                 ).toBeInTheDocument()
             })
             // Fill in form to make valid
-            await userEvent.click(screen.getByRole('option', { name: 'MSHO' }))
-            await userEvent.click(screen.getByLabelText('Contract action only'))
-            await userEvent.type(screen.getByRole('textbox'), 'a description')
+            userEvent.click(screen.getByRole('option', { name: 'MSHO' }))
+            userEvent.click(screen.getByLabelText('Contract action only'))
+            userEvent.type(screen.getByRole('textbox'), 'a description')
 
             // Click continue
-            await userEvent.click(
+            userEvent.click(
                 screen.getByRole('button', {
                     name: 'Continue',
                 })

@@ -12,13 +12,13 @@ const ROUTES = [
     'HELP_SUBMISSION_DESCRIPTION',
     'SUBMISSIONS',
     'SUBMISSIONS_NEW',
+    'SUBMISSIONS_FORM',
     'SUBMISSIONS_TYPE',
     'SUBMISSIONS_CONTRACT_DETAILS',
     'SUBMISSIONS_RATE_DETAILS',
     'SUBMISSIONS_CONTACTS',
     'SUBMISSIONS_DOCUMENTS',
     'SUBMISSIONS_REVIEW_SUBMIT',
-    'SUBMISSIONS_EDIT',
 ] as const // iterable union type
 type RouteT = typeof ROUTES[number]
 
@@ -30,7 +30,7 @@ const RoutesRecord: Record<RouteT, string> = {
     HELP_SUBMISSION_DESCRIPTION: '/help/submission-description-examples',
     SUBMISSIONS: '/submissions',
     SUBMISSIONS_NEW: '/submissions/new',
-    SUBMISSIONS_EDIT: '/submissions/:id',
+    SUBMISSIONS_FORM: '/submissions/:id',
     SUBMISSIONS_TYPE: '/submissions/:id/type',
     SUBMISSIONS_CONTRACT_DETAILS: '/submissions/:id/contract-details',
     SUBMISSIONS_RATE_DETAILS: '/submissions/:id/rate-details',
@@ -54,7 +54,7 @@ const PageTitlesRecord: Record<RouteT, string> = {
     DASHBOARD: 'Dashboard - Managed Care',
     SUBMISSIONS: 'Submissions - Managed Care',
     SUBMISSIONS_NEW: 'New submission - Managed Care',
-    SUBMISSIONS_EDIT: 'NEVER SEE ME',
+    SUBMISSIONS_FORM: 'Submissions - Managed Care',
     SUBMISSIONS_TYPE: 'Submission type - Managed Care',
     SUBMISSIONS_CONTRACT_DETAILS: 'Contract Details - Managed Care',
     SUBMISSIONS_RATE_DETAILS: 'Rate Details - Managed Care',
