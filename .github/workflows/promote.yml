@@ -108,32 +108,32 @@ jobs:
           # This can optionally be set as an GitHub Actions Secret
           ./deploy.sh $STAGE_PREFIX$branch_name
 
-      - name: Set application endpoint - dev
-        run: |
-          cd services
-          endpoint=$(./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name)
-          echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
+      # - name: Set application endpoint - dev
+      #   run: |
+      #     cd services
+      #     endpoint=$(./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name)
+      #     echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
 
-      - name: Cypress run - dev
-        uses: cypress-io/github-action@v2
-        with:
-          config: baseUrl=${{env.APPLICATION_ENDPOINT}}
-        env: 
-          AUTH_MODE: ${{env.REACT_APP_AUTH_MODE}}
+      # - name: Cypress run - dev
+      #   uses: cypress-io/github-action@v2
+      #   with:
+      #     config: baseUrl=${{env.APPLICATION_ENDPOINT}}
+      #   env: 
+      #     AUTH_MODE: ${{env.REACT_APP_AUTH_MODE}}
 
-      - name: Upload cypress screenshots - dev
-        uses: actions/upload-artifact@v1
-        if: failure()
-        with:
-          name: cypress-screenshots
-          path: tests/cypress/screenshots
+      # - name: Upload cypress screenshots - dev
+      #   uses: actions/upload-artifact@v1
+      #   if: failure()
+      #   with:
+      #     name: cypress-screenshots
+      #     path: tests/cypress/screenshots
       
-      - name: Upload cypress video - dev
-        uses: actions/upload-artifact@v1
-        if: always()
-        with:
-          name: cypress-videos
-          path: tests/cypress/videos
+      # - name: Upload cypress video - dev
+      #   uses: actions/upload-artifact@v1
+      #   if: always()
+      #   with:
+      #     name: cypress-videos
+      #     path: tests/cypress/videos
 
       - name: set val aws keys
         run: ./.github/build_vars.sh set_values
@@ -143,32 +143,32 @@ jobs:
       - name: Deploy to val
         run: ./deploy.sh val
       
-      - name: Set application endpoint - val
-        run: |
-          cd services
-          endpoint=$(./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name)
-          echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
+      # - name: Set application endpoint - val
+      #   run: |
+      #     cd services
+      #     endpoint=$(./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name)
+      #     echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
 
-      - name: Cypress run - val
-        uses: cypress-io/github-action@v2
-        with:
-          config: baseUrl=${{env.APPLICATION_ENDPOINT}}
-        env: 
-          AUTH_MODE: ${{env.REACT_APP_AUTH_MODE}}
+      # - name: Cypress run - val
+      #   uses: cypress-io/github-action@v2
+      #   with:
+      #     config: baseUrl=${{env.APPLICATION_ENDPOINT}}
+      #   env: 
+      #     AUTH_MODE: ${{env.REACT_APP_AUTH_MODE}}
 
-      - name: Upload cypress screenshots - val
-        uses: actions/upload-artifact@v1
-        if: failure()
-        with:
-          name: cypress-screenshots
-          path: tests/cypress/screenshots
+      # - name: Upload cypress screenshots - val
+      #   uses: actions/upload-artifact@v1
+      #   if: failure()
+      #   with:
+      #     name: cypress-screenshots
+      #     path: tests/cypress/screenshots
       
-      - name: Upload cypress video - val
-        uses: actions/upload-artifact@v1
-        if: always()
-        with:
-          name: cypress-videos
-          path: tests/cypress/videos
+      # - name: Upload cypress video - val
+      #   uses: actions/upload-artifact@v1
+      #   if: always()
+      #   with:
+      #     name: cypress-videos
+      #     path: tests/cypress/videos
 
       - name: set prod aws keys
         run: ./.github/build_vars.sh set_values
@@ -178,29 +178,29 @@ jobs:
       - name: Deploy to prod
         run: ./deploy.sh prod
       
-      - name: Set application endpoint - prod
-        run: |
-          cd services
-          endpoint=$(./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name)
-          echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
+      # - name: Set application endpoint - prod
+      #   run: |
+      #     cd services
+      #     endpoint=$(./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name)
+      #     echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
 
-      - name: Cypress run - prod
-        uses: cypress-io/github-action@v2
-        with:
-          config: baseUrl=${{env.APPLICATION_ENDPOINT}}
-        env: 
-          AUTH_MODE: ${{env.REACT_APP_AUTH_MODE}}
+      # - name: Cypress run - prod
+      #   uses: cypress-io/github-action@v2
+      #   with:
+      #     config: baseUrl=${{env.APPLICATION_ENDPOINT}}
+      #   env: 
+      #     AUTH_MODE: ${{env.REACT_APP_AUTH_MODE}}
 
-      - name: Upload cypress screenshots - prod
-        uses: actions/upload-artifact@v1
-        if: failure()
-        with:
-          name: cypress-screenshots
-          path: tests/cypress/screenshots
+      # - name: Upload cypress screenshots - prod
+      #   uses: actions/upload-artifact@v1
+      #   if: failure()
+      #   with:
+      #     name: cypress-screenshots
+      #     path: tests/cypress/screenshots
       
-      - name: Upload cypress video - prod
-        uses: actions/upload-artifact@v1
-        if: always()
-        with:
-          name: cypress-videos
-          path: tests/cypress/videos
+      # - name: Upload cypress video - prod
+      #   uses: actions/upload-artifact@v1
+      #   if: always()
+      #   with:
+      #     name: cypress-videos
+      #     path: tests/cypress/videos
