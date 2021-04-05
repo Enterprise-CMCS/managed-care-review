@@ -117,7 +117,7 @@ jobs:
       - name: Cypress run - dev
         uses: cypress-io/github-action@v2
         with:
-          config: baseUrl=${{env.APPLICATION_ENDPOINT}}
+          config: baseUrl=${{env.APPLICATION_ENDPOINT}} AUTH_MODE=${{env.REACT_APP_AUTH_MODE}}
 
       - name: Upload cypress screenshots - dev
         uses: actions/upload-artifact@v1
@@ -150,7 +150,7 @@ jobs:
       - name: Cypress run - val
         uses: cypress-io/github-action@v2
         with:
-          config: baseUrl=${{env.APPLICATION_ENDPOINT}}
+          config: baseUrl=${{env.APPLICATION_ENDPOINT}} AUTH_MODE=${{env.REACT_APP_AUTH_MODE}}
 
       - name: Upload cypress screenshots - val
         uses: actions/upload-artifact@v1
@@ -183,7 +183,7 @@ jobs:
       - name: Cypress run - prod
         uses: cypress-io/github-action@v2
         with:
-          config: baseUrl=${{env.APPLICATION_ENDPOINT}}
+          config: baseUrl=${{env.APPLICATION_ENDPOINT}} AUTH_MODE=${{env.REACT_APP_AUTH_MODE}}
 
       - name: Upload cypress screenshots - prod
         uses: actions/upload-artifact@v1
