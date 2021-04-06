@@ -17,8 +17,8 @@ stage=${1:-dev}
 # )
 # These test users are only available in DEV environments.
 TEST_USERS=(
-  'aang.hhs.local'
-  'toph@cms.hhs.local'
+  'aang@dhs.state.mn.us'
+  'toph@dmas.virginia.gov'
 )
 
 TEST_USER_PASSWORD="Passw0rd!"
