@@ -111,6 +111,10 @@ jobs:
           cd services
           endpoint=$(./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name)
           echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
+          
+      - name: Set test users for Cypress
+        run: |
+          ./scripts/add_cypress_test_users.sh
 
       - name: Cypress run
         uses: cypress-io/github-action@v2
