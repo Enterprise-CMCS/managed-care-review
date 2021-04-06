@@ -1,13 +1,27 @@
-import {matchPath} from 'react-router'
+import { matchPath } from 'react-router'
 
 /* 
     Every application route is named here. 
     These types ensure we use valid routes throughout the application.
 */
-const ROUTES = ['ROOT', 'AUTH', 'DASHBOARD', 'HELP', 'HELP_SUBMISSION_DESCRIPTION', 'SUBMISSIONS', 'SUBMISSIONS_NEW', 'SUBMISSIONS_TYPE', 'SUBMISSIONS_CONTRACT_DETAILS', 'SUBMISSIONS_RATE_DETAILS', 'SUBMISSIONS_CONTACTS', 'SUBMISSIONS_DOCUMENTS', 'SUBMISSIONS_REVIEW_SUBMIT'] as const; // iterable union type
+const ROUTES = [
+    'ROOT',
+    'AUTH',
+    'DASHBOARD',
+    'HELP',
+    'HELP_SUBMISSION_DESCRIPTION',
+    'SUBMISSIONS',
+    'SUBMISSIONS_NEW',
+    'SUBMISSIONS_TYPE',
+    'SUBMISSIONS_CONTRACT_DETAILS',
+    'SUBMISSIONS_RATE_DETAILS',
+    'SUBMISSIONS_CONTACTS',
+    'SUBMISSIONS_DOCUMENTS',
+    'SUBMISSIONS_REVIEW_SUBMIT',
+] as const // iterable union type
 type RouteT = typeof ROUTES[number]
 
-const RoutesRecord: Record<RouteT, string> =  {
+const RoutesRecord: Record<RouteT, string> = {
     ROOT: '/',
     AUTH: '/auth',
     DASHBOARD: '/dashboard',
@@ -29,8 +43,8 @@ const PageHeadingsRecord: Record<string, string> = {
     SUBMISSIONS_NEW: 'New submission',
 }
 
-// Page titles used in <title>. 
-const PageTitlesRecord: Record<RouteT,string> = {
+// Page titles used in <title>.
+const PageTitlesRecord: Record<RouteT, string> = {
     ROOT: 'Home - Managed Care',
     AUTH: 'Login - Managed Care',
     HELP: 'Help - Managed Care',
@@ -47,14 +61,20 @@ const PageTitlesRecord: Record<RouteT,string> = {
 }
 
 const getRouteName = (pathname: string): RouteT | 'UNKNOWN_ROUTE' => {
-    const match = ROUTES.find(route => 
-        matchPath(pathname,  {
-        path: RoutesRecord[route],
-        exact: true,
-        strict: true
-      }) 
-)
-        return match ? match :  'UNKNOWN_ROUTE'
+    const match = ROUTES.find((route) =>
+        matchPath(pathname, {
+            path: RoutesRecord[route],
+            exact: true,
+            strict: true,
+        })
+    )
+    return match ? match : 'UNKNOWN_ROUTE'
 }
 
-export {PageHeadingsRecord, PageTitlesRecord, RoutesRecord, ROUTES, getRouteName}
+export {
+    PageHeadingsRecord,
+    PageTitlesRecord,
+    RoutesRecord,
+    ROUTES,
+    getRouteName,
+}
