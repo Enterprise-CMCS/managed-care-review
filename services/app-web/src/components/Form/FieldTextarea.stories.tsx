@@ -18,9 +18,9 @@ const Template: Story<TextAreaProps> = (args) => (
     </Formik>
 )
 
-export const Draft = Template.bind({})
+export const Default = Template.bind({})
 
-Draft.args = {
+Default.args = {
     label: "Submission description",
     id: "submission-description",
     showError: false,
