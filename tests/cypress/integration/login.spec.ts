@@ -6,9 +6,7 @@ describe('Login', () => {
             button.trigger('click')
             cy.url().should('eq', Cypress.config().baseUrl + '/auth');
             cy.findByRole('link', {name: /Sign In/i}).should('exist')
-        })
-
-       
+        }) 
     })  
 
     it('user can login and see personal dashboard for their state', () => {
