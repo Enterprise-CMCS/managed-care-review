@@ -3,19 +3,18 @@ import React, { useEffect } from 'react'
 import { GridContainer } from '@trussworks/react-uswds'
 import { Switch, Route, useParams } from 'react-router-dom'
 
+import { Loading } from '../../components/Loading/'
 import { usePage } from '../../contexts/PageContext'
+import { RoutesRecord } from '../../constants/routes'
 import { ContractDetails } from './ContractDetails'
 import { ReviewSubmit } from './ReviewSubmit/ReviewSubmit'
 import { SubmissionType } from './SubmissionType'
-import { RoutesRecord } from '../../constants/routes'
 
 import { useShowDraftSubmissionQuery } from '../../gen/gqlClient'
 
 export const StateSubmissionForm = (): React.ReactElement => {
     const { id } = useParams<{ id: string }>()
-    if (id === undefined) {
-        return <div>notyet</div>
-    }
+
     const { updateHeading } = usePage()
 
     const { data, loading, error } = useShowDraftSubmissionQuery({
@@ -32,10 +31,14 @@ export const StateSubmissionForm = (): React.ReactElement => {
         if (draft) {
             updateHeading(draft.name)
         }
-    }, [data])
+    }, [data, updateHeading])
 
     if (loading) {
-        return <div>Loading...</div>
+        return (
+            <GridContainer>
+                <Loading />
+            </GridContainer>
+        )
     }
 
     if (error) {
