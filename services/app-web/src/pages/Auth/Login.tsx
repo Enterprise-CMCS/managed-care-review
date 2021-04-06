@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import {
+    Alert,
     Button,
     Form,
     FormGroup,
@@ -11,15 +12,12 @@ import { useHistory } from 'react-router-dom'
 import { signIn } from '../Auth/cognitoAuth'
 import { useAuth } from '../../contexts/AuthContext'
 
-export function showError(error: string): void {
-    console.log('showError', error)
-}
-
 type Props = {
     defaultEmail?: string
 }
 
 export function Login({ defaultEmail }: Props): React.ReactElement {
+    const [showFormAlert, setShowFormAlert] = React.useState(false)
     const [fields, setFields] = useState({
         loginEmail: defaultEmail || '',
         loginPassword: '',
@@ -32,6 +30,7 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
     const onFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = event.target
         setFields((prevFields) => ({ ...prevFields, ...fields, [id]: value }))
+        if (showFormAlert) setShowFormAlert(false)
     }
 
     function validateForm() {
@@ -59,12 +58,14 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
                 } else {
                     console.log('Unknown error from Amplify: ', result)
                 }
-                showError(result.message)
+                setShowFormAlert(true)
+                console.log('Error', result.message)
             } else {
                 try {
                     await checkAuth()
                 } catch (e) {
-                    console.log('UNEXPECTED NOT LOGGED IN AFTETR LOGGIN', e)
+                    console.log('UNEXPECTED NOT LOGGED IN AFTER LOGGIN', e)
+                    setShowFormAlert(true)
                 }
 
                 history.push('/dashboard')
@@ -76,6 +77,7 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
 
     return (
         <Form onSubmit={handleSubmit} name="Login" aria-label="Login Form">
+            {showFormAlert && <Alert type="error">Something went wrong</Alert>}
             <FormGroup>
                 <Label htmlFor="loginEmail">Email</Label>
                 <TextInput
