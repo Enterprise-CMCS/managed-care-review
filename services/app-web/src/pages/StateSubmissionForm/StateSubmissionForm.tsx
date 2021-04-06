@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 
-import { GridContainer } from '@trussworks/react-uswds'
+import { Alert, GridContainer } from '@trussworks/react-uswds'
 import { Switch, Route, useParams } from 'react-router-dom'
 
 import { Loading } from '../../components/Loading/'
@@ -43,14 +43,26 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
     if (error) {
         console.log('error loading draft:', error)
-        return <div>Error loading submission to edit!</div>
+        return (
+            <GridContainer>
+                <Alert type="error">
+                    Something went wrong, try refreshing?
+                </Alert>
+            </GridContainer>
+        )
     }
 
     const draft = data?.showDraftSubmission?.draftSubmission
 
     if (draft === undefined || draft === null) {
-        console.log('got undefined back from showDraftSubmission')
-        return <div>Error loading submission to edit!</div>
+        console.log('got undefined back from loaded showDraftSubmission')
+        return (
+            <GridContainer>
+                <Alert type="error">
+                    Something went wrong, try refreshing?
+                </Alert>
+            </GridContainer>
+        )
     }
 
     return (
