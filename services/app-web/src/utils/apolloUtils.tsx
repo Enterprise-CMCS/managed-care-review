@@ -29,8 +29,8 @@ const mockDraftSubmission: DraftSubmission = {
     id: 'test-abc-123',
     stateCode: 'MN',
     program: {
-        id: 'msho',
-        name: 'MSHO',
+        id: 'snbc',
+        name: 'SNBC',
     },
     name: 'MN-MSHO-0001',
     submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
