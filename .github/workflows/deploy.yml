@@ -114,7 +114,7 @@ jobs:
           
       - name: Set test users for Cypress
         run: |
-          ./scripts/add_cypress_test_users.sh
+          ./scripts/add_cypress_test_users.sh $STAGE_PREFIX$branch_name
 
       - name: Cypress run
         uses: cypress-io/github-action@v2
