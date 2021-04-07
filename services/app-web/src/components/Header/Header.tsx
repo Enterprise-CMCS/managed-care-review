@@ -112,7 +112,7 @@ export const Header = ({
                                 alt="One Mac"
                                 className={styles.logoImg}
                             />
-                            <span>Manged Care Review</span>
+                            <span>Managed Care Review</span>
                         </NavLink>
                         <UserInfo />
                     </Grid>
