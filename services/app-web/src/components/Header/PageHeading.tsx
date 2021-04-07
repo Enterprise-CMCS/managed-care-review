@@ -38,7 +38,7 @@ export const PageHeading = ({
                 <h1>
                     {!isLoading && (
                         <>
-                            <span className="text-bold">MAC-MCRRS&nbsp;</span>
+                            <span className="text-bold">Manged Care Review&nbsp;</span>
                             <span className="font-heading-lg">
                                 Medicaid and CHIP Managed Care Reporting and
                                 Review System
