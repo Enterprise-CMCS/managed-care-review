@@ -14,11 +14,9 @@
  */
 // eslint-disable-next-line no-unused-vars
 module.exports = (on, config) => {
+    const newConfig = config
+    newConfig.env.AUTH_MODE = process.env.AUTH_MODE
+    newConfig.env.TEST_USERS_PASS = process.env.TEST_USERS_PASS
 
-  const newConfig = config;
-  newConfig.env.AUTH_MODE = process.env.AUTH_MODE
-  
-  return config;
-};
-
-
+    return config
+}
