@@ -7,6 +7,7 @@ import {
     getCurrentUserResolver,
     createDraftSubmissionResolver,
     showDraftSubmissionResolver,
+    draftSubmissionResolver,
 } from '../resolvers'
 import { userResolver } from '../resolvers/userResolver'
 import { Context } from '../handlers/apollo_gql'
@@ -18,10 +19,11 @@ const testResolvers: Resolvers = {
         getCurrentUser: getCurrentUserResolver(),
         showDraftSubmission: showDraftSubmissionResolver(store),
     },
-    User: userResolver,
     Mutation: {
         createDraftSubmission: createDraftSubmissionResolver(store),
     },
+    User: userResolver,
+    DraftSubmission: draftSubmissionResolver,
 }
 
 const defaultContext = (): Context => {

@@ -18,6 +18,7 @@ import {
     createDraftSubmissionResolver,
     getCurrentUserResolver,
     userResolver,
+    draftSubmissionResolver,
 } from '../resolvers'
 import { Resolvers } from '../gen/gqlServer'
 import {
@@ -63,6 +64,7 @@ const resolvers: Resolvers = {
         createDraftSubmission: createDraftSubmissionResolver(store),
     },
     User: userResolver,
+    DraftSubmission: draftSubmissionResolver,
 }
 
 export interface Context {

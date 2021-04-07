@@ -2,8 +2,7 @@ import { ForbiddenError } from 'apollo-server-lambda'
 
 import { isStoreError, Store } from '../store/index'
 
-import statePrograms from '../data/statePrograms.json'
-import { QueryResolvers, SubmissionType, State } from '../gen/gqlServer'
+import { QueryResolvers, State } from '../gen/gqlServer'
 
 import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
 
@@ -16,7 +15,6 @@ export function showDraftSubmissionResolver(
         // fetch from the store
         const result = await store.findDraftSubmission(input.submissionID)
 
-        console.log('RESULT!', result)
         if (isStoreError(result)) {
             throw new Error('unimplmented error: ${result}')
         }
@@ -36,29 +34,6 @@ export function showDraftSubmissionResolver(
             )
         }
 
-        // get the program from this programID (this should be its own resolver)
-        const program = statePrograms.states
-            .find((state) => state.code === stateFromCurrentUser)
-            ?.programs.find((program) => program.id == draft.programID)
-
-        if (program === undefined) {
-            throw new Error(
-                `The program id ${draft.programID} does not exist in state ${stateFromCurrentUser}`
-            )
-        }
-
-        const padNumber = draft.stateNumber.toString().padStart(4, '0')
-        const draftSubmission = {
-            id: draft.id,
-            createdAt: draft.createdAt,
-            submissionDescription: draft.submissionDescription,
-            name: `${draft.stateCode}-${program.name}-${padNumber}`,
-            submissionType: draft.submissionType as SubmissionType,
-            program,
-            stateCode: draft.stateCode,
-        }
-        return {
-            draftSubmission,
-        }
+        return { draftSubmission: draft }
     }
 }

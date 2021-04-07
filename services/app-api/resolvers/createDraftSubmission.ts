@@ -38,22 +38,10 @@ export function createDraftSubmissionResolver(
                 throw new Error(
                     `Issue creating a draft submission of type ${draftSubResult.code}. Message: ${draftSubResult.message}`
                 )
-            } else {
-                const padNumber = draftSubResult.stateNumber
-                    .toString()
-                    .padStart(4, '0')
-                const draftSubmission = {
-                    id: draftSubResult.id,
-                    createdAt: draftSubResult.createdAt,
-                    submissionDescription: draftSubResult.submissionDescription,
-                    name: `${draftSubResult.stateCode}-${program.name}-${padNumber}`,
-                    submissionType: draftSubResult.submissionType as SubmissionType,
-                    program,
-                    stateCode: draftSubResult.stateCode,
-                }
-                return {
-                    draftSubmission,
-                }
+            }
+
+            return {
+                draftSubmission: draftSubResult,
             }
         } catch (createErr) {
             console.log('Error creating a draft submission:', createErr)
