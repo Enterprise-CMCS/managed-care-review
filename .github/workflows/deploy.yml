@@ -59,6 +59,7 @@ jobs:
           IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.IAM_PERMISSIONS_BOUNDARY_POLICY }}
           STAGE_PREFIX: ${{ secrets.STAGE_PREFIX }}
           DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
+          TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
       - name: lock this branch to prevent concurrent builds
         run: ./.github/github-lock.sh
         env:
@@ -111,25 +112,23 @@ jobs:
           cd services
           endpoint=$(./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name)
           echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
-          
+
       - name: Set test users for Cypress
         run: |
-          ./scripts/add_cypress_test_users.sh $STAGE_PREFIX$branch_name ${{secrets.TEST_USERS_PASS}}
+          ./scripts/add_cypress_test_users.sh $STAGE_PREFIX$branch_name
 
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
           config: baseUrl=${{env.APPLICATION_ENDPOINT}}
-        env: 
-          AUTH_MODE: ${{env.REACT_APP_AUTH_MODE}}
-          TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
+
       - name: Upload cypress screenshots
         uses: actions/upload-artifact@v1
         if: failure()
         with:
           name: cypress-screenshots
           path: tests/cypress/screenshots
-      
+
       - name: Upload cypress video
         uses: actions/upload-artifact@v1
         if: always()
