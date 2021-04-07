@@ -13,7 +13,7 @@ type PageHeadingProps = {
 
 export const PageHeading = ({
     isLoading = false,
-    heading = 'Managed Care Dashboard',
+    heading = 'Dashboard',
     loggedInUser,
 }: PageHeadingProps): React.ReactElement => {
     return loggedInUser ? (
