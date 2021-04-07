@@ -14,7 +14,9 @@ export function showDraftSubmissionResolver(
         const result = await store.findDraftSubmission(input.submissionID)
 
         if (isStoreError(result)) {
-            throw new Error('unimplmented error: ${result}')
+            throw new Error(
+                `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
+            )
         }
 
         if (result === undefined) {
