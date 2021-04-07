@@ -4,8 +4,7 @@ import {
     Store,
 } from '../store/index'
 
-import statePrograms from '../data/statePrograms.json'
-import { MutationResolvers, SubmissionType, State } from '../gen/gqlServer'
+import { MutationResolvers, State } from '../gen/gqlServer'
 
 // TODO: potential refactor: pull out database interactions into /datasources createDraftSubmission as per apollo server docs
 export function createDraftSubmissionResolver(
@@ -13,9 +12,8 @@ export function createDraftSubmissionResolver(
 ): MutationResolvers['createDraftSubmission'] {
     return async (_parent, { input }, context) => {
         const stateFromCurrentUser: State['code'] = context.user.state_code
-        const program = statePrograms.states
-            .find((state) => state.code === stateFromCurrentUser)
-            ?.programs.find((program) => program.id == input.programId)
+
+        const program = store.findProgram(stateFromCurrentUser, input.programId)
 
         if (program === undefined) {
             throw new Error(

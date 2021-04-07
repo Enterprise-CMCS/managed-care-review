@@ -9,8 +9,12 @@ import {
     findDraftSubmission,
     findDraftSubmissionByStateNumber,
 } from './findDraftSubmission'
+import { findProgram } from './findProgram'
 import { StoreError } from './storeError'
-import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
+import {
+    DraftSubmissionType,
+    ProgramT,
+} from '../../app-web/src/common-code/domain-models'
 
 export type Store = {
     insertDraftSubmission: (
@@ -24,6 +28,8 @@ export type Store = {
         stateCoder: string,
         stateNumber: number
     ) => Promise<DraftSubmissionType | undefined | StoreError>
+
+    findProgram: (stateCode: string, programID: string) => ProgramT | undefined
 }
 
 export function storeWithDynamoConfig(
@@ -42,6 +48,7 @@ export function storeWithDynamoConfig(
             findDraftSubmission(mapper, draftUUID),
         findDraftSubmissionByStateNumber: (stateCode, stateNumber) =>
             findDraftSubmissionByStateNumber(mapper, stateCode, stateNumber),
+        findProgram: findProgram,
     }
 }
 

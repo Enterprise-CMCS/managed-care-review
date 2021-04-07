@@ -10,8 +10,6 @@ export function showDraftSubmissionResolver(
     store: Store
 ): QueryResolvers['showDraftSubmission'] {
     return async (_parent, { input }, context) => {
-        const stateFromCurrentUser: State['code'] = context.user.state_code
-
         // fetch from the store
         const result = await store.findDraftSubmission(input.submissionID)
 
@@ -28,6 +26,7 @@ export function showDraftSubmissionResolver(
         const draft: DraftSubmissionType = result
 
         // Authorization
+        const stateFromCurrentUser: State['code'] = context.user.state_code
         if (draft.stateCode !== stateFromCurrentUser) {
             throw new ForbiddenError(
                 'user not authorized to fetch data from a different state'

@@ -64,7 +64,7 @@ const resolvers: Resolvers = {
         createDraftSubmission: createDraftSubmissionResolver(store),
     },
     User: userResolver,
-    DraftSubmission: draftSubmissionResolver,
+    DraftSubmission: draftSubmissionResolver(store),
 }
 
 export interface Context {

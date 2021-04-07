@@ -7,7 +7,6 @@ export { assertIsAuthMode, assertNever } from './config'
 export { isCognitoUser } from './user'
 export type { CognitoUserType } from './cognitoUserType'
 
-export type {
-	DraftSubmissionType,
-	SubmissionType,
-} from './DraftSubmissionType'
+export type { DraftSubmissionType, SubmissionType } from './DraftSubmissionType'
+
+export type { ProgramT } from './ProgramT'

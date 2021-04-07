@@ -1,35 +1,40 @@
 import { Resolvers } from '../gen/gqlServer'
 import statePrograms from '../data/statePrograms.json'
+import { Store } from '../store'
 
-export const draftSubmissionResolver: Resolvers['DraftSubmission'] = {
-    program(parent) {
-        const stateFromCurrentUser = parent.stateCode
-        const program = statePrograms.states
-            .find((state) => state.code === stateFromCurrentUser)
-            ?.programs.find((program) => program.id == parent.programID)
-
-        if (program === undefined) {
-            throw new Error(
-                `The program id ${parent.programID} does not exist in state ${stateFromCurrentUser}`
+export function draftSubmissionResolver(
+    store: Store
+): Resolvers['DraftSubmission'] {
+    return {
+        program(parent) {
+            const program = store.findProgram(
+                parent.stateCode,
+                parent.programID
             )
-        }
 
-        return program
-    },
+            if (program === undefined) {
+                throw new Error(
+                    `The program id ${parent.programID} does not exist in state ${parent.stateCode}`
+                )
+            }
 
-    name(parent) {
-        const stateFromCurrentUser = parent.stateCode
-        const program = statePrograms.states
-            .find((state) => state.code === stateFromCurrentUser)
-            ?.programs.find((program) => program.id == parent.programID)
+            return program
+        },
 
-        if (program === undefined) {
-            throw new Error(
-                `The program id ${parent.programID} does not exist in state ${stateFromCurrentUser}`
+        name(parent) {
+            const program = store.findProgram(
+                parent.stateCode,
+                parent.programID
             )
-        }
 
-        const padNumber = parent.stateNumber.toString().padStart(4, '0')
-        return `${parent.stateCode}-${program.name}-${padNumber}`
-    },
+            if (program === undefined) {
+                throw new Error(
+                    `The program id ${parent.programID} does not exist in state ${parent.stateCode}`
+                )
+            }
+
+            const padNumber = parent.stateNumber.toString().padStart(4, '0')
+            return `${parent.stateCode}-${program.name}-${padNumber}`
+        },
+    }
 }

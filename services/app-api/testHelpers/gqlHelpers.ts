@@ -23,7 +23,7 @@ const testResolvers: Resolvers = {
         createDraftSubmission: createDraftSubmissionResolver(store),
     },
     User: userResolver,
-    DraftSubmission: draftSubmissionResolver,
+    DraftSubmission: draftSubmissionResolver(store),
 }
 
 const defaultContext = (): Context => {
