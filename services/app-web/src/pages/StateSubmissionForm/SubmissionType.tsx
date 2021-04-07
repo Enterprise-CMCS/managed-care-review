@@ -42,13 +42,13 @@ export interface SubmissionTypeFormValues {
 }
 type SubmissionTypeProps = {
     showValidations?: boolean
-    initialValues?: DraftSubmission
+    draftSubmission?: DraftSubmission
 }
 
 type FormError = FormikErrors<SubmissionTypeFormValues>[keyof FormikErrors<SubmissionTypeFormValues>]
 export const SubmissionType = ({
     showValidations = false,
-    initialValues = undefined,
+    draftSubmission = undefined,
 }: SubmissionTypeProps): React.ReactElement => {
     const [showFormAlert, setShowFormAlert] = React.useState(false)
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
@@ -80,19 +80,11 @@ export const SubmissionType = ({
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
-    const submissionTypeInitialValues: SubmissionTypeFormValues = {
-        programId: programs[0]?.id, // TODO: change this to be the program selected on the tab
-        submissionDescription: '',
-        submissionType: '',
-    }
 
-    // if we have initial values, we should set them.
-    if (initialValues) {
-        submissionTypeInitialValues.programId = initialValues.program.id
-        submissionTypeInitialValues.submissionDescription =
-            initialValues.submissionDescription
-        submissionTypeInitialValues.submissionType =
-            initialValues.submissionType
+    const submissionTypeInitialValues: SubmissionTypeFormValues = {
+        programId: draftSubmission?.program.id ?? programs[0]?.id, // TODO: change this to be the program selected on the tab
+        submissionDescription: draftSubmission?.submissionDescription ?? '',
+        submissionType: draftSubmission?.submissionType ?? '',
     }
 
     const handleFormSubmit = async (

@@ -1,5 +1,4 @@
 import { Resolvers } from '../gen/gqlServer'
-import statePrograms from '../data/statePrograms.json'
 import { Store } from '../store'
 
 export function draftSubmissionResolver(

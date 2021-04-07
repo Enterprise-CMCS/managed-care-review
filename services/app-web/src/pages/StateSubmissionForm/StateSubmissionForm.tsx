@@ -71,7 +71,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                 <Route
                     path={RoutesRecord.SUBMISSIONS_TYPE}
                     render={(props) => (
-                        <SubmissionType initialValues={draft} {...props} />
+                        <SubmissionType draftSubmission={draft} {...props} />
                     )}
                 />
                 <Route
