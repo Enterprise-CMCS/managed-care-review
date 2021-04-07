@@ -7,6 +7,7 @@ import { AppRoutes } from './AppRoutes'
 import { Error400 } from '../Errors/Error400'
 import { Footer } from '../../components/Footer/Footer'
 import { Header } from '../../components/Header/Header'
+import { Loading } from '../../components/Loading'
 
 import { AuthModeType } from '../../common-code/domain-models'
 import { useAuth } from '../../contexts/AuthContext'
@@ -65,9 +66,7 @@ export function AppBody({
             <main id="main-content" className={styles.mainContent} role="main">
                 {alert && Error400}
                 {loginStatus === 'LOADING' ? (
-                    showLoading === 'SHOW_LOADING' && (
-                        <h2 className={styles.loadingLabel}>Loading...</h2>
-                    )
+                    showLoading === 'SHOW_LOADING' && <Loading />
                 ) : (
                     <AppRoutes authMode={authMode} />
                 )}

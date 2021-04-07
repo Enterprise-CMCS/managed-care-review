@@ -1,39 +1,78 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 
-import { GridContainer } from '@trussworks/react-uswds'
-import { Switch, Route } from 'react-router-dom'
+import { Alert, GridContainer } from '@trussworks/react-uswds'
+import { Switch, Route, useParams } from 'react-router-dom'
 
+import { Loading } from '../../components/Loading/'
+import { usePage } from '../../contexts/PageContext'
+import { RoutesRecord } from '../../constants/routes'
 import { ContractDetails } from './ContractDetails'
 import { ReviewSubmit } from './ReviewSubmit/ReviewSubmit'
 import { SubmissionType } from './SubmissionType'
-import { RoutesRecord } from '../../constants/routes'
+
+import { useShowDraftSubmissionQuery } from '../../gen/gqlClient'
 
 export const StateSubmissionForm = (): React.ReactElement => {
-    // TODO: move handling of page heading to this level once we have more pages
-    // const { pathname } = useLocation()
-    // const { updateHeading } = usePage()
-    // const isNewSubmission = pathname === RoutesRecord.SUBMISSIONS_NEW
+    const { id } = useParams<{ id: string }>()
 
-    // React.useEffect(() => {
-    //     if (!isNewSubmission) {
-    //         // updateHeading('CUSTOM-SUBMISSION--OO1')
-    //     }
+    const { updateHeading } = usePage()
 
-    //     return function cleanup() {
-    //         updateHeading(undefined)
-    //     }
-    // })
+    const { data, loading, error } = useShowDraftSubmissionQuery({
+        variables: {
+            input: {
+                submissionID: id,
+            },
+        },
+    })
+
+    useEffect(() => {
+        // We have to updateHeading inside useEffect so that we don't update two components at the same time
+        const draft = data?.showDraftSubmission?.draftSubmission
+        if (draft) {
+            updateHeading(draft.name)
+        }
+    }, [data, updateHeading])
+
+    if (loading) {
+        return (
+            <GridContainer>
+                <Loading />
+            </GridContainer>
+        )
+    }
+
+    if (error) {
+        console.log('error loading draft:', error)
+        return (
+            <GridContainer>
+                <Alert type="error">
+                    Something went wrong, try refreshing?
+                </Alert>
+            </GridContainer>
+        )
+    }
+
+    const draft = data?.showDraftSubmission?.draftSubmission
+
+    if (draft === undefined || draft === null) {
+        console.log('got undefined back from loaded showDraftSubmission')
+        return (
+            <GridContainer>
+                <Alert type="error">
+                    Something went wrong, try refreshing?
+                </Alert>
+            </GridContainer>
+        )
+    }
 
     return (
         <GridContainer>
             <Switch>
                 <Route
-                    path={RoutesRecord.SUBMISSIONS_NEW}
-                    component={SubmissionType}
-                />
-                <Route
                     path={RoutesRecord.SUBMISSIONS_TYPE}
-                    component={SubmissionType}
+                    render={(props) => (
+                        <SubmissionType draftSubmission={draft} {...props} />
+                    )}
                 />
                 <Route
                     path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}

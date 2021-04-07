@@ -50,3 +50,25 @@ export class DraftSubmissionStoreType {
         this.stateNumber = -1
     }
 }
+
+export type DynamoError = {
+    code: string
+}
+
+export function isDynamoError(err: unknown): err is DynamoError {
+    if (err && typeof err == 'object' && 'code' in err) {
+        return true
+    }
+    return false
+}
+
+export type MapperError = {
+    name: string
+}
+
+export function isMapperError(err: unknown): err is MapperError {
+    if (err && typeof err == 'object' && 'name' in err) {
+        return true
+    }
+    return false
+}

@@ -1,8 +1,8 @@
-import { DraftSubmissionStoreType } from './draftSubmissionStoreType'
+import { DraftSubmissionStoreType } from './dynamoTypes'
 import { getTestStore, getTestDynamoMapper } from '../testHelpers/storeHelpers'
 import { storeWithDynamoConfig } from './store'
 
-import { isStoreError } from './insertDraftSubmission'
+import { isStoreError } from './storeError'
 
 describe('insertDraftSubmission', () => {
     it('creates a new submission from scratch', async () => {
@@ -115,7 +115,7 @@ describe('insertDraftSubmission', () => {
         }
     })
 
-    it('makes a consecutive state ID', async () => {
+    it('makes an increasing state ID', async () => {
         // get a connection to the db
 
         const store = getTestStore()
@@ -198,8 +198,8 @@ describe('insertDraftSubmission', () => {
                 )
 
                 expect(one.id).not.toEqual(two.id)
-                expect(two.stateNumber).toEqual(one.stateNumber + 1)
-                expect(twoIN.stateNumber).toEqual(oneIN.stateNumber + 1)
+                expect(two.stateNumber).toBeGreaterThan(one.stateNumber)
+                expect(twoIN.stateNumber).toBeGreaterThan(oneIN.stateNumber)
             } catch (dynamoErr) {
                 console.log(dynamoErr)
                 throw new Error(dynamoErr)

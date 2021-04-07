@@ -4,6 +4,7 @@ import {
     SubmissionType,
     User as UserType,
     CreateDraftSubmissionDocument,
+    ShowDraftSubmissionDocument,
 } from '../gen/gqlClient'
 import { MockedResponse } from '@apollo/client/testing'
 
@@ -28,8 +29,8 @@ const mockDraftSubmission: DraftSubmission = {
     id: 'test-abc-123',
     stateCode: 'MN',
     program: {
-        id: 'msho',
-        name: 'MSHO',
+        id: 'snbc',
+        name: 'SNBC',
     },
     name: 'MN-MSHO-0001',
     submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
@@ -102,4 +103,48 @@ const createDraftSubmissionMock = ({
     }
 }
 
-export { getCurrentUserMock, createDraftSubmissionMock }
+type showDraftSubmissionMockProps = {
+    draftSubmission?: DraftSubmission | Partial<DraftSubmission>
+    id: string
+    statusCode: 200 | 403 | 500
+}
+
+const showDraftSubmissionMock = ({
+    draftSubmission = mockDraftSubmission,
+    id,
+    statusCode, // eslint-disable-next-line @typescript-eslint/no-explicit-any
+}: showDraftSubmissionMockProps): MockedResponse<Record<string, any>> => {
+    switch (statusCode) {
+        case 200:
+            return {
+                request: {
+                    query: ShowDraftSubmissionDocument,
+                    variables: { input: { submissionID: id } },
+                },
+                // error: new Error('You are not logged in'),
+                result: {
+                    data: {
+                        showDraftSubmission: {
+                            draftSubmission,
+                        },
+                    },
+                },
+            }
+        case 403:
+            return {
+                request: { query: ShowDraftSubmissionDocument },
+                error: new Error('You are not logged in'),
+            }
+        default:
+            return {
+                request: { query: ShowDraftSubmissionDocument },
+                error: new Error('A network error occurred'),
+            }
+    }
+}
+
+export {
+    getCurrentUserMock,
+    createDraftSubmissionMock,
+    showDraftSubmissionMock,
+}
