@@ -119,11 +119,13 @@ jobs:
         with:
           name: test_results
           path: tests/nightwatch/tests_output
-      - name: set val aws keys
+      - name: set val env vars
         run: ./.github/build_vars.sh set_values
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.VAL_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.VAL_AWS_SECRET_ACCESS_KEY }}
+          OKTA_METADATA_URL: ${{ secrets.VAL_OKTA_METADATA_URL }}
+          REACT_APP_AUTH_MODE: IDM
       - name: Deploy to val
         run: ./deploy.sh val
       - name: Run Nightwatch suite on val
@@ -137,11 +139,12 @@ jobs:
         with:
           name: test_results
           path: tests/nightwatch/tests_output
-      - name: set prod aws keys
+      - name: set prod env vars
         run: ./.github/build_vars.sh set_values
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
+          REACT_APP_AUTH_MODE: AWS_COGNITO
       - name: Deploy to prod
         run: ./deploy.sh prod
       - name: Run Nightwatch suite on prod
