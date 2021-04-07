@@ -2,16 +2,26 @@ import React from 'react'
 import { screen, render } from '@testing-library/react'
 import { FormTextarea } from './FieldTextarea'
 import { Link } from '@trussworks/react-uswds'
-import { useField } from 'formik'; // Also saw this in Suz's test file, unsure if I need this
+import { useField } from 'formik';
 
 // mock out formik hook as we are not testing formik
 // needs to be before first describe
 
-jest.mock('formik'); // I'm not sure if I need this, I saw it in Suz's test file
+jest.mock('formik'); 
 
 describe('FieldTextarea component', () => {
     it('renders without errors', () => {
-        // Do these need to be wrapped in <Formik> like the stories?
+        const mockField = {
+            value: '',
+            checked: false,
+            onChange: jest.fn(),
+            onBlur: jest.fn(),
+            multiple: undefined,
+            name: 'input1',
+        };
+      
+        useField.mockReturnValue([mockField]);
+
         render(<FormTextarea 
             id="input1" 
             label="default label" 
@@ -21,6 +31,17 @@ describe('FieldTextarea component', () => {
     })
 
     it('displays hint', () => {
+        const mockField = {
+            value: '',
+            checked: false,
+            onChange: jest.fn(),
+            onBlur: jest.fn(),
+            multiple: undefined,
+            name: 'input1',
+        };
+    
+        useField.mockReturnValue([mockField]);
+
         render(<FormTextarea 
             id="input1" 
             label="default label" 
@@ -42,6 +63,17 @@ describe('FieldTextarea component', () => {
     })
 
     it('displays with errors', () => {
+        const mockField = {
+            value: '',
+            checked: false,
+            onChange: jest.fn(),
+            onBlur: jest.fn(),
+            multiple: undefined,
+            name: 'input1',
+        };
+    
+        useField.mockReturnValue([mockField]);
+
         render(<FormTextarea 
             id="input1" 
             label="default label" 
