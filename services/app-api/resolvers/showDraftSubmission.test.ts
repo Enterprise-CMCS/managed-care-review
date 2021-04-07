@@ -62,6 +62,54 @@ describe('createDraftSubmission', () => {
         expect(result.data.showDraftSubmission.draftSubmission).toBeNull()
     })
 
+    it('a different user from the same state can fetch the draft', async () => {
+        const server = constructTestServer()
+
+        const { mutate } = createTestClient(server)
+
+        // First, create a new submission
+        const createInput: CreateDraftSubmissionInput = {
+            programId: 'smmc',
+            submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
+            submissionDescription: 'A real submission',
+        }
+        const createResult = await mutate({
+            mutation: CREATE_DRAFT_SUBMISSION,
+            variables: { input: createInput },
+        })
+
+        const createdID =
+            createResult.data.createDraftSubmission.draftSubmission.id
+
+        // then see if we can fetch that same submission
+        const input = {
+            submissionID: createdID,
+        }
+
+        // setup a server with a different user
+        const otherUserServer = constructTestServer({
+            context: {
+                user: {
+                    name: 'Aang',
+                    state_code: 'FL',
+                    role: 'STATE_USER',
+                    email: 'aang@mn.gov',
+                },
+            },
+        })
+
+        const { query } = createTestClient(otherUserServer)
+
+        const result = await query({
+            query: SHOW_DRAFT_SUBMISSION,
+            variables: { input },
+        })
+
+        expect(result.errors).toBeUndefined()
+
+        expect(result.data).toBeDefined()
+    })
+
     it('returns an error if you are requesting for a different state (403)', async () => {
         const server = constructTestServer()
 
