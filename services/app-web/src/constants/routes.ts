@@ -41,7 +41,7 @@ const RoutesRecord: Record<RouteT, string> = {
 
 // Page headings used in <header> h1. Dynamic headings are set in page specific parent component.
 const PageHeadingsRecord: Record<string, string> = {
-    DASHBOARD: 'Managed Care Dashboard',
+    DASHBOARD: 'Dashboard',
     SUBMISSIONS_NEW: 'New submission',
 }
 

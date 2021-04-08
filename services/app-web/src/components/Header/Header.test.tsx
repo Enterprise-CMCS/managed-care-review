@@ -20,7 +20,7 @@ describe('Header', () => {
             renderWithProviders(<Header authMode={'AWS_COGNITO'} />)
             const logoImage = screen.getByRole('img')
             const logoLink = screen.getByRole('link', {
-                name: /Medicaid.gov-Keeping America Healthy/i,
+                name: /One Mac/i,
             })
             expect(logoLink).toBeVisible()
             expect(logoLink).toHaveAttribute('href', '/dashboard')
@@ -69,7 +69,7 @@ describe('Header', () => {
             })
             const logoImage = screen.getByRole('img')
             const logoLink = screen.getByRole('link', {
-                name: /Medicaid.gov-Keeping America Healthy/i,
+                name: /One Mac/i,
             })
             expect(logoLink).toBeVisible()
             expect(logoLink).toHaveAttribute('href', '/dashboard')

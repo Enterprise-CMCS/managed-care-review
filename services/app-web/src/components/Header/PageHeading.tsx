@@ -13,7 +13,7 @@ type PageHeadingProps = {
 
 export const PageHeading = ({
     isLoading = false,
-    heading = 'Managed Care Dashboard',
+    heading = 'Dashboard',
     loggedInUser,
 }: PageHeadingProps): React.ReactElement => {
     return loggedInUser ? (
@@ -38,7 +38,7 @@ export const PageHeading = ({
                 <h1>
                     {!isLoading && (
                         <>
-                            <span className="text-bold">MAC-MCRRS&nbsp;</span>
+                            <span className="text-bold">Managed Care Review&nbsp;</span>
                             <span className="font-heading-lg">
                                 Medicaid and CHIP Managed Care Reporting and
                                 Review System

@@ -27,7 +27,7 @@ export function AppBody({
     */
     const title =
         route === 'UNKNOWN_ROUTE'
-            ? 'Managed Care Dashboard'
+            ? 'Dashboard'
             : PageTitlesRecord[route]
     useTitle(title)
 
