@@ -14,7 +14,13 @@ import {
     Label,
     Textarea,
 } from '@trussworks/react-uswds'
-import { Field, Formik, FormikHelpers, FormikErrors } from 'formik'
+import {
+    Field,
+    Formik,
+    FormikHelpers,
+    FormikErrors,
+    useFormikContext,
+} from 'formik'
 import { NavLink, useHistory } from 'react-router-dom'
 import PageHeading from '../../components/PageHeading'
 import { useMutation } from '@apollo/client'
@@ -27,14 +33,30 @@ import {
 } from '../../gen/gqlClient'
 import { useAuth } from '../../contexts/AuthContext'
 import { SubmissionTypeRecord } from '../../constants/submissions'
-import { usePage } from '../../contexts/PageContext'
+
+/*
+    Add focus to "first" form element that is invalid when errors exist
+    Approx order of form inputs is determined by the Formik schema
+*/
+const FormikFocusOnErrors = () => {
+    const { errors } = useFormikContext()
+    const errorKeys = Object.keys(errors)
+    React.useEffect(() => {
+        if (errorKeys.length > 0) {
+            document.getElementsByName(errorKeys[0])[0].focus()
+        }
+    }, [errorKeys])
+    return null
+}
+
 // Formik setup
+// Should be listed in order of appearance on field to allow errors to focus as expected
 const SubmissionTypeFormSchema = Yup.object().shape({
     program: Yup.string(),
+    submissionType: Yup.string().required('You must choose a submission type'),
     submissionDescription: Yup.string().required(
         'You must provide a description of any major changes or updates'
     ),
-    submissionType: Yup.string().required('You must choose a submission type'),
 })
 export interface SubmissionTypeFormValues {
     programId: string
@@ -53,14 +75,13 @@ export const SubmissionType = ({
 }: SubmissionTypeProps): React.ReactElement => {
     const [showFormAlert, setShowFormAlert] = React.useState(false)
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
-    const { updateHeading } = usePage()
     const { loggedInUser: { state: { programs = [] } = {} } = {} } = useAuth()
 
     const history = useHistory()
     const location = history.location
     const isNewSubmission = location.pathname === '/submissions/new'
 
-    const [createDraftSubmission, { data, error }] = useMutation(
+    const [createDraftSubmission, { error }] = useMutation(
         CreateDraftSubmissionDocument
     )
 
@@ -68,15 +89,6 @@ export const SubmissionType = ({
         setShowFormAlert(true)
         console.log('Log: creating new submission failed with gql error', error)
     }
-
-    // TODO: remove in favor of handling this at the StateSubmissionForm level
-    React.useEffect(() => {
-        const submissionName =
-            data && data.createDraftSubmission.draftSubmission.name
-        if (submissionName) {
-            updateHeading(submissionName)
-        }
-    }, [data, updateHeading])
 
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
@@ -154,7 +166,6 @@ export const SubmissionType = ({
                                 .catch(() =>
                                     console.warn('Log: Validation Error')
                                 )
-
                             if (!isValidating) handleSubmit()
                         }}
                     >
@@ -304,6 +315,7 @@ export const SubmissionType = ({
                                 </Button>
                             </ButtonGroup>
                         </fieldset>
+                        <FormikFocusOnErrors />
                     </UswdsForm>
                 </>
             )}
