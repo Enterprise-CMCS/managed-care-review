@@ -16,5 +16,6 @@ Cypress.Commands.add('login', () => {
     } else {
         console.log('Auth mode is not defined or is IDM')
     }
-    cy.url().should('match', /.*dashboard$/)
+    // this login/initial fetch can take a little while.
+    cy.url({ timeout: 10_000 }).should('match', /.*dashboard$/)
 })
