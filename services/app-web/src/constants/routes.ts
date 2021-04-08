@@ -47,7 +47,7 @@ const PageHeadingsRecord: Record<string, string> = {
 
 // Page titles used in <title>.
 const PageTitlesRecord: Record<RouteT, string> = {
-    ROOT: 'Home - Managed Care',
+    ROOT: 'Dashboard - Managed Care',
     AUTH: 'Login - Managed Care',
     HELP: 'Help - Managed Care',
     HELP_SUBMISSION_DESCRIPTION: 'Help - Managed Care',
