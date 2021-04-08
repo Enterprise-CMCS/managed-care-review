@@ -81,6 +81,7 @@ export const SubmissionType = ({
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
+
     const submissionTypeInitialValues: SubmissionTypeFormValues = {
         programId: draftSubmission?.program.id ?? programs[0]?.id, // TODO: change this to be the program selected on the tab
         submissionDescription: draftSubmission?.submissionDescription ?? '',
@@ -140,8 +141,7 @@ export const SubmissionType = ({
                     <UswdsForm
                         className="usa-form--large"
                         id="SubmissionTypeForm"
-                        name="Submission Type"
-                        aria-label="Submission Type"
+                        aria-label="New Submission Form"
                         onSubmit={(e) => {
                             e.preventDefault()
                             validateForm()
