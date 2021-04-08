@@ -194,6 +194,7 @@ export const SubmissionType = ({
                                         )}
                                         <Field
                                             as={Radio}
+                                            aria-required
                                             checked={
                                                 values.submissionType ===
                                                 SubmissionTypeT.ContractOnly
@@ -209,6 +210,7 @@ export const SubmissionType = ({
                                         />
                                         <Field
                                             as={Radio}
+                                            aria-required
                                             checked={
                                                 values.submissionType ===
                                                 SubmissionTypeT.ContractAndRates
@@ -254,6 +256,7 @@ export const SubmissionType = ({
                                     </p>
                                     <Field
                                         as={Textarea}
+                                        aria-required
                                         id="submissionDescription"
                                         name="submissionDescription"
                                         value={values.submissionDescription}
