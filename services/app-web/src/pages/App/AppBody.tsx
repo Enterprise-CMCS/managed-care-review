@@ -4,7 +4,6 @@ import { useLocation } from 'react-router'
 import styles from './AppBody.module.scss'
 
 import { AppRoutes } from './AppRoutes'
-import { Error400 } from '../Errors/Error400'
 import { Footer } from '../../components/Footer/Footer'
 import { Header } from '../../components/Header/Header'
 import { Loading } from '../../components/Loading'
@@ -32,7 +31,9 @@ export function AppBody({
     useTitle(title)
 
     // TODO: create an DialogContext to handle all app alerts
-    const [alert, setAlert] = React.useState(false)
+    const [alert, setAlert] = React.useState<React.ReactElement | undefined>(
+        undefined
+    )
     const [showLoading, setShowLoading] = React.useState<
         'NOT_LOADING' | 'WAITING' | 'SHOW_LOADING'
     >('NOT_LOADING')
@@ -64,7 +65,7 @@ export function AppBody({
 
             <Header authMode={authMode} setAlert={setAlert} />
             <main id="main-content" className={styles.mainContent} role="main">
-                {alert && Error400}
+                {alert && alert}
                 {loginStatus === 'LOADING' ? (
                     showLoading === 'SHOW_LOADING' && <Loading />
                 ) : (

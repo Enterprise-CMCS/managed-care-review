@@ -1,9 +1,9 @@
 import React from 'react'
 import { screen } from '@testing-library/react'
 import { renderWithProviders } from '../../utils/jestUtils'
-import { PageHeading } from './PageHeading'
+import { PageHeadingRow } from './PageHeadingRow'
 
-describe('Page Heading', () => {
+describe('Page Heading Row', () => {
     const loggedInUser = {
         state: {
             name: 'Minnesota',
@@ -19,12 +19,12 @@ describe('Page Heading', () => {
         email: 'bob@dmas.mn.gov',
     }
     it('renders without errors', () => {
-        renderWithProviders(<PageHeading />)
+        renderWithProviders(<PageHeadingRow />)
         expect(screen.getByRole('heading')).toBeInTheDocument()
     })
 
     it('does not display heading text when isLoading', async () => {
-        renderWithProviders(<PageHeading isLoading />)
+        renderWithProviders(<PageHeadingRow isLoading />)
 
         expect(screen.getByRole('heading')).toBeInTheDocument()
         expect(screen.getByRole('heading')).not.toHaveTextContent(
@@ -33,7 +33,7 @@ describe('Page Heading', () => {
     })
 
     it('displays Medicaid and CHIP Managed Care Reporting heading when logged out', () => {
-        renderWithProviders(<PageHeading heading="Custom page heading" />)
+        renderWithProviders(<PageHeadingRow heading="Custom page heading" />)
         expect(screen.getByRole('heading')).toHaveTextContent(
             'Medicaid and CHIP Managed Care Reporting and Review System'
         )
@@ -41,7 +41,7 @@ describe('Page Heading', () => {
 
     it('displays custom heading for page when loggedInUser exists', () => {
         renderWithProviders(
-            <PageHeading
+            <PageHeadingRow
                 heading="Custom page heading"
                 loggedInUser={loggedInUser}
             />

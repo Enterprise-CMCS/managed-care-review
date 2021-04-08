@@ -1,5 +1,11 @@
 import React from 'react'
-import { Button, Link, GridContainer, Grid } from '@trussworks/react-uswds'
+import {
+    Alert,
+    Button,
+    Link,
+    GridContainer,
+    Grid,
+} from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 
 import { idmRedirectURL } from '../../pages/Auth/cognitoAuth'
@@ -10,13 +16,13 @@ import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
 import { AuthModeType } from '../../common-code/domain-models'
 import { Logo } from '../Logo/Logo'
-import { PageHeading } from './PageHeading'
+import { PageHeadingRow } from './PageHeadingRow'
 import { User } from '../../gen/gqlClient'
 import { PageHeadingsRecord, getRouteName } from '../../constants/routes'
 
 export type HeaderProps = {
     authMode: AuthModeType
-    setAlert?: React.Dispatch<boolean>
+    setAlert?: React.Dispatch<React.ReactElement>
 }
 /**
  * CMS Header
@@ -37,7 +43,7 @@ export const Header = ({
         3. Fallback in case of new route
     */
 
-    const pageHeading =
+    const pageHeadingText =
         routeName !== 'UNKNOWN_ROUTE' &&
         Object.prototype.hasOwnProperty.call(PageHeadingsRecord, routeName)
             ? PageHeadingsRecord[routeName]
@@ -54,9 +60,18 @@ export const Header = ({
         }
 
         logout().catch(() => {
-            setAlert && setAlert(true)
+            // TODO: Add site wide alert
+            setAlert &&
+                setAlert(
+                    <Alert
+                        data-testid="Error400"
+                        style={{ width: '600px', marginBottom: '5px' }}
+                        type="error"
+                        heading="Oops! Something went wrong"
+                    />
+                )
         })
-        history.push('/auth')
+        history.push('/')
     }
 
     const LoggedInUserInfo = (user: User): React.ReactElement => {
@@ -116,8 +131,8 @@ export const Header = ({
                     </Grid>
                 </GridContainer>
             </div>
-            <PageHeading
-                heading={pageHeading}
+            <PageHeadingRow
+                heading={pageHeadingText}
                 isLoading={loginStatus === 'LOADING'}
                 loggedInUser={loggedInUser}
             />

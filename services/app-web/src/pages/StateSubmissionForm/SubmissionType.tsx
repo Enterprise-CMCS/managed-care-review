@@ -16,6 +16,7 @@ import {
 } from '@trussworks/react-uswds'
 import { Field, Formik, FormikHelpers, FormikErrors } from 'formik'
 import { NavLink, useHistory } from 'react-router-dom'
+import PageHeading from '../../components/PageHeading'
 import { useMutation } from '@apollo/client'
 
 import styles from './StateSubmissionForm.module.scss'
@@ -156,7 +157,9 @@ export const SubmissionType = ({
                     >
                         <fieldset className="usa-fieldset">
                             <legend className={styles.formHeader}>
-                                <h2>Submission type</h2>
+                                <PageHeading headingLevel="h2">
+                                    Submission type
+                                </PageHeading>
                             </legend>
                             {showFormAlert && (
                                 <Alert type="error">Something went wrong</Alert>
