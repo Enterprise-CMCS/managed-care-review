@@ -86,46 +86,46 @@ describe('findDraftSubmissionByStateNumber', () => {
         expect(findResult).toBe(undefined)
     })
 
-    // it('returns a submission if it exists', async () => {
-    //     const store = getTestStore()
+    it('returns a submission if it exists', async () => {
+        const store = getTestStore()
 
-    //     const inputParams = {
-    //         stateCode: 'FL',
-    //         programID: 'MCAC',
-    //         submissionDescription: 'a new great submission',
-    //         submissionType: 'CONTRACT_ONLY' as const,
-    //     }
+        const inputParams = {
+            stateCode: 'FL',
+            programID: 'MCAC',
+            submissionDescription: 'a new great submission',
+            submissionType: 'CONTRACT_ONLY' as const,
+        }
 
-    //     const draftSubResult = await store.insertDraftSubmission(inputParams)
-    //     if (isStoreError(draftSubResult)) {
-    //         throw new Error('Got an error setting up test')
-    //     }
+        const draftSubResult = await store.insertDraftSubmission(inputParams)
+        if (isStoreError(draftSubResult)) {
+            throw new Error('Got an error setting up test')
+        }
 
-    //     const createdStateNumber = draftSubResult.stateNumber
+        const createdStateNumber = draftSubResult.stateNumber
 
-    //     // See if we can get it back
+        // See if we can get it back
 
-    //     const result = await store.findDraftSubmissionByStateNumber(
-    //         'FL',
-    //         createdStateNumber
-    //     )
+        const result = await store.findDraftSubmissionByStateNumber(
+            'FL',
+            createdStateNumber
+        )
 
-    //     if (isStoreError(result)) {
-    //         throw new Error('Got an error finding')
-    //     }
+        if (isStoreError(result)) {
+            throw new Error('Got an error finding')
+        }
 
-    //     expect(result).toBeDefined()
-    //     // this lets us type narrow, but should have been covered by toBeDefined, honestly.
-    //     if (result === undefined) {
-    //         throw new Error('got nothing back')
-    //     }
+        expect(result).toBeDefined()
+        // this lets us type narrow, but should have been covered by toBeDefined, honestly.
+        if (result === undefined) {
+            throw new Error('got nothing back')
+        }
 
-    //     expect(result.stateCode).toBe('FL')
-    //     expect(result.stateNumber).toBe(createdStateNumber)
-    //     expect(result.submissionType).toBe('CONTRACT_ONLY')
-    //     expect(result.submissionDescription).toBe('a new great submission')
-    //     expect(result.programID).toBe('MCAC')
-    // })
+        expect(result.stateCode).toBe('FL')
+        expect(result.stateNumber).toBe(createdStateNumber)
+        expect(result.submissionType).toBe('CONTRACT_ONLY')
+        expect(result.submissionDescription).toBe('a new great submission')
+        expect(result.programID).toBe('MCAC')
+    })
     it('returns an error if the connection is bad', async () => {
         const config = {
             region: 'localhost',
