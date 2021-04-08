@@ -3,32 +3,47 @@ import { Button, Link, GridContainer, Grid } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 
 import { idmRedirectURL } from '../../pages/Auth/cognitoAuth'
-import medicaidLogo from '../../assets/images/medicaidgovlogo.png'
+import onemacLogo from '../../assets/images/onemac-logo.svg'
 import styles from './Header.module.scss'
 import { useHistory } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { usePage } from '../../contexts/PageContext'
 import { AuthModeType } from '../../common-code/domain-models'
-
 import { Logo } from '../Logo/Logo'
 import { PageHeading } from './PageHeading'
 import { User } from '../../gen/gqlClient'
+import { PageHeadingsRecord, getRouteName } from '../../constants/routes'
 
 export type HeaderProps = {
     authMode: AuthModeType
-    activePage?: string
     setAlert?: React.Dispatch<boolean>
 }
-
 /**
  * CMS Header
  */
 export const Header = ({
     authMode,
-    activePage = 'Managed Care Dashboard',
     setAlert,
 }: HeaderProps): React.ReactElement => {
     const { logout, loggedInUser, loginStatus } = useAuth()
     const history = useHistory()
+    const routeName = getRouteName(history.location.pathname)
+    const { heading } = usePage()
+
+    /*
+        Dynamically calculate heading in priority order
+        1. If there a constant heading set up, use that
+        2. Otherwise, use whatever is in the PageContext
+        3. Fallback in case of new route
+    */
+
+    const pageHeading =
+        routeName !== 'UNKNOWN_ROUTE' &&
+        Object.prototype.hasOwnProperty.call(PageHeadingsRecord, routeName)
+            ? PageHeadingsRecord[routeName]
+            : heading
+            ? heading
+            : 'Managed Care Review' // fallback for safety
 
     const handleLogout = (
         e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -60,7 +75,7 @@ export const Header = ({
     const LoggedOutUserInfo = (authMode: AuthModeType): React.ReactElement => {
         return authMode === 'IDM' ? (
             <Link
-                className="usa-button usa-button--outline"
+                className="usa-button usa-button--outline usa-button--inverse"
                 variant="unstyled"
                 href={idmRedirectURL()}
             >
@@ -69,7 +84,7 @@ export const Header = ({
         ) : (
             <Link
                 asCustom={NavLink}
-                className="usa-button usa-button--outline"
+                className="usa-button usa-button--outline usa-button--inverse"
                 variant="unstyled"
                 to="/auth"
             >
@@ -91,18 +106,20 @@ export const Header = ({
             <div className={styles.banner}>
                 <GridContainer>
                     <Grid row className="flex-justify flex-align-center">
-                        <NavLink to="/dashboard">
+                        <NavLink className={styles.bannerLogo} to="/dashboard">
                             <Logo
-                                src={medicaidLogo}
-                                alt="Medicaid.gov-Keeping America Healthy"
+                                src={onemacLogo}
+                                alt="One Mac"
+                                className={styles.logoImg}
                             />
+                            <span>Managed Care Review</span>
                         </NavLink>
                         <UserInfo />
                     </Grid>
                 </GridContainer>
             </div>
             <PageHeading
-                heading={activePage}
+                heading={pageHeading}
                 isLoading={loginStatus === 'LOADING'}
                 loggedInUser={loggedInUser}
             />

@@ -4,6 +4,15 @@
 .userInfo {
     font-weight: font-weight('light');
     padding: 0 units(1);
+    color: $cms-color-white;
+
+    button {
+        color: $cms-color-white;
+
+        &:hover {
+            color: $cms-color-white;
+        }
+    }
 }
 
 .divider {
@@ -32,5 +41,29 @@
         flex-flow: column;
         text-align: center;
         font-weight: font-weight('light');
+        line-height: 1.5;
+    }
+}
+
+.banner {
+    background: $cms-color-primary;
+}
+
+.bannerLogo {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    text-decoration: none;
+
+    .logoImg {
+        border-right: 2px solid $cms-color-white;
+        padding-right: units(2);
+    }
+
+    span {
+        margin-left: units(2);
+        font-size: size('body', 'lg');
+        color: $cms-color-white;
+        height: 100%;
     }
 }

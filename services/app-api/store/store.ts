@@ -1,33 +1,63 @@
 import DynamoDB from 'aws-sdk/clients/dynamodb'
+import { DataMapper } from '@aws/dynamodb-data-mapper'
+
 import {
-    StoreError,
     InsertDraftSubmissionArgsType,
     insertDraftSubmission,
 } from './insertDraftSubmission'
-import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
+import {
+    findDraftSubmission,
+    findDraftSubmissionByStateNumber,
+} from './findDraftSubmission'
+import { findProgram } from './findProgram'
+import { StoreError } from './storeError'
+import {
+    DraftSubmissionType,
+    ProgramT,
+} from '../../app-web/src/common-code/domain-models'
 
 export type Store = {
     insertDraftSubmission: (
         args: InsertDraftSubmissionArgsType
     ) => Promise<DraftSubmissionType | StoreError>
+
+    findDraftSubmission: (
+        draftUUID: string
+    ) => Promise<DraftSubmissionType | undefined | StoreError>
+    findDraftSubmissionByStateNumber: (
+        stateCoder: string,
+        stateNumber: number
+    ) => Promise<DraftSubmissionType | undefined | StoreError>
+
+    findProgram: (stateCode: string, programID: string) => ProgramT | undefined
 }
 
 export function storeWithDynamoConfig(
-    config: DynamoDB.ClientConfiguration
+    config: DynamoDB.ClientConfiguration,
+    tablePrefix: string
 ): Store {
     const conn = new DynamoDB(config)
+    const mapper = new DataMapper({
+        client: conn,
+        tableNamePrefix: tablePrefix,
+    })
 
     return {
-        insertDraftSubmission: (args) => insertDraftSubmission(conn, args),
+        insertDraftSubmission: (args) => insertDraftSubmission(mapper, args),
+        findDraftSubmission: (draftUUID) =>
+            findDraftSubmission(mapper, draftUUID),
+        findDraftSubmissionByStateNumber: (stateCode, stateNumber) =>
+            findDraftSubmissionByStateNumber(mapper, stateCode, stateNumber),
+        findProgram: findProgram,
     }
 }
 
-export function newDeployedStore(region: string): Store {
+export function newDeployedStore(region: string, tablePrefix: string): Store {
     const config = {
         region,
     }
 
-    return storeWithDynamoConfig(config)
+    return storeWithDynamoConfig(config, tablePrefix)
 }
 
 export function newLocalStore(dyanmoURL: string): Store {
@@ -38,5 +68,5 @@ export function newLocalStore(dyanmoURL: string): Store {
         secretAccessKey: 'LOCAL_FAKE_SECRET',
     }
 
-    return storeWithDynamoConfig(config)
+    return storeWithDynamoConfig(config, 'local-')
 }

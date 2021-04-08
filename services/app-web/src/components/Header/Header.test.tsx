@@ -20,7 +20,7 @@ describe('Header', () => {
             renderWithProviders(<Header authMode={'AWS_COGNITO'} />)
             const logoImage = screen.getByRole('img')
             const logoLink = screen.getByRole('link', {
-                name: /Medicaid.gov-Keeping America Healthy/i,
+                name: /One Mac/i,
             })
             expect(logoLink).toBeVisible()
             expect(logoLink).toHaveAttribute('href', '/dashboard')
@@ -69,7 +69,7 @@ describe('Header', () => {
             })
             const logoImage = screen.getByRole('img')
             const logoLink = screen.getByRole('link', {
-                name: /Medicaid.gov-Keeping America Healthy/i,
+                name: /One Mac/i,
             })
             expect(logoLink).toBeVisible()
             expect(logoLink).toHaveAttribute('href', '/dashboard')
@@ -91,17 +91,15 @@ describe('Header', () => {
         })
 
         it('displays heading with the current page', async () => {
-            renderWithProviders(
-                <Header authMode={'AWS_COGNITO'} activePage={'Dashboard'} />,
-                {
-                    apolloProvider: {
-                        mocks: [getCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
+            renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/submissions/new' },
+                apolloProvider: {
+                    mocks: [getCurrentUserMock({ statusCode: 200 })],
+                },
+            })
             await waitFor(() =>
                 expect(screen.getByRole('heading')).toHaveTextContent(
-                    'Dashboard'
+                    'Minnesota New submission'
                 )
             )
         })

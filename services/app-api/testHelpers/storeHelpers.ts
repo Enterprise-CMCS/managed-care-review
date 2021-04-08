@@ -16,7 +16,7 @@ export function getTestStore(): Store {
         maxRetries: 1,
     }
 
-    return storeWithDynamoConfig(config)
+    return storeWithDynamoConfig(config, 'local-')
 }
 
 export function getTestDynamoMapper(): DataMapper {
@@ -32,7 +32,7 @@ export function getTestDynamoMapper(): DataMapper {
     }
 
     const conn = new DynamoDB(config)
-    const mapper = new DataMapper({ client: conn })
+    const mapper = new DataMapper({ client: conn, tableNamePrefix: 'local-' })
 
     return mapper
 }

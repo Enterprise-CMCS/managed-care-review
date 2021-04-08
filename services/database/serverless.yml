@@ -55,6 +55,14 @@ resources:
                 KeyType: RANGE
             Projection:
               ProjectionType: KEYS_ONLY
+          - IndexName: StateStateNumberAllIndex
+            KeySchema:
+              - AttributeName: stateCode
+                KeyType: HASH
+              - AttributeName: stateNumber
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
         # Set the capacity to auto-scale
         BillingMode: PAY_PER_REQUEST
     AmendmentsTable:
@@ -88,6 +96,10 @@ resources:
         # Set the capacity to auto-scale
         BillingMode: PAY_PER_REQUEST
   Outputs:
+    DraftSubmissionsTableArn:
+      Value: !GetAtt DraftSubmissionsTable.Arn
+    DraftSubmissionsTableStreamArn:
+      Value: !GetAtt DraftSubmissionsTable.StreamArn
     AmendmentsTableName:
       Value:
         Ref: AmendmentsTable
