@@ -258,19 +258,26 @@ export const SubmissionType = ({
                                             {errors.submissionDescription}
                                         </ErrorMessage>
                                     )}
-                                    <Link
-                                        variant="nav"
-                                        href={
-                                            '/help/submission-description-examples'
-                                        }
-                                        target="_blank"
+
+                                    <div
+                                        aria-labelledby="submissionDescription"
+                                        className="usa-hint"
                                     >
-                                        View description examples
-                                    </Link>
-                                    <p className="usa-hint margin-top-1">
-                                        Provide a description of any major
-                                        changes or updates
-                                    </p>
+                                        <Link
+                                            variant="nav"
+                                            href={
+                                                '/help/submission-description-examples'
+                                            }
+                                            target="_blank"
+                                        >
+                                            View description examples
+                                        </Link>
+
+                                        <p>
+                                            Provide a description of any major
+                                            changes or updates
+                                        </p>
+                                    </div>
                                     <Field
                                         as={Textarea}
                                         aria-required

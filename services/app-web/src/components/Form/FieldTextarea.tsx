@@ -36,21 +36,25 @@ export const FormTextarea = ({
     name,
     ...inputProps
 }: TextAreaProps): React.ReactElement => {
-    const [field] = useField({name});
-    return(
+    const [field] = useField({ name })
+    return (
         <FormGroup error={showError}>
             <Label htmlFor={id} error={showError}>
                 {label}
             </Label>
-            {showError && 
-                <ErrorMessage>{error}</ErrorMessage>
-            }
-            {hint && 
-                <div className="usa-hint margin-top-1">
+            {showError && <ErrorMessage>{error}</ErrorMessage>}
+            {hint && (
+                <div aria-labelledby={id} className="usa-hint margin-top-1">
                     {hint}
                 </div>
-            }
-            <Textarea {...field} {...inputProps} id={id} name={name} error={showError}/>
+            )}
+            <Textarea
+                {...field}
+                {...inputProps}
+                id={id}
+                name={name}
+                error={showError}
+            />
         </FormGroup>
     )
 }
