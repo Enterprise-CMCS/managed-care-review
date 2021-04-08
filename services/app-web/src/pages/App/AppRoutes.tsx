@@ -32,7 +32,6 @@ function componentForAuthMode(
     }
 }
 
-// For a reference of all named routes in the application go to constants/routes.ts
 export const AppRoutes = ({
     authMode,
 }: {
