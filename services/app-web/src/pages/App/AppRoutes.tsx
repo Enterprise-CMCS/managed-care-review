@@ -1,5 +1,6 @@
 import React from 'react'
 import { Switch, Route } from 'react-router-dom'
+import { useLocation } from 'react-router'
 
 import { CognitoLogin } from '../Auth/CognitoLogin'
 import { LocalLogin } from '../Auth/LocalLogin'
@@ -11,6 +12,8 @@ import { RoutesRecord } from '../../constants/routes'
 import { StateSubmissionForm } from '../StateSubmissionForm/StateSubmissionForm'
 import { NewStateSubmissionForm } from '../StateSubmissionForm/NewStateSubmissionForm'
 import { SubmissionDescriptionExamples } from '../Help/SubmissionDescriptionExamples'
+import { useTitle } from '../../hooks/useTitle'
+import { getRouteName, PageTitlesRecord } from '../../constants/routes'
 
 import { AuthModeType, assertNever } from '../../common-code/domain-models'
 
@@ -36,6 +39,19 @@ export const AppRoutes = ({
     authMode: AuthModeType
 }): React.ReactElement => {
     const { loggedInUser } = useAuth()
+    const { pathname } = useLocation()
+    const route = getRouteName(pathname)
+
+    /*
+        Add page titles throughout the application
+    */
+    const title =
+        route === 'ROOT' && loggedInUser
+            ? PageTitlesRecord['DASHBOARD']
+            : route === 'UNKNOWN_ROUTE'
+            ? 'Managed Care Review'
+            : PageTitlesRecord[route]
+    useTitle(title)
 
     const authComponent = componentForAuthMode(authMode)
 
