@@ -47,14 +47,6 @@ resources:
           - AttributeName: id
             KeyType: HASH
         GlobalSecondaryIndexes:
-          - IndexName: StateStateNumberIndex
-            KeySchema:
-              - AttributeName: stateCode
-                KeyType: HASH
-              - AttributeName: stateNumber
-                KeyType: RANGE
-            Projection:
-              ProjectionType: KEYS_ONLY
           - IndexName: StateStateNumberAllIndex
             KeySchema:
               - AttributeName: stateCode
