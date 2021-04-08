@@ -36,7 +36,7 @@ async function getNextStateNumber(
                 stateCode: stateCode,
             },
             {
-                indexName: 'StateStateNumberIndex',
+                indexName: 'StateStateNumberAllIndex',
                 limit: 1,
                 scanIndexForward: false,
             }

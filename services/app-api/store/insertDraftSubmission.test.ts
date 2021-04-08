@@ -98,7 +98,7 @@ describe('insertDraftSubmission', () => {
                         stateCode: 'FL',
                         stateNumber: createdStateNumber,
                     },
-                    { indexName: 'StateStateNumberIndex' }
+                    { indexName: 'StateStateNumberAllIndex' }
                 )) {
                     subsOfID.push(foo)
                     // individual items with a hash key of "foo" will be yielded as the query is performed
