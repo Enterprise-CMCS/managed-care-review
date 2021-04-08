@@ -54,7 +54,7 @@ resources:
               - AttributeName: stateNumber
                 KeyType: RANGE
             Projection:
-              ProjectionType: ALL
+              ProjectionType: KEYS_ONLY
         # Set the capacity to auto-scale
         BillingMode: PAY_PER_REQUEST
     AmendmentsTable:
