@@ -54,6 +54,14 @@ resources:
               - AttributeName: stateNumber
                 KeyType: RANGE
             Projection:
+              ProjectionType: KEYS_ONLY
+          - IndexName: StateStateNumberAllIndex
+            KeySchema:
+              - AttributeName: stateCode
+                KeyType: HASH
+              - AttributeName: stateNumber
+                KeyType: RANGE
+            Projection:
               ProjectionType: ALL
         # Set the capacity to auto-scale
         BillingMode: PAY_PER_REQUEST

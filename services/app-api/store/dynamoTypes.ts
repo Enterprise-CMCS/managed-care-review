@@ -28,14 +28,14 @@ export class DraftSubmissionStoreType {
 
     @attribute({
         indexKeyConfigurations: {
-            StateStateNumberIndex: 'HASH',
+            StateStateNumberAllIndex: 'HASH',
         },
     })
     stateCode: string
 
     @attribute({
         indexKeyConfigurations: {
-            StateStateNumberIndex: 'RANGE',
+            StateStateNumberAllIndex: 'RANGE',
         },
     })
     stateNumber: number

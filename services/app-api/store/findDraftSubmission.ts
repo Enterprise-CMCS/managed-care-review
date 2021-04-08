@@ -59,7 +59,7 @@ export async function findDraftSubmissionByStateNumber(
                 stateNumber: stateNumber,
             },
             {
-                indexName: 'StateStateNumberIndex',
+                indexName: 'StateStateNumberAllIndex',
                 limit: 1,
                 scanIndexForward: false,
             }
