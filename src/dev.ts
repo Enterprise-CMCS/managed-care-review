@@ -394,8 +394,6 @@ async function run_online_tests(runner: LabeledProcessRunner) {
     if (nightCode != 0) {
         throw new Error('nightwatch tests FAILED')
     }
-
-   
 }
 
 function main() {
