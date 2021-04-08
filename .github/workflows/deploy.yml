@@ -86,6 +86,7 @@ jobs:
             services/storybook/node_modules
             services/app-web/node_modules
             node_modules
+            tests/nightwatch/node_modules
           key: ${{ runner.os }}-${{ hashFiles('combined-yarn-lock.txt') }}
       - name: set path
         run: |
@@ -106,6 +107,18 @@ jobs:
           # When deploying multiple copies of this quickstart to the same AWS Account (not ideal), a prefix helps prevent stepping on each other.
           # This can optionally be set as an GitHub Actions Secret
           ./deploy.sh $STAGE_PREFIX$branch_name
+
+      - name: Run nightwatch tests
+        run: |
+            pushd services
+            export APPLICATION_ENDPOINT=`./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name`
+            popd
+            ./dev test --online
+      - name: Store nightwatch results
+        uses: actions/upload-artifact@v2
+        with:
+          name: test_results
+          path: tests/nightwatch/tests_output
 
       - name: Set application endpoint
         run: |

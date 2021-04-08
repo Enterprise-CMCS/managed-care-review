@@ -386,15 +386,16 @@ async function run_online_tests(runner: LabeledProcessRunner) {
     // if (webCode != 0) {
     //  throw new Error('web - a11y tests FAILED')
     // }
-
-    const cypressCode = await runner.run_command_and_output(
-        'cypress',
-        ['yarn', 'cypress:run'],
-        ''
+    const nightCode = await runner.run_command_and_output(
+        'nightwatch',
+        ['./test.sh'],
+        'tests'
     )
-    if (cypressCode != 0) {
-        throw new Error('cypress tests FAILED')
+    if (nightCode != 0) {
+        throw new Error('nightwatch tests FAILED')
     }
+
+   
 }
 
 function main() {
