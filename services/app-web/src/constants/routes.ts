@@ -47,20 +47,20 @@ const PageHeadingsRecord: Record<string, string> = {
 
 // Page titles used in <title>.
 const PageTitlesRecord: Record<RouteT, string> = {
-    ROOT: 'Dashboard - Managed Care',
-    AUTH: 'Login - Managed Care',
-    HELP: 'Help - Managed Care',
-    HELP_SUBMISSION_DESCRIPTION: 'Help - Managed Care',
-    DASHBOARD: 'Dashboard - Managed Care',
-    SUBMISSIONS: 'Submissions - Managed Care',
-    SUBMISSIONS_NEW: 'New submission - Managed Care',
-    SUBMISSIONS_FORM: 'Submissions - Managed Care',
-    SUBMISSIONS_TYPE: 'Submission type - Managed Care',
-    SUBMISSIONS_CONTRACT_DETAILS: 'Contract Details - Managed Care',
-    SUBMISSIONS_RATE_DETAILS: 'Rate Details - Managed Care',
-    SUBMISSIONS_CONTACTS: 'Contacts - Managed Care',
-    SUBMISSIONS_DOCUMENTS: 'Documents - Managed Care',
-    SUBMISSIONS_REVIEW_SUBMIT: 'Review and Submit - Managed Care',
+    ROOT: 'Dashboard - Managed Care Review',
+    AUTH: 'Login - Managed Care Review',
+    HELP: 'Help - Managed Care Review',
+    HELP_SUBMISSION_DESCRIPTION: 'Help - Managed Care Review',
+    DASHBOARD: 'Dashboard - Managed Care Review',
+    SUBMISSIONS: 'Submissions - Managed Care Review',
+    SUBMISSIONS_NEW: 'New submission - Managed Care Review',
+    SUBMISSIONS_FORM: 'Submissions - Managed Care Review',
+    SUBMISSIONS_TYPE: 'Submission type - Managed Care Review',
+    SUBMISSIONS_CONTRACT_DETAILS: 'Contract Details - Managed Care Review',
+    SUBMISSIONS_RATE_DETAILS: 'Rate Details - Managed Care Review',
+    SUBMISSIONS_CONTACTS: 'Contacts - Managed Care Review',
+    SUBMISSIONS_DOCUMENTS: 'Documents - Managed Care Review',
+    SUBMISSIONS_REVIEW_SUBMIT: 'Review and Submit - Managed Care Review',
 }
 
 const getRouteName = (pathname: string): RouteT | 'UNKNOWN_ROUTE' => {
