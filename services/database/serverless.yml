@@ -47,7 +47,7 @@ resources:
           - AttributeName: id
             KeyType: HASH
         GlobalSecondaryIndexes:
-          - IndexName: StateStateNumberIndex
+          - IndexName: StateStateNumberAllIndex
             KeySchema:
               - AttributeName: stateCode
                 KeyType: HASH
