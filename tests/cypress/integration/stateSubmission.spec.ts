@@ -2,7 +2,7 @@ describe('State Submission', () => {
     describe('submission type form', () => {
         it('user encounters Not Found message when navigating to non-existent submission', () => {
             cy.login()
-            cy.visit('/submissions/not-a-draft-submission/type')
+            cy.visit('/submissions/not-a-draft-submission/type', {failOnStatusCode: false})
             cy.findByText('404 / Page not found').should('exist')
         })
 
@@ -62,7 +62,7 @@ describe('State Submission', () => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/');
             const draftSubmissionId = pathnameArray[2];
-            cy.visit(`/submissions/${draftSubmissionId}/type`)
+            cy.visit(`/submissions/${draftSubmissionId}/type`, {failOnStatusCode: false})
           })
         
           // Check that submission type form loads with correct data
