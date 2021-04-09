@@ -1,5 +1,6 @@
 import React from 'react'
 import {
+    Alert,
     Button,
     Card,
     CardHeader,
@@ -39,6 +40,7 @@ const userAvatars: { [key: string]: string } = {
 }
 
 export function LocalLogin(): React.ReactElement {
+    const [showFormAlert, setShowFormAlert] = React.useState(false)
     const history = useHistory()
     const { checkAuth, loginStatus } = useAuth()
 
@@ -49,6 +51,7 @@ export function LocalLogin(): React.ReactElement {
             await checkAuth()
             history.push('/dashboard')
         } catch (error) {
+            setShowFormAlert(true)
             console.log('Log: Server Error')
         }
     }
@@ -58,6 +61,7 @@ export function LocalLogin(): React.ReactElement {
             <h2>Auth Page</h2>
             <h3>Local Login</h3>
             <div>Login as one of our hard coded users:</div>
+            {showFormAlert && <Alert type="error">Something went wrong</Alert>}
             <CardGroup>
                 {localUsers.map((user) => {
                     return (

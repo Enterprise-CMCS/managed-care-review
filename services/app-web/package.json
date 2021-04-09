@@ -44,6 +44,10 @@
         "build-storybook": "build-storybook -s public --quiet"
     },
     "jest": {
+        "coveragePathIgnorePatterns": [
+            "src/pages/Auth/Signup",
+            "src/pages/Auth/ConfirmSignUp"
+        ],
         "coverageReporters": [
             [
                 "lcov",

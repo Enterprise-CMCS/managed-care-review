@@ -1,5 +1,5 @@
 {
-    "name": "macpro-quickstart-serverless",
+    "name": "guide-wire",
     "type": "module",
     "version": "1.0.0",
     "description": "",
@@ -8,23 +8,34 @@
         "test": "tests"
     },
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "cypress:open": "cypress open",
+        "cypress:run": "cypress run"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/CMSgov/macpro-quickstart-serverless.git"
+        "url": "git+https://github.com/CMSgov/guide-wire.git"
     },
     "author": "",
     "license": "CC0-1.0",
     "bugs": {
-        "url": "https://github.com/CMSgov/macpro-quickstart-serverless/issues"
+        "url": "https://github.com/CMSgov/guide-wire/issues"
     },
-    "homepage": "https://github.com/CMSgov/macpro-quickstart-serverless#readme",
+    "homepage": "https://github.com/CMSgov/guide-wire#readme",
+    "jest": {
+        "testPathIgnorePatterns": [
+            "src/pages/Auth/Signup",
+            "src/pages/Auth/ConfirmSignUp",
+            "**/*.stories.tsx"
+        ]
+    },
     "devDependencies": {
+        "@testing-library/cypress": "^7.0.5",
         "@types/dotenv": "^8.2.0",
-        "@types/node": "^14.14.6",
+        "@types/node": "^14.14.35",
         "@types/yargs": "^15.0.10",
         "chromedriver": "^86.0.0",
+        "cypress": "^6.8.0",
         "dotenv": "^8.2.0",
         "nightwatch": "^1.5.1",
         "prettier": "^2.2.1",
