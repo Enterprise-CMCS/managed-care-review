@@ -36,6 +36,7 @@
         "@types/yargs": "^15.0.10",
         "chromedriver": "^86.0.0",
         "cypress": "^6.8.0",
+        "cypress-pipe": "^2.0.0",
         "dotenv": "^8.2.0",
         "nightwatch": "^1.5.1",
         "prettier": "^2.2.1",
