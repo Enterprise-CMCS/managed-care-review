@@ -1,5 +1,11 @@
 describe('State Submission', () => {
     describe('submission type form', () => {
+        it('user encounters Not Found message when navigating to non-existent submission', () => {
+            cy.login()
+            cy.visit('/submissions/not-a-draft-submission/type')
+            cy.findByText('404 / Page not found').should('exist')
+        })
+
     it('user can start a new submission and continue with valid input', () => {
         cy.login()
         cy.findByTestId('dashboardPage').should('exist')
@@ -65,5 +71,6 @@ describe('State Submission', () => {
           cy.findByLabelText('Contract action only').should('be.checked')
           cy.findByRole('textbox', {name: 'Submission description'}).should('have.value', "description of submission")
     }) 
-    })
+
+            })
 })
