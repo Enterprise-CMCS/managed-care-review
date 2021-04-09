@@ -12,7 +12,7 @@ describe('Login', () => {
     it('user can login and see personal dashboard for their state', () => {
         cy.login()
         cy.findByText('aang@dhs.state.mn.us').should('exist')
-        cy.findByRole('heading', {name: 'Minnesota Managed Care Dashboard'}).should('exist')
+        cy.findByRole('heading', {name: 'Minnesota Dashboard'}).should('exist')
         cy.findAllByRole('tab', {name: 'MSHO'}).should('exist')
         cy.findAllByRole('tab', {name: 'PMAP'}).should('exist')
         cy.findAllByRole('tab', {name: 'SNBC'}).should('exist')
