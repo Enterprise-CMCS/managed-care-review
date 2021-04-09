@@ -27,7 +27,7 @@ jobs:
 
               From Serverless:
                 A service name should only contain alphanumeric (case sensitive) and hyphens. It should start with an alphabetic character and shouldnt exceed 128 characters.
-
+              
               For Github Actions support, please push your code to a new branch with a name that meets Serverless' service name requirements.
               So, make a new branch with a name that begins with a letter and is made up of only letters, numbers, and hyphens... then delete this branch.
               ------------------------------------------------------------------------------------------------------------------------------

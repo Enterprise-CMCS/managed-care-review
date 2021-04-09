@@ -386,7 +386,6 @@ async function run_online_tests(runner: LabeledProcessRunner) {
     // if (webCode != 0) {
     //  throw new Error('web - a11y tests FAILED')
     // }
-
     const nightCode = await runner.run_command_and_output(
         'nightwatch',
         ['./test.sh'],
@@ -498,7 +497,7 @@ function main() {
                     .option('online', {
                         type: 'boolean',
                         describe:
-                            'run run all tests that run against a live instance. Confiugre with APPLICATION_ENDPOINT',
+                            'run run all tests that run against a live instance. Configure with APPLICATION_ENDPOINT',
                     })
                     .option('run-db', {
                         type: 'boolean',
