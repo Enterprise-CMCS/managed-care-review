@@ -137,7 +137,7 @@ resources:
               - CloudFrontDefaultCertificate: true
           CustomErrorResponses:
             - ErrorCode: 403
-              ResponseCode: 403
+              ResponseCode: 200
               ResponsePagePath: /index.html
           WebACLId:
             Fn::GetAtt:
