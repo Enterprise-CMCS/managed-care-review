@@ -4,7 +4,7 @@ describe('Login', () => {
         cy.url().should('eq', Cypress.config().baseUrl + '/dashboard');
         cy.findByRole('button', {name: /Sign out/i}).should('exist').then( (button) => {
             button.trigger('click')
-            cy.url().should('eq', Cypress.config().baseUrl + '/auth');
+            cy.location('pathname').should('eq', '/')
             cy.findByRole('link', {name: /Sign In/i}).should('exist')
         }) 
     })  

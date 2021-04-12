@@ -2,6 +2,8 @@ import React from 'react'
 import { GridContainer, Grid } from '@trussworks/react-uswds'
 
 import styles from './Header.module.scss'
+
+import PageHeading from '../../components/PageHeading'
 import { StateIcon } from './StateIcon'
 import { User } from '../../gen/gqlClient'
 
@@ -11,7 +13,7 @@ type PageHeadingProps = {
     heading?: string
 }
 
-export const PageHeading = ({
+export const PageHeadingRow = ({
     isLoading = false,
     heading = 'Dashboard',
     loggedInUser,
@@ -23,12 +25,12 @@ export const PageHeading = ({
                     <div>
                         <StateIcon code={loggedInUser.state.code} />
                     </div>
-                    <h1>
+                    <PageHeading>
                         <span>{loggedInUser.state.name}&nbsp;</span>
                         <span className="font-heading-lg text-light">
                             {heading}
                         </span>
-                    </h1>
+                    </PageHeading>
                 </Grid>
             </GridContainer>
         </div>

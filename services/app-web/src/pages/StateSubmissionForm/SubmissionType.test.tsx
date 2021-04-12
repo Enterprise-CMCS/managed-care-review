@@ -32,10 +32,29 @@ describe('SubmissionType', () => {
         )
     })
 
-    it('displays a form', async () => {
+    it('displays submission type form when expected', async () => {
         renderWithProviders(<SubmissionType />, {
             apolloProvider: {
                 mocks: [getCurrentUserMock({ statusCode: 200 })],
+            },
+        })
+
+        await waitFor(() =>
+            expect(
+                screen.getByRole('form', { name: 'Submission Type Form' })
+            ).toBeInTheDocument()
+        )
+    })
+
+    it('displays new submission form when expected', async () => {
+        const history = createMemoryHistory()
+        renderWithProviders(<SubmissionType />, {
+            apolloProvider: {
+                mocks: [getCurrentUserMock({ statusCode: 200 })],
+            },
+            routerProvider: {
+                route: '/submissions/new',
+                routerProps: { history: history },
             },
         })
 
@@ -347,6 +366,7 @@ describe('SubmissionType', () => {
             )
 
             await waitFor(() => {
+                expect(screen.getByText('Contract details')).toBeInTheDocument()
                 expect(history.location.pathname).toBe(
                     '/submissions/test-id/contract-details'
                 )

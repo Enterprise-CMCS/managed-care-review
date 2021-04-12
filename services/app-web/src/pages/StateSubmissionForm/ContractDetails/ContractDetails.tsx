@@ -1,4 +1,5 @@
 import { GridContainer } from '@trussworks/react-uswds'
+import PageHeading from '../../../components/PageHeading'
 
 export const ContractDetails = ({
     code,
@@ -7,7 +8,7 @@ export const ContractDetails = ({
 }): React.ReactElement => {
     return (
         <GridContainer>
-            <h2>Contract details</h2>
+            <PageHeading headingLevel="h2"> Contract details </PageHeading>
         </GridContainer>
     )
 }
