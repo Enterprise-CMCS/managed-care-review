@@ -73,6 +73,7 @@ const context = async ({
                 )
             }
         } catch (err) {
+            console.log('Error attempting to fetch user: ', err)
             throw new Error('Log: placing user in gql context failed')
         }
     } else {

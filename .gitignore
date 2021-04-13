@@ -19,6 +19,9 @@ gen/
 todo.txt
 notes/
 
+/tests/cypress/screenshots
+/tests/cypress/videos
+
 services/app-web/public/env-config.js
 services/app-web/storybook-static
 services/app-web/build

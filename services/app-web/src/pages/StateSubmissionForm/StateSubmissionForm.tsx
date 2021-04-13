@@ -6,7 +6,7 @@ import { Switch, Route, useParams } from 'react-router-dom'
 import { Loading } from '../../components/Loading/'
 import { usePage } from '../../contexts/PageContext'
 import { RoutesRecord } from '../../constants/routes'
-import { ContractDetails } from './ContractDetails'
+import { ContractDetails } from './ContractDetails/ContractDetails'
 import { ReviewSubmit } from './ReviewSubmit/ReviewSubmit'
 import { SubmissionType } from './SubmissionType'
 

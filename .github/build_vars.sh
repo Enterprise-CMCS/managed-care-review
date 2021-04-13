@@ -17,6 +17,7 @@ var_list=(
   'IAM_PERMISSIONS_BOUNDARY_POLICY'
   'STAGE_PREFIX'
   'DYNAMO_CONNECTION'
+  'TEST_USERS_PASS'
 )
 
 set_value() {

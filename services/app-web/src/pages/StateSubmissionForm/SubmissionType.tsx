@@ -14,8 +14,15 @@ import {
     Label,
     Textarea,
 } from '@trussworks/react-uswds'
-import { Field, Formik, FormikHelpers, FormikErrors } from 'formik'
+import {
+    Field,
+    Formik,
+    FormikHelpers,
+    FormikErrors,
+    useFormikContext,
+} from 'formik'
 import { NavLink, useHistory } from 'react-router-dom'
+import PageHeading from '../../components/PageHeading'
 import { useMutation } from '@apollo/client'
 
 import styles from './StateSubmissionForm.module.scss'
@@ -28,13 +35,29 @@ import {
 import { useAuth } from '../../contexts/AuthContext'
 import { SubmissionTypeRecord } from '../../constants/submissions'
 
+/*
+    Add focus to "first" form element that is invalid when errors exist
+    Approx order of form inputs is determined by the Formik schema
+*/
+const FormikFocusOnErrors = () => {
+    const { errors } = useFormikContext()
+    const errorKeys = Object.keys(errors)
+    React.useEffect(() => {
+        if (errorKeys.length > 0) {
+            document.getElementsByName(errorKeys[0])[0].focus()
+        }
+    }, [errorKeys])
+    return null
+}
+
 // Formik setup
+// Should be listed in order of appearance on field to allow errors to focus as expected
 const SubmissionTypeFormSchema = Yup.object().shape({
     program: Yup.string(),
+    submissionType: Yup.string().required('You must choose a submission type'),
     submissionDescription: Yup.string().required(
         'You must provide a description of any major changes or updates'
     ),
-    submissionType: Yup.string().required('You must choose a submission type'),
 })
 export interface SubmissionTypeFormValues {
     programId: string
@@ -170,7 +193,11 @@ export const SubmissionType = ({
                     <UswdsForm
                         className="usa-form--large"
                         id="SubmissionTypeForm"
-                        aria-label="New Submission Form"
+                        aria-label={
+                            isNewSubmission
+                                ? 'New Submission Form'
+                                : 'Submission Type Form'
+                        }
                         onSubmit={(e) => {
                             e.preventDefault()
                             validateForm()
@@ -180,13 +207,14 @@ export const SubmissionType = ({
                                 .catch(() =>
                                     console.warn('Log: Validation Error')
                                 )
-
                             if (!isValidating) handleSubmit()
                         }}
                     >
                         <fieldset className="usa-fieldset">
                             <legend className={styles.formHeader}>
-                                <h2>Submission type</h2>
+                                <PageHeading headingLevel="h2">
+                                    Submission type
+                                </PageHeading>
                             </legend>
                             {showFormAlert && (
                                 <Alert type="error">Something went wrong</Alert>
@@ -224,6 +252,7 @@ export const SubmissionType = ({
                                         )}
                                         <Field
                                             as={Radio}
+                                            aria-required
                                             checked={
                                                 values.submissionType ===
                                                 SubmissionTypeT.ContractOnly
@@ -239,6 +268,7 @@ export const SubmissionType = ({
                                         />
                                         <Field
                                             as={Radio}
+                                            aria-required
                                             checked={
                                                 values.submissionType ===
                                                 SubmissionTypeT.ContractAndRates
@@ -269,21 +299,29 @@ export const SubmissionType = ({
                                             {errors.submissionDescription}
                                         </ErrorMessage>
                                     )}
-                                    <Link
-                                        variant="nav"
-                                        href={
-                                            '/help/submission-description-examples'
-                                        }
-                                        target="_blank"
+
+                                    <div
+                                        aria-labelledby="submissionDescription"
+                                        className="usa-hint"
                                     >
-                                        View description examples
-                                    </Link>
-                                    <p className="usa-hint margin-top-1">
-                                        Provide a description of any major
-                                        changes or updates
-                                    </p>
+                                        <Link
+                                            variant="nav"
+                                            href={
+                                                '/help/submission-description-examples'
+                                            }
+                                            target="_blank"
+                                        >
+                                            View description examples
+                                        </Link>
+
+                                        <p>
+                                            Provide a description of any major
+                                            changes or updates
+                                        </p>
+                                    </div>
                                     <Field
                                         as={Textarea}
+                                        aria-required
                                         id="submissionDescription"
                                         name="submissionDescription"
                                         value={values.submissionDescription}
@@ -325,6 +363,7 @@ export const SubmissionType = ({
                                 </Button>
                             </ButtonGroup>
                         </fieldset>
+                        <FormikFocusOnErrors />
                     </UswdsForm>
                 </>
             )}

@@ -1,38 +1,24 @@
 import React from 'react'
 import { GovBanner } from '@trussworks/react-uswds'
-import { useLocation } from 'react-router'
 import styles from './AppBody.module.scss'
 
 import { AppRoutes } from './AppRoutes'
-import { Error400 } from '../Errors/Error400'
 import { Footer } from '../../components/Footer/Footer'
 import { Header } from '../../components/Header/Header'
 import { Loading } from '../../components/Loading'
 
 import { AuthModeType } from '../../common-code/domain-models'
 import { useAuth } from '../../contexts/AuthContext'
-import { useTitle } from '../../hooks/useTitle'
-import { getRouteName, PageTitlesRecord } from '../../constants/routes'
 
 export function AppBody({
     authMode,
 }: {
     authMode: AuthModeType
 }): React.ReactElement {
-    const { pathname } = useLocation()
-    const route = getRouteName(pathname)
-
-    /*
-        Adds page titles throughout the application
-    */
-    const title =
-        route === 'UNKNOWN_ROUTE'
-            ? 'Dashboard'
-            : PageTitlesRecord[route]
-    useTitle(title)
-
     // TODO: create an DialogContext to handle all app alerts
-    const [alert, setAlert] = React.useState(false)
+    const [alert, setAlert] = React.useState<React.ReactElement | undefined>(
+        undefined
+    )
     const [showLoading, setShowLoading] = React.useState<
         'NOT_LOADING' | 'WAITING' | 'SHOW_LOADING'
     >('NOT_LOADING')
@@ -64,7 +50,7 @@ export function AppBody({
 
             <Header authMode={authMode} setAlert={setAlert} />
             <main id="main-content" className={styles.mainContent} role="main">
-                {alert && Error400}
+                {alert && alert}
                 {loginStatus === 'LOADING' ? (
                     showLoading === 'SHOW_LOADING' && <Loading />
                 ) : (
