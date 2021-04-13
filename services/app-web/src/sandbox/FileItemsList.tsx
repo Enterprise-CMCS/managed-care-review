@@ -1,6 +1,5 @@
 import React from 'react'
-import { FileItem as FileItemT } from './FileInput'
-import { FileItem } from './FileItem'
+import { FileItem, FileItemT } from './FileItem'
 
 export const FileItemsList = ({
     fileItems,

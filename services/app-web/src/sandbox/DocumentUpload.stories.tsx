@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { DocumentUpload } from './DocumentUpload'
 import { Alert, Button, Form } from '@trussworks/react-uswds'
-import { FileItemT } from './FileItem'
+import { FileItemT, FileStatuses } from './FileItem'
 
 export default {
     title: 'Sandbox/DocumentUpload',
@@ -25,12 +25,6 @@ const fakeApiRequest = (success: boolean): Promise<void> => {
 
     TODO: request existing submission documents and pass down to DocumentUpload (to be merged with files dynamically added to input)
     TODO: Delete all files unattached to a submission from S3 on Cancel button click
-
-    Expected submit button behavior
-    - on load it is enabled
-    - when files are being uploaded it is disabled
-    - after button is  clicked the first time, turns on validation. Should be disabled itself if no files exist or no uploaded files exist
-    - if files are value, attach to overall draft submission data and call updateDraftSubmissionMutation
 */
 
 export const DemoDocumentUploadSuccess = (): React.ReactElement => {
@@ -61,7 +55,7 @@ export const DemoDocumentUploadSuccess = (): React.ReactElement => {
     return (
         <Form
             className="usa-form--large"
-            onSubmit={() => {
+            onSubmit={(e) => {
                 e.preventDefault()
                 console.log('Check validation and submit files:')
                 setShouldValidate(true)
@@ -146,7 +140,7 @@ export const DemoDocumentUploadFailure = (): React.ReactElement => {
                 <Button
                     type="submit"
                     secondary={shouldValidate && !hasValidFiles}
-                    disabled={shouldValidate && !hasValidFiles}
+                    disabled={fileItems.length > 0 && !hasValidFiles}
                 >
                     Continue
                 </Button>
