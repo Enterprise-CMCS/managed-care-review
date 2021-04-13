@@ -358,7 +358,7 @@ async function run_unit_tests(runner: LabeledProcessRunner) {
 
     const apiCode = await runner.run_command_and_output(
         'api - unit',
-        ['yarn', 'test', '--coverage'],
+        ['yarn', 'test:unit', '--coverage'],
         'services/app-api'
     )
     if (apiCode != 0) {

@@ -4,7 +4,8 @@
     "main": "handler.js",
     "license": "MIT",
     "scripts": {
-        "test": "jest",
+        "test": "jest --watch",
+        "test:unit": "jest",
         "lint": "tsc --noEmit && eslint . --ignore-path ../../.gitignore",
         "clean": "rm -rf node_modules && yarn cache clean"
     },

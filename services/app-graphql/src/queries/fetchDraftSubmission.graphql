@@ -1,5 +1,5 @@
-query showDraftSubmission($input: ShowDraftSubmissionInput!) {
-    showDraftSubmission(input: $input) {
+query fetchDraftSubmission($input: FetchDraftSubmissionInput!) {
+    fetchDraftSubmission(input: $input) {
         draftSubmission {
             id
             name

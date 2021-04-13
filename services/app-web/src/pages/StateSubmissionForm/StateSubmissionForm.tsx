@@ -10,14 +10,14 @@ import { ContractDetails } from './ContractDetails/ContractDetails'
 import { ReviewSubmit } from './ReviewSubmit/ReviewSubmit'
 import { SubmissionType } from './SubmissionType'
 
-import { useShowDraftSubmissionQuery } from '../../gen/gqlClient'
+import { useFetchDraftSubmissionQuery } from '../../gen/gqlClient'
 
 export const StateSubmissionForm = (): React.ReactElement => {
     const { id } = useParams<{ id: string }>()
 
     const { updateHeading } = usePage()
 
-    const { data, loading, error } = useShowDraftSubmissionQuery({
+    const { data, loading, error } = useFetchDraftSubmissionQuery({
         variables: {
             input: {
                 submissionID: id,
@@ -27,7 +27,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
     useEffect(() => {
         // We have to updateHeading inside useEffect so that we don't update two components at the same time
-        const draft = data?.showDraftSubmission?.draftSubmission
+        const draft = data?.fetchDraftSubmission?.draftSubmission
         if (draft) {
             updateHeading(draft.name)
         }
@@ -52,10 +52,10 @@ export const StateSubmissionForm = (): React.ReactElement => {
         )
     }
 
-    const draft = data?.showDraftSubmission?.draftSubmission
+    const draft = data?.fetchDraftSubmission?.draftSubmission
 
     if (draft === undefined || draft === null) {
-        console.log('got undefined back from loaded showDraftSubmission')
+        console.log('got undefined back from loaded fetchDraftSubmission')
         return (
             <GridContainer>
                 <Alert type="error">

@@ -4,10 +4,10 @@ schema {
 }
 
 type Query {
-    getCurrentUser: User!
-    showDraftSubmission(
-        input: ShowDraftSubmissionInput!
-    ): ShowDraftSubmissionPayload
+    fetchCurrentUser: User!
+    fetchDraftSubmission(
+        input: FetchDraftSubmissionInput!
+    ): FetchDraftSubmissionPayload
 }
 
 type Mutation {
@@ -29,17 +29,17 @@ type CreateDraftSubmissionPayload {
     draftSubmission: DraftSubmission!
 }
 
-input ShowDraftSubmissionInput {
+input FetchDraftSubmissionInput {
     submissionID: ID!
 }
 
-type ShowDraftSubmissionPayload {
+type FetchDraftSubmissionPayload {
     draftSubmission: DraftSubmission
 }
 
 input UpdateDraftSubmissionInput {
     submissionID: ID!
-    draftSubmission: DraftSubmissionInput!
+    draftSubmissionUpdates: DraftSubmissionUpdates!
 }
 
 type UpdateDraftSubmissionPayload {
@@ -84,7 +84,7 @@ type DraftSubmission {
     updatedAt: DateTime!
 }
 
-input DraftSubmissionInput {
+input DraftSubmissionUpdates {
     programID: String!
     submissionType: SubmissionType!
     submissionDescription: String!

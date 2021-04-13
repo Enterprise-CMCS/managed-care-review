@@ -153,7 +153,7 @@ export const SubmissionType = ({
                     variables: {
                         input: {
                             submissionID: draftSubmission.id,
-                            draftSubmission: updatedDraft,
+                            draftSubmissionUpdates: updatedDraft,
                         },
                     },
                 })
