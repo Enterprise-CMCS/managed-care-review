@@ -1,10 +1,24 @@
 import React from 'react'
 import { Button } from '@trussworks/react-uswds'
 import classnames from 'classnames'
-import { FileItem as FileItemT } from './FileInput'
 
 const SPACER_GIF =
     'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+
+export const FileStatuses = [
+    'PENDING',
+    'UPLOAD_COMPLETE',
+    'UPLOAD_ERROR',
+    'SAVED_TO_SUBMISSION',
+] as const
+type FileStatus = typeof FileStatuses[number] // iterable union type
+
+export type FileItemT = {
+    id: string
+    name: string
+    url?: string
+    status: FileStatus
+}
 
 export const FileItem = ({
     item,
@@ -30,8 +44,6 @@ export const FileItem = ({
     })
 
     const handleDelete = (e: React.MouseEvent) => {
-        console.log(e)
-        console.log('dlete')
         deleteItem(item.id)
     }
     return (
