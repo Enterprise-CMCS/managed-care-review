@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import {
     Button,
     ErrorMessage,
@@ -6,6 +6,7 @@ import {
     Label,
     FileInput as ReactUSWDSFileInput,
 } from '@trussworks/react-uswds'
+import { FileItemPreview } from './FileItemPreview'
 
 export const FileStatuses = [
     'PENDING',
@@ -29,12 +30,21 @@ type FileInputProps = {
     ) => Promise<void>
 } & JSX.IntrinsicElements['input']
 
-type FileItem = {
+export type FileItem = {
     id: string
     name: string
     url?: string
     status: FileStatus
 }
+
+/* 
+mc-review FileInput. Async upload of files using uswds styles.
+
+TODO: Display pdf icon
+TODO: call deleteFiles on delete
+TODO: show Error alert when trying to continue and not files uplaoded
+TODO: disallow file upload of the same name (maybe show some kind of alert)
+*/
 export const FileInput = ({
     id,
     name,
@@ -43,10 +53,23 @@ export const FileInput = ({
     ...props
 }: FileInputProps): React.ReactElement => {
     const [fileItems, setFileItems] = useState<FileItem[]>([])
+    const [canSubmit, setCanSubmit] = useState(true)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
-    const generateFileItems = (fileList: FileList | null) => {
-        if (!fileList || fileList.length === 0) return
+    useEffect(() => {
+        const hasValidFiles: boolean =
+            fileItems.length > 0 &&
+            fileItems.every((item) => item.status !== 'PENDING') &&
+            fileItems.some(
+                (item) =>
+                    item.status === 'UPLOAD_COMPLETE' ||
+                    item.status === 'SAVED_TO_SUBMISSION'
+            )
+
+        setCanSubmit(hasValidFiles)
+    }, [fileItems])
+
+    const generateFileItems = (fileList: FileList) => {
         const fileItems: FileItem[] = []
         for (let i = 0; i < fileList?.length; i++) {
             fileItems.push({
@@ -59,21 +82,15 @@ export const FileInput = ({
         return fileItems
     }
 
-    const canSubmit = () =>
-        fileItems.length > 0 &&
-        fileItems.every((item) => item.status !== 'PENDING') &&
-        fileItems.some(
-            (item) =>
-                item.status === 'UPLOAD_COMPLETE' ||
-                item.status === 'SAVED_TO_SUBMISSION'
-        )
+    const deleteItem = (id: string) => {
+        setFileItems((prevItems) => prevItems.filter((item) => item.id !== id))
+        // also call deleteFilesApi
+    }
 
     const asyncS3Upload = (items: FileItem[]) => {
         items.forEach((item) => {
-            console.log('uploading', item.name)
             uploadFilesApi(true)
                 .then(() => {
-                    console.log('then')
                     setFileItems((prevItems) => {
                         const newItems = [...prevItems]
                         return newItems.map((current) => {
@@ -103,28 +120,25 @@ export const FileInput = ({
                         })
                     })
                 })
-                .finally(() => {
-                    console.log('done', item.name)
-                })
         })
     }
 
     const handleDrop = (e: React.DragEvent): void => {
-        console.log('onDrop')
-        const items = generateFileItems(fileInputRef?.current?.files || null)
-        if (items) {
-            setFileItems((array) => [...array, ...items])
-            asyncS3Upload(items)
-        }
+        if (!fileInputRef?.current?.files) return
+
+        const items = generateFileItems(fileInputRef.current.files)
+        fileInputRef.current.value = ''
+        setFileItems((array) => [...array, ...items])
+        asyncS3Upload(items)
     }
 
     const handleChange = (e: React.ChangeEvent): void => {
-        console.log('onChange')
-        const items = generateFileItems(fileInputRef?.current?.files || null)
-        if (items) {
-            setFileItems((array) => [...array, ...items])
-            asyncS3Upload(items)
-        }
+        if (!fileInputRef?.current?.files) return
+
+        const items = generateFileItems(fileInputRef.current.files)
+        fileInputRef.current.value = ''
+        setFileItems((array) => [...array, ...items])
+        asyncS3Upload(items)
     }
 
     return (
@@ -148,17 +162,40 @@ export const FileInput = ({
                 />
             </FormGroup>
             {fileItems && (
-                <ul>
+                <ul
+                    style={{
+                        listStyleType: 'none',
+                        display: 'inline-block',
+                        padding: 0,
+                        margin: '0 0 -1px ',
+                    }}
+                >
                     {fileItems.map((item) => (
-                        <li key={item.id} id={item.id}>
-                            {item.status === 'PENDING' ? 'pending' : item.name}
+                        <li
+                            key={item.id}
+                            id={item.id}
+                            className="usa-file-input__preview"
+                        >
+                            <FileItemPreview
+                                deleteItem={deleteItem}
+                                item={item}
+                            />
                         </li>
                     ))}
                 </ul>
             )}
-            <Button type="button" disabled={!canSubmit}>
-                Continue
-            </Button>
+            <div>
+                <Button
+                    type="button"
+                    secondary={!canSubmit}
+                    disabled={!canSubmit}
+                    onClick={() =>
+                        console.log('Continue with files:', fileItems)
+                    }
+                >
+                    Continue
+                </Button>
+            </div>
         </div>
     )
 }
