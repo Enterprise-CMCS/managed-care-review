@@ -5,7 +5,7 @@ query showDraftSubmission($input: ShowDraftSubmissionInput!) {
             name
             createdAt
             updatedAt
-            programId
+            programID
             program {
                 name
                 id

@@ -5,10 +5,6 @@ export function draftSubmissionResolver(
     store: Store
 ): Resolvers['DraftSubmission'] {
     return {
-        programId(parent) {
-            return parent.programID
-        },
-
         program(parent) {
             const program = store.findProgram(
                 parent.stateCode,

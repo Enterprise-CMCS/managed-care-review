@@ -6,7 +6,6 @@ import { MutationResolvers, State } from '../gen/gqlServer'
 
 import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
 
-// TODO: potential refactor: pull out database interactions into /datasources createDraftSubmission as per apollo server docs
 export function updateDraftSubmissionResolver(
     store: Store
 ): MutationResolvers['updateDraftSubmission'] {
@@ -41,21 +40,19 @@ export function updateDraftSubmissionResolver(
         // Validate the programID
         const program = store.findProgram(
             stateFromCurrentUser,
-            input.draftSubmission.programId
+            input.draftSubmission.programID
         )
 
         if (program === undefined) {
             throw new UserInputError(
-                `The program id ${input.draftSubmission.programId} does not exist in state ${stateFromCurrentUser}`,
+                `The program id ${input.draftSubmission.programID} does not exist in state ${stateFromCurrentUser}`,
                 {
                     argumentName: 'programID',
                 }
             )
         }
 
-        const draft: any = Object.assign(initialDraft, input.draftSubmission)
-        // TODO "applyChanges" fn
-        draft.programID = draft.programId
+        const draft = Object.assign(initialDraft, input.draftSubmission)
 
         const updateResult = await store.updateDraftSubmission(draft)
 

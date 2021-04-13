@@ -20,7 +20,7 @@ type Mutation {
 }
 
 input CreateDraftSubmissionInput {
-    programId: ID!
+    programID: ID!
     submissionType: SubmissionType!
     submissionDescription: String!
 }
@@ -74,7 +74,7 @@ enum SubmissionType {
 
 type DraftSubmission {
     id: ID!
-    programId: String!
+    programID: String!
     program: Program!
     submissionType: SubmissionType!
     submissionDescription: String!
@@ -85,7 +85,7 @@ type DraftSubmission {
 }
 
 input DraftSubmissionInput {
-    programId: String!
+    programID: String!
     submissionType: SubmissionType!
     submissionDescription: String!
     # documents[] ...

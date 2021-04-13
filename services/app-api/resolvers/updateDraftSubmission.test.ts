@@ -14,7 +14,7 @@ describe('updateDraftSubmission', () => {
 
         // SETUP: First, create a new submission
         const createInput: CreateDraftSubmissionInput = {
-            programId: 'smmc',
+            programID: 'smmc',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A created submission',
         }
@@ -35,7 +35,7 @@ describe('updateDraftSubmission', () => {
         await new Promise((resolve) => setTimeout(resolve, 2000))
 
         const updatedDraft = {
-            programId: 'cnet',
+            programID: 'cnet',
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
         }
@@ -90,7 +90,7 @@ describe('updateDraftSubmission', () => {
         const { mutate } = createTestClient(server)
 
         const updatedDraft = {
-            programId: 'cnet',
+            programID: 'cnet',
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
         }
@@ -125,7 +125,7 @@ describe('updateDraftSubmission', () => {
 
         // SETUP: First, create a new submission
         const createInput: CreateDraftSubmissionInput = {
-            programId: 'smmc',
+            programID: 'smmc',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A created submission',
         }
@@ -157,7 +157,7 @@ describe('updateDraftSubmission', () => {
         const { mutate: otherMutate } = createTestClient(otherUserServer)
 
         const updatedDraft = {
-            programId: 'cnet',
+            programID: 'cnet',
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
         }
@@ -188,7 +188,7 @@ describe('updateDraftSubmission', () => {
 
         // SETUP: First, create a new submission
         const createInput: CreateDraftSubmissionInput = {
-            programId: 'smmc',
+            programID: 'smmc',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A created submission',
         }
@@ -206,7 +206,7 @@ describe('updateDraftSubmission', () => {
         const createdID = createdDraft.id
 
         const updatedDraft = {
-            programId: 'wefwefwefew',
+            programID: 'wefwefwefew',
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
         }

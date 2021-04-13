@@ -13,7 +13,7 @@ import { Formik } from 'formik'
 
 describe('SubmissionType', () => {
     const SubmissionTypeInitialValues: SubmissionTypeFormValues = {
-        programId: 'ccc-plus',
+        programID: 'ccc-plus',
         submissionDescription: '',
         submissionType: '',
     }

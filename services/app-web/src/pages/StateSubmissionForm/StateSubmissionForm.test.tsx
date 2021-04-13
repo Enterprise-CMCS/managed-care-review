@@ -155,7 +155,7 @@ describe('StateSubmissionForm', () => {
                                 submissionType: 'CONTRACT_ONLY' as SubmissionType,
                                 submissionDescription:
                                     'A real submissionan updated something',
-                                programId: 'snbc',
+                                programID: 'snbc',
                             },
                             statusCode: 200,
                         }),

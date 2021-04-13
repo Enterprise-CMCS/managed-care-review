@@ -31,7 +31,7 @@ const mockDraftSubmission: DraftSubmission = {
     updatedAt: new Date(),
     id: 'test-abc-123',
     stateCode: 'MN',
-    programId: 'snbc',
+    programID: 'snbc',
     program: {
         id: 'snbc',
         name: 'SNBC',

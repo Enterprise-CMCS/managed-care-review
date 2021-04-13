@@ -13,7 +13,7 @@ describe('createDraftSubmission', () => {
 
         // First, create a new submission
         const createInput: CreateDraftSubmissionInput = {
-            programId: 'smmc',
+            programID: 'smmc',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A real submission',
         }
@@ -69,7 +69,7 @@ describe('createDraftSubmission', () => {
 
         // First, create a new submission
         const createInput: CreateDraftSubmissionInput = {
-            programId: 'smmc',
+            programID: 'smmc',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A real submission',
         }
@@ -117,7 +117,7 @@ describe('createDraftSubmission', () => {
 
         // First, create a new submission
         const createInput: CreateDraftSubmissionInput = {
-            programId: 'smmc',
+            programID: 'smmc',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A real submission',
         }

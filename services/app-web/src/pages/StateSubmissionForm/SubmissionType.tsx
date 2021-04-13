@@ -60,7 +60,7 @@ const SubmissionTypeFormSchema = Yup.object().shape({
     ),
 })
 export interface SubmissionTypeFormValues {
-    programId: string
+    programID: string
     submissionDescription: string
     submissionType: string
 }
@@ -99,7 +99,7 @@ export const SubmissionType = ({
         shouldValidate && Boolean(error)
 
     const submissionTypeInitialValues: SubmissionTypeFormValues = {
-        programId: draftSubmission?.program.id ?? programs[0]?.id, // TODO: change this to be the program selected on the tab
+        programID: draftSubmission?.program.id ?? programs[0]?.id, // TODO: change this to be the program selected on the tab
         submissionDescription: draftSubmission?.submissionDescription ?? '',
         submissionType: draftSubmission?.submissionType ?? '',
     }
@@ -143,7 +143,7 @@ export const SubmissionType = ({
             // TODO: once we have more values, we'll need to pick the other values out
             // off of the existing draft.
             const updatedDraft = {
-                programId: values.programId,
+                programID: values.programID,
                 submissionType: values.submissionType as SubmissionTypeT,
                 submissionDescription: values.submissionDescription,
             }
@@ -222,13 +222,13 @@ export const SubmissionType = ({
                             <div className={styles.formContainer}>
                                 <span>All fields are required</span>
                                 <FormGroup className={styles.formGroup}>
-                                    <Label htmlFor="programId">Program</Label>
+                                    <Label htmlFor="programID">Program</Label>
                                     <Field
-                                        id="programId"
-                                        name="programId"
+                                        id="programID"
+                                        name="programID"
                                         as={Dropdown}
                                         onChange={handleChange}
-                                        value={values.programId}
+                                        value={values.programID}
                                     >
                                         {programs.map((program) => (
                                             <option
