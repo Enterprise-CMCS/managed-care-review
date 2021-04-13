@@ -1,5 +1,5 @@
-mutation createDraftSubmission($input: CreateDraftSubmissionInput!) {
-    createDraftSubmission(input: $input) {
+mutation updateDraftSubmission($input: UpdateDraftSubmissionInput!) {
+    updateDraftSubmission(input: $input) {
         draftSubmission {
             id
             name

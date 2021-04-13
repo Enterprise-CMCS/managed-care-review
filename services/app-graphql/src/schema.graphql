@@ -14,6 +14,9 @@ type Mutation {
     createDraftSubmission(
         input: CreateDraftSubmissionInput!
     ): CreateDraftSubmissionPayload
+    updateDraftSubmission(
+        input: UpdateDraftSubmissionInput!
+    ): UpdateDraftSubmissionPayload!
 }
 
 input CreateDraftSubmissionInput {
@@ -34,7 +37,17 @@ type ShowDraftSubmissionPayload {
     draftSubmission: DraftSubmission
 }
 
+input UpdateDraftSubmissionInput {
+    submissionID: ID!
+    draftSubmission: DraftSubmissionInput!
+}
+
+type UpdateDraftSubmissionPayload {
+    draftSubmission: DraftSubmission!
+}
+
 scalar Date
+scalar DateTime
 
 type User {
     role: String!
@@ -61,10 +74,19 @@ enum SubmissionType {
 
 type DraftSubmission {
     id: ID!
-    name: String!
-    createdAt: Date!
+    programId: String!
     program: Program!
     submissionType: SubmissionType!
     submissionDescription: String!
     stateCode: String!
+    name: String!
+    createdAt: Date!
+    updatedAt: DateTime!
+}
+
+input DraftSubmissionInput {
+    programId: String!
+    submissionType: SubmissionType!
+    submissionDescription: String!
+    # documents[] ...
 }

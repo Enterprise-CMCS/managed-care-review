@@ -23,10 +23,11 @@ import {
     CreateDraftSubmissionDocument,
     DraftSubmission,
     SubmissionType as SubmissionTypeT,
+    useUpdateDraftSubmissionMutation,
 } from '../../gen/gqlClient'
 import { useAuth } from '../../contexts/AuthContext'
 import { SubmissionTypeRecord } from '../../constants/submissions'
-import { usePage } from '../../contexts/PageContext'
+
 // Formik setup
 const SubmissionTypeFormSchema = Yup.object().shape({
     program: Yup.string(),
@@ -52,34 +53,27 @@ export const SubmissionType = ({
 }: SubmissionTypeProps): React.ReactElement => {
     const [showFormAlert, setShowFormAlert] = React.useState(false)
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
-    const { updateHeading } = usePage()
     const { loggedInUser: { state: { programs = [] } = {} } = {} } = useAuth()
 
     const history = useHistory()
     const location = history.location
     const isNewSubmission = location.pathname === '/submissions/new'
 
-    const [createDraftSubmission, { data, error }] = useMutation(
+    const [createDraftSubmission, { error }] = useMutation(
         CreateDraftSubmissionDocument
     )
+    const [
+        updateDraftSubmission,
+        { error: updateError },
+    ] = useUpdateDraftSubmissionMutation()
 
-    if (error) {
+    if ((error || updateError) && !showFormAlert) {
         setShowFormAlert(true)
         console.log('Log: creating new submission failed with gql error', error)
     }
 
-    // TODO: remove in favor of handling this at the StateSubmissionForm level
-    React.useEffect(() => {
-        const submissionName =
-            data && data.createDraftSubmission.draftSubmission.name
-        if (submissionName) {
-            updateHeading(submissionName)
-        }
-    }, [data, updateHeading])
-
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
-
 
     const submissionTypeInitialValues: SubmissionTypeFormValues = {
         programId: draftSubmission?.program.id ?? programs[0]?.id, // TODO: change this to be the program selected on the tab
@@ -114,8 +108,44 @@ export const SubmissionType = ({
                 )
             }
         } else {
-            // TODO: implement saving an existing submission
-            console.log('mock save draft submission', values)
+            if (draftSubmission === undefined) {
+                // this is a sign that we should hoist the saving stuff out of this leaf
+                // let's reconsider once we have our second editiable component.
+                console.log(
+                    'ERROR, when editing a draft, one should always be passed in.'
+                )
+                return
+            }
+
+            // TODO: once we have more values, we'll need to pick the other values out
+            // off of the existing draft.
+            const updatedDraft = {
+                programId: values.programId,
+                submissionType: values.submissionType as SubmissionTypeT,
+                submissionDescription: values.submissionDescription,
+            }
+
+            try {
+                await updateDraftSubmission({
+                    variables: {
+                        input: {
+                            submissionID: draftSubmission.id,
+                            draftSubmission: updatedDraft,
+                        },
+                    },
+                })
+
+                history.push(
+                    `/submissions/${draftSubmission.id}/contract-details`
+                )
+            } catch (serverError) {
+                setShowFormAlert(true)
+                formikHelpers.setSubmitting(false) // unblock submit button to allow resubmit
+                console.log(
+                    'Log: updating submission failed with server error',
+                    serverError
+                )
+            }
         }
     }
 

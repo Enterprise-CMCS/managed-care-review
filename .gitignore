@@ -17,6 +17,7 @@ tests_output
 coverage/
 gen/
 todo.txt
+notes/
 
 services/app-web/public/env-config.js
 services/app-web/storybook-static

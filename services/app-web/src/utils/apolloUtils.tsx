@@ -5,6 +5,8 @@ import {
     User as UserType,
     CreateDraftSubmissionDocument,
     ShowDraftSubmissionDocument,
+    UpdateDraftSubmissionDocument,
+    DraftSubmissionInput,
 } from '../gen/gqlClient'
 import { MockedResponse } from '@apollo/client/testing'
 
@@ -26,8 +28,10 @@ const mockValidUser: UserType = {
 
 const mockDraftSubmission: DraftSubmission = {
     createdAt: new Date(),
+    updatedAt: new Date(),
     id: 'test-abc-123',
     stateCode: 'MN',
+    programId: 'snbc',
     program: {
         id: 'snbc',
         name: 'SNBC',
@@ -143,8 +147,53 @@ const showDraftSubmissionMock = ({
     }
 }
 
+type updateDraftSubmissionMockProps = {
+    draftSubmission?: DraftSubmission | Partial<DraftSubmission>
+    id: string
+    updates: DraftSubmissionInput
+    statusCode: 200 | 403 | 500
+}
+
+const updateDraftSubmissionMock = ({
+    draftSubmission = mockDraftSubmission,
+    id,
+    updates,
+    statusCode, // eslint-disable-next-line @typescript-eslint/no-explicit-any
+}: updateDraftSubmissionMockProps): MockedResponse<Record<string, any>> => {
+    switch (statusCode) {
+        case 200:
+            return {
+                request: {
+                    query: UpdateDraftSubmissionDocument,
+                    variables: {
+                        input: { submissionID: id, draftSubmission: updates },
+                    },
+                },
+                // error: new Error('You are not logged in'),
+                result: {
+                    data: {
+                        showDraftSubmission: {
+                            draftSubmission,
+                        },
+                    },
+                },
+            }
+        case 403:
+            return {
+                request: { query: UpdateDraftSubmissionDocument },
+                error: new Error('You are not logged in'),
+            }
+        default:
+            return {
+                request: { query: UpdateDraftSubmissionDocument },
+                error: new Error('A network error occurred'),
+            }
+    }
+}
+
 export {
     getCurrentUserMock,
     createDraftSubmissionMock,
     showDraftSubmissionMock,
+    updateDraftSubmissionMock,
 }
