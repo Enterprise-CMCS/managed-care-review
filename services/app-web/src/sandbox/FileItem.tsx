@@ -1,20 +1,19 @@
 import React from 'react'
 import { Button } from '@trussworks/react-uswds'
 import classnames from 'classnames'
-import { FileItem } from './FileInput'
+import { FileItem as FileItemT } from './FileInput'
 
 const SPACER_GIF =
     'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 
-export const FileItemPreview = ({
+export const FileItem = ({
     item,
     deleteItem,
 }: {
-    item: FileItem
+    item: FileItemT
     deleteItem: (id: string) => void
 }): React.ReactElement => {
     const { name, status } = item
-
     const isPDF = name.indexOf('.pdf') > 0
     const isWord = name.indexOf('.doc') > 0 || name.indexOf('.pages') > 0
     const isVideo = name.indexOf('.mov') > 0 || name.indexOf('.mp4') > 0
@@ -30,22 +29,26 @@ export const FileItemPreview = ({
         'usa-file-input__preview-image--generic': isGeneric,
     })
 
+    const handleDelete = (e: React.MouseEvent) => {
+        console.log(e)
+        console.log('dlete')
+        deleteItem(item.id)
+    }
     return (
         <>
-            <img
-                id={item.id}
-                data-testid="file-input-preview-image"
-                src={SPACER_GIF}
-                alt=""
-                className={imageClasses}
-            />
-            <span style={{ padding: '5px', marginRight: '5px' }}>{name}</span>
-            <Button
-                type="button"
-                size="small"
-                unstyled
-                onClick={() => deleteItem(item.id)}
-            >
+            <div>
+                <img
+                    id={item.id}
+                    data-testid="file-input-preview-image"
+                    src={SPACER_GIF}
+                    alt=""
+                    className={imageClasses}
+                />
+                <span style={{ padding: '5px', marginRight: '5px' }}>
+                    {name}
+                </span>
+            </div>
+            <Button type="button" size="small" unstyled onClick={handleDelete}>
                 Delete
             </Button>
         </>
