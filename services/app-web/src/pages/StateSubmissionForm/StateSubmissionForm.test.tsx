@@ -34,7 +34,7 @@ describe('StateSubmissionForm', () => {
         expect(heading).toBeInTheDocument()
     })
 
-    it('shows a loading screen before data comes', async () => {
+    it('shows a loading screen before data comes', () => {
         renderWithProviders(
             <Route
                 path={RoutesRecord.SUBMISSIONS_FORM}
@@ -50,8 +50,6 @@ describe('StateSubmissionForm', () => {
                 routerProvider: { route: '/submissions/15/type' },
             }
         )
-
-        // it renders immediately, so use getBy
         const loading = screen.getByText('Loading...')
         expect(loading).toBeInTheDocument()
     })
@@ -73,10 +71,7 @@ describe('StateSubmissionForm', () => {
             }
         )
 
-        // it renders immediately, so use getBy
-        const loading = await screen.findByText(
-            'Something went wrong, try refreshing?'
-        )
+        const loading = await screen.findByText('Something went wrong...')
         expect(loading).toBeInTheDocument()
     })
 
