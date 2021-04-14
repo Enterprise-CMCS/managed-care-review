@@ -49,7 +49,7 @@ export const Header = ({
             ? PageHeadingsRecord[routeName]
             : heading
             ? heading
-            : 'Managed Care Review' // fallback for safety
+            : '' // fallback for safety
 
     const handleLogout = (
         e: React.MouseEvent<HTMLButtonElement, MouseEvent>

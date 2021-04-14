@@ -1,11 +1,21 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { Spinner } from '@cmsgov/design-system'
 
 import styles from './Loading.module.scss'
 
 export const Loading = (): React.ReactElement => {
-    // TODO: delay
-    // did mount
-    // set timeout => set state
+    const [showLoading, setShowLoading] = useState(false)
 
-    return <h2 className={styles.loadingLabel}>Loading...</h2>
+    useEffect(() => {
+        setTimeout(() => {
+            setShowLoading(true)
+        }, 750)
+    }, [])
+
+    return (
+        <>
+            {showLoading && <h2 className={styles.loadingLabel}>Loading...</h2>}
+            <Spinner />
+        </>
+    )
 }
