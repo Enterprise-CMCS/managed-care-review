@@ -3,10 +3,14 @@ import React from 'react'
 import PageHeading from '.'
 
 export default {
-    title: 'Page Heading',
+    title: 'Components/PageHeading',
     component: PageHeading,
+    parameters: {
+        componentSubtitle:
+            'PageHeading should be used for page titles and to direct keyboard focus.',
+    },
 }
 
-export const Default = (): React.ReactElement => (
+export const H1 = (): React.ReactElement => (
     <PageHeading>Test Page Heading</PageHeading>
 )

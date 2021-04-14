@@ -10,9 +10,8 @@ type PageHeadingProps = {
 } & JSX.IntrinsicElements['h1']
 
 /**
- * Drawn from CMSgov/easi-app
- * By default, this is h1 that belongs on every view page.
- * It be used at any heading level if it needs to be read on mount on assistive tech.
+ * This heading is used to direct focus within the app for assistive tech.
+ * Drawn from CMSgov/easi-app.
  */
 const PageHeading = ({
     children,
