@@ -9,47 +9,42 @@ describe('State Submission', () => {
     it('user can start a new submission and continue with valid input', () => {
         cy.login()
         cy.findByTestId('dashboardPage').should('exist')
-        cy.findByRole('link', {name: 'Start new submission'}).should('be.visible').click({force: true})
-        cy.location('pathname').should('eq', '/submissions/new')
-       
-        // Fill out new submission form
-        cy.findByRole('form', { name: 'New Submission Form' })
-        cy.findByRole('combobox', { name: 'Program' }).select('msho')
-        cy.findByLabelText('Contract action only').safeClick()
-        cy.findByRole('textbox', {name: 'Submission description'}).should('exist').type( 'description of submission')
-
-
-        cy.findByRole('button', {
-            name: 'Continue',
-        }).click()
-        cy.findByText('Contract details').should('exist')
-
-    })  
-
-    it('user can start a new submission and see errors with invalid input', () => {
-        cy.login()
-        cy.findByTestId('dashboardPage').should('exist')
         cy.findByRole('link', {name: 'Start new submission'}).click({force: true})
         cy.location('pathname').should('eq', '/submissions/new')
-
+       
         // Fill out some fields but not all
-        cy.findByRole('combobox', { name: 'Program' }).select('msho')
         cy.findByLabelText('Contract action only').safeClick()
+        cy.findByRole('combobox', { name: 'Program' }).select('msho')
 
         cy.findByRole('button', {
             name: 'Continue',
         }).click()
         
+        // Submit button triggers validation 
         cy.findByText(
                 'You must provide a description of any major changes or updates'
             ).should('exist')
+
+        // Fill out missing required fields for new submission form
+        cy.findByRole('textbox', {name: 'Submission description'}).should('exist').type( 'description of submission')
+        cy.findByText(
+            'You must provide a description of any major changes or updates'
+        ).should('not.exist')
+
+        // Submit button continues to next page
+        cy.findByRole('button', {
+            name: 'Continue',
+        }).safeClick()
+        cy.findByText('Contract details').should('exist')
+
     })  
 
+
     it('user can edit a draft submission type', () => {
-        // Add new submission
         cy.login()
+
+        // Add a new submission (use default selected program)
         cy.findByRole('link', {name: 'Start new submission'}).click({force: true})
-        cy.findByRole('combobox', { name: 'Program' }).select('msho')
         cy.findByLabelText('Contract action only').safeClick()
         cy.findByRole('textbox', {name: 'Submission description'}).should('exist').type( 'description of submission')
         cy.findByRole('button', {
