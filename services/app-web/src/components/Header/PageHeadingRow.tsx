@@ -4,7 +4,7 @@ import { GridContainer, Grid } from '@trussworks/react-uswds'
 import styles from './Header.module.scss'
 
 import PageHeading from '../../components/PageHeading'
-import { StateIcon } from './StateIcon'
+import { StateIcon, StateIconProps } from './StateIcon'
 import { User } from '../../gen/gqlClient'
 
 type PageHeadingProps = {
@@ -23,7 +23,12 @@ export const PageHeadingRow = ({
             <GridContainer>
                 <Grid row className="flex-align-center">
                     <div>
-                        <StateIcon code={loggedInUser.state.code} />
+                        <StateIcon
+                            code={
+                                loggedInUser.state
+                                    .code as StateIconProps['code']
+                            }
+                        />
                     </div>
                     <PageHeading>
                         <span>{loggedInUser.state.name}&nbsp;</span>
@@ -40,7 +45,9 @@ export const PageHeadingRow = ({
                 <h1>
                     {!isLoading && (
                         <>
-                            <span className="text-bold">Managed Care Review&nbsp;</span>
+                            <span className="text-bold">
+                                Managed Care Review&nbsp;
+                            </span>
                             <span className="font-heading-lg">
                                 Medicaid and CHIP Managed Care Reporting and
                                 Review System
