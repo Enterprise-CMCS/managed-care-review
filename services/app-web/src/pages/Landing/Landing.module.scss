@@ -7,6 +7,9 @@
     padding: units(4) 0;
     .detailsSectionContent {
         max-width: 65rem;
+        h2 {
+            line-height: line-height('heading', 3);
+        }
         .detailsSteps {
             padding: units(4);
             margin: units(2) 0;
@@ -16,8 +19,38 @@
                 margin-top: 0;
                 margin-bottom: units(4);
             }
+            ul {
+                list-style-type: none;
+                margin: 0;
+                padding: 0;
+            }
             ul > li {
-                padding: 0 0 units(4) 0;
+                padding: 0 0 units(7) 0;
+                border-left: 3px solid $theme-color-base-lighter;
+                padding-left: units(4);
+                position: relative;
+                line-height: line-height('body', 3);
+
+                &:last-child {
+                    padding-bottom: 0;
+                    border-left: 3px solid transparent;
+                }
+                &::before {
+                    position: absolute;
+                    left: -18px;
+                    top: -5px;
+                    background-color: $cms-color-white;
+                }
+                &.login::before {
+                    content: url(../../assets/images/login-icon.svg);
+                }
+                &.upload::before {
+                    content: url(../../assets/images/upload-icon.svg);
+                }
+                &.email::before {
+                    content: url(../../assets/images/email-icon.svg);
+                }
+
             }
             ul > li span {
                 display: block;

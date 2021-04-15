@@ -48,7 +48,7 @@ describe('App Body and routes', () => {
             })
             expect(
                 screen.getByRole('heading', {
-                    name: /In this system, pilot state users can/i,
+                    name: /You can submit capitation rates and contracts/i,
                     level: 2,
                 })
             ).toBeInTheDocument()
