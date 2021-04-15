@@ -5,7 +5,7 @@
     "license": "MIT",
     "scripts": {
         "test": "jest --watch",
-        "test:unit": "jest",
+        "test:once": "jest",
         "lint": "tsc --noEmit && eslint . --ignore-path ../../.gitignore",
         "clean": "rm -rf node_modules && yarn cache clean"
     },
