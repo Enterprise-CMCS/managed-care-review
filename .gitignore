@@ -17,6 +17,7 @@ tests_output
 coverage/
 gen/
 todo.txt
+notes/
 
 /tests/cypress/screenshots
 /tests/cypress/videos

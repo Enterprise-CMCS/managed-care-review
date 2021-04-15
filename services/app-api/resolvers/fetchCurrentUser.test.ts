@@ -2,7 +2,7 @@ import { createTestClient } from 'apollo-server-testing'
 import { Context } from '../handlers/apollo_gql'
 
 import { constructTestServer } from '../testHelpers/gqlHelpers'
-import GET_CURRENT_USER from '../../app-graphql/src/queries/currentUserQuery.graphql'
+import FETCH_CURRENT_USER from '../../app-graphql/src/queries/fetchCurrentUser.graphql'
 
 describe('currentUser', () => {
     it('returns the currentUser', async () => {
@@ -10,14 +10,14 @@ describe('currentUser', () => {
         const { query } = createTestClient(server)
 
         // make a mock request
-        const res = await query({ query: GET_CURRENT_USER })
+        const res = await query({ query: FETCH_CURRENT_USER })
 
         // confirm that we get what we got
         expect(res.errors).toBeUndefined()
 
-        expect(res.data.getCurrentUser.email).toBe('james@example.com')
-        expect(res.data.getCurrentUser.state.code).toBe('FL')
-        expect(res.data.getCurrentUser.state.programs).toHaveLength(4)
+        expect(res.data.fetchCurrentUser.email).toBe('james@example.com')
+        expect(res.data.fetchCurrentUser.state.code).toBe('FL')
+        expect(res.data.fetchCurrentUser.state.programs).toHaveLength(4)
     })
 
     it('returns a state with no programs if the state is not in valid state list', async () => {
@@ -34,14 +34,14 @@ describe('currentUser', () => {
         const { query } = createTestClient(server)
 
         // make a mock request
-        const res = await query({ query: GET_CURRENT_USER })
+        const res = await query({ query: FETCH_CURRENT_USER })
 
         // confirm that we get what we got
         expect(res.errors).toBeUndefined()
 
-        expect(res.data.getCurrentUser.email).toBe('james@example.com')
-        expect(res.data.getCurrentUser.state.code).toBe('MI')
-        expect(res.data.getCurrentUser.state.name).toBe(
+        expect(res.data.fetchCurrentUser.email).toBe('james@example.com')
+        expect(res.data.fetchCurrentUser.state.code).toBe('MI')
+        expect(res.data.fetchCurrentUser.state.name).toBe(
             'This state is not part of the pilot'
         )
     })

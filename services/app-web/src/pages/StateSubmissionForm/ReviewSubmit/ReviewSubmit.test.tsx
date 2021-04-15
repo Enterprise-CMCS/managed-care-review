@@ -1,7 +1,7 @@
 import React from 'react'
 import { screen, waitFor } from '@testing-library/react'
 
-import { getCurrentUserMock } from '../../../utils/apolloUtils'
+import { fetchCurrentUserMock } from '../../../utils/apolloUtils'
 import { renderWithProviders } from '../../../utils/jestUtils'
 import { ReviewSubmit } from './ReviewSubmit'
 
@@ -9,7 +9,7 @@ describe('ReviewSubmit', () => {
     it('renders without errors', async () => {
         renderWithProviders(<ReviewSubmit />, {
             apolloProvider: {
-                mocks: [getCurrentUserMock({ statusCode: 200 })],
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
         })
 

@@ -4,7 +4,6 @@ import {
     APIGatewayProxyEvent,
     Context as LambdaContext,
 } from 'aws-lambda'
-import { GraphQLDate } from 'graphql-scalars'
 
 import typeDefs from '../../app-graphql/src/schema.graphql'
 import {
@@ -12,15 +11,8 @@ import {
     CognitoUserType,
 } from '../../app-web/src/common-code/domain-models'
 
-import { newDeployedStore, newLocalStore } from '../store/index'
-import {
-    showDraftSubmissionResolver,
-    createDraftSubmissionResolver,
-    getCurrentUserResolver,
-    userResolver,
-    draftSubmissionResolver,
-} from '../resolvers'
-import { Resolvers } from '../gen/gqlServer'
+import { newDeployedStore, newLocalStore } from '../store'
+import { configureResolvers } from '../resolvers'
 import {
     userFromLocalAuthProvider,
     userFromCognitoAuthProvider,
@@ -54,18 +46,7 @@ const userFetcher =
 // End Configuration
 
 // Resolvers are defined and tested in the resolvers package
-const resolvers: Resolvers = {
-    Date: GraphQLDate,
-    Query: {
-        getCurrentUser: getCurrentUserResolver(),
-        showDraftSubmission: showDraftSubmissionResolver(store),
-    },
-    Mutation: {
-        createDraftSubmission: createDraftSubmissionResolver(store),
-    },
-    User: userResolver,
-    DraftSubmission: draftSubmissionResolver(store),
-}
+const resolvers = configureResolvers(store)
 
 export interface Context {
     user: CognitoUserType

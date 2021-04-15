@@ -1,6 +1,6 @@
 import { QueryResolvers } from '../gen/gqlServer'
 
-export function getCurrentUserResolver(): QueryResolvers['getCurrentUser'] {
+export function fetchCurrentUserResolver(): QueryResolvers['fetchCurrentUser'] {
     return async (_parent, _args, context) => {
         return context.user
     }

@@ -10,4 +10,5 @@ export type DraftSubmissionType = {
     submissionDescription: string
     submissionType: SubmissionType
     createdAt: Date
+    updatedAt: Date
 }

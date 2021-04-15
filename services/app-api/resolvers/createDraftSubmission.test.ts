@@ -11,7 +11,7 @@ describe('createDraftSubmission', () => {
         const { mutate } = createTestClient(server)
 
         const input: CreateDraftSubmissionInput = {
-            programId: 'smmc',
+            programID: 'smmc',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A real submission',
         }
@@ -39,7 +39,7 @@ describe('createDraftSubmission', () => {
         const server = constructTestServer()
         const { mutate } = createTestClient(server)
         const input: CreateDraftSubmissionInput = {
-            programId: 'xyz123',
+            programID: 'xyz123',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A real submission',
         }

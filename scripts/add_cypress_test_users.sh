@@ -41,6 +41,7 @@ then
         aws cognito-idp admin-create-user --user-pool-id "$cognito_user_pool_id" --message-action SUPPRESS --username aang@dhs.state.mn.us \
         --user-attributes Name=given_name,Value=TestFirstName Name=family_name,Value=TestLastName Name=email,Value=aang@dhs.state.mn.us Name=custom:state_code,Value=MN
         set -e
+        echo "set password aang"
         aws cognito-idp admin-set-user-password --user-pool-id "$cognito_user_pool_id" --username aang@dhs.state.mn.us --password "$test_user_password" --permanent
 
         echo "add user toph"
@@ -48,6 +49,7 @@ then
         aws cognito-idp admin-create-user --user-pool-id "$cognito_user_pool_id" --message-action SUPPRESS --username toph@dmas.virginia.gov \
         --user-attributes Name=given_name,Value=TestFirstName Name=family_name,Value=TestLastName Name=email,Value=toph@dmas.virginia.gov Name=custom:state_code,Value=VA
         set -e
+        echo "set password toph"
         aws cognito-idp admin-set-user-password --user-pool-id "$cognito_user_pool_id" --username toph@dmas.virginia.gov --password "$test_user_password" --permanent
 else
     echo "ERROR: There was an error obtaining AWS resource information to create users or the command was called with the incorrect stage."

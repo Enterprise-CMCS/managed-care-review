@@ -4,7 +4,10 @@ import { ReactComponent as MsIcon } from '../../assets/icons/ms-icon.svg'
 import { ReactComponent as VaIcon } from '../../assets/icons/va-icon.svg'
 import { ReactComponent as MnIcon } from '../../assets/icons/mn-icon.svg'
 
-export const StateIcon = ({ code }: { code: string }): React.ReactElement => {
+export type StateIconProps = {
+    code: 'FL' | 'IN' | 'MN' | 'MS' | 'VA'
+}
+export const StateIcon = ({ code }: StateIconProps): React.ReactElement => {
     switch (code) {
         case 'FL':
             return <FlIcon />

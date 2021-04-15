@@ -4,20 +4,23 @@ schema {
 }
 
 type Query {
-    getCurrentUser: User!
-    showDraftSubmission(
-        input: ShowDraftSubmissionInput!
-    ): ShowDraftSubmissionPayload
+    fetchCurrentUser: User!
+    fetchDraftSubmission(
+        input: FetchDraftSubmissionInput!
+    ): FetchDraftSubmissionPayload
 }
 
 type Mutation {
     createDraftSubmission(
         input: CreateDraftSubmissionInput!
     ): CreateDraftSubmissionPayload
+    updateDraftSubmission(
+        input: UpdateDraftSubmissionInput!
+    ): UpdateDraftSubmissionPayload!
 }
 
 input CreateDraftSubmissionInput {
-    programId: ID!
+    programID: ID!
     submissionType: SubmissionType!
     submissionDescription: String!
 }
@@ -26,15 +29,25 @@ type CreateDraftSubmissionPayload {
     draftSubmission: DraftSubmission!
 }
 
-input ShowDraftSubmissionInput {
+input FetchDraftSubmissionInput {
     submissionID: ID!
 }
 
-type ShowDraftSubmissionPayload {
+type FetchDraftSubmissionPayload {
     draftSubmission: DraftSubmission
 }
 
+input UpdateDraftSubmissionInput {
+    submissionID: ID!
+    draftSubmissionUpdates: DraftSubmissionUpdates!
+}
+
+type UpdateDraftSubmissionPayload {
+    draftSubmission: DraftSubmission!
+}
+
 scalar Date
+scalar DateTime
 
 type User {
     role: String!
@@ -61,10 +74,19 @@ enum SubmissionType {
 
 type DraftSubmission {
     id: ID!
-    name: String!
-    createdAt: Date!
+    programID: String!
     program: Program!
     submissionType: SubmissionType!
     submissionDescription: String!
     stateCode: String!
+    name: String!
+    createdAt: Date!
+    updatedAt: DateTime!
+}
+
+input DraftSubmissionUpdates {
+    programID: String!
+    submissionType: SubmissionType!
+    submissionDescription: String!
+    # documents[] ...
 }
