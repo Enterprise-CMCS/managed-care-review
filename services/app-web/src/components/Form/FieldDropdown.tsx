@@ -3,7 +3,7 @@ import { useField } from 'formik'
 import {
     ErrorMessage,
     Label,
-    Textarea,
+    Dropdown,
     FormGroup,
 } from '@trussworks/react-uswds'
 
@@ -18,24 +18,31 @@ import {
  * ReactUSWDS components directly.
  */
 
-export type TextAreaProps = {
+type DropdownOption = {
+    key: string
+    value: string
+}
+
+export type FieldDropdownProps = {
     label: string
     id: string
     hint?: React.ReactNode
     error?: string
     showError: boolean
     name: string
-} & JSX.IntrinsicElements['textarea']
+    options: DropdownOption[]
+}
 
-export const FieldTextarea = ({
+export const FieldDropdown = ({
     label,
     id,
     hint,
     error,
     showError,
     name,
+    options,
     ...inputProps
-}: TextAreaProps): React.ReactElement => {
+}: FieldDropdownProps): React.ReactElement => {
     const [field] = useField({ name })
     return (
         <FormGroup error={showError}>
@@ -48,13 +55,15 @@ export const FieldTextarea = ({
                     {hint}
                 </div>
             )}
-            <Textarea
-                {...field}
-                {...inputProps}
-                id={id}
-                name={name}
-                error={showError}
-            />
+            <Dropdown id={id} {...field} {...inputProps}>
+                {options &&
+                    options.map(({key, value}) => (
+                        <option key={key} value={key}>
+                            {value}
+                        </option>
+                    ))
+                }
+            </Dropdown>
         </FormGroup>
     )
 }

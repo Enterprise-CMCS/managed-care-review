@@ -1,12 +1,12 @@
 import React from 'react'
 import { Story } from '@storybook/react'
 import { Formik } from 'formik'
-import { FormTextarea, TextAreaProps } from './FieldTextarea'
+import { FieldTextarea, TextAreaProps } from './FieldTextarea'
 import { Link } from '@trussworks/react-uswds'
 
 export default {
     title: 'Components/Forms/FieldTextarea',
-    component: FormTextarea
+    component: FieldTextarea
 }
 
 const Template: Story<TextAreaProps> = (args) => (
@@ -14,7 +14,7 @@ const Template: Story<TextAreaProps> = (args) => (
         initialValues={{input1: ''}}
         onSubmit={e => console.log('submitted')}
     >
-        <FormTextarea {...args}/>
+        <FieldTextarea {...args}/>
     </Formik>
 )
 

@@ -1,6 +1,6 @@
 import React from 'react'
 import { screen, render } from '@testing-library/react'
-import { FormTextarea } from './FieldTextarea'
+import { FieldTextarea } from './FieldTextarea'
 import { Link } from '@trussworks/react-uswds'
 import { useField } from 'formik';
 
@@ -22,7 +22,7 @@ describe('FieldTextarea component', () => {
       
         useField.mockReturnValue([mockField]);
 
-        render(<FormTextarea 
+        render(<FieldTextarea 
             id="input1" 
             label="default label" 
             name="input1" 
@@ -42,7 +42,7 @@ describe('FieldTextarea component', () => {
     
         useField.mockReturnValue([mockField]);
 
-        render(<FormTextarea 
+        render(<FieldTextarea 
             id="input1" 
             label="default label" 
             name="input1" 
@@ -74,7 +74,7 @@ describe('FieldTextarea component', () => {
     
         useField.mockReturnValue([mockField]);
 
-        render(<FormTextarea 
+        render(<FieldTextarea 
             id="input1" 
             label="default label" 
             name="input1" 
