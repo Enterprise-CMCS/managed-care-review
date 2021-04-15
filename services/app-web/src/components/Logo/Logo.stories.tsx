@@ -1,12 +1,19 @@
 import React from 'react'
-import macproLogo from '../../assets/images/macprologo.png'
+import onemacLogo from '../../assets/images/onemac-logo.svg'
 import { Logo } from './Logo'
 
 export default {
     title: 'Components/Logo',
     component: Logo,
+    parameters: {
+        componentSubtitle: 'Logo displays image pngs wrapped in uswds styles',
+        backgrounds: {
+            default: 'page-heading-blue',
+            values: [{ name: 'page-heading-blue', value: '#205493' }],
+        },
+    },
 }
 
 export const Default = (): React.ReactElement => (
-    <Logo src={macproLogo} alt="Macpro-Medicaid and CHIP Program System" />
+    <Logo src={onemacLogo} alt="One Mac" />
 )

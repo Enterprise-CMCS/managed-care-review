@@ -12,6 +12,10 @@ import {
 export default {
     title: 'Components/SubmissionCard',
     component: SubmissionCard,
+    parameters: {
+        componentSubtitle:
+            'SubmissionCard displays important information about a managed care submission.',
+    },
     argTypes: {
         date: {
             control: {

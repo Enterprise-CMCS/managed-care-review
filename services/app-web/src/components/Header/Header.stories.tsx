@@ -8,6 +8,10 @@ import { fetchCurrentUserMock } from '../../utils/apolloUtils'
 export default {
     title: 'Components/Header',
     component: Header,
+    parameters: {
+        componentSubtitle:
+            'Header identifies the name of the application, the current page, and provides a quick way to log in and out.',
+    },
 }
 
 const Template: Story<HeaderProps> = (args) => <Header {...args} />
