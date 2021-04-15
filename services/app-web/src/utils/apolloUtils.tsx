@@ -125,7 +125,6 @@ const showDraftSubmissionMock = ({
                     query: ShowDraftSubmissionDocument,
                     variables: { input: { submissionID: id } },
                 },
-                // error: new Error('You are not logged in'),
                 result: {
                     data: {
                         showDraftSubmission: {
