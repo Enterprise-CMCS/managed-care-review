@@ -1,12 +1,12 @@
 import {
     DraftSubmission,
-    GetCurrentUserDocument,
+    FetchCurrentUserDocument,
     SubmissionType,
     User as UserType,
     CreateDraftSubmissionDocument,
-    ShowDraftSubmissionDocument,
+    FetchDraftSubmissionDocument,
     UpdateDraftSubmissionDocument,
-    DraftSubmissionInput,
+    DraftSubmissionUpdates,
 } from '../gen/gqlClient'
 import { MockedResponse } from '@apollo/client/testing'
 
@@ -41,33 +41,33 @@ const mockDraftSubmission: DraftSubmission = {
     submissionDescription: 'A real submission',
 }
 
-type getCurrentUserMockProps = {
+type fetchCurrentUserMockProps = {
     user?: UserType | Partial<UserType>
     statusCode: 200 | 403 | 500
 }
-const getCurrentUserMock = ({
+const fetchCurrentUserMock = ({
     user = mockValidUser,
     statusCode,
 }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-getCurrentUserMockProps): MockedResponse<Record<string, any>> => {
+fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
     switch (statusCode) {
         case 200:
             return {
-                request: { query: GetCurrentUserDocument },
+                request: { query: FetchCurrentUserDocument },
                 result: {
                     data: {
-                        getCurrentUser: user,
+                        fetchCurrentUser: user,
                     },
                 },
             }
         case 403:
             return {
-                request: { query: GetCurrentUserDocument },
+                request: { query: FetchCurrentUserDocument },
                 error: new Error('You are not logged in'),
             }
         default:
             return {
-                request: { query: GetCurrentUserDocument },
+                request: { query: FetchCurrentUserDocument },
                 error: new Error('A network error occurred'),
             }
     }
@@ -107,27 +107,27 @@ const createDraftSubmissionMock = ({
     }
 }
 
-type showDraftSubmissionMockProps = {
+type fetchDraftSubmissionMockProps = {
     draftSubmission?: DraftSubmission | Partial<DraftSubmission>
     id: string
     statusCode: 200 | 403 | 500
 }
 
-const showDraftSubmissionMock = ({
+const fetchDraftSubmissionMock = ({
     draftSubmission = mockDraftSubmission,
     id,
     statusCode, // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}: showDraftSubmissionMockProps): MockedResponse<Record<string, any>> => {
+}: fetchDraftSubmissionMockProps): MockedResponse<Record<string, any>> => {
     switch (statusCode) {
         case 200:
             return {
                 request: {
-                    query: ShowDraftSubmissionDocument,
+                    query: FetchDraftSubmissionDocument,
                     variables: { input: { submissionID: id } },
                 },
                 result: {
                     data: {
-                        showDraftSubmission: {
+                        fetchDraftSubmission: {
                             draftSubmission,
                         },
                     },
@@ -135,12 +135,12 @@ const showDraftSubmissionMock = ({
             }
         case 403:
             return {
-                request: { query: ShowDraftSubmissionDocument },
+                request: { query: FetchDraftSubmissionDocument },
                 error: new Error('You are not logged in'),
             }
         default:
             return {
-                request: { query: ShowDraftSubmissionDocument },
+                request: { query: FetchDraftSubmissionDocument },
                 error: new Error('A network error occurred'),
             }
     }
@@ -149,7 +149,7 @@ const showDraftSubmissionMock = ({
 type updateDraftSubmissionMockProps = {
     draftSubmission?: DraftSubmission | Partial<DraftSubmission>
     id: string
-    updates: DraftSubmissionInput
+    updates: DraftSubmissionUpdates
     statusCode: 200 | 403 | 500
 }
 
@@ -165,13 +165,16 @@ const updateDraftSubmissionMock = ({
                 request: {
                     query: UpdateDraftSubmissionDocument,
                     variables: {
-                        input: { submissionID: id, draftSubmission: updates },
+                        input: {
+                            submissionID: id,
+                            draftSubmissionUpdates: updates,
+                        },
                     },
                 },
                 // error: new Error('You are not logged in'),
                 result: {
                     data: {
-                        showDraftSubmission: {
+                        updateDraftSubmission: {
                             draftSubmission,
                         },
                     },
@@ -191,8 +194,8 @@ const updateDraftSubmissionMock = ({
 }
 
 export {
-    getCurrentUserMock,
+    fetchCurrentUserMock,
     createDraftSubmissionMock,
-    showDraftSubmissionMock,
+    fetchDraftSubmissionMock,
     updateDraftSubmissionMock,
 }

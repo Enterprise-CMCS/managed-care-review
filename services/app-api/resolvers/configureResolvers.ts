@@ -3,9 +3,9 @@ import { GraphQLDate, GraphQLDateTime } from 'graphql-scalars'
 import type { Store } from '../store'
 import { Resolvers } from '../gen/gqlServer'
 
-import { getCurrentUserResolver } from './currentUser'
+import { fetchCurrentUserResolver } from './fetchCurrentUser'
 import { userResolver } from './userResolver'
-import { showDraftSubmissionResolver } from './showDraftSubmission'
+import { fetchDraftSubmissionResolver } from './fetchDraftSubmission'
 import { createDraftSubmissionResolver } from './createDraftSubmission'
 import { updateDraftSubmissionResolver } from './updateDraftSubmission'
 import { draftSubmissionResolver } from './draftSubmissionResolver'
@@ -15,8 +15,8 @@ export function configureResolvers(store: Store): Resolvers {
         Date: GraphQLDate,
         DateTime: GraphQLDateTime,
         Query: {
-            getCurrentUser: getCurrentUserResolver(),
-            showDraftSubmission: showDraftSubmissionResolver(store),
+            fetchCurrentUser: fetchCurrentUserResolver(),
+            fetchDraftSubmission: fetchDraftSubmissionResolver(store),
         },
         Mutation: {
             createDraftSubmission: createDraftSubmissionResolver(store),

@@ -5,8 +5,8 @@ import { Route } from 'react-router-dom'
 import { RoutesRecord } from '../../constants/routes'
 import { SubmissionType } from '../../gen/gqlClient'
 import {
-    getCurrentUserMock,
-    showDraftSubmissionMock,
+    fetchCurrentUserMock,
+    fetchDraftSubmissionMock,
     updateDraftSubmissionMock,
 } from '../../utils/apolloUtils'
 import { renderWithProviders } from '../../utils/jestUtils'
@@ -23,8 +23,8 @@ describe('StateSubmissionForm', () => {
             {
                 apolloProvider: {
                     mocks: [
-                        getCurrentUserMock({ statusCode: 200 }),
-                        showDraftSubmissionMock({ id: '15', statusCode: 200 }),
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchDraftSubmissionMock({ id: '15', statusCode: 200 }),
                     ],
                 },
                 routerProvider: { route: '/submissions/15/type' },
@@ -46,8 +46,8 @@ describe('StateSubmissionForm', () => {
             {
                 apolloProvider: {
                     mocks: [
-                        getCurrentUserMock({ statusCode: 200 }),
-                        showDraftSubmissionMock({ id: '15', statusCode: 200 }),
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchDraftSubmissionMock({ id: '15', statusCode: 200 }),
                     ],
                 },
                 routerProvider: { route: '/submissions/15/type' },
@@ -68,8 +68,8 @@ describe('StateSubmissionForm', () => {
             {
                 apolloProvider: {
                     mocks: [
-                        getCurrentUserMock({ statusCode: 200 }),
-                        showDraftSubmissionMock({ id: '15', statusCode: 403 }),
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchDraftSubmissionMock({ id: '15', statusCode: 403 }),
                     ],
                 },
                 routerProvider: { route: '/submissions/15/type' },
@@ -92,8 +92,8 @@ describe('StateSubmissionForm', () => {
             {
                 apolloProvider: {
                     mocks: [
-                        getCurrentUserMock({ statusCode: 200 }),
-                        showDraftSubmissionMock({ id: '15', statusCode: 200 }),
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchDraftSubmissionMock({ id: '15', statusCode: 200 }),
                     ],
                 },
                 routerProvider: { route: '/submissions/15/type' },
@@ -123,8 +123,8 @@ describe('StateSubmissionForm', () => {
             {
                 apolloProvider: {
                     mocks: [
-                        getCurrentUserMock({ statusCode: 200 }),
-                        showDraftSubmissionMock({ id: '12', statusCode: 200 }),
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchDraftSubmissionMock({ id: '12', statusCode: 200 }),
                     ],
                 },
                 routerProvider: { route: '/submissions/12/contract-details' },
@@ -147,8 +147,8 @@ describe('StateSubmissionForm', () => {
             {
                 apolloProvider: {
                     mocks: [
-                        getCurrentUserMock({ statusCode: 200 }),
-                        showDraftSubmissionMock({ id: '15', statusCode: 200 }),
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchDraftSubmissionMock({ id: '15', statusCode: 200 }),
                         updateDraftSubmissionMock({
                             id: 'test-abc-123',
                             updates: {
@@ -159,7 +159,7 @@ describe('StateSubmissionForm', () => {
                             },
                             statusCode: 200,
                         }),
-                        showDraftSubmissionMock({
+                        fetchDraftSubmissionMock({
                             id: 'test-abc-123',
                             statusCode: 200,
                         }),

@@ -1,8 +1,7 @@
 import * as React from 'react'
-import { useQuery } from '@apollo/client'
 
 import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
-import { GetCurrentUserDocument, User as UserType } from '../gen/gqlClient'
+import { useFetchCurrentUserQuery, User as UserType } from '../gen/gqlClient'
 import { logoutLocalUser } from '../pages/Auth/localAuth'
 import { AuthModeType } from '../common-code/domain-models'
 
@@ -40,7 +39,7 @@ function AuthProvider({
         'LOGGED_OUT'
     )
 
-    const { loading, data, error, refetch } = useQuery(GetCurrentUserDocument, {
+    const { loading, data, error, refetch } = useFetchCurrentUserQuery({
         notifyOnNetworkStatusChange: true,
     })
 
@@ -77,9 +76,9 @@ function AuthProvider({
             // if the error is 403, then that's all gravy, just set logged in user to undefined
             // lets try and record what different errors are here.
             // call a generic graphql connection etc. error here.
-        } else if (data?.getCurrentUser) {
+        } else if (data?.fetchCurrentUser) {
             if (!isAuthenticated) {
-                setLoggedInUser(data.getCurrentUser)
+                setLoggedInUser(data.fetchCurrentUser)
                 setLoginStatus('LOGGED_IN')
             }
         }

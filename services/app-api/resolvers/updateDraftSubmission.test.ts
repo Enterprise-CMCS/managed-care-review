@@ -3,7 +3,7 @@ import { createTestClient } from 'apollo-server-testing'
 import { CreateDraftSubmissionInput, SubmissionType } from '../gen/gqlServer'
 import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
 import UPDATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/updateDraftSubmission.graphql'
-import SHOW_DRAFT_SUBMISSION from '../../app-graphql/src/queries/showDraftSubmission.graphql'
+import FETCH_DRAFT_SUBMISSION from '../../app-graphql/src/queries/fetchDraftSubmission.graphql'
 import { constructTestServer } from '../testHelpers/gqlHelpers'
 
 describe('updateDraftSubmission', () => {
@@ -45,7 +45,7 @@ describe('updateDraftSubmission', () => {
             variables: {
                 input: {
                     submissionID: createdID,
-                    draftSubmission: updatedDraft,
+                    draftSubmissionUpdates: updatedDraft,
                 },
             },
         })
@@ -58,13 +58,13 @@ describe('updateDraftSubmission', () => {
         }
 
         const result = await query({
-            query: SHOW_DRAFT_SUBMISSION,
+            query: FETCH_DRAFT_SUBMISSION,
             variables: { input },
         })
 
         expect(result.errors).toBeUndefined()
 
-        const resultDraft = result.data.showDraftSubmission.draftSubmission
+        const resultDraft = result.data.fetchDraftSubmission.draftSubmission
         expect(resultDraft.id).toEqual(createdID)
         expect(resultDraft.submissionType).toEqual('CONTRACT_AND_RATES')
         expect(resultDraft.program.id).toEqual('cnet')
@@ -100,7 +100,7 @@ describe('updateDraftSubmission', () => {
             variables: {
                 input: {
                     submissionID: 'foo-bar-123',
-                    draftSubmission: updatedDraft,
+                    draftSubmissionUpdates: updatedDraft,
                 },
             },
         })
@@ -167,7 +167,7 @@ describe('updateDraftSubmission', () => {
             variables: {
                 input: {
                     submissionID: createdID,
-                    draftSubmission: updatedDraft,
+                    draftSubmissionUpdates: updatedDraft,
                 },
             },
         })
@@ -216,7 +216,7 @@ describe('updateDraftSubmission', () => {
             variables: {
                 input: {
                     submissionID: createdID,
-                    draftSubmission: updatedDraft,
+                    draftSubmissionUpdates: updatedDraft,
                 },
             },
         })

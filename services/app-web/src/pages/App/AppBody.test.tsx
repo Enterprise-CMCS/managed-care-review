@@ -3,7 +3,7 @@ import { screen, waitFor } from '@testing-library/react'
 
 import { renderWithProviders, userClickSignIn } from '../../utils/jestUtils'
 import { AppBody } from './AppBody'
-import { getCurrentUserMock } from '../../utils/apolloUtils'
+import { fetchCurrentUserMock } from '../../utils/apolloUtils'
 test('App renders without errors', () => {
     renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
     const mainElement = screen.getByRole('main')
@@ -19,7 +19,7 @@ describe('App Body and routes', () => {
         it('display dashboard when logged in', async () => {
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
-                    mocks: [getCurrentUserMock({ statusCode: 200 })],
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
             })
 
@@ -139,7 +139,7 @@ describe('App Body and routes', () => {
         it('redirects to 404 error page when logged in', async () => {
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
-                    mocks: [getCurrentUserMock({ statusCode: 200 })],
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
                 routerProvider: { route: '/not-a-real-place' },
             })
