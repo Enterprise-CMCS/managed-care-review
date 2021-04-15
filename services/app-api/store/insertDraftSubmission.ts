@@ -86,6 +86,7 @@ export async function insertDraftSubmission(
     const draft = new DraftSubmissionStoreType() // you might like that this took input vars, but that seems opposed to how this library works wrt to searching
     draft.id = uuidv4()
     draft.createdAt = new Date()
+    draft.updatedAt = new Date()
 
     draft.submissionType = args.submissionType
     draft.programID = args.programID

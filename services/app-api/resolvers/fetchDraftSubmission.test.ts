@@ -2,7 +2,7 @@ import { createTestClient } from 'apollo-server-testing'
 
 import { CreateDraftSubmissionInput, SubmissionType } from '../gen/gqlServer'
 import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
-import SHOW_DRAFT_SUBMISSION from '../../app-graphql/src/queries/showDraftSubmission.graphql'
+import FETCH_DRAFT_SUBMISSION from '../../app-graphql/src/queries/fetchDraftSubmission.graphql'
 import { constructTestServer } from '../testHelpers/gqlHelpers'
 
 describe('createDraftSubmission', () => {
@@ -13,7 +13,7 @@ describe('createDraftSubmission', () => {
 
         // First, create a new submission
         const createInput: CreateDraftSubmissionInput = {
-            programId: 'smmc',
+            programID: 'smmc',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A real submission',
         }
@@ -31,13 +31,13 @@ describe('createDraftSubmission', () => {
         }
 
         const result = await query({
-            query: SHOW_DRAFT_SUBMISSION,
+            query: FETCH_DRAFT_SUBMISSION,
             variables: { input },
         })
 
         expect(result.errors).toBeUndefined()
 
-        const resultDraft = result.data.showDraftSubmission.draftSubmission
+        const resultDraft = result.data.fetchDraftSubmission.draftSubmission
         expect(resultDraft.id).toEqual(createdID)
         expect(resultDraft.program.id).toEqual('smmc')
         expect(resultDraft.submissionDescription).toEqual('A real submission')
@@ -54,12 +54,12 @@ describe('createDraftSubmission', () => {
         }
 
         const result = await query({
-            query: SHOW_DRAFT_SUBMISSION,
+            query: FETCH_DRAFT_SUBMISSION,
             variables: { input },
         })
 
         expect(result.errors).toBeUndefined()
-        expect(result.data.showDraftSubmission.draftSubmission).toBeNull()
+        expect(result.data.fetchDraftSubmission.draftSubmission).toBeNull()
     })
 
     it('a different user from the same state can fetch the draft', async () => {
@@ -69,7 +69,7 @@ describe('createDraftSubmission', () => {
 
         // First, create a new submission
         const createInput: CreateDraftSubmissionInput = {
-            programId: 'smmc',
+            programID: 'smmc',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A real submission',
         }
@@ -101,7 +101,7 @@ describe('createDraftSubmission', () => {
         const { query } = createTestClient(otherUserServer)
 
         const result = await query({
-            query: SHOW_DRAFT_SUBMISSION,
+            query: FETCH_DRAFT_SUBMISSION,
             variables: { input },
         })
 
@@ -117,7 +117,7 @@ describe('createDraftSubmission', () => {
 
         // First, create a new submission
         const createInput: CreateDraftSubmissionInput = {
-            programId: 'smmc',
+            programID: 'smmc',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A real submission',
         }
@@ -149,7 +149,7 @@ describe('createDraftSubmission', () => {
         const { query } = createTestClient(otherUserServer)
 
         const result = await query({
-            query: SHOW_DRAFT_SUBMISSION,
+            query: FETCH_DRAFT_SUBMISSION,
             variables: { input },
         })
 

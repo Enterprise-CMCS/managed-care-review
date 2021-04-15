@@ -12,7 +12,7 @@ import {
 } from '../../utils/jestUtils'
 import { CognitoLogin } from './CognitoLogin'
 import { LocalLogin } from './LocalLogin'
-import { getCurrentUserMock } from '../../utils/apolloUtils'
+import { fetchCurrentUserMock } from '../../utils/apolloUtils'
 /*  
 This file should only have basic user flows for auth. Form and implementation details are tested at the component level.
 
@@ -45,7 +45,7 @@ describe('Auth', () => {
         it('displays signup form when logged out', () => {
             renderWithProviders(<CognitoLogin />, {
                 apolloProvider: {
-                    mocks: [getCurrentUserMock({ statusCode: 403 })],
+                    mocks: [fetchCurrentUserMock({ statusCode: 403 })],
                 },
             })
 
@@ -60,7 +60,7 @@ describe('Auth', () => {
         it('show login button displays login form', async () => {
             renderWithProviders(<CognitoLogin />, {
                 apolloProvider: {
-                    mocks: [getCurrentUserMock({ statusCode: 403 })],
+                    mocks: [fetchCurrentUserMock({ statusCode: 403 })],
                 },
             })
 
@@ -95,8 +95,8 @@ describe('Auth', () => {
             renderWithProviders(<CognitoLogin />, {
                 apolloProvider: {
                     mocks: [
-                        getCurrentUserMock({ statusCode: 403 }),
-                        getCurrentUserMock({ statusCode: 403 }),
+                        fetchCurrentUserMock({ statusCode: 403 }),
+                        fetchCurrentUserMock({ statusCode: 403 }),
                     ],
                 },
                 routerProvider: { routerProps: { history: history } },
@@ -118,9 +118,9 @@ describe('Auth', () => {
             renderWithProviders(<CognitoLogin />, {
                 apolloProvider: {
                     mocks: [
-                        getCurrentUserMock({ statusCode: 403 }),
-                        getCurrentUserMock({ statusCode: 403 }),
-                        getCurrentUserMock({ statusCode: 403 }),
+                        fetchCurrentUserMock({ statusCode: 403 }),
+                        fetchCurrentUserMock({ statusCode: 403 }),
+                        fetchCurrentUserMock({ statusCode: 403 }),
                     ],
                 },
                 routerProvider: {
@@ -145,7 +145,7 @@ describe('Auth', () => {
         it('displays ang and toph when logged out', () => {
             renderWithProviders(<LocalLogin />, {
                 apolloProvider: {
-                    mocks: [getCurrentUserMock({ statusCode: 403 })],
+                    mocks: [fetchCurrentUserMock({ statusCode: 403 })],
                 },
             })
 
@@ -175,9 +175,9 @@ describe('Auth', () => {
                 routerProvider: { routerProps: { history: history } },
                 apolloProvider: {
                     mocks: [
-                        getCurrentUserMock({ statusCode: 403 }),
-                        getCurrentUserMock({ statusCode: 200 }),
-                        getCurrentUserMock({ statusCode: 200 }),
+                        fetchCurrentUserMock({ statusCode: 403 }),
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchCurrentUserMock({ statusCode: 200 }),
                     ],
                 },
             })
@@ -201,8 +201,8 @@ describe('Auth', () => {
             renderWithProviders(<LocalLogin />, {
                 apolloProvider: {
                     mocks: [
-                        getCurrentUserMock({ statusCode: 403 }),
-                        getCurrentUserMock({ statusCode: 403 }),
+                        fetchCurrentUserMock({ statusCode: 403 }),
+                        fetchCurrentUserMock({ statusCode: 403 }),
                     ],
                 },
                 routerProvider: {

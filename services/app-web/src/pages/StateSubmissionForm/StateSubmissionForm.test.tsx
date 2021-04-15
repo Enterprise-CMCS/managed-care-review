@@ -1,10 +1,13 @@
-import { findByText, screen, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { Route } from 'react-router-dom'
 
 import { RoutesRecord } from '../../constants/routes'
+import { SubmissionType } from '../../gen/gqlClient'
 import {
-    getCurrentUserMock,
-    showDraftSubmissionMock,
+    fetchCurrentUserMock,
+    fetchDraftSubmissionMock,
+    updateDraftSubmissionMock,
 } from '../../utils/apolloUtils'
 import { renderWithProviders } from '../../utils/jestUtils'
 
@@ -20,8 +23,8 @@ describe('StateSubmissionForm', () => {
             {
                 apolloProvider: {
                     mocks: [
-                        getCurrentUserMock({ statusCode: 200 }),
-                        showDraftSubmissionMock({ id: '15', statusCode: 200 }),
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchDraftSubmissionMock({ id: '15', statusCode: 200 }),
                     ],
                 },
                 routerProvider: { route: '/submissions/15/type' },
@@ -43,8 +46,8 @@ describe('StateSubmissionForm', () => {
             {
                 apolloProvider: {
                     mocks: [
-                        getCurrentUserMock({ statusCode: 200 }),
-                        showDraftSubmissionMock({ id: '15', statusCode: 200 }),
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchDraftSubmissionMock({ id: '15', statusCode: 200 }),
                     ],
                 },
                 routerProvider: { route: '/submissions/15/type' },
@@ -63,8 +66,8 @@ describe('StateSubmissionForm', () => {
             {
                 apolloProvider: {
                     mocks: [
-                        getCurrentUserMock({ statusCode: 200 }),
-                        showDraftSubmissionMock({ id: '15', statusCode: 403 }),
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchDraftSubmissionMock({ id: '15', statusCode: 403 }),
                     ],
                 },
                 routerProvider: { route: '/submissions/15/type' },
@@ -84,8 +87,8 @@ describe('StateSubmissionForm', () => {
             {
                 apolloProvider: {
                     mocks: [
-                        getCurrentUserMock({ statusCode: 200 }),
-                        showDraftSubmissionMock({ id: '15', statusCode: 200 }),
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchDraftSubmissionMock({ id: '15', statusCode: 200 }),
                     ],
                 },
                 routerProvider: { route: '/submissions/15/type' },
@@ -115,8 +118,8 @@ describe('StateSubmissionForm', () => {
             {
                 apolloProvider: {
                     mocks: [
-                        getCurrentUserMock({ statusCode: 200 }),
-                        showDraftSubmissionMock({ id: '12', statusCode: 200 }),
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchDraftSubmissionMock({ id: '12', statusCode: 200 }),
                     ],
                 },
                 routerProvider: { route: '/submissions/12/contract-details' },
@@ -129,4 +132,57 @@ describe('StateSubmissionForm', () => {
             ).toBeInTheDocument()
         )
     })
+
+    it('update type sends the update', async () => {
+        renderWithProviders(
+            <Route
+                path={RoutesRecord.SUBMISSIONS_FORM}
+                component={StateSubmissionForm}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchDraftSubmissionMock({ id: '15', statusCode: 200 }),
+                        updateDraftSubmissionMock({
+                            id: 'test-abc-123',
+                            updates: {
+                                submissionType: 'CONTRACT_ONLY' as SubmissionType,
+                                submissionDescription:
+                                    'A real submissionan updated something',
+                                programID: 'snbc',
+                            },
+                            statusCode: 200,
+                        }),
+                        fetchDraftSubmissionMock({
+                            id: 'test-abc-123',
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+                routerProvider: { route: '/submissions/15/type' },
+            }
+        )
+
+        const heading = await screen.findByRole('heading', {
+            name: 'Submission type',
+        })
+        expect(heading).toBeInTheDocument()
+
+        const textarea = await screen.findByRole('textbox', {
+            name: 'Submission description',
+        })
+        userEvent.type(textarea, 'an updated something')
+
+        const continueButton = await screen.findByRole('button', {
+            name: 'Continue',
+        })
+        continueButton.click()
+
+        await screen.findByRole('heading', {
+            name: 'Contract details',
+        })
+    })
+
+    it.todo('The read/write of the submission should be atomic?')
 })

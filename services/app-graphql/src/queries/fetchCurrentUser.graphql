@@ -1,5 +1,5 @@
-query getCurrentUser {
-    getCurrentUser {
+query fetchCurrentUser {
+    fetchCurrentUser {
         email
         state {
             code
