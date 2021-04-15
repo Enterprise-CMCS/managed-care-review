@@ -25,7 +25,7 @@ export const Landing = (): React.ReactElement => {
                                         <span>Fill out the submission form and attach all relevant documentation.</span>
                                     </li>
                                     <li className={styles.email}>
-                                        <span>Recieve an email confirmation</span>
+                                        <span>Receive an email confirmation</span>
                                         <span>After you submit, CMS will confirm receipt and start their review process.</span>
                                     </li>
                                 </ul>
