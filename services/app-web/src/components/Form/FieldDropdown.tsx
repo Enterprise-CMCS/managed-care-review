@@ -31,6 +31,7 @@ export type FieldDropdownProps = {
     showError: boolean
     name: string
     options: DropdownOption[]
+    showDropdownPlaceholderText?: boolean
 }
 
 export const FieldDropdown = ({
@@ -41,6 +42,7 @@ export const FieldDropdown = ({
     showError,
     name,
     options,
+    showDropdownPlaceholderText,
     ...inputProps
 }: FieldDropdownProps): React.ReactElement => {
     const [field] = useField({ name })
@@ -56,6 +58,7 @@ export const FieldDropdown = ({
                 </div>
             )}
             <Dropdown id={id} {...field} {...inputProps}>
+                {showDropdownPlaceholderText && <option value="">- Select -</option>}
                 {options &&
                     options.map(({key, value}) => (
                         <option key={key} value={key}>
