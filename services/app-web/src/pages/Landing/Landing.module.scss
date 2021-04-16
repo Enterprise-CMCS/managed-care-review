@@ -1,71 +1,71 @@
 @import '../../styles/uswdsImports.scss';
 @import '../../styles/custom';
 
-.outlineSection {
-    padding: units(2);
-    & h2 {
-        text-align: center;
-    }
-}
 .detailsSection {
     background-color: $cms-color-background;
     flex: 1;
+    padding: units(4) 0;
     .detailsSectionContent {
-        max-width: 55rem;
-    }
-    & h2 {
-        padding-bottom: units(2);
-        text-align: center;
-    }
-    & h3 {
-        font-size: size('heading', 'sm');
-    }
-    & ul {
-        font-size: size('heading', 'xs');
-        padding-bottom: units(2);
-        > li {
-            padding: units('05');
+        max-width: 65rem;
+        h2 {
+            line-height: line-height('heading', 3);
+        }
+        .detailsSteps {
+            padding: units(4);
+            margin: units(2) 0;
+            border: 1px solid $theme-color-base-lighter;
+            @include u-radius('lg');
+            h2 {
+                margin-top: 0;
+                margin-bottom: units(4);
+            }
+            ul {
+                list-style-type: none;
+                margin: 0;
+                padding: 0;
+            }
+            ul > li {
+                padding: 0 0 units(7) 0;
+                border-left: 3px solid $theme-color-base-lighter;
+                padding-left: units(4);
+                position: relative;
+                line-height: line-height('body', 3);
+
+                &:last-child {
+                    padding-bottom: 0;
+                    border-left: 3px solid transparent;
+                }
+                &::before {
+                    position: absolute;
+                    left: -18px;
+                    top: -5px;
+                    background-color: $cms-color-white;
+                }
+                &.login::before {
+                    content: url(../../assets/images/login-icon.svg);
+                }
+                &.upload::before {
+                    content: url(../../assets/images/upload-icon.svg);
+                }
+                &.email::before {
+                    content: url(../../assets/images/email-icon.svg);
+                }
+
+            }
+            ul > li span {
+                display: block;
+            }
+            ul > li span:first-child {
+                font-weight: bold;
+                margin-bottom: units(1);
+            }
+        }
+        .detailsList {
+            > li {
+                padding: units(1);
+                font-size: size('body', 'md')
+            }
         }
     }
-}
 
-.grid {
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 73rem;
-}
-
-.cardList {
-    display: flex;
-    counter-reset: li;
-    font-size: size('heading', 'xs');
-    padding: units(2);
-
-    > li:before {
-        @include u-flex('row', 'align-center', 'justify-center');
-        @include u-circle($theme-process-list-counter-size);
-        border: 3px solid $theme-color-primary-dark;
-        content: counter(li);
-        counter-increment: li;
-        color: $theme-color-primary-dark;
-        display: flex;
-        font-size: 1.33rem;
-        font-weight: bold;
-        margin: units(1);
-    }
-    > li {
-        @include border-box-sizing;
-        @include u-flex('column', 'align-center');
-        @include u-margin-x($theme-card-gap / 2);
-        @include u-radius('md');
-        background-color: $cms-color-white;
-        border: $theme-summary-box-border-width $theme-color-base-lighter solid;
-        display: flex;
-        padding: units(2);
-        list-style: none;
-        text-align: center;
-        > span {
-            padding: units(2);
-        }
-    }
 }

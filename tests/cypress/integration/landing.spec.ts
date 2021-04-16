@@ -15,7 +15,7 @@ describe('Landing Page', () => {
       level: 2,
     })
     cy.findByRole('heading', {
-        name: /In this system, pilot state users can/i,
+        name: /You can submit capitation rates and contracts/i,
         level: 2,
     })
   })
