@@ -86,6 +86,7 @@ jobs:
             services/storybook/node_modules
             services/app-web/node_modules
             node_modules
+            cache/Cypress
             tests/nightwatch/node_modules
           key: ${{ runner.os }}-${{ hashFiles('combined-yarn-lock.txt') }}
       - name: set path
@@ -125,9 +126,10 @@ jobs:
           cd services
           endpoint=$(./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name)
           echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
-
-      - name: Set test users for Cypress
+          
+      - name: Cypress setup
         run: |
+          yarn cypress verify
           ./scripts/add_cypress_test_users.sh $STAGE_PREFIX$branch_name
 
       - name: Cypress run
