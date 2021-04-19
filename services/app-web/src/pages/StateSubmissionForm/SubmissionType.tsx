@@ -363,7 +363,7 @@ export const SubmissionType = ({
                                 </Button>
                             </ButtonGroup>
                         </fieldset>
-                        <FormikFocusOnErrors />
+                        {/* <FormikFocusOnErrors /> */}
                     </UswdsForm>
                 </>
             )}
