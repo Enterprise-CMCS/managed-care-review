@@ -129,6 +129,7 @@ jobs:
           
       - name: Cypress setup
         run: |
+          yarn cypress install
           yarn cypress verify
           ./scripts/add_cypress_test_users.sh $STAGE_PREFIX$branch_name
 
