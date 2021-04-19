@@ -19,18 +19,18 @@ import {
  */
 
 type DropdownOption = {
-    key: string
-    value: string
+    id: string
+    label: string
 }
 
 export type FieldDropdownProps = {
     label: string
     id: string
     hint?: React.ReactNode
-    error?: string
     showError: boolean
     name: string
     options: DropdownOption[]
+    required?: boolean
     showDropdownPlaceholderText?: boolean
 }
 
@@ -38,34 +38,42 @@ export const FieldDropdown = ({
     label,
     id,
     hint,
-    error,
     showError,
     name,
     options,
+    required = false,
     showDropdownPlaceholderText,
     ...inputProps
 }: FieldDropdownProps): React.ReactElement => {
-    const [field] = useField({ name })
+    const [field, meta] = useField({ name })
     return (
         <FormGroup error={showError}>
             <Label htmlFor={id} error={showError}>
                 {label}
             </Label>
-            {showError && <ErrorMessage>{error}</ErrorMessage>}
+            {showError && meta.error && (
+                <ErrorMessage>{meta.error}</ErrorMessage>
+            )}
             {hint && (
                 <div aria-labelledby={id} className="usa-hint margin-top-1">
                     {hint}
                 </div>
             )}
-            <Dropdown id={id} {...field} {...inputProps}>
-                {showDropdownPlaceholderText && <option value="">- Select -</option>}
+            <Dropdown
+                id={id}
+                {...field}
+                {...inputProps}
+                aria-required={required}
+            >
+                {showDropdownPlaceholderText && (
+                    <option value="">- Select -</option>
+                )}
                 {options &&
-                    options.map(({key, value}) => (
-                        <option key={key} value={key}>
-                            {value}
+                    options.map(({ id, label }) => (
+                        <option key={id} value={id}>
+                            {label}
                         </option>
-                    ))
-                }
+                    ))}
             </Dropdown>
         </FormGroup>
     )
