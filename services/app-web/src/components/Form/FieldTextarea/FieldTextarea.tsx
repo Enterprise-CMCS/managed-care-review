@@ -25,6 +25,7 @@ export type TextAreaProps = {
     error?: string
     showError: boolean
     name: string
+    required?: boolean
 } & JSX.IntrinsicElements['textarea']
 
 export const FieldTextarea = ({
@@ -34,15 +35,18 @@ export const FieldTextarea = ({
     error,
     showError,
     name,
+    required = false,
     ...inputProps
 }: TextAreaProps): React.ReactElement => {
-    const [field] = useField({ name })
+    const [field, meta] = useField({ name })
     return (
         <FormGroup error={showError}>
             <Label htmlFor={id} error={showError}>
                 {label}
             </Label>
-            {showError && <ErrorMessage>{error}</ErrorMessage>}
+            {showError && meta.error && (
+                <ErrorMessage>{meta.error}</ErrorMessage>
+            )}
             {hint && (
                 <div aria-labelledby={id} className="usa-hint margin-top-1">
                     {hint}
@@ -54,6 +58,7 @@ export const FieldTextarea = ({
                 id={id}
                 name={name}
                 error={showError}
+                aria-required={required}
             />
         </FormGroup>
     )
