@@ -52,6 +52,7 @@ export const FieldDropdown = ({
                 {label}
             </Label>
             {showError && <ErrorMessage>{error}</ErrorMessage>}
+            
             {hint && (
                 <div aria-labelledby={id} className="usa-hint margin-top-1">
                     {hint}

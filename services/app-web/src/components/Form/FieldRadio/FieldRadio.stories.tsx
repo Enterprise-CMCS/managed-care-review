@@ -21,29 +21,28 @@ const Template: Story<FieldRadioProps> =
 export const Default = Template.bind({})
 
 Default.args = {
-    id: "contractOnly", 
     name: "submissionType",
-    label: "Executed contract action only",
-    checked: false,
-    disabled: false
+    legend: "Choose a submission type",
+    showError: false,
+    options: [{id: "contractOnly", label: "Executed contract action only"}, {id: "contractRate", label: "Executed contract action and signed rate certification"}], 
 }
 
-export const Selected = Template.bind({})
+export const Hint = Template.bind({})
 
-Selected.args = {
-    id: "contractOnly", 
+Hint.args = {
     name: "submissionType",
-    label: "Executed contract action only",
-    checked: true,
-    disabled: false
+    legend: "Choose a submission type",
+    showError: false,
+    options: [{id: "contractOnly", label: "Executed contract action only"}, {id: "contractRate", label: "Executed contract action and signed rate certification"}],
+    hint: <span>This is an example of hint text</span>
 }
 
-export const Disabled = Template.bind({})
+export const Error = Template.bind({})
 
-Disabled.args = {
-    id: "contractOnly", 
+Error.args = {
     name: "submissionType",
-    label: "Executed contract action only",
-    checked: true,
-    disabled: true
+    legend: "Choose a submission type",
+    showError: true,
+    options: [{id: "contractOnly", label: "Executed contract action only"}, {id: "contractRate", label: "Executed contract action and signed rate certification"}],
+    error: "You must choose a submission type"
 }
