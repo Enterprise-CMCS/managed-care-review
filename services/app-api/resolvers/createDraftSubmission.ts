@@ -1,3 +1,5 @@
+import { UserInputError } from 'apollo-server-lambda'
+
 import {
     InsertDraftSubmissionArgsType,
     isStoreError,
@@ -13,17 +15,20 @@ export function createDraftSubmissionResolver(
     return async (_parent, { input }, context) => {
         const stateFromCurrentUser: State['code'] = context.user.state_code
 
-        const program = store.findProgram(stateFromCurrentUser, input.programId)
+        const program = store.findProgram(stateFromCurrentUser, input.programID)
 
         if (program === undefined) {
-            throw new Error(
-                `The program id ${input.programId} does not exist in state ${stateFromCurrentUser}`
+            throw new UserInputError(
+                `The program id ${input.programID} does not exist in state ${stateFromCurrentUser}`,
+                {
+                    argumentName: 'programID',
+                }
             )
         }
 
         const dbDraftSubmission: InsertDraftSubmissionArgsType = {
             stateCode: stateFromCurrentUser,
-            programID: input.programId,
+            programID: input.programID,
             submissionDescription: input.submissionDescription,
             submissionType: input.submissionType as InsertDraftSubmissionArgsType['submissionType'],
         }

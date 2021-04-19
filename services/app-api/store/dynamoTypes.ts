@@ -24,6 +24,9 @@ export class DraftSubmissionStoreType {
     createdAt: Date
 
     @attribute()
+    updatedAt: Date
+
+    @attribute()
     programID: string
 
     @attribute({
@@ -45,6 +48,7 @@ export class DraftSubmissionStoreType {
         this.submissionDescription = ''
         this.submissionType = 'CONTRACT_ONLY'
         this.createdAt = new Date()
+        this.updatedAt = new Date()
         this.stateCode = ''
         this.programID = ''
         this.stateNumber = -1

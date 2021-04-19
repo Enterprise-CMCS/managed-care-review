@@ -2,29 +2,12 @@ import { ApolloServer } from 'apollo-server-lambda'
 import { getTestStore } from '../testHelpers/storeHelpers'
 
 import typeDefs from '../../app-graphql/src/schema.graphql'
-import { Resolvers } from '../gen/gqlServer'
-import {
-    getCurrentUserResolver,
-    createDraftSubmissionResolver,
-    showDraftSubmissionResolver,
-    draftSubmissionResolver,
-} from '../resolvers'
-import { userResolver } from '../resolvers/userResolver'
+import { configureResolvers } from '../resolvers'
 import { Context } from '../handlers/apollo_gql'
 
 const store = getTestStore()
 
-const testResolvers: Resolvers = {
-    Query: {
-        getCurrentUser: getCurrentUserResolver(),
-        showDraftSubmission: showDraftSubmissionResolver(store),
-    },
-    Mutation: {
-        createDraftSubmission: createDraftSubmissionResolver(store),
-    },
-    User: userResolver,
-    DraftSubmission: draftSubmissionResolver(store),
-}
+const testResolvers = configureResolvers(store)
 
 const defaultContext = (): Context => {
     return {

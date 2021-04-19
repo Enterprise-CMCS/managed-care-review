@@ -4,7 +4,7 @@ import { createMemoryHistory } from 'history'
 import { screen, waitFor } from '@testing-library/react'
 
 import {
-    getCurrentUserMock,
+    fetchCurrentUserMock,
     createDraftSubmissionMock,
 } from '../../utils/apolloUtils'
 import { renderWithProviders } from '../../utils/jestUtils'
@@ -13,7 +13,7 @@ import { Formik } from 'formik'
 
 describe('SubmissionType', () => {
     const SubmissionTypeInitialValues: SubmissionTypeFormValues = {
-        programId: 'ccc-plus',
+        programID: 'ccc-plus',
         submissionDescription: '',
         submissionType: '',
     }
@@ -21,7 +21,7 @@ describe('SubmissionType', () => {
     it('renders without errors', async () => {
         renderWithProviders(<SubmissionType />, {
             apolloProvider: {
-                mocks: [getCurrentUserMock({ statusCode: 200 })],
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
         })
 
@@ -35,7 +35,7 @@ describe('SubmissionType', () => {
     it('displays submission type form when expected', async () => {
         renderWithProviders(<SubmissionType />, {
             apolloProvider: {
-                mocks: [getCurrentUserMock({ statusCode: 200 })],
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
         })
 
@@ -50,7 +50,7 @@ describe('SubmissionType', () => {
         const history = createMemoryHistory()
         renderWithProviders(<SubmissionType />, {
             apolloProvider: {
-                mocks: [getCurrentUserMock({ statusCode: 200 })],
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
             routerProvider: {
                 route: '/submissions/new',
@@ -68,7 +68,7 @@ describe('SubmissionType', () => {
     it('displays a cancel link', async () => {
         renderWithProviders(<SubmissionType />, {
             apolloProvider: {
-                mocks: [getCurrentUserMock({ statusCode: 200 })],
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
         })
 
@@ -84,7 +84,7 @@ describe('SubmissionType', () => {
     it('displays a continue button', async () => {
         renderWithProviders(<SubmissionType />, {
             apolloProvider: {
-                mocks: [getCurrentUserMock({ statusCode: 200 })],
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
         })
 
@@ -107,7 +107,7 @@ describe('SubmissionType', () => {
             </Formik>,
             {
                 apolloProvider: {
-                    mocks: [getCurrentUserMock({ statusCode: 200 })],
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
             }
         )
@@ -144,7 +144,10 @@ describe('SubmissionType', () => {
             {
                 apolloProvider: {
                     mocks: [
-                        getCurrentUserMock({ statusCode: 200, user: mockUser }),
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockUser,
+                        }),
                     ],
                 },
             }
@@ -171,7 +174,7 @@ describe('SubmissionType', () => {
             </Formik>,
             {
                 apolloProvider: {
-                    mocks: [getCurrentUserMock({ statusCode: 200 })],
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
             }
         )
@@ -200,7 +203,7 @@ describe('SubmissionType', () => {
             </Formik>,
             {
                 apolloProvider: {
-                    mocks: [getCurrentUserMock({ statusCode: 200 })],
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
             }
         )
@@ -215,7 +218,7 @@ describe('SubmissionType', () => {
         it('does not show error validations on initial load', async () => {
             renderWithProviders(<SubmissionType />, {
                 apolloProvider: {
-                    mocks: [getCurrentUserMock({ statusCode: 200 })],
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
             })
 
@@ -244,7 +247,7 @@ describe('SubmissionType', () => {
 
                 {
                     apolloProvider: {
-                        mocks: [getCurrentUserMock({ statusCode: 200 })],
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                     },
                 }
             )
@@ -271,7 +274,7 @@ describe('SubmissionType', () => {
         it('do not show error messages when showValidations is false', async () => {
             renderWithProviders(<SubmissionType showValidations={false} />, {
                 apolloProvider: {
-                    mocks: [getCurrentUserMock({ statusCode: 200 })],
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
             })
             await waitFor(() => {
@@ -296,7 +299,7 @@ describe('SubmissionType', () => {
         it('if form fields are invalid, shows validation error messages when continue button is clicked', async () => {
             renderWithProviders(<SubmissionType />, {
                 apolloProvider: {
-                    mocks: [getCurrentUserMock({ statusCode: 200 })],
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
             })
 
@@ -331,7 +334,7 @@ describe('SubmissionType', () => {
                 authProvider: { authMode: 'LOCAL' },
                 apolloProvider: {
                     mocks: [
-                        getCurrentUserMock({
+                        fetchCurrentUserMock({
                             statusCode: 200,
                         }),
                         createDraftSubmissionMock({

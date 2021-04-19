@@ -27,6 +27,7 @@ import {
     CreateDraftSubmissionDocument,
     DraftSubmission,
     SubmissionType as SubmissionTypeT,
+    useUpdateDraftSubmissionMutation,
 } from '../../gen/gqlClient'
 import { useAuth } from '../../contexts/AuthContext'
 import { FieldTextarea } from '../../components/Form/FieldTextarea/FieldTextarea'
@@ -58,7 +59,7 @@ const SubmissionTypeFormSchema = Yup.object().shape({
     ),
 })
 export interface SubmissionTypeFormValues {
-    programId: string
+    programID: string
     submissionDescription: string
     submissionType: string
 }
@@ -88,8 +89,12 @@ export const SubmissionType = ({
     const [createDraftSubmission, { error }] = useMutation(
         CreateDraftSubmissionDocument
     )
+    const [
+        updateDraftSubmission,
+        { error: updateError },
+    ] = useUpdateDraftSubmissionMutation()
 
-    if (error) {
+    if ((error || updateError) && !showFormAlert) {
         setShowFormAlert(true)
         console.log('Log: creating new submission failed with gql error', error)
     }
@@ -98,7 +103,7 @@ export const SubmissionType = ({
         shouldValidate && Boolean(error)
 
     const submissionTypeInitialValues: SubmissionTypeFormValues = {
-        programId: draftSubmission?.program.id ?? programs[0]?.id, // TODO: change this to be the program selected on the tab
+        programID: draftSubmission?.program.id ?? programs[0]?.id, // TODO: change this to be the program selected on the tab
         submissionDescription: draftSubmission?.submissionDescription ?? '',
         submissionType: draftSubmission?.submissionType ?? '',
     }
@@ -130,8 +135,44 @@ export const SubmissionType = ({
                 )
             }
         } else {
-            // TODO: implement saving an existing submission
-            console.log('mock save draft submission', values)
+            if (draftSubmission === undefined) {
+                // this is a sign that we should hoist the saving stuff out of this leaf
+                // let's reconsider once we have our second editiable component.
+                console.log(
+                    'ERROR, when editing a draft, one should always be passed in.'
+                )
+                return
+            }
+
+            // TODO: once we have more values, we'll need to pick the other values out
+            // off of the existing draft.
+            const updatedDraft = {
+                programID: values.programID,
+                submissionType: values.submissionType as SubmissionTypeT,
+                submissionDescription: values.submissionDescription,
+            }
+
+            try {
+                await updateDraftSubmission({
+                    variables: {
+                        input: {
+                            submissionID: draftSubmission.id,
+                            draftSubmissionUpdates: updatedDraft,
+                        },
+                    },
+                })
+
+                history.push(
+                    `/submissions/${draftSubmission.id}/contract-details`
+                )
+            } catch (serverError) {
+                setShowFormAlert(true)
+                formikHelpers.setSubmitting(false) // unblock submit button to allow resubmit
+                console.log(
+                    'Log: updating submission failed with server error',
+                    serverError
+                )
+            }
         }
     }
 
@@ -186,11 +227,11 @@ export const SubmissionType = ({
                                 <span>All fields are required</span>
 
                                 <FieldDropdown
-                                    id="programId"
-                                    name="programId"
+                                    id="programID"
+                                    name="programID"
                                     label="Program"
                                     showError={showFieldErrors(
-                                        errors.programId
+                                        errors.programID
                                     )}
                                     options={programOptions}
                                 />

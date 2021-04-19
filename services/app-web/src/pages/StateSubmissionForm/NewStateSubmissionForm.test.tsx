@@ -1,7 +1,7 @@
 import React from 'react'
 import { screen, waitFor } from '@testing-library/react'
 
-import { getCurrentUserMock } from '../../utils/apolloUtils'
+import { fetchCurrentUserMock } from '../../utils/apolloUtils'
 import { renderWithProviders } from '../../utils/jestUtils'
 import { NewStateSubmissionForm } from './NewStateSubmissionForm'
 
@@ -10,8 +10,8 @@ describe('NewStateSubmissionForm', () => {
         renderWithProviders(<NewStateSubmissionForm />, {
             apolloProvider: {
                 mocks: [
-                    getCurrentUserMock({ statusCode: 200 }),
-                    getCurrentUserMock({ statusCode: 200 }),
+                    fetchCurrentUserMock({ statusCode: 200 }),
+                    fetchCurrentUserMock({ statusCode: 200 }),
                 ],
             },
             routerProvider: { route: '/submissions/new' },

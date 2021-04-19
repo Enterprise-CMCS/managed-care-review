@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
 import { Button, Alert, GridContainer } from '@trussworks/react-uswds'
-import { useLazyQuery } from '@apollo/client'
 
-import { GetCurrentUserDocument } from '../../gen/gqlClient'
+import { useFetchCurrentUserLazyQuery } from '../../gen/gqlClient'
 
 type AuthStatus = 'Unknown' | 'Authenticated' | 'Unauthenticated'
 
@@ -10,11 +9,9 @@ type AuthStatus = 'Unknown' | 'Authenticated' | 'Unauthenticated'
 export function CheckAuth(): React.ReactElement {
     const [authStatus, setAuthStatus] = useState<AuthStatus>('Unknown')
 
-    const [checkAuth, { called, loading, data }] = useLazyQuery(
-        GetCurrentUserDocument,
+    const [checkAuth, { called, loading, data }] = useFetchCurrentUserLazyQuery(
         {
             fetchPolicy: 'network-only',
-            variables: { language: 'english' },
         }
     )
 
@@ -23,7 +20,7 @@ export function CheckAuth(): React.ReactElement {
         console.log('checking auth')
 
         checkAuth()
-        if (data?.getCurrentUser) {
+        if (data?.fetchCurrentUser) {
             setAuthStatus('Authenticated')
         } else {
             setAuthStatus('Unauthenticated')

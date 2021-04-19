@@ -5,12 +5,12 @@ import { screen, waitFor, Screen, queries } from '@testing-library/react'
 import { CognitoUser, CognitoUserPool } from 'amazon-cognito-identity-js'
 
 import * as CognitoAuthApi from '../Auth/cognitoAuth'
-import { GetCurrentUserDocument } from '../../gen/gqlClient'
+import { FetchCurrentUserDocument } from '../../gen/gqlClient'
 import { Login } from './Login'
 import { renderWithProviders, userClickByRole } from '../../utils/jestUtils'
 
 const failedAuthMock = {
-    request: { query: GetCurrentUserDocument },
+    request: { query: FetchCurrentUserDocument },
     result: {
         ok: false,
         status: 403,
@@ -23,10 +23,10 @@ const failedAuthMock = {
 }
 
 const successfulAuthMock = {
-    request: { query: GetCurrentUserDocument },
+    request: { query: FetchCurrentUserDocument },
     result: {
         data: {
-            getCurrentUser: {
+            fetchCurrentUser: {
                 state: 'MN',
                 role: 'State User',
                 name: 'Bob it user',

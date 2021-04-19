@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 
 import * as CognitoAuthApi from '../../pages/Auth/cognitoAuth'
 import { renderWithProviders } from '../../utils/jestUtils'
-import { getCurrentUserMock } from '../../utils/apolloUtils'
+import { fetchCurrentUserMock } from '../../utils/apolloUtils'
 import { Header } from './Header'
 
 describe('Header', () => {
@@ -64,7 +64,7 @@ describe('Header', () => {
         it('displays Medicaid logo image link that redirects to /dashboard', () => {
             renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
-                    mocks: [getCurrentUserMock({ statusCode: 200 })],
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
             })
             const logoImage = screen.getByRole('img')
@@ -80,7 +80,7 @@ describe('Header', () => {
             // TODO: make a loop that goes through all states and checks icons/headings
             renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
-                    mocks: [getCurrentUserMock({ statusCode: 200 })],
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
             })
             await waitFor(() =>
@@ -94,7 +94,7 @@ describe('Header', () => {
             renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
                 routerProvider: { route: '/submissions/new' },
                 apolloProvider: {
-                    mocks: [getCurrentUserMock({ statusCode: 200 })],
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
             })
             await waitFor(() =>
@@ -107,7 +107,7 @@ describe('Header', () => {
         it('displays sign out button', async () => {
             renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
-                    mocks: [getCurrentUserMock({ statusCode: 200 })],
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
             })
 
@@ -127,8 +127,8 @@ describe('Header', () => {
             renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
                     mocks: [
-                        getCurrentUserMock({ statusCode: 200 }),
-                        getCurrentUserMock({ statusCode: 403 }),
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchCurrentUserMock({ statusCode: 403 }),
                     ],
                 },
             })
@@ -155,8 +155,8 @@ describe('Header', () => {
                 {
                     apolloProvider: {
                         mocks: [
-                            getCurrentUserMock({ statusCode: 200 }),
-                            getCurrentUserMock({ statusCode: 403 }),
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchCurrentUserMock({ statusCode: 403 }),
                         ],
                     },
                 }
@@ -183,8 +183,8 @@ describe('Header', () => {
             renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
                     mocks: [
-                        getCurrentUserMock({ statusCode: 200 }),
-                        getCurrentUserMock({ statusCode: 403 }),
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchCurrentUserMock({ statusCode: 403 }),
                     ],
                 },
             })
