@@ -13,14 +13,3 @@ const Template: Story = (args) => <Loading {...args} />
 
 export const LoadingDefault = Template.bind({})
 LoadingDefault.decorators = [(Story) => ProvidersDecorator(Story, {})]
-
-// export const CMSHeaderLoggedIn = Template.bind({})
-
-// CMSHeaderLoggedIn.decorators = [
-//     (Story) =>
-//         ProvidersDecorator(Story, {
-//             apolloProvider: {
-//                 mocks: [getCurrentUserMock({ statusCode: 200 })],
-//             },
-//         }),
-// ]
