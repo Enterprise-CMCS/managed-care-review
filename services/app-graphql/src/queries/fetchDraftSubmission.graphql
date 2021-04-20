@@ -13,6 +13,10 @@ query fetchDraftSubmission($input: FetchDraftSubmissionInput!) {
             stateCode
             submissionType
             submissionDescription
+            documents {
+                name
+                url
+            }
         }
     }
 }

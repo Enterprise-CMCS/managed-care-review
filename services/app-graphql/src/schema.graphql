@@ -23,6 +23,7 @@ input CreateDraftSubmissionInput {
     programID: ID!
     submissionType: SubmissionType!
     submissionDescription: String!
+    documents: [DocumentInput!]!
 }
 
 type CreateDraftSubmissionPayload {
@@ -67,6 +68,11 @@ type Program {
     name: String!
 }
 
+type Document {
+    name: String!
+    url: String!
+}
+
 enum SubmissionType {
     CONTRACT_ONLY
     CONTRACT_AND_RATES
@@ -82,11 +88,16 @@ type DraftSubmission {
     name: String!
     createdAt: Date!
     updatedAt: DateTime!
+    documents: [Document!]!
 }
 
+input DocumentInput {
+    name: String!
+    url: String!
+}
 input DraftSubmissionUpdates {
     programID: String!
     submissionType: SubmissionType!
     submissionDescription: String!
-    # documents[] ...
+    documents: [DocumentInput!]!
 }

@@ -1,9 +1,6 @@
 import { ForbiddenError } from 'apollo-server-lambda'
-
 import { isStoreError, Store } from '../store/index'
-
 import { QueryResolvers, State } from '../gen/gqlServer'
-
 import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
 
 export function fetchDraftSubmissionResolver(

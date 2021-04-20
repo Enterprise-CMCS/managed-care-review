@@ -5,7 +5,7 @@ import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraft
 import FETCH_DRAFT_SUBMISSION from '../../app-graphql/src/queries/fetchDraftSubmission.graphql'
 import { constructTestServer } from '../testHelpers/gqlHelpers'
 
-describe('createDraftSubmission', () => {
+describe('fetchDraftSubmission', () => {
     it('returns draft submission payload with a draft submission', async () => {
         const server = constructTestServer()
 
@@ -16,6 +16,11 @@ describe('createDraftSubmission', () => {
             programID: 'smmc',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A real submission',
+            documents:[
+                {
+                name: 'testdoc.pdf',
+                url: 'https://www.example.com'
+            }]
         }
         const createResult = await mutate({
             mutation: CREATE_DRAFT_SUBMISSION,
@@ -36,11 +41,18 @@ describe('createDraftSubmission', () => {
         })
 
         expect(result.errors).toBeUndefined()
-
+       
         const resultDraft = result.data.fetchDraftSubmission.draftSubmission
         expect(resultDraft.id).toEqual(createdID)
         expect(resultDraft.program.id).toEqual('smmc')
         expect(resultDraft.submissionDescription).toEqual('A real submission')
+        expect(resultDraft.documents.length).toEqual(1)
+        expect(resultDraft.documents[0]).toEqual(expect.objectContaining(
+            {
+                name: 'testdoc.pdf',
+                url: 'https://www.example.com'
+            }
+        ))
     })
 
     it('returns null if the ID does not exist', async () => {
@@ -72,6 +84,7 @@ describe('createDraftSubmission', () => {
             programID: 'smmc',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A real submission',
+            documents: []
         }
         const createResult = await mutate({
             mutation: CREATE_DRAFT_SUBMISSION,
@@ -120,6 +133,7 @@ describe('createDraftSubmission', () => {
             programID: 'smmc',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A real submission',
+            documents: []
         }
         const createResult = await mutate({
             mutation: CREATE_DRAFT_SUBMISSION,

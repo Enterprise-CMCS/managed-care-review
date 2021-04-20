@@ -17,6 +17,7 @@ describe('updateDraftSubmission', () => {
             programID: 'smmc',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A created submission',
+            documents: []
         }
         const createResult = await mutate({
             mutation: CREATE_DRAFT_SUBMISSION,
@@ -38,6 +39,7 @@ describe('updateDraftSubmission', () => {
             programID: 'cnet',
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
+            documents: []
         }
 
         const updateResult = await mutate({
@@ -84,6 +86,115 @@ describe('updateDraftSubmission', () => {
         ).toBeGreaterThan(0)
     })
 
+    it.only('updates a submission to have documents', async () => {
+        const server = constructTestServer()
+
+        const { query, mutate } = createTestClient(server)
+
+        // SETUP: First, create a new submission
+        const createInput: CreateDraftSubmissionInput = {
+            programID: 'smmc',
+            submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
+            submissionDescription: 'A created submission',
+            documents: []
+        }
+        const createResult = await mutate({
+            mutation: CREATE_DRAFT_SUBMISSION,
+            variables: { input: createInput },
+        })
+
+        expect(createResult.errors).toBeUndefined()
+
+        const createdDraft =
+            createResult.data.createDraftSubmission.draftSubmission
+
+        // ACT: next, update that submission with a single document
+        const createdID = createdDraft.id
+
+        const updatedDraft = {
+            programID: 'cnet',
+            submissionType: 'CONTRACT_AND_RATES',
+            submissionDescription: 'An updated submission',
+            documents:[
+                {
+                    name: 'myfile.pdf',
+                    url: 'https://www.example.com'
+                }
+            ]
+        }
+
+        const updateResult = await mutate({
+            mutation: UPDATE_DRAFT_SUBMISSION,
+            variables: {
+                input: {
+                    submissionID: createdID,
+                    draftSubmissionUpdates: updatedDraft,
+                },
+            },
+        })
+
+        expect(updateResult.errors).toBeUndefined()
+
+        // TEST: fetch and see if that works
+        const input = {
+            submissionID: createdID,
+        }
+
+        const result = await query({
+            query: FETCH_DRAFT_SUBMISSION,
+            variables: { input },
+        })
+
+        expect(result.errors).toBeUndefined()
+
+        const resultDraft = result.data.fetchDraftSubmission.draftSubmission
+
+        expect(resultDraft.id).toEqual(createdID)
+        expect(resultDraft.submissionType).toEqual('CONTRACT_AND_RATES')
+        expect(resultDraft.program.id).toEqual('cnet')
+        expect(resultDraft.submissionDescription).toEqual(
+            'An updated submission'
+        )
+        expect(resultDraft.documents.length).toEqual(1)
+        expect(resultDraft.documents).toEqual([ {
+            name: 'myfile.pdf',
+            url: 'https://www.example.com'
+        }])
+
+        // Update with two more documents
+        const updatedDraft2 = {
+            programID: 'cnet',
+            submissionType: 'CONTRACT_AND_RATES',
+            submissionDescription: 'An updated submission',
+            documents:[
+                {
+                    name: 'myfile2.pdf',
+                    url: 'https://www.example.com'
+                },
+                {
+                    name: 'myfile3.pdf',
+                    url: 'https://www.example.com'
+                }
+            ]
+        }
+
+        const updateResult2 = await mutate({
+            mutation: UPDATE_DRAFT_SUBMISSION,
+            variables: {
+                input: {
+                    submissionID: createdID,
+                    draftSubmissionUpdates: updatedDraft2,
+                },
+            },
+        })
+        const resultDraft2 = updateResult2.data.updateDraftSubmission.draftSubmission
+        expect(resultDraft2.documents.length).toEqual(2)
+        expect(resultDraft2.documents[0].name).toEqual('myfile2.pdf')
+
+    })
+
+    it.todo('updates a submission to remove existing documents')
+
     it('errors if the ID doesnt exist', async () => {
         const server = constructTestServer()
 
@@ -93,6 +204,7 @@ describe('updateDraftSubmission', () => {
             programID: 'cnet',
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
+            documents: []
         }
 
         const updateResult = await mutate({
@@ -128,6 +240,7 @@ describe('updateDraftSubmission', () => {
             programID: 'smmc',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A created submission',
+            documents: []
         }
         const createResult = await mutate({
             mutation: CREATE_DRAFT_SUBMISSION,
@@ -160,6 +273,7 @@ describe('updateDraftSubmission', () => {
             programID: 'cnet',
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
+            documents: []
         }
 
         const updateResult = await otherMutate({
@@ -191,6 +305,7 @@ describe('updateDraftSubmission', () => {
             programID: 'smmc',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A created submission',
+            documents: []
         }
         const createResult = await mutate({
             mutation: CREATE_DRAFT_SUBMISSION,
@@ -208,7 +323,8 @@ describe('updateDraftSubmission', () => {
         const updatedDraft = {
             programID: 'wefwefwefew',
             submissionType: 'CONTRACT_AND_RATES',
-            submissionDescription: 'An updated submission',
+            submissionDescription: 'An updated submission',      
+            documents: []
         }
 
         const updateResult = await mutate({
