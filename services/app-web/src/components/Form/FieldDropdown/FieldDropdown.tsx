@@ -30,9 +30,8 @@ export type FieldDropdownProps = {
     showError: boolean
     name: string
     options: DropdownOption[]
-    required?: boolean
     showDropdownPlaceholderText?: boolean
-}
+} & JSX.IntrinsicElements['select']
 
 export const FieldDropdown = ({
     label,
@@ -41,7 +40,6 @@ export const FieldDropdown = ({
     showError,
     name,
     options,
-    required = false,
     showDropdownPlaceholderText,
     ...inputProps
 }: FieldDropdownProps): React.ReactElement => {
@@ -59,12 +57,7 @@ export const FieldDropdown = ({
                     {hint}
                 </div>
             )}
-            <Dropdown
-                id={id}
-                {...field}
-                {...inputProps}
-                aria-required={required}
-            >
+            <Dropdown id={id} {...field} {...inputProps}>
                 {showDropdownPlaceholderText && (
                     <option value="">- Select -</option>
                 )}

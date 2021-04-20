@@ -42,6 +42,7 @@ Hint.args = {
     id: 'submissionDescription',
     showError: false,
     name: 'submissionDescription',
+    'aria-required': 'true',
     hint: (
         <>
             <Link

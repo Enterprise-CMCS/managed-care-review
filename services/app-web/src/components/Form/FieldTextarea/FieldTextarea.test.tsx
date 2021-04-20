@@ -40,6 +40,22 @@ describe('FieldTextarea component', () => {
         expect(screen.getByLabelText('default label')).toBeInTheDocument()
     })
 
+    it('handles custom aria attributes', () => {
+        render(
+            <FieldTextarea
+                id="input1"
+                label="default label"
+                name="input1"
+                aria-required
+                showError={false}
+            />
+        )
+        expect(screen.getByLabelText('default label')).toHaveAttribute(
+            'aria-required',
+            'true'
+        )
+    })
+
     it('displays hint', () => {
         render(
             <FieldTextarea

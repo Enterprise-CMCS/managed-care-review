@@ -57,6 +57,7 @@ Error.args = {
     id: 'program',
     showError: true,
     name: 'program',
+    'aria-required': 'true',
     options: [
         { id: 'ccc-plus', label: 'CCC Plus' },
         { id: 'medallion', label: 'Medallion' },

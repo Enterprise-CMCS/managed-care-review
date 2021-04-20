@@ -17,7 +17,7 @@ export type FieldRadioProps = {
     name: string
     label: string
     id: string
-}
+} & JSX.IntrinsicElements['input']
 
 export const FieldRadio = ({
     name,
@@ -25,14 +25,6 @@ export const FieldRadio = ({
     id,
     ...inputProps
 }: FieldRadioProps): React.ReactElement => {
-    const [field] = useField({ name });
-    return (
-        
-        <Radio
-            id={id} 
-            label={label}
-            {...field} 
-            {...inputProps} 
-        /> 
-    )
+    const [field] = useField({ name })
+    return <Radio id={id} label={label} {...field} {...inputProps} />
 }

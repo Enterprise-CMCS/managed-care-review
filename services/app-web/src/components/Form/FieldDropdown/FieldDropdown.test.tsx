@@ -48,6 +48,26 @@ describe('FieldDropdown component', () => {
         expect(programOptions.length).toBe(3)
     })
 
+    it('handles custom aria attributes', () => {
+        render(
+            <FieldDropdown
+                label="Program"
+                id="input1"
+                showError={false}
+                name="input1"
+                aria-required
+                options={[
+                    { id: 'id1', label: 'value1' },
+                    { id: 'id2', label: 'value2' },
+                    { id: 'id3', label: 'value3' },
+                ]}
+            />
+        )
+        expect(
+            screen.getByRole('combobox', { name: 'Program' })
+        ).toHaveAttribute('aria-required', 'true')
+    })
+
     it('displays hint', () => {
         render(
             <FieldDropdown
