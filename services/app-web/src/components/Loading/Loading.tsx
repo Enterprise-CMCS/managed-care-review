@@ -3,13 +3,19 @@ import { Spinner } from '../Spinner/Spinner'
 
 import styles from './Loading.module.scss'
 
-export const Loading = (): React.ReactElement | null => {
+export const Loading = ({
+    delayMS = 750,
+}: {
+    delayMS?: number
+}): React.ReactElement | null => {
     const [showLoading, setShowLoading] = useState(false)
+
+    console.log('RENDERLOAS', showLoading)
 
     useEffect(() => {
         setTimeout(() => {
             setShowLoading(true)
-        }, 750)
+        }, delayMS)
     }, [])
 
     if (!showLoading) {

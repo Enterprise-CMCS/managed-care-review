@@ -1,10 +1,11 @@
-import { render } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 
 import { Spinner } from './Spinner'
 
 describe('Spinner', () => {
     it('renders without errors', async () => {
-        const { getByTestId } = render(<Spinner />)
-        expect(getByTestId('tabs')).toBeInTheDocument()
+        render(<Spinner />)
+
+        expect(screen.getByRole('progressbar')).toBeInTheDocument()
     })
 })
