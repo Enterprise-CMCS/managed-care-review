@@ -4,14 +4,14 @@ import { createMemoryHistory } from 'history'
 import { screen, waitFor } from '@testing-library/react'
 
 import { Dashboard } from './Dashboard'
-import { getCurrentUserMock } from '../../utils/apolloUtils'
+import { fetchCurrentUserMock } from '../../utils/apolloUtils'
 import { renderWithProviders } from '../../utils/jestUtils'
 
 describe('Dashboard', () => {
     it('display submission heading', async () => {
         renderWithProviders(<Dashboard />, {
             apolloProvider: {
-                mocks: [getCurrentUserMock({ statusCode: 200 })],
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
         })
 
@@ -28,7 +28,7 @@ describe('Dashboard', () => {
     it('displays new submission link', async () => {
         renderWithProviders(<Dashboard />, {
             apolloProvider: {
-                mocks: [getCurrentUserMock({ statusCode: 200 })],
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
         })
 
@@ -60,7 +60,7 @@ describe('Dashboard', () => {
         renderWithProviders(<Dashboard />, {
             apolloProvider: {
                 mocks: [
-                    getCurrentUserMock({ statusCode: 200, user: mockUser }),
+                    fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
                 ],
             },
         })
@@ -76,7 +76,7 @@ describe('Dashboard', () => {
     it('loads first tab active', async () => {
         renderWithProviders(<Dashboard />, {
             apolloProvider: {
-                mocks: [getCurrentUserMock({ statusCode: 200 })],
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
         })
 
@@ -94,7 +94,7 @@ describe('Dashboard', () => {
 
         renderWithProviders(<Dashboard />, {
             apolloProvider: {
-                mocks: [getCurrentUserMock({ statusCode: 200 })],
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
             routerProvider: {
                 routerProps: { history: history },

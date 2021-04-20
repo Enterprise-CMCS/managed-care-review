@@ -6,14 +6,15 @@ import { QueryResolvers, State } from '../gen/gqlServer'
 
 import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
 
-export function showDraftSubmissionResolver(
+export function fetchDraftSubmissionResolver(
     store: Store
-): QueryResolvers['showDraftSubmission'] {
+): QueryResolvers['fetchDraftSubmission'] {
     return async (_parent, { input }, context) => {
         // fetch from the store
         const result = await store.findDraftSubmission(input.submissionID)
 
         if (isStoreError(result)) {
+            console.log('Error finding a submission', result)
             throw new Error(
                 `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
             )

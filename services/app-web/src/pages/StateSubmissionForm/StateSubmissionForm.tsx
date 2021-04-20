@@ -1,8 +1,10 @@
 import React, { useEffect } from 'react'
 
-import { Alert, GridContainer } from '@trussworks/react-uswds'
+import { GridContainer } from '@trussworks/react-uswds'
 import { Switch, Route, useParams } from 'react-router-dom'
 
+import { Error404 } from '../Errors/Error404'
+import { GenericError } from '../Errors/GenericError'
 import { Loading } from '../../components/Loading/'
 import { usePage } from '../../contexts/PageContext'
 import { RoutesRecord } from '../../constants/routes'
@@ -10,14 +12,14 @@ import { ContractDetails } from './ContractDetails/ContractDetails'
 import { ReviewSubmit } from './ReviewSubmit/ReviewSubmit'
 import { SubmissionType } from './SubmissionType'
 
-import { useShowDraftSubmissionQuery } from '../../gen/gqlClient'
+import { useFetchDraftSubmissionQuery } from '../../gen/gqlClient'
 
 export const StateSubmissionForm = (): React.ReactElement => {
     const { id } = useParams<{ id: string }>()
 
     const { updateHeading } = usePage()
 
-    const { data, loading, error } = useShowDraftSubmissionQuery({
+    const { data, loading, error } = useFetchDraftSubmissionQuery({
         variables: {
             input: {
                 submissionID: id,
@@ -27,7 +29,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
     useEffect(() => {
         // We have to updateHeading inside useEffect so that we don't update two components at the same time
-        const draft = data?.showDraftSubmission?.draftSubmission
+        const draft = data?.fetchDraftSubmission?.draftSubmission
         if (draft) {
             updateHeading(draft.name)
         }
@@ -43,26 +45,14 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
     if (error) {
         console.log('error loading draft:', error)
-        return (
-            <GridContainer>
-                <Alert type="error">
-                    Something went wrong, try refreshing?
-                </Alert>
-            </GridContainer>
-        )
+        return <GenericError />
     }
 
-    const draft = data?.showDraftSubmission?.draftSubmission
+    const draft = data?.fetchDraftSubmission?.draftSubmission
 
     if (draft === undefined || draft === null) {
         console.log('got undefined back from loaded showDraftSubmission')
-        return (
-            <GridContainer>
-                <Alert type="error">
-                    Something went wrong, try refreshing?
-                </Alert>
-            </GridContainer>
-        )
+        return <Error404 />
     }
 
     return (

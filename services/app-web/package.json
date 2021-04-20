@@ -40,7 +40,7 @@
         "format": "prettier --write src/**/*.ts{,x}",
         "lint": "tsc --noEmit && eslint src/",
         "test:a11y": "pa11y-ci",
-        "test:unit": "react-scripts test --watchAll=false",
+        "test:once": "react-scripts test --watchAll=false",
         "storybook": "start-storybook -p 6006 -s public --quiet",
         "build-storybook": "build-storybook -s public --quiet"
     },

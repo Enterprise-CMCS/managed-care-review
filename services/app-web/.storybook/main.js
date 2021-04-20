@@ -6,12 +6,6 @@ module.exports = {
         '@storybook/addon-essentials',
         '@storybook/preset-create-react-app',
     ],
-    refs: {
-        'design-system': {
-            title: 'ReactUSWDS',
-            url: 'https://trussworks.github.io/react-uswds/',
-        },
-    },
     typescript: {
         check: false,
         checkOptions: {},

@@ -1674,6 +1674,11 @@ cross-spawn@^7.0.0:
     shebang-command "^2.0.0"
     which "^2.0.1"
 
+cypress-pipe@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/cypress-pipe/-/cypress-pipe-2.0.0.tgz#577df7a70a8603d89a96dfe4092a605962181af8"
+  integrity sha512-KW9s+bz4tFLucH3rBGfjW+Q12n7S4QpUSSyxiGrgPOfoHlbYWzAGB3H26MO0VTojqf9NVvfd5Kt0MH5XMgbfyg==
+
 cypress@^6.8.0:
   version "6.8.0"
   resolved "https://registry.yarnpkg.com/cypress/-/cypress-6.8.0.tgz#8338f39212a8f71e91ff8c017a1b6e22d823d8c1"
