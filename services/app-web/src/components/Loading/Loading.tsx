@@ -16,7 +16,7 @@ export const Loading = ({
         setTimeout(() => {
             setShowLoading(true)
         }, delayMS)
-    }, [])
+    }, [delayMS])
 
     if (!showLoading) {
         return null
