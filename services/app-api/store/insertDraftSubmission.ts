@@ -2,8 +2,9 @@ import { DataMapper } from '@aws/dynamodb-data-mapper'
 import { v4 as uuidv4 } from 'uuid'
 
 import { StoreError, isStoreError } from './storeError'
-import { DraftSubmissionStoreType, isDynamoError } from './dynamoTypes'
+import { DocumentStoreT, DraftSubmissionStoreType, isDynamoError } from './dynamoTypes'
 import {
+    SubmissionDocument,
     DraftSubmissionType,
     SubmissionType,
 } from '../../app-web/src/common-code/domain-models'
@@ -13,6 +14,7 @@ export type InsertDraftSubmissionArgsType = {
     programID: string
     submissionType: SubmissionType
     submissionDescription: string
+    documents: SubmissionDocument[]
 }
 
 // getNextStateNumber returns the next "number" for a submission for a given state. See comments below for more.
@@ -82,6 +84,7 @@ export async function insertDraftSubmission(
     //   * state-num -- this is a transaction. find biggest state-num, add one
     //   * name (state_program_num) -- db? / synthesized
     //   * id -- db/resolver? -- generate a new UUID
+    //   * convert documents SubmissionDocument[] into DocumentStoreT
 
     const draft = new DraftSubmissionStoreType() // you might like that this took input vars, but that seems opposed to how this library works wrt to searching
     draft.id = uuidv4()
@@ -92,6 +95,13 @@ export async function insertDraftSubmission(
     draft.programID = args.programID
     draft.submissionDescription = args.submissionDescription
     draft.stateCode = args.stateCode
+
+   args.documents.forEach ((doc) => {
+        const storeDocument = new DocumentStoreT()
+        storeDocument.name = doc.name
+        storeDocument.url = doc.url
+        draft.documents.push(storeDocument)
+    })
 
     try {
         const stateNumberResult = await getNextStateNumber(

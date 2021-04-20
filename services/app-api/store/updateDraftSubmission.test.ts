@@ -16,6 +16,7 @@ describe('updateDraftSubmission', () => {
             programID: 'MCAC',
             submissionDescription: 'a new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
+            documents: []
         }
 
         try {

@@ -2,7 +2,6 @@
 
 export type SubmissionType = 'CONTRACT_ONLY' | 'CONTRACT_AND_RATES'
 export type SubmissionDocument = {
-    // createdAt: Date
     name: string
     url: string
 }

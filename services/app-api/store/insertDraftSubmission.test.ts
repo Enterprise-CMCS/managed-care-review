@@ -16,6 +16,7 @@ describe('insertDraftSubmission', () => {
             programID: 'MCAC',
             submissionDescription: 'a new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
+            documents: []
         }
 
         try {
@@ -73,6 +74,7 @@ describe('insertDraftSubmission', () => {
             programID: 'MCAC',
             submissionDescription: 'a new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
+            documents: []
         }
 
         try {
@@ -128,6 +130,7 @@ describe('insertDraftSubmission', () => {
             programID: 'MCAC',
             submissionDescription: 'a new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
+            documents: []
         }
 
         const inputINParams = {
@@ -135,6 +138,7 @@ describe('insertDraftSubmission', () => {
             programID: 'INVC',
             submissionDescription: 'a new submission is great',
             submissionType: 'CONTRACT_AND_RATES' as const,
+            documents: []
         }
 
         try {
@@ -220,6 +224,7 @@ describe('insertDraftSubmission', () => {
             programID: 'MCAC',
             submissionDescription: 'a new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
+            documents: []
         }
 
         try {
@@ -289,6 +294,7 @@ describe('insertDraftSubmission', () => {
             programID: 'MCAC',
             submissionDescription: 'a new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
+            documents: []
         }
 
         try {
