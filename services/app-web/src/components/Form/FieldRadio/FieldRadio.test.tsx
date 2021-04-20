@@ -10,7 +10,7 @@ import { Redirect } from 'react-router';
 jest.mock('formik');
 
 describe('FieldRadio component', () => {
-    it('reders without errors', () => {
+    it('renders without errors', () => {
         const mockField = {
             value: '',
             checked: false,
