@@ -9,10 +9,7 @@ import {
     Fieldset,
     Radio,
     FormGroup,
-    Dropdown,
     Link,
-    Label,
-    Textarea,
 } from '@trussworks/react-uswds'
 import {
     Field,
@@ -33,6 +30,8 @@ import {
     useUpdateDraftSubmissionMutation,
 } from '../../gen/gqlClient'
 import { useAuth } from '../../contexts/AuthContext'
+import { FieldTextarea } from '../../components/Form/FieldTextarea/FieldTextarea'
+import { FieldDropdown } from '../../components/Form/FieldDropdown/FieldDropdown'
 import { SubmissionTypeRecord } from '../../constants/submissions'
 
 /*
@@ -82,6 +81,11 @@ export const SubmissionType = ({
     const history = useHistory()
     const location = history.location
     const isNewSubmission = location.pathname === '/submissions/new'
+    const programOptions: Array<{ id: string; label: string }> = programs.map(
+        (program) => {
+            return { id: program.id, label: program.name }
+        }
+    )
 
     const [createDraftSubmission, { error }] = useMutation(
         CreateDraftSubmissionDocument
@@ -222,25 +226,16 @@ export const SubmissionType = ({
                             )}
                             <div className={styles.formContainer}>
                                 <span>All fields are required</span>
-                                <FormGroup className={styles.formGroup}>
-                                    <Label htmlFor="programID">Program</Label>
-                                    <Field
-                                        id="programID"
-                                        name="programID"
-                                        as={Dropdown}
-                                        onChange={handleChange}
-                                        value={values.programID}
-                                    >
-                                        {programs.map((program) => (
-                                            <option
-                                                key={program.id}
-                                                value={program.id}
-                                            >
-                                                {program.name}
-                                            </option>
-                                        ))}
-                                    </Field>
-                                </FormGroup>
+
+                                <FieldDropdown
+                                    id="programID"
+                                    name="programID"
+                                    label="Program"
+                                    showError={showFieldErrors(
+                                        errors.programID
+                                    )}
+                                    options={programOptions}
+                                />
 
                                 <FormGroup className={styles.formGroup}>
                                     <Fieldset legend="Choose submission type">
@@ -289,48 +284,32 @@ export const SubmissionType = ({
                                     </Fieldset>
                                 </FormGroup>
 
-                                <FormGroup className={styles.formGroupLast}>
-                                    <Label htmlFor="submissionDescription">
-                                        Submission description
-                                    </Label>
-                                    {showFieldErrors(
+                                <FieldTextarea
+                                    label="Submission description"
+                                    id="submissionDescription"
+                                    name="submissionDescription"
+                                    showError={showFieldErrors(
                                         errors.submissionDescription
-                                    ) && (
-                                        <ErrorMessage>
-                                            {errors.submissionDescription}
-                                        </ErrorMessage>
                                     )}
+                                    hint={
+                                        <>
+                                            <Link
+                                                variant="nav"
+                                                href={
+                                                    '/help/submission-description-examples'
+                                                }
+                                                target="_blank"
+                                            >
+                                                View description examples
+                                            </Link>
 
-                                    <div
-                                        aria-labelledby="submissionDescription"
-                                        className="usa-hint"
-                                    >
-                                        <Link
-                                            variant="nav"
-                                            href={
-                                                '/help/submission-description-examples'
-                                            }
-                                            target="_blank"
-                                        >
-                                            View description examples
-                                        </Link>
-
-                                        <p>
-                                            Provide a description of any major
-                                            changes or updates
-                                        </p>
-                                    </div>
-                                    <Field
-                                        as={Textarea}
-                                        aria-required
-                                        id="submissionDescription"
-                                        name="submissionDescription"
-                                        value={values.submissionDescription}
-                                        error={showFieldErrors(
-                                            errors.submissionDescription
-                                        )}
-                                    />
-                                </FormGroup>
+                                            <p>
+                                                Provide a description of any
+                                                major changes or updates
+                                            </p>
+                                        </>
+                                    }
+                                />
                             </div>
                             <ButtonGroup
                                 type="default"
