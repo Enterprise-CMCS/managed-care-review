@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import { Spinner } from '@cmsgov/design-system'
+import { Spinner } from '../Spinner/Spinner'
 
 import styles from './Loading.module.scss'
 
-export const Loading = (): React.ReactElement => {
+export const Loading = (): React.ReactElement | null => {
     const [showLoading, setShowLoading] = useState(false)
 
     useEffect(() => {
@@ -12,10 +12,14 @@ export const Loading = (): React.ReactElement => {
         }, 750)
     }, [])
 
+    if (!showLoading) {
+        return null
+    }
+
     return (
-        <>
-            {showLoading && <h2 className={styles.loadingLabel}>Loading...</h2>}
+        <div className={styles.loadingBox}>
+            <h2 className={styles.loadingLabel}>Loading</h2>
             <Spinner />
-        </>
+        </div>
     )
 }
