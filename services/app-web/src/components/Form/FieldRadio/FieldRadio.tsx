@@ -1,5 +1,5 @@
 import React from 'react'
-import { Field, useField } from 'formik'
+import { useField } from 'formik'
 import { Radio, ErrorMessage, FormGroup } from '@trussworks/react-uswds'
 import { options } from 'yargs'
 
@@ -13,54 +13,26 @@ import { options } from 'yargs'
  * ReactUSWDS components directly.
  */
 
-type RadioOption = {
-    id: string
-    label: string
-}
-
 export type FieldRadioProps = {
     name: string
     label: string
-    legend: string
-    showError: boolean
-    error?: string
-    options: RadioOption[]
-    hint?: React.ReactNode
+    id: string
 }
 
 export const FieldRadio = ({
     name,
     label,
-    legend,
-    showError,
-    error,
-    options,
-    hint,
+    id,
     ...inputProps
 }: FieldRadioProps): React.ReactElement => {
     const [field] = useField({ name });
     return (
-        <FormGroup error={showError}>
-            <fieldset className="usa-fieldset">
-                <legend className="usa-legend">{legend}</legend>
-                {showError && <ErrorMessage>{error}</ErrorMessage>}
-                {hint && (
-                    <div className="usa-hint margin-top-1">
-                        {hint}
-                    </div>
-                )}
-                {options &&
-                    options.map(({id, label})=>(
-                        <Radio
-                            key={id} 
-                            id={id} 
-                            label={label}
-                            {...field} 
-                            {...inputProps} 
-                        /> 
-                    ))
-                }
-            </fieldset>
-        </FormGroup>
+        
+        <Radio
+            id={id} 
+            label={label}
+            {...field} 
+            {...inputProps} 
+        /> 
     )
 }

@@ -22,27 +22,6 @@ export const Default = Template.bind({})
 
 Default.args = {
     name: "submissionType",
-    legend: "Choose a submission type",
-    showError: false,
-    options: [{id: "contractOnly", label: "Executed contract action only"}, {id: "contractRate", label: "Executed contract action and signed rate certification"}], 
-}
-
-export const Hint = Template.bind({})
-
-Hint.args = {
-    name: "submissionType",
-    legend: "Choose a submission type",
-    showError: false,
-    options: [{id: "contractOnly", label: "Executed contract action only"}, {id: "contractRate", label: "Executed contract action and signed rate certification"}],
-    hint: <span>This is an example of hint text</span>
-}
-
-export const Error = Template.bind({})
-
-Error.args = {
-    name: "submissionType",
-    legend: "Choose a submission type",
-    showError: true,
-    options: [{id: "contractOnly", label: "Executed contract action only"}, {id: "contractRate", label: "Executed contract action and signed rate certification"}],
-    error: "You must choose a submission type"
+    id: "contractOnly",
+    label: "Executed contract action only"
 }
