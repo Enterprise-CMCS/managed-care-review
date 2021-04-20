@@ -1,0 +1,153 @@
+@import '../../styles/uswdsImports.scss';
+@import '../../styles/custom';
+
+// taken from CMS design system settings
+$multiple: 8px !default;
+
+$spacers: (
+    0,
+    $multiple,
+    $multiple * 2,
+    $multiple * 3,
+    $multiple * 4,
+    $multiple * 5,
+    $multiple * 6,
+    $multiple * 7
+) !default;
+
+$spacer-1: nth($spacers, 2) !default; // 8px
+$spacer-2: nth($spacers, 3) !default; // 16px
+$spacer-3: nth($spacers, 4) !default; // 24px
+$spacer-4: nth($spacers, 5) !default; // 32px
+$spacer-5: nth($spacers, 6) !default; // 40px
+$spacer-6: nth($spacers, 7) !default; // 48px
+$spacer-7: nth($spacers, 8) !default; // 56px
+$spacer-half: $spacer-1 / 2; // 4px
+
+// From CMS _animation
+$ease-in-out-expo: cubic-bezier(1, 0, 0, 1) !default;
+
+// Changing the base to a larger number will slow down all animations.
+// This can be useful when debugging animations.
+$speed-base: 1 !default;
+// 250ms is the quickest an animation can be for it to even be noticeable
+$animation-speed-1: 0.25s * $speed-base !default;
+$animation-speed-2: 0.3s * $speed-base !default;
+$animation-speed-3: 0.5s * $speed-base !default;
+$animation-speed-4: 0.8s * $speed-base !default;
+
+// CMS inlineIcon
+
+@mixin inline-icon {
+    fill: currentColor;
+    height: 1em;
+    margin-bottom: -0.1em; // apply negative margin so icon doesn't affect height
+    margin-top: -0.1em;
+    position: relative;
+    top: -0.1em;
+    vertical-align: middle;
+    width: 1em;
+}
+
+// CMS Colors
+
+.ds-u-fill--background-inverse {
+    background-color: $cms-color-primary !important;
+}
+
+.ds-u-color--base-inverse:not(:focus) {
+    color: $cms-color-white !important;
+}
+
+// Below is all from the CMS Design system for the spinner
+
+@mixin spinner-size($inner-size, $outer-size) {
+    height: $outer-size;
+    width: $outer-size;
+    $padding: (($outer-size - $inner-size) / 2);
+
+    &::before,
+    &::after {
+        border-width: ($inner-size / 8);
+        height: $inner-size;
+        left: $padding;
+        top: $padding;
+        width: $inner-size;
+    }
+}
+
+.spinnerBasic {
+    color: red;
+}
+
+.ds-c-spinner {
+    @include spinner-size($spacer-4, $spacer-4);
+    box-sizing: border-box;
+    display: inline-block;
+    position: relative;
+
+    &::before,
+    &::after {
+        border-radius: 50%;
+        border-style: solid;
+        box-sizing: border-box;
+        content: '';
+        display: block;
+        left: 0;
+        position: absolute;
+        top: 0;
+    }
+
+    &::before {
+        border-color: inherit;
+        opacity: 0.2;
+    }
+
+    &::after {
+        animation: spin $animation-speed-4 infinite linear;
+        border-bottom-color: transparent;
+        border-left-color: inherit;
+        border-right-color: transparent;
+        border-top-color: transparent;
+        transform: translateZ(0);
+    }
+
+    .ds-c-button > & {
+        @include inline-icon;
+        @include spinner-size(1em, 1em);
+    }
+}
+
+.ds-c-spinner--filled {
+    @include spinner-size($spacer-4, $spacer-6);
+    background-color: $cms-color-white; // $color-background;
+    border-radius: 50%;
+    color: $cms-color-primary; // $color-base;
+    height: $spacer-6;
+    width: $spacer-6;
+}
+
+.ds-c-spinner--small {
+    @include spinner-size($spacer-2, $spacer-2);
+
+    &.ds-c-spinner--filled {
+        @include spinner-size($spacer-2, $spacer-3);
+    }
+}
+
+.ds-c-spinner--big {
+    @include spinner-size($spacer-5, $spacer-5);
+
+    &.ds-c-spinner--filled {
+        @include spinner-size($spacer-5, $spacer-7);
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
