@@ -27,7 +27,7 @@ export type TextAreaProps = {
     name: string
 } & JSX.IntrinsicElements['textarea']
 
-export const FormTextarea = ({
+export const FieldTextarea = ({
     label,
     id,
     hint,
@@ -36,13 +36,15 @@ export const FormTextarea = ({
     name,
     ...inputProps
 }: TextAreaProps): React.ReactElement => {
-    const [field] = useField({ name })
+    const [field, meta] = useField({ name })
     return (
         <FormGroup error={showError}>
             <Label htmlFor={id} error={showError}>
                 {label}
             </Label>
-            {showError && <ErrorMessage>{error}</ErrorMessage>}
+            {showError && meta.error && (
+                <ErrorMessage>{meta.error}</ErrorMessage>
+            )}
             {hint && (
                 <div aria-labelledby={id} className="usa-hint margin-top-1">
                     {hint}
