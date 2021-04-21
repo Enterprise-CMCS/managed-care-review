@@ -37,26 +37,6 @@ describe('StateSubmissionForm', () => {
         expect(heading).toBeInTheDocument()
     })
 
-    it('shows a loading screen before data comes', () => {
-        renderWithProviders(
-            <Route
-                path={RoutesRecord.SUBMISSIONS_FORM}
-                component={StateSubmissionForm}
-            />,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        fetchDraftSubmissionMock({ id: '15', statusCode: 200 }),
-                    ],
-                },
-                routerProvider: { route: '/submissions/15/type' },
-            }
-        )
-        const loading = screen.getByText('Loading...')
-        expect(loading).toBeInTheDocument()
-    })
-
     it('shows an error screen if theres an error', async () => {
         renderWithProviders(
             <Route
@@ -151,6 +131,7 @@ describe('StateSubmissionForm', () => {
                                 submissionDescription:
                                     'A real submissionan updated something',
                                 programID: 'snbc',
+                                documents: [],
                             },
                             statusCode: 200,
                         }),

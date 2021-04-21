@@ -1,8 +1,11 @@
 @import '../../styles/uswdsImports.scss';
 @import '../../styles/custom';
 
-.loadingLabel {
+.loadingBox {
     margin-top: 10vh;
     text-align: center;
-    color: gray;
+}
+
+.loadingLabel {
+    margin-bottom: units(2);
 }

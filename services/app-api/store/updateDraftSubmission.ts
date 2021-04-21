@@ -1,7 +1,7 @@
 import { DataMapper } from '@aws/dynamodb-data-mapper'
 
 import { StoreError } from './storeError'
-import { DraftSubmissionStoreType, isDynamoError } from './dynamoTypes'
+import { DocumentStoreT, DraftSubmissionStoreType, isDynamoError } from './dynamoTypes'
 
 import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
 
@@ -10,7 +10,7 @@ export async function updateDraftSubmission(
     draftSubmission: DraftSubmissionType
 ): Promise<DraftSubmissionType | StoreError> {
     const storeDraft = new DraftSubmissionStoreType()
-
+    
     storeDraft.id = draftSubmission.id
     storeDraft.createdAt = draftSubmission.createdAt
     storeDraft.updatedAt = new Date()
@@ -23,6 +23,13 @@ export async function updateDraftSubmission(
     storeDraft.submissionType = draftSubmission.submissionType
     storeDraft.programID = draftSubmission.programID
     storeDraft.submissionDescription = draftSubmission.submissionDescription
+    
+    draftSubmission.documents.forEach ((doc) => {
+        const storeDocument = new DocumentStoreT()
+        storeDocument.name = doc.name
+        storeDocument.url = doc.url
+        storeDraft.documents.push(storeDocument)
+    })
 
     try {
         const putResult = await mapper.put(storeDraft)

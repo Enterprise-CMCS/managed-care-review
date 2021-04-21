@@ -3,8 +3,9 @@ import { screen, render } from '@testing-library/react'
 import { Loading } from './Loading'
 
 describe('Loading component', () => {
-    it('renders without errors', () => {
-        render(<Loading />)
-        expect(screen.getByText(/Loading/i)).toBeInTheDocument()
+    it('renders without errors', async () => {
+        render(<Loading delayMS={0} />)
+
+        expect(await screen.findByText('Loading')).toBeInTheDocument()
     })
 })

@@ -37,6 +37,7 @@ import { SubmissionTypeRecord } from '../../constants/submissions'
     Add focus to "first" form element that is invalid when errors exist
     Approx order of form inputs is determined by the Formik schema
 */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const FormikFocusOnErrors = () => {
     const { errors } = useFormikContext()
     const errorKeys = Object.keys(errors)
@@ -149,6 +150,7 @@ export const SubmissionType = ({
                 programID: values.programID,
                 submissionType: values.submissionType as SubmissionTypeT,
                 submissionDescription: values.submissionDescription,
+                documents: [],
             }
 
             try {
@@ -344,7 +346,7 @@ export const SubmissionType = ({
                                 </Button>
                             </ButtonGroup>
                         </fieldset>
-                        <FormikFocusOnErrors />
+                        {/* <FormikFocusOnErrors /> */}
                     </UswdsForm>
                 </>
             )}

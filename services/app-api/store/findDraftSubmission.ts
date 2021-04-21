@@ -19,7 +19,6 @@ export async function findDraftSubmission(
                 id: draftUUID,
             })
         )
-
         return getResult
     } catch (err) {
         if (isMapperError(err)) {

@@ -5,7 +5,7 @@ import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraft
 import FETCH_DRAFT_SUBMISSION from '../../app-graphql/src/queries/fetchDraftSubmission.graphql'
 import { constructTestServer } from '../testHelpers/gqlHelpers'
 
-describe('createDraftSubmission', () => {
+describe('fetchDraftSubmission', () => {
     it('returns draft submission payload with a draft submission', async () => {
         const server = constructTestServer()
 
@@ -36,11 +36,12 @@ describe('createDraftSubmission', () => {
         })
 
         expect(result.errors).toBeUndefined()
-
+       
         const resultDraft = result.data.fetchDraftSubmission.draftSubmission
         expect(resultDraft.id).toEqual(createdID)
         expect(resultDraft.program.id).toEqual('smmc')
         expect(resultDraft.submissionDescription).toEqual('A real submission')
+        expect(resultDraft.documents).toEqual([])
     })
 
     it('returns null if the ID does not exist', async () => {
