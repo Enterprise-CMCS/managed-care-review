@@ -39,6 +39,7 @@ const mockDraftSubmission: DraftSubmission = {
     name: 'MN-MSHO-0001',
     submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
     submissionDescription: 'A real submission',
+    documents: [],
 }
 
 type fetchCurrentUserMockProps = {

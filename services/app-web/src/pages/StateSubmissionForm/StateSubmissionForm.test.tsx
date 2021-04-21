@@ -151,6 +151,7 @@ describe('StateSubmissionForm', () => {
                                 submissionDescription:
                                     'A real submissionan updated something',
                                 programID: 'snbc',
+                                documents: [],
                             },
                             statusCode: 200,
                         }),
