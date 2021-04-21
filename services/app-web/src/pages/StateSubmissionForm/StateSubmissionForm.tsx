@@ -56,20 +56,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
         return <Error404 />
     }
 
-    // temporary s3 uploads func.
-    const fakeApiRequest = (success: boolean): Promise<void> => {
-        const timeout = Math.round(Math.random() * 4000 + 1000)
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                if (success) {
-                    resolve()
-                } else {
-                    reject(new Error('Error'))
-                }
-            }, timeout)
-        })
-    }
-
     return (
         <GridContainer>
             <Switch>
