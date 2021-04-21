@@ -12,6 +12,7 @@ import { RoutesRecord } from '../../constants/routes'
 import { StateSubmissionForm } from '../StateSubmissionForm/StateSubmissionForm'
 import { NewStateSubmissionForm } from '../StateSubmissionForm/NewStateSubmissionForm'
 import { SubmissionDescriptionExamples } from '../Help/SubmissionDescriptionExamples'
+import { S3Test } from '../S3Test/S3Test'
 import { useTitle } from '../../hooks/useTitle'
 import { getRouteName, PageTitlesRecord } from '../../constants/routes'
 
@@ -71,6 +72,9 @@ export const AppRoutes = ({
                     path={RoutesRecord.HELP_SUBMISSION_DESCRIPTION}
                     component={SubmissionDescriptionExamples}
                 />
+                <Route path="/dev/s3test">
+                    <S3Test />
+                </Route>
                 <Route path="*" component={Error404} />
             </Switch>
         )
