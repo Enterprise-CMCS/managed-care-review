@@ -4,7 +4,7 @@ import { CreateDraftSubmissionInput, SubmissionType } from '../gen/gqlServer'
 import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
 import UPDATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/updateDraftSubmission.graphql'
 import FETCH_DRAFT_SUBMISSION from '../../app-graphql/src/queries/fetchDraftSubmission.graphql'
-import { constructTestServer, createTestDraftSubmission } from '../testHelpers/gqlHelpers'
+import { constructTestServer, createTestDraftSubmission, fetchTestDraftSubmissionById } from '../testHelpers/gqlHelpers'
 
 describe('updateDraftSubmission', () => {
     it('updates a submission if the state matches', async () => {
@@ -37,19 +37,8 @@ describe('updateDraftSubmission', () => {
 
         expect(updateResult.errors).toBeUndefined()
 
-        // TEST: Finally, fetch and see if that works
-        const input = {
-            submissionID: createdID,
-        }
+        const resultDraft = await fetchTestDraftSubmissionById(query, createdID)
 
-        const result = await query({
-            query: FETCH_DRAFT_SUBMISSION,
-            variables: { input },
-        })
-
-        expect(result.errors).toBeUndefined()
-
-        const resultDraft = result.data.fetchDraftSubmission.draftSubmission
         expect(resultDraft.id).toEqual(createdID)
         expect(resultDraft.submissionType).toEqual('CONTRACT_AND_RATES')
         expect(resultDraft.program.id).toEqual('cnet')
@@ -100,22 +89,9 @@ describe('updateDraftSubmission', () => {
 
         expect(updateResult.errors).toBeUndefined()
 
-        // TEST: fetch and see if that works
-        const input = {
-            submissionID: createdID,
-        }
-
-        const result = await query({
-            query: FETCH_DRAFT_SUBMISSION,
-            variables: { input },
-        })
-
-        expect(result.errors).toBeUndefined()
-
-        const resultDraft = result.data.fetchDraftSubmission.draftSubmission
-
-        expect(resultDraft.id).toEqual(createdID)
-        expect(resultDraft.documents).toEqual([ {
+        const resultDraft1 = updateResult.data.updateDraftSubmission.draftSubmission
+        expect(resultDraft1.id).toEqual(createdID)
+        expect(resultDraft1.documents).toEqual([ {
             name: 'myfile.pdf',
             url: 'https://www.example.com'
         }])
@@ -183,18 +159,7 @@ describe('updateDraftSubmission', () => {
 
         expect(updateResult.errors).toBeUndefined()
 
-        // TEST: fetch and see if that works
-        const input = {
-            submissionID: createdID,
-        }
-
-        const result = await query({
-            query: FETCH_DRAFT_SUBMISSION,
-            variables: { input },
-        })
-
-        expect(result.errors).toBeUndefined()
-        const resultDraft = result.data.fetchDraftSubmission.draftSubmission
+        const resultDraft = await fetchTestDraftSubmissionById(query, createdID)
         expect(resultDraft.id).toEqual(createdID)
         expect(resultDraft.documents).toEqual([ {
             name: 'myfile.pdf',
