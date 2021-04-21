@@ -32,6 +32,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext'
 import { FieldTextarea } from '../../components/Form/FieldTextarea/FieldTextarea'
 import { FieldDropdown } from '../../components/Form/FieldDropdown/FieldDropdown'
+import { FieldRadio } from '../../components/Form/FieldRadio/FieldRadio'
 import { SubmissionTypeRecord } from '../../constants/submissions'
 
 /*
@@ -236,7 +237,9 @@ export const SubmissionType = ({
                                     options={programOptions}
                                 />
 
-                                <FormGroup className={styles.formGroup}>
+                                <FormGroup error={showFieldErrors(
+                                            errors.submissionType
+                                        )}>
                                     <Fieldset legend="Choose submission type">
                                         {showFieldErrors(
                                             errors.submissionType
@@ -245,8 +248,7 @@ export const SubmissionType = ({
                                                 {errors.submissionType}
                                             </ErrorMessage>
                                         )}
-                                        <Field
-                                            as={Radio}
+                                        <FieldRadio
                                             aria-required
                                             checked={
                                                 values.submissionType ===
@@ -261,8 +263,7 @@ export const SubmissionType = ({
                                             }
                                             value={SubmissionTypeT.ContractOnly}
                                         />
-                                        <Field
-                                            as={Radio}
+                                        <FieldRadio
                                             aria-required
                                             checked={
                                                 values.submissionType ===
