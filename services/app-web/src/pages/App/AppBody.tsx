@@ -19,27 +19,7 @@ export function AppBody({
     const [alert, setAlert] = React.useState<React.ReactElement | undefined>(
         undefined
     )
-    const [showLoading, setShowLoading] = React.useState<
-        'NOT_LOADING' | 'WAITING' | 'SHOW_LOADING'
-    >('NOT_LOADING')
     const { loginStatus } = useAuth()
-
-    // we have a loading text/icon, but we only want to display it if we've been loading for longer than .7 seconds
-    // if we load faster than that, let's not tell anyone we were loading
-    if (showLoading === 'NOT_LOADING' && loginStatus === 'LOADING') {
-        setShowLoading('WAITING')
-        setTimeout(() => {
-            setShowLoading((actualShowLoading) => {
-                return actualShowLoading === 'WAITING'
-                    ? 'SHOW_LOADING'
-                    : actualShowLoading
-            })
-        }, 700)
-    }
-
-    if (loginStatus !== 'LOADING' && showLoading !== 'NOT_LOADING') {
-        setShowLoading('NOT_LOADING')
-    }
 
     return (
         <div id="App" className={styles.app}>
@@ -52,7 +32,7 @@ export function AppBody({
             <main id="main-content" className={styles.mainContent} role="main">
                 {alert && alert}
                 {loginStatus === 'LOADING' ? (
-                    showLoading === 'SHOW_LOADING' && <Loading />
+                    <Loading />
                 ) : (
                     <AppRoutes authMode={authMode} />
                 )}
