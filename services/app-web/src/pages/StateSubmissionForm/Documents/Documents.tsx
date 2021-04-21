@@ -1,155 +1,176 @@
-import React, { useState, useRef } from 'react'
-import { GridContainer } from '@trussworks/react-uswds'
-import PageHeading from '../../../components/PageHeading'
+import React, { useEffect, useState } from 'react'
 import {
-    ErrorMessage,
-    FormGroup,
-    Label,
-    FileInput,
+    GridContainer,
+    Form,
+    Button,
+    ButtonGroup,
+    Alert,
+    Link,
 } from '@trussworks/react-uswds'
-import { FileItemT } from '../../../sandbox/FileItem'
-import { FileItemsList } from '../../../sandbox/FileItemsList'
+import { NavLink } from 'react-router-dom'
 
-type DocumentUploadProps = {
-    id: string
-    name: string
-    // TODO: Refine types for real api calls
-    uploadS3Files: () => Promise<void>
-    deleteS3Files: () => Promise<void>
-    onLoadComplete: ({ files }: { files: FileItemT[] }) => void
-}
+import styles from '../StateSubmissionForm.module.scss'
+import {
+    DraftSubmission,
+    useUpdateDraftSubmissionMutation,
+} from '../../../gen/gqlClient'
+import PageHeading from '../../../components/PageHeading'
+import { FileUpload } from '../../../components/FileUpload/FileUpload'
+import { FileItemT } from '../../../components/FileUpload/FileItem'
 
 /* 
-    Document Upload. Handles async upload of document files to S3 and displaying in line errors. 
-
-    TODO: Refactor asyncS3Upload to use Promise.all
-    TODO: Disallow file upload of the same name
-    TODO: Disallow files that are not doc file type
-    TODO: Implement inline error handling (when a specific file item fails to upload)
-    TODO: Style fix for many items in list or items have long document titles
-    TODO: Check thoroughly for accessibility 
+    Documents should error alerts for overall errors related to invalid documents for a submission, including no files added.
+    Inline errors, specific to the individual files as they upload,  should be handled in FileUpload. 
 */
 
+type DocumentProps = {
+    showValidations?: boolean
+    draftSubmission: DraftSubmission
+}
+
 export const Documents = ({
-    id,
-    name,
-    uploadS3Files,
-    deleteS3Files,
-    onLoadComplete,
-    ...props
-}: DocumentUploadProps): React.ReactElement => {
-    const [fieldError, setFieldError] = useState<string | null>(null)
-    const [fileItems, setFileItems] = useState<FileItemT[]>([])
-    const fileInputRef = useRef<HTMLInputElement>(null) // reference to the overall input
-    /*  
-        This component rewrites the FileInput key whenever user adds a new file to force re-render. 
-        Changing the key ensure we clears the input immediately and display our FileItemList in favor of built-in react-uswds FilePreview list.\
-        The key is a React.Key, should be a unique number
-    */
-    const fileInputKey = useRef(Math.random())
+    showValidations,
+    draftSubmission,
+}: DocumentProps): React.ReactElement => {
+    const [shouldValidate, setShouldValidate] = useState(showValidations)
+    const [hasValidFiles, setHasValidFiles] = useState(false)
+    const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
 
-    const generateFileItems = (fileList: FileList) => {
-        const fileItems: FileItemT[] = []
-        for (let i = 0; i < fileList?.length; i++) {
-            fileItems.push({
-                id: fileList[i].name,
-                name: fileList[i].name,
-                url: window.URL.createObjectURL(fileList[i]),
-                status: 'PENDING',
-            })
-        }
-        return fileItems
+    const [
+        updateDraftSubmission,
+        { error: updateError },
+    ] = useUpdateDraftSubmissionMutation()
+
+    useEffect(() => {
+        const hasNoPendingFiles: boolean = fileItems.every(
+            (item) => item.status !== 'PENDING'
+        )
+
+        const hasValidFiles: boolean =
+            fileItems.length > 0 &&
+            hasNoPendingFiles &&
+            fileItems.some(
+                (item) =>
+                    item.status === 'UPLOAD_COMPLETE' ||
+                    item.status === 'SAVED_TO_SUBMISSION'
+            )
+        setHasValidFiles(hasValidFiles)
+    }, [fileItems])
+
+    const showError = (error: string) => {
+        if (!shouldValidate) setShouldValidate(true)
+        console.log('Error', error)
     }
 
-    const deleteItem = (id: string) => {
-        setFileItems((prevItems) => prevItems.filter((item) => item.id !== id))
-        deleteS3Files().catch(() => console.log('error deleting from s3'))
+    if (updateError) {
+        showError('Apollo error')
+        console.log(updateError)
     }
 
-    const asyncS3Upload = (items: FileItemT[]) => {
-        items.forEach((item) => {
-            uploadS3Files()
-                .then(() => {
-                    console.log('uploaded')
-                    setFileItems((prevItems) => {
-                        const newItems = [...prevItems]
-                        return newItems.map((current) => {
-                            if (current.id === item.id) {
-                                return {
-                                    ...item,
-                                    status: 'UPLOAD_COMPLETE',
-                                } as FileItemT
-                            } else {
-                                return current
-                            }
-                        })
-                    })
-                })
-                .catch((e) => {
-                    console.log('hello')
-                    setFileItems((prevItems) => {
-                        const newItems = [...prevItems]
-                        return newItems.map((current) => {
-                            if (current.id === item.id) {
-                                return {
-                                    ...item,
-                                    status: 'UPLOAD_ERROR',
-                                } as FileItemT
-                            } else {
-                                return current
-                            }
-                        })
-                    })
-                    setFieldError(
-                        'Some files have failed to upload, please retry.'
-                    )
-                })
-                .finally(() => {
-                    console.log('upload complete')
-                })
+    const onLoadComplete = ({ files }: { files: FileItemT[] }) => {
+        setFileItems(files)
+    }
+
+    const fakeS3Request = (success: boolean): Promise<void> => {
+        const timeout = Math.round(Math.random() * 4000 + 1000)
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                if (success) {
+                    resolve()
+                } else {
+                    reject(new Error('Error'))
+                }
+            }, timeout)
         })
     }
 
-    const handleFileInputChangeOrDrop = (
-        e: React.DragEvent | React.ChangeEvent
-    ): void => {
-        console.log('HANDING CHANGE', e)
+    const handleFormSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setShouldValidate(true)
+        const documents = fileItems.map((file) => {
+            if (!file.url)
+                throw Error(
+                    'The file has no url, this should not happen onSubmit'
+                )
+            return {
+                name: file.name,
+                url: file.url,
+            }
+        })
 
-        if (!fileInputRef?.current?.files) return
-        setFieldError(null)
+        const updatedDraft = {
+            programID: draftSubmission.programID,
+            submissionType: draftSubmission.submissionType,
+            submissionDescription: draftSubmission.submissionDescription,
+            documents,
+        }
 
-        console.log('no err', fileInputRef.current)
-        console.log('no err', fileInputRef.current.files)
+        try {
+            const data = await updateDraftSubmission({
+                variables: {
+                    input: {
+                        submissionID: draftSubmission.id,
+                        draftSubmissionUpdates: updatedDraft,
+                    },
+                },
+            })
 
-        const items = generateFileItems(fileInputRef.current.files)
-        fileInputKey.current = Math.random()
-        setFileItems((array) => [...array, ...items])
-        asyncS3Upload(items)
+            if (data.errors) {
+                showError('gql errors have occurred')
+                console.log(data.errors)
+            }
+
+            // history.push(
+            //     `/submissions/${draftSubmission.id}/review-and-submit`
+            // )
+        } catch (error) {
+            showError(error)
+        }
     }
-
     return (
         <GridContainer>
             <PageHeading headingLevel="h2"> Documents </PageHeading>
-            <FormGroup>
-                <Label htmlFor={id}>Input accepts any kind of document</Label>
-                <span className="usa-hint" id={`${id}-hint`}>
-                    Select any type of document
-                </span>
-                {fieldError && (
-                    <ErrorMessage id={`${id}-error`}>{fieldError}</ErrorMessage>
+            <Form className="usa-form--large" onSubmit={handleFormSubmit}>
+                {shouldValidate && !hasValidFiles && (
+                    <Alert
+                        type="error"
+                        heading="Oops! Something went wrong. Invalid files or no files"
+                    />
                 )}
-                <FileInput
-                    key={fileInputKey.current}
-                    id={id}
-                    name={name}
-                    aria-describedby={`${id}-error ${id}-hint`}
-                    multiple
-                    onChange={handleFileInputChangeOrDrop}
-                    onDrop={handleFileInputChangeOrDrop}
-                    inputRef={fileInputRef}
+                <FileUpload
+                    id="documents"
+                    name="documents"
+                    label="Upload Documents"
+                    uploadS3Files={() => fakeS3Request(true)}
+                    deleteS3Files={() => fakeS3Request(true)}
+                    onLoadComplete={onLoadComplete}
                 />
-                <FileItemsList deleteItem={deleteItem} fileItems={fileItems} />
-            </FormGroup>
+
+                <ButtonGroup type="default" className={styles.buttonGroup}>
+                    <Button
+                        type="button"
+                        secondary
+                        onClick={() => setShouldValidate(!hasValidFiles)}
+                    >
+                        Test Validation
+                    </Button>
+                    <Link
+                        asCustom={NavLink}
+                        className="usa-button usa-button--outline"
+                        variant="unstyled"
+                        to="/dashboard"
+                    >
+                        Cancel
+                    </Link>
+                    <Button
+                        type="submit"
+                        secondary={shouldValidate && !hasValidFiles}
+                        // disabled={shouldValidate && !hasValidFiles}
+                    >
+                        Continue
+                    </Button>
+                </ButtonGroup>
+            </Form>
         </GridContainer>
     )
 }

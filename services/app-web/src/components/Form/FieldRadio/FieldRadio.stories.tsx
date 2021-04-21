@@ -5,23 +5,22 @@ import { FieldRadio, FieldRadioProps } from './FieldRadio'
 
 export default {
     title: 'Components/Forms/FieldRadio',
-    component: FieldRadio
+    component: FieldRadio,
 }
 
-const Template: Story<FieldRadioProps> = 
-(args) => (
+const Template: Story<FieldRadioProps> = (args) => (
     <Formik
-        initialValues={{input1: ''}}
-        onSubmit={e => console.log('submitted')}
+        initialValues={{ input1: '' }}
+        onSubmit={(e) => console.log('submitted')}
     >
-        <FieldRadio {...args}/>
+        <FieldRadio {...args} />
     </Formik>
 )
 
 export const Default = Template.bind({})
 
 Default.args = {
-    name: "submissionType",
-    id: "contractOnly",
-    label: "Executed contract action only"
+    name: 'submissionType',
+    id: 'contractOnly',
+    label: 'Executed contract action only',
 }

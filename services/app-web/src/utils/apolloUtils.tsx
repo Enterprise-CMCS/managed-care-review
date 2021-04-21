@@ -26,7 +26,7 @@ const mockValidUser: UserType = {
     email: 'bob@dmas.mn.gov',
 }
 
-const mockDraftSubmission: DraftSubmission = {
+export const mockDraftSubmission: DraftSubmission = {
     createdAt: new Date(),
     updatedAt: new Date(),
     id: 'test-abc-123',
@@ -155,7 +155,6 @@ type updateDraftSubmissionMockProps = {
 }
 
 const updateDraftSubmissionMock = ({
-    draftSubmission = mockDraftSubmission,
     id,
     updates,
     statusCode, // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -176,7 +175,7 @@ const updateDraftSubmissionMock = ({
                 result: {
                     data: {
                         updateDraftSubmission: {
-                            draftSubmission,
+                            draftSubmission: updates,
                         },
                     },
                 },

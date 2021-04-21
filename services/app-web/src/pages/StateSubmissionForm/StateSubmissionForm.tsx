@@ -84,13 +84,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     component={ContractDetails}
                 />
                 <Route path={RoutesRecord.SUBMISSIONS_DOCUMENTS}>
-                    <Documents
-                        id="23"
-                        name="foobar"
-                        uploadS3Files={() => fakeApiRequest(true)}
-                        deleteS3Files={() => Promise.resolve()}
-                        onLoadComplete={() => Promise.resolve()}
-                    />
+                    <Documents draftSubmission={draft} />
                 </Route>
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
