@@ -31,7 +31,6 @@ export function createDraftSubmissionResolver(
             programID: input.programID,
             submissionDescription: input.submissionDescription,
             submissionType: input.submissionType as InsertDraftSubmissionArgsType['submissionType'],
-            documents: input.documents as InsertDraftSubmissionArgsType['documents']
         }
 
         try {

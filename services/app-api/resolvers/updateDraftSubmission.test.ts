@@ -17,7 +17,6 @@ describe('updateDraftSubmission', () => {
             programID: 'smmc',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A created submission',
-            documents: []
         }
         const createResult = await mutate({
             mutation: CREATE_DRAFT_SUBMISSION,
@@ -86,7 +85,7 @@ describe('updateDraftSubmission', () => {
         ).toBeGreaterThan(0)
     })
 
-    it.only('updates a submission to have documents', async () => {
+    it('updates a submission to have documents', async () => {
         const server = constructTestServer()
 
         const { query, mutate } = createTestClient(server)
@@ -96,7 +95,6 @@ describe('updateDraftSubmission', () => {
             programID: 'smmc',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A created submission',
-            documents: []
         }
         const createResult = await mutate({
             mutation: CREATE_DRAFT_SUBMISSION,
@@ -240,7 +238,6 @@ describe('updateDraftSubmission', () => {
             programID: 'smmc',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A created submission',
-            documents: []
         }
         const createResult = await mutate({
             mutation: CREATE_DRAFT_SUBMISSION,
@@ -304,8 +301,7 @@ describe('updateDraftSubmission', () => {
         const createInput: CreateDraftSubmissionInput = {
             programID: 'smmc',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
-            submissionDescription: 'A created submission',
-            documents: []
+            submissionDescription: 'A created submission'
         }
         const createResult = await mutate({
             mutation: CREATE_DRAFT_SUBMISSION,

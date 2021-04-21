@@ -16,7 +16,6 @@ describe('insertDraftSubmission', () => {
             programID: 'MCAC',
             submissionDescription: 'a new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
-            documents: []
         }
 
         try {
@@ -47,6 +46,7 @@ describe('insertDraftSubmission', () => {
                 )
                 expect(getResult.stateCode).toEqual('FL')
                 expect(getResult.programID).toEqual('MCAC')
+                expect(getResult.documents).toEqual([])
 
                 expect(Date.now() - getResult.createdAt.valueOf()).toBeLessThan(
                     2000
@@ -74,7 +74,6 @@ describe('insertDraftSubmission', () => {
             programID: 'MCAC',
             submissionDescription: 'a new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
-            documents: []
         }
 
         try {
@@ -130,7 +129,6 @@ describe('insertDraftSubmission', () => {
             programID: 'MCAC',
             submissionDescription: 'a new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
-            documents: []
         }
 
         const inputINParams = {
@@ -138,7 +136,6 @@ describe('insertDraftSubmission', () => {
             programID: 'INVC',
             submissionDescription: 'a new submission is great',
             submissionType: 'CONTRACT_AND_RATES' as const,
-            documents: []
         }
 
         try {
@@ -224,7 +221,6 @@ describe('insertDraftSubmission', () => {
             programID: 'MCAC',
             submissionDescription: 'a new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
-            documents: []
         }
 
         try {
@@ -294,7 +290,6 @@ describe('insertDraftSubmission', () => {
             programID: 'MCAC',
             submissionDescription: 'a new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
-            documents: []
         }
 
         try {

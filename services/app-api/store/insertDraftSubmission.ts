@@ -2,9 +2,8 @@ import { DataMapper } from '@aws/dynamodb-data-mapper'
 import { v4 as uuidv4 } from 'uuid'
 
 import { StoreError, isStoreError } from './storeError'
-import { DocumentStoreT, DraftSubmissionStoreType, isDynamoError } from './dynamoTypes'
+import { DraftSubmissionStoreType, isDynamoError } from './dynamoTypes'
 import {
-    SubmissionDocument,
     DraftSubmissionType,
     SubmissionType,
 } from '../../app-web/src/common-code/domain-models'
@@ -14,7 +13,6 @@ export type InsertDraftSubmissionArgsType = {
     programID: string
     submissionType: SubmissionType
     submissionDescription: string
-    documents: SubmissionDocument[]
 }
 
 // getNextStateNumber returns the next "number" for a submission for a given state. See comments below for more.
@@ -95,13 +93,7 @@ export async function insertDraftSubmission(
     draft.programID = args.programID
     draft.submissionDescription = args.submissionDescription
     draft.stateCode = args.stateCode
-
-   args.documents.forEach ((doc) => {
-        const storeDocument = new DocumentStoreT()
-        storeDocument.name = doc.name
-        storeDocument.url = doc.url
-        draft.documents.push(storeDocument)
-    })
+    draft.documents = []
 
     try {
         const stateNumberResult = await getNextStateNumber(

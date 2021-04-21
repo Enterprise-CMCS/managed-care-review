@@ -16,11 +16,6 @@ describe('fetchDraftSubmission', () => {
             programID: 'smmc',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A real submission',
-            documents:[
-                {
-                name: 'testdoc.pdf',
-                url: 'https://www.example.com'
-            }]
         }
         const createResult = await mutate({
             mutation: CREATE_DRAFT_SUBMISSION,
@@ -46,13 +41,7 @@ describe('fetchDraftSubmission', () => {
         expect(resultDraft.id).toEqual(createdID)
         expect(resultDraft.program.id).toEqual('smmc')
         expect(resultDraft.submissionDescription).toEqual('A real submission')
-        expect(resultDraft.documents.length).toEqual(1)
-        expect(resultDraft.documents[0]).toEqual(expect.objectContaining(
-            {
-                name: 'testdoc.pdf',
-                url: 'https://www.example.com'
-            }
-        ))
+        expect(resultDraft.documents).toEqual([])
     })
 
     it('returns null if the ID does not exist', async () => {
@@ -84,7 +73,6 @@ describe('fetchDraftSubmission', () => {
             programID: 'smmc',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A real submission',
-            documents: []
         }
         const createResult = await mutate({
             mutation: CREATE_DRAFT_SUBMISSION,
@@ -133,7 +121,6 @@ describe('fetchDraftSubmission', () => {
             programID: 'smmc',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A real submission',
-            documents: []
         }
         const createResult = await mutate({
             mutation: CREATE_DRAFT_SUBMISSION,

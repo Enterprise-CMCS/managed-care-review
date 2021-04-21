@@ -1,6 +1,5 @@
 import { DraftSubmissionStoreType } from './dynamoTypes'
 import { getTestStore, getTestDynamoMapper } from '../testHelpers/storeHelpers'
-import { storeWithDynamoConfig } from './store'
 
 import { isStoreError } from './storeError'
 

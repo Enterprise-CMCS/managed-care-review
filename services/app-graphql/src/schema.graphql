@@ -23,7 +23,6 @@ input CreateDraftSubmissionInput {
     programID: ID!
     submissionType: SubmissionType!
     submissionDescription: String!
-    documents: [DocumentInput!]!
 }
 
 type CreateDraftSubmissionPayload {

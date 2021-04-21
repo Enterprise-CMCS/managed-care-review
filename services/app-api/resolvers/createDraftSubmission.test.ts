@@ -14,7 +14,6 @@ describe('createDraftSubmission', () => {
             programID: 'smmc',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A real submission',
-            documents: []
         }
         const res = await mutate({
             mutation: CREATE_DRAFT_SUBMISSION,
@@ -43,7 +42,6 @@ describe('createDraftSubmission', () => {
             programID: 'xyz123',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A real submission',
-            documents: []
         }
         const res = await mutate({
             mutation: CREATE_DRAFT_SUBMISSION,
