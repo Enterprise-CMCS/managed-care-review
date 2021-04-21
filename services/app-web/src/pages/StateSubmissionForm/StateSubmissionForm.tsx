@@ -56,6 +56,20 @@ export const StateSubmissionForm = (): React.ReactElement => {
         return <Error404 />
     }
 
+    // temporary s3 uploads func.
+    const fakeApiRequest = (success: boolean): Promise<void> => {
+        const timeout = Math.round(Math.random() * 4000 + 1000)
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                if (success) {
+                    resolve()
+                } else {
+                    reject(new Error('Error'))
+                }
+            }, timeout)
+        })
+    }
+
     return (
         <GridContainer>
             <Switch>
@@ -69,10 +83,15 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
                     component={ContractDetails}
                 />
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_DOCUMENTS}
-                    component={Documents}
-                />
+                <Route path={RoutesRecord.SUBMISSIONS_DOCUMENTS}>
+                    <Documents
+                        id="23"
+                        name="foobar"
+                        uploadS3Files={() => fakeApiRequest(true)}
+                        deleteS3Files={() => Promise.resolve()}
+                        onLoadComplete={() => Promise.resolve()}
+                    />
+                </Route>
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
                     component={ReviewSubmit}
