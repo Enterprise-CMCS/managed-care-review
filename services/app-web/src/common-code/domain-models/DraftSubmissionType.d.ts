@@ -1,6 +1,10 @@
 // DraftSubmission is a draft submission.
 
 export type SubmissionType = 'CONTRACT_ONLY' | 'CONTRACT_AND_RATES'
+export type SubmissionDocument = {
+    name: string
+    url: string
+}
 
 export type DraftSubmissionType = {
     id: string
@@ -11,4 +15,5 @@ export type DraftSubmissionType = {
     submissionType: SubmissionType
     createdAt: Date
     updatedAt: Date
+    documents: SubmissionDocument[]
 }

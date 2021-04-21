@@ -21,6 +21,7 @@ describe('findDraftSubmission', () => {
             programID: 'MCAC',
             submissionDescription: 'a new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
+            documents: []
         }
 
         const draftSubResult = await store.insertDraftSubmission(inputParams)
@@ -94,6 +95,7 @@ describe('findDraftSubmissionByStateNumber', () => {
             programID: 'MCAC',
             submissionDescription: 'a new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
+            documents: []
         }
 
         const draftSubResult = await store.insertDraftSubmission(inputParams)

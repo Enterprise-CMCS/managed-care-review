@@ -82,6 +82,7 @@ export async function insertDraftSubmission(
     //   * state-num -- this is a transaction. find biggest state-num, add one
     //   * name (state_program_num) -- db? / synthesized
     //   * id -- db/resolver? -- generate a new UUID
+    //   * convert documents SubmissionDocument[] into DocumentStoreT
 
     const draft = new DraftSubmissionStoreType() // you might like that this took input vars, but that seems opposed to how this library works wrt to searching
     draft.id = uuidv4()
@@ -92,6 +93,7 @@ export async function insertDraftSubmission(
     draft.programID = args.programID
     draft.submissionDescription = args.submissionDescription
     draft.stateCode = args.stateCode
+    draft.documents = []
 
     try {
         const stateNumberResult = await getNextStateNumber(

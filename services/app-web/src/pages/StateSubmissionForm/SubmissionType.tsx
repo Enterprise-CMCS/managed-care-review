@@ -151,6 +151,7 @@ export const SubmissionType = ({
                 programID: values.programID,
                 submissionType: values.submissionType as SubmissionTypeT,
                 submissionDescription: values.submissionDescription,
+                documents: [],
             }
 
             try {

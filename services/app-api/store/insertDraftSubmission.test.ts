@@ -46,6 +46,7 @@ describe('insertDraftSubmission', () => {
                 )
                 expect(getResult.stateCode).toEqual('FL')
                 expect(getResult.programID).toEqual('MCAC')
+                expect(getResult.documents).toEqual([])
 
                 expect(Date.now() - getResult.createdAt.valueOf()).toBeLessThan(
                     2000

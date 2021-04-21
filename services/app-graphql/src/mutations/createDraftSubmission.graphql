@@ -13,6 +13,10 @@ mutation createDraftSubmission($input: CreateDraftSubmissionInput!) {
             stateCode
             submissionType
             submissionDescription
+            documents {
+                name
+                url
+            }
         }
     }
 }
