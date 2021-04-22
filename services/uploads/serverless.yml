@@ -46,14 +46,31 @@ resources:
                 - DELETE
                 - HEAD
               MaxAge: 3000
+    DocumentUploadsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        # Set the CORS policy
+        CorsConfiguration:
+          CorsRules:
+            - AllowedOrigins:
+                - '*'
+              AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - GET
+                - PUT
+                - POST
+                - DELETE
+                - HEAD
+              MaxAge: 3000
 
   # Print out the name of the bucket that is created
   Outputs:
-    AttachmentsBucketName:
+    DocumentUploadsBucketName:
       Value:
-        Ref: AttachmentsBucket
-    AttachmentsBucketArn:
-      Value: !GetAtt AttachmentsBucket.Arn
+        Ref: DocumentUploadsBucket
+    DocumentUploadsBucketArn:
+      Value: !GetAtt DocumentUploadsBucket.Arn
     Region:
       Value:
         Ref: AWS::Region

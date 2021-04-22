@@ -284,6 +284,22 @@ async function run_web_against_aws(
         }
     )
 
+    const s3Region = commandMustSucceedSync(
+        './output.sh',
+        ['uploads', 'Region', stageName],
+        {
+            cwd: './services',
+        }
+    )
+
+    const s3DocsBucket = commandMustSucceedSync(
+        './output.sh',
+        ['uploads', 'DocumentUploadsBucketName', stageName],
+        {
+            cwd: './services',
+        }
+    )
+
     // set them
     process.env.PORT = '3003' // run hybrid on a different port
     process.env.REACT_APP_AUTH_MODE = apiAuthMode // override local_login in .env
@@ -293,6 +309,9 @@ async function run_web_against_aws(
     process.env.REACT_APP_COGNITO_USER_POOL_ID = userPool
     process.env.REACT_APP_COGNITO_USER_POOL_CLIENT_ID = userPoolClient
     process.env.REACT_APP_COGNITO_USER_POOL_CLIENT_DOMAIN = userPoolDomain
+    process.env.REACT_APP_S3_REGION = s3Region
+    delete process.env.REACT_APP_S3_LOCAL_URL
+    process.env.REACT_APP_S3_DOCUMENTS_BUCKET = s3DocsBucket
     process.env.REACT_APP_APPLICATION_ENDPOINT = 'http://localhost:3003/'
 
     // run it

@@ -13,6 +13,8 @@ import { AuthProvider } from '../../contexts/AuthContext'
 import { PageProvider } from '../../contexts/PageContext'
 import { GenericError } from '../Errors/GenericError'
 import { AuthModeType } from '../../common-code/domain-models'
+import { S3Provider } from '../../contexts/S3Context'
+import type { S3ClientT } from '../../s3'
 
 function ErrorFallback({
     error,
@@ -27,9 +29,11 @@ function ErrorFallback({
 function App({
     authMode,
     apolloClient,
+    s3Client,
 }: {
     authMode: AuthModeType
     apolloClient: ApolloClient<NormalizedCacheObject>
+    s3Client: S3ClientT
 }): React.ReactElement {
     logEvent('on_load', { success: true })
 
@@ -37,11 +41,13 @@ function App({
         <ErrorBoundary FallbackComponent={ErrorFallback}>
             <BrowserRouter>
                 <ApolloProvider client={apolloClient}>
-                    <AuthProvider authMode={authMode}>
-                        <PageProvider>
-                            <AppBody authMode={authMode} />
-                        </PageProvider>
-                    </AuthProvider>
+                    <S3Provider client={s3Client}>
+                        <AuthProvider authMode={authMode}>
+                            <PageProvider>
+                                <AppBody authMode={authMode} />
+                            </PageProvider>
+                        </AuthProvider>
+                    </S3Provider>
                 </ApolloProvider>
             </BrowserRouter>
         </ErrorBoundary>

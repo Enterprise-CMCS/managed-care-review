@@ -9,7 +9,7 @@ service: ui-auth
 
 custom:
   stage: ${opt:stage, self:provider.stage}
-  attachments_bucket_arn: ${cf:uploads-${self:custom.stage}.AttachmentsBucketArn}
+  document_uploads_bucket_arn: ${cf:uploads-${self:custom.stage}.DocumentUploadsBucketArn}
   api_gateway_rest_api_name: ${cf:app-api-${self:custom.stage}.ApiGatewayRestApiName}
   application_endpoint_url: ${cf:ui-${self:custom.stage}.CloudFrontEndpointUrl}
   okta_metadata_url: ${env:OKTA_METADATA_URL}
@@ -208,7 +208,7 @@ resources:
                   Resource:
                     - Fn::Join:
                         - ''
-                        - - ${self:custom.attachments_bucket_arn}
+                        - - ${self:custom.document_uploads_bucket_arn}
                           - '/private/'
                           - '$'
                           - '{cognito-identity.amazonaws.com:sub}/*'
