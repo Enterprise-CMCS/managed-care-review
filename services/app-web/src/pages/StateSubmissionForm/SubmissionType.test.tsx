@@ -5,11 +5,8 @@ import { screen, waitFor } from '@testing-library/react'
 
 import {
     fetchCurrentUserMock,
-    createDraftSubmissionMock,
     mockDraftSubmission,
-    updateDraftSubmissionMock,
 } from '../../utils/apolloUtils'
-import { SubmissionType as SubmissionT } from '../../gen/gqlClient'
 import { renderWithProviders } from '../../utils/jestUtils'
 import { SubmissionType, SubmissionTypeFormValues } from './SubmissionType'
 import { Formik } from 'formik'
@@ -64,6 +61,23 @@ describe('SubmissionType', () => {
         await waitFor(() =>
             expect(
                 screen.getByRole('form', { name: 'New Submission Form' })
+            ).toBeInTheDocument()
+        )
+    })
+
+    it('displays with draft submission when expected', async () => {
+        renderWithProviders(
+            <SubmissionType draftSubmission={mockDraftSubmission} />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        await waitFor(() =>
+            expect(
+                screen.getByRole('form', { name: 'Submission Type Form' })
             ).toBeInTheDocument()
         )
     })
@@ -325,106 +339,6 @@ describe('SubmissionType', () => {
                         'You must provide a description of any major changes or updates'
                     )
                 ).toBeInTheDocument()
-            })
-        })
-
-        it.skip('if form fields are valid, create new submission and navigate to /:id/contract-details when continue button is clicked', async () => {
-            const history = createMemoryHistory()
-
-            renderWithProviders(<SubmissionType />, {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            statusCode: 200,
-                        }),
-                        createDraftSubmissionMock({
-                            statusCode: 200,
-                        }),
-                        createDraftSubmissionMock({
-                            statusCode: 200,
-                        }),
-                    ],
-                },
-                routerProvider: {
-                    route: '/submissions/new',
-                    routerProps: { history: history },
-                },
-            })
-
-            await waitFor(() => {
-                expect(
-                    screen.getByRole('heading', { name: 'Submission type' })
-                ).toBeInTheDocument()
-                expect(
-                    screen.getByRole('option', { name: 'MSHO' })
-                ).toBeInTheDocument()
-            })
-            // Fill in form to make valid
-            userEvent.click(screen.getByRole('option', { name: 'MSHO' }))
-            userEvent.click(screen.getByLabelText('Contract action only'))
-            userEvent.type(screen.getByRole('textbox'), 'a description')
-
-            // Click continue
-            userEvent.click(
-                screen.getByRole('button', {
-                    name: 'Continue',
-                })
-            )
-
-            await waitFor(() => {
-                expect(history.location.pathname).toBe(
-                    '/submissions/test-id/contract-details'
-                )
-            })
-        })
-
-        it.skip('if form loads with existing submission, update submission when continue button is clicked', async () => {
-            const history = createMemoryHistory()
-            renderWithProviders(
-                <SubmissionType draftSubmission={mockDraftSubmission} />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            updateDraftSubmissionMock({
-                                id: 'test-abc-123',
-                                updates: {
-                                    submissionType: 'CONTRACT_ONLY' as SubmissionT,
-                                    submissionDescription:
-                                        'A real submission and updated something',
-                                    programID: 'snbc',
-                                    documents: [],
-                                },
-                                statusCode: 200,
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15/type',
-                        routerProps: { history: history },
-                    },
-                }
-            )
-
-            const heading = await screen.findByRole('heading', {
-                name: 'Submission type',
-            })
-            expect(heading).toBeInTheDocument()
-
-            const textarea = await screen.findByRole('textbox', {
-                name: 'Submission description',
-            })
-            userEvent.type(textarea, 'and updated something')
-
-            const continueButton = await screen.findByRole('button', {
-                name: 'Continue',
-            })
-            continueButton.click()
-
-            await waitFor(() => {
-                expect(history.location.pathname).toBe(
-                    '/submissions/test-id/contract-details'
-                )
             })
         })
     })

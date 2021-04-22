@@ -87,7 +87,6 @@ export const Documents = ({
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setShouldValidate(true)
-        console.log(fileItems)
         const documents = fileItems.map((file) => {
             if (!file.url)
                 throw Error(
@@ -118,7 +117,6 @@ export const Documents = ({
 
             if (data.errors) {
                 showError('gql errors have occurred')
-                console.log(data.errors)
             }
 
             if (data.data?.updateDraftSubmission)

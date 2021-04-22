@@ -1,16 +1,71 @@
 import { screen, waitFor } from '@testing-library/react'
 import { Route } from 'react-router-dom'
+import { createMemoryHistory } from 'history'
+import userEvent from '@testing-library/user-event'
 
 import { RoutesRecord } from '../../constants/routes'
 import {
     fetchCurrentUserMock,
     fetchDraftSubmissionMock,
+    updateDraftSubmissionMock,
 } from '../../utils/apolloUtils'
 import { renderWithProviders } from '../../utils/jestUtils'
 
 import { StateSubmissionForm } from './StateSubmissionForm'
 
 describe('StateSubmissionForm', () => {
+    describe('edit submission', () => {
+        // This test is not working, needs another look later
+        it.skip('edit submission type and and navigate to contract details', async () => {
+            const history = createMemoryHistory()
+            renderWithProviders(
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_FORM}
+                    component={StateSubmissionForm}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchDraftSubmissionMock({
+                                id: '15',
+                                statusCode: 200,
+                            }),
+                            updateDraftSubmissionMock({
+                                id: '15',
+                                updates: {
+                                    submissionDescription: 'a new description',
+                                },
+                                statusCode: 200,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/type',
+                        routerProps: { history: history },
+                    },
+                }
+            )
+
+            expect(
+                await screen.findByRole('heading', { name: 'Submission type' })
+            ).toBeInTheDocument()
+
+            userEvent.type(screen.getByRole('textbox'), 'a new description')
+
+            userEvent.click(
+                screen.getByRole('button', {
+                    name: 'Continue',
+                })
+            )
+            await waitFor(() => {
+                expect(history.location.pathname).toBe(
+                    '/submissions/15/contract-details'
+                )
+            })
+        })
+    })
+
     describe('navigate each form step', () => {
         it('loads submission type step for /submissions/:id/type', async () => {
             renderWithProviders(

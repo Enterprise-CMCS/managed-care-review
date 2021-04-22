@@ -150,7 +150,7 @@ const fetchDraftSubmissionMock = ({
 type updateDraftSubmissionMockProps = {
     draftSubmission?: DraftSubmission | Partial<DraftSubmission>
     id: string
-    updates: DraftSubmissionUpdates
+    updates: DraftSubmissionUpdates | Partial<DraftSubmissionUpdates>
     statusCode: 200 | 403 | 500
 }
 
