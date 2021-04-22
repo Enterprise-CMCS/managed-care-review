@@ -88,6 +88,7 @@ export const FileUpload = ({
                             if (current.id === item.id) {
                                 return {
                                     ...item,
+                                    url: 'https://www.example.com',
                                     status: 'UPLOAD_COMPLETE',
                                 } as FileItemT
                             } else {

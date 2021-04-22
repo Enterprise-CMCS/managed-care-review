@@ -6,7 +6,10 @@ import { screen, waitFor } from '@testing-library/react'
 import {
     fetchCurrentUserMock,
     createDraftSubmissionMock,
+    mockDraftSubmission,
+    updateDraftSubmissionMock,
 } from '../../utils/apolloUtils'
+import { SubmissionType as SubmissionT } from '../../gen/gqlClient'
 import { renderWithProviders } from '../../utils/jestUtils'
 import { SubmissionType, SubmissionTypeFormValues } from './SubmissionType'
 import { Formik } from 'formik'
@@ -325,16 +328,16 @@ describe('SubmissionType', () => {
             })
         })
 
-        // Test is caught in infinite loop - need to revisit whats going on with AuthContext
-        // eslint-disable-next-line jest/no-disabled-tests
-        it.skip('if form fields are valid, navigate to /:id/contract-details when continue button is clicked', async () => {
+        it.skip('if form fields are valid, create new submission and navigate to /:id/contract-details when continue button is clicked', async () => {
             const history = createMemoryHistory()
 
             renderWithProviders(<SubmissionType />, {
-                authProvider: { authMode: 'LOCAL' },
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                        createDraftSubmissionMock({
                             statusCode: 200,
                         }),
                         createDraftSubmissionMock({
@@ -369,7 +372,56 @@ describe('SubmissionType', () => {
             )
 
             await waitFor(() => {
-                expect(screen.getByText('Contract details')).toBeInTheDocument()
+                expect(history.location.pathname).toBe(
+                    '/submissions/test-id/contract-details'
+                )
+            })
+        })
+
+        it.skip('if form loads with existing submission, update submission when continue button is clicked', async () => {
+            const history = createMemoryHistory()
+            renderWithProviders(
+                <SubmissionType draftSubmission={mockDraftSubmission} />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            updateDraftSubmissionMock({
+                                id: 'test-abc-123',
+                                updates: {
+                                    submissionType: 'CONTRACT_ONLY' as SubmissionT,
+                                    submissionDescription:
+                                        'A real submission and updated something',
+                                    programID: 'snbc',
+                                    documents: [],
+                                },
+                                statusCode: 200,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/type',
+                        routerProps: { history: history },
+                    },
+                }
+            )
+
+            const heading = await screen.findByRole('heading', {
+                name: 'Submission type',
+            })
+            expect(heading).toBeInTheDocument()
+
+            const textarea = await screen.findByRole('textbox', {
+                name: 'Submission description',
+            })
+            userEvent.type(textarea, 'and updated something')
+
+            const continueButton = await screen.findByRole('button', {
+                name: 'Continue',
+            })
+            continueButton.click()
+
+            await waitFor(() => {
                 expect(history.location.pathname).toBe(
                     '/submissions/test-id/contract-details'
                 )

@@ -167,7 +167,11 @@ const updateDraftSubmissionMock = ({
                     variables: {
                         input: {
                             submissionID: id,
-                            draftSubmissionUpdates: updates,
+                            draftSubmissionUpdates: Object.assign(
+                                {},
+                                mockDraftSubmission,
+                                updates
+                            ),
                         },
                     },
                 },

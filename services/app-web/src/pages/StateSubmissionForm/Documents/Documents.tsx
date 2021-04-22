@@ -7,7 +7,7 @@ import {
     Alert,
     Link,
 } from '@trussworks/react-uswds'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useHistory } from 'react-router-dom'
 
 import styles from '../StateSubmissionForm.module.scss'
 import {
@@ -35,7 +35,7 @@ export const Documents = ({
     const [shouldValidate, setShouldValidate] = useState(showValidations)
     const [hasValidFiles, setHasValidFiles] = useState(false)
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
-
+    const history = useHistory()
     const [
         updateDraftSubmission,
         { error: updateError },
@@ -46,7 +46,7 @@ export const Documents = ({
             (item) => item.status !== 'PENDING'
         )
 
-        const hasValidFiles: boolean =
+        const hasValidDocumentsForSubmission: boolean =
             fileItems.length > 0 &&
             hasNoPendingFiles &&
             fileItems.some(
@@ -54,7 +54,7 @@ export const Documents = ({
                     item.status === 'UPLOAD_COMPLETE' ||
                     item.status === 'SAVED_TO_SUBMISSION'
             )
-        setHasValidFiles(hasValidFiles)
+        setHasValidFiles(hasValidDocumentsForSubmission)
     }, [fileItems])
 
     const showError = (error: string) => {
@@ -87,6 +87,7 @@ export const Documents = ({
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setShouldValidate(true)
+        console.log(fileItems)
         const documents = fileItems.map((file) => {
             if (!file.url)
                 throw Error(
@@ -120,9 +121,10 @@ export const Documents = ({
                 console.log(data.errors)
             }
 
-            // history.push(
-            //     `/submissions/${draftSubmission.id}/review-and-submit`
-            // )
+            if (data.data?.updateDraftSubmission)
+                history.push(
+                    `/submissions/${draftSubmission.id}/review-and-submit`
+                )
         } catch (error) {
             showError(error)
         }
