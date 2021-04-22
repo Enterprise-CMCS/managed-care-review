@@ -1,7 +1,6 @@
 import React from 'react'
 import { useField } from 'formik'
-import { Radio, ErrorMessage, FormGroup } from '@trussworks/react-uswds'
-import { options } from 'yargs'
+import { Radio } from '@trussworks/react-uswds'
 
 /**
  * This component renders a checkbox
