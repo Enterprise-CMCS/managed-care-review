@@ -10,6 +10,7 @@ import App from './pages/App/App'
 import reportWebVitals from './reportWebVitals'
 import { localGQLFetch, fakeAmplifyFetch } from './api'
 import { assertIsAuthMode } from './common-code/domain-models'
+import { newAmplifyS3Client, newLocalS3Client } from './api'
 
 const gqlSchema = loader('../../app-web/src/gen/schema.graphql')
 
@@ -28,6 +29,11 @@ Amplify.configure({
             scope: ['email', 'openid'],
             responseType: 'token',
         },
+    },
+    Storage: {
+        region: process.env.REACT_APP_S3_REGION,
+        bucket: process.env.REACT_APP_S3_DOCUMENTS_BUCKET,
+        identityPoolId: process.env.REACT_APP_COGNITO_ID_POOL_ID,
     },
     API: {
         endpoints: [
@@ -52,9 +58,18 @@ const apolloClient = new ApolloClient({
     typeDefs: gqlSchema,
 })
 
+const s3Client = newAmplifyS3Client()
+// const s3Client = newLocalS3Client('http://localhost:4569', 'local-uploads')
+
+// console.log('RUNNING', s3Client.uploadFile(undefined as any))
+
 ReactDOM.render(
     <React.StrictMode>
-        <App authMode={authMode} apolloClient={apolloClient} />
+        <App
+            authMode={authMode}
+            apolloClient={apolloClient}
+            s3Client={s3Client}
+        />
     </React.StrictMode>,
     document.getElementById('root')
 )

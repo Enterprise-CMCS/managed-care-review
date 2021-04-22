@@ -1,31 +1,15 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { GridContainer, FileInput } from '@trussworks/react-uswds'
 
 import { useAuth } from '../../contexts/AuthContext'
 import { Program } from '../../gen/gqlClient'
-
-import AWS from 'aws-sdk'
-import { s3LocalUploader, s3LocalGetURL } from '../../api/s3Local'
-import { s3AmplifyUpload, s3AmplifyGetURL } from '../../api/s3Amplify'
-
-// Local s3
-const localEndpoint = 'http://localhost:4569'
-const s3Client = new AWS.S3({
-    s3ForcePathStyle: true,
-    apiVersion: '2006-03-01',
-    accessKeyId: 'S3RVER', // This specific key is required when working offline
-    secretAccessKey: 'S3RVER',
-    params: { Bucket: 'local-uploads' },
-    endpoint: new AWS.Endpoint(localEndpoint),
-})
-// const s3Upload = s3LocalUploader(s3Client)
-// const s3Linker = s3LocalGetURL(s3Client)
-
-const s3Upload = s3AmplifyUpload
-const s3Linker = s3AmplifyGetURL
+import { useS3 } from '../../contexts/S3Context'
 
 export const S3Test = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
+
+    const { uploadFile, getURL } = useS3()
+
     let programs: Program[] = []
 
     const [uploadedFiles, setUploadedFiles] = useState<[string, string][]>([])
@@ -42,14 +26,14 @@ export const S3Test = (): React.ReactElement => {
         console.log(e)
         if (e.currentTarget.files === null) return
         try {
-            const uploadFile = e.currentTarget.files[0]
-            if (uploadFile === undefined) {
+            const uploadingFile = e.currentTarget.files[0]
+            if (uploadingFile === undefined) {
                 console.log('no file to uploaded')
                 return
             }
-            const s3Key = await s3Upload(uploadFile)
+            const s3Key = await uploadFile(uploadingFile)
 
-            const maybeLink = await s3Linker(s3Key)
+            const maybeLink = await getURL(s3Key)
 
             let link: string
             if (typeof maybeLink === 'string') {

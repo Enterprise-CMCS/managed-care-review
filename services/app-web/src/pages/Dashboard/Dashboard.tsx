@@ -9,20 +9,6 @@ import { useAuth } from '../../contexts/AuthContext'
 import { Program } from '../../gen/gqlClient'
 
 import AWS from 'aws-sdk'
-import { s3LocalUploader } from '../../api/s3Local'
-
-// Local s3
-const localEndpoint = 'http://localhost:4569'
-const s3Client = new AWS.S3({
-    s3ForcePathStyle: true,
-    apiVersion: '2006-03-01',
-    accessKeyId: 'S3RVER', // This specific key is required when working offline
-    secretAccessKey: 'S3RVER',
-    params: { Bucket: 'local-uploads' },
-    endpoint: new AWS.Endpoint(localEndpoint),
-})
-const s3Upload = s3LocalUploader(s3Client)
-// const s3URLResolver = s3LocalGetURL(s3Client)
 
 export const Dashboard = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
@@ -32,16 +18,6 @@ export const Dashboard = (): React.ReactElement => {
         return <div>Loading User Info</div>
     } else {
         programs = loggedInUser.state.programs
-    }
-
-    const handleOnChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(e)
-        if (e.currentTarget.files === null) return
-        try {
-            await s3Upload(e.currentTarget.files[0])
-        } catch (error) {
-            console.log('S3 error', error)
-        }
     }
 
     const ProgramContent = ({
@@ -85,12 +61,6 @@ export const Dashboard = (): React.ReactElement => {
                                 <ProgramContent
                                     key={program.name}
                                     program={program}
-                                />
-
-                                <FileInput
-                                    id="test"
-                                    name="test"
-                                    onChange={handleOnChange}
                                 />
                             </GridContainer>
                         </TabPanel>
