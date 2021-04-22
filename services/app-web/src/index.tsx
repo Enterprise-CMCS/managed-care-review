@@ -64,12 +64,6 @@ const s3Region = process.env.REACT_APP_S3_REGION
 const s3LocalURL = process.env.REACT_APP_S3_LOCAL_URL
 const s3DocumentsBucket = process.env.REACT_APP_S3_DOCUMENTS_BUCKET
 
-console.log('staring', s3Region, s3LocalURL, typeof s3LocalURL)
-
-if (s3LocalURL === undefined) {
-    console.log('ewllewe')
-}
-
 if (s3DocumentsBucket === undefined) {
     throw new Error(
         'To configure s3, you  must set REACT_APP_S3_DOCUMENTS_BUCKET'

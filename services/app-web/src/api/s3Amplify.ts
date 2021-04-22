@@ -30,8 +30,9 @@ export function newAmplifyS3Client(): S3ClientT {
             if (typeof result === 'string') {
                 return result
             } else {
-                console.log('what is this tho', result)
-                return 'ERROR: WHAT IS THIS'
+                throw new Error(
+                    `Didn't get a string back from s3.get. We should have to use a different config for that.`
+                )
             }
         },
     }

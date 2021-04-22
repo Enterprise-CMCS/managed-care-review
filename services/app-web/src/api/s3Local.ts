@@ -17,7 +17,6 @@ export function newLocalS3Client(
 
     return {
         uploadFile: async (file: File): Promise<string> => {
-            console.log('UPLOAD S3')
             const filename = `${Date.now()}-${file.name}`
 
             return new Promise((resolve, reject) => {
@@ -31,6 +30,7 @@ export function newLocalS3Client(
                         if (err) {
                             console.log('ERROR::', err)
                             reject(err)
+                            return
                         }
                         console.log('data this worked', data)
                         resolve(filename)

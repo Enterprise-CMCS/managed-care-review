@@ -6,8 +6,8 @@ import { S3ClientT } from '../api'
 // If we wanted to return something different we could, but for now the S3ClientT is all we're
 // really exposing.
 const S3Context = React.createContext<S3ClientT>({
-    uploadFile: (f: File) => Promise.resolve('INIT'),
-    getURL: (s: string) => Promise.resolve('INIT'),
+    uploadFile: (_f: File) => Promise.resolve('INIT'),
+    getURL: (_s: string) => Promise.resolve('INIT'),
 })
 
 export type S3ProviderProps = {
@@ -16,8 +16,6 @@ export type S3ProviderProps = {
 }
 
 function S3Provider({ client, children }: S3ProviderProps): React.ReactElement {
-    console.log('PASSED CLIENT', client)
-
     return <S3Context.Provider value={client} children={children} />
 }
 
