@@ -1,6 +1,11 @@
 import AWS from 'aws-sdk'
 
-export function newLocalS3Client(endpoint: string, bucketName: string) {
+import { S3ClientT } from './s3'
+
+export function newLocalS3Client(
+    endpoint: string,
+    bucketName: string
+): S3ClientT {
     const s3Client = new AWS.S3({
         s3ForcePathStyle: true,
         apiVersion: '2006-03-01',

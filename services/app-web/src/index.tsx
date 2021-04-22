@@ -8,7 +8,7 @@ import './index.scss'
 
 import App from './pages/App/App'
 import reportWebVitals from './reportWebVitals'
-import { localGQLFetch, fakeAmplifyFetch } from './api'
+import { localGQLFetch, fakeAmplifyFetch, S3ClientT } from './api'
 import { assertIsAuthMode } from './common-code/domain-models'
 import { newAmplifyS3Client, newLocalS3Client } from './api'
 
@@ -58,10 +58,40 @@ const apolloClient = new ApolloClient({
     typeDefs: gqlSchema,
 })
 
-const s3Client = newAmplifyS3Client()
-// const s3Client = newLocalS3Client('http://localhost:4569', 'local-uploads')
+// S3 Region and LocalUrl are mutually exclusive.
+// One is used in AWS and one is used locally.
+const s3Region = process.env.REACT_APP_S3_REGION
+const s3LocalURL = process.env.REACT_APP_S3_LOCAL_URL
+const s3DocumentsBucket = process.env.REACT_APP_S3_DOCUMENTS_BUCKET
 
-// console.log('RUNNING', s3Client.uploadFile(undefined as any))
+console.log('staring', s3Region, s3LocalURL, typeof s3LocalURL)
+
+if (s3LocalURL === undefined) {
+    console.log('ewllewe')
+}
+
+if (s3DocumentsBucket === undefined) {
+    throw new Error(
+        'To configure s3, you  must set REACT_APP_S3_DOCUMENTS_BUCKET'
+    )
+}
+
+if (s3Region !== undefined && s3LocalURL !== undefined) {
+    throw new Error(
+        'You cant set both REACT_APP_S3_REGION and REACT_APP_S3_LOCAL_URL. Pick one dependning on what environment you are in'
+    )
+}
+
+let s3Client: S3ClientT
+if (s3Region) {
+    s3Client = newAmplifyS3Client()
+} else if (s3LocalURL) {
+    s3Client = newLocalS3Client(s3LocalURL, s3DocumentsBucket)
+} else {
+    throw new Error(
+        'You must set either REACT_APP_S3_REGION or REACT_APP_S3_LOCAL_URL depending on what environment you are in'
+    )
+}
 
 ReactDOM.render(
     <React.StrictMode>

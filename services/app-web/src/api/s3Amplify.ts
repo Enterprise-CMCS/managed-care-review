@@ -1,5 +1,7 @@
 import { Storage } from 'aws-amplify'
 
+import { S3ClientT } from './s3'
+
 type s3PutResponse = {
     key: string
 }
@@ -10,7 +12,7 @@ function assertIsS3PutResponse(val: unknown): asserts val is s3PutResponse {
     }
 }
 
-export function newAmplifyS3Client() {
+export function newAmplifyS3Client(): S3ClientT {
     return {
         uploadFile: async (file: File): Promise<string> => {
             const filename = `${Date.now()}-${file.name}`

@@ -1,4 +1,5 @@
-import { GridContainer, Link, FileInput } from '@trussworks/react-uswds'
+import React from 'react'
+import { GridContainer, Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 
 import styles from './Dashboard.module.scss'
@@ -7,8 +8,6 @@ import { Tabs } from '../../components/Tabs/Tabs'
 import { TabPanel } from '../../components/Tabs/TabPanel'
 import { useAuth } from '../../contexts/AuthContext'
 import { Program } from '../../gen/gqlClient'
-
-import AWS from 'aws-sdk'
 
 export const Dashboard = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
