@@ -109,8 +109,7 @@ describe('StateSubmissionForm', () => {
     })
 
     describe('when user edits submission', () => {
-        // TODO: figure out why this test failing
-        it.skip('change draft submission description and navigate to contract details', async () => {
+        it('change draft submission description and navigate to contract details', async () => {
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
@@ -125,17 +124,20 @@ describe('StateSubmissionForm', () => {
                                 statusCode: 200,
                             }),
                             updateDraftSubmissionMock({
-                                id: '15',
+                                // Because we haven't changed the ID of the submission returned by fetchDraftSubmissionMock
+                                // we need to use the ID of the default mock going forward. Our logic uses that ID over the one in the URL.
+                                id: 'test-abc-123',
                                 updates: {
                                     submissionType: 'CONTRACT_ONLY' as SubmissionTypeT,
                                     submissionDescription:
                                         'A real submission but updated something',
                                     programID: 'snbc',
+                                    documents: [],
                                 },
                                 statusCode: 200,
                             }),
                             fetchDraftSubmissionMock({
-                                id: '15',
+                                id: 'test-abc-123',
                                 statusCode: 200,
                             }),
                         ],

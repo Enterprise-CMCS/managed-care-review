@@ -172,7 +172,7 @@ const updateDraftSubmissionMock = ({
                     variables: {
                         input: {
                             submissionID: id,
-                            draftSubmissionUpdates: mergedDraftSubmission,
+                            draftSubmissionUpdates: updates,
                         },
                     },
                 },
