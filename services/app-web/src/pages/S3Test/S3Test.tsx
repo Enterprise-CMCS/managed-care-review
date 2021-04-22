@@ -3,6 +3,7 @@ import { GridContainer, FileInput } from '@trussworks/react-uswds'
 
 import { useAuth } from '../../contexts/AuthContext'
 import { useS3 } from '../../contexts/S3Context'
+import { isS3Error } from '../../s3'
 
 export const S3Test = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
@@ -24,11 +25,17 @@ export const S3Test = (): React.ReactElement => {
                 return
             }
             const s3Key = await uploadFile(uploadingFile)
+
+            if (isS3Error(s3Key)) {
+                console.log('Got an error', s3Key)
+                return
+            }
+
             const link = await getURL(s3Key)
 
             setUploadedFiles(uploadedFiles.concat([[s3Key, link]]))
         } catch (error) {
-            console.log('S3 error', error)
+            console.log('Unexpected S3', error)
         }
     }
 
