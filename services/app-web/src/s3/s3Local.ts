@@ -1,6 +1,6 @@
 import AWS from 'aws-sdk'
 
-import { S3ClientT } from './s3'
+import { S3ClientT } from './index'
 
 export function newLocalS3Client(
     endpoint: string,

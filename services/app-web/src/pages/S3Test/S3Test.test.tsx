@@ -16,7 +16,7 @@ describe('S3Test', () => {
         })
 
         await waitFor(() =>
-            expect(screen.getByTestId('testS3Input')).toBeInTheDocument()
+            expect(screen.getByTestId('s3TestPage')).toBeInTheDocument()
         )
     })
 

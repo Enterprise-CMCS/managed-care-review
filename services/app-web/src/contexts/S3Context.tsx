@@ -1,14 +1,13 @@
 import * as React from 'react'
 
-import { S3ClientT } from '../api'
+import type { S3ClientT } from '../s3'
 
-// We save a step here and have the context return the S3ClientT directly
-// If we wanted to return something different we could, but for now the S3ClientT is all we're
-// really exposing.
-const S3Context = React.createContext<S3ClientT>({
-    uploadFile: (_f: File) => Promise.resolve('INIT'),
-    getURL: (_s: string) => Promise.resolve('INIT'),
-})
+// For now, the Context is the same as the Client.
+// We make a typealias here so that if in the future they need to diverge we
+// have a separate ContextT
+type S3ContextT = S3ClientT
+
+const S3Context = React.createContext<S3ContextT | undefined>(undefined)
 
 export type S3ProviderProps = {
     client: S3ClientT
@@ -19,6 +18,14 @@ function S3Provider({ client, children }: S3ProviderProps): React.ReactElement {
     return <S3Context.Provider value={client} children={children} />
 }
 
-const useS3 = (): S3ClientT => React.useContext(S3Context)
+const useS3 = (): S3ContextT => {
+    const context = React.useContext(S3Context)
+    if (context === undefined) {
+        // stole this trick from Kent C Dodds
+        // https://kentcdodds.com/blog/how-to-use-react-context-effectively
+        throw new Error('useS3 can only be used within an S3Provider')
+    }
+    return context
+}
 
 export { S3Provider, useS3 }

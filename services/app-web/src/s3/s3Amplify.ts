@@ -1,6 +1,6 @@
 import { Storage } from 'aws-amplify'
 
-import { S3ClientT } from './s3'
+import { S3ClientT } from './index'
 
 type s3PutResponse = {
     key: string
