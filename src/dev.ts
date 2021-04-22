@@ -294,7 +294,7 @@ async function run_web_against_aws(
 
     const s3DocsBucket = commandMustSucceedSync(
         './output.sh',
-        ['uploads', 'AttachmentsBucketName', stageName],
+        ['uploads', 'DocumentUploadsBucketName', stageName],
         {
             cwd: './services',
         }
