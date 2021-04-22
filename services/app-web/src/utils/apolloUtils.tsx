@@ -159,6 +159,11 @@ const updateDraftSubmissionMock = ({
     updates,
     statusCode, // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }: updateDraftSubmissionMockProps): MockedResponse<Record<string, any>> => {
+    const mergedDraftSubmission = Object.assign(
+        {},
+        mockDraftSubmission,
+        updates
+    )
     switch (statusCode) {
         case 200:
             return {
@@ -167,11 +172,7 @@ const updateDraftSubmissionMock = ({
                     variables: {
                         input: {
                             submissionID: id,
-                            draftSubmissionUpdates: Object.assign(
-                                {},
-                                mockDraftSubmission,
-                                updates
-                            ),
+                            draftSubmissionUpdates: mergedDraftSubmission,
                         },
                     },
                 },
@@ -179,7 +180,7 @@ const updateDraftSubmissionMock = ({
                 result: {
                     data: {
                         updateDraftSubmission: {
-                            draftSubmission: updates,
+                            draftSubmission: mergedDraftSubmission,
                         },
                     },
                 },
