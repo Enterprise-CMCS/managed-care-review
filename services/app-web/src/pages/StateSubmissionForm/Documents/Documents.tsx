@@ -141,6 +141,7 @@ export const Documents = ({
                     id="documents"
                     name="documents"
                     label="Upload Documents"
+                    accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                     uploadS3Files={() => fakeS3Request(true)}
                     deleteS3Files={() => fakeS3Request(true)}
                     onLoadComplete={onLoadComplete}
