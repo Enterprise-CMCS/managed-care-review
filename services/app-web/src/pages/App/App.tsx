@@ -14,7 +14,7 @@ import { PageProvider } from '../../contexts/PageContext'
 import { GenericError } from '../Errors/GenericError'
 import { AuthModeType } from '../../common-code/domain-models'
 import { S3Provider } from '../../contexts/S3Context'
-import type { S3ClientT } from '../../api'
+import type { S3ClientT } from '../../s3'
 
 function ErrorFallback({
     error,

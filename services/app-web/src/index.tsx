@@ -8,9 +8,9 @@ import './index.scss'
 
 import App from './pages/App/App'
 import reportWebVitals from './reportWebVitals'
-import { localGQLFetch, fakeAmplifyFetch, S3ClientT } from './api'
+import { localGQLFetch, fakeAmplifyFetch } from './api'
 import { assertIsAuthMode } from './common-code/domain-models'
-import { newAmplifyS3Client, newLocalS3Client } from './api'
+import { S3ClientT, newAmplifyS3Client, newLocalS3Client } from './s3'
 
 const gqlSchema = loader('../../app-web/src/gen/schema.graphql')
 
