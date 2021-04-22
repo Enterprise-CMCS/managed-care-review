@@ -144,7 +144,8 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
-          REACT_APP_AUTH_MODE: AWS_COGNITO
+          OKTA_METADATA_URL: ${{ secrets.PROD_OKTA_METADATA_URL }}
+          REACT_APP_AUTH_MODE: IDM
       - name: Deploy to prod
         run: ./deploy.sh prod
       - name: Run Nightwatch suite on prod
