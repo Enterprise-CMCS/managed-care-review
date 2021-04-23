@@ -60,7 +60,7 @@ describe('updateDraftSubmission', () => {
 
     it('updates a submission to have documents', async () => {
         const server = constructTestServer()
-        const { query, mutate } = createTestClient(server)
+        const {  mutate } = createTestClient(server)
 
         const createdDraft = await createTestDraftSubmission(mutate)
         const createdID = createdDraft.id
@@ -72,7 +72,8 @@ describe('updateDraftSubmission', () => {
             documents:[
                 {
                     name: 'myfile.pdf',
-                    url: 'https://www.example.com'
+                    url: 'https://www.example.com',
+                    s3URL: 'fakeS3URL'
                 }
             ]
         }
@@ -93,7 +94,8 @@ describe('updateDraftSubmission', () => {
         expect(resultDraft1.id).toEqual(createdID)
         expect(resultDraft1.documents).toEqual([ {
             name: 'myfile.pdf',
-            url: 'https://www.example.com'
+            url: 'https://www.example.com',
+            s3URL: 'fakeS3URL'
         }])
 
         // Update with two more documents
@@ -104,11 +106,13 @@ describe('updateDraftSubmission', () => {
             documents:[
                 {
                     name: 'myfile2.pdf',
-                    url: 'https://www.example.com'
+                    url: 'https://www.example.com',
+                    s3URL: 'fakeS3URL'
                 },
                 {
                     name: 'myfile3.pdf',
-                    url: 'https://www.example.com'
+                    url: 'https://www.example.com',
+                    s3URL: 'fakeS3URL'
                 }
             ]
         }
@@ -142,7 +146,8 @@ describe('updateDraftSubmission', () => {
             documents:[
                 {
                     name: 'myfile.pdf',
-                    url: 'https://www.example.com'
+                    url: 'https://www.example.com',
+                    s3URL: 'fakeS3URL'
                 }
             ]
         }
@@ -163,7 +168,8 @@ describe('updateDraftSubmission', () => {
         expect(resultDraft.id).toEqual(createdID)
         expect(resultDraft.documents).toEqual([ {
             name: 'myfile.pdf',
-            url: 'https://www.example.com'
+            url: 'https://www.example.com',
+            s3URL: 'fakeS3URL'
         }])
 
         // Remove documents

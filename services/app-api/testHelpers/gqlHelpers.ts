@@ -8,7 +8,6 @@ import typeDefs from '../../app-graphql/src/schema.graphql'
 import { configureResolvers } from '../resolvers'
 import { Context } from '../handlers/apollo_gql'
 import { CreateDraftSubmissionInput, DraftSubmission, SubmissionType } from '../gen/gqlServer'
-import { Store, } from '../store/store'
 
 const store = getTestStore()
 

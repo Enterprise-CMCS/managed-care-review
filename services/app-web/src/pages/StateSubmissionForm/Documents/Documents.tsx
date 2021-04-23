@@ -37,7 +37,7 @@ export const Documents = ({
     showValidations,
     draftSubmission,
 }: DocumentProps): React.ReactElement => {
-    const { deleteFile, uploadFile, getURL } = useS3()
+    const { deleteFile, uploadFile, getURL, getS3URL } = useS3()
     const [shouldValidate, setShouldValidate] = useState(showValidations)
     const [hasValidFiles, setHasValidFiles] = useState(false)
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
@@ -92,8 +92,9 @@ export const Documents = ({
             throw new Error(`Error in S3 filename: ${file.name}`)
         }
 
+        const s3URL = await getS3URL(s3Key, file.name)
         const link = await getURL(s3Key)
-        return { key: s3Key, url: link }
+        return { key: s3Key, url: link, s3URL }
     }
 
     const handleFormSubmit = async (e: React.FormEvent) => {
@@ -107,6 +108,7 @@ export const Documents = ({
             return {
                 name: file.name,
                 url: file.url,
+                s3URL: 'fakeS3URL',
             }
         })
 

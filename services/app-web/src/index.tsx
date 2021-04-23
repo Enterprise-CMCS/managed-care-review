@@ -78,7 +78,7 @@ if (s3Region !== undefined && s3LocalURL !== undefined) {
 
 let s3Client: S3ClientT
 if (s3Region) {
-    s3Client = newAmplifyS3Client()
+    s3Client = newAmplifyS3Client(s3DocumentsBucket)
 } else if (s3LocalURL) {
     s3Client = newLocalS3Client(s3LocalURL, s3DocumentsBucket)
 } else {

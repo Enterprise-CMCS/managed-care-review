@@ -67,6 +67,10 @@ export function newLocalS3Client(
                 throw err
             }
         },
+        getS3URL: async (s3key: string, filename: string,): Promise<string> => {
+            // ignore what's passed in as the bucket and use whats in LocalS3Client
+            return `s3://${bucketName}/${s3key}/${filename}`
+        },
         getURL: async (s3key: string): Promise<string> => {
             const params = { Key: s3key }
             return s3Client.getSignedUrl('getObject', params)

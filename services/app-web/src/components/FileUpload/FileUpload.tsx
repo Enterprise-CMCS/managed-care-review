@@ -12,6 +12,7 @@ import { FileItemsList } from './FileItemsList'
 export type S3FileData = {
     url: string
     key: string
+    s3URL: string
 }
 type FileUploadProps = {
     id: string

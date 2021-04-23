@@ -16,6 +16,7 @@ mutation updateDraftSubmission($input: UpdateDraftSubmissionInput!) {
             documents {
                 name
                 url
+                s3URL
             }
         }
     }

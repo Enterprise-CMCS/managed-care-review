@@ -40,7 +40,8 @@ describe('updateDraftSubmission', () => {
                     documents: [
                         {
                         name: 'testdoc.pdf',
-                        url: 'https://www.example.com'
+                        url: 'https://www.example.com',
+                        s3URL: 'fakeS3URL'
                     }
                     ]
                 }
@@ -64,7 +65,8 @@ describe('updateDraftSubmission', () => {
                 expect(getResult.documents[0]).toEqual(expect.objectContaining(
                     {
                         name: 'testdoc.pdf',
-                        url: 'https://www.example.com'
+                        url: 'https://www.example.com',
+                        s3URL: 'fakeS3URL'
                     }
                 ))
                
