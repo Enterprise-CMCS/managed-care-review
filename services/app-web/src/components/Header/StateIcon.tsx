@@ -5,7 +5,7 @@ import { ReactComponent as VaIcon } from '../../assets/icons/va-icon.svg'
 import { ReactComponent as MnIcon } from '../../assets/icons/mn-icon.svg'
 
 export type StateIconProps = {
-    code: 'FL' | 'IN' | 'MN' | 'MS' | 'VA'
+    code: 'FL' | 'IN' | 'MN' | 'MS' | 'VA' | 'AS'
 }
 export const StateIcon = ({ code }: StateIconProps): React.ReactElement => {
     switch (code) {
@@ -19,6 +19,8 @@ export const StateIcon = ({ code }: StateIconProps): React.ReactElement => {
             return <MsIcon />
         case 'VA':
             return <VaIcon />
+        case 'AS':
+            return <span>MC Review Team</span>
         default:
             return <span>STATE UNKNOWN</span>
     }
