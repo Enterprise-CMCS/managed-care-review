@@ -93,6 +93,7 @@ export const Documents = ({
         const s3Key = await uploadFile(file)
 
         if (isS3Error(s3Key)) {
+            console.log(`Log: S3 upload error: ${s3Key}`)
             throw new Error(`Error in S3 ${file.name}`)
         }
 
