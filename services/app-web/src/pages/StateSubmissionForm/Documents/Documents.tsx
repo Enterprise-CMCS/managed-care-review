@@ -37,7 +37,7 @@ export const Documents = ({
     showValidations,
     draftSubmission,
 }: DocumentProps): React.ReactElement => {
-    const { uploadFile, getURL } = useS3()
+    const { deleteFile, uploadFile, getURL } = useS3()
     const [shouldValidate, setShouldValidate] = useState(showValidations)
     const [hasValidFiles, setHasValidFiles] = useState(false)
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
@@ -76,25 +76,20 @@ export const Documents = ({
     const onLoadComplete = ({ files }: { files: FileItemT[] }) => {
         setFileItems(files)
     }
-    const fakeS3Request = (success: boolean): Promise<S3FileData> => {
-        const timeout = Math.round(Math.random() * 4000 + 1000)
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                if (success) {
-                    resolve({ url: 'test', key: 'testtest' })
-                } else {
-                    reject(new Error('Error'))
-                }
-            }, timeout)
-        })
+    const handleDeleteFile = async (key: string) => {
+        const result = await deleteFile(key)
+        if (isS3Error(result)) {
+            throw new Error(`Error in S3 key: ${key}`)
+        }
+
+        return
     }
 
     const handleUploadFile = async (file: File): Promise<S3FileData> => {
         const s3Key = await uploadFile(file)
 
         if (isS3Error(s3Key)) {
-            console.log(`Log: S3 upload error: ${s3Key}`)
-            throw new Error(`Error in S3 ${file.name}`)
+            throw new Error(`Error in S3 filename: ${file.name}`)
         }
 
         const link = await getURL(s3Key)
@@ -160,7 +155,7 @@ export const Documents = ({
                     label="Upload Documents"
                     accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                     uploadFile={handleUploadFile}
-                    deleteFile={(key: string) => fakeS3Request(true)}
+                    deleteFile={handleDeleteFile}
                     onLoadComplete={onLoadComplete}
                 />
 

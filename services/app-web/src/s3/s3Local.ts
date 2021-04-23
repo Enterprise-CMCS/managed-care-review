@@ -39,7 +39,31 @@ export function newLocalS3Client(
                     }
                 }
 
-                console.log('Unexpected Error putting file to S3', err)
+                console.log('Log: Unexpected Error putting file to S3', err)
+                throw err
+            }
+        },
+
+        deleteFile: async (s3Key: string): Promise<string | S3Error> => {
+            try {
+                const deleteResult = await s3Client
+                    .deleteObject({
+                        Bucket: bucketName,
+                        Key: s3Key,
+                    })
+                    .promise()
+
+                console.log('delete success',deleteResult)
+                return 'Success'
+            } catch (err) {
+                if (err.code === 'NetworkingError') {
+                    return {
+                        code: 'NETWORK_ERROR',
+                        message: 'Error saving file to the cloud.',
+                    }
+                }
+
+                console.log('Log: Unexpected Error deleting file on S3', err)
                 throw err
             }
         },

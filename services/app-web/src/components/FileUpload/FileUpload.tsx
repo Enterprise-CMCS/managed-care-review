@@ -19,7 +19,7 @@ type FileUploadProps = {
     label: string
     hint?: React.ReactNode
     uploadFile: (file: File) => Promise<S3FileData>
-    deleteFile: (key: string) => Promise<S3FileData>
+    deleteFile: (key: string) => Promise<void>
     onLoadComplete: ({ files }: { files: FileItemT[] }) => void
 } & JSX.IntrinsicElements['input']
 
@@ -77,10 +77,14 @@ export const FileUpload = ({
         return fileItems
     }
 
-    const deleteItem = (key: string) => {
+    const deleteItem = (id: string) => {
         // setLoadingStatus(null)
-        setFileItems((prevItems) => prevItems.filter((item) => item.id !== id))
-        deleteFile(key).catch(() => console.log('error deleting from s3'))
+        const key = fileItems.find((item) => item.id === id)?.key
+        setFileItems((prevItems) =>
+            prevItems.filter((item) => item.key !== key)
+        )
+        if (key !== undefined)
+            deleteFile(key).catch(() => console.log('error deleting from s3'))
     }
 
     const asyncS3Upload = (files: FileList) => {

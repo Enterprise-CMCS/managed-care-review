@@ -39,6 +39,25 @@ export function newAmplifyS3Client(): S3ClientT {
                 throw err
             }
         },
+      
+        deleteFile: async (filename: string): Promise<string | S3Error> => {
+            try {
+                const deleteResult = await Storage.vault.remove(filename)
+                console.log(deleteResult)
+                return 'Success'
+            } catch (err) {
+                if (err.name === 'Error' && err.message === 'Network Error') {
+                    console.log('Error deleting file', err)
+                    return {
+                        code: 'NETWORK_ERROR',
+                        message: 'Error deleting file from the cloud.',
+                    }
+                }
+
+                console.log('Unexpected Error deleting file from S3', err)
+                throw err
+            }
+        },
         getURL: async (s3key: string): Promise<string> => {
             const result = await Storage.vault.get(s3key)
             if (typeof result === 'string') {
