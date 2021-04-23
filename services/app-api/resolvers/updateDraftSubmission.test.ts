@@ -3,8 +3,11 @@ import { createTestClient } from 'apollo-server-testing'
 import { CreateDraftSubmissionInput, SubmissionType } from '../gen/gqlServer'
 import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
 import UPDATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/updateDraftSubmission.graphql'
-import FETCH_DRAFT_SUBMISSION from '../../app-graphql/src/queries/fetchDraftSubmission.graphql'
-import { constructTestServer, createTestDraftSubmission, fetchTestDraftSubmissionById } from '../testHelpers/gqlHelpers'
+import {
+    constructTestServer,
+    createTestDraftSubmission,
+    fetchTestDraftSubmissionById,
+} from '../testHelpers/gqlHelpers'
 
 describe('updateDraftSubmission', () => {
     it('updates a submission if the state matches', async () => {
@@ -22,7 +25,7 @@ describe('updateDraftSubmission', () => {
             programID: 'cnet',
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
-            documents: []
+            documents: [],
         }
 
         const updateResult = await mutate({
@@ -60,7 +63,7 @@ describe('updateDraftSubmission', () => {
 
     it('updates a submission to have documents', async () => {
         const server = constructTestServer()
-        const { query, mutate } = createTestClient(server)
+        const { mutate } = createTestClient(server)
 
         const createdDraft = await createTestDraftSubmission(mutate)
         const createdID = createdDraft.id
@@ -69,12 +72,12 @@ describe('updateDraftSubmission', () => {
             programID: 'cnet',
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
-            documents:[
+            documents: [
                 {
                     name: 'myfile.pdf',
-                    url: 'https://www.example.com'
-                }
-            ]
+                    url: 'https://www.example.com',
+                },
+            ],
         }
 
         const updateResult = await mutate({
@@ -89,28 +92,31 @@ describe('updateDraftSubmission', () => {
 
         expect(updateResult.errors).toBeUndefined()
 
-        const resultDraft1 = updateResult.data.updateDraftSubmission.draftSubmission
+        const resultDraft1 =
+            updateResult.data.updateDraftSubmission.draftSubmission
         expect(resultDraft1.id).toEqual(createdID)
-        expect(resultDraft1.documents).toEqual([ {
-            name: 'myfile.pdf',
-            url: 'https://www.example.com'
-        }])
+        expect(resultDraft1.documents).toEqual([
+            {
+                name: 'myfile.pdf',
+                url: 'https://www.example.com',
+            },
+        ])
 
         // Update with two more documents
         const updatedDraft2 = {
             programID: 'cnet',
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
-            documents:[
+            documents: [
                 {
                     name: 'myfile2.pdf',
-                    url: 'https://www.example.com'
+                    url: 'https://www.example.com',
                 },
                 {
                     name: 'myfile3.pdf',
-                    url: 'https://www.example.com'
-                }
-            ]
+                    url: 'https://www.example.com',
+                },
+            ],
         }
 
         const updateResult2 = await mutate({
@@ -122,10 +128,10 @@ describe('updateDraftSubmission', () => {
                 },
             },
         })
-        const resultDraft2 = updateResult2.data.updateDraftSubmission.draftSubmission
+        const resultDraft2 =
+            updateResult2.data.updateDraftSubmission.draftSubmission
         expect(resultDraft2.documents.length).toEqual(2)
         expect(resultDraft2.documents[0].name).toEqual('myfile2.pdf')
-
     })
 
     it('updates a submission to remove existing documents', async () => {
@@ -139,12 +145,12 @@ describe('updateDraftSubmission', () => {
             programID: 'cnet',
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
-            documents:[
+            documents: [
                 {
                     name: 'myfile.pdf',
-                    url: 'https://www.example.com'
-                }
-            ]
+                    url: 'https://www.example.com',
+                },
+            ],
         }
 
         const updateResult = await mutate({
@@ -161,17 +167,19 @@ describe('updateDraftSubmission', () => {
 
         const resultDraft = await fetchTestDraftSubmissionById(query, createdID)
         expect(resultDraft.id).toEqual(createdID)
-        expect(resultDraft.documents).toEqual([ {
-            name: 'myfile.pdf',
-            url: 'https://www.example.com'
-        }])
+        expect(resultDraft.documents).toEqual([
+            {
+                name: 'myfile.pdf',
+                url: 'https://www.example.com',
+            },
+        ])
 
         // Remove documents
         const updatedDraft2 = {
             programID: 'cnet',
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
-            documents:[]
+            documents: [],
         }
 
         const updateResult2 = await mutate({
@@ -183,7 +191,8 @@ describe('updateDraftSubmission', () => {
                 },
             },
         })
-        const resultDraft2 = updateResult2.data.updateDraftSubmission.draftSubmission
+        const resultDraft2 =
+            updateResult2.data.updateDraftSubmission.draftSubmission
         expect(resultDraft2.documents).toEqual([])
     })
 
@@ -196,7 +205,7 @@ describe('updateDraftSubmission', () => {
             programID: 'cnet',
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
-            documents: []
+            documents: [],
         }
 
         const updateResult = await mutate({
@@ -264,7 +273,7 @@ describe('updateDraftSubmission', () => {
             programID: 'cnet',
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
-            documents: []
+            documents: [],
         }
 
         const updateResult = await otherMutate({
@@ -298,8 +307,8 @@ describe('updateDraftSubmission', () => {
         const updatedDraft = {
             programID: 'wefwefwefew',
             submissionType: 'CONTRACT_AND_RATES',
-            submissionDescription: 'An updated submission',      
-            documents: []
+            submissionDescription: 'An updated submission',
+            documents: [],
         }
 
         const updateResult = await mutate({

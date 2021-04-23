@@ -81,6 +81,20 @@
                     "name": "CCC Plus"
                 }
             ]
+        },
+        {
+            "code": "AS",
+            "name": "American Samoa",
+            "programs": [
+                {
+                    "id": "mc-review-test",
+                    "name": "MC Review Test Program"
+                },
+                {
+                    "id": "mcrtpp",
+                    "name": "TPPlus"
+                }
+            ]
         }
     ]
 }
