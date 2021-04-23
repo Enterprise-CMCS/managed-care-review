@@ -7,6 +7,8 @@ import userEvent from '@testing-library/user-event'
 import { AuthProvider, AuthProviderProps } from '../contexts/AuthContext'
 
 import { PageProvider } from '../contexts/PageContext'
+import { S3Provider } from '../contexts/S3Context'
+import { testS3Client } from './s3Helpers'
 
 /* Render */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -33,7 +35,9 @@ const renderWithProviders = (
         <MockedProvider {...apolloProvider}>
             <Router history={testHistory}>
                 <AuthProvider authMode={'AWS_COGNITO'} {...authProvider}>
-                    <PageProvider>{ui}</PageProvider>
+                    <S3Provider client={testS3Client}>
+                        <PageProvider>{ui}</PageProvider>
+                    </S3Provider>
                 </AuthProvider>
             </Router>
         </MockedProvider>

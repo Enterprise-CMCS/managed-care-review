@@ -10,8 +10,6 @@ export const Loading = ({
 }): React.ReactElement | null => {
     const [showLoading, setShowLoading] = useState(false)
 
-    console.log('RENDERLOAS', showLoading)
-
     useEffect(() => {
         setTimeout(() => {
             setShowLoading(true)

@@ -6,7 +6,6 @@ plugins:
   - serverless-cloudfront-invalidate
 custom:
   stage: ${opt:stage, self:provider.stage}
-  api_region: ${cf:app-api-${self:custom.stage}.Region}
   api_url: ${cf:app-api-${self:custom.stage}.ApiGatewayRestApiUrl}
   application_endpoint_url: ${cf:ui-${self:custom.stage}.CloudFrontEndpointUrl}
   cognito_region: ${cf:ui-auth-${self:custom.stage}.Region}
@@ -14,8 +13,8 @@ custom:
   cognito_user_pool_id: ${cf:ui-auth-${self:custom.stage}.UserPoolId}
   cognito_client_id: ${cf:ui-auth-${self:custom.stage}.UserPoolClientId}
   cognito_user_pool_client_domain: ${cf:ui-auth-${self:custom.stage}.UserPoolClientDomain}
-  s3_attachments_bucket_region: ${cf:uploads-${self:custom.stage}.Region}
-  s3_attachments_bucket_name: ${cf:uploads-${self:custom.stage}.AttachmentsBucketName}
+  s3_documents_bucket_region: ${cf:uploads-${self:custom.stage}.Region}
+  s3_documents_bucket_name: ${cf:uploads-${self:custom.stage}.DocumentUploadsBucketName}
   ui_s3_bucket_name: ${cf:ui-${self:custom.stage}.S3BucketName}
   ui_cloudfront_distribution_id: ${cf:ui-${self:custom.stage}.CloudFrontDistributionId}
   storybook_s3_bucket_name: ${cf:storybook-${self:custom.stage}.S3BucketName}
@@ -51,13 +50,10 @@ custom:
         export REACT_APP_COGNITO_USER_POOL_ID=${self:custom.cognito_user_pool_id}
         export REACT_APP_COGNITO_USER_POOL_CLIENT_ID=${self:custom.cognito_client_id}
         export REACT_APP_COGNITO_USER_POOL_CLIENT_DOMAIN=${self:custom.cognito_user_pool_client_domain}
+        export REACT_APP_S3_REGION=${self:custom.s3_documents_bucket_region}
+        export REACT_APP_S3_DOCUMENTS_BUCKET=${self:custom.s3_documents_bucket_name}
         yarn run build
         yarn build-storybook
-        # export API_REGION=${self:custom.api_region}
-        # export S3_ATTACHMENTS_BUCKET_REGION=${self:custom.s3_attachments_bucket_region}
-        # export S3_ATTACHMENTS_BUCKET_NAME=${self:custom.s3_attachments_bucket_name}
-        # ./env.sh
-        # cp public/env-config.js build/env-config.js
 
 # The `provider` block defines where your service will be deployed
 provider:
