@@ -5,16 +5,21 @@ import {
     Label,
     FileInput,
 } from '@trussworks/react-uswds'
+
 import { FileItemT } from './FileItem'
 import { FileItemsList } from './FileItemsList'
 
+export type S3FileData = {
+    url: string
+    key: string
+}
 type FileUploadProps = {
     id: string
     name: string
     label: string
     hint?: React.ReactNode
-    uploadS3Files: () => Promise<void>
-    deleteS3Files: () => Promise<void>
+    uploadFile: (file: File) => Promise<S3FileData>
+    deleteFile: (key: string) => Promise<S3FileData>
     onLoadComplete: ({ files }: { files: FileItemT[] }) => void
 } & JSX.IntrinsicElements['input']
 
@@ -39,8 +44,8 @@ export const FileUpload = ({
     name,
     label,
     hint,
-    uploadS3Files,
-    deleteS3Files,
+    uploadFile,
+    deleteFile,
     onLoadComplete,
     ...inputProps
 }: FileUploadProps): React.ReactElement => {
@@ -65,34 +70,36 @@ export const FileUpload = ({
                 id: fileList[i].name,
                 name: fileList[i].name,
                 url: undefined,
+                key: undefined,
                 status: 'PENDING',
             })
         }
         return fileItems
     }
 
-    const deleteItem = (id: string) => {
+    const deleteItem = (key: string) => {
         // setLoadingStatus(null)
         setFileItems((prevItems) => prevItems.filter((item) => item.id !== id))
-        deleteS3Files().catch(() => console.log('error deleting from s3'))
+        deleteFile(key).catch(() => console.log('error deleting from s3'))
     }
 
-    const asyncS3Upload = (items: FileItemT[]) => {
+    const asyncS3Upload = (files: FileList) => {
         setLoadingStatus('UPLOADING')
-        items.forEach((item) => {
-            uploadS3Files()
-                .then(() => {
+        Array.from(files).forEach((file) => {
+            uploadFile(file)
+                .then((data) => {
                     setFileItems((prevItems) => {
                         const newItems = [...prevItems]
-                        return newItems.map((current) => {
-                            if (current.id === item.id) {
+                        return newItems.map((item) => {
+                            if (item.id === file.name) {
                                 return {
                                     ...item,
-                                    url: 'https://www.example.com',
+                                    url: data.url,
+                                    key: data.key,
                                     status: 'UPLOAD_COMPLETE',
                                 } as FileItemT
                             } else {
-                                return current
+                                return item
                             }
                         })
                     })
@@ -100,14 +107,14 @@ export const FileUpload = ({
                 .catch((e) => {
                     setFileItems((prevItems) => {
                         const newItems = [...prevItems]
-                        return newItems.map((current) => {
-                            if (current.id === item.id) {
+                        return newItems.map((item) => {
+                            if (item.id === file.name) {
                                 return {
                                     ...item,
                                     status: 'UPLOAD_ERROR',
                                 } as FileItemT
                             } else {
-                                return current
+                                return item
                             }
                         })
                     })
@@ -125,12 +132,16 @@ export const FileUpload = ({
         e: React.DragEvent | React.ChangeEvent
     ): void => {
         if (!fileInputRef?.current?.files) return
-        setFormError(null)
 
+        const files = fileInputRef.current.files
         const items = generateFileItems(fileInputRef.current.files)
-        fileInputKey.current = Math.random()
+
         setFileItems((array) => [...array, ...items])
-        asyncS3Upload(items)
+        asyncS3Upload(files)
+
+        // reset input
+        fileInputKey.current = Math.random()
+        setFormError(null)
     }
 
     return (

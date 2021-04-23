@@ -16,7 +16,8 @@ type FileStatus = typeof FileStatuses[number] // iterable union type
 export type FileItemT = {
     id: string
     name: string
-    url?: string
+    url?: string // only items uploaded to s3 have this
+    key?: string // only items uploaded to s3 have this
     status: FileStatus
 }
 

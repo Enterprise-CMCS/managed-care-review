@@ -14,8 +14,13 @@ import {
     DraftSubmission,
     useUpdateDraftSubmissionMutation,
 } from '../../../gen/gqlClient'
+import { useS3 } from '../../../contexts/S3Context'
+import { isS3Error } from '../../../s3'
 import PageHeading from '../../../components/PageHeading'
-import { FileUpload } from '../../../components/FileUpload/FileUpload'
+import {
+    FileUpload,
+    S3FileData,
+} from '../../../components/FileUpload/FileUpload'
 import { FileItemT } from '../../../components/FileUpload/FileItem'
 
 /* 
@@ -32,6 +37,7 @@ export const Documents = ({
     showValidations,
     draftSubmission,
 }: DocumentProps): React.ReactElement => {
+    const { uploadFile, getURL } = useS3()
     const [shouldValidate, setShouldValidate] = useState(showValidations)
     const [hasValidFiles, setHasValidFiles] = useState(false)
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
@@ -70,18 +76,28 @@ export const Documents = ({
     const onLoadComplete = ({ files }: { files: FileItemT[] }) => {
         setFileItems(files)
     }
-
-    const fakeS3Request = (success: boolean): Promise<void> => {
+    const fakeS3Request = (success: boolean): Promise<S3FileData> => {
         const timeout = Math.round(Math.random() * 4000 + 1000)
         return new Promise((resolve, reject) => {
             setTimeout(() => {
                 if (success) {
-                    resolve()
+                    resolve({ url: 'test', key: 'testtest' })
                 } else {
                     reject(new Error('Error'))
                 }
             }, timeout)
         })
+    }
+
+    const handleUploadFile = async (file: File): Promise<S3FileData> => {
+        const s3Key = await uploadFile(file)
+
+        if (isS3Error(s3Key)) {
+            throw new Error(`Error in S3 ${file.name}`)
+        }
+
+        const link = await getURL(s3Key)
+        return { key: s3Key, url: link }
     }
 
     const handleFormSubmit = async (e: React.FormEvent) => {
@@ -142,8 +158,8 @@ export const Documents = ({
                     name="documents"
                     label="Upload Documents"
                     accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                    uploadS3Files={() => fakeS3Request(true)}
-                    deleteS3Files={() => fakeS3Request(true)}
+                    uploadFile={handleUploadFile}
+                    deleteFile={(key: string) => fakeS3Request(true)}
                     onLoadComplete={onLoadComplete}
                 />
 
