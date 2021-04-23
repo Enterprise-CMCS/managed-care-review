@@ -26,7 +26,7 @@ const mockValidUser: UserType = {
     email: 'bob@dmas.mn.gov',
 }
 
-const mockDraftSubmission: DraftSubmission = {
+export const mockDraftSubmission: DraftSubmission = {
     createdAt: new Date(),
     updatedAt: new Date(),
     id: 'test-abc-123',
@@ -150,16 +150,20 @@ const fetchDraftSubmissionMock = ({
 type updateDraftSubmissionMockProps = {
     draftSubmission?: DraftSubmission | Partial<DraftSubmission>
     id: string
-    updates: DraftSubmissionUpdates
+    updates: DraftSubmissionUpdates | Partial<DraftSubmissionUpdates>
     statusCode: 200 | 403 | 500
 }
 
 const updateDraftSubmissionMock = ({
-    draftSubmission = mockDraftSubmission,
     id,
     updates,
     statusCode, // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }: updateDraftSubmissionMockProps): MockedResponse<Record<string, any>> => {
+    const mergedDraftSubmission = Object.assign(
+        {},
+        mockDraftSubmission,
+        updates
+    )
     switch (statusCode) {
         case 200:
             return {
@@ -176,7 +180,7 @@ const updateDraftSubmissionMock = ({
                 result: {
                     data: {
                         updateDraftSubmission: {
-                            draftSubmission,
+                            draftSubmission: mergedDraftSubmission,
                         },
                     },
                 },

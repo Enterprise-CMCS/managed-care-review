@@ -5,7 +5,7 @@ import { screen, waitFor } from '@testing-library/react'
 
 import {
     fetchCurrentUserMock,
-    createDraftSubmissionMock,
+    mockDraftSubmission,
 } from '../../utils/apolloUtils'
 import { renderWithProviders } from '../../utils/jestUtils'
 import { SubmissionType, SubmissionTypeFormValues } from './SubmissionType'
@@ -61,6 +61,23 @@ describe('SubmissionType', () => {
         await waitFor(() =>
             expect(
                 screen.getByRole('form', { name: 'New Submission Form' })
+            ).toBeInTheDocument()
+        )
+    })
+
+    it('displays with draft submission when expected', async () => {
+        renderWithProviders(
+            <SubmissionType draftSubmission={mockDraftSubmission} />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        await waitFor(() =>
+            expect(
+                screen.getByRole('form', { name: 'Submission Type Form' })
             ).toBeInTheDocument()
         )
     })
@@ -322,57 +339,6 @@ describe('SubmissionType', () => {
                         'You must provide a description of any major changes or updates'
                     )
                 ).toBeInTheDocument()
-            })
-        })
-
-        // Test is caught in infinite loop - need to revisit whats going on with AuthContext
-        // eslint-disable-next-line jest/no-disabled-tests
-        it.skip('if form fields are valid, navigate to /:id/contract-details when continue button is clicked', async () => {
-            const history = createMemoryHistory()
-
-            renderWithProviders(<SubmissionType />, {
-                authProvider: { authMode: 'LOCAL' },
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            statusCode: 200,
-                        }),
-                        createDraftSubmissionMock({
-                            statusCode: 200,
-                        }),
-                    ],
-                },
-                routerProvider: {
-                    route: '/submissions/new',
-                    routerProps: { history: history },
-                },
-            })
-
-            await waitFor(() => {
-                expect(
-                    screen.getByRole('heading', { name: 'Submission type' })
-                ).toBeInTheDocument()
-                expect(
-                    screen.getByRole('option', { name: 'MSHO' })
-                ).toBeInTheDocument()
-            })
-            // Fill in form to make valid
-            userEvent.click(screen.getByRole('option', { name: 'MSHO' }))
-            userEvent.click(screen.getByLabelText('Contract action only'))
-            userEvent.type(screen.getByRole('textbox'), 'a description')
-
-            // Click continue
-            userEvent.click(
-                screen.getByRole('button', {
-                    name: 'Continue',
-                })
-            )
-
-            await waitFor(() => {
-                expect(screen.getByText('Contract details')).toBeInTheDocument()
-                expect(history.location.pathname).toBe(
-                    '/submissions/test-id/contract-details'
-                )
             })
         })
     })

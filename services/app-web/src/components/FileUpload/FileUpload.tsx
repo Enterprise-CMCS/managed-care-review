@@ -8,17 +8,23 @@ import {
 import { FileItemT } from './FileItem'
 import { FileItemsList } from './FileItemsList'
 
-type DocumentUploadProps = {
+type FileUploadProps = {
     id: string
     name: string
-    // TODO: Refine types for real api calls
+    label: string
+    hint?: React.ReactNode
     uploadS3Files: () => Promise<void>
     deleteS3Files: () => Promise<void>
     onLoadComplete: ({ files }: { files: FileItemT[] }) => void
-}
+} & JSX.IntrinsicElements['input']
 
-/* 
-    Document Upload. Handles async upload of document files to S3 and displaying in line errors. 
+/*  FileUpload handles async file upload to S3 and displays inline errors per file. 
+    Tracks files as they are uploaded. Once files are no longer processing passes to parent with onLoadComplete.
+
+    Note: This component uses a ref to access files in the input. It also clears its own value after each change.
+    This is not standard behavior for an HTML input. However, rendering quickly allows us to take over handling of files
+    for upload and display in our custom FileItemList.
+
 
     TODO: Refactor asyncS3Upload to use Promise.all
     TODO: Disallow file upload of the same name
@@ -28,23 +34,29 @@ type DocumentUploadProps = {
     TODO: Check thoroughly for accessibility 
 */
 
-export const DocumentUpload = ({
+export const FileUpload = ({
     id,
     name,
+    label,
+    hint,
     uploadS3Files,
     deleteS3Files,
     onLoadComplete,
-    ...props
-}: DocumentUploadProps): React.ReactElement => {
-    const [fieldError, setFieldError] = useState<string | null>(null)
+    ...inputProps
+}: FileUploadProps): React.ReactElement => {
+    const [formError, setFormError] = useState<string | null>(null)
+    const [loadingStatus, setLoadingStatus] = useState<
+        null | 'UPLOADING' | 'COMPLETE'
+    >(null)
     const [fileItems, setFileItems] = useState<FileItemT[]>([])
-    const fileInputRef = useRef<HTMLInputElement>(null) // reference to the overall input
-    /*  
-        This component rewrites the FileInput key whenever user adds a new file to force re-render. 
-        Changing the key ensure we clears the input immediately and display our FileItemList in favor of built-in react-uswds FilePreview list.\
-        The key is a React.Key, should be a unique number
-    */
-    const fileInputKey = useRef(Math.random())
+    const fileInputRef = useRef<HTMLInputElement>(null) // reference to the HTML input which has files
+    const fileInputKey = useRef(Math.random()) // use of randomized key forces re-render of file input, and empties content on change
+
+    React.useEffect(() => {
+        if (loadingStatus === 'COMPLETE') {
+            onLoadComplete({ files: fileItems })
+        }
+    }, [fileItems, loadingStatus, onLoadComplete])
 
     const generateFileItems = (fileList: FileList) => {
         const fileItems: FileItemT[] = []
@@ -52,7 +64,7 @@ export const DocumentUpload = ({
             fileItems.push({
                 id: fileList[i].name,
                 name: fileList[i].name,
-                url: window.URL.createObjectURL(fileList[i]),
+                url: undefined,
                 status: 'PENDING',
             })
         }
@@ -60,11 +72,13 @@ export const DocumentUpload = ({
     }
 
     const deleteItem = (id: string) => {
+        // setLoadingStatus(null)
         setFileItems((prevItems) => prevItems.filter((item) => item.id !== id))
         deleteS3Files().catch(() => console.log('error deleting from s3'))
     }
 
     const asyncS3Upload = (items: FileItemT[]) => {
+        setLoadingStatus('UPLOADING')
         items.forEach((item) => {
             uploadS3Files()
                 .then(() => {
@@ -74,6 +88,7 @@ export const DocumentUpload = ({
                             if (current.id === item.id) {
                                 return {
                                     ...item,
+                                    url: 'https://www.example.com',
                                     status: 'UPLOAD_COMPLETE',
                                 } as FileItemT
                             } else {
@@ -83,7 +98,6 @@ export const DocumentUpload = ({
                     })
                 })
                 .catch((e) => {
-                    console.log('hello')
                     setFileItems((prevItems) => {
                         const newItems = [...prevItems]
                         return newItems.map((current) => {
@@ -97,12 +111,12 @@ export const DocumentUpload = ({
                             }
                         })
                     })
-                    setFieldError(
+                    setFormError(
                         'Some files have failed to upload, please retry.'
                     )
                 })
                 .finally(() => {
-                    console.log('upload complete')
+                    setLoadingStatus('COMPLETE')
                 })
         })
     }
@@ -111,7 +125,7 @@ export const DocumentUpload = ({
         e: React.DragEvent | React.ChangeEvent
     ): void => {
         if (!fileInputRef?.current?.files) return
-        setFieldError(null)
+        setFormError(null)
 
         const items = generateFileItems(fileInputRef.current.files)
         fileInputKey.current = Math.random()
@@ -121,12 +135,18 @@ export const DocumentUpload = ({
 
     return (
         <FormGroup>
-            <Label htmlFor={id}>Input accepts any kind of document</Label>
-            <span className="usa-hint" id={`${id}-hint`}>
-                Select any type of document
-            </span>
-            {fieldError && (
-                <ErrorMessage id={`${id}-error`}>{fieldError}</ErrorMessage>
+            <Label htmlFor={id}>{label}</Label>
+            {formError && (
+                <ErrorMessage id={`${id}-error`}>{formError}</ErrorMessage>
+            )}
+            {hint && (
+                <span
+                    id={`${id}-hint`}
+                    aria-labelledby={id}
+                    className="usa-hint margin-top-1"
+                >
+                    {hint}
+                </span>
             )}
             <FileInput
                 key={fileInputKey.current}
@@ -136,6 +156,7 @@ export const DocumentUpload = ({
                 multiple
                 onChange={handleFileInputChangeOrDrop}
                 onDrop={handleFileInputChangeOrDrop}
+                accept={inputProps.accept}
                 inputRef={fileInputRef}
             />
             <FileItemsList deleteItem={deleteItem} fileItems={fileItems} />

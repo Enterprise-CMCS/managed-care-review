@@ -11,9 +11,13 @@ export const Loading = ({
     const [showLoading, setShowLoading] = useState(false)
 
     useEffect(() => {
-        setTimeout(() => {
+        const timeout = setTimeout(() => {
             setShowLoading(true)
         }, delayMS)
+
+        return function cleanup() {
+            clearTimeout(timeout)
+        }
     }, [delayMS])
 
     if (!showLoading) {
