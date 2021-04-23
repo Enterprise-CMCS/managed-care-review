@@ -78,13 +78,14 @@ export const FileUpload = ({
     }
 
     const deleteItem = (id: string) => {
-        // setLoadingStatus(null)
         const key = fileItems.find((item) => item.id === id)?.key
         setFileItems((prevItems) =>
             prevItems.filter((item) => item.key !== key)
         )
         if (key !== undefined)
-            deleteFile(key).catch(() => console.log('error deleting from s3'))
+            deleteFile(key).catch(() =>
+                console.log('silent error deleting from s3')
+            )
     }
 
     const asyncS3Upload = (files: FileList) => {
@@ -136,7 +137,6 @@ export const FileUpload = ({
         e: React.DragEvent | React.ChangeEvent
     ): void => {
         if (!fileInputRef?.current?.files) return
-
         const files = fileInputRef.current.files
         const items = generateFileItems(fileInputRef.current.files)
 

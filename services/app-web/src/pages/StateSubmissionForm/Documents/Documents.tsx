@@ -178,7 +178,7 @@ export const Documents = ({
                     <Button
                         type="submit"
                         secondary={shouldValidate && !hasValidFiles}
-                        // disabled={shouldValidate && !hasValidFiles}
+                        disabled={shouldValidate && !hasValidFiles}
                     >
                         Continue
                     </Button>
