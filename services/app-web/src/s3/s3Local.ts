@@ -48,7 +48,7 @@ export function newLocalS3Client(
                 const deleteResult = await s3Client
                     .deleteObject({
                         Bucket: bucketName,
-                        Key: 's3Key',
+                        Key: s3Key,
                     })
                     .promise()
 
