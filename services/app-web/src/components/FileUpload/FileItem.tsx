@@ -3,7 +3,10 @@ import { Button } from '@trussworks/react-uswds'
 import classnames from 'classnames'
 import { SPACER_GIF } from './constants'
 
+import styles from './FileUpload.module.scss'
+
 export type FileStatus =
+    | 'DUPLICATE_NAME_ERROR'
     | 'PENDING'
     | 'UPLOAD_COMPLETE'
     | 'UPLOAD_ERROR'
@@ -19,13 +22,15 @@ export type FileItemT = {
 
 export type FileItemProps = {
     item: FileItemT
-    deleteItem: (id: string) => void
+    deleteItem: (item: FileItemT) => void
 }
 export const FileItem = ({
     item,
     deleteItem,
 }: FileItemProps): React.ReactElement => {
     const { name, status } = item
+    const hasDuplicateNameError = status === 'DUPLICATE_NAME_ERROR'
+    const hasUploadError = status === 'UPLOAD_ERROR'
     const isPDF = name.indexOf('.pdf') > 0
     const isWord = name.indexOf('.doc') > 0 || name.indexOf('.pages') > 0
     const isVideo = name.indexOf('.mov') > 0 || name.indexOf('.mp4') > 0
@@ -42,8 +47,31 @@ export const FileItem = ({
     })
 
     const handleDelete = (e: React.MouseEvent) => {
-        deleteItem(item.id)
+        deleteItem(item)
     }
+
+    const Error = (): React.ReactElement | null => {
+        if (hasDuplicateNameError)
+            return (
+                <>
+                    <span className={styles.fileItemError}>Duplicate file</span>
+                    <span className={styles.fileItemError}>Please remove</span>
+                </>
+            )
+        else if (hasUploadError)
+            return (
+                <>
+                    <span className={styles.fileItemError}>Upload failed</span>
+                    <span className={styles.fileItemError}>
+                        Please remove or retry
+                    </span>
+                </>
+            )
+        else {
+            return null
+        }
+    }
+
     return (
         <>
             <div>
@@ -55,7 +83,8 @@ export const FileItem = ({
                     className={imageClasses}
                 />
                 <span style={{ padding: '5px', marginRight: '5px' }}>
-                    {name}
+                    <Error />
+                    <span>{name}</span>
                 </span>
             </div>
             <Button type="button" size="small" unstyled onClick={handleDelete}>

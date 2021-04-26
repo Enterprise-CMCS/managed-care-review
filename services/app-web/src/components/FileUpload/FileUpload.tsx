@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react'
+import { v4 as uuidv4 } from 'uuid'
 import {
     ErrorMessage,
     FormGroup,
@@ -33,7 +34,6 @@ export type FileUploadProps = {
 
 
     TODO: Refactor asyncS3Upload to use Promise.all
-    TODO: Disallow file upload of the same name
     TODO: Style fix for many items in list or items have long document titles
     TODO: Check thoroughly for accessibility 
 */
@@ -62,31 +62,79 @@ export const FileUpload = ({
         }
     }, [fileItems, loadingStatus, onLoadComplete])
 
+    const isDuplicateItem = (
+        existingList: FileItemT[],
+        currentItem: FileItemT
+    ) => Boolean(existingList.some((item) => item.name === currentItem.name))
+
+    // Generate FileItems from the HTML FileList that is in the input on load or drop
     const generateFileItems = (fileList: FileList) => {
-        const fileItems: FileItemT[] = []
+        const items: FileItemT[] = []
         for (let i = 0; i < fileList?.length; i++) {
-            fileItems.push({
-                id: fileList[i].name,
+            const newItem: FileItemT = {
+                id: uuidv4(),
                 name: fileList[i].name,
                 url: undefined,
                 key: undefined,
                 status: 'PENDING',
-            })
+            }
+
+            if (isDuplicateItem(fileItems, newItem)) {
+                newItem.status = 'DUPLICATE_NAME_ERROR'
+            }
+
+            items.push(newItem)
         }
-        return fileItems
+
+        return items
     }
 
-    const deleteItem = (id: string) => {
-        const key = fileItems.find((item) => item.id === id)?.key
-        setFileItems((prevItems) =>
-            prevItems.filter((item) => item.key !== key)
-        )
+    // Remove deleted file items and update all file statuses
+    const refreshItems = (
+        existingList: FileItemT[],
+        deletedItem?: FileItemT
+    ) => {
+        const newList: FileItemT[] = []
+        existingList.forEach((currentItem) => {
+            if (deletedItem && currentItem.id === deletedItem.id) return null
+            // Update formerly duplicate item status if a duplicate item has been deleted
+            if (
+                currentItem.status === 'DUPLICATE_NAME_ERROR' &&
+                !isDuplicateItem(newList, currentItem)
+            ) {
+                if (currentItem.key !== undefined) {
+                    // we know S3 succeeded
+                    newList.push({
+                        ...currentItem,
+                        status: 'UPLOAD_COMPLETE',
+                    })
+                } else {
+                    newList.push({
+                        // user should retry S3 upload
+                        ...currentItem,
+                        status: 'UPLOAD_ERROR',
+                    })
+                }
+            } else {
+                newList.push(currentItem)
+            }
+        })
+        return newList
+    }
+
+    const deleteItem = (deletedItem: FileItemT) => {
+        const key = fileItems.find((item) => item.id === deletedItem.id)?.key
         if (key !== undefined)
             deleteFile(key).catch(() =>
                 console.log('silent error deleting from s3')
             )
-    }
 
+        setFileItems((prevItems) => {
+            return refreshItems(prevItems, deletedItem)
+        })
+    }
+    // Upload to S3 and update file items in component state with the async loading status
+    // This includes moving from pending/loading UI to display success or errors
     const asyncS3Upload = (files: FileList) => {
         setLoadingStatus('UPLOADING')
         Array.from(files).forEach((file) => {
@@ -95,12 +143,17 @@ export const FileUpload = ({
                     setFileItems((prevItems) => {
                         const newItems = [...prevItems]
                         return newItems.map((item) => {
-                            if (item.id === file.name) {
+                            if (item.name === file.name) {
                                 return {
                                     ...item,
                                     url: data.url,
                                     key: data.key,
-                                    status: 'UPLOAD_COMPLETE',
+                                    // In general we update the UI status for file items as uploads to S3 complete
+                                    // However, files with duplicate name errors are an exception. They are uploaded to s3 silently.
+                                    status:
+                                        item.status === 'DUPLICATE_NAME_ERROR'
+                                            ? item.status
+                                            : 'UPLOAD_COMPLETE',
                                 } as FileItemT
                             } else {
                                 return item
@@ -109,6 +162,7 @@ export const FileUpload = ({
                     })
                 })
                 .catch((e) => {
+                    console.log(e, file)
                     setFileItems((prevItems) => {
                         const newItems = [...prevItems]
                         return newItems.map((item) => {
@@ -135,7 +189,7 @@ export const FileUpload = ({
     const handleFileInputChangeOrDrop = (
         e: React.DragEvent | React.ChangeEvent
     ): void => {
-        // return early to ensure we display errors when invalid errors are dropped
+        // return early to ensure we display errors when invalid files are dropped
         if (
             !fileInputRef?.current?.files ||
             fileInputRef?.current?.files.length === 0
