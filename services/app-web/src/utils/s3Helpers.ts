@@ -4,8 +4,8 @@ export const testS3Client: S3ClientT = {
     uploadFile: async (file: File): Promise<string> => {
         return `${Date.now()}-${file.name}`
     },
-    deleteFile: async (filename: string): Promise<string> => {
-        return `${Date.now()}-${filename}`
+    deleteFile: async (filename: string): Promise<void> => {
+        return 
     },
     getS3URL: async (s3key: string, fileName: string): Promise<string> => {
             return `fakes3://fake-bucket/${s3key}/${fileName}`

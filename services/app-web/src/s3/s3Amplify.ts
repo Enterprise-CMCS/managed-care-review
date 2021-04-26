@@ -40,11 +40,11 @@ export function newAmplifyS3Client(bucketName: string): S3ClientT {
             }
         },
       
-        deleteFile: async (filename: string): Promise<string | S3Error> => {
+        deleteFile: async (filename: string): Promise<void| S3Error> => {
             try {
                 const deleteResult = await Storage.vault.remove(filename)
                 console.log(deleteResult)
-                return 'Success'
+                return 
             } catch (err) {
                 if (err.name === 'Error' && err.message === 'Network Error') {
                     console.log('Error deleting file', err)

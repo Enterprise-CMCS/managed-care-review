@@ -1,17 +1,13 @@
 import React from 'react'
 import { Button } from '@trussworks/react-uswds'
 import classnames from 'classnames'
+import { SPACER_GIF } from './constants'
 
-const SPACER_GIF =
-    'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
-
-export const FileStatuses = [
-    'PENDING',
-    'UPLOAD_COMPLETE',
-    'UPLOAD_ERROR',
-    'SAVED_TO_SUBMISSION',
-] as const
-type FileStatus = typeof FileStatuses[number] // iterable union type
+export type FileStatus =
+    | 'PENDING'
+    | 'UPLOAD_COMPLETE'
+    | 'UPLOAD_ERROR'
+    | 'SAVED_TO_SUBMISSION'
 
 export type FileItemT = {
     id: string
@@ -21,13 +17,14 @@ export type FileItemT = {
     status: FileStatus
 }
 
+export type FileItemProps = {
+    item: FileItemT
+    deleteItem: (id: string) => void
+}
 export const FileItem = ({
     item,
     deleteItem,
-}: {
-    item: FileItemT
-    deleteItem: (id: string) => void
-}): React.ReactElement => {
+}: FileItemProps): React.ReactElement => {
     const { name, status } = item
     const isPDF = name.indexOf('.pdf') > 0
     const isWord = name.indexOf('.doc') > 0 || name.indexOf('.pages') > 0

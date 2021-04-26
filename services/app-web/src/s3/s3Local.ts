@@ -21,7 +21,7 @@ export function newLocalS3Client(
             const filename = `${Date.now()}-${file.name}`
 
             try {
-                const putResult = await s3Client
+                await s3Client
                     .putObject({
                         Bucket: bucketName,
                         Key: filename,
@@ -29,7 +29,6 @@ export function newLocalS3Client(
                     })
                     .promise()
 
-                console.log('data this worked', putResult)
                 return filename
             } catch (err) {
                 if (err.code === 'NetworkingError') {
@@ -44,17 +43,17 @@ export function newLocalS3Client(
             }
         },
 
-        deleteFile: async (s3Key: string): Promise<string | S3Error> => {
+        deleteFile: async (s3Key: string): Promise<void | S3Error> => {
             try {
                 const deleteResult = await s3Client
                     .deleteObject({
                         Bucket: bucketName,
-                        Key: s3Key,
+                        Key: 's3Key',
                     })
                     .promise()
 
                 console.log('delete success',deleteResult)
-                return 'Success'
+                return 
             } catch (err) {
                 if (err.code === 'NetworkingError') {
                     return {

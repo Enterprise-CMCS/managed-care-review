@@ -14,7 +14,7 @@ export type S3FileData = {
     key: string
     s3URL: string
 }
-type FileUploadProps = {
+export type FileUploadProps = {
     id: string
     name: string
     label: string
@@ -34,8 +34,6 @@ type FileUploadProps = {
 
     TODO: Refactor asyncS3Upload to use Promise.all
     TODO: Disallow file upload of the same name
-    TODO: Disallow files that are not doc file type
-    TODO: Implement inline error handling (when a specific file item fails to upload)
     TODO: Style fix for many items in list or items have long document titles
     TODO: Check thoroughly for accessibility 
 */
@@ -137,10 +135,17 @@ export const FileUpload = ({
     const handleFileInputChangeOrDrop = (
         e: React.DragEvent | React.ChangeEvent
     ): void => {
-        if (!fileInputRef?.current?.files) return
+        // return early to ensure we display errors when invalid errors are dropped
+        if (
+            !fileInputRef?.current?.files ||
+            fileInputRef?.current?.files.length === 0
+        )
+            return
+
         const files = fileInputRef.current.files
         const items = generateFileItems(fileInputRef.current.files)
 
+        // start upload and display pending files
         setFileItems((array) => [...array, ...items])
         asyncS3Upload(files)
 
