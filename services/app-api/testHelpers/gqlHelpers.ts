@@ -7,8 +7,11 @@ import FETCH_DRAFT_SUBMISSION from '../../app-graphql/src/queries/fetchDraftSubm
 import typeDefs from '../../app-graphql/src/schema.graphql'
 import { configureResolvers } from '../resolvers'
 import { Context } from '../handlers/apollo_gql'
-import { CreateDraftSubmissionInput, DraftSubmission, SubmissionType } from '../gen/gqlServer'
-import { Store, } from '../store/store'
+import {
+    CreateDraftSubmissionInput,
+    DraftSubmission,
+    SubmissionType,
+} from '../gen/gqlServer'
 
 const store = getTestStore()
 
@@ -37,7 +40,9 @@ const constructTestServer = (
         context,
     })
 
-const createTestDraftSubmission = async (mutate: ApolloServerTestClient['mutate']): Promise<DraftSubmission> => {
+const createTestDraftSubmission = async (
+    mutate: ApolloServerTestClient['mutate']
+): Promise<DraftSubmission> => {
     const input: CreateDraftSubmissionInput = {
         programID: 'smmc',
         submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
@@ -45,23 +50,32 @@ const createTestDraftSubmission = async (mutate: ApolloServerTestClient['mutate'
     }
     const result = await mutate({
         mutation: CREATE_DRAFT_SUBMISSION,
-        variables: { input},
+        variables: { input },
     })
-    if (result.errors) throw new Error('createTestDraftSubmission mutation failed with errors')
+    if (result.errors)
+        throw new Error('createTestDraftSubmission mutation failed with errors')
 
     return result.data.createDraftSubmission.draftSubmission
 }
 
-const fetchTestDraftSubmissionById = async (query: ApolloServerTestClient['query'], submissionID: string): Promise<DraftSubmission> => {
-     const input = { submissionID }
+const fetchTestDraftSubmissionById = async (
+    query: ApolloServerTestClient['query'],
+    submissionID: string
+): Promise<DraftSubmission> => {
+    const input = { submissionID }
     const result = await query({
         query: FETCH_DRAFT_SUBMISSION,
         variables: { input },
     })
 
-    if (result.errors) throw new Error('fetchTestDraftSubmission query failed with errors')
+    if (result.errors)
+        throw new Error('fetchTestDraftSubmission query failed with errors')
 
     return result.data.fetchDraftSubmission.draftSubmission
 }
 
-export { constructTestServer, createTestDraftSubmission, fetchTestDraftSubmissionById  }
+export {
+    constructTestServer,
+    createTestDraftSubmission,
+    fetchTestDraftSubmissionById,
+}

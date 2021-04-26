@@ -59,24 +59,18 @@ export const StateSubmissionForm = (): React.ReactElement => {
     return (
         <GridContainer>
             <Switch>
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_TYPE}
-                    render={(props) => (
-                        <SubmissionType draftSubmission={draft} {...props} />
-                    )}
-                />
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                    component={ContractDetails}
-                />
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_DOCUMENTS}
-                    component={Documents}
-                />
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
-                    component={ReviewSubmit}
-                />
+                <Route path={RoutesRecord.SUBMISSIONS_TYPE}>
+                    <SubmissionType draftSubmission={draft} />
+                </Route>
+                <Route path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}>
+                    <ContractDetails draftSubmission={draft} />
+                </Route>
+                <Route path={RoutesRecord.SUBMISSIONS_DOCUMENTS}>
+                    <Documents draftSubmission={draft} />
+                </Route>
+                <Route path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}>
+                    <ReviewSubmit />
+                </Route>
             </Switch>
         </GridContainer>
     )
