@@ -14,8 +14,13 @@ import {
     DraftSubmission,
     useUpdateDraftSubmissionMutation,
 } from '../../../gen/gqlClient'
+import { useS3 } from '../../../contexts/S3Context'
+import { isS3Error } from '../../../s3'
 import PageHeading from '../../../components/PageHeading'
-import { FileUpload } from '../../../components/FileUpload/FileUpload'
+import {
+    FileUpload,
+    S3FileData,
+} from '../../../components/FileUpload/FileUpload'
 import { FileItemT } from '../../../components/FileUpload/FileItem'
 
 /* 
@@ -32,6 +37,7 @@ export const Documents = ({
     showValidations,
     draftSubmission,
 }: DocumentProps): React.ReactElement => {
+    const { deleteFile, uploadFile, getURL, getS3URL } = useS3()
     const [shouldValidate, setShouldValidate] = useState(showValidations)
     const [hasValidFiles, setHasValidFiles] = useState(false)
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
@@ -70,23 +76,32 @@ export const Documents = ({
     const onLoadComplete = ({ files }: { files: FileItemT[] }) => {
         setFileItems(files)
     }
+    const handleDeleteFile = async (key: string) => {
+        const result = await deleteFile(key)
+        if (isS3Error(result)) {
+            throw new Error(`Error in S3 key: ${key}`)
+        }
 
-    const fakeS3Request = (success: boolean): Promise<void> => {
-        const timeout = Math.round(Math.random() * 4000 + 1000)
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                if (success) {
-                    resolve()
-                } else {
-                    reject(new Error('Error'))
-                }
-            }, timeout)
-        })
+        return
+    }
+
+    const handleUploadFile = async (file: File): Promise<S3FileData> => {
+        const s3Key = await uploadFile(file)
+
+        if (isS3Error(s3Key)) {
+            throw new Error(`Error in S3 filename: ${file.name}`)
+        }
+
+        const s3URL = await getS3URL(s3Key, file.name)
+        const link = await getURL(s3Key)
+        return { key: s3Key, url: link, s3URL }
     }
 
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setShouldValidate(true)
+        if (!hasValidFiles) return
+
         const documents = fileItems.map((file) => {
             if (!file.url)
                 throw Error(
@@ -95,6 +110,7 @@ export const Documents = ({
             return {
                 name: file.name,
                 url: file.url,
+                s3URL: 'fakeS3URL',
             }
         })
 
@@ -104,7 +120,6 @@ export const Documents = ({
             submissionDescription: draftSubmission.submissionDescription,
             documents,
         }
-
         try {
             const data = await updateDraftSubmission({
                 variables: {
@@ -142,8 +157,8 @@ export const Documents = ({
                     name="documents"
                     label="Upload Documents"
                     accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                    uploadS3Files={() => fakeS3Request(true)}
-                    deleteS3Files={() => fakeS3Request(true)}
+                    uploadFile={handleUploadFile}
+                    deleteFile={handleDeleteFile}
                     onLoadComplete={onLoadComplete}
                 />
 
@@ -166,7 +181,7 @@ export const Documents = ({
                     <Button
                         type="submit"
                         secondary={shouldValidate && !hasValidFiles}
-                        // disabled={shouldValidate && !hasValidFiles}
+                        disabled={shouldValidate && !hasValidFiles}
                     >
                         Continue
                     </Button>

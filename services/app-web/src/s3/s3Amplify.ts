@@ -13,7 +13,7 @@ function assertIsS3PutResponse(val: unknown): asserts val is s3PutResponse {
     }
 }
 
-export function newAmplifyS3Client(): S3ClientT {
+export function newAmplifyS3Client(bucketName: string): S3ClientT {
     return {
         uploadFile: async (file: File): Promise<string | S3Error> => {
             const filename = `${Date.now()}-${file.name}`
@@ -38,6 +38,29 @@ export function newAmplifyS3Client(): S3ClientT {
                 console.log('Unexpected Error putting file to S3', err)
                 throw err
             }
+        },
+      
+        deleteFile: async (filename: string): Promise<void| S3Error> => {
+            try {
+                const deleteResult = await Storage.vault.remove(filename)
+                console.log(deleteResult)
+                return 
+            } catch (err) {
+                if (err.name === 'Error' && err.message === 'Network Error') {
+                    console.log('Error deleting file', err)
+                    return {
+                        code: 'NETWORK_ERROR',
+                        message: 'Error deleting file from the cloud.',
+                    }
+                }
+
+                console.log('Unexpected Error deleting file from S3', err)
+                throw err
+            }
+        },
+        getS3URL: async (s3key: string, fileName: string,): Promise<string> => {
+            console.log(`s3://${bucketName}/${s3key}/${fileName}`)
+            return `s3://${bucketName}/${s3key}/${fileName}`
         },
         getURL: async (s3key: string): Promise<string> => {
             const result = await Storage.vault.get(s3key)

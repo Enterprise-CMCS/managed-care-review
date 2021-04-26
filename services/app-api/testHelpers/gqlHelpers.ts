@@ -7,11 +7,7 @@ import FETCH_DRAFT_SUBMISSION from '../../app-graphql/src/queries/fetchDraftSubm
 import typeDefs from '../../app-graphql/src/schema.graphql'
 import { configureResolvers } from '../resolvers'
 import { Context } from '../handlers/apollo_gql'
-import {
-    CreateDraftSubmissionInput,
-    DraftSubmission,
-    SubmissionType,
-} from '../gen/gqlServer'
+import { CreateDraftSubmissionInput, DraftSubmission, SubmissionType } from '../gen/gqlServer'
 
 const store = getTestStore()
 

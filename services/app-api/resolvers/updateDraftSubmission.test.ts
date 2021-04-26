@@ -63,7 +63,7 @@ describe('updateDraftSubmission', () => {
 
     it('updates a submission to have documents', async () => {
         const server = constructTestServer()
-        const { mutate } = createTestClient(server)
+        const {  mutate } = createTestClient(server)
 
         const createdDraft = await createTestDraftSubmission(mutate)
         const createdID = createdDraft.id
@@ -76,8 +76,9 @@ describe('updateDraftSubmission', () => {
                 {
                     name: 'myfile.pdf',
                     url: 'https://www.example.com',
-                },
-            ],
+                    s3URL: 'fakeS3URL'
+                }
+            ]
         }
 
         const updateResult = await mutate({
@@ -95,12 +96,11 @@ describe('updateDraftSubmission', () => {
         const resultDraft1 =
             updateResult.data.updateDraftSubmission.draftSubmission
         expect(resultDraft1.id).toEqual(createdID)
-        expect(resultDraft1.documents).toEqual([
-            {
-                name: 'myfile.pdf',
-                url: 'https://www.example.com',
-            },
-        ])
+        expect(resultDraft1.documents).toEqual([ {
+            name: 'myfile.pdf',
+            url: 'https://www.example.com',
+            s3URL: 'fakeS3URL'
+        }])
 
         // Update with two more documents
         const updatedDraft2 = {
@@ -111,12 +111,14 @@ describe('updateDraftSubmission', () => {
                 {
                     name: 'myfile2.pdf',
                     url: 'https://www.example.com',
+                    s3URL: 'fakeS3URL'
                 },
                 {
                     name: 'myfile3.pdf',
                     url: 'https://www.example.com',
-                },
-            ],
+                    s3URL: 'fakeS3URL'
+                }
+            ]
         }
 
         const updateResult2 = await mutate({
@@ -149,8 +151,9 @@ describe('updateDraftSubmission', () => {
                 {
                     name: 'myfile.pdf',
                     url: 'https://www.example.com',
-                },
-            ],
+                    s3URL: 'fakeS3URL'
+                }
+            ]
         }
 
         const updateResult = await mutate({
@@ -167,12 +170,11 @@ describe('updateDraftSubmission', () => {
 
         const resultDraft = await fetchTestDraftSubmissionById(query, createdID)
         expect(resultDraft.id).toEqual(createdID)
-        expect(resultDraft.documents).toEqual([
-            {
-                name: 'myfile.pdf',
-                url: 'https://www.example.com',
-            },
-        ])
+        expect(resultDraft.documents).toEqual([ {
+            name: 'myfile.pdf',
+            url: 'https://www.example.com',
+            s3URL: 'fakeS3URL'
+        }])
 
         // Remove documents
         const updatedDraft2 = {

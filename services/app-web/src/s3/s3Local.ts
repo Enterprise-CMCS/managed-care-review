@@ -21,7 +21,7 @@ export function newLocalS3Client(
             const filename = `${Date.now()}-${file.name}`
 
             try {
-                const putResult = await s3Client
+                await s3Client
                     .putObject({
                         Bucket: bucketName,
                         Key: filename,
@@ -29,7 +29,6 @@ export function newLocalS3Client(
                     })
                     .promise()
 
-                console.log('data this worked', putResult)
                 return filename
             } catch (err) {
                 if (err.code === 'NetworkingError') {
@@ -39,9 +38,37 @@ export function newLocalS3Client(
                     }
                 }
 
-                console.log('Unexpected Error putting file to S3', err)
+                console.log('Log: Unexpected Error putting file to S3', err)
                 throw err
             }
+        },
+
+        deleteFile: async (s3Key: string): Promise<void | S3Error> => {
+            try {
+                const deleteResult = await s3Client
+                    .deleteObject({
+                        Bucket: bucketName,
+                        Key: 's3Key',
+                    })
+                    .promise()
+
+                console.log('delete success',deleteResult)
+                return 
+            } catch (err) {
+                if (err.code === 'NetworkingError') {
+                    return {
+                        code: 'NETWORK_ERROR',
+                        message: 'Error saving file to the cloud.',
+                    }
+                }
+
+                console.log('Log: Unexpected Error deleting file on S3', err)
+                throw err
+            }
+        },
+        getS3URL: async (s3key: string, filename: string,): Promise<string> => {
+            // ignore what's passed in as the bucket and use whats in LocalS3Client
+            return `s3://${bucketName}/${s3key}/${filename}`
         },
         getURL: async (s3key: string): Promise<string> => {
             const params = { Key: s3key }

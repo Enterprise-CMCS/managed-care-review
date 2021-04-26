@@ -5,16 +5,22 @@ import {
     Label,
     FileInput,
 } from '@trussworks/react-uswds'
+
 import { FileItemT } from './FileItem'
 import { FileItemsList } from './FileItemsList'
 
-type FileUploadProps = {
+export type S3FileData = {
+    url: string
+    key: string
+    s3URL: string
+}
+export type FileUploadProps = {
     id: string
     name: string
     label: string
     hint?: React.ReactNode
-    uploadS3Files: () => Promise<void>
-    deleteS3Files: () => Promise<void>
+    uploadFile: (file: File) => Promise<S3FileData>
+    deleteFile: (key: string) => Promise<void>
     onLoadComplete: ({ files }: { files: FileItemT[] }) => void
 } & JSX.IntrinsicElements['input']
 
@@ -28,8 +34,6 @@ type FileUploadProps = {
 
     TODO: Refactor asyncS3Upload to use Promise.all
     TODO: Disallow file upload of the same name
-    TODO: Disallow files that are not doc file type
-    TODO: Implement inline error handling (when a specific file item fails to upload)
     TODO: Style fix for many items in list or items have long document titles
     TODO: Check thoroughly for accessibility 
 */
@@ -39,8 +43,8 @@ export const FileUpload = ({
     name,
     label,
     hint,
-    uploadS3Files,
-    deleteS3Files,
+    uploadFile,
+    deleteFile,
     onLoadComplete,
     ...inputProps
 }: FileUploadProps): React.ReactElement => {
@@ -65,6 +69,7 @@ export const FileUpload = ({
                 id: fileList[i].name,
                 name: fileList[i].name,
                 url: undefined,
+                key: undefined,
                 status: 'PENDING',
             })
         }
@@ -72,27 +77,33 @@ export const FileUpload = ({
     }
 
     const deleteItem = (id: string) => {
-        // setLoadingStatus(null)
-        setFileItems((prevItems) => prevItems.filter((item) => item.id !== id))
-        deleteS3Files().catch(() => console.log('error deleting from s3'))
+        const key = fileItems.find((item) => item.id === id)?.key
+        setFileItems((prevItems) =>
+            prevItems.filter((item) => item.key !== key)
+        )
+        if (key !== undefined)
+            deleteFile(key).catch(() =>
+                console.log('silent error deleting from s3')
+            )
     }
 
-    const asyncS3Upload = (items: FileItemT[]) => {
+    const asyncS3Upload = (files: FileList) => {
         setLoadingStatus('UPLOADING')
-        items.forEach((item) => {
-            uploadS3Files()
-                .then(() => {
+        Array.from(files).forEach((file) => {
+            uploadFile(file)
+                .then((data) => {
                     setFileItems((prevItems) => {
                         const newItems = [...prevItems]
-                        return newItems.map((current) => {
-                            if (current.id === item.id) {
+                        return newItems.map((item) => {
+                            if (item.id === file.name) {
                                 return {
                                     ...item,
-                                    url: 'https://www.example.com',
+                                    url: data.url,
+                                    key: data.key,
                                     status: 'UPLOAD_COMPLETE',
                                 } as FileItemT
                             } else {
-                                return current
+                                return item
                             }
                         })
                     })
@@ -100,14 +111,14 @@ export const FileUpload = ({
                 .catch((e) => {
                     setFileItems((prevItems) => {
                         const newItems = [...prevItems]
-                        return newItems.map((current) => {
-                            if (current.id === item.id) {
+                        return newItems.map((item) => {
+                            if (item.id === file.name) {
                                 return {
                                     ...item,
                                     status: 'UPLOAD_ERROR',
                                 } as FileItemT
                             } else {
-                                return current
+                                return item
                             }
                         })
                     })
@@ -124,13 +135,23 @@ export const FileUpload = ({
     const handleFileInputChangeOrDrop = (
         e: React.DragEvent | React.ChangeEvent
     ): void => {
-        if (!fileInputRef?.current?.files) return
-        setFormError(null)
+        // return early to ensure we display errors when invalid errors are dropped
+        if (
+            !fileInputRef?.current?.files ||
+            fileInputRef?.current?.files.length === 0
+        )
+            return
 
+        const files = fileInputRef.current.files
         const items = generateFileItems(fileInputRef.current.files)
-        fileInputKey.current = Math.random()
+
+        // start upload and display pending files
         setFileItems((array) => [...array, ...items])
-        asyncS3Upload(items)
+        asyncS3Upload(files)
+
+        // reset input
+        fileInputKey.current = Math.random()
+        setFormError(null)
     }
 
     return (

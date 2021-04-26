@@ -70,6 +70,7 @@ type Program {
 type Document {
     name: String!
     url: String!
+    s3URL: String!
 }
 
 enum SubmissionType {
@@ -93,6 +94,7 @@ type DraftSubmission {
 input DocumentInput {
     name: String!
     url: String!
+    s3URL: String!
 }
 input DraftSubmissionUpdates {
     programID: String!

@@ -17,9 +17,14 @@ export class DocumentStoreT {
     @attribute()
     url: string
 
+    @attribute()
+    s3URL: string
+
+
     constructor() {
         this.name = '',
         this.url = ''
+        this.s3URL = ''
     }
 }
 @table('draft-submissions')
