@@ -100,6 +100,8 @@ export const Documents = ({
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setShouldValidate(true)
+        if (!hasValidFiles) return
+
         const documents = fileItems.map((file) => {
             if (!file.url)
                 throw Error(
@@ -118,7 +120,6 @@ export const Documents = ({
             submissionDescription: draftSubmission.submissionDescription,
             documents,
         }
-
         try {
             const data = await updateDraftSubmission({
                 variables: {
