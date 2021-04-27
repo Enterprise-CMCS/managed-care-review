@@ -147,14 +147,14 @@ export const Documents = ({
             <PageHeading headingLevel="h2"> Documents </PageHeading>
             <Form className="usa-form--large" onSubmit={handleFormSubmit}>
                 {shouldValidate && !hasValidFiles && (
-                    <Alert type="error" heading="Missing Documents">
+                    <Alert type="error" heading="Missing documents">
                         You must upload at least one document
                     </Alert>
                 )}
                 <FileUpload
                     id="documents"
                     name="documents"
-                    label="Upload Documents"
+                    label="Upload documents"
                     accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                     uploadFile={handleUploadFile}
                     deleteFile={handleDeleteFile}
