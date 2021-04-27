@@ -4,9 +4,11 @@ import { FileItem, FileItemT, FileStatus } from './FileItem'
 export const FileItemsList = ({
     fileItems,
     deleteItem,
+    retryItem,
 }: {
     fileItems: FileItemT[]
     deleteItem: (id: FileItemT) => void
+    retryItem: (item: FileItemT) => void
 }): React.ReactElement => {
     const hasError = (status: FileStatus) => {
         return status === 'UPLOAD_ERROR' || status === 'DUPLICATE_NAME_ERROR'
@@ -34,10 +36,15 @@ export const FileItemsList = ({
                     style={{
                         display: 'flex',
                         justifyContent: 'space-between',
+                        padding: '10px',
                         pointerEvents: 'all',
                     }}
                 >
-                    <FileItem deleteItem={deleteItem} item={item} />
+                    <FileItem
+                        deleteItem={deleteItem}
+                        retryItem={retryItem}
+                        item={item}
+                    />
                 </li>
             ))}
         </ul>

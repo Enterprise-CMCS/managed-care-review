@@ -147,10 +147,9 @@ export const Documents = ({
             <PageHeading headingLevel="h2"> Documents </PageHeading>
             <Form className="usa-form--large" onSubmit={handleFormSubmit}>
                 {shouldValidate && !hasValidFiles && (
-                    <Alert
-                        type="error"
-                        heading="Oops! Something went wrong. Invalid files or no files"
-                    />
+                    <Alert type="error" heading="Missing Documents">
+                        You must upload at least one document
+                    </Alert>
                 )}
                 <FileUpload
                     id="documents"

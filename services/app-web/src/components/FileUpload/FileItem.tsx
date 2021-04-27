@@ -15,6 +15,7 @@ export type FileStatus =
 export type FileItemT = {
     id: string
     name: string
+    file?: File // only items that are not uploaded to s3 have this
     url?: string // only items uploaded to s3 have this
     key?: string // only items uploaded to s3 have this
     status: FileStatus
@@ -23,10 +24,12 @@ export type FileItemT = {
 export type FileItemProps = {
     item: FileItemT
     deleteItem: (item: FileItemT) => void
+    retryItem: (item: FileItemT) => void
 }
 export const FileItem = ({
     item,
     deleteItem,
+    retryItem,
 }: FileItemProps): React.ReactElement => {
     const { name, status } = item
     const hasDuplicateNameError = status === 'DUPLICATE_NAME_ERROR'
@@ -50,19 +53,29 @@ export const FileItem = ({
         deleteItem(item)
     }
 
+    const handleRetry = (e: React.MouseEvent) => {
+        retryItem(item)
+    }
+
     const Error = (): React.ReactElement | null => {
         if (hasDuplicateNameError)
             return (
                 <>
-                    <span className={styles.fileItemError}>Duplicate file</span>
-                    <span className={styles.fileItemError}>Please remove</span>
+                    <span className={styles.fileItemErrorMessage}>
+                        Duplicate file
+                    </span>
+                    <span className={styles.fileItemErrorMessage}>
+                        Please remove
+                    </span>
                 </>
             )
         else if (hasUploadError)
             return (
                 <>
-                    <span className={styles.fileItemError}>Upload failed</span>
-                    <span className={styles.fileItemError}>
+                    <span className={styles.fileItemErrorMessage}>
+                        Upload failed
+                    </span>
+                    <span className={styles.fileItemErrorMessage}>
                         Please remove or retry
                     </span>
                 </>
@@ -74,7 +87,7 @@ export const FileItem = ({
 
     return (
         <>
-            <div>
+            <div className={styles.fileItemText}>
                 <img
                     id={item.id}
                     data-testid="file-input-preview-image"
@@ -82,14 +95,37 @@ export const FileItem = ({
                     alt=""
                     className={imageClasses}
                 />
-                <span style={{ padding: '5px', marginRight: '5px' }}>
+                <span
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        fontSize: 'inherit',
+                    }}
+                >
                     <Error />
                     <span>{name}</span>
                 </span>
             </div>
-            <Button type="button" size="small" unstyled onClick={handleDelete}>
-                Delete
-            </Button>
+            <div className={styles.fileItemButtons}>
+                <Button
+                    type="button"
+                    size="small"
+                    unstyled
+                    onClick={handleDelete}
+                >
+                    Remove
+                </Button>
+                {hasUploadError && (
+                    <Button
+                        type="button"
+                        size="small"
+                        unstyled
+                        onClick={handleRetry}
+                    >
+                        Retry
+                    </Button>
+                )}
+            </div>
         </>
     )
 }

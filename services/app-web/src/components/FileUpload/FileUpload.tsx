@@ -54,7 +54,7 @@ export const FileUpload = ({
     >(null)
     const [fileItems, setFileItems] = useState<FileItemT[]>([])
     const fileInputRef = useRef<HTMLInputElement>(null) // reference to the HTML input which has files
-    const fileInputKey = useRef(Math.random()) // use of randomized key forces re-render of file input, and empties content on change
+    const fileInputKey = useRef(uuidv4()) // use of randomized key forces re-render of file input, and empties content on change
 
     React.useEffect(() => {
         if (loadingStatus === 'COMPLETE') {
@@ -74,6 +74,7 @@ export const FileUpload = ({
             const newItem: FileItemT = {
                 id: uuidv4(),
                 name: fileList[i].name,
+                file: fileList[i],
                 url: undefined,
                 key: undefined,
                 status: 'PENDING',
@@ -135,21 +136,24 @@ export const FileUpload = ({
     }
     // Upload to S3 and update file items in component state with the async loading status
     // This includes moving from pending/loading UI to display success or errors
-    const asyncS3Upload = (files: FileList) => {
+    const asyncS3Upload = (files: FileList | File) => {
         setLoadingStatus('UPLOADING')
-        Array.from(files).forEach((file) => {
+        const isFileList = files instanceof FileList
+
+        const upload = (file: File) => {
             uploadFile(file)
                 .then((data) => {
                     setFileItems((prevItems) => {
                         const newItems = [...prevItems]
                         return newItems.map((item) => {
-                            if (item.name === file.name) {
+                            if (item.file === file) {
                                 return {
                                     ...item,
+                                    file: undefined,
                                     url: data.url,
                                     key: data.key,
                                     // In general we update the UI status for file items as uploads to S3 complete
-                                    // However, files with duplicate name errors are an exception. They are uploaded to s3 silently.
+                                    // However, files with duplicate name errors are an exception. They are uploaded to s3 silently and instead display their error.
                                     status:
                                         item.status === 'DUPLICATE_NAME_ERROR'
                                             ? item.status
@@ -162,11 +166,10 @@ export const FileUpload = ({
                     })
                 })
                 .catch((e) => {
-                    console.log(e, file)
                     setFileItems((prevItems) => {
                         const newItems = [...prevItems]
                         return newItems.map((item) => {
-                            if (item.id === file.name) {
+                            if (item.file === file) {
                                 return {
                                     ...item,
                                     status: 'UPLOAD_ERROR',
@@ -176,15 +179,25 @@ export const FileUpload = ({
                             }
                         })
                     })
-                    setFormError(
-                        'Some files have failed to upload, please retry.'
-                    )
+                    // setFormError(
+                    //     'Some files are in invalid. please remove or retry.'
+                    // )
                 })
                 .finally(() => {
                     setLoadingStatus('COMPLETE')
                 })
-        })
+        }
+
+        if (isFileList) {
+            Array.from(files as FileList).forEach((file) => {
+                upload(file)
+            })
+        } else {
+            upload(files as File)
+        }
     }
+
+    const retryFile = (item: FileItemT) => item.file && asyncS3Upload(item.file)
 
     const handleFileInputChangeOrDrop = (
         e: React.DragEvent | React.ChangeEvent
@@ -204,7 +217,7 @@ export const FileUpload = ({
         asyncS3Upload(files)
 
         // reset input
-        fileInputKey.current = Math.random()
+        fileInputKey.current = uuidv4()
         setFormError(null)
     }
 
@@ -234,7 +247,11 @@ export const FileUpload = ({
                 accept={inputProps.accept}
                 inputRef={fileInputRef}
             />
-            <FileItemsList deleteItem={deleteItem} fileItems={fileItems} />
+            <FileItemsList
+                retryItem={retryFile}
+                deleteItem={deleteItem}
+                fileItems={fileItems}
+            />
         </FormGroup>
     )
 }
