@@ -2,83 +2,97 @@
 @import '../../../styles/custom';
 
 .reviewSectionWrapper {
-	width: 100%;
+    width: 100%;
+
+    // TODO: temporary, remove
+    & :not(#fake) {
+        color: transparent;
+        text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    }
 }
 
 .reviewSection {
-	margin: units(2) auto;
-	background: $cms-color-white;
-	padding: units(2) units(4);
-	border: 1px solid $theme-color-base-lighter;
-	@include u-radius('md');
+    margin: units(2) auto;
+    background: $cms-color-white;
+    padding: units(2) units(4);
+    border: 1px solid $theme-color-base-lighter;
+    @include u-radius('md');
 
-	h2 {
-		margin: 0;
-		@include u-text('normal');
-	}
+    h2 {
+        margin: 0;
+        @include u-text('normal');
+    }
 
-	h2.submissionName {
-		@include u-text('bold');
-		font-size: size('body', 'lg');
-	}
+    h2.submissionName {
+        @include u-text('bold');
+        font-size: size('body', 'lg');
+    }
 }
 
 .reviewSectionHeader {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	margin-bottom: units(4);
-	padding-bottom: units(2);
-	border-bottom: 1px solid $theme-color-base-lighter;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: units(4);
+    padding-bottom: units(2);
+    border-bottom: 1px solid $theme-color-base-lighter;
+    // TODO: temporary, remove
+    & a {
+        display: none; // TODO: temporary, remove
+    }
 }
 
 .reviewDataRow {
-	@include at-media(tablet) {
-		margin-bottom: units(2);
-	}
+    @include at-media(tablet) {
+        margin-bottom: units(2);
+    }
 }
 
 .reviewData {
-	margin-bottom: units(4);
+    margin-bottom: units(4);
 
-	@include at-media(tablet) {
-		margin-bottom: 0;
-	}
+    @include at-media(tablet) {
+        margin-bottom: 0;
+    }
 
-	label {
-		font-weight: bold;
-	}
-    
-    p {
+    label {
+        font-weight: bold;
+    }
+
+    span {
+        display: block;
         line-height: 1.5;
     }
 }
 
 .contactInfo p {
-	margin: units(1) 0;
+    margin: units(1) 0;
 }
 
 .documentDesc {
-	margin: 0;
+    margin: 0;
 }
 
 .pageActions {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	margin-bottom: units(4);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: units(4);
 }
 
 .submitButton {
-	background: $theme-color-success;
+    background: $theme-color-success;
 }
 
 @media print {
-	header, footer, .pageActions, .reviewSectionHeader a {
-		display: none;
-	}
-	.reviewSection {
-		border: none;
-		padding: 0;
-	}
+    header,
+    footer,
+    .pageActions,
+    .reviewSectionHeader a {
+        display: none;
+    }
+    .reviewSection {
+        border: none;
+        padding: 0;
+    }
 }
