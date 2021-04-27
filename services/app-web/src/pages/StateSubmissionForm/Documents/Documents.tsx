@@ -94,7 +94,7 @@ export const Documents = ({
 
         const s3URL = await getS3URL(s3Key, file.name)
         const link = await getURL(s3Key)
-        return { key: s3Key, url: link, s3URL }
+        return { key: s3Key, url: link, s3URL: s3URL }
     }
 
     const handleFormSubmit = async (e: React.FormEvent) => {
@@ -102,15 +102,15 @@ export const Documents = ({
         setShouldValidate(true)
         if (!hasValidFiles) return
 
-        const documents = fileItems.map((file) => {
-            if (!file.url)
+        const documents = fileItems.map((fileItem) => {
+            if (!fileItem.url || !fileItem.s3URL)
                 throw Error(
-                    'The file has no url, this should not happen onSubmit'
+                    'The file item has no url or s3url, this should not happen onSubmit'
                 )
             return {
-                name: file.name,
-                url: file.url,
-                s3URL: 'fakeS3URL',
+                name: fileItem.name,
+                url: fileItem.url,
+                s3URL: fileItem.s3URL,
             }
         })
 
