@@ -67,7 +67,7 @@ describe('Documents', () => {
             }
         )
 
-        const input = screen.getByLabelText('Upload Documents')
+        const input = screen.getByLabelText('Upload documents')
         expect(input).toBeInTheDocument()
         userEvent.upload(input, [TEST_DOC_FILE])
         await waitFor(() =>
@@ -101,7 +101,7 @@ describe('Documents', () => {
             }
         )
 
-        const input = screen.getByLabelText('Upload Documents')
+        const input = screen.getByLabelText('Upload documents')
         expect(input).toBeInTheDocument()
         expect(input).toHaveAttribute(
             'accept',

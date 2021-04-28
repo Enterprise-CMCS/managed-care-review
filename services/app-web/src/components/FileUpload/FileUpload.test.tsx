@@ -37,6 +37,15 @@ describe('FileUpload component', () => {
         expect(screen.getByText('File input label')).toBeInTheDocument()
     })
 
+    it.todo('shows duplicate name error when the same file is uploaded twice')
+
+    it.todo('removes  duplicate name error when a duplicate file is deleted')
+    it.todo(
+        'show last file in list as invalid when multiple duplicate files loaded'
+    )
+    it.todo(
+        'displays file upload state when duplicate name error for file is resolved'
+    )
     // describe('while the file is loading', () => {
     //     it('renders a loading image', async () => {
     //         await render(<FileUpload {...testProps} />)

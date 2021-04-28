@@ -94,7 +94,7 @@ export const Documents = ({
 
         const s3URL = await getS3URL(s3Key, file.name)
         const link = await getURL(s3Key)
-        return { key: s3Key, url: link, s3URL }
+        return { key: s3Key, url: link, s3URL: s3URL }
     }
 
     const handleFormSubmit = async (e: React.FormEvent) => {
@@ -102,15 +102,15 @@ export const Documents = ({
         setShouldValidate(true)
         if (!hasValidFiles) return
 
-        const documents = fileItems.map((file) => {
-            if (!file.url)
+        const documents = fileItems.map((fileItem) => {
+            if (!fileItem.url || !fileItem.s3URL)
                 throw Error(
-                    'The file has no url, this should not happen onSubmit'
+                    'The file item has no url or s3url, this should not happen onSubmit'
                 )
             return {
-                name: file.name,
-                url: file.url,
-                s3URL: 'fakeS3URL',
+                name: fileItem.name,
+                url: fileItem.url,
+                s3URL: fileItem.s3URL,
             }
         })
 
@@ -147,15 +147,14 @@ export const Documents = ({
             <PageHeading headingLevel="h2"> Documents </PageHeading>
             <Form className="usa-form--large" onSubmit={handleFormSubmit}>
                 {shouldValidate && !hasValidFiles && (
-                    <Alert
-                        type="error"
-                        heading="Oops! Something went wrong. Invalid files or no files"
-                    />
+                    <Alert type="error" heading="Missing documents">
+                        You must upload at least one document
+                    </Alert>
                 )}
                 <FileUpload
                     id="documents"
                     name="documents"
-                    label="Upload Documents"
+                    label="Upload documents"
                     accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                     uploadFile={handleUploadFile}
                     deleteFile={handleDeleteFile}

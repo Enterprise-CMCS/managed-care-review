@@ -1,13 +1,19 @@
 import React from 'react'
-import { FileItem, FileItemT } from './FileItem'
+import { FileItem, FileItemT, FileStatus } from './FileItem'
 
 export const FileItemsList = ({
     fileItems,
     deleteItem,
+    retryItem,
 }: {
     fileItems: FileItemT[]
-    deleteItem: (id: string) => void
+    deleteItem: (id: FileItemT) => void
+    retryItem: (item: FileItemT) => void
 }): React.ReactElement => {
+    const hasError = (status: FileStatus) => {
+        return status === 'UPLOAD_ERROR' || status === 'DUPLICATE_NAME_ERROR'
+    }
+
     return (
         <ul
             style={{
@@ -23,17 +29,22 @@ export const FileItemsList = ({
                     key={item.id}
                     id={item.id}
                     className={
-                        item.status === 'UPLOAD_ERROR'
+                        hasError(item.status)
                             ? 'bg-secondary-lighter border-secondary'
                             : 'usa-file-input__preview'
                     }
                     style={{
                         display: 'flex',
                         justifyContent: 'space-between',
+                        padding: '10px',
                         pointerEvents: 'all',
                     }}
                 >
-                    <FileItem deleteItem={deleteItem} item={item} />
+                    <FileItem
+                        deleteItem={deleteItem}
+                        retryItem={retryItem}
+                        item={item}
+                    />
                 </li>
             ))}
         </ul>

@@ -1,0 +1,22 @@
+.fileItemText {
+    display: flex;
+    align-items: center;
+    flex: 3;
+    font-size: 0.82rem;
+}
+
+.fileItemErrorMessage {
+    font-weight: bold;
+    font-size: 0.82rem;
+}
+
+.fileItemButtons {
+    display: flex;
+    justify-content: space-around;
+    flex-direction: column;
+    flex: 1;
+    > button {
+        margin-top: 0 !important;
+        padding-left: 5px;
+    }
+}

@@ -39,7 +39,7 @@ export function newLocalS3Client(
                 }
 
                 console.log('Log: Unexpected Error putting file to S3', err)
-                throw err
+                return err
             }
         },
 
@@ -48,7 +48,7 @@ export function newLocalS3Client(
                 const deleteResult = await s3Client
                     .deleteObject({
                         Bucket: bucketName,
-                        Key: 's3Key',
+                        Key: s3Key,
                     })
                     .promise()
 
@@ -63,7 +63,7 @@ export function newLocalS3Client(
                 }
 
                 console.log('Log: Unexpected Error deleting file on S3', err)
-                throw err
+                return err
             }
         },
         getS3URL: async (s3key: string, filename: string,): Promise<string> => {
