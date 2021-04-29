@@ -13,7 +13,7 @@ describe('fetchDraftSubmission', () => {
 
         // First, create a new submission
         const createInput: CreateDraftSubmissionInput = {
-            programID: 'smmc',
+            programID: 'managed-medical-assistance',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A real submission',
         }
@@ -39,7 +39,13 @@ describe('fetchDraftSubmission', () => {
        
         const resultDraft = result.data.fetchDraftSubmission.draftSubmission
         expect(resultDraft.id).toEqual(createdID)
-        expect(resultDraft.program.id).toEqual('smmc')
+        expect(resultDraft.program.id).toEqual('managed-medical-assistance')
+        expect(
+            resultDraft.program.name
+        ).toBe('Managed Medical Assistance')
+        expect(resultDraft.name).toContain(
+            'FL-MANAGED-MEDICAL-ASSISTANCE'
+        )
         expect(resultDraft.submissionDescription).toEqual('A real submission')
         expect(resultDraft.documents).toEqual([])
     })

@@ -11,7 +11,7 @@ describe('createDraftSubmission', () => {
         const { mutate } = createTestClient(server)
 
         const input: CreateDraftSubmissionInput = {
-            programID: 'smmc',
+            programID: 'managed-medical-assistance',
             submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
             submissionDescription: 'A real submission',
         }
@@ -28,10 +28,13 @@ describe('createDraftSubmission', () => {
             res.data.createDraftSubmission.draftSubmission.submissionType
         ).toBe('CONTRACT_ONLY')
         expect(
+            res.data.createDraftSubmission.draftSubmission.program.id
+        ).toBe('managed-medical-assistance')
+        expect(
             res.data.createDraftSubmission.draftSubmission.program.name
-        ).toBe('SMMC')
+        ).toBe('Managed Medical Assistance')
         expect(res.data.createDraftSubmission.draftSubmission.name).toContain(
-            'FL-SMMC-'
+            'FL-MANAGED-MEDICAL-ASSISTANCE'
         )
     })
 
