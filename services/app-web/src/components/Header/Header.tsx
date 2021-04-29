@@ -42,7 +42,6 @@ export const Header = ({
         2. Otherwise, use whatever is in the PageContext
         3. Fallback in case of new route
     */
-
     const pageHeadingText =
         routeName !== 'UNKNOWN_ROUTE' &&
         Object.prototype.hasOwnProperty.call(PageHeadingsRecord, routeName)

@@ -1,13 +1,17 @@
 import React, { useEffect } from 'react'
 
 import { GridContainer } from '@trussworks/react-uswds'
-import { Switch, Route, useParams } from 'react-router-dom'
+import { Switch, Route, useParams, useLocation } from 'react-router-dom'
 
 import { Error404 } from '../Errors/Error404'
 import { GenericError } from '../Errors/GenericError'
 import { Loading } from '../../components/Loading/'
 import { usePage } from '../../contexts/PageContext'
-import { RoutesRecord } from '../../constants/routes'
+import {
+    PageHeadingsRecord,
+    RoutesRecord,
+    getRouteName,
+} from '../../constants/routes'
 import { ContractDetails } from './ContractDetails/ContractDetails'
 import { Documents } from './Documents/Documents'
 import { ReviewSubmit } from './ReviewSubmit/ReviewSubmit'
@@ -17,9 +21,9 @@ import { useFetchDraftSubmissionQuery } from '../../gen/gqlClient'
 
 export const StateSubmissionForm = (): React.ReactElement => {
     const { id } = useParams<{ id: string }>()
-
+    const { pathname } = useLocation()
     const { updateHeading } = usePage()
-
+    const routeName = getRouteName(pathname)
     const { data, loading, error } = useFetchDraftSubmissionQuery({
         variables: {
             input: {
@@ -27,14 +31,15 @@ export const StateSubmissionForm = (): React.ReactElement => {
             },
         },
     })
-
+    const draft = data?.fetchDraftSubmission?.draftSubmission
+    const defaultHeading = PageHeadingsRecord[routeName]
     useEffect(() => {
-        // We have to updateHeading inside useEffect so that we don't update two components at the same time
-        const draft = data?.fetchDraftSubmission?.draftSubmission
-        if (draft) {
-            updateHeading(draft.name)
+        updateHeading(draft?.name || defaultHeading)
+        return function cleanup() {
+            // clear out custom heading for draft name
+            updateHeading()
         }
-    }, [data, updateHeading])
+    }, [updateHeading, draft, defaultHeading])
 
     if (loading) {
         return (
@@ -49,13 +54,10 @@ export const StateSubmissionForm = (): React.ReactElement => {
         return <GenericError />
     }
 
-    const draft = data?.fetchDraftSubmission?.draftSubmission
-
     if (draft === undefined || draft === null) {
         console.log('got undefined back from loaded showDraftSubmission')
         return <Error404 />
     }
-
     return (
         <GridContainer>
             <Switch>

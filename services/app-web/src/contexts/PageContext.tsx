@@ -17,7 +17,7 @@ export type PageProviderProps = {
 const PageProvider: React.FC = ({ children }) => {
     const [heading, setHeading] = React.useState<string | undefined>(undefined)
 
-    const updateHeading = (text?: string) => setHeading(text)
+    const updateHeading = (customHeading?: string) => setHeading(customHeading)
     return (
         <PageContext.Provider
             value={{ heading, updateHeading }}
