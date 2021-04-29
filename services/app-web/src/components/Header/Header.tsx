@@ -18,7 +18,6 @@ import { AuthModeType } from '../../common-code/domain-models'
 import { Logo } from '../Logo/Logo'
 import { PageHeadingRow } from './PageHeadingRow'
 import { User } from '../../gen/gqlClient'
-import { PageHeadingsRecord, getRouteName } from '../../constants/routes'
 
 export type HeaderProps = {
     authMode: AuthModeType
@@ -33,22 +32,7 @@ export const Header = ({
 }: HeaderProps): React.ReactElement => {
     const { logout, loggedInUser, loginStatus } = useAuth()
     const history = useHistory()
-    const routeName = getRouteName(history.location.pathname)
     const { heading } = usePage()
-
-    /*
-        Dynamically calculate heading in priority order
-        1. If there a constant heading set up, use that
-        2. Otherwise, use whatever is in the PageContext
-        3. Fallback in case of new route
-    */
-    const pageHeadingText =
-        routeName !== 'UNKNOWN_ROUTE' &&
-        Object.prototype.hasOwnProperty.call(PageHeadingsRecord, routeName)
-            ? PageHeadingsRecord[routeName]
-            : heading
-            ? heading
-            : '' // fallback for safety
 
     const handleLogout = (
         e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -133,7 +117,7 @@ export const Header = ({
                 </GridContainer>
             </div>
             <PageHeadingRow
-                heading={pageHeadingText}
+                heading={heading}
                 isLoading={loginStatus === 'LOADING'}
                 loggedInUser={loggedInUser}
             />

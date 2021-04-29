@@ -23,7 +23,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
     const { id } = useParams<{ id: string }>()
     const { pathname } = useLocation()
     const { updateHeading } = usePage()
-    const routeName = getRouteName(pathname)
+    // const routeName = getRouteName(pathname)
     const { data, loading, error } = useFetchDraftSubmissionQuery({
         variables: {
             input: {
@@ -32,14 +32,15 @@ export const StateSubmissionForm = (): React.ReactElement => {
         },
     })
     const draft = data?.fetchDraftSubmission?.draftSubmission
-    const defaultHeading = PageHeadingsRecord[routeName]
+    // const defaultHeading = PageHeadingsRecord[routeName]
     useEffect(() => {
-        updateHeading(draft?.name || defaultHeading)
-        return function cleanup() {
-            // clear out custom heading for draft name
-            updateHeading()
-        }
-    }, [updateHeading, draft, defaultHeading])
+        updateHeading(pathname, draft?.name)
+        // updateHeading(draft?.name || defaultHeading)
+        // return function cleanup() {
+        //     // clear out custom heading for draft name
+        //     // updateHeading(pathmame)
+        // }
+    }, [updateHeading, pathname, draft])
 
     if (loading) {
         return (
