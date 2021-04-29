@@ -33,7 +33,7 @@ export function draftSubmissionResolver(
             }
 
             const padNumber = parent.stateNumber.toString().padStart(4, '0')
-            return `${parent.stateCode}-${program.name}-${padNumber}`
+            return `${parent.stateCode.toUpperCase()}-${parent.programID.toUpperCase()}-${padNumber}`
         },
     }
 }
