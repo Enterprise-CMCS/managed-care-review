@@ -99,7 +99,7 @@ describe('Header', () => {
             })
             await waitFor(() =>
                 expect(screen.getByRole('heading')).toHaveTextContent(
-                    'Minnesota New submission'
+                    /Minnesota/
                 )
             )
         })
