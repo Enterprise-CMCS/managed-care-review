@@ -43,15 +43,14 @@ export const AppRoutes = ({
     const { updateHeading } = usePage()
 
     /*
-        Add page titles throughout the application
+        Add page titles and headings throughout the application
     */
     const title =
         route === 'ROOT' && loggedInUser
             ? PageTitlesRecord['DASHBOARD']
-            : route === 'UNKNOWN_ROUTE'
-            ? 'Managed Care Review'
             : PageTitlesRecord[route]
     useTitle(title)
+
     useEffect(() => {
         updateHeading(pathname)
     }, [pathname, updateHeading])

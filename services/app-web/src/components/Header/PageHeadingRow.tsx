@@ -15,7 +15,7 @@ type PageHeadingProps = {
 
 export const PageHeadingRow = ({
     isLoading = false,
-    heading = 'Dashboard',
+    heading,
     loggedInUser,
 }: PageHeadingProps): React.ReactElement => {
     return loggedInUser ? (
@@ -32,9 +32,11 @@ export const PageHeadingRow = ({
                     </div>
                     <PageHeading>
                         <span>{loggedInUser.state.name}&nbsp;</span>
-                        <span className="font-heading-lg text-light">
-                            {heading}
-                        </span>
+                        {heading && (
+                            <span className="font-heading-lg text-light">
+                                {heading}
+                            </span>
+                        )}
                     </PageHeading>
                 </Grid>
             </GridContainer>

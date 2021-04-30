@@ -2,6 +2,7 @@ Cypress.Commands.add('login', () => {
     cy.visit('/')
     cy.findByText('Sign In').click()
     const authMode = Cypress.env('AUTH_MODE')
+    console.log(authMode, 'authmode')
     if (authMode === 'LOCAL') {
         cy.findByTestId('AangButton').click()
     } else if (authMode === 'AWS_COGNITO') {
@@ -18,4 +19,5 @@ Cypress.Commands.add('login', () => {
     }
     // this login/initial fetch can take a little while.
     cy.url({ timeout: 10_000 }).should('match', /.*dashboard$/)
+    cy.findByRole('heading', {level: 1, name: /Dashboard/ })
 })

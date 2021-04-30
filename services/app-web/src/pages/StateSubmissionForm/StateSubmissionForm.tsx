@@ -7,11 +7,7 @@ import { Error404 } from '../Errors/Error404'
 import { GenericError } from '../Errors/GenericError'
 import { Loading } from '../../components/Loading/'
 import { usePage } from '../../contexts/PageContext'
-import {
-    PageHeadingsRecord,
-    RoutesRecord,
-    getRouteName,
-} from '../../constants/routes'
+import { RoutesRecord } from '../../constants/routes'
 import { ContractDetails } from './ContractDetails/ContractDetails'
 import { Documents } from './Documents/Documents'
 import { ReviewSubmit } from './ReviewSubmit/ReviewSubmit'
@@ -32,14 +28,9 @@ export const StateSubmissionForm = (): React.ReactElement => {
         },
     })
     const draft = data?.fetchDraftSubmission?.draftSubmission
-    // const defaultHeading = PageHeadingsRecord[routeName]
+
     useEffect(() => {
         updateHeading(pathname, draft?.name)
-        // updateHeading(draft?.name || defaultHeading)
-        // return function cleanup() {
-        //     // clear out custom heading for draft name
-        //     // updateHeading(pathmame)
-        // }
     }, [updateHeading, pathname, draft])
 
     if (loading) {

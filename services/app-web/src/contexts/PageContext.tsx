@@ -20,23 +20,24 @@ const PageProvider: React.FC = ({ children }) => {
 
     /* 
         Set headings in priority order
-        1. If there a custom or dynamic page heading, use that
-        2. Otherwise, use default heading based on the PageHeadingsRecord constant
-        3. We do not show any headings when user is logged out by assigning pathname variable to unknown string.
+        1. If there a custom heading, use that
+        2. Otherwise, use default headings based on the PageHeadingsRecord
+        3. Do not show any page-specific headings when user is logged out (handled in Header component)
+        4. Do not show any headings when logged in user is on a Not Found page (handled in Header component)
     */
     const updateHeading = (pathname: string, customHeading?: string) => {
         const routeName = getRouteName(pathname)
-        const defaultHeading =
-            routeName !== 'UNKNOWN_ROUTE' &&
-            Object.prototype.hasOwnProperty.call(PageHeadingsRecord, routeName)
-                ? PageHeadingsRecord[routeName]
-                : undefined
-
-        setHeading((prev) =>
-            prev !== customHeading || defaultHeading
-                ? customHeading
-                : defaultHeading
+        const defaultHeading = Object.prototype.hasOwnProperty.call(
+            PageHeadingsRecord,
+            routeName
         )
+            ? PageHeadingsRecord[routeName]
+            : undefined
+
+        setHeading((prev) => {
+            if (!defaultHeading && !customHeading) return prev
+            return customHeading ? customHeading : defaultHeading
+        })
     }
 
     return (

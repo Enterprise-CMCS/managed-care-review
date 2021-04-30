@@ -11,6 +11,8 @@ import { NavLink } from 'react-router-dom'
 import { idmRedirectURL } from '../../pages/Auth/cognitoAuth'
 import onemacLogo from '../../assets/images/onemac-logo.svg'
 import styles from './Header.module.scss'
+
+import { getRouteName } from '../../constants/routes'
 import { useHistory } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
@@ -33,6 +35,7 @@ export const Header = ({
     const { logout, loggedInUser, loginStatus } = useAuth()
     const history = useHistory()
     const { heading } = usePage()
+    const route = getRouteName(history.location.pathname)
 
     const handleLogout = (
         e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -117,7 +120,7 @@ export const Header = ({
                 </GridContainer>
             </div>
             <PageHeadingRow
-                heading={heading}
+                heading={route !== 'UNKNOWN_ROUTE' ? heading : undefined}
                 isLoading={loginStatus === 'LOADING'}
                 loggedInUser={loggedInUser}
             />
