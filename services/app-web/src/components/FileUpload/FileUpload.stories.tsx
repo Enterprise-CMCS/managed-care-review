@@ -28,7 +28,7 @@ export const DemoFileUploadSuccess = (): React.ReactElement => {
                 await fakeApiRequest(true)
                 return
             }}
-            onLoadComplete={() => console.log('stuff')}
+            onLoadComplete={() => console.log('Async load complete')}
         />
     )
 }
@@ -44,7 +44,7 @@ export const DemoFileUploadFailure = (): React.ReactElement => {
                 await fakeApiRequest(true)
                 return
             }}
-            onLoadComplete={() => console.log('stuff')}
+            onLoadComplete={() => console.log('Async load complete')}
         />
     )
 }
