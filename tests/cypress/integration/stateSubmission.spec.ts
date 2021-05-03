@@ -4,6 +4,7 @@ describe('State Submission', () => {
             cy.login()
             cy.visit('/submissions/not-a-draft-submission/type')
             cy.findByText('404 / Page not found').should('exist')
+            cy.findByText('Dashboard').not('exist')
         })
 
         it('user can start a new submission and continue with valid input', () => {
@@ -13,7 +14,7 @@ describe('State Submission', () => {
                 force: true,
             })
             cy.location('pathname').should('eq', '/submissions/new')
-
+            cy.findByText('New submission').should('exist')
             // Fill out some fields but not all
             cy.findByLabelText('Contract action only').safeClick()
             cy.findByRole('combobox', { name: 'Program' }).select('msho')
@@ -40,6 +41,7 @@ describe('State Submission', () => {
                 name: 'Continue',
             }).safeClick()
             cy.findByText('Contract details').should('exist')
+            cy.findByText(/MN-MSHO-/).should('exist')
         })
 
         it('user can edit a draft submission type', () => {

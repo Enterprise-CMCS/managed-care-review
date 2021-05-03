@@ -39,15 +39,16 @@ const RoutesRecord: Record<RouteT, string> = {
     SUBMISSIONS_REVIEW_SUBMIT: '/submissions/:id/review-and-submit',
 }
 
-// Static page headings used in <header> h1. Dynamic headings, when necessary, are set in page specific parent component.
+// Static page headings used in <header> h1 when logged in. Dynamic headings, when necessary, are set in page specific parent component.
 const PageHeadingsRecord: Record<string, string> = {
+    ROOT: 'Dashboard',
     DASHBOARD: 'Dashboard',
     SUBMISSIONS_NEW: 'New submission',
 }
 
 // Static page titles used in <title>.
 // Every route must have a fallback page title. Dynamic page title logic are set in AppRoutes.tsx
-const PageTitlesRecord: Record<RouteT, string> = {
+const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     ROOT: 'Home - Managed Care Review',
     AUTH: 'Login - Managed Care Review',
     HELP: 'Help - Managed Care Review',
@@ -62,6 +63,7 @@ const PageTitlesRecord: Record<RouteT, string> = {
     SUBMISSIONS_CONTACTS: 'Contacts - Managed Care Review',
     SUBMISSIONS_DOCUMENTS: 'Documents - Managed Care Review',
     SUBMISSIONS_REVIEW_SUBMIT: 'Review and Submit - Managed Care Review',
+    UNKNOWN_ROUTE: 'Not Found - Managed Care Review'
 }
 
 const getRouteName = (pathname: string): RouteT | 'UNKNOWN_ROUTE' => {

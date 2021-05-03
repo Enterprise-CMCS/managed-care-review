@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 
 import { GridContainer } from '@trussworks/react-uswds'
-import { Switch, Route, useParams } from 'react-router-dom'
+import { Switch, Route, useParams, useLocation } from 'react-router-dom'
 
 import { Error404 } from '../Errors/Error404'
 import { GenericError } from '../Errors/GenericError'
@@ -17,9 +17,9 @@ import { useFetchDraftSubmissionQuery } from '../../gen/gqlClient'
 
 export const StateSubmissionForm = (): React.ReactElement => {
     const { id } = useParams<{ id: string }>()
-
+    const { pathname } = useLocation()
     const { updateHeading } = usePage()
-
+    // const routeName = getRouteName(pathname)
     const { data, loading, error } = useFetchDraftSubmissionQuery({
         variables: {
             input: {
@@ -27,14 +27,11 @@ export const StateSubmissionForm = (): React.ReactElement => {
             },
         },
     })
+    const draft = data?.fetchDraftSubmission?.draftSubmission
 
     useEffect(() => {
-        // We have to updateHeading inside useEffect so that we don't update two components at the same time
-        const draft = data?.fetchDraftSubmission?.draftSubmission
-        if (draft) {
-            updateHeading(draft.name)
-        }
-    }, [data, updateHeading])
+        updateHeading(pathname, draft?.name)
+    }, [updateHeading, pathname, draft])
 
     if (loading) {
         return (
@@ -49,13 +46,10 @@ export const StateSubmissionForm = (): React.ReactElement => {
         return <GenericError />
     }
 
-    const draft = data?.fetchDraftSubmission?.draftSubmission
-
     if (draft === undefined || draft === null) {
         console.log('got undefined back from loaded showDraftSubmission')
         return <Error404 />
     }
-
     return (
         <GridContainer>
             <Switch>

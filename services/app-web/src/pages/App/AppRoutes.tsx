@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Switch, Route } from 'react-router-dom'
 import { useLocation } from 'react-router'
 
@@ -14,7 +14,7 @@ import { NewStateSubmissionForm } from '../StateSubmissionForm/NewStateSubmissio
 import { SubmissionDescriptionExamples } from '../Help/SubmissionDescriptionExamples'
 import { useTitle } from '../../hooks/useTitle'
 import { getRouteName, PageTitlesRecord } from '../../constants/routes'
-
+import { usePage } from '../../contexts/PageContext'
 import { AuthModeType, assertNever } from '../../common-code/domain-models'
 
 function componentForAuthMode(
@@ -40,17 +40,20 @@ export const AppRoutes = ({
     const { loggedInUser } = useAuth()
     const { pathname } = useLocation()
     const route = getRouteName(pathname)
+    const { updateHeading } = usePage()
 
     /*
-        Add page titles throughout the application
+        Add page titles and headings throughout the application
     */
     const title =
         route === 'ROOT' && loggedInUser
             ? PageTitlesRecord['DASHBOARD']
-            : route === 'UNKNOWN_ROUTE'
-            ? 'Managed Care Review'
             : PageTitlesRecord[route]
     useTitle(title)
+
+    useEffect(() => {
+        updateHeading(pathname)
+    }, [pathname, updateHeading])
 
     const authComponent = componentForAuthMode(authMode)
 
