@@ -10,6 +10,12 @@ import {
 import { FileItemT } from './FileItem'
 import { FileItemsList } from './FileItemsList'
 
+type FileInputRef = {
+    clearFiles: () => void
+    input: HTMLInputElement | null
+    files: FileList
+}
+
 export type S3FileData = {
     url: string
     key: string
@@ -51,14 +57,11 @@ export const FileUpload = ({
     ...inputProps
 }: FileUploadProps): React.ReactElement => {
     const [formError, setFormError] = useState<string | null>(null)
-    const [loadingStatus, setLoadingStatus] = useState<
-        null | 'UPLOADING' | 'COMPLETE'
-    >(null)
-    const [fileItems, setFileItems] = useState<FileItemT[]>(
-        initialItems ? initialItems : []
-    )
-    const fileInputRef = useRef<HTMLInputElement>(null) // reference to the HTML input which has files
-    const fileInputKey = useRef(uuidv4()) // use of randomized key forces re-render of file input, and empties content on change
+    const [loadingStatus, setLoadingStatus] =
+        useState<null | 'UPLOADING' | 'COMPLETE'>(null)
+
+    const [fileItems, setFileItems] = useState<FileItemT[]>(initialItems || [])
+    const fileInputRef = useRef<FileInputRef>(null) // reference to the HTML input which has files
 
     React.useEffect(() => {
         if (loadingStatus !== 'UPLOADING') {
@@ -73,6 +76,7 @@ export const FileUpload = ({
 
     // Generate FileItems from the HTML FileList that is in the input on load or drop
     const generateFileItems = (fileList: FileList) => {
+        console.log('this is a valid FileList, so we can process it')
         const items: FileItemT[] = []
         for (let i = 0; i < fileList?.length; i++) {
             const newItem: FileItemT = {
@@ -185,9 +189,6 @@ export const FileUpload = ({
                             }
                         })
                     })
-                    // setFormError(
-                    //     'Some files are in invalid. please remove or retry.'
-                    // )
                 })
                 .finally(() => {
                     setLoadingStatus('COMPLETE')
@@ -208,22 +209,24 @@ export const FileUpload = ({
     const handleFileInputChangeOrDrop = (
         e: React.DragEvent | React.ChangeEvent
     ): void => {
-        // return early to ensure we display errors when invalid files are dropped
-        if (
-            !fileInputRef?.current?.files ||
-            fileInputRef?.current?.files.length === 0
-        )
+        const files = fileInputRef.current?.files
+        console.log('files :', files)
+        console.log('current : ', fileInputRef.current)
+        console.log('fileInputRef : ', fileInputRef)
+        // return early to ensure we display errors when only invalid files are dropped
+        if (!files || files.length === 0) {
+            console.log('Something is broken!')
             return
+        }
 
-        const files = fileInputRef.current.files
-        const items = generateFileItems(fileInputRef.current.files)
+        const items = generateFileItems(files)
 
         // start upload and display pending files
         setFileItems((array) => [...array, ...items])
         asyncS3Upload(files)
 
         // reset input
-        fileInputKey.current = uuidv4()
+        fileInputRef.current?.clearFiles()
         setFormError(null)
     }
 
@@ -243,7 +246,6 @@ export const FileUpload = ({
                 </span>
             )}
             <FileInput
-                key={fileInputKey.current}
                 id={id}
                 name={name}
                 aria-describedby={`${id}-error ${id}-hint`}
@@ -251,7 +253,8 @@ export const FileUpload = ({
                 onChange={handleFileInputChangeOrDrop}
                 onDrop={handleFileInputChangeOrDrop}
                 accept={inputProps.accept}
-                inputRef={fileInputRef}
+                enterKeyHint="enter"
+                ref={fileInputRef}
             />
             <FileItemsList
                 retryItem={retryFile}
