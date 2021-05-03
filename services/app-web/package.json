@@ -31,6 +31,9 @@
         "web-vitals": "^0.2.4",
         "yup": "^0.32.9"
     },
+    "resolutions": {
+        "@storybook/react/babel-loader": "8.1.0"
+     },
     "scripts": {
         "start": "react-scripts start",
         "build": "react-scripts build",
