@@ -5270,9 +5270,9 @@ aws-amplify@^3.3.15:
     "@aws-amplify/xr" "2.2.30"
 
 aws-sdk@^2.224.1, aws-sdk@^2.346.0:
-  version "2.897.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.897.0.tgz#cb3594639bd57badd4908870d7f77f814f6a3166"
-  integrity sha512-GnjnZ5kgmeGe1BW+wsfRJ8Hu5mU7py/GBLXikSgtNPbMmF66yTMfND99hpS5U7m3SSaHG0qBYGVySC7Z+U1AJA==
+  version "2.899.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.899.0.tgz#fac90b8926707b3e9dcd1e7d5937cfa71c0be5ca"
+  integrity sha512-k8jSANDQGvTyyj1f/7Hj4SWaV61/gjj/BopRmavAr6n1ayjXtUeVrV8G29+ABD3V82pHXDqLq47bqNmZ9m86xQ==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -5358,7 +5358,7 @@ babel-literal-to-ast@^2.1.0:
     "@babel/traverse" "^7.1.6"
     "@babel/types" "^7.1.6"
 
-babel-loader@8.1.0, babel-loader@^8.1.0:
+babel-loader@8.1.0:
   version "8.1.0"
   resolved "https://registry.yarnpkg.com/babel-loader/-/babel-loader-8.1.0.tgz#c611d5112bd5209abe8b9fa84c3e4da25275f1c3"
   integrity sha512-7q7nC1tYOrqvUrN3LQK4GwSk/TQorZSOlO9C+RZDZpODgyN4ZlCqE5q9cDsyWOliN+aU9B4JX01xK9eJXowJLw==
@@ -5367,6 +5367,16 @@ babel-loader@8.1.0, babel-loader@^8.1.0:
     loader-utils "^1.4.0"
     mkdirp "^0.5.3"
     pify "^4.0.1"
+    schema-utils "^2.6.5"
+
+babel-loader@^8.2.2:
+  version "8.2.2"
+  resolved "https://registry.yarnpkg.com/babel-loader/-/babel-loader-8.2.2.tgz#9363ce84c10c9a40e6c753748e1441b60c8a0b81"
+  integrity sha512-JvTd0/D889PQBtUXJ2PXaKU/pjZDMtHA9V2ecm+eNRmmBCMR09a+fmpGTNwnJtFmFl5Ei7Vy47LjBb+L0wQ99g==
+  dependencies:
+    find-cache-dir "^3.3.1"
+    loader-utils "^1.4.0"
+    make-dir "^3.1.0"
     schema-utils "^2.6.5"
 
 babel-plugin-add-react-displayname@^0.0.5:
@@ -8576,9 +8586,9 @@ fork-ts-checker-webpack-plugin@4.1.6, fork-ts-checker-webpack-plugin@^4.1.6:
     worker-rpc "^0.1.0"
 
 fork-ts-checker-webpack-plugin@^6.0.4:
-  version "6.2.5"
-  resolved "https://registry.yarnpkg.com/fork-ts-checker-webpack-plugin/-/fork-ts-checker-webpack-plugin-6.2.5.tgz#09e81ad57ed862c9dd093298550e7f6966ab1a2f"
-  integrity sha512-EqHkTmxOotb5WJEc8kjzJh8IRuRUpHxtBh+jGyOHJcEwwZzqTmlMNAJsVF3tvALohi9yJzV8C1j215DyK8Ta8w==
+  version "6.2.6"
+  resolved "https://registry.yarnpkg.com/fork-ts-checker-webpack-plugin/-/fork-ts-checker-webpack-plugin-6.2.6.tgz#cd105c9064d05ad9b518fc3cc9906389daa1a7ec"
+  integrity sha512-f/oF2BFFPKEWQ3wgfq4bWALSDm7+f21shVONplo1xHKs1IdMfdmDa/aREgEurkIyrsyMFed42W7NVp4mh4DXzg==
   dependencies:
     "@babel/code-frame" "^7.8.3"
     "@types/json-schema" "^7.0.5"
@@ -8587,6 +8597,7 @@ fork-ts-checker-webpack-plugin@^6.0.4:
     cosmiconfig "^6.0.0"
     deepmerge "^4.2.2"
     fs-extra "^9.0.0"
+    glob "^7.1.6"
     memfs "^3.1.2"
     minimatch "^3.0.4"
     schema-utils "2.7.0"
@@ -11218,7 +11229,7 @@ make-dir@^2.0.0, make-dir@^2.1.0:
     pify "^4.0.1"
     semver "^5.6.0"
 
-make-dir@^3.0.0, make-dir@^3.0.2:
+make-dir@^3.0.0, make-dir@^3.0.2, make-dir@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/make-dir/-/make-dir-3.1.0.tgz#415e967046b3a7f1d185277d84aa58203726a13f"
   integrity sha512-g3FeP20LNwhALb/6Cz6Dd4F2ngze0jz7tbzrD2wAV+o9FeNHe4rL+yK2md0J/fiSf1sa1ADhXqi5+oVwOM/eGw==
