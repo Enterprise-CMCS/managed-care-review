@@ -3,12 +3,12 @@ import { useField } from 'formik'
 import {
     ErrorMessage,
     Label,
-    Textarea,
+    TextInput,
     FormGroup,
 } from '@trussworks/react-uswds'
 
 /**
- * This component renders a ReactUSWDS TextArea component inside of a FormGroup,
+ * This component renders a ReactUSWDS TextInput component inside of a FormGroup,
  * with a Label and ErrorMessage.
  *
  * It relies on the Formik useField hook to work, so it must ALWAYS be rendered
@@ -18,24 +18,26 @@ import {
  * ReactUSWDS components directly.
  */
 
-export type TextAreaProps = {
+ export type TextInputProps = {
     label: string
     id: string
     hint?: React.ReactNode
     error?: string
     showError: boolean
     name: string
-} & JSX.IntrinsicElements['textarea']
+    type: 'text' | 'email' | 'number' | 'password' | 'search' | 'tel' | 'url'
+} & JSX.IntrinsicElements['input']
 
-export const FieldTextarea = ({
+export const FieldTextInput = ({
     label,
     id,
     hint,
     error,
     showError,
     name,
+    type,
     ...inputProps
-}: TextAreaProps): React.ReactElement => {
+}: TextInputProps): React.ReactElement => {
     const [field, meta] = useField({ name })
     return (
         <FormGroup error={showError}>
@@ -50,12 +52,13 @@ export const FieldTextarea = ({
                     {hint}
                 </div>
             )}
-            <Textarea
+            <TextInput
                 {...field}
                 {...inputProps}
                 id={id}
                 name={name}
                 error={showError}
+                type={type}
             />
         </FormGroup>
     )
