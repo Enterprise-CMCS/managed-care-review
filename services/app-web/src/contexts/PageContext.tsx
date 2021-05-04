@@ -34,8 +34,9 @@ const PageProvider: React.FC = ({ children }) => {
             ? PageHeadingsRecord[routeName]
             : undefined
 
+        if (!defaultHeading && !customHeading) return
+
         setHeading((prev) => {
-            if (!defaultHeading && !customHeading) return prev
             return customHeading ? customHeading : defaultHeading
         })
     }

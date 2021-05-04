@@ -20,6 +20,7 @@ export type FileUploadProps = {
     name: string
     label: string
     hint?: React.ReactNode
+    initialItems?: FileItemT[]
     uploadFile: (file: File) => Promise<S3FileData>
     deleteFile: (key: string) => Promise<void>
     onLoadComplete: ({ files }: { files: FileItemT[] }) => void
@@ -43,6 +44,7 @@ export const FileUpload = ({
     name,
     label,
     hint,
+    initialItems,
     uploadFile,
     deleteFile,
     onLoadComplete,
@@ -52,12 +54,14 @@ export const FileUpload = ({
     const [loadingStatus, setLoadingStatus] = useState<
         null | 'UPLOADING' | 'COMPLETE'
     >(null)
-    const [fileItems, setFileItems] = useState<FileItemT[]>([])
+    const [fileItems, setFileItems] = useState<FileItemT[]>(
+        initialItems ? initialItems : []
+    )
     const fileInputRef = useRef<HTMLInputElement>(null) // reference to the HTML input which has files
     const fileInputKey = useRef(uuidv4()) // use of randomized key forces re-render of file input, and empties content on change
 
     React.useEffect(() => {
-        if (loadingStatus === 'COMPLETE') {
+        if (loadingStatus !== 'UPLOADING') {
             onLoadComplete({ files: fileItems })
         }
     }, [fileItems, loadingStatus, onLoadComplete])
