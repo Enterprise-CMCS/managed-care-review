@@ -34,7 +34,7 @@
         "@types/dotenv": "^8.2.0",
         "@types/node": "^14.14.35",
         "@types/yargs": "^15.0.10",
-        "chromedriver": "^86.0.0",
+        "chromedriver": "^90.0.0",
         "cypress": "^6.8.0",
         "cypress-pipe": "^2.0.0",
         "dotenv": "^8.2.0",
