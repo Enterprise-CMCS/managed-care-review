@@ -98,4 +98,23 @@ describe('FieldTextInput component', () => {
         ).toBeInTheDocument()
         expect(screen.getByTestId('errorMessage')).toBeInTheDocument()
     })
+
+    it('renders with value in field', () => {
+        render(
+            <FieldTextInput
+                id="input1"
+                label="default label"
+                name="input1"
+                showError={true}
+                type='text'
+                value="default value"
+            />
+        )
+        expect(
+            screen.getByText(
+                'You must provide a description of this document'
+            )
+        ).toBeInTheDocument()
+        expect(screen.getByDisplayValue('default value')).toBeInTheDocument()
+    })
 })

@@ -103,4 +103,17 @@ describe('FieldTextarea component', () => {
         ).toBeInTheDocument()
         expect(screen.getByTestId('errorMessage')).toBeInTheDocument()
     })
+
+    it('renders with value in textarea', () => {
+        render(
+            <FieldTextarea
+                id="input1"
+                label="default label"
+                name="input1"
+                showError={false}
+                value="default value"
+            />
+        )
+        expect(screen.getByDisplayValue('default value')).toBeInTheDocument()
+    })
 })
