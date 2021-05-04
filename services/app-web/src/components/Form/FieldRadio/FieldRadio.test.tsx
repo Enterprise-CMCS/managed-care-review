@@ -67,4 +67,32 @@ describe('FieldRadio component', () => {
             screen.getByLabelText('Executed contract action only')
         ).toHaveAttribute('aria-required', 'true')
     })
+
+    it('renders as checked when expected', () => {
+        const mockField = {
+            value: '',
+            checked: true,
+            onChange: jest.fn(),
+            onBlur: jest.fn(),
+            multiple: undefined,
+            name: 'input1',
+        }
+
+        useField.mockReturnValue([mockField])
+
+        render(
+            <FieldRadio
+                name="submissionType"
+                id="contractOnly"
+                aria-required
+                label="Executed contract action only"
+            />
+        )
+        expect(
+            screen.getByLabelText('Executed contract action only')
+        ).toBeInTheDocument()
+        expect(
+            screen.getByLabelText('Executed contract action only')
+        ).toBeChecked()
+    })
 })

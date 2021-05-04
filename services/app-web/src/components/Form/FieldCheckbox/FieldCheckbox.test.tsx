@@ -67,4 +67,32 @@ describe('FieldCheckbox component', () => {
             screen.getByLabelText('Managed Care Organization (MCO)')
         ).toHaveAttribute('aria-required', 'true')
     })
+
+    it('renders as checked when expected', () => {
+        const mockField = {
+            value: '',
+            checked: true,
+            onChange: jest.fn(),
+            onBlur: jest.fn(),
+            multiple: undefined,
+            name: 'input1',
+        }
+
+        useField.mockReturnValue([mockField])
+
+        render(
+            <FieldCheckbox
+                name="managedCareEntity"
+                id="mco"
+                aria-required
+                label="Managed Care Organization (MCO)"
+            />
+        )
+        expect(
+            screen.getByLabelText('Managed Care Organization (MCO)')
+        ).toBeInTheDocument()
+        expect(
+            screen.getByLabelText('Managed Care Organization (MCO)')
+        ).toBeChecked()
+    })
 })
