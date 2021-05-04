@@ -1,9 +1,9 @@
 import React from 'react'
 import { useField } from 'formik'
-import { Radio } from '@trussworks/react-uswds'
+import { Checkbox } from '@trussworks/react-uswds'
 
 /**
- * This component renders a radio button
+ * This component renders a checkbox
  *
  * It relies on the Formik useField hook to work, so it must ALWAYS be rendered
  * inside of a Formik form context.
@@ -12,18 +12,18 @@ import { Radio } from '@trussworks/react-uswds'
  * ReactUSWDS components directly.
  */
 
-export type FieldRadioProps = {
+export type FieldCheckboxProps = {
     name: string
     label: string
     id: string
 } & JSX.IntrinsicElements['input']
 
-export const FieldRadio = ({
+export const FieldCheckbox = ({
     name,
     label,
     id,
     ...inputProps
-}: FieldRadioProps): React.ReactElement => {
+}: FieldCheckboxProps): React.ReactElement => {
     const [field] = useField({ name })
-    return <Radio id={id} label={label} {...field} {...inputProps} />
+    return <Checkbox id={id} label={label} {...field} {...inputProps} />
 }

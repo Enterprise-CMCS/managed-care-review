@@ -1,6 +1,6 @@
 import React from 'react'
 import { screen, render, getByLabelText } from '@testing-library/react'
-import { FieldRadio } from './FieldRadio'
+import { FieldCheckbox } from './FieldCheckbox'
 import { useField } from 'formik'
 import { Redirect } from 'react-router'
 
@@ -9,7 +9,7 @@ import { Redirect } from 'react-router'
 
 jest.mock('formik')
 
-describe('FieldRadio component', () => {
+describe('FieldCheckbox component', () => {
     it('renders without errors', () => {
         const mockField = {
             value: '',
@@ -23,21 +23,21 @@ describe('FieldRadio component', () => {
         useField.mockReturnValue([mockField])
 
         render(
-            <FieldRadio
-                name="submissionType"
-                id="contractOnly"
-                label="Executed contract action only"
+            <FieldCheckbox
+                name="managedCareEntity"
+                id="mco"
+                label="Managed Care Organization (MCO)"
             />
         )
         expect(
-            screen.getByLabelText('Executed contract action only')
+            screen.getByLabelText('Managed Care Organization (MCO)')
         ).toBeInTheDocument()
         expect(
-            screen.getByLabelText('Executed contract action only')
+            screen.getByLabelText('Managed Care Organization (MCO)')
         ).toHaveAttribute('name', 'input1')
         expect(
-            screen.getByLabelText('Executed contract action only')
-        ).toHaveAttribute('id', 'contractOnly')
+            screen.getByLabelText('Managed Care Organization (MCO)')
+        ).toHaveAttribute('id', 'mco')
     })
 
     it('handles custom aria attributes', () => {
@@ -53,18 +53,18 @@ describe('FieldRadio component', () => {
         useField.mockReturnValue([mockField])
 
         render(
-            <FieldRadio
-                name="submissionType"
-                id="contractOnly"
+            <FieldCheckbox
+                name="managedCareEntity"
+                id="mco"
                 aria-required
-                label="Executed contract action only"
+                label="Managed Care Organization (MCO)"
             />
         )
         expect(
-            screen.getByLabelText('Executed contract action only')
+            screen.getByLabelText('Managed Care Organization (MCO)')
         ).toBeInTheDocument()
         expect(
-            screen.getByLabelText('Executed contract action only')
+            screen.getByLabelText('Managed Care Organization (MCO)')
         ).toHaveAttribute('aria-required', 'true')
     })
 
@@ -81,18 +81,18 @@ describe('FieldRadio component', () => {
         useField.mockReturnValue([mockField])
 
         render(
-            <FieldRadio
-                name="submissionType"
-                id="contractOnly"
+            <FieldCheckbox
+                name="managedCareEntity"
+                id="mco"
                 aria-required
-                label="Executed contract action only"
+                label="Managed Care Organization (MCO)"
             />
         )
         expect(
-            screen.getByLabelText('Executed contract action only')
+            screen.getByLabelText('Managed Care Organization (MCO)')
         ).toBeInTheDocument()
         expect(
-            screen.getByLabelText('Executed contract action only')
+            screen.getByLabelText('Managed Care Organization (MCO)')
         ).toBeChecked()
     })
 })
