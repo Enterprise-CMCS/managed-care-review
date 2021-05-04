@@ -48,6 +48,12 @@ export const Documents = ({
         { error: updateError },
     ] = useUpdateDraftSubmissionMutation()
 
+    const keyFromS3URL = (url: string) => {
+        const keyMatcher = /s3?:\/\/[a-z0-9]+\/([a-z0-9]+)\/[a-z0-9]+$/g
+        const match = url.match(keyMatcher)
+        return match ? match[0] : undefined
+    }
+
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         draftSubmission &&
         draftSubmission.documents.map((doc) => {
@@ -55,7 +61,7 @@ export const Documents = ({
                 id: uuidv4(),
                 name: doc.name,
                 url: doc.url,
-                key: 'UNKNOWN',
+                key: keyFromS3URL(doc.url || 'MISSING'),
                 s3URL: doc.s3URL,
                 status: 'UPLOAD_COMPLETE',
             }
