@@ -99,4 +99,20 @@ describe('FieldDropdown component', () => {
         ).toBeInTheDocument()
         expect(screen.getByTestId('errorMessage')).toBeInTheDocument()
     })
+
+    it('displays dropdown with selected option', () => {
+        render(
+            <FieldDropdown
+                label="Program"
+                id="input1"
+                showError={true}
+                name="input1"
+                options={[{ id: 'id', label: 'value' }]}
+            />
+        )
+        expect(
+            screen.getByText('Must select at least one program')
+        ).toBeInTheDocument()
+        expect(screen.getByTestId('errorMessage')).toBeInTheDocument()
+    })
 })

@@ -1,7 +1,6 @@
 import React from 'react'
 import { screen, render } from '@testing-library/react'
-import { FieldTextarea } from './FieldTextarea'
-import { Link } from '@trussworks/react-uswds'
+import { FieldTextInput } from './FieldTextInput'
 
 const mockOnChange = jest.fn()
 const mockSetValue = jest.fn()
@@ -20,21 +19,22 @@ jest.mock('formik', () => {
             {
                 touched: true,
                 error:
-                    'You must provide a description of any major changes or updates',
+                    'You must provide a description of this document',
             },
             { setValue: mockSetValue },
         ],
     }
 })
 
-describe('FieldTextarea component', () => {
+describe('FieldTextInput component', () => {
     it('renders without errors', () => {
         render(
-            <FieldTextarea
+            <FieldTextInput
                 id="input1"
                 label="default label"
                 name="input1"
                 showError={false}
+                type='text'
             />
         )
         expect(screen.getByLabelText('default label')).toBeInTheDocument()
@@ -42,12 +42,13 @@ describe('FieldTextarea component', () => {
 
     it('handles custom aria attributes', () => {
         render(
-            <FieldTextarea
+            <FieldTextInput
                 id="input1"
                 label="default label"
                 name="input1"
                 aria-required
                 showError={false}
+                type='text'
             />
         )
         expect(screen.getByLabelText('default label')).toHaveAttribute(
@@ -58,62 +59,62 @@ describe('FieldTextarea component', () => {
 
     it('displays hint', () => {
         render(
-            <FieldTextarea
+            <FieldTextInput
                 id="input1"
                 label="default label"
                 name="input1"
                 showError={false}
                 hint={
                     <>
-                        <Link
-                            variant="nav"
-                            href="https://www.medicaid.gov/medicaid/managed-care/managed-care-authorities/index.html"
-                            target="_blank"
-                        >
-                            Managed Care entity definitions
-                        </Link>
                         <span>
-                            Provide a description of any major changes or
-                            updates
+                            Provide a brief description of what this document is about
                         </span>
                     </>
                 }
+                type='text'
             />
         )
         expect(
             screen.getByText(
-                'Provide a description of any major changes or updates'
+                'Provide a brief description of what this document is about'
             )
         ).toBeInTheDocument()
     })
 
     it('displays with errors', () => {
         render(
-            <FieldTextarea
+            <FieldTextInput
                 id="input1"
                 label="default label"
                 name="input1"
                 showError={true}
+                type='text'
             />
         )
         expect(
             screen.getByText(
-                'You must provide a description of any major changes or updates'
+                'You must provide a description of this document'
             )
         ).toBeInTheDocument()
         expect(screen.getByTestId('errorMessage')).toBeInTheDocument()
     })
 
-    it('renders with value in textarea', () => {
+    it('renders with value in field', () => {
         render(
-            <FieldTextarea
+            <FieldTextInput
                 id="input1"
                 label="default label"
                 name="input1"
-                showError={false}
+                showError={true}
+                type='text'
                 value="default value"
             />
         )
+        expect(
+            screen.getByText(
+                'You must provide a description of this document'
+            )
+        ).toBeInTheDocument()
         expect(screen.getByDisplayValue('default value')).toBeInTheDocument()
     })
 })
