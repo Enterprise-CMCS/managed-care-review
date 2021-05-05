@@ -8,6 +8,7 @@ import {
     Link,
 } from '@trussworks/react-uswds'
 import { NavLink, useHistory } from 'react-router-dom'
+import { v4 as uuidv4 } from 'uuid'
 
 import styles from '../StateSubmissionForm.module.scss'
 import {
@@ -46,6 +47,25 @@ export const Documents = ({
         updateDraftSubmission,
         { error: updateError },
     ] = useUpdateDraftSubmissionMutation()
+
+    const keyFromS3URL = (url: string) => {
+        const keyMatcher = /s3?:\/\/[a-z0-9]+\/([a-z0-9]+)\/[a-z0-9]+$/g
+        const match = url.match(keyMatcher)
+        return match ? match[0] : undefined
+    }
+
+    const fileItemsFromDraftSubmission: FileItemT[] | undefined =
+        draftSubmission &&
+        draftSubmission.documents.map((doc) => {
+            return {
+                id: uuidv4(),
+                name: doc.name,
+                url: doc.url,
+                key: keyFromS3URL(doc.url || 'MISSING'),
+                s3URL: doc.s3URL,
+                status: 'UPLOAD_COMPLETE',
+            }
+        })
 
     useEffect(() => {
         const hasNoPendingFiles: boolean = fileItems.every(
@@ -156,6 +176,7 @@ export const Documents = ({
                     name="documents"
                     label="Upload documents"
                     accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    initialItems={fileItemsFromDraftSubmission}
                     uploadFile={handleUploadFile}
                     deleteFile={handleDeleteFile}
                     onLoadComplete={onLoadComplete}
