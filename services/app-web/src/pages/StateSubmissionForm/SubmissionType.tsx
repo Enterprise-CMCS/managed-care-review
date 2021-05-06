@@ -10,12 +10,7 @@ import {
     FormGroup,
     Link,
 } from '@trussworks/react-uswds'
-import {
-    Formik,
-    FormikHelpers,
-    FormikErrors,
-    useFormikContext,
-} from 'formik'
+import { Formik, FormikHelpers, FormikErrors, useFormikContext } from 'formik'
 import { NavLink, useHistory } from 'react-router-dom'
 import PageHeading from '../../components/PageHeading'
 import { useMutation } from '@apollo/client'
@@ -226,93 +221,92 @@ export const SubmissionType = ({
                             )}
                             <div className={styles.formContainer}>
                                 <span>All fields are required</span>
-                                <div className="margin-top-205">
-                                    <FieldDropdown
-                                        id="programID"
-                                        name="programID"
-                                        label="Program"
-                                        showError={showFieldErrors(
-                                            errors.programID
+                                <FieldDropdown
+                                    id="programID"
+                                    name="programID"
+                                    label="Program"
+                                    showError={showFieldErrors(
+                                        errors.programID
+                                    )}
+                                    options={programOptions}
+                                />
+                                <FormGroup
+                                    error={showFieldErrors(
+                                        errors.submissionType
+                                    )}
+                                >
+                                    <Fieldset
+                                        className={styles.radioGroup}
+                                        legend="Choose submission type"
+                                    >
+                                        {showFieldErrors(
+                                            errors.submissionType
+                                        ) && (
+                                            <ErrorMessage>
+                                                {errors.submissionType}
+                                            </ErrorMessage>
                                         )}
-                                        options={programOptions}
-                                    />
-                                </div>
-                                <div className="margin-top-5">
-                                    <FormGroup error={showFieldErrors(
-                                                errors.submissionType
-                                            )}>
-                                        <Fieldset legend="Choose submission type">
-                                            {showFieldErrors(
-                                                errors.submissionType
-                                            ) && (
-                                                <ErrorMessage>
-                                                    {errors.submissionType}
-                                                </ErrorMessage>
-                                            )}
-                                            <FieldRadio
-                                                aria-required
-                                                checked={
-                                                    values.submissionType ===
+                                        <FieldRadio
+                                            aria-required
+                                            checked={
+                                                values.submissionType ===
+                                                SubmissionTypeT.ContractOnly
+                                            }
+                                            id="contractOnly"
+                                            name="submissionType"
+                                            label={
+                                                SubmissionTypeRecord[
                                                     SubmissionTypeT.ContractOnly
+                                                ]
+                                            }
+                                            value={SubmissionTypeT.ContractOnly}
+                                        />
+                                        <FieldRadio
+                                            aria-required
+                                            checked={
+                                                values.submissionType ===
+                                                SubmissionTypeT.ContractAndRates
+                                            }
+                                            id="contractRate"
+                                            name="submissionType"
+                                            label={
+                                                SubmissionTypeRecord[
+                                                    SubmissionTypeT
+                                                        .ContractAndRates
+                                                ]
+                                            }
+                                            value={
+                                                SubmissionTypeT.ContractAndRates
+                                            }
+                                        />
+                                    </Fieldset>
+                                </FormGroup>
+                                <FieldTextarea
+                                    label="Submission description"
+                                    id="submissionDescription"
+                                    name="submissionDescription"
+                                    showError={showFieldErrors(
+                                        errors.submissionDescription
+                                    )}
+                                    hint={
+                                        <>
+                                            <Link
+                                                variant="nav"
+                                                href={
+                                                    '/help/submission-description-examples'
                                                 }
-                                                id="contractOnly"
-                                                name="submissionType"
-                                                label={
-                                                    SubmissionTypeRecord[
-                                                        SubmissionTypeT.ContractOnly
-                                                    ]
-                                                }
-                                                value={SubmissionTypeT.ContractOnly}
-                                            />
-                                            <FieldRadio
-                                                aria-required
-                                                checked={
-                                                    values.submissionType ===
-                                                    SubmissionTypeT.ContractAndRates
-                                                }
-                                                id="contractRate"
-                                                name="submissionType"
-                                                label={
-                                                    SubmissionTypeRecord[
-                                                        SubmissionTypeT
-                                                            .ContractAndRates
-                                                    ]
-                                                }
-                                                value={
-                                                    SubmissionTypeT.ContractAndRates
-                                                }
-                                            />
-                                        </Fieldset>
-                                    </FormGroup>
-                                </div>
-                                <div className="margin-top-5">
-                                    <FieldTextarea
-                                        label="Submission description"
-                                        id="submissionDescription"
-                                        name="submissionDescription"
-                                        showError={showFieldErrors(
-                                            errors.submissionDescription
-                                        )}
-                                        hint={
-                                            <>
-                                                <Link
-                                                    variant="nav"
-                                                    href={
-                                                        '/help/submission-description-examples'
-                                                    }
-                                                    target="_blank"
-                                                >
-                                                    View description examples
-                                                </Link>
+                                                target="_blank"
+                                            >
+                                                View description examples
+                                            </Link>
 
-                                                <p>
-                                                    Provide a description of any
-                                                    major changes or updates
-                                                </p>
-                                            </>
-                                        }
-                                    />
-                                </div>
+                                            <p>
+                                                Provide a description of any
+                                                major changes or updates
+                                            </p>
+                                        </>
+                                    }
+                                />
                             </div>
                             <ButtonGroup
                                 type="default"

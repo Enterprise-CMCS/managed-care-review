@@ -19,17 +19,17 @@
     h2 {
         margin-top: 0;
     }
+
+    > div[class^='usa-form-group']:not(:first-of-type) {
+        margin-top: 2.5rem;
+    }
 }
 
-.formGroup {
-    margin: units(4) 0;
+.radioGroup {
+    legend {
+        margin-top: 0;
+    }
 }
-
-.formGroupLast {
-    composes: formGroup;
-    margin-bottom: 0;
-}
-
 .buttonGroup {
     justify-content: flex-end;
     margin-right: 0;
