@@ -163,25 +163,53 @@ export const Documents = ({
         }
     }
     return (
-        <GridContainer>
-            <PageHeading headingLevel="h2"> Documents </PageHeading>
-            <Form className="usa-form--large" onSubmit={handleFormSubmit}>
+        <Form
+            className="usa-form--large"
+            id="DocumentsForm"
+            aria-label="Documents Form"
+            onSubmit={handleFormSubmit}
+        >
+            <fieldset className="usa-fieldset">
+                <legend className={styles.formHeader}>
+                    <PageHeading headingLevel="h2"> Documents </PageHeading>
+                </legend>
                 {shouldValidate && !hasValidFiles && (
                     <Alert type="error" heading="Missing documents">
                         You must upload at least one document
                     </Alert>
                 )}
-                <FileUpload
-                    id="documents"
-                    name="documents"
-                    label="Upload documents"
-                    accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                    initialItems={fileItemsFromDraftSubmission}
-                    uploadFile={handleUploadFile}
-                    deleteFile={handleDeleteFile}
-                    onLoadComplete={onLoadComplete}
-                />
+                <div className={styles.formContainer}>
+                    <FileUpload
+                        id="documents"
+                        name="documents"
+                        label="Upload documents"
+                        hint={
+                            <>
+                                <Link
+                                    href={
+                                        'https://www.medicaid.gov/federal-policy-guidance/downloads/cib110819.pdf'
+                                    }
+                                    variant="external"
+                                    target="_blank"
+                                >
+                                    Tip sheet for complete contract action
+                                    submissions
+                                </Link>
 
+                                <p className="text-base-darker">
+                                    <strong>Must include:</strong> (1) an
+                                    executed contract, (2) a signed rate
+                                    certification
+                                </p>
+                            </>
+                        }
+                        accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                        initialItems={fileItemsFromDraftSubmission}
+                        uploadFile={handleUploadFile}
+                        deleteFile={handleDeleteFile}
+                        onLoadComplete={onLoadComplete}
+                    />
+                </div>
                 <ButtonGroup type="default" className={styles.buttonGroup}>
                     <Button
                         type="button"
@@ -192,8 +220,7 @@ export const Documents = ({
                     </Button>
                     <Link
                         asCustom={NavLink}
-                        className="usa-button usa-button--outline"
-                        variant="unstyled"
+                        className={`${styles.outlineButtonLink} usa-button usa-button--outline`}
                         to="/dashboard"
                     >
                         Cancel
@@ -206,7 +233,7 @@ export const Documents = ({
                         Continue
                     </Button>
                 </ButtonGroup>
-            </Form>
-        </GridContainer>
+            </fieldset>
+        </Form>
     )
 }

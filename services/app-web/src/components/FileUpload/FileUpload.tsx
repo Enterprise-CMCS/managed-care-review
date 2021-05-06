@@ -185,9 +185,6 @@ export const FileUpload = ({
                             }
                         })
                     })
-                    // setFormError(
-                    //     'Some files are in invalid. please remove or retry.'
-                    // )
                 })
                 .finally(() => {
                     setLoadingStatus('COMPLETE')
@@ -228,8 +225,10 @@ export const FileUpload = ({
     }
 
     return (
-        <FormGroup>
-            <Label htmlFor={id}>{label}</Label>
+        <FormGroup className="margin-top-0">
+            <Label className="srOnly" htmlFor={id}>
+                {label}
+            </Label>
             {formError && (
                 <ErrorMessage id={`${id}-error`}>{formError}</ErrorMessage>
             )}

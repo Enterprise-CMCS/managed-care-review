@@ -35,4 +35,10 @@
     margin-right: 0;
     margin-left: 0;
     margin-bottom: units(3);
+
+    .outlineButtonLink {
+        // use this to remove styles from an outline button-styled link
+        text-decoration: none;
+        color: #1a4480 !important;
+    }
 }
