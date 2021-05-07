@@ -167,7 +167,7 @@ export const Documents = ({
                     <PageHeading headingLevel="h2"> Documents </PageHeading>
                 </legend>
                 {shouldValidate && !hasValidFiles && (
-                    <Alert type="error" heading="Missing documents">
+                    <Alert type="error" heading="Missing documents" className="margin-bottom-2">
                         You must upload at least one document
                     </Alert>
                 )}
