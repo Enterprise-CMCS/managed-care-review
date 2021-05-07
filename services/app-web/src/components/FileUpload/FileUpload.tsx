@@ -11,12 +11,6 @@ import {
 import { FileItemT } from './FileItem'
 import { FileItemsList } from './FileItemsList'
 
-type FileInputRef = {
-    clearFiles: () => void
-    input: HTMLInputElement | null
-    files: FileList
-}
-
 export type S3FileData = {
     url: string
     key: string
@@ -77,7 +71,6 @@ export const FileUpload = ({
 
     // Generate FileItems from the HTML FileList that is in the input on load or drop
     const generateFileItems = (fileList: FileList) => {
-        console.log('this is a valid FileList, so we can process it')
         const items: FileItemT[] = []
         for (let i = 0; i < fileList?.length; i++) {
             const newItem: FileItemT = {
@@ -210,19 +203,9 @@ export const FileUpload = ({
     const handleFileInputChangeOrDrop = (
         e: React.DragEvent | React.ChangeEvent
     ): void => {
-<<<<<<< HEAD
         const files = fileInputRef.current?.input?.files
         // return early to ensure we display errors when only invalid files are dropped
         if (!files || files.length === 0) {
-=======
-        const files = fileInputRef.current?.files
-        console.log('files :', files)
-        console.log('current : ', fileInputRef.current)
-        console.log('fileInputRef : ', fileInputRef)
-        // return early to ensure we display errors when only invalid files are dropped
-        if (!files || files.length === 0) {
-            console.log('Something is broken!')
->>>>>>> 07d9531... Test new file input with forwardRef
             return
         }
 
@@ -260,10 +243,6 @@ export const FileUpload = ({
                 onChange={handleFileInputChangeOrDrop}
                 onDrop={handleFileInputChangeOrDrop}
                 accept={inputProps.accept}
-<<<<<<< HEAD
-=======
-                enterKeyHint="enter"
->>>>>>> 07d9531... Test new file input with forwardRef
                 ref={fileInputRef}
             />
             <FileItemsList
