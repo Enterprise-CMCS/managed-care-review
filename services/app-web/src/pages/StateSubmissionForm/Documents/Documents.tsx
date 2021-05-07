@@ -11,6 +11,7 @@ import {
 import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
 import PageHeading from '../../../components/PageHeading'
+import { isContractAndRates } from '../../../constants/submissions'
 import {
     FileUpload,
     S3FileData,
@@ -155,6 +156,19 @@ export const Documents = ({
             showError(error)
         }
     }
+
+    const Hint = (): JSX.Element =>
+        isContractAndRates(draftSubmission) ? (
+            <>
+                <strong>Must include:</strong> an executed contract and a signed
+                rate certification
+            </>
+        ) : (
+            <>
+                <strong>Must include:</strong> an executed contract
+            </>
+        )
+
     return (
         <Form
             className="usa-form--large"
@@ -167,7 +181,11 @@ export const Documents = ({
                     <PageHeading headingLevel="h2"> Documents </PageHeading>
                 </legend>
                 {shouldValidate && !hasValidFiles && (
-                    <Alert type="error" heading="Missing documents" className="margin-bottom-2">
+                    <Alert
+                        type="error"
+                        heading="Missing documents"
+                        className="margin-bottom-2"
+                    >
                         You must upload at least one document
                     </Alert>
                 )}
@@ -189,10 +207,11 @@ export const Documents = ({
                                     submissions (opens in new window)
                                 </Link>
 
-                                <p className="text-base-darker">
-                                    <strong>Must include:</strong> (1) an
-                                    executed contract, (2) a signed rate
-                                    certification
+                                <p
+                                    data-testid="documents-hint"
+                                    className="text-base-darker"
+                                >
+                                    <Hint />
                                 </p>
                             </>
                         }
