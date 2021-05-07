@@ -291,13 +291,13 @@ export const SubmissionType = ({
                                     hint={
                                         <>
                                             <Link
-                                                variant="nav"
+                                                variant="external"
                                                 href={
                                                     '/help/submission-description-examples'
                                                 }
                                                 target="_blank"
                                             >
-                                                View description examples
+                                                View description examples (opens in new window)
                                             </Link>
 
                                             <p>

@@ -186,7 +186,7 @@ export const Documents = ({
                                     target="_blank"
                                 >
                                     Tip sheet for complete contract action
-                                    submissions
+                                    submissions (opens in new window)
                                 </Link>
 
                                 <p className="text-base-darker">
