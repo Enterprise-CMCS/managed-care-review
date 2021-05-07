@@ -5,16 +5,11 @@ import {
     FormGroup,
     Label,
     FileInput,
+    FileInputRef,
 } from '@trussworks/react-uswds'
 
 import { FileItemT } from './FileItem'
 import { FileItemsList } from './FileItemsList'
-
-type FileInputRef = {
-    clearFiles: () => void
-    input: HTMLInputElement | null
-    files: FileList
-}
 
 export type S3FileData = {
     url: string
@@ -76,7 +71,6 @@ export const FileUpload = ({
 
     // Generate FileItems from the HTML FileList that is in the input on load or drop
     const generateFileItems = (fileList: FileList) => {
-        console.log('this is a valid FileList, so we can process it')
         const items: FileItemT[] = []
         for (let i = 0; i < fileList?.length; i++) {
             const newItem: FileItemT = {
@@ -209,13 +203,9 @@ export const FileUpload = ({
     const handleFileInputChangeOrDrop = (
         e: React.DragEvent | React.ChangeEvent
     ): void => {
-        const files = fileInputRef.current?.files
-        console.log('files :', files)
-        console.log('current : ', fileInputRef.current)
-        console.log('fileInputRef : ', fileInputRef)
+        const files = fileInputRef.current?.input?.files
         // return early to ensure we display errors when only invalid files are dropped
         if (!files || files.length === 0) {
-            console.log('Something is broken!')
             return
         }
 
@@ -253,7 +243,6 @@ export const FileUpload = ({
                 onChange={handleFileInputChangeOrDrop}
                 onDrop={handleFileInputChangeOrDrop}
                 accept={inputProps.accept}
-                enterKeyHint="enter"
                 ref={fileInputRef}
             />
             <FileItemsList

@@ -11,15 +11,15 @@
         "@types/classnames": "^2.2.11",
         "@types/jest": "^26.0.15",
         "@types/node": "^12.0.0",
-        "@types/react": "^16.9.53",
-        "@types/react-dom": "^16.9.8",
+        "@types/react": "^17.0.5",
+        "@types/react-dom": "^17.0.2",
         "@types/yup": "^0.29.11",
         "aws-amplify": "^3.3.15",
         "axios": "^0.21.1",
         "eslint-plugin-testing-library": "^3.10.1",
         "formik": "^2.2.6",
         "graphql": "^15.5.0",
-        "react": "^17.0.1",
+        "react": "^17.0.2",
         "react-dom": "^17.0.1",
         "react-error-boundary": "^3.1.0",
         "react-router-dom": "^5.2.0",
@@ -33,7 +33,7 @@
     },
     "resolutions": {
         "@storybook/react/babel-loader": "8.1.0"
-     },
+    },
     "scripts": {
         "start": "react-scripts start",
         "build": "react-scripts build",
@@ -46,9 +46,6 @@
         "test:once": "react-scripts test --watchAll=false",
         "storybook": "start-storybook -p 6006 -s public --quiet",
         "build-storybook": "build-storybook -s public --quiet"
-    },
-    "resolutions": {
-        "@storybook/react/babel-loader": "8.1.0"
     },
     "jest": {
         "coveragePathIgnorePatterns": [
