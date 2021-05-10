@@ -54,7 +54,6 @@ export const FileUpload = ({
     const [formError, setFormError] = useState<string | null>(null)
     const [loadingStatus, setLoadingStatus] =
         useState<null | 'UPLOADING' | 'COMPLETE'>(null)
-
     const [fileItems, setFileItems] = useState<FileItemT[]>(initialItems || [])
     const fileInputRef = useRef<FileInputRef>(null) // reference to the HTML input which has files
 
