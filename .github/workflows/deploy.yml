@@ -37,17 +37,28 @@ jobs:
           fi
       - uses: actions/checkout@v1
       - name: this is gonna fail
+        id: to-fail
         run: exit 3
 
+      # - name: Alert Slack On Failure
+      #   uses: rtCamp/action-slack-notify@v2
+      #   if: failure()
+      #   env:
+      #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      #     SLACK_USERNAME: Deploy Alerts
+      #     SLACK_ICON_EMOJI: ':bell:'
+      #     SLACK_COLOR: ${{job.status}}
+      #     SLACK_FOOTER: from.... what?
+      #     MSG_MINIMAL: Ref, Actions URL, Commit
+
       - name: Alert Slack On Failure
-        uses: rtCamp/action-slack-notify@v2
+        uses: act10ns/slack@v1
         if: failure()
         env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_USERNAME: Deploy Alerts
-          SLACK_ICON_EMOJI: ':bell:'
-          SLACK_COLOR: ${{job.status}}
-          SLACK_FOOTER: none ${{github.event.number}}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        with:
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}
 
       - name: set app version
         run: echo "APP_VERSION=$(scripts/app_version.sh)" >> $GITHUB_ENV
@@ -117,6 +128,7 @@ jobs:
             ${{github.workspace}}/services/app-api/coverage/lcov.info:lcov
             ${{github.workspace}}/services/app-web/coverage/lcov.info:lcov
       - name: deploy
+        id: deploy-review-app
         run: |
           # When deploying multiple copies of this quickstart to the same AWS Account (not ideal), a prefix helps prevent stepping on each other.
           # This can optionally be set as an GitHub Actions Secret
