@@ -30,7 +30,7 @@ export const FileItemsList = ({
                     id={item.id}
                     className={
                         hasError(item.status)
-                            ? 'bg-secondary-lighter border-secondary'
+                            ? 'bg-secondary-lighter border-secondary margin-top-1px'
                             : 'usa-file-input__preview'
                     }
                     style={{

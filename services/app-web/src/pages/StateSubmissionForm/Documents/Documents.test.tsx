@@ -17,6 +17,7 @@ import {
     TEST_PNG_FILE,
 } from '../../../components/FileUpload/constants'
 import { Documents } from './Documents'
+import { SubmissionType } from '../../../gen/gqlClient'
 
 describe('Documents', () => {
     it('renders without errors', async () => {
@@ -149,6 +150,44 @@ describe('Documents', () => {
                 screen.queryByTestId('file-input-preview')
             ).not.toBeInTheDocument()
         })
+    })
+
+    it('show correct hint text for contract only submission', () => {
+        renderWithProviders(
+            <Documents
+                draftSubmission={{
+                    ...mockDraftSubmission,
+                    submissionType: SubmissionType.ContractOnly,
+                }}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+        expect(screen.queryByTestId('documents-hint')).toHaveTextContent(
+            'Must include: an executed contract'
+        )
+    })
+
+    it('show correct hint text for contract and rates submission', () => {
+        renderWithProviders(
+            <Documents
+                draftSubmission={{
+                    ...mockDraftSubmission,
+                    submissionType: SubmissionType.ContractAndRates,
+                }}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+        expect(screen.queryByTestId('documents-hint')).toHaveTextContent(
+            'Must include: an executed contract and a signed rate certification'
+        )
     })
 
     it.todo('does not accept a drop that has valid and invalid files together')

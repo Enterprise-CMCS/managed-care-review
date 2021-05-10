@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import {
-    GridContainer,
-    Form,
-    Button,
-    ButtonGroup,
-    Alert,
-    Link,
-} from '@trussworks/react-uswds'
+import { Form, Button, ButtonGroup, Alert, Link } from '@trussworks/react-uswds'
 import { NavLink, useHistory } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -18,6 +11,7 @@ import {
 import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
 import PageHeading from '../../../components/PageHeading'
+import { isContractAndRates } from '../../../constants/submissions'
 import {
     FileUpload,
     S3FileData,
@@ -162,26 +156,72 @@ export const Documents = ({
             showError(error)
         }
     }
+
+    const Hint = (): JSX.Element =>
+        isContractAndRates(draftSubmission) ? (
+            <>
+                <strong>Must include:</strong> an executed contract and a signed
+                rate certification
+            </>
+        ) : (
+            <>
+                <strong>Must include:</strong> an executed contract
+            </>
+        )
+
     return (
-        <GridContainer>
-            <PageHeading headingLevel="h2"> Documents </PageHeading>
-            <Form className="usa-form--large" onSubmit={handleFormSubmit}>
+        <Form
+            className="usa-form--large"
+            id="DocumentsForm"
+            aria-label="Documents Form"
+            onSubmit={handleFormSubmit}
+        >
+            <fieldset className="usa-fieldset">
+                <legend className={styles.formHeader}>
+                    <PageHeading headingLevel="h2"> Documents </PageHeading>
+                </legend>
                 {shouldValidate && !hasValidFiles && (
-                    <Alert type="error" heading="Missing documents">
+                    <Alert
+                        type="error"
+                        heading="Missing documents"
+                        className="margin-bottom-2"
+                    >
                         You must upload at least one document
                     </Alert>
                 )}
-                <FileUpload
-                    id="documents"
-                    name="documents"
-                    label="Upload documents"
-                    accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                    initialItems={fileItemsFromDraftSubmission}
-                    uploadFile={handleUploadFile}
-                    deleteFile={handleDeleteFile}
-                    onLoadComplete={onLoadComplete}
-                />
+                <div className={styles.formContainer}>
+                    <FileUpload
+                        id="documents"
+                        name="documents"
+                        label="Upload documents"
+                        hint={
+                            <>
+                                <Link
+                                    href={
+                                        'https://www.medicaid.gov/federal-policy-guidance/downloads/cib110819.pdf'
+                                    }
+                                    variant="external"
+                                    target="_blank"
+                                >
+                                    Tip sheet for complete contract action
+                                    submissions (opens in new window)
+                                </Link>
 
+                                <p
+                                    data-testid="documents-hint"
+                                    className="text-base-darker"
+                                >
+                                    <Hint />
+                                </p>
+                            </>
+                        }
+                        accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                        initialItems={fileItemsFromDraftSubmission}
+                        uploadFile={handleUploadFile}
+                        deleteFile={handleDeleteFile}
+                        onLoadComplete={onLoadComplete}
+                    />
+                </div>
                 <ButtonGroup type="default" className={styles.buttonGroup}>
                     <Button
                         type="button"
@@ -192,8 +232,7 @@ export const Documents = ({
                     </Button>
                     <Link
                         asCustom={NavLink}
-                        className="usa-button usa-button--outline"
-                        variant="unstyled"
+                        className={`${styles.outlineButtonLink} usa-button usa-button--outline`}
                         to="/dashboard"
                     >
                         Cancel
@@ -206,7 +245,7 @@ export const Documents = ({
                         Continue
                     </Button>
                 </ButtonGroup>
-            </Form>
-        </GridContainer>
+            </fieldset>
+        </Form>
     )
 }
