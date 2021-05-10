@@ -36,11 +36,10 @@ jobs:
             exit 1
           fi
       - uses: actions/checkout@v1
-
       - name: this is gonna pass
-          id: to-pass
-          run: exit 0
-          
+        id: to-pass
+        run: exit 0
+
       - name: this is gonna fail
         id: to-fail
         run: exit 3
