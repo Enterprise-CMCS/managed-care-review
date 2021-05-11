@@ -126,7 +126,7 @@ jobs:
           cd services
           endpoint=$(./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name)
           echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
-          
+
       - name: Cypress setup
         run: |
           yarn cypress install

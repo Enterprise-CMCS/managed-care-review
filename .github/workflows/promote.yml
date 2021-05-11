@@ -35,6 +35,10 @@ jobs:
             exit 1
           fi
       - uses: actions/checkout@v1
+      # Find the PR associated with this push, if there is one.
+      # PR number is in steps.findPr.outputs.pr
+      - uses: jwalton/gh-find-current-pr@v1
+        id: findPr
       - name: set app version
         run: echo "APP_VERSION=$(scripts/app_version.sh)" >> $GITHUB_ENV
       - name: set branch specific variable names
@@ -139,6 +143,8 @@ jobs:
         with:
           name: test_results
           path: tests/nightwatch/tests_output
+      - name: this is gonna fail
+        run: exit 3
       - name: set prod env vars
         run: ./.github/build_vars.sh set_values
         env:
@@ -159,3 +165,13 @@ jobs:
         with:
           name: test_results
           path: tests/nightwatch/tests_output
+      - name: Alert Slack On Failure
+        uses: rtCamp/action-slack-notify@v2
+        if: failure()
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: Deploy Alerts
+          SLACK_ICON_EMOJI: ':bell:'
+          SLACK_COLOR: ${{job.status}}
+          SLACK_FOOTER: https://github.com/CMSgov/managed-care-review/pull/${{ steps.findPr.outputs.pr }}
+          MSG_MINIMAL: actions url,commit
