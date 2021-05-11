@@ -12,21 +12,23 @@ import {
 } from '@trussworks/react-uswds'
 import { Formik, FormikHelpers, FormikErrors, useFormikContext } from 'formik'
 import { NavLink, useHistory } from 'react-router-dom'
-import PageHeading from '../../components/PageHeading'
 import { useMutation } from '@apollo/client'
 
-import styles from './StateSubmissionForm.module.scss'
+import PageHeading from '../../../components/PageHeading'
 import {
     CreateDraftSubmissionDocument,
     DraftSubmission,
     SubmissionType as SubmissionTypeT,
     useUpdateDraftSubmissionMutation,
-} from '../../gen/gqlClient'
-import { useAuth } from '../../contexts/AuthContext'
-import { FieldTextarea } from '../../components/Form/FieldTextarea/FieldTextarea'
-import { FieldDropdown } from '../../components/Form/FieldDropdown/FieldDropdown'
-import { FieldRadio } from '../../components/Form/FieldRadio/FieldRadio'
-import { SubmissionTypeRecord } from '../../constants/submissions'
+} from '../../../gen/gqlClient'
+import { useAuth } from '../../../contexts/AuthContext'
+import { FieldTextarea } from '../../../components/Form/FieldTextarea/FieldTextarea'
+import { FieldDropdown } from '../../../components/Form/FieldDropdown/FieldDropdown'
+import { FieldRadio } from '../../../components/Form/FieldRadio/FieldRadio'
+import { SubmissionTypeRecord } from '../../../constants/submissions'
+import { updatesFromSubmission } from '../updateSubmissionTransform'
+
+import styles from '../StateSubmissionForm.module.scss'
 
 /*
     Add focus to "first" form element that is invalid when errors exist
@@ -139,14 +141,11 @@ export const SubmissionType = ({
                 return
             }
 
-            // TODO: once we have more values, we'll need to pick the other values out
-            // off of the existing draft.
-            const updatedDraft = {
-                programID: values.programID,
-                submissionType: values.submissionType as SubmissionTypeT,
-                submissionDescription: values.submissionDescription,
-                documents: [],
-            }
+            const updatedDraft = updatesFromSubmission(draftSubmission)
+
+            updatedDraft.programID = values.programID
+            updatedDraft.submissionType = values.submissionType as SubmissionTypeT
+            updatedDraft.submissionDescription = values.submissionDescription
 
             try {
                 await updateDraftSubmission({
@@ -183,7 +182,6 @@ export const SubmissionType = ({
             {({
                 values,
                 errors,
-                handleChange,
                 handleSubmit,
                 isSubmitting,
                 isValidating,
@@ -297,7 +295,8 @@ export const SubmissionType = ({
                                                 }
                                                 target="_blank"
                                             >
-                                                View description examples (opens in new window)
+                                                View description examples (opens
+                                                in new window)
                                             </Link>
 
                                             <p>

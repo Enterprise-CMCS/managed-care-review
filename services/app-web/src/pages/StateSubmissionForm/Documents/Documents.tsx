@@ -17,6 +17,7 @@ import {
     S3FileData,
 } from '../../../components/FileUpload/FileUpload'
 import { FileItemT } from '../../../components/FileUpload/FileItem'
+import { updatesFromSubmission } from '../updateSubmissionTransform'
 
 /* 
     Documents should error alerts for overall errors related to invalid documents for a submission, including no files added.
@@ -128,12 +129,10 @@ export const Documents = ({
             }
         })
 
-        const updatedDraft = {
-            programID: draftSubmission.programID,
-            submissionType: draftSubmission.submissionType,
-            submissionDescription: draftSubmission.submissionDescription,
-            documents,
-        }
+        const updatedDraft = updatesFromSubmission(draftSubmission)
+
+        updatedDraft.documents = documents
+
         try {
             const data = await updateDraftSubmission({
                 variables: {

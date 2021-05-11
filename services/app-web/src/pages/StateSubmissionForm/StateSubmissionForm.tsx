@@ -11,7 +11,7 @@ import { RoutesRecord } from '../../constants/routes'
 import { ContractDetails } from './ContractDetails/ContractDetails'
 import { Documents } from './Documents/Documents'
 import { ReviewSubmit } from './ReviewSubmit/ReviewSubmit'
-import { SubmissionType } from './SubmissionType'
+import { SubmissionType } from './SubmissionType/SubmissionType'
 
 import { useFetchDraftSubmissionQuery } from '../../gen/gqlClient'
 
