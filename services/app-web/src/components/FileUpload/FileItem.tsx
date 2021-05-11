@@ -37,6 +37,7 @@ export const FileItem = ({
     const { name, status } = item
     const hasDuplicateNameError = status === 'DUPLICATE_NAME_ERROR'
     const hasUploadError = status === 'UPLOAD_ERROR'
+    const isLoading = status === 'PENDING'
     const isPDF = name.indexOf('.pdf') > 0
     const isWord = name.indexOf('.doc') > 0 || name.indexOf('.pages') > 0
     const isVideo = name.indexOf('.mov') > 0 || name.indexOf('.mp4') > 0
@@ -44,7 +45,7 @@ export const FileItem = ({
     const isGeneric = !isPDF && !isWord && !isVideo && !isExcel
 
     const imageClasses = classnames('usa-file-input__preview-image', {
-        'is-loading': status === 'PENDING',
+        'is-loading': isLoading,
         'usa-file-input__preview-image--pdf': isPDF,
         'usa-file-input__preview-image--word': isWord,
         'usa-file-input__preview-image--video': isVideo,
