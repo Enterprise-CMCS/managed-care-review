@@ -124,9 +124,7 @@ describe('StateSubmissionForm', () => {
                                 statusCode: 200,
                             }),
                             updateDraftSubmissionMock({
-                                // Because we haven't changed the ID of the submission returned by fetchDraftSubmissionMock
-                                // we need to use the ID of the default mock going forward. Our logic uses that ID over the one in the URL.
-                                id: 'test-abc-123',
+                                id: '15',
                                 updates: {
                                     submissionType: 'CONTRACT_ONLY' as SubmissionTypeT,
                                     submissionDescription:
@@ -137,7 +135,7 @@ describe('StateSubmissionForm', () => {
                                 statusCode: 200,
                             }),
                             fetchDraftSubmissionMock({
-                                id: 'test-abc-123',
+                                id: '15',
                                 statusCode: 200,
                             }),
                         ],

@@ -119,6 +119,8 @@ const fetchDraftSubmissionMock = ({
     id,
     statusCode, // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }: fetchDraftSubmissionMockProps): MockedResponse<Record<string, any>> => {
+    // override the ID of the returned draft to match the queried id.
+    const mergedDraftSubmission = Object.assign({}, draftSubmission, { id })
     switch (statusCode) {
         case 200:
             return {
@@ -129,7 +131,7 @@ const fetchDraftSubmissionMock = ({
                 result: {
                     data: {
                         fetchDraftSubmission: {
-                            draftSubmission,
+                            draftSubmission: mergedDraftSubmission,
                         },
                     },
                 },
@@ -162,7 +164,8 @@ const updateDraftSubmissionMock = ({
     const mergedDraftSubmission = Object.assign(
         {},
         mockDraftSubmission,
-        updates
+        updates,
+        { id } // make sure the id matches what we queried
     )
     switch (statusCode) {
         case 200:
