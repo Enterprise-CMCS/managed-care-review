@@ -53,7 +53,7 @@ jobs:
           SLACK_ICON_EMOJI: ':bell:'
           SLACK_COLOR: ${{job.status}}
           SLACK_FOOTER: from.... what?
-          MSG_MINIMAL: Ref, Actions URL, Commit
+          MSG_MINIMAL: ref,actions url,commit
 
       # - name: Alert Slack On Failure
       #   uses: act10ns/slack@v1
