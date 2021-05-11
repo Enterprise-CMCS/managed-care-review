@@ -36,6 +36,11 @@ jobs:
             exit 1
           fi
       - uses: actions/checkout@v1
+      # Find the PR associated with this push, if there is one.
+      # PR number is in steps.findPr.outputs.pr
+      - uses: jwalton/gh-find-current-pr@v1
+        id: findPr
+
       - name: this is gonna pass
         id: to-pass
         run: exit 0
@@ -44,9 +49,6 @@ jobs:
         id: to-fail
         run: exit 3
 
-      # Find the PR associated with this push, if there is one.
-      - uses: jwalton/gh-find-current-pr@v1
-        id: findPr
       - name: Alert Slack On Failure
         uses: rtCamp/action-slack-notify@v2
         if: failure()
