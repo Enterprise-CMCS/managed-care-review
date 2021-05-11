@@ -148,12 +148,6 @@ export const FileUpload = ({
                     setFileItems((prevItems) => {
                         const newItems = [...prevItems]
                         return newItems.map((item) => {
-                            console.log(
-                                'THIS',
-                                item.file,
-                                file,
-                                item.file === file
-                            )
                             if (item.file && item.file === file) {
                                 return {
                                     ...item,
