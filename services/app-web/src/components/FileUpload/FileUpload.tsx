@@ -35,6 +35,7 @@ export type FileUploadProps = {
 
 
     TODO: Refactor asyncS3Upload to use Promise.all
+    TODO: Add updateFileItems for updating state with a specific item
     TODO: Style fix for many items in list or items have long document titles
     TODO: Check thoroughly for accessibility 
 */
@@ -70,7 +71,7 @@ export const FileUpload = ({
         currentItem: FileItemT
     ) => Boolean(existingList.some((item) => item.name === currentItem.name))
 
-    // Generate FileItems from the HTML FileList that is in the input on load or drop
+    // Generate initial list of FileItem stored component state
     const generateFileItems = (files: File[]) => {
         const items: FileItemT[] = []
         for (let i = 0; i < files?.length; i++) {
@@ -197,7 +198,25 @@ export const FileUpload = ({
         }
     }
 
-    const retryFile = (item: FileItemT) => item.file && asyncS3Upload(item.file)
+    const retryFile = (item: FileItemT) => {
+        if (!item.file) return
+
+        setFileItems((prevItems) => {
+            const newItems = [...prevItems]
+            return newItems.map((i) => {
+                if (item.file === i.file) {
+                    return {
+                        ...i,
+                        status: 'PENDING',
+                    } as FileItemT
+                } else {
+                    return i
+                }
+            })
+        })
+
+        asyncS3Upload(item.file)
+    }
 
     const handleFileInputChangeOrDrop = (
         e: React.DragEvent | React.ChangeEvent
