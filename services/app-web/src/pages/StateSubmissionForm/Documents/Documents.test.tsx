@@ -189,12 +189,4 @@ describe('Documents', () => {
             'Must include: an executed contract and a signed rate certification'
         )
     })
-
-    it.todo('does not accept a drop that has valid and invalid files together')
-    it.todo(
-        'continue button is disabled when input is loaded with invalid or missing files'
-    )
-    it.todo(
-        'continue button is disabled when input is edited to have invalid or missing files'
-    )
 })

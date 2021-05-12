@@ -35,6 +35,7 @@ export type FileUploadProps = {
 
 
     TODO: Refactor asyncS3Upload to use Promise.all
+    TODO: Add updateFileItems for updating state with a specific item
     TODO: Style fix for many items in list or items have long document titles
     TODO: Check thoroughly for accessibility 
 */
@@ -51,9 +52,8 @@ export const FileUpload = ({
     ...inputProps
 }: FileUploadProps): React.ReactElement => {
     const [formError, setFormError] = useState<string | null>(null)
-    const [loadingStatus, setLoadingStatus] = useState<
-        null | 'UPLOADING' | 'COMPLETE'
-    >(null)
+    const [loadingStatus, setLoadingStatus] =
+        useState<null | 'UPLOADING' | 'COMPLETE'>(null)
     const [fileItems, setFileItems] = useState<FileItemT[]>(
         initialItems ? initialItems : []
     )
@@ -71,14 +71,14 @@ export const FileUpload = ({
         currentItem: FileItemT
     ) => Boolean(existingList.some((item) => item.name === currentItem.name))
 
-    // Generate FileItems from the HTML FileList that is in the input on load or drop
-    const generateFileItems = (fileList: FileList) => {
+    // Generate initial list of FileItem stored component state
+    const generateFileItems = (files: File[]) => {
         const items: FileItemT[] = []
-        for (let i = 0; i < fileList?.length; i++) {
+        for (let i = 0; i < files?.length; i++) {
             const newItem: FileItemT = {
                 id: uuidv4(),
-                name: fileList[i].name,
-                file: fileList[i],
+                name: files[i].name,
+                file: files[i],
                 url: undefined,
                 key: undefined,
                 s3URL: undefined,
@@ -141,17 +141,15 @@ export const FileUpload = ({
     }
     // Upload to S3 and update file items in component state with the async loading status
     // This includes moving from pending/loading UI to display success or errors
-    const asyncS3Upload = (files: FileList | File) => {
+    const asyncS3Upload = (files: File[] | File) => {
         setLoadingStatus('UPLOADING')
-        const isFileList = files instanceof FileList
-
         const upload = (file: File) => {
             uploadFile(file)
                 .then((data) => {
                     setFileItems((prevItems) => {
                         const newItems = [...prevItems]
                         return newItems.map((item) => {
-                            if (item.file === file) {
+                            if (item.file && item.file === file) {
                                 return {
                                     ...item,
                                     file: undefined,
@@ -191,8 +189,8 @@ export const FileUpload = ({
                 })
         }
 
-        if (isFileList) {
-            Array.from(files as FileList).forEach((file) => {
+        if (!(files instanceof File)) {
+            files.forEach((file) => {
                 upload(file)
             })
         } else {
@@ -200,7 +198,25 @@ export const FileUpload = ({
         }
     }
 
-    const retryFile = (item: FileItemT) => item.file && asyncS3Upload(item.file)
+    const retryFile = (item: FileItemT) => {
+        if (!item.file) return
+
+        setFileItems((prevItems) => {
+            const newItems = [...prevItems]
+            return newItems.map((i) => {
+                if (item.file === i.file) {
+                    return {
+                        ...i,
+                        status: 'PENDING',
+                    } as FileItemT
+                } else {
+                    return i
+                }
+            })
+        })
+
+        asyncS3Upload(item.file)
+    }
 
     const handleFileInputChangeOrDrop = (
         e: React.DragEvent | React.ChangeEvent
@@ -212,8 +228,8 @@ export const FileUpload = ({
         )
             return
 
-        const files = fileInputRef.current.files
-        const items = generateFileItems(fileInputRef.current.files)
+        const files = Array.from(fileInputRef.current.files)
+        const items = generateFileItems(files)
 
         // start upload and display pending files
         setFileItems((array) => [...array, ...items])
