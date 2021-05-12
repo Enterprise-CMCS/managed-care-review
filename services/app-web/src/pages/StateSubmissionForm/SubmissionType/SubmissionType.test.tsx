@@ -6,8 +6,8 @@ import { screen, waitFor } from '@testing-library/react'
 import {
     fetchCurrentUserMock,
     mockDraftSubmission,
-} from '../../utils/apolloUtils'
-import { renderWithProviders } from '../../utils/jestUtils'
+} from '../../../utils/apolloUtils'
+import { renderWithProviders } from '../../../utils/jestUtils'
 import { SubmissionType, SubmissionTypeFormValues } from './SubmissionType'
 import { Formik } from 'formik'
 

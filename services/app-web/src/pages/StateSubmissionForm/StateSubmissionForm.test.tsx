@@ -8,7 +8,11 @@ import {
     fetchDraftSubmissionMock,
     updateDraftSubmissionMock,
 } from '../../utils/apolloUtils'
-import { SubmissionType as SubmissionTypeT } from '../../gen/gqlClient'
+import {
+    SubmissionType as SubmissionTypeT,
+    DraftSubmission,
+    Document,
+} from '../../gen/gqlClient'
 import { renderWithProviders } from '../../utils/jestUtils'
 
 import { StateSubmissionForm } from './StateSubmissionForm'
@@ -131,6 +135,85 @@ describe('StateSubmissionForm', () => {
                                         'A real submission but updated something',
                                     programID: 'snbc',
                                     documents: [],
+                                },
+                                statusCode: 200,
+                            }),
+                            fetchDraftSubmissionMock({
+                                id: '15',
+                                statusCode: 200,
+                            }),
+                        ],
+                    },
+                    routerProvider: { route: '/submissions/15/type' },
+                }
+            )
+
+            const heading = await screen.findByRole('heading', {
+                name: 'Submission type',
+            })
+            expect(heading).toBeInTheDocument()
+
+            const textarea = await screen.findByRole('textbox', {
+                name: 'Submission description',
+            })
+            userEvent.type(textarea, ' but updated something')
+
+            const continueButton = await screen.findByRole('button', {
+                name: 'Continue',
+            })
+            continueButton.click()
+
+            await screen.findByRole('heading', {
+                name: 'Contract details',
+            })
+        })
+
+        it('works even if other sections of the form have been filled out', async () => {
+            const mockDocs: Document[] = [
+                {
+                    name: 'somedoc.pdf',
+                    url: 'whatsinaurl',
+                    s3URL: 's3://bucketName/key',
+                },
+            ]
+            const mockDraftSubmissionWithDocs: DraftSubmission = {
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                id: 'test-abc-123',
+                stateCode: 'MN',
+                programID: 'snbc',
+                program: {
+                    id: 'snbc',
+                    name: 'SNBC',
+                },
+                name: 'MN-MSHO-0001',
+                submissionType: 'CONTRACT_ONLY' as SubmissionTypeT.ContractOnly,
+                submissionDescription: 'A real submission',
+                documents: mockDocs,
+            }
+
+            renderWithProviders(
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_FORM}
+                    component={StateSubmissionForm}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchDraftSubmissionMock({
+                                id: '15',
+                                draftSubmission: mockDraftSubmissionWithDocs,
+                                statusCode: 200,
+                            }),
+                            updateDraftSubmissionMock({
+                                id: '15',
+                                updates: {
+                                    submissionType: 'CONTRACT_ONLY' as SubmissionTypeT,
+                                    submissionDescription:
+                                        'A real submission but updated something',
+                                    programID: 'snbc',
+                                    documents: mockDocs,
                                 },
                                 statusCode: 200,
                             }),
