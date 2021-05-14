@@ -1,4 +1,6 @@
 import React from 'react'
+import classnames from 'classnames'
+import styles from './FileUpload.module.scss'
 import { FileItem, FileItemT, FileStatus } from './FileItem'
 
 export const FileItemsList = ({
@@ -10,35 +12,25 @@ export const FileItemsList = ({
     deleteItem: (id: FileItemT) => void
     retryItem: (item: FileItemT) => void
 }): React.ReactElement => {
-    const hasError = (status: FileStatus) => {
-        return status === 'UPLOAD_ERROR' || status === 'DUPLICATE_NAME_ERROR'
+    const liClasses = (status: FileStatus): string => {
+        const hasError =
+            status === 'UPLOAD_ERROR' || status === 'DUPLICATE_NAME_ERROR'
+        return classnames(styles.fileItem, {
+            'bg-secondary-lighter border-secondary margin-top-1px': hasError,
+            'usa-file-input__preview': !hasError,
+        })
     }
 
     return (
         <ul
-            style={{
-                listStyleType: 'none',
-                display: 'inline-block',
-                padding: 0,
-                margin: '0 0 -1px ',
-                width: '480px',
-            }}
+            data-testid="file-input-preview-list"
+            className={styles.fileItemList}
         >
             {fileItems.map((item) => (
                 <li
                     key={item.id}
                     id={item.id}
-                    className={
-                        hasError(item.status)
-                            ? 'bg-secondary-lighter border-secondary margin-top-1px'
-                            : 'usa-file-input__preview'
-                    }
-                    style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        padding: '10px',
-                        pointerEvents: 'all',
-                    }}
+                    className={liClasses(item.status)}
                 >
                     <FileItem
                         deleteItem={deleteItem}
