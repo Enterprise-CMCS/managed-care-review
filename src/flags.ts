@@ -70,5 +70,3 @@ export function parseRunFlags<T extends runFlags>(
 
     return parsedFlags as T
 }
-
-// T
