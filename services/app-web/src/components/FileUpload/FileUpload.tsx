@@ -32,12 +32,6 @@ export type FileUploadProps = {
     Note: This component uses a ref to access files in the input. It also clears its own value after each change.
     This is not standard behavior for an HTML input. However, rendering quickly allows us to take over handling of files
     for upload and display in our custom FileItemList.
-
-
-    TODO: Refactor asyncS3Upload to use Promise.all
-    TODO: Add updateFileItems for updating state with a specific item
-    TODO: Style fix for many items in list or items have long document titles
-    TODO: Check thoroughly for accessibility 
 */
 
 export const FileUpload = ({
@@ -52,8 +46,9 @@ export const FileUpload = ({
     ...inputProps
 }: FileUploadProps): React.ReactElement => {
     const [formError, setFormError] = useState<string | null>(null)
-    const [loadingStatus, setLoadingStatus] =
-        useState<null | 'UPLOADING' | 'COMPLETE'>(null)
+    const [loadingStatus, setLoadingStatus] = useState<
+        null | 'UPLOADING' | 'COMPLETE'
+    >(null)
     const [fileItems, setFileItems] = useState<FileItemT[]>(
         initialItems ? initialItems : []
     )

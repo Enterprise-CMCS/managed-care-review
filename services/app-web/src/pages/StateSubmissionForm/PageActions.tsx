@@ -3,11 +3,6 @@ import { Link, ButtonGroup, Button } from '@trussworks/react-uswds'
 
 import styles from './ReviewSubmit/ReviewSubmit.module.scss'
 
-/* 
-TODO
-    - Refactor to handle dynamic components (NavLinks and Buttons) that will have different onClick and to/href depending on page
-    - make new prop exit Action for what is right now "Save as draft". This will conditionally display
-*/
 export type PageActionsProps = {
     secondaryAction: string
     primaryAction: string

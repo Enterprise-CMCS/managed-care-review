@@ -15,7 +15,6 @@ export function AppBody({
 }: {
     authMode: AuthModeType
 }): React.ReactElement {
-    // TODO: create an DialogContext to handle all app alerts
     const [alert, setAlert] = React.useState<React.ReactElement | undefined>(
         undefined
     )
