@@ -51,11 +51,14 @@ describe('FileUpload component', () => {
         const initialItems: FileItemT[] = [
             {
                 id: '3cef7a28-bd28-47d7-b838-ddd3bfb7d405',
-                key: '1620164967212-Trussel Guide to Truss - trussels-guide.pdf',
+                key:
+                    '1620164967212-Trussel Guide to Truss - trussels-guide.pdf',
                 name: 'Trussel Guide to Truss - trussels-guide.pdf',
-                s3URL: "s3://local-uploads/1620164967212-Trussels' Guide to Truss - trussels-guide.pdf/Trussels' Guide to Truss - trussels-guide.pdf",
+                s3URL:
+                    "s3://local-uploads/1620164967212-Trussels' Guide to Truss - trussels-guide.pdf/Trussels' Guide to Truss - trussels-guide.pdf",
                 status: 'UPLOAD_COMPLETE',
-                url: 'http://localhost:4569/local-uploads/1620164967212-Trussels%27%20Guide%20to%20Truss%20-%20trussels-guide.pdf?AWSAccessKeyId=S3RV',
+                url:
+                    'http://localhost:4569/local-uploads/1620164967212-Trussels%27%20Guide%20to%20Truss%20-%20trussels-guide.pdf?AWSAccessKeyId=S3RV',
             },
         ]
 
@@ -139,25 +142,6 @@ describe('FileUpload component', () => {
         expect(screen.getByRole('listitem')).toBeInTheDocument()
     })
 
-    it.skip('accepts an upload and a drop file of valid types', async () => {
-        await render(<FileUpload {...testProps} accept=".pdf,.txt" />)
-
-        const inputEl = screen.getByTestId('file-input-input')
-        expect(inputEl).toHaveAttribute('accept', '.pdf,.txt')
-
-        const targetEl = screen.getByTestId('file-input-droptarget')
-        fireEvent.drop(targetEl, {
-            dataTransfer: {
-                files: [TEST_PDF_FILE],
-            },
-        })
-        userEvent.upload(inputEl, TEST_TEXT_FILE, {}, { applyAccept: true })
-
-        await waitFor(() =>
-            expect(screen.queryAllByRole('listitem').length).toBe(2)
-        )
-    })
-
     it('does not accept upload file of invalid type', async () => {
         await render(<FileUpload {...testProps} accept=".pdf,.txt" />)
 
@@ -223,57 +207,5 @@ describe('FileUpload component', () => {
         )
 
         expect(queryByTestId('file-input-preview')).not.toBeInTheDocument()
-    })
-
-    it.skip('shows duplicate name error when the same file is uploaded twice', async () => {
-        await render(<FileUpload {...testProps} />)
-        const inputEl = screen.getByTestId('file-input-input')
-        userEvent.upload(inputEl, [TEST_PDF_FILE, TEST_PDF_FILE])
-
-        expect(screen.getAllByRole('listitem').length).toBe(2)
-        await waitFor(() =>
-            expect(screen.getByText('Duplicate file')).toBeInTheDocument()
-        )
-    })
-
-    it.skip('removes duplicate name error when a duplicate file is deleted', async () => {
-        await render(<FileUpload {...testProps} />)
-
-        const inputEl = screen.getByTestId('file-input-input')
-
-        userEvent.upload(inputEl, [TEST_PDF_FILE])
-        await waitFor(() =>
-            expect(screen.getAllByRole('listitem').length).toBe(1)
-        )
-
-        userEvent.upload(inputEl, [TEST_PDF_FILE])
-        await waitFor(() =>
-            expect(screen.getAllByRole('listitem').length).toBe(2)
-        )
-        expect(screen.getByText('Duplicate file')).toBeInTheDocument()
-
-        userEvent.click(screen.getAllByText('Remove')[0])
-        expect(screen.getAllByRole('listitem').length).toBe(1)
-        expect(screen.getByText('Duplicate file')).not.toBeInTheDocument()
-    })
-
-    it.skip('show last files in list as duplicate name errors when multiple duplicate files loaded', async () => {
-        await render(<FileUpload {...testProps} />)
-
-        const inputEl = screen.getByTestId('file-input-input')
-
-        userEvent.upload(inputEl, [TEST_PDF_FILE, TEST_PDF_FILE, TEST_PDF_FILE])
-
-        const fileItems = screen.getAllByRole('listitem')
-        const errorClasses = 'bg-secondary-lighter border-secondary'
-
-        expect(fileItems.length).toBe(3)
-        await waitFor(() =>
-            expect(screen.getAllByText('Duplicate file').length).toBe(2)
-        )
-        expect(fileItems[0]).toHaveClass('usa-file-input__preview')
-        expect(fileItems[0]).not.toHaveClass(errorClasses)
-        expect(fileItems[1]).toHaveClass(errorClasses)
-        expect(fileItems[2]).toHaveClass(errorClasses)
     })
 })
