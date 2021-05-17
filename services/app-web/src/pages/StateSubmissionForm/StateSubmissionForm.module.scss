@@ -23,6 +23,10 @@
     > div[class^='usa-form-group']:not(:first-of-type) {
         margin-top: 2.5rem;
     }
+
+    &[class^='usa-form'] {
+        min-width: units('mobile-lg');
+    }
 }
 
 .radioGroup {
@@ -40,5 +44,11 @@
         // use this to remove styles from an outline button-styled link
         text-decoration: none;
         color: #1a4480 !important;
+    }
+}
+
+.dateRangePicker {
+    [class^='usa-label']{
+        font-weight: normal;
     }
 }
