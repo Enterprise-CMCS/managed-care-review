@@ -42,9 +42,6 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
 
         try {
             const result = await signIn(fields.loginEmail, fields.loginPassword)
-            // TODO: try and useAuth() here, track state using the loading param there instead of awaiting something.
-            // if loading, show "redirecting" spinner or something.
-            // if loggedInUser, redirect
 
             if (result && 'code' in result) {
                 if (result.code === 'UserNotConfirmedException') {

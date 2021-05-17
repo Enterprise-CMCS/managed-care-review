@@ -100,7 +100,7 @@ export const SubmissionType = ({
         shouldValidate && Boolean(error)
 
     const submissionTypeInitialValues: SubmissionTypeFormValues = {
-        programID: draftSubmission?.program.id ?? programs[0]?.id, // TODO: change this to be the program selected on the tab
+        programID: draftSubmission?.program.id ?? programs[0]?.id,
         submissionDescription: draftSubmission?.submissionDescription ?? '',
         submissionType: draftSubmission?.submissionType ?? '',
     }

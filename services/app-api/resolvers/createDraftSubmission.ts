@@ -8,7 +8,6 @@ import {
 
 import { MutationResolvers, State } from '../gen/gqlServer'
 
-// TODO: potential refactor: pull out database interactions into /datasources createDraftSubmission as per apollo server docs
 export function createDraftSubmissionResolver(
     store: Store
 ): MutationResolvers['createDraftSubmission'] {

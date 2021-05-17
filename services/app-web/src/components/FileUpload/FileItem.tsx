@@ -12,8 +12,6 @@ export type FileStatus =
     | 'UPLOAD_ERROR'
     | 'SAVED_TO_SUBMISSION'
 
-// TODO: May want to use a union data type here to further clarify states
-// FileItemUploadComplete | FileItemUploadIncomplete
 export type FileItemT = {
     id: string
     name: string

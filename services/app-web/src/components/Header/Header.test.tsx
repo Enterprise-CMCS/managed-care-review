@@ -77,7 +77,6 @@ describe('Header', () => {
         })
 
         it('displays heading with users state', async () => {
-            // TODO: make a loop that goes through all states and checks icons/headings
             renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],

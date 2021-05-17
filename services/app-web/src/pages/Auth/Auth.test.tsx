@@ -15,11 +15,6 @@ import { LocalLogin } from './LocalLogin'
 import { fetchCurrentUserMock } from '../../utils/apolloUtils'
 /*  
 This file should only have basic user flows for auth. Form and implementation details are tested at the component level.
-
-TODO: Where will we test:
-    - bad internet connection
-    - bad auth (403)
-    - server error (500)
 */
 
 describe('Auth', () => {
@@ -80,7 +75,6 @@ describe('Auth', () => {
             })
         })
 
-        // TODO: this one is logging an error about updating things at the wrong time
         it('when login is successful, redirect to dashboard', async () => {
             const loginSpy = jest
                 .spyOn(CognitoAuthApi, 'signIn')
@@ -110,7 +104,6 @@ describe('Auth', () => {
             )
         })
 
-        // TODO: This one seems to have some other weirdness logging
         it('when login fails, stay on page and display error alert', async () => {
             const loginSpy = jest.spyOn(CognitoAuthApi, 'signIn')
             const history = createMemoryHistory()

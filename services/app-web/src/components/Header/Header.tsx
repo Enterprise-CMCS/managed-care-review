@@ -46,7 +46,6 @@ export const Header = ({
         }
 
         logout().catch(() => {
-            // TODO: Add site wide alert
             setAlert &&
                 setAlert(
                     <Alert

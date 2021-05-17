@@ -3,7 +3,6 @@ import { Tag } from '@trussworks/react-uswds'
 
 import styles from './SubmissionCard.module.scss'
 
-// TODO: use gqlClient
 export enum SubmissionType {
     ContractOnly = 'CONTRACT_ONLY',
     ContractAndRates = 'CONTRACT_AND_RATES',
@@ -14,7 +13,6 @@ export enum SubmissionStatus {
     submitted = 'SUBMITTED',
 }
 
-//TODO: create date/time utilities
 /**
  * Format a date to format YYYY-MM-DD
  *
