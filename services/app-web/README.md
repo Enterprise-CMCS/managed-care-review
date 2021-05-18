@@ -49,7 +49,17 @@ This command will remove the single build dependency from your project.Instead, 
 
 ## Testing
 
-## pa11y
+### Jest and [testing-library](https://testing-library.com/)
+
+- We write unit and react component integration tests with these tools. For more, learn about `testing-library` [queries](https://testing-library.com/docs/queries/about) and [`waitFor`](https://testing-library.com/docs/dom-testing-library/api-async) as well as [`jest-dom` matchers](https://github.com/testing-library/jest-dom). Understanding these will make it much easier to write React tests.
+- If all seems lost try -  `console.log(prettyDOM(firstItem))` - to print the test html with attributes
+- Snapshot tests, written with [`react-test-renderer`](https://github.com/facebook/react/tree/master/packages/react-test-renderer) can be useful to guard against small regressions from unintended changes to markup. However, they should be used sparingly, since we have many other great testing tools in place. To override failing snapshot tests with the new markup run `jest --update-snapshots`.
+
+### cypress
+
+We have end to end testing (in the live browser) with [cypress](https://www.cypress.io/). This is configured in the main application `/cypress`, above the level of this service.
+
+### pa11y
 
 `pa11y` is a tool for accessibility testing. `pa11y-ci` is a tool to against the list of urls declared in the config file or a sitemap (if configured). To run locally, you need to global install [pa11y-ci](https://github.com/pa11y/pa11y-ci) `yarn global add pa11y-ci`. For context, By default, pa11y uses the WCAG2AA standard.
 
