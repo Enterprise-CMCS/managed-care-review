@@ -9,7 +9,7 @@ export type DataDetailProps = {
 
 /*  
     DataDetail displays definition terms and descriptions using semantic HTML.
-    This is useful for summarizing static data.
+    This is useful for summarizing static data. Should be used inside a <dl>
 */
 export const DataDetail = ({
     id,

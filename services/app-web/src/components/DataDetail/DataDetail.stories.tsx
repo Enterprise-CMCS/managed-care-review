@@ -2,7 +2,7 @@ import React from 'react'
 import { DataDetail } from './DataDetail'
 
 export default {
-    title: 'Components/Logo',
+    title: 'Components/DataDetail',
     component: DataDetail,
 }
 
