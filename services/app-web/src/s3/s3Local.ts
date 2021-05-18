@@ -45,14 +45,13 @@ export function newLocalS3Client(
 
         deleteFile: async (s3Key: string): Promise<void | S3Error> => {
             try {
-                const deleteResult = await s3Client
+                 await s3Client
                     .deleteObject({
                         Bucket: bucketName,
                         Key: s3Key,
                     })
                     .promise()
 
-                console.log('delete success',deleteResult)
                 return 
             } catch (err) {
                 if (err.code === 'NetworkingError') {
@@ -65,6 +64,11 @@ export function newLocalS3Client(
                 console.log('Log: Unexpected Error deleting file on S3', err)
                 return err
             }
+        },
+        getKey: (s3URL: string) => {
+            const match = s3URL.match(/s3?:\/\/[a-z0-9]+\/([a-z0-9]+)\/[a-z0-9]+$/g)
+            if (!match) return 'NOT_VALID_S3_URL'
+            return match[0]
         },
         getS3URL: async (s3key: string, filename: string,): Promise<string> => {
             // ignore what's passed in as the bucket and use whats in LocalS3Client

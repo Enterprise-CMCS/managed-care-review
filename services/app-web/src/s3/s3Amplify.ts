@@ -58,12 +58,16 @@ export function newAmplifyS3Client(bucketName: string): S3ClientT {
                 throw err
             }
         },
-        getS3URL: async (s3key: string, fileName: string,): Promise<string> => {
-            console.log(`s3://${bucketName}/${s3key}/${fileName}`)
-            return `s3://${bucketName}/${s3key}/${fileName}`
+        getS3URL: async (key: string, fileName: string,): Promise<string> => {
+            return `s3://${bucketName}/${key}/${fileName}`
         },
-        getURL: async (s3key: string): Promise<string> => {
-            const result = await Storage.vault.get(s3key)
+        getKey: (s3URL: string) => {
+            const match = s3URL.match(/s3?:\/\/[a-z0-9]+\/([a-z0-9]+)\/[a-z0-9]+$/g)
+            if (!match) return 'NOT_VALID_S3_URL'
+            return match[0]
+        },
+        getURL: async (key: string): Promise<string> => {
+            const result = await Storage.vault.get(key)
             if (typeof result === 'string') {
                 return result
             } else {

@@ -33,7 +33,7 @@ export const Documents = ({
     showValidations,
     draftSubmission,
 }: DocumentProps): React.ReactElement => {
-    const { deleteFile, uploadFile, getURL, getS3URL } = useS3()
+    const { deleteFile, uploadFile, getKey, getURL, getS3URL } = useS3()
     const [shouldValidate, setShouldValidate] = useState(showValidations)
     const [hasValidFiles, setHasValidFiles] = useState(false)
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
@@ -43,12 +43,6 @@ export const Documents = ({
         { error: updateError },
     ] = useUpdateDraftSubmissionMutation()
 
-    const keyFromS3URL = (url: string) => {
-        const keyMatcher = /s3?:\/\/[a-z0-9]+\/([a-z0-9]+)\/[a-z0-9]+$/g
-        const match = url.match(keyMatcher)
-        return match ? match[0] : undefined
-    }
-
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         draftSubmission &&
         draftSubmission.documents.map((doc) => {
@@ -56,7 +50,7 @@ export const Documents = ({
                 id: uuidv4(),
                 name: doc.name,
                 url: doc.url,
-                key: keyFromS3URL(doc.url || 'MISSING'),
+                key: getKey(doc.s3URL),
                 s3URL: doc.s3URL,
                 status: 'UPLOAD_COMPLETE',
             }
