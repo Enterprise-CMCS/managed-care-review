@@ -25,9 +25,6 @@ describe('ReviewSubmit', () => {
             ).toBeInTheDocument()
 
             expect(
-                screen.getByRole('heading', { name: 'State contacts' })
-            ).toBeInTheDocument()
-            expect(
                 screen.getByRole('heading', { name: 'Documents' })
             ).toBeInTheDocument()
 
