@@ -24,7 +24,7 @@ export const FileItemsList = ({
     return (
         <ul
             data-testid="file-input-preview-list"
-            className={styles.fileItemList}
+            className={styles.fileItemsList}
         >
             {fileItems.map((item) => (
                 <li
