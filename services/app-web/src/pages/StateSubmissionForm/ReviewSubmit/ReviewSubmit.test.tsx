@@ -1,17 +1,23 @@
 import React from 'react'
 import { screen, waitFor } from '@testing-library/react'
 
-import { fetchCurrentUserMock } from '../../../utils/apolloUtils'
+import {
+    fetchCurrentUserMock,
+    mockDraftSubmission,
+} from '../../../utils/apolloUtils'
 import { renderWithProviders } from '../../../utils/jestUtils'
 import { ReviewSubmit } from './ReviewSubmit'
 
 describe('ReviewSubmit', () => {
     it('renders without errors', async () => {
-        renderWithProviders(<ReviewSubmit />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-        })
+        renderWithProviders(
+            <ReviewSubmit draftSubmission={mockDraftSubmission} />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
 
         await waitFor(() => {
             expect(
@@ -35,5 +41,43 @@ describe('ReviewSubmit', () => {
                 editButtons.length
             )
         })
+    })
+
+    it('displays back link', async () => {
+        renderWithProviders(
+            <ReviewSubmit draftSubmission={mockDraftSubmission} />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        await waitFor(() =>
+            expect(
+                screen.getByRole('link', {
+                    name: 'Back',
+                })
+            ).toBeDefined()
+        )
+    })
+
+    it('displays submit button', async () => {
+        renderWithProviders(
+            <ReviewSubmit draftSubmission={mockDraftSubmission} />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        await waitFor(() =>
+            expect(
+                screen.getByRole('button', {
+                    name: 'Submit',
+                })
+            ).toBeDefined()
+        )
     })
 })

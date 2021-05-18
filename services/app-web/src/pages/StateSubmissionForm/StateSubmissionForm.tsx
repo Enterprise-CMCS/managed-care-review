@@ -63,7 +63,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     <Documents draftSubmission={draft} />
                 </Route>
                 <Route path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}>
-                    <ReviewSubmit />
+                    <ReviewSubmit draftSubmission={draft} />
                 </Route>
             </Switch>
         </GridContainer>
