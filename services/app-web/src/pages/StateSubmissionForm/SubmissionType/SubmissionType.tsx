@@ -289,14 +289,15 @@ export const SubmissionType = ({
                                     hint={
                                         <>
                                             <Link
+                                                aria-label="View description examples (opens
+                                                in new window)"
                                                 variant="external"
                                                 href={
                                                     '/help/submission-description-examples'
                                                 }
                                                 target="_blank"
                                             >
-                                                View description examples (opens
-                                                in new window)
+                                                View description examples
                                             </Link>
 
                                             <p>

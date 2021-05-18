@@ -196,6 +196,8 @@ export const Documents = ({
                         hint={
                             <>
                                 <Link
+                                    aria-label="Tip sheet for complete contract action
+                                submissions (opens in new window)"
                                     href={
                                         'https://www.medicaid.gov/federal-policy-guidance/downloads/cib110819.pdf'
                                     }
@@ -203,7 +205,7 @@ export const Documents = ({
                                     target="_blank"
                                 >
                                     Tip sheet for complete contract action
-                                    submissions (opens in new window)
+                                    submissions
                                 </Link>
 
                                 <p
