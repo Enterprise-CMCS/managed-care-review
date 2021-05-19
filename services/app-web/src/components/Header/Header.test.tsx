@@ -3,8 +3,8 @@ import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import * as CognitoAuthApi from '../../pages/Auth/cognitoAuth'
-import { renderWithProviders } from '../../utils/jestUtils'
-import { fetchCurrentUserMock } from '../../utils/apolloUtils'
+import { renderWithProviders } from '../../testHelpers/jestHelpers'
+import { fetchCurrentUserMock } from '../../testHelpers/apolloHelpers'
 import { Header } from './Header'
 
 describe('Header', () => {

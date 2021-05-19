@@ -1,6 +1,6 @@
 import React from 'react'
 import { screen, waitFor } from '@testing-library/react'
-import { renderWithProviders } from '../../utils/jestUtils'
+import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { PageActions } from './PageActions'
 
 describe('PageActions', () => {

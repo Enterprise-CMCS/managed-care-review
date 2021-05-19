@@ -7,13 +7,13 @@ import {
     fetchCurrentUserMock,
     fetchDraftSubmissionMock,
     updateDraftSubmissionMock,
-} from '../../utils/apolloUtils'
+} from '../../testHelpers/apolloHelpers'
 import {
     SubmissionType as SubmissionTypeT,
     DraftSubmission,
     Document,
 } from '../../gen/gqlClient'
-import { renderWithProviders } from '../../utils/jestUtils'
+import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
 import { StateSubmissionForm } from './StateSubmissionForm'
 

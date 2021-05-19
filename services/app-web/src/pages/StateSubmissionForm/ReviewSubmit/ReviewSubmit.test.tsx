@@ -4,8 +4,8 @@ import { screen, waitFor } from '@testing-library/react'
 import {
     fetchCurrentUserMock,
     mockDraftSubmission,
-} from '../../../utils/apolloUtils'
-import { renderWithProviders } from '../../../utils/jestUtils'
+} from '../../../testHelpers/apolloHelpers'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { ReviewSubmit } from './ReviewSubmit'
 
 describe('ReviewSubmit', () => {
