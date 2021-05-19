@@ -4,7 +4,7 @@ import {
     table,
 } from '@aws/dynamodb-data-mapper-annotations'
 
-import {embed} from '@aws/dynamodb-data-mapper'
+import { embed } from '@aws/dynamodb-data-mapper'
 import { SubmissionType } from '../../app-web/src/common-code/domain-models'
 
 // Data mapper annotations are meant to go on your domain models, and we might use them that way at some point
@@ -15,15 +15,10 @@ export class DocumentStoreT {
     name: string
 
     @attribute()
-    url: string
-
-    @attribute()
     s3URL: string
 
-
     constructor() {
-        this.name = '',
-        this.s3URL = ''
+        ;(this.name = ''), (this.s3URL = '')
     }
 }
 @table('draft-submissions')
@@ -60,7 +55,7 @@ export class DraftSubmissionStoreType {
     })
     stateNumber: number
 
-    @attribute({memberType: embed(DocumentStoreT)})
+    @attribute({ memberType: embed(DocumentStoreT) })
     documents: Array<DocumentStoreT>
 
     constructor() {
