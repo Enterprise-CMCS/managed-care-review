@@ -23,7 +23,7 @@ describe('State Submission', () => {
             // Continue button triggers submission type validation
             cy.findByRole('button', {
                 name: 'Continue',
-            }).click()
+            }).safeClick()
             cy.findByText(
                 'You must provide a description of any major changes or updates'
             ).should('exist')
@@ -131,13 +131,13 @@ describe('State Submission', () => {
                 .type('description of submission')
             cy.findByRole('button', {
                 name: 'Continue',
-            }).click()
+            }).safeClick()
 
             // Skip contract details
             cy.findByText('Contract details').should('exist')
             cy.findByRole('button', {
                 name: 'Continue',
-            }).click()
+            }).safeClick()
 
             // Add documents
             cy.findByRole('heading', { name: 'Documents' }).should('exist')
@@ -158,7 +158,7 @@ describe('State Submission', () => {
             )
             cy.findByRole('button', {
                 name: 'Continue',
-            }).click()
+            }).safeClick()
 
             // Get draft submission id and navigate back to submission type form to edit existing draft
             cy.location().then((fullUrl) => {
@@ -179,13 +179,13 @@ describe('State Submission', () => {
             cy.findByLabelText('Contract action only').safeClick()
             cy.findByRole('button', {
                 name: 'Continue',
-            }).click()
+            }).safeClick()
 
             // Skip contract details
             cy.findByText('Contract details').should('exist')
             cy.findByRole('button', {
                 name: 'Continue',
-            }).click()
+            }).safeClick()
 
             // Check that documents loads with correct data
             cy.findByRole('heading', { name: 'Documents' }).should('exist')
@@ -209,7 +209,7 @@ describe('State Submission', () => {
                 .type('description of submission')
             cy.findByRole('button', {
                 name: 'Continue',
-            }).click()
+            }).safeClick()
             cy.findByText('Contract details').should('exist')
 
             // Get draft submission id and navigate back to submission type form to edit existing draft
