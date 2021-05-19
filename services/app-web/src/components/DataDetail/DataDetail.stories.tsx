@@ -7,22 +7,28 @@ export default {
 }
 
 export const WithString = (): React.ReactElement => (
-    <DataDetail
-        id="rainfall"
-        label="Average rainfall in May"
-        data="31.58 inches"
-    />
+    <dl>
+        <DataDetail
+            id="rainfall"
+            label="Average rainfall in May"
+            data="31.58 inches"
+        />
+    </dl>
 )
 export const WithAddress = (): React.ReactElement => (
-    <DataDetail
-        id="disney"
-        label="Disney World Contact Info"
-        data={
-            <address>
-                Mickey Mouse
-                <a href="mailto:mickey@disney.com">mickey@disney.com</a>
-                <a href="tel:555-555-5555">555-555-5555</a>
-            </address>
-        }
-    />
+    <dl>
+        <DataDetail
+            id="disney"
+            label="Disney World Contact Info"
+            data={
+                <address>
+                    Mickey Mouse
+                    <br />
+                    <a href="mailto:mickey@disney.com">mickey@disney.com</a>
+                    <br />
+                    <a href="tel:555-555-5555">555-555-5555</a>
+                </address>
+            }
+        />
+    </dl>
 )
