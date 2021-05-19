@@ -12,7 +12,7 @@ import { PageActions } from '../PageActions'
 import { SubmissionTypeRecord } from '../../../constants/submissions'
 import { useS3 } from '../../../contexts/S3Context'
 
-type DocumentWithLink = { url: string } & Document
+type DocumentWithLink = { url: string | null } & Document
 export const ReviewSubmit = ({
     draftSubmission,
 }: {
@@ -26,6 +26,12 @@ export const ReviewSubmit = ({
             const newDocs = await Promise.all(
                 draftSubmission.documents.map(async (doc) => {
                     const key = getKey(doc.s3URL)
+                    if (!key)
+                        return {
+                            ...doc,
+                            url: null,
+                        }
+
                     const documentLink = await getURL(key)
                     return {
                         ...doc,
@@ -233,14 +239,18 @@ export const ReviewSubmit = ({
                         <ul>
                             {refreshedDocs.map((doc) => (
                                 <li key={doc.name}>
-                                    <Link
-                                        aria-label={`${doc.name} (opens in new window)`}
-                                        href={doc.url}
-                                        variant="external"
-                                        target="_blank"
-                                    >
-                                        {doc.name}
-                                    </Link>
+                                    {doc.url ? (
+                                        <Link
+                                            aria-label={`${doc.name} (opens in new window)`}
+                                            href={doc.url}
+                                            variant="external"
+                                            target="_blank"
+                                        >
+                                            {doc.name}
+                                        </Link>
+                                    ) : (
+                                        <span>{doc.name}</span>
+                                    )}
                                 </li>
                             ))}
                         </ul>

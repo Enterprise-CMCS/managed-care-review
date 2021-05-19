@@ -46,10 +46,20 @@ export const Documents = ({
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         draftSubmission &&
         draftSubmission.documents.map((doc) => {
+            const key = getKey(doc.s3URL)
+            if (!key) {
+                return {
+                    id: uuidv4(),
+                    name: doc.name,
+                    key: 'INVALID_KEY',
+                    s3URL: undefined,
+                    status: 'UPLOAD_ERROR',
+                }
+            }
             return {
                 id: uuidv4(),
                 name: doc.name,
-                key: getKey(doc.s3URL),
+                key: key,
                 s3URL: doc.s3URL,
                 status: 'UPLOAD_COMPLETE',
             }
@@ -63,17 +73,12 @@ export const Documents = ({
         const hasValidDocumentsForSubmission: boolean =
             fileItems.length > 0 &&
             hasNoPendingFiles &&
-            fileItems.some(
-                (item) =>
-                    item.status === 'UPLOAD_COMPLETE' ||
-                    item.status === 'SAVED_TO_SUBMISSION'
-            )
+            fileItems.some((item) => item.status === 'UPLOAD_COMPLETE')
         setHasValidFiles(hasValidDocumentsForSubmission)
     }, [fileItems])
 
     const showError = (error: string) => {
         if (!shouldValidate) setShouldValidate(true)
-        console.log('Error', error)
     }
 
     if (updateError) {

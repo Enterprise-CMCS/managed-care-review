@@ -124,9 +124,7 @@ export const FileUpload = ({
     const deleteItem = (deletedItem: FileItemT) => {
         const key = fileItems.find((item) => item.id === deletedItem.id)?.key
         if (key !== undefined)
-            deleteFile(key).catch(() =>
-                console.log('silent error deleting from s3')
-            )
+            deleteFile(key).catch(() => console.log('Error deleting from s3'))
 
         setFileItems((prevItems) => {
             return refreshItems(prevItems, deletedItem)
