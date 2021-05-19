@@ -4,17 +4,17 @@
 .formHeader {
     text-align: center;
     width: 100%;
-
-    h2 {
-        padding: units(4) 0;
-    }
+    padding: units(4) 0;
 }
 
 .formContainer {
-    padding: units(4);
-    background: $cms-color-white;
-    border: 1px solid $theme-color-base-lighter;
-    @include u-radius('md');
+
+    > [class^='usa-fieldset'] {
+        padding: units(4);
+        background: $cms-color-white;
+        border: 1px solid $theme-color-base-lighter;
+        @include u-radius('md');
+    }
 
     h2 {
         margin-top: 0;
@@ -25,7 +25,7 @@
     }
 
     &[class^='usa-form'] {
-        min-width: units('mobile-lg');
+        min-width: 35rem;
     }
 }
 
@@ -50,6 +50,9 @@
 .dateRangePicker {
     [class^='usa-label']{
         font-weight: normal;
+    }
+    [class^='usa-form-group'] {
+        margin-top: .75rem;
     }
 }
 

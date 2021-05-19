@@ -1,4 +1,4 @@
-import { Form as UswdsForm, FormGroup, Fieldset, Button, Link, DateRangePicker, Label } from '@trussworks/react-uswds'
+import { Form as UswdsForm, FormGroup, Fieldset, Button, Link, DateRangePicker, ButtonGroup } from '@trussworks/react-uswds'
 import { NavLink, useHistory } from 'react-router-dom'
 import PageHeading from '../../../components/PageHeading'
 import { FieldRadio } from '../../../components/Form/FieldRadio/FieldRadio'
@@ -57,7 +57,7 @@ export const ContractDetails = ({
                         </FormGroup>
                         <FormGroup>
                             <Fieldset
-                                legend="Amendment effective dates"
+                                legend="Contract effective dates"
                             >
                                 <DateRangePicker
                                     className={styles.dateRangePicker}
@@ -85,13 +85,15 @@ export const ContractDetails = ({
                                 <Link
                                     variant="external"
                                     href={
-                                        ''
+                                        'https://www.medicaid.gov/medicaid/managed-care/managed-care-entities/index.html'
                                     }
                                     target="_blank"
                                 >
                                     Managed Care entity definitions
                                 </Link>
-                                <div className="usa-hint margin-top-1">Check all that apply</div>
+                                <div className="usa-hint">
+                                    <span>Check all that apply</span>
+                                </div>
                                 <FieldCheckbox
                                     id="managedCareOrganization"
                                     name="managedCareEntity"
@@ -131,7 +133,9 @@ export const ContractDetails = ({
                                 >
                                     Items being amended definitions
                                 </Link>
-                                <div className="usa-hint margin-top-1">Check all that apply</div>
+                                <div className="usa-hint">
+                                    <span>Check all that apply</span>
+                                </div>
                                 <FieldCheckbox
                                     id="benefitsProvided"
                                     name="itemsAmended"
@@ -301,13 +305,15 @@ export const ContractDetails = ({
                                 <Link
                                     variant="external"
                                     href={
-                                        ''
+                                        'https://www.medicaid.gov/medicaid/managed-care/managed-care-authorities/index.html'
                                     }
                                     target="_blank"
                                 >
                                     Manged Care authority definitions
                                 </Link>
-                                <div className="usa-hint margin-top-1">Check all that apply</div>
+                                <div className="usa-hint">
+                                    <span>Check all that apply</span>
+                                </div>
                                 <FieldCheckbox
                                     id="1932aStatePlanAuthority"
                                     name="federalAuthority"
@@ -347,20 +353,21 @@ export const ContractDetails = ({
                             </Fieldset>
                         </FormGroup>
                     </fieldset>
+                    <ButtonGroup className={styles.buttonGroup}>
+                        <Link
+                            asCustom={NavLink}
+                            className={`${styles.outlineButtonLink} usa-button usa-button--outline`}
+                            variant="unstyled"
+                            to="/dashboard"
+                        >
+                            Cancel
+                        </Link>
+                        <Button type="button" onClick={handleFormSubmit}>
+                            Continue
+                        </Button>
+                    </ButtonGroup>
                 </UswdsForm>
-                
             </Formik>
-            <Link
-                asCustom={NavLink}
-                className="usa-button usa-button--outline"
-                variant="unstyled"
-                to="/dashboard"
-            >
-                Cancel
-            </Link>
-            <Button type="button" onClick={handleFormSubmit}>
-                Continue
-            </Button>
         </>
     )
 }
