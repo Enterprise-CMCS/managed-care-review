@@ -1,5 +1,6 @@
 import AWS from 'aws-sdk'
 
+import { parseKey } from '../common-code/s3URLEncoding'
 import { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
 
@@ -45,14 +46,14 @@ export function newLocalS3Client(
 
         deleteFile: async (s3Key: string): Promise<void | S3Error> => {
             try {
-                 await s3Client
+                await s3Client
                     .deleteObject({
                         Bucket: bucketName,
                         Key: s3Key,
                     })
                     .promise()
 
-                return 
+                return
             } catch (err) {
                 if (err.code === 'NetworkingError') {
                     return {
@@ -66,11 +67,10 @@ export function newLocalS3Client(
             }
         },
         getKey: (s3URL: string) => {
-            const match = s3URL.match(/s3?:\/\/[a-z0-9]+\/([a-z0-9]+)\/[a-z0-9]+$/g)
-            if (!match) return 'NOT_VALID_S3_URL'
-            return match[0]
+            const key = parseKey(s3URL)
+            return key instanceof Error ? null : key
         },
-        getS3URL: async (s3key: string, filename: string,): Promise<string> => {
+        getS3URL: async (s3key: string, filename: string): Promise<string> => {
             // ignore what's passed in as the bucket and use whats in LocalS3Client
             return `s3://${bucketName}/${s3key}/${filename}`
         },

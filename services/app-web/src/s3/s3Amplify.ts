@@ -1,5 +1,5 @@
 import { Storage } from 'aws-amplify'
-
+import { parseKey } from '../common-code/s3URLEncoding'
 import type { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
 
@@ -39,12 +39,12 @@ export function newAmplifyS3Client(bucketName: string): S3ClientT {
                 throw err
             }
         },
-      
-        deleteFile: async (filename: string): Promise<void| S3Error> => {
+
+        deleteFile: async (filename: string): Promise<void | S3Error> => {
             try {
                 const deleteResult = await Storage.vault.remove(filename)
                 console.log(deleteResult)
-                return 
+                return
             } catch (err) {
                 if (err.name === 'Error' && err.message === 'Network Error') {
                     console.log('Error deleting file', err)
@@ -58,13 +58,12 @@ export function newAmplifyS3Client(bucketName: string): S3ClientT {
                 throw err
             }
         },
-        getS3URL: async (key: string, fileName: string,): Promise<string> => {
+        getS3URL: async (key: string, fileName: string): Promise<string> => {
             return `s3://${bucketName}/${key}/${fileName}`
         },
         getKey: (s3URL: string) => {
-            const match = s3URL.match(/s3?:\/\/[a-z0-9]+\/([a-z0-9]+)\/[a-z0-9]+$/g)
-            if (!match) return 'NOT_VALID_S3_URL'
-            return match[0]
+            const key = parseKey(s3URL)
+            return key instanceof Error ? null : key
         },
         getURL: async (key: string): Promise<string> => {
             const result = await Storage.vault.get(key)
