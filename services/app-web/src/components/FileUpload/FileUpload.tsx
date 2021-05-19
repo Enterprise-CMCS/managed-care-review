@@ -11,7 +11,6 @@ import { FileItemT } from './FileItem'
 import { FileItemsList } from './FileItemsList'
 
 export type S3FileData = {
-    url: string
     key: string
     s3URL: string
 }
@@ -74,7 +73,6 @@ export const FileUpload = ({
                 id: uuidv4(),
                 name: files[i].name,
                 file: files[i],
-                url: undefined,
                 key: undefined,
                 s3URL: undefined,
                 status: 'PENDING',
@@ -148,7 +146,6 @@ export const FileUpload = ({
                                 return {
                                     ...item,
                                     file: undefined,
-                                    url: data.url,
                                     key: data.key,
                                     s3URL: data.s3URL,
                                     // In general we update the UI status for file items as uploads to S3 complete

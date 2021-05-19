@@ -19,7 +19,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
     const { id } = useParams<{ id: string }>()
     const { pathname } = useLocation()
     const { updateHeading } = usePage()
-    // const routeName = getRouteName(pathname)
+
     const { data, loading, error } = useFetchDraftSubmissionQuery({
         variables: {
             input: {
@@ -47,7 +47,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
     }
 
     if (draft === undefined || draft === null) {
-        console.log('got undefined back from loaded showDraftSubmission')
         return <Error404 />
     }
     return (

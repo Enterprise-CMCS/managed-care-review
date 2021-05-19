@@ -69,7 +69,6 @@ type Program {
 
 type Document {
     name: String!
-    url: String!
     s3URL: String!
 }
 
@@ -93,7 +92,6 @@ type DraftSubmission {
 
 input DocumentInput {
     name: String!
-    url: String!
     s3URL: String!
 }
 input DraftSubmissionUpdates {

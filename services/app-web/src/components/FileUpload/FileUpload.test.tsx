@@ -17,7 +17,7 @@ const fakeApiRequest = (success: boolean): Promise<S3FileData> => {
     return new Promise((resolve, reject) => {
         setTimeout(() => {
             if (success) {
-                resolve({ url: 'test', key: 'testtest', s3URL: 'fakeS3url' })
+                resolve({ key: 'testtest', s3URL: 'fakeS3url' })
             } else {
                 reject(new Error('Error'))
             }
@@ -57,8 +57,6 @@ describe('FileUpload component', () => {
                 s3URL:
                     "s3://local-uploads/1620164967212-Trussels' Guide to Truss - trussels-guide.pdf/Trussels' Guide to Truss - trussels-guide.pdf",
                 status: 'UPLOAD_COMPLETE',
-                url:
-                    'http://localhost:4569/local-uploads/1620164967212-Trussels%27%20Guide%20to%20Truss%20-%20trussels-guide.pdf?AWSAccessKeyId=S3RV',
             },
         ]
 

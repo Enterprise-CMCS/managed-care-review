@@ -5,21 +5,20 @@ import { NavLink } from 'react-router-dom'
 import styles from './ReviewSubmit.module.scss'
 import stylesForm from '../StateSubmissionForm.module.scss'
 
-import { DraftSubmission } from '../../../gen/gqlClient'
+import { DraftSubmission, Document } from '../../../gen/gqlClient'
 import { DataDetail } from '../../../components/DataDetail/DataDetail'
 import { DoubleColumnRow } from '../../../components/DoubleColumnRow/DoubleColumnRow'
 import { PageActions } from '../PageActions'
 import { SubmissionTypeRecord } from '../../../constants/submissions'
 import { useS3 } from '../../../contexts/S3Context'
 
+type DocumentWithLink = { url: string } & Document
 export const ReviewSubmit = ({
     draftSubmission,
 }: {
     draftSubmission: DraftSubmission
 }): React.ReactElement => {
-    const [refreshedDocs, setRefreshedDocs] = useState(
-        draftSubmission.documents
-    )
+    const [refreshedDocs, setRefreshedDocs] = useState<DocumentWithLink[]>([])
     const { getURL, getKey } = useS3()
 
     useEffect(() => {
@@ -33,7 +32,7 @@ export const ReviewSubmit = ({
                         url: documentLink,
                     }
                 })
-            ).catch((err) => draftSubmission.documents)
+            ).catch((err) => [])
             setRefreshedDocs(newDocs)
         }
 

@@ -23,7 +23,6 @@ export class DocumentStoreT {
 
     constructor() {
         this.name = '',
-        this.url = ''
         this.s3URL = ''
     }
 }

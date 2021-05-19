@@ -11,7 +11,6 @@ describe('FileItem component', () => {
         item: {
             id: 'testFile',
             name: 'testFile.pdf',
-            url: undefined,
             key: undefined,
             s3URL: undefined,
             status: 'PENDING',

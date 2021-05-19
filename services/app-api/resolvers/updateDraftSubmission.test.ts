@@ -75,7 +75,6 @@ describe('updateDraftSubmission', () => {
             documents: [
                 {
                     name: 'myfile.pdf',
-                    url: 'https://www.example.com',
                     s3URL: 'fakeS3URL'
                 }
             ]
@@ -98,7 +97,6 @@ describe('updateDraftSubmission', () => {
         expect(resultDraft1.id).toEqual(createdID)
         expect(resultDraft1.documents).toEqual([ {
             name: 'myfile.pdf',
-            url: 'https://www.example.com',
             s3URL: 'fakeS3URL'
         }])
 
@@ -110,12 +108,10 @@ describe('updateDraftSubmission', () => {
             documents: [
                 {
                     name: 'myfile2.pdf',
-                    url: 'https://www.example.com',
                     s3URL: 'fakeS3URL'
                 },
                 {
                     name: 'myfile3.pdf',
-                    url: 'https://www.example.com',
                     s3URL: 'fakeS3URL'
                 }
             ]
@@ -150,7 +146,6 @@ describe('updateDraftSubmission', () => {
             documents: [
                 {
                     name: 'myfile.pdf',
-                    url: 'https://www.example.com',
                     s3URL: 'fakeS3URL'
                 }
             ]
@@ -172,7 +167,6 @@ describe('updateDraftSubmission', () => {
         expect(resultDraft.id).toEqual(createdID)
         expect(resultDraft.documents).toEqual([ {
             name: 'myfile.pdf',
-            url: 'https://www.example.com',
             s3URL: 'fakeS3URL'
         }])
 

@@ -10,7 +10,6 @@ describe('FileItem component', () => {
             {
                 id: 'testFile1',
                 name: 'testFile1.pdf',
-                url: undefined,
                 key: undefined,
                 s3URL: undefined,
                 status: 'PENDING',
@@ -18,7 +17,6 @@ describe('FileItem component', () => {
             {
                 id: 'testFile2',
                 name: 'testFile2.pdf',
-                url: undefined,
                 key: undefined,
                 s3URL: undefined,
                 status: 'UPLOAD_ERROR',

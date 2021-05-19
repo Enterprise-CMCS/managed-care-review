@@ -55,7 +55,6 @@ describe('Documents', () => {
                                 ...mockDraftSubmission,
                                 documents: [
                                     {
-                                        url: 'https://www.example.com',
                                         name: 'test.txt',
                                         s3URL: 'fakeS3URL',
                                     },
@@ -89,7 +88,6 @@ describe('Documents', () => {
                                 ...mockDraftSubmission,
                                 documents: [
                                     {
-                                        url: 'https://www.example.com',
                                         name: 'test.txt',
                                         s3URL: 'fakeS3URL',
                                     },

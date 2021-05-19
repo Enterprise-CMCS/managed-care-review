@@ -172,7 +172,6 @@ describe('StateSubmissionForm', () => {
             const mockDocs: Document[] = [
                 {
                     name: 'somedoc.pdf',
-                    url: 'whatsinaurl',
                     s3URL: 's3://bucketName/key',
                 },
             ]

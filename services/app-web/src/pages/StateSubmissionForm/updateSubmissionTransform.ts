@@ -21,7 +21,6 @@ export function updatesFromSubmission(
             (doc: Document): DocumentInput => {
                 return {
                     name: doc.name,
-                    url: doc.url,
                     s3URL: doc.s3URL,
                 }
             }

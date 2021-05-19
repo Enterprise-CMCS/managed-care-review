@@ -16,7 +16,6 @@ export type FileItemT = {
     id: string
     name: string
     file?: File // only items that are not uploaded to s3 have this
-    url?: string // only items uploaded to s3 have this
     key?: string // only items uploaded to s3 have this
     s3URL?: string // only items uploaded to s3 have this
     status: FileStatus
