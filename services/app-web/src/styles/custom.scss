@@ -35,3 +35,8 @@
         color: #dfe1e2 !important;
     }
 }
+
+.usa-checkbox__label, .usa-radio__label {
+    // The default spacing between checkboxes and radio buttons in USWDS feels too small, would like to increase this across the app.
+    margin-top: 1rem;
+}

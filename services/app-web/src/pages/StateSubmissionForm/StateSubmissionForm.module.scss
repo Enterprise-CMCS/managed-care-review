@@ -4,17 +4,17 @@
 .formHeader {
     text-align: center;
     width: 100%;
-
-    h2 {
-        padding: units(4) 0;
-    }
+    padding: units(4) 0;
 }
 
 .formContainer {
-    padding: units(4);
-    background: $cms-color-white;
-    border: 1px solid $theme-color-base-lighter;
-    @include u-radius('md');
+
+    > [class^='usa-fieldset'] {
+        padding: units(4);
+        background: $cms-color-white;
+        border: 1px solid $theme-color-base-lighter;
+        @include u-radius('md');
+    }
 
     h2 {
         margin-top: 0;
@@ -22,6 +22,10 @@
 
     > div[class^='usa-form-group']:not(:first-of-type) {
         margin-top: 2.5rem;
+    }
+
+    &[class^='usa-form'] {
+        min-width: 35rem;
     }
 }
 
@@ -40,5 +44,24 @@
         // use this to remove styles from an outline button-styled link
         text-decoration: none;
         color: #1a4480 !important;
+    }
+}
+
+.dateRangePicker {
+    [class^='usa-label']{
+        font-weight: normal;
+    }
+    [class^='usa-form-group'] {
+        margin-top: .75rem;
+    }
+}
+
+.nestedOptions {
+    padding-left: units(4);
+    margin: units(2) 0;
+    border-left: 4px solid $theme-color-primary;
+
+    legend, label {
+        font-weight: normal;
     }
 }
