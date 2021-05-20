@@ -1,0 +1,23 @@
+mutation createStateSubmission($input: CreateStateSubmissionInput!) {
+    createStateSubmission(input: $input) {
+        stateSubmission {
+            id
+            name
+            createdAt
+            updatedAt
+            submittedAt
+            programID
+            program {
+                name
+                id
+            }
+            stateCode
+            submissionType
+            submissionDescription
+            documents {
+                name
+                s3URL
+            }
+        }
+    }
+}
