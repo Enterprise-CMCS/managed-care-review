@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Form, Button, ButtonGroup, Alert, Link } from '@trussworks/react-uswds'
+import { Form as UswdsForm, Button, ButtonGroup, Alert, Link } from '@trussworks/react-uswds'
 import { NavLink, useHistory } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -165,26 +165,27 @@ export const Documents = ({
         )
 
     return (
-        <Form
-            className="usa-form--large"
-            id="DocumentsForm"
-            aria-label="Documents Form"
-            onSubmit={handleFormSubmit}
-        >
-            <fieldset className="usa-fieldset">
-                <legend className={styles.formHeader}>
-                    <PageHeading headingLevel="h2"> Documents </PageHeading>
-                </legend>
-                {shouldValidate && !hasValidFiles && (
-                    <Alert
-                        type="error"
-                        heading="Missing documents"
-                        className="margin-bottom-2"
-                    >
-                        You must upload at least one document
-                    </Alert>
-                )}
-                <div className={styles.formContainer}>
+        <>
+            <PageHeading className={styles.formHeader} headingLevel="h2"> Documents </PageHeading>
+            <UswdsForm
+                className={styles.formContainer}
+                id="DocumentsForm"
+                aria-label="Documents Form"
+                onSubmit={handleFormSubmit}
+            >
+                <fieldset className="usa-fieldset">
+                    <legend className='srOnly'>
+                        Documents
+                    </legend>
+                    {shouldValidate && !hasValidFiles && (
+                        <Alert
+                            type="error"
+                            heading="Missing documents"
+                            className="margin-bottom-2"
+                        >
+                            You must upload at least one document
+                        </Alert>
+                    )}
                     <FileUpload
                         id="documents"
                         name="documents"
@@ -218,7 +219,7 @@ export const Documents = ({
                         deleteFile={handleDeleteFile}
                         onLoadComplete={onLoadComplete}
                     />
-                </div>
+                </fieldset>
                 <ButtonGroup type="default" className={styles.buttonGroup}>
                     <Button
                         type="button"
@@ -242,7 +243,7 @@ export const Documents = ({
                         Continue
                     </Button>
                 </ButtonGroup>
-            </fieldset>
-        </Form>
+            </UswdsForm>
+        </>
     )
 }
