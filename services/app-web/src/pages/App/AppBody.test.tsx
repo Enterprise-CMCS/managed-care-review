@@ -1,9 +1,12 @@
 import React from 'react'
 import { screen, waitFor } from '@testing-library/react'
 
-import { renderWithProviders, userClickSignIn } from '../../utils/jestUtils'
+import {
+    renderWithProviders,
+    userClickSignIn,
+} from '../../testHelpers/jestHelpers'
 import { AppBody } from './AppBody'
-import { fetchCurrentUserMock } from '../../utils/apolloUtils'
+import { fetchCurrentUserMock } from '../../testHelpers/apolloHelpers'
 test('App renders without errors', () => {
     renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
     const mainElement = screen.getByRole('main')

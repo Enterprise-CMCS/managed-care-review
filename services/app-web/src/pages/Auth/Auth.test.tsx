@@ -9,10 +9,10 @@ import {
     renderWithProviders,
     userClickByTestId,
     userClickByRole,
-} from '../../utils/jestUtils'
+} from '../../testHelpers/jestHelpers'
 import { CognitoLogin } from './CognitoLogin'
 import { LocalLogin } from './LocalLogin'
-import { fetchCurrentUserMock } from '../../utils/apolloUtils'
+import { fetchCurrentUserMock } from '../../testHelpers/apolloHelpers'
 /*  
 This file should only have basic user flows for auth. Form and implementation details are tested at the component level.
 */

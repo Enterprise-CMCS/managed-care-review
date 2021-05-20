@@ -9,7 +9,7 @@ const fakeApiRequest = (success: boolean): Promise<S3FileData> => {
     return new Promise((resolve, reject) => {
         setTimeout(() => {
             if (success) {
-                resolve({ url: 'test', key: 'testtest', s3URL: 'fakeS3url' })
+                resolve({ key: 'testtest', s3URL: 'fakeS3url' })
             } else {
                 reject(new Error('Error'))
             }

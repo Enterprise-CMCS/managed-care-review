@@ -10,13 +10,11 @@ export type FileStatus =
     | 'PENDING'
     | 'UPLOAD_COMPLETE'
     | 'UPLOAD_ERROR'
-    | 'SAVED_TO_SUBMISSION'
 
 export type FileItemT = {
     id: string
     name: string
     file?: File // only items that are not uploaded to s3 have this
-    url?: string // only items uploaded to s3 have this
     key?: string // only items uploaded to s3 have this
     s3URL?: string // only items uploaded to s3 have this
     status: FileStatus
@@ -32,10 +30,12 @@ export const FileItem = ({
     deleteItem,
     retryItem,
 }: FileItemProps): React.ReactElement => {
-    const { name, status } = item
+    const { name, status, file } = item
     const hasDuplicateNameError = status === 'DUPLICATE_NAME_ERROR'
     const hasUploadError = status === 'UPLOAD_ERROR'
+    const hasUnexpectedError = status === 'UPLOAD_ERROR' && file === undefined
     const isLoading = status === 'PENDING'
+
     const isPDF = name.indexOf('.pdf') > 0
     const isWord = name.indexOf('.doc') > 0 || name.indexOf('.pages') > 0
     const isVideo = name.indexOf('.mov') > 0 || name.indexOf('.mp4') > 0
@@ -71,7 +71,7 @@ export const FileItem = ({
                     </span>
                 </>
             )
-        else if (hasUploadError)
+        else if (hasUploadError && !hasUnexpectedError)
             return (
                 <>
                     <span className={styles.fileItemErrorMessage}>
@@ -82,7 +82,18 @@ export const FileItem = ({
                     </span>
                 </>
             )
-        else {
+        else if (hasUnexpectedError) {
+            return (
+                <>
+                    <span className={styles.fileItemErrorMessage}>
+                        Upload failed
+                    </span>
+                    <span className={styles.fileItemErrorMessage}>
+                        Unexpected error. Please remove.
+                    </span>
+                </>
+            )
+        } else {
             return null
         }
     }
@@ -117,7 +128,7 @@ export const FileItem = ({
                 >
                     Remove
                 </Button>
-                {hasUploadError && (
+                {hasUploadError && !hasUnexpectedError && (
                     <Button
                         type="button"
                         size="small"

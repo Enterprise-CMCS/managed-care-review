@@ -3,7 +3,6 @@
 export type SubmissionType = 'CONTRACT_ONLY' | 'CONTRACT_AND_RATES'
 export type SubmissionDocument = {
     name: string
-    url: string
     s3URL: string
 }
 

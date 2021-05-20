@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react'
 
 import { FileItem, FileItemT, FileItemProps } from './FileItem'
 import userEvent from '@testing-library/user-event'
+import { TEST_PDF_FILE } from './constants'
 
 describe('FileItem component', () => {
     const mockRetry = jest.fn()
@@ -11,7 +12,7 @@ describe('FileItem component', () => {
         item: {
             id: 'testFile',
             name: 'testFile.pdf',
-            url: undefined,
+            file: TEST_PDF_FILE,
             key: undefined,
             s3URL: undefined,
             status: 'PENDING',
@@ -53,7 +54,7 @@ describe('FileItem component', () => {
         expect(screen.queryByRole('button', { name: 'Retry' })).toBeNull()
     })
 
-    it('displays upload failed message when expected, wit retry and remove buttons', () => {
+    it('displays upload failed message when S3 upload fails, with retry and remove buttons', () => {
         render(
             <FileItem
                 item={{ ...testProps.item, status: 'UPLOAD_ERROR' }}
@@ -74,6 +75,31 @@ describe('FileItem component', () => {
 
         userEvent.click(screen.getByRole('button', { name: 'Retry' }))
         expect(mockRetry).toHaveBeenCalled()
+
+        userEvent.click(screen.getByRole('button', { name: 'Remove' }))
+        expect(mockDelete).toHaveBeenCalled()
+    })
+
+    it('displays upload failed message for unexpected error, with a remove button', () => {
+        render(
+            <FileItem
+                item={{
+                    ...testProps.item,
+                    status: 'UPLOAD_ERROR',
+                    file: undefined,
+                }}
+                retryItem={testProps.retryItem}
+                deleteItem={testProps.deleteItem}
+            />
+        )
+
+        const imageEl = screen.getByTestId('file-input-preview-image')
+        expect(imageEl).not.toHaveClass('is-loading')
+        expect(screen.getByText('Upload failed')).toBeInTheDocument()
+        expect(
+            screen.getByRole('button', { name: 'Remove' })
+        ).toBeInTheDocument()
+        expect(screen.queryByRole('button', { name: 'Retry' })).toBeNull()
 
         userEvent.click(screen.getByRole('button', { name: 'Remove' }))
         expect(mockDelete).toHaveBeenCalled()

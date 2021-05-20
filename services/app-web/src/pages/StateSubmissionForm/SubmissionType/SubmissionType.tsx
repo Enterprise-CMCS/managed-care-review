@@ -187,8 +187,11 @@ export const SubmissionType = ({
                 isValidating,
                 validateForm,
             }) => (
-                <> 
-                    <PageHeading className={styles.formHeader} headingLevel="h2">
+                <>
+                    <PageHeading
+                        className={styles.formHeader}
+                        headingLevel="h2"
+                    >
                         Submission type
                     </PageHeading>
                     <UswdsForm
@@ -212,9 +215,7 @@ export const SubmissionType = ({
                         }}
                     >
                         <fieldset className="usa-fieldset">
-                            <legend className='srOnly'>
-                                Submission type
-                            </legend>
+                            <legend className="srOnly">Submission type</legend>
                             {showFormAlert && (
                                 <Alert type="error">Something went wrong</Alert>
                             )}
@@ -223,23 +224,17 @@ export const SubmissionType = ({
                                 id="programID"
                                 name="programID"
                                 label="Program"
-                                showError={showFieldErrors(
-                                    errors.programID
-                                )}
+                                showError={showFieldErrors(errors.programID)}
                                 options={programOptions}
                             />
                             <FormGroup
-                                error={showFieldErrors(
-                                    errors.submissionType
-                                )}
+                                error={showFieldErrors(errors.submissionType)}
                             >
                                 <Fieldset
                                     className={styles.radioGroup}
                                     legend="Choose submission type"
                                 >
-                                    {showFieldErrors(
-                                        errors.submissionType
-                                    ) && (
+                                    {showFieldErrors(errors.submissionType) && (
                                         <ErrorMessage>
                                             {errors.submissionType}
                                         </ErrorMessage>
@@ -269,13 +264,10 @@ export const SubmissionType = ({
                                         name="submissionType"
                                         label={
                                             SubmissionTypeRecord[
-                                                SubmissionTypeT
-                                                    .ContractAndRates
+                                                SubmissionTypeT.ContractAndRates
                                             ]
                                         }
-                                        value={
-                                            SubmissionTypeT.ContractAndRates
-                                        }
+                                        value={SubmissionTypeT.ContractAndRates}
                                     />
                                 </Fieldset>
                             </FormGroup>
@@ -289,19 +281,20 @@ export const SubmissionType = ({
                                 hint={
                                     <>
                                         <Link
+                                            aria-label="View description examples (opens
+                                        in new window)"
                                             variant="external"
                                             href={
                                                 '/help/submission-description-examples'
                                             }
                                             target="_blank"
                                         >
-                                            View description examples (opens
-                                            in new window)
+                                            View description examples
                                         </Link>
 
                                         <p>
-                                            Provide a description of any
-                                            major changes or updates
+                                            Provide a description of any major
+                                            changes or updates
                                         </p>
                                     </>
                                 }

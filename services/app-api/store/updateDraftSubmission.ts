@@ -27,7 +27,6 @@ export async function updateDraftSubmission(
     draftSubmission.documents.forEach ((doc) => {
         const storeDocument = new DocumentStoreT()
         storeDocument.name = doc.name
-        storeDocument.url = doc.url
         storeDocument.s3URL = doc.s3URL
         storeDraft.documents.push(storeDocument)
     })

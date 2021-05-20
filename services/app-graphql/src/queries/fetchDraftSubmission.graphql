@@ -15,7 +15,6 @@ query fetchDraftSubmission($input: FetchDraftSubmissionInput!) {
             submissionDescription
             documents {
                 name
-                url
                 s3URL
             }
         }
