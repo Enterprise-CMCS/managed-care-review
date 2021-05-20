@@ -291,7 +291,7 @@ export const SubmissionType = ({
                                         <Link
                                             variant="external"
                                             href={
-                                                '/help/submission-description-examples'
+                                                '/help#submission-description'
                                             }
                                             target="_blank"
                                         >

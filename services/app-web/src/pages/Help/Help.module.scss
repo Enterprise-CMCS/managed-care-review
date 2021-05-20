@@ -2,5 +2,9 @@
 @import '../../styles/custom';
 
 .helpSection {
-    margin: units(4);
+    margin: units(4) 0;
+
+    table {
+        max-width: 88ex;
+    }
 }

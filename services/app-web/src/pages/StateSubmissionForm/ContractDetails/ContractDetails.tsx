@@ -127,7 +127,7 @@ export const ContractDetails = ({
                                 <Link
                                     variant="external"
                                     href={
-                                        ''
+                                        '/help#items-being-amended-definitions'
                                     }
                                     target="_blank"
                                 >
