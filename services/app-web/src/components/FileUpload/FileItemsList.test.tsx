@@ -1,6 +1,6 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react'
-
+import renderer from 'react-test-renderer'
 import { FileItemT } from './FileItem'
 import { FileItemsList } from './FileItemsList'
 
@@ -38,6 +38,11 @@ describe('FileItem component', () => {
         )
         expect(screen.getByText('testFile1.pdf')).toBeInTheDocument()
         expect(screen.getByText('testFile2.pdf')).toBeInTheDocument()
+    })
+
+    it('renders correctly', () => {
+        const tree = renderer.create(<FileItemsList {...testProps} />).toJSON()
+        expect(tree).toMatchSnapshot()
     })
 
     it('displays error styles for items that have errors', () => {

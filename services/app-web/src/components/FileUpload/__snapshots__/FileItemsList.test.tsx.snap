@@ -1,0 +1,109 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FileItem component renders correctly 1`] = `
+<ul
+  className="fileItemsList"
+  data-testid="file-input-preview-list"
+>
+  <li
+    className="fileItem usa-file-input__preview"
+    id="testFile1"
+  >
+    <div
+      className="fileItemText"
+    >
+      <img
+        alt=""
+        className="usa-file-input__preview-image is-loading usa-file-input__preview-image--pdf"
+        data-testid="file-input-preview-image"
+        id="testFile1"
+        src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+      />
+      <span
+        style={
+          Object {
+            "display": "flex",
+            "flexDirection": "column",
+            "fontSize": "inherit",
+          }
+        }
+      >
+        <span>
+          testFile1.pdf
+        </span>
+      </span>
+    </div>
+    <div
+      className="fileItemButtons"
+    >
+      <button
+        className="usa-button usa-button--small usa-button--unstyled"
+        data-testid="button"
+        onClick={[Function]}
+        type="button"
+      >
+        Remove
+      </button>
+    </div>
+  </li>
+  <li
+    className="fileItem bg-secondary-lighter border-secondary margin-top-1px"
+    id="testFile2"
+  >
+    <div
+      className="fileItemText"
+    >
+      <img
+        alt=""
+        className="usa-file-input__preview-image usa-file-input__preview-image--pdf"
+        data-testid="file-input-preview-image"
+        id="testFile2"
+        src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+      />
+      <span
+        style={
+          Object {
+            "display": "flex",
+            "flexDirection": "column",
+            "fontSize": "inherit",
+          }
+        }
+      >
+        <span
+          className="fileItemErrorMessage"
+        >
+          Upload failed
+        </span>
+        <span
+          className="fileItemErrorMessage"
+        >
+          Please remove or retry
+        </span>
+        <span>
+          testFile2.pdf
+        </span>
+      </span>
+    </div>
+    <div
+      className="fileItemButtons"
+    >
+      <button
+        className="usa-button usa-button--small usa-button--unstyled"
+        data-testid="button"
+        onClick={[Function]}
+        type="button"
+      >
+        Remove
+      </button>
+      <button
+        className="usa-button usa-button--small usa-button--unstyled"
+        data-testid="button"
+        onClick={[Function]}
+        type="button"
+      >
+        Retry
+      </button>
+    </div>
+  </li>
+</ul>
+`;
