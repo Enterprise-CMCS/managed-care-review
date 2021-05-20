@@ -9,10 +9,15 @@ import {
     findDraftSubmission,
     findDraftSubmissionByStateNumber,
 } from './findDraftSubmission'
+import {
+    InsertStateSubmissionArgsType,
+    insertStateSubmission,
+} from './insertStateSubmission'
 import { findProgram } from './findProgram'
 import { StoreError } from './storeError'
 import {
     DraftSubmissionType,
+    StateSubmissionType,
     ProgramT,
 } from '../../app-web/src/common-code/domain-models'
 import { updateDraftSubmission } from './updateDraftSubmission'
@@ -33,6 +38,10 @@ export type Store = {
     updateDraftSubmission: (
         draftSubmission: DraftSubmissionType
     ) => Promise<DraftSubmissionType | StoreError>
+
+    insertStateSubmission: (
+        args: InsertStateSubmissionArgsType
+    ) => Promise<StateSubmissionType | undefined | StoreError>
 
     findProgram: (stateCode: string, programID: string) => ProgramT | undefined
 }
@@ -55,6 +64,8 @@ export function storeWithDynamoConfig(
             findDraftSubmissionByStateNumber(mapper, stateCode, stateNumber),
         updateDraftSubmission: (draftSubmission) =>
             updateDraftSubmission(mapper, draftSubmission),
+        insertStateSubmission: (submissionID) =>
+            insertStateSubmission(mapper, submissionID),
         findProgram: findProgram,
     }
 }

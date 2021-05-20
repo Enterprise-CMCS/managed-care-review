@@ -71,6 +71,60 @@ export class DraftSubmissionStoreType {
     }
 }
 
+@table('state-submissions')
+export class StateSubmissionStoreType {
+    @hashKey()
+    id: string
+
+    @attribute()
+    submissionDescription: string
+
+    @attribute()
+    submissionType: SubmissionType
+
+    @attribute()
+    createdAt: Date
+
+    @attribute()
+    updatedAt: Date
+
+    @attribute()
+    submittedAt: Date
+
+    @attribute()
+    programID: string
+
+    @attribute({
+        indexKeyConfigurations: {
+            StateStateNumberAllIndex: 'HASH',
+        },
+    })
+    stateCode: string
+
+    @attribute({
+        indexKeyConfigurations: {
+            StateStateNumberAllIndex: 'RANGE',
+        },
+    })
+    stateNumber: number
+
+    @attribute({ memberType: embed(DocumentStoreT) })
+    documents: Array<DocumentStoreT>
+
+    constructor() {
+        this.id = ''
+        this.submissionDescription = ''
+        this.submissionType = 'CONTRACT_ONLY'
+        this.createdAt = new Date()
+        this.updatedAt = new Date()
+        this.stateCode = ''
+        this.programID = ''
+        this.stateNumber = -1
+        this.documents = []
+        this.submittedAt = new Date()
+    }
+}
+
 export type DynamoError = {
     code: string
 }

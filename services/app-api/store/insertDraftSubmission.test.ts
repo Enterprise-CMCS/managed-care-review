@@ -52,11 +52,9 @@ describe('insertDraftSubmission', () => {
                     2000
                 )
             } catch (dynamoErr) {
-                console.log(dynamoErr)
                 throw new Error(dynamoErr)
             }
         } catch (createErr) {
-            console.log('Error creating a draft submission:', createErr)
             throw new Error(createErr)
         }
     })
