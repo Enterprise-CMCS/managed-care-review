@@ -1,5 +1,13 @@
-import { Form as UswdsForm, FormGroup, Fieldset, Button, Link, DateRangePicker, ButtonGroup } from '@trussworks/react-uswds'
-import { NavLink, useHistory } from 'react-router-dom'
+import {
+    Form as UswdsForm,
+    FormGroup,
+    Fieldset,
+    Button,
+    Link,
+    DateRangePicker,
+    ButtonGroup,
+} from '@trussworks/react-uswds'
+import { Link as ReactRouterLink, NavLink, useHistory } from 'react-router-dom'
 import PageHeading from '../../../components/PageHeading'
 import { FieldRadio } from '../../../components/Form/FieldRadio/FieldRadio'
 import { FieldCheckbox } from '../../../components/Form/FieldCheckbox/FieldCheckbox'
@@ -19,10 +27,12 @@ export const ContractDetails = ({
         history.push(`/submissions/${draftSubmission.id}/documents`)
     }
     return (
-        <>  
-            <PageHeading className={styles.formHeader} headingLevel="h2"> Contract details </PageHeading>    
+        <>
+            <PageHeading className={styles.formHeader} headingLevel="h2">
+                Contract details
+            </PageHeading>
             <Formik
-                initialValues={{contractType: ""}}
+                initialValues={{ contractType: '' }}
                 onSubmit={handleFormSubmit}
             >
                 <UswdsForm
@@ -32,12 +42,10 @@ export const ContractDetails = ({
                     onSubmit={handleFormSubmit}
                 >
                     <fieldset className="usa-fieldset">
-                        <legend className="srOnly">
-                            Contract Details
-                        </legend>
+                        <legend className="srOnly">Contract Details</legend>
                         <span>All fields are required</span>
                         <FormGroup>
-                            <Fieldset 
+                            <Fieldset
                                 className={styles.radioGroup}
                                 legend="Contract action type"
                             >
@@ -56,32 +64,28 @@ export const ContractDetails = ({
                             </Fieldset>
                         </FormGroup>
                         <FormGroup>
-                            <Fieldset
-                                legend="Contract effective dates"
-                            >
+                            <Fieldset legend="Contract effective dates">
                                 <DateRangePicker
                                     className={styles.dateRangePicker}
                                     endDateHint="mm/dd/yyyy"
                                     endDateLabel="Start date"
                                     endDatePickerProps={{
-                                    disabled: false,
-                                    id: 'contract-date-start',
-                                    name: 'contract-date-start'
+                                        disabled: false,
+                                        id: 'contract-date-start',
+                                        name: 'contract-date-start',
                                     }}
                                     startDateHint="mm/dd/yyyy"
                                     startDateLabel="End date"
                                     startDatePickerProps={{
-                                    disabled: false,
-                                    id: 'contract-date-end',
-                                    name: 'contract-date-end'
+                                        disabled: false,
+                                        id: 'contract-date-end',
+                                        name: 'contract-date-end',
                                     }}
                                 />
                             </Fieldset>
                         </FormGroup>
                         <FormGroup>
-                            <Fieldset
-                                legend="Managed Care entities"
-                            >
+                            <Fieldset legend="Managed Care entities">
                                 <Link
                                     variant="external"
                                     href={
@@ -121,15 +125,14 @@ export const ContractDetails = ({
                             </Fieldset>
                         </FormGroup>
                         <FormGroup>
-                            <Fieldset
-                                legend="Items being amended"
-                            >
+                            <Fieldset legend="Items being amended">
                                 <Link
-                                    variant="external"
-                                    href={
-                                        '/help#items-being-amended-definitions'
-                                    }
-                                    target="_blank"
+                                    asCustom={ReactRouterLink}
+                                    to={{
+                                        pathname: '/help',
+                                        hash:
+                                            '#items-being-amended-definitions',
+                                    }}
                                 >
                                     Items being amended definitions
                                 </Link>
@@ -149,9 +152,7 @@ export const ContractDetails = ({
                                     value="capitation-rates"
                                 />
                                 <div className={styles.nestedOptions}>
-                                    <Fieldset
-                                        legend="Select reason for capitation rate change"
-                                    >
+                                    <Fieldset legend="Select reason for capitation rate change">
                                         <FieldRadio
                                             id="annualRateUpdate"
                                             name="capitationRates"
@@ -263,9 +264,7 @@ export const ContractDetails = ({
                             </Fieldset>
                         </FormGroup>
                         <FormGroup>
-                            <Fieldset
-                                legend="Is this contract action related to the COVID-19 public health emergency?"
-                            >
+                            <Fieldset legend="Is this contract action related to the COVID-19 public health emergency?">
                                 <FieldRadio
                                     id="covidYes"
                                     name="covidRelated"
@@ -281,9 +280,7 @@ export const ContractDetails = ({
                             </Fieldset>
                         </FormGroup>
                         <FormGroup>
-                            <Fieldset
-                                legend="Is this related to coverage and reimbursement for vaccine administration?"
-                            >
+                            <Fieldset legend="Is this related to coverage and reimbursement for vaccine administration?">
                                 <FieldRadio
                                     id="vaccineYes"
                                     name="vaccineReimbursement"
@@ -299,9 +296,7 @@ export const ContractDetails = ({
                             </Fieldset>
                         </FormGroup>
                         <FormGroup>
-                            <Fieldset
-                                legend="Federal authority your program operates under"
-                            >
+                            <Fieldset legend="Federal authority your program operates under">
                                 <Link
                                     variant="external"
                                     href={

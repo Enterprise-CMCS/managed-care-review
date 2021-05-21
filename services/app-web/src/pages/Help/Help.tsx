@@ -1,9 +1,19 @@
-import React from 'react'
-
+import React, { useEffect } from 'react'
+import { useLocation } from 'react-router'
 import { GridContainer, Table } from '@trussworks/react-uswds'
 import styles from './Help.module.scss'
 
 export const Help = (): React.ReactElement => {
+    const location = useLocation()
+
+    useEffect(() => {
+        if (location.hash) {
+            const id = location.hash.replace('#', '')
+            const element = document.getElementById(id)
+            if (element) element.scrollIntoView({ behavior: 'smooth' })
+        }
+    }, [location])
+
     return (
         <GridContainer>
             <h2>Help documentation</h2>
