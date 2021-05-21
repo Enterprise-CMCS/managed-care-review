@@ -3,6 +3,7 @@ import { ReactComponent as InIcon } from '../../assets/icons/in-icon.svg'
 import { ReactComponent as MsIcon } from '../../assets/icons/ms-icon.svg'
 import { ReactComponent as VaIcon } from '../../assets/icons/va-icon.svg'
 import { ReactComponent as MnIcon } from '../../assets/icons/mn-icon.svg'
+import { ReactComponent as AsIcon } from '../../assets/icons/as-icon.svg'
 
 export type StateIconProps = {
     code: 'FL' | 'IN' | 'MN' | 'MS' | 'VA' | 'AS'
@@ -20,7 +21,7 @@ export const StateIcon = ({ code }: StateIconProps): React.ReactElement => {
         case 'VA':
             return <VaIcon />
         case 'AS':
-            return <span>MC Review Team</span>
+            return <AsIcon />
         default:
             return <span>STATE UNKNOWN</span>
     }
