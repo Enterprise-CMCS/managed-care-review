@@ -1,8 +1,8 @@
 import React from 'react'
 import { screen, waitFor } from '@testing-library/react'
 
-import { fetchCurrentUserMock } from '../../utils/apolloUtils'
-import { renderWithProviders } from '../../utils/jestUtils'
+import { fetchCurrentUserMock } from '../../testHelpers/apolloHelpers'
+import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { NewStateSubmissionForm } from './NewStateSubmissionForm'
 
 describe('NewStateSubmissionForm', () => {

@@ -2,12 +2,12 @@ import React from 'react'
 import { screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-import { renderWithProviders } from '../../../utils/jestUtils'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import {
     fetchCurrentUserMock,
     mockDraftSubmission,
     updateDraftSubmissionMock,
-} from '../../../utils/apolloUtils'
+} from '../../../testHelpers/apolloHelpers'
 
 import {
     TEST_DOC_FILE,
@@ -55,7 +55,6 @@ describe('Documents', () => {
                                 ...mockDraftSubmission,
                                 documents: [
                                     {
-                                        url: 'https://www.example.com',
                                         name: 'test.txt',
                                         s3URL: 'fakeS3URL',
                                     },
@@ -89,7 +88,6 @@ describe('Documents', () => {
                                 ...mockDraftSubmission,
                                 documents: [
                                     {
-                                        url: 'https://www.example.com',
                                         name: 'test.txt',
                                         s3URL: 'fakeS3URL',
                                     },

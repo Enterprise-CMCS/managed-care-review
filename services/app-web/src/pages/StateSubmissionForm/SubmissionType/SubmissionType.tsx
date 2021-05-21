@@ -287,8 +287,7 @@ export const SubmissionType = ({
                                                 hash: '#submission-description',
                                             }}
                                         >
-                                            View description examples (opens in
-                                            new window)
+                                            View description examples
                                         </Link>
 
                                         <p>

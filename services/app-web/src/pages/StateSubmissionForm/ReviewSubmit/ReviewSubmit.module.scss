@@ -3,12 +3,6 @@
 
 .reviewSectionWrapper {
     width: 100%;
-
-    // TODO: temporary, remove
-    & :not(#fake) {
-        color: transparent;
-        text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-    }
 }
 
 .reviewSection {
@@ -22,10 +16,20 @@
         margin: 0;
         @include u-text('normal');
     }
+    &:first-of-type {
+        h2 {
+            @include u-text('bold');
+            font-size: size('body', 'lg');
+        }
+    }
 
-    h2.submissionName {
-        @include u-text('bold');
-        font-size: size('body', 'lg');
+    ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        li {
+            padding: units(1) 0;
+        }
     }
 }
 
@@ -36,33 +40,6 @@
     margin-bottom: units(4);
     padding-bottom: units(2);
     border-bottom: 1px solid $theme-color-base-lighter;
-    // TODO: temporary, remove
-    & a {
-        display: none;
-    }
-}
-
-.reviewDataRow {
-    @include at-media(tablet) {
-        margin-bottom: units(2);
-    }
-}
-
-.reviewData {
-    margin-bottom: units(4);
-
-    @include at-media(tablet) {
-        margin-bottom: 0;
-    }
-
-    label {
-        font-weight: bold;
-    }
-
-    span {
-        display: block;
-        line-height: 1.5;
-    }
 }
 
 .contactInfo p {

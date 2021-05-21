@@ -33,7 +33,7 @@ export const Documents = ({
     showValidations,
     draftSubmission,
 }: DocumentProps): React.ReactElement => {
-    const { deleteFile, uploadFile, getURL, getS3URL } = useS3()
+    const { deleteFile, uploadFile, getKey, getS3URL } = useS3()
     const [shouldValidate, setShouldValidate] = useState(showValidations)
     const [hasValidFiles, setHasValidFiles] = useState(false)
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
@@ -43,20 +43,23 @@ export const Documents = ({
         { error: updateError },
     ] = useUpdateDraftSubmissionMutation()
 
-    const keyFromS3URL = (url: string) => {
-        const keyMatcher = /s3?:\/\/[a-z0-9]+\/([a-z0-9]+)\/[a-z0-9]+$/g
-        const match = url.match(keyMatcher)
-        return match ? match[0] : undefined
-    }
-
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         draftSubmission &&
         draftSubmission.documents.map((doc) => {
+            const key = getKey(doc.s3URL)
+            if (!key) {
+                return {
+                    id: uuidv4(),
+                    name: doc.name,
+                    key: 'INVALID_KEY',
+                    s3URL: undefined,
+                    status: 'UPLOAD_ERROR',
+                }
+            }
             return {
                 id: uuidv4(),
                 name: doc.name,
-                url: doc.url,
-                key: keyFromS3URL(doc.url || 'MISSING'),
+                key: key,
                 s3URL: doc.s3URL,
                 status: 'UPLOAD_COMPLETE',
             }
@@ -70,17 +73,12 @@ export const Documents = ({
         const hasValidDocumentsForSubmission: boolean =
             fileItems.length > 0 &&
             hasNoPendingFiles &&
-            fileItems.some(
-                (item) =>
-                    item.status === 'UPLOAD_COMPLETE' ||
-                    item.status === 'SAVED_TO_SUBMISSION'
-            )
+            fileItems.some((item) => item.status === 'UPLOAD_COMPLETE')
         setHasValidFiles(hasValidDocumentsForSubmission)
     }, [fileItems])
 
     const showError = (error: string) => {
         if (!shouldValidate) setShouldValidate(true)
-        console.log('Error', error)
     }
 
     if (updateError) {
@@ -108,8 +106,7 @@ export const Documents = ({
         }
 
         const s3URL = await getS3URL(s3Key, file.name)
-        const link = await getURL(s3Key)
-        return { key: s3Key, url: link, s3URL: s3URL }
+        return { key: s3Key, s3URL: s3URL }
     }
 
     const handleFormSubmit = async (e: React.FormEvent) => {
@@ -118,13 +115,12 @@ export const Documents = ({
         if (!hasValidFiles) return
 
         const documents = fileItems.map((fileItem) => {
-            if (!fileItem.url || !fileItem.s3URL)
+            if (!fileItem.s3URL)
                 throw Error(
-                    'The file item has no url or s3url, this should not happen onSubmit'
+                    'The file item has no s3url, this should not happen onSubmit'
                 )
             return {
                 name: fileItem.name,
-                url: fileItem.url,
                 s3URL: fileItem.s3URL,
             }
         })
@@ -197,6 +193,8 @@ export const Documents = ({
                         hint={
                             <>
                                 <Link
+                                    aria-label="Tip sheet for complete contract action
+                                submissions (opens in new window)"
                                     href={
                                         'https://www.medicaid.gov/federal-policy-guidance/downloads/cib110819.pdf'
                                     }
@@ -204,7 +202,7 @@ export const Documents = ({
                                     target="_blank"
                                 >
                                     Tip sheet for complete contract action
-                                    submissions (opens in new window)
+                                    submissions
                                 </Link>
 
                                 <p

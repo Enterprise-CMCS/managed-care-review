@@ -7,7 +7,10 @@ import { CognitoUser, CognitoUserPool } from 'amazon-cognito-identity-js'
 import * as CognitoAuthApi from '../Auth/cognitoAuth'
 import { FetchCurrentUserDocument } from '../../gen/gqlClient'
 import { Login } from './Login'
-import { renderWithProviders, userClickByRole } from '../../utils/jestUtils'
+import {
+    renderWithProviders,
+    userClickByRole,
+} from '../../testHelpers/jestHelpers'
 
 const failedAuthMock = {
     request: { query: FetchCurrentUserDocument },

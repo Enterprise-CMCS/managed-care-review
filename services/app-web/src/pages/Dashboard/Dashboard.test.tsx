@@ -4,8 +4,8 @@ import { createMemoryHistory } from 'history'
 import { screen, waitFor } from '@testing-library/react'
 
 import { Dashboard } from './Dashboard'
-import { fetchCurrentUserMock } from '../../utils/apolloUtils'
-import { renderWithProviders } from '../../utils/jestUtils'
+import { fetchCurrentUserMock } from '../../testHelpers/apolloHelpers'
+import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
 describe('Dashboard', () => {
     it('display submission heading', async () => {

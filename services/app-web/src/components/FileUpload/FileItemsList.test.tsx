@@ -3,22 +3,23 @@ import { render, screen } from '@testing-library/react'
 import renderer from 'react-test-renderer'
 import { FileItemT } from './FileItem'
 import { FileItemsList } from './FileItemsList'
+import { TEST_PDF_FILE } from './constants'
 
 describe('FileItem component', () => {
     const testProps = {
         fileItems: [
             {
                 id: 'testFile1',
+                file: TEST_PDF_FILE,
                 name: 'testFile1.pdf',
-                url: undefined,
                 key: undefined,
                 s3URL: undefined,
                 status: 'PENDING',
             },
             {
                 id: 'testFile2',
+                file: TEST_PDF_FILE,
                 name: 'testFile2.pdf',
-                url: undefined,
                 key: undefined,
                 s3URL: undefined,
                 status: 'UPLOAD_ERROR',
