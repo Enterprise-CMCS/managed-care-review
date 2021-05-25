@@ -17,7 +17,9 @@ type Mutation {
     updateDraftSubmission(
         input: UpdateDraftSubmissionInput!
     ): UpdateDraftSubmissionPayload!
-    createStateSubmission(input: CreateStateSubmissionInput!): StateSubmission!
+    submitDraftSubmission(
+        input: SubmitDraftSubmissionInput!
+    ): SubmitDraftSubmissionPayload!
 }
 
 input CreateDraftSubmissionInput {
@@ -47,11 +49,11 @@ type UpdateDraftSubmissionPayload {
     draftSubmission: DraftSubmission!
 }
 
-input CreateStateSubmissionInput {
+input SubmitDraftSubmissionInput {
     submissionID: ID!
 }
 
-type CreateStateSubmissionPayload {
+type SubmitDraftSubmissionPayload {
     submission: StateSubmission!
 }
 scalar Date

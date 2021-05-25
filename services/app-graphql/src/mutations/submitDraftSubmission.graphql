@@ -1,6 +1,6 @@
-mutation createStateSubmission($input: CreateStateSubmissionInput!) {
-    createStateSubmission(input: $input) {
-        stateSubmission {
+mutation submitDraftSubmission($input: SubmitDraftSubmissionInput!) {
+    submitDraftSubmission(input: $input) {
+        submission {
             id
             name
             createdAt
