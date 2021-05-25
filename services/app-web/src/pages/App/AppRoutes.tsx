@@ -11,7 +11,7 @@ import { Landing } from '../Landing/Landing'
 import { RoutesRecord } from '../../constants/routes'
 import { StateSubmissionForm } from '../StateSubmissionForm/StateSubmissionForm'
 import { NewStateSubmissionForm } from '../StateSubmissionForm/NewStateSubmissionForm'
-import { SubmissionDescriptionExamples } from '../Help/SubmissionDescriptionExamples'
+import { Help } from '../Help/Help'
 import { useTitle } from '../../hooks/useTitle'
 import { getRouteName, PageTitlesRecord } from '../../constants/routes'
 import { usePage } from '../../contexts/PageContext'
@@ -70,10 +70,7 @@ export const AppRoutes = ({
                     path={RoutesRecord.SUBMISSIONS_FORM}
                     component={StateSubmissionForm}
                 />
-                <Route
-                    path={RoutesRecord.HELP_SUBMISSION_DESCRIPTION}
-                    component={SubmissionDescriptionExamples}
-                />
+                <Route path={RoutesRecord.HELP} component={Help} />
                 <Route path="*" component={Error404} />
             </Switch>
         )

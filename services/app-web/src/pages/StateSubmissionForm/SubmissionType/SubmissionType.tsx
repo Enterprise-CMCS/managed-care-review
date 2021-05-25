@@ -11,7 +11,7 @@ import {
     Link,
 } from '@trussworks/react-uswds'
 import { Formik, FormikHelpers, FormikErrors, useFormikContext } from 'formik'
-import { NavLink, useHistory } from 'react-router-dom'
+import { NavLink, useHistory, Link as ReactRouterLink } from 'react-router-dom'
 import { useMutation } from '@apollo/client'
 
 import PageHeading from '../../../components/PageHeading'
@@ -281,13 +281,11 @@ export const SubmissionType = ({
                                 hint={
                                     <>
                                         <Link
-                                            aria-label="View description examples (opens
-                                        in new window)"
-                                            variant="external"
-                                            href={
-                                                '/help/submission-description-examples'
-                                            }
-                                            target="_blank"
+                                            asCustom={ReactRouterLink}
+                                            to={{
+                                                pathname: '/help',
+                                                hash: '#submission-description',
+                                            }}
                                         >
                                             View description examples
                                         </Link>
