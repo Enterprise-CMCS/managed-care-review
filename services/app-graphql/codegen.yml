@@ -16,6 +16,7 @@ generates:
       mappers:
         User: ../../app-web/src/common-code/domain-models#CognitoUserType
         DraftSubmission: ../../app-web/src/common-code/domain-models#DraftSubmissionType
+        StateSubmission: ../../app-web/src/common-code/domain-models#StateSubmissionType
   ../app-web/src/gen/gqlClient.tsx:
     documents:
       - src/queries/*.graphql

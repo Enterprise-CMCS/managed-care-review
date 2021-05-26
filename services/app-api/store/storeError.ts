@@ -4,6 +4,7 @@ export const StoreErrorCodes = [
     'CONNECTION_ERROR',
     'INSERT_ERROR',
     'UNEXPECTED_EXCEPTION',
+    'WRONG_TYPE',
 ] as const
 type StoreErrorCode = typeof StoreErrorCodes[number] // iterable union type
 

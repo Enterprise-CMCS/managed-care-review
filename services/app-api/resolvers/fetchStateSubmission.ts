@@ -1,25 +1,26 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { isStoreError, Store } from '../store/index'
 import { QueryResolvers, State } from '../gen/gqlServer'
-import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
+import { StateSubmissionType } from '../../app-web/src/common-code/domain-models'
 
-export function fetchDraftSubmissionResolver(
+export function fetchStateSubmissionResolver(
     store: Store
-): QueryResolvers['fetchDraftSubmission'] {
+): QueryResolvers['fetchStateSubmission'] {
     return async (_parent, { input }, context) => {
         // fetch from the store
-        const result = await store.findDraftSubmission(input.submissionID)
+        const result = await store.findStateSubmission(input.submissionID)
 
         if (isStoreError(result)) {
             console.log('Error finding a submission', result)
             if (result.code === 'WRONG_TYPE') {
                 throw new UserInputError(
-                    `Submission is not a DraftSubmission`,
+                    `Submission is not a StateSubmission`,
                     {
                         argumentName: 'submissionID',
                     }
                 )
             }
+
             throw new Error(
                 `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
             )
@@ -27,11 +28,11 @@ export function fetchDraftSubmissionResolver(
 
         if (result === undefined) {
             return {
-                draftSubmission: undefined,
+                submission: undefined,
             }
         }
 
-        const draft: DraftSubmissionType = result
+        const draft: StateSubmissionType = result
 
         // Authorization
         const stateFromCurrentUser: State['code'] = context.user.state_code
@@ -41,6 +42,6 @@ export function fetchDraftSubmissionResolver(
             )
         }
 
-        return { draftSubmission: draft }
+        return { submission: draft }
     }
 }

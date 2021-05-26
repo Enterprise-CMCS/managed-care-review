@@ -7,13 +7,16 @@ type Query {
     fetchCurrentUser: User!
     fetchDraftSubmission(
         input: FetchDraftSubmissionInput!
-    ): FetchDraftSubmissionPayload
+    ): FetchDraftSubmissionPayload!
+    fetchStateSubmission(
+        input: FetchStateSubmissionInput!
+    ): FetchStateSubmissionPayload!
 }
 
 type Mutation {
     createDraftSubmission(
         input: CreateDraftSubmissionInput!
-    ): CreateDraftSubmissionPayload
+    ): CreateDraftSubmissionPayload!
     updateDraftSubmission(
         input: UpdateDraftSubmissionInput!
     ): UpdateDraftSubmissionPayload!
@@ -38,6 +41,14 @@ input FetchDraftSubmissionInput {
 
 type FetchDraftSubmissionPayload {
     draftSubmission: DraftSubmission
+}
+
+input FetchStateSubmissionInput {
+    submissionID: ID!
+}
+
+type FetchStateSubmissionPayload {
+    submission: StateSubmission
 }
 
 input UpdateDraftSubmissionInput {
