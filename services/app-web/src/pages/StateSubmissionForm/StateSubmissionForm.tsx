@@ -9,6 +9,7 @@ import { Loading } from '../../components/Loading/'
 import { usePage } from '../../contexts/PageContext'
 import { RoutesRecord } from '../../constants/routes'
 import { ContractDetails } from './ContractDetails/ContractDetails'
+import { RateDetails } from './RateDetails/RateDetails'
 import { Documents } from './Documents/Documents'
 import { ReviewSubmit } from './ReviewSubmit/ReviewSubmit'
 import { SubmissionType } from './SubmissionType/SubmissionType'
@@ -57,6 +58,9 @@ export const StateSubmissionForm = (): React.ReactElement => {
                 </Route>
                 <Route path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}>
                     <ContractDetails draftSubmission={draft} />
+                </Route>
+                <Route path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}>
+                    <RateDetails draftSubmission={draft} />
                 </Route>
                 <Route path={RoutesRecord.SUBMISSIONS_DOCUMENTS}>
                     <Documents draftSubmission={draft} />

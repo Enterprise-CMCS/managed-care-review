@@ -24,7 +24,7 @@ export const ContractDetails = ({
     const history = useHistory()
 
     const handleFormSubmit = () => {
-        history.push(`/submissions/${draftSubmission.id}/documents`)
+        history.push(`/submissions/${draftSubmission.id}/rate-details`)
     }
     return (
         <>
