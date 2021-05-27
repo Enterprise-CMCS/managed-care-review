@@ -71,18 +71,18 @@ export const RateDetails = ({
                                 <DateRangePicker
                                     className={styles.dateRangePicker}
                                     endDateHint="mm/dd/yyyy"
-                                    endDateLabel="Start date"
+                                    endDateLabel="End date"
                                     endDatePickerProps={{
-                                        disabled: false,
-                                        id: 'rateDateStart',
-                                        name: 'rate-date-start',
-                                    }}
-                                    startDateHint="mm/dd/yyyy"
-                                    startDateLabel="End date"
-                                    startDatePickerProps={{
                                         disabled: false,
                                         id: 'rateDateEnd',
                                         name: 'rate-date-end',
+                                    }}
+                                    startDateHint="mm/dd/yyyy"
+                                    startDateLabel="Start date"
+                                    startDatePickerProps={{
+                                        disabled: false,
+                                        id: 'rateDateStart',
+                                        name: 'rate-date-start',
                                     }}
                                 />
                             </Fieldset>
@@ -109,18 +109,18 @@ export const RateDetails = ({
                                 <DateRangePicker
                                     className={styles.dateRangePicker}
                                     endDateHint="mm/dd/yyyy"
-                                    endDateLabel="Start date"
+                                    endDateLabel="End date"
                                     endDatePickerProps={{
-                                        disabled: false,
-                                        id: 'originalRateDateStart',
-                                        name: 'original-rate-date-start',
-                                    }}
-                                    startDateHint="mm/dd/yyyy"
-                                    startDateLabel="End date"
-                                    startDatePickerProps={{
                                         disabled: false,
                                         id: 'originalRateDateEnd',
                                         name: 'original-rate-date-end',
+                                    }}
+                                    startDateHint="mm/dd/yyyy"
+                                    startDateLabel="Start date"
+                                    startDatePickerProps={{
+                                        disabled: false,
+                                        id: 'originalRateDateStart',
+                                        name: 'original-rate-date-start',
                                     }}
                                 />
                             </Fieldset>
@@ -135,18 +135,18 @@ export const RateDetails = ({
                                 <DateRangePicker
                                     className={styles.dateRangePicker}
                                     endDateHint="mm/dd/yyyy"
-                                    endDateLabel="Start date"
+                                    endDateLabel="End date"
                                     endDatePickerProps={{
-                                        disabled: false,
-                                        id: 'amendmentRateDateStart',
-                                        name: 'amendment-rate-date-start',
-                                    }}
-                                    startDateHint="mm/dd/yyyy"
-                                    startDateLabel="End date"
-                                    startDatePickerProps={{
                                         disabled: false,
                                         id: 'amendmentRateDateEnd',
                                         name: 'amendment-rate-date-end',
+                                    }}
+                                    startDateHint="mm/dd/yyyy"
+                                    startDateLabel="Start date"
+                                    startDatePickerProps={{
+                                        disabled: false,
+                                        id: 'amendmentRateDateStart',
+                                        name: 'amendment-rate-date-start',
                                     }}
                                 />
                             </Fieldset>

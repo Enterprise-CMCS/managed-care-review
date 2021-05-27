@@ -68,18 +68,18 @@ export const ContractDetails = ({
                                 <DateRangePicker
                                     className={styles.dateRangePicker}
                                     endDateHint="mm/dd/yyyy"
-                                    endDateLabel="Start date"
+                                    endDateLabel="End date"
                                     endDatePickerProps={{
                                         disabled: false,
-                                        id: 'contract-date-start',
-                                        name: 'contract-date-start',
+                                        id: 'contractDateEnd',
+                                        name: 'contract-date-end',
                                     }}
                                     startDateHint="mm/dd/yyyy"
-                                    startDateLabel="End date"
+                                    startDateLabel="Start date"
                                     startDatePickerProps={{
                                         disabled: false,
-                                        id: 'contract-date-end',
-                                        name: 'contract-date-end',
+                                        id: 'contractDateStart',
+                                        name: 'contract-date-start',
                                     }}
                                 />
                             </Fieldset>
