@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import { GridContainer, Grid, Link } from '@trussworks/react-uswds'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useHistory } from 'react-router-dom'
 
 import styles from './ReviewSubmit.module.scss'
 import stylesForm from '../StateSubmissionForm.module.scss'
 
-import { DraftSubmission, Document } from '../../../gen/gqlClient'
+import {
+    DraftSubmission,
+    Document,
+    useSubmitDraftSubmissionMutation,
+} from '../../../gen/gqlClient'
 import { DataDetail } from '../../../components/DataDetail/DataDetail'
 import { DoubleColumnRow } from '../../../components/DoubleColumnRow/DoubleColumnRow'
 import { PageActions } from '../PageActions'
@@ -20,6 +24,12 @@ export const ReviewSubmit = ({
 }): React.ReactElement => {
     const [refreshedDocs, setRefreshedDocs] = useState<DocumentWithLink[]>([])
     const { getURL, getKey } = useS3()
+
+    const [userVisibleError, setUserVisibleError] = useState<
+        string | undefined
+    >(undefined)
+    const history = useHistory()
+    const [submitDraftSubmission] = useSubmitDraftSubmissionMutation()
 
     useEffect(() => {
         const refreshDocuments = async () => {
@@ -38,7 +48,10 @@ export const ReviewSubmit = ({
                         url: documentLink,
                     }
                 })
-            ).catch((err) => [])
+            ).catch((err) => {
+                console.log(err)
+                return []
+            })
             setRefreshedDocs(newDocs)
         }
 
@@ -72,8 +85,39 @@ export const ReviewSubmit = ({
         draftSubmission.documents.length === 1 ? 'file' : 'files'
     }`
 
+    const showError = (error: string) => {
+        setUserVisibleError(error)
+    }
+
+    const handleFormSubmit = async (e: React.FormEvent): Promise<void> => {
+        e.preventDefault()
+
+        try {
+            const data = await submitDraftSubmission({
+                variables: {
+                    input: {
+                        submissionID: draftSubmission.id,
+                    },
+                },
+            })
+
+            if (data.errors) {
+                console.log(data.errors)
+                showError('Error attempting to submit. Please try again.')
+            }
+
+            if (data.data?.submitDraftSubmission) {
+                history.push(`/dashboard`)
+            }
+        } catch (error) {
+            console.log(error)
+            showError('Error attempting to submit. Please try again.')
+        }
+    }
+
     return (
         <GridContainer className={styles.reviewSectionWrapper}>
+            {userVisibleError && <div>Error: {userVisibleError}</div>}
             <Grid row>
                 <Grid col={12} tablet={{ col: 8, offset: 2 }}>
                     <section
@@ -258,6 +302,7 @@ export const ReviewSubmit = ({
                     <PageActions
                         secondaryAction="Back"
                         primaryAction="Submit"
+                        primaryActionCallback={handleFormSubmit}
                     />
                 </Grid>
             </Grid>
