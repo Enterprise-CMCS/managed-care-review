@@ -6,6 +6,7 @@ import {
     Label,
     FileInput,
 } from '@trussworks/react-uswds'
+import styles from './FileUpload.module.scss'
 
 import { FileItemT } from './FileItem'
 import { FileItemsList } from './FileItemsList'
@@ -251,6 +252,7 @@ export const FileUpload = ({
                 key={fileInputKey.current}
                 id={id}
                 name={name}
+                className={styles.fileInput}
                 aria-describedby={`${id}-error ${id}-hint`}
                 multiple
                 onChange={handleFileInputChangeOrDrop}
