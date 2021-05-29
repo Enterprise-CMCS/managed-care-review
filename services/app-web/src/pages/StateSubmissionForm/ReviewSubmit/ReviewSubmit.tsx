@@ -107,7 +107,7 @@ export const ReviewSubmit = ({
             }
 
             if (data.data?.submitDraftSubmission) {
-                history.push(`/dashboard`)
+                history.push(`/dashboard?justSubmitted=${draftSubmission.name}`)
             }
         } catch (error) {
             console.log(error)

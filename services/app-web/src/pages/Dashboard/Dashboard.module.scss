@@ -8,6 +8,24 @@
     width: 100%;
 }
 
+.alertContainer {
+    padding-top: units(4);
+    margin: auto;
+    max-width: 75rem;
+}
+
+.alert {
+    div {
+        margin-top: units(1);
+    }
+    ol {
+        margin-top: 0;
+    }
+    li {
+        padding: units(1) 0;
+    }
+}
+
 .tabs {
     width: 100%;
 }

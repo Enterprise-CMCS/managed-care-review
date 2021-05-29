@@ -1,6 +1,6 @@
 import React from 'react'
 import { GridContainer, Link } from '@trussworks/react-uswds'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 
 import styles from './Dashboard.module.scss'
 
@@ -8,9 +8,11 @@ import { Tabs } from '../../components/Tabs/Tabs'
 import { TabPanel } from '../../components/Tabs/TabPanel'
 import { useAuth } from '../../contexts/AuthContext'
 import { Program } from '../../gen/gqlClient'
+import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
 
 export const Dashboard = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
+    const location = useLocation()
     let programs: Program[] = []
 
     if (loginStatus === 'LOADING' || !loggedInUser) {
@@ -18,6 +20,10 @@ export const Dashboard = (): React.ReactElement => {
     } else {
         programs = loggedInUser.state.programs
     }
+
+    const justSubmittedSubmissionName = new URLSearchParams(
+        location.search
+    ).get('justSubmitted')
 
     const ProgramContent = ({
         program,
@@ -47,27 +53,34 @@ export const Dashboard = (): React.ReactElement => {
     }
 
     return (
-        <div className={styles.container} data-testid="dashboardPage">
-            {programs.length ? (
-                <Tabs className={styles.tabs}>
-                    {programs.map((program: Program) => (
-                        <TabPanel
-                            key={program.name}
-                            id={program.name}
-                            tabName={program.name}
-                        >
-                            <GridContainer>
-                                <ProgramContent
-                                    key={program.name}
-                                    program={program}
-                                />
-                            </GridContainer>
-                        </TabPanel>
-                    ))}
-                </Tabs>
-            ) : (
-                <p>No programs exist</p>
+        <>
+            {justSubmittedSubmissionName && (
+                <SubmissionSuccessMessage
+                    submissionName={justSubmittedSubmissionName}
+                />
             )}
-        </div>
+            <div className={styles.container} data-testid="dashboardPage">
+                {programs.length ? (
+                    <Tabs className={styles.tabs}>
+                        {programs.map((program: Program) => (
+                            <TabPanel
+                                key={program.name}
+                                id={program.name}
+                                tabName={program.name}
+                            >
+                                <GridContainer>
+                                    <ProgramContent
+                                        key={program.name}
+                                        program={program}
+                                    />
+                                </GridContainer>
+                            </TabPanel>
+                        ))}
+                    </Tabs>
+                ) : (
+                    <p>No programs exist</p>
+                )}
+            </div>
+        </>
     )
 }

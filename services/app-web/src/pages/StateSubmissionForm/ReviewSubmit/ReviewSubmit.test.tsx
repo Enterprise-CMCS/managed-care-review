@@ -147,7 +147,10 @@ describe('ReviewSubmit', () => {
         submitButton.click()
 
         await waitFor(() => {
-            expect(history.location.pathname).toEqual('/dashboard')
+            expect(history.location.pathname).toEqual(`/dashboard`)
+            expect(history.location.search).toEqual(
+                `?justSubmitted=${mockDraftSubmission.name}`
+            )
         })
     })
 
