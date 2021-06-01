@@ -8,13 +8,11 @@ import {
     DatePicker,
     ButtonGroup,
     Label,
-    Checkbox
 } from '@trussworks/react-uswds'
-import { Link as ReactRouterLink, NavLink, useHistory } from 'react-router-dom'
+import { NavLink, useHistory } from 'react-router-dom'
 import PageHeading from '../../../components/PageHeading'
 import { FieldRadio } from '../../../components/Form/FieldRadio/FieldRadio'
 import { FieldCheckbox } from '../../../components/Form/FieldCheckbox/FieldCheckbox'
-import { FieldTextInput } from '../../../components/Form/FieldTextInput/FieldTextInput'
 import { DraftSubmission } from '../../../gen/gqlClient'
 import { Formik } from 'formik'
 import styles from '../StateSubmissionForm.module.scss'
@@ -91,12 +89,14 @@ export const RateDetails = ({
                             <Label
                                 htmlFor="certification-date"
                                 id="certificationDateLabel"
-                            >Date certified
+                            >
+                                Date certified
                             </Label>
                             <div
-                            className="usa-hint"
-                            id="certificationDateHint"
-                            >mm/dd/yyyy
+                                className="usa-hint"
+                                id="certificationDateHint"
+                            >
+                                mm/dd/yyyy
                             </div>
                             <DatePicker
                                 aria-describedby="certificationDateLabel certificationDateHint"
@@ -155,12 +155,14 @@ export const RateDetails = ({
                             <Label
                                 htmlFor="amendment-certification-date"
                                 id="amendmentCertificationDateLabel"
-                            >Date certified for rate amendment
+                            >
+                                Date certified for rate amendment
                             </Label>
                             <div
-                            className="usa-hint"
-                            id="amendmentCertificationDateHint"
-                            >mm/dd/yyyy
+                                className="usa-hint"
+                                id="amendmentCertificationDateHint"
+                            >
+                                mm/dd/yyyy
                             </div>
                             <DatePicker
                                 aria-describedby="amendmentCertificationDateLabel amendmentCertificationDateHint"
