@@ -1,6 +1,6 @@
 Cypress.Commands.add('login', () => {
     cy.visit('/')
-    cy.findByText('Sign In').should('exist').click()
+    cy.contains('Sign In').click()
     const authMode = Cypress.env('AUTH_MODE')
     console.log(authMode, 'authmode')
     if (authMode === 'LOCAL') {
