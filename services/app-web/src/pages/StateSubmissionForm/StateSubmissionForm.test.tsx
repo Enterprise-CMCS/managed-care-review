@@ -248,7 +248,7 @@ describe('StateSubmissionForm', () => {
     })
 
     describe('errors', () => {
-        it('shows an error fetching submission fails at submission type', async () => {
+        it('shows a generic error fetching submission fails at submission type', async () => {
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
@@ -271,7 +271,7 @@ describe('StateSubmissionForm', () => {
             const loading = await screen.findByText('Something went wrong...')
             expect(loading).toBeInTheDocument()
         })
-        it('shows an error fetching submission fails at contract details', async () => {
+        it('shows a generic error fetching submission fails at contract details', async () => {
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
@@ -296,7 +296,8 @@ describe('StateSubmissionForm', () => {
             const loading = await screen.findByText('Something went wrong...')
             expect(loading).toBeInTheDocument()
         })
-        it('shows an error fetching submission fails at documents', async () => {
+
+        it('shows a generic error fetching submission fails at documents', async () => {
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}

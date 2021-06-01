@@ -42,16 +42,16 @@ export const StateSubmissionForm = (): React.ReactElement => {
         )
     }
 
-    if (draft === undefined || draft === null) {
-        if (error && error.message.includes('not a DraftSubmission')) {
-            return <ErrorInvalidSubmissionStatus />
-        }
-        return <Error404 />
-    }
-
     if (error) {
         console.log('error loading draft:', error)
+        if (error.message.includes('not a DraftSubmission')) {
+            return <ErrorInvalidSubmissionStatus />
+        }
         return <GenericError />
+    }
+
+    if (draft === undefined || draft === null) {
+        return <Error404 />
     }
 
     return (
