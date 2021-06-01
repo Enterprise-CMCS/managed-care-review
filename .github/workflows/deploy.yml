@@ -134,20 +134,21 @@ jobs:
           ./scripts/add_cypress_test_users.sh $STAGE_PREFIX$branch_name
 
       - name: Cypress run
+        id: cypress
         uses: cypress-io/github-action@v2
         with:
           config: baseUrl=${{env.APPLICATION_ENDPOINT}}
 
       - name: Upload cypress screenshots
         uses: actions/upload-artifact@v1
-        if: failure()
+        if: steps.cypress.outcome == 'failure'
         with:
           name: cypress-screenshots
           path: tests/cypress/screenshots
 
       - name: Upload cypress video
         uses: actions/upload-artifact@v1
-        if: always()
+        if: steps.cypress.outcome != 'skipped'
         with:
           name: cypress-videos
           path: tests/cypress/videos
