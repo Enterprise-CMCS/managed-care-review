@@ -13,7 +13,7 @@ export const ErrorInvalidSubmissionStatus = (): React.ReactElement => {
                 <PageHeading>This submission was sent to CMS</PageHeading>
                 <p>
                     <span>It cannot be edited. Return to your </span>
-                    <NavLink to="/dashboard">Dashboard</NavLink>
+                    <NavLink to="/dashboard">Dashboard</NavLink>.
                 </p>
             </GridContainer>
         </section>

@@ -14,7 +14,7 @@ export const Error404 = (): React.ReactElement => {
                 <p>You might want to double-check your link and try again.</p>
                 <p>
                     <span>Or return to your </span>
-                    <NavLink to="/dashboard">Dashboard</NavLink>
+                    <NavLink to="/dashboard">Dashboard</NavLink>.
                 </p>
             </GridContainer>
         </section>
