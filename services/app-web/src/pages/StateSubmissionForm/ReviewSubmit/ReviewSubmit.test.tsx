@@ -176,7 +176,7 @@ describe('ReviewSubmit', () => {
         submitButton.click()
 
         const errorText = await screen.findByText(
-            'Error: Error attempting to submit. Please try again.'
+            'Error attempting to submit. Please try again.'
         )
 
         expect(errorText).toBeInTheDocument()

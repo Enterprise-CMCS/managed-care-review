@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { GridContainer, Grid, Link } from '@trussworks/react-uswds'
+import { GridContainer, Grid, Link, Alert } from '@trussworks/react-uswds'
 import { NavLink, useHistory } from 'react-router-dom'
 
 import styles from './ReviewSubmit.module.scss'
@@ -117,7 +117,11 @@ export const ReviewSubmit = ({
 
     return (
         <GridContainer className={styles.reviewSectionWrapper}>
-            {userVisibleError && <div>Error: {userVisibleError}</div>}
+            {userVisibleError && (
+                <Alert type="error" heading="Submission Error">
+                    {userVisibleError}
+                </Alert>
+            )}
             <Grid row>
                 <Grid col={12} tablet={{ col: 8, offset: 2 }}>
                     <section
