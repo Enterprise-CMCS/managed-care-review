@@ -21,7 +21,7 @@ export async function findStateSubmission(
         )
 
         // if the result in the DB is a DRAFT, return an error
-        if (getResult.type !== 'SUBMITTED') {
+        if (getResult.status !== 'SUBMITTED') {
             return {
                 code: 'WRONG_TYPE',
                 message: 'The requested submission is not a StateSubmission',

@@ -21,7 +21,7 @@ export async function findDraftSubmission(
         )
 
         // if the result in the DB is a DRAFT, return an error
-        if (getResult.type !== 'DRAFT') {
+        if (getResult.status !== 'DRAFT') {
             return {
                 code: 'WRONG_TYPE',
                 message: 'The requested submission is not a DraftSubmission',

@@ -26,9 +26,9 @@ export class DraftSubmissionStoreType {
     @hashKey()
     id: string
 
-    // This is used to differentriate between DraftSubmission and StateSubmission
+    // This is used to differentiate between DraftSubmission and StateSubmission
     @attribute()
-    type: string
+    status: string
 
     @attribute()
     submissionDescription: string
@@ -64,7 +64,7 @@ export class DraftSubmissionStoreType {
 
     constructor() {
         this.id = ''
-        this.type = 'DRAFT'
+        this.status = 'DRAFT'
         this.submissionDescription = ''
         this.submissionType = 'CONTRACT_ONLY'
         this.createdAt = new Date(0)
@@ -83,7 +83,7 @@ export class StateSubmissionStoreType {
 
     // This is used to differentriate between DraftSubmission and StateSubmission
     @attribute()
-    type: string
+    status: string
 
     @attribute()
     submissionDescription: string
@@ -122,7 +122,7 @@ export class StateSubmissionStoreType {
 
     constructor() {
         this.id = ''
-        this.type = 'SUBMITTED'
+        this.status = 'SUBMITTED'
         this.submissionDescription = ''
         this.submissionType = 'CONTRACT_ONLY'
         this.createdAt = new Date(0)
