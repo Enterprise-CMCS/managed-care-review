@@ -1,4 +1,4 @@
-import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import { ForbiddenError, ApolloError } from 'apollo-server-lambda'
 import { isStoreError, Store } from '../store/index'
 import { QueryResolvers, State } from '../gen/gqlServer'
 import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
@@ -12,9 +12,10 @@ export function fetchDraftSubmissionResolver(
 
         if (isStoreError(result)) {
             console.log('Error finding a submission', result)
-            if (result.code === 'WRONG_TYPE') {
-                throw new UserInputError(
+            if (result.code === 'WRONG_STATUS') {
+                throw new ApolloError(
                     `Submission is not a DraftSubmission`,
+                    'WRONG_STATUS',
                     {
                         argumentName: 'submissionID',
                     }

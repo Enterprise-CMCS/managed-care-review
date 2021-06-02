@@ -48,7 +48,8 @@ export const StateSubmissionForm = (): React.ReactElement => {
         // check to see if we have a specific submission error
         let specificErr: React.ReactElement | undefined = undefined
         error.graphQLErrors.forEach((err) => {
-            if (err?.extensions?.code === 'BAD_USER_INPUT') {
+            if (err?.extensions?.code === 'WRONG_STATUS') {
+                console.log('gotem')
                 specificErr = <ErrorInvalidSubmissionStatus />
             }
         })
