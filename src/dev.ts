@@ -104,28 +104,32 @@ async function compile_graphql_types(runner: LabeledProcessRunner) {
     )
 }
 
+const install_web_deps_once = once(install_web_deps)
+
+async function install_web_deps(runner: LabeledProcessRunner) {
+    return runner.run_command_and_output(
+        'web deps',
+        ['yarn', 'install'],
+        'services/app-web'
+    )
+}
+
 const compile_graphql_types_once = once(compile_graphql_types)
 
 // run_web_locally runs app-web locally
 async function run_web_locally(runner: LabeledProcessRunner) {
     compile_graphql_types_watch_once(runner)
 
-    await runner.run_command_and_output(
-        'web deps',
-        ['yarn', 'install'],
-        'services/app-web'
-    )
+    await install_web_deps_once(runner)
+
     runner.run_command_and_output('web', ['yarn', 'start'], 'services/app-web')
 }
 
 async function run_sb_locally(runner: LabeledProcessRunner) {
     compile_graphql_types_watch_once(runner)
 
-    await runner.run_command_and_output(
-        'web deps',
-        ['yarn', 'install'],
-        'services/app-web'
-    )
+    await install_web_deps_once(runner)
+
     runner.run_command_and_output(
         'storybook',
         ['yarn', 'storybook'],
@@ -399,7 +403,7 @@ async function run_online_tests(runner: LabeledProcessRunner) {
             `the URL ${base_url} does not resolve, make sure the system is running before runnin online tests`
         )
     }
-    
+
     const nightCode = await runner.run_command_and_output(
         'nightwatch',
         ['./test.sh'],
