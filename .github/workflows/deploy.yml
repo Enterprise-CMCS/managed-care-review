@@ -139,9 +139,6 @@ jobs:
         with:
           config: baseUrl=${{env.APPLICATION_ENDPOINT}}
 
-      -  run: | 
-          echo "cypress.outcome is ${{ steps.cypress.outcome }}"
-
       - name: Upload cypress screenshots
         uses: actions/upload-artifact@v1
         if: failure() && steps.cypress.outcome == 'failure'
