@@ -1,5 +1,6 @@
 Cypress.Commands.add('login', () => {
     cy.visit('/')
+    cy.findByRole('progressbar', { name: 'Loading' }).should('not.exist')
     cy.contains('Sign In').click()
     const authMode = Cypress.env('AUTH_MODE')
     console.log(authMode, 'authmode')
@@ -18,6 +19,7 @@ Cypress.Commands.add('login', () => {
         console.log('Auth mode is not defined or is IDM')
     }
     // this login/initial fetch can take a little while.
+    cy.findByRole('progressbar', { name: 'Loading' }).should('not.exist')
     cy.url({ timeout: 10_000 }).should('match', /.*dashboard$/)
     cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 })

@@ -42,6 +42,15 @@ describe('State Submission', () => {
             // Skip contract details
             cy.findByText('Contract details').should('exist')
             cy.findByText(/MN-MSHO-/).should('exist')
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).safeClick()
+
+            // Skip rate details
+            cy.findByText('Rate details').should('exist')
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).safeClick()
 
             // Continue button navigates to documents page
             cy.findByRole('button', {
@@ -139,6 +148,12 @@ describe('State Submission', () => {
                 name: 'Continue',
             }).safeClick()
 
+            //Skip rate details
+            cy.findByText('Rate details').should('exist')
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).safeClick()
+
             // Add documents
             cy.findByRole('heading', { name: 'Documents' }).should('exist')
             cy.findByTestId('documents-hint').should(
@@ -183,6 +198,12 @@ describe('State Submission', () => {
 
             // Skip contract details
             cy.findByText('Contract details').should('exist')
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).safeClick()
+
+            // Skip rate details
+            cy.findByText('Rate details').should('exist')
             cy.findByRole('button', {
                 name: 'Continue',
             }).safeClick()
