@@ -44,10 +44,16 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
     if (error) {
         console.log('error loading draft:', error)
-        if (error.message.includes('not a DraftSubmission')) {
-            return <ErrorInvalidSubmissionStatus />
-        }
-        return <GenericError />
+
+        // check to see if we have a specific submission error
+        let specificErr: React.ReactElement | undefined = undefined
+        error.graphQLErrors.forEach((err) => {
+            if (err?.extensions?.code === 'BAD_USER_INPUT') {
+                specificErr = <ErrorInvalidSubmissionStatus />
+            }
+        })
+
+        return specificErr ?? <GenericError />
     }
 
     if (draft === undefined || draft === null) {
