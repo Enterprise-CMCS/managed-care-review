@@ -1,5 +1,5 @@
 import React from 'react'
-import { screen, render, prettyDOM } from '@testing-library/react'
+import { screen, render } from '@testing-library/react'
 import { FieldCheckbox } from './FieldCheckbox'
 
 const mockOnChange = jest.fn()
@@ -7,8 +7,6 @@ const mockSetValue = jest.fn()
 
 jest.mock('formik', () => {
     return {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore-next-line
         ...jest.requireActual('formik'),
         useField: () => [
             {
@@ -63,17 +61,23 @@ describe('FieldCheckbox component', () => {
 
     it('renders as checked when expected', () => {
         render(
-            <FieldCheckbox
-                name="managedCareEntity"
-                id="mco"
-                aria-required
-                label="Managed Care Organization (MCO)"
-                checked
-            />
+            <fieldset>
+                <FieldCheckbox
+                    name="managedCareEntity"
+                    id="foobar"
+                    aria-required
+                    label="Foobar"
+                />
+                <FieldCheckbox
+                    name="managedCareEntity"
+                    id="mco"
+                    aria-required
+                    label="Managed Care Organization (MCO)"
+                    checked
+                />
+            </fieldset>
         )
-        expect(
-            screen.getByLabelText('Managed Care Organization (MCO)')
-        ).toBeInTheDocument()
+        expect(screen.getByLabelText('Foobar')).not.toBeChecked()
         expect(
             screen.getByLabelText('Managed Care Organization (MCO)')
         ).toBeChecked()

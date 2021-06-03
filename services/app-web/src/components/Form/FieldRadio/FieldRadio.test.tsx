@@ -7,8 +7,6 @@ const mockSetValue = jest.fn()
 
 jest.mock('formik', () => {
     return {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore-next-line
         ...jest.requireActual('formik'),
         useField: () => [
             {
@@ -33,7 +31,6 @@ describe('FieldRadio component', () => {
                 label="Executed contract action only"
             />
         )
-        screen.debug()
         expect(
             screen.getByLabelText('Executed contract action only')
         ).toBeInTheDocument()
