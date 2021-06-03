@@ -33,7 +33,7 @@ describe('createDraftSubmission', () => {
         expect(
             res.data.createDraftSubmission.draftSubmission.program.name
         ).toBe('Managed Medical Assistance')
-        expect(res.data.createDraftSubmission.draftSubmission.name).toBe(
+        expect(res.data.createDraftSubmission.draftSubmission.name).toContain(
             'FL-MANAGED-MEDICAL-ASSISTANCE'
         )
         expect(
