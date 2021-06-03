@@ -75,7 +75,7 @@ describe('fetchStateSubmission', () => {
         expect(resultErr?.message).toEqual(
             'Submission is not a StateSubmission'
         )
-        expect(resultErr?.extensions?.code).toEqual('BAD_USER_INPUT')
+        expect(resultErr?.extensions?.code).toEqual('WRONG_STATUS')
     })
 
     it('returns null if the ID does not exist', async () => {

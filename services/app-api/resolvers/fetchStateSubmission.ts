@@ -14,7 +14,7 @@ export function fetchStateSubmissionResolver(
             console.log('Error finding a submission', result)
             if (result.code === 'WRONG_STATUS') {
                 throw new ApolloError(
-                    `Submission is not a DraftSubmission`,
+                    `Submission is not a StateSubmission`,
                     'WRONG_STATUS',
                     {
                         argumentName: 'submissionID',

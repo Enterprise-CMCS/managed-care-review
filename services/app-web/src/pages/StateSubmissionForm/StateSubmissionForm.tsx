@@ -49,7 +49,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
         let specificErr: React.ReactElement | undefined = undefined
         error.graphQLErrors.forEach((err) => {
             if (err?.extensions?.code === 'WRONG_STATUS') {
-                console.log('gotem')
                 specificErr = <ErrorInvalidSubmissionStatus />
             }
         })
