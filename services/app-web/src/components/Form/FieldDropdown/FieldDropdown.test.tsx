@@ -5,8 +5,6 @@ import { FieldDropdown } from './FieldDropdown'
 const mockOnChange = jest.fn()
 const mockSetValue = jest.fn()
 
-// mock out formik hook as we are not testing formik
-// needs to be before first describe
 jest.mock('formik', () => {
     return {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment

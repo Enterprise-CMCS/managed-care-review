@@ -25,5 +25,13 @@ export const FieldCheckbox = ({
     ...inputProps
 }: FieldCheckboxProps): React.ReactElement => {
     const [field] = useField({ name })
-    return <Checkbox id={id} label={label} {...field} {...inputProps} />
+    return (
+        <Checkbox
+            id={id}
+            label={label}
+            {...field}
+            {...inputProps}
+            name={name}
+        />
+    )
 }

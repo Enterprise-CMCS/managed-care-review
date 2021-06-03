@@ -1,27 +1,31 @@
 import React from 'react'
-import { screen, render, getByLabelText } from '@testing-library/react'
+import { screen, render } from '@testing-library/react'
 import { FieldRadio } from './FieldRadio'
-import { useField } from 'formik'
-import { Redirect } from 'react-router'
 
-// mock out formik hook as we are not testing formik
-// needs to be before first describe
+const mockOnChange = jest.fn()
+const mockSetValue = jest.fn()
 
-jest.mock('formik')
+jest.mock('formik', () => {
+    return {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore-next-line
+        ...jest.requireActual('formik'),
+        useField: () => [
+            {
+                onChange: mockOnChange,
+            },
+            { touched: true },
+            { setValue: mockSetValue },
+        ],
+    }
+})
 
 describe('FieldRadio component', () => {
+    afterAll(() => {
+        jest.clearAllMocks()
+    })
+
     it('renders without errors', () => {
-        const mockField = {
-            value: '',
-            checked: false,
-            onChange: jest.fn(),
-            onBlur: jest.fn(),
-            multiple: undefined,
-            name: 'input1',
-        }
-
-        useField.mockReturnValue([mockField])
-
         render(
             <FieldRadio
                 name="submissionType"
@@ -29,29 +33,19 @@ describe('FieldRadio component', () => {
                 label="Executed contract action only"
             />
         )
+        screen.debug()
         expect(
             screen.getByLabelText('Executed contract action only')
         ).toBeInTheDocument()
         expect(
             screen.getByLabelText('Executed contract action only')
-        ).toHaveAttribute('name', 'input1')
+        ).toHaveAttribute('name', 'submissionType')
         expect(
             screen.getByLabelText('Executed contract action only')
         ).toHaveAttribute('id', 'contractOnly')
     })
 
     it('handles custom aria attributes', () => {
-        const mockField = {
-            value: '',
-            checked: false,
-            onChange: jest.fn(),
-            onBlur: jest.fn(),
-            multiple: undefined,
-            name: 'input1',
-        }
-
-        useField.mockReturnValue([mockField])
-
         render(
             <FieldRadio
                 name="submissionType"
@@ -69,30 +63,30 @@ describe('FieldRadio component', () => {
     })
 
     it('renders as checked when expected', () => {
-        const mockField = {
-            value: '',
-            checked: true,
-            onChange: jest.fn(),
-            onBlur: jest.fn(),
-            multiple: undefined,
-            name: 'input1',
-        }
-
-        useField.mockReturnValue([mockField])
-
         render(
-            <FieldRadio
-                name="submissionType"
-                id="contractOnly"
-                aria-required
-                label="Executed contract action only"
-            />
+            <fieldset>
+                <FieldRadio
+                    name="submissionType"
+                    id="contractOnly"
+                    aria-required
+                    label="Executed contract action only"
+                />
+                <FieldRadio
+                    name="submissionType"
+                    id="contractAndRates"
+                    aria-required
+                    label="Contract and rates"
+                    checked
+                />
+            </fieldset>
         )
         expect(
             screen.getByLabelText('Executed contract action only')
         ).toBeInTheDocument()
+        expect(screen.getByLabelText('Contract and rates')).toBeInTheDocument()
         expect(
             screen.getByLabelText('Executed contract action only')
-        ).toBeChecked()
+        ).not.toBeChecked()
+        expect(screen.getByLabelText('Contract and rates')).toBeChecked()
     })
 })
