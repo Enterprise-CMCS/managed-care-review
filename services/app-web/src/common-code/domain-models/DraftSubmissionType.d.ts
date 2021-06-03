@@ -1,12 +1,26 @@
-// DraftSubmission is a draft submission.
-
-export type SubmissionType = 'CONTRACT_ONLY' | 'CONTRACT_AND_RATES'
-export type SubmissionDocument = {
+// GQL SCHEMA MATCHED TYPES
+type SubmissionType = 'CONTRACT_ONLY' | 'CONTRACT_AND_RATES'
+type SubmissionDocument = {
     name: string
     s3URL: string
 }
 
-export type DraftSubmissionType = {
+type ContractType = BASE | AMENDMENT
+
+type FederalAuthority =
+    | STATE_PLAN
+    | WAIVER_1915B
+    | WAIVER_1115
+    | VOLUNTARY
+    | BENCHMARK
+    | TITLE_XXI
+
+// CLIENT_SIDE ONLY TYPES
+const ENTITIES = ['MCO', 'PIHIP', 'PAHP', 'PCCM'] as const
+type ManagedCareEntity = typeof ENTITIES[number]
+
+// MAIN
+type DraftSubmissionType = {
     id: string
     stateCode: string
     stateNumber: number
@@ -16,4 +30,18 @@ export type DraftSubmissionType = {
     createdAt: Date
     updatedAt: Date
     documents: SubmissionDocument[]
+    contractType: ContractType | null
+    contractDateStart: Date | null
+    contractDateEnd: Date | null
+    managedCareEntities: string[]
+    federalAuthorities: FederalAuthority[]
+}
+
+export type {
+    SubmissionType,
+    SubmissionDocument,
+    ContractType,
+    FederalAuthority,
+    ManagedCareEntity,
+    DraftSubmissionType,
 }

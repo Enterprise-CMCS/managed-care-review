@@ -5,7 +5,10 @@ import {
 } from '@aws/dynamodb-data-mapper-annotations'
 
 import { embed } from '@aws/dynamodb-data-mapper'
-import { SubmissionType } from '../../app-web/src/common-code/domain-models'
+import {
+    SubmissionType,
+    FederalAuthority,
+} from '../../app-web/src/common-code/domain-models'
 
 // Data mapper annotations are meant to go on your domain models, and we might use them that way at some point
 // but for now, especially since we probably want to rip out all the dynamodb stuff eventually anyway, we're going to keep
@@ -41,6 +44,21 @@ export class DraftSubmissionStoreType {
     @attribute()
     programID: string
 
+    @attribute()
+    contractType: string | null
+
+    @attribute()
+    contractDateStart: Date | null
+
+    @attribute()
+    contractDateEnd: Date | null
+
+    @attribute()
+    managedCareEntities: Array<string>
+
+    @attribute()
+    federalAuthorities: Array<FederalAuthority>
+
     @attribute({
         indexKeyConfigurations: {
             StateStateNumberAllIndex: 'HASH',
@@ -68,6 +86,11 @@ export class DraftSubmissionStoreType {
         this.programID = ''
         this.stateNumber = -1
         this.documents = []
+        this.contractType = null
+        this.contractDateStart = null
+        this.contractDateEnd = null
+        this.managedCareEntities = []
+        this.federalAuthorities = []
     }
 }
 

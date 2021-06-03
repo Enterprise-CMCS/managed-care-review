@@ -27,15 +27,30 @@ describe('createDraftSubmission', () => {
         expect(
             res.data.createDraftSubmission.draftSubmission.submissionType
         ).toBe('CONTRACT_ONLY')
-        expect(
-            res.data.createDraftSubmission.draftSubmission.program.id
-        ).toBe('managed-medical-assistance')
+        expect(res.data.createDraftSubmission.draftSubmission.program.id).toBe(
+            'managed-medical-assistance'
+        )
         expect(
             res.data.createDraftSubmission.draftSubmission.program.name
         ).toBe('Managed Medical Assistance')
-        expect(res.data.createDraftSubmission.draftSubmission.name).toContain(
+        expect(res.data.createDraftSubmission.draftSubmission.name).toBe(
             'FL-MANAGED-MEDICAL-ASSISTANCE'
         )
+        expect(
+            res.data.createDraftSubmission.draftSubmission.documents
+        ).toContain([])
+        expect(
+            res.data.createDraftSubmission.draftSubmission.managedCareEntities
+        ).toBe([])
+        expect(
+            res.data.createDraftSubmission.draftSubmission.federalAuthorities
+        ).toBe([])
+        expect(
+            res.data.createDraftSubmission.draftSubmission.contractDateStart
+        ).toBe(null)
+        expect(
+            res.data.createDraftSubmission.draftSubmission.contractDateEnd
+        ).toBe(null)
     })
 
     it('returns an error if the program id is not in valid', async () => {
