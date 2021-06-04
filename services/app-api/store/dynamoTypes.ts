@@ -26,6 +26,10 @@ export class DraftSubmissionStoreType {
     @hashKey()
     id: string
 
+    // This is used to differentiate between DraftSubmission and StateSubmission
+    @attribute()
+    status: string
+
     @attribute()
     submissionDescription: string
 
@@ -60,14 +64,74 @@ export class DraftSubmissionStoreType {
 
     constructor() {
         this.id = ''
+        this.status = 'DRAFT'
         this.submissionDescription = ''
         this.submissionType = 'CONTRACT_ONLY'
-        this.createdAt = new Date()
-        this.updatedAt = new Date()
+        this.createdAt = new Date(0)
+        this.updatedAt = new Date(0)
         this.stateCode = ''
         this.programID = ''
         this.stateNumber = -1
         this.documents = []
+    }
+}
+
+@table('draft-submissions')
+export class StateSubmissionStoreType {
+    @hashKey()
+    id: string
+
+    // This is used to differentriate between DraftSubmission and StateSubmission
+    @attribute()
+    status: string
+
+    @attribute()
+    submissionDescription: string
+
+    @attribute()
+    submissionType: SubmissionType
+
+    @attribute()
+    createdAt: Date
+
+    @attribute()
+    updatedAt: Date
+
+    @attribute()
+    submittedAt: Date
+
+    @attribute()
+    programID: string
+
+    @attribute({
+        indexKeyConfigurations: {
+            StateStateNumberAllIndex: 'HASH',
+        },
+    })
+    stateCode: string
+
+    @attribute({
+        indexKeyConfigurations: {
+            StateStateNumberAllIndex: 'RANGE',
+        },
+    })
+    stateNumber: number
+
+    @attribute({ memberType: embed(DocumentStoreT) })
+    documents: Array<DocumentStoreT>
+
+    constructor() {
+        this.id = ''
+        this.status = 'SUBMITTED'
+        this.submissionDescription = ''
+        this.submissionType = 'CONTRACT_ONLY'
+        this.createdAt = new Date(0)
+        this.updatedAt = new Date(0)
+        this.stateCode = ''
+        this.programID = ''
+        this.stateNumber = -1
+        this.documents = []
+        this.submittedAt = new Date(0)
     }
 }
 

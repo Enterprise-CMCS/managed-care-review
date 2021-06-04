@@ -6,11 +6,13 @@ import styles from './ReviewSubmit/ReviewSubmit.module.scss'
 export type PageActionsProps = {
     secondaryAction: string
     primaryAction: string
+    primaryActionCallback: (e: React.FormEvent) => Promise<void>
 }
 
 export const PageActions = ({
     secondaryAction,
     primaryAction,
+    primaryActionCallback,
 }: PageActionsProps): React.ReactElement => {
     return (
         <div className={styles.pageActions}>
@@ -23,7 +25,11 @@ export const PageActions = ({
                 >
                     {secondaryAction}
                 </Link>
-                <Button type="button" className={styles.submitButton}>
+                <Button
+                    type="button"
+                    className={styles.submitButton}
+                    onClick={primaryActionCallback}
+                >
                     {primaryAction}
                 </Button>
             </ButtonGroup>

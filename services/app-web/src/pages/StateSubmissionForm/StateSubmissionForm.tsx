@@ -4,6 +4,7 @@ import { GridContainer } from '@trussworks/react-uswds'
 import { Switch, Route, useParams, useLocation } from 'react-router-dom'
 
 import { Error404 } from '../Errors/Error404'
+import { ErrorInvalidSubmissionStatus } from '../Errors/ErrorInvalidSubmissionStatus'
 import { GenericError } from '../Errors/GenericError'
 import { Loading } from '../../components/Loading/'
 import { usePage } from '../../contexts/PageContext'
@@ -44,12 +45,22 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
     if (error) {
         console.log('error loading draft:', error)
-        return <GenericError />
+
+        // check to see if we have a specific submission error
+        let specificErr: React.ReactElement | undefined = undefined
+        error.graphQLErrors.forEach((err) => {
+            if (err?.extensions?.code === 'WRONG_STATUS') {
+                specificErr = <ErrorInvalidSubmissionStatus />
+            }
+        })
+
+        return specificErr ?? <GenericError />
     }
 
     if (draft === undefined || draft === null) {
         return <Error404 />
     }
+
     return (
         <GridContainer>
             <Switch>

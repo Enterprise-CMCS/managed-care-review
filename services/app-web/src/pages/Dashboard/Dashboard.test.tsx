@@ -113,4 +113,20 @@ describe('Dashboard', () => {
             expect(history.location.pathname).toBe('/submissions/new')
         })
     })
+
+    it('shows the success message if set', async () => {
+        renderWithProviders(<Dashboard />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+            routerProvider: {
+                route: `dashboard?justSubmitted=Some-ID`,
+            },
+        })
+
+        await waitFor(() => {
+            const title = screen.getByText('Some-ID was sent to CMS')
+            expect(title).toBeInTheDocument()
+        })
+    })
 })

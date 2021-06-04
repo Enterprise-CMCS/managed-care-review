@@ -1,0 +1,23 @@
+query fetchStateSubmission($input: FetchStateSubmissionInput!) {
+    fetchStateSubmission(input: $input) {
+        submission {
+            id
+            name
+            createdAt
+            updatedAt
+            submittedAt
+            programID
+            program {
+                name
+                id
+            }
+            stateCode
+            submissionType
+            submissionDescription
+            documents {
+                name
+                s3URL
+            }
+        }
+    }
+}

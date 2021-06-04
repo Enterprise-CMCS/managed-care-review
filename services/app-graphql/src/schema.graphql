@@ -7,16 +7,22 @@ type Query {
     fetchCurrentUser: User!
     fetchDraftSubmission(
         input: FetchDraftSubmissionInput!
-    ): FetchDraftSubmissionPayload
+    ): FetchDraftSubmissionPayload!
+    fetchStateSubmission(
+        input: FetchStateSubmissionInput!
+    ): FetchStateSubmissionPayload!
 }
 
 type Mutation {
     createDraftSubmission(
         input: CreateDraftSubmissionInput!
-    ): CreateDraftSubmissionPayload
+    ): CreateDraftSubmissionPayload!
     updateDraftSubmission(
         input: UpdateDraftSubmissionInput!
     ): UpdateDraftSubmissionPayload!
+    submitDraftSubmission(
+        input: SubmitDraftSubmissionInput!
+    ): SubmitDraftSubmissionPayload!
 }
 
 input CreateDraftSubmissionInput {
@@ -37,6 +43,14 @@ type FetchDraftSubmissionPayload {
     draftSubmission: DraftSubmission
 }
 
+input FetchStateSubmissionInput {
+    submissionID: ID!
+}
+
+type FetchStateSubmissionPayload {
+    submission: StateSubmission
+}
+
 input UpdateDraftSubmissionInput {
     submissionID: ID!
     draftSubmissionUpdates: DraftSubmissionUpdates!
@@ -46,6 +60,13 @@ type UpdateDraftSubmissionPayload {
     draftSubmission: DraftSubmission!
 }
 
+input SubmitDraftSubmissionInput {
+    submissionID: ID!
+}
+
+type SubmitDraftSubmissionPayload {
+    submission: StateSubmission!
+}
 scalar Date
 scalar DateTime
 
@@ -88,6 +109,20 @@ type DraftSubmission {
     createdAt: Date!
     updatedAt: DateTime!
     documents: [Document!]!
+}
+
+type StateSubmission {
+    id: ID!
+    programID: String!
+    program: Program!
+    submissionType: SubmissionType!
+    submissionDescription: String!
+    stateCode: String!
+    name: String!
+    createdAt: Date!
+    updatedAt: DateTime!
+    documents: [Document!]!
+    submittedAt: Date!
 }
 
 input DocumentInput {

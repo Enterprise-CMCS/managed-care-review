@@ -1,4 +1,4 @@
-// DraftSubmission is a draft submission.
+// DraftSubmission is a draft health plan submission.
 
 export type SubmissionType = 'CONTRACT_ONLY' | 'CONTRACT_AND_RATES'
 export type SubmissionDocument = {

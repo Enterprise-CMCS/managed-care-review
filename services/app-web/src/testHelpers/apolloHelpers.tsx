@@ -6,9 +6,12 @@ import {
     CreateDraftSubmissionDocument,
     FetchDraftSubmissionDocument,
     UpdateDraftSubmissionDocument,
+    SubmitDraftSubmissionDocument,
     DraftSubmissionUpdates,
+    StateSubmission,
 } from '../gen/gqlClient'
 import { MockedResponse } from '@apollo/client/testing'
+import { GraphQLError } from 'graphql'
 
 /* For use with Apollo MockedProvider in jest tests */
 const mockValidUser: UserType = {
@@ -201,9 +204,64 @@ const updateDraftSubmissionMock = ({
     }
 }
 
+type submitDraftSubmissionMockSuccessProps = {
+    stateSubmission?: StateSubmission | Partial<StateSubmission>
+    id: string
+}
+
+const submitDraftSubmissionMockSuccess = ({
+    id,
+    stateSubmission,
+}: submitDraftSubmissionMockSuccessProps): MockedResponse<
+    Record<string, any>
+> => {
+    const submission = stateSubmission ?? mockDraftSubmission
+    return {
+        request: {
+            query: SubmitDraftSubmissionDocument,
+            variables: {
+                input: {
+                    submissionID: id,
+                },
+            },
+        },
+        result: {
+            data: {
+                submitDraftSubmission: {
+                    submission: submission,
+                },
+            },
+        },
+    }
+}
+
+const submitDraftSubmissionMockError = ({
+    id,
+}: {
+    id: string
+}): MockedResponse<Record<string, any>> => {
+    return {
+        request: {
+            query: SubmitDraftSubmissionDocument,
+            variables: {
+                input: {
+                    submissionID: id,
+                },
+            },
+        },
+        result: {
+            errors: [
+                new GraphQLError('Incomplete submission cannot be submitted'),
+            ],
+        },
+    }
+}
+
 export {
     fetchCurrentUserMock,
     createDraftSubmissionMock,
     fetchDraftSubmissionMock,
     updateDraftSubmissionMock,
+    submitDraftSubmissionMockSuccess,
+    submitDraftSubmissionMockError,
 }
