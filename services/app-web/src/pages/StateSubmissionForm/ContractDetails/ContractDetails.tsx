@@ -32,13 +32,15 @@ import { updatesFromSubmission } from '../updateSubmissionTransform'
 // Formik setup
 // Should be listed in order of appearance on field to allow errors to focus as expected
 const ContractDetailsFormSchema = Yup.object().shape({
-    contractType: Yup.string().required(),
-    contractDateStart: Yup.string().required('You must provide a start state'),
-    contractDateEnd: Yup.string().required('You must provide a end date'),
-    managedCareEntities: Yup.array().required(
+    contractType: Yup.string().defined(),
+    contractDateStart: Yup.string().defined('You must provide a start state'),
+    contractDateEnd: Yup.string().defined('You must provide an end state'),
+    managedCareEntities: Yup.array().min(
+        1,
         'You must choose managed care entities'
     ),
-    federalAuthorities: Yup.array().required(
+    federalAuthorities: Yup.array().min(
+        1,
         'You must choose federal authorities'
     ),
 })
@@ -117,11 +119,7 @@ export const ContractDetails = ({
             history.push(`/submissions/${draftSubmission.id}/rate-details`)
         } catch (serverError) {
             setShowFormAlert(true)
-            formikHelpers.setSubmitting(false) // unblock submit button to allow resubmit
-            console.log(
-                'Log: updating submission failed with server error',
-                serverError
-            )
+            formikHelpers.setSubmitting(false)
         }
     }
 
@@ -209,8 +207,22 @@ export const ContractDetails = ({
                                     />
                                 </Fieldset>
                             </FormGroup>
-                            <FormGroup>
+                            <FormGroup
+                                error={
+                                    showFieldErrors(errors.contractDateStart) ||
+                                    showFieldErrors(errors.contractDateEnd)
+                                }
+                            >
                                 <Fieldset legend="Contract effective dates">
+                                    {showFieldErrors(
+                                        errors.contractDateStart ||
+                                            errors.contractDateEnd
+                                    ) && (
+                                        <ErrorMessage>
+                                            {errors.contractDateStart ||
+                                                errors.contractDateEnd}
+                                        </ErrorMessage>
+                                    )}
                                     <DateRangePicker
                                         className={styles.dateRangePicker}
                                         startDateHint="mm/dd/yyyy"
@@ -253,7 +265,9 @@ export const ContractDetails = ({
                                 </Fieldset>
                             </FormGroup>
                             <FormGroup
-                                error={showFieldErrors(errors.contractType)}
+                                error={showFieldErrors(
+                                    errors.managedCareEntities
+                                )}
                             >
                                 <Fieldset legend="Managed Care entities">
                                     <Link
@@ -496,7 +510,11 @@ export const ContractDetails = ({
                                 </>
                             )}
 
-                            <FormGroup>
+                            <FormGroup
+                                error={showFieldErrors(
+                                    errors.federalAuthorities
+                                )}
+                            >
                                 <Fieldset legend="Federal authority your program operates under">
                                     <Link
                                         variant="external"
