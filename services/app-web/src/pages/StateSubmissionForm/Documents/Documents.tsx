@@ -173,8 +173,7 @@ export const Documents = ({
     return (
         <>
             <PageHeading className={styles.formHeader} headingLevel="h2">
-                {' '}
-                Documents{' '}
+                Documents
             </PageHeading>
             <UswdsForm
                 className={styles.formContainer}
@@ -228,13 +227,6 @@ export const Documents = ({
                     />
                 </fieldset>
                 <ButtonGroup type="default" className={styles.buttonGroup}>
-                    <Button
-                        type="button"
-                        secondary
-                        onClick={() => setShouldValidate(!hasValidFiles)}
-                    >
-                        Test Validation
-                    </Button>
                     <Link
                         asCustom={NavLink}
                         className={`${styles.outlineButtonLink} usa-button usa-button--outline`}
