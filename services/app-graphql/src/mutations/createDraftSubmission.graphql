@@ -17,6 +17,11 @@ mutation createDraftSubmission($input: CreateDraftSubmissionInput!) {
                 name
                 s3URL
             }
+            contractType
+            contractDateStart
+            contractDateEnd
+            managedCareEntities
+            federalAuthorities
         }
     }
 }

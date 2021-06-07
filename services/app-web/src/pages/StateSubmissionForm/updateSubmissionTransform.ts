@@ -25,5 +25,10 @@ export function updatesFromSubmission(
                 }
             }
         ),
+        contractType: draft.contractType,
+        contractDateStart: draft.contractDateStart,
+        contractDateEnd: draft.contractDateEnd,
+        federalAuthorities: draft.federalAuthorities,
+        managedCareEntities: draft.managedCareEntities,
     }
 }

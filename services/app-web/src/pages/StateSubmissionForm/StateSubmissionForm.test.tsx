@@ -9,7 +9,9 @@ import {
     updateDraftSubmissionMock,
 } from '../../testHelpers/apolloHelpers'
 import {
-    SubmissionType as SubmissionTypeT,
+    SubmissionType,
+    ContractType,
+    FederalAuthority,
     DraftSubmission,
     Document,
 } from '../../gen/gqlClient'
@@ -130,7 +132,7 @@ describe('StateSubmissionForm', () => {
                             updateDraftSubmissionMock({
                                 id: '15',
                                 updates: {
-                                    submissionType: 'CONTRACT_ONLY' as SubmissionTypeT,
+                                    submissionType: 'CONTRACT_ONLY' as SubmissionType,
                                     submissionDescription:
                                         'A real submission but updated something',
                                     programID: 'snbc',
@@ -186,9 +188,17 @@ describe('StateSubmissionForm', () => {
                     name: 'SNBC',
                 },
                 name: 'MN-MSHO-0001',
-                submissionType: 'CONTRACT_ONLY' as SubmissionTypeT.ContractOnly,
+                submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
                 submissionDescription: 'A real submission',
                 documents: mockDocs,
+                contractType: ContractType.Base,
+                contractDateStart: new Date(),
+                contractDateEnd: new Date(),
+                managedCareEntities: [''],
+                federalAuthorities: [
+                    FederalAuthority.Voluntary,
+                    FederalAuthority.Benchmark,
+                ],
             }
 
             renderWithProviders(
@@ -208,7 +218,7 @@ describe('StateSubmissionForm', () => {
                             updateDraftSubmissionMock({
                                 id: '15',
                                 updates: {
-                                    submissionType: 'CONTRACT_ONLY' as SubmissionTypeT,
+                                    submissionType: 'CONTRACT_ONLY' as SubmissionType,
                                     submissionDescription:
                                         'A real submission but updated something',
                                     programID: 'snbc',

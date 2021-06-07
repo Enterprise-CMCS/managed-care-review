@@ -1,22 +1,26 @@
-import { SubmissionType } from '../common-code/domain-models/DraftSubmissionType'
 import {
-    DraftSubmission,
-} from '../gen/gqlClient'
-/*
-    Maps submission field enums to constant strings for UI
-    These are usually domain constants that are not captured in a database field and only in types.
-    When localization is in place, can return an i18n value instead of an English string
-*/
+    SubmissionType,
+    ContractType,
+    FederalAuthority,
+} from '../common-code/domain-models/DraftSubmissionType'
+
 const SubmissionTypeRecord: Record<SubmissionType, string> = {
     CONTRACT_ONLY: 'Contract action only',
     CONTRACT_AND_RATES: 'Contract action and rate certification',
 }
 
-const isContractOnly= (sub: DraftSubmission ):boolean  =>  
-    sub.submissionType === 'CONTRACT_ONLY'
+const ContractTypeRecord: Record<ContractType, string> = {
+    BASE: 'Base contract',
+    AMENDMENT: 'Contract amendment',
+}
 
+const FederalAuthorityRecord: Record<FederalAuthority, string> = {
+    STATE_PLAN: '1932(a) State Plan Authority',
+    WAIVER_1915B: '1915(b) Waiver Authority',
+    WAIVER_1115: '1115 Waiver Authority',
+    VOLUNTARY: '1915(a) Voluntary Authority',
+    BENCHMARK: '1937 Benchmark Authority',
+    TITLE_XXI: 'Title XXI Separate CHIP State Plan Authority',
+}
 
-const isContractAndRates= (sub:  DraftSubmission):boolean  =>  
-    sub.submissionType === 'CONTRACT_AND_RATES'
-
-export { SubmissionTypeRecord, isContractOnly, isContractAndRates }
+export { ContractTypeRecord, SubmissionTypeRecord, FederalAuthorityRecord }

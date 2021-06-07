@@ -26,6 +26,11 @@ describe('updateDraftSubmission', () => {
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [],
+            contractType: 'BASE',
+            contractDateStart: new Date(),
+            contractDateEnd: new Date(),
+            managedCareEntities: ['MCO'],
+            federalAuthorities: ['VOLUNTARY'],
         }
 
         const updateResult = await mutate({
@@ -41,7 +46,7 @@ describe('updateDraftSubmission', () => {
         expect(updateResult.errors).toBeUndefined()
 
         const resultDraft = await fetchTestDraftSubmissionById(query, createdID)
-
+        // General
         expect(resultDraft.id).toEqual(createdID)
         expect(resultDraft.submissionType).toEqual('CONTRACT_AND_RATES')
         expect(resultDraft.program.id).toEqual('cnet')
@@ -53,17 +58,24 @@ describe('updateDraftSubmission', () => {
             'An updated submission'
         )
 
-        // UpdatedAt should be after the former updatedAt
+        // updatedAt should be after the former updatedAt
         const resultUpdated = new Date(resultDraft.updatedAt)
         const createdUpdated = new Date(createdDraft.updatedAt)
         expect(
             resultUpdated.getTime() - createdUpdated.getTime()
         ).toBeGreaterThan(0)
+
+        // Contract details
+        expect(resultDraft.contractType).toEqual('BASE')
+        expect(resultDraft.contractDateStart).not.toBeNull()
+        expect(resultDraft.contractDateEnd).not.toBeNull()
+        expect(resultDraft.managedCareEntities).toEqual(['MCO'])
+        expect(resultDraft.managedCareEntities).toEqual(['VOLUNTARY'])
     })
 
     it('updates a submission to have documents', async () => {
         const server = constructTestServer()
-        const {  mutate } = createTestClient(server)
+        const { mutate } = createTestClient(server)
 
         const createdDraft = await createTestDraftSubmission(mutate)
         const createdID = createdDraft.id
@@ -75,9 +87,14 @@ describe('updateDraftSubmission', () => {
             documents: [
                 {
                     name: 'myfile.pdf',
-                    s3URL: 'fakeS3URL'
-                }
-            ]
+                    s3URL: 'fakeS3URL',
+                },
+            ],
+            contractType: 'BASE',
+            contractDateStart: new Date(),
+            contractDateEnd: new Date(),
+            managedCareEntities: [],
+            federalAuthorities: [],
         }
 
         const updateResult = await mutate({
@@ -95,10 +112,12 @@ describe('updateDraftSubmission', () => {
         const resultDraft1 =
             updateResult.data.updateDraftSubmission.draftSubmission
         expect(resultDraft1.id).toEqual(createdID)
-        expect(resultDraft1.documents).toEqual([ {
-            name: 'myfile.pdf',
-            s3URL: 'fakeS3URL'
-        }])
+        expect(resultDraft1.documents).toEqual([
+            {
+                name: 'myfile.pdf',
+                s3URL: 'fakeS3URL',
+            },
+        ])
 
         // Update with two more documents
         const updatedDraft2 = {
@@ -108,13 +127,18 @@ describe('updateDraftSubmission', () => {
             documents: [
                 {
                     name: 'myfile2.pdf',
-                    s3URL: 'fakeS3URL'
+                    s3URL: 'fakeS3URL',
                 },
                 {
                     name: 'myfile3.pdf',
-                    s3URL: 'fakeS3URL'
-                }
-            ]
+                    s3URL: 'fakeS3URL',
+                },
+            ],
+            contractType: 'BASE',
+            contractDateStart: resultDraft1.contractDateStart,
+            contractDateEnd: resultDraft1.contractDateEnd,
+            managedCareEntities: [],
+            federalAuthorities: [],
         }
 
         const updateResult2 = await mutate({
@@ -146,9 +170,14 @@ describe('updateDraftSubmission', () => {
             documents: [
                 {
                     name: 'myfile.pdf',
-                    s3URL: 'fakeS3URL'
-                }
-            ]
+                    s3URL: 'fakeS3URL',
+                },
+            ],
+            contractType: 'BASE',
+            contractDateStart: new Date(),
+            contractDateEnd: new Date(),
+            managedCareEntities: [],
+            federalAuthorities: [],
         }
 
         const updateResult = await mutate({
@@ -165,10 +194,12 @@ describe('updateDraftSubmission', () => {
 
         const resultDraft = await fetchTestDraftSubmissionById(query, createdID)
         expect(resultDraft.id).toEqual(createdID)
-        expect(resultDraft.documents).toEqual([ {
-            name: 'myfile.pdf',
-            s3URL: 'fakeS3URL'
-        }])
+        expect(resultDraft.documents).toEqual([
+            {
+                name: 'myfile.pdf',
+                s3URL: 'fakeS3URL',
+            },
+        ])
 
         // Remove documents
         const updatedDraft2 = {
@@ -176,6 +207,11 @@ describe('updateDraftSubmission', () => {
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [],
+            contractType: 'BASE',
+            contractDateStart: resultDraft.contractDateStart,
+            contractDateEnd: resultDraft.contractDateEnd,
+            managedCareEntities: [],
+            federalAuthorities: [],
         }
 
         const updateResult2 = await mutate({
@@ -202,6 +238,11 @@ describe('updateDraftSubmission', () => {
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [],
+            contractType: 'BASE',
+            contractDateStart: new Date(),
+            contractDateEnd: new Date(),
+            managedCareEntities: [],
+            federalAuthorities: [],
         }
 
         const updateResult = await mutate({
@@ -270,6 +311,11 @@ describe('updateDraftSubmission', () => {
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [],
+            contractType: 'BASE',
+            contractDateStart: new Date(),
+            contractDateEnd: new Date(),
+            managedCareEntities: [],
+            federalAuthorities: [],
         }
 
         const updateResult = await otherMutate({
@@ -305,6 +351,11 @@ describe('updateDraftSubmission', () => {
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [],
+            contractType: 'BASE',
+            contractDateStart: new Date(),
+            contractDateEnd: new Date(),
+            managedCareEntities: [],
+            federalAuthorities: [],
         }
 
         const updateResult = await mutate({

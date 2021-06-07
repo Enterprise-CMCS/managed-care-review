@@ -2,6 +2,8 @@ import {
     DraftSubmission,
     FetchCurrentUserDocument,
     SubmissionType,
+    ContractType,
+    FederalAuthority,
     User as UserType,
     CreateDraftSubmissionDocument,
     FetchDraftSubmissionDocument,
@@ -40,9 +42,17 @@ export const mockDraftSubmission: DraftSubmission = {
         name: 'SNBC',
     },
     name: 'MN-MSHO-0001',
-    submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
+    submissionType: SubmissionType.ContractOnly,
     submissionDescription: 'A real submission',
     documents: [],
+    contractType: ContractType.Base,
+    contractDateStart: new Date(),
+    contractDateEnd: new Date(),
+    managedCareEntities: [''],
+    federalAuthorities: [
+        FederalAuthority.Voluntary,
+        FederalAuthority.Benchmark,
+    ],
 }
 
 type fetchCurrentUserMockProps = {

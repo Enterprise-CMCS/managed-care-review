@@ -17,6 +17,11 @@ query fetchDraftSubmission($input: FetchDraftSubmissionInput!) {
                 name
                 s3URL
             }
+            contractType
+            contractDateStart
+            contractDateEnd
+            managedCareEntities
+            federalAuthorities
         }
     }
 }
