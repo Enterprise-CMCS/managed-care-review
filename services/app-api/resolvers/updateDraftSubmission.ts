@@ -53,9 +53,7 @@ export function updateDraftSubmissionResolver(
         }
 
         const draft = Object.assign(initialDraft, input.draftSubmissionUpdates)
-
         const updateResult = await store.updateDraftSubmission(draft)
-
         if (isStoreError(updateResult)) {
             console.log(
                 `Issue updating a draft submission of type ${updateResult.code}. Message: ${updateResult.message}`

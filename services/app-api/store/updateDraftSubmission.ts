@@ -27,9 +27,9 @@ export async function updateDraftSubmission(
     storeDraft.submissionType = draftSubmission.submissionType
     storeDraft.programID = draftSubmission.programID
     storeDraft.submissionDescription = draftSubmission.submissionDescription
-    storeDraft.contractDateEnd = draftSubmission.contractDateEnd || null
-    storeDraft.contractDateStart = draftSubmission.contractDateStart || null
-    storeDraft.contractType = draftSubmission.contractType || null
+    storeDraft.contractDateEnd = draftSubmission.contractDateEnd
+    storeDraft.contractDateStart = draftSubmission.contractDateStart
+    storeDraft.contractType = draftSubmission.contractType
     storeDraft.federalAuthorities = draftSubmission.federalAuthorities
     storeDraft.managedCareEntities = draftSubmission.managedCareEntities
 

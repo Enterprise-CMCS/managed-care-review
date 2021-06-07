@@ -33,6 +33,8 @@ describe('updateDraftSubmission', () => {
             expect(draftSubmission.documents.length).toEqual(0)
 
             // update submission
+            const startDate = new Date('2021-06-07T17:48:47.000Z')
+            const endDate = new Date('2021-06-12T17:48:47.000Z')
             const updateSubResult = await store.updateDraftSubmission({
                 ...draftSubmission,
                 documents: [
@@ -41,6 +43,11 @@ describe('updateDraftSubmission', () => {
                         s3URL: 'fakeS3URL',
                     },
                 ],
+                contractType: 'BASE',
+                contractDateStart: startDate,
+                contractDateEnd: endDate,
+                managedCareEntities: ['MCO'],
+                federalAuthorities: ['VOLUNTARY'],
             })
 
             if (isStoreError(updateSubResult)) {
@@ -64,6 +71,8 @@ describe('updateDraftSubmission', () => {
                         s3URL: 'fakeS3URL',
                     })
                 )
+                expect(getResult.contractDateStart).toEqual(startDate)
+                expect(getResult.contractDateEnd).toEqual(endDate)
             } catch (dynamoErr) {
                 throw new Error(dynamoErr)
             }

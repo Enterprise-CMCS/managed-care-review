@@ -16,7 +16,6 @@ describe('submitDraftSubmission', () => {
 
         const draft = await createCompleteTestDraftSubmission(mutate)
         const draftID = draft.id
-
         // In order to test updatedAt, we delay 2 seconds here.
         await new Promise((resolve) => setTimeout(resolve, 2000))
 
@@ -64,7 +63,7 @@ describe('submitDraftSubmission', () => {
     it('returns an error if there are no documents attached', async () => {
         const server = constructTestServer()
 
-        const { query, mutate } = createTestClient(server)
+        const { mutate } = createTestClient(server)
 
         const draft = await createTestDraftSubmission(mutate)
         const draftID = draft.id

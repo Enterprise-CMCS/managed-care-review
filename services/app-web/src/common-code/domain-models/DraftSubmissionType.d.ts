@@ -28,11 +28,11 @@ type DraftSubmissionType = {
     submissionDescription: string
     submissionType: SubmissionType
     createdAt: Date
-    updatedAt: Date
+    updatedAt: DateTime
     documents: SubmissionDocument[]
-    contractType: ContractType | null
-    contractDateStart: Date | null
-    contractDateEnd: Date | null
+    contractType?: ContractType
+    contractDateStart?: Date
+    contractDateEnd?: Date
     managedCareEntities: string[]
     federalAuthorities: FederalAuthority[]
 }

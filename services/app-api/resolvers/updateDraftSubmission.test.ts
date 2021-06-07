@@ -17,6 +17,8 @@ describe('updateDraftSubmission', () => {
 
         const createdDraft = await createTestDraftSubmission(mutate)
         const createdID = createdDraft.id
+        const startDate = '2021-07-06'
+        const endDate = '2021-07-12'
 
         // In order to test updatedAt, we delay 2 seconds here.
         await new Promise((resolve) => setTimeout(resolve, 2000))
@@ -27,8 +29,8 @@ describe('updateDraftSubmission', () => {
             submissionDescription: 'An updated submission',
             documents: [],
             contractType: 'BASE',
-            contractDateStart: new Date(),
-            contractDateEnd: new Date(),
+            contractDateStart: startDate,
+            contractDateEnd: endDate,
             managedCareEntities: ['MCO'],
             federalAuthorities: ['VOLUNTARY'],
         }
@@ -67,10 +69,11 @@ describe('updateDraftSubmission', () => {
 
         // Contract details
         expect(resultDraft.contractType).toEqual('BASE')
-        expect(resultDraft.contractDateStart).not.toBeNull()
-        expect(resultDraft.contractDateEnd).not.toBeNull()
+        expect(resultDraft.contractDateStart).not.toBeUndefined()
+        expect(resultDraft.contractDateStart).toBe(startDate)
+        expect(resultDraft.contractDateEnd).toBe(endDate)
         expect(resultDraft.managedCareEntities).toEqual(['MCO'])
-        expect(resultDraft.managedCareEntities).toEqual(['VOLUNTARY'])
+        expect(resultDraft.federalAuthorities).toEqual(['VOLUNTARY'])
     })
 
     it('updates a submission to have documents', async () => {
@@ -79,6 +82,8 @@ describe('updateDraftSubmission', () => {
 
         const createdDraft = await createTestDraftSubmission(mutate)
         const createdID = createdDraft.id
+        const startDate = '2021-07-06'
+        const endDate = '2021-07-12'
 
         const updatedDraft = {
             programID: 'cnet',
@@ -91,8 +96,8 @@ describe('updateDraftSubmission', () => {
                 },
             ],
             contractType: 'BASE',
-            contractDateStart: new Date(),
-            contractDateEnd: new Date(),
+            contractDateStart: startDate,
+            contractDateEnd: endDate,
             managedCareEntities: [],
             federalAuthorities: [],
         }
@@ -162,6 +167,8 @@ describe('updateDraftSubmission', () => {
 
         const createdDraft = await createTestDraftSubmission(mutate)
         const createdID = createdDraft.id
+        const startDate = '2021-07-06'
+        const endDate = '2021-07-12'
 
         const updatedDraft = {
             programID: 'cnet',
@@ -174,8 +181,8 @@ describe('updateDraftSubmission', () => {
                 },
             ],
             contractType: 'BASE',
-            contractDateStart: new Date(),
-            contractDateEnd: new Date(),
+            contractDateStart: startDate,
+            contractDateEnd: endDate,
             managedCareEntities: [],
             federalAuthorities: [],
         }
@@ -203,15 +210,15 @@ describe('updateDraftSubmission', () => {
 
         // Remove documents
         const updatedDraft2 = {
-            programID: 'cnet',
-            submissionType: 'CONTRACT_AND_RATES',
-            submissionDescription: 'An updated submission',
+            programID: resultDraft.programID,
+            submissionType: resultDraft.submissionType,
+            submissionDescription: resultDraft.submissionDescription,
             documents: [],
-            contractType: 'BASE',
+            contractType: resultDraft.contractType,
             contractDateStart: resultDraft.contractDateStart,
             contractDateEnd: resultDraft.contractDateEnd,
-            managedCareEntities: [],
-            federalAuthorities: [],
+            managedCareEntities: resultDraft.managedCareEntities,
+            federalAuthorities: resultDraft.federalAuthorities,
         }
 
         const updateResult2 = await mutate({
@@ -232,6 +239,8 @@ describe('updateDraftSubmission', () => {
         const server = constructTestServer()
 
         const { mutate } = createTestClient(server)
+        const startDate = '2021-07-06'
+        const endDate = '2021-07-12'
 
         const updatedDraft = {
             programID: 'cnet',
@@ -239,8 +248,8 @@ describe('updateDraftSubmission', () => {
             submissionDescription: 'An updated submission',
             documents: [],
             contractType: 'BASE',
-            contractDateStart: new Date(),
-            contractDateEnd: new Date(),
+            contractDateStart: startDate,
+            contractDateEnd: endDate,
             managedCareEntities: [],
             federalAuthorities: [],
         }
@@ -305,15 +314,16 @@ describe('updateDraftSubmission', () => {
         })
 
         const { mutate: otherMutate } = createTestClient(otherUserServer)
-
+        const startDate = '2021-07-06'
+        const endDate = '2021-07-12'
         const updatedDraft = {
             programID: 'cnet',
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [],
             contractType: 'BASE',
-            contractDateStart: new Date(),
-            contractDateEnd: new Date(),
+            contractDateStart: startDate,
+            contractDateEnd: endDate,
             managedCareEntities: [],
             federalAuthorities: [],
         }
@@ -344,7 +354,8 @@ describe('updateDraftSubmission', () => {
 
         const createdDraft = await createTestDraftSubmission(mutate)
         const createdID = createdDraft.id
-
+        const startDate = '2021-07-06'
+        const endDate = '2021-07-12'
         // ACT: next, update that submission but from a user from a different state
         const updatedDraft = {
             programID: 'wefwefwefew',
@@ -352,8 +363,8 @@ describe('updateDraftSubmission', () => {
             submissionDescription: 'An updated submission',
             documents: [],
             contractType: 'BASE',
-            contractDateStart: new Date(),
-            contractDateEnd: new Date(),
+            contractDateStart: startDate,
+            contractDateEnd: endDate,
             managedCareEntities: [],
             federalAuthorities: [],
         }

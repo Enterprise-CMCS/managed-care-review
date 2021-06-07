@@ -37,14 +37,16 @@ describe('createDraftSubmission', () => {
             'FL-MANAGED-MEDICAL-ASSISTANCE'
         )
         expect(
-            res.data.createDraftSubmission.draftSubmission.documents
-        ).toContain([])
+            res.data.createDraftSubmission.draftSubmission.documents.length
+        ).toBe(0)
         expect(
             res.data.createDraftSubmission.draftSubmission.managedCareEntities
-        ).toBe([])
+                .length
+        ).toBe(0)
         expect(
             res.data.createDraftSubmission.draftSubmission.federalAuthorities
-        ).toBe([])
+                .length
+        ).toBe(0)
         expect(
             res.data.createDraftSubmission.draftSubmission.contractDateStart
         ).toBe(null)

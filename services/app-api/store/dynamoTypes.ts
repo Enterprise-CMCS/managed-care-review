@@ -49,13 +49,13 @@ export class DraftSubmissionStoreType {
     programID: string
 
     @attribute()
-    contractType: string | null
+    contractType?: string
 
     @attribute()
-    contractDateStart: Date | null
+    contractDateStart?: Date
 
     @attribute()
-    contractDateEnd: Date | null
+    contractDateEnd?: Date
 
     @attribute()
     managedCareEntities: Array<string>
@@ -91,9 +91,9 @@ export class DraftSubmissionStoreType {
         this.programID = ''
         this.stateNumber = -1
         this.documents = []
-        this.contractType = null
-        this.contractDateStart = null
-        this.contractDateEnd = null
+        this.contractType = undefined
+        this.contractDateStart = undefined
+        this.contractDateEnd = undefined
         this.managedCareEntities = []
         this.federalAuthorities = []
     }
@@ -127,13 +127,13 @@ export class StateSubmissionStoreType {
     programID: string
 
     @attribute()
-    contractType: string | null
+    contractType?: string
 
     @attribute()
-    contractDateStart: Date | null
+    contractDateStart?: Date
 
     @attribute()
-    contractDateEnd: Date | null
+    contractDateEnd?: Date
 
     @attribute()
     managedCareEntities: Array<string>
@@ -170,9 +170,9 @@ export class StateSubmissionStoreType {
         this.stateNumber = -1
         this.documents = []
         this.submittedAt = new Date(0)
-        this.contractType = null
-        this.contractDateStart = null
-        this.contractDateEnd = null
+        this.contractType = undefined
+        this.contractDateStart = undefined
+        this.contractDateEnd = undefined
         this.managedCareEntities = []
         this.federalAuthorities = []
     }
