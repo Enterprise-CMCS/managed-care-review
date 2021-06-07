@@ -25,5 +25,7 @@ export const FieldRadio = ({
     ...inputProps
 }: FieldRadioProps): React.ReactElement => {
     const [field] = useField({ name })
-    return <Radio id={id} label={label} {...field} {...inputProps} />
+    return (
+        <Radio id={id} label={label} {...field} {...inputProps} name={name} />
+    )
 }
