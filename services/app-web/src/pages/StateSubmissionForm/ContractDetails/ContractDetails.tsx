@@ -1,5 +1,6 @@
 import React from 'react'
 import * as Yup from 'yup'
+import dayjs from 'dayjs'
 import {
     Alert,
     Form as UswdsForm,
@@ -44,8 +45,8 @@ const ContractDetailsFormSchema = Yup.object().shape({
 
 export interface ContractDetailsFormValues {
     contractType: ContractType
-    contractDateStart: Date
-    contractDateEnd: Date
+    contractDateStart: string
+    contractDateEnd: string
     managedCareEntities: ManagedCareEntity[]
     federalAuthorities: FederalAuthority[]
 }
@@ -138,6 +139,7 @@ export const ContractDetails = ({
                 handleSubmit,
                 isSubmitting,
                 isValidating,
+                setFieldValue,
                 validateForm,
             }) => (
                 <>
@@ -156,6 +158,8 @@ export const ContractDetails = ({
                             validateForm()
                                 .then(() => {
                                     setShouldValidate(true)
+                                    console.log(values)
+                                    console.log(errors)
                                 })
                                 .catch(() =>
                                     console.warn('Log: Validation Error')
@@ -209,19 +213,41 @@ export const ContractDetails = ({
                                 <Fieldset legend="Contract effective dates">
                                     <DateRangePicker
                                         className={styles.dateRangePicker}
-                                        endDateHint="mm/dd/yyyy"
-                                        endDateLabel="End date"
-                                        endDatePickerProps={{
-                                            disabled: false,
-                                            id: 'contractDateEnd',
-                                            name: 'contract-date-end',
-                                        }}
                                         startDateHint="mm/dd/yyyy"
                                         startDateLabel="Start date"
                                         startDatePickerProps={{
                                             disabled: false,
                                             id: 'contractDateStart',
-                                            name: 'contract-date-start',
+                                            name: 'contractDateStart',
+                                            defaultValue:
+                                                values.contractDateStart,
+                                            onChange: (val) => {
+                                                const formattedDate = dayjs(
+                                                    val
+                                                ).format('YYYY-MM-DD')
+                                                setFieldValue(
+                                                    'contractDateStart',
+                                                    formattedDate
+                                                )
+                                            },
+                                        }}
+                                        endDateHint="mm/dd/yyyy"
+                                        endDateLabel="End date"
+                                        endDatePickerProps={{
+                                            disabled: false,
+                                            id: 'contractDateEnd',
+                                            name: 'contractDateEnd',
+                                            defaultValue:
+                                                values.contractDateEnd,
+                                            onChange: (val) => {
+                                                const formattedDate = dayjs(
+                                                    val
+                                                ).format('YYYY-MM-DD')
+                                                setFieldValue(
+                                                    'contractDateEnd',
+                                                    formattedDate
+                                                )
+                                            },
                                         }}
                                     />
                                 </Fieldset>
@@ -254,24 +280,36 @@ export const ContractDetails = ({
                                         name="managedCareEntities"
                                         label="Managed Care Organization (MCO)"
                                         value="MCO"
+                                        checked={values.managedCareEntities.includes(
+                                            'MCO'
+                                        )}
                                     />
                                     <FieldCheckbox
                                         id="prepaidInpatientHealthPlan"
                                         name="managedCareEntities"
                                         label="Prepaid Inpatient Health Plan (PIHP)"
                                         value="PIHP"
+                                        checked={values.managedCareEntities.includes(
+                                            'PIHP'
+                                        )}
                                     />
                                     <FieldCheckbox
                                         id="prepaidAmbulatoryHealthPlans"
                                         name="managedCareEntities"
                                         label="Prepaid Ambulatory Health Plans (PAHP)"
                                         value="PAHP"
+                                        checked={values.managedCareEntities.includes(
+                                            'PAHP'
+                                        )}
                                     />
                                     <FieldCheckbox
                                         id="primaryCareCaseManagementEntity"
                                         name="managedCareEntities"
                                         label="Primary Care Case Management Entity (PCCM Entity)"
                                         value="PCCM"
+                                        checked={values.managedCareEntities.includes(
+                                            'PCCM'
+                                        )}
                                     />
                                 </Fieldset>
                             </FormGroup>
@@ -484,36 +522,54 @@ export const ContractDetails = ({
                                         name="federalAuthorities"
                                         label="1932(a) State Plan Authority"
                                         value={FederalAuthority.StatePlan}
+                                        checked={values.federalAuthorities.includes(
+                                            FederalAuthority.StatePlan
+                                        )}
                                     />
                                     <FieldCheckbox
                                         id="1915bWaiverAuthority"
                                         name="federalAuthorities"
                                         label="1915(b) Waiver Authority"
                                         value={FederalAuthority.Waiver_1915B}
+                                        checked={values.federalAuthorities.includes(
+                                            FederalAuthority.Waiver_1915B
+                                        )}
                                     />
                                     <FieldCheckbox
                                         id="1115WaiverAuthority"
                                         name="federalAuthorities"
                                         label="1115 Waiver Authority"
                                         value={FederalAuthority.Waiver_1115}
+                                        checked={values.federalAuthorities.includes(
+                                            FederalAuthority.Waiver_1115
+                                        )}
                                     />
                                     <FieldCheckbox
                                         id="1915aVoluntaryAuthority"
                                         name="federalAuthorities"
                                         label="1915(a) Voluntary Authority"
                                         value={FederalAuthority.Voluntary}
+                                        checked={values.federalAuthorities.includes(
+                                            FederalAuthority.Voluntary
+                                        )}
                                     />
                                     <FieldCheckbox
                                         id="1937BenchmarkAuthority"
                                         name="federalAuthorities"
                                         label="1937 Benchmark Authority"
                                         value={FederalAuthority.Benchmark}
+                                        checked={values.federalAuthorities.includes(
+                                            FederalAuthority.Benchmark
+                                        )}
                                     />
                                     <FieldCheckbox
                                         id="titleXXISeparateChipStatePlanAuthority"
                                         name="federalAuthorities"
                                         label="Title XXI Separate CHIP State Plan Authority"
                                         value={FederalAuthority.TitleXxi}
+                                        checked={values.federalAuthorities.includes(
+                                            FederalAuthority.TitleXxi
+                                        )}
                                     />
                                 </Fieldset>
                             </FormGroup>

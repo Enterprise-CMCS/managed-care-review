@@ -16,7 +16,7 @@ type FederalAuthority =
     | TITLE_XXI
 
 // CLIENT_SIDE ONLY TYPES
-const ENTITIES = ['MCO', 'PIHIP', 'PAHP', 'PCCM'] as const
+const ENTITIES = ['MCO', 'PIHP', 'PAHP', 'PCCM'] as const
 type ManagedCareEntity = typeof ENTITIES[number]
 
 // MAIN
