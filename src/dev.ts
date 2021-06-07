@@ -1,6 +1,7 @@
 import yargs from 'yargs'
 import * as dotenv from 'dotenv'
 import request from 'request'
+import { spawn, spawnSync } from 'child_process'
 
 import { commandMustSucceedSync } from './localProcess.js'
 import LabeledProcessRunner from './runner.js'
@@ -26,6 +27,7 @@ async function run_db_locally(runner: LabeledProcessRunner) {
         ['serverless', 'dynamodb', 'install'],
         'services/database'
     )
+
     runner.run_command_and_output(
         'db',
         ['serverless', '--stage', 'local', 'dynamodb', 'start', '--migrate'],
@@ -33,15 +35,20 @@ async function run_db_locally(runner: LabeledProcessRunner) {
     )
 }
 
-// run_api_locally uses the serverless-offline plugin to run the api lambdas locally
-async function run_api_locally(runner: LabeledProcessRunner) {
-    compile_graphql_types_watch_once(runner)
-
-    await runner.run_command_and_output(
+async function install_api_deps(runner: LabeledProcessRunner) {
+    return runner.run_command_and_output(
         'api deps',
         ['yarn', 'install'],
         'services/app-api'
     )
+}
+
+// run_api_locally uses the serverless-offline plugin to run the api lambdas locally
+async function run_api_locally(runner: LabeledProcessRunner) {
+    compile_graphql_types_watch_once(runner)
+
+    await install_api_deps(runner)
+
     runner.run_command_and_output(
         'api',
         [
@@ -355,6 +362,61 @@ async function run_all_tests({
     process.exit(0)
 }
 
+async function run_api_tests(jestArgs: string[], runDB: boolean) {
+    const runner = new LabeledProcessRunner()
+
+    compile_graphql_types_watch_once(runner)
+
+    if (runDB) {
+        run_db_locally(runner)
+    }
+
+    await install_api_deps(runner)
+
+    // because we are inheriting stdio for this process,
+    // we need to not run spawnSync or else all the output
+    // for the graphql compiler & db will be swallowed.
+    const proc = spawn('yarn', ['test'].concat(jestArgs), {
+        cwd: 'services/app-api',
+        stdio: 'inherit',
+    })
+
+    proc.on('close', (code) => {
+        process.exit(code ? code : 0)
+    })
+}
+
+async function run_web_tests(jestArgs: string[]) {
+    const runner = new LabeledProcessRunner()
+
+    compile_graphql_types_watch_once(runner)
+
+    await install_web_deps_once(runner)
+
+    // because we are inheriting stdio for this process,
+    // we need to not run spawnSync or else all the output
+    // for the graphql compiler will be swallowed.
+    const proc = spawn('yarn', ['test'].concat(jestArgs), {
+        cwd: 'services/app-web',
+        stdio: 'inherit',
+    })
+
+    proc.on('close', (code) => {
+        process.exit(code ? code : 0)
+    })
+}
+
+async function run_browser_tests(cypressArgs: string[]) {
+    let args = ['open']
+    if (cypressArgs.length > 0) {
+        args = cypressArgs
+    }
+
+    spawnSync('cypress', args, {
+        stdio: 'inherit',
+    })
+}
+
 async function run_unit_tests(runner: LabeledProcessRunner) {
     await compile_graphql_types_once(runner)
 
@@ -438,6 +500,7 @@ function main() {
     */
 
     yargs(process.argv.slice(2))
+        .scriptName('dev')
         .command('clean', 'clean node dependencies', {}, () => {
             run_all_clean()
         })
@@ -508,44 +571,144 @@ function main() {
             'run tests. If no flags are passed runs both --unit and --online',
             (yargs) => {
                 return yargs
-                    .option('unit', {
-                        type: 'boolean',
-                        describe: 'run all unit tests',
-                    })
-                    .option('online', {
-                        type: 'boolean',
-                        describe:
-                            'run run all tests that run against a live instance. Configure with APPLICATION_ENDPOINT',
-                    })
                     .option('run-db', {
                         type: 'boolean',
                         default: false,
                         describe:
                             'runs the ./dev local --db command before starting testing',
                     })
-            },
-            (args) => {
-                // If no test flags are passed, default to running everything.
-                const inputRunFlags = {
-                    runUnit: args.unit,
-                    runOnline: args.online,
-                }
+                    .command(
+                        ['check', '*'], // adding '*' here makes this subcommand the default command
+                        'run all tests once, exiting non-zero on failure and generating coverage data. These are all the tests run by CI',
+                        (yargs) => {
+                            return yargs
+                                .option('unit', {
+                                    type: 'boolean',
+                                    describe: 'run all unit tests',
+                                })
+                                .option('online', {
+                                    type: 'boolean',
+                                    describe:
+                                        'run run all tests that run against a live instance. Configure with APPLICATION_ENDPOINT',
+                                })
+                        },
+                        (args) => {
+                            // all args that come after a `--` hang out in args._, along with the command name(s)
+                            // they can be strings or numbers so we map them before passing them on
+                            // If no test flags are passed, default to running everything.
+                            const inputRunFlags = {
+                                runUnit: args.unit,
+                                runOnline: args.online,
+                            }
 
-                const runFlags = parseRunFlags(inputRunFlags)
+                            const runFlags = parseRunFlags(inputRunFlags)
 
-                if (runFlags === undefined) {
-                    console.log(
-                        "Error: Don't mix and match positive and negative boolean flags"
+                            if (runFlags === undefined) {
+                                console.log(
+                                    "Error: Don't mix and match positive and negative boolean flags"
+                                )
+                                process.exit(1)
+                            }
+
+                            const testingFlags = {
+                                ...runFlags,
+                                runDBInBackground: args['run-db'],
+                            }
+
+                            run_all_tests(testingFlags)
+                        }
                     )
-                    process.exit(1)
-                }
-
-                const testingFlags = {
-                    ...runFlags,
-                    runDBInBackground: args['run-db'],
-                }
-
-                run_all_tests(testingFlags)
+                    .command(
+                        'api',
+                        'run & watch api jest tests. Any args passed after a -- will be passed directly to jest',
+                        (yargs) => {
+                            return yargs.example([
+                                [
+                                    '$0 test api',
+                                    'run the api jest tests, rerunning on save',
+                                ],
+                                [
+                                    '$0 test api -- -t submit',
+                                    'run tests that match the pattern /submit/',
+                                ],
+                                [
+                                    '$0 test api -- --watchAll=false',
+                                    'run the tests once and exit',
+                                ],
+                            ])
+                        },
+                        (args) => {
+                            // all args that come after a `--` hang out in args._, along with the command name(s)
+                            // they can be strings or numbers so we map them before passing them on
+                            const unparsedJestArgs = args._.slice(2).map(
+                                (intOrString) => {
+                                    return intOrString.toString()
+                                }
+                            )
+                            run_api_tests(unparsedJestArgs, args['run-db'])
+                        }
+                    )
+                    .command(
+                        'web',
+                        'run & watch web jest tests. Any args passed after a -- will be passed directly to jest',
+                        (yargs) => {
+                            return yargs.example([
+                                [
+                                    '$0 test web',
+                                    'run the web jest tests, rerunning on save',
+                                ],
+                                [
+                                    '$0 test web -- -t submit',
+                                    'run tests that match the pattern /submit/',
+                                ],
+                                [
+                                    '$0 test web -- --watchAll=false',
+                                    'run the tests once and exit',
+                                ],
+                            ])
+                        },
+                        (args) => {
+                            // all args that come after a `--` hang out in args._, along with the command name(s)
+                            // they can be strings or numbers so we map them before passing them on
+                            const unparsedJestArgs = args._.slice(2).map(
+                                (intOrString) => {
+                                    return intOrString.toString()
+                                }
+                            )
+                            run_web_tests(unparsedJestArgs)
+                        }
+                    )
+                    .command(
+                        'browser',
+                        'run & watch cypress browser tests. Default command is `cypress open`. Any args passed after a -- will be passed to cypress instead. This requires a URL to run against, configured with APPLICATION_ENDPOINT',
+                        (yargs) => {
+                            return yargs.example([
+                                [
+                                    '$0 test browser',
+                                    'launch the cypress test runner',
+                                ],
+                                [
+                                    '$0 test browser -- run',
+                                    'run all the cypress tests once from the CLI',
+                                ],
+                            ])
+                        },
+                        (args) => {
+                            // all args that come after a `--` hang out in args._, along with the command name(s)
+                            // they can be strings or numbers so we map them before passing them on
+                            const unparsedCypressArgs = args._.slice(2).map(
+                                (intOrString) => {
+                                    return intOrString.toString()
+                                }
+                            )
+                            run_browser_tests(unparsedCypressArgs)
+                        }
+                    )
+            },
+            () => {
+                console.log(
+                    "with a default subcommand, I don't think this code can be reached"
+                )
             }
         )
         .command(
