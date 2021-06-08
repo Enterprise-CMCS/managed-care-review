@@ -33,8 +33,8 @@ import { updatesFromSubmission } from '../updateSubmissionTransform'
 // Should be listed in order of appearance on field to allow errors to focus as expected
 const ContractDetailsFormSchema = Yup.object().shape({
     contractType: Yup.string().defined(),
-    contractDateStart: Yup.string().defined('You must provide a start state'),
-    contractDateEnd: Yup.string().defined('You must provide an end state'),
+    contractDateStart: Yup.string().defined('You must provide a start date'),
+    contractDateEnd: Yup.string().defined('You must provide an end date'),
     managedCareEntities: Yup.array().min(
         1,
         'You must choose managed care entities'
@@ -67,8 +67,8 @@ export const ContractDetails = ({
 
     const ContractDetailsInitialValues: ContractDetailsFormValues = {
         contractType: draftSubmission?.contractType ?? ContractType.Base,
-        contractDateStart: draftSubmission?.contractDateStart ?? '',
-        contractDateEnd: draftSubmission?.contractDateEnd ?? '',
+        contractDateStart: draftSubmission?.contractDateStart?.toString() ?? '',
+        contractDateEnd: draftSubmission?.contractDateEnd?.toString() ?? '',
         managedCareEntities:
             (draftSubmission?.managedCareEntities as ManagedCareEntity[]) ?? [],
         federalAuthorities: draftSubmission?.federalAuthorities ?? [],
@@ -82,7 +82,7 @@ export const ContractDetails = ({
     if (updateError && !showFormAlert) {
         setShowFormAlert(true)
         console.log(
-            'Log: updatingsubmission failed with gql error',
+            'Log: updating submission failed with gql error',
             updateError
         )
     }

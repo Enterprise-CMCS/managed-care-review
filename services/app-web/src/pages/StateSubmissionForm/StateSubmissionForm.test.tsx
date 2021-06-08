@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 
 import { RoutesRecord } from '../../constants/routes'
 import {
+    mockDraft,
     fetchCurrentUserMock,
     fetchDraftSubmissionMock,
     updateDraftSubmissionMock,
@@ -18,6 +19,7 @@ import {
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
 import { StateSubmissionForm } from './StateSubmissionForm'
+import { updatesFromSubmission } from './updateSubmissionTransform'
 
 describe('StateSubmissionForm', () => {
     describe('loads draft submission', () => {
@@ -116,6 +118,11 @@ describe('StateSubmissionForm', () => {
 
     describe('when user edits submission', () => {
         it('change draft submission description and navigate to contract details', async () => {
+            const mockSubmission = mockDraft()
+            const mockUpdate = updatesFromSubmission(mockSubmission)
+            mockUpdate.submissionDescription =
+                'A real submission but updated something'
+
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
@@ -126,18 +133,13 @@ describe('StateSubmissionForm', () => {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchDraftSubmissionMock({
+                                draftSubmission: mockSubmission,
                                 id: '15',
                                 statusCode: 200,
                             }),
                             updateDraftSubmissionMock({
                                 id: '15',
-                                updates: {
-                                    submissionType: 'CONTRACT_ONLY' as SubmissionType,
-                                    submissionDescription:
-                                        'A real submission but updated something',
-                                    programID: 'snbc',
-                                    documents: [],
-                                },
+                                updates: mockUpdate,
                                 statusCode: 200,
                             }),
                             fetchDraftSubmissionMock({
@@ -201,6 +203,12 @@ describe('StateSubmissionForm', () => {
                 ],
             }
 
+            const mockUpdate = updatesFromSubmission(
+                mockDraftSubmissionWithDocs
+            )
+            mockUpdate.submissionDescription =
+                'A real submission but updated something'
+
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
@@ -217,13 +225,7 @@ describe('StateSubmissionForm', () => {
                             }),
                             updateDraftSubmissionMock({
                                 id: '15',
-                                updates: {
-                                    submissionType: 'CONTRACT_ONLY' as SubmissionType,
-                                    submissionDescription:
-                                        'A real submission but updated something',
-                                    programID: 'snbc',
-                                    documents: mockDocs,
-                                },
+                                updates: mockUpdate,
                                 statusCode: 200,
                             }),
                             fetchDraftSubmissionMock({

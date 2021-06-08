@@ -17,7 +17,7 @@ import {
 import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
 import PageHeading from '../../../components/PageHeading'
-import { isContractAndRates } from '../../../common-code/domain-models'
+import { isContractAndRates } from '../submissionChecks'
 import {
     FileUpload,
     S3FileData,
@@ -84,6 +84,7 @@ export const Documents = ({
     }, [fileItems])
 
     const showError = (error: string) => {
+        console.log('Document error: ', error)
         if (!shouldValidate) setShouldValidate(true)
     }
 

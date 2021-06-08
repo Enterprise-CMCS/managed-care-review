@@ -31,7 +31,7 @@ const mockValidUser: UserType = {
     email: 'bob@dmas.mn.gov',
 }
 
-export const mockDraftSubmission: DraftSubmission = {
+const mockDraftSubmission: DraftSubmission = {
     createdAt: new Date(),
     updatedAt: new Date(),
     id: 'test-abc-123',
@@ -53,6 +53,12 @@ export const mockDraftSubmission: DraftSubmission = {
         FederalAuthority.Voluntary,
         FederalAuthority.Benchmark,
     ],
+}
+
+// Only export a function that returns the mockDraftSubmission so that
+// we don't ever accidentally modified the shared mock in tests.
+export function mockDraft() {
+    return mockDraftSubmission
 }
 
 type fetchCurrentUserMockProps = {

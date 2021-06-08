@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import {
     fetchCurrentUserMock,
-    mockDraftSubmission,
+    mockDraft,
     updateDraftSubmissionMock,
 } from '../../../testHelpers/apolloHelpers'
 
@@ -21,14 +21,11 @@ import { SubmissionType } from '../../../gen/gqlClient'
 
 describe('Documents', () => {
     it('renders without errors', async () => {
-        renderWithProviders(
-            <Documents draftSubmission={mockDraftSubmission} />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<Documents draftSubmission={mockDraft()} />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         await waitFor(() => {
             expect(
@@ -43,29 +40,26 @@ describe('Documents', () => {
     })
 
     it('accepts a new document', async () => {
-        renderWithProviders(
-            <Documents draftSubmission={mockDraftSubmission} />,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        updateDraftSubmissionMock({
-                            id: mockDraftSubmission.id,
-                            updates: {
-                                ...mockDraftSubmission,
-                                documents: [
-                                    {
-                                        name: 'test.txt',
-                                        s3URL: 'fakeS3URL',
-                                    },
-                                ],
-                            },
-                            statusCode: 200,
-                        }),
-                    ],
-                },
-            }
-        )
+        renderWithProviders(<Documents draftSubmission={mockDraft()} />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200 }),
+                    updateDraftSubmissionMock({
+                        id: mockDraft().id,
+                        updates: {
+                            ...mockDraft(),
+                            documents: [
+                                {
+                                    name: 'test.txt',
+                                    s3URL: 'fakeS3URL',
+                                },
+                            ],
+                        },
+                        statusCode: 200,
+                    }),
+                ],
+            },
+        })
 
         const input = screen.getByLabelText('Upload documents')
         expect(input).toBeInTheDocument()
@@ -76,29 +70,26 @@ describe('Documents', () => {
     })
 
     it('accepts multiple pdf, word, excel documents', async () => {
-        renderWithProviders(
-            <Documents draftSubmission={mockDraftSubmission} />,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        updateDraftSubmissionMock({
-                            id: mockDraftSubmission.id,
-                            updates: {
-                                ...mockDraftSubmission,
-                                documents: [
-                                    {
-                                        name: 'test.txt',
-                                        s3URL: 'fakeS3URL',
-                                    },
-                                ],
-                            },
-                            statusCode: 200,
-                        }),
-                    ],
-                },
-            }
-        )
+        renderWithProviders(<Documents draftSubmission={mockDraft()} />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200 }),
+                    updateDraftSubmissionMock({
+                        id: mockDraft().id,
+                        updates: {
+                            ...mockDraft(),
+                            documents: [
+                                {
+                                    name: 'test.txt',
+                                    s3URL: 'fakeS3URL',
+                                },
+                            ],
+                        },
+                        statusCode: 200,
+                    }),
+                ],
+            },
+        })
 
         const input = screen.getByLabelText('Upload documents')
         expect(input).toBeInTheDocument()
@@ -115,14 +106,11 @@ describe('Documents', () => {
     })
 
     it('does not accept image files', async () => {
-        renderWithProviders(
-            <Documents draftSubmission={mockDraftSubmission} />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<Documents draftSubmission={mockDraft()} />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         // drop documents because accept (used for userEvent.upload) not allow invalid documents to upload in the first place
         const targetEl = screen.getByTestId('file-input-droptarget')
@@ -154,7 +142,7 @@ describe('Documents', () => {
         renderWithProviders(
             <Documents
                 draftSubmission={{
-                    ...mockDraftSubmission,
+                    ...mockDraft(),
                     submissionType: SubmissionType.ContractOnly,
                 }}
             />,
@@ -173,7 +161,7 @@ describe('Documents', () => {
         renderWithProviders(
             <Documents
                 draftSubmission={{
-                    ...mockDraftSubmission,
+                    ...mockDraft(),
                     submissionType: SubmissionType.ContractAndRates,
                 }}
             />,
