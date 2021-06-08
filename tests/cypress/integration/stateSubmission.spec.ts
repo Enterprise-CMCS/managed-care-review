@@ -55,9 +55,11 @@ describe('State Submission', () => {
                 name: 'Continue',
             }).safeClick()
             cy.findByText('You must choose federal authorities').should('exist')
+            cy.findAllByTestId('errorMessage').should('have.length', 1)
 
             // Fill out missing required fields for contract details
             cy.findByLabelText('1932(a) State Plan Authority').safeClick()
+            cy.findAllByTestId('errorMessage').should('have.length', 0)
             cy.findByRole('button', {
                 name: 'Continue',
             }).safeClick()
@@ -141,7 +143,7 @@ describe('State Submission', () => {
             cy.url({ timeout: 10_000 }).should('match', /.*review-and-submit$/)
         })
 
-        it('user can edit an draft contract only submission', () => {
+        it('user can edit a draft contract only submission', () => {
             cy.login()
 
             // Add a new contract only submission
@@ -245,7 +247,7 @@ describe('State Submission', () => {
             cy.findByText('trussel-guide.pdf').should('exist')
         })
 
-        it('user can edit a draft contract and rates submission type', () => {
+        it('user can edit a draft contract and rates submission', () => {
             cy.login()
 
             // Add a new submission (use default selected program)
