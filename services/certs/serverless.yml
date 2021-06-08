@@ -8,7 +8,7 @@ provider:
 
 custom:
   stage: ${opt:stage, self:provider.stage}
-  dnsName: mc-review-${self:cusom.stage}.onemac.cms.gov
+  dnsName: mc-review-${self:custom.stage}.onemac.cms.gov
 resources:
   Resources:
     MCReviewCertificate:
