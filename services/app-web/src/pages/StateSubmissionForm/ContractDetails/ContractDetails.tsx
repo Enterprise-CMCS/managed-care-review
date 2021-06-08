@@ -32,19 +32,28 @@ import { updatesFromSubmission } from '../updateSubmissionTransform'
 // Formik setup
 // Should be listed in order of appearance on field to allow errors to focus as expected
 const ContractDetailsFormSchema = Yup.object().shape({
-    contractType: Yup.string().defined(),
-    contractDateStart: Yup.string().defined('You must provide a start date'),
-    contractDateEnd: Yup.string().defined('You must provide an end date'),
+    contractType: Yup.string().defined(
+        'You must choose a contract action type'
+    ),
+    contractDateStart: Yup.date().defined('You must enter a start date'),
+    contractDateEnd: Yup.date()
+        .transform(function (value, originalValue) {
+            const dayjsValue = dayjs(originalValue)
+            // if it's valid return the date object, otherwise return an `InvalidDate`
+            return dayjsValue.isValid() ? dayjsValue.toDate() : new Date('')
+        })
+        .typeError('Invalid date')
+        .defined('You must enter an end date')
+        .min(
+            Yup.ref('contractDateStart'),
+            'The end date must come after the start date'
+        ),
     managedCareEntities: Yup.array().min(
         1,
-        'You must choose managed care entities'
+        'You must select at least one entity'
     ),
-    federalAuthorities: Yup.array().min(
-        1,
-        'You must choose federal authorities'
-    ),
+    federalAuthorities: Yup.array().min(1, 'You must select at least one item'),
 })
-
 export interface ContractDetailsFormValues {
     contractType: ContractType
     contractDateStart: string
@@ -156,8 +165,6 @@ export const ContractDetails = ({
                             validateForm()
                                 .then(() => {
                                     setShouldValidate(true)
-                                    console.log(values)
-                                    console.log(errors)
                                 })
                                 .catch(() =>
                                     console.warn('Log: Validation Error')
@@ -225,8 +232,11 @@ export const ContractDetails = ({
                                             errors.contractDateEnd
                                     ) && (
                                         <ErrorMessage>
-                                            {errors.contractDateStart ||
-                                                errors.contractDateEnd}
+                                            {errors.contractDateStart &&
+                                            errors.contractDateEnd
+                                                ? 'You must provide a start and an end date'
+                                                : errors.contractDateStart ||
+                                                  errors.contractDateEnd}
                                         </ErrorMessage>
                                     )}
                                     <DateRangePicker
