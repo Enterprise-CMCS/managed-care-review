@@ -55,7 +55,7 @@ const ContractDetailsFormSchema = Yup.object().shape({
     federalAuthorities: Yup.array().min(1, 'You must select at least one item'),
 })
 export interface ContractDetailsFormValues {
-    contractType: ContractType | null
+    contractType: ContractType | undefined
     contractDateStart: string
     contractDateEnd: string
     managedCareEntities: ManagedCareEntity[]
@@ -75,7 +75,7 @@ export const ContractDetails = ({
     const history = useHistory()
 
     const ContractDetailsInitialValues: ContractDetailsFormValues = {
-        contractType: draftSubmission?.contractType ?? null,
+        contractType: draftSubmission?.contractType ?? undefined,
         contractDateStart: draftSubmission?.contractDateStart?.toString() ?? '',
         contractDateEnd: draftSubmission?.contractDateEnd?.toString() ?? '',
         managedCareEntities:
@@ -100,7 +100,7 @@ export const ContractDetails = ({
         shouldValidate && Boolean(error)
 
     const isContractTypeEmpty = (values: ContractDetailsFormValues): boolean =>
-        values.contractType === null
+        values.contractType === undefined
 
     const isContractAmendmentSelected = (
         values: ContractDetailsFormValues
