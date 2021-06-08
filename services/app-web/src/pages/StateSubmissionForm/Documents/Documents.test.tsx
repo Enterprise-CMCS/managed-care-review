@@ -2,20 +2,19 @@ import React from 'react'
 import { screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import {
-    fetchCurrentUserMock,
-    mockDraft,
-    updateDraftSubmissionMock,
-} from '../../../testHelpers/apolloHelpers'
-
-import {
+    renderWithProviders,
     TEST_DOC_FILE,
     TEST_PDF_FILE,
     TEST_XLS_FILE,
     TEST_VIDEO_FILE,
     TEST_PNG_FILE,
-} from '../../../components/FileUpload/constants'
+} from '../../../testHelpers/jestHelpers'
+import {
+    fetchCurrentUserMock,
+    mockDraft,
+    updateDraftSubmissionMock,
+} from '../../../testHelpers/apolloHelpers'
 import { Documents } from './Documents'
 import { SubmissionType } from '../../../gen/gqlClient'
 

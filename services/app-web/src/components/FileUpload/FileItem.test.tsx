@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react'
 
 import { FileItem, FileItemT, FileItemProps } from './FileItem'
 import userEvent from '@testing-library/user-event'
-import { TEST_PDF_FILE } from './constants'
+import { TEST_PDF_FILE } from '../../testHelpers/jestHelpers'
 
 describe('FileItem component', () => {
     const mockRetry = jest.fn()

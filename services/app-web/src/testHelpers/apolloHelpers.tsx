@@ -57,7 +57,7 @@ const mockDraftSubmission: DraftSubmission = {
 
 // Only export a function that returns the mockDraftSubmission so that
 // we don't ever accidentally modified the shared mock in tests.
-export function mockDraft() {
+export function mockDraft(): DraftSubmission {
     return mockDraftSubmission
 }
 
@@ -278,6 +278,7 @@ export {
     createDraftSubmissionMock,
     fetchDraftSubmissionMock,
     updateDraftSubmissionMock,
+    mockDraftSubmission,
     submitDraftSubmissionMockSuccess,
     submitDraftSubmissionMockError,
 }

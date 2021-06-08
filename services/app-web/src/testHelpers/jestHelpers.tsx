@@ -67,6 +67,10 @@ const userClickSignIn = (screen: Screen<typeof queries>): void => {
     userEvent.click(signInButton)
 }
 
+const TEST_TEXT_FILE = new File(['Test File Contents'], 'testFile.txt', {
+    type: 'text/plain',
+})
+
 const TEST_PDF_FILE = new File(['Test PDF File'], 'testFile.pdf', {
     type: 'application/pdf',
 })
@@ -86,9 +90,16 @@ const TEST_VIDEO_FILE = new File(['Test video File'], 'testFile.mp4', {
 const TEST_PNG_FILE = new File(['Test PNG Image'], 'testFile.png', {
     type: 'image/png',
 })
+
 export {
     renderWithProviders,
     userClickByRole,
     userClickByTestId,
     userClickSignIn,
+    TEST_DOC_FILE,
+    TEST_PDF_FILE,
+    TEST_PNG_FILE,
+    TEST_TEXT_FILE,
+    TEST_VIDEO_FILE,
+    TEST_XLS_FILE,
 }

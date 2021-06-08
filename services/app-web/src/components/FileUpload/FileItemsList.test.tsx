@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react'
 import renderer from 'react-test-renderer'
 import { FileItemT } from './FileItem'
 import { FileItemsList } from './FileItemsList'
-import { TEST_PDF_FILE } from './constants'
+import { TEST_PDF_FILE } from '../../testHelpers/jestHelpers'
 
 describe('FileItem component', () => {
     const testProps = {
