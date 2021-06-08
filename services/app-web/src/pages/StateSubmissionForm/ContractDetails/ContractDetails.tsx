@@ -213,7 +213,13 @@ export const ContractDetails = ({
                                     showFieldErrors(errors.contractDateEnd)
                                 }
                             >
-                                <Fieldset legend="Contract effective dates">
+                                <Fieldset
+                                    legend={
+                                        isContractAmendmentSelected(values)
+                                            ? 'Amendment effective dates'
+                                            : 'Contract effective dates'
+                                    }
+                                >
                                     {showFieldErrors(
                                         errors.contractDateStart ||
                                             errors.contractDateEnd
