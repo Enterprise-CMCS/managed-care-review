@@ -412,7 +412,10 @@ async function run_browser_tests(cypressArgs: string[]) {
         args = cypressArgs
     }
 
-    spawnSync('cypress', args, {
+    args = ['cypress'].concat(args)
+
+    console.log(`running: npx ${args.join(' ')}`)
+    spawnSync('npx', args, {
         stdio: 'inherit',
     })
 }
