@@ -16,7 +16,7 @@ describe('State Submission', () => {
             cy.location('pathname').should('eq', '/submissions/new')
             cy.findByText('New submission').should('exist')
 
-            // Fill out some fields but not all
+            // Fill out some submission type fields but not all
             cy.findByLabelText('Contract action only').safeClick()
             cy.findByRole('combobox', { name: 'Program' }).select('msho')
 
@@ -39,9 +39,25 @@ describe('State Submission', () => {
                 name: 'Continue',
             }).safeClick()
 
-            // Skip contract details
+            // Fill out some base contract fields
             cy.findByText('Contract details').should('exist')
             cy.findByText(/MN-MSHO-/).should('exist')
+            cy.findByLabelText('Base contract').should('be.checked')
+            cy.findByLabelText('Start date').type('04/01/2024')
+            cy.findByLabelText('End date').type('04/01/2026')
+            cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).safeClick()
+
+            // Continue button triggers contract details validation
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).safeClick()
+            cy.findByText('You must choose federal authorities').should('exist')
+
+            // Fill out missing required fields for contract details
+            cy.findByLabelText('1932(a) State Plan Authority').safeClick()
             cy.findByRole('button', {
                 name: 'Continue',
             }).safeClick()
@@ -125,7 +141,7 @@ describe('State Submission', () => {
             cy.url({ timeout: 10_000 }).should('match', /.*review-and-submit$/)
         })
 
-        it('user can edit to change the type of a submission type and form loads as expected', () => {
+        it('user can edit an draft contract only submission', () => {
             cy.login()
 
             // Add a new contract only submission
@@ -142,8 +158,14 @@ describe('State Submission', () => {
                 name: 'Continue',
             }).safeClick()
 
-            // Skip contract details
+            // Fill out contract details
             cy.findByText('Contract details').should('exist')
+            cy.findByText(/MN-MSHO-/).should('exist')
+            cy.findByLabelText('Base contract').should('be.checked')
+            cy.findByLabelText('Start date').type('04/01/2024')
+            cy.findByLabelText('End date').type('04/01/2026')
+            cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
+            cy.findByLabelText('1932(a) State Plan Authority').safeClick()
             cy.findByRole('button', {
                 name: 'Continue',
             }).safeClick()
@@ -196,8 +218,14 @@ describe('State Submission', () => {
                 name: 'Continue',
             }).safeClick()
 
-            // Skip contract details
+            // Change contract dates
             cy.findByText('Contract details').should('exist')
+            cy.findByText(/MN-MSHO-/).should('exist')
+            cy.findByLabelText('Base contract').should('be.checked')
+            cy.findByLabelText('Start date').clear()
+            cy.findByLabelText('Start date').type('04/15/2024')
+            cy.findByLabelText('End date').clear()
+            cy.findByLabelText('End date').type('04/15/2026')
             cy.findByRole('button', {
                 name: 'Continue',
             }).safeClick()
