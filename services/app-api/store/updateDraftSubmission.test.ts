@@ -15,7 +15,6 @@ describe('updateDraftSubmission', () => {
             programID: 'MCAC',
             submissionDescription: 'a new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
-            documents: []
         }
 
         try {
@@ -33,25 +32,30 @@ describe('updateDraftSubmission', () => {
 
             expect(draftSubmission.documents.length).toEqual(0)
 
-            // update submission by adding a document
-            const updateSubResult = await store.updateDraftSubmission(
-                {
-                    ...draftSubmission,
-                    documents: [
-                        {
+            // update submission
+            const startDate = new Date('2021-06-07T17:48:47.000Z')
+            const endDate = new Date('2021-06-12T17:48:47.000Z')
+            const updateSubResult = await store.updateDraftSubmission({
+                ...draftSubmission,
+                documents: [
+                    {
                         name: 'testdoc.pdf',
-                        s3URL: 'fakeS3URL'
-                    }
-                    ]
-                }
-            )
-        
+                        s3URL: 'fakeS3URL',
+                    },
+                ],
+                contractType: 'BASE',
+                contractDateStart: startDate,
+                contractDateEnd: endDate,
+                managedCareEntities: ['MCO'],
+                federalAuthorities: ['VOLUNTARY'],
+            })
+
             if (isStoreError(updateSubResult)) {
                 throw new Error(
                     'Got an error in insert test' + updateSubResult.message
                 )
             }
-        
+
             try {
                 const getResult = await mapper.get(
                     Object.assign(new DraftSubmissionStoreType(), {
@@ -61,22 +65,19 @@ describe('updateDraftSubmission', () => {
 
                 expect(getResult.id).not.toEqual('foo')
                 expect(getResult.documents.length).toEqual(1)
-                expect(getResult.documents[0]).toEqual(expect.objectContaining(
-                    {
+                expect(getResult.documents[0]).toEqual(
+                    expect.objectContaining({
                         name: 'testdoc.pdf',
-                        s3URL: 'fakeS3URL'
-                    }
-                ))
-               
-                 
+                        s3URL: 'fakeS3URL',
+                    })
+                )
+                expect(getResult.contractDateStart).toEqual(startDate)
+                expect(getResult.contractDateEnd).toEqual(endDate)
             } catch (dynamoErr) {
                 throw new Error(dynamoErr)
             }
         } catch (createErr) {
             throw new Error(createErr)
         }
-
-    
     })
-    
 })

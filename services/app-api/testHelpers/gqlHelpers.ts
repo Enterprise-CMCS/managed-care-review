@@ -16,6 +16,8 @@ import {
     DraftSubmissionUpdates,
     StateSubmission,
     SubmissionType,
+    ContractType,
+    FederalAuthority,
 } from '../gen/gqlServer'
 
 const store = getTestStore()
@@ -90,6 +92,10 @@ const createCompleteTestDraftSubmission = async (
     mutate: ApolloServerTestClient['mutate']
 ): Promise<DraftSubmission> => {
     const draft = await createTestDraftSubmission(mutate)
+    const startDate = new Date().toISOString().split('T')[0]
+    const endDate = new Date(new Date().getTime() + 5 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split('T')[0]
 
     const updates = {
         programID: 'cnet',
@@ -101,6 +107,11 @@ const createCompleteTestDraftSubmission = async (
                 s3URL: 'fakeS3URL',
             },
         ],
+        contractType: 'BASE' as ContractType.Base,
+        contractDateStart: startDate,
+        contractDateEnd: endDate,
+        managedCareEntities: ['MCO'],
+        federalAuthorities: ['STATE_PLAN' as FederalAuthority.StatePlan],
     }
 
     const updatedDraft = await updateTestDraftSubmission(

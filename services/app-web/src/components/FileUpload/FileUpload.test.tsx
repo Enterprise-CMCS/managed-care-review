@@ -4,13 +4,13 @@ import userEvent from '@testing-library/user-event'
 
 import { FileUpload, FileUploadProps, S3FileData } from './FileUpload'
 import { FileItemT } from './FileItem'
+import { SPACER_GIF } from './constants'
 import {
-    SPACER_GIF,
     TEST_PDF_FILE,
     TEST_PNG_FILE,
     TEST_TEXT_FILE,
     TEST_VIDEO_FILE,
-} from './constants'
+} from '../../testHelpers/jestHelpers'
 
 const fakeApiRequest = (success: boolean): Promise<S3FileData> => {
     const timeout = Math.round(Math.random() * 1000)

@@ -302,21 +302,6 @@ export const SubmissionType = ({
                             type="default"
                             className={styles.buttonGroup}
                         >
-                            <Button
-                                type="button"
-                                secondary
-                                onClick={() =>
-                                    validateForm()
-                                        .then(() => {
-                                            setShouldValidate(true)
-                                        })
-                                        .catch(() =>
-                                            console.warn('Validation Error')
-                                        )
-                                }
-                            >
-                                Test Validation
-                            </Button>
                             <Link
                                 asCustom={NavLink}
                                 className={`${styles.outlineButtonLink} usa-button usa-button--outline`}

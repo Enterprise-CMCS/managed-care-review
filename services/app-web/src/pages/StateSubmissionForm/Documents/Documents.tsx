@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { Form as UswdsForm, Button, ButtonGroup, Alert, Link } from '@trussworks/react-uswds'
+import {
+    Form as UswdsForm,
+    Button,
+    ButtonGroup,
+    Alert,
+    Link,
+} from '@trussworks/react-uswds'
 import { NavLink, useHistory } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -11,7 +17,7 @@ import {
 import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
 import PageHeading from '../../../components/PageHeading'
-import { isContractAndRates } from '../../../constants/submissions'
+import { isContractAndRates } from '../submissionChecks'
 import {
     FileUpload,
     S3FileData,
@@ -78,6 +84,7 @@ export const Documents = ({
     }, [fileItems])
 
     const showError = (error: string) => {
+        console.log('Document error: ', error)
         if (!shouldValidate) setShouldValidate(true)
     }
 
@@ -166,7 +173,9 @@ export const Documents = ({
 
     return (
         <>
-            <PageHeading className={styles.formHeader} headingLevel="h2"> Documents </PageHeading>
+            <PageHeading className={styles.formHeader} headingLevel="h2">
+                Documents
+            </PageHeading>
             <UswdsForm
                 className={styles.formContainer}
                 id="DocumentsForm"
@@ -174,9 +183,7 @@ export const Documents = ({
                 onSubmit={handleFormSubmit}
             >
                 <fieldset className="usa-fieldset">
-                    <legend className='srOnly'>
-                        Documents
-                    </legend>
+                    <legend className="srOnly">Documents</legend>
                     {shouldValidate && !hasValidFiles && (
                         <Alert
                             type="error"
@@ -221,13 +228,6 @@ export const Documents = ({
                     />
                 </fieldset>
                 <ButtonGroup type="default" className={styles.buttonGroup}>
-                    <Button
-                        type="button"
-                        secondary
-                        onClick={() => setShouldValidate(!hasValidFiles)}
-                    >
-                        Test Validation
-                    </Button>
                     <Link
                         asCustom={NavLink}
                         className={`${styles.outlineButtonLink} usa-button usa-button--outline`}

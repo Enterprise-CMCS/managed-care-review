@@ -4,18 +4,22 @@ import userEvent from '@testing-library/user-event'
 
 import { RoutesRecord } from '../../constants/routes'
 import {
+    mockDraft,
     fetchCurrentUserMock,
     fetchDraftSubmissionMock,
     updateDraftSubmissionMock,
 } from '../../testHelpers/apolloHelpers'
 import {
-    SubmissionType as SubmissionTypeT,
+    SubmissionType,
+    ContractType,
+    FederalAuthority,
     DraftSubmission,
     Document,
 } from '../../gen/gqlClient'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
 import { StateSubmissionForm } from './StateSubmissionForm'
+import { updatesFromSubmission } from './updateSubmissionTransform'
 
 describe('StateSubmissionForm', () => {
     describe('loads draft submission', () => {
@@ -114,6 +118,11 @@ describe('StateSubmissionForm', () => {
 
     describe('when user edits submission', () => {
         it('change draft submission description and navigate to contract details', async () => {
+            const mockSubmission = mockDraft()
+            const mockUpdate = updatesFromSubmission(mockSubmission)
+            mockUpdate.submissionDescription =
+                'A real submission but updated something'
+
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
@@ -124,18 +133,13 @@ describe('StateSubmissionForm', () => {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchDraftSubmissionMock({
+                                draftSubmission: mockSubmission,
                                 id: '15',
                                 statusCode: 200,
                             }),
                             updateDraftSubmissionMock({
                                 id: '15',
-                                updates: {
-                                    submissionType: 'CONTRACT_ONLY' as SubmissionTypeT,
-                                    submissionDescription:
-                                        'A real submission but updated something',
-                                    programID: 'snbc',
-                                    documents: [],
-                                },
+                                updates: mockUpdate,
                                 statusCode: 200,
                             }),
                             fetchDraftSubmissionMock({
@@ -186,10 +190,24 @@ describe('StateSubmissionForm', () => {
                     name: 'SNBC',
                 },
                 name: 'MN-MSHO-0001',
-                submissionType: 'CONTRACT_ONLY' as SubmissionTypeT.ContractOnly,
+                submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
                 submissionDescription: 'A real submission',
                 documents: mockDocs,
+                contractType: ContractType.Base,
+                contractDateStart: new Date(),
+                contractDateEnd: new Date(),
+                managedCareEntities: [''],
+                federalAuthorities: [
+                    FederalAuthority.Voluntary,
+                    FederalAuthority.Benchmark,
+                ],
             }
+
+            const mockUpdate = updatesFromSubmission(
+                mockDraftSubmissionWithDocs
+            )
+            mockUpdate.submissionDescription =
+                'A real submission but updated something'
 
             renderWithProviders(
                 <Route
@@ -207,13 +225,7 @@ describe('StateSubmissionForm', () => {
                             }),
                             updateDraftSubmissionMock({
                                 id: '15',
-                                updates: {
-                                    submissionType: 'CONTRACT_ONLY' as SubmissionTypeT,
-                                    submissionDescription:
-                                        'A real submission but updated something',
-                                    programID: 'snbc',
-                                    documents: mockDocs,
-                                },
+                                updates: mockUpdate,
                                 statusCode: 200,
                             }),
                             fetchDraftSubmissionMock({

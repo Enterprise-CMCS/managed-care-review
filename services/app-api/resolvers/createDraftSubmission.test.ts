@@ -21,21 +21,19 @@ describe('createDraftSubmission', () => {
         })
 
         expect(res.errors).toBeUndefined()
-        expect(
-            res.data.createDraftSubmission.draftSubmission.submissionDescription
-        ).toBe('A real submission')
-        expect(
-            res.data.createDraftSubmission.draftSubmission.submissionType
-        ).toBe('CONTRACT_ONLY')
-        expect(
-            res.data.createDraftSubmission.draftSubmission.program.id
-        ).toBe('managed-medical-assistance')
-        expect(
-            res.data.createDraftSubmission.draftSubmission.program.name
-        ).toBe('Managed Medical Assistance')
-        expect(res.data.createDraftSubmission.draftSubmission.name).toContain(
-            'FL-MANAGED-MEDICAL-ASSISTANCE'
-        )
+
+        const draft = res.data.createDraftSubmission.draftSubmission
+
+        expect(draft.submissionDescription).toBe('A real submission')
+        expect(draft.submissionType).toBe('CONTRACT_ONLY')
+        expect(draft.program.id).toBe('managed-medical-assistance')
+        expect(draft.program.name).toBe('Managed Medical Assistance')
+        expect(draft.name).toContain('FL-MANAGED-MEDICAL-ASSISTANCE')
+        expect(draft.documents.length).toBe(0)
+        expect(draft.managedCareEntities.length).toBe(0)
+        expect(draft.federalAuthorities.length).toBe(0)
+        expect(draft.contractDateStart).toBe(null)
+        expect(draft.contractDateEnd).toBe(null)
     })
 
     it('returns an error if the program id is not in valid', async () => {

@@ -1,4 +1,3 @@
-import { DynamoError } from './dynamoTypes'
 export const StoreErrorCodes = [
     'CONFIGURATION_ERROR',
     'CONNECTION_ERROR',

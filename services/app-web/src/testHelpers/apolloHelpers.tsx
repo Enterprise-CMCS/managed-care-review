@@ -2,6 +2,8 @@ import {
     DraftSubmission,
     FetchCurrentUserDocument,
     SubmissionType,
+    ContractType,
+    FederalAuthority,
     User as UserType,
     CreateDraftSubmissionDocument,
     FetchDraftSubmissionDocument,
@@ -29,7 +31,7 @@ const mockValidUser: UserType = {
     email: 'bob@dmas.mn.gov',
 }
 
-export const mockDraftSubmission: DraftSubmission = {
+const mockDraftSubmission: DraftSubmission = {
     createdAt: new Date(),
     updatedAt: new Date(),
     id: 'test-abc-123',
@@ -40,9 +42,23 @@ export const mockDraftSubmission: DraftSubmission = {
         name: 'SNBC',
     },
     name: 'MN-MSHO-0001',
-    submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
+    submissionType: SubmissionType.ContractOnly,
     submissionDescription: 'A real submission',
     documents: [],
+    contractType: ContractType.Base,
+    contractDateStart: new Date(),
+    contractDateEnd: new Date(),
+    managedCareEntities: [''],
+    federalAuthorities: [
+        FederalAuthority.Voluntary,
+        FederalAuthority.Benchmark,
+    ],
+}
+
+// Only export a function that returns the mockDraftSubmission so that
+// we don't ever accidentally modified the shared mock in tests.
+export function mockDraft(): DraftSubmission {
+    return mockDraftSubmission
 }
 
 type fetchCurrentUserMockProps = {
@@ -262,6 +278,7 @@ export {
     createDraftSubmissionMock,
     fetchDraftSubmissionMock,
     updateDraftSubmissionMock,
+    mockDraftSubmission,
     submitDraftSubmissionMockSuccess,
     submitDraftSubmissionMockError,
 }

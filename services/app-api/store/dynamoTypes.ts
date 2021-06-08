@@ -5,7 +5,10 @@ import {
 } from '@aws/dynamodb-data-mapper-annotations'
 
 import { embed } from '@aws/dynamodb-data-mapper'
-import { SubmissionType } from '../../app-web/src/common-code/domain-models'
+import {
+    SubmissionType,
+    FederalAuthority,
+} from '../../app-web/src/common-code/domain-models'
 
 // Data mapper annotations are meant to go on your domain models, and we might use them that way at some point
 // but for now, especially since we probably want to rip out all the dynamodb stuff eventually anyway, we're going to keep
@@ -45,6 +48,21 @@ export class DraftSubmissionStoreType {
     @attribute()
     programID: string
 
+    @attribute()
+    contractType?: string
+
+    @attribute()
+    contractDateStart?: Date
+
+    @attribute()
+    contractDateEnd?: Date
+
+    @attribute()
+    managedCareEntities: Array<string>
+
+    @attribute()
+    federalAuthorities: Array<FederalAuthority>
+
     @attribute({
         indexKeyConfigurations: {
             StateStateNumberAllIndex: 'HASH',
@@ -73,6 +91,11 @@ export class DraftSubmissionStoreType {
         this.programID = ''
         this.stateNumber = -1
         this.documents = []
+        this.contractType = undefined
+        this.contractDateStart = undefined
+        this.contractDateEnd = undefined
+        this.managedCareEntities = []
+        this.federalAuthorities = []
     }
 }
 
@@ -103,6 +126,21 @@ export class StateSubmissionStoreType {
     @attribute()
     programID: string
 
+    @attribute()
+    contractType?: string
+
+    @attribute()
+    contractDateStart?: Date
+
+    @attribute()
+    contractDateEnd?: Date
+
+    @attribute()
+    managedCareEntities: Array<string>
+
+    @attribute()
+    federalAuthorities: Array<FederalAuthority>
+
     @attribute({
         indexKeyConfigurations: {
             StateStateNumberAllIndex: 'HASH',
@@ -132,6 +170,11 @@ export class StateSubmissionStoreType {
         this.stateNumber = -1
         this.documents = []
         this.submittedAt = new Date(0)
+        this.contractType = undefined
+        this.contractDateStart = undefined
+        this.contractDateEnd = undefined
+        this.managedCareEntities = []
+        this.federalAuthorities = []
     }
 }
 

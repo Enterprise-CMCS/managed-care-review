@@ -98,6 +98,20 @@ enum SubmissionType {
     CONTRACT_AND_RATES
 }
 
+enum ContractType {
+    BASE
+    AMENDMENT
+}
+
+enum FederalAuthority {
+    STATE_PLAN
+    WAIVER_1915B
+    WAIVER_1115
+    VOLUNTARY
+    BENCHMARK
+    TITLE_XXI
+}
+
 type DraftSubmission {
     id: ID!
     programID: String!
@@ -109,6 +123,11 @@ type DraftSubmission {
     createdAt: Date!
     updatedAt: DateTime!
     documents: [Document!]!
+    contractType: ContractType
+    contractDateStart: Date
+    contractDateEnd: Date
+    managedCareEntities: [String!]!
+    federalAuthorities: [FederalAuthority!]!
 }
 
 type StateSubmission {
@@ -134,4 +153,9 @@ input DraftSubmissionUpdates {
     submissionType: SubmissionType!
     submissionDescription: String!
     documents: [DocumentInput!]!
+    contractType: ContractType
+    contractDateStart: Date
+    contractDateEnd: Date
+    managedCareEntities: [String!]!
+    federalAuthorities: [FederalAuthority!]!
 }

@@ -47,6 +47,11 @@ describe('insertDraftSubmission', () => {
                 expect(getResult.stateCode).toEqual('FL')
                 expect(getResult.programID).toEqual('MCAC')
                 expect(getResult.documents).toEqual([])
+                expect(getResult.contractType).toEqual(undefined)
+                expect(getResult.contractDateStart).toEqual(undefined)
+                expect(getResult.contractDateEnd).toEqual(undefined)
+                expect(getResult.managedCareEntities).toEqual([])
+                expect(getResult.federalAuthorities).toEqual([])
 
                 expect(Date.now() - getResult.createdAt.valueOf()).toBeLessThan(
                     2000
