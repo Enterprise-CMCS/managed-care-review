@@ -1,0 +1,21 @@
+service: certs
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: us-east-1
+  stage: dev
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  dnsName: mc-review-${self:cusom.stage}.onemac.cms.gov
+resources:
+  Resources:
+    MCReviewCertificate:
+      Type: AWS::CertificateManager::Certificate
+      Properties:
+        DomainName: ${self:custom.dnsName}
+        SubjectAlternativeNames:
+          - api.${self:custom.dnsName}
+          - sb.${self:custom.dnsName}
+        ValidationMethod: 'DNS'

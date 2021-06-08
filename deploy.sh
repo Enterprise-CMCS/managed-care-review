@@ -14,6 +14,7 @@ services=(
   'ui-auth'
   'storybook'
   'app-web'
+  'certs'
 )
 
 install_deps() {
