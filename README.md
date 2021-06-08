@@ -30,7 +30,7 @@ Run tests locally
 
 -   `./dev test web` to run the web tests, watching the results
 -   `./dev test api` to run the api tests, watching the results
--   `./dev test browser` to run the cypress browser based tests, this opens the cypress runner and requires an endpoint (local or otherwise) to test against
+-   `./dev test browser` to run the cypress browser based tests, this opens the cypress runner and requires an endpoint  to test against. By default, runs on localhost (so you should be running the app locally if this is what you intend).  To see options for flags cypress accepts see [docs](https://docs.cypress.io/guides/guides/command-line#Commands). 
 
 -   `./dev test` (or `dev test check`) to run all the tests that CI runs, once. This will run the web, api, and browser tests
 -   Run with flags `./dev test --unit`, `.dev test --online`, to filter down, but still run once.
