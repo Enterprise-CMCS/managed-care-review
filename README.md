@@ -24,18 +24,22 @@ Run app locally
 
 -   `./dev local` to run the entire app and storybook
 -   Available flags: `--storybook`, `--web`, `--api`, `--s3`, '--db' for running services individually
--   (you can also exlcude services by using the yargs 'no' standard: `./dev local --no-db --no-storybook`)
+-   (you can also exclude services by using the yargs 'no' standard: `./dev local --no-storybook`)
 
 Run tests locally
 
--   `./dev test` with the app running in another tab for end to end tests
--   Run with flags `./dev test --unit`, `.dev test --online`, etc
+-   `./dev test web` to run the web tests, watching the results
+-   `./dev test api` to run the api tests, watching the results
+-   `./dev test browser` to run the cypress browser based tests, this opens the cypress runner and requires an endpoint  to test against. By default, runs on localhost (so you should be running the app locally if this is what you intend).  To see options for flags cypress accepts see [docs](https://docs.cypress.io/guides/guides/command-line#Commands). 
+
+-   `./dev test` (or `dev test check`) to run all the tests that CI runs, once. This will run the web, api, and browser tests
+-   Run with flags `./dev test --unit`, `.dev test --online`, to filter down, but still run once.
 
 Clear dependencies
 
 -   `./dev clean`
 
-Run web app locally, but configure it to run against a deployed backend
+Run web app locally, but configured to run against a deployed backend
 
 -   `./dev hybrid`
 -   For local dev testing, you should push your local branch to deploy a review app and then `./dev hybrid` will connect to that running review app by default.
