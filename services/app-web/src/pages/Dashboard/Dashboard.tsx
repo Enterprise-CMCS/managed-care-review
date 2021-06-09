@@ -25,6 +25,11 @@ export const Dashboard = (): React.ReactElement => {
         location.search
     ).get('justSubmitted')
 
+    /* 
+        Note: Program reference is passed via submission name e.g. AS-TEST-PROGRAM-001
+        This means the state program id must match the state program name 
+        with dashes where there are spaces e.g. {id: test-program, name: TestProgram}
+    */
     const programIDFromSubmissionName = (name: string) => name.split('-')[1]
 
     const ProgramContent = ({
