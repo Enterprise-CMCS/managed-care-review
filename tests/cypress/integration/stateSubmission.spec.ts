@@ -42,7 +42,7 @@ describe('State Submission', () => {
             // Fill out some base contract fields
             cy.findByText('Contract details').should('exist')
             cy.findByText(/MN-MSHO-/).should('exist')
-            cy.findByLabelText('Base contract').should('be.checked')
+            cy.findByLabelText('Base contract').safeClick()
             cy.findByLabelText('Start date').type('04/01/2024')
             cy.findByLabelText('End date').type('04/01/2026')
             cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
@@ -54,7 +54,7 @@ describe('State Submission', () => {
             cy.findByRole('button', {
                 name: 'Continue',
             }).safeClick()
-            cy.findByText('You must choose federal authorities').should('exist')
+            cy.findByText('You must select at least one item').should('exist')
             cy.findAllByTestId('errorMessage').should('have.length', 1)
 
             // Fill out missing required fields for contract details
@@ -163,7 +163,7 @@ describe('State Submission', () => {
             // Fill out contract details
             cy.findByText('Contract details').should('exist')
             cy.findByText(/MN-MSHO-/).should('exist')
-            cy.findByLabelText('Base contract').should('be.checked')
+            cy.findByLabelText('Base contract').safeClick()
             cy.findByLabelText('Start date').type('04/01/2024')
             cy.findByLabelText('End date').type('04/01/2026')
             cy.findByLabelText('Managed Care Organization (MCO)').safeClick()

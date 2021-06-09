@@ -2,6 +2,7 @@ import React from 'react'
 import { Link, ButtonGroup, Button } from '@trussworks/react-uswds'
 
 import styles from './ReviewSubmit/ReviewSubmit.module.scss'
+import classNames from 'classnames'
 
 export type PageActionsProps = {
     secondaryAction: string
@@ -14,6 +15,7 @@ export const PageActions = ({
     primaryAction,
     primaryActionCallback,
 }: PageActionsProps): React.ReactElement => {
+    const submitButtonClasses = classNames('usa-button', styles.submitButton)
     return (
         <div className={styles.pageActions}>
             <Link href="#">Save as draft</Link>
@@ -27,7 +29,7 @@ export const PageActions = ({
                 </Link>
                 <Button
                     type="button"
-                    className={styles.submitButton}
+                    className={submitButtonClasses}
                     onClick={primaryActionCallback}
                 >
                     {primaryAction}

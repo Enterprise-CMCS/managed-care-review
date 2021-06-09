@@ -25,6 +25,8 @@ export const Dashboard = (): React.ReactElement => {
         location.search
     ).get('justSubmitted')
 
+    const programIDFromSubmissionName = (name: string) => name.split('-')[1]
+
     const ProgramContent = ({
         program,
     }: {
@@ -32,6 +34,13 @@ export const Dashboard = (): React.ReactElement => {
     }): React.ReactElement => {
         return (
             <section key={program.name} className={styles.panel}>
+                {justSubmittedSubmissionName &&
+                    programIDFromSubmissionName(justSubmittedSubmissionName) ===
+                        program.id.toUpperCase() && (
+                        <SubmissionSuccessMessage
+                            submissionName={justSubmittedSubmissionName}
+                        />
+                    )}
                 <div className={styles.panelHeader}>
                     <h2>Submissions</h2>
                     <div>
@@ -54,11 +63,6 @@ export const Dashboard = (): React.ReactElement => {
 
     return (
         <>
-            {justSubmittedSubmissionName && (
-                <SubmissionSuccessMessage
-                    submissionName={justSubmittedSubmissionName}
-                />
-            )}
             <div className={styles.container} data-testid="dashboardPage">
                 {programs.length ? (
                     <Tabs className={styles.tabs}>

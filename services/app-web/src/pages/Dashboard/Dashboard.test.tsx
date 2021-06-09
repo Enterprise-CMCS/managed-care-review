@@ -43,18 +43,18 @@ describe('Dashboard', () => {
 
     it('displays tabs for available programs based on loggedInUser state', async () => {
         const mockUser = {
-            role: 'State User',
-            name: 'Bob in Virginia',
-            email: 'bob@dmas.va.gov',
             state: {
-                name: 'Virginia',
-                code: 'VA',
+                name: 'Minnesota',
+                code: 'MN',
                 programs: [
-                    { id: 'first', name: 'Program 1' },
-                    { id: 'second', name: 'Program 2' },
-                    { id: 'third', name: 'Program 3' },
+                    { id: 'msho', name: 'MSHO' },
+                    { id: 'pmap', name: 'PMAP' },
+                    { id: 'snbc', name: 'SNBC' },
                 ],
             },
+            role: 'State User',
+            name: 'Bob it user',
+            email: 'bob@dmas.mn.gov',
         }
 
         renderWithProviders(<Dashboard />, {
@@ -68,8 +68,8 @@ describe('Dashboard', () => {
         await waitFor(() => {
             const tabs = screen.getAllByRole('tab')
             expect(tabs.length).toBe(3)
-            expect(tabs[0].textContent).toBe('Program 1')
-            expect(tabs[1].textContent).toBe('Program 2')
+            expect(tabs[0].textContent).toBe('MSHO')
+            expect(tabs[1].textContent).toBe('PMAP')
         })
     })
 
@@ -113,19 +113,19 @@ describe('Dashboard', () => {
             expect(history.location.pathname).toBe('/submissions/new')
         })
     })
-
+    // Currently first tab and program is selected by default, adjust test when this is dynamic
     it('shows the success message if set', async () => {
         renderWithProviders(<Dashboard />, {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
             routerProvider: {
-                route: `dashboard?justSubmitted=Some-ID`,
+                route: `dashboard?justSubmitted=MN-MSHO-0001`,
             },
         })
 
         await waitFor(() => {
-            const title = screen.getByText('Some-ID was sent to CMS')
+            const title = screen.getByText('MN-MSHO-0001 was sent to CMS')
             expect(title).toBeInTheDocument()
         })
     })
