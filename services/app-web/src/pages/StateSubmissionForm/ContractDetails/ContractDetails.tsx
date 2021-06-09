@@ -35,14 +35,22 @@ const ContractDetailsFormSchema = Yup.object().shape({
     contractType: Yup.string().defined(
         'You must choose a contract action type'
     ),
-    contractDateStart: Yup.date().defined('You must enter a start date'),
-    contractDateEnd: Yup.date()
+    contractDateStart: Yup.date()
         .transform(function (value, originalValue) {
-            const dayjsValue = dayjs(originalValue)
+            const dayjsValue = dayjs(originalValue, 'MM-DD-YYYY', true)
             // when valid return date object, otherwise return `InvalidDate`
             return dayjsValue.isValid() ? dayjsValue.toDate() : new Date('')
         })
-        .typeError('Invalid date')
+        .typeError('The start date must be in MM/DD/YYYY format')
+        .defined('You must enter a start date'),
+
+    contractDateEnd: Yup.date()
+        .transform(function (value, originalValue) {
+            const dayjsValue = dayjs(originalValue, 'MM-DD-YYYY', true)
+            // when valid return date object, otherwise return `InvalidDate`
+            return dayjsValue.isValid() ? dayjsValue.toDate() : new Date('')
+        })
+        .typeError('The end date must be in MM/DD/YYYY format')
         .defined('You must enter an end date')
         .min(
             Yup.ref('contractDateStart'),
@@ -52,7 +60,10 @@ const ContractDetailsFormSchema = Yup.object().shape({
         1,
         'You must select at least one entity'
     ),
-    federalAuthorities: Yup.array().min(1, 'You must select at least one item'),
+    federalAuthorities: Yup.array().min(
+        1,
+        'You must select at least one authority'
+    ),
 })
 export interface ContractDetailsFormValues {
     contractType: ContractType | undefined
@@ -244,8 +255,8 @@ export const ContractDetails = ({
                                                     errors.contractDateEnd
                                             ) && (
                                                 <ErrorMessage>
-                                                    {errors.contractDateStart &&
-                                                    errors.contractDateEnd
+                                                    {!values.contractDateStart &&
+                                                    !values.contractDateEnd
                                                         ? 'You must provide a start and an end date'
                                                         : errors.contractDateStart ||
                                                           errors.contractDateEnd}
@@ -564,7 +575,7 @@ export const ContractDetails = ({
                                                 }
                                                 target="_blank"
                                             >
-                                                Manged Care authority
+                                                Managed Care authority
                                                 definitions
                                             </Link>
                                             <div className="usa-hint">
