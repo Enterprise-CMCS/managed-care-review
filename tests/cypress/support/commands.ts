@@ -42,7 +42,7 @@ Cypress.Commands.add('safeClick', { prevSubject: 'element' }, ($element) => {
 Cypress.Commands.add('navigateForm', (buttonName: 'string') => {
     cy.findByRole('button', {
         name: buttonName,
-    }).safeClick()
+    }).click()
 
     cy.findByRole('progressbar', { name: 'Loading' }).should('not.exist')
 })
