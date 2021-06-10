@@ -193,6 +193,7 @@ describe('StateSubmissionForm', () => {
                 submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
                 submissionDescription: 'A real submission',
                 documents: mockDocs,
+                contractAmendmentInfo: null,
                 contractType: ContractType.Base,
                 contractDateStart: new Date(),
                 contractDateEnd: new Date(),
