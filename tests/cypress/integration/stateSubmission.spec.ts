@@ -54,7 +54,9 @@ describe('State Submission', () => {
             cy.findByRole('button', {
                 name: 'Continue',
             }).safeClick()
-            cy.findByText('You must select at least one item').should('exist')
+            cy.findByText('You must select at least one authority').should(
+                'exist'
+            )
             cy.findAllByTestId('errorMessage').should('have.length', 1)
 
             // Fill out missing required fields for contract details

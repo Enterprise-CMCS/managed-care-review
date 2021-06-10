@@ -182,8 +182,6 @@ export const ContractDetails = ({
             initialValues={ContractDetailsInitialValues}
             onSubmit={handleFormSubmit}
             validationSchema={ContractDetailsFormSchema}
-            validateOnChange={shouldValidate}
-            validateOnBlur={shouldValidate}
         >
             {({
                 values,
@@ -695,7 +693,11 @@ export const ContractDetails = ({
                             >
                                 Cancel
                             </Link>
-                            <Button type="submit" disabled={isSubmitting}>
+                            <Button
+                                type="submit"
+                                onClick={() => setShouldValidate(true)}
+                                disabled={isSubmitting}
+                            >
                                 Continue
                             </Button>
                         </ButtonGroup>
