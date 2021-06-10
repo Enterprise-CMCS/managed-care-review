@@ -1,26 +1,25 @@
-
 // ***********************************************
 // For more comprehensive examples of custom
 // commands please read more here:
 // https://on.cypress.io/custom-commands
 // ***********************************************
-import '@testing-library/cypress/add-commands';
-import 'cypress-file-upload';
+import '@testing-library/cypress/add-commands'
+import 'cypress-file-upload'
 import 'cypress-pipe'
 
-const LOCAL_STORAGE_MEMORY = {};
+const LOCAL_STORAGE_MEMORY = {}
 
 Cypress.Commands.add('saveLocalStorage', () => {
-  Object.keys(localStorage).forEach(key => {
-    LOCAL_STORAGE_MEMORY[key] = localStorage[key];
-  });
-});
+    Object.keys(localStorage).forEach((key) => {
+        LOCAL_STORAGE_MEMORY[key] = localStorage[key]
+    })
+})
 
 Cypress.Commands.add('restoreLocalStorage', () => {
-  Object.keys(LOCAL_STORAGE_MEMORY).forEach(key => {
-    localStorage.setItem(key, LOCAL_STORAGE_MEMORY[key]);
-  });
-});
+    Object.keys(LOCAL_STORAGE_MEMORY).forEach((key) => {
+        localStorage.setItem(key, LOCAL_STORAGE_MEMORY[key])
+    })
+})
 
 /**
  * This will help with flaky behavior in cypress where there is a race condition
@@ -35,10 +34,15 @@ Cypress.Commands.add('restoreLocalStorage', () => {
  * problem for the time being.
  * https://www.cypress.io/blog/2019/01/22/when-can-the-test-click/
  */
-Cypress.Commands.add('safeClick', { prevSubject: 'element' }, $element => {
-  const click = $el => $el.click()
-  return cy
-    .wrap($element)
-    .should('be.visible')
-    .pipe(click)
+Cypress.Commands.add('safeClick', { prevSubject: 'element' }, ($element) => {
+    const click = ($el) => $el.click()
+    return cy.wrap($element).should('be.visible').pipe(click)
+})
+
+Cypress.Commands.add('navigateForm', (buttonName: 'string') => {
+    cy.findByRole('button', {
+        name: buttonName,
+    }).safeClick()
+
+    cy.findByRole('progressbar', { name: 'Loading' }).should('not.exist')
 })
