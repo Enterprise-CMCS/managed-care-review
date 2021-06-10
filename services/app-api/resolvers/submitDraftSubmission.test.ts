@@ -37,7 +37,7 @@ describe('submitDraftSubmission', () => {
 
         const resultDraft = await fetchTestStateSubmissionById(query, createdID)
 
-        // The fields should still be set
+        // The submission fields should still be set
         expect(resultDraft.id).toEqual(createdID)
         expect(resultDraft.submissionType).toEqual('CONTRACT_AND_RATES')
         expect(resultDraft.program.id).toEqual('cnet')
@@ -47,6 +47,14 @@ describe('submitDraftSubmission', () => {
             'An updated submission'
         )
 
+        // Contract details fields should still be set
+        expect(resultDraft.contractType).toEqual(draft.contractType)
+        expect(resultDraft.contractDateStart).toEqual(draft.contractDateStart)
+        expect(resultDraft.contractDateEnd).toEqual(draft.contractDateEnd)
+        expect(resultDraft.managedCareEntities).toEqual(
+            draft.managedCareEntities
+        )
+        expect(resultDraft.federalAuthorities).toEqual(draft.federalAuthorities)
         // submittedAt should be set to today's date
         const today = new Date()
         const expectedDate = today.toISOString().split('T')[0]

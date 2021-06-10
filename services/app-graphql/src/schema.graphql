@@ -142,6 +142,11 @@ type StateSubmission {
     updatedAt: DateTime!
     documents: [Document!]!
     submittedAt: Date!
+    contractType: ContractType!
+    contractDateStart: Date!
+    contractDateEnd: Date!
+    managedCareEntities: [String!]!
+    federalAuthorities: [FederalAuthority!]!
 }
 
 input DocumentInput {
