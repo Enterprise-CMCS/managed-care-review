@@ -2,6 +2,7 @@ import {
     SubmissionType,
     ContractType,
     FederalAuthority,
+    ManagedCareEntity,
 } from '../common-code/domain-models/DraftSubmissionType'
 
 const SubmissionTypeRecord: Record<SubmissionType, string> = {
@@ -23,4 +24,16 @@ const FederalAuthorityRecord: Record<FederalAuthority, string> = {
     TITLE_XXI: 'Title XXI Separate CHIP State Plan Authority',
 }
 
-export { ContractTypeRecord, SubmissionTypeRecord, FederalAuthorityRecord }
+const ManagedCareEntityRecord: Record<ManagedCareEntity, string> = {
+    MCO: 'Managed Care Organization (MCO)',
+    PIHP: 'Prepaid Inpatient Health Plan (PIHP)',
+    PAHP: 'Prepaid Ambulatory Health Plans (PAHP)',
+    PCCM: 'Primary Care Case Management Entity (PCCM Entity)',
+}
+
+export {
+    ContractTypeRecord,
+    SubmissionTypeRecord,
+    FederalAuthorityRecord,
+    ManagedCareEntityRecord,
+}

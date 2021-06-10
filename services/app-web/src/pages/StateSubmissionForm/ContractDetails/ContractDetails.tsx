@@ -28,6 +28,10 @@ import {
 import styles from '../StateSubmissionForm.module.scss'
 import { ManagedCareEntity } from '../../../common-code/domain-models/DraftSubmissionType'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
+import {
+    ManagedCareEntityRecord,
+    FederalAuthorityRecord,
+} from '../../../constants/submissions'
 
 // Formik setup
 // Should be listed in order of appearance on field to allow errors to focus as expected
@@ -324,7 +328,9 @@ export const ContractDetails = ({
                                             <FieldCheckbox
                                                 id="managedCareOrganization"
                                                 name="managedCareEntities"
-                                                label="Managed Care Organization (MCO)"
+                                                label={
+                                                    ManagedCareEntityRecord.MCO
+                                                }
                                                 value="MCO"
                                                 checked={values.managedCareEntities.includes(
                                                     'MCO'
@@ -333,7 +339,9 @@ export const ContractDetails = ({
                                             <FieldCheckbox
                                                 id="prepaidInpatientHealthPlan"
                                                 name="managedCareEntities"
-                                                label="Prepaid Inpatient Health Plan (PIHP)"
+                                                label={
+                                                    ManagedCareEntityRecord.PIHP
+                                                }
                                                 value="PIHP"
                                                 checked={values.managedCareEntities.includes(
                                                     'PIHP'
@@ -342,7 +350,9 @@ export const ContractDetails = ({
                                             <FieldCheckbox
                                                 id="prepaidAmbulatoryHealthPlans"
                                                 name="managedCareEntities"
-                                                label="Prepaid Ambulatory Health Plans (PAHP)"
+                                                label={
+                                                    ManagedCareEntityRecord.PAHP
+                                                }
                                                 value="PAHP"
                                                 checked={values.managedCareEntities.includes(
                                                     'PAHP'
@@ -351,7 +361,9 @@ export const ContractDetails = ({
                                             <FieldCheckbox
                                                 id="primaryCareCaseManagementEntity"
                                                 name="managedCareEntities"
-                                                label="Primary Care Case Management Entity (PCCM Entity)"
+                                                label={
+                                                    ManagedCareEntityRecord.PCCM
+                                                }
                                                 value="PCCM"
                                                 checked={values.managedCareEntities.includes(
                                                     'PCCM'
@@ -582,7 +594,9 @@ export const ContractDetails = ({
                                             <FieldCheckbox
                                                 id="1932aStatePlanAuthority"
                                                 name="federalAuthorities"
-                                                label="1932(a) State Plan Authority"
+                                                label={
+                                                    FederalAuthorityRecord.STATE_PLAN
+                                                }
                                                 value={
                                                     FederalAuthority.StatePlan
                                                 }
@@ -593,7 +607,9 @@ export const ContractDetails = ({
                                             <FieldCheckbox
                                                 id="1915bWaiverAuthority"
                                                 name="federalAuthorities"
-                                                label="1915(b) Waiver Authority"
+                                                label={
+                                                    FederalAuthorityRecord.WAIVER_1915B
+                                                }
                                                 value={
                                                     FederalAuthority.Waiver_1915B
                                                 }
@@ -604,7 +620,9 @@ export const ContractDetails = ({
                                             <FieldCheckbox
                                                 id="1115WaiverAuthority"
                                                 name="federalAuthorities"
-                                                label="1115 Waiver Authority"
+                                                label={
+                                                    FederalAuthorityRecord.WAIVER_1115
+                                                }
                                                 value={
                                                     FederalAuthority.Waiver_1115
                                                 }
@@ -615,7 +633,9 @@ export const ContractDetails = ({
                                             <FieldCheckbox
                                                 id="1915aVoluntaryAuthority"
                                                 name="federalAuthorities"
-                                                label="1915(a) Voluntary Authority"
+                                                label={
+                                                    FederalAuthorityRecord.VOLUNTARY
+                                                }
                                                 value={
                                                     FederalAuthority.Voluntary
                                                 }
@@ -626,7 +646,9 @@ export const ContractDetails = ({
                                             <FieldCheckbox
                                                 id="1937BenchmarkAuthority"
                                                 name="federalAuthorities"
-                                                label="1937 Benchmark Authority"
+                                                label={
+                                                    FederalAuthorityRecord.BENCHMARK
+                                                }
                                                 value={
                                                     FederalAuthority.Benchmark
                                                 }
@@ -637,7 +659,9 @@ export const ContractDetails = ({
                                             <FieldCheckbox
                                                 id="titleXXISeparateChipStatePlanAuthority"
                                                 name="federalAuthorities"
-                                                label="Title XXI Separate CHIP State Plan Authority"
+                                                label={
+                                                    FederalAuthorityRecord.TITLE_XXI
+                                                }
                                                 value={
                                                     FederalAuthority.TitleXxi
                                                 }
