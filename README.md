@@ -30,7 +30,7 @@ Run tests locally
 
 -   `./dev test web` to run the web tests, watching the results
 -   `./dev test api` to run the api tests, watching the results
--   `./dev test browser` to run the cypress browser based tests, this opens the cypress runner and requires an endpoint  to test against. By default, runs on localhost (so you should be running the app locally if this is what you intend).  To see options for flags cypress accepts see [docs](https://docs.cypress.io/guides/guides/command-line#Commands). 
+-   `./dev test browser` to run the cypress browser based tests, this opens the cypress runner and requires an endpoint to test against. By default, runs on localhost (so you should be running the app locally if this is what you intend). To see options for flags cypress accepts see [docs](https://docs.cypress.io/guides/guides/command-line#Commands).
 
 -   `./dev test` (or `dev test check`) to run all the tests that CI runs, once. This will run the web, api, and browser tests
 -   Run with flags `./dev test --unit`, `.dev test --online`, to filter down, but still run once.
@@ -45,14 +45,6 @@ Run web app locally, but configured to run against a deployed backend
 -   For local dev testing, you should push your local branch to deploy a review app and then `./dev hybrid` will connect to that running review app by default.
 -   If you want to specify a different instance to run against, you can set the `--stage` parameter. For more info about stages/accounts take a gander at the Deploy section below.
 
-## AWS Keys
-
-In order to run commands against a live AWS environment you need to configure AWS keys to grant you authorization to do so. You will need this for sure to run the `./dev hybrid` command, and might be necessary to run any serverless commands directly by hand.
-
-You can get keys out of Cloudtamer, on the VPN. Click "Cloud Access" on the account you want access to. Then the account > the access type > "Short-term access keys"
-
-From there it's up to you how to make things work locally. Either set the three environment variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_SESSION_TOKEN` or put the values in your `~/.aws/credentials` file before invoking the command you want to invoke. I usually just throw the env vars into my .env file and everything works.
-
 ## Build & Deploy
 
 See main build/deploy [here](https://github.com/CMSgov/managed-care-review/actions/workflows/promote.yml?query=branch%3Amain)
@@ -65,7 +57,7 @@ In the Dev account, in addition to deploying the main branch, we deploy a full v
 
 You can see the deploys for review apps [here](https://github.com/CMSgov/managed-care-review/actions/workflows/deploy.yml)
 
-## Requirements
+## Application Requirements
 
 Serverless - Get help installing it here: [Serverless Getting Started page](https://www.serverless.com/framework/docs/providers/aws/guide/installation/). Learn more about serverless from the [Serverless Stack tutorial](https://serverless-stack.com/).
 
@@ -96,13 +88,113 @@ node which    # should return something like /Users/YOURUSER/.nvm/versions/node/
 nvm install
 nvm use
 
-
 # install yarn for dependency manage
 brew install yarn
 
 # run the app and storybook
 ./dev local
 ```
+
+## Infrastructure Dependencies
+
+These dependencies can be installed if you are wanting or needing to run `aws` or serverless `sls` commands locally.
+
+Before beginning, it is assumed you have:
+
+1. Added your public key to your GitHub account
+2. Cloned this repo locally
+
+The following should install everything you need on macOS:
+
+```bash
+brew install awscli direnv pre-commit shellcheck
+pre-commit install --install-hooks
+```
+
+### Direnv
+
+We use [direnv](https://direnv.net/) to automatically set `AWS_PROFILE` and
+other environment variables when you enter this directory or its children. This
+will be used by tools like the `aws` CLI.
+
+If you've never setup [direnv](https://direnv.net/) before, add the following to
+the bottom of your `.bashrc`.
+
+```bash
+if command -v direnv >/dev/null; then
+    eval "$(direnv hook bash)"
+fi
+```
+
+If using zsh, add the following to your `.zshrc`
+
+```bash
+eval "$(direnv hook zsh)"
+```
+
+After adding, start a new shell so the hook runs.
+
+The first time you enter a directory with an `.envrc` file, you'll receive a
+warning like:
+
+```text
+    direnv: error /some/path/to/.envrc is blocked. Run `direnv allow` to approve its content
+```
+
+Run `direnv allow` to allow the environment to load.
+
+### AWS Access
+
+AWS access is managed via Active Directory and Cloudtamer.
+
+In order to run commands against a live AWS environment you need to configure AWS keys to grant you authorization to do so. You will need this for sure to run the `./dev hybrid` command, and might be necessary to run any serverless commands directly by hand.
+
+We can use the `ctkey` tool to make setting up the appropriate access easier, which is described below.
+
+### ctkey
+
+`ctkey` is a tool provided by Cloudtamer that allows you to generate temporary
+AWS access keys from your CLI/terminal using cloudtamer.cms.gov.
+
+See [Getting started with Access Key CLI
+tool](https://cloud.cms.gov/getting-started-access-key-cli-tool) for a link to
+download the ctkey tool.
+
+Download and unzip the ctkey file onto your local computer. Move the
+executable that is applicable to your system (e.g., Mac/OS X) to a directory in
+your PATH. Rename the executable to `ctkey`.
+
+To verify things are working, run:
+
+```shell
+ctkey --version
+```
+
+Mac users: If you get an OS X error about the file not being trusted, go to
+System Preferences > Security > General and click to allow ctkey.
+
+### ctkey-wrapper
+
+```text
+scripts
+├── aws -> ctkey-wrapper
+├── ctkey-wrapper
+└── sls -> ctkey-wrapper
+```
+
+`ctkey-wrapper` is a small bash script that runs the `ctkey` command to set your
+AWS environment variables. With `ctkey-wrapper` in place, you can simply run
+`aws` or `sls` commands in this directory and `ctkey-wrapper` manages all
+of the `ctkey` complexity behind the scenes.
+
+Set the `CTKEY_USERNAME` and `CTKEY_PASSWORD` environment variables in
+.envrc.local or another suitable location. These are are the same credentials
+used for logging into Cloudtamer and will need to be updated whenever your
+Cloudtamer credentials are updated.
+
+Currently, `ctkey-wrapper` requires the user to be running the openconnect-tinyproxy
+container [here](https://github.com/trussworks/openconnect-tinyproxy) to connect
+to Cloudtamer.
 
 ## License
 
