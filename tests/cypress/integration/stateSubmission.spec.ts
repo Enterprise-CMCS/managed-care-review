@@ -167,13 +167,15 @@ describe('State Submission', () => {
             cy.findByText(/MN-MSHO-/).should('exist')
             cy.findByLabelText('Base contract').safeClick()
             cy.findByLabelText('Start date').type('04/01/2024')
-            cy.findByLabelText('End date').type('04/01/2026')
+            cy.findByLabelText('End date').type('04/01/2026').blur()
             cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
             cy.findByLabelText('1932(a) State Plan Authority').safeClick()
             cy.findAllByTestId('errorMessage').should('have.length', 0)
             cy.findByRole('button', {
                 name: 'Continue',
-            }).safeClick()
+            })
+                .scrollIntoView()
+                .safeClick()
 
             //Skip rate details
             cy.findByText('Rate details').should('exist')
