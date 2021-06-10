@@ -93,6 +93,43 @@ type Document {
     s3URL: String!
 }
 
+input DocumentInput {
+    name: String!
+    s3URL: String!
+}
+
+type CapitationRatesAmendedInfo {
+    reason: CapitationRatesAmendmentReason!
+    reasonOther: String
+}
+
+input CapitationRatesAmendedInfoInput {
+    reason: CapitationRatesAmendmentReason!
+    reasonOther: String
+}
+
+type ContractAmendmentInfo {
+    itemsBeingAmended: [String!]!
+    itemsBeingAmendedOther: String
+    capitationRatesAmendedInfo: CapitationRatesAmendedInfo
+    relatedToCovid19: Boolean
+    relatedToVaccination: Boolean
+}
+
+input ContractAmendmentInfoInput {
+    itemsBeingAmended: [String!]!
+    itemsBeingAmendedOther: String
+    capitationRatesAmendedInfo: CapitationRatesAmendedInfoInput
+    relatedToCovid19: Boolean
+    relatedToVaccination: Boolean
+}
+
+enum CapitationRatesAmendmentReason {
+    ANNUAL
+    MIDYEAR
+    OTHER
+}
+
 enum SubmissionType {
     CONTRACT_ONLY
     CONTRACT_AND_RATES
@@ -128,6 +165,7 @@ type DraftSubmission {
     contractDateEnd: Date
     managedCareEntities: [String!]!
     federalAuthorities: [FederalAuthority!]!
+    contractAmendmentInfo: ContractAmendmentInfo
 }
 
 type StateSubmission {
@@ -141,13 +179,10 @@ type StateSubmission {
     createdAt: Date!
     updatedAt: DateTime!
     documents: [Document!]!
+    contractAmendmentInfo: ContractAmendmentInfo
     submittedAt: Date!
 }
 
-input DocumentInput {
-    name: String!
-    s3URL: String!
-}
 input DraftSubmissionUpdates {
     programID: String!
     submissionType: SubmissionType!
@@ -158,4 +193,5 @@ input DraftSubmissionUpdates {
     contractDateEnd: Date
     managedCareEntities: [String!]!
     federalAuthorities: [FederalAuthority!]!
+    contractAmendmentInfo: ContractAmendmentInfoInput
 }

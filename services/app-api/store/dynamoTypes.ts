@@ -24,6 +24,40 @@ export class DocumentStoreT {
         ;(this.name = ''), (this.s3URL = '')
     }
 }
+
+export class CapitationRatesAmendedInfo {
+    @attribute()
+    reason: 'ANNUAL' | 'MIDYEAR' | 'OTHER'
+
+    @attribute()
+    reasonOther?: string
+
+    constructor() {
+        this.reason = 'OTHER'
+    }
+}
+
+export class ContractAmendmentInfoT {
+    @attribute()
+    itemsBeingAmended: string[]
+
+    @attribute()
+    itemsBeingAmendedOther?: string
+
+    @attribute()
+    relatedToCovid19?: Boolean
+
+    @attribute()
+    relatedToVaccination?: Boolean
+
+    @attribute()
+    capitationRatesAmendedInfo?: CapitationRatesAmendedInfo
+
+    constructor() {
+        this.itemsBeingAmended = []
+    }
+}
+
 @table('draft-submissions')
 export class DraftSubmissionStoreType {
     @hashKey()
@@ -80,6 +114,9 @@ export class DraftSubmissionStoreType {
     @attribute({ memberType: embed(DocumentStoreT) })
     documents: Array<DocumentStoreT>
 
+    @attribute()
+    contractAmendmentInfo?: ContractAmendmentInfoT
+
     constructor() {
         this.id = ''
         this.status = 'DRAFT'
@@ -104,7 +141,7 @@ export class StateSubmissionStoreType {
     @hashKey()
     id: string
 
-    // This is used to differentriate between DraftSubmission and StateSubmission
+    // This is used to differentiate between DraftSubmission and StateSubmission
     @attribute()
     status: string
 

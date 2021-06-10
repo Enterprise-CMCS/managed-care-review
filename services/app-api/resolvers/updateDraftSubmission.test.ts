@@ -161,6 +161,139 @@ describe('updateDraftSubmission', () => {
         expect(resultDraft2.documents[0].name).toEqual('myfile2.pdf')
     })
 
+    it('updates a submission to have some amendment details', async () => {
+        const server = constructTestServer()
+        const { mutate } = createTestClient(server)
+
+        const createdDraft = await createTestDraftSubmission(mutate)
+        const createdID = createdDraft.id
+        const startDate = '2021-07-06'
+
+        const updatedDraft = {
+            programID: 'cnet',
+            submissionType: 'CONTRACT_AND_RATES',
+            submissionDescription: 'An updated submission',
+            documents: [],
+            contractType: 'AMENDMENT',
+            contractDateStart: startDate,
+            managedCareEntities: [],
+            federalAuthorities: [],
+
+            // rate detail info
+            contractAmendmentInfo: {
+                itemsBeingAmended: [
+                    'BENEFITS_PROVIDED',
+                    'LENGTH_OF_CONTRACT_PERIOD',
+                ],
+                relatedToCovid19: false,
+            },
+        }
+
+        const updateResult = await mutate({
+            mutation: UPDATE_DRAFT_SUBMISSION,
+            variables: {
+                input: {
+                    submissionID: createdID,
+                    draftSubmissionUpdates: updatedDraft,
+                },
+            },
+        })
+
+        expect(updateResult.errors).toBeUndefined()
+
+        const resultDraft =
+            updateResult.data.updateDraftSubmission.draftSubmission
+
+        expect(resultDraft.id).toEqual(createdID)
+        expect(resultDraft.contractAmendmentInfo.itemsBeingAmended).toEqual([
+            'BENEFITS_PROVIDED',
+            'LENGTH_OF_CONTRACT_PERIOD',
+        ])
+        expect(resultDraft.contractAmendmentInfo.relatedToCovid19).toEqual(
+            false
+        )
+        expect(resultDraft.contractAmendmentInfo.relatedToVaccination).toEqual(
+            null
+        )
+    })
+
+    it('updates a submission with conditionals in the amendment details', async () => {
+        const server = constructTestServer()
+        const { query, mutate } = createTestClient(server)
+
+        const createdDraft = await createTestDraftSubmission(mutate)
+        const createdID = createdDraft.id
+        const startDate = '2021-07-06'
+
+        const updatedDraft = {
+            programID: 'cnet',
+            submissionType: 'CONTRACT_AND_RATES',
+            submissionDescription: 'An updated submission',
+            documents: [],
+            contractType: 'AMENDMENT',
+            contractDateStart: startDate,
+            managedCareEntities: [],
+            federalAuthorities: [],
+
+            // rate detail info
+            contractAmendmentInfo: {
+                itemsBeingAmended: [
+                    'BENEFITS_PROVIDED',
+                    'LENGTH_OF_CONTRACT_PERIOD',
+                    'CAPITATION_RATES',
+                ],
+                itemsBeingAmendedOther: 'just having a laugh',
+                capitationRatesAmendedInfo: {
+                    reason: 'OTHER',
+                    reasonOther: 'something for fun',
+                },
+                relatedToCovid19: true,
+            },
+        }
+
+        const updateResult = await mutate({
+            mutation: UPDATE_DRAFT_SUBMISSION,
+            variables: {
+                input: {
+                    submissionID: createdID,
+                    draftSubmissionUpdates: updatedDraft,
+                },
+            },
+        })
+
+        expect(updateResult.errors).toBeUndefined()
+
+        const resultDraft =
+            updateResult.data.updateDraftSubmission.draftSubmission
+
+        // also check on the fetch of the same
+        const fetchedDraft = await fetchTestDraftSubmissionById(
+            query,
+            createdID
+        )
+
+        const drafts = [resultDraft, fetchedDraft]
+
+        // for both the result of the update call, and the result of the fetch call, make sure
+        // our fields came through
+        drafts.forEach((draft) => {
+            expect(draft.id).toEqual(createdID)
+
+            const info = draft.contractAmendmentInfo
+            // todo should we sort these? // it should be a SET
+            expect(info.itemsBeingAmended).toEqual([
+                'BENEFITS_PROVIDED',
+                'LENGTH_OF_CONTRACT_PERIOD',
+                'CAPITATION_RATES',
+            ])
+            expect(info.itemsBeingAmendedOther).toEqual('just having a laugh')
+            expect(info.capitationRatesAmendedInfo.reason).toEqual('OTHER')
+            expect(info.capitationRatesAmendedInfo.reasonOther).toEqual(
+                'something for fun'
+            )
+        })
+    })
+
     it('updates a submission to remove existing documents', async () => {
         const server = constructTestServer()
         const { query, mutate } = createTestClient(server)

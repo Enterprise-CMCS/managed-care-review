@@ -22,6 +22,8 @@ the expect matchers are from jest-dom: https://github.com/testing-library/jest-d
 ### Todo:
 
 -   GraphQL
+-   Apollo Server / Client
+-   GraphQL Code Generator
 -   Typescript
 -   Jest?
 -   node?
