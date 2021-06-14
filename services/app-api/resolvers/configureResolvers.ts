@@ -10,6 +10,7 @@ import { createDraftSubmissionResolver } from './createDraftSubmission'
 import { updateDraftSubmissionResolver } from './updateDraftSubmission'
 import { submitDraftSubmissionResolver } from './submitDraftSubmission'
 import { draftSubmissionResolver } from './draftSubmissionResolver'
+import { stateSubmissionResolver } from './stateSubmissionResolver'
 import { fetchStateSubmissionResolver } from './fetchStateSubmission'
 
 export function configureResolvers(store: Store): Resolvers {
@@ -28,7 +29,7 @@ export function configureResolvers(store: Store): Resolvers {
         },
         User: userResolver,
         DraftSubmission: draftSubmissionResolver(store),
-        StateSubmission: draftSubmissionResolver(store), // Surprisingly, we can reuse this
+        StateSubmission: stateSubmissionResolver(store), // Surprisingly, we can reuse this
         // This may diverge eventually, but so long as the computed properties are the same
         // we should be able to get away with this.
     }

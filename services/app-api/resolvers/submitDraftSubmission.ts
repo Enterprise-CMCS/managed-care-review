@@ -4,6 +4,7 @@ import { MutationResolvers, State } from '../gen/gqlServer'
 import {
     DraftSubmissionType,
     StateSubmissionType,
+    isStateSubmission,
 } from '../../app-web/src/common-code/domain-models'
 
 export const SubmissionErrorCodes = ['INCOMPLETE'] as const
@@ -48,16 +49,21 @@ function submit(
         }
     }
 
-    const stateSubmission: StateSubmissionType = {
+    const maybeStateSubmission: Record<string, unknown> = {
         ...draft,
         submittedAt: new Date(),
     }
 
-    return stateSubmission
+    if (isStateSubmission(maybeStateSubmission)) return maybeStateSubmission
+    else
+        return {
+            code: 'INCOMPLETE',
+            message: 'submission is missing a required field',
+        }
 }
 
 // submitDraftSubmissionResolver is a state machine transition for Submission,
-// transforming it from a DraftSubmissinon to a StateSubmission
+// transforming it from a DraftSubmission to a StateSubmission
 export function submitDraftSubmissionResolver(
     store: Store
 ): MutationResolvers['submitDraftSubmission'] {
