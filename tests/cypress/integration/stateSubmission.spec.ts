@@ -33,7 +33,9 @@ describe('State Submission', () => {
             cy.findByText(
                 'You must provide a description of any major changes or updates'
             ).should('not.exist')
-            cy.navigateForm('Continue')
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).safeClick()
 
             // Fill out some base contract fields
             cy.findByText('Contract details').should('exist')
@@ -63,7 +65,6 @@ describe('State Submission', () => {
             cy.navigateForm('Continue')
 
             // Continue button navigates to documents page
-            cy.navigateForm('Continue')
             cy.findByRole('heading', { name: 'Documents' }).should('exist')
             cy.findByText(/MN-MSHO-/).should('exist')
 
