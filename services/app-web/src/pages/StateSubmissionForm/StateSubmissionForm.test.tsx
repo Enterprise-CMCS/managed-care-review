@@ -86,6 +86,46 @@ describe('StateSubmissionForm', () => {
             )
         })
 
+        it('loads contract details fields for /submissions/:id/contract-details with amendments', async () => {
+            const mockAmendment = mockDraft()
+
+            mockAmendment.contractAmendmentInfo = {
+                itemsBeingAmended: ['foo', 'bar', 'OTHER'],
+                itemsBeingAmendedOther: 'Something Nice',
+                capitationRatesAmendedInfo: null,
+                relatedToCovid19: true,
+                relatedToVaccination: null,
+            }
+
+            renderWithProviders(
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_FORM}
+                    component={StateSubmissionForm}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchDraftSubmissionMock({
+                                id: '12',
+                                statusCode: 200,
+                                draftSubmission: mockAmendment,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/12/contract-details',
+                    },
+                }
+            )
+
+            await waitFor(() =>
+                expect(
+                    screen.getByRole('heading', { name: 'Contract details' })
+                ).toBeInTheDocument()
+            )
+        })
+
         it('loads documents fields for /submissions/:id/documents', async () => {
             renderWithProviders(
                 <Route

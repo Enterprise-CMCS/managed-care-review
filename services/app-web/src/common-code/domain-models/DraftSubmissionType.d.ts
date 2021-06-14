@@ -45,7 +45,7 @@ const AMENDABLE_ITEMS = [
     'QUALITY_STANDARDS',
     'RISK_SHARING_MECHANISM',
 ] as const
-type AmendableItems = typeof AMENDABLE_ITEMS[number]
+export type AmendableItems = typeof AMENDABLE_ITEMS[number]
 
 // MAIN
 type DraftSubmissionType = {

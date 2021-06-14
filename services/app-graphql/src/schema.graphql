@@ -99,12 +99,12 @@ input DocumentInput {
 }
 
 type CapitationRatesAmendedInfo {
-    reason: CapitationRatesAmendmentReason!
+    reason: CapitationRatesAmendmentReason
     reasonOther: String
 }
 
 input CapitationRatesAmendedInfoInput {
-    reason: CapitationRatesAmendmentReason!
+    reason: CapitationRatesAmendmentReason
     reasonOther: String
 }
 
