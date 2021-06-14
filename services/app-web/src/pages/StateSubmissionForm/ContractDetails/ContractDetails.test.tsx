@@ -1,4 +1,5 @@
 import { screen, waitFor } from '@testing-library/react'
+import { within } from '@testing-library/dom'
 import { act } from 'react-dom/test-utils'
 import { createMemoryHistory } from 'history'
 import userEvent from '@testing-library/user-event'
@@ -141,8 +142,17 @@ describe('ContractDetails', () => {
         ).toBeNull()
 
         // click other,
+        const capitationChoices = screen.getByText(
+            'Select reason for capitation rate change'
+        ).parentElement
+        if (capitationChoices === null) {
+            throw new Error('cap choices should always have a parent')
+        }
+
         await act(async () => {
-            screen.getByLabelText('Other (please describe)').click()
+            within(capitationChoices)
+                .getByLabelText('Other (please describe)')
+                .click()
         })
 
         // other is displayed, error is back
@@ -155,7 +165,7 @@ describe('ContractDetails', () => {
             const otherBox = screen.getByLabelText(
                 'Other capitation rate description'
             )
-            userEvent.type(otherBox, 'x')
+            userEvent.type(otherBox, 'x') // WEIRD, for some reason it's not recording but the last character of the typing
             screen.getByLabelText('No').click()
         })
 
@@ -254,6 +264,7 @@ describe('ContractDetails', () => {
                             managedCareEntities: ['MCO'],
                             contractAmendmentInfo: {
                                 itemsBeingAmended: ['FINANCIAL_INCENTIVES'],
+                                itemsBeingAmendedOther: null,
                                 relatedToCovid19: true,
                                 relatedToVaccination: false,
                             },

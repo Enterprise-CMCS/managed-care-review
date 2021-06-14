@@ -27,7 +27,7 @@ export class DocumentStoreT {
 
 export class CapitationRatesAmendedInfo {
     @attribute()
-    reason: 'ANNUAL' | 'MIDYEAR' | 'OTHER'
+    reason?: 'ANNUAL' | 'MIDYEAR' | 'OTHER'
 
     @attribute()
     reasonOther?: string
@@ -45,10 +45,10 @@ export class ContractAmendmentInfoT {
     itemsBeingAmendedOther?: string
 
     @attribute()
-    relatedToCovid19?: Boolean
+    relatedToCovid19?: boolean
 
     @attribute()
-    relatedToVaccination?: Boolean
+    relatedToVaccination?: boolean
 
     @attribute()
     capitationRatesAmendedInfo?: CapitationRatesAmendedInfo

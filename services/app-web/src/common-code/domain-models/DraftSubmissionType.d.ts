@@ -9,11 +9,11 @@ type ContractAmendmentInfo = {
     itemsBeingAmended: string[]
     itemsBeingAmendedOther?: string
     capitationRatesAmendedInfo?: {
-        reason: 'ANNUAL' | 'MIDYEAR' | 'OTHER'
+        reason?: 'ANNUAL' | 'MIDYEAR' | 'OTHER'
         reasonOther?: string
     }
-    relatedToCovid19?: Boolean
-    relatedToVaccination?: Boolean
+    relatedToCovid19?: boolean
+    relatedToVaccination?: boolean
 }
 
 type ContractType = BASE | AMENDMENT

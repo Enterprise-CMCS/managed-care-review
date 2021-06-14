@@ -28,10 +28,7 @@ import {
     useUpdateDraftSubmissionMutation,
 } from '../../../gen/gqlClient'
 import styles from '../StateSubmissionForm.module.scss'
-import {
-    CapitationRateReason,
-    ManagedCareEntity,
-} from '../../../common-code/domain-models/DraftSubmissionType'
+import { ManagedCareEntity } from '../../../common-code/domain-models/DraftSubmissionType'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
 
 function nullOrValue(attribute: string): string | null {
@@ -39,6 +36,13 @@ function nullOrValue(attribute: string): string | null {
         return null
     }
     return attribute
+}
+
+function emptyStringOrValue(attribute: boolean | null): string {
+    if (attribute === null) {
+        return ''
+    }
+    return attribute ? 'YES' : 'NO'
 }
 
 // Formik setup
@@ -119,18 +123,29 @@ export const ContractDetails = ({
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const history = useHistory()
 
-    const ContractDetailsInitialValues: ContractDetailsFormValues = {
+
+    const contractDetailsInitialValues: ContractDetailsFormValues = {
         contractType: draftSubmission?.contractType ?? undefined,
         contractDateStart: draftSubmission?.contractDateStart?.toString() ?? '',
         contractDateEnd: draftSubmission?.contractDateEnd?.toString() ?? '',
         managedCareEntities:
             (draftSubmission?.managedCareEntities as ManagedCareEntity[]) ?? [],
-        itemsAmended: [],
-        itemsAmendedOther: '',
-        capitationRates: undefined,
-        capitationRatesOther: '',
-        relatedToCovid19: '',
-        relatedToVaccination: '',
+        itemsAmended:
+            draftSubmission.contractAmendmentInfo?.itemsBeingAmended ?? [],
+        itemsAmendedOther:
+            draftSubmission.contractAmendmentInfo?.itemsBeingAmendedOther ?? '',
+        capitationRates:
+            draftSubmission.contractAmendmentInfo?.capitationRatesAmendedInfo
+                ?.reason ?? undefined,
+        capitationRatesOther:
+            draftSubmission.contractAmendmentInfo?.capitationRatesAmendedInfo
+                ?.reasonOther ?? '',
+        relatedToCovid19: emptyStringOrValue(
+            draftSubmission.contractAmendmentInfo?.relatedToCovid19 ?? null
+        ),
+        relatedToVaccination: emptyStringOrValue(
+            draftSubmission.contractAmendmentInfo?.relatedToVaccination ?? null
+        ),
         federalAuthorities: draftSubmission?.federalAuthorities ?? [],
     }
 
@@ -177,15 +192,12 @@ export const ContractDetails = ({
 
             const amendedOther = nullOrValue(values.itemsAmendedOther)
 
-            let capitationInfo: CapitationRatesAmendedInfo | null = null
+            let capitationInfo: 
+                | CapitationRatesAmendedInfo
+                | undefined = undefined
             if (values.itemsAmended.includes('CAPITATION_RATES')) {
-                const capRates: CapitationRatesAmendmentReason | null =
-                    values.capitationRates === undefined
-                        ? null
-                        : values.capitationRates
-
                 capitationInfo = {
-                    reason: capRates,
+                    reason: values.capitationRates,
                     reasonOther: nullOrValue(values.capitationRatesOther),
                 }
             }
@@ -224,7 +236,7 @@ export const ContractDetails = ({
 
     return (
         <Formik
-            initialValues={ContractDetailsInitialValues}
+            initialValues={contractDetailsInitialValues}
             onSubmit={handleFormSubmit}
             validationSchema={ContractDetailsFormSchema}
             validateOnChange={shouldValidate}
@@ -529,7 +541,9 @@ export const ContractDetails = ({
                                                                         id="annualRateUpdate"
                                                                         name="capitationRates"
                                                                         label="Annual rate update"
-                                                                        value="ANNUAL_RATE_UPDATE"
+                                                                        value={
+                                                                            CapitationRatesAmendmentReason.Annual
+                                                                        }
                                                                         checked={
                                                                             values.capitationRates ===
                                                                             CapitationRatesAmendmentReason.Annual
@@ -539,17 +553,21 @@ export const ContractDetails = ({
                                                                         id="midYearUpdate"
                                                                         name="capitationRates"
                                                                         label="Mid-year update"
-                                                                        value="MID_YEAR_UPDATE"
+                                                                        value={
+                                                                            CapitationRatesAmendmentReason.Midyear
+                                                                        }
                                                                         checked={
                                                                             values.capitationRates ===
                                                                             CapitationRatesAmendmentReason.Midyear
                                                                         }
                                                                     />
                                                                     <FieldRadio
-                                                                        id="other"
+                                                                        id="capitation-other"
                                                                         name="capitationRates"
                                                                         label="Other (please describe)"
-                                                                        value="OTHER"
+                                                                        value={
+                                                                            CapitationRatesAmendmentReason.Other
+                                                                        }
                                                                         checked={
                                                                             values.capitationRates ===
                                                                             CapitationRatesAmendmentReason.Other
@@ -671,7 +689,7 @@ export const ContractDetails = ({
                                                         )}
                                                     />
                                                     <FieldCheckbox
-                                                        id="other"
+                                                        id="items-other"
                                                         name="itemsAmended"
                                                         label="Other (please describe)"
                                                         value="OTHER"
@@ -723,12 +741,20 @@ export const ContractDetails = ({
                                                                 name="relatedToCovid19"
                                                                 label="Yes"
                                                                 value="YES"
+                                                                checked={
+                                                                    values.relatedToCovid19 ===
+                                                                    'YES'
+                                                                }
                                                             />
                                                             <FieldRadio
                                                                 id="covidNo"
                                                                 name="relatedToCovid19"
                                                                 label="No"
                                                                 value="NO"
+                                                                checked={
+                                                                    values.relatedToCovid19 ===
+                                                                    'NO'
+                                                                }
                                                             />
                                                         </Fieldset>
                                                     </FormGroup>
@@ -754,12 +780,20 @@ export const ContractDetails = ({
                                                                     name="relatedToVaccination"
                                                                     label="Yes"
                                                                     value="YES"
+                                                                    checked={
+                                                                        values.relatedToVaccination ===
+                                                                        'YES'
+                                                                    }
                                                                 />
                                                                 <FieldRadio
                                                                     id="vaccineNo"
                                                                     name="relatedToVaccination"
                                                                     label="No"
                                                                     value="NO"
+                                                                    checked={
+                                                                        values.relatedToVaccination ===
+                                                                        'NO'
+                                                                    }
                                                                 />
                                                             </Fieldset>
                                                         </FormGroup>

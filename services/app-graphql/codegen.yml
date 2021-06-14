@@ -11,7 +11,7 @@ generates:
       - 'typescript-resolvers'
     config: # Go ahead and prettier it
       contextType: ../handlers/apollo_gql#Context
-      useIndexSignature: true # Don't forget this or Apollo will give an inscrutible error
+      useIndexSignature: true # Don't forget this or Apollo will give an inscrutable error
       defaultMapper: Partial<{T}>
       mappers:
         User: ../../app-web/src/common-code/domain-models#CognitoUserType

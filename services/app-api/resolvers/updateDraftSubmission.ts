@@ -2,9 +2,61 @@ import { UserInputError, ForbiddenError } from 'apollo-server-lambda'
 
 import { isStoreError, Store } from '../store/index'
 
-import { MutationResolvers, State } from '../gen/gqlServer'
+import {
+    MutationResolvers,
+    State,
+    DraftSubmissionUpdates,
+} from '../gen/gqlServer'
 
 import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
+
+import { CapitationRatesAmendedInfo } from '../store/dynamoTypes'
+
+// This MUTATES the passed in draft, overwriting all the current fields with the updated fields
+function applyUpdates(
+    draft: DraftSubmissionType,
+    updates: DraftSubmissionUpdates
+) {
+    const capitationRatesUpdates = updates.contractAmendmentInfo
+        ?.capitationRatesAmendedInfo
+        ? {
+              reason:
+                  updates.contractAmendmentInfo.capitationRatesAmendedInfo
+                      .reason ?? undefined,
+
+              reasonOther:
+                  updates.contractAmendmentInfo.capitationRatesAmendedInfo
+                      .reasonOther ?? undefined,
+          }
+        : undefined
+
+    const amendmentInfoUpdates = updates.contractAmendmentInfo
+        ? {
+              itemsBeingAmended:
+                  updates.contractAmendmentInfo.itemsBeingAmended,
+              itemsBeingAmendedOther:
+                  updates.contractAmendmentInfo.itemsBeingAmendedOther ??
+                  undefined,
+              capitationRatesAmendedInfo: capitationRatesUpdates,
+              relatedToCovid19:
+                  updates.contractAmendmentInfo.relatedToCovid19 ?? undefined,
+              relatedToVaccination:
+                  updates.contractAmendmentInfo.relatedToVaccination ??
+                  undefined,
+          }
+        : undefined
+
+    draft.programID = updates.programID
+    draft.submissionType = updates.submissionType
+    draft.submissionDescription = updates.submissionDescription
+    draft.documents = updates.documents
+    draft.contractType = updates.contractType
+    draft.contractDateStart = updates.contractDateStart
+    draft.contractDateEnd = updates.contractDateEnd
+    draft.managedCareEntities = updates.managedCareEntities
+    draft.federalAuthorities = updates.federalAuthorities
+    draft.contractAmendmentInfo = amendmentInfoUpdates
+}
 
 export function updateDraftSubmissionResolver(
     store: Store
@@ -27,11 +79,11 @@ export function updateDraftSubmissionResolver(
                 }
             )
         }
-        const initialDraft: DraftSubmissionType = result
+        const draft: DraftSubmissionType = result
 
         // Authorize the update
         const stateFromCurrentUser: State['code'] = context.user.state_code
-        if (initialDraft.stateCode !== stateFromCurrentUser) {
+        if (draft.stateCode !== stateFromCurrentUser) {
             throw new ForbiddenError(
                 'user not authorized to fetch data from a different state'
             )
@@ -52,7 +104,10 @@ export function updateDraftSubmissionResolver(
             )
         }
 
-        const draft = Object.assign(initialDraft, input.draftSubmissionUpdates)
+
+        // apply the updates to the draft
+        applyUpdates(draft, input.draftSubmissionUpdates)
+
         const updateResult = await store.updateDraftSubmission(draft)
         if (isStoreError(updateResult)) {
             console.log(
