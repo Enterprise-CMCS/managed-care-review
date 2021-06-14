@@ -29,21 +29,44 @@ import styles from '../StateSubmissionForm.module.scss'
 import { ManagedCareEntity } from '../../../common-code/domain-models/DraftSubmissionType'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
 
-// Formik setup
-// Should be listed in order of appearance on field to allow errors to focus as expected
+/*  
+ Date validations
+ Dates are formatted from user input MM/DD/YYY to YYYY-MM-DD form data. This matches the graphql Date scalar.
+ Use custom Yup verifyFormat method to validate formatting https://github.com/jquense/yup#yupaddmethodschematype-schema-name-string-method--schema-void
+ If date is not correct, handle as Invalid Date
+*/
+
+const formatDate = (initialValue?: string): string | undefined => {
+    const dayjsValue = dayjs(initialValue)
+    return initialValue && dayjsValue.isValid()
+        ? dayjs(initialValue).format('YYYY-MM-DD')
+        : initialValue // undefined
+}
+
+Yup.addMethod(Yup.date, 'verifyFormat', function (formats, parseStrict) {
+    return this.transform(function (value, originalValue) {
+        if (this.isType(value)) return value
+        value = dayjs(originalValue, formats, parseStrict)
+        return value.isValid() ? value.toDate() : new Date('') // Invalid Date
+    })
+})
+
 const ContractDetailsFormSchema = Yup.object().shape({
     contractType: Yup.string().defined(
         'You must choose a contract action type'
     ),
-    contractDateStart: Yup.date().defined('You must enter a start date'),
+    contractDateStart: Yup.date()
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore-next-line
+        .verifyFormat('YYYY-MM-DD', true)
+        .defined('You must enter a start date')
+        .typeError('The start date must be in MM/DD/YYYY format'),
     contractDateEnd: Yup.date()
-        .transform(function (value, originalValue) {
-            const dayjsValue = dayjs(originalValue)
-            // when valid return date object, otherwise return `InvalidDate`
-            return dayjsValue.isValid() ? dayjsValue.toDate() : new Date('')
-        })
-        .typeError('Invalid date')
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore-next-line
+        .verifyFormat('YYYY-MM-DD', true)
         .defined('You must enter an end date')
+        .typeError('The end date must be in MM/DD/YYYY format')
         .min(
             Yup.ref('contractDateStart'),
             'The end date must come after the start date'
@@ -52,7 +75,10 @@ const ContractDetailsFormSchema = Yup.object().shape({
         1,
         'You must select at least one entity'
     ),
-    federalAuthorities: Yup.array().min(1, 'You must select at least one item'),
+    federalAuthorities: Yup.array().min(
+        1,
+        'You must select at least one authority'
+    ),
 })
 export interface ContractDetailsFormValues {
     contractType: ContractType | undefined
@@ -106,6 +132,22 @@ export const ContractDetails = ({
         values: ContractDetailsFormValues
     ): boolean => values.contractType === ContractType.Amendment
 
+    const isDateEmptyOrInvalid = (dateValue: string): boolean => !dateValue
+
+    const ContractDatesErrorMessage = ({
+        values,
+        validationErrorMessage,
+    }: {
+        values: ContractDetailsFormValues
+        validationErrorMessage: string
+    }): React.ReactElement => (
+        <ErrorMessage>
+            {isDateEmptyOrInvalid(values.contractDateEnd) &&
+            isDateEmptyOrInvalid(values.contractDateStart)
+                ? 'You must provide a start and an end date'
+                : validationErrorMessage}
+        </ErrorMessage>
+    )
     const handleFormSubmit = async (
         values: ContractDetailsFormValues,
         formikHelpers: FormikHelpers<ContractDetailsFormValues>
@@ -140,8 +182,6 @@ export const ContractDetails = ({
             initialValues={ContractDetailsInitialValues}
             onSubmit={handleFormSubmit}
             validationSchema={ContractDetailsFormSchema}
-            validateOnChange={shouldValidate}
-            validateOnBlur={shouldValidate}
         >
             {({
                 values,
@@ -243,13 +283,14 @@ export const ContractDetails = ({
                                                 errors.contractDateStart ||
                                                     errors.contractDateEnd
                                             ) && (
-                                                <ErrorMessage>
-                                                    {errors.contractDateStart &&
-                                                    errors.contractDateEnd
-                                                        ? 'You must provide a start and an end date'
-                                                        : errors.contractDateStart ||
-                                                          errors.contractDateEnd}
-                                                </ErrorMessage>
+                                                <ContractDatesErrorMessage
+                                                    values={values}
+                                                    validationErrorMessage={
+                                                        errors.contractDateStart ||
+                                                        errors.contractDateEnd ||
+                                                        'Invalid date'
+                                                    }
+                                                />
                                             )}
                                             <DateRangePicker
                                                 className={
@@ -263,15 +304,11 @@ export const ContractDetails = ({
                                                     name: 'contractDateStart',
                                                     defaultValue:
                                                         values.contractDateStart,
-                                                    onChange: (val) => {
-                                                        const formattedDate = dayjs(
-                                                            val
-                                                        ).format('YYYY-MM-DD')
+                                                    onChange: (val) =>
                                                         setFieldValue(
                                                             'contractDateStart',
-                                                            formattedDate
-                                                        )
-                                                    },
+                                                            formatDate(val)
+                                                        ),
                                                 }}
                                                 endDateHint="mm/dd/yyyy"
                                                 endDateLabel="End date"
@@ -281,15 +318,11 @@ export const ContractDetails = ({
                                                     name: 'contractDateEnd',
                                                     defaultValue:
                                                         values.contractDateEnd,
-                                                    onChange: (val) => {
-                                                        const formattedDate = dayjs(
-                                                            val
-                                                        ).format('YYYY-MM-DD')
+                                                    onChange: (val) =>
                                                         setFieldValue(
                                                             'contractDateEnd',
-                                                            formattedDate
-                                                        )
-                                                    },
+                                                            formatDate(val)
+                                                        ),
                                                 }}
                                             />
                                         </Fieldset>
@@ -564,7 +597,7 @@ export const ContractDetails = ({
                                                 }
                                                 target="_blank"
                                             >
-                                                Manged Care authority
+                                                Managed Care authority
                                                 definitions
                                             </Link>
                                             <div className="usa-hint">
@@ -660,7 +693,11 @@ export const ContractDetails = ({
                             >
                                 Cancel
                             </Link>
-                            <Button type="submit" disabled={isSubmitting}>
+                            <Button
+                                type="submit"
+                                onClick={() => setShouldValidate(true)}
+                                disabled={isSubmitting}
+                            >
                                 Continue
                             </Button>
                         </ButtonGroup>
