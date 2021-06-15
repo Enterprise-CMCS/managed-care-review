@@ -30,38 +30,7 @@ describe('ContractDetails', () => {
 
         renderWithProviders(<ContractDetails draftSubmission={emptyDraft} />, {
             apolloProvider: {
-                mocks: [
-                    fetchCurrentUserMock({ statusCode: 200 }),
-                    updateDraftSubmissionMock({
-                        id: '12',
-                        updates: {
-                            programID: 'snbc',
-                            submissionType: 'CONTRACT_ONLY' as SubmissionType,
-                            submissionDescription: 'A real submission',
-                            documents: [],
-                            contractType: 'AMENDMENT' as ContractType,
-                            contractDateStart: '2021-06-14',
-                            contractDateEnd: '2023-06-14',
-                            federalAuthorities: [
-                                FederalAuthority.Voluntary,
-                                FederalAuthority.Benchmark,
-                                FederalAuthority.Waiver_1115,
-                            ],
-                            managedCareEntities: ['MCO'],
-                            contractAmendmentInfo: {
-                                itemsBeingAmended: ['CAPITATION_RATES'],
-                                capitationRatesAmendedInfo: {
-                                    reason: 'OTHER' as CapitationRatesAmendmentReason,
-                                    reasonOther: 'x',
-                                },
-                                itemsBeingAmendedOther: null,
-                                relatedToCovid19: false,
-                                relatedToVaccination: null,
-                            },
-                        },
-                        statusCode: 200,
-                    }),
-                ],
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
             routerProvider: {
                 route: '/submissions/12/contract-details',
@@ -168,20 +137,6 @@ describe('ContractDetails', () => {
             userEvent.type(otherBox, 'x') // WEIRD, for some reason it's not recording but the last character of the typing
             screen.getByLabelText('No').click()
         })
-
-        // click continue. If our mock is configured correctly we should advance.
-        await act(async () => {
-            const continueButton = screen.getByRole('button', {
-                name: 'Continue',
-            })
-            continueButton.click()
-        })
-
-        await waitFor(() => {
-            expect(history.location.pathname).toBe(
-                '/submissions/12/rate-details'
-            )
-        })
     })
 
     it('progressively discloses option for amended items', async () => {
@@ -243,34 +198,7 @@ describe('ContractDetails', () => {
 
         renderWithProviders(<ContractDetails draftSubmission={emptyDraft} />, {
             apolloProvider: {
-                mocks: [
-                    fetchCurrentUserMock({ statusCode: 200 }),
-                    updateDraftSubmissionMock({
-                        id: '12',
-                        updates: {
-                            programID: 'snbc',
-                            submissionType: 'CONTRACT_ONLY' as SubmissionType,
-                            submissionDescription: 'A real submission',
-                            documents: [],
-                            contractType: 'AMENDMENT' as ContractType,
-                            contractDateStart: '2021-06-14',
-                            contractDateEnd: '2021-06-14',
-                            federalAuthorities: [
-                                FederalAuthority.Voluntary,
-                                FederalAuthority.Benchmark,
-                                FederalAuthority.Waiver_1115,
-                            ],
-                            managedCareEntities: ['MCO'],
-                            contractAmendmentInfo: {
-                                itemsBeingAmended: ['FINANCIAL_INCENTIVES'],
-                                itemsBeingAmendedOther: null,
-                                relatedToCovid19: true,
-                                relatedToVaccination: false,
-                            },
-                        },
-                        statusCode: 200,
-                    }),
-                ],
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
             routerProvider: {
                 route: '/submissions/12/contract-details',
@@ -334,18 +262,5 @@ describe('ContractDetails', () => {
                 'You must indicate whether or not this is related to vaccine administration'
             )
         ).toBeNull()
-
-        await act(async () => {
-            const continueButton = screen.getByRole('button', {
-                name: 'Continue',
-            })
-            continueButton.click()
-        })
-
-        await waitFor(() => {
-            expect(history.location.pathname).toBe(
-                '/submissions/12/rate-details'
-            )
-        })
     })
 })

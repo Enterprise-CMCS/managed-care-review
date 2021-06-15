@@ -269,11 +269,8 @@ export const ContractDetails = ({
             }
         }
 
-        console.log('UPDATING DRAFT', values)
-
         try {
-            console.log('UPPP')
-            const updater = await updateDraftSubmission({
+            const updateResult = await updateDraftSubmission({
                 variables: {
                     input: {
                         submissionID: draftSubmission.id,
@@ -281,12 +278,16 @@ export const ContractDetails = ({
                     },
                 },
             })
+            const updatedSubmission: DraftSubmission | undefined =
+                updateResult?.data?.updateDraftSubmission.draftSubmission
 
-            console.log('usccessss??', updater)
-
-            history.push(`/submissions/${draftSubmission.id}/rate-details`)
+            if (updatedSubmission) {
+                history.push(`/submissions/${draftSubmission.id}/rate-details`)
+            } else {
+                console.log(updateResult.errors)
+                setShowFormAlert(true)
+            }
         } catch (serverError) {
-            console.log('GOT ERER', serverError)
             setShowFormAlert(true)
             formikHelpers.setSubmitting(false)
         }
