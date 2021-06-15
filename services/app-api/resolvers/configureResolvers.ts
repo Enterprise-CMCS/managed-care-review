@@ -29,9 +29,7 @@ export function configureResolvers(store: Store): Resolvers {
         },
         User: userResolver,
         DraftSubmission: draftSubmissionResolver(store),
-        StateSubmission: stateSubmissionResolver(store), // Surprisingly, we can reuse this
-        // This may diverge eventually, but so long as the computed properties are the same
-        // we should be able to get away with this.
+        StateSubmission: stateSubmissionResolver(store),
     }
 
     return resolvers
