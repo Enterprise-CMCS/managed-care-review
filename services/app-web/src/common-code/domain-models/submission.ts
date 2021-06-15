@@ -10,10 +10,13 @@ const isContractAndRates = (sub: DraftSubmissionType): boolean =>
 const isStateSubmission = (
     sub: DraftSubmissionType | Record<string, unknown>
 ): sub is StateSubmissionType =>
-    sub.contractType !== null &&
-    sub.contractDateStart !== null &&
-    sub.contractDateEnd !== null &&
-    sub.contractDateStart !== null &&
-    sub.contractDateEnd !== null
+    sub.contractType !== undefined &&
+    sub.contractDateStart !== undefined &&
+    sub.contractDateEnd !== undefined &&
+    sub.contractDateStart !== undefined &&
+    sub.contractDateEnd !== undefined &&
+    sub.documents !== [] &&
+    sub.managedCareEntities !== [] &&
+    sub.federalAuthorities !== []
 
 export { isContractOnly, isContractAndRates, isStateSubmission }
