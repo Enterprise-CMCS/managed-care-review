@@ -30,7 +30,8 @@ export const Dashboard = (): React.ReactElement => {
         This means the state program id must match the state program name 
         with dashes where there are spaces e.g. {id: test-program, name: 'Test Program'}
     */
-    const programIDFromSubmissionName = (name: string) => name.split('-')[1]
+    const programIDFromSubmissionName = (name: string) =>
+        name.split('-').slice(1, -1).join('-').toLowerCase()
 
     const ProgramContent = ({
         program,
@@ -41,7 +42,7 @@ export const Dashboard = (): React.ReactElement => {
             <section key={program.name} className={styles.panel}>
                 {justSubmittedSubmissionName &&
                     programIDFromSubmissionName(justSubmittedSubmissionName) ===
-                        program.id.toUpperCase() && (
+                        program.id && (
                         <SubmissionSuccessMessage
                             submissionName={justSubmittedSubmissionName}
                         />

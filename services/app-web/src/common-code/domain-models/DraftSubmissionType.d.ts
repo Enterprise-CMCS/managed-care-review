@@ -1,3 +1,5 @@
+// Draft state submission is a health plan that a state user is still working on
+
 // GQL SCHEMA MATCHED TYPES
 type SubmissionType = 'CONTRACT_ONLY' | 'CONTRACT_AND_RATES'
 type SubmissionDocument = {

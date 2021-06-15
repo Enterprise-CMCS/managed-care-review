@@ -4,7 +4,7 @@ import FETCH_STATE_SUBMISSION from '../../app-graphql/src/queries/fetchStateSubm
 import {
     constructTestServer,
     createTestStateSubmission,
-    createCompleteTestDraftSubmission,
+    createAndUpdateTestDraftSubmission,
 } from '../testHelpers/gqlHelpers'
 
 describe('fetchStateSubmission', () => {
@@ -53,7 +53,7 @@ describe('fetchStateSubmission', () => {
         const { query, mutate } = createTestClient(server)
 
         // First, create a new submission
-        const draft = await createCompleteTestDraftSubmission(mutate)
+        const draft = await createAndUpdateTestDraftSubmission(mutate)
 
         // then see if we can fetch that same submission
         const input = {

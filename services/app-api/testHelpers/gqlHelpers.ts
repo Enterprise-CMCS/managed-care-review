@@ -11,6 +11,7 @@ import typeDefs from '../../app-graphql/src/schema.graphql'
 import { configureResolvers } from '../resolvers'
 import { Context } from '../handlers/apollo_gql'
 import {
+    UpdateDraftSubmissionInput,
     CreateDraftSubmissionInput,
     DraftSubmission,
     DraftSubmissionUpdates,
@@ -88,8 +89,11 @@ const updateTestDraftSubmission = async (
     return updateResult.data.updateDraftSubmission.draftSubmission
 }
 
-const createCompleteTestDraftSubmission = async (
-    mutate: ApolloServerTestClient['mutate']
+const createAndUpdateTestDraftSubmission = async (
+    mutate: ApolloServerTestClient['mutate'],
+    partialDraftSubmissionUpdates?: Partial<
+        UpdateDraftSubmissionInput['draftSubmissionUpdates']
+    >
 ): Promise<DraftSubmission> => {
     const draft = await createTestDraftSubmission(mutate)
     const startDate = new Date().toISOString().split('T')[0]
@@ -112,6 +116,7 @@ const createCompleteTestDraftSubmission = async (
         contractDateEnd: endDate,
         managedCareEntities: ['MCO'],
         federalAuthorities: ['STATE_PLAN' as FederalAuthority.StatePlan],
+        ...partialDraftSubmissionUpdates,
     }
 
     const updatedDraft = await updateTestDraftSubmission(
@@ -147,7 +152,7 @@ const submitTestDraftSubmission = async (
 const createTestStateSubmission = async (
     mutate: ApolloServerTestClient['mutate']
 ): Promise<DraftSubmission> => {
-    const draft = await createCompleteTestDraftSubmission(mutate)
+    const draft = await createAndUpdateTestDraftSubmission(mutate)
 
     const updatedSubmission = await submitTestDraftSubmission(mutate, draft.id)
 
@@ -193,7 +198,7 @@ export {
     createTestDraftSubmission,
     createTestStateSubmission,
     updateTestDraftSubmission,
-    createCompleteTestDraftSubmission,
+    createAndUpdateTestDraftSubmission,
     fetchTestDraftSubmissionById,
     fetchTestStateSubmissionById,
 }
