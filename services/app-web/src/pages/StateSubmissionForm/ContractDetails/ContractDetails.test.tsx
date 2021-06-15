@@ -1,5 +1,5 @@
 import { screen, waitFor } from '@testing-library/react'
-import { within } from '@testing-library/dom'
+import { within } from '@testing-library/react'
 import { act } from 'react-dom/test-utils'
 import { createMemoryHistory } from 'history'
 import userEvent from '@testing-library/user-event'
@@ -41,7 +41,7 @@ describe('ContractDetails', () => {
                             documents: [],
                             contractType: 'AMENDMENT' as ContractType,
                             contractDateStart: '2021-06-14',
-                            contractDateEnd: '2021-06-14',
+                            contractDateEnd: '2023-06-14',
                             federalAuthorities: [
                                 FederalAuthority.Voluntary,
                                 FederalAuthority.Benchmark,
@@ -174,7 +174,6 @@ describe('ContractDetails', () => {
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
-            console.log('CLICKING CONTINUE')
             continueButton.click()
         })
 
@@ -301,7 +300,9 @@ describe('ContractDetails', () => {
 
         // check on the covid error
         expect(
-            screen.queryByText('You must select yes or no')
+            screen.queryByText(
+                'You must indicate whether or not this contract action is related to COVID-19'
+            )
         ).toBeInTheDocument()
 
         // click other
@@ -316,17 +317,23 @@ describe('ContractDetails', () => {
             )
         ).toBeInTheDocument()
         expect(
-            screen.queryByText('You must select yes or no')
+            screen.queryByText(
+                'You must indicate whether or not this is related to vaccine administration'
+            )
         ).toBeInTheDocument()
 
         // click annual rate
         await act(async () => {
-            const vaccieneNo = screen.getAllByLabelText('No')[1]
-            vaccieneNo.click()
+            const vaccineNo = screen.getAllByLabelText('No')[1]
+            vaccineNo.click()
         })
 
         // error should be gone
-        expect(screen.queryByText('You must select yes or no')).toBeNull()
+        expect(
+            screen.queryByText(
+                'You must indicate whether or not this is related to vaccine administration'
+            )
+        ).toBeNull()
 
         await act(async () => {
             const continueButton = screen.getByRole('button', {

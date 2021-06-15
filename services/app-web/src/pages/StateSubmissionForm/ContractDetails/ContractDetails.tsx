@@ -42,11 +42,11 @@ import {
  If date is not correct, handle as Invalid Date
 */
 
-const formatDate = (initialValue?: string): string | undefined => {
+const formatUserInputDate = (initialValue?: string): string | undefined => {
     const dayjsValue = dayjs(initialValue)
     return initialValue && dayjsValue.isValid()
         ? dayjs(initialValue).format('YYYY-MM-DD')
-        : initialValue // undefined
+        : initialValue // preserve undefined to show validations later
 }
 
 Yup.addMethod(Yup.date, 'verifyFormat', function (formats, parseStrict) {
@@ -121,11 +121,15 @@ const ContractDetailsFormSchema = Yup.object().shape({
     }),
     relatedToCovid19: Yup.string().when('contractType', {
         is: ContractType.Amendment,
-        then: Yup.string().defined('You must select yes or no'),
+        then: Yup.string().defined(
+            'You must indicate whether or not this contract action is related to COVID-19'
+        ),
     }),
     relatedToVaccination: Yup.string().when('relatedToCovid19', {
         is: 'YES',
-        then: Yup.string().defined('You must select yes or no'),
+        then: Yup.string().defined(
+            'You must indicate whether or not this is related to vaccine administration'
+        ),
     }),
 })
 export interface ContractDetailsFormValues {
@@ -156,8 +160,16 @@ export const ContractDetails = ({
 
     const contractDetailsInitialValues: ContractDetailsFormValues = {
         contractType: draftSubmission?.contractType ?? undefined,
-        contractDateStart: draftSubmission?.contractDateStart?.toString() ?? '',
-        contractDateEnd: draftSubmission?.contractDateEnd?.toString() ?? '',
+        contractDateStart:
+            (draftSubmission &&
+                dayjs(draftSubmission.contractDateStart).format(
+                    'YYYY-MM-DD'
+                )) ??
+            '',
+        contractDateEnd:
+            (draftSubmission &&
+                dayjs(draftSubmission.contractDateEnd).format('YYYY-MM-DD')) ??
+            '',
         managedCareEntities:
             (draftSubmission?.managedCareEntities as ManagedCareEntity[]) ?? [],
         itemsAmended:
@@ -307,12 +319,10 @@ export const ContractDetails = ({
                         id="ContractDetailsForm"
                         aria-label="Contract Details Form"
                         onSubmit={(e) => {
-                            console.log('SUBMITTING')
                             e.preventDefault()
                             validateForm()
                                 .then(() => {
                                     setShouldValidate(true)
-                                    console.log('setted Should vallifdat')
                                 })
                                 .catch(() =>
                                     console.warn('Log: Validation Error')
@@ -412,7 +422,9 @@ export const ContractDetails = ({
                                                     onChange: (val) =>
                                                         setFieldValue(
                                                             'contractDateStart',
-                                                            formatDate(val)
+                                                            formatUserInputDate(
+                                                                val
+                                                            )
                                                         ),
                                                 }}
                                                 endDateHint="mm/dd/yyyy"
@@ -426,7 +438,9 @@ export const ContractDetails = ({
                                                     onChange: (val) =>
                                                         setFieldValue(
                                                             'contractDateEnd',
-                                                            formatDate(val)
+                                                            formatUserInputDate(
+                                                                val
+                                                            )
                                                         ),
                                                 }}
                                             />
