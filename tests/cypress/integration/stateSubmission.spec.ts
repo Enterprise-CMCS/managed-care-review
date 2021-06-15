@@ -81,6 +81,7 @@ describe('State Submission', () => {
                 'documents/testing.docx',
                 'documents/testing.csv',
             ])
+
             cy.findAllByTestId('file-input-preview-image').should(
                 'have.class',
                 'is-loading'
@@ -255,6 +256,60 @@ describe('State Submission', () => {
                 'have.value',
                 'description of submission'
             )
+        })
+
+        it('user can add a draft contract submission with a rates amendment', () => {
+            cy.login()
+
+            // Add a new submission
+            cy.findByRole('link', { name: 'Start new submission' }).click({
+                force: true,
+            })
+            cy.findByLabelText('Contract action only').safeClick()
+            cy.findByRole('textbox', { name: 'Submission description' })
+                .should('exist')
+                .type('description of submission')
+            cy.navigateForm('Continue')
+
+            // Fill out contract details
+            cy.findByText('Contract details').should('exist')
+            cy.findByLabelText('Amendment to base contract').safeClick()
+            cy.findByLabelText('Start date').type('03/01/2024')
+            cy.findByLabelText('End date').type('03/31/2026').blur()
+            cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
+            cy.findByLabelText('1932(a) State Plan Authority').safeClick()
+            cy.findByLabelText('Capitation rates').safeClick()
+            cy.findByLabelText('Annual rate update').safeClick()
+            cy.findByLabelText('No').safeClick()
+            cy.findAllByTestId('errorMessage').should('have.length', 0)
+
+            // Go to rate details
+            cy.navigateForm('Continue')
+            cy.findByText('Rate details').should('exist')
+
+            // Navigate back to contract details
+            cy.location().then((fullUrl) => {
+                const { pathname } = fullUrl
+                const pathnameArray = pathname.split('/')
+                const draftSubmissionId = pathnameArray[2]
+                cy.visit(`/submissions/${draftSubmissionId}/contract-details`)
+            })
+
+            // Check that contract details form loads with correct data
+            cy.findByText('Contract details').should('exist')
+            cy.findByLabelText('Amendment to base contract').should(
+                'be.checked'
+            )
+            cy.findByLabelText('Start date').should('have.value', '03/01/2024')
+            cy.findByLabelText('End date').should('have.value', '03/31/2026')
+            cy.findByLabelText('Managed Care Organization (MCO)').should(
+                'be.checked'
+            )
+            cy.findByLabelText('1932(a) State Plan Authority').should(
+                'be.checked'
+            )
+            cy.findByLabelText('Capitation rates').should('be.checked')
+            cy.findByLabelText('Annual rate update').should('be.checked')
         })
     })
 })
