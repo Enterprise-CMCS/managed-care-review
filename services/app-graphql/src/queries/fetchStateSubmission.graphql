@@ -18,6 +18,11 @@ query fetchStateSubmission($input: FetchStateSubmissionInput!) {
                 name
                 s3URL
             }
+            contractType
+            contractDateStart
+            contractDateEnd
+            managedCareEntities
+            federalAuthorities
         }
     }
 }

@@ -164,13 +164,13 @@ export class StateSubmissionStoreType {
     programID: string
 
     @attribute()
-    contractType?: string
+    contractType: string
 
     @attribute()
-    contractDateStart?: Date
+    contractDateStart: Date
 
     @attribute()
-    contractDateEnd?: Date
+    contractDateEnd: Date
 
     @attribute()
     managedCareEntities: Array<string>
@@ -207,9 +207,9 @@ export class StateSubmissionStoreType {
         this.stateNumber = -1
         this.documents = []
         this.submittedAt = new Date(0)
-        this.contractType = undefined
-        this.contractDateStart = undefined
-        this.contractDateEnd = undefined
+        this.contractType = 'BASE'
+        this.contractDateStart = new Date(0)
+        this.contractDateEnd = new Date(0)
         this.managedCareEntities = []
         this.federalAuthorities = []
     }

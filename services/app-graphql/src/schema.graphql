@@ -181,6 +181,11 @@ type StateSubmission {
     documents: [Document!]!
     contractAmendmentInfo: ContractAmendmentInfo
     submittedAt: Date!
+    contractType: ContractType!
+    contractDateStart: Date!
+    contractDateEnd: Date!
+    managedCareEntities: [String!]!
+    federalAuthorities: [FederalAuthority!]!
 }
 
 input DraftSubmissionUpdates {

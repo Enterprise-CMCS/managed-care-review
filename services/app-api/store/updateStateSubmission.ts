@@ -8,22 +8,17 @@ import {
 } from './dynamoTypes'
 import { StateSubmissionType } from '../../app-web/src/common-code/domain-models'
 
+// Initially called when we convert a draft submission to a state submission
 export async function updateStateSubmission(
     mapper: DataMapper,
     stateSubmission: StateSubmissionType
 ): Promise<StateSubmissionType | StoreError> {
-    // Copy over the values to our db model
     const storeSubmission = new StateSubmissionStoreType()
-
     storeSubmission.id = stateSubmission.id
     storeSubmission.createdAt = stateSubmission.createdAt
     storeSubmission.updatedAt = new Date()
-
-    // these args carry over but aren't set explicitly
     storeSubmission.stateCode = stateSubmission.stateCode
     storeSubmission.stateNumber = stateSubmission.stateNumber
-
-    // SOME args can be set, others must be kept
     storeSubmission.submissionType = stateSubmission.submissionType
     storeSubmission.programID = stateSubmission.programID
     storeSubmission.submissionDescription =
@@ -36,8 +31,14 @@ export async function updateStateSubmission(
         storeSubmission.documents.push(storeDocument)
     })
 
-    // new fields
-    storeSubmission.submittedAt = new Date()
+    storeSubmission.contractType = stateSubmission.contractType
+    storeSubmission.contractDateStart = stateSubmission.contractDateStart
+    storeSubmission.contractDateEnd = stateSubmission.contractDateEnd
+    storeSubmission.managedCareEntities = stateSubmission.managedCareEntities
+    storeSubmission.federalAuthorities = stateSubmission.federalAuthorities
+
+    // State submission only field
+    storeSubmission.submittedAt = stateSubmission.submittedAt
 
     try {
         const putResult = await mapper.put(storeSubmission)

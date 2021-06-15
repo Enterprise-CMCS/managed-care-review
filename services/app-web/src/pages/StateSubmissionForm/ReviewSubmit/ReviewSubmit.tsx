@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { GridContainer, Grid, Link, Alert } from '@trussworks/react-uswds'
 import { NavLink, useHistory } from 'react-router-dom'
+import dayjs from 'dayjs'
 
 import styles from './ReviewSubmit.module.scss'
 import stylesForm from '../StateSubmissionForm.module.scss'
@@ -9,11 +10,17 @@ import {
     DraftSubmission,
     Document,
     useSubmitDraftSubmissionMutation,
+    ContractType,
 } from '../../../gen/gqlClient'
+import {
+    ContractTypeRecord,
+    FederalAuthorityRecord,
+    ManagedCareEntityRecord,
+    SubmissionTypeRecord,
+} from '../../../constants/submissions'
 import { DataDetail } from '../../../components/DataDetail/DataDetail'
 import { DoubleColumnRow } from '../../../components/DoubleColumnRow/DoubleColumnRow'
 import { PageActions } from '../PageActions'
-import { SubmissionTypeRecord } from '../../../constants/submissions'
 import { useS3 } from '../../../contexts/S3Context'
 
 type DocumentWithLink = { url: string | null } & Document
@@ -114,7 +121,19 @@ export const ReviewSubmit = ({
             showError('Error attempting to submit. Please try again.')
         }
     }
+    // Array of values from a checkbox field is displayed in a comma-separated list
+    const createCheckboxList = (
+        items: string[], // Checkbox field array
+        itemRecord: Record<string, string> // A lang constant record like ManagedCareEntityRecord or FederalAuthorityRecord
+    ) => {
+        const userFriendlyItems = items.map((item) => {
+            return itemRecord[`${item}`]
+        })
+        return userFriendlyItems.join(', ')
+    }
 
+    const isContractAmendment =
+        draftSubmission.contractType === ContractType.Amendment
     return (
         <GridContainer className={styles.reviewSectionWrapper}>
             {userVisibleError && (
@@ -194,14 +213,22 @@ export const ReviewSubmit = ({
                                     <DataDetail
                                         id="contractType"
                                         label="Contract action type"
-                                        data="Amendment to base contract"
+                                        data={
+                                            ContractTypeRecord[
+                                                `${draftSubmission.contractType}`
+                                            ]
+                                        }
                                     />
                                 }
                                 right={
                                     <DataDetail
                                         id="contractEffectiveDates"
                                         label="Contract effective dates"
-                                        data="07/01/2020 - 06/30/2021"
+                                        data={`${dayjs(
+                                            draftSubmission.contractDateStart
+                                        ).format('MM/DD/YYYY')} - ${dayjs(
+                                            draftSubmission.contractDateEnd
+                                        ).format('MM/DD/YYYY')}`}
                                     />
                                 }
                             />
@@ -210,42 +237,52 @@ export const ReviewSubmit = ({
                                     <DataDetail
                                         id="managedCareEntities"
                                         label="Managed care entities"
-                                        data="Managed Care Organization (MCO)"
+                                        data={createCheckboxList(
+                                            draftSubmission.managedCareEntities,
+                                            ManagedCareEntityRecord
+                                        )}
                                     />
                                 }
                                 right={
                                     <DataDetail
-                                        id="itemsAmended"
-                                        label="Items being amended"
-                                        data="Benefits provided, Capitation rates (Updates based on more recent data)"
-                                    />
-                                }
-                            />
-                            <DoubleColumnRow
-                                left={
-                                    <DataDetail
-                                        id="federalOperatingAuth"
+                                        id="federalAuthorities"
                                         label="Federal authority your program operates under"
-                                        data="1115 waiver"
-                                    />
-                                }
-                                right={
-                                    <DataDetail
-                                        id="covidRelated"
-                                        label="Is this contract action related to the COVID-19 public health emergency"
-                                        data="Yes"
+                                        data={createCheckboxList(
+                                            draftSubmission.federalAuthorities,
+                                            FederalAuthorityRecord
+                                        )}
                                     />
                                 }
                             />
-                            <DoubleColumnRow
-                                left={
-                                    <DataDetail
-                                        id="vaccineRelated"
-                                        label="Is this related to coverage and reimbursement for vaccine administration?"
-                                        data="Yes"
+                            {isContractAmendment && (
+                                <>
+                                    <DoubleColumnRow
+                                        left={
+                                            <DataDetail
+                                                id="itemsAmended"
+                                                label="Items being amended"
+                                                data="Benefits provided, Capitation rates (Updates based on more recent data)"
+                                            />
+                                        }
+                                        right={
+                                            <DataDetail
+                                                id="covidRelated"
+                                                label="Is this contract action related to the COVID-19 public health emergency"
+                                                data="Yes"
+                                            />
+                                        }
                                     />
-                                }
-                            />
+                                    <DoubleColumnRow
+                                        left={
+                                            <DataDetail
+                                                id="vaccineRelated"
+                                                label="Is this related to coverage and reimbursement for vaccine administration?"
+                                                data="Yes"
+                                            />
+                                        }
+                                    />
+                                </>
+                            )}
                         </dl>
                     </section>
                     <section id="rateDetails" className={styles.reviewSection}>

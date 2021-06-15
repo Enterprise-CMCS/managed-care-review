@@ -21,9 +21,7 @@ describe('State Submission', () => {
             cy.findByRole('combobox', { name: 'Program' }).select('msho')
 
             // Continue button triggers submission type validation
-            cy.findByRole('button', {
-                name: 'Continue',
-            }).safeClick()
+            cy.navigateForm('Continue')
             cy.findByText(
                 'You must provide a description of any major changes or updates'
             ).should('exist')
@@ -51,36 +49,27 @@ describe('State Submission', () => {
             }).safeClick()
 
             // Continue button triggers contract details validation
-            cy.findByRole('button', {
-                name: 'Continue',
-            }).safeClick()
-            cy.findByText('You must select at least one item').should('exist')
+            cy.navigateForm('Continue')
+            cy.findByText('You must select at least one authority').should(
+                'exist'
+            )
             cy.findAllByTestId('errorMessage').should('have.length', 1)
 
             // Fill out missing required fields for contract details
             cy.findByLabelText('1932(a) State Plan Authority').safeClick()
             cy.findAllByTestId('errorMessage').should('have.length', 0)
-            cy.findByRole('button', {
-                name: 'Continue',
-            }).safeClick()
+            cy.navigateForm('Continue')
 
             // Skip rate details
             cy.findByText('Rate details').should('exist')
-            cy.findByRole('button', {
-                name: 'Continue',
-            }).safeClick()
+            cy.navigateForm('Continue')
 
             // Continue button navigates to documents page
-            cy.findByRole('button', {
-                name: 'Continue',
-            }).safeClick()
             cy.findByRole('heading', { name: 'Documents' }).should('exist')
             cy.findByText(/MN-MSHO-/).should('exist')
 
             // Continue button, without filling out form, triggers validation
-            cy.findByRole('button', {
-                name: 'Continue',
-            }).safeClick()
+            cy.navigateForm('Continue')
             cy.findByText('Missing documents').should('exist')
             cy.findByText('You must upload at least one document').should(
                 'exist'
@@ -132,14 +121,7 @@ describe('State Submission', () => {
             cy.findAllByText('Duplicate file').should('not.exist')
 
             // Continue button with valid documents navigates to review and submit page
-            cy.findAllByTestId('file-input-preview-image').should(
-                'not.have.class',
-                'is-loading'
-            )
-            cy.findByRole('button', {
-                name: 'Continue',
-            }).safeClick()
-            cy.findByRole('button', { name: 'Continue' }).should('exist')
+            cy.navigateForm('Continue')
             cy.url({ timeout: 10_000 }).should('match', /.*review-and-submit$/)
         })
 
@@ -156,21 +138,18 @@ describe('State Submission', () => {
             cy.findByRole('textbox', { name: 'Submission description' })
                 .should('exist')
                 .type('description of submission')
-            cy.findByRole('button', {
-                name: 'Continue',
-            }).safeClick()
+            cy.navigateForm('Continue')
 
             // Fill out contract details
             cy.findByText('Contract details').should('exist')
             cy.findByText(/MN-MSHO-/).should('exist')
             cy.findByLabelText('Base contract').safeClick()
             cy.findByLabelText('Start date').type('04/01/2024')
-            cy.findByLabelText('End date').type('04/01/2026')
+            cy.findByLabelText('End date').type('04/01/2026').blur()
             cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
             cy.findByLabelText('1932(a) State Plan Authority').safeClick()
-            cy.findByRole('button', {
-                name: 'Continue',
-            }).safeClick()
+            cy.findAllByTestId('errorMessage').should('have.length', 0)
+            cy.navigateForm('Continue')
 
             //Skip rate details
             cy.findByText('Rate details').should('exist')
@@ -179,6 +158,9 @@ describe('State Submission', () => {
             }).safeClick()
 
             // Add documents
+            cy.findByRole('progressbar', { name: 'Loading' }).should(
+                'not.exist'
+            )
             cy.findByRole('heading', { name: 'Documents' }).should('exist')
             cy.findByTestId('documents-hint').should(
                 'contain.text',
@@ -195,9 +177,7 @@ describe('State Submission', () => {
                 'not.have.class',
                 'is-loading'
             )
-            cy.findByRole('button', {
-                name: 'Continue',
-            }).safeClick()
+            cy.navigateForm('Continue')
 
             // Get draft submission id and navigate back to submission type form to edit existing draft
             cy.location().then((fullUrl) => {
@@ -216,9 +196,7 @@ describe('State Submission', () => {
                 'description of submission'
             )
             cy.findByLabelText('Contract action only').safeClick()
-            cy.findByRole('button', {
-                name: 'Continue',
-            }).safeClick()
+            cy.navigateForm('Continue')
 
             // Change contract dates
             cy.findByText('Contract details').should('exist')
@@ -228,15 +206,11 @@ describe('State Submission', () => {
             cy.findByLabelText('Start date').type('04/15/2024')
             cy.findByLabelText('End date').clear()
             cy.findByLabelText('End date').type('04/15/2026')
-            cy.findByRole('button', {
-                name: 'Continue',
-            }).safeClick()
+            cy.navigateForm('Continue')
 
             // Skip rate details
             cy.findByText('Rate details').should('exist')
-            cy.findByRole('button', {
-                name: 'Continue',
-            }).safeClick()
+            cy.navigateForm('Continue')
 
             // Check that documents loads with correct data
             cy.findByRole('heading', { name: 'Documents' }).should('exist')
@@ -258,9 +232,8 @@ describe('State Submission', () => {
             cy.findByRole('textbox', { name: 'Submission description' })
                 .should('exist')
                 .type('description of submission')
-            cy.findByRole('button', {
-                name: 'Continue',
-            }).safeClick()
+            cy.navigateForm('Continue')
+
             cy.findByText('Contract details').should('exist')
 
             // Get draft submission id and navigate back to submission type form to edit existing draft

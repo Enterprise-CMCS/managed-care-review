@@ -11,7 +11,6 @@ export function fetchDraftSubmissionResolver(
         const result = await store.findDraftSubmission(input.submissionID)
 
         if (isStoreError(result)) {
-            console.log('Error finding a submission', result)
             if (result.code === 'WRONG_STATUS') {
                 throw new ApolloError(
                     `Submission is not a DraftSubmission`,

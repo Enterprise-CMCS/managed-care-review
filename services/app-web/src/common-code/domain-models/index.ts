@@ -20,6 +20,10 @@ export type { StateSubmissionType } from './StateSubmissionType'
 
 export type { ProgramT } from './ProgramT'
 
-// Typechecks
+// Type checks and type guards
 export { isCognitoUser } from './user'
-export { isContractOnly, isContractAndRates } from './submission'
+export {
+    isContractOnly,
+    isContractAndRates,
+    isStateSubmission,
+} from './submission'
