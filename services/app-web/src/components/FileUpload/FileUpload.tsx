@@ -5,6 +5,7 @@ import {
     FormGroup,
     Label,
     FileInput,
+    FileInputRef,
 } from '@trussworks/react-uswds'
 import styles from './FileUpload.module.scss'
 
@@ -49,11 +50,8 @@ export const FileUpload = ({
     const [loadingStatus, setLoadingStatus] = useState<
         null | 'UPLOADING' | 'COMPLETE'
     >(null)
-    const [fileItems, setFileItems] = useState<FileItemT[]>(
-        initialItems ? initialItems : []
-    )
-    const fileInputRef = useRef<HTMLInputElement>(null) // reference to the HTML input which has files
-    const fileInputKey = useRef(uuidv4()) // use of randomized key forces re-render of file input, and empties content on change
+    const [fileItems, setFileItems] = useState<FileItemT[]>(initialItems || [])
+    const fileInputRef = useRef<FileInputRef>(null) // reference to the HTML input which has files
 
     React.useEffect(() => {
         if (loadingStatus !== 'UPLOADING') {
@@ -213,21 +211,22 @@ export const FileUpload = ({
         e: React.DragEvent | React.ChangeEvent
     ): void => {
         // return early to ensure we display errors when invalid files are dropped
-        if (
-            !fileInputRef?.current?.files ||
-            fileInputRef?.current?.files.length === 0
-        )
+        const files =
+            (fileInputRef.current?.input?.files &&
+                Array.from(fileInputRef.current?.input?.files)) ||
+            []
+        // return early to ensure we display errors when only invalid files are dropped
+        if (!files || files.length === 0) {
             return
+        }
 
-        const files = Array.from(fileInputRef.current.files)
         const items = generateFileItems(files)
-
         // start upload and display pending files
         setFileItems((array) => [...array, ...items])
         asyncS3Upload(files)
 
         // reset input
-        fileInputKey.current = uuidv4()
+        fileInputRef.current?.clearFiles()
         setFormError(null)
     }
 
@@ -249,7 +248,6 @@ export const FileUpload = ({
                 </span>
             )}
             <FileInput
-                key={fileInputKey.current}
                 id={id}
                 name={name}
                 className={styles.fileInput}
@@ -258,7 +256,7 @@ export const FileUpload = ({
                 onChange={handleFileInputChangeOrDrop}
                 onDrop={handleFileInputChangeOrDrop}
                 accept={inputProps.accept}
-                inputRef={fileInputRef}
+                ref={fileInputRef}
             />
             <FileItemsList
                 retryItem={retryFile}
