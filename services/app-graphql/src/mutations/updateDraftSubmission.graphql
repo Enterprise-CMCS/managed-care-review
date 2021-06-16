@@ -24,10 +24,10 @@ mutation updateDraftSubmission($input: UpdateDraftSubmissionInput!) {
             federalAuthorities
             contractAmendmentInfo {
                 itemsBeingAmended
-                itemsBeingAmendedOther
+                otherItemBeingAmended
                 capitationRatesAmendedInfo {
                     reason
-                    reasonOther
+                    otherReason
                 }
                 relatedToCovid19
                 relatedToVaccination

@@ -100,17 +100,17 @@ input DocumentInput {
 
 type CapitationRatesAmendedInfo {
     reason: CapitationRatesAmendmentReason
-    reasonOther: String
+    otherReason: String
 }
 
 input CapitationRatesAmendedInfoInput {
     reason: CapitationRatesAmendmentReason
-    reasonOther: String
+    otherReason: String
 }
 
 type ContractAmendmentInfo {
     itemsBeingAmended: [String!]!
-    itemsBeingAmendedOther: String
+    otherItemBeingAmended: String
     capitationRatesAmendedInfo: CapitationRatesAmendedInfo
     relatedToCovid19: Boolean
     relatedToVaccination: Boolean
@@ -118,7 +118,7 @@ type ContractAmendmentInfo {
 
 input ContractAmendmentInfoInput {
     itemsBeingAmended: [String!]!
-    itemsBeingAmendedOther: String
+    otherItemBeingAmended: String
     capitationRatesAmendedInfo: CapitationRatesAmendedInfoInput
     relatedToCovid19: Boolean
     relatedToVaccination: Boolean

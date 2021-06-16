@@ -30,7 +30,7 @@ export class CapitationRatesAmendedInfo {
     reason?: 'ANNUAL' | 'MIDYEAR' | 'OTHER'
 
     @attribute()
-    reasonOther?: string
+    otherReason?: string
 
     constructor() {
         this.reason = 'OTHER'
@@ -42,7 +42,7 @@ export class ContractAmendmentInfoT {
     itemsBeingAmended: string[]
 
     @attribute()
-    itemsBeingAmendedOther?: string
+    otherItemBeingAmended?: string
 
     @attribute()
     relatedToCovid19?: boolean

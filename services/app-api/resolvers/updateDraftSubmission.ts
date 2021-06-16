@@ -10,8 +10,6 @@ import {
 
 import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
 
-import { CapitationRatesAmendedInfo } from '../store/dynamoTypes'
-
 // This MUTATES the passed in draft, overwriting all the current fields with the updated fields
 function applyUpdates(
     draft: DraftSubmissionType,
@@ -24,9 +22,9 @@ function applyUpdates(
                   updates.contractAmendmentInfo.capitationRatesAmendedInfo
                       .reason ?? undefined,
 
-              reasonOther:
+              otherReason:
                   updates.contractAmendmentInfo.capitationRatesAmendedInfo
-                      .reasonOther ?? undefined,
+                      .otherReason ?? undefined,
           }
         : undefined
 
@@ -34,8 +32,8 @@ function applyUpdates(
         ? {
               itemsBeingAmended:
                   updates.contractAmendmentInfo.itemsBeingAmended,
-              itemsBeingAmendedOther:
-                  updates.contractAmendmentInfo.itemsBeingAmendedOther ??
+              otherItemBeingAmended:
+                  updates.contractAmendmentInfo.otherItemBeingAmended ??
                   undefined,
               capitationRatesAmendedInfo: capitationRatesUpdates,
               relatedToCovid19:
@@ -50,9 +48,9 @@ function applyUpdates(
     draft.submissionType = updates.submissionType
     draft.submissionDescription = updates.submissionDescription
     draft.documents = updates.documents
-    draft.contractType = updates.contractType
-    draft.contractDateStart = updates.contractDateStart
-    draft.contractDateEnd = updates.contractDateEnd
+    draft.contractType = updates.contractType ?? undefined
+    draft.contractDateStart = updates.contractDateStart ?? undefined
+    draft.contractDateEnd = updates.contractDateEnd ?? undefined
     draft.managedCareEntities = updates.managedCareEntities
     draft.federalAuthorities = updates.federalAuthorities
     draft.contractAmendmentInfo = amendmentInfoUpdates
@@ -103,7 +101,6 @@ export function updateDraftSubmissionResolver(
                 }
             )
         }
-
 
         // apply the updates to the draft
         applyUpdates(draft, input.draftSubmissionUpdates)

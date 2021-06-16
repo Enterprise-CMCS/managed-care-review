@@ -40,13 +40,13 @@ export async function updateDraftSubmission(
 
         const info = new ContractAmendmentInfoT()
         info.itemsBeingAmended = draftInfo.itemsBeingAmended
-        info.itemsBeingAmendedOther = draftInfo.itemsBeingAmendedOther
+        info.otherItemBeingAmended = draftInfo.otherItemBeingAmended
 
         if (draftInfo.capitationRatesAmendedInfo) {
             const capRates = new CapitationRatesAmendedInfo()
             capRates.reason = draftInfo.capitationRatesAmendedInfo.reason
-            capRates.reasonOther =
-                draftInfo.capitationRatesAmendedInfo.reasonOther
+            capRates.otherReason =
+                draftInfo.capitationRatesAmendedInfo.otherReason
 
             info.capitationRatesAmendedInfo = capRates
         }

@@ -57,6 +57,9 @@ Yup.addMethod(Yup.date, 'verifyFormat', function (formats, parseStrict) {
     })
 })
 
+// The form type doesn't like nulls, so empty inputs are stored in an empty string
+// nullOrValue and emptyStringOrValue are converters between optional graphql types and form types
+// nullOrValue turns a form string into a GQL string | null
 function nullOrValue(attribute: string): string | null {
     if (attribute === '') {
         return null
@@ -64,6 +67,7 @@ function nullOrValue(attribute: string): string | null {
     return attribute
 }
 
+// emptyStringOrValue converts a graphQL boolean into a form YES/NO value
 function emptyStringOrValue(attribute: boolean | null): string {
     if (attribute === null) {
         return ''
@@ -138,7 +142,7 @@ export interface ContractDetailsFormValues {
     contractDateEnd: string
     managedCareEntities: ManagedCareEntity[]
     itemsAmended: string[]
-    itemsAmendedOther: string
+    otherItemAmended: string
     capitationRates: CapitationRatesAmendmentReason | undefined
     capitationRatesOther: string
     relatedToCovid19: string
@@ -174,14 +178,14 @@ export const ContractDetails = ({
             (draftSubmission?.managedCareEntities as ManagedCareEntity[]) ?? [],
         itemsAmended:
             draftSubmission.contractAmendmentInfo?.itemsBeingAmended ?? [],
-        itemsAmendedOther:
-            draftSubmission.contractAmendmentInfo?.itemsBeingAmendedOther ?? '',
+        otherItemAmended:
+            draftSubmission.contractAmendmentInfo?.otherItemBeingAmended ?? '',
         capitationRates:
             draftSubmission.contractAmendmentInfo?.capitationRatesAmendedInfo
                 ?.reason ?? undefined,
         capitationRatesOther:
             draftSubmission.contractAmendmentInfo?.capitationRatesAmendedInfo
-                ?.reasonOther ?? '',
+                ?.otherReason ?? '',
         relatedToCovid19: emptyStringOrValue(
             draftSubmission.contractAmendmentInfo?.relatedToCovid19 ?? null
         ),
@@ -248,7 +252,7 @@ export const ContractDetails = ({
                 ? values.relatedToVaccination === 'YES'
                 : null
 
-            const amendedOther = nullOrValue(values.itemsAmendedOther)
+            const amendedOther = nullOrValue(values.otherItemAmended)
 
             let capitationInfo:
                 | CapitationRatesAmendedInfo
@@ -256,13 +260,13 @@ export const ContractDetails = ({
             if (values.itemsAmended.includes('CAPITATION_RATES')) {
                 capitationInfo = {
                     reason: values.capitationRates,
-                    reasonOther: nullOrValue(values.capitationRatesOther),
+                    otherReason: nullOrValue(values.capitationRatesOther),
                 }
             }
 
             updatedDraft.contractAmendmentInfo = {
                 itemsBeingAmended: values.itemsAmended,
-                itemsBeingAmendedOther: amendedOther,
+                otherItemBeingAmended: amendedOther,
                 capitationRatesAmendedInfo: capitationInfo,
                 relatedToCovid19: relatedToCovid,
                 relatedToVaccination: relatedToVacciene,
@@ -769,7 +773,7 @@ export const ContractDetails = ({
                                                                 id="other-items-amended"
                                                                 label="Other item description"
                                                                 showError={showFieldErrors(
-                                                                    errors.itemsAmendedOther
+                                                                    errors.otherItemAmended
                                                                 )}
                                                                 name="itemsAmendedOther"
                                                                 type="text"

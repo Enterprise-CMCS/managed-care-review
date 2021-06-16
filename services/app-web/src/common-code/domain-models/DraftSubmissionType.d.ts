@@ -9,10 +9,10 @@ type SubmissionDocument = {
 
 type ContractAmendmentInfo = {
     itemsBeingAmended: string[]
-    itemsBeingAmendedOther?: string
+    otherItemBeingAmended?: string
     capitationRatesAmendedInfo?: {
         reason?: 'ANNUAL' | 'MIDYEAR' | 'OTHER'
-        reasonOther?: string
+        otherReason?: string
     }
     relatedToCovid19?: boolean
     relatedToVaccination?: boolean
