@@ -2,6 +2,8 @@ import { DataMapper } from '@aws/dynamodb-data-mapper'
 
 import { StoreError } from './storeError'
 import {
+    CapitationRatesAmendedInfo,
+    ContractAmendmentInfoT,
     DocumentStoreT,
     DraftSubmissionStoreType,
     isDynamoError,
@@ -32,6 +34,28 @@ export async function updateDraftSubmission(
     storeDraft.contractType = draftSubmission.contractType
     storeDraft.federalAuthorities = draftSubmission.federalAuthorities
     storeDraft.managedCareEntities = draftSubmission.managedCareEntities
+
+    if (draftSubmission.contractAmendmentInfo) {
+        const draftInfo = draftSubmission.contractAmendmentInfo
+
+        const info = new ContractAmendmentInfoT()
+        info.itemsBeingAmended = draftInfo.itemsBeingAmended
+        info.otherItemBeingAmended = draftInfo.otherItemBeingAmended
+
+        if (draftInfo.capitationRatesAmendedInfo) {
+            const capRates = new CapitationRatesAmendedInfo()
+            capRates.reason = draftInfo.capitationRatesAmendedInfo.reason
+            capRates.otherReason =
+                draftInfo.capitationRatesAmendedInfo.otherReason
+
+            info.capitationRatesAmendedInfo = capRates
+        }
+
+        info.relatedToCovid19 = draftInfo.relatedToCovid19
+        info.relatedToVaccination = draftInfo.relatedToVaccination
+
+        storeDraft.contractAmendmentInfo = info
+    }
 
     draftSubmission.documents.forEach((doc) => {
         const storeDocument = new DocumentStoreT()

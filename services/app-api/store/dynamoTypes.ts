@@ -24,6 +24,40 @@ export class DocumentStoreT {
         ;(this.name = ''), (this.s3URL = '')
     }
 }
+
+export class CapitationRatesAmendedInfo {
+    @attribute()
+    reason?: 'ANNUAL' | 'MIDYEAR' | 'OTHER'
+
+    @attribute()
+    otherReason?: string
+
+    constructor() {
+        this.reason = 'OTHER'
+    }
+}
+
+export class ContractAmendmentInfoT {
+    @attribute()
+    itemsBeingAmended: string[]
+
+    @attribute()
+    otherItemBeingAmended?: string
+
+    @attribute()
+    relatedToCovid19?: boolean
+
+    @attribute()
+    relatedToVaccination?: boolean
+
+    @attribute()
+    capitationRatesAmendedInfo?: CapitationRatesAmendedInfo
+
+    constructor() {
+        this.itemsBeingAmended = []
+    }
+}
+
 @table('draft-submissions')
 export class DraftSubmissionStoreType {
     @hashKey()
@@ -79,6 +113,9 @@ export class DraftSubmissionStoreType {
 
     @attribute({ memberType: embed(DocumentStoreT) })
     documents: Array<DocumentStoreT>
+
+    @attribute()
+    contractAmendmentInfo?: ContractAmendmentInfoT
 
     constructor() {
         this.id = ''

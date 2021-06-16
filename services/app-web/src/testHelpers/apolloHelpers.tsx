@@ -48,7 +48,8 @@ const mockDraftSubmission: DraftSubmission = {
     contractType: ContractType.Base,
     contractDateStart: new Date(),
     contractDateEnd: new Date(),
-    managedCareEntities: [''],
+    contractAmendmentInfo: null,
+    managedCareEntities: [],
     federalAuthorities: [
         FederalAuthority.Voluntary,
         FederalAuthority.Benchmark,

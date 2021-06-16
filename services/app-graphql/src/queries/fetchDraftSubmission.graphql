@@ -22,6 +22,16 @@ query fetchDraftSubmission($input: FetchDraftSubmissionInput!) {
             contractDateEnd
             managedCareEntities
             federalAuthorities
+            contractAmendmentInfo {
+                itemsBeingAmended
+                otherItemBeingAmended
+                capitationRatesAmendedInfo {
+                    reason
+                    otherReason
+                }
+                relatedToCovid19
+                relatedToVaccination
+            }
         }
     }
 }

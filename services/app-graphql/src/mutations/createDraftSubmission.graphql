@@ -22,6 +22,16 @@ mutation createDraftSubmission($input: CreateDraftSubmissionInput!) {
             contractDateEnd
             managedCareEntities
             federalAuthorities
+            contractAmendmentInfo {
+                itemsBeingAmended
+                otherItemBeingAmended
+                capitationRatesAmendedInfo {
+                    reason
+                    otherReason
+                }
+                relatedToCovid19
+                relatedToVaccination
+            }
         }
     }
 }
