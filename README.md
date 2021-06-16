@@ -30,7 +30,7 @@ Run tests locally
 
 -   `./dev test web` to run the web tests, watching the results
 -   `./dev test api` to run the api tests, watching the results
--   `./dev test browser` to run the cypress browser based tests, this opens the cypress runner and requires an endpoint  to test against. By default, runs on localhost (so you should be running the app locally if this is what you intend).  To see options for flags cypress accepts see [docs](https://docs.cypress.io/guides/guides/command-line#Commands). 
+-   `./dev test browser` to run the cypress browser based tests, this opens the cypress runner and requires an endpoint  to test against. By default, runs on localhost (so you should be running the app locally if this is what you intend).  To see options for flags cypress accepts see [docs](https://docs.cypress.io/guides/guides/command-line#Commands).
 
 -   `./dev test` (or `dev test check`) to run all the tests that CI runs, once. This will run the web, api, and browser tests
 -   Run with flags `./dev test --unit`, `.dev test --online`, to filter down, but still run once.
@@ -65,17 +65,14 @@ In the Dev account, in addition to deploying the main branch, we deploy a full v
 
 You can see the deploys for review apps [here](https://github.com/CMSgov/managed-care-review/actions/workflows/deploy.yml)
 
-## Requirements
+## Requirements - How To Get Started
 
-Serverless - Get help installing it here: [Serverless Getting Started page](https://www.serverless.com/framework/docs/providers/aws/guide/installation/). Learn more about serverless from the [Serverless Stack tutorial](https://serverless-stack.com/).
-
-Yarn - In order to install dependencies, you need to [install yarn](https://classic.yarnpkg.com/en/docs/install/).
-
-AWS Account: You'll need an AWS account with appropriate IAM permissions (admin recommended) to deploy this app in Amazon.
-
-Java - our local database runner (which is a serverless plugin called `serverless-dynamodb-local`) requires java to run. You can install it here: https://www.oracle.com/java/technologies/javase-downloads.html
-
-If you are on a Mac using nvm, you should be able to install all the dependencies like so:
+- [ ] Node.js
+- [ ] Serverless - Get help installing it here: [Serverless Getting Started page](https://www.serverless.com/framework/docs/providers/aws/guide/installation/). Learn more about serverless from the [Serverless Stack tutorial](https://serverless-stack.com/).
+- [ ] Yarn - In order to install dependencies, you need to [install yarn](https://classic.yarnpkg.com/en/docs/install/).
+- [ ] AWS Account - You'll need an AWS account with appropriate IAM permissions (admin recommended) to deploy this app in Amazon.
+- [ ] Java - Our local database runner (which is a serverless plugin called `serverless-dynamodb-local`) requires java to run. You can install it here: https://www.oracle.com/java/technologies/javase-downloads.html
+- [ ] NVM - If you are on a Mac using nvm, you should be able to install all the dependencies like so:
 
 ```
 # install nvm
@@ -103,6 +100,8 @@ brew install yarn
 # run the app and storybook
 ./dev local
 ```
+
+**Note:** Loading `./dev/local` for the first time will take longer than usual (few minutes or more) to initialize all the dependencies needed to run the project.
 
 ## License
 
