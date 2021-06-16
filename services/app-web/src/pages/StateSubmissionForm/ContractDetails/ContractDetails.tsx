@@ -109,7 +109,7 @@ const ContractDetailsFormSchema = Yup.object().shape({
         is: ContractType.Amendment,
         then: Yup.array().min(1, 'You must select at least one item'),
     }),
-    itemsAmendedOther: Yup.string().when('itemsAmended', {
+    otherItemAmended: Yup.string().when('itemsAmended', {
         is: (items: string[]) => items.includes('OTHER'),
         then: Yup.string().defined('You must enter the other item'),
     }),
@@ -775,7 +775,7 @@ export const ContractDetails = ({
                                                                 showError={showFieldErrors(
                                                                     errors.otherItemAmended
                                                                 )}
-                                                                name="itemsAmendedOther"
+                                                                name="otherItemAmended"
                                                                 type="text"
                                                             />
                                                         </div>

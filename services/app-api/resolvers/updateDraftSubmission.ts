@@ -11,7 +11,7 @@ import {
 import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
 
 // This MUTATES the passed in draft, overwriting all the current fields with the updated fields
-function applyUpdates(
+export function applyUpdates(
     draft: DraftSubmissionType,
     updates: DraftSubmissionUpdates
 ) {

@@ -1,6 +1,11 @@
 import { createTestClient } from 'apollo-server-testing'
 
-import { CreateDraftSubmissionInput, SubmissionType } from '../gen/gqlServer'
+import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
+import {
+    DraftSubmissionUpdates,
+    CreateDraftSubmissionInput,
+    SubmissionType,
+} from '../gen/gqlServer'
 import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
 import UPDATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/updateDraftSubmission.graphql'
 import {
@@ -9,7 +14,148 @@ import {
     fetchTestDraftSubmissionById,
 } from '../testHelpers/gqlHelpers'
 
+import { applyUpdates } from './updateDraftSubmission'
+
 describe('updateDraftSubmission', () => {
+    describe('applyUpdates', () => {
+        it('correctly applies empty updates', () => {
+            // table test, given different inputs do we get what we expect?
+
+            const baseDraft: DraftSubmissionType = {
+                id: 'foo-bar',
+                stateCode: 'FL',
+                stateNumber: 3,
+                programID: 'MCAC',
+                submissionType: 'CONTRACT_ONLY' as const,
+                submissionDescription: 'an old submission',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                documents: [],
+                managedCareEntities: [],
+                federalAuthorities: [],
+            }
+
+            const updates: DraftSubmissionUpdates = {
+                programID: 'MCAC',
+                submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
+                submissionDescription: 'an updated draft',
+                documents: [],
+                contractType: null,
+                contractDateStart: null,
+                contractDateEnd: null,
+                managedCareEntities: [],
+                federalAuthorities: [],
+                contractAmendmentInfo: null,
+            }
+
+            applyUpdates(baseDraft, updates)
+
+            expect(baseDraft.submissionDescription).toBe('an updated draft')
+            expect(baseDraft.contractType).toBeUndefined()
+            expect(baseDraft.contractDateStart).toBeUndefined()
+            expect(baseDraft.contractDateEnd).toBeUndefined()
+            expect(baseDraft.contractAmendmentInfo).toBeUndefined()
+        })
+
+        it('correctly applies empty amendment updates', () => {
+            // table test, given different inputs do we get what we expect?
+
+            const baseDraft: DraftSubmissionType = {
+                id: 'foo-bar',
+                stateCode: 'FL',
+                stateNumber: 3,
+                programID: 'MCAC',
+                submissionType: 'CONTRACT_ONLY' as const,
+                submissionDescription: 'an old submission',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                documents: [],
+                managedCareEntities: [],
+                federalAuthorities: [],
+            }
+
+            const updates: DraftSubmissionUpdates = {
+                programID: 'MCAC',
+                submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
+                submissionDescription: 'an updated draft',
+                documents: [],
+                contractType: null,
+                contractDateStart: null,
+                contractDateEnd: null,
+                managedCareEntities: [],
+                federalAuthorities: [],
+                contractAmendmentInfo: {
+                    itemsBeingAmended: [],
+                    otherItemBeingAmended: null,
+                    capitationRatesAmendedInfo: null,
+                    relatedToCovid19: null,
+                    relatedToVaccination: null,
+                },
+            }
+
+            applyUpdates(baseDraft, updates)
+
+            expect(baseDraft.submissionDescription).toBe('an updated draft')
+            expect(baseDraft.contractAmendmentInfo).toStrictEqual({
+                itemsBeingAmended: [],
+                otherItemBeingAmended: undefined,
+                capitationRatesAmendedInfo: undefined,
+                relatedToCovid19: undefined,
+                relatedToVaccination: undefined,
+            })
+        })
+
+        it('correctly applies empty capitationRates updates', () => {
+            // table test, given different inputs do we get what we expect?
+
+            const baseDraft: DraftSubmissionType = {
+                id: 'foo-bar',
+                stateCode: 'FL',
+                stateNumber: 3,
+                programID: 'MCAC',
+                submissionType: 'CONTRACT_ONLY' as const,
+                submissionDescription: 'an old submission',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                documents: [],
+                managedCareEntities: [],
+                federalAuthorities: [],
+            }
+
+            const updates: DraftSubmissionUpdates = {
+                programID: 'MCAC',
+                submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
+                submissionDescription: 'an updated draft',
+                documents: [],
+                contractType: null,
+                contractDateStart: null,
+                contractDateEnd: null,
+                managedCareEntities: [],
+                federalAuthorities: [],
+                contractAmendmentInfo: {
+                    itemsBeingAmended: [],
+                    otherItemBeingAmended: null,
+                    capitationRatesAmendedInfo: {
+                        reason: null,
+                        otherReason: null,
+                    },
+                    relatedToCovid19: null,
+                    relatedToVaccination: null,
+                },
+            }
+
+            applyUpdates(baseDraft, updates)
+
+            expect(baseDraft.submissionDescription).toBe('an updated draft')
+            expect(
+                baseDraft.contractAmendmentInfo?.capitationRatesAmendedInfo
+            ).toStrictEqual({
+                reason: undefined,
+                otherReason: undefined,
+            })
+        })
+    })
+
     it('updates a submission if the state matches', async () => {
         const server = constructTestServer()
 
@@ -242,10 +388,10 @@ describe('updateDraftSubmission', () => {
                     'LENGTH_OF_CONTRACT_PERIOD',
                     'CAPITATION_RATES',
                 ],
-                itemsBeingAmendedOther: 'just having a laugh',
+                otherItemBeingAmended: 'just having a laugh',
                 capitationRatesAmendedInfo: {
                     reason: 'OTHER',
-                    reasonOther: 'something for fun',
+                    otherReason: 'something for fun',
                 },
                 relatedToCovid19: true,
             },
@@ -286,9 +432,9 @@ describe('updateDraftSubmission', () => {
                 'LENGTH_OF_CONTRACT_PERIOD',
                 'CAPITATION_RATES',
             ])
-            expect(info.itemsBeingAmendedOther).toEqual('just having a laugh')
+            expect(info.otherItemBeingAmended).toEqual('just having a laugh')
             expect(info.capitationRatesAmendedInfo.reason).toEqual('OTHER')
-            expect(info.capitationRatesAmendedInfo.reasonOther).toEqual(
+            expect(info.capitationRatesAmendedInfo.otherReason).toEqual(
                 'something for fun'
             )
         })

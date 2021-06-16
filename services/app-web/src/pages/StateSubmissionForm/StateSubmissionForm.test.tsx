@@ -98,10 +98,10 @@ describe('StateSubmissionForm', () => {
                     'GEO_AREA_SERVED',
                     'OTHER',
                 ],
-                itemsBeingAmendedOther: 'foobar',
+                otherItemBeingAmended: 'foobar',
                 capitationRatesAmendedInfo: {
                     reason: CapitationRatesAmendmentReason.Midyear,
-                    reasonOther: null,
+                    otherReason: null,
                 },
                 relatedToCovid19: true,
                 relatedToVaccination: false,
