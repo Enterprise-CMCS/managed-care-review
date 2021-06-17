@@ -160,7 +160,7 @@ describe('Documents', () => {
             <Documents
                 draftSubmission={{
                     ...mockDraft(),
-                    submissionType: 'CONTRACT_ONLY',
+                    submissionType: 'CONTRACT_AND_RATES',
                 }}
             />,
             {
