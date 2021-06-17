@@ -1,9 +1,6 @@
 import {
     DraftSubmission,
     FetchCurrentUserDocument,
-    SubmissionType,
-    ContractType,
-    FederalAuthority,
     User as UserType,
     CreateDraftSubmissionDocument,
     FetchDraftSubmissionDocument,
@@ -42,18 +39,15 @@ const mockDraftSubmission: DraftSubmission = {
         name: 'SNBC',
     },
     name: 'MN-MSHO-0001',
-    submissionType: SubmissionType.ContractOnly,
+    submissionType: 'CONTRACT_ONLY',
     submissionDescription: 'A real submission',
     documents: [],
-    contractType: ContractType.Base,
+    contractType: 'BASE',
     contractDateStart: new Date(),
     contractDateEnd: new Date(),
     contractAmendmentInfo: null,
     managedCareEntities: [],
-    federalAuthorities: [
-        FederalAuthority.Voluntary,
-        FederalAuthority.Benchmark,
-    ],
+    federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
 }
 
 // Only export a function that returns the mockDraftSubmission so that

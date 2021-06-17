@@ -14,7 +14,6 @@ import {
 import {
     SubmissionType,
     ContractType,
-    FederalAuthority,
     CapitationRatesAmendmentReason,
 } from '../../../gen/gqlClient'
 
@@ -45,9 +44,9 @@ describe('ContractDetails', () => {
                             contractDateStart: dayjs().format('YYYY-MM-DD'),
                             contractDateEnd: dayjs().format('YYYY-MM-DD'),
                             federalAuthorities: [
-                                FederalAuthority.Voluntary,
-                                FederalAuthority.Benchmark,
-                                FederalAuthority.Waiver_1115,
+                                'VOLUNTARY',
+                                'BENCHMARK',
+                                'WAIVER_1115',
                             ],
                             managedCareEntities: ['MCO'],
                             contractAmendmentInfo: {

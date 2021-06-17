@@ -16,7 +16,6 @@ import {
     updateDraftSubmissionMock,
 } from '../../../testHelpers/apolloHelpers'
 import { Documents } from './Documents'
-import { SubmissionType } from '../../../gen/gqlClient'
 
 describe('Documents', () => {
     it('renders without errors', async () => {
@@ -142,7 +141,7 @@ describe('Documents', () => {
             <Documents
                 draftSubmission={{
                     ...mockDraft(),
-                    submissionType: SubmissionType.ContractOnly,
+                    submissionType: 'CONTRACT_ONLY',
                 }}
             />,
             {
@@ -161,7 +160,7 @@ describe('Documents', () => {
             <Documents
                 draftSubmission={{
                     ...mockDraft(),
-                    submissionType: SubmissionType.ContractAndRates,
+                    submissionType: 'CONTRACT_ONLY',
                 }}
             />,
             {

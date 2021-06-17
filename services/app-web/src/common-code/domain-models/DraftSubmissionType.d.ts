@@ -18,15 +18,15 @@ type ContractAmendmentInfo = {
     relatedToVaccination?: boolean
 }
 
-type ContractType = BASE | AMENDMENT
+type ContractType = 'BASE' | 'AMENDMENT'
 
 type FederalAuthority =
-    | STATE_PLAN
-    | WAIVER_1915B
-    | WAIVER_1115
-    | VOLUNTARY
-    | BENCHMARK
-    | TITLE_XXI
+    | 'STATE_PLAN'
+    | 'WAIVER_1915B'
+    | 'WAIVER_1115'
+    | 'VOLUNTARY'
+    | 'BENCHMARK'
+    | 'TITLE_XXI'
 
 // CLIENT_SIDE ONLY TYPES
 const ENTITIES = ['MCO', 'PIHP', 'PAHP', 'PCCM'] as const
