@@ -5,6 +5,7 @@ import {
     DraftSubmissionUpdates,
     CreateDraftSubmissionInput,
     SubmissionType,
+    RateType,
 } from '../gen/gqlServer'
 import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
 import UPDATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/updateDraftSubmission.graphql'
@@ -26,13 +27,17 @@ describe('updateDraftSubmission', () => {
                 stateCode: 'FL',
                 stateNumber: 3,
                 programID: 'MCAC',
-                submissionType: 'CONTRACT_ONLY' as const,
+                submissionType: 'CONTRACT_ONLY',
                 submissionDescription: 'an old submission',
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 documents: [],
                 managedCareEntities: [],
                 federalAuthorities: [],
+                rateType: 'AMENDMENT',
+                rateDateStart: new Date(),
+                rateDateEnd: new Date(),
+                rateDateCertified: new Date(),
             }
 
             const updates: DraftSubmissionUpdates = {
@@ -46,6 +51,10 @@ describe('updateDraftSubmission', () => {
                 managedCareEntities: [],
                 federalAuthorities: [],
                 contractAmendmentInfo: null,
+                rateType: 'NEW' as RateType.New,
+                rateDateStart: null,
+                rateDateEnd: null,
+                rateDateCertified: null,
             }
 
             applyUpdates(baseDraft, updates)
@@ -55,6 +64,10 @@ describe('updateDraftSubmission', () => {
             expect(baseDraft.contractDateStart).toBeUndefined()
             expect(baseDraft.contractDateEnd).toBeUndefined()
             expect(baseDraft.contractAmendmentInfo).toBeUndefined()
+            expect(baseDraft.rateType).toBe('NEW')
+            expect(baseDraft.rateDateStart).toBeUndefined()
+            expect(baseDraft.rateDateEnd).toBeUndefined()
+            expect(baseDraft.rateDateCertified).toBeUndefined()
         })
 
         it('correctly applies empty amendment updates', () => {
@@ -91,6 +104,10 @@ describe('updateDraftSubmission', () => {
                     relatedToCovid19: null,
                     relatedToVaccination: null,
                 },
+                rateType: null,
+                rateDateStart: null,
+                rateDateEnd: null,
+                rateDateCertified: null,
             }
 
             applyUpdates(baseDraft, updates)
@@ -142,6 +159,10 @@ describe('updateDraftSubmission', () => {
                     relatedToCovid19: null,
                     relatedToVaccination: null,
                 },
+                rateType: null,
+                rateDateStart: null,
+                rateDateEnd: null,
+                rateDateCertified: null,
             }
 
             applyUpdates(baseDraft, updates)
@@ -165,7 +186,7 @@ describe('updateDraftSubmission', () => {
         const createdID = createdDraft.id
         const startDate = '2021-07-06'
         const endDate = '2021-07-12'
-
+        const certifiedDate = '2021-01-01'
         // In order to test updatedAt, we delay 2 seconds here.
         await new Promise((resolve) => setTimeout(resolve, 2000))
 
@@ -179,6 +200,9 @@ describe('updateDraftSubmission', () => {
             contractDateEnd: endDate,
             managedCareEntities: ['MCO'],
             federalAuthorities: ['VOLUNTARY'],
+            rateDateStart: startDate,
+            rateDateEnd: endDate,
+            rateDateCertified: certifiedDate,
         }
 
         const updateResult = await mutate({
@@ -220,6 +244,11 @@ describe('updateDraftSubmission', () => {
         expect(resultDraft.contractDateEnd).toBe(endDate)
         expect(resultDraft.managedCareEntities).toEqual(['MCO'])
         expect(resultDraft.federalAuthorities).toEqual(['VOLUNTARY'])
+
+        // Rate Details
+        expect(resultDraft.rateDateStart).toBe(startDate)
+        expect(resultDraft.rateDateEnd).toBe(endDate)
+        expect(resultDraft.rateDateCertified).toBe(certifiedDate)
     })
 
     it('updates a submission to have documents', async () => {

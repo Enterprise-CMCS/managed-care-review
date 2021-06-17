@@ -34,6 +34,10 @@ export async function updateDraftSubmission(
     storeDraft.contractType = draftSubmission.contractType
     storeDraft.federalAuthorities = draftSubmission.federalAuthorities
     storeDraft.managedCareEntities = draftSubmission.managedCareEntities
+    storeDraft.rateDateEnd = draftSubmission.rateDateEnd
+    storeDraft.rateDateStart = draftSubmission.rateDateStart
+    storeDraft.rateType = draftSubmission.rateType
+    storeDraft.rateDateCertified = draftSubmission.rateDateCertified
 
     if (draftSubmission.contractAmendmentInfo) {
         const draftInfo = draftSubmission.contractAmendmentInfo

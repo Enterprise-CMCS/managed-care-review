@@ -92,6 +92,18 @@ export class DraftSubmissionStoreType {
     contractDateEnd?: Date
 
     @attribute()
+    rateType?: string
+
+    @attribute()
+    rateDateStart?: Date
+
+    @attribute()
+    rateDateEnd?: Date
+
+    @attribute()
+    rateDateCertified?: Date
+
+    @attribute()
     managedCareEntities: Array<string>
 
     @attribute()
@@ -133,6 +145,10 @@ export class DraftSubmissionStoreType {
         this.contractDateEnd = undefined
         this.managedCareEntities = []
         this.federalAuthorities = []
+        this.rateType = undefined
+        this.rateDateStart = undefined
+        this.rateDateEnd = undefined
+        this.rateDateCertified = undefined
     }
 }
 

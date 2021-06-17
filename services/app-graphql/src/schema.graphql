@@ -140,6 +140,11 @@ enum ContractType {
     AMENDMENT
 }
 
+enum RateType {
+    NEW
+    AMENDMENT
+}
+
 enum FederalAuthority {
     STATE_PLAN
     WAIVER_1915B
@@ -166,6 +171,10 @@ type DraftSubmission {
     managedCareEntities: [String!]!
     federalAuthorities: [FederalAuthority!]!
     contractAmendmentInfo: ContractAmendmentInfo
+    rateType: RateType
+    rateDateStart: Date
+    rateDateEnd: Date
+    rateDateCertified: Date
 }
 
 type StateSubmission {
@@ -186,6 +195,10 @@ type StateSubmission {
     contractDateEnd: Date!
     managedCareEntities: [String!]!
     federalAuthorities: [FederalAuthority!]!
+    rateType: RateType!
+    rateDateStart: Date!
+    rateDateEnd: Date!
+    rateDateCertified: Date!
 }
 
 input DraftSubmissionUpdates {
@@ -199,4 +212,8 @@ input DraftSubmissionUpdates {
     managedCareEntities: [String!]!
     federalAuthorities: [FederalAuthority!]!
     contractAmendmentInfo: ContractAmendmentInfoInput
+    rateType: RateType
+    rateDateStart: Date
+    rateDateEnd: Date
+    rateDateCertified: Date
 }
