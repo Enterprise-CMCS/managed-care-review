@@ -32,18 +32,15 @@ export const RateDetails = ({
             <PageHeading className={styles.formHeader} headingLevel="h2">
                 Rate details
             </PageHeading>
-            <Formik
-                initialValues={{ contractType: '' }}
-                onSubmit={handleFormSubmit}
-            >
+            <Formik initialValues={{ newRate: '' }} onSubmit={handleFormSubmit}>
                 <UswdsForm
                     className={styles.formContainer}
-                    id="ContractDetailsForm"
-                    aria-label="Contract Details Form"
+                    id="RateDetailsForm"
+                    aria-label="Rate Details Form"
                     onSubmit={handleFormSubmit}
                 >
                     <fieldset className="usa-fieldset">
-                        <legend className="srOnly">Contract Details</legend>
+                        <legend className="srOnly">Rate Details</legend>
                         <span>All fields are required</span>
                         <FormGroup>
                             <Fieldset
@@ -54,13 +51,13 @@ export const RateDetails = ({
                                     id="newRate"
                                     name="rateType"
                                     label="New rate certification"
-                                    value="new-rate"
+                                    value="newRate"
                                 />
                                 <FieldRadio
                                     id="amendmentRate"
                                     name="rateType"
                                     label="Amendment to prior rate certification"
-                                    value="amendment-rate"
+                                    value="amendmentRate"
                                 />
                             </Fieldset>
                         </FormGroup>
@@ -73,14 +70,14 @@ export const RateDetails = ({
                                     endDatePickerProps={{
                                         disabled: false,
                                         id: 'rateDateEnd',
-                                        name: 'rate-date-end',
+                                        name: 'rateDateEnd',
                                     }}
                                     startDateHint="mm/dd/yyyy"
                                     startDateLabel="Start date"
                                     startDatePickerProps={{
                                         disabled: false,
                                         id: 'rateDateStart',
-                                        name: 'rate-date-start',
+                                        name: 'rateDateStart',
                                     }}
                                 />
                             </Fieldset>
@@ -101,7 +98,7 @@ export const RateDetails = ({
                             <DatePicker
                                 aria-describedby="certificationDateLabel certificationDateHint"
                                 id="certificationDate"
-                                name="certification-date"
+                                name="certificationDate"
                             />
                         </FormGroup>
                         <FormGroup>
@@ -113,14 +110,14 @@ export const RateDetails = ({
                                     endDatePickerProps={{
                                         disabled: false,
                                         id: 'originalRateDateEnd',
-                                        name: 'original-rate-date-end',
+                                        name: 'originalRateDateEnd',
                                     }}
                                     startDateHint="mm/dd/yyyy"
                                     startDateLabel="Start date"
                                     startDatePickerProps={{
                                         disabled: false,
                                         id: 'originalRateDateStart',
-                                        name: 'original-rate-date-start',
+                                        name: 'originalRateDateStart',
                                     }}
                                 />
                             </Fieldset>
@@ -128,9 +125,9 @@ export const RateDetails = ({
                         <FormGroup>
                             <Fieldset legend="Effective dates of rate amendment">
                                 <FieldCheckbox
-                                    name="same-as-original-rate"
+                                    name="sameAsOriginalRatePeriod"
                                     label="Use same dates as original rating period"
-                                    id="SameAsOriginalRatePeriod"
+                                    id="sameAsOriginalRatePeriod"
                                 />
                                 <DateRangePicker
                                     className={styles.dateRangePicker}
@@ -139,14 +136,14 @@ export const RateDetails = ({
                                     endDatePickerProps={{
                                         disabled: false,
                                         id: 'amendmentRateDateEnd',
-                                        name: 'amendment-rate-date-end',
+                                        name: 'amendmentRateDateEnd',
                                     }}
                                     startDateHint="mm/dd/yyyy"
                                     startDateLabel="Start date"
                                     startDatePickerProps={{
                                         disabled: false,
                                         id: 'amendmentRateDateStart',
-                                        name: 'amendment-rate-date-start',
+                                        name: 'amendmentRateDateEnd',
                                     }}
                                 />
                             </Fieldset>
