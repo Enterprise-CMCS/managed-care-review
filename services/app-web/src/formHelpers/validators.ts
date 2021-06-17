@@ -5,7 +5,8 @@ import * as Yup from 'yup'
 
 /*  
     validateDateFormat is a custom Yup method
-    This is needed to validate manual user input format (usually MM/DD/YYYY) and display specific errors when user input is invalid
+    This is needed to transform manual user input format MM/DD/YYYY to YYYY-MM-DD 
+    and display specific errors when date is invalid
     More on this approach: https://github.com/jquense/yup#yupaddmethodschematype-schema-name-string-method--schema-void
 
 */
@@ -24,4 +25,8 @@ function validateDateFormat(
         return value.isValid() ? value.toDate() : new Date('') // force return 'Invalid Date'
     })
 }
-export { validateDateFormat }
+
+const isDateRangeEmpty = (startDate: string, endDate: string) =>
+    startDate === undefined && endDate === undefined
+
+export { isDateRangeEmpty, validateDateFormat }

@@ -24,6 +24,7 @@ import {
     formatForApi,
     formatForForm,
     formatUserInputDate,
+    isDateRangeEmpty,
     validateDateFormat,
 } from '../../../formHelpers'
 import {
@@ -44,7 +45,6 @@ import {
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
 // Formik setup
-// Should be listed in order of appearance on field to allow errors to focus as expected
 const ContractDetailsFormSchema = Yup.object().shape({
     contractType: Yup.string().defined(
         'You must choose a contract action type'
@@ -184,8 +184,6 @@ export const ContractDetails = ({
         values: ContractDetailsFormValues
     ): boolean => values.contractType === ContractType.Amendment
 
-    const isDateEmptyOrInvalid = (dateValue: string): boolean => !dateValue
-
     const ContractDatesErrorMessage = ({
         values,
         validationErrorMessage,
@@ -194,8 +192,7 @@ export const ContractDetails = ({
         validationErrorMessage: string
     }): React.ReactElement => (
         <ErrorMessage>
-            {isDateEmptyOrInvalid(values.contractDateEnd) &&
-            isDateEmptyOrInvalid(values.contractDateStart)
+            {isDateRangeEmpty(values.contractDateStart, values.contractDateEnd)
                 ? 'You must provide a start and an end date'
                 : validationErrorMessage}
         </ErrorMessage>
