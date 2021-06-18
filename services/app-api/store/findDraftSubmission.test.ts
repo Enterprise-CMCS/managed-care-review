@@ -18,10 +18,10 @@ describe('findDraftSubmission', () => {
 
         const inputParams = {
             stateCode: 'FL',
-            programID: 'MCAC',
+            programID: 'smmc',
             submissionDescription: 'a new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
-            documents: []
+            documents: [],
         }
 
         const draftSubResult = await store.insertDraftSubmission(inputParams)
@@ -46,7 +46,7 @@ describe('findDraftSubmission', () => {
         }
 
         expect(result.stateCode).toBe('FL')
-        expect(result.programID).toBe('MCAC')
+        expect(result.programID).toBe('smmc')
         expect(result.id).toBe(createdID)
         expect(result.submissionType).toBe('CONTRACT_ONLY')
         expect(result.submissionDescription).toBe('a new great submission')
@@ -92,10 +92,10 @@ describe('findDraftSubmissionByStateNumber', () => {
 
         const inputParams = {
             stateCode: 'FL',
-            programID: 'MCAC',
+            programID: 'smmc',
             submissionDescription: 'a new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
-            documents: []
+            documents: [],
         }
 
         const draftSubResult = await store.insertDraftSubmission(inputParams)
@@ -126,7 +126,7 @@ describe('findDraftSubmissionByStateNumber', () => {
         expect(result.stateNumber).toBe(createdStateNumber)
         expect(result.submissionType).toBe('CONTRACT_ONLY')
         expect(result.submissionDescription).toBe('a new great submission')
-        expect(result.programID).toBe('MCAC')
+        expect(result.programID).toBe('smmc')
     })
     it('returns an error if the connection is bad', async () => {
         const config = {

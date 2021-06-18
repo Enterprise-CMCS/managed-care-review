@@ -18,6 +18,8 @@ export type {
 
 export type { StateSubmissionType } from './StateSubmissionType'
 
+export type { SubmissionUnionType } from './SubmissionUnionType'
+
 export type { ProgramT } from './ProgramT'
 
 // Type checks and type guards

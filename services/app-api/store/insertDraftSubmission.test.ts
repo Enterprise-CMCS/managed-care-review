@@ -13,7 +13,7 @@ describe('insertDraftSubmission', () => {
 
         const inputParams = {
             stateCode: 'FL',
-            programID: 'MCAC',
+            programID: 'smmc',
             submissionDescription: 'a new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
         }
@@ -45,7 +45,7 @@ describe('insertDraftSubmission', () => {
                     'a new great submission'
                 )
                 expect(getResult.stateCode).toEqual('FL')
-                expect(getResult.programID).toEqual('MCAC')
+                expect(getResult.programID).toEqual('smmc')
                 expect(getResult.documents).toEqual([])
                 expect(getResult.contractType).toEqual(undefined)
                 expect(getResult.contractDateStart).toEqual(undefined)
@@ -74,7 +74,7 @@ describe('insertDraftSubmission', () => {
 
         const inputParams = {
             stateCode: 'FL',
-            programID: 'MCAC',
+            programID: 'smmc',
             submissionDescription: 'a new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
         }
@@ -129,7 +129,7 @@ describe('insertDraftSubmission', () => {
 
         const inputParams = {
             stateCode: 'FL',
-            programID: 'MCAC',
+            programID: 'smmc',
             submissionDescription: 'a new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
         }
@@ -221,7 +221,7 @@ describe('insertDraftSubmission', () => {
 
         const inputParams = {
             stateCode: 'FL',
-            programID: 'MCAC',
+            programID: 'smmc',
             submissionDescription: 'a new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
         }
@@ -290,7 +290,7 @@ describe('insertDraftSubmission', () => {
 
         const inputParams = {
             stateCode: 'FL',
-            programID: 'MCAC',
+            programID: 'smmc',
             submissionDescription: 'a new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
         }

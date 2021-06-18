@@ -25,7 +25,7 @@ describe('updateDraftSubmission', () => {
                 id: 'foo-bar',
                 stateCode: 'FL',
                 stateNumber: 3,
-                programID: 'MCAC',
+                programID: 'smmc',
                 submissionType: 'CONTRACT_ONLY' as const,
                 submissionDescription: 'an old submission',
                 createdAt: new Date(),
@@ -36,7 +36,7 @@ describe('updateDraftSubmission', () => {
             }
 
             const updates: DraftSubmissionUpdates = {
-                programID: 'MCAC',
+                programID: 'smmc',
                 submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
                 submissionDescription: 'an updated draft',
                 documents: [],
@@ -64,7 +64,7 @@ describe('updateDraftSubmission', () => {
                 id: 'foo-bar',
                 stateCode: 'FL',
                 stateNumber: 3,
-                programID: 'MCAC',
+                programID: 'smmc',
                 submissionType: 'CONTRACT_ONLY' as const,
                 submissionDescription: 'an old submission',
                 createdAt: new Date(),
@@ -75,7 +75,7 @@ describe('updateDraftSubmission', () => {
             }
 
             const updates: DraftSubmissionUpdates = {
-                programID: 'MCAC',
+                programID: 'smmc',
                 submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
                 submissionDescription: 'an updated draft',
                 documents: [],
@@ -112,7 +112,7 @@ describe('updateDraftSubmission', () => {
                 id: 'foo-bar',
                 stateCode: 'FL',
                 stateNumber: 3,
-                programID: 'MCAC',
+                programID: 'smmc',
                 submissionType: 'CONTRACT_ONLY' as const,
                 submissionDescription: 'an old submission',
                 createdAt: new Date(),
@@ -123,7 +123,7 @@ describe('updateDraftSubmission', () => {
             }
 
             const updates: DraftSubmissionUpdates = {
-                programID: 'MCAC',
+                programID: 'smmc',
                 submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
                 submissionDescription: 'an updated draft',
                 documents: [],

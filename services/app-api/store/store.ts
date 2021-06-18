@@ -19,11 +19,16 @@ import {
 } from '../../app-web/src/common-code/domain-models'
 import { updateDraftSubmission } from './updateDraftSubmission'
 import { findStateSubmission } from './findStateSubmission'
+import { findAllSubmissions } from './findAllSubmissions'
 
 export type Store = {
     insertDraftSubmission: (
         args: InsertDraftSubmissionArgsType
     ) => Promise<DraftSubmissionType | StoreError>
+
+    findAllSubmissions: (
+        stateCode: string
+    ) => Promise<(DraftSubmissionType | StateSubmissionType)[] | StoreError>
 
     findDraftSubmission: (
         draftUUID: string
@@ -59,6 +64,8 @@ export function storeWithDynamoConfig(
     })
 
     return {
+        findAllSubmissions: (stateCode) =>
+            findAllSubmissions(mapper, stateCode),
         insertDraftSubmission: (args) => insertDraftSubmission(mapper, args),
         findDraftSubmission: (draftUUID) =>
             findDraftSubmission(mapper, draftUUID),
