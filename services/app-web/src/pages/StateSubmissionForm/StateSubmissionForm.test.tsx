@@ -3,6 +3,7 @@ import { within } from '@testing-library/react'
 import { Route } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 
+import { Document } from '../../gen/gqlClient'
 import { RoutesRecord } from '../../constants/routes'
 import {
     mockDraft,
@@ -251,8 +252,16 @@ describe('StateSubmissionForm', () => {
         })
 
         it('works even if other sections of the form have been filled out', async () => {
+            const mockDocs: Document[] = [
+                {
+                    name: 'somedoc.pdf',
+                    s3URL: 's3://bucketName/key',
+                },
+            ]
             const mockSubmission = mockDraft()
             mockSubmission.id = '15'
+            mockSubmission.documents = mockDocs
+
             const mockUpdate = updatesFromSubmission(mockSubmission)
             mockUpdate.submissionDescription =
                 'A real submission but updated something'
