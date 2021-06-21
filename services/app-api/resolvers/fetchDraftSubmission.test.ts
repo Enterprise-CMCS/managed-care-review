@@ -1,6 +1,6 @@
 import { createTestClient } from 'apollo-server-testing'
 
-import { CreateDraftSubmissionInput, SubmissionType } from '../gen/gqlServer'
+import { CreateDraftSubmissionInput } from '../gen/gqlServer'
 import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
 import FETCH_DRAFT_SUBMISSION from '../../app-graphql/src/queries/fetchDraftSubmission.graphql'
 import { constructTestServer } from '../testHelpers/gqlHelpers'
@@ -14,7 +14,7 @@ describe('fetchDraftSubmission', () => {
         // First, create a new submission
         const createInput: CreateDraftSubmissionInput = {
             programID: 'managed-medical-assistance',
-            submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
+            submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
         }
         const createResult = await mutate({
@@ -36,16 +36,12 @@ describe('fetchDraftSubmission', () => {
         })
 
         expect(result.errors).toBeUndefined()
-       
+
         const resultDraft = result.data.fetchDraftSubmission.draftSubmission
         expect(resultDraft.id).toEqual(createdID)
         expect(resultDraft.program.id).toEqual('managed-medical-assistance')
-        expect(
-            resultDraft.program.name
-        ).toBe('Managed Medical Assistance')
-        expect(resultDraft.name).toContain(
-            'FL-MANAGED-MEDICAL-ASSISTANCE'
-        )
+        expect(resultDraft.program.name).toBe('Managed Medical Assistance')
+        expect(resultDraft.name).toContain('FL-MANAGED-MEDICAL-ASSISTANCE')
         expect(resultDraft.submissionDescription).toEqual('A real submission')
         expect(resultDraft.documents).toEqual([])
     })
@@ -77,7 +73,7 @@ describe('fetchDraftSubmission', () => {
         // First, create a new submission
         const createInput: CreateDraftSubmissionInput = {
             programID: 'smmc',
-            submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
+            submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
         }
         const createResult = await mutate({
@@ -125,7 +121,7 @@ describe('fetchDraftSubmission', () => {
         // First, create a new submission
         const createInput: CreateDraftSubmissionInput = {
             programID: 'smmc',
-            submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
+            submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
         }
         const createResult = await mutate({

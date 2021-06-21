@@ -8,6 +8,7 @@ import { embed } from '@aws/dynamodb-data-mapper'
 import {
     SubmissionType,
     FederalAuthority,
+    ContractType,
 } from '../../app-web/src/common-code/domain-models'
 
 // Data mapper annotations are meant to go on your domain models, and we might use them that way at some point
@@ -83,7 +84,7 @@ export class DraftSubmissionStoreType {
     programID: string
 
     @attribute()
-    contractType?: string
+    contractType?: ContractType
 
     @attribute()
     contractDateStart?: Date
@@ -164,7 +165,7 @@ export class StateSubmissionStoreType {
     programID: string
 
     @attribute()
-    contractType: string
+    contractType: ContractType
 
     @attribute()
     contractDateStart: Date

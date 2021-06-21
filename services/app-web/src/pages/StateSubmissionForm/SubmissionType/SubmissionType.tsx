@@ -243,31 +243,31 @@ export const SubmissionType = ({
                                         aria-required
                                         checked={
                                             values.submissionType ===
-                                            SubmissionTypeT.ContractOnly
+                                            'CONTRACT_ONLY'
                                         }
                                         id="contractOnly"
                                         name="submissionType"
                                         label={
                                             SubmissionTypeRecord[
-                                                SubmissionTypeT.ContractOnly
+                                                'CONTRACT_ONLY'
                                             ]
                                         }
-                                        value={SubmissionTypeT.ContractOnly}
+                                        value={'CONTRACT_ONLY'}
                                     />
                                     <FieldRadio
                                         aria-required
                                         checked={
                                             values.submissionType ===
-                                            SubmissionTypeT.ContractAndRates
+                                            'CONTRACT_AND_RATES'
                                         }
                                         id="contractRate"
                                         name="submissionType"
                                         label={
                                             SubmissionTypeRecord[
-                                                SubmissionTypeT.ContractAndRates
+                                                'CONTRACT_AND_RATES'
                                             ]
                                         }
-                                        value={SubmissionTypeT.ContractAndRates}
+                                        value={'CONTRACT_AND_RATES'}
                                     />
                                 </Fieldset>
                             </FormGroup>

@@ -14,7 +14,7 @@ import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models
 export function applyUpdates(
     draft: DraftSubmissionType,
     updates: DraftSubmissionUpdates
-) {
+): void {
     const capitationRatesUpdates = updates.contractAmendmentInfo
         ?.capitationRatesAmendedInfo
         ? {

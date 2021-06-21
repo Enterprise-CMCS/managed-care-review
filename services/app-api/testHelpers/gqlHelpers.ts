@@ -16,9 +16,6 @@ import {
     DraftSubmission,
     DraftSubmissionUpdates,
     StateSubmission,
-    SubmissionType,
-    ContractType,
-    FederalAuthority,
 } from '../gen/gqlServer'
 
 const store = getTestStore()
@@ -53,7 +50,7 @@ const createTestDraftSubmission = async (
 ): Promise<DraftSubmission> => {
     const input: CreateDraftSubmissionInput = {
         programID: 'smmc',
-        submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
+        submissionType: 'CONTRACT_ONLY' as const,
         submissionDescription: 'A created submission',
     }
     const result = await mutate({
@@ -103,7 +100,7 @@ const createAndUpdateTestDraftSubmission = async (
 
     const updates = {
         programID: 'cnet',
-        submissionType: 'CONTRACT_AND_RATES' as SubmissionType.ContractAndRates,
+        submissionType: 'CONTRACT_AND_RATES' as const,
         submissionDescription: 'An updated submission',
         documents: [
             {
@@ -111,11 +108,11 @@ const createAndUpdateTestDraftSubmission = async (
                 s3URL: 'fakeS3URL',
             },
         ],
-        contractType: 'BASE' as ContractType.Base,
+        contractType: 'BASE' as const,
         contractDateStart: startDate,
         contractDateEnd: endDate,
         managedCareEntities: ['MCO'],
-        federalAuthorities: ['STATE_PLAN' as FederalAuthority.StatePlan],
+        federalAuthorities: ['STATE_PLAN' as const],
         ...partialDraftSubmissionUpdates,
     }
 

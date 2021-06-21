@@ -57,7 +57,7 @@ export const SubmissionCard = ({
             </div>
             <div className={styles.cardRight}>
                 <span className={styles.submissionType}>
-                    {submissionType === SubmissionType.ContractOnly
+                    {submissionType === 'CONTRACT_ONLY'
                         ? 'Contract only'
                         : 'Contract and rate certification'}
                 </span>
