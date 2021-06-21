@@ -28,7 +28,7 @@ type FederalAuthority =
     | 'BENCHMARK'
     | 'TITLE_XXI'
 
-type RateType = NEW | AMENDMENT
+type RateType = 'NEW' | 'AMENDMENT'
 
 // CLIENT_SIDE ONLY TYPES
 const ENTITIES = ['MCO', 'PIHP', 'PAHP', 'PCCM'] as const
