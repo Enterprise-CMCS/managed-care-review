@@ -2,10 +2,15 @@ import { DataMapper } from '@aws/dynamodb-data-mapper'
 import { v4 as uuidv4 } from 'uuid'
 
 import { StoreError, isStoreError } from './storeError'
-import { SubmissionStoreType, isDynamoError } from './dynamoTypes'
+import {
+    convertToDomainSubmission,
+    SubmissionStoreType,
+    isDynamoError,
+} from './dynamoTypes'
 import {
     DraftSubmissionType,
     SubmissionType,
+    isDraftSubmission,
 } from '../../app-web/src/common-code/domain-models'
 
 export type InsertDraftSubmissionArgsType = {
@@ -77,7 +82,7 @@ export async function insertDraftSubmission(
     args: InsertDraftSubmissionArgsType
 ): Promise<DraftSubmissionType | StoreError> {
     // in order to create a new draft submission, we have to do a few things in the DB.
-    // * given: state.program, contractstype, description
+    // * given: state.program, contractType, description
     //   * createdAt -- now
     //   * state-num -- this is a transaction. find biggest state-num, add one
     //   * name (state_program_num) -- db? / synthesized
@@ -115,7 +120,17 @@ export async function insertDraftSubmission(
     try {
         const putResult = await mapper.put(draft)
 
-        return putResult
+        const domainResult = convertToDomainSubmission(putResult)
+
+        // if the result in the DB is a DRAFT, return an error
+        if (!isDraftSubmission(domainResult)) {
+            return {
+                code: 'WRONG_STATUS',
+                message: 'The inserted submission is not a DraftSubmission',
+            }
+        }
+
+        return domainResult
     } catch (err) {
         if (isDynamoError(err)) {
             if (

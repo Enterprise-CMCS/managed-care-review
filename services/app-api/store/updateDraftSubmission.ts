@@ -2,6 +2,7 @@ import { DataMapper } from '@aws/dynamodb-data-mapper'
 
 import { StoreError } from './storeError'
 import {
+    convertToDomainSubmission,
     CapitationRatesAmendedInfo,
     ContractAmendmentInfoT,
     DocumentStoreT,
@@ -9,7 +10,10 @@ import {
     isDynamoError,
 } from './dynamoTypes'
 
-import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
+import {
+    DraftSubmissionType,
+    isDraftSubmission,
+} from '../../app-web/src/common-code/domain-models'
 
 export async function updateDraftSubmission(
     mapper: DataMapper,
@@ -67,7 +71,17 @@ export async function updateDraftSubmission(
     try {
         const putResult = await mapper.put(storeDraft)
 
-        return putResult
+        const domainResult = convertToDomainSubmission(putResult)
+
+        // if the result in the DB is a DRAFT, return an error
+        if (!isDraftSubmission(domainResult)) {
+            return {
+                code: 'WRONG_STATUS',
+                message: 'The inserted submission is not a DraftSubmission',
+            }
+        }
+
+        return domainResult
     } catch (err) {
         if (isDynamoError(err)) {
             if (

@@ -2,19 +2,24 @@ import { DataMapper } from '@aws/dynamodb-data-mapper'
 
 import { StoreError, convertDynamoErrorToStoreError } from './storeError'
 import {
-    StateSubmissionStoreType,
+    convertToDomainSubmission,
+    SubmissionStoreType,
     isDynamoError,
     DocumentStoreT,
 } from './dynamoTypes'
-import { StateSubmissionType } from '../../app-web/src/common-code/domain-models'
+import {
+    isStateSubmission,
+    StateSubmissionType,
+} from '../../app-web/src/common-code/domain-models'
 
 // Initially called when we convert a draft submission to a state submission
 export async function updateStateSubmission(
     mapper: DataMapper,
     stateSubmission: StateSubmissionType
 ): Promise<StateSubmissionType | StoreError> {
-    const storeSubmission = new StateSubmissionStoreType()
+    const storeSubmission = new SubmissionStoreType()
     storeSubmission.id = stateSubmission.id
+    storeSubmission.status = 'SUBMITTED'
     storeSubmission.createdAt = stateSubmission.createdAt
     storeSubmission.updatedAt = new Date()
     storeSubmission.stateCode = stateSubmission.stateCode
@@ -42,7 +47,18 @@ export async function updateStateSubmission(
 
     try {
         const putResult = await mapper.put(storeSubmission)
-        return putResult
+
+        const domainResult = convertToDomainSubmission(putResult)
+
+        if (!isStateSubmission(domainResult)) {
+            return {
+                code: 'WRONG_STATUS',
+                message:
+                    'the updated stateSubmission did not come back with all its fields',
+            }
+        }
+
+        return domainResult
     } catch (err) {
         if (isDynamoError(err)) {
             return convertDynamoErrorToStoreError(err.code)
