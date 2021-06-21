@@ -29,7 +29,7 @@ describe('dynamo Types', () => {
         storeSub.contractDateStart = new Date()
         storeSub.contractDateEnd = new Date()
         storeSub.documents = [{ s3URL: 'foo.com', name: 'foo' }]
-        storeSub.federalAuthorities = ['foo']
+        storeSub.federalAuthorities = ['WAIVER_1915B']
         storeSub.managedCareEntities = ['bar']
 
         const domainSubResult = convertToDomainSubmission(storeSub)

@@ -10,14 +10,7 @@ import {
     fetchDraftSubmissionMock,
     updateDraftSubmissionMock,
 } from '../../testHelpers/apolloHelpers'
-import {
-    SubmissionType,
-    ContractType,
-    FederalAuthority,
-    DraftSubmission,
-    Document,
-    CapitationRatesAmendmentReason,
-} from '../../gen/gqlClient'
+import { DraftSubmission, Document } from '../../gen/gqlClient'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
 import { StateSubmissionForm } from './StateSubmissionForm'
@@ -91,7 +84,7 @@ describe('StateSubmissionForm', () => {
         it('loads contract details fields for /submissions/:id/contract-details with amendments', async () => {
             const mockAmendment = mockDraft()
 
-            mockAmendment.contractType = ContractType.Amendment
+            mockAmendment.contractType = 'AMENDMENT'
             mockAmendment.contractAmendmentInfo = {
                 itemsBeingAmended: [
                     'CAPITATION_RATES',
@@ -100,7 +93,7 @@ describe('StateSubmissionForm', () => {
                 ],
                 otherItemBeingAmended: 'foobar',
                 capitationRatesAmendedInfo: {
-                    reason: CapitationRatesAmendmentReason.Midyear,
+                    reason: 'MIDYEAR',
                     otherReason: null,
                 },
                 relatedToCovid19: true,
@@ -276,18 +269,15 @@ describe('StateSubmissionForm', () => {
                     name: 'SNBC',
                 },
                 name: 'MN-MSHO-0001',
-                submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
+                submissionType: 'CONTRACT_ONLY' as 'CONTRACT_ONLY',
                 submissionDescription: 'A real submission',
                 documents: mockDocs,
                 contractAmendmentInfo: null,
-                contractType: ContractType.Base,
+                contractType: 'BASE',
                 contractDateStart: new Date(),
                 contractDateEnd: new Date(),
                 managedCareEntities: [''],
-                federalAuthorities: [
-                    FederalAuthority.Voluntary,
-                    FederalAuthority.Benchmark,
-                ],
+                federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
             }
 
             const mockUpdate = updatesFromSubmission(

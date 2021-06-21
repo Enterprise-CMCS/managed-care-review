@@ -6,6 +6,7 @@ import {
 
 import { embed } from '@aws/dynamodb-data-mapper'
 import {
+    ContractType,
     SubmissionType,
     FederalAuthority,
     DraftSubmissionType,
@@ -150,7 +151,7 @@ export class SubmissionStoreType {
     programID: string
 
     @attribute()
-    contractType?: string
+    contractType?: ContractType
 
     @attribute()
     contractDateStart?: Date
