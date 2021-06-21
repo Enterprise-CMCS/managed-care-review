@@ -15,9 +15,9 @@ const isStateSubmission = (sub: unknown): sub is StateSubmissionType => {
             maybeStateSub.contractType !== undefined &&
             maybeStateSub.contractDateStart !== undefined &&
             maybeStateSub.contractDateEnd !== undefined &&
-            maybeStateSub.documents.length != 0 &&
-            maybeStateSub.managedCareEntities.length != 0 &&
-            maybeStateSub.federalAuthorities.length != 0
+            maybeStateSub.documents.length !== 0 &&
+            maybeStateSub.managedCareEntities.length !== 0 &&
+            maybeStateSub.federalAuthorities.length !== 0
         )
     }
     return false

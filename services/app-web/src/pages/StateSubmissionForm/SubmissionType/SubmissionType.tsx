@@ -134,7 +134,7 @@ export const SubmissionType = ({
         } else {
             if (draftSubmission === undefined) {
                 // this is a sign that we should hoist the saving stuff out of this leaf
-                // let's reconsider once we have our second editiable component.
+                // let's reconsider once we have our second editable component.
                 console.log(
                     'ERROR, when editing a draft, one should always be passed in.'
                 )

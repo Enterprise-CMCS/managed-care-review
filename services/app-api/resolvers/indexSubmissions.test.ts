@@ -44,24 +44,16 @@ describe('indexDraftSubmission', () => {
             )
         expect(theseSubmissions.length).toBe(2)
 
-        // this is dumb and bad but I'm not sure how to do this right
-        // by doing true ? we trick the compiler into thinking that draftResult actually can
-        // be DraftSubmission or undefined. For some reason, the fact that it can be set
-        // inside the forEach function is ignored by typescript.
-        let draftResult: DraftSubmission | undefined = true
-            ? undefined
-            : draftSub
-        let stateResult: StateSubmission | undefined = true
-            ? undefined
-            : stateSub
-        theseSubmissions.forEach((sub: Submission) => {
+        let draftResult: DraftSubmission | undefined = undefined
+        let stateResult: StateSubmission | undefined = undefined
+        for (const sub of theseSubmissions) {
             if (sub.id === draftSub.id) {
                 draftResult = sub as DraftSubmission
             }
             if (sub.id === stateSub.id) {
                 stateResult = sub as StateSubmission
             }
-        })
+        }
 
         expect(draftResult).toBeDefined()
         expect(stateResult).toBeDefined()
@@ -77,7 +69,7 @@ describe('indexDraftSubmission', () => {
     it('returns no submissions for a different user', async () => {
         const server = constructTestServer()
 
-        const { query, mutate } = createTestClient(server)
+        const { mutate } = createTestClient(server)
 
         // First, create a new submission
         const draftSub = await createTestDraftSubmission(mutate)

@@ -2,11 +2,7 @@ import { ApolloError } from 'apollo-server-lambda'
 import { isStoreError, Store } from '../store/index'
 import { QueryResolvers } from '../gen/gqlServer'
 
-import {
-    DraftSubmissionType,
-    StateSubmissionType,
-    SubmissionUnionType,
-} from '../../app-web/src/common-code/domain-models'
+import { SubmissionUnionType } from '../../app-web/src/common-code/domain-models'
 
 export function indexSubmissionsResolver(
     store: Store

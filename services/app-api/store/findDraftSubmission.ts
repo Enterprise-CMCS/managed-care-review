@@ -12,7 +12,6 @@ import {
     DraftSubmissionType,
     isDraftSubmission,
 } from '../../app-web/src/common-code/domain-models'
-import { domain } from 'process'
 
 export async function findDraftSubmission(
     mapper: DataMapper,
