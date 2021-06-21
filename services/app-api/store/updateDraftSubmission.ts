@@ -5,7 +5,7 @@ import {
     CapitationRatesAmendedInfo,
     ContractAmendmentInfoT,
     DocumentStoreT,
-    DraftSubmissionStoreType,
+    SubmissionStoreType,
     isDynamoError,
 } from './dynamoTypes'
 
@@ -15,7 +15,7 @@ export async function updateDraftSubmission(
     mapper: DataMapper,
     draftSubmission: DraftSubmissionType
 ): Promise<DraftSubmissionType | StoreError> {
-    const storeDraft = new DraftSubmissionStoreType()
+    const storeDraft = new SubmissionStoreType()
 
     storeDraft.id = draftSubmission.id
     storeDraft.createdAt = draftSubmission.createdAt

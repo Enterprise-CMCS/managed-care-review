@@ -50,6 +50,7 @@ function submit(
 
     const maybeStateSubmission: Record<string, unknown> = {
         ...draft,
+        status: 'SUBMITTED',
         submittedAt: new Date(),
     }
 

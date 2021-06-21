@@ -3,6 +3,7 @@
 export type StateSubmissionType = {
     submittedAt: Date
     id: string
+    status: 'SUBMITTED'
     stateCode: string
     stateNumber: number
     programID: string

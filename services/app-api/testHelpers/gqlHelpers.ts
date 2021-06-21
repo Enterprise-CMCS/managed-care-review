@@ -151,7 +151,7 @@ const submitTestDraftSubmission = async (
 
 const createTestStateSubmission = async (
     mutate: ApolloServerTestClient['mutate']
-): Promise<DraftSubmission> => {
+): Promise<StateSubmission> => {
     const draft = await createAndUpdateTestDraftSubmission(mutate)
 
     const updatedSubmission = await submitTestDraftSubmission(mutate, draft.id)

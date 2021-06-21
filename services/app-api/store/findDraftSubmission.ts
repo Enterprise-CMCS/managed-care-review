@@ -2,7 +2,7 @@ import { DataMapper } from '@aws/dynamodb-data-mapper'
 
 import { StoreError } from './storeError'
 import {
-    DraftSubmissionStoreType,
+    SubmissionStoreType,
     isDynamoError,
     isMapperError,
 } from './dynamoTypes'
@@ -15,7 +15,7 @@ export async function findDraftSubmission(
 ): Promise<DraftSubmissionType | undefined | StoreError> {
     try {
         const getResult = await mapper.get(
-            Object.assign(new DraftSubmissionStoreType(), {
+            Object.assign(new SubmissionStoreType(), {
                 id: draftUUID,
             })
         )
@@ -61,7 +61,7 @@ export async function findDraftSubmissionByStateNumber(
 ): Promise<DraftSubmissionType | undefined | StoreError> {
     try {
         const getIterator = mapper.query(
-            DraftSubmissionStoreType,
+            SubmissionStoreType,
             {
                 stateCode: stateCode,
                 stateNumber: stateNumber,

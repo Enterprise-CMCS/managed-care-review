@@ -1,4 +1,4 @@
-import { DraftSubmissionStoreType } from './dynamoTypes'
+import { SubmissionStoreType } from './dynamoTypes'
 import { getTestStore, getTestDynamoMapper } from '../testHelpers/storeHelpers'
 import { storeWithDynamoConfig } from './store'
 
@@ -34,7 +34,7 @@ describe('insertDraftSubmission', () => {
             const createdID = draftSub.id
             try {
                 const getResult = await mapper.get(
-                    Object.assign(new DraftSubmissionStoreType(), {
+                    Object.assign(new SubmissionStoreType(), {
                         id: createdID,
                     })
                 )
@@ -97,7 +97,7 @@ describe('insertDraftSubmission', () => {
             try {
                 const subsOfID = []
                 for await (const foo of mapper.query(
-                    DraftSubmissionStoreType,
+                    SubmissionStoreType,
                     {
                         stateCode: 'FL',
                         stateNumber: createdStateNumber,
@@ -179,24 +179,24 @@ describe('insertDraftSubmission', () => {
 
             try {
                 const one = await mapper.get(
-                    Object.assign(new DraftSubmissionStoreType(), {
+                    Object.assign(new SubmissionStoreType(), {
                         id: idOne,
                     })
                 )
                 const two = await mapper.get(
-                    Object.assign(new DraftSubmissionStoreType(), {
+                    Object.assign(new SubmissionStoreType(), {
                         id: idTwo,
                     })
                 )
 
                 const oneIN = await mapper.get(
-                    Object.assign(new DraftSubmissionStoreType(), {
+                    Object.assign(new SubmissionStoreType(), {
                         id: idINOne,
                     })
                 )
 
                 const twoIN = await mapper.get(
-                    Object.assign(new DraftSubmissionStoreType(), {
+                    Object.assign(new SubmissionStoreType(), {
                         id: idINTwo,
                     })
                 )

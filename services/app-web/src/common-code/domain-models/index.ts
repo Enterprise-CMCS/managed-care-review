@@ -28,4 +28,5 @@ export {
     isContractOnly,
     isContractAndRates,
     isStateSubmission,
+    isDraftSubmission,
 } from './submission'

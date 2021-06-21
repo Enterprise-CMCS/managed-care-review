@@ -30,8 +30,6 @@ export function indexSubmissionsResolver(
             )
         }
 
-        console.log('got back', result)
-
         const submissions: SubmissionUnionType[] = result
 
         const edges = submissions.map((sub) => {

@@ -23,6 +23,7 @@ describe('updateDraftSubmission', () => {
 
             const baseDraft: DraftSubmissionType = {
                 id: 'foo-bar',
+                status: 'DRAFT',
                 stateCode: 'FL',
                 stateNumber: 3,
                 programID: 'smmc',
@@ -62,6 +63,7 @@ describe('updateDraftSubmission', () => {
 
             const baseDraft: DraftSubmissionType = {
                 id: 'foo-bar',
+                status: 'DRAFT',
                 stateCode: 'FL',
                 stateNumber: 3,
                 programID: 'smmc',
@@ -110,6 +112,7 @@ describe('updateDraftSubmission', () => {
 
             const baseDraft: DraftSubmissionType = {
                 id: 'foo-bar',
+                status: 'DRAFT',
                 stateCode: 'FL',
                 stateNumber: 3,
                 programID: 'smmc',

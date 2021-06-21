@@ -2,9 +2,10 @@ import { DataMapper } from '@aws/dynamodb-data-mapper'
 
 import { StoreError } from './storeError'
 import {
-    DraftSubmissionStoreType,
-    StateSubmissionStoreType,
+    SubmissionStoreType,
     isDynamoError,
+    isNodeError,
+    convertToDomainSubmission,
 } from './dynamoTypes'
 
 import {
@@ -19,8 +20,8 @@ export async function findAllSubmissions(
     try {
         const submissions: (DraftSubmissionType | StateSubmissionType)[] = []
 
-        for await (const draftSubmission of mapper.query(
-            DraftSubmissionStoreType,
+        for await (const storeSubmission of mapper.query(
+            SubmissionStoreType,
             {
                 stateCode: stateCode,
             },
@@ -28,12 +29,17 @@ export async function findAllSubmissions(
                 indexName: 'StateStateNumberAllIndex',
             }
         )) {
-            console.log(
-                'FOUND draftSubmission',
-                draftSubmission.status,
-                draftSubmission.submittedAt
-            )
-            submissions.push(draftSubmission)
+            const domainSubmission = convertToDomainSubmission(storeSubmission)
+            // What do we do with an error here? Log it? If we have corrupted data in
+            // the db there likely isn't anything we can do about it, we should log?
+            // Still return all the non corrupted things?
+            if (isNodeError(domainSubmission)) {
+                console.log(
+                    `ERROR: submission with id: ${storeSubmission.id} did not parse into a domain model`
+                )
+            } else {
+                submissions.push(domainSubmission)
+            }
         }
 
         return submissions

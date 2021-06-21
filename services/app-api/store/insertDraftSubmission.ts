@@ -2,7 +2,7 @@ import { DataMapper } from '@aws/dynamodb-data-mapper'
 import { v4 as uuidv4 } from 'uuid'
 
 import { StoreError, isStoreError } from './storeError'
-import { DraftSubmissionStoreType, isDynamoError } from './dynamoTypes'
+import { SubmissionStoreType, isDynamoError } from './dynamoTypes'
 import {
     DraftSubmissionType,
     SubmissionType,
@@ -31,7 +31,7 @@ async function getNextStateNumber(
         // get all submissions for a given state in order, see the last one, add one.
         const biggestStateNumber = []
         for await (const draft of mapper.query(
-            DraftSubmissionStoreType,
+            SubmissionStoreType,
             {
                 stateCode: stateCode,
             },
@@ -84,7 +84,7 @@ export async function insertDraftSubmission(
     //   * id -- db/resolver? -- generate a new UUID
     //   * convert documents SubmissionDocument[] into DocumentStoreT
 
-    const draft = new DraftSubmissionStoreType() // you might like that this took input vars, but that seems opposed to how this library works wrt to searching
+    const draft = new SubmissionStoreType() // you might like that this took input vars, but that seems opposed to how this library works wrt to searching
     draft.id = uuidv4()
     draft.createdAt = new Date()
     draft.updatedAt = new Date()

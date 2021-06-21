@@ -3,6 +3,7 @@ query indexSubmissions {
         totalCount
         edges {
             node {
+                __typename
                 ... on DraftSubmission {
                     id
                     name

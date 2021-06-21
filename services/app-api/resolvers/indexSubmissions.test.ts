@@ -1,16 +1,19 @@
 import { createTestClient } from 'apollo-server-testing'
 
-import { CreateDraftSubmissionInput, SubmissionType } from '../gen/gqlServer'
-import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
 import INDEX_SUBMISSIONS from '../../app-graphql/src/queries/indexSubmissions.graphql'
 import {
     constructTestServer,
     createTestDraftSubmission,
     createTestStateSubmission,
 } from '../testHelpers/gqlHelpers'
-import { DraftSubmission, StateSubmission } from '../gen/gqlServer'
+import {
+    DraftSubmission,
+    StateSubmission,
+    SubmissionEdge,
+    Submission,
+} from '../gen/gqlServer'
 
-describe('fetchDraftSubmission', () => {
+describe('indexDraftSubmission', () => {
     it('returns some submissions', async () => {
         const server = constructTestServer()
 
@@ -27,23 +30,47 @@ describe('fetchDraftSubmission', () => {
 
         expect(result.errors).toBeUndefined()
 
-        const resultSubmissions = result.data.indexSubmissions
+        const submissionsIndex = result.data.indexSubmissions
 
-        expect(resultSubmissions.totalCount).toBeGreaterThan(3)
+        expect(submissionsIndex.totalCount).toBeGreaterThan(1)
 
         // Since we don't wipe the DB between tests, here we filter out all
         // the extraneous submissions and grab the two we started with.
-        const theseSubmissions: (DraftSubmission | StateSubmission)[] = []
-        resultSubmissions.edges.forEach(
-            (sub: { node: DraftSubmission | StateSubmission }) => {
-                if ([draftSub.id, stateSub.id].includes(sub.node.id)) {
-                    theseSubmissions.push(sub.node)
-                }
-            }
-        )
 
+        const theseSubmissions: Submission[] = submissionsIndex.edges
+            .map((edge: SubmissionEdge) => edge.node)
+            .filter((sub: Submission) =>
+                [draftSub.id, stateSub.id].includes(sub.id)
+            )
         expect(theseSubmissions.length).toBe(2)
 
-        console.log('BACK', theseSubmissions)
+        // this is dumb and bad but I'm not sure how to do this right
+        // by doing true ? we trick the compiler into thinking that draftResult actually can
+        // be DraftSubmission or undefined. For some reason, the fact that it can be set
+        // inside the forEach function is ignored by typescript.
+        let draftResult: DraftSubmission | undefined = true
+            ? undefined
+            : draftSub
+        let stateResult: StateSubmission | undefined = true
+            ? undefined
+            : stateSub
+        theseSubmissions.forEach((sub: Submission) => {
+            if (sub.id === draftSub.id) {
+                draftResult = sub as DraftSubmission
+            }
+            if (sub.id === stateSub.id) {
+                stateResult = sub as StateSubmission
+            }
+        })
+
+        expect(draftResult).toBeDefined()
+        expect(stateResult).toBeDefined()
+
+        if (draftResult === undefined || stateResult === undefined) {
+            throw new Error('gotta make the type checker happy')
+        }
+
+        expect(draftResult.__typename).toBe('DraftSubmission')
+        expect(stateResult.__typename).toBe('StateSubmission')
     })
 })

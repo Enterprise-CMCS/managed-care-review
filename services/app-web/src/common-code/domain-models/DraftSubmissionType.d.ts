@@ -52,6 +52,7 @@ export type AmendableItems = typeof AMENDABLE_ITEMS[number]
 // MAIN
 type DraftSubmissionType = {
     id: string
+    status: 'DRAFT'
     stateCode: string
     stateNumber: number
     programID: string
