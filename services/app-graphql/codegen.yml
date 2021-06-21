@@ -13,6 +13,7 @@ generates:
       contextType: ../handlers/apollo_gql#Context
       useIndexSignature: true # Don't forget this or Apollo will give an inscrutable error
       defaultMapper: Partial<{T}>
+      enumsAsTypes: true
       mappers:
         User: ../../app-web/src/common-code/domain-models#CognitoUserType
         DraftSubmission: ../../app-web/src/common-code/domain-models#DraftSubmissionType
@@ -25,6 +26,8 @@ generates:
       - 'typescript'
       - 'typescript-operations'
       - 'typescript-react-apollo'
+    config:
+      enumsAsTypes: true
   # ./src/common-code/graphql/generated/graphql.schema.json:
   #   plugins:
   #     - 'introspection'

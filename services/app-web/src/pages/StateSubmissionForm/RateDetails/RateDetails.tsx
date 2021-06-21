@@ -124,7 +124,7 @@ export const RateDetails = ({
         values.rateType === undefined
 
     const isRateTypeAmendment = (values: RateDetailsFormValues): boolean =>
-        values.rateType === RateType.Amendment
+        values.rateType === 'AMENDMENT'
 
     const handleFormSubmit = async (
         values: RateDetailsFormValues,
@@ -232,20 +232,17 @@ export const RateDetails = ({
                                             id="newRate"
                                             name="rateType"
                                             label="New rate certification"
-                                            value={RateType.New}
-                                            checked={
-                                                values.rateType === RateType.New
-                                            }
+                                            value={'NEW'}
+                                            checked={values.rateType === 'NEW'}
                                             aria-required
                                         />
                                         <FieldRadio
                                             id="amendmentRate"
                                             name="rateType"
                                             label="Amendment to prior rate certification"
-                                            value={RateType.Amendment}
+                                            value={'AMENDMENT'}
                                             checked={
-                                                values.rateType ===
-                                                RateType.Amendment
+                                                values.rateType === 'AMENDMENT'
                                             }
                                             aria-required
                                         />

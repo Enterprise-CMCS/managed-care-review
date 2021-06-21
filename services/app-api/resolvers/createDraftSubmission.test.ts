@@ -1,6 +1,6 @@
 import { createTestClient } from 'apollo-server-testing'
 
-import { CreateDraftSubmissionInput, SubmissionType } from '../gen/gqlServer'
+import { CreateDraftSubmissionInput } from '../gen/gqlServer'
 import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
 import { constructTestServer } from '../testHelpers/gqlHelpers'
 
@@ -12,7 +12,7 @@ describe('createDraftSubmission', () => {
 
         const input: CreateDraftSubmissionInput = {
             programID: 'managed-medical-assistance',
-            submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
+            submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
         }
         const res = await mutate({
@@ -41,7 +41,7 @@ describe('createDraftSubmission', () => {
         const { mutate } = createTestClient(server)
         const input: CreateDraftSubmissionInput = {
             programID: 'xyz123',
-            submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
+            submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
         }
         const res = await mutate({

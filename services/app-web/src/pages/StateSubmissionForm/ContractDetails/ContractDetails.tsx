@@ -74,7 +74,7 @@ const ContractDetailsFormSchema = Yup.object().shape({
         'You must select at least one authority'
     ),
     itemsAmended: Yup.array().when('contractType', {
-        is: ContractType.Amendment,
+        is: 'AMENDMENT',
         then: Yup.array().min(1, 'You must select at least one item'),
     }),
     otherItemAmended: Yup.string().when('itemsAmended', {
@@ -92,7 +92,7 @@ const ContractDetailsFormSchema = Yup.object().shape({
         then: Yup.string().defined('You must enter the other reason'),
     }),
     relatedToCovid19: Yup.string().when('contractType', {
-        is: ContractType.Amendment,
+        is: 'AMENDMENT',
         then: Yup.string().defined(
             'You must indicate whether or not this contract action is related to COVID-19'
         ),
@@ -182,7 +182,7 @@ export const ContractDetails = ({
 
     const isContractAmendmentSelected = (
         values: ContractDetailsFormValues
-    ): boolean => values.contractType === ContractType.Amendment
+    ): boolean => values.contractType === 'AMENDMENT'
 
     const ContractDatesErrorMessage = ({
         values,
@@ -209,7 +209,7 @@ export const ContractDetails = ({
         updatedDraft.managedCareEntities = values.managedCareEntities
         updatedDraft.federalAuthorities = values.federalAuthorities
 
-        if (values.contractType === ContractType.Amendment) {
+        if (values.contractType === 'AMENDMENT') {
             const relatedToCovid = values.relatedToCovid19 === 'YES'
             const relatedToVaccine = relatedToCovid
                 ? values.relatedToVaccination === 'YES'
@@ -320,21 +320,17 @@ export const ContractDetails = ({
                                         id="baseContract"
                                         name="contractType"
                                         label="Base contract"
-                                        value={ContractType.Base}
-                                        checked={
-                                            values.contractType ===
-                                            ContractType.Base
-                                        }
+                                        value={'BASE'}
+                                        checked={values.contractType === 'BASE'}
                                         aria-required
                                     />
                                     <FieldRadio
                                         id="amendmentContract"
                                         name="contractType"
                                         label="Amendment to base contract"
-                                        value={ContractType.Amendment}
+                                        value={'AMENDMENT'}
                                         checked={
-                                            values.contractType ===
-                                            ContractType.Amendment
+                                            values.contractType === 'AMENDMENT'
                                         }
                                         aria-required
                                     />
@@ -569,11 +565,11 @@ export const ContractDetails = ({
                                                                         name="capitationRates"
                                                                         label="Annual rate update"
                                                                         value={
-                                                                            CapitationRatesAmendmentReason.Annual
+                                                                            'ANNUAL'
                                                                         }
                                                                         checked={
                                                                             values.capitationRates ===
-                                                                            CapitationRatesAmendmentReason.Annual
+                                                                            'ANNUAL'
                                                                         }
                                                                     />
                                                                     <FieldRadio
@@ -581,11 +577,11 @@ export const ContractDetails = ({
                                                                         name="capitationRates"
                                                                         label="Mid-year update"
                                                                         value={
-                                                                            CapitationRatesAmendmentReason.Midyear
+                                                                            'MIDYEAR'
                                                                         }
                                                                         checked={
                                                                             values.capitationRates ===
-                                                                            CapitationRatesAmendmentReason.Midyear
+                                                                            'MIDYEAR'
                                                                         }
                                                                     />
                                                                     <FieldRadio
@@ -593,15 +589,15 @@ export const ContractDetails = ({
                                                                         name="capitationRates"
                                                                         label="Other (please describe)"
                                                                         value={
-                                                                            CapitationRatesAmendmentReason.Other
+                                                                            'OTHER'
                                                                         }
                                                                         checked={
                                                                             values.capitationRates ===
-                                                                            CapitationRatesAmendmentReason.Other
+                                                                            'OTHER'
                                                                         }
                                                                     />
                                                                     {values.capitationRates ===
-                                                                        CapitationRatesAmendmentReason.Other && (
+                                                                        'OTHER' && (
                                                                         <FieldTextInput
                                                                             id="other-rates"
                                                                             label="Other capitation rate description"
@@ -746,7 +742,7 @@ export const ContractDetails = ({
                                                 </Fieldset>
                                             </FormGroup>
                                             {values.contractType ===
-                                                ContractType.Amendment && (
+                                                'AMENDMENT' && (
                                                 <>
                                                     <FormGroup
                                                         error={showFieldErrors(
@@ -864,11 +860,9 @@ export const ContractDetails = ({
                                                 label={
                                                     FederalAuthorityRecord.STATE_PLAN
                                                 }
-                                                value={
-                                                    FederalAuthority.StatePlan
-                                                }
+                                                value={'STATE_PLAN'}
                                                 checked={values.federalAuthorities.includes(
-                                                    FederalAuthority.StatePlan
+                                                    'STATE_PLAN'
                                                 )}
                                             />
                                             <FieldCheckbox
@@ -877,11 +871,9 @@ export const ContractDetails = ({
                                                 label={
                                                     FederalAuthorityRecord.WAIVER_1915B
                                                 }
-                                                value={
-                                                    FederalAuthority.Waiver_1915B
-                                                }
+                                                value={'WAIVER_1915B'}
                                                 checked={values.federalAuthorities.includes(
-                                                    FederalAuthority.Waiver_1915B
+                                                    'WAIVER_1915B'
                                                 )}
                                             />
                                             <FieldCheckbox
@@ -890,11 +882,9 @@ export const ContractDetails = ({
                                                 label={
                                                     FederalAuthorityRecord.WAIVER_1115
                                                 }
-                                                value={
-                                                    FederalAuthority.Waiver_1115
-                                                }
+                                                value={'WAIVER_1115'}
                                                 checked={values.federalAuthorities.includes(
-                                                    FederalAuthority.Waiver_1115
+                                                    'WAIVER_1115'
                                                 )}
                                             />
                                             <FieldCheckbox
@@ -903,11 +893,9 @@ export const ContractDetails = ({
                                                 label={
                                                     FederalAuthorityRecord.VOLUNTARY
                                                 }
-                                                value={
-                                                    FederalAuthority.Voluntary
-                                                }
+                                                value={'VOLUNTARY'}
                                                 checked={values.federalAuthorities.includes(
-                                                    FederalAuthority.Voluntary
+                                                    'VOLUNTARY'
                                                 )}
                                             />
                                             <FieldCheckbox
@@ -916,11 +904,9 @@ export const ContractDetails = ({
                                                 label={
                                                     FederalAuthorityRecord.BENCHMARK
                                                 }
-                                                value={
-                                                    FederalAuthority.Benchmark
-                                                }
+                                                value={'BENCHMARK'}
                                                 checked={values.federalAuthorities.includes(
-                                                    FederalAuthority.Benchmark
+                                                    'BENCHMARK'
                                                 )}
                                             />
                                             <FieldCheckbox
@@ -929,11 +915,9 @@ export const ContractDetails = ({
                                                 label={
                                                     FederalAuthorityRecord.TITLE_XXI
                                                 }
-                                                value={
-                                                    FederalAuthority.TitleXxi
-                                                }
+                                                value={'TITLE_XXI'}
                                                 checked={values.federalAuthorities.includes(
-                                                    FederalAuthority.TitleXxi
+                                                    'TITLE_XXI'
                                                 )}
                                             />
                                         </Fieldset>

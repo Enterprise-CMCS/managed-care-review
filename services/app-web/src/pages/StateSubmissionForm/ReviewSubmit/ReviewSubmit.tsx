@@ -10,7 +10,6 @@ import {
     DraftSubmission,
     Document,
     useSubmitDraftSubmissionMutation,
-    ContractType,
 } from '../../../gen/gqlClient'
 import {
     ContractTypeRecord,
@@ -132,8 +131,7 @@ export const ReviewSubmit = ({
         return userFriendlyItems.join(', ')
     }
 
-    const isContractAmendment =
-        draftSubmission.contractType === ContractType.Amendment
+    const isContractAmendment = draftSubmission.contractType === 'AMENDMENT'
     return (
         <GridContainer className={styles.reviewSectionWrapper}>
             {userVisibleError && (
@@ -214,9 +212,12 @@ export const ReviewSubmit = ({
                                         id="contractType"
                                         label="Contract action type"
                                         data={
-                                            ContractTypeRecord[
-                                                `${draftSubmission.contractType}`
-                                            ]
+                                            draftSubmission.contractType
+                                                ? ContractTypeRecord[
+                                                      draftSubmission
+                                                          .contractType
+                                                  ]
+                                                : ''
                                         }
                                     />
                                 }

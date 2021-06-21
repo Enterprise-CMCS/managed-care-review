@@ -10,10 +10,6 @@ import {
     fetchDraftSubmissionMock,
     updateDraftSubmissionMock,
 } from '../../testHelpers/apolloHelpers'
-import {
-    ContractType,
-    CapitationRatesAmendmentReason,
-} from '../../gen/gqlClient'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
 import { StateSubmissionForm } from './StateSubmissionForm'
@@ -87,7 +83,7 @@ describe('StateSubmissionForm', () => {
         it('loads contract details fields for /submissions/:id/contract-details with amendments', async () => {
             const mockAmendment = mockDraft()
 
-            mockAmendment.contractType = ContractType.Amendment
+            mockAmendment.contractType = 'AMENDMENT'
             mockAmendment.contractAmendmentInfo = {
                 itemsBeingAmended: [
                     'CAPITATION_RATES',
@@ -96,7 +92,7 @@ describe('StateSubmissionForm', () => {
                 ],
                 otherItemBeingAmended: 'foobar',
                 capitationRatesAmendedInfo: {
-                    reason: CapitationRatesAmendmentReason.Midyear,
+                    reason: 'MIDYEAR',
                     otherReason: null,
                 },
                 relatedToCovid19: true,

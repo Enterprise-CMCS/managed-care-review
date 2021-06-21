@@ -4,8 +4,6 @@ import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models
 import {
     DraftSubmissionUpdates,
     CreateDraftSubmissionInput,
-    SubmissionType,
-    RateType,
 } from '../gen/gqlServer'
 import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
 import UPDATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/updateDraftSubmission.graphql'
@@ -42,7 +40,7 @@ describe('updateDraftSubmission', () => {
 
             const updates: DraftSubmissionUpdates = {
                 programID: 'MCAC',
-                submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
+                submissionType: 'CONTRACT_ONLY',
                 submissionDescription: 'an updated draft',
                 documents: [],
                 contractType: null,
@@ -51,7 +49,7 @@ describe('updateDraftSubmission', () => {
                 managedCareEntities: [],
                 federalAuthorities: [],
                 contractAmendmentInfo: null,
-                rateType: 'NEW' as RateType.New,
+                rateType: 'NEW',
                 rateDateStart: null,
                 rateDateEnd: null,
                 rateDateCertified: null,
@@ -78,7 +76,7 @@ describe('updateDraftSubmission', () => {
                 stateCode: 'FL',
                 stateNumber: 3,
                 programID: 'MCAC',
-                submissionType: 'CONTRACT_ONLY' as const,
+                submissionType: 'CONTRACT_ONLY',
                 submissionDescription: 'an old submission',
                 createdAt: new Date(),
                 updatedAt: new Date(),
@@ -89,7 +87,7 @@ describe('updateDraftSubmission', () => {
 
             const updates: DraftSubmissionUpdates = {
                 programID: 'MCAC',
-                submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
+                submissionType: 'CONTRACT_ONLY',
                 submissionDescription: 'an updated draft',
                 documents: [],
                 contractType: null,
@@ -141,7 +139,7 @@ describe('updateDraftSubmission', () => {
 
             const updates: DraftSubmissionUpdates = {
                 programID: 'MCAC',
-                submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
+                submissionType: 'CONTRACT_ONLY',
                 submissionDescription: 'an updated draft',
                 documents: [],
                 contractType: null,
@@ -593,7 +591,7 @@ describe('updateDraftSubmission', () => {
         // SETUP: First, create a new submission
         const createInput: CreateDraftSubmissionInput = {
             programID: 'smmc',
-            submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
+            submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A created submission',
         }
         const createResult = await mutate({
