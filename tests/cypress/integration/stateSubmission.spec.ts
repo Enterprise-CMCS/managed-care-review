@@ -42,7 +42,7 @@ describe('State Submission', () => {
             cy.findByText(/MN-MSHO-/).should('exist')
             cy.findByLabelText('Base contract').safeClick()
             cy.findByLabelText('Start date').type('04/01/2024')
-            cy.findByLabelText('End date').type('04/01/2026')
+            cy.findByLabelText('End date').type('03/31/2025')
             cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
 
             // Continue button triggers contract details validation
@@ -62,17 +62,22 @@ describe('State Submission', () => {
             cy.findByText(/MN-MSHO-/).should('exist')
             cy.findByLabelText('New rate certification').safeClick()
             cy.findByLabelText('Start date').type('04/01/2024')
-            cy.findByLabelText('End date').type('04/01/2026')
+            cy.findByLabelText('End date').type('03/30/2025')
 
             // Continue button triggers rate details validation
             cy.navigateForm('Continue')
             cy.findByText(
                 'You must enter the date the document was certified'
             ).should('exist')
-            cy.findAllByTestId('errorMessage').should('have.length', 1)
+            cy.findByText('You must enter a 12-month rating period').should(
+                'exist'
+            )
+            cy.findAllByTestId('errorMessage').should('have.length', 2)
 
             // Fill out missing required fields for rate details
             cy.findByLabelText('Date certified').type('03/15/2024')
+            cy.findByLabelText('End date').clear()
+            cy.findByLabelText('End date').type('03/31/2025')
             cy.findAllByTestId('errorMessage').should('have.length', 0)
 
             // Continue button navigates to documents page
@@ -160,7 +165,7 @@ describe('State Submission', () => {
             cy.findByText(/MN-MSHO-/).should('exist')
             cy.findByLabelText('Base contract').safeClick()
             cy.findByLabelText('Start date').type('04/01/2024')
-            cy.findByLabelText('End date').type('04/01/2026').blur()
+            cy.findByLabelText('End date').type('03/31/2025').blur()
             cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
             cy.findByLabelText('1932(a) State Plan Authority').safeClick()
             cy.findAllByTestId('errorMessage').should('have.length', 0)
@@ -169,8 +174,8 @@ describe('State Submission', () => {
             //Fill out rate details
             cy.findByText('Rate details').should('exist')
             cy.findByLabelText('New rate certification').safeClick()
-            cy.findByLabelText('Start date').type('04/01/2024')
-            cy.findByLabelText('End date').type('04/01/2026')
+            cy.findByLabelText('Start date').type('02/29/2024')
+            cy.findByLabelText('End date').type('02/28/2025')
             cy.findByLabelText('Date certified').type('03/01/2024')
             cy.navigateForm('Continue')
 
@@ -227,11 +232,11 @@ describe('State Submission', () => {
                 name: 'Continue',
             }).safeClick()
 
-            //Fill out rate details
+            //Change rate details
             cy.findByText('Rate details').should('exist')
             cy.findByLabelText('New rate certification').safeClick()
             cy.findByLabelText('Start date').type('04/01/2024')
-            cy.findByLabelText('End date').type('04/01/2026')
+            cy.findByLabelText('End date').type('03/31/2025')
             cy.findByLabelText('Date certified').type('03/01/2024')
             cy.navigateForm('Continue')
 
@@ -301,7 +306,7 @@ describe('State Submission', () => {
             cy.findByText('Contract details').should('exist')
             cy.findByLabelText('Amendment to base contract').safeClick()
             cy.findByLabelText('Start date').type('03/01/2024')
-            cy.findByLabelText('End date').type('03/31/2026').blur()
+            cy.findByLabelText('End date').type('03/31/2026')
             cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
             cy.findByLabelText('1932(a) State Plan Authority').safeClick()
             cy.findByLabelText('Capitation rates').safeClick()

@@ -26,7 +26,22 @@ function validateDateFormat(
     })
 }
 
+const validateDateRange12Months = (
+    value: string,
+    context: Yup.TestContext
+): boolean => {
+    const startDate = dayjs(context.parent.rateDateStart)
+    const isStartDateLeapDay =
+        startDate.isLeapYear() &&
+        startDate.month() === 1 &&
+        startDate.date() === 29
+    const oneYearLater = isStartDateLeapDay
+        ? startDate.add(1, 'year')
+        : startDate.add(1, 'year').subtract(1, 'day')
+    return dayjs(context.parent.rateDateEnd).isSame(oneYearLater, 'day')
+}
+
 const isDateRangeEmpty = (startDate: string, endDate: string) =>
     !startDate && !endDate
 
-export { isDateRangeEmpty, validateDateFormat }
+export { isDateRangeEmpty, validateDateFormat, validateDateRange12Months }
