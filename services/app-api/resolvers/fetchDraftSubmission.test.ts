@@ -36,16 +36,12 @@ describe('fetchDraftSubmission', () => {
         })
 
         expect(result.errors).toBeUndefined()
-       
+
         const resultDraft = result.data.fetchDraftSubmission.draftSubmission
         expect(resultDraft.id).toEqual(createdID)
         expect(resultDraft.program.id).toEqual('managed-medical-assistance')
-        expect(
-            resultDraft.program.name
-        ).toBe('Managed Medical Assistance')
-        expect(resultDraft.name).toContain(
-            'FL-MANAGED-MEDICAL-ASSISTANCE'
-        )
+        expect(resultDraft.program.name).toBe('Managed Medical Assistance')
+        expect(resultDraft.name).toContain('FL-MANAGED-MEDICAL-ASSISTANCE')
         expect(resultDraft.submissionDescription).toEqual('A real submission')
         expect(resultDraft.documents).toEqual([])
     })

@@ -1,6 +1,5 @@
 import React from 'react'
 import * as Yup from 'yup'
-import dayjs from 'dayjs'
 import {
     Alert,
     ErrorMessage,
@@ -132,7 +131,6 @@ export const RateDetails = ({
         formikHelpers: FormikHelpers<RateDetailsFormValues>
     ) => {
         const updatedDraft = updatesFromSubmission(draftSubmission)
-
         updatedDraft.rateType = values.rateType
         updatedDraft.rateDateStart = values.rateDateStart
         updatedDraft.rateDateEnd = values.rateDateEnd

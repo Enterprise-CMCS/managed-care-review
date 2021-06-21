@@ -44,9 +44,6 @@ describe('State Submission', () => {
             cy.findByLabelText('Start date').type('04/01/2024')
             cy.findByLabelText('End date').type('04/01/2026')
             cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
-            cy.findByRole('button', {
-                name: 'Continue',
-            }).safeClick()
 
             // Continue button triggers contract details validation
             cy.navigateForm('Continue')
@@ -60,11 +57,26 @@ describe('State Submission', () => {
             cy.findAllByTestId('errorMessage').should('have.length', 0)
             cy.navigateForm('Continue')
 
-            // Skip rate details
+            // Fill out some new rate details
             cy.findByText('Rate details').should('exist')
+            cy.findByText(/MN-MSHO-/).should('exist')
+            cy.findByLabelText('New rate certification').safeClick()
+            cy.findByLabelText('Start date').type('04/01/2024')
+            cy.findByLabelText('End date').type('04/01/2026')
+
+            // Continue button triggers rate details validation
             cy.navigateForm('Continue')
+            cy.findByText(
+                'You must enter the date the document was certified'
+            ).should('exist')
+            cy.findAllByTestId('errorMessage').should('have.length', 1)
+
+            // Fill out missing required fields for rate details
+            cy.findByLabelText('Date certified').type('03/15/2024')
+            cy.findAllByTestId('errorMessage').should('have.length', 0)
 
             // Continue button navigates to documents page
+            cy.navigateForm('Continue')
             cy.findByRole('heading', { name: 'Documents' }).should('exist')
             cy.findByText(/MN-MSHO-/).should('exist')
 
@@ -139,7 +151,9 @@ describe('State Submission', () => {
             cy.findByRole('textbox', { name: 'Submission description' })
                 .should('exist')
                 .type('description of submission')
-            cy.navigateForm('Continue')
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).safeClick()
 
             // Fill out contract details
             cy.findByText('Contract details').should('exist')
@@ -152,11 +166,13 @@ describe('State Submission', () => {
             cy.findAllByTestId('errorMessage').should('have.length', 0)
             cy.navigateForm('Continue')
 
-            //Skip rate details
+            //Fill out rate details
             cy.findByText('Rate details').should('exist')
-            cy.findByRole('button', {
-                name: 'Continue',
-            }).safeClick()
+            cy.findByLabelText('New rate certification').safeClick()
+            cy.findByLabelText('Start date').type('04/01/2024')
+            cy.findByLabelText('End date').type('04/01/2026')
+            cy.findByLabelText('Date certified').type('03/01/2024')
+            cy.navigateForm('Continue')
 
             // Add documents
             cy.findByRole('progressbar', { name: 'Loading' }).should(
@@ -207,10 +223,16 @@ describe('State Submission', () => {
             cy.findByLabelText('Start date').type('04/15/2024')
             cy.findByLabelText('End date').clear()
             cy.findByLabelText('End date').type('04/15/2026')
-            cy.navigateForm('Continue')
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).safeClick()
 
-            // Skip rate details
+            //Fill out rate details
             cy.findByText('Rate details').should('exist')
+            cy.findByLabelText('New rate certification').safeClick()
+            cy.findByLabelText('Start date').type('04/01/2024')
+            cy.findByLabelText('End date').type('04/01/2026')
+            cy.findByLabelText('Date certified').type('03/01/2024')
             cy.navigateForm('Continue')
 
             // Check that documents loads with correct data
@@ -233,7 +255,9 @@ describe('State Submission', () => {
             cy.findByRole('textbox', { name: 'Submission description' })
                 .should('exist')
                 .type('description of submission')
-            cy.navigateForm('Continue')
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).safeClick()
 
             cy.findByText('Contract details').should('exist')
 
@@ -269,7 +293,9 @@ describe('State Submission', () => {
             cy.findByRole('textbox', { name: 'Submission description' })
                 .should('exist')
                 .type('description of submission')
-            cy.navigateForm('Continue')
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).safeClick()
 
             // Fill out contract details
             cy.findByText('Contract details').should('exist')
@@ -282,10 +308,15 @@ describe('State Submission', () => {
             cy.findByLabelText('Annual rate update').safeClick()
             cy.findByLabelText('No').safeClick()
             cy.findAllByTestId('errorMessage').should('have.length', 0)
-
-            // Go to rate details
             cy.navigateForm('Continue')
+
+            //Fill out rate details
             cy.findByText('Rate details').should('exist')
+            cy.findByLabelText('New rate certification').safeClick()
+            cy.findByLabelText('Start date').type('04/01/2024')
+            cy.findByLabelText('End date').type('04/01/2026')
+            cy.findByLabelText('Date certified').type('03/01/2024')
+            cy.navigateForm('Continue')
 
             // Navigate back to contract details
             cy.location().then((fullUrl) => {
