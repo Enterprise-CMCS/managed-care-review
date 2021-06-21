@@ -9,6 +9,7 @@ import {
     SubmissionType,
     FederalAuthority,
     ContractType,
+    RateType,
 } from '../../app-web/src/common-code/domain-models'
 
 // Data mapper annotations are meant to go on your domain models, and we might use them that way at some point
@@ -93,7 +94,7 @@ export class DraftSubmissionStoreType {
     contractDateEnd?: Date
 
     @attribute()
-    rateType?: string
+    rateType?: RateType
 
     @attribute()
     rateDateStart?: Date

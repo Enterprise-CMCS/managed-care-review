@@ -77,6 +77,7 @@ type DraftSubmissionType = {
 export type {
     SubmissionType,
     SubmissionDocument,
+    RateType,
     ContractType,
     FederalAuthority,
     ManagedCareEntity,
