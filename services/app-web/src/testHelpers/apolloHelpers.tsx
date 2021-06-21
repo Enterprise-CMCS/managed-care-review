@@ -3,6 +3,7 @@ import {
     FetchCurrentUserDocument,
     SubmissionType,
     ContractType,
+    RateType,
     FederalAuthority,
     User as UserType,
     CreateDraftSubmissionDocument,
@@ -54,6 +55,10 @@ const mockDraftSubmission: DraftSubmission = {
         FederalAuthority.Voluntary,
         FederalAuthority.Benchmark,
     ],
+    rateType: RateType.New,
+    rateDateStart: new Date(),
+    rateDateEnd: new Date(),
+    rateDateCertified: new Date(),
 }
 
 // Only export a function that returns the mockDraftSubmission so that

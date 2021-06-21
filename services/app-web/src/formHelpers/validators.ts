@@ -27,6 +27,6 @@ function validateDateFormat(
 }
 
 const isDateRangeEmpty = (startDate: string, endDate: string) =>
-    startDate === undefined && endDate === undefined
+    !startDate && !endDate
 
 export { isDateRangeEmpty, validateDateFormat }

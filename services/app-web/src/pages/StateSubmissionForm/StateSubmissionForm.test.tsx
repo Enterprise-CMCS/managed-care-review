@@ -1,5 +1,5 @@
 import { screen, waitFor } from '@testing-library/react'
-import { within } from '@testing-library/dom'
+import { within } from '@testing-library/react'
 import { Route } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 
@@ -11,11 +11,7 @@ import {
     updateDraftSubmissionMock,
 } from '../../testHelpers/apolloHelpers'
 import {
-    SubmissionType,
     ContractType,
-    FederalAuthority,
-    DraftSubmission,
-    Document,
     CapitationRatesAmendmentReason,
 } from '../../gen/gqlClient'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
@@ -259,40 +255,9 @@ describe('StateSubmissionForm', () => {
         })
 
         it('works even if other sections of the form have been filled out', async () => {
-            const mockDocs: Document[] = [
-                {
-                    name: 'somedoc.pdf',
-                    s3URL: 's3://bucketName/key',
-                },
-            ]
-            const mockDraftSubmissionWithDocs: DraftSubmission = {
-                createdAt: new Date(),
-                updatedAt: new Date(),
-                id: 'test-abc-123',
-                stateCode: 'MN',
-                programID: 'snbc',
-                program: {
-                    id: 'snbc',
-                    name: 'SNBC',
-                },
-                name: 'MN-MSHO-0001',
-                submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
-                submissionDescription: 'A real submission',
-                documents: mockDocs,
-                contractAmendmentInfo: null,
-                contractType: ContractType.Base,
-                contractDateStart: new Date(),
-                contractDateEnd: new Date(),
-                managedCareEntities: [''],
-                federalAuthorities: [
-                    FederalAuthority.Voluntary,
-                    FederalAuthority.Benchmark,
-                ],
-            }
-
-            const mockUpdate = updatesFromSubmission(
-                mockDraftSubmissionWithDocs
-            )
+            const mockSubmission = mockDraft()
+            mockSubmission.id = '15'
+            const mockUpdate = updatesFromSubmission(mockSubmission)
             mockUpdate.submissionDescription =
                 'A real submission but updated something'
 
@@ -307,7 +272,7 @@ describe('StateSubmissionForm', () => {
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchDraftSubmissionMock({
                                 id: '15',
-                                draftSubmission: mockDraftSubmissionWithDocs,
+                                draftSubmission: mockSubmission,
                                 statusCode: 200,
                             }),
                             updateDraftSubmissionMock({

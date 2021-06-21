@@ -177,9 +177,6 @@ export const RateDetails = ({
 
     return (
         <>
-            <PageHeading className={styles.formHeader} headingLevel="h2">
-                Rate details
-            </PageHeading>
             <Formik
                 initialValues={rateDetailsInitialValues}
                 onSubmit={handleFormSubmit}
@@ -228,6 +225,11 @@ export const RateDetails = ({
                                         className={styles.radioGroup}
                                         legend="Rate certification type"
                                     >
+                                        {showFieldErrors(errors.rateType) && (
+                                            <ErrorMessage>
+                                                {errors.rateType}
+                                            </ErrorMessage>
+                                        )}
                                         <FieldRadio
                                             id="newRate"
                                             name="rateType"
@@ -267,8 +269,8 @@ export const RateDetails = ({
                                             <Fieldset
                                                 legend={
                                                     isRateTypeAmendment(values)
-                                                        ? 'Rating period'
-                                                        : 'Rating period of original rate certification'
+                                                        ? 'Rating period of original rate certification'
+                                                        : 'Rating period'
                                                 }
                                             >
                                                 {showFieldErrors(
@@ -367,33 +369,6 @@ export const RateDetails = ({
 
                                         {isRateTypeAmendment(values) && (
                                             <>
-                                                <FormGroup>
-                                                    <Fieldset legend="Rating period of original rate certification">
-                                                        <DateRangePicker
-                                                            className={
-                                                                styles.dateRangePicker
-                                                            }
-                                                            endDateHint="mm/dd/yyyy"
-                                                            endDateLabel="End date"
-                                                            endDatePickerProps={{
-                                                                disabled: false,
-                                                                id:
-                                                                    'originalRateDateEnd',
-                                                                name:
-                                                                    'originalRateDateEnd',
-                                                            }}
-                                                            startDateHint="mm/dd/yyyy"
-                                                            startDateLabel="Start date"
-                                                            startDatePickerProps={{
-                                                                disabled: false,
-                                                                id:
-                                                                    'originalRateDateStart',
-                                                                name:
-                                                                    'originalRateDateStart',
-                                                            }}
-                                                        />
-                                                    </Fieldset>
-                                                </FormGroup>
                                                 <FormGroup>
                                                     <Fieldset legend="Effective dates of rate amendment">
                                                         <FieldCheckbox
