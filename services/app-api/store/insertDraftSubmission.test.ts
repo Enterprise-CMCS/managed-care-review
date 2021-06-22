@@ -75,7 +75,7 @@ describe('insertDraftSubmission', () => {
         const inputParams = {
             stateCode: 'FL',
             programID: 'MCAC',
-            submissionDescription: 'a new great submission',
+            submissionDescription: 'another new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
         }
 

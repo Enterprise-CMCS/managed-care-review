@@ -28,6 +28,8 @@ type FederalAuthority =
     | 'BENCHMARK'
     | 'TITLE_XXI'
 
+type RateType = 'NEW' | 'AMENDMENT'
+
 // CLIENT_SIDE ONLY TYPES
 const ENTITIES = ['MCO', 'PIHP', 'PAHP', 'PCCM'] as const
 type ManagedCareEntity = typeof ENTITIES[number]
@@ -66,11 +68,16 @@ type DraftSubmissionType = {
     managedCareEntities: string[]
     federalAuthorities: FederalAuthority[]
     contractAmendmentInfo?: ContractAmendmentInfo
+    rateType?: RateType
+    rateDateStart?: Date
+    rateDateEnd?: Date
+    rateDateCertified?: Date
 }
 
 export type {
     SubmissionType,
     SubmissionDocument,
+    RateType,
     ContractType,
     FederalAuthority,
     ManagedCareEntity,

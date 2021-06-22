@@ -48,12 +48,18 @@ export function applyUpdates(
     draft.submissionType = updates.submissionType
     draft.submissionDescription = updates.submissionDescription
     draft.documents = updates.documents
+
     draft.contractType = updates.contractType ?? undefined
     draft.contractDateStart = updates.contractDateStart ?? undefined
     draft.contractDateEnd = updates.contractDateEnd ?? undefined
     draft.managedCareEntities = updates.managedCareEntities
     draft.federalAuthorities = updates.federalAuthorities
     draft.contractAmendmentInfo = amendmentInfoUpdates
+
+    draft.rateType = updates.rateType ?? undefined
+    draft.rateDateStart = updates.rateDateStart ?? undefined
+    draft.rateDateEnd = updates.rateDateEnd ?? undefined
+    draft.rateDateCertified = updates.rateDateCertified ?? undefined
 }
 
 export function updateDraftSubmissionResolver(

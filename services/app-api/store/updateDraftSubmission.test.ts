@@ -34,7 +34,7 @@ describe('updateDraftSubmission', () => {
 
             // update submission
             const startDate = new Date('2021-06-07T17:48:47.000Z')
-            const endDate = new Date('2021-06-12T17:48:47.000Z')
+            const endDate = new Date('2022-06-12T17:48:47.000Z')
             const updateSubResult = await store.updateDraftSubmission({
                 ...draftSubmission,
                 documents: [
@@ -48,6 +48,10 @@ describe('updateDraftSubmission', () => {
                 contractDateEnd: endDate,
                 managedCareEntities: ['MCO'],
                 federalAuthorities: ['VOLUNTARY'],
+                rateType: 'NEW',
+                rateDateStart: startDate,
+                rateDateEnd: endDate,
+                rateDateCertified: new Date('2021-04-01T17:48:47.000Z'),
             })
 
             if (isStoreError(updateSubResult)) {
@@ -73,6 +77,8 @@ describe('updateDraftSubmission', () => {
                 )
                 expect(getResult.contractDateStart).toEqual(startDate)
                 expect(getResult.contractDateEnd).toEqual(endDate)
+                expect(getResult.rateDateStart).toEqual(startDate)
+                expect(getResult.rateDateEnd).toEqual(endDate)
             } catch (dynamoErr) {
                 throw new Error(dynamoErr)
             }

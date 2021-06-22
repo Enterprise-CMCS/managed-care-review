@@ -11,6 +11,7 @@ export type {
     DraftSubmissionType,
     SubmissionType,
     SubmissionDocument,
+    RateType,
     ContractType,
     FederalAuthority,
     ManagedCareEntity,
