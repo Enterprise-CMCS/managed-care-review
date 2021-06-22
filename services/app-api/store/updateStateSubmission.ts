@@ -53,8 +53,7 @@ export async function updateStateSubmission(
         if (!isStateSubmission(domainResult)) {
             return {
                 code: 'WRONG_STATUS',
-                message:
-                    'the updated stateSubmission did not come back with all its fields',
+                message: 'the updated submission is not a StateSubmission',
             }
         }
 

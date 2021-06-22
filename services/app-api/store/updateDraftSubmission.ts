@@ -81,7 +81,7 @@ export async function updateDraftSubmission(
         if (!isDraftSubmission(domainResult)) {
             return {
                 code: 'WRONG_STATUS',
-                message: 'The inserted submission is not a DraftSubmission',
+                message: 'The updated submission is not a DraftSubmission',
             }
         }
 
