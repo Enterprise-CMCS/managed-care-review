@@ -48,10 +48,11 @@ const mockDraftSubmission: DraftSubmission = {
     contractAmendmentInfo: null,
     managedCareEntities: [],
     federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
-    rateType: 'NEW',
-    rateDateStart: new Date(),
-    rateDateEnd: new Date(),
-    rateDateCertified: new Date(),
+    rateType: null,
+    rateDateStart: null,
+    rateDateEnd: null,
+    rateDateCertified: null,
+    rateAmendmentInfo: null,
 }
 
 // Only export a function that returns the mockDraftSubmission so that

@@ -31,5 +31,10 @@ export function updatesFromSubmission(
         federalAuthorities: draft.federalAuthorities,
         managedCareEntities: draft.managedCareEntities,
         contractAmendmentInfo: draft.contractAmendmentInfo,
+        rateType: draft.rateType,
+        rateDateStart: draft.rateDateStart,
+        rateDateEnd: draft.rateDateEnd,
+        rateDateCertified: draft.rateDateCertified,
+        rateAmendmentInfo: draft.rateAmendmentInfo,
     }
 }
