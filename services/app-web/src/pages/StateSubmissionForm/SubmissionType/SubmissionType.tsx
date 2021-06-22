@@ -176,8 +176,6 @@ export const SubmissionType = ({
             initialValues={submissionTypeInitialValues}
             onSubmit={handleFormSubmit}
             validationSchema={SubmissionTypeFormSchema}
-            validateOnChange={shouldValidate}
-            validateOnBlur={shouldValidate}
         >
             {({
                 values,

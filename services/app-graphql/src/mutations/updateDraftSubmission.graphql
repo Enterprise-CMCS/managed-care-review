@@ -32,6 +32,10 @@ mutation updateDraftSubmission($input: UpdateDraftSubmissionInput!) {
                 relatedToCovid19
                 relatedToVaccination
             }
+            rateType
+            rateDateStart
+            rateDateEnd
+            rateDateCertified
         }
     }
 }

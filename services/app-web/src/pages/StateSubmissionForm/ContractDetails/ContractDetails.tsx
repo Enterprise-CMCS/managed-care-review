@@ -1,6 +1,5 @@
 import React from 'react'
 import * as Yup from 'yup'
-import dayjs from 'dayjs'
 import {
     Alert,
     Form as UswdsForm,
@@ -15,10 +14,19 @@ import {
 import { Link as ReactRouterLink, NavLink, useHistory } from 'react-router-dom'
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 
+import styles from '../StateSubmissionForm.module.scss'
+
 import PageHeading from '../../../components/PageHeading'
 import { FieldRadio } from '../../../components/Form/FieldRadio/FieldRadio'
 import { FieldCheckbox } from '../../../components/Form/FieldCheckbox/FieldCheckbox'
 import { FieldTextInput } from '../../../components/Form/FieldTextInput/FieldTextInput'
+import {
+    formatForApi,
+    formatForForm,
+    formatUserInputDate,
+    isDateRangeEmpty,
+    validateDateFormat,
+} from '../../../formHelpers'
 import {
     DraftSubmission,
     ContractType,
@@ -27,7 +35,6 @@ import {
     CapitationRatesAmendmentReason,
     useUpdateDraftSubmissionMutation,
 } from '../../../gen/gqlClient'
-import styles from '../StateSubmissionForm.module.scss'
 import { ManagedCareEntity } from '../../../common-code/domain-models/DraftSubmissionType'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
 import {
@@ -35,48 +42,9 @@ import {
     FederalAuthorityRecord,
 } from '../../../constants/submissions'
 
-/*  
- Date validations
- Dates are formatted from user input MM/DD/YYY to YYYY-MM-DD form data. This matches the graphql Date scalar.
- Use custom Yup verifyFormat method to validate formatting https://github.com/jquense/yup#yupaddmethodschematype-schema-name-string-method--schema-void
- If date is not correct, handle as Invalid Date
-*/
-
-const formatUserInputDate = (initialValue?: string): string | undefined => {
-    const dayjsValue = dayjs(initialValue)
-    return initialValue && dayjsValue.isValid()
-        ? dayjs(initialValue).format('YYYY-MM-DD')
-        : initialValue // preserve undefined to show validations later
-}
-
-Yup.addMethod(Yup.date, 'verifyFormat', function (formats, parseStrict) {
-    return this.transform(function (value, originalValue) {
-        if (this.isType(value)) return value
-        value = dayjs(originalValue, formats, parseStrict)
-        return value.isValid() ? value.toDate() : new Date('') // Invalid Date
-    })
-})
-
-// The form type doesn't like nulls, so empty inputs are stored in an empty string
-// nullOrValue and emptyStringOrValue are converters between optional graphql types and form types
-// nullOrValue turns a form string into a GQL string | null
-function nullOrValue(attribute: string): string | null {
-    if (attribute === '') {
-        return null
-    }
-    return attribute
-}
-
-// emptyStringOrValue converts a graphQL boolean into a form YES/NO value
-function emptyStringOrValue(attribute: boolean | null): string {
-    if (attribute === null) {
-        return ''
-    }
-    return attribute ? 'YES' : 'NO'
-}
+Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
 // Formik setup
-// Should be listed in order of appearance on field to allow errors to focus as expected
 const ContractDetailsFormSchema = Yup.object().shape({
     contractType: Yup.string().defined(
         'You must choose a contract action type'
@@ -84,13 +52,13 @@ const ContractDetailsFormSchema = Yup.object().shape({
     contractDateStart: Yup.date()
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore-next-line
-        .verifyFormat('YYYY-MM-DD', true)
+        .validateDateFormat('YYYY-MM-DD', true)
         .defined('You must enter a start date')
         .typeError('The start date must be in MM/DD/YYYY format'),
     contractDateEnd: Yup.date()
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore-next-line
-        .verifyFormat('YYYY-MM-DD', true)
+        .validateDateFormat('YYYY-MM-DD', true)
         .defined('You must enter an end date')
         .typeError('The end date must be in MM/DD/YYYY format')
         .min(
@@ -166,13 +134,11 @@ export const ContractDetails = ({
         contractType: draftSubmission?.contractType ?? undefined,
         contractDateStart:
             (draftSubmission &&
-                dayjs(draftSubmission.contractDateStart).format(
-                    'YYYY-MM-DD'
-                )) ??
+                formatForForm(draftSubmission.contractDateStart)) ??
             '',
         contractDateEnd:
             (draftSubmission &&
-                dayjs(draftSubmission.contractDateEnd).format('YYYY-MM-DD')) ??
+                formatForForm(draftSubmission.contractDateEnd)) ??
             '',
         managedCareEntities:
             (draftSubmission?.managedCareEntities as ManagedCareEntity[]) ?? [],
@@ -186,10 +152,10 @@ export const ContractDetails = ({
         capitationRatesOther:
             draftSubmission.contractAmendmentInfo?.capitationRatesAmendedInfo
                 ?.otherReason ?? '',
-        relatedToCovid19: emptyStringOrValue(
+        relatedToCovid19: formatForForm(
             draftSubmission.contractAmendmentInfo?.relatedToCovid19 ?? null
         ),
-        relatedToVaccination: emptyStringOrValue(
+        relatedToVaccination: formatForForm(
             draftSubmission.contractAmendmentInfo?.relatedToVaccination ?? null
         ),
         federalAuthorities: draftSubmission?.federalAuthorities ?? [],
@@ -218,8 +184,6 @@ export const ContractDetails = ({
         values: ContractDetailsFormValues
     ): boolean => values.contractType === 'AMENDMENT'
 
-    const isDateEmptyOrInvalid = (dateValue: string): boolean => !dateValue
-
     const ContractDatesErrorMessage = ({
         values,
         validationErrorMessage,
@@ -228,8 +192,7 @@ export const ContractDetails = ({
         validationErrorMessage: string
     }): React.ReactElement => (
         <ErrorMessage>
-            {isDateEmptyOrInvalid(values.contractDateEnd) &&
-            isDateEmptyOrInvalid(values.contractDateStart)
+            {isDateRangeEmpty(values.contractDateStart, values.contractDateEnd)
                 ? 'You must provide a start and an end date'
                 : validationErrorMessage}
         </ErrorMessage>
@@ -248,11 +211,11 @@ export const ContractDetails = ({
 
         if (values.contractType === 'AMENDMENT') {
             const relatedToCovid = values.relatedToCovid19 === 'YES'
-            const relatedToVacciene = relatedToCovid
+            const relatedToVaccine = relatedToCovid
                 ? values.relatedToVaccination === 'YES'
                 : null
 
-            const amendedOther = nullOrValue(values.otherItemAmended)
+            const amendedOther = formatForApi(values.otherItemAmended)
 
             let capitationInfo:
                 | CapitationRatesAmendedInfo
@@ -260,7 +223,7 @@ export const ContractDetails = ({
             if (values.itemsAmended.includes('CAPITATION_RATES')) {
                 capitationInfo = {
                     reason: values.capitationRates,
-                    otherReason: nullOrValue(values.capitationRatesOther),
+                    otherReason: formatForApi(values.capitationRatesOther),
                 }
             }
 
@@ -269,7 +232,7 @@ export const ContractDetails = ({
                 otherItemBeingAmended: amendedOther,
                 capitationRatesAmendedInfo: capitationInfo,
                 relatedToCovid19: relatedToCovid,
-                relatedToVaccination: relatedToVacciene,
+                relatedToVaccination: relatedToVaccine,
             }
         }
 

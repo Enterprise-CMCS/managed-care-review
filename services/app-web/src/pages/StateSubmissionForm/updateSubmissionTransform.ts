@@ -30,5 +30,6 @@ export function updatesFromSubmission(
         contractDateEnd: draft.contractDateEnd,
         federalAuthorities: draft.federalAuthorities,
         managedCareEntities: draft.managedCareEntities,
+        contractAmendmentInfo: draft.contractAmendmentInfo,
     }
 }

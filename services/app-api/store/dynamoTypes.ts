@@ -13,6 +13,7 @@ import {
     StateSubmissionType,
     SubmissionUnionType,
     isStateSubmission,
+    RateType,
 } from '../../app-web/src/common-code/domain-models'
 
 export function convertToDomainSubmission(
@@ -160,6 +161,18 @@ export class SubmissionStoreType {
     contractDateEnd?: Date
 
     @attribute()
+    rateType?: RateType
+
+    @attribute()
+    rateDateStart?: Date
+
+    @attribute()
+    rateDateEnd?: Date
+
+    @attribute()
+    rateDateCertified?: Date
+
+    @attribute()
     managedCareEntities: Array<string>
 
     @attribute()
@@ -201,6 +214,10 @@ export class SubmissionStoreType {
         this.contractDateEnd = undefined
         this.managedCareEntities = []
         this.federalAuthorities = []
+        this.rateType = undefined
+        this.rateDateStart = undefined
+        this.rateDateEnd = undefined
+        this.rateDateCertified = undefined
     }
 }
 
