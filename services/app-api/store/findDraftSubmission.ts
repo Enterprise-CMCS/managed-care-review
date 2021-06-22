@@ -87,7 +87,7 @@ export async function findDraftSubmissionByStateNumber(
             // do something with `record`
             const domainResult = convertToDomainSubmission(draftSubmission)
 
-            // if the result in the DB is a DRAFT, return an error
+            // if the result in the DB is not a DRAFT, return an error
             if (!isDraftSubmission(domainResult)) {
                 return {
                     code: 'WRONG_STATUS',
