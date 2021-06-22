@@ -18,6 +18,11 @@ type ContractAmendmentInfo = {
     relatedToVaccination?: boolean
 }
 
+type RateAmendmentInfo = {
+    effectiveDateStart?: Date
+    effectiveDateEnd?: Date
+}
+
 type ContractType = 'BASE' | 'AMENDMENT'
 
 type FederalAuthority =
@@ -72,6 +77,7 @@ type DraftSubmissionType = {
     rateDateStart?: Date
     rateDateEnd?: Date
     rateDateCertified?: Date
+    rateAmendmentInfo?: RateAmendmentInfo
 }
 
 export type {

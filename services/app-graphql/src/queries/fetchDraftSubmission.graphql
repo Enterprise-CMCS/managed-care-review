@@ -36,6 +36,10 @@ query fetchDraftSubmission($input: FetchDraftSubmissionInput!) {
             rateDateStart
             rateDateEnd
             rateDateCertified
+            rateAmendmentInfo {
+                effectiveDateStart
+                effectiveDateEnd
+            }
         }
     }
 }

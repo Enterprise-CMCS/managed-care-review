@@ -4,6 +4,9 @@ import { MutationResolvers, State } from '../gen/gqlServer'
 import {
     DraftSubmissionType,
     StateSubmissionType,
+    hasValidContract,
+    hasValidDocuments,
+    // hasValidRates,
     isStateSubmission,
 } from '../../app-web/src/common-code/domain-models'
 
@@ -41,20 +44,31 @@ export function isSubmissionError(err: unknown): err is SubmissionError {
 function submit(
     draft: DraftSubmissionType
 ): StateSubmissionType | SubmissionError {
-    if (draft.documents.length === 0) {
-        return {
-            code: 'INCOMPLETE',
-            message: 'submissions must have documents',
-        }
-    }
-
     const maybeStateSubmission: Record<string, unknown> = {
         ...draft,
         submittedAt: new Date(),
     }
 
     if (isStateSubmission(maybeStateSubmission)) return maybeStateSubmission
-    else
+    else if (!hasValidContract(maybeStateSubmission as DraftSubmissionType)) {
+        return {
+            code: 'INCOMPLETE',
+            message: 'submissions is missing required contract fields',
+        }
+    }
+    // TODO: add when review and submit is implemented
+    // else if (!hasValidRates(maybeStateSubmission as DraftSubmissionType)) {
+    //     return {
+    //         code: 'INCOMPLETE',
+    //         message: 'submissions is missing required rate fields',
+    //     }
+    // }
+    else if (!hasValidDocuments(maybeStateSubmission as DraftSubmissionType)) {
+        return {
+            code: 'INCOMPLETE',
+            message: 'submissions must have documents',
+        }
+    } else
         return {
             code: 'INCOMPLETE',
             message: 'submission is missing a required field',

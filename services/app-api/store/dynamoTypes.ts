@@ -60,6 +60,14 @@ export class ContractAmendmentInfoT {
     }
 }
 
+export class RateAmendmentInfoT {
+    @attribute()
+    effectiveDateStart?: Date
+
+    @attribute()
+    effectiveDateEnd?: Date
+}
+
 @table('draft-submissions')
 export class DraftSubmissionStoreType {
     @hashKey()
@@ -130,6 +138,9 @@ export class DraftSubmissionStoreType {
 
     @attribute()
     contractAmendmentInfo?: ContractAmendmentInfoT
+
+    @attribute()
+    rateAmendmentInfo?: RateAmendmentInfoT
 
     constructor() {
         this.id = ''

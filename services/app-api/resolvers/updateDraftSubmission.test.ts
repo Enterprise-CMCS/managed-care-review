@@ -36,6 +36,10 @@ describe('updateDraftSubmission', () => {
                 rateDateStart: new Date(),
                 rateDateEnd: new Date(),
                 rateDateCertified: new Date(),
+                rateAmendmentInfo: {
+                    effectiveDateStart: new Date(),
+                    effectiveDateEnd: new Date(),
+                },
             }
 
             const updates: DraftSubmissionUpdates = {
@@ -49,10 +53,11 @@ describe('updateDraftSubmission', () => {
                 managedCareEntities: [],
                 federalAuthorities: [],
                 contractAmendmentInfo: null,
-                rateType: 'NEW',
+                rateType: null,
                 rateDateStart: null,
                 rateDateEnd: null,
                 rateDateCertified: null,
+                rateAmendmentInfo: undefined,
             }
 
             applyUpdates(baseDraft, updates)
@@ -62,10 +67,11 @@ describe('updateDraftSubmission', () => {
             expect(baseDraft.contractDateStart).toBeUndefined()
             expect(baseDraft.contractDateEnd).toBeUndefined()
             expect(baseDraft.contractAmendmentInfo).toBeUndefined()
-            expect(baseDraft.rateType).toBe('NEW')
+            expect(baseDraft.rateType).toBeUndefined()
             expect(baseDraft.rateDateStart).toBeUndefined()
             expect(baseDraft.rateDateEnd).toBeUndefined()
             expect(baseDraft.rateDateCertified).toBeUndefined()
+            expect(baseDraft.rateAmendmentInfo).toBeUndefined()
         })
 
         it('correctly applies empty amendment updates', () => {
@@ -106,6 +112,10 @@ describe('updateDraftSubmission', () => {
                 rateDateStart: null,
                 rateDateEnd: null,
                 rateDateCertified: null,
+                rateAmendmentInfo: {
+                    effectiveDateStart: null,
+                    effectiveDateEnd: null,
+                },
             }
 
             applyUpdates(baseDraft, updates)
@@ -117,6 +127,10 @@ describe('updateDraftSubmission', () => {
                 capitationRatesAmendedInfo: undefined,
                 relatedToCovid19: undefined,
                 relatedToVaccination: undefined,
+            })
+            expect(baseDraft.rateAmendmentInfo).toStrictEqual({
+                effectiveDateStart: undefined,
+                effectiveDateEnd: undefined,
             })
         })
 
@@ -334,7 +348,7 @@ describe('updateDraftSubmission', () => {
         expect(resultDraft2.documents[0].name).toEqual('myfile2.pdf')
     })
 
-    it('updates a submission to have some amendment details', async () => {
+    it('updates a submission to have contract amendment details', async () => {
         const server = constructTestServer()
         const { mutate } = createTestClient(server)
 
@@ -390,7 +404,7 @@ describe('updateDraftSubmission', () => {
         )
     })
 
-    it('updates a submission with conditionals in the amendment details', async () => {
+    it('updates a submission with conditionals in contract amendment details', async () => {
         const server = constructTestServer()
         const { query, mutate } = createTestClient(server)
 
@@ -407,8 +421,6 @@ describe('updateDraftSubmission', () => {
             contractDateStart: startDate,
             managedCareEntities: [],
             federalAuthorities: [],
-
-            // rate detail info
             contractAmendmentInfo: {
                 itemsBeingAmended: [
                     'BENEFITS_PROVIDED',
@@ -467,30 +479,29 @@ describe('updateDraftSubmission', () => {
         })
     })
 
-    it('updates a submission to remove existing documents', async () => {
+    it('updates a submission to have a new rate', async () => {
         const server = constructTestServer()
-        const { query, mutate } = createTestClient(server)
+        const { mutate } = createTestClient(server)
 
         const createdDraft = await createTestDraftSubmission(mutate)
         const createdID = createdDraft.id
-        const startDate = '2021-07-06'
-        const endDate = '2021-07-12'
+        const startDate = '2021-07-01'
+        const endDate = '2022-06-30'
+        const rateDetails = {
+            rateType: 'NEW' as const,
+            rateDateStart: startDate,
+            rateDateEnd: endDate,
+            rateDateCertified: '2021-06-13',
+        }
 
         const updatedDraft = {
             programID: 'cnet',
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
-            documents: [
-                {
-                    name: 'myfile.pdf',
-                    s3URL: 'fakeS3URL',
-                },
-            ],
-            contractType: 'BASE',
-            contractDateStart: startDate,
-            contractDateEnd: endDate,
+            documents: [],
             managedCareEntities: [],
             federalAuthorities: [],
+            ...rateDetails,
         }
 
         const updateResult = await mutate({
@@ -499,6 +510,111 @@ describe('updateDraftSubmission', () => {
                 input: {
                     submissionID: createdID,
                     draftSubmissionUpdates: updatedDraft,
+                },
+            },
+        })
+
+        expect(updateResult.errors).toBeUndefined()
+
+        const resultDraft =
+            updateResult.data.updateDraftSubmission.draftSubmission
+
+        expect(resultDraft.id).toEqual(createdID)
+        expect(resultDraft.rateType).toEqual(rateDetails.rateType)
+        expect(resultDraft.rateDateStart).toEqual(rateDetails.rateDateStart)
+        expect(resultDraft.rateDateEnd).toEqual(rateDetails.rateDateEnd)
+        expect(resultDraft.rateDateCertified).toEqual(
+            rateDetails.rateDateCertified
+        )
+        expect(resultDraft.rateAmendmentInfo).toBeNull()
+    })
+
+    it('updates a submission to have a rate amendment', async () => {
+        const server = constructTestServer()
+        const { mutate } = createTestClient(server)
+
+        const createdDraft = await createTestDraftSubmission(mutate)
+        const createdID = createdDraft.id
+        const startDate = '2021-07-01'
+        const endDate = '2022-06-30'
+        const rateAmendment = {
+            rateType: 'AMENDMENT' as const,
+            rateDateStart: startDate,
+            rateDateEnd: endDate,
+            rateDateCertified: '2021-06-13',
+            rateAmendmentInfo: {
+                effectiveDateStart: startDate,
+                effectiveDateEnd: endDate,
+            },
+        }
+
+        const updatedDraft = {
+            programID: 'cnet',
+            submissionType: 'CONTRACT_AND_RATES',
+            submissionDescription: 'An updated submission',
+            documents: [],
+            managedCareEntities: [],
+            federalAuthorities: [],
+            ...rateAmendment,
+        }
+
+        const updateResult = await mutate({
+            mutation: UPDATE_DRAFT_SUBMISSION,
+            variables: {
+                input: {
+                    submissionID: createdID,
+                    draftSubmissionUpdates: updatedDraft,
+                },
+            },
+        })
+
+        expect(updateResult.errors).toBeUndefined()
+
+        const resultDraft =
+            updateResult.data.updateDraftSubmission.draftSubmission
+
+        expect(resultDraft.id).toEqual(createdID)
+        expect(resultDraft.rateType).toEqual(rateAmendment.rateType)
+        expect(resultDraft.rateDateStart).toEqual(rateAmendment.rateDateStart)
+        expect(resultDraft.rateDateEnd).toEqual(rateAmendment.rateDateEnd)
+        expect(resultDraft.rateDateCertified).toEqual(
+            rateAmendment.rateDateCertified
+        )
+        expect(resultDraft.rateAmendmentInfo.effectiveDateStart).toEqual(
+            rateAmendment.rateAmendmentInfo.effectiveDateStart
+        )
+        expect(resultDraft.rateAmendmentInfo.effectiveDateEnd).toEqual(
+            rateAmendment.rateAmendmentInfo.effectiveDateEnd
+        )
+    })
+
+    it('updates a submission to remove existing documents', async () => {
+        const server = constructTestServer()
+        const { query, mutate } = createTestClient(server)
+
+        const createdDraft = await createTestDraftSubmission(mutate)
+        const createdID = createdDraft.id
+
+        const updatedDraftWithDocs = {
+            programID: 'cnet',
+            submissionType: 'CONTRACT_AND_RATES',
+            submissionDescription: 'An updated submission',
+            managedCareEntities: [],
+            federalAuthorities: [],
+            documents: [
+                {
+                    name: 'myfile.pdf',
+                    s3URL: 'fakeS3URL',
+                },
+            ],
+        }
+
+        const updateResult = await mutate({
+            mutation: UPDATE_DRAFT_SUBMISSION,
+            variables: {
+                input: {
+                    submissionID: createdID,
+                    draftSubmissionUpdates: updatedDraftWithDocs,
                 },
             },
         })
@@ -515,16 +631,13 @@ describe('updateDraftSubmission', () => {
         ])
 
         // Remove documents
-        const updatedDraft2 = {
+        const updatedDraftWithoutDocs = {
             programID: resultDraft.programID,
             submissionType: resultDraft.submissionType,
             submissionDescription: resultDraft.submissionDescription,
+            managedCareEntities: [],
+            federalAuthorities: [],
             documents: [],
-            contractType: resultDraft.contractType,
-            contractDateStart: resultDraft.contractDateStart,
-            contractDateEnd: resultDraft.contractDateEnd,
-            managedCareEntities: resultDraft.managedCareEntities,
-            federalAuthorities: resultDraft.federalAuthorities,
         }
 
         const updateResult2 = await mutate({
@@ -532,7 +645,7 @@ describe('updateDraftSubmission', () => {
             variables: {
                 input: {
                     submissionID: createdID,
-                    draftSubmissionUpdates: updatedDraft2,
+                    draftSubmissionUpdates: updatedDraftWithoutDocs,
                 },
             },
         })

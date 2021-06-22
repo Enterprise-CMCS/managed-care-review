@@ -3,6 +3,7 @@ import { DataMapper } from '@aws/dynamodb-data-mapper'
 import { StoreError } from './storeError'
 import {
     CapitationRatesAmendedInfo,
+    RateAmendmentInfoT,
     ContractAmendmentInfoT,
     DocumentStoreT,
     DraftSubmissionStoreType,
@@ -59,6 +60,15 @@ export async function updateDraftSubmission(
         info.relatedToVaccination = draftInfo.relatedToVaccination
 
         storeDraft.contractAmendmentInfo = info
+    }
+
+    if (draftSubmission.rateAmendmentInfo) {
+        const draftInfo = draftSubmission.rateAmendmentInfo
+
+        const info = new RateAmendmentInfoT()
+        info.effectiveDateStart = draftInfo.effectiveDateStart
+        info.effectiveDateEnd = draftInfo.effectiveDateEnd
+        storeDraft.rateAmendmentInfo = info
     }
 
     draftSubmission.documents.forEach((doc) => {

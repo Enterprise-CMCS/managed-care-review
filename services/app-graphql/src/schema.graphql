@@ -130,6 +130,16 @@ enum CapitationRatesAmendmentReason {
     OTHER
 }
 
+type RateAmendmentInfo {
+    effectiveDateStart: Date!
+    effectiveDateEnd: Date!
+}
+
+input RateAmendmentInfoInput {
+    effectiveDateStart: Date!
+    effectiveDateEnd: Date!
+}
+
 enum SubmissionType {
     CONTRACT_ONLY
     CONTRACT_AND_RATES
@@ -175,6 +185,7 @@ type DraftSubmission {
     rateDateStart: Date
     rateDateEnd: Date
     rateDateCertified: Date
+    rateAmendmentInfo: RateAmendmentInfo
 }
 
 type StateSubmission {
@@ -199,6 +210,7 @@ type StateSubmission {
     rateDateStart: Date!
     rateDateEnd: Date!
     rateDateCertified: Date!
+    rateAmendmentInfo: RateAmendmentInfo
 }
 
 input DraftSubmissionUpdates {
@@ -216,4 +228,5 @@ input DraftSubmissionUpdates {
     rateDateStart: Date
     rateDateEnd: Date
     rateDateCertified: Date
+    rateAmendmentInfo: RateAmendmentInfoInput
 }

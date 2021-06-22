@@ -93,10 +93,9 @@ const createAndUpdateTestDraftSubmission = async (
     >
 ): Promise<DraftSubmission> => {
     const draft = await createTestDraftSubmission(mutate)
-    const startDate = new Date().toISOString().split('T')[0]
-    const endDate = new Date(new Date().getTime() + 5 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split('T')[0]
+    const startDate = '2025-05-01'
+    const endDate = '2026-04-30'
+    const dateCertified = '2025-03-15'
 
     const updates = {
         programID: 'cnet',
@@ -113,6 +112,10 @@ const createAndUpdateTestDraftSubmission = async (
         contractDateEnd: endDate,
         managedCareEntities: ['MCO'],
         federalAuthorities: ['STATE_PLAN' as const],
+        rateType: 'NEW' as const,
+        rateDateStart: startDate,
+        rateDateEnd: endDate,
+        rateDateCertified: dateCertified,
         ...partialDraftSubmissionUpdates,
     }
 
