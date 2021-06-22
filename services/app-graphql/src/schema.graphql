@@ -59,7 +59,7 @@ type SubmissionEdge {
 
 type IndexSubmissionsPayload {
     totalCount: Int
-    edges: [SubmissionEdge]!
+    edges: [SubmissionEdge!]!
 }
 
 input UpdateDraftSubmissionInput {

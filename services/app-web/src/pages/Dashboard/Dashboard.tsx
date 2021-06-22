@@ -1,13 +1,18 @@
 import React from 'react'
-import { GridContainer, Link } from '@trussworks/react-uswds'
+import { GridContainer, Link, Alert } from '@trussworks/react-uswds'
 import { NavLink, useLocation } from 'react-router-dom'
 
 import styles from './Dashboard.module.scss'
 
 import { Tabs } from '../../components/Tabs/Tabs'
 import { TabPanel } from '../../components/Tabs/TabPanel'
+import {
+    SubmissionCard,
+    SubmissionStatus,
+    SubmissionType,
+} from '../../components/SubmissionCard/SubmissionCard'
 import { useAuth } from '../../contexts/AuthContext'
-import { Program } from '../../gen/gqlClient'
+import { Program, useIndexSubmissionsQuery } from '../../gen/gqlClient'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
 
 export const Dashboard = (): React.ReactElement => {
@@ -15,11 +20,24 @@ export const Dashboard = (): React.ReactElement => {
     const location = useLocation()
     let programs: Program[] = []
 
-    if (loginStatus === 'LOADING' || !loggedInUser) {
+    const { loading, data, error } = useIndexSubmissionsQuery()
+
+    if (error) {
+        console.log('error loading submissions')
+        return (
+            <Alert type="error">
+                Unexpected Error loading your submissions, please try again.
+            </Alert>
+        )
+    }
+
+    if (loginStatus === 'LOADING' || !loggedInUser || loading || !data) {
         return <div>Loading User Info</div>
     } else {
         programs = loggedInUser.state.programs
     }
+
+    const submissionList = data.indexSubmissions.edges.map((edge) => edge.node)
 
     const justSubmittedSubmissionName = new URLSearchParams(
         location.search
@@ -38,6 +56,10 @@ export const Dashboard = (): React.ReactElement => {
     }: {
         program: Program
     }): React.ReactElement => {
+        const programSubs = submissionList.filter(
+            (submission) => submission.programID === program.id
+        )
+
         return (
             <section key={program.name} className={styles.panel}>
                 {justSubmittedSubmissionName &&
@@ -60,9 +82,23 @@ export const Dashboard = (): React.ReactElement => {
                         </Link>
                     </div>
                 </div>
-                <div className={styles.panelEmpty}>
-                    <h3>You have no submissions yet.</h3>
-                </div>
+                {programSubs.length > 0 ? (
+                    <ul className="SubmissionCard_submissionList__1okWK">
+                        {programSubs.map((submission) => (
+                            <SubmissionCard
+                                key={submission.name}
+                                description="Rates are being adjusted to reflect revised capitation rates based on more recent data as well as benefit changes approved by the General Assembly."
+                                name={submission.name}
+                                status={SubmissionStatus.draft}
+                                submissionType={SubmissionType.ContractAndRates}
+                            />
+                        ))}
+                    </ul>
+                ) : (
+                    <div className={styles.panelEmpty}>
+                        <h3>You have no submissions for {program.name} yet.</h3>
+                    </div>
+                )}
             </section>
         )
     }
