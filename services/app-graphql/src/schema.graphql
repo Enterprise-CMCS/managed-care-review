@@ -11,6 +11,8 @@ type Query {
     fetchStateSubmission(
         input: FetchStateSubmissionInput!
     ): FetchStateSubmissionPayload!
+
+    indexSubmissions: IndexSubmissionsPayload!
 }
 
 type Mutation {
@@ -49,6 +51,15 @@ input FetchStateSubmissionInput {
 
 type FetchStateSubmissionPayload {
     submission: StateSubmission
+}
+
+type SubmissionEdge {
+    node: Submission!
+}
+
+type IndexSubmissionsPayload {
+    totalCount: Int
+    edges: [SubmissionEdge]!
 }
 
 input UpdateDraftSubmissionInput {
@@ -200,6 +211,8 @@ type StateSubmission {
     rateDateEnd: Date!
     rateDateCertified: Date!
 }
+
+union Submission = DraftSubmission | StateSubmission
 
 input DraftSubmissionUpdates {
     programID: String!

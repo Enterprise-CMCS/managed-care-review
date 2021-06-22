@@ -6,11 +6,64 @@ import {
 
 import { embed } from '@aws/dynamodb-data-mapper'
 import {
+    ContractType,
     SubmissionType,
     FederalAuthority,
-    ContractType,
+    DraftSubmissionType,
+    StateSubmissionType,
+    SubmissionUnionType,
+    isStateSubmission,
     RateType,
 } from '../../app-web/src/common-code/domain-models'
+
+export function convertToDomainSubmission(
+    submission: SubmissionStoreType
+): SubmissionUnionType | Error {
+    // check the .status on the store submission type to determine how to expand it
+    if (submission.status === 'DRAFT') {
+        delete submission.submittedAt // Why does typescript allow this?, this changes the type
+        const draft: DraftSubmissionType = {
+            ...submission,
+            status: 'DRAFT' as const,
+        }
+
+        return draft
+    } else if (submission.status === 'SUBMITTED') {
+        // It feels like a generic typescript function could help with this
+        // kind of checking.
+        const submittedAt = submission.submittedAt
+        const contractType = submission.contractType
+        const contractDateStart = submission.contractDateStart
+        const contractDateEnd = submission.contractDateEnd
+        if (
+            submittedAt === undefined ||
+            contractType === undefined ||
+            contractDateStart === undefined ||
+            contractDateEnd === undefined
+        ) {
+            return new Error(
+                'a stateSubmission must have all optional values set'
+            )
+        }
+        const stateSubmission: StateSubmissionType = {
+            ...submission,
+            status: 'SUBMITTED' as const,
+            submittedAt,
+            contractType,
+            contractDateStart,
+            contractDateEnd,
+        }
+
+        // do the rest of the validations by calling the type guard
+        if (!isStateSubmission(stateSubmission)) {
+            return new Error('state submission is not valid')
+        }
+
+        return stateSubmission
+    }
+
+    return new Error('Unknown store submission type')
+}
 
 // Data mapper annotations are meant to go on your domain models, and we might use them that way at some point
 // but for now, especially since we probably want to rip out all the dynamodb stuff eventually anyway, we're going to keep
@@ -23,7 +76,8 @@ export class DocumentStoreT {
     s3URL: string
 
     constructor() {
-        ;(this.name = ''), (this.s3URL = '')
+        this.name = ''
+        this.s3URL = ''
     }
 }
 
@@ -60,8 +114,18 @@ export class ContractAmendmentInfoT {
     }
 }
 
+// Even though we have two different submission types returned by our API, the
+// db treats them the same. This is a consequence of storing all our form data in
+// a document database. These mappers take the document data and turn them
+// into a typescript representation.
+// DraftSubmissions and StateSubmissions have almost the same set of fields, though
+// many that are required by StateSubmission are optional in the Draft state. Dynamo
+// db stores both side by side in the same table, so it's a fairly accurate state of affairs
+// to pull both out into the same DB Type before converting that into the correct
+// domain model.
+// —MacRae June 2021
 @table('draft-submissions')
-export class DraftSubmissionStoreType {
+export class SubmissionStoreType {
     @hashKey()
     id: string
 
@@ -80,6 +144,9 @@ export class DraftSubmissionStoreType {
 
     @attribute()
     updatedAt: Date
+
+    @attribute()
+    submittedAt?: Date
 
     @attribute()
     programID: string
@@ -154,85 +221,6 @@ export class DraftSubmissionStoreType {
     }
 }
 
-@table('draft-submissions')
-export class StateSubmissionStoreType {
-    @hashKey()
-    id: string
-
-    // This is used to differentiate between DraftSubmission and StateSubmission
-    @attribute()
-    status: string
-
-    @attribute()
-    submissionDescription: string
-
-    @attribute()
-    submissionType: SubmissionType
-
-    @attribute()
-    createdAt: Date
-
-    @attribute()
-    updatedAt: Date
-
-    @attribute()
-    submittedAt: Date
-
-    @attribute()
-    programID: string
-
-    @attribute()
-    contractType: ContractType
-
-    @attribute()
-    contractDateStart: Date
-
-    @attribute()
-    contractDateEnd: Date
-
-    @attribute()
-    managedCareEntities: Array<string>
-
-    @attribute()
-    federalAuthorities: Array<FederalAuthority>
-
-    @attribute({
-        indexKeyConfigurations: {
-            StateStateNumberAllIndex: 'HASH',
-        },
-    })
-    stateCode: string
-
-    @attribute({
-        indexKeyConfigurations: {
-            StateStateNumberAllIndex: 'RANGE',
-        },
-    })
-    stateNumber: number
-
-    @attribute({ memberType: embed(DocumentStoreT) })
-    documents: Array<DocumentStoreT>
-
-    constructor() {
-        this.id = ''
-        this.status = 'SUBMITTED'
-        this.submissionDescription = ''
-        this.submissionType = 'CONTRACT_ONLY'
-        this.createdAt = new Date(0)
-        this.updatedAt = new Date(0)
-        this.stateCode = ''
-        this.programID = ''
-        this.stateNumber = -1
-        this.documents = []
-        this.submittedAt = new Date(0)
-        this.contractType = 'BASE'
-        this.contractDateStart = new Date(0)
-        this.contractDateEnd = new Date(0)
-        this.managedCareEntities = []
-        this.federalAuthorities = []
-    }
-}
-
 export type DynamoError = {
     code: string
 }
@@ -250,6 +238,13 @@ export type MapperError = {
 
 export function isMapperError(err: unknown): err is MapperError {
     if (err && typeof err == 'object' && 'name' in err) {
+        return true
+    }
+    return false
+}
+
+export function isNodeError(err: unknown): err is Error {
+    if (err && typeof err == 'object' && 'name' in err && 'message' in err) {
         return true
     }
     return false

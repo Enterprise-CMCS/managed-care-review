@@ -16,6 +16,7 @@ Store Methods:
 
 -   findFoo
 -   findFooByBar
+-   findAllFoo
 -   insertFoo
 -   updateFoo
 -   destroyFoo
@@ -124,6 +125,14 @@ For example:
 Instead of the db returning a db-ified class model called `DraftSubmission` that has `save()` and `refresh()` and `findUploadedFiles()` on it, we write `DraftSubmission` as a domain model. This has only the common fields like `submissionType`, `description`, and `files` that make up the concept of a "draft submission" regardless of service. Then, functions exported by the store package like `updateDraftSubmission`, `findDraftSubmission`, and `findUploadedFiles` can handle this domain model. A side benefit to this is that it's very obvious when code is making calls to the db, because you have to call something from the store package. No matter if you are writing to the database, checking it for the right permissions for the current user, or reporting up on how many Drafts are in progress, the DraftSubmission has the same properties. Using domain models let us define those shared properties without tying that to a specific use case.
 
 There's a kind of functional programming vs. object-oriented-programming thing going on in this pattern, for sure. It can definitely work either way. But what tips the scales for me is separating the definition of our core models away from any particular use case for them.
+
+## Pagination
+
+There is an established pattern for pagination in GraphQL apis that has some funky terminology. We're going to hew to that standard for now. As of June 2021, we don't actually paginate anything, but we're going to build the containers into our index apis so that when we do paginate the client won't have to readjust too hard.
+
+Pagination in graphQL is done through a "connections" pattern, described in detail in the [GraphQL Docs](https://graphql.org/learn/pagination/) and the terminology explained well in [this blogpost](https://www.apollographql.com/blog/graphql/explaining-graphql-connections/). It's a cursor based pagination where individual records are returned as "edges" to the current "node".
+
+The [official specification](https://relay.dev/graphql/connections.htm) has more detail, as well.
 
 ## Future Work
 
