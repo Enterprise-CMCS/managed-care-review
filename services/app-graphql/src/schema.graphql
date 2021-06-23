@@ -131,13 +131,13 @@ enum CapitationRatesAmendmentReason {
 }
 
 type RateAmendmentInfo {
-    effectiveDateStart: Date!
-    effectiveDateEnd: Date!
+    effectiveDateStart: Date
+    effectiveDateEnd: Date
 }
 
 input RateAmendmentInfoInput {
-    effectiveDateStart: Date!
-    effectiveDateEnd: Date!
+    effectiveDateStart: Date
+    effectiveDateEnd: Date
 }
 
 enum SubmissionType {

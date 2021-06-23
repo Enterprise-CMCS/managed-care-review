@@ -27,10 +27,10 @@ function validateDateFormat(
 }
 
 const validateDateRange12Months = (
-    value: string,
-    context: Yup.TestContext
+    startDateField: string,
+    endDateField: string
 ): boolean => {
-    const startDate = dayjs(context.parent.rateDateStart)
+    const startDate = dayjs(startDateField)
     const isStartDateLeapDay =
         startDate.isLeapYear() &&
         startDate.month() === 1 &&
@@ -38,7 +38,7 @@ const validateDateRange12Months = (
     const oneYearLater = isStartDateLeapDay
         ? startDate.add(1, 'year')
         : startDate.add(1, 'year').subtract(1, 'day')
-    return dayjs(context.parent.rateDateEnd).isSame(oneYearLater, 'day')
+    return dayjs(endDateField).isSame(oneYearLater, 'day')
 }
 
 const isDateRangeEmpty = (startDate: string, endDate: string) =>

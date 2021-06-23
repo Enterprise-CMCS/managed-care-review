@@ -234,6 +234,8 @@ export const ContractDetails = ({
                 relatedToCovid19: relatedToCovid,
                 relatedToVaccination: relatedToVaccine,
             }
+        } else {
+            updatedDraft.contractAmendmentInfo = null
         }
 
         try {

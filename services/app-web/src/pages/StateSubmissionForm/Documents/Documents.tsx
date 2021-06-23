@@ -17,7 +17,6 @@ import {
 import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
 import PageHeading from '../../../components/PageHeading'
-import { isContractAndRates } from '../submissionChecks'
 import {
     FileUpload,
     S3FileData,
@@ -160,7 +159,7 @@ export const Documents = ({
     }
 
     const Hint = (): JSX.Element =>
-        isContractAndRates(draftSubmission) ? (
+        draftSubmission.submissionType === 'CONTRACT_AND_RATES' ? (
             <>
                 <strong>Must include:</strong> an executed contract and a signed
                 rate certification
