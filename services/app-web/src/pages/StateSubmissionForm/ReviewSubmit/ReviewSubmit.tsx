@@ -297,14 +297,26 @@ export const ReviewSubmit = ({
                                     <DataDetail
                                         id="rateType"
                                         label="Rate certification type"
-                                        data="New rate certification"
+                                        data={
+                                            draftSubmission.rateAmendmentInfo
+                                                ? 'Amendment to prior rate certification'
+                                                : 'New rate certification'
+                                        }
                                     />
                                 }
                                 right={
                                     <DataDetail
                                         id="ratingPeriod"
-                                        label="Rating period"
-                                        data="07/01/2020 - 06/30/2021"
+                                        label={
+                                            draftSubmission.rateAmendmentInfo
+                                                ? 'Rating period of original rate certification'
+                                                : 'Rating period'
+                                        }
+                                        data={`${dayjs(
+                                            draftSubmission.rateDateStart
+                                        ).format('MM/DD/YYYY')} - ${dayjs(
+                                            draftSubmission.rateDateEnd
+                                        ).format('MM/DD/YYYY')}`}
                                     />
                                 }
                             />
@@ -312,9 +324,32 @@ export const ReviewSubmit = ({
                                 left={
                                     <DataDetail
                                         id="dateCertified"
-                                        label="Date certified"
-                                        data="06/03/2021"
+                                        label={
+                                            draftSubmission.rateAmendmentInfo
+                                                ? 'Date certified for rate amendment'
+                                                : 'Date certified'
+                                        }
+                                        data={dayjs(
+                                            draftSubmission.rateDateCertified
+                                        ).format('MM/DD/YYYY')}
                                     />
+                                }
+                                right={
+                                    draftSubmission.rateAmendmentInfo ? (
+                                        <DataDetail
+                                            id="effectiveRatingPeriod"
+                                            label="Effective dates of rate amendment"
+                                            data={`${dayjs(
+                                                draftSubmission
+                                                    .rateAmendmentInfo
+                                                    .effectiveDateStart
+                                            ).format('MM/DD/YYYY')} - ${dayjs(
+                                                draftSubmission
+                                                    .rateAmendmentInfo
+                                                    .effectiveDateEnd
+                                            ).format('MM/DD/YYYY')}`}
+                                        />
+                                    ) : null
                                 }
                             />
                         </dl>
