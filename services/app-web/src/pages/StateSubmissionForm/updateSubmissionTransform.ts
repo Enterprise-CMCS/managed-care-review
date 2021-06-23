@@ -7,15 +7,19 @@ import {
 
 /* 
     Clean out _typename from submission
-    If you pass gql _typename within a mutation input things break; however,  _typename comes down on cached queries by default
+    If you pass gql __typename within a mutation input things break; however,  __typename comes down on cached queries by default
     This function is needed to remove _typename  for optional objects such as contractAmendmentInfo and rateAmendmentInfo
 */
-function stripTypename<T>(input: T) {
+function stripTypename<T>(input: T): T {
     if (!input) return input
-    const cleanedInput = { ...input }
+    const cleanedInput = Object.assign({}, input)
+
     for (const prop in cleanedInput) {
         if (prop === '__typename') delete cleanedInput[prop]
-        else if (typeof cleanedInput[prop] === 'object') {
+        else if (
+            !Array.isArray(cleanedInput[prop]) &&
+            typeof cleanedInput[prop] === 'object'
+        ) {
             cleanedInput[prop] = stripTypename(cleanedInput[prop])
         }
     }
@@ -34,14 +38,7 @@ export function updatesFromSubmission(
         programID: draft.programID,
         submissionType: draft.submissionType,
         submissionDescription: draft.submissionDescription,
-        documents: draft.documents.map(
-            (doc: Document): DocumentInput => {
-                return {
-                    name: doc.name,
-                    s3URL: doc.s3URL,
-                }
-            }
-        ),
+        documents: stripTypename(draft.documents),
         contractType: draft.contractType,
         contractDateStart: draft.contractDateStart,
         contractDateEnd: draft.contractDateEnd,
