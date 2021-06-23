@@ -302,7 +302,7 @@ export const SubmissionType = ({
                         >
                             <Link
                                 asCustom={NavLink}
-                                className={`${styles.outlineButtonLink} usa-button usa-button--outline`}
+                                className="usa-button usa-button--outline"
                                 to="/dashboard"
                             >
                                 Cancel

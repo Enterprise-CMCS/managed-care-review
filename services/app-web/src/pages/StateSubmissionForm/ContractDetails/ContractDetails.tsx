@@ -928,23 +928,36 @@ export const ContractDetails = ({
                             )}
                         </fieldset>
 
-                        <ButtonGroup className={styles.buttonGroup}>
-                            <Link
-                                asCustom={NavLink}
-                                className={`${styles.outlineButtonLink} usa-button usa-button--outline`}
-                                variant="unstyled"
-                                to="/dashboard"
-                            >
-                                Cancel
-                            </Link>
+                        <div className={styles.pageActions}>
                             <Button
                                 type="submit"
-                                onClick={() => setShouldValidate(true)}
                                 disabled={isSubmitting}
+                                onClick={() => setShouldValidate(true)}
+                                unstyled
                             >
-                                Continue
+                                Save as Draft
                             </Button>
-                        </ButtonGroup>
+                            <ButtonGroup
+                                type="default"
+                                className={styles.buttonGroup}
+                            >
+                                <Link
+                                    asCustom={NavLink}
+                                    className="usa-button usa-button--outline"
+                                    variant="unstyled"
+                                    to="type"
+                                >
+                                    Back
+                                </Link>
+                                <Button
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                    onClick={() => setShouldValidate(true)}
+                                >
+                                    Continue
+                                </Button>
+                            </ButtonGroup>
+                        </div>
                     </UswdsForm>
                 </>
             )}

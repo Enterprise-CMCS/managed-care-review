@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { GridContainer, Grid, Link, Alert } from '@trussworks/react-uswds'
+import {
+    Button,
+    ButtonGroup,
+    GridContainer,
+    Grid,
+    Link,
+    Alert,
+} from '@trussworks/react-uswds'
 import { NavLink, useHistory } from 'react-router-dom'
 import dayjs from 'dayjs'
 
@@ -19,7 +26,6 @@ import {
 } from '../../../constants/submissions'
 import { DataDetail } from '../../../components/DataDetail/DataDetail'
 import { DoubleColumnRow } from '../../../components/DoubleColumnRow/DoubleColumnRow'
-import { PageActions } from '../PageActions'
 import { useS3 } from '../../../contexts/S3Context'
 
 type DocumentWithLink = { url: string | null } & Document
@@ -78,7 +84,7 @@ export const ReviewSubmit = ({
                     <Link
                         variant="unstyled"
                         asCustom={NavLink}
-                        className={`${stylesForm.outlineButtonLink} usa-button usa-button--outline`}
+                        className="usa-button usa-button--outline"
                         to={to}
                     >
                         Edit <span className="srOnly">{header}</span>
@@ -153,7 +159,7 @@ export const ReviewSubmit = ({
                                 <Link
                                     asCustom={NavLink}
                                     to="type"
-                                    className={`${stylesForm.outlineButtonLink} usa-button usa-button--outline`}
+                                    className="usa-button usa-button--outline"
                                     variant="unstyled"
                                 >
                                     Edit
@@ -376,11 +382,32 @@ export const ReviewSubmit = ({
                             ))}
                         </ul>
                     </section>
-                    <PageActions
-                        secondaryAction="Back"
-                        primaryAction="Submit"
-                        primaryActionCallback={handleFormSubmit}
-                    />
+
+                    <div className={stylesForm.pageActions}>
+                        <Button type="submit" unstyled>
+                            Save as Draft
+                        </Button>
+                        <ButtonGroup
+                            type="default"
+                            className={stylesForm.buttonGroup}
+                        >
+                            <Link
+                                asCustom={NavLink}
+                                className="usa-button usa-button--outline"
+                                variant="unstyled"
+                                to="documents"
+                            >
+                                Back
+                            </Link>
+                            <Button
+                                type="button"
+                                className={styles.submitButtonClasses}
+                                onClick={handleFormSubmit}
+                            >
+                                Continue
+                            </Button>
+                        </ButtonGroup>
+                    </div>
                 </Grid>
             </Grid>
         </GridContainer>
