@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import {
+    StepIndicator,
+    StepIndicatorStep,
     Form as UswdsForm,
     Button,
     ButtonGroup,
@@ -25,9 +27,9 @@ import {
 import { FileItemT } from '../../../components/FileUpload/FileItem'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
 
-/* 
+/*
     Documents should error alerts for overall errors related to invalid documents for a submission, including no files added.
-    Inline errors, specific to the individual files as they upload,  should be handled in FileUpload. 
+    Inline errors, specific to the individual files as they upload,  should be handled in FileUpload.
 */
 
 type DocumentProps = {
@@ -174,7 +176,12 @@ export const Documents = ({
     return (
         <>
             <PageHeading className={styles.formHeader} headingLevel="h2">
-                Documents
+              <StepIndicator>
+                <StepIndicatorStep label="Contract Details" status="complete" />
+                <StepIndicatorStep label="Rate Details" status="complete" />
+                <StepIndicatorStep label="Documents" status="current" />
+                <StepIndicatorStep label="Review and submit" />
+              </StepIndicator>
             </PageHeading>
             <UswdsForm
                 className={styles.formContainer}

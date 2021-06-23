@@ -5,6 +5,8 @@ import isLeapYear from 'dayjs/plugin/isLeapYear'
 import {
     Alert,
     ErrorMessage,
+    StepIndicator,
+    StepIndicatorStep,
     Form as UswdsForm,
     FormGroup,
     Fieldset,
@@ -195,7 +197,12 @@ export const RateDetails = ({
                             className={styles.formHeader}
                             headingLevel="h2"
                         >
-                            Rate details
+                          <StepIndicator>
+                            <StepIndicatorStep label="Contract Details" status="complete" />
+                            <StepIndicatorStep label="Rate Details" status="current" />
+                            <StepIndicatorStep label="Documents" />
+                            <StepIndicatorStep label="Review and submit" />
+                          </StepIndicator>
                         </PageHeading>
                         <UswdsForm
                             className={styles.formContainer}

@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { GridContainer, Grid, Link, Alert } from '@trussworks/react-uswds'
+import {
+    StepIndicator,
+    StepIndicatorStep,
+    GridContainer,
+    Grid,
+    Link,
+    Alert,
+ } from '@trussworks/react-uswds'
 import { NavLink, useHistory } from 'react-router-dom'
 import dayjs from 'dayjs'
 
@@ -73,7 +80,12 @@ export const ReviewSubmit = ({
     }): React.ReactElement => {
         return (
             <div className={styles.reviewSectionHeader}>
-                <h2>{header}</h2>
+                <StepIndicator>
+                  <StepIndicatorStep label="Contract Details" status="complete" />
+                  <StepIndicatorStep label="Rate Details" status="complete" />
+                  <StepIndicatorStep label="Documents" status="complete" />
+                  <StepIndicatorStep label="Review and submit" status="current" />
+                </StepIndicator>
                 <div>
                     <Link
                         variant="unstyled"

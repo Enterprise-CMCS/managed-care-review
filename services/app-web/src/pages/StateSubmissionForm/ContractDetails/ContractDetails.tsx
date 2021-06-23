@@ -2,6 +2,8 @@ import React from 'react'
 import * as Yup from 'yup'
 import {
     Alert,
+    StepIndicator,
+    StepIndicatorStep,
     Form as UswdsForm,
     FormGroup,
     Fieldset,
@@ -280,7 +282,12 @@ export const ContractDetails = ({
                         className={styles.formHeader}
                         headingLevel="h2"
                     >
-                        Contract details
+                      <StepIndicator>
+                        <StepIndicatorStep label="Contract Details" status="current" />
+                        <StepIndicatorStep label="Rate Details" />
+                        <StepIndicatorStep label="Documents" />
+                        <StepIndicatorStep label="Review and submit" />
+                      </StepIndicator>
                     </PageHeading>
                     <UswdsForm
                         className={styles.formContainer}
