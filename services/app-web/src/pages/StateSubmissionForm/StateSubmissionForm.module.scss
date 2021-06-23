@@ -24,7 +24,7 @@
     }
 
     &[class^='usa-form'] {
-        min-width: 35rem;
+        min-width: 40rem;
     }
 }
 
@@ -74,6 +74,8 @@
 
 div[class^='usa-step-indicator'] {
   background-color: transparent;
+  margin: 1.25rem 0;
+  text-align: center;
 }
 
 [class^='usa-step-indicator__header'] {

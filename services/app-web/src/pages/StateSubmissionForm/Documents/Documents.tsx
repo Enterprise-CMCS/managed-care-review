@@ -18,7 +18,6 @@ import {
 } from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
-import PageHeading from '../../../components/PageHeading'
 import { isContractAndRates } from '../submissionChecks'
 import {
     FileUpload,
@@ -175,14 +174,13 @@ export const Documents = ({
 
     return (
         <>
-            <PageHeading className={styles.formHeader} headingLevel="h2">
-              <StepIndicator>
-                <StepIndicatorStep label="Contract Details" status="complete" />
-                <StepIndicatorStep label="Rate Details" status="complete" />
-                <StepIndicatorStep label="Documents" status="current" />
-                <StepIndicatorStep label="Review and submit" />
-              </StepIndicator>
-            </PageHeading>
+            <StepIndicator>
+              <StepIndicatorStep label="Contract Details" status="complete" />
+              <StepIndicatorStep label="Rate Details" status="complete" />
+              <StepIndicatorStep label="Documents" status="current" />
+              <StepIndicatorStep label="Review and submit" />
+            </StepIndicator>
+
             <UswdsForm
                 className={styles.formContainer}
                 id="DocumentsForm"

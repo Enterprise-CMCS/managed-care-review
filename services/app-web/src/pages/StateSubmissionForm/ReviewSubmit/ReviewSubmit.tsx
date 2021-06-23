@@ -27,6 +27,7 @@ import {
 import { DataDetail } from '../../../components/DataDetail/DataDetail'
 import { DoubleColumnRow } from '../../../components/DoubleColumnRow/DoubleColumnRow'
 import { PageActions } from '../PageActions'
+import PageHeading from '../../../components/PageHeading'
 import { useS3 } from '../../../contexts/S3Context'
 
 type DocumentWithLink = { url: string | null } & Document
@@ -80,12 +81,7 @@ export const ReviewSubmit = ({
     }): React.ReactElement => {
         return (
             <div className={styles.reviewSectionHeader}>
-                <StepIndicator>
-                  <StepIndicatorStep label="Contract Details" status="complete" />
-                  <StepIndicatorStep label="Rate Details" status="complete" />
-                  <StepIndicatorStep label="Documents" status="complete" />
-                  <StepIndicatorStep label="Review and submit" status="current" />
-                </StepIndicator>
+                <h2>{header}</h2>
                 <div>
                     <Link
                         variant="unstyled"
@@ -151,6 +147,16 @@ export const ReviewSubmit = ({
                     {userVisibleError}
                 </Alert>
             )}
+
+            <PageHeading className={styles.formHeader} headingLevel="h2">
+                <StepIndicator>
+                  <StepIndicatorStep label="Contract Details" status="complete" />
+                  <StepIndicatorStep label="Rate Details" status="complete" />
+                  <StepIndicatorStep label="Documents" status="complete" />
+                  <StepIndicatorStep label="Review and submit" status="current" />
+                </StepIndicator>
+            </PageHeading>
+
             <Grid row>
                 <Grid col={12} tablet={{ col: 8, offset: 2 }}>
                     <section

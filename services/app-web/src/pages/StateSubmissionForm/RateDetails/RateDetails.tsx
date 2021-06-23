@@ -22,7 +22,6 @@ import { NavLink, useHistory } from 'react-router-dom'
 
 import styles from '../StateSubmissionForm.module.scss'
 
-import PageHeading from '../../../components/PageHeading'
 import {
     DraftSubmission,
     RateType,
@@ -178,6 +177,13 @@ export const RateDetails = ({
 
     return (
         <>
+            <StepIndicator>
+              <StepIndicatorStep label="Contract Details" status="complete" />
+              <StepIndicatorStep label="Rate Details" status="current" />
+              <StepIndicatorStep label="Documents" />
+              <StepIndicatorStep label="Review and submit" />
+            </StepIndicator>
+
             <Formik
                 initialValues={rateDetailsInitialValues}
                 onSubmit={handleFormSubmit}
@@ -193,17 +199,6 @@ export const RateDetails = ({
                     validateForm,
                 }) => (
                     <>
-                        <PageHeading
-                            className={styles.formHeader}
-                            headingLevel="h2"
-                        >
-                          <StepIndicator>
-                            <StepIndicatorStep label="Contract Details" status="complete" />
-                            <StepIndicatorStep label="Rate Details" status="current" />
-                            <StepIndicatorStep label="Documents" />
-                            <StepIndicatorStep label="Review and submit" />
-                          </StepIndicator>
-                        </PageHeading>
                         <UswdsForm
                             className={styles.formContainer}
                             id="RateDetailsForm"
