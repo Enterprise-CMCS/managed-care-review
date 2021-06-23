@@ -2,8 +2,6 @@ import React from 'react'
 import * as Yup from 'yup'
 import {
     Alert,
-    StepIndicator,
-    StepIndicatorStep,
     Form as UswdsForm,
     FormGroup,
     Fieldset,
@@ -263,13 +261,6 @@ export const ContractDetails = ({
 
     return (
         <>
-            <StepIndicator>
-              <StepIndicatorStep label="Contract Details" status="current" />
-              <StepIndicatorStep label="Rate Details" />
-              <StepIndicatorStep label="Documents" />
-              <StepIndicatorStep label="Review and submit" />
-            </StepIndicator>
-
             <Formik
                 initialValues={contractDetailsInitialValues}
                 onSubmit={handleFormSubmit}

@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import {
-    StepIndicator,
-    StepIndicatorStep,
     Form as UswdsForm,
     Button,
     ButtonGroup,
@@ -174,13 +172,6 @@ export const Documents = ({
 
     return (
         <>
-            <StepIndicator>
-              <StepIndicatorStep label="Contract Details" status="complete" />
-              <StepIndicatorStep label="Rate Details" status="complete" />
-              <StepIndicatorStep label="Documents" status="current" />
-              <StepIndicatorStep label="Review and submit" />
-            </StepIndicator>
-
             <UswdsForm
                 className={styles.formContainer}
                 id="DocumentsForm"

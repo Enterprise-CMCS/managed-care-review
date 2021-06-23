@@ -1,6 +1,10 @@
 import React, { useEffect } from 'react'
 
-import { GridContainer } from '@trussworks/react-uswds'
+import {
+    GridContainer,
+    StepIndicator,
+    StepIndicatorStep,
+  } from '@trussworks/react-uswds'
 import { Switch, Route, useParams, useLocation } from 'react-router-dom'
 
 import { Error404 } from '../Errors/Error404'
@@ -62,6 +66,14 @@ export const StateSubmissionForm = (): React.ReactElement => {
     }
 
     return (
+      <>
+        <StepIndicator>
+          <StepIndicatorStep label="Contract Details" />
+          <StepIndicatorStep label="Rate Details" status="current" />
+          <StepIndicatorStep label="Documents" />
+          <StepIndicatorStep label="Review and submit" />
+        </StepIndicator>
+
         <GridContainer>
             <Switch>
                 <Route path={RoutesRecord.SUBMISSIONS_TYPE}>
@@ -81,5 +93,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
                 </Route>
             </Switch>
         </GridContainer>
+      </>
     )
 }

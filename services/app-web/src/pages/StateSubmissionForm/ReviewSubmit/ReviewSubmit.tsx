@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import {
-    StepIndicator,
-    StepIndicatorStep,
     GridContainer,
     Grid,
     Link,
@@ -27,7 +25,6 @@ import {
 import { DataDetail } from '../../../components/DataDetail/DataDetail'
 import { DoubleColumnRow } from '../../../components/DoubleColumnRow/DoubleColumnRow'
 import { PageActions } from '../PageActions'
-import PageHeading from '../../../components/PageHeading'
 import { useS3 } from '../../../contexts/S3Context'
 
 type DocumentWithLink = { url: string | null } & Document
@@ -141,21 +138,13 @@ export const ReviewSubmit = ({
 
     const isContractAmendment = draftSubmission.contractType === 'AMENDMENT'
     return (
+      <>
         <GridContainer className={styles.reviewSectionWrapper}>
             {userVisibleError && (
                 <Alert type="error" heading="Submission Error">
                     {userVisibleError}
                 </Alert>
             )}
-
-            <PageHeading className={styles.formHeader} headingLevel="h2">
-                <StepIndicator>
-                  <StepIndicatorStep label="Contract Details" status="complete" />
-                  <StepIndicatorStep label="Rate Details" status="complete" />
-                  <StepIndicatorStep label="Documents" status="complete" />
-                  <StepIndicatorStep label="Review and submit" status="current" />
-                </StepIndicator>
-            </PageHeading>
 
             <Grid row>
                 <Grid col={12} tablet={{ col: 8, offset: 2 }}>
@@ -367,6 +356,7 @@ export const ReviewSubmit = ({
                 </Grid>
             </Grid>
         </GridContainer>
+      </>
     )
 }
 
