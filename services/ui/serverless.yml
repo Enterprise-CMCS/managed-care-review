@@ -30,7 +30,7 @@ resources:
         - Fn::Not:
             - Fn::Equals:
                 - ''
-                - ${env:CLOUDFRONT_STORYBOOK_DOMAIN_NAME, ""}
+                - ${env:CLOUDFRONT_DOMAIN_NAME, ""}
   Resources:
     S3Bucket:
       Type: AWS::S3::Bucket
