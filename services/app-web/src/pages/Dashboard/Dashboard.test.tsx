@@ -4,14 +4,20 @@ import { createMemoryHistory } from 'history'
 import { screen, waitFor } from '@testing-library/react'
 
 import { Dashboard } from './Dashboard'
-import { fetchCurrentUserMock } from '../../testHelpers/apolloHelpers'
+import {
+    fetchCurrentUserMock,
+    indexSubmissionsMockSuccess,
+} from '../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
 describe('Dashboard', () => {
     it('display submission heading', async () => {
         renderWithProviders(<Dashboard />, {
             apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200 }),
+                    indexSubmissionsMockSuccess(),
+                ],
             },
         })
 
@@ -28,7 +34,10 @@ describe('Dashboard', () => {
     it('displays new submission link', async () => {
         renderWithProviders(<Dashboard />, {
             apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200 }),
+                    indexSubmissionsMockSuccess(),
+                ],
             },
         })
 
@@ -61,6 +70,7 @@ describe('Dashboard', () => {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
+                    indexSubmissionsMockSuccess(),
                 ],
             },
         })
@@ -76,7 +86,10 @@ describe('Dashboard', () => {
     it('loads first tab active', async () => {
         renderWithProviders(<Dashboard />, {
             apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200 }),
+                    indexSubmissionsMockSuccess(),
+                ],
             },
         })
 
@@ -94,7 +107,10 @@ describe('Dashboard', () => {
 
         renderWithProviders(<Dashboard />, {
             apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200 }),
+                    indexSubmissionsMockSuccess(),
+                ],
             },
             routerProvider: {
                 routerProps: { history: history },
@@ -117,7 +133,10 @@ describe('Dashboard', () => {
     it('shows the success message if set', async () => {
         renderWithProviders(<Dashboard />, {
             apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200 }),
+                    indexSubmissionsMockSuccess(),
+                ],
             },
             routerProvider: {
                 route: `dashboard?justSubmitted=MN-MSHO-0001`,

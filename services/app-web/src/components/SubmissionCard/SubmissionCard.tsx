@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import { Tag } from '@trussworks/react-uswds'
 
 import styles from './SubmissionCard.module.scss'
@@ -20,7 +21,7 @@ export enum SubmissionStatus {
  * @returns {string} the formatted date string
  */
 export const formatDateFromUnixTimestamp = (unixTimestamp: number): string => {
-    const date = new Date(unixTimestamp)
+    const date = new Date(unixTimestamp * 1000)
     const padZeros = (value: number, length: number): string => {
         return `0000${value}`.slice(-length)
     }
@@ -38,6 +39,7 @@ export type SubmissionCardProps = {
     submissionType: SubmissionType
     status: SubmissionStatus
     date?: number
+    href: string
 }
 
 export const SubmissionCard = ({
@@ -46,13 +48,14 @@ export const SubmissionCard = ({
     submissionType,
     status,
     date,
+    href,
 }: SubmissionCardProps): React.ReactElement => {
     const submitted = status === SubmissionStatus.submitted && date
 
     return (
         <li className={styles.cardContainer}>
             <div className={styles.cardLeft}>
-                <a href="/">{name}</a>
+                <Link to={href}>{name}</Link>
                 <p>{description}</p>
             </div>
             <div className={styles.cardRight}>

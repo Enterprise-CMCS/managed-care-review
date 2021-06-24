@@ -1,4 +1,5 @@
 import React from 'react'
+import dayjs from 'dayjs'
 import { GridContainer, Link, Alert } from '@trussworks/react-uswds'
 import { NavLink, useLocation } from 'react-router-dom'
 
@@ -14,6 +15,50 @@ import {
 import { useAuth } from '../../contexts/AuthContext'
 import { Program, useIndexSubmissionsQuery } from '../../gen/gqlClient'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
+import { SubmissionType as DomainSubmissionType } from '../../../../app-web/src/common-code/domain-models'
+
+// We don't return full submissions in the indexSubmissionQuery because
+// of some weird field collision syntax in GQL fragment matching
+// That means we can't use the full Submission type exported by gqlClient
+// ListedSubmission has everything we need for displaying a submission card
+type ListedSubmission = {
+    __typename: string
+    id: string
+    submissionType: DomainSubmissionType
+    submissionDescription: string
+    programID: string
+    name: string
+    submittedAt?: string
+}
+
+const domainSubmissionTypeMap: {
+    [Property in DomainSubmissionType]: SubmissionType
+} = {
+    CONTRACT_ONLY: SubmissionType.ContractOnly,
+    CONTRACT_AND_RATES: SubmissionType.ContractAndRates,
+}
+
+const submissionStatusMap: {
+    [key: string]: SubmissionStatus
+} = {
+    DraftSubmission: SubmissionStatus.draft,
+    StateSubmission: SubmissionStatus.submitted,
+}
+
+function editUrlForSubmission(submission: ListedSubmission): string {
+    // go to the edit URLS
+    if (submission.__typename === 'DraftSubmission') {
+        return `/submissions/${submission.id}/type`
+    }
+    return `/submissions/${submission.id}/`
+}
+
+function submittedAtDateForSubmission(submission: ListedSubmission): number {
+    console.log('OINWEF', submission.submittedAt)
+    const day = dayjs(submission.submittedAt)
+    console.log('dat', day, day.unix())
+    return day.unix()
+}
 
 export const Dashboard = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
@@ -23,7 +68,7 @@ export const Dashboard = (): React.ReactElement => {
     const { loading, data, error } = useIndexSubmissionsQuery()
 
     if (error) {
-        console.log('error loading submissions')
+        console.log('error loading submissions', error)
         return (
             <Alert type="error">
                 Unexpected Error loading your submissions, please try again.
@@ -37,7 +82,9 @@ export const Dashboard = (): React.ReactElement => {
         programs = loggedInUser.state.programs
     }
 
-    const submissionList = data.indexSubmissions.edges.map((edge) => edge.node)
+    const submissionList: ListedSubmission[] = data.indexSubmissions.edges.map(
+        (edge) => edge.node
+    )
 
     const justSubmittedSubmissionName = new URLSearchParams(
         location.search
@@ -87,10 +134,24 @@ export const Dashboard = (): React.ReactElement => {
                         {programSubs.map((submission) => (
                             <SubmissionCard
                                 key={submission.name}
-                                description="Rates are being adjusted to reflect revised capitation rates based on more recent data as well as benefit changes approved by the General Assembly."
+                                href={editUrlForSubmission(submission)}
+                                description={submission.submissionDescription}
                                 name={submission.name}
-                                status={SubmissionStatus.draft}
-                                submissionType={SubmissionType.ContractAndRates}
+                                date={
+                                    submission.submittedAt
+                                        ? submittedAtDateForSubmission(
+                                              submission
+                                          )
+                                        : undefined
+                                }
+                                status={
+                                    submissionStatusMap[submission.__typename]
+                                }
+                                submissionType={
+                                    domainSubmissionTypeMap[
+                                        submission.submissionType
+                                    ]
+                                }
                             />
                         ))}
                     </ul>

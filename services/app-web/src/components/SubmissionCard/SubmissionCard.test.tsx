@@ -5,6 +5,7 @@ import {
     SubmissionStatus,
     SubmissionType,
 } from './SubmissionCard'
+import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
 describe('SubmissionCard', () => {
     const contractOnlyDraftSubmission = {
@@ -13,15 +14,16 @@ describe('SubmissionCard', () => {
             'Rates are being adjusted to reflect revised capitation rates based on more recent data as well as benefit changes approved by the General Assembly.',
         submissionType: SubmissionType.ContractOnly,
         status: SubmissionStatus.draft,
+        href: '/foo',
     }
 
     it('renders without errors', () => {
-        render(<SubmissionCard {...contractOnlyDraftSubmission} />)
+        renderWithProviders(<SubmissionCard {...contractOnlyDraftSubmission} />)
         expect(screen.getByRole('listitem')).toBeInTheDocument()
     })
 
     it('displays draft tag styling when submission type is draft', () => {
-        render(<SubmissionCard {...contractOnlyDraftSubmission} />)
+        renderWithProviders(<SubmissionCard {...contractOnlyDraftSubmission} />)
         expect(screen.getByTestId('tag')).toBeInTheDocument()
 
         expect(screen.getByTestId('tag')).toHaveStyle(`
@@ -30,12 +32,13 @@ describe('SubmissionCard', () => {
     })
 
     it('displays submitted tag styling when submission type is submitted', () => {
-        render(
+        renderWithProviders(
             <SubmissionCard
                 name="VA-CCCPlus-0001"
                 description="Rates are being adjusted to reflect revised capitation rates based on more recent data as well as benefit changes approved by the General Assembly."
                 submissionType={SubmissionType.ContractOnly}
                 status={SubmissionStatus.submitted}
+                href="/foo"
             />
         )
         expect(screen.getByTestId('tag')).toBeInTheDocument()
@@ -46,32 +49,33 @@ describe('SubmissionCard', () => {
     })
 
     it('displays draft tag text when submission type is draft', () => {
-        render(<SubmissionCard {...contractOnlyDraftSubmission} />)
+        renderWithProviders(<SubmissionCard {...contractOnlyDraftSubmission} />)
         expect(screen.getByText('Draft')).toBeInTheDocument()
     })
 
     it('displays submitted tag text when submission type is submitted', () => {
-        render(
+        renderWithProviders(
             <SubmissionCard
                 name="VA-CCCPlus-0001"
                 description="Rates are being adjusted to reflect revised capitation rates based on more recent data as well as benefit changes approved by the General Assembly."
                 submissionType={SubmissionType.ContractOnly}
                 status={SubmissionStatus.submitted}
                 date={Date.now()}
+                href="/foo"
             />
         )
         expect(screen.getByText(/Submitted/i)).toBeInTheDocument()
     })
 
     it('displays submission name as a link', () => {
-        render(<SubmissionCard {...contractOnlyDraftSubmission} />)
+        renderWithProviders(<SubmissionCard {...contractOnlyDraftSubmission} />)
         expect(
             screen.getByRole('link', { name: 'VA-CCCPlus-0001' })
         ).toBeInTheDocument()
     })
 
     it('displays submission description', () => {
-        render(<SubmissionCard {...contractOnlyDraftSubmission} />)
+        renderWithProviders(<SubmissionCard {...contractOnlyDraftSubmission} />)
         expect(
             screen.getByText(
                 'Rates are being adjusted to reflect revised capitation rates based on more recent data as well as benefit changes approved by the General Assembly.'
@@ -80,12 +84,12 @@ describe('SubmissionCard', () => {
     })
 
     it('displays appropriate contract type text for contract only submission', () => {
-        render(<SubmissionCard {...contractOnlyDraftSubmission} />)
+        renderWithProviders(<SubmissionCard {...contractOnlyDraftSubmission} />)
         expect(screen.getByText('Contract only')).toBeInTheDocument()
     })
 
     it('displays appropriate contract type text for contract and rate certification submission', () => {
-        render(
+        renderWithProviders(
             <SubmissionCard
                 {...contractOnlyDraftSubmission}
                 submissionType={SubmissionType.ContractAndRates}
