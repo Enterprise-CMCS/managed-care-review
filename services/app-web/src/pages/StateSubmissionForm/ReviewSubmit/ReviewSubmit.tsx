@@ -141,60 +141,12 @@ export const ReviewSubmit = ({
 
     const isContractAmendment = draftSubmission.contractType === 'AMENDMENT'
     return (
-      <>
         <GridContainer className={styles.reviewSectionWrapper}>
             {userVisibleError && (
                 <Alert type="error" heading="Submission Error">
                     {userVisibleError}
                 </Alert>
             )}
-<<<<<<< HEAD
-
-            <Grid row>
-                <Grid col={12} tablet={{ col: 8, offset: 2 }}>
-                    <section
-                        id="submissionType"
-                        className={styles.reviewSection}
-                    >
-                        <div className={styles.reviewSectionHeader}>
-                            <h2 className={styles.submissionName}>
-                                {draftSubmission.name}
-                            </h2>
-                            <div>
-                                <Link
-                                    asCustom={NavLink}
-                                    to="type"
-                                    className={`${stylesForm.outlineButtonLink} usa-button usa-button--outline`}
-                                    variant="unstyled"
-                                >
-                                    Edit
-                                    <span className="srOnly">
-                                        Submission type
-                                    </span>
-                                </Link>
-                            </div>
-                        </div>
-                        <dl>
-                            <DoubleColumnRow
-                                left={
-                                    <DataDetail
-                                        id="program"
-                                        label="Program"
-                                        data={draftSubmission.program.name}
-                                    />
-                                }
-                                right={
-                                    <DataDetail
-                                        id="submissionType"
-                                        label="Submission type"
-                                        data={
-                                            SubmissionTypeRecord[
-                                                draftSubmission.submissionType
-                                            ]
-                                        }
-                                    />
-                                }
-=======
             <PageHeading
                 className={stylesForm.formHeader}
                 headingLevel="h2"
@@ -230,7 +182,6 @@ export const ReviewSubmit = ({
                                 id="program"
                                 label="Program"
                                 data={draftSubmission.program.name}
->>>>>>> main
                             />
                         }
                         right={
@@ -490,7 +441,6 @@ export const ReviewSubmit = ({
                 </ButtonGroup>
             </div>
         </GridContainer>
-      </>
     )
 }
 
