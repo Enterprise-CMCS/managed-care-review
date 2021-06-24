@@ -26,10 +26,6 @@ describe('Documents', () => {
         })
 
         await waitFor(() => {
-            expect(
-                screen.getByRole('heading', { name: 'Documents' })
-            ).toBeInTheDocument()
-
             expect(screen.getByTestId('file-input')).toBeInTheDocument()
             expect(screen.getByTestId('file-input')).toHaveClass(
                 'usa-file-input'

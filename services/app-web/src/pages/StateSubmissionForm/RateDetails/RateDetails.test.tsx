@@ -28,10 +28,6 @@ describe('RateDetails', () => {
                 },
             }
         )
-
-        expect(
-            await screen.findByRole('heading', { name: 'Rate details' })
-        ).toBeInTheDocument()
     })
 
     it('loads with only rate type form field visible', async () => {

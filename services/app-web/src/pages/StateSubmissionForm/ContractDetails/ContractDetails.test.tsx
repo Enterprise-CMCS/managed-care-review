@@ -70,10 +70,6 @@ describe('ContractDetails', () => {
             },
         })
 
-        expect(
-            await screen.findByRole('heading', { name: 'Contract details' })
-        ).toBeInTheDocument()
-
         // should not be able to find hidden things
         // "Items being amended"
         expect(screen.queryByText('Items being amended')).toBeNull()

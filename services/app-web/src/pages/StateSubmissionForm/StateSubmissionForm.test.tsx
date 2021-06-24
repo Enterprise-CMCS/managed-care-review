@@ -73,12 +73,6 @@ describe('StateSubmissionForm', () => {
                     },
                 }
             )
-
-            await waitFor(() =>
-                expect(
-                    screen.getByRole('heading', { name: 'Contract details' })
-                ).toBeInTheDocument()
-            )
         })
 
         it('loads contract details fields for /submissions/:id/contract-details with amendments', async () => {
@@ -123,10 +117,6 @@ describe('StateSubmissionForm', () => {
             )
 
             await waitFor(() => {
-                expect(
-                    screen.getByRole('heading', { name: 'Contract details' })
-                ).toBeInTheDocument()
-
                 expect(screen.getByLabelText('Capitation rates')).toBeChecked()
 
                 expect(screen.getByLabelText('Mid-year update')).toBeChecked()
@@ -186,12 +176,6 @@ describe('StateSubmissionForm', () => {
                     },
                 }
             )
-
-            await waitFor(() =>
-                expect(
-                    screen.getByRole('heading', { name: 'Documents' })
-                ).toBeInTheDocument()
-            )
         })
     })
 
@@ -245,10 +229,6 @@ describe('StateSubmissionForm', () => {
                 name: 'Continue',
             })
             continueButton.click()
-
-            await screen.findByRole('heading', {
-                name: 'Contract details',
-            })
         })
 
         it('works even if other sections of the form have been filled out', async () => {
@@ -309,10 +289,6 @@ describe('StateSubmissionForm', () => {
                 name: 'Continue',
             })
             continueButton.click()
-
-            await screen.findByRole('heading', {
-                name: 'Contract details',
-            })
         })
     })
 

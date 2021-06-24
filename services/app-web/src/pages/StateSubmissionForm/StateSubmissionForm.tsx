@@ -12,7 +12,7 @@ import { ErrorInvalidSubmissionStatus } from '../Errors/ErrorInvalidSubmissionSt
 import { GenericError } from '../Errors/GenericError'
 import { Loading } from '../../components/Loading/'
 import { usePage } from '../../contexts/PageContext'
-import { RoutesRecord } from '../../constants/routes'
+import { RoutesRecord, getRouteName, PageTitlesRecord, RouteT } from '../../constants/routes'
 import { ContractDetails } from './ContractDetails/ContractDetails'
 import { RateDetails } from './RateDetails/RateDetails'
 import { Documents } from './Documents/Documents'
@@ -47,6 +47,29 @@ export const StateSubmissionForm = (): React.ReactElement => {
         )
     }
 
+    const FormPages = [
+      'SUBMISSIONS_CONTRACT_DETAILS',
+      'SUBMISSIONS_RATE_DETAILS',
+      'SUBMISSIONS_DOCUMENTS',
+      'SUBMISSIONS_REVIEW_SUBMIT',
+    ] as RouteT[]
+
+    const DynamicStepIndicator = () => {
+
+      const currentFormPage = getRouteName(pathname)
+
+      return(
+        <>
+        <StepIndicator>
+          {FormPages.map((formPageName) => {
+            return <StepIndicatorStep
+            label={PageTitlesRecord[formPageName]} status={currentFormPage == formPageName ? 'current' : undefined} />
+          })}
+        </StepIndicator>
+        </>
+    )}
+
+
     if (error) {
         console.log('error loading draft:', error)
 
@@ -67,12 +90,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
     return (
       <>
-        <StepIndicator>
-          <StepIndicatorStep label="Contract Details" />
-          <StepIndicatorStep label="Rate Details" status="current" />
-          <StepIndicatorStep label="Documents" />
-          <StepIndicatorStep label="Review and submit" />
-        </StepIndicator>
+        <DynamicStepIndicator />
 
         <GridContainer>
             <Switch>
