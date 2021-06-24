@@ -129,6 +129,7 @@ export const RateDetails = ({
 }): React.ReactElement => {
     const [showFormAlert, setShowFormAlert] = React.useState(false)
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
+
     const history = useHistory()
     const [
         updateDraftSubmission,
@@ -220,14 +221,16 @@ export const RateDetails = ({
     }
 
     const RateDatesErrorMessage = ({
-        values,
+        startDate,
+        endDate,
         validationErrorMessage,
     }: {
-        values: RateDetailsFormValues
+        startDate: string
+        endDate: string
         validationErrorMessage: string
     }): React.ReactElement => (
         <ErrorMessage>
-            {isDateRangeEmpty(values.rateDateStart, values.rateDateEnd)
+            {isDateRangeEmpty(startDate, endDate)
                 ? 'You must provide a start and an end date'
                 : validationErrorMessage}
         </ErrorMessage>
@@ -243,10 +246,12 @@ export const RateDetails = ({
                 {({
                     values,
                     errors,
+                    handleChange,
                     handleSubmit,
                     isSubmitting,
                     isValidating,
                     setFieldValue,
+                    setValues,
                     validateForm,
                 }) => (
                     <>
@@ -333,7 +338,12 @@ export const RateDetails = ({
                                                         errors.rateDateEnd
                                                 ) && (
                                                     <RateDatesErrorMessage
-                                                        values={values}
+                                                        startDate={
+                                                            values.rateDateStart
+                                                        }
+                                                        endDate={
+                                                            values.rateDateEnd
+                                                        }
                                                         validationErrorMessage={
                                                             errors.rateDateStart ||
                                                             errors.rateDateEnd ||
@@ -433,7 +443,12 @@ export const RateDetails = ({
                                                                 errors.effectiveDateEnd
                                                         ) && (
                                                             <RateDatesErrorMessage
-                                                                values={values}
+                                                                startDate={
+                                                                    values.effectiveDateStart
+                                                                }
+                                                                endDate={
+                                                                    values.effectiveDateEnd
+                                                                }
                                                                 validationErrorMessage={
                                                                     errors.effectiveDateStart ||
                                                                     errors.effectiveDateEnd ||
@@ -445,35 +460,55 @@ export const RateDetails = ({
                                                             name="sameAsOriginalRatePeriod"
                                                             label="Use same dates as original rating period"
                                                             id="sameAsOriginalRatePeriod"
+                                                            disabled
                                                             defaultValue={
                                                                 'false'
                                                             }
-                                                            // onClick={(
-                                                            //     e: React.MouseEvent<HTMLInputElement>
-                                                            // ) => {
-                                                            //     const {
-                                                            //         value,
-                                                            //     } = e.target as HTMLInputElement
-                                                            //     if (value) {
-                                                            //         setFieldValue(
-                                                            //             'effectiveDateStart',
-                                                            //             values.rateDateStart
-                                                            //         )
-                                                            //         setFieldValue(
-                                                            //             'effectiveDateEnd',
-                                                            //             values.rateDateEnd
-                                                            //         )
-                                                            //     } else {
-                                                            //         setFieldValue(
-                                                            //             'effectiveDateStart',
-                                                            //             ''
-                                                            //         )
-                                                            //         setFieldValue(
-                                                            //             'effectiveDateEnd',
-                                                            //             ' values.rateDateEnd'
-                                                            //         )
-                                                            //     }
-                                                            // }}
+                                                            onClick={(
+                                                                e: React.MouseEvent<HTMLInputElement>
+                                                            ) => {
+                                                                const {
+                                                                    value,
+                                                                } = e.target as HTMLInputElement
+
+                                                                if (
+                                                                    value ===
+                                                                    'false'
+                                                                ) {
+                                                                    setValues(
+                                                                        (
+                                                                            prevValues
+                                                                        ) => {
+                                                                            return {
+                                                                                ...prevValues,
+                                                                                effectiveDateStart:
+                                                                                    prevValues.rateDateStart,
+                                                                                effectiveDateEnd:
+                                                                                    prevValues.rateDateEnd,
+                                                                            }
+                                                                        }
+                                                                    )
+                                                                } else {
+                                                                    setValues(
+                                                                        (
+                                                                            prevValues
+                                                                        ) => ({
+                                                                            ...prevValues,
+                                                                            effectiveDateStart:
+                                                                                '',
+                                                                            effectiveDateEnd:
+                                                                                '',
+                                                                        })
+                                                                    )
+                                                                }
+                                                                console.log(
+                                                                    values
+                                                                )
+                                                                handleChange(e)
+                                                                console.log(
+                                                                    values
+                                                                )
+                                                            }}
                                                         />
                                                         <DateRangePicker
                                                             className={

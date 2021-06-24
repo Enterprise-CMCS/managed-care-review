@@ -5,20 +5,11 @@ import { DraftSubmission, DraftSubmissionUpdates } from '../../gen/gqlClient'
     If you pass gql __typename within a mutation input things break; however,  __typename comes down on cached queries by default
     This function is needed to remove _typename  for optional objects such as contractAmendmentInfo and rateAmendmentInfo
 */
-function stripTypename<T>(input: T): T {
-    if (!input) return input
-    const cleanedInput = Object.assign({}, input)
+const omitTypename = (key: unknown, value: unknown) =>
+    key === '__typename' ? undefined : value
 
-    for (const prop in cleanedInput) {
-        if (prop === '__typename') delete cleanedInput[prop]
-        else if (
-            !Array.isArray(cleanedInput[prop]) &&
-            typeof cleanedInput[prop] === 'object'
-        ) {
-            cleanedInput[prop] = stripTypename(cleanedInput[prop])
-        }
-    }
-    return cleanedInput
+function stripTypename<T>(input: T): T {
+    return JSON.parse(JSON.stringify(input), omitTypename)
 }
 
 // this function takes a DraftSubmission and picks off all the keys that are valid

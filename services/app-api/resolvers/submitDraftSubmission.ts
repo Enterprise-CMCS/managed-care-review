@@ -6,7 +6,7 @@ import {
     StateSubmissionType,
     hasValidContract,
     hasValidDocuments,
-    // hasValidRates,
+    hasValidRates,
     isStateSubmission,
 } from '../../app-web/src/common-code/domain-models'
 
@@ -51,20 +51,19 @@ function submit(
     }
 
     if (isStateSubmission(maybeStateSubmission)) return maybeStateSubmission
-    else if (!hasValidContract(maybeStateSubmission as DraftSubmissionType)) {
+    else if (!hasValidContract(maybeStateSubmission as StateSubmissionType)) {
         return {
             code: 'INCOMPLETE',
             message: 'submissions is missing required contract fields',
         }
-    }
-    // TODO: add when review and submit is implemented
-    // else if (!hasValidRates(maybeStateSubmission as DraftSubmissionType)) {
-    //     return {
-    //         code: 'INCOMPLETE',
-    //         message: 'submissions is missing required rate fields',
-    //     }
-    // }
-    else if (!hasValidDocuments(maybeStateSubmission as DraftSubmissionType)) {
+    } else if (!hasValidRates(maybeStateSubmission as StateSubmissionType)) {
+        return {
+            code: 'INCOMPLETE',
+            message: 'submissions is missing required rate fields',
+        }
+    } else if (
+        !hasValidDocuments(maybeStateSubmission as StateSubmissionType)
+    ) {
         return {
             code: 'INCOMPLETE',
             message: 'submissions must have documents',

@@ -404,7 +404,7 @@ export const ReviewSubmit = ({
                                 className={styles.submitButtonClasses}
                                 onClick={handleFormSubmit}
                             >
-                                Continue
+                                Submit
                             </Button>
                         </ButtonGroup>
                     </div>
