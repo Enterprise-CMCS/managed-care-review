@@ -34,7 +34,6 @@ import {
     validateDateRange12Months,
 } from '../../../formHelpers'
 import { FieldRadio } from '../../../components/Form/FieldRadio/FieldRadio'
-import { FieldCheckbox } from '../../../components/Form/FieldCheckbox/FieldCheckbox'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
 
 // Dependency setup
@@ -456,60 +455,7 @@ export const RateDetails = ({
                                                                 }
                                                             />
                                                         )}
-                                                        <FieldCheckbox
-                                                            name="sameAsOriginalRatePeriod"
-                                                            label="Use same dates as original rating period"
-                                                            id="sameAsOriginalRatePeriod"
-                                                            disabled
-                                                            defaultValue={
-                                                                'false'
-                                                            }
-                                                            onClick={(
-                                                                e: React.MouseEvent<HTMLInputElement>
-                                                            ) => {
-                                                                const {
-                                                                    value,
-                                                                } = e.target as HTMLInputElement
 
-                                                                if (
-                                                                    value ===
-                                                                    'false'
-                                                                ) {
-                                                                    setValues(
-                                                                        (
-                                                                            prevValues
-                                                                        ) => {
-                                                                            return {
-                                                                                ...prevValues,
-                                                                                effectiveDateStart:
-                                                                                    prevValues.rateDateStart,
-                                                                                effectiveDateEnd:
-                                                                                    prevValues.rateDateEnd,
-                                                                            }
-                                                                        }
-                                                                    )
-                                                                } else {
-                                                                    setValues(
-                                                                        (
-                                                                            prevValues
-                                                                        ) => ({
-                                                                            ...prevValues,
-                                                                            effectiveDateStart:
-                                                                                '',
-                                                                            effectiveDateEnd:
-                                                                                '',
-                                                                        })
-                                                                    )
-                                                                }
-                                                                console.log(
-                                                                    values
-                                                                )
-                                                                handleChange(e)
-                                                                console.log(
-                                                                    values
-                                                                )
-                                                            }}
-                                                        />
                                                         <DateRangePicker
                                                             className={
                                                                 styles.dateRangePicker
