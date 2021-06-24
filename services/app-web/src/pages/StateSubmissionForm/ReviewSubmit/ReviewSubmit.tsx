@@ -19,6 +19,7 @@ import {
     useSubmitDraftSubmissionMutation,
 } from '../../../gen/gqlClient'
 import {
+    AmendableItemsRecord,
     ContractTypeRecord,
     FederalAuthorityRecord,
     ManagedCareEntityRecord,
@@ -134,7 +135,7 @@ export const ReviewSubmit = ({
         const userFriendlyItems = items.map((item) => {
             return itemRecord[`${item}`]
         })
-        return userFriendlyItems.join(', ')
+        return userFriendlyItems.join(', ').replace(/,\s*$/, '')
     }
 
     const isContractAmendment = draftSubmission.contractType === 'AMENDMENT'
@@ -261,35 +262,56 @@ export const ReviewSubmit = ({
                                     />
                                 }
                             />
-                            {isContractAmendment && (
-                                <>
-                                    <DoubleColumnRow
-                                        left={
-                                            <DataDetail
-                                                id="itemsAmended"
-                                                label="Items being amended"
-                                                data="Benefits provided, Capitation rates (Updates based on more recent data)"
+                            {isContractAmendment &&
+                                draftSubmission.contractAmendmentInfo && (
+                                    <>
+                                        <DoubleColumnRow
+                                            left={
+                                                <DataDetail
+                                                    id="itemsAmended"
+                                                    label="Items being amended"
+                                                    data={createCheckboxList(
+                                                        draftSubmission
+                                                            .contractAmendmentInfo
+                                                            .itemsBeingAmended,
+                                                        AmendableItemsRecord
+                                                    )}
+                                                />
+                                            }
+                                            right={
+                                                <DataDetail
+                                                    id="covidRelated"
+                                                    label="Is this contract action related to the COVID-19 public health emergency"
+                                                    data={
+                                                        draftSubmission
+                                                            .contractAmendmentInfo
+                                                            .relatedToCovid19
+                                                            ? 'Yes'
+                                                            : 'No'
+                                                    }
+                                                />
+                                            }
+                                        />
+                                        {draftSubmission.contractAmendmentInfo
+                                            .relatedToCovid19 && (
+                                            <DoubleColumnRow
+                                                left={
+                                                    <DataDetail
+                                                        id="vaccineRelated"
+                                                        label="Is this related to coverage and reimbursement for vaccine administration?"
+                                                        data={
+                                                            draftSubmission
+                                                                .contractAmendmentInfo
+                                                                .relatedToVaccination
+                                                                ? 'Yes'
+                                                                : 'No'
+                                                        }
+                                                    />
+                                                }
                                             />
-                                        }
-                                        right={
-                                            <DataDetail
-                                                id="covidRelated"
-                                                label="Is this contract action related to the COVID-19 public health emergency"
-                                                data="Yes"
-                                            />
-                                        }
-                                    />
-                                    <DoubleColumnRow
-                                        left={
-                                            <DataDetail
-                                                id="vaccineRelated"
-                                                label="Is this related to coverage and reimbursement for vaccine administration?"
-                                                data="Yes"
-                                            />
-                                        }
-                                    />
-                                </>
-                            )}
+                                        )}
+                                    </>
+                                )}
                         </dl>
                     </section>
                     <section id="rateDetails" className={styles.reviewSection}>
@@ -384,9 +406,14 @@ export const ReviewSubmit = ({
                     </section>
 
                     <div className={stylesForm.pageActions}>
-                        <Button type="submit" unstyled>
+                        <Link
+                            asCustom={NavLink}
+                            className="usa-button usa-button--unstyled"
+                            variant="unstyled"
+                            to="/dashboard"
+                        >
                             Save as Draft
-                        </Button>
+                        </Link>
                         <ButtonGroup
                             type="default"
                             className={stylesForm.buttonGroup}
