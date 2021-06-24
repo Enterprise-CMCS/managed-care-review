@@ -1,4 +1,4 @@
-import { DraftSubmissionStoreType } from './dynamoTypes'
+import { SubmissionStoreType } from './dynamoTypes'
 import { getTestStore, getTestDynamoMapper } from '../testHelpers/storeHelpers'
 
 import { isStoreError } from './storeError'
@@ -12,7 +12,7 @@ describe('updateDraftSubmission', () => {
         // create new submission
         const inputParams = {
             stateCode: 'FL',
-            programID: 'MCAC',
+            programID: 'smmc',
             submissionDescription: 'a new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
         }
@@ -63,7 +63,7 @@ describe('updateDraftSubmission', () => {
 
             try {
                 const getResult = await mapper.get(
-                    Object.assign(new DraftSubmissionStoreType(), {
+                    Object.assign(new SubmissionStoreType(), {
                         id: createdID,
                     })
                 )

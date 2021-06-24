@@ -12,6 +12,7 @@ import { submitDraftSubmissionResolver } from './submitDraftSubmission'
 import { draftSubmissionResolver } from './draftSubmissionResolver'
 import { stateSubmissionResolver } from './stateSubmissionResolver'
 import { fetchStateSubmissionResolver } from './fetchStateSubmission'
+import { indexSubmissionsResolver } from './indexSubmissions'
 
 export function configureResolvers(store: Store): Resolvers {
     const resolvers: Resolvers = {
@@ -21,11 +22,22 @@ export function configureResolvers(store: Store): Resolvers {
             fetchCurrentUser: fetchCurrentUserResolver(),
             fetchDraftSubmission: fetchDraftSubmissionResolver(store),
             fetchStateSubmission: fetchStateSubmissionResolver(store),
+            indexSubmissions: indexSubmissionsResolver(store),
         },
         Mutation: {
             createDraftSubmission: createDraftSubmissionResolver(store),
             updateDraftSubmission: updateDraftSubmissionResolver(store),
             submitDraftSubmission: submitDraftSubmissionResolver(store),
+        },
+        Submission: {
+            // resolveType is required to differentiate Unions
+            __resolveType(obj) {
+                if ('submittedAt' in obj) {
+                    return 'StateSubmission'
+                } else {
+                    return 'DraftSubmission'
+                }
+            },
         },
         User: userResolver,
         DraftSubmission: draftSubmissionResolver(store),

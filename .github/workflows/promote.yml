@@ -124,6 +124,8 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.VAL_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.VAL_AWS_SECRET_ACCESS_KEY }}
+          CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets.VAL_CLOUDFRONT_CERTIFICATE_ARN }}
+          CLOUDFRONT_DOMAIN_NAME: ${{ secrets.VAL_CLOUDFRONT_DOMAIN_NAME }}
           OKTA_METADATA_URL: ${{ secrets.VAL_OKTA_METADATA_URL }}
           REACT_APP_AUTH_MODE: IDM
       - name: Deploy to val
@@ -144,6 +146,8 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
+          CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets.PROD_CLOUDFRONT_CERTIFICATE_ARN }}
+          CLOUDFRONT_DOMAIN_NAME: ${{ secrets.PROD_CLOUDFRONT_DOMAIN_NAME }}
           OKTA_METADATA_URL: ${{ secrets.PROD_OKTA_METADATA_URL }}
           REACT_APP_AUTH_MODE: IDM
       - name: Deploy to prod

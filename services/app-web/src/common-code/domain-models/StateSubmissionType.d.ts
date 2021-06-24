@@ -3,6 +3,7 @@
 export type StateSubmissionType = {
     submittedAt: Date
     id: string
+    status: 'SUBMITTED'
     stateCode: string
     stateNumber: number
     programID: string
@@ -16,4 +17,10 @@ export type StateSubmissionType = {
     contractDateEnd: Date
     managedCareEntities: string[]
     federalAuthorities: FederalAuthority[]
+    contractAmendmentInfo?: ContractAmendmentInfo
+    rateType?: RateType
+    rateDateStart?: Date
+    rateDateEnd?: Date
+    rateDateCertified?: Date
+    rateAmendmentInfo?: RateAmendmentInfo
 }

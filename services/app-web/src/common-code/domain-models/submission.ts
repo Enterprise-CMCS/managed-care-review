@@ -7,10 +7,10 @@ const isContractOnly = (sub: DraftSubmissionType): boolean =>
 const isContractAndRates = (sub: DraftSubmissionType): boolean =>
     sub.submissionType === 'CONTRACT_AND_RATES'
 
-const isRateAmendment = (sub: DraftSubmissionType): boolean =>
+const isRateAmendment = (sub: StateSubmissionType): boolean =>
     sub.rateType === 'AMENDMENT'
 
-const hasValidContract = (sub: DraftSubmissionType): boolean =>
+const hasValidContract = (sub: StateSubmissionType): boolean =>
     sub.contractType !== undefined &&
     sub.contractDateStart !== undefined &&
     sub.contractDateEnd !== undefined &&
@@ -19,7 +19,7 @@ const hasValidContract = (sub: DraftSubmissionType): boolean =>
     sub.managedCareEntities.length !== 0 &&
     sub.federalAuthorities.length !== 0
 
-const hasValidRates = (sub: DraftSubmissionType): boolean => {
+const hasValidRates = (sub: StateSubmissionType): boolean => {
     if (sub.submissionType === 'CONTRACT_ONLY') return true
 
     const validBaseRate =
@@ -38,16 +38,35 @@ const hasValidRates = (sub: DraftSubmissionType): boolean => {
         : validBaseRate
 }
 
-const hasValidDocuments = (sub: DraftSubmissionType): boolean =>
+const hasValidDocuments = (sub: StateSubmissionType): boolean =>
     sub.documents.length !== 0
 
-const isStateSubmission = (
-    sub: DraftSubmissionType | Record<string, unknown>
-): sub is StateSubmissionType =>
-    hasValidContract(sub as DraftSubmissionType) &&
-    // TODO: Add when review and submit is implemented
-    // hasValidRates(sub as DraftSubmissionType) &&
-    hasValidDocuments(sub as DraftSubmissionType)
+const isStateSubmission = (sub: unknown): sub is StateSubmissionType => {
+    if (sub && typeof sub === 'object' && 'status' in sub) {
+        const maybeStateSub = sub as StateSubmissionType
+        return (
+            maybeStateSub.status === 'SUBMITTED' &&
+            hasValidContract(maybeStateSub) &&
+            hasValidRates(maybeStateSub) &&
+            hasValidDocuments(maybeStateSub)
+        )
+    }
+    return false
+}
+
+const isDraftSubmission = (sub: unknown): sub is DraftSubmissionType => {
+    if (sub && typeof sub === 'object') {
+        if ('status' in sub) {
+            const maybeDraft = sub as { status: unknown }
+
+            return (
+                maybeDraft.status === 'DRAFT' && !('submittedAt' in maybeDraft)
+            )
+        }
+    }
+
+    return false
+}
 
 export {
     hasValidContract,
@@ -56,4 +75,5 @@ export {
     isContractOnly,
     isContractAndRates,
     isStateSubmission,
+    isDraftSubmission,
 }

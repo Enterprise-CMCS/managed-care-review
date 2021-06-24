@@ -22,10 +22,11 @@ describe('updateDraftSubmission', () => {
 
             const baseDraft: DraftSubmissionType = {
                 id: 'foo-bar',
+                status: 'DRAFT',
                 stateCode: 'FL',
                 stateNumber: 3,
-                programID: 'MCAC',
-                submissionType: 'CONTRACT_ONLY',
+                programID: 'smmc',
+                submissionType: 'CONTRACT_ONLY' as const,
                 submissionDescription: 'an old submission',
                 createdAt: new Date(),
                 updatedAt: new Date(),
@@ -43,7 +44,7 @@ describe('updateDraftSubmission', () => {
             }
 
             const updates: DraftSubmissionUpdates = {
-                programID: 'MCAC',
+                programID: 'smmc',
                 submissionType: 'CONTRACT_ONLY',
                 submissionDescription: 'an updated draft',
                 documents: [],
@@ -79,10 +80,11 @@ describe('updateDraftSubmission', () => {
 
             const baseDraft: DraftSubmissionType = {
                 id: 'foo-bar',
+                status: 'DRAFT',
                 stateCode: 'FL',
                 stateNumber: 3,
-                programID: 'MCAC',
-                submissionType: 'CONTRACT_ONLY',
+                programID: 'smmc',
+                submissionType: 'CONTRACT_ONLY' as const,
                 submissionDescription: 'an old submission',
                 createdAt: new Date(),
                 updatedAt: new Date(),
@@ -92,7 +94,7 @@ describe('updateDraftSubmission', () => {
             }
 
             const updates: DraftSubmissionUpdates = {
-                programID: 'MCAC',
+                programID: 'smmc',
                 submissionType: 'CONTRACT_ONLY',
                 submissionDescription: 'an updated draft',
                 documents: [],
@@ -139,9 +141,10 @@ describe('updateDraftSubmission', () => {
 
             const baseDraft: DraftSubmissionType = {
                 id: 'foo-bar',
+                status: 'DRAFT',
                 stateCode: 'FL',
                 stateNumber: 3,
-                programID: 'MCAC',
+                programID: 'smmc',
                 submissionType: 'CONTRACT_ONLY' as const,
                 submissionDescription: 'an old submission',
                 createdAt: new Date(),
@@ -152,7 +155,7 @@ describe('updateDraftSubmission', () => {
             }
 
             const updates: DraftSubmissionUpdates = {
-                programID: 'MCAC',
+                programID: 'smmc',
                 submissionType: 'CONTRACT_ONLY',
                 submissionDescription: 'an updated draft',
                 documents: [],

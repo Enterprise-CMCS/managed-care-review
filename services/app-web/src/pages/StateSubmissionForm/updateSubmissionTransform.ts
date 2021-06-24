@@ -1,9 +1,4 @@
-import {
-    DraftSubmission,
-    DraftSubmissionUpdates,
-    Document,
-    DocumentInput,
-} from '../../gen/gqlClient'
+import { DraftSubmission, DraftSubmissionUpdates } from '../../gen/gqlClient'
 
 /* 
     Clean out _typename from submission

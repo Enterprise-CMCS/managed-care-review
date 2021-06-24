@@ -46,6 +46,7 @@ function submit(
 ): StateSubmissionType | SubmissionError {
     const maybeStateSubmission: Record<string, unknown> = {
         ...draft,
+        status: 'SUBMITTED',
         submittedAt: new Date(),
     }
 
