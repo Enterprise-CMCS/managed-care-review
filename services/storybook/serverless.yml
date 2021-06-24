@@ -100,7 +100,7 @@ resources:
           Aliases:
             Fn::If:
               - CreateCustomCloudFrontDomain
-              - - ${env:CLOUDFRONT_DOMAIN_NAME, ""}
+              - - ${env:CLOUDFRONT_STORYBOOK_DOMAIN_NAME, ""}
               - Ref: AWS::NoValue
           Origins:
             - DomainName:
