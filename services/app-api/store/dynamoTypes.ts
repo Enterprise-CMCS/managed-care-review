@@ -24,7 +24,7 @@ export function convertToDomainSubmission(
         delete submission.submittedAt // Why does typescript allow this?, this changes the type
         const draft: DraftSubmissionType = {
             ...submission,
-            status: 'DRAFT' as const,
+            status: 'DRAFT',
         }
 
         return draft
@@ -47,7 +47,7 @@ export function convertToDomainSubmission(
         }
         const stateSubmission: StateSubmissionType = {
             ...submission,
-            status: 'SUBMITTED' as const,
+            status: 'SUBMITTED',
             submittedAt,
             contractType,
             contractDateStart,
@@ -112,6 +112,14 @@ export class ContractAmendmentInfoT {
     constructor() {
         this.itemsBeingAmended = []
     }
+}
+
+export class RateAmendmentInfoT {
+    @attribute()
+    effectiveDateStart?: Date
+
+    @attribute()
+    effectiveDateEnd?: Date
 }
 
 // Even though we have two different submission types returned by our API, the
@@ -197,6 +205,9 @@ export class SubmissionStoreType {
 
     @attribute()
     contractAmendmentInfo?: ContractAmendmentInfoT
+
+    @attribute()
+    rateAmendmentInfo?: RateAmendmentInfoT
 
     constructor() {
         this.id = ''

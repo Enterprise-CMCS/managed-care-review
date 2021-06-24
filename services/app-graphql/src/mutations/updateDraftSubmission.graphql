@@ -36,6 +36,10 @@ mutation updateDraftSubmission($input: UpdateDraftSubmissionInput!) {
             rateDateStart
             rateDateEnd
             rateDateCertified
+            rateAmendmentInfo {
+                effectiveDateStart
+                effectiveDateEnd
+            }
         }
     }
 }

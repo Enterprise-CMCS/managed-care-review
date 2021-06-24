@@ -44,6 +44,15 @@ export function applyUpdates(
           }
         : undefined
 
+    const rateAmendmentUpdates = updates.rateAmendmentInfo
+        ? {
+              effectiveDateStart:
+                  updates.rateAmendmentInfo.effectiveDateStart ?? undefined,
+              effectiveDateEnd:
+                  updates.rateAmendmentInfo.effectiveDateEnd ?? undefined,
+          }
+        : undefined
+
     draft.programID = updates.programID
     draft.submissionType = updates.submissionType
     draft.submissionDescription = updates.submissionDescription
@@ -60,6 +69,7 @@ export function applyUpdates(
     draft.rateDateStart = updates.rateDateStart ?? undefined
     draft.rateDateEnd = updates.rateDateEnd ?? undefined
     draft.rateDateCertified = updates.rateDateCertified ?? undefined
+    draft.rateAmendmentInfo = rateAmendmentUpdates
 }
 
 export function updateDraftSubmissionResolver(

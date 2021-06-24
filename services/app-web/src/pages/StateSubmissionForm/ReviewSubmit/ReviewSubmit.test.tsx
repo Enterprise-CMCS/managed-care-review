@@ -4,7 +4,7 @@ import { createMemoryHistory } from 'history'
 
 import {
     fetchCurrentUserMock,
-    mockDraft,
+    mockCompleteDraft,
     submitDraftSubmissionMockSuccess,
     submitDraftSubmissionMockError,
 } from '../../../testHelpers/apolloHelpers'
@@ -13,11 +13,14 @@ import { ReviewSubmit } from './ReviewSubmit'
 
 describe('ReviewSubmit', () => {
     it('renders without errors', async () => {
-        renderWithProviders(<ReviewSubmit draftSubmission={mockDraft()} />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-        })
+        renderWithProviders(
+            <ReviewSubmit draftSubmission={mockCompleteDraft()} />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
 
         await waitFor(() => {
             expect(
@@ -41,11 +44,14 @@ describe('ReviewSubmit', () => {
     })
 
     it('renders info from a DraftSubmission', async () => {
-        renderWithProviders(<ReviewSubmit draftSubmission={mockDraft()} />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-        })
+        renderWithProviders(
+            <ReviewSubmit draftSubmission={mockCompleteDraft()} />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
 
         await waitFor(() => {
             expect(
@@ -74,11 +80,14 @@ describe('ReviewSubmit', () => {
     })
 
     it('displays back link', async () => {
-        renderWithProviders(<ReviewSubmit draftSubmission={mockDraft()} />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-        })
+        renderWithProviders(
+            <ReviewSubmit draftSubmission={mockCompleteDraft()} />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
 
         await waitFor(() =>
             expect(
@@ -90,11 +99,14 @@ describe('ReviewSubmit', () => {
     })
 
     it('displays submit button', async () => {
-        renderWithProviders(<ReviewSubmit draftSubmission={mockDraft()} />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-        })
+        renderWithProviders(
+            <ReviewSubmit draftSubmission={mockCompleteDraft()} />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
 
         await waitFor(() =>
             expect(
@@ -108,22 +120,27 @@ describe('ReviewSubmit', () => {
     it('redirects if submission succeeds', async () => {
         const history = createMemoryHistory()
 
-        renderWithProviders(<ReviewSubmit draftSubmission={mockDraft()} />, {
-            apolloProvider: {
-                mocks: [
-                    fetchCurrentUserMock({ statusCode: 200 }),
-                    submitDraftSubmissionMockSuccess({
-                        id: mockDraft().id,
-                    }),
-                ],
-            },
-            routerProvider: {
-                route: `draftSubmission/${mockDraft().id}/review`,
-                routerProps: {
-                    history,
+        renderWithProviders(
+            <ReviewSubmit draftSubmission={mockCompleteDraft()} />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        submitDraftSubmissionMockSuccess({
+                            id: mockCompleteDraft().id,
+                        }),
+                    ],
                 },
-            },
-        })
+                routerProvider: {
+                    route: `draftSubmission/${
+                        mockCompleteDraft().id
+                    }/review-and-submit`,
+                    routerProps: {
+                        history,
+                    },
+                },
+            }
+        )
 
         const submitButton = await screen.findByRole('button', {
             name: 'Submit',
@@ -134,22 +151,25 @@ describe('ReviewSubmit', () => {
         await waitFor(() => {
             expect(history.location.pathname).toEqual(`/dashboard`)
             expect(history.location.search).toEqual(
-                `?justSubmitted=${mockDraft().name}`
+                `?justSubmitted=${mockCompleteDraft().name}`
             )
         })
     })
 
     it('displays an error if submission fails', async () => {
-        renderWithProviders(<ReviewSubmit draftSubmission={mockDraft()} />, {
-            apolloProvider: {
-                mocks: [
-                    fetchCurrentUserMock({ statusCode: 200 }),
-                    submitDraftSubmissionMockError({
-                        id: mockDraft().id,
-                    }),
-                ],
-            },
-        })
+        renderWithProviders(
+            <ReviewSubmit draftSubmission={mockCompleteDraft()} />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        submitDraftSubmissionMockError({
+                            id: mockCompleteDraft().id,
+                        }),
+                    ],
+                },
+            }
+        )
 
         const submitButton = await screen.findByRole('button', {
             name: 'Submit',

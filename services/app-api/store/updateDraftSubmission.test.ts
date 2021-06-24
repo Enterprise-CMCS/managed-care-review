@@ -33,8 +33,9 @@ describe('updateDraftSubmission', () => {
             expect(draftSubmission.documents.length).toEqual(0)
 
             // update submission
-            const startDate = new Date('2021-06-07T17:48:47.000Z')
-            const endDate = new Date('2022-06-12T17:48:47.000Z')
+            const startDate = new Date(2021, 5, 6)
+            const endDate = new Date(2022, 4, 31)
+            const dateCertified = new Date(2021, 3, 15)
             const updateSubResult = await store.updateDraftSubmission({
                 ...draftSubmission,
                 documents: [
@@ -51,7 +52,7 @@ describe('updateDraftSubmission', () => {
                 rateType: 'NEW',
                 rateDateStart: startDate,
                 rateDateEnd: endDate,
-                rateDateCertified: new Date('2021-04-01T17:48:47.000Z'),
+                rateDateCertified: dateCertified,
             })
 
             if (isStoreError(updateSubResult)) {
@@ -79,6 +80,7 @@ describe('updateDraftSubmission', () => {
                 expect(getResult.contractDateEnd).toEqual(endDate)
                 expect(getResult.rateDateStart).toEqual(startDate)
                 expect(getResult.rateDateEnd).toEqual(endDate)
+                expect(getResult.rateDateCertified).toEqual(dateCertified)
             } catch (dynamoErr) {
                 throw new Error(dynamoErr)
             }

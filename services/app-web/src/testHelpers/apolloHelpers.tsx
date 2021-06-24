@@ -48,16 +48,47 @@ const mockDraftSubmission: DraftSubmission = {
     contractAmendmentInfo: null,
     managedCareEntities: [],
     federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
+    rateType: null,
+    rateDateStart: null,
+    rateDateEnd: null,
+    rateDateCertified: null,
+    rateAmendmentInfo: null,
+}
+const mockCompleteDraftSubmission: DraftSubmission = {
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    id: 'test-abc-123',
+    stateCode: 'MN',
+    programID: 'snbc',
+    program: {
+        id: 'snbc',
+        name: 'SNBC',
+    },
+    name: 'MN-MSHO-0001',
+    submissionType: 'CONTRACT_ONLY',
+    submissionDescription: 'A real submission',
+    documents: [],
+    contractType: 'BASE',
+    contractDateStart: new Date(),
+    contractDateEnd: new Date(),
+    contractAmendmentInfo: null,
+    managedCareEntities: [],
+    federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
     rateType: 'NEW',
     rateDateStart: new Date(),
     rateDateEnd: new Date(),
     rateDateCertified: new Date(),
+    rateAmendmentInfo: null,
 }
 
 // Only export a function that returns the mockDraftSubmission so that
 // we don't ever accidentally modified the shared mock in tests.
 export function mockDraft(): DraftSubmission {
     return mockDraftSubmission
+}
+
+export function mockCompleteDraft(): DraftSubmission {
+    return mockCompleteDraftSubmission
 }
 
 type fetchCurrentUserMockProps = {
