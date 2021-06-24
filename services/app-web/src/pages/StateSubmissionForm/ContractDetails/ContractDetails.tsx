@@ -38,6 +38,8 @@ import {
 import { ManagedCareEntity } from '../../../common-code/domain-models/DraftSubmissionType'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
 import {
+    AmendableItemsRecord,
+    RateChangeReasonRecord,
     ManagedCareEntityRecord,
     FederalAuthorityRecord,
 } from '../../../constants/submissions'
@@ -234,6 +236,8 @@ export const ContractDetails = ({
                 relatedToCovid19: relatedToCovid,
                 relatedToVaccination: relatedToVaccine,
             }
+        } else {
+            updatedDraft.contractAmendmentInfo = null
         }
 
         try {
@@ -522,7 +526,9 @@ export const ContractDetails = ({
                                                     <FieldCheckbox
                                                         id="benefitsProvided"
                                                         name="itemsAmended"
-                                                        label="Benefits provided"
+                                                        label={
+                                                            AmendableItemsRecord.BENEFITS_PROVIDED
+                                                        }
                                                         value="BENEFITS_PROVIDED"
                                                         checked={values.itemsAmended.includes(
                                                             'BENEFITS_PROVIDED'
@@ -531,7 +537,9 @@ export const ContractDetails = ({
                                                     <FieldCheckbox
                                                         id="capitationRates"
                                                         name="itemsAmended"
-                                                        label="Capitation rates"
+                                                        label={
+                                                            AmendableItemsRecord.CAPITATION_RATES
+                                                        }
                                                         value="CAPITATION_RATES"
                                                         checked={values.itemsAmended.includes(
                                                             'CAPITATION_RATES'
@@ -563,7 +571,9 @@ export const ContractDetails = ({
                                                                     <FieldRadio
                                                                         id="annualRateUpdate"
                                                                         name="capitationRates"
-                                                                        label="Annual rate update"
+                                                                        label={
+                                                                            RateChangeReasonRecord.ANNUAL
+                                                                        }
                                                                         value={
                                                                             'ANNUAL'
                                                                         }
@@ -575,7 +585,9 @@ export const ContractDetails = ({
                                                                     <FieldRadio
                                                                         id="midYearUpdate"
                                                                         name="capitationRates"
-                                                                        label="Mid-year update"
+                                                                        label={
+                                                                            RateChangeReasonRecord.MIDYEAR
+                                                                        }
                                                                         value={
                                                                             'MIDYEAR'
                                                                         }
@@ -587,7 +599,9 @@ export const ContractDetails = ({
                                                                     <FieldRadio
                                                                         id="capitation-other"
                                                                         name="capitationRates"
-                                                                        label="Other (please describe)"
+                                                                        label={
+                                                                            RateChangeReasonRecord.OTHER
+                                                                        }
                                                                         value={
                                                                             'OTHER'
                                                                         }
@@ -615,7 +629,9 @@ export const ContractDetails = ({
                                                     <FieldCheckbox
                                                         id="encounterData"
                                                         name="itemsAmended"
-                                                        label="Encounter data"
+                                                        label={
+                                                            AmendableItemsRecord.ENCOUNTER_DATA
+                                                        }
                                                         value="ENCOUNTER_DATA"
                                                         checked={values.itemsAmended.includes(
                                                             'ENCOUNTER_DATA'
@@ -624,7 +640,9 @@ export const ContractDetails = ({
                                                     <FieldCheckbox
                                                         id="enrolleeAccess"
                                                         name="itemsAmended"
-                                                        label="Enrollee access"
+                                                        label={
+                                                            AmendableItemsRecord.ENROLLE_ACCESS
+                                                        }
                                                         value="ENROLLE_ACCESS"
                                                         checked={values.itemsAmended.includes(
                                                             'ENROLLE_ACCESS'
@@ -633,7 +651,9 @@ export const ContractDetails = ({
                                                     <FieldCheckbox
                                                         id="enrollmentDisenrollementProcess"
                                                         name="itemsAmended"
-                                                        label="Enrollment/disenrollment process"
+                                                        label={
+                                                            AmendableItemsRecord.ENROLLMENT_PROCESS
+                                                        }
                                                         value="ENROLLMENT_PROCESS"
                                                         checked={values.itemsAmended.includes(
                                                             'ENROLLMENT_PROCESS'
@@ -642,7 +662,9 @@ export const ContractDetails = ({
                                                     <FieldCheckbox
                                                         id="financialIncentives"
                                                         name="itemsAmended"
-                                                        label="Financial incentives"
+                                                        label={
+                                                            AmendableItemsRecord.FINANCIAL_INCENTIVES
+                                                        }
                                                         value="FINANCIAL_INCENTIVES"
                                                         checked={values.itemsAmended.includes(
                                                             'FINANCIAL_INCENTIVES'
@@ -651,7 +673,9 @@ export const ContractDetails = ({
                                                     <FieldCheckbox
                                                         id="geographicAreaServed"
                                                         name="itemsAmended"
-                                                        label="Geographic area served"
+                                                        label={
+                                                            AmendableItemsRecord.GEO_AREA_SERVED
+                                                        }
                                                         value="GEO_AREA_SERVED"
                                                         checked={values.itemsAmended.includes(
                                                             'GEO_AREA_SERVED'
@@ -660,7 +684,9 @@ export const ContractDetails = ({
                                                     <FieldCheckbox
                                                         id="grievancesAndAppealsSystem"
                                                         name="itemsAmended"
-                                                        label="Grievances and appeals system"
+                                                        label={
+                                                            AmendableItemsRecord.GRIEVANCES_AND_APPEALS_SYSTEM
+                                                        }
                                                         value="GRIEVANCES_AND_APPEALS_SYSTEM"
                                                         checked={values.itemsAmended.includes(
                                                             'GRIEVANCES_AND_APPEALS_SYSTEM'
@@ -669,7 +695,9 @@ export const ContractDetails = ({
                                                     <FieldCheckbox
                                                         id="lengthOfContractPeriod"
                                                         name="itemsAmended"
-                                                        label="Length of contract period"
+                                                        label={
+                                                            AmendableItemsRecord.LENGTH_OF_CONTRACT_PERIOD
+                                                        }
                                                         value="LENGTH_OF_CONTRACT_PERIOD"
                                                         checked={values.itemsAmended.includes(
                                                             'LENGTH_OF_CONTRACT_PERIOD'
@@ -678,7 +706,9 @@ export const ContractDetails = ({
                                                     <FieldCheckbox
                                                         id="nonriskPayment"
                                                         name="itemsAmended"
-                                                        label="Non-risk payment"
+                                                        label={
+                                                            AmendableItemsRecord.NON_RISK_PAYMENT
+                                                        }
                                                         value="NON_RISK_PAYMENT"
                                                         checked={values.itemsAmended.includes(
                                                             'NON_RISK_PAYMENT'
@@ -687,7 +717,9 @@ export const ContractDetails = ({
                                                     <FieldCheckbox
                                                         id="programIntegrity"
                                                         name="itemsAmended"
-                                                        label="Program integrity"
+                                                        label={
+                                                            AmendableItemsRecord.PROGRAM_INTEGRITY
+                                                        }
                                                         value="PROGRAM_INTEGRITY"
                                                         checked={values.itemsAmended.includes(
                                                             'PROGRAM_INTEGRITY'
@@ -696,7 +728,9 @@ export const ContractDetails = ({
                                                     <FieldCheckbox
                                                         id="qualityStandards"
                                                         name="itemsAmended"
-                                                        label="Quality standards"
+                                                        label={
+                                                            AmendableItemsRecord.QUALITY_STANDARDS
+                                                        }
                                                         value="QUALITY_STANDARDS"
                                                         checked={values.itemsAmended.includes(
                                                             'QUALITY_STANDARDS'
@@ -705,7 +739,9 @@ export const ContractDetails = ({
                                                     <FieldCheckbox
                                                         id="riskSharingMechanisms"
                                                         name="itemsAmended"
-                                                        label="Risk sharing mechanisms"
+                                                        label={
+                                                            AmendableItemsRecord.RISK_SHARING_MECHANISM
+                                                        }
                                                         value="RISK_SHARING_MECHANISM"
                                                         checked={values.itemsAmended.includes(
                                                             'RISK_SHARING_MECHANISM'
@@ -926,23 +962,36 @@ export const ContractDetails = ({
                             )}
                         </fieldset>
 
-                        <ButtonGroup className={styles.buttonGroup}>
-                            <Link
-                                asCustom={NavLink}
-                                className={`${styles.outlineButtonLink} usa-button usa-button--outline`}
-                                variant="unstyled"
-                                to="/dashboard"
-                            >
-                                Cancel
-                            </Link>
+                        <div className={styles.pageActions}>
                             <Button
                                 type="submit"
-                                onClick={() => setShouldValidate(true)}
                                 disabled={isSubmitting}
+                                onClick={() => setShouldValidate(true)}
+                                unstyled
                             >
-                                Continue
+                                Save as Draft
                             </Button>
-                        </ButtonGroup>
+                            <ButtonGroup
+                                type="default"
+                                className={styles.buttonGroup}
+                            >
+                                <Link
+                                    asCustom={NavLink}
+                                    className="usa-button usa-button--outline"
+                                    variant="unstyled"
+                                    to="type"
+                                >
+                                    Back
+                                </Link>
+                                <Button
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                    onClick={() => setShouldValidate(true)}
+                                >
+                                    Continue
+                                </Button>
+                            </ButtonGroup>
+                        </div>
                     </UswdsForm>
                 </>
             )}

@@ -3,9 +3,12 @@ import { DataMapper } from '@aws/dynamodb-data-mapper'
 import { StoreError, convertDynamoErrorToStoreError } from './storeError'
 import {
     convertToDomainSubmission,
+    CapitationRatesAmendedInfo,
+    RateAmendmentInfoT,
+    ContractAmendmentInfoT,
+    DocumentStoreT,
     SubmissionStoreType,
     isDynamoError,
-    DocumentStoreT,
 } from './dynamoTypes'
 import {
     isStateSubmission,
@@ -42,6 +45,41 @@ export async function updateStateSubmission(
     storeSubmission.managedCareEntities = stateSubmission.managedCareEntities
     storeSubmission.federalAuthorities = stateSubmission.federalAuthorities
 
+    storeSubmission.rateType = stateSubmission.rateType
+    storeSubmission.rateDateStart = stateSubmission.rateDateStart
+    storeSubmission.rateDateEnd = stateSubmission.rateDateEnd
+    storeSubmission.rateDateCertified = stateSubmission.rateDateCertified
+
+    if (stateSubmission.contractAmendmentInfo) {
+        const draftInfo = stateSubmission.contractAmendmentInfo
+
+        const info = new ContractAmendmentInfoT()
+        info.itemsBeingAmended = draftInfo.itemsBeingAmended
+        info.otherItemBeingAmended = draftInfo.otherItemBeingAmended
+
+        if (draftInfo.capitationRatesAmendedInfo) {
+            const capRates = new CapitationRatesAmendedInfo()
+            capRates.reason = draftInfo.capitationRatesAmendedInfo.reason
+            capRates.otherReason =
+                draftInfo.capitationRatesAmendedInfo.otherReason
+
+            info.capitationRatesAmendedInfo = capRates
+        }
+
+        info.relatedToCovid19 = draftInfo.relatedToCovid19
+        info.relatedToVaccination = draftInfo.relatedToVaccination
+
+        storeSubmission.contractAmendmentInfo = info
+    }
+
+    if (stateSubmission.rateAmendmentInfo) {
+        const draftInfo = stateSubmission.rateAmendmentInfo
+
+        const info = new RateAmendmentInfoT()
+        info.effectiveDateStart = draftInfo.effectiveDateStart
+        info.effectiveDateEnd = draftInfo.effectiveDateEnd
+        storeSubmission.rateAmendmentInfo = info
+    }
     // State submission only field
     storeSubmission.submittedAt = stateSubmission.submittedAt
 

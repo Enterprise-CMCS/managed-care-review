@@ -17,7 +17,6 @@ import {
 import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
 import PageHeading from '../../../components/PageHeading'
-import { isContractAndRates } from '../submissionChecks'
 import {
     FileUpload,
     S3FileData,
@@ -160,7 +159,7 @@ export const Documents = ({
     }
 
     const Hint = (): JSX.Element =>
-        isContractAndRates(draftSubmission) ? (
+        draftSubmission.submissionType === 'CONTRACT_AND_RATES' ? (
             <>
                 <strong>Must include:</strong> an executed contract and a signed
                 rate certification
@@ -227,22 +226,33 @@ export const Documents = ({
                         onLoadComplete={onLoadComplete}
                     />
                 </fieldset>
-                <ButtonGroup type="default" className={styles.buttonGroup}>
-                    <Link
-                        asCustom={NavLink}
-                        className={`${styles.outlineButtonLink} usa-button usa-button--outline`}
-                        to="/dashboard"
-                    >
-                        Cancel
-                    </Link>
+
+                <div className={styles.pageActions}>
                     <Button
                         type="submit"
-                        secondary={shouldValidate && !hasValidFiles}
+                        unstyled
                         disabled={shouldValidate && !hasValidFiles}
                     >
-                        Continue
+                        Save as Draft
                     </Button>
-                </ButtonGroup>
+                    <ButtonGroup type="default" className={styles.buttonGroup}>
+                        <Link
+                            asCustom={NavLink}
+                            className="usa-button usa-button--outline"
+                            variant="unstyled"
+                            to="rate-details"
+                        >
+                            Back
+                        </Link>
+                        <Button
+                            type="submit"
+                            secondary={shouldValidate && !hasValidFiles}
+                            disabled={shouldValidate && !hasValidFiles}
+                        >
+                            Continue
+                        </Button>
+                    </ButtonGroup>
+                </div>
             </UswdsForm>
         </>
     )

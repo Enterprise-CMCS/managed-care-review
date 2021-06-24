@@ -63,7 +63,11 @@ const RateDetailsFormSchema = Yup.object().shape({
         .test(
             'ratingPeriod',
             'You must enter a 12-month rating period',
-            validateDateRange12Months
+            (value: string, context: Yup.TestContext) =>
+                validateDateRange12Months(
+                    context.parent.rateDateStart,
+                    context.parent.rateDateEnd
+                )
         ),
     rateDateCertified: Yup.date()
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -71,6 +75,39 @@ const RateDetailsFormSchema = Yup.object().shape({
         .validateDateFormat('YYYY-MM-DD', true)
         .defined('You must enter the date the document was certified')
         .typeError('The certified date must be in MM/DD/YYYY format'),
+    effectiveDateStart: Yup.date().when('rateType', {
+        is: 'AMENDMENT',
+        then: Yup.date()
+            .nullable()
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore-next-line
+            .validateDateFormat('YYYY-MM-DD', true)
+            .defined('You must enter a start date')
+            .typeError('The start date must be in MM/DD/YYYY format'),
+    }),
+    effectiveDateEnd: Yup.date().when('rateType', {
+        is: 'AMENDMENT',
+        then: Yup.date()
+            .nullable()
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore-next-line
+            .validateDateFormat('YYYY-MM-DD', true)
+            .defined('You must enter an end date')
+            .typeError('The end date must be in MM/DD/YYYY format')
+            .min(
+                Yup.ref('effectiveDateStart'),
+                'The end date must come after the start date'
+            )
+            .test(
+                'ratingPeriod',
+                'You must enter a 12-month rating period',
+                (value: string, context: Yup.TestContext) =>
+                    validateDateRange12Months(
+                        context.parent.effectiveDateStart,
+                        context.parent.effectiveDateEnd
+                    )
+            ),
+    }),
 })
 
 type FormError = FormikErrors<RateDetailsFormValues>[keyof FormikErrors<RateDetailsFormValues>]
@@ -80,6 +117,8 @@ export interface RateDetailsFormValues {
     rateDateStart: string
     rateDateEnd: string
     rateDateCertified: string
+    effectiveDateStart: string
+    effectiveDateEnd: string
 }
 export const RateDetails = ({
     draftSubmission,
@@ -90,6 +129,7 @@ export const RateDetails = ({
 }): React.ReactElement => {
     const [showFormAlert, setShowFormAlert] = React.useState(false)
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
+
     const history = useHistory()
     const [
         updateDraftSubmission,
@@ -103,7 +143,6 @@ export const RateDetails = ({
             updateError
         )
     }
-
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
@@ -118,6 +157,18 @@ export const RateDetails = ({
         rateDateCertified:
             (draftSubmission &&
                 formatForForm(draftSubmission.rateDateCertified)) ??
+            '',
+        effectiveDateStart:
+            (draftSubmission &&
+                formatForForm(
+                    draftSubmission.rateAmendmentInfo?.effectiveDateStart
+                )) ??
+            '',
+        effectiveDateEnd:
+            (draftSubmission &&
+                formatForForm(
+                    draftSubmission.rateAmendmentInfo?.effectiveDateEnd
+                )) ??
             '',
     }
 
@@ -136,6 +187,15 @@ export const RateDetails = ({
         updatedDraft.rateDateStart = values.rateDateStart
         updatedDraft.rateDateEnd = values.rateDateEnd
         updatedDraft.rateDateCertified = values.rateDateCertified
+
+        if (values.rateType === 'AMENDMENT') {
+            updatedDraft.rateAmendmentInfo = {
+                effectiveDateStart: values.effectiveDateStart,
+                effectiveDateEnd: values.effectiveDateEnd,
+            }
+        } else {
+            updatedDraft.rateAmendmentInfo = null
+        }
 
         try {
             const updateResult = await updateDraftSubmission({
@@ -161,14 +221,16 @@ export const RateDetails = ({
     }
 
     const RateDatesErrorMessage = ({
-        values,
+        startDate,
+        endDate,
         validationErrorMessage,
     }: {
-        values: RateDetailsFormValues
+        startDate: string
+        endDate: string
         validationErrorMessage: string
     }): React.ReactElement => (
         <ErrorMessage>
-            {isDateRangeEmpty(values.rateDateStart, values.rateDateEnd)
+            {isDateRangeEmpty(startDate, endDate)
                 ? 'You must provide a start and an end date'
                 : validationErrorMessage}
         </ErrorMessage>
@@ -184,10 +246,12 @@ export const RateDetails = ({
                 {({
                     values,
                     errors,
+                    handleChange,
                     handleSubmit,
                     isSubmitting,
                     isValidating,
                     setFieldValue,
+                    setValues,
                     validateForm,
                 }) => (
                     <>
@@ -274,7 +338,12 @@ export const RateDetails = ({
                                                         errors.rateDateEnd
                                                 ) && (
                                                     <RateDatesErrorMessage
-                                                        values={values}
+                                                        startDate={
+                                                            values.rateDateStart
+                                                        }
+                                                        endDate={
+                                                            values.rateDateEnd
+                                                        }
                                                         validationErrorMessage={
                                                             errors.rateDateStart ||
                                                             errors.rateDateEnd ||
@@ -331,7 +400,9 @@ export const RateDetails = ({
                                                 htmlFor="rateDateCertified"
                                                 id="rateDateCertifiedLabel"
                                             >
-                                                Date certified
+                                                {isRateTypeAmendment(values)
+                                                    ? 'Date certified for rate amendment'
+                                                    : 'Date certified'}
                                             </Label>
                                             <div
                                                 className="usa-hint"
@@ -367,78 +438,160 @@ export const RateDetails = ({
                                             <>
                                                 <FormGroup>
                                                     <Fieldset legend="Effective dates of rate amendment">
+                                                        {showFieldErrors(
+                                                            errors.effectiveDateStart ||
+                                                                errors.effectiveDateEnd
+                                                        ) && (
+                                                            <RateDatesErrorMessage
+                                                                startDate={
+                                                                    values.effectiveDateStart
+                                                                }
+                                                                endDate={
+                                                                    values.effectiveDateEnd
+                                                                }
+                                                                validationErrorMessage={
+                                                                    errors.effectiveDateStart ||
+                                                                    errors.effectiveDateEnd ||
+                                                                    'Invalid date'
+                                                                }
+                                                            />
+                                                        )}
                                                         <FieldCheckbox
                                                             name="sameAsOriginalRatePeriod"
                                                             label="Use same dates as original rating period"
                                                             id="sameAsOriginalRatePeriod"
+                                                            disabled
+                                                            defaultValue={
+                                                                'false'
+                                                            }
+                                                            onClick={(
+                                                                e: React.MouseEvent<HTMLInputElement>
+                                                            ) => {
+                                                                const {
+                                                                    value,
+                                                                } = e.target as HTMLInputElement
+
+                                                                if (
+                                                                    value ===
+                                                                    'false'
+                                                                ) {
+                                                                    setValues(
+                                                                        (
+                                                                            prevValues
+                                                                        ) => {
+                                                                            return {
+                                                                                ...prevValues,
+                                                                                effectiveDateStart:
+                                                                                    prevValues.rateDateStart,
+                                                                                effectiveDateEnd:
+                                                                                    prevValues.rateDateEnd,
+                                                                            }
+                                                                        }
+                                                                    )
+                                                                } else {
+                                                                    setValues(
+                                                                        (
+                                                                            prevValues
+                                                                        ) => ({
+                                                                            ...prevValues,
+                                                                            effectiveDateStart:
+                                                                                '',
+                                                                            effectiveDateEnd:
+                                                                                '',
+                                                                        })
+                                                                    )
+                                                                }
+                                                                console.log(
+                                                                    values
+                                                                )
+                                                                handleChange(e)
+                                                                console.log(
+                                                                    values
+                                                                )
+                                                            }}
                                                         />
                                                         <DateRangePicker
                                                             className={
                                                                 styles.dateRangePicker
                                                             }
-                                                            endDateHint="mm/dd/yyyy"
-                                                            endDateLabel="End date"
-                                                            endDatePickerProps={{
-                                                                disabled: false,
-                                                                id:
-                                                                    'amendmentRateDateEnd',
-                                                                name:
-                                                                    'amendmentRateDateEnd',
-                                                            }}
                                                             startDateHint="mm/dd/yyyy"
                                                             startDateLabel="Start date"
                                                             startDatePickerProps={{
                                                                 disabled: false,
                                                                 id:
-                                                                    'amendmentRateDateStart',
+                                                                    'effectiveDateStart',
                                                                 name:
-                                                                    'amendmentRateDateEnd',
+                                                                    'effectiveDateStart',
+                                                                defaultValue:
+                                                                    values.effectiveDateStart,
+                                                                onChange: (
+                                                                    val
+                                                                ) =>
+                                                                    setFieldValue(
+                                                                        'effectiveDateStart',
+                                                                        formatUserInputDate(
+                                                                            val
+                                                                        )
+                                                                    ),
+                                                            }}
+                                                            endDateHint="mm/dd/yyyy"
+                                                            endDateLabel="End date"
+                                                            endDatePickerProps={{
+                                                                disabled: false,
+                                                                id:
+                                                                    'effectiveDateEnd',
+                                                                name:
+                                                                    'effectiveDateEnd',
+                                                                defaultValue:
+                                                                    values.effectiveDateEnd,
+                                                                onChange: (
+                                                                    val
+                                                                ) =>
+                                                                    setFieldValue(
+                                                                        'effectiveDateEnd',
+                                                                        formatUserInputDate(
+                                                                            val
+                                                                        )
+                                                                    ),
                                                             }}
                                                         />
                                                     </Fieldset>
-                                                </FormGroup>
-                                                <FormGroup>
-                                                    <Label
-                                                        htmlFor="amendment-certification-date"
-                                                        id="amendmentCertificationDateLabel"
-                                                    >
-                                                        Date certified for rate
-                                                        amendment
-                                                    </Label>
-                                                    <div
-                                                        className="usa-hint"
-                                                        id="amendmentCertificationDateHint"
-                                                    >
-                                                        mm/dd/yyyy
-                                                    </div>
-                                                    <DatePicker
-                                                        aria-describedby="amendmentCertificationDateLabel amendmentCertificationDateHint"
-                                                        id="amendmentCertificationDate"
-                                                        name="amendment-certification-date"
-                                                    />
                                                 </FormGroup>
                                             </>
                                         )}
                                     </>
                                 )}
                             </fieldset>
-                            <ButtonGroup className={styles.buttonGroup}>
-                                <Link
-                                    asCustom={NavLink}
-                                    className={`${styles.outlineButtonLink} usa-button usa-button--outline`}
-                                    variant="unstyled"
-                                    to="/dashboard"
-                                >
-                                    Cancel
-                                </Link>
+                            <div className={styles.pageActions}>
                                 <Button
                                     type="submit"
                                     disabled={isSubmitting}
                                     onClick={() => setShouldValidate(true)}
+                                    unstyled
                                 >
-                                    Continue
+                                    Save as Draft
                                 </Button>
-                            </ButtonGroup>
+                                <ButtonGroup
+                                    type="default"
+                                    className={styles.buttonGroup}
+                                >
+                                    <Link
+                                        asCustom={NavLink}
+                                        className="usa-button usa-button--outline"
+                                        variant="unstyled"
+                                        to={`contract-details`}
+                                    >
+                                        Back
+                                    </Link>
+                                    <Button
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        onClick={() => setShouldValidate(true)}
+                                    >
+                                        Continue
+                                    </Button>
+                                </ButtonGroup>
+                            </div>
                         </UswdsForm>
                     </>
                 )}

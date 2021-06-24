@@ -50,13 +50,6 @@
     margin: 0;
 }
 
-.pageActions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: units(4);
-}
-
 .submitButton {
     background: $theme-color-success;
     &:hover {

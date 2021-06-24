@@ -7,17 +7,48 @@ const isContractOnly = (sub: DraftSubmissionType): boolean =>
 const isContractAndRates = (sub: DraftSubmissionType): boolean =>
     sub.submissionType === 'CONTRACT_AND_RATES'
 
+const isRateAmendment = (sub: StateSubmissionType): boolean =>
+    sub.rateType === 'AMENDMENT'
+
+const hasValidContract = (sub: StateSubmissionType): boolean =>
+    sub.contractType !== undefined &&
+    sub.contractDateStart !== undefined &&
+    sub.contractDateEnd !== undefined &&
+    sub.contractDateStart !== undefined &&
+    sub.contractDateEnd !== undefined &&
+    sub.managedCareEntities.length !== 0 &&
+    sub.federalAuthorities.length !== 0
+
+const hasValidRates = (sub: StateSubmissionType): boolean => {
+    if (sub.submissionType === 'CONTRACT_ONLY') return true
+
+    const validBaseRate =
+        sub.rateType !== undefined &&
+        sub.rateDateCertified !== undefined &&
+        sub.rateDateStart !== undefined &&
+        sub.rateDateEnd !== undefined
+
+    return isRateAmendment(sub)
+        ? validBaseRate &&
+              Boolean(
+                  sub.rateAmendmentInfo &&
+                      sub.rateAmendmentInfo.effectiveDateEnd &&
+                      sub.rateAmendmentInfo.effectiveDateStart
+              )
+        : validBaseRate
+}
+
+const hasValidDocuments = (sub: StateSubmissionType): boolean =>
+    sub.documents.length !== 0
+
 const isStateSubmission = (sub: unknown): sub is StateSubmissionType => {
     if (sub && typeof sub === 'object' && 'status' in sub) {
         const maybeStateSub = sub as StateSubmissionType
         return (
             maybeStateSub.status === 'SUBMITTED' &&
-            maybeStateSub.contractType !== undefined &&
-            maybeStateSub.contractDateStart !== undefined &&
-            maybeStateSub.contractDateEnd !== undefined &&
-            maybeStateSub.documents.length !== 0 &&
-            maybeStateSub.managedCareEntities.length !== 0 &&
-            maybeStateSub.federalAuthorities.length !== 0
+            hasValidContract(maybeStateSub) &&
+            hasValidRates(maybeStateSub) &&
+            hasValidDocuments(maybeStateSub)
         )
     }
     return false
@@ -38,6 +69,9 @@ const isDraftSubmission = (sub: unknown): sub is DraftSubmissionType => {
 }
 
 export {
+    hasValidContract,
+    hasValidDocuments,
+    hasValidRates,
     isContractOnly,
     isContractAndRates,
     isStateSubmission,

@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { GridContainer, Grid, Link, Alert } from '@trussworks/react-uswds'
+import {
+    Button,
+    ButtonGroup,
+    GridContainer,
+    Grid,
+    Link,
+    Alert,
+} from '@trussworks/react-uswds'
 import { NavLink, useHistory } from 'react-router-dom'
 import dayjs from 'dayjs'
 
@@ -12,6 +19,7 @@ import {
     useSubmitDraftSubmissionMutation,
 } from '../../../gen/gqlClient'
 import {
+    AmendableItemsRecord,
     ContractTypeRecord,
     FederalAuthorityRecord,
     ManagedCareEntityRecord,
@@ -20,7 +28,6 @@ import {
 import PageHeading from '../../../components/PageHeading'
 import { DataDetail } from '../../../components/DataDetail/DataDetail'
 import { DoubleColumnRow } from '../../../components/DoubleColumnRow/DoubleColumnRow'
-import { PageActions } from '../PageActions'
 import { useS3 } from '../../../contexts/S3Context'
 
 type DocumentWithLink = { url: string | null } & Document
@@ -79,7 +86,7 @@ export const ReviewSubmit = ({
                     <Link
                         variant="unstyled"
                         asCustom={NavLink}
-                        className={`${stylesForm.outlineButtonLink} usa-button usa-button--outline`}
+                        className="usa-button usa-button--outline"
                         to={to}
                     >
                         Edit <span className="srOnly">{header}</span>
@@ -129,7 +136,7 @@ export const ReviewSubmit = ({
         const userFriendlyItems = items.map((item) => {
             return itemRecord[`${item}`]
         })
-        return userFriendlyItems.join(', ')
+        return userFriendlyItems.join(', ').replace(/,\s*$/, '')
     }
 
     const isContractAmendment = draftSubmission.contractType === 'AMENDMENT'
@@ -158,7 +165,7 @@ export const ReviewSubmit = ({
                         <Link
                             asCustom={NavLink}
                             to="type"
-                            className={`${stylesForm.outlineButtonLink} usa-button usa-button--outline`}
+                            className="usa-button usa-button--outline"
                             variant="unstyled"
                         >
                             Edit
@@ -260,35 +267,56 @@ export const ReviewSubmit = ({
                             />
                         }
                     />
-                    {isContractAmendment && (
-                        <>
-                            <DoubleColumnRow
-                                left={
-                                    <DataDetail
-                                        id="itemsAmended"
-                                        label="Items being amended"
-                                        data="Benefits provided, Capitation rates (Updates based on more recent data)"
+                    {isContractAmendment &&
+                        draftSubmission.contractAmendmentInfo && (
+                            <>
+                                <DoubleColumnRow
+                                    left={
+                                        <DataDetail
+                                            id="itemsAmended"
+                                            label="Items being amended"
+                                            data={createCheckboxList(
+                                                draftSubmission
+                                                    .contractAmendmentInfo
+                                                    .itemsBeingAmended,
+                                                AmendableItemsRecord
+                                            )}
+                                        />
+                                    }
+                                    right={
+                                        <DataDetail
+                                            id="covidRelated"
+                                            label="Is this contract action related to the COVID-19 public health emergency"
+                                            data={
+                                                draftSubmission
+                                                    .contractAmendmentInfo
+                                                    .relatedToCovid19
+                                                    ? 'Yes'
+                                                    : 'No'
+                                            }
+                                        />
+                                    }
+                                />
+                                {draftSubmission.contractAmendmentInfo
+                                    .relatedToCovid19 && (
+                                    <DoubleColumnRow
+                                        left={
+                                            <DataDetail
+                                                id="vaccineRelated"
+                                                label="Is this related to coverage and reimbursement for vaccine administration?"
+                                                data={
+                                                    draftSubmission
+                                                        .contractAmendmentInfo
+                                                        .relatedToVaccination
+                                                        ? 'Yes'
+                                                        : 'No'
+                                                }
+                                            />
+                                        }
                                     />
-                                }
-                                right={
-                                    <DataDetail
-                                        id="covidRelated"
-                                        label="Is this contract action related to the COVID-19 public health emergency"
-                                        data="Yes"
-                                    />
-                                }
-                            />
-                            <DoubleColumnRow
-                                left={
-                                    <DataDetail
-                                        id="vaccineRelated"
-                                        label="Is this related to coverage and reimbursement for vaccine administration?"
-                                        data="Yes"
-                                    />
-                                }
-                            />
-                        </>
-                    )}
+                                )}
+                            </>
+                        )}
                 </dl>
             </section>
             <section id="rateDetails" className={styles.reviewSection}>
@@ -302,14 +330,26 @@ export const ReviewSubmit = ({
                             <DataDetail
                                 id="rateType"
                                 label="Rate certification type"
-                                data="New rate certification"
+                                data={
+                                    draftSubmission.rateAmendmentInfo
+                                        ? 'Amendment to prior rate certification'
+                                        : 'New rate certification'
+                                }
                             />
                         }
                         right={
                             <DataDetail
                                 id="ratingPeriod"
-                                label="Rating period"
-                                data="07/01/2020 - 06/30/2021"
+                                label={
+                                    draftSubmission.rateAmendmentInfo
+                                        ? 'Rating period of original rate certification'
+                                        : 'Rating period'
+                                }
+                                data={`${dayjs(
+                                    draftSubmission.rateDateStart
+                                ).format('MM/DD/YYYY')} - ${dayjs(
+                                    draftSubmission.rateDateEnd
+                                ).format('MM/DD/YYYY')}`}
                             />
                         }
                     />
@@ -317,9 +357,32 @@ export const ReviewSubmit = ({
                         left={
                             <DataDetail
                                 id="dateCertified"
-                                label="Date certified"
-                                data="06/03/2021"
+                                label={
+                                    draftSubmission.rateAmendmentInfo
+                                        ? 'Date certified for rate amendment'
+                                        : 'Date certified'
+                                }
+                                data={dayjs(
+                                    draftSubmission.rateDateCertified
+                                ).format('MM/DD/YYYY')}
                             />
+                        }
+                        right={
+                            draftSubmission.rateAmendmentInfo ? (
+                                <DataDetail
+                                    id="effectiveRatingPeriod"
+                                    label="Effective dates of rate amendment"
+                                    data={`${dayjs(
+                                        draftSubmission
+                                            .rateAmendmentInfo
+                                            .effectiveDateStart
+                                    ).format('MM/DD/YYYY')} - ${dayjs(
+                                        draftSubmission
+                                            .rateAmendmentInfo
+                                            .effectiveDateEnd
+                                    ).format('MM/DD/YYYY')}`}
+                                />
+                            ) : null
                         }
                     />
                 </dl>
@@ -346,11 +409,37 @@ export const ReviewSubmit = ({
                     ))}
                 </ul>
             </section>
-            <PageActions
-                secondaryAction="Back"
-                primaryAction="Submit"
-                primaryActionCallback={handleFormSubmit}
-            />
+
+            <div className={stylesForm.pageActions}>
+                <Link
+                    asCustom={NavLink}
+                    className="usa-button usa-button--unstyled"
+                    variant="unstyled"
+                    to="/dashboard"
+                >
+                    Save as Draft
+                </Link>
+                <ButtonGroup
+                    type="default"
+                    className={stylesForm.buttonGroup}
+                >
+                    <Link
+                        asCustom={NavLink}
+                        className="usa-button usa-button--outline"
+                        variant="unstyled"
+                        to="documents"
+                    >
+                        Back
+                    </Link>
+                    <Button
+                        type="button"
+                        className={styles.submitButton}
+                        onClick={handleFormSubmit}
+                    >
+                        Submit
+                    </Button>
+                </ButtonGroup>
+            </div>
         </GridContainer>
     )
 }

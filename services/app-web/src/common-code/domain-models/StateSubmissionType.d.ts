@@ -17,4 +17,10 @@ export type StateSubmissionType = {
     contractDateEnd: Date
     managedCareEntities: string[]
     federalAuthorities: FederalAuthority[]
+    contractAmendmentInfo?: ContractAmendmentInfo
+    rateType?: RateType
+    rateDateStart?: Date
+    rateDateEnd?: Date
+    rateDateCertified?: Date
+    rateAmendmentInfo?: RateAmendmentInfo
 }

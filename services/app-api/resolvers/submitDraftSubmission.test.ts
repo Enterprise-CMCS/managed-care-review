@@ -121,7 +121,7 @@ describe('submitDraftSubmission', () => {
             'BAD_USER_INPUT'
         )
         expect(submitResult.errors?.[0].extensions?.message).toEqual(
-            'submission is missing a required field'
+            'submissions is missing required contract fields'
         )
     })
 })
