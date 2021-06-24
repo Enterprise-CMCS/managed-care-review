@@ -26,6 +26,9 @@ export type { ProgramT } from './ProgramT'
 // Type checks and type guards
 export { isCognitoUser } from './user'
 export {
+    hasValidContract,
+    hasValidDocuments,
+    hasValidRates,
     isContractOnly,
     isContractAndRates,
     isStateSubmission,

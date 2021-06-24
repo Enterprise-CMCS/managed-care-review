@@ -37,6 +37,8 @@ import {
 import { ManagedCareEntity } from '../../../common-code/domain-models/DraftSubmissionType'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
 import {
+    AmendableItemsRecord,
+    RateChangeReasonRecord,
     ManagedCareEntityRecord,
     FederalAuthorityRecord,
 } from '../../../constants/submissions'
@@ -233,6 +235,8 @@ export const ContractDetails = ({
                 relatedToCovid19: relatedToCovid,
                 relatedToVaccination: relatedToVaccine,
             }
+        } else {
+            updatedDraft.contractAmendmentInfo = null
         }
 
         try {
@@ -485,6 +489,7 @@ export const ContractDetails = ({
                                                     error={showFieldErrors(
                                                         errors.itemsAmended
                                                     )}
+<<<<<<< HEAD
                                                 >
                                                     <Fieldset legend="Items being amended">
                                                         <Link
@@ -533,6 +538,27 @@ export const ContractDetails = ({
                                                             )}
                                                         />
                                                         {values.itemsAmended.includes(
+=======
+                                                    <FieldCheckbox
+                                                        id="benefitsProvided"
+                                                        name="itemsAmended"
+                                                        label={
+                                                            AmendableItemsRecord.BENEFITS_PROVIDED
+                                                        }
+                                                        value="BENEFITS_PROVIDED"
+                                                        checked={values.itemsAmended.includes(
+                                                            'BENEFITS_PROVIDED'
+                                                        )}
+                                                    />
+                                                    <FieldCheckbox
+                                                        id="capitationRates"
+                                                        name="itemsAmended"
+                                                        label={
+                                                            AmendableItemsRecord.CAPITATION_RATES
+                                                        }
+                                                        value="CAPITATION_RATES"
+                                                        checked={values.itemsAmended.includes(
+>>>>>>> main
                                                             'CAPITATION_RATES'
                                                         ) && (
                                                             <div>
@@ -729,10 +755,228 @@ export const ContractDetails = ({
                                                                     showError={showFieldErrors(
                                                                         errors.otherItemAmended
                                                                     )}
+<<<<<<< HEAD
                                                                     name="otherItemAmended"
                                                                     type="text"
                                                                 />
                                                             </div>
+=======
+                                                                    <FieldRadio
+                                                                        id="annualRateUpdate"
+                                                                        name="capitationRates"
+                                                                        label={
+                                                                            RateChangeReasonRecord.ANNUAL
+                                                                        }
+                                                                        value={
+                                                                            'ANNUAL'
+                                                                        }
+                                                                        checked={
+                                                                            values.capitationRates ===
+                                                                            'ANNUAL'
+                                                                        }
+                                                                    />
+                                                                    <FieldRadio
+                                                                        id="midYearUpdate"
+                                                                        name="capitationRates"
+                                                                        label={
+                                                                            RateChangeReasonRecord.MIDYEAR
+                                                                        }
+                                                                        value={
+                                                                            'MIDYEAR'
+                                                                        }
+                                                                        checked={
+                                                                            values.capitationRates ===
+                                                                            'MIDYEAR'
+                                                                        }
+                                                                    />
+                                                                    <FieldRadio
+                                                                        id="capitation-other"
+                                                                        name="capitationRates"
+                                                                        label={
+                                                                            RateChangeReasonRecord.OTHER
+                                                                        }
+                                                                        value={
+                                                                            'OTHER'
+                                                                        }
+                                                                        checked={
+                                                                            values.capitationRates ===
+                                                                            'OTHER'
+                                                                        }
+                                                                    />
+                                                                    {values.capitationRates ===
+                                                                        'OTHER' && (
+                                                                        <FieldTextInput
+                                                                            id="other-rates"
+                                                                            label="Other capitation rate description"
+                                                                            showError={showFieldErrors(
+                                                                                errors.capitationRatesOther
+                                                                            )}
+                                                                            name="capitationRatesOther"
+                                                                            type="text"
+                                                                        />
+                                                                    )}
+                                                                </Fieldset>
+                                                            </FormGroup>
+                                                        </div>
+                                                    )}
+                                                    <FieldCheckbox
+                                                        id="encounterData"
+                                                        name="itemsAmended"
+                                                        label={
+                                                            AmendableItemsRecord.ENCOUNTER_DATA
+                                                        }
+                                                        value="ENCOUNTER_DATA"
+                                                        checked={values.itemsAmended.includes(
+                                                            'ENCOUNTER_DATA'
+                                                        )}
+                                                    />
+                                                    <FieldCheckbox
+                                                        id="enrolleeAccess"
+                                                        name="itemsAmended"
+                                                        label={
+                                                            AmendableItemsRecord.ENROLLE_ACCESS
+                                                        }
+                                                        value="ENROLLE_ACCESS"
+                                                        checked={values.itemsAmended.includes(
+                                                            'ENROLLE_ACCESS'
+                                                        )}
+                                                    />
+                                                    <FieldCheckbox
+                                                        id="enrollmentDisenrollementProcess"
+                                                        name="itemsAmended"
+                                                        label={
+                                                            AmendableItemsRecord.ENROLLMENT_PROCESS
+                                                        }
+                                                        value="ENROLLMENT_PROCESS"
+                                                        checked={values.itemsAmended.includes(
+                                                            'ENROLLMENT_PROCESS'
+                                                        )}
+                                                    />
+                                                    <FieldCheckbox
+                                                        id="financialIncentives"
+                                                        name="itemsAmended"
+                                                        label={
+                                                            AmendableItemsRecord.FINANCIAL_INCENTIVES
+                                                        }
+                                                        value="FINANCIAL_INCENTIVES"
+                                                        checked={values.itemsAmended.includes(
+                                                            'FINANCIAL_INCENTIVES'
+                                                        )}
+                                                    />
+                                                    <FieldCheckbox
+                                                        id="geographicAreaServed"
+                                                        name="itemsAmended"
+                                                        label={
+                                                            AmendableItemsRecord.GEO_AREA_SERVED
+                                                        }
+                                                        value="GEO_AREA_SERVED"
+                                                        checked={values.itemsAmended.includes(
+                                                            'GEO_AREA_SERVED'
+                                                        )}
+                                                    />
+                                                    <FieldCheckbox
+                                                        id="grievancesAndAppealsSystem"
+                                                        name="itemsAmended"
+                                                        label={
+                                                            AmendableItemsRecord.GRIEVANCES_AND_APPEALS_SYSTEM
+                                                        }
+                                                        value="GRIEVANCES_AND_APPEALS_SYSTEM"
+                                                        checked={values.itemsAmended.includes(
+                                                            'GRIEVANCES_AND_APPEALS_SYSTEM'
+                                                        )}
+                                                    />
+                                                    <FieldCheckbox
+                                                        id="lengthOfContractPeriod"
+                                                        name="itemsAmended"
+                                                        label={
+                                                            AmendableItemsRecord.LENGTH_OF_CONTRACT_PERIOD
+                                                        }
+                                                        value="LENGTH_OF_CONTRACT_PERIOD"
+                                                        checked={values.itemsAmended.includes(
+                                                            'LENGTH_OF_CONTRACT_PERIOD'
+                                                        )}
+                                                    />
+                                                    <FieldCheckbox
+                                                        id="nonriskPayment"
+                                                        name="itemsAmended"
+                                                        label={
+                                                            AmendableItemsRecord.NON_RISK_PAYMENT
+                                                        }
+                                                        value="NON_RISK_PAYMENT"
+                                                        checked={values.itemsAmended.includes(
+                                                            'NON_RISK_PAYMENT'
+                                                        )}
+                                                    />
+                                                    <FieldCheckbox
+                                                        id="programIntegrity"
+                                                        name="itemsAmended"
+                                                        label={
+                                                            AmendableItemsRecord.PROGRAM_INTEGRITY
+                                                        }
+                                                        value="PROGRAM_INTEGRITY"
+                                                        checked={values.itemsAmended.includes(
+                                                            'PROGRAM_INTEGRITY'
+                                                        )}
+                                                    />
+                                                    <FieldCheckbox
+                                                        id="qualityStandards"
+                                                        name="itemsAmended"
+                                                        label={
+                                                            AmendableItemsRecord.QUALITY_STANDARDS
+                                                        }
+                                                        value="QUALITY_STANDARDS"
+                                                        checked={values.itemsAmended.includes(
+                                                            'QUALITY_STANDARDS'
+                                                        )}
+                                                    />
+                                                    <FieldCheckbox
+                                                        id="riskSharingMechanisms"
+                                                        name="itemsAmended"
+                                                        label={
+                                                            AmendableItemsRecord.RISK_SHARING_MECHANISM
+                                                        }
+                                                        value="RISK_SHARING_MECHANISM"
+                                                        checked={values.itemsAmended.includes(
+                                                            'RISK_SHARING_MECHANISM'
+                                                        )}
+                                                    />
+                                                    <FieldCheckbox
+                                                        id="items-other"
+                                                        name="itemsAmended"
+                                                        label="Other (please describe)"
+                                                        value="OTHER"
+                                                        checked={values.itemsAmended.includes(
+                                                            'OTHER'
+                                                        )}
+                                                    />
+                                                    {values.itemsAmended.includes(
+                                                        'OTHER'
+                                                    ) && (
+                                                        <div
+                                                            className={
+                                                                styles.nestedOptions
+                                                            }
+                                                        >
+                                                            <FieldTextInput
+                                                                id="other-items-amended"
+                                                                label="Other item description"
+                                                                showError={showFieldErrors(
+                                                                    errors.otherItemAmended
+                                                                )}
+                                                                name="otherItemAmended"
+                                                                type="text"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </Fieldset>
+                                            </FormGroup>
+                                            {values.contractType ===
+                                                'AMENDMENT' && (
+                                                <>
+                                                    <FormGroup
+                                                        error={showFieldErrors(
+                                                            errors.relatedToCovid19
+>>>>>>> main
                                                         )}
                                                     </Fieldset>
                                                 </FormGroup>
@@ -921,6 +1165,7 @@ export const ContractDetails = ({
                                 )}
                             </fieldset>
 
+<<<<<<< HEAD
                             <ButtonGroup className={styles.buttonGroup}>
                                 <Link
                                     asCustom={NavLink}
@@ -934,14 +1179,49 @@ export const ContractDetails = ({
                                     type="submit"
                                     onClick={() => setShouldValidate(true)}
                                     disabled={isSubmitting}
+=======
+                        <div className={styles.pageActions}>
+                            <Button
+                                type="submit"
+                                disabled={isSubmitting}
+                                onClick={() => setShouldValidate(true)}
+                                unstyled
+                            >
+                                Save as Draft
+                            </Button>
+                            <ButtonGroup
+                                type="default"
+                                className={styles.buttonGroup}
+                            >
+                                <Link
+                                    asCustom={NavLink}
+                                    className="usa-button usa-button--outline"
+                                    variant="unstyled"
+                                    to="type"
+                                >
+                                    Back
+                                </Link>
+                                <Button
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                    onClick={() => setShouldValidate(true)}
+>>>>>>> main
                                 >
                                     Continue
                                 </Button>
                             </ButtonGroup>
+<<<<<<< HEAD
                         </UswdsForm>
                     </>
                 )}
             </Formik>
         </>
+=======
+                        </div>
+                    </UswdsForm>
+                </>
+            )}
+        </Formik>
+>>>>>>> main
     )
 }

@@ -235,8 +235,11 @@ describe('State Submission', () => {
             //Change rate details
             cy.findByText('Rate details').should('exist')
             cy.findByLabelText('New rate certification').safeClick()
+            cy.findByLabelText('Start date').clear()
             cy.findByLabelText('Start date').type('04/01/2024')
+            cy.findByLabelText('End date').clear()
             cy.findByLabelText('End date').type('03/31/2025')
+            cy.findByLabelText('Date certified').clear()
             cy.findByLabelText('Date certified').type('03/01/2024')
             cy.navigateForm('Continue')
 
@@ -305,6 +308,9 @@ describe('State Submission', () => {
             // Fill out contract details
             cy.findByText('Contract details').should('exist')
             cy.findByLabelText('Amendment to base contract').safeClick()
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).safeClick()
             cy.findByLabelText('Start date').type('03/01/2024')
             cy.findByLabelText('End date').type('03/31/2026')
             cy.findByLabelText('Managed Care Organization (MCO)').safeClick()

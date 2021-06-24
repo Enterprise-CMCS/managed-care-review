@@ -2,7 +2,7 @@
 @import '../../../styles/custom';
 
 .reviewSectionWrapper {
-    width: 100%;
+    max-width: 50rem;
 }
 
 .reviewSection {
@@ -48,13 +48,6 @@
 
 .documentDesc {
     margin: 0;
-}
-
-.pageActions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: units(4);
 }
 
 .submitButton {
