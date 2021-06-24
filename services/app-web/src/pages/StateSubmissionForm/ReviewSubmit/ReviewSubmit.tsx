@@ -25,6 +25,7 @@ import {
     ManagedCareEntityRecord,
     SubmissionTypeRecord,
 } from '../../../constants/submissions'
+import PageHeading from '../../../components/PageHeading'
 import { DataDetail } from '../../../components/DataDetail/DataDetail'
 import { DoubleColumnRow } from '../../../components/DoubleColumnRow/DoubleColumnRow'
 import { useS3 } from '../../../contexts/S3Context'
@@ -146,297 +147,299 @@ export const ReviewSubmit = ({
                     {userVisibleError}
                 </Alert>
             )}
-            <Grid row>
-                <Grid col={12} tablet={{ col: 8, offset: 2 }}>
-                    <section
-                        id="submissionType"
-                        className={styles.reviewSection}
-                    >
-                        <div className={styles.reviewSectionHeader}>
-                            <h2 className={styles.submissionName}>
-                                {draftSubmission.name}
-                            </h2>
-                            <div>
-                                <Link
-                                    asCustom={NavLink}
-                                    to="type"
-                                    className="usa-button usa-button--outline"
-                                    variant="unstyled"
-                                >
-                                    Edit
-                                    <span className="srOnly">
-                                        Submission type
-                                    </span>
-                                </Link>
-                            </div>
-                        </div>
-                        <dl>
-                            <DoubleColumnRow
-                                left={
-                                    <DataDetail
-                                        id="program"
-                                        label="Program"
-                                        data={draftSubmission.program.name}
-                                    />
-                                }
-                                right={
-                                    <DataDetail
-                                        id="submissionType"
-                                        label="Submission type"
-                                        data={
-                                            SubmissionTypeRecord[
-                                                draftSubmission.submissionType
-                                            ]
-                                        }
-                                    />
-                                }
-                            />
-                            <Grid row gap className={styles.reviewDataRow}>
-                                <Grid col={12}>
-                                    <DataDetail
-                                        id="submissionDescription"
-                                        label="Submission description"
-                                        data={
-                                            draftSubmission.submissionDescription
-                                        }
-                                    />
-                                </Grid>
-                            </Grid>
-                        </dl>
-                    </section>
-                    <section
-                        id="contractDetails"
-                        className={styles.reviewSection}
-                    >
-                        <SectionHeader
-                            header="Contract details"
-                            to="contract-details"
-                        />
-                        <dl>
-                            <DoubleColumnRow
-                                left={
-                                    <DataDetail
-                                        id="contractType"
-                                        label="Contract action type"
-                                        data={
-                                            draftSubmission.contractType
-                                                ? ContractTypeRecord[
-                                                      draftSubmission
-                                                          .contractType
-                                                  ]
-                                                : ''
-                                        }
-                                    />
-                                }
-                                right={
-                                    <DataDetail
-                                        id="contractEffectiveDates"
-                                        label="Contract effective dates"
-                                        data={`${dayjs(
-                                            draftSubmission.contractDateStart
-                                        ).format('MM/DD/YYYY')} - ${dayjs(
-                                            draftSubmission.contractDateEnd
-                                        ).format('MM/DD/YYYY')}`}
-                                    />
-                                }
-                            />
-                            <DoubleColumnRow
-                                left={
-                                    <DataDetail
-                                        id="managedCareEntities"
-                                        label="Managed care entities"
-                                        data={createCheckboxList(
-                                            draftSubmission.managedCareEntities,
-                                            ManagedCareEntityRecord
-                                        )}
-                                    />
-                                }
-                                right={
-                                    <DataDetail
-                                        id="federalAuthorities"
-                                        label="Federal authority your program operates under"
-                                        data={createCheckboxList(
-                                            draftSubmission.federalAuthorities,
-                                            FederalAuthorityRecord
-                                        )}
-                                    />
-                                }
-                            />
-                            {isContractAmendment &&
-                                draftSubmission.contractAmendmentInfo && (
-                                    <>
-                                        <DoubleColumnRow
-                                            left={
-                                                <DataDetail
-                                                    id="itemsAmended"
-                                                    label="Items being amended"
-                                                    data={createCheckboxList(
-                                                        draftSubmission
-                                                            .contractAmendmentInfo
-                                                            .itemsBeingAmended,
-                                                        AmendableItemsRecord
-                                                    )}
-                                                />
-                                            }
-                                            right={
-                                                <DataDetail
-                                                    id="covidRelated"
-                                                    label="Is this contract action related to the COVID-19 public health emergency"
-                                                    data={
-                                                        draftSubmission
-                                                            .contractAmendmentInfo
-                                                            .relatedToCovid19
-                                                            ? 'Yes'
-                                                            : 'No'
-                                                    }
-                                                />
-                                            }
-                                        />
-                                        {draftSubmission.contractAmendmentInfo
-                                            .relatedToCovid19 && (
-                                            <DoubleColumnRow
-                                                left={
-                                                    <DataDetail
-                                                        id="vaccineRelated"
-                                                        label="Is this related to coverage and reimbursement for vaccine administration?"
-                                                        data={
-                                                            draftSubmission
-                                                                .contractAmendmentInfo
-                                                                .relatedToVaccination
-                                                                ? 'Yes'
-                                                                : 'No'
-                                                        }
-                                                    />
-                                                }
-                                            />
-                                        )}
-                                    </>
-                                )}
-                        </dl>
-                    </section>
-                    <section id="rateDetails" className={styles.reviewSection}>
-                        <dl>
-                            <SectionHeader
-                                header="Rate details"
-                                to="rate-details"
-                            />
-                            <DoubleColumnRow
-                                left={
-                                    <DataDetail
-                                        id="rateType"
-                                        label="Rate certification type"
-                                        data={
-                                            draftSubmission.rateAmendmentInfo
-                                                ? 'Amendment to prior rate certification'
-                                                : 'New rate certification'
-                                        }
-                                    />
-                                }
-                                right={
-                                    <DataDetail
-                                        id="ratingPeriod"
-                                        label={
-                                            draftSubmission.rateAmendmentInfo
-                                                ? 'Rating period of original rate certification'
-                                                : 'Rating period'
-                                        }
-                                        data={`${dayjs(
-                                            draftSubmission.rateDateStart
-                                        ).format('MM/DD/YYYY')} - ${dayjs(
-                                            draftSubmission.rateDateEnd
-                                        ).format('MM/DD/YYYY')}`}
-                                    />
-                                }
-                            />
-                            <DoubleColumnRow
-                                left={
-                                    <DataDetail
-                                        id="dateCertified"
-                                        label={
-                                            draftSubmission.rateAmendmentInfo
-                                                ? 'Date certified for rate amendment'
-                                                : 'Date certified'
-                                        }
-                                        data={dayjs(
-                                            draftSubmission.rateDateCertified
-                                        ).format('MM/DD/YYYY')}
-                                    />
-                                }
-                                right={
-                                    draftSubmission.rateAmendmentInfo ? (
-                                        <DataDetail
-                                            id="effectiveRatingPeriod"
-                                            label="Effective dates of rate amendment"
-                                            data={`${dayjs(
-                                                draftSubmission
-                                                    .rateAmendmentInfo
-                                                    .effectiveDateStart
-                                            ).format('MM/DD/YYYY')} - ${dayjs(
-                                                draftSubmission
-                                                    .rateAmendmentInfo
-                                                    .effectiveDateEnd
-                                            ).format('MM/DD/YYYY')}`}
-                                        />
-                                    ) : null
-                                }
-                            />
-                        </dl>
-                    </section>
-                    <section id="documents" className={styles.reviewSection}>
-                        <SectionHeader header="Documents" to="documents" />
-                        <span className="text-bold">{documentsSummary}</span>
-                        <ul>
-                            {refreshedDocs.map((doc) => (
-                                <li key={doc.name}>
-                                    {doc.url ? (
-                                        <Link
-                                            aria-label={`${doc.name} (opens in new window)`}
-                                            href={doc.url}
-                                            variant="external"
-                                            target="_blank"
-                                        >
-                                            {doc.name}
-                                        </Link>
-                                    ) : (
-                                        <span>{doc.name}</span>
-                                    )}
-                                </li>
-                            ))}
-                        </ul>
-                    </section>
-
-                    <div className={stylesForm.pageActions}>
+            <PageHeading
+                className={stylesForm.formHeader}
+                headingLevel="h2"
+            >
+                Review and Submit
+            </PageHeading>
+            <section
+                id="submissionType"
+                className={styles.reviewSection}
+            >
+                <div className={styles.reviewSectionHeader}>
+                    <h2 className={styles.submissionName}>
+                        {draftSubmission.name}
+                    </h2>
+                    <div>
                         <Link
                             asCustom={NavLink}
-                            className="usa-button usa-button--unstyled"
+                            to="type"
+                            className="usa-button usa-button--outline"
                             variant="unstyled"
-                            to="/dashboard"
                         >
-                            Save as Draft
+                            Edit
+                            <span className="srOnly">
+                                Submission type
+                            </span>
                         </Link>
-                        <ButtonGroup
-                            type="default"
-                            className={stylesForm.buttonGroup}
-                        >
-                            <Link
-                                asCustom={NavLink}
-                                className="usa-button usa-button--outline"
-                                variant="unstyled"
-                                to="documents"
-                            >
-                                Back
-                            </Link>
-                            <Button
-                                type="button"
-                                className={styles.submitButtonClasses}
-                                onClick={handleFormSubmit}
-                            >
-                                Submit
-                            </Button>
-                        </ButtonGroup>
                     </div>
-                </Grid>
-            </Grid>
+                </div>
+                <dl>
+                    <DoubleColumnRow
+                        left={
+                            <DataDetail
+                                id="program"
+                                label="Program"
+                                data={draftSubmission.program.name}
+                            />
+                        }
+                        right={
+                            <DataDetail
+                                id="submissionType"
+                                label="Submission type"
+                                data={
+                                    SubmissionTypeRecord[
+                                        draftSubmission.submissionType
+                                    ]
+                                }
+                            />
+                        }
+                    />
+                    <Grid row gap className={styles.reviewDataRow}>
+                        <Grid col={12}>
+                            <DataDetail
+                                id="submissionDescription"
+                                label="Submission description"
+                                data={
+                                    draftSubmission.submissionDescription
+                                }
+                            />
+                        </Grid>
+                    </Grid>
+                </dl>
+            </section>
+            <section
+                id="contractDetails"
+                className={styles.reviewSection}
+            >
+                <SectionHeader
+                    header="Contract details"
+                    to="contract-details"
+                />
+                <dl>
+                    <DoubleColumnRow
+                        left={
+                            <DataDetail
+                                id="contractType"
+                                label="Contract action type"
+                                data={
+                                    draftSubmission.contractType
+                                        ? ContractTypeRecord[
+                                                draftSubmission
+                                                    .contractType
+                                            ]
+                                        : ''
+                                }
+                            />
+                        }
+                        right={
+                            <DataDetail
+                                id="contractEffectiveDates"
+                                label="Contract effective dates"
+                                data={`${dayjs(
+                                    draftSubmission.contractDateStart
+                                ).format('MM/DD/YYYY')} - ${dayjs(
+                                    draftSubmission.contractDateEnd
+                                ).format('MM/DD/YYYY')}`}
+                            />
+                        }
+                    />
+                    <DoubleColumnRow
+                        left={
+                            <DataDetail
+                                id="managedCareEntities"
+                                label="Managed care entities"
+                                data={createCheckboxList(
+                                    draftSubmission.managedCareEntities,
+                                    ManagedCareEntityRecord
+                                )}
+                            />
+                        }
+                        right={
+                            <DataDetail
+                                id="federalAuthorities"
+                                label="Federal authority your program operates under"
+                                data={createCheckboxList(
+                                    draftSubmission.federalAuthorities,
+                                    FederalAuthorityRecord
+                                )}
+                            />
+                        }
+                    />
+                    {isContractAmendment &&
+                        draftSubmission.contractAmendmentInfo && (
+                            <>
+                                <DoubleColumnRow
+                                    left={
+                                        <DataDetail
+                                            id="itemsAmended"
+                                            label="Items being amended"
+                                            data={createCheckboxList(
+                                                draftSubmission
+                                                    .contractAmendmentInfo
+                                                    .itemsBeingAmended,
+                                                AmendableItemsRecord
+                                            )}
+                                        />
+                                    }
+                                    right={
+                                        <DataDetail
+                                            id="covidRelated"
+                                            label="Is this contract action related to the COVID-19 public health emergency"
+                                            data={
+                                                draftSubmission
+                                                    .contractAmendmentInfo
+                                                    .relatedToCovid19
+                                                    ? 'Yes'
+                                                    : 'No'
+                                            }
+                                        />
+                                    }
+                                />
+                                {draftSubmission.contractAmendmentInfo
+                                    .relatedToCovid19 && (
+                                    <DoubleColumnRow
+                                        left={
+                                            <DataDetail
+                                                id="vaccineRelated"
+                                                label="Is this related to coverage and reimbursement for vaccine administration?"
+                                                data={
+                                                    draftSubmission
+                                                        .contractAmendmentInfo
+                                                        .relatedToVaccination
+                                                        ? 'Yes'
+                                                        : 'No'
+                                                }
+                                            />
+                                        }
+                                    />
+                                )}
+                            </>
+                        )}
+                </dl>
+            </section>
+            <section id="rateDetails" className={styles.reviewSection}>
+                <dl>
+                    <SectionHeader
+                        header="Rate details"
+                        to="rate-details"
+                    />
+                    <DoubleColumnRow
+                        left={
+                            <DataDetail
+                                id="rateType"
+                                label="Rate certification type"
+                                data={
+                                    draftSubmission.rateAmendmentInfo
+                                        ? 'Amendment to prior rate certification'
+                                        : 'New rate certification'
+                                }
+                            />
+                        }
+                        right={
+                            <DataDetail
+                                id="ratingPeriod"
+                                label={
+                                    draftSubmission.rateAmendmentInfo
+                                        ? 'Rating period of original rate certification'
+                                        : 'Rating period'
+                                }
+                                data={`${dayjs(
+                                    draftSubmission.rateDateStart
+                                ).format('MM/DD/YYYY')} - ${dayjs(
+                                    draftSubmission.rateDateEnd
+                                ).format('MM/DD/YYYY')}`}
+                            />
+                        }
+                    />
+                    <DoubleColumnRow
+                        left={
+                            <DataDetail
+                                id="dateCertified"
+                                label={
+                                    draftSubmission.rateAmendmentInfo
+                                        ? 'Date certified for rate amendment'
+                                        : 'Date certified'
+                                }
+                                data={dayjs(
+                                    draftSubmission.rateDateCertified
+                                ).format('MM/DD/YYYY')}
+                            />
+                        }
+                        right={
+                            draftSubmission.rateAmendmentInfo ? (
+                                <DataDetail
+                                    id="effectiveRatingPeriod"
+                                    label="Effective dates of rate amendment"
+                                    data={`${dayjs(
+                                        draftSubmission
+                                            .rateAmendmentInfo
+                                            .effectiveDateStart
+                                    ).format('MM/DD/YYYY')} - ${dayjs(
+                                        draftSubmission
+                                            .rateAmendmentInfo
+                                            .effectiveDateEnd
+                                    ).format('MM/DD/YYYY')}`}
+                                />
+                            ) : null
+                        }
+                    />
+                </dl>
+            </section>
+            <section id="documents" className={styles.reviewSection}>
+                <SectionHeader header="Documents" to="documents" />
+                <span className="text-bold">{documentsSummary}</span>
+                <ul>
+                    {refreshedDocs.map((doc) => (
+                        <li key={doc.name}>
+                            {doc.url ? (
+                                <Link
+                                    aria-label={`${doc.name} (opens in new window)`}
+                                    href={doc.url}
+                                    variant="external"
+                                    target="_blank"
+                                >
+                                    {doc.name}
+                                </Link>
+                            ) : (
+                                <span>{doc.name}</span>
+                            )}
+                        </li>
+                    ))}
+                </ul>
+            </section>
+
+            <div className={stylesForm.pageActions}>
+                <Link
+                    asCustom={NavLink}
+                    className="usa-button usa-button--unstyled"
+                    variant="unstyled"
+                    to="/dashboard"
+                >
+                    Save as Draft
+                </Link>
+                <ButtonGroup
+                    type="default"
+                    className={stylesForm.buttonGroup}
+                >
+                    <Link
+                        asCustom={NavLink}
+                        className="usa-button usa-button--outline"
+                        variant="unstyled"
+                        to="documents"
+                    >
+                        Back
+                    </Link>
+                    <Button
+                        type="button"
+                        className={styles.submitButton}
+                        onClick={handleFormSubmit}
+                    >
+                        Submit
+                    </Button>
+                </ButtonGroup>
+            </div>
         </GridContainer>
     )
 }
