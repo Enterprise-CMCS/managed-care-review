@@ -131,7 +131,7 @@ describe('ContractDetails', () => {
         // check error for not selected
         expect(
             screen.getByText(
-                'You must select why capitation rates are changing'
+                'You must select reason for capitation rate change'
             )
         ).toBeInTheDocument()
 
@@ -143,7 +143,7 @@ describe('ContractDetails', () => {
         // error should be gone
         expect(
             screen.queryByText(
-                'You must select why capitation rates are changing'
+                'You must select reason for capitation rate change'
             )
         ).toBeNull()
 
@@ -163,7 +163,7 @@ describe('ContractDetails', () => {
 
         // other is displayed, error is back
         expect(
-            screen.getByText('You must enter the other reason')
+            screen.getByText('You must enter a description')
         ).toBeInTheDocument()
 
         // click "NO" for the Covid question so we can submit

@@ -1,5 +1,6 @@
 import React from 'react'
 import * as Yup from 'yup'
+import dayjs from 'dayjs'
 import {
     Alert,
     Form as UswdsForm,
@@ -63,9 +64,16 @@ const ContractDetailsFormSchema = Yup.object().shape({
         .validateDateFormat('YYYY-MM-DD', true)
         .defined('You must enter an end date')
         .typeError('The end date must be in MM/DD/YYYY format')
-        .min(
-            Yup.ref('contractDateStart'),
-            'The end date must come after the start date'
+        .when(
+            // ContractDateEnd must be at minimum the day after Start
+            'contractDateStart',
+            (contractDateStart: Date, schema: Yup.DateSchema) => {
+                const dayAfter = dayjs(contractDateStart).add(1, 'day')
+                return schema.min(
+                    dayAfter,
+                    'The end date must come after the start date'
+                )
+            }
         ),
     managedCareEntities: Yup.array().min(
         1,
@@ -87,11 +95,11 @@ const ContractDetailsFormSchema = Yup.object().shape({
         is: (items: string[]) => items.includes('CAPITATION_RATES'),
         then: Yup.string()
             .nullable()
-            .defined('You must select why capitation rates are changing'),
+            .defined('You must select reason for capitation rate change'),
     }),
     capitationRatesOther: Yup.string().when('capitationRates', {
         is: 'OTHER',
-        then: Yup.string().defined('You must enter the other reason'),
+        then: Yup.string().defined('You must enter a description'),
     }),
     relatedToCovid19: Yup.string().when('contractType', {
         is: 'AMENDMENT',
@@ -106,6 +114,21 @@ const ContractDetailsFormSchema = Yup.object().shape({
         ),
     }),
 })
+
+function formattedDatePlusOneDay(initialValue: string): string {
+    const dayjsValue = dayjs(initialValue)
+    return initialValue && dayjsValue.isValid()
+        ? dayjsValue.add(1, 'day').format('YYYY-MM-DD')
+        : initialValue // preserve undefined to show validations later
+}
+
+function formattedDateMinusOneDay(initialValue: string): string {
+    const dayjsValue = dayjs(initialValue)
+    return initialValue && dayjsValue.isValid()
+        ? dayjsValue.subtract(1, 'day').format('YYYY-MM-DD')
+        : initialValue // preserve undefined to show validations later
+}
+
 export interface ContractDetailsFormValues {
     contractType: ContractType | undefined
     contractDateStart: string
@@ -387,6 +410,9 @@ export const ContractDetails = ({
                                                     name: 'contractDateStart',
                                                     defaultValue:
                                                         values.contractDateStart,
+                                                    maxDate: formattedDateMinusOneDay(
+                                                        values.contractDateEnd
+                                                    ),
                                                     onChange: (val) =>
                                                         setFieldValue(
                                                             'contractDateStart',
@@ -403,6 +429,9 @@ export const ContractDetails = ({
                                                     name: 'contractDateEnd',
                                                     defaultValue:
                                                         values.contractDateEnd,
+                                                    minDate: formattedDatePlusOneDay(
+                                                        values.contractDateStart
+                                                    ),
                                                     onChange: (val) =>
                                                         setFieldValue(
                                                             'contractDateEnd',
@@ -497,6 +526,7 @@ export const ContractDetails = ({
                                             >
                                                 <Fieldset legend="Items being amended">
                                                     <Link
+                                                        variant="external"
                                                         asCustom={
                                                             ReactRouterLink
                                                         }
@@ -505,6 +535,7 @@ export const ContractDetails = ({
                                                             hash:
                                                                 '#items-being-amended-definitions',
                                                         }}
+                                                        target="_blank"
                                                     >
                                                         Items being amended
                                                         definitions
