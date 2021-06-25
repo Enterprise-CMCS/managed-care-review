@@ -41,8 +41,12 @@ describe('ContractDetails', () => {
                             submissionDescription: 'A real submission',
                             documents: [],
                             contractType: 'AMENDMENT' as ContractType,
-                            contractDateStart: dayjs().format('YYYY-MM-DD'),
-                            contractDateEnd: dayjs().format('YYYY-MM-DD'),
+                            contractDateStart: dayjs(
+                                emptyDraft.contractDateStart
+                            ).format('YYYY-MM-DD'),
+                            contractDateEnd: dayjs(
+                                emptyDraft.contractDateEnd
+                            ).format('YYYY-MM-DD'),
                             federalAuthorities: [
                                 'VOLUNTARY',
                                 'BENCHMARK',

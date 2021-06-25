@@ -1,3 +1,5 @@
+import dayjs from 'dayjs'
+
 import {
     DraftSubmission,
     FetchCurrentUserDocument,
@@ -46,7 +48,7 @@ const mockDraftSubmission: DraftSubmission = {
     documents: [],
     contractType: 'BASE',
     contractDateStart: new Date(),
-    contractDateEnd: new Date(),
+    contractDateEnd: dayjs().add(2, 'days').toDate(),
     contractAmendmentInfo: null,
     managedCareEntities: [],
     federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
