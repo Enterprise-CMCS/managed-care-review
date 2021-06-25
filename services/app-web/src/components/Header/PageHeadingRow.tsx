@@ -33,7 +33,10 @@ export const PageHeadingRow = ({
                     <PageHeading>
                         <span>{loggedInUser.state.name}&nbsp;</span>
                         {heading && (
-                            <span className="font-heading-lg text-light">
+                            <span
+                                className="font-heading-lg text-light"
+                                data-testid="submission-name"
+                            >
                                 {heading}
                             </span>
                         )}

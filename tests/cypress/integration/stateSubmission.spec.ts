@@ -141,6 +141,62 @@ describe('State Submission', () => {
             // Continue button with valid documents navigates to review and submit page
             cy.navigateForm('Continue')
             cy.url({ timeout: 10_000 }).should('match', /.*review-and-submit$/)
+
+            cy.findByTestId('submission-name')
+                .invoke('text')
+                .then((nameText) => {
+                    console.log('GOT TEXT', nameText)
+
+                    // Navigate to the dashboard again
+                    cy.navigateForm('Submit')
+                    cy.findByRole('heading', { name: 'Submissions' }).should(
+                        'exist'
+                    )
+
+                    cy.findByText(nameText).should('exist')
+                })
+        })
+
+        it('user can start a new submission and see it on the dashboard', () => {
+            cy.login()
+            cy.findByTestId('dashboardPage').should('exist')
+            cy.findByRole('link', { name: 'Start new submission' }).click({
+                force: true,
+            })
+            cy.location('pathname').should('eq', '/submissions/new')
+            cy.findByText('New submission').should('exist')
+
+            cy.findByLabelText('Contract action only').safeClick()
+            cy.findByRole('combobox', { name: 'Program' }).select('msho')
+
+            cy.findByRole('textbox', { name: 'Submission description' })
+                .should('exist')
+                .type('description of submission')
+
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).safeClick()
+
+            cy.findByRole('heading', { name: 'Contract details' }).should(
+                'exist'
+            )
+
+            // see that the submission appears on the dashboard
+            cy.findByTestId('submission-name')
+                .invoke('text')
+                .then((nameText) => {
+                    console.log('GOT TEXT', nameText)
+
+                    // Navigate to the dashboard again
+                    cy.findByRole('link', {
+                        name: 'One Mac Managed Care Review',
+                    }).click()
+                    cy.findByRole('heading', { name: 'Submissions' }).should(
+                        'exist'
+                    )
+
+                    cy.findByText(nameText).should('exist')
+                })
         })
 
         it('user can edit a draft contract only submission', () => {

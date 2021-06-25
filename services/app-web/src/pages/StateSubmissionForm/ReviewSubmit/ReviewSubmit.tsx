@@ -43,7 +43,10 @@ export const ReviewSubmit = ({
         string | undefined
     >(undefined)
     const history = useHistory()
-    const [submitDraftSubmission] = useSubmitDraftSubmissionMutation()
+    const [submitDraftSubmission] = useSubmitDraftSubmissionMutation({
+        // An alternative to messing with the cache, just force refetch this query along with this one
+        refetchQueries: ['indexSubmissions'],
+    })
 
     useEffect(() => {
         const refreshDocuments = async () => {
