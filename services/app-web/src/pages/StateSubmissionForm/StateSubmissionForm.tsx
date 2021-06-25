@@ -48,27 +48,45 @@ export const StateSubmissionForm = (): React.ReactElement => {
     }
 
     const FormPages = [
-      'SUBMISSIONS_CONTRACT_DETAILS',
-      'SUBMISSIONS_RATE_DETAILS',
-      'SUBMISSIONS_DOCUMENTS',
-      'SUBMISSIONS_REVIEW_SUBMIT',
+        'SUBMISSIONS_CONTRACT_DETAILS',
+        'SUBMISSIONS_RATE_DETAILS',
+        'SUBMISSIONS_DOCUMENTS',
+        'SUBMISSIONS_REVIEW_SUBMIT',
     ] as RouteT[]
 
     const DynamicStepIndicator = () => {
 
-      const currentFormPage = getRouteName(pathname)
+        const currentFormPage = getRouteName(pathname)
 
-      return(
-        <>
-        <StepIndicator>
-          {FormPages.map((formPageName) => {
-            return <StepIndicatorStep
-            label={PageTitlesRecord[formPageName]} status={currentFormPage == formPageName ? 'current' : undefined} />
-          })}
-        </StepIndicator>
-        </>
-    )}
+        let formStepCompleted = true;
+        let formStepStatus: any = undefined
 
+        return(
+          <>
+            <StepIndicator>
+                {FormPages.map((formPageName) => {
+                  if (formPageName == currentFormPage) {
+                    formStepCompleted = false;
+                    formStepStatus = 'current';
+                  }
+                  else if (formStepCompleted) {
+                    formStepStatus = 'complete'
+                  }
+                  else {
+                    formStepStatus = undefined;
+                  }
+
+                  return (
+                      <StepIndicatorStep
+                          label={PageTitlesRecord[formPageName]}
+                          status={formStepStatus}
+                      />
+                  )
+                })}
+            </StepIndicator>
+          </>
+        )
+    }
 
     if (error) {
         console.log('error loading draft:', error)
