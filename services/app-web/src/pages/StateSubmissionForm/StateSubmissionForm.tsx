@@ -59,7 +59,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
         const currentFormPage = getRouteName(pathname)
 
         let formStepCompleted = true;
-        let formStepStatus: any = undefined
+        let formStepStatus: 'current' | 'complete' | undefined
 
         return(
           <>
@@ -80,6 +80,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                       <StepIndicatorStep
                           label={PageTitlesRecord[formPageName]}
                           status={formStepStatus}
+                          key={PageTitlesRecord[formPageName]}
                       />
                   )
                 })}
