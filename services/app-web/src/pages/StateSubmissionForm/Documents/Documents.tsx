@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import {
+    Alert,
     Form as UswdsForm,
     Button,
     ButtonGroup,
-    Alert,
     Link,
 } from '@trussworks/react-uswds'
 import { NavLink, useHistory } from 'react-router-dom'
@@ -12,7 +12,7 @@ import { v4 as uuidv4 } from 'uuid'
 import styles from '../StateSubmissionForm.module.scss'
 import {
     DraftSubmission,
-    useUpdateDraftSubmissionMutation,
+    UpdateDraftSubmissionInput,
 } from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
@@ -32,21 +32,24 @@ import { updatesFromSubmission } from '../updateSubmissionTransform'
 type DocumentProps = {
     showValidations?: boolean
     draftSubmission: DraftSubmission
+    formAlert?: React.ReactElement
+    updateDraft: (
+        input: UpdateDraftSubmissionInput
+    ) => Promise<DraftSubmission | undefined>
 }
 
 export const Documents = ({
     showValidations,
     draftSubmission,
+    updateDraft,
+    formAlert = undefined,
 }: DocumentProps): React.ReactElement => {
     const { deleteFile, uploadFile, getKey, getS3URL } = useS3()
     const [shouldValidate, setShouldValidate] = useState(showValidations)
+    const redirectToDashboard = React.useRef(false)
     const [hasValidFiles, setHasValidFiles] = useState(false)
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
     const history = useHistory()
-    const [
-        updateDraftSubmission,
-        { error: updateError },
-    ] = useUpdateDraftSubmissionMutation()
 
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         draftSubmission &&
@@ -87,11 +90,6 @@ export const Documents = ({
         if (!shouldValidate) setShouldValidate(true)
     }
 
-    if (updateError) {
-        showError('Apollo error')
-        console.log(updateError)
-    }
-
     const onLoadComplete = ({ files }: { files: FileItemT[] }) => {
         setFileItems(files)
     }
@@ -115,7 +113,7 @@ export const Documents = ({
         return { key: s3Key, s3URL: s3URL }
     }
 
-    const handleFormSubmit = async (e: React.FormEvent) => {
+    const handleFormSubmit = async (e: React.FormEvent | React.MouseEvent) => {
         e.preventDefault()
         setShouldValidate(true)
         if (!hasValidFiles) return
@@ -136,25 +134,22 @@ export const Documents = ({
         updatedDraft.documents = documents
 
         try {
-            const data = await updateDraftSubmission({
-                variables: {
-                    input: {
-                        submissionID: draftSubmission.id,
-                        draftSubmissionUpdates: updatedDraft,
-                    },
-                },
+            const updatedSubmission = await updateDraft({
+                submissionID: draftSubmission.id,
+                draftSubmissionUpdates: updatedDraft,
             })
-
-            if (data.errors) {
-                showError('gql errors have occurred')
+            if (updatedSubmission) {
+                if (redirectToDashboard.current) {
+                    history.push(`/dashboard`)
+                } else {
+                    history.push(
+                        `/submissions/${draftSubmission.id}/review-and-submit`
+                    )
+                }
             }
-
-            if (data.data?.updateDraftSubmission)
-                history.push(
-                    `/submissions/${draftSubmission.id}/review-and-submit`
-                )
         } catch (error) {
             showError(error)
+            redirectToDashboard.current = false
         }
     }
 
@@ -192,6 +187,7 @@ export const Documents = ({
                             You must upload at least one document
                         </Alert>
                     )}
+                    {formAlert && formAlert}
                     <FileUpload
                         id="documents"
                         name="documents"
@@ -229,9 +225,17 @@ export const Documents = ({
 
                 <div className={styles.pageActions}>
                     <Button
-                        type="submit"
+                        type="button"
                         unstyled
                         disabled={shouldValidate && !hasValidFiles}
+                        onClick={async (e) => {
+                            if (!hasValidFiles) {
+                                history.push(`/dashboard`)
+                            } else {
+                                redirectToDashboard.current = true
+                                await handleFormSubmit(e)
+                            }
+                        }}
                     >
                         Save as Draft
                     </Button>
@@ -248,6 +252,9 @@ export const Documents = ({
                             type="submit"
                             secondary={shouldValidate && !hasValidFiles}
                             disabled={shouldValidate && !hasValidFiles}
+                            onClick={() =>
+                                (redirectToDashboard.current = false)
+                            }
                         >
                             Continue
                         </Button>
