@@ -89,7 +89,7 @@ export const SubmissionType = ({
             // Without it, we wouldn't show this newly created submission on the dashboard page
             // without a refresh. Anytime a mutation does more than "modify an existing object"
             // you'll need to handle the cache.
-            update(cache, { data, errors }) {
+            update(cache, { data }) {
                 if (data) {
                     cache.modify({
                         fields: {
@@ -106,10 +106,10 @@ export const SubmissionType = ({
                                 return {
                                     totalCount: index.totalCount + 1,
                                     edges: [
-                                        ...index.edges,
                                         {
                                             node: newRef,
                                         },
+                                        ...index.edges,
                                     ],
                                 }
                             },

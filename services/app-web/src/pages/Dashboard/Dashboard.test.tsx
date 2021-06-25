@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { createMemoryHistory } from 'history'
 import { screen, waitFor } from '@testing-library/react'
 
-import { Dashboard } from './Dashboard'
+import { Dashboard, ListedSubmission, sortDraftsToTop } from './Dashboard'
 import {
     fetchCurrentUserMock,
     indexSubmissionsMockSuccess,
@@ -147,5 +147,59 @@ describe('Dashboard', () => {
             const title = screen.getByText('MN-MSHO-0001 was sent to CMS')
             expect(title).toBeInTheDocument()
         })
+    })
+
+    it('has a stable Draft sort', async () => {
+        const input: ListedSubmission[] = [
+            {
+                __typename: 'DraftSubmission',
+                id: '4',
+                submissionType: 'CONTRACT_ONLY',
+                submissionDescription: 'string',
+                programID: 'msho',
+                name: 'MSHO-0001',
+                submittedAt: undefined,
+            },
+            {
+                __typename: 'StateSubmission',
+                id: '3',
+                submissionType: 'CONTRACT_ONLY',
+                submissionDescription: 'string',
+                programID: 'msho',
+                name: 'MSHO-0001',
+                submittedAt: undefined,
+            },
+            {
+                __typename: 'DraftSubmission',
+                id: '2',
+                submissionType: 'CONTRACT_ONLY',
+                submissionDescription: 'string',
+                programID: 'msho',
+                name: 'MSHO-0001',
+                submittedAt: undefined,
+            },
+            {
+                __typename: 'StateSubmission',
+                id: '1',
+                submissionType: 'CONTRACT_ONLY',
+                submissionDescription: 'string',
+                programID: 'msho',
+                name: 'MSHO-0001',
+                submittedAt: undefined,
+            },
+            {
+                __typename: 'DraftSubmission',
+                id: '0',
+                submissionType: 'CONTRACT_ONLY',
+                submissionDescription: 'string',
+                programID: 'msho',
+                name: 'MSHO-0001',
+                submittedAt: undefined,
+            },
+        ]
+
+        sortDraftsToTop(input)
+
+        expect(input.map((i) => i.id)).toStrictEqual(['4', '2', '0', '3', '1'])
     })
 })

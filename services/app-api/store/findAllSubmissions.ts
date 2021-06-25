@@ -27,6 +27,7 @@ export async function findAllSubmissions(
             },
             {
                 indexName: 'StateStateNumberAllIndex',
+                scanIndexForward: false,
             }
         )) {
             const domainSubmission = convertToDomainSubmission(storeSubmission)

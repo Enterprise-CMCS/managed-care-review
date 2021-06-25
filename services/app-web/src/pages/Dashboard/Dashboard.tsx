@@ -5,6 +5,7 @@ import { NavLink, useLocation } from 'react-router-dom'
 
 import styles from './Dashboard.module.scss'
 
+import { Loading } from '../../components/Loading'
 import { Tabs } from '../../components/Tabs/Tabs'
 import { TabPanel } from '../../components/Tabs/TabPanel'
 import {
@@ -21,7 +22,7 @@ import { SubmissionType as DomainSubmissionType } from '../../../../app-web/src/
 // of some weird field collision syntax in GQL fragment matching
 // That means we can't use the full Submission type exported by gqlClient
 // ListedSubmission has everything we need for displaying a submission card
-type ListedSubmission = {
+export type ListedSubmission = {
     __typename: string
     id: string
     submissionType: DomainSubmissionType
@@ -45,19 +46,28 @@ const submissionStatusMap: {
     StateSubmission: SubmissionStatus.submitted,
 }
 
+// we want all the DraftSubmissions to rise above the StateSubmissions
+// but otherwise remain in numeric order  so we can compare their
+// typenames to sort them.
+export function sortDraftsToTop(submissions: ListedSubmission[]) {
+    submissions.sort((a, b) => {
+        // 'StateSubmission' > 'DraftSubmission'
+        if (a.__typename > b.__typename) {
+            return 1
+        }
+        if (a.__typename < b.__typename) {
+            return -1
+        }
+        return 0
+    })
+}
+
 function editUrlForSubmission(submission: ListedSubmission): string {
     // go to the edit URLS
     if (submission.__typename === 'DraftSubmission') {
         return `/submissions/${submission.id}/type`
     }
     return `/submissions/${submission.id}/`
-}
-
-function submittedAtDateForSubmission(submission: ListedSubmission): number {
-    console.log('OINWEF', submission.submittedAt)
-    const day = dayjs(submission.submittedAt)
-    console.log('dat', day, day.unix())
-    return day.unix()
 }
 
 export const Dashboard = (): React.ReactElement => {
@@ -77,7 +87,7 @@ export const Dashboard = (): React.ReactElement => {
     }
 
     if (loginStatus === 'LOADING' || !loggedInUser || loading || !data) {
-        return <div>Loading User Info</div>
+        return <Loading />
     } else {
         programs = loggedInUser.state.programs
     }
@@ -106,6 +116,7 @@ export const Dashboard = (): React.ReactElement => {
         const programSubs = submissionList.filter(
             (submission) => submission.programID === program.id
         )
+        sortDraftsToTop(programSubs)
 
         return (
             <section key={program.name} className={styles.panel}>
@@ -139,9 +150,7 @@ export const Dashboard = (): React.ReactElement => {
                                 name={submission.name}
                                 date={
                                     submission.submittedAt
-                                        ? submittedAtDateForSubmission(
-                                              submission
-                                          )
+                                        ? dayjs(submission.submittedAt)
                                         : undefined
                                 }
                                 status={
