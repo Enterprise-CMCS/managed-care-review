@@ -233,13 +233,11 @@ export const RateDetails = ({
                 {({
                     values,
                     errors,
-                    handleChange,
+                    dirty,
                     handleSubmit,
                     isSubmitting,
                     isValidating,
                     setFieldValue,
-                    setValues,
-                    validateForm,
                 }) => (
                     <>
                         <PageHeading
@@ -493,11 +491,15 @@ export const RateDetails = ({
                                 <Button
                                     type="button"
                                     unstyled
-                                    onClick={(e) => {
-                                        setShouldValidate(true)
-                                        if (!isValidating) {
-                                            redirectToDashboard.current = true
-                                            handleSubmit()
+                                    onClick={() => {
+                                        if (!dirty) {
+                                            history.push(`/dashboard`)
+                                        } else {
+                                            setShouldValidate(true)
+                                            if (!isValidating) {
+                                                redirectToDashboard.current = true
+                                                handleSubmit()
+                                            }
                                         }
                                     }}
                                 >
@@ -518,7 +520,10 @@ export const RateDetails = ({
                                     <Button
                                         type="submit"
                                         disabled={isSubmitting}
-                                        onClick={() => setShouldValidate(true)}
+                                        onClick={() => {
+                                            redirectToDashboard.current = false
+                                            setShouldValidate(true)
+                                        }}
                                     >
                                         Continue
                                     </Button>

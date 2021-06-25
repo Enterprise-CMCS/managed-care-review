@@ -229,8 +229,12 @@ export const Documents = ({
                         unstyled
                         disabled={shouldValidate && !hasValidFiles}
                         onClick={async (e) => {
-                            redirectToDashboard.current = true
-                            await handleFormSubmit(e)
+                            if (!hasValidFiles) {
+                                history.push(`/dashboard`)
+                            } else {
+                                redirectToDashboard.current = true
+                                await handleFormSubmit(e)
+                            }
                         }}
                     >
                         Save as Draft
@@ -248,6 +252,9 @@ export const Documents = ({
                             type="submit"
                             secondary={shouldValidate && !hasValidFiles}
                             disabled={shouldValidate && !hasValidFiles}
+                            onClick={() =>
+                                (redirectToDashboard.current = false)
+                            }
                         >
                             Continue
                         </Button>

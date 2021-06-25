@@ -260,11 +260,11 @@ export const ContractDetails = ({
             {({
                 values,
                 errors,
+                dirty,
                 handleSubmit,
                 isSubmitting,
                 isValidating,
                 setFieldValue,
-                validateForm,
             }) => (
                 <>
                     <PageHeading
@@ -944,11 +944,15 @@ export const ContractDetails = ({
                             <Button
                                 type="button"
                                 unstyled
-                                onClick={(e) => {
-                                    setShouldValidate(true)
-                                    if (!isValidating) {
-                                        redirectToDashboard.current = true
-                                        handleSubmit()
+                                onClick={() => {
+                                    if (!dirty) {
+                                        history.push(`/dashboard`)
+                                    } else {
+                                        setShouldValidate(true)
+                                        if (!isValidating) {
+                                            redirectToDashboard.current = true
+                                            handleSubmit()
+                                        }
                                     }
                                 }}
                             >
@@ -969,7 +973,10 @@ export const ContractDetails = ({
                                 <Button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    onClick={() => setShouldValidate(true)}
+                                    onClick={() => {
+                                        redirectToDashboard.current = false
+                                        setShouldValidate(true)
+                                    }}
                                 >
                                     Continue
                                 </Button>
