@@ -131,7 +131,13 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     />
                 </Route>
                 <Route path={RoutesRecord.SUBMISSIONS_DOCUMENTS}>
-                    <Documents draftSubmission={draft} />
+                    <Documents
+                        draftSubmission={draft}
+                        updateDraft={updateDraft}
+                        formAlert={
+                            showFormAlert ? GenericFormAlert() : undefined
+                        }
+                    />
                 </Route>
                 <Route path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}>
                     <ReviewSubmit draftSubmission={draft} />

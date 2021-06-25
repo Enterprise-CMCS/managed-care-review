@@ -491,7 +491,7 @@ export const RateDetails = ({
                             </fieldset>
                             <div className={styles.pageActions}>
                                 <Button
-                                    type="submit"
+                                    type="button"
                                     unstyled
                                     onClick={(e) => {
                                         setShouldValidate(true)
