@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 
-import { GridContainer } from '@trussworks/react-uswds'
+import { Alert, GridContainer } from '@trussworks/react-uswds'
 import { Switch, Route, useParams, useLocation } from 'react-router-dom'
 
 import { Error404 } from '../Errors/Error404'
@@ -15,21 +15,41 @@ import { Documents } from './Documents/Documents'
 import { ReviewSubmit } from './ReviewSubmit/ReviewSubmit'
 import { SubmissionType } from './SubmissionType/SubmissionType'
 
-import { useFetchDraftSubmissionQuery } from '../../gen/gqlClient'
+import {
+    DraftSubmission,
+    UpdateDraftSubmissionInput,
+    useUpdateDraftSubmissionMutation,
+    useFetchDraftSubmissionQuery,
+} from '../../gen/gqlClient'
 
 export const StateSubmissionForm = (): React.ReactElement => {
     const { id } = useParams<{ id: string }>()
     const { pathname } = useLocation()
     const { updateHeading } = usePage()
+    const [showFormAlert, setShowFormAlert] = React.useState(false)
 
-    const { data, loading, error } = useFetchDraftSubmissionQuery({
+    const { data: fetchData, loading, error } = useFetchDraftSubmissionQuery({
         variables: {
             input: {
                 submissionID: id,
             },
         },
     })
-    const draft = data?.fetchDraftSubmission?.draftSubmission
+
+    const [
+        updateDraftSubmission,
+        { error: updateError },
+    ] = useUpdateDraftSubmissionMutation()
+
+    if (updateError && !showFormAlert) {
+        setShowFormAlert(true)
+        console.log(
+            'Log: updating submission failed with gql error',
+            updateError
+        )
+    }
+
+    const draft = fetchData?.fetchDraftSubmission?.draftSubmission
 
     useEffect(() => {
         updateHeading(pathname, draft?.name)
@@ -61,6 +81,31 @@ export const StateSubmissionForm = (): React.ReactElement => {
         return <Error404 />
     }
 
+    const updateDraft = async (
+        input: UpdateDraftSubmissionInput
+    ): Promise<DraftSubmission | undefined> => {
+        setShowFormAlert(false)
+        try {
+            const updateResult = await updateDraftSubmission({
+                variables: {
+                    input: input,
+                },
+            })
+            const updatedSubmission: DraftSubmission | undefined =
+                updateResult?.data?.updateDraftSubmission.draftSubmission
+
+            if (!updatedSubmission) setShowFormAlert(true)
+
+            return updatedSubmission
+        } catch (serverError) {
+            setShowFormAlert(true)
+            return undefined
+        }
+    }
+
+    const GenericFormAlert = () => (
+        <Alert type="error">Something went wrong</Alert>
+    )
     return (
         <GridContainer>
             <Switch>
@@ -68,7 +113,11 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     <SubmissionType draftSubmission={draft} />
                 </Route>
                 <Route path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}>
-                    <ContractDetails draftSubmission={draft} />
+                    <ContractDetails
+                        draftSubmission={draft}
+                        updateDraft={updateDraft}
+                        formAlert={showFormAlert ? GenericFormAlert() : null}
+                    />
                 </Route>
                 <Route path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}>
                     <RateDetails draftSubmission={draft} />
