@@ -116,11 +116,19 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     <ContractDetails
                         draftSubmission={draft}
                         updateDraft={updateDraft}
-                        formAlert={showFormAlert ? GenericFormAlert() : null}
+                        formAlert={
+                            showFormAlert ? GenericFormAlert() : undefined
+                        }
                     />
                 </Route>
                 <Route path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}>
-                    <RateDetails draftSubmission={draft} />
+                    <RateDetails
+                        draftSubmission={draft}
+                        updateDraft={updateDraft}
+                        formAlert={
+                            showFormAlert ? GenericFormAlert() : undefined
+                        }
+                    />
                 </Route>
                 <Route path={RoutesRecord.SUBMISSIONS_DOCUMENTS}>
                     <Documents draftSubmission={draft} />

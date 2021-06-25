@@ -124,14 +124,14 @@ export const ContractDetails = ({
     draftSubmission,
     showValidations = false,
     updateDraft,
-    formAlert = null,
+    formAlert = undefined,
 }: {
     draftSubmission: DraftSubmission
     showValidations?: boolean
     updateDraft: (
         input: UpdateDraftSubmissionInput
     ) => Promise<DraftSubmission | undefined>
-    formAlert?: React.ReactElement | null
+    formAlert?: React.ReactElement
 }): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const redirectToDashboard = React.useRef(false)

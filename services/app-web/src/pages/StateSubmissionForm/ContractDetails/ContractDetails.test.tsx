@@ -7,7 +7,6 @@ import userEvent from '@testing-library/user-event'
 import {
     mockDraft,
     fetchCurrentUserMock,
-    mockDraftSubmission,
 } from '../../../testHelpers/apolloHelpers'
 
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
@@ -15,7 +14,7 @@ import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { ContractDetails } from './ContractDetails'
 
 describe('ContractDetails', () => {
-    afterAll(() => jest.clearAllMocks())
+    afterEach(() => jest.clearAllMocks())
 
     it('progressively discloses options for capitation rates', async () => {
         // mount an empty form
