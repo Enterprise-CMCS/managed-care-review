@@ -152,7 +152,7 @@ export const ReviewSubmit = ({
 
         return otherReasons
             ? `${userFriendlyList}, ${otherReasons
-                  .map((reason) => `Other - ${reason}`)
+                  .filter((el) => el !== null)
                   .join(', ')
                   .replace(/,\s*$/, '')}`
             : userFriendlyList
@@ -160,13 +160,16 @@ export const ReviewSubmit = ({
 
     const isContractAmendment = draftSubmission.contractType === 'AMENDMENT'
 
-    const capitationRateChangeReason = () => {
+    const capitationRateChangeReason = (): string | null => {
         const capRates =
             draftSubmission?.contractAmendmentInfo?.capitationRatesAmendedInfo
         const changeReason = capRates?.reason
+        if (!capRates) return null
 
-        return capRates && changeReason
-            ? `${RateChangeReasonRecord[changeReason]} - ${capRates.otherReason}`
+        return capRates.otherReason
+            ? `Other - ${capRates.otherReason}`
+            : changeReason
+            ? RateChangeReasonRecord[changeReason]
             : null
     }
 
@@ -298,11 +301,12 @@ export const ReviewSubmit = ({
                                                         .itemsBeingAmended,
                                                 dict: AmendableItemsRecord,
                                                 otherReasons: [
+                                                    capitationRateChangeReason(),
                                                     draftSubmission
                                                         .contractAmendmentInfo
-                                                        ?.otherItemBeingAmended ??
-                                                        null,
-                                                    capitationRateChangeReason(),
+                                                        ?.otherItemBeingAmended
+                                                        ? `Other - ${draftSubmission.contractAmendmentInfo?.otherItemBeingAmended}`
+                                                        : null,
                                                 ],
                                             })}
                                         />
