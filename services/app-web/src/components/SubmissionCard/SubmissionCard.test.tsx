@@ -1,5 +1,6 @@
 import React from 'react'
 import { screen, render } from '@testing-library/react'
+import dayjs from 'dayjs'
 import {
     SubmissionCard,
     SubmissionStatus,
@@ -60,7 +61,7 @@ describe('SubmissionCard', () => {
                 description="Rates are being adjusted to reflect revised capitation rates based on more recent data as well as benefit changes approved by the General Assembly."
                 submissionType={SubmissionType.ContractOnly}
                 status={SubmissionStatus.submitted}
-                date={Date.now()}
+                date={dayjs()}
                 href="/foo"
             />
         )

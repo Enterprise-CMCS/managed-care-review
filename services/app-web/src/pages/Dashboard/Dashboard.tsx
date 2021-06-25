@@ -49,7 +49,7 @@ const submissionStatusMap: {
 // we want all the DraftSubmissions to rise above the StateSubmissions
 // but otherwise remain in numeric order  so we can compare their
 // typenames to sort them.
-export function sortDraftsToTop(submissions: ListedSubmission[]) {
+export function sortDraftsToTop(submissions: ListedSubmission[]): void {
     submissions.sort((a, b) => {
         // 'StateSubmission' > 'DraftSubmission'
         if (a.__typename > b.__typename) {
