@@ -22,6 +22,7 @@ import {
     AmendableItemsRecord,
     ContractTypeRecord,
     FederalAuthorityRecord,
+    RateChangeReasonRecord,
     ManagedCareEntityRecord,
     SubmissionTypeRecord,
 } from '../../../constants/submissions'
@@ -132,17 +133,46 @@ export const ReviewSubmit = ({
         }
     }
     // Array of values from a checkbox field is displayed in a comma-separated list
-    const createCheckboxList = (
-        items: string[], // Checkbox field array
-        itemRecord: Record<string, string> // A lang constant record like ManagedCareEntityRecord or FederalAuthorityRecord
-    ) => {
-        const userFriendlyItems = items.map((item) => {
-            return itemRecord[`${item}`]
-        })
-        return userFriendlyItems.join(', ').replace(/,\s*$/, '')
+    const createCheckboxList = ({
+        list,
+        dict,
+        otherReasons,
+    }: {
+        list: string[] // Checkbox field array
+        dict: Record<string, string> // A lang constant dictionary like ManagedCareEntityRecord or FederalAuthorityRecord,
+        otherReasons?: (string | null)[] // additional "Other" text values
+    }) => {
+        const userFriendlyList = list
+            .map((item) => {
+                return dict[item] ?? dict[item]
+            })
+            .filter((el) => el !== null)
+            .join(', ')
+            .replace(/,\s*$/, '')
+
+        return otherReasons
+            ? `${userFriendlyList}, ${otherReasons
+                  .filter((el) => el !== null)
+                  .join(', ')
+                  .replace(/,\s*$/, '')}`
+            : userFriendlyList
     }
 
     const isContractAmendment = draftSubmission.contractType === 'AMENDMENT'
+
+    const capitationRateChangeReason = (): string | null => {
+        const capRates =
+            draftSubmission?.contractAmendmentInfo?.capitationRatesAmendedInfo
+        const changeReason = capRates?.reason
+        if (!capRates) return null
+
+        return capRates.otherReason
+            ? `Other - ${capRates.otherReason}`
+            : changeReason
+            ? RateChangeReasonRecord[changeReason]
+            : null
+    }
+
     return (
         <GridContainer className={styles.reviewSectionWrapper}>
             {userVisibleError && (
@@ -150,16 +180,10 @@ export const ReviewSubmit = ({
                     {userVisibleError}
                 </Alert>
             )}
-            <PageHeading
-                className={stylesForm.formHeader}
-                headingLevel="h2"
-            >
+            <PageHeading className={stylesForm.formHeader} headingLevel="h2">
                 Review and Submit
             </PageHeading>
-            <section
-                id="submissionType"
-                className={styles.reviewSection}
-            >
+            <section id="submissionType" className={styles.reviewSection}>
                 <div className={styles.reviewSectionHeader}>
                     <h2 className={styles.submissionName}>
                         {draftSubmission.name}
@@ -172,9 +196,7 @@ export const ReviewSubmit = ({
                             variant="unstyled"
                         >
                             Edit
-                            <span className="srOnly">
-                                Submission type
-                            </span>
+                            <span className="srOnly">Submission type</span>
                         </Link>
                     </div>
                 </div>
@@ -204,18 +226,13 @@ export const ReviewSubmit = ({
                             <DataDetail
                                 id="submissionDescription"
                                 label="Submission description"
-                                data={
-                                    draftSubmission.submissionDescription
-                                }
+                                data={draftSubmission.submissionDescription}
                             />
                         </Grid>
                     </Grid>
                 </dl>
             </section>
-            <section
-                id="contractDetails"
-                className={styles.reviewSection}
-            >
+            <section id="contractDetails" className={styles.reviewSection}>
                 <SectionHeader
                     header="Contract details"
                     to="contract-details"
@@ -229,9 +246,8 @@ export const ReviewSubmit = ({
                                 data={
                                     draftSubmission.contractType
                                         ? ContractTypeRecord[
-                                                draftSubmission
-                                                    .contractType
-                                            ]
+                                              draftSubmission.contractType
+                                          ]
                                         : ''
                                 }
                             />
@@ -253,20 +269,20 @@ export const ReviewSubmit = ({
                             <DataDetail
                                 id="managedCareEntities"
                                 label="Managed care entities"
-                                data={createCheckboxList(
-                                    draftSubmission.managedCareEntities,
-                                    ManagedCareEntityRecord
-                                )}
+                                data={createCheckboxList({
+                                    list: draftSubmission.managedCareEntities,
+                                    dict: ManagedCareEntityRecord,
+                                })}
                             />
                         }
                         right={
                             <DataDetail
                                 id="federalAuthorities"
                                 label="Federal authority your program operates under"
-                                data={createCheckboxList(
-                                    draftSubmission.federalAuthorities,
-                                    FederalAuthorityRecord
-                                )}
+                                data={createCheckboxList({
+                                    list: draftSubmission.federalAuthorities,
+                                    dict: FederalAuthorityRecord,
+                                })}
                             />
                         }
                     />
@@ -278,12 +294,21 @@ export const ReviewSubmit = ({
                                         <DataDetail
                                             id="itemsAmended"
                                             label="Items being amended"
-                                            data={createCheckboxList(
-                                                draftSubmission
-                                                    .contractAmendmentInfo
-                                                    .itemsBeingAmended,
-                                                AmendableItemsRecord
-                                            )}
+                                            data={createCheckboxList({
+                                                list:
+                                                    draftSubmission
+                                                        .contractAmendmentInfo
+                                                        .itemsBeingAmended,
+                                                dict: AmendableItemsRecord,
+                                                otherReasons: [
+                                                    capitationRateChangeReason(),
+                                                    draftSubmission
+                                                        .contractAmendmentInfo
+                                                        ?.otherItemBeingAmended
+                                                        ? `Other - ${draftSubmission.contractAmendmentInfo?.otherItemBeingAmended}`
+                                                        : null,
+                                                ],
+                                            })}
                                         />
                                     }
                                     right={
@@ -324,10 +349,7 @@ export const ReviewSubmit = ({
             </section>
             <section id="rateDetails" className={styles.reviewSection}>
                 <dl>
-                    <SectionHeader
-                        header="Rate details"
-                        to="rate-details"
-                    />
+                    <SectionHeader header="Rate details" to="rate-details" />
                     <DoubleColumnRow
                         left={
                             <DataDetail
@@ -376,12 +398,10 @@ export const ReviewSubmit = ({
                                     id="effectiveRatingPeriod"
                                     label="Effective dates of rate amendment"
                                     data={`${dayjs(
-                                        draftSubmission
-                                            .rateAmendmentInfo
+                                        draftSubmission.rateAmendmentInfo
                                             .effectiveDateStart
                                     ).format('MM/DD/YYYY')} - ${dayjs(
-                                        draftSubmission
-                                            .rateAmendmentInfo
+                                        draftSubmission.rateAmendmentInfo
                                             .effectiveDateEnd
                                     ).format('MM/DD/YYYY')}`}
                                 />
@@ -422,10 +442,7 @@ export const ReviewSubmit = ({
                 >
                     Save as Draft
                 </Link>
-                <ButtonGroup
-                    type="default"
-                    className={stylesForm.buttonGroup}
-                >
+                <ButtonGroup type="default" className={stylesForm.buttonGroup}>
                     <Link
                         asCustom={NavLink}
                         className="usa-button usa-button--outline"
