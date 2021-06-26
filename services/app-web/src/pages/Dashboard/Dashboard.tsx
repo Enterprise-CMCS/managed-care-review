@@ -18,20 +18,8 @@ import { Program, useIndexSubmissionsQuery } from '../../gen/gqlClient'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
 import { SubmissionType as DomainSubmissionType } from '../../../../app-web/src/common-code/domain-models'
 
-// We don't return full submissions in the indexSubmissionQuery because
-// of some weird field collision syntax in GQL fragment matching
-// That means we can't use the full Submission type exported by gqlClient
-// ListedSubmission has everything we need for displaying a submission card
-export type ListedSubmission = {
-    __typename: string
-    id: string
-    submissionType: DomainSubmissionType
-    submissionDescription: string
-    programID: string
-    name: string
-    submittedAt?: string
-}
-
+// The SubmissionCard uses some enums, which I think might be a storybook think but I haven't looked too deeply in it
+// so we map our types to the enums.
 const domainSubmissionTypeMap: {
     [Property in DomainSubmissionType]: SubmissionType
 } = {
@@ -49,7 +37,7 @@ const submissionStatusMap: {
 // we want all the DraftSubmissions to rise above the StateSubmissions
 // but otherwise remain in numeric order  so we can compare their
 // typenames to sort them.
-export function sortDraftsToTop(submissions: ListedSubmission[]): void {
+export function sortDraftsToTop(submissions: { __typename: string }[]): void {
     submissions.sort((a, b) => {
         // 'StateSubmission' > 'DraftSubmission'
         if (a.__typename > b.__typename) {
@@ -62,7 +50,10 @@ export function sortDraftsToTop(submissions: ListedSubmission[]): void {
     })
 }
 
-function editUrlForSubmission(submission: ListedSubmission): string {
+function editUrlForSubmission(submission: {
+    __typename: string
+    id: string
+}): string {
     // go to the edit URLS
     if (submission.__typename === 'DraftSubmission') {
         return `/submissions/${submission.id}/type`
@@ -92,9 +83,7 @@ export const Dashboard = (): React.ReactElement => {
         programs = loggedInUser.state.programs
     }
 
-    const submissionList: ListedSubmission[] = data.indexSubmissions.edges.map(
-        (edge) => edge.node
-    )
+    const submissionList = data.indexSubmissions.edges.map((edge) => edge.node)
 
     const justSubmittedSubmissionName = new URLSearchParams(
         location.search
@@ -149,6 +138,8 @@ export const Dashboard = (): React.ReactElement => {
                                 description={submission.submissionDescription}
                                 name={submission.name}
                                 date={
+                                    submission.__typename ===
+                                        'StateSubmission' &&
                                     submission.submittedAt
                                         ? dayjs(submission.submittedAt)
                                         : undefined
