@@ -10,8 +10,11 @@ import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { RateDetails } from './RateDetails'
 
 describe('RateDetails', () => {
+    afterEach(() => jest.clearAllMocks())
+
     it('renders without errors', async () => {
         const mock = mockDraft()
+        const mockUpdateDraftFn = jest.fn()
         const emptyRateDetailsDraft = {
             ...mock,
             rateType: null,
@@ -21,7 +24,10 @@ describe('RateDetails', () => {
         }
 
         renderWithProviders(
-            <RateDetails draftSubmission={emptyRateDetailsDraft} />,
+            <RateDetails
+                draftSubmission={emptyRateDetailsDraft}
+                updateDraft={mockUpdateDraftFn}
+            />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -36,6 +42,7 @@ describe('RateDetails', () => {
 
     it('loads with only rate type form field visible', async () => {
         const mock = mockDraft()
+        const mockUpdateDraftFn = jest.fn()
         const emptyRateDetailsDraft = {
             ...mock,
             rateType: null,
@@ -45,7 +52,10 @@ describe('RateDetails', () => {
         }
 
         renderWithProviders(
-            <RateDetails draftSubmission={emptyRateDetailsDraft} />,
+            <RateDetails
+                draftSubmission={emptyRateDetailsDraft}
+                updateDraft={mockUpdateDraftFn}
+            />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -72,6 +82,7 @@ describe('RateDetails', () => {
 
     it('cannot continue without selecting rate type', async () => {
         const mock = mockDraft()
+        const mockUpdateDraftFn = jest.fn()
         const emptyRateDetailsDraft = {
             ...mock,
             rateType: null,
@@ -81,7 +92,10 @@ describe('RateDetails', () => {
         }
 
         renderWithProviders(
-            <RateDetails draftSubmission={emptyRateDetailsDraft} />,
+            <RateDetails
+                draftSubmission={emptyRateDetailsDraft}
+                updateDraft={mockUpdateDraftFn}
+            />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -100,6 +114,7 @@ describe('RateDetails', () => {
 
     it('cannot continue if rating period is more than or less than 12 months', async () => {
         const mock = mockDraft()
+        const mockUpdateDraftFn = jest.fn()
         const emptyRateDetailsDraft = {
             ...mock,
             rateType: null,
@@ -109,7 +124,10 @@ describe('RateDetails', () => {
         }
 
         renderWithProviders(
-            <RateDetails draftSubmission={emptyRateDetailsDraft} />,
+            <RateDetails
+                draftSubmission={emptyRateDetailsDraft}
+                updateDraft={mockUpdateDraftFn}
+            />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -187,6 +205,7 @@ describe('RateDetails', () => {
 
     it('progressively disclose new rate form fields as expected', async () => {
         const mock = mockDraft()
+        const mockUpdateDraftFn = jest.fn()
         const emptyRateDetailsDraft = {
             ...mock,
             rateType: null,
@@ -196,7 +215,10 @@ describe('RateDetails', () => {
         }
 
         renderWithProviders(
-            <RateDetails draftSubmission={emptyRateDetailsDraft} />,
+            <RateDetails
+                draftSubmission={emptyRateDetailsDraft}
+                updateDraft={mockUpdateDraftFn}
+            />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],

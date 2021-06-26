@@ -2,7 +2,6 @@ import React from 'react'
 import * as Yup from 'yup'
 import dayjs from 'dayjs'
 import {
-    Alert,
     Form as UswdsForm,
     FormGroup,
     Fieldset,
@@ -34,7 +33,7 @@ import {
     FederalAuthority,
     CapitationRatesAmendedInfo,
     CapitationRatesAmendmentReason,
-    useUpdateDraftSubmissionMutation,
+    UpdateDraftSubmissionInput,
 } from '../../../gen/gqlClient'
 import { ManagedCareEntity } from '../../../common-code/domain-models/DraftSubmissionType'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
@@ -95,7 +94,7 @@ const ContractDetailsFormSchema = Yup.object().shape({
         is: (items: string[]) => items.includes('CAPITATION_RATES'),
         then: Yup.string()
             .nullable()
-            .defined('You must select reason for capitation rate change'),
+            .defined('You must select a reason for capitation rate change'),
     }),
     capitationRatesOther: Yup.string().when('capitationRates', {
         is: 'OTHER',
@@ -147,12 +146,18 @@ type FormError = FormikErrors<ContractDetailsFormValues>[keyof FormikErrors<Cont
 export const ContractDetails = ({
     draftSubmission,
     showValidations = false,
+    updateDraft,
+    formAlert = undefined,
 }: {
     draftSubmission: DraftSubmission
     showValidations?: boolean
+    updateDraft: (
+        input: UpdateDraftSubmissionInput
+    ) => Promise<DraftSubmission | undefined>
+    formAlert?: React.ReactElement
 }): React.ReactElement => {
-    const [showFormAlert, setShowFormAlert] = React.useState(false)
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
+    const redirectToDashboard = React.useRef(false)
     const history = useHistory()
 
     const contractDetailsInitialValues: ContractDetailsFormValues = {
@@ -186,19 +191,6 @@ export const ContractDetails = ({
         federalAuthorities: draftSubmission?.federalAuthorities ?? [],
     }
 
-    const [
-        updateDraftSubmission,
-        { error: updateError },
-    ] = useUpdateDraftSubmissionMutation()
-
-    if (updateError && !showFormAlert) {
-        setShowFormAlert(true)
-        console.log(
-            'Log: updating submission failed with gql error',
-            updateError
-        )
-    }
-
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
@@ -227,7 +219,6 @@ export const ContractDetails = ({
         formikHelpers: FormikHelpers<ContractDetailsFormValues>
     ) => {
         const updatedDraft = updatesFromSubmission(draftSubmission)
-
         updatedDraft.contractType = values.contractType
         updatedDraft.contractDateStart = values.contractDateStart
         updatedDraft.contractDateEnd = values.contractDateEnd
@@ -264,26 +255,22 @@ export const ContractDetails = ({
         }
 
         try {
-            const updateResult = await updateDraftSubmission({
-                variables: {
-                    input: {
-                        submissionID: draftSubmission.id,
-                        draftSubmissionUpdates: updatedDraft,
-                    },
-                },
+            const updatedSubmission = await updateDraft({
+                submissionID: draftSubmission.id,
+                draftSubmissionUpdates: updatedDraft,
             })
-            const updatedSubmission: DraftSubmission | undefined =
-                updateResult?.data?.updateDraftSubmission.draftSubmission
-
             if (updatedSubmission) {
-                history.push(`/submissions/${draftSubmission.id}/rate-details`)
-            } else {
-                console.log(updateResult.errors)
-                setShowFormAlert(true)
+                if (redirectToDashboard.current) {
+                    history.push(`/dashboard`)
+                } else {
+                    history.push(
+                        `/submissions/${draftSubmission.id}/rate-details`
+                    )
+                }
             }
         } catch (serverError) {
-            setShowFormAlert(true)
             formikHelpers.setSubmitting(false)
+            redirectToDashboard.current = false
         }
     }
 
@@ -296,11 +283,11 @@ export const ContractDetails = ({
             {({
                 values,
                 errors,
+                dirty,
                 handleSubmit,
                 isSubmitting,
                 isValidating,
                 setFieldValue,
-                validateForm,
             }) => (
                 <>
                     <PageHeading
@@ -315,21 +302,12 @@ export const ContractDetails = ({
                         aria-label="Contract Details Form"
                         onSubmit={(e) => {
                             e.preventDefault()
-                            validateForm()
-                                .then(() => {
-                                    setShouldValidate(true)
-                                })
-                                .catch(() =>
-                                    console.warn('Log: Validation Error')
-                                )
                             if (!isValidating) handleSubmit()
                         }}
                     >
                         <fieldset className="usa-fieldset">
                             <legend className="srOnly">Contract Details</legend>
-                            {showFormAlert && (
-                                <Alert type="error">Something went wrong</Alert>
-                            )}
+                            {formAlert && formAlert}
                             <span>All fields are required</span>
                             <FormGroup
                                 error={showFieldErrors(errors.contractType)}
@@ -995,10 +973,19 @@ export const ContractDetails = ({
 
                         <div className={styles.pageActions}>
                             <Button
-                                type="submit"
-                                disabled={isSubmitting}
-                                onClick={() => setShouldValidate(true)}
+                                type="button"
                                 unstyled
+                                onClick={() => {
+                                    if (!dirty) {
+                                        history.push(`/dashboard`)
+                                    } else {
+                                        setShouldValidate(true)
+                                        if (!isValidating) {
+                                            redirectToDashboard.current = true
+                                            handleSubmit()
+                                        }
+                                    }
+                                }}
                             >
                                 Save as Draft
                             </Button>
@@ -1017,7 +1004,10 @@ export const ContractDetails = ({
                                 <Button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    onClick={() => setShouldValidate(true)}
+                                    onClick={() => {
+                                        redirectToDashboard.current = false
+                                        setShouldValidate(true)
+                                    }}
                                 >
                                     Continue
                                 </Button>

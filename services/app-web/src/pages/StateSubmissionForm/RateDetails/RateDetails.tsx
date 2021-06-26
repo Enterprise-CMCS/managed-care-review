@@ -3,7 +3,6 @@ import * as Yup from 'yup'
 import dayjs from 'dayjs'
 import isLeapYear from 'dayjs/plugin/isLeapYear'
 import {
-    Alert,
     ErrorMessage,
     Form as UswdsForm,
     FormGroup,
@@ -24,7 +23,7 @@ import PageHeading from '../../../components/PageHeading'
 import {
     DraftSubmission,
     RateType,
-    useUpdateDraftSubmissionMutation,
+    UpdateDraftSubmissionInput,
 } from '../../../gen/gqlClient'
 import {
     formatForForm,
@@ -122,26 +121,20 @@ export interface RateDetailsFormValues {
 export const RateDetails = ({
     draftSubmission,
     showValidations = false,
+    updateDraft,
+    formAlert = undefined,
 }: {
     draftSubmission: DraftSubmission
     showValidations?: boolean
+    formAlert?: React.ReactElement
+    updateDraft: (
+        input: UpdateDraftSubmissionInput
+    ) => Promise<DraftSubmission | undefined>
 }): React.ReactElement => {
-    const [showFormAlert, setShowFormAlert] = React.useState(false)
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
-
+    const redirectToDashboard = React.useRef(false)
     const history = useHistory()
-    const [
-        updateDraftSubmission,
-        { error: updateError },
-    ] = useUpdateDraftSubmissionMutation()
 
-    if (updateError && !showFormAlert) {
-        setShowFormAlert(true)
-        console.log(
-            'Log: updating submission failed with gql error',
-            updateError
-        )
-    }
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
@@ -197,25 +190,20 @@ export const RateDetails = ({
         }
 
         try {
-            const updateResult = await updateDraftSubmission({
-                variables: {
-                    input: {
-                        submissionID: draftSubmission.id,
-                        draftSubmissionUpdates: updatedDraft,
-                    },
-                },
+            const updatedSubmission = await updateDraft({
+                submissionID: draftSubmission.id,
+                draftSubmissionUpdates: updatedDraft,
             })
-            const updatedSubmission: DraftSubmission | undefined =
-                updateResult?.data?.updateDraftSubmission.draftSubmission
-
             if (updatedSubmission) {
-                history.push(`/submissions/${draftSubmission.id}/documents`)
-            } else {
-                setShowFormAlert(true)
+                if (redirectToDashboard.current) {
+                    history.push(`/dashboard`)
+                } else {
+                    history.push(`/submissions/${draftSubmission.id}/documents`)
+                }
             }
         } catch (serverError) {
-            setShowFormAlert(true)
             formikHelpers.setSubmitting(false)
+            redirectToDashboard.current = false
         }
     }
 
@@ -245,13 +233,11 @@ export const RateDetails = ({
                 {({
                     values,
                     errors,
-                    handleChange,
+                    dirty,
                     handleSubmit,
                     isSubmitting,
                     isValidating,
                     setFieldValue,
-                    setValues,
-                    validateForm,
                 }) => (
                     <>
                         <PageHeading
@@ -266,19 +252,12 @@ export const RateDetails = ({
                             aria-label="Rate Details Form"
                             onSubmit={(e) => {
                                 e.preventDefault()
-                                validateForm().catch(() =>
-                                    console.warn('Log: Validation Error')
-                                )
                                 if (!isValidating) handleSubmit()
                             }}
                         >
                             <fieldset className="usa-fieldset">
                                 <legend className="srOnly">Rate Details</legend>
-                                {showFormAlert && (
-                                    <Alert type="error">
-                                        Something went wrong
-                                    </Alert>
-                                )}
+                                {formAlert && formAlert}
                                 <span>All fields are required</span>
                                 <FormGroup
                                     error={showFieldErrors(errors.rateType)}
@@ -510,10 +489,19 @@ export const RateDetails = ({
                             </fieldset>
                             <div className={styles.pageActions}>
                                 <Button
-                                    type="submit"
-                                    disabled={isSubmitting}
-                                    onClick={() => setShouldValidate(true)}
+                                    type="button"
                                     unstyled
+                                    onClick={() => {
+                                        if (!dirty) {
+                                            history.push(`/dashboard`)
+                                        } else {
+                                            setShouldValidate(true)
+                                            if (!isValidating) {
+                                                redirectToDashboard.current = true
+                                                handleSubmit()
+                                            }
+                                        }
+                                    }}
                                 >
                                     Save as Draft
                                 </Button>
@@ -532,7 +520,10 @@ export const RateDetails = ({
                                     <Button
                                         type="submit"
                                         disabled={isSubmitting}
-                                        onClick={() => setShouldValidate(true)}
+                                        onClick={() => {
+                                            redirectToDashboard.current = false
+                                            setShouldValidate(true)
+                                        }}
                                     >
                                         Continue
                                     </Button>
