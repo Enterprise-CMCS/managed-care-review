@@ -181,6 +181,10 @@ describe('State Submission', () => {
                 'exist'
             )
 
+            // This will break eventually, but is fixing a weird bug in CI where the heading hasn't been 
+            // updated with the Submission.name even though we can see 'Contract details'
+            cy.findByText(/^MN-MSHO-/).should('exist')
+
             // see that the submission appears on the dashboard
             cy.findByTestId('submission-name')
                 .invoke('text')
