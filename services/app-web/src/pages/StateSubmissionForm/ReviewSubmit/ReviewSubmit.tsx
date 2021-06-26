@@ -118,6 +118,8 @@ export const ReviewSubmit = ({
                 },
             })
 
+            console.log("Got data: ", data)
+
             if (data.errors) {
                 console.log(data.errors)
                 showError('Error attempting to submit. Please try again.')
