@@ -67,11 +67,13 @@ const ContractDetailsFormSchema = Yup.object().shape({
             // ContractDateEnd must be at minimum the day after Start
             'contractDateStart',
             (contractDateStart: Date, schema: Yup.DateSchema) => {
-                const dayAfter = dayjs(contractDateStart).add(1, 'day')
-                return schema.min(
-                    dayAfter,
-                    'The end date must come after the start date'
-                )
+                const startDate = dayjs(contractDateStart)
+                if (startDate.isValid()){
+                    return schema.min(
+                        startDate.add(1, 'day'),
+                        'The end date must come after the start date'
+                    )
+                }
             }
         ),
     managedCareEntities: Yup.array().min(
