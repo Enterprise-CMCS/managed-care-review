@@ -58,7 +58,7 @@ function editUrlForSubmission(submission: {
     if (submission.__typename === 'DraftSubmission') {
         return `/submissions/${submission.id}/type`
     }
-    return `/submissions/${submission.id}/`
+    return `/submissions/${submission.id}`
 }
 
 export const Dashboard = (): React.ReactElement => {

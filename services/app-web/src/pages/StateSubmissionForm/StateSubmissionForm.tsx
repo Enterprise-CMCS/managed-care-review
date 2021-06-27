@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 
 import { Alert, GridContainer } from '@trussworks/react-uswds'
 import { Switch, Route, useParams, useLocation } from 'react-router-dom'
@@ -8,7 +8,11 @@ import { ErrorInvalidSubmissionStatus } from '../Errors/ErrorInvalidSubmissionSt
 import { GenericError } from '../Errors/GenericError'
 import { Loading } from '../../components/Loading/'
 import { usePage } from '../../contexts/PageContext'
-import { RoutesRecord } from '../../constants/routes'
+import {
+    RoutesRecord,
+    STATE_SUBMISSION_FORM_ROUTES,
+    getRouteName,
+} from '../../constants/routes'
 import { ContractDetails } from './ContractDetails/ContractDetails'
 import { RateDetails } from './RateDetails/RateDetails'
 import { Documents } from './Documents/Documents'
@@ -22,13 +26,21 @@ import {
     useFetchDraftSubmissionQuery,
 } from '../../gen/gqlClient'
 
+const GenericFormAlert = () => <Alert type="error">Something went wrong</Alert>
+
 export const StateSubmissionForm = (): React.ReactElement => {
     const { id } = useParams<{ id: string }>()
     const { pathname } = useLocation()
+    const routeConstant = getRouteName(pathname)
     const { updateHeading } = usePage()
-    const [showFormAlert, setShowFormAlert] = React.useState(false)
+    const [showFormAlert, setShowFormAlert] = useState(false)
 
-    const { data: fetchData, loading, error } = useFetchDraftSubmissionQuery({
+    // Set up graphql calls
+    const {
+        data: fetchData,
+        loading,
+        error: fetchError,
+    } = useFetchDraftSubmissionQuery({
         variables: {
             input: {
                 submissionID: id,
@@ -40,46 +52,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
         updateDraftSubmission,
         { error: updateError },
     ] = useUpdateDraftSubmissionMutation()
-
-    if (updateError && !showFormAlert) {
-        setShowFormAlert(true)
-        console.log(
-            'Log: updating submission failed with gql error',
-            updateError
-        )
-    }
-
-    const draft = fetchData?.fetchDraftSubmission?.draftSubmission
-
-    useEffect(() => {
-        updateHeading(pathname, draft?.name)
-    }, [updateHeading, pathname, draft])
-
-    if (loading) {
-        return (
-            <GridContainer>
-                <Loading />
-            </GridContainer>
-        )
-    }
-
-    if (error) {
-        console.log('error loading draft:', error)
-
-        // check to see if we have a specific submission error
-        let specificErr: React.ReactElement | undefined = undefined
-        error.graphQLErrors.forEach((err) => {
-            if (err?.extensions?.code === 'WRONG_STATUS') {
-                specificErr = <ErrorInvalidSubmissionStatus />
-            }
-        })
-
-        return specificErr ?? <GenericError />
-    }
-
-    if (draft === undefined || draft === null) {
-        return <Error404 />
-    }
 
     const updateDraft = async (
         input: UpdateDraftSubmissionInput
@@ -103,9 +75,45 @@ export const StateSubmissionForm = (): React.ReactElement => {
         }
     }
 
-    const GenericFormAlert = () => (
-        <Alert type="error">Something went wrong</Alert>
-    )
+    const draft = fetchData?.fetchDraftSubmission?.draftSubmission
+
+    // Set up side effects
+    useEffect(() => {
+        updateHeading(pathname, draft?.name)
+    }, [updateHeading, pathname, draft?.name])
+
+    if (loading) {
+        return (
+            <GridContainer>
+                <Loading />
+            </GridContainer>
+        )
+    }
+
+    if (updateError && !showFormAlert) {
+        setShowFormAlert(true)
+    }
+
+    if (fetchError) {
+        /*  On fetch draft error, check if submission is already submitted 
+            if so,  display summary page or already sent to CMS message depending on submissions/:id/route,
+            if not, display generic eror
+        */
+        let specificContent: React.ReactElement | undefined = undefined
+        fetchError.graphQLErrors.forEach((err) => {
+            if (err?.extensions?.code === 'WRONG_STATUS') {
+                if (STATE_SUBMISSION_FORM_ROUTES.includes(routeConstant)) {
+                    specificContent = <ErrorInvalidSubmissionStatus />
+                }
+            }
+        })
+        return specificContent ?? <GenericError />
+    }
+
+    if (draft === undefined || draft === null) {
+        return <Error404 />
+    }
+
     return (
         <GridContainer>
             <Switch>

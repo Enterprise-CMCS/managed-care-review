@@ -21,6 +21,14 @@ const ROUTES = [
 ] as const // iterable union type
 type RouteT = typeof ROUTES[number]
 
+const STATE_SUBMISSION_FORM_ROUTES = [
+    'SUBMISSIONS_TYPE',
+    'SUBMISSIONS_CONTRACT_DETAILS',
+    'SUBMISSIONS_RATE_DETAILS',
+    'SUBMISSIONS_CONTACTS',
+    'SUBMISSIONS_DOCUMENTS',
+] as string[]
+
 const RoutesRecord: Record<RouteT, string> = {
     ROOT: '/',
     AUTH: '/auth',
@@ -60,7 +68,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     SUBMISSIONS_CONTACTS: 'Contacts - Managed Care Review',
     SUBMISSIONS_DOCUMENTS: 'Documents - Managed Care Review',
     SUBMISSIONS_REVIEW_SUBMIT: 'Review and Submit - Managed Care Review',
-    UNKNOWN_ROUTE: 'Not Found - Managed Care Review'
+    UNKNOWN_ROUTE: 'Not Found - Managed Care Review',
 }
 
 const getRouteName = (pathname: string): RouteT | 'UNKNOWN_ROUTE' => {
@@ -79,5 +87,6 @@ export {
     PageTitlesRecord,
     RoutesRecord,
     ROUTES,
+    STATE_SUBMISSION_FORM_ROUTES,
     getRouteName,
 }
