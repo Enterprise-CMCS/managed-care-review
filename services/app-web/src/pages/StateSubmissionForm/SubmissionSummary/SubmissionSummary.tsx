@@ -139,7 +139,10 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     return (
         <div className={styles.background}>
-            <GridContainer className={styles.container}>
+            <GridContainer
+                data-testid="submission-summary"
+                className={styles.container}
+            >
                 <Link asCustom={NavLink} variant="unstyled" to="/dashboard">
                     <svg
                         className="usa-icon"

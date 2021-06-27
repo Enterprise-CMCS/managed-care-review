@@ -181,7 +181,7 @@ describe('State Submission', () => {
                 'exist'
             )
 
-            // This will break eventually, but is fixing a weird bug in CI where the heading hasn't been 
+            // This will break eventually, but is fixing a weird bug in CI where the heading hasn't been
             // updated with the Submission.name even though we can see 'Contract details'
             cy.findByText(/^MN-MSHO-/).should('exist')
 
@@ -412,6 +412,93 @@ describe('State Submission', () => {
             )
             cy.findByLabelText('Capitation rates').should('be.checked')
             cy.findByLabelText('Annual rate update').should('be.checked')
+        })
+
+        it('user can complete a contract submission and see submission summary', () => {
+            cy.login()
+
+            // Add a new contract only submission
+            cy.findByRole('link', { name: 'Start new submission' }).click({
+                force: true,
+            })
+            cy.findByLabelText(
+                'Contract action and rate certification'
+            ).safeClick()
+            cy.findByRole('textbox', { name: 'Submission description' })
+                .should('exist')
+                .type('description of submission')
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).safeClick()
+
+            // Fill out contract details
+            cy.findByText('Contract details').should('exist')
+            cy.findByText(/MN-MSHO-/).should('exist')
+            cy.findByLabelText('Base contract').safeClick()
+            cy.findByLabelText('Start date').type('04/01/2024')
+            cy.findByLabelText('End date').type('03/31/2025').blur()
+            cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
+            cy.findByLabelText('1932(a) State Plan Authority').safeClick()
+            cy.findAllByTestId('errorMessage').should('have.length', 0)
+            cy.navigateForm('Continue')
+
+            //Fill out rate details
+            cy.findByText('Rate details').should('exist')
+            cy.findByLabelText('New rate certification').safeClick()
+            cy.findByLabelText('Start date').type('02/29/2024')
+            cy.findByLabelText('End date').type('02/28/2025')
+            cy.findByLabelText('Date certified').type('03/01/2024')
+            cy.navigateForm('Continue')
+
+            // Add documents
+            cy.findByRole('heading', { name: 'Documents' }).should('exist')
+            cy.findByTestId('file-input-input').attachFile(
+                'documents/trussel-guide.pdf'
+            )
+            cy.findByText('Upload failed').should('not.exist')
+            cy.findByText('Duplicate file').should('not.exist')
+            cy.findAllByTestId('file-input-preview-image').should(
+                'not.have.class',
+                'is-loading'
+            )
+            // Navigate review and submit pag
+            cy.navigateForm('Continue')
+            cy.findByText('Review and Submit').should('exist')
+
+            // s=Store submission name for reference later
+
+            let submissionId = ''
+            cy.location().then((fullUrl) => {
+                const { pathname } = fullUrl
+                const pathnameArray = pathname.split('/')
+                submissionId = pathnameArray[2]
+            })
+
+            // Submit
+            cy.navigateForm('Submit')
+
+            // User sent to dashboard
+            cy.findByText('Dashboard').should('exist')
+            cy.findByRole('heading', { name: 'Submissions' }).should('exist')
+            cy.location().then((loc) => {
+                expect(loc.search).to.match(/.*justSubmitted=*/)
+                const submissionName = loc.search.split('=').pop()
+                cy.findByText(`${submissionName} was sent to CMS`).should(
+                    'exist'
+                )
+                cy.findByText(submissionName).should('exist')
+                cy.findByText(submissionName).click()
+
+                // Click submitted submission to view SubmissionSummary
+                cy.findByRole('progressbar', { name: 'Loading' }).should(
+                    'not.exist'
+                )
+                cy.findByTestId('submission-summary').should('exist')
+                cy.findByText(submissionName).should('exist')
+                cy.findByText('Back to state dashboard').should('exist')
+                const submissionUrl = `/submissions/${submissionId}/`
+                cy.url({ timeout: 10_000 }).should('match', submissionUrl)
+            })
         })
     })
 })
