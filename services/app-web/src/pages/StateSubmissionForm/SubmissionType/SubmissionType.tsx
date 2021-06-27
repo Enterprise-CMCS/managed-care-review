@@ -331,11 +331,13 @@ export const SubmissionType = ({
                                 hint={
                                     <>
                                         <Link
+                                            variant="external"
                                             asCustom={ReactRouterLink}
                                             to={{
                                                 pathname: '/help',
                                                 hash: '#submission-description',
                                             }}
+                                            target="_blank"
                                         >
                                             View description examples
                                         </Link>
