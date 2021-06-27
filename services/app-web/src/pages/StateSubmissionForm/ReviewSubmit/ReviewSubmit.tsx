@@ -45,8 +45,21 @@ export const ReviewSubmit = ({
     >(undefined)
     const history = useHistory()
     const [submitDraftSubmission] = useSubmitDraftSubmissionMutation({
-        // An alternative to messing with the cache, just force refetch this query along with this one
-        refetchQueries: ['indexSubmissions'],
+        // An alternative to messing with the cache like we do with create, just zero it out.
+        update(cache, { data }) {
+            if (data) {
+                cache.modify({
+                    id: 'ROOT_QUERY',
+                    fields: {
+                        indexSubmissions(
+                            _index, {DELETE}
+                        ) {
+                            return DELETE
+                        },
+                    },
+                })
+            }
+        },
     })
 
     useEffect(() => {

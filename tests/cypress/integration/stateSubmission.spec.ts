@@ -145,15 +145,18 @@ describe('State Submission', () => {
             cy.findByTestId('submission-name')
                 .invoke('text')
                 .then((nameText) => {
-                    console.log('GOT TEXT', nameText)
-
-                    // Navigate to the dashboard again
+                    // Submit the form and navigate to the dashboard again
                     cy.navigateForm('Submit')
                     cy.findByRole('heading', { name: 'Submissions' }).should(
                         'exist'
                     )
 
-                    cy.findByText(nameText).should('exist')
+                    cy.findByText(nameText).should('exist').then( (submittedText) => {
+                        // find "SUBMITTED" in the card
+                        const submissionCard = submittedText.parent().parent()
+                        const cardStatus = submissionCard.find('span[data-testid="tag"]').html()
+                        assert(cardStatus.indexOf('Submitted') === 0, 'Submission isnt displayed as Submitted')
+                    })
                 })
         })
 
