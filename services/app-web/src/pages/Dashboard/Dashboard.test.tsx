@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { createMemoryHistory } from 'history'
 import { screen, waitFor } from '@testing-library/react'
 
-import { Dashboard, ListedSubmission, sortDraftsToTop } from './Dashboard'
+import { Dashboard, sortDraftsToTop } from './Dashboard'
 import {
     fetchCurrentUserMock,
     indexSubmissionsMockSuccess,
@@ -150,51 +150,26 @@ describe('Dashboard', () => {
     })
 
     it('has a stable Draft sort', async () => {
-        const input: ListedSubmission[] = [
+        const input: { __typename: string; id: string }[] = [
             {
                 __typename: 'DraftSubmission',
                 id: '4',
-                submissionType: 'CONTRACT_ONLY',
-                submissionDescription: 'string',
-                programID: 'msho',
-                name: 'MSHO-0001',
-                submittedAt: undefined,
             },
             {
                 __typename: 'StateSubmission',
                 id: '3',
-                submissionType: 'CONTRACT_ONLY',
-                submissionDescription: 'string',
-                programID: 'msho',
-                name: 'MSHO-0001',
-                submittedAt: undefined,
             },
             {
                 __typename: 'DraftSubmission',
                 id: '2',
-                submissionType: 'CONTRACT_ONLY',
-                submissionDescription: 'string',
-                programID: 'msho',
-                name: 'MSHO-0001',
-                submittedAt: undefined,
             },
             {
                 __typename: 'StateSubmission',
                 id: '1',
-                submissionType: 'CONTRACT_ONLY',
-                submissionDescription: 'string',
-                programID: 'msho',
-                name: 'MSHO-0001',
-                submittedAt: undefined,
             },
             {
                 __typename: 'DraftSubmission',
                 id: '0',
-                submissionType: 'CONTRACT_ONLY',
-                submissionDescription: 'string',
-                programID: 'msho',
-                name: 'MSHO-0001',
-                submittedAt: undefined,
             },
         ]
 

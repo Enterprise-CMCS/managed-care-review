@@ -61,8 +61,6 @@ export async function fakeAmplifyFetch(
     uri: string,
     options: RequestInit
 ): Promise<Response> {
-    console.log('try to amplify', uri, options)
-
     if (options.method !== 'POST') {
         throw new Error('unexpected GQL request')
     }

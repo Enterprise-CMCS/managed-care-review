@@ -1,4 +1,5 @@
 import { screen, waitFor } from '@testing-library/react'
+import dayjs from 'dayjs'
 import { within } from '@testing-library/react'
 import { act } from 'react-dom/test-utils'
 import { createMemoryHistory } from 'history'
@@ -7,6 +8,7 @@ import userEvent from '@testing-library/user-event'
 import {
     mockDraft,
     fetchCurrentUserMock,
+    updateDraftSubmissionMock,
 } from '../../../testHelpers/apolloHelpers'
 
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
@@ -21,19 +23,19 @@ describe('ContractDetails', () => {
 
         const emptyDraft = mockDraft()
         emptyDraft.id = '12'
-        const mockUpdateDraftFn = jest.fn()
+        const history = createMemoryHistory()
 
-        renderWithProviders(
-            <ContractDetails
-                updateDraft={mockUpdateDraftFn}
-                draftSubmission={emptyDraft}
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<ContractDetails draftSubmission={emptyDraft} />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200 }),
+                ],
+            },
+            routerProvider: {
+                route: '/submissions/12/contract-details',
+                routerProps: { history: history },
+            },
+        })
 
         expect(
             await screen.findByRole('heading', { name: 'Contract details' })
@@ -91,7 +93,7 @@ describe('ContractDetails', () => {
         // check error for not selected
         expect(
             screen.getByText(
-                'You must select why capitation rates are changing'
+                'You must select a reason for capitation rate change'
             )
         ).toBeInTheDocument()
 
@@ -103,7 +105,7 @@ describe('ContractDetails', () => {
         // error should be gone
         expect(
             screen.queryByText(
-                'You must select why capitation rates are changing'
+                'You must select a reason for capitation rate change'
             )
         ).toBeNull()
 
@@ -122,7 +124,7 @@ describe('ContractDetails', () => {
         // other is displayed, error is back
         await waitFor(() =>
             expect(
-                screen.getByText('You must enter the other reason')
+                screen.getByText('You must enter a description')
             ).toBeInTheDocument()
         )
         // click "NO" for the Covid question so we can submit
