@@ -30,7 +30,6 @@ import {
     isDateRangeEmpty,
     formatUserInputDate,
     validateDateFormat,
-    validateDateRange12Months,
 } from '../../../formHelpers'
 import { FieldRadio } from '../../../components/Form/FieldRadio/FieldRadio'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
@@ -57,15 +56,6 @@ const RateDetailsFormSchema = Yup.object().shape({
         .min(
             Yup.ref('rateDateStart'),
             'The end date must come after the start date'
-        )
-        .test(
-            'ratingPeriod',
-            'You must enter a 12-month rating period',
-            (value: string, context: Yup.TestContext) =>
-                validateDateRange12Months(
-                    context.parent.rateDateStart,
-                    context.parent.rateDateEnd
-                )
         ),
     rateDateCertified: Yup.date()
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -95,15 +85,6 @@ const RateDetailsFormSchema = Yup.object().shape({
             .min(
                 Yup.ref('effectiveDateStart'),
                 'The end date must come after the start date'
-            )
-            .test(
-                'ratingPeriod',
-                'You must enter a 12-month rating period',
-                (value: string, context: Yup.TestContext) =>
-                    validateDateRange12Months(
-                        context.parent.effectiveDateStart,
-                        context.parent.effectiveDateEnd
-                    )
             ),
     }),
 })
