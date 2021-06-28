@@ -1,3 +1,7 @@
+// This file needs to be converted into Typescript or swapped out with a modal that has clearer types
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable no-use-before-define */
+
 import React from 'react'
 import AriaModal from 'react-aria-modal';
 import PropTypes from 'prop-types';
@@ -34,13 +38,8 @@ export class Dialog extends React.PureComponent {
     const {
       actions,
       actionsClassName,
-      ariaCloseLabel,
       children,
       className,
-      closeButtonSize,
-      closeButtonText,
-      closeButtonVariation,
-      closeText,
       escapeExits,
       escapeExitDisabled,
       headerClassName,
