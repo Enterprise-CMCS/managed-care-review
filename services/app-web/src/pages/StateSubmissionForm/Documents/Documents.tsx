@@ -6,7 +6,7 @@ import {
     ButtonGroup,
     Link,
 } from '@trussworks/react-uswds'
-import { NavLink, useHistory } from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
 import styles from '../StateSubmissionForm.module.scss'
@@ -240,14 +240,21 @@ export const Documents = ({
                         Save as Draft
                     </Button>
                     <ButtonGroup type="default" className={styles.buttonGroup}>
-                        <Link
-                            asCustom={NavLink}
+                        <Button
+                            type="button"
                             className="usa-button usa-button--outline"
-                            variant="unstyled"
-                            to="rate-details"
+                            disabled={shouldValidate && !hasValidFiles}
+                            onClick={async (e) => {
+                                if (hasValidFiles) {
+                                    history.push(`/rate-details`)
+                                } else {
+                                    redirectToDashboard.current = true
+                                    await handleFormSubmit(e)
+                                }
+                            }}
                         >
                             Back
-                        </Link>
+                        </Button>
                         <Button
                             type="submit"
                             secondary={shouldValidate && !hasValidFiles}
