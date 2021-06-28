@@ -496,20 +496,21 @@ export const ReviewSubmit = ({
                         actions={[
                             <Button
                                 type="button"
-                                key="submitButton"
-                                aria-label="Confirm submit"
-                                onClick={handleFormSubmit}
-                            >
-                                Submit
-                            </Button>,
-                            <Button
-                                type="button"
                                 key="cancelButton"
                                 outline
                                 onClick={handleCancelSubmitConfirmation}
                             >
                                 Cancel
                             </Button>,
+                            <Button
+                                type="button"
+                                key="submitButton"
+                                aria-label="Confirm submit"
+                                className={styles.submitButton}
+                                onClick={handleFormSubmit}
+                            >
+                                Submit
+                            </Button>
                         ]}
                     >
                         <p>

@@ -77,15 +77,9 @@ $dialog-spacer: $spacer-4;
   max-width: $site-max-width;
 }
 
-.ds-c-dialog__header {
-  align-items: flex-start;
-  display: flex;
-  // Provide some spacing when the header only includes the close button
-  padding-bottom: $spacer-1;
-}
-
 .ds-c-dialog__actions {
-  margin-top: $spacer-3;
+  margin-top: $spacer-5;
+  text-align: right;
 }
 
 .ds-c-dialog-wrap {
