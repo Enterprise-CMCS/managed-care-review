@@ -69,15 +69,10 @@ describe('State Submission', () => {
             cy.findByText(
                 'You must enter the date the document was certified'
             ).should('exist')
-            cy.findByText('You must enter a 12-month rating period').should(
-                'exist'
-            )
-            cy.findAllByTestId('errorMessage').should('have.length', 2)
+            cy.findAllByTestId('errorMessage').should('have.length', 1)
 
             // Fill out missing required fields for rate details
             cy.findByLabelText('Date certified').type('03/15/2024')
-            cy.findByLabelText('End date').clear()
-            cy.findByLabelText('End date').type('03/31/2025')
             cy.findAllByTestId('errorMessage').should('have.length', 0)
 
             // Continue button navigates to documents page
