@@ -229,7 +229,7 @@ export const Documents = ({
                         unstyled
                         disabled={shouldValidate && !hasValidFiles}
                         onClick={async (e) => {
-                            if (!hasValidFiles) {
+                            if (hasValidFiles) {
                                 history.push(`/dashboard`)
                             } else {
                                 redirectToDashboard.current = true
