@@ -25,7 +25,6 @@ import {
     ManagedCareEntityRecord,
     SubmissionTypeRecord,
 } from '../../../constants/submissions'
-import PageHeading from '../../../components/PageHeading'
 import { DataDetail } from '../../../components/DataDetail/DataDetail'
 import { DoubleColumnRow } from '../../../components/DoubleColumnRow/DoubleColumnRow'
 import { useS3 } from '../../../contexts/S3Context'
@@ -147,12 +146,6 @@ export const ReviewSubmit = ({
                     {userVisibleError}
                 </Alert>
             )}
-            <PageHeading
-                className={stylesForm.formHeader}
-                headingLevel="h2"
-            >
-                Review and Submit
-            </PageHeading>
             <section
                 id="submissionType"
                 className={styles.reviewSection}
