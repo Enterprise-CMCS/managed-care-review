@@ -147,6 +147,7 @@ describe('State Submission', () => {
                 .then((nameText) => {
                     // Submit the form and navigate to the dashboard again
                     cy.navigateForm('Submit')
+                    cy.navigateForm('Confirm submit')
                     cy.findByRole('heading', { name: 'Submissions' }).should(
                         'exist'
                     )

@@ -39,9 +39,9 @@ Cypress.Commands.add('safeClick', { prevSubject: 'element' }, ($element) => {
     return cy.wrap($element).should('be.visible').pipe(click)
 })
 
-Cypress.Commands.add('navigateForm', (buttonName: 'string') => {
+Cypress.Commands.add('navigateForm', (buttonAccessibleName: 'string') => {
     cy.findByRole('button', {
-        name: buttonName,
+        name: buttonAccessibleName,
     }).click()
 
     cy.findByRole('progressbar', { name: 'Loading' }).should('not.exist')
