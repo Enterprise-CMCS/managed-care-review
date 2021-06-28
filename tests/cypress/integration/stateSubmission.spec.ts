@@ -151,12 +151,21 @@ describe('State Submission', () => {
                         'exist'
                     )
 
-                    cy.findByText(nameText).should('exist').then( (submittedText) => {
-                        // find "SUBMITTED" in the card
-                        const submissionCard = submittedText.parent().parent()
-                        const cardStatus = submissionCard.find('span[data-testid="tag"]').html()
-                        assert(cardStatus.indexOf('Submitted') === 0, 'Submission isnt displayed as Submitted')
-                    })
+                    cy.findByText(nameText)
+                        .should('exist')
+                        .then((submittedText) => {
+                            // find "SUBMITTED" in the card
+                            const submissionCard = submittedText
+                                .parent()
+                                .parent()
+                            const cardStatus = submissionCard
+                                .find('span[data-testid="tag"]')
+                                .html()
+                            assert(
+                                cardStatus.indexOf('Submitted') === 0,
+                                'Submission isnt displayed as Submitted'
+                            )
+                        })
                 })
         })
 
@@ -417,7 +426,7 @@ describe('State Submission', () => {
             cy.findByLabelText('Annual rate update').should('be.checked')
         })
 
-        it('user can complete a contract submission and see submission summary', () => {
+        it.only('user can complete a contract submission and see submission summary', () => {
             cy.login()
 
             // Add a new contract only submission
@@ -499,8 +508,7 @@ describe('State Submission', () => {
                 cy.findByTestId('submission-summary').should('exist')
                 cy.findByText(submissionName).should('exist')
                 cy.findByText('Back to state dashboard').should('exist')
-                const submissionUrl = `/submissions/${submissionId}/`
-                cy.url({ timeout: 10_000 }).should('match', submissionUrl)
+                cy.url({ timeout: 10_000 }).should('contain', submissionId)
             })
         })
     })
