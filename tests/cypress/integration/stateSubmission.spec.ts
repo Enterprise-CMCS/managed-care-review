@@ -426,7 +426,7 @@ describe('State Submission', () => {
             cy.findByLabelText('Annual rate update').should('be.checked')
         })
 
-        it.only('user can complete a contract submission and see submission summary', () => {
+        it('user can complete a contract submission and see submission summary', () => {
             cy.login()
 
             // Add a new contract only submission
@@ -506,7 +506,10 @@ describe('State Submission', () => {
                     'not.exist'
                 )
                 cy.findByTestId('submission-summary').should('exist')
-                cy.findByText(submissionName).should('exist')
+
+                cy.findByRole('heading', {
+                    name: `Minnesota ${submissionName}`,
+                }).should('exist')
                 cy.findByText('Back to state dashboard').should('exist')
                 cy.url({ timeout: 10_000 }).should('contain', submissionId)
             })
