@@ -489,7 +489,7 @@ export const ReviewSubmit = ({
                     </Button>
                 </ButtonGroup>
                 {displayConfirmation && (
-                <Dialog heading="Confirm Submission"
+                <Dialog heading="Ready to Submit?"
                 actions={[
                     <Button
                         type="button"
@@ -508,7 +508,7 @@ export const ReviewSubmit = ({
                     </Button>,
                   ]}
                 >
-                    <p>Upon clicking "Submit" your Managed Care documents will be sent to CMS, you won't be able to make any more edits.</p>
+                    <p>Submitting this package will sent it to CMS to begin their review.</p>
                 </Dialog>
             )}
             </div>
