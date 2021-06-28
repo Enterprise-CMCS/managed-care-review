@@ -39,6 +39,8 @@ describe('StateSubmissionForm', () => {
         )
 
         const stepIndicator = await screen.findByTestId('step-indicator')
+
+        expect(stepIndicator).toHaveClass('usa-step-indicator')
       })
 
         it('loads submission type fields for /submissions/:id/type', async () => {
