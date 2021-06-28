@@ -508,7 +508,7 @@ export const ReviewSubmit = ({
                     </Button>,
                   ]}
                 >
-                    <p>Submitting this package will sent it to CMS to begin their review.</p>
+                    <p>Submitting this package will send it to CMS to begin their review.</p>
                 </Dialog>
             )}
             </div>
