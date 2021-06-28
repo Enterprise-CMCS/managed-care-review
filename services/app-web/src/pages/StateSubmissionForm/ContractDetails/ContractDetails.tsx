@@ -497,6 +497,102 @@ export const ContractDetails = ({
                                         </Fieldset>
                                     </FormGroup>
 
+                                    <FormGroup
+                                        error={showFieldErrors(
+                                            errors.federalAuthorities
+                                        )}
+                                    >
+                                        <Fieldset legend="Federal authority your program operates under">
+                                            <Link
+                                                variant="external"
+                                                href={
+                                                    'https://www.medicaid.gov/medicaid/managed-care/managed-care-authorities/index.html'
+                                                }
+                                                target="_blank"
+                                            >
+                                                Managed Care authority
+                                                definitions
+                                            </Link>
+                                            <div className="usa-hint">
+                                                <span>
+                                                    Check all that apply
+                                                </span>
+                                            </div>
+                                            {showFieldErrors(
+                                                errors.federalAuthorities
+                                            ) && (
+                                                <ErrorMessage>
+                                                    {errors.federalAuthorities}
+                                                </ErrorMessage>
+                                            )}
+                                            <FieldCheckbox
+                                                id="1932aStatePlanAuthority"
+                                                name="federalAuthorities"
+                                                label={
+                                                    FederalAuthorityRecord.STATE_PLAN
+                                                }
+                                                value={'STATE_PLAN'}
+                                                checked={values.federalAuthorities.includes(
+                                                    'STATE_PLAN'
+                                                )}
+                                            />
+                                            <FieldCheckbox
+                                                id="1915bWaiverAuthority"
+                                                name="federalAuthorities"
+                                                label={
+                                                    FederalAuthorityRecord.WAIVER_1915B
+                                                }
+                                                value={'WAIVER_1915B'}
+                                                checked={values.federalAuthorities.includes(
+                                                    'WAIVER_1915B'
+                                                )}
+                                            />
+                                            <FieldCheckbox
+                                                id="1115WaiverAuthority"
+                                                name="federalAuthorities"
+                                                label={
+                                                    FederalAuthorityRecord.WAIVER_1115
+                                                }
+                                                value={'WAIVER_1115'}
+                                                checked={values.federalAuthorities.includes(
+                                                    'WAIVER_1115'
+                                                )}
+                                            />
+                                            <FieldCheckbox
+                                                id="1915aVoluntaryAuthority"
+                                                name="federalAuthorities"
+                                                label={
+                                                    FederalAuthorityRecord.VOLUNTARY
+                                                }
+                                                value={'VOLUNTARY'}
+                                                checked={values.federalAuthorities.includes(
+                                                    'VOLUNTARY'
+                                                )}
+                                            />
+                                            <FieldCheckbox
+                                                id="1937BenchmarkAuthority"
+                                                name="federalAuthorities"
+                                                label={
+                                                    FederalAuthorityRecord.BENCHMARK
+                                                }
+                                                value={'BENCHMARK'}
+                                                checked={values.federalAuthorities.includes(
+                                                    'BENCHMARK'
+                                                )}
+                                            />
+                                            <FieldCheckbox
+                                                id="titleXXISeparateChipStatePlanAuthority"
+                                                name="federalAuthorities"
+                                                label={
+                                                    FederalAuthorityRecord.TITLE_XXI
+                                                }
+                                                value={'TITLE_XXI'}
+                                                checked={values.federalAuthorities.includes(
+                                                    'TITLE_XXI'
+                                                )}
+                                            />
+                                        </Fieldset>
+                                    </FormGroup>
                                     {isContractAmendmentSelected(values) && (
                                         <>
                                             <FormGroup
@@ -872,103 +968,6 @@ export const ContractDetails = ({
                                             )}
                                         </>
                                     )}
-
-                                    <FormGroup
-                                        error={showFieldErrors(
-                                            errors.federalAuthorities
-                                        )}
-                                    >
-                                        <Fieldset legend="Federal authority your program operates under">
-                                            <Link
-                                                variant="external"
-                                                href={
-                                                    'https://www.medicaid.gov/medicaid/managed-care/managed-care-authorities/index.html'
-                                                }
-                                                target="_blank"
-                                            >
-                                                Managed Care authority
-                                                definitions
-                                            </Link>
-                                            <div className="usa-hint">
-                                                <span>
-                                                    Check all that apply
-                                                </span>
-                                            </div>
-                                            {showFieldErrors(
-                                                errors.federalAuthorities
-                                            ) && (
-                                                <ErrorMessage>
-                                                    {errors.federalAuthorities}
-                                                </ErrorMessage>
-                                            )}
-                                            <FieldCheckbox
-                                                id="1932aStatePlanAuthority"
-                                                name="federalAuthorities"
-                                                label={
-                                                    FederalAuthorityRecord.STATE_PLAN
-                                                }
-                                                value={'STATE_PLAN'}
-                                                checked={values.federalAuthorities.includes(
-                                                    'STATE_PLAN'
-                                                )}
-                                            />
-                                            <FieldCheckbox
-                                                id="1915bWaiverAuthority"
-                                                name="federalAuthorities"
-                                                label={
-                                                    FederalAuthorityRecord.WAIVER_1915B
-                                                }
-                                                value={'WAIVER_1915B'}
-                                                checked={values.federalAuthorities.includes(
-                                                    'WAIVER_1915B'
-                                                )}
-                                            />
-                                            <FieldCheckbox
-                                                id="1115WaiverAuthority"
-                                                name="federalAuthorities"
-                                                label={
-                                                    FederalAuthorityRecord.WAIVER_1115
-                                                }
-                                                value={'WAIVER_1115'}
-                                                checked={values.federalAuthorities.includes(
-                                                    'WAIVER_1115'
-                                                )}
-                                            />
-                                            <FieldCheckbox
-                                                id="1915aVoluntaryAuthority"
-                                                name="federalAuthorities"
-                                                label={
-                                                    FederalAuthorityRecord.VOLUNTARY
-                                                }
-                                                value={'VOLUNTARY'}
-                                                checked={values.federalAuthorities.includes(
-                                                    'VOLUNTARY'
-                                                )}
-                                            />
-                                            <FieldCheckbox
-                                                id="1937BenchmarkAuthority"
-                                                name="federalAuthorities"
-                                                label={
-                                                    FederalAuthorityRecord.BENCHMARK
-                                                }
-                                                value={'BENCHMARK'}
-                                                checked={values.federalAuthorities.includes(
-                                                    'BENCHMARK'
-                                                )}
-                                            />
-                                            <FieldCheckbox
-                                                id="titleXXISeparateChipStatePlanAuthority"
-                                                name="federalAuthorities"
-                                                label={
-                                                    FederalAuthorityRecord.TITLE_XXI
-                                                }
-                                                value={'TITLE_XXI'}
-                                                checked={values.federalAuthorities.includes(
-                                                    'TITLE_XXI'
-                                                )}
-                                            />
-                                        </Fieldset>
-                                    </FormGroup>
                                 </>
                             )}
                         </fieldset>
