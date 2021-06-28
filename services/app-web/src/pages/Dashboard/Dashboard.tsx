@@ -37,8 +37,15 @@ const submissionStatusMap: {
 // we want all the DraftSubmissions to rise above the StateSubmissions
 // but otherwise remain in numeric order  so we can compare their
 // typenames to sort them.
-export function sortDraftsToTop(submissions: { __typename: string }[]): void {
+export function sortDraftsToTop(submissions: { __typename: string, name: string }[], justSubmitted: string | undefined): void {
     submissions.sort((a, b) => {
+        // if this one was justSubmitted, float it to the top.
+        if (a.name === justSubmitted) {
+            return -1
+        }
+        if (b.name === justSubmitted) {
+            return 1
+        }
         // 'StateSubmission' > 'DraftSubmission'
         if (a.__typename > b.__typename) {
             return 1
@@ -105,7 +112,7 @@ export const Dashboard = (): React.ReactElement => {
         const programSubs = submissionList.filter(
             (submission) => submission.programID === program.id
         )
-        sortDraftsToTop(programSubs)
+        sortDraftsToTop(programSubs, justSubmittedSubmissionName ?? undefined)
 
         return (
             <section key={program.name} className={styles.panel}>
