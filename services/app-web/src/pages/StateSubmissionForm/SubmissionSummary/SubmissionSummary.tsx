@@ -37,7 +37,6 @@ export const SubmissionSummary = (): React.ReactElement => {
         },
     })
 
-    console.log('here')
     const submission = data?.fetchStateSubmission.submission
 
     useEffect(() => {
@@ -94,49 +93,44 @@ export const SubmissionSummary = (): React.ReactElement => {
     const documentsSummary = `${submission.documents.length} ${
         submission.documents.length === 1 ? 'file' : 'files'
     }`
-
     // Array of values from a checkbox field is displayed in a comma-separated list
     const createCheckboxList = ({
         list,
         dict,
-        otherReasons,
+        otherReasons = [],
     }: {
         list: string[] // Checkbox field array
         dict: Record<string, string> // A lang constant dictionary like ManagedCareEntityRecord or FederalAuthorityRecord,
         otherReasons?: (string | null)[] // additional "Other" text values
     }) => {
-        const userFriendlyList = list
-            .map((item) => {
-                return dict[item] ?? dict[item]
-            })
-            .filter((el) => el !== null)
-            .join(', ')
+        const userFriendlyList = list.map((item) => {
+            return dict[item] ? dict[item] : null
+        })
 
         const listToDisplay = otherReasons
-            ? `${userFriendlyList.length}, ${otherReasons
-                  .filter((el) => el !== null)
-                  .join(', ')}`
+            ? userFriendlyList.concat(otherReasons)
             : userFriendlyList
 
-        // strip leftover commas at the end
-        return listToDisplay.replace(/,\s*$/, '')
+        // strip nulls and leftover commas at the end
+        return listToDisplay
+            .filter((el) => {
+                return el !== null
+            })
+            .join(', ')
+            .replace(/,\s*$/, '')
+    }
+
+    const capitationRateChangeReason = (): string | null => {
+        const { reason, otherReason } =
+            submission?.contractAmendmentInfo?.capitationRatesAmendedInfo || {}
+        if (!reason) return null
+
+        return otherReason
+            ? `${AmendableItemsRecord['CAPITATION_RATES']} (${otherReason})`
+            : `${AmendableItemsRecord['CAPITATION_RATES']} (${RateChangeReasonRecord[reason]})`
     }
 
     const isContractAmendment = submission.contractType === 'AMENDMENT'
-
-    const capitationRateChangeReason = (): string | null => {
-        const capRates =
-            submission?.contractAmendmentInfo?.capitationRatesAmendedInfo
-        const changeReason = capRates?.reason
-        if (!capRates) return null
-
-        return capRates.otherReason
-            ? `Other - ${capRates.otherReason}`
-            : changeReason
-            ? RateChangeReasonRecord[changeReason]
-            : null
-    }
-
     return (
         <div className={styles.background}>
             <GridContainer
@@ -255,17 +249,23 @@ export const SubmissionSummary = (): React.ReactElement => {
                                                 id="itemsAmended"
                                                 label="Items being amended"
                                                 data={createCheckboxList({
-                                                    list:
-                                                        submission
-                                                            .contractAmendmentInfo
-                                                            .itemsBeingAmended,
+                                                    list: submission.contractAmendmentInfo.itemsBeingAmended.filter(
+                                                        (item) =>
+                                                            item !==
+                                                                'CAPITATION_RATES' &&
+                                                            item !== 'OTHER'
+                                                    ),
                                                     dict: AmendableItemsRecord,
                                                     otherReasons: [
-                                                        capitationRateChangeReason(),
+                                                        submission.contractAmendmentInfo.itemsBeingAmended.includes(
+                                                            'CAPITATION_RATES'
+                                                        )
+                                                            ? capitationRateChangeReason()
+                                                            : null,
                                                         submission
                                                             .contractAmendmentInfo
                                                             ?.otherItemBeingAmended
-                                                            ? `Other - ${submission.contractAmendmentInfo?.otherItemBeingAmended}`
+                                                            ? `Other (${submission.contractAmendmentInfo?.otherItemBeingAmended})`
                                                             : null,
                                                     ],
                                                 })}

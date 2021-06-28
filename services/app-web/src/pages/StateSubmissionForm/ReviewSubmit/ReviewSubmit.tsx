@@ -51,9 +51,7 @@ export const ReviewSubmit = ({
                 cache.modify({
                     id: 'ROOT_QUERY',
                     fields: {
-                        indexSubmissions(
-                            _index, {DELETE}
-                        ) {
+                        indexSubmissions(_index, { DELETE }) {
                             return DELETE
                         },
                     },
@@ -132,7 +130,7 @@ export const ReviewSubmit = ({
                 },
             })
 
-            console.log("Got data: ", data)
+            console.log('Got data: ', data)
 
             if (data.errors) {
                 console.log(data.errors)
@@ -147,46 +145,46 @@ export const ReviewSubmit = ({
             showError('Error attempting to submit. Please try again.')
         }
     }
+
     // Array of values from a checkbox field is displayed in a comma-separated list
     const createCheckboxList = ({
         list,
         dict,
-        otherReasons,
+        otherReasons = [],
     }: {
         list: string[] // Checkbox field array
         dict: Record<string, string> // A lang constant dictionary like ManagedCareEntityRecord or FederalAuthorityRecord,
         otherReasons?: (string | null)[] // additional "Other" text values
     }) => {
-        const userFriendlyList = list
-            .map((item) => {
-                return dict[item] ?? dict[item]
+        const userFriendlyList = list.map((item) => {
+            return dict[item] ? dict[item] : null
+        })
+
+        const listToDisplay = otherReasons
+            ? userFriendlyList.concat(otherReasons)
+            : userFriendlyList
+
+        // strip nulls and leftover commas at the end
+        return listToDisplay
+            .filter((el) => {
+                return el !== null
             })
-            .filter((el) => el !== null)
             .join(', ')
             .replace(/,\s*$/, '')
+    }
 
-        return otherReasons
-            ? `${userFriendlyList}, ${otherReasons
-                  .filter((el) => el !== null)
-                  .join(', ')
-                  .replace(/,\s*$/, '')}`
-            : userFriendlyList
+    const capitationRateChangeReason = (): string | null => {
+        const { reason, otherReason } =
+            draftSubmission?.contractAmendmentInfo
+                ?.capitationRatesAmendedInfo || {}
+        if (!reason) return null
+
+        return otherReason
+            ? `${AmendableItemsRecord['CAPITATION_RATES']} (${otherReason})`
+            : `${AmendableItemsRecord['CAPITATION_RATES']} (${RateChangeReasonRecord[reason]})`
     }
 
     const isContractAmendment = draftSubmission.contractType === 'AMENDMENT'
-
-    const capitationRateChangeReason = (): string | null => {
-        const capRates =
-            draftSubmission?.contractAmendmentInfo?.capitationRatesAmendedInfo
-        const changeReason = capRates?.reason
-        if (!capRates) return null
-
-        return capRates.otherReason
-            ? `Other - ${capRates.otherReason}`
-            : changeReason
-            ? RateChangeReasonRecord[changeReason]
-            : null
-    }
 
     return (
         <GridContainer className={styles.reviewSectionWrapper}>
@@ -310,17 +308,23 @@ export const ReviewSubmit = ({
                                             id="itemsAmended"
                                             label="Items being amended"
                                             data={createCheckboxList({
-                                                list:
-                                                    draftSubmission
-                                                        .contractAmendmentInfo
-                                                        .itemsBeingAmended,
+                                                list: draftSubmission.contractAmendmentInfo.itemsBeingAmended.filter(
+                                                    (item) =>
+                                                        item !==
+                                                            'CAPITATION_RATES' &&
+                                                        item !== 'OTHER'
+                                                ),
                                                 dict: AmendableItemsRecord,
                                                 otherReasons: [
-                                                    capitationRateChangeReason(),
+                                                    draftSubmission.contractAmendmentInfo.itemsBeingAmended.includes(
+                                                        'CAPITATION_RATES'
+                                                    )
+                                                        ? capitationRateChangeReason()
+                                                        : null,
                                                     draftSubmission
                                                         .contractAmendmentInfo
                                                         ?.otherItemBeingAmended
-                                                        ? `Other - ${draftSubmission.contractAmendmentInfo?.otherItemBeingAmended}`
+                                                        ? `Other (${draftSubmission.contractAmendmentInfo?.otherItemBeingAmended})`
                                                         : null,
                                                 ],
                                             })}
