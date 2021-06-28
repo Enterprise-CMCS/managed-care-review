@@ -13,6 +13,7 @@ import dayjs from 'dayjs'
 import styles from './ReviewSubmit.module.scss'
 import stylesForm from '../StateSubmissionForm.module.scss'
 
+import { Dialog } from '../../../components/Dialog/Dialog'
 import {
     DraftSubmission,
     Document,
@@ -38,6 +39,7 @@ export const ReviewSubmit = ({
     draftSubmission: DraftSubmission
 }): React.ReactElement => {
     const [refreshedDocs, setRefreshedDocs] = useState<DocumentWithLink[]>([])
+    const [displayConfirmation, setDisplayConfirmation] = useState<boolean>(false)
     const { getURL, getKey } = useS3()
 
     const [userVisibleError, setUserVisibleError] = useState<
@@ -120,6 +122,16 @@ export const ReviewSubmit = ({
         setUserVisibleError(error)
     }
 
+    const handleSubmitConfirmation = () => {
+        console.log('Confirmation Button Presssed')
+        setDisplayConfirmation(true)
+    }
+
+    const handleCancelSubmitConfirmation = () => {
+        console.log('cancel sub comf')
+        setDisplayConfirmation(false)
+    }
+
     const handleFormSubmit = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault()
 
@@ -137,6 +149,7 @@ export const ReviewSubmit = ({
             if (data.errors) {
                 console.log(data.errors)
                 showError('Error attempting to submit. Please try again.')
+                setDisplayConfirmation(false)
             }
 
             if (data.data?.submitDraftSubmission) {
@@ -145,6 +158,7 @@ export const ReviewSubmit = ({
         } catch (error) {
             console.log(error)
             showError('Error attempting to submit. Please try again.')
+            setDisplayConfirmation(false)
         }
     }
     // Array of values from a checkbox field is displayed in a comma-separated list
@@ -469,11 +483,34 @@ export const ReviewSubmit = ({
                     <Button
                         type="button"
                         className={styles.submitButton}
-                        onClick={handleFormSubmit}
+                        onClick={handleSubmitConfirmation}
                     >
                         Submit
                     </Button>
                 </ButtonGroup>
+                {displayConfirmation && (
+                <Dialog heading="Confirm Submission"
+                actions={[
+                    <Button
+                        type="button"
+                        key="submitButton"
+                        onClick={handleFormSubmit}
+                    >
+                      Submit
+                    </Button>,
+                    <Button
+                      type="button"
+                      key="cancelButton"
+                      outline
+                      onClick={handleCancelSubmitConfirmation}
+                    >
+                      Cancel
+                    </Button>,
+                  ]}
+                >
+                    <p>Upon clicking "Submit" your Managed Care documents will be sent to CMS, you won't be able to make any more edits.</p>
+                </Dialog>
+            )}
             </div>
         </GridContainer>
     )
