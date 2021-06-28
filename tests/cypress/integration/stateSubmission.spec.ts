@@ -421,7 +421,7 @@ describe('State Submission', () => {
             cy.findByLabelText('Annual rate update').should('be.checked')
         })
 
-        it.only('user can complete a contract submission and see submission summary', () => {
+        it('user can complete a contract submission and see submission summary', () => {
             cy.login()
 
             // Add a new contract only submission
