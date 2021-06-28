@@ -65,7 +65,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
           <>
             <StepIndicator>
                 {FormPages.map((formPageName) => {
-                  if (formPageName == currentFormPage) {
+                  if (formPageName === currentFormPage) {
                     formStepCompleted = false;
                     formStepStatus = 'current';
                   }

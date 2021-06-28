@@ -16,7 +16,6 @@ import {
 } from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
-import PageHeading from '../../../components/PageHeading'
 import {
     FileUpload,
     S3FileData,
