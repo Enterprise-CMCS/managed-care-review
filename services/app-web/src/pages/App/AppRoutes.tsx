@@ -11,6 +11,7 @@ import { Landing } from '../Landing/Landing'
 import { RoutesRecord } from '../../constants/routes'
 import { StateSubmissionForm } from '../StateSubmissionForm/StateSubmissionForm'
 import { NewStateSubmissionForm } from '../StateSubmissionForm/NewStateSubmissionForm'
+import { SubmissionSummary } from '../StateSubmissionForm/SubmissionSummary/SubmissionSummary'
 import { Help } from '../Help/Help'
 import { useTitle } from '../../hooks/useTitle'
 import { getRouteName, PageTitlesRecord } from '../../constants/routes'
@@ -65,6 +66,11 @@ export const AppRoutes = ({
                 <Route
                     path={RoutesRecord.SUBMISSIONS_NEW}
                     component={NewStateSubmissionForm}
+                />
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_FORM}
+                    component={SubmissionSummary}
+                    exact
                 />
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}

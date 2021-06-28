@@ -1,0 +1,49 @@
+@import '../../../styles/uswdsImports.scss';
+@import '../../../styles/custom';
+
+.background {
+    background-color: $cms-color-white;
+    width: 100%;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    max-width: 50rem; // should match ReviewSubmit max-width
+    padding: 2rem 0;
+    > a {
+        display: flex;
+        align-items: center;
+        padding-bottom: 1rem;
+        > svg {
+            fill: black;
+        }
+    }
+    ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        li {
+            padding: units(1) 0;
+        }
+    }
+}
+
+.firstHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: units(4);
+}
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid $theme-color-base-lighter;
+    padding-bottom: units(1);
+
+    > h2 {
+        padding-top: units(1);
+        font-weight: normal;
+    }
+}
