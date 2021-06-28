@@ -369,48 +369,6 @@ export const RateDetails = ({
                                                 />
                                             </Fieldset>
                                         </FormGroup>
-                                        <FormGroup
-                                            error={showFieldErrors(
-                                                errors.rateDateCertified
-                                            )}
-                                        >
-                                            <Label
-                                                htmlFor="rateDateCertified"
-                                                id="rateDateCertifiedLabel"
-                                            >
-                                                {isRateTypeAmendment(values)
-                                                    ? 'Date certified for rate amendment'
-                                                    : 'Date certified'}
-                                            </Label>
-                                            <div
-                                                className="usa-hint"
-                                                id="rateDateCertifiedHint"
-                                            >
-                                                mm/dd/yyyy
-                                            </div>
-                                            {showFieldErrors(
-                                                errors.rateDateCertified
-                                            ) && (
-                                                <ErrorMessage>
-                                                    {errors.rateDateCertified}
-                                                </ErrorMessage>
-                                            )}
-                                            <DatePicker
-                                                aria-required
-                                                aria-describedby="rateDateCertifiedLabel rateDateCertifiedHint"
-                                                id="rateDateCertified"
-                                                name="rateDateCertified"
-                                                defaultValue={
-                                                    values.rateDateCertified
-                                                }
-                                                onChange={(val) =>
-                                                    setFieldValue(
-                                                        'rateDateCertified',
-                                                        formatUserInputDate(val)
-                                                    )
-                                                }
-                                            />
-                                        </FormGroup>
 
                                         {isRateTypeAmendment(values) && (
                                             <>
@@ -484,6 +442,48 @@ export const RateDetails = ({
                                                 </FormGroup>
                                             </>
                                         )}
+                                        <FormGroup
+                                            error={showFieldErrors(
+                                                errors.rateDateCertified
+                                            )}
+                                        >
+                                            <Label
+                                                htmlFor="rateDateCertified"
+                                                id="rateDateCertifiedLabel"
+                                            >
+                                                {isRateTypeAmendment(values)
+                                                    ? 'Date certified for rate amendment'
+                                                    : 'Date certified'}
+                                            </Label>
+                                            <div
+                                                className="usa-hint"
+                                                id="rateDateCertifiedHint"
+                                            >
+                                                mm/dd/yyyy
+                                            </div>
+                                            {showFieldErrors(
+                                                errors.rateDateCertified
+                                            ) && (
+                                                <ErrorMessage>
+                                                    {errors.rateDateCertified}
+                                                </ErrorMessage>
+                                            )}
+                                            <DatePicker
+                                                aria-required
+                                                aria-describedby="rateDateCertifiedLabel rateDateCertifiedHint"
+                                                id="rateDateCertified"
+                                                name="rateDateCertified"
+                                                defaultValue={
+                                                    values.rateDateCertified
+                                                }
+                                                onChange={(val) =>
+                                                    setFieldValue(
+                                                        'rateDateCertified',
+                                                        formatUserInputDate(val)
+                                                    )
+                                                }
+                                            />
+                                        </FormGroup>
                                     </>
                                 )}
                             </fieldset>
