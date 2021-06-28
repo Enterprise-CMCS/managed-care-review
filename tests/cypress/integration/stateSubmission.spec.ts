@@ -37,10 +37,9 @@ describe('State Submission', () => {
                 name: 'Continue',
             }).safeClick()
 
-            // Shows step indicator
-            cy.findByTestId('step-indicator').should('exist')
-            
             // Fill out some base contract fields
+            cy.findByTestId('step-indicator').findAllByText('Contract Details').should('have.length', 2)
+
             cy.findByText(/MN-MSHO-/).should('exist')
             cy.findByLabelText('Base contract').safeClick()
             cy.findByLabelText('Start date').type('04/01/2024')
@@ -59,14 +58,13 @@ describe('State Submission', () => {
             cy.findAllByTestId('errorMessage').should('have.length', 0)
             cy.navigateForm('Continue')
 
-            // Shows step indicator
-            cy.findByTestId('step-indicator').should('exist')
-
             // Fill out some new rate details
             cy.findByText(/MN-MSHO-/).should('exist')
             cy.findByLabelText('New rate certification').safeClick()
             cy.findByLabelText('Start date').type('04/01/2024')
             cy.findByLabelText('End date').type('03/30/2025')
+
+            cy.findByTestId('step-indicator').findAllByText('Rate Details').should('have.length', 2)
 
             // Continue button triggers rate details validation
             cy.navigateForm('Continue')
@@ -86,6 +84,7 @@ describe('State Submission', () => {
 
             // Continue button navigates to documents page
             cy.navigateForm('Continue')
+
             cy.findByText(/MN-MSHO-/).should('exist')
 
             // Continue button, without filling out form, triggers validation
@@ -94,6 +93,8 @@ describe('State Submission', () => {
             cy.findByText('You must upload at least one document').should(
                 'exist'
             )
+
+            cy.findByTestId('step-indicator').findAllByText('Documents').should('have.length', 2)
 
             // Add multiple documents, show loading indicators
             cy.findByTestId('file-input-input').attachFile([
@@ -163,10 +164,9 @@ describe('State Submission', () => {
                 name: 'Continue',
             }).safeClick()
 
-            // Shows step indicator
-            cy.findByTestId('step-indicator').should('exist')
-
             // Fill out contract details
+            cy.findByTestId('step-indicator').findAllByText('Contract Details').should('have.length', 2)
+
             cy.findByText(/MN-MSHO-/).should('exist')
             cy.findByLabelText('Base contract').safeClick()
             cy.findByLabelText('Start date').type('04/01/2024')
@@ -176,10 +176,6 @@ describe('State Submission', () => {
             cy.findAllByTestId('errorMessage').should('have.length', 0)
             cy.navigateForm('Continue')
 
-            // Shows step indicator
-            cy.findByTestId('step-indicator').should('exist')
-
-            //Fill out rate details
             cy.findByLabelText('New rate certification').safeClick()
             cy.findByLabelText('Start date').type('02/29/2024')
             cy.findByLabelText('End date').type('02/28/2025')
@@ -228,6 +224,8 @@ describe('State Submission', () => {
             cy.navigateForm('Continue')
 
             // Change contract dates
+            cy.findByTestId('step-indicator').findAllByText('Contract Details').should('have.length', 2)
+
             cy.findByText(/MN-MSHO-/).should('exist')
             cy.findByLabelText('Base contract').should('be.checked')
             cy.findByLabelText('Start date').clear()
@@ -310,10 +308,9 @@ describe('State Submission', () => {
                 name: 'Continue',
             }).safeClick()
 
-            // Shows step indicator
-            cy.findByTestId('step-indicator').should('exist')
-
             // Fill out contract details
+            cy.findByTestId('step-indicator').findAllByText('Contract Details').should('have.length', 2)
+
             cy.findByLabelText('Amendment to base contract').safeClick()
             cy.findByRole('button', {
                 name: 'Continue',
@@ -330,6 +327,7 @@ describe('State Submission', () => {
 
             //Fill out rate details
             cy.findByLabelText('New rate certification').safeClick()
+            cy.findByTestId('step-indicator').findAllByText('Rate Details').should('have.length', 2)
             cy.findByLabelText('Start date').type('04/01/2024')
             cy.findByLabelText('End date').type('04/01/2026')
             cy.findByLabelText('Date certified').type('03/01/2024')
