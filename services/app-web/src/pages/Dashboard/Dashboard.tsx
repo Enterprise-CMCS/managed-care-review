@@ -96,6 +96,16 @@ export const Dashboard = (): React.ReactElement => {
         location.search
     ).get('justSubmitted')
 
+    let defaultTab: string | undefined = undefined
+    if (justSubmittedSubmissionName) {
+        for (const submission of submissionList) {
+            if (submission.name === justSubmittedSubmissionName) {
+                defaultTab = submission.program.name
+            }
+        }
+    }
+
+
     /* 
         Note: Program reference is passed within the submission name e.g. AS-TEST-PROGRAM-001
         This means the state program id must match the state program name 
@@ -130,7 +140,7 @@ export const Dashboard = (): React.ReactElement => {
                             asCustom={NavLink}
                             className="usa-button"
                             variant="unstyled"
-                            to="/submissions/new"
+                            to={`/submissions/new?defaultProgram=${program.id}`}
                         >
                             Start new submission
                         </Link>
@@ -175,7 +185,7 @@ export const Dashboard = (): React.ReactElement => {
         <>
             <div className={styles.container} data-testid="dashboardPage">
                 {programs.length ? (
-                    <Tabs className={styles.tabs}>
+                    <Tabs className={styles.tabs} defaultActiveTab={defaultTab}>
                         {programs.map((program: Program) => (
                             <TabPanel
                                 key={program.name}

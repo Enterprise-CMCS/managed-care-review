@@ -372,7 +372,6 @@ const indexSubmissionsMockSuccess = (): MockedResponse<Record<string, any>> => {
             node: sub,
         }
     })
-    console.log('subsl', submissionEdges)
     return {
         request: {
             query: IndexSubmissionsDocument,

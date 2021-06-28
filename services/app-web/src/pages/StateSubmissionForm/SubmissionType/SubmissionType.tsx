@@ -132,8 +132,12 @@ export const SubmissionType = ({
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
+    const defaultInitialProgramID = new URLSearchParams(
+        location.search
+    ).get('defaultProgram')
+
     const submissionTypeInitialValues: SubmissionTypeFormValues = {
-        programID: draftSubmission?.program.id ?? programs[0]?.id,
+        programID: draftSubmission?.program.id ?? defaultInitialProgramID ?? programs[0]?.id,
         submissionDescription: draftSubmission?.submissionDescription ?? '',
         submissionType: draftSubmission?.submissionType ?? '',
     }
