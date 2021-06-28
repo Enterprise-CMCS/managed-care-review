@@ -147,16 +147,26 @@ describe('State Submission', () => {
                 .then((nameText) => {
                     // Submit the form and navigate to the dashboard again
                     cy.navigateForm('Submit')
+                    cy.navigateForm('Confirm submit')
                     cy.findByRole('heading', { name: 'Submissions' }).should(
                         'exist'
                     )
 
-                    cy.findByText(nameText).should('exist').then( (submittedText) => {
-                        // find "SUBMITTED" in the card
-                        const submissionCard = submittedText.parent().parent()
-                        const cardStatus = submissionCard.find('span[data-testid="tag"]').html()
-                        assert(cardStatus.indexOf('Submitted') === 0, 'Submission isnt displayed as Submitted')
-                    })
+                    cy.findByText(nameText)
+                        .should('exist')
+                        .then((submittedText) => {
+                            // find "SUBMITTED" in the card
+                            const submissionCard = submittedText
+                                .parent()
+                                .parent()
+                            const cardStatus = submissionCard
+                                .find('span[data-testid="tag"]')
+                                .html()
+                            assert(
+                                cardStatus.indexOf('Submitted') === 0,
+                                'Submission isnt displayed as Submitted'
+                            )
+                        })
                 })
         })
 
@@ -184,7 +194,7 @@ describe('State Submission', () => {
                 'exist'
             )
 
-            // This will break eventually, but is fixing a weird bug in CI where the heading hasn't been 
+            // This will break eventually, but is fixing a weird bug in CI where the heading hasn't been
             // updated with the Submission.name even though we can see 'Contract details'
             cy.findByText(/^MN-MSHO-/).should('exist')
 

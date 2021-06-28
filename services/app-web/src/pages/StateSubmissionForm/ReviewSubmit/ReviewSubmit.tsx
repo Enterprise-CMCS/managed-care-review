@@ -39,7 +39,9 @@ export const ReviewSubmit = ({
     draftSubmission: DraftSubmission
 }): React.ReactElement => {
     const [refreshedDocs, setRefreshedDocs] = useState<DocumentWithLink[]>([])
-    const [displayConfirmation, setDisplayConfirmation] = useState<boolean>(false)
+    const [displayConfirmation, setDisplayConfirmation] = useState<boolean>(
+        false
+    )
     const { getURL, getKey } = useS3()
 
     const [userVisibleError, setUserVisibleError] = useState<
@@ -53,9 +55,7 @@ export const ReviewSubmit = ({
                 cache.modify({
                     id: 'ROOT_QUERY',
                     fields: {
-                        indexSubmissions(
-                            _index, {DELETE}
-                        ) {
+                        indexSubmissions(_index, { DELETE }) {
                             return DELETE
                         },
                     },
@@ -144,7 +144,7 @@ export const ReviewSubmit = ({
                 },
             })
 
-            console.log("Got data: ", data)
+            console.log('Got data: ', data)
 
             if (data.errors) {
                 console.log(data.errors)
@@ -483,34 +483,41 @@ export const ReviewSubmit = ({
                     <Button
                         type="button"
                         className={styles.submitButton}
+                        data-testId="pageSubmitButton"
                         onClick={handleSubmitConfirmation}
                     >
                         Submit
                     </Button>
                 </ButtonGroup>
+
                 {displayConfirmation && (
-                <Dialog heading="Ready to Submit?"
-                actions={[
-                    <Button
-                        type="button"
-                        key="submitButton"
-                        onClick={handleFormSubmit}
+                    <Dialog
+                        heading="Ready to Submit?"
+                        actions={[
+                            <Button
+                                type="button"
+                                key="submitButton"
+                                aria-label="Confirm submit"
+                                onClick={handleFormSubmit}
+                            >
+                                Submit
+                            </Button>,
+                            <Button
+                                type="button"
+                                key="cancelButton"
+                                outline
+                                onClick={handleCancelSubmitConfirmation}
+                            >
+                                Cancel
+                            </Button>,
+                        ]}
                     >
-                      Submit
-                    </Button>,
-                    <Button
-                      type="button"
-                      key="cancelButton"
-                      outline
-                      onClick={handleCancelSubmitConfirmation}
-                    >
-                      Cancel
-                    </Button>,
-                  ]}
-                >
-                    <p>Submitting this package will send it to CMS to begin their review.</p>
-                </Dialog>
-            )}
+                        <p>
+                            Submitting this package will send it to CMS to begin
+                            their review.
+                        </p>
+                    </Dialog>
+                )}
             </div>
         </GridContainer>
     )
