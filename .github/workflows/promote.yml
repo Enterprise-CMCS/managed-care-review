@@ -103,6 +103,9 @@ jobs:
       - name: set dev env vars
         run: ./.github/build_vars.sh set_values
         env:
+          CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets.DEV_CLOUDFRONT_CERTIFICATE_ARN }}
+          CLOUDFRONT_DOMAIN_NAME: ${{ secrets.DEV_CLOUDFRONT_DOMAIN_NAME }
+          CLOUDFRONT_STORYBOOK_DOMAIN_NAME: ${{ secrets.DEV_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
           REACT_APP_AUTH_MODE: IDM
       - name: deploy to dev
         run: |
