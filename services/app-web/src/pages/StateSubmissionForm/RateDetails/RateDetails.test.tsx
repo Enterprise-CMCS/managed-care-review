@@ -144,63 +144,9 @@ describe('RateDetails', () => {
         userEvent.type(screen.getByText('Date certified'), '12/01/2021')
 
         continueButton.click()
-
-        await waitFor(() => {
-            expect(
-                screen.getByText('You must enter a 12-month rating period')
-            ).toBeInTheDocument()
-        })
-
-        userEvent.clear(endDateInput)
-        userEvent.type(endDateInput, '03/30/2024')
-
-        await waitFor(() => {
-            expect(
-                screen.getByText('You must enter a 12-month rating period')
-            ).toBeInTheDocument()
-        })
-
-        userEvent.clear(endDateInput)
-        userEvent.type(endDateInput, '03/31/2024')
-        await waitFor(() => {
-            expect(
-                screen.queryByText('You must enter a 12-month rating period')
-            ).toBeNull()
+        await waitFor(() =>
             expect(screen.queryAllByTestId('errorMessage').length).toBe(0)
-        })
-
-        // Test leap year
-        userEvent.clear(startDateInput)
-        userEvent.clear(endDateInput)
-        userEvent.type(startDateInput, '03/01/2023')
-        userEvent.type(endDateInput, '02/28/2024')
-
-        await waitFor(() => {
-            expect(
-                screen.queryByText('You must enter a 12-month rating period')
-            ).toBeInTheDocument()
-        })
-
-        userEvent.clear(endDateInput)
-        userEvent.type(endDateInput, '02/29/2024')
-
-        await waitFor(() => {
-            expect(
-                screen.queryByText('You must enter a 12-month rating period')
-            ).toBeNull()
-        })
-
-        userEvent.clear(startDateInput)
-        userEvent.clear(endDateInput)
-
-        userEvent.type(startDateInput, '02/29/2024')
-        userEvent.type(endDateInput, '02/28/2025')
-
-        await waitFor(() => {
-            expect(
-                screen.queryByText('You must enter a 12-month rating period')
-            ).toBeNull()
-        })
+        )
     })
 
     it('progressively disclose new rate form fields as expected', async () => {

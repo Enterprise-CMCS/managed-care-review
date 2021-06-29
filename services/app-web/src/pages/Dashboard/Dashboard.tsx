@@ -14,6 +14,7 @@ import {
     SubmissionType,
 } from '../../components/SubmissionCard/SubmissionCard'
 import { useAuth } from '../../contexts/AuthContext'
+import { MCRouterState } from "../../constants/routerState"
 import { Program, useIndexSubmissionsQuery } from '../../gen/gqlClient'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
 import { SubmissionType as DomainSubmissionType } from '../../../../app-web/src/common-code/domain-models'
@@ -37,8 +38,15 @@ const submissionStatusMap: {
 // we want all the DraftSubmissions to rise above the StateSubmissions
 // but otherwise remain in numeric order  so we can compare their
 // typenames to sort them.
-export function sortDraftsToTop(submissions: { __typename: string }[]): void {
+export function sortDraftsToTop(submissions: { __typename: string, name: string }[], justSubmitted: string | undefined): void {
     submissions.sort((a, b) => {
+        // if this one was justSubmitted, float it to the top.
+        if (a.name === justSubmitted) {
+            return -1
+        }
+        if (b.name === justSubmitted) {
+            return 1
+        }
         // 'StateSubmission' > 'DraftSubmission'
         if (a.__typename > b.__typename) {
             return 1
@@ -63,7 +71,7 @@ function editUrlForSubmission(submission: {
 
 export const Dashboard = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
-    const location = useLocation()
+    const location = useLocation<MCRouterState>()
     let programs: Program[] = []
 
     const { loading, data, error } = useIndexSubmissionsQuery()
@@ -89,6 +97,19 @@ export const Dashboard = (): React.ReactElement => {
         location.search
     ).get('justSubmitted')
 
+    let defaultTab: string | undefined = undefined
+    if (justSubmittedSubmissionName) {
+        for (const submission of submissionList) {
+            if (submission.name === justSubmittedSubmissionName) {
+                defaultTab = submission.program.name
+            }
+        }
+    } else if (location.state && location.state.defaultProgramID) {
+        const defaultProgram = loggedInUser.state.programs.find((program) => program.id === location.state?.defaultProgramID)
+        defaultTab = defaultProgram?.name
+    }
+
+
     /* 
         Note: Program reference is passed within the submission name e.g. AS-TEST-PROGRAM-001
         This means the state program id must match the state program name 
@@ -105,7 +126,7 @@ export const Dashboard = (): React.ReactElement => {
         const programSubs = submissionList.filter(
             (submission) => submission.programID === program.id
         )
-        sortDraftsToTop(programSubs)
+        sortDraftsToTop(programSubs, justSubmittedSubmissionName ?? undefined)
 
         return (
             <section key={program.name} className={styles.panel}>
@@ -123,7 +144,7 @@ export const Dashboard = (): React.ReactElement => {
                             asCustom={NavLink}
                             className="usa-button"
                             variant="unstyled"
-                            to="/submissions/new"
+                            to={{pathname: "/submissions/new", state: {defaultProgramID: program.id}}}
                         >
                             Start new submission
                         </Link>
@@ -168,7 +189,7 @@ export const Dashboard = (): React.ReactElement => {
         <>
             <div className={styles.container} data-testid="dashboardPage">
                 {programs.length ? (
-                    <Tabs className={styles.tabs}>
+                    <Tabs className={styles.tabs} defaultActiveTab={defaultTab}>
                         {programs.map((program: Program) => (
                             <TabPanel
                                 key={program.name}

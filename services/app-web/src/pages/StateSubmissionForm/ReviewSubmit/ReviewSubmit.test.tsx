@@ -117,6 +117,37 @@ describe('ReviewSubmit', () => {
         )
     })
 
+    it('submit button opens confirmation modal', async () => {
+        renderWithProviders(
+            <ReviewSubmit draftSubmission={mockCompleteDraft()} />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+        const submitButton = screen.getByRole('button', {
+            name: 'Submit',
+        })
+
+        expect(submitButton).toBeInTheDocument()
+
+        submitButton.click()
+
+        await waitFor(() => {
+            const confirmSubmit = screen.getByRole('button', {
+                name: 'Confirm submit',
+            })
+            expect(confirmSubmit).toBeInTheDocument()
+            expect(screen.getByText('Ready to Submit?')).toBeInTheDocument()
+            expect(
+                screen.getByText(
+                    'Submitting this package will send it to CMS to begin their review.'
+                )
+            ).toBeInTheDocument()
+        })
+    })
+
     it('redirects if submission succeeds', async () => {
         const history = createMemoryHistory()
 
@@ -142,11 +173,18 @@ describe('ReviewSubmit', () => {
             }
         )
 
-        const submitButton = await screen.findByRole('button', {
+        const submit = screen.getByRole('button', {
             name: 'Submit',
         })
+        submit.click()
 
-        submitButton.click()
+        await waitFor(() => {
+            const confirmSubmit = screen.getByRole('button', {
+                name: 'Confirm submit',
+            })
+            expect(confirmSubmit).toBeInTheDocument()
+            confirmSubmit.click()
+        })
 
         await waitFor(() => {
             expect(history.location.pathname).toEqual(`/dashboard`)
@@ -176,6 +214,12 @@ describe('ReviewSubmit', () => {
         })
 
         submitButton.click()
+
+        const confirmSubmit = await screen.findByRole('button', {
+            name: 'Confirm submit',
+        })
+        expect(confirmSubmit).toBeInTheDocument()
+        confirmSubmit.click()
 
         const errorText = await screen.findByText(
             'Error attempting to submit. Please try again.'

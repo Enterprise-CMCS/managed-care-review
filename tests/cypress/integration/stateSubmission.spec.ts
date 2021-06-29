@@ -69,15 +69,10 @@ describe('State Submission', () => {
             cy.findByText(
                 'You must enter the date the document was certified'
             ).should('exist')
-            cy.findByText('You must enter a 12-month rating period').should(
-                'exist'
-            )
-            cy.findAllByTestId('errorMessage').should('have.length', 2)
+            cy.findAllByTestId('errorMessage').should('have.length', 1)
 
             // Fill out missing required fields for rate details
             cy.findByLabelText('Date certified').type('03/15/2024')
-            cy.findByLabelText('End date').clear()
-            cy.findByLabelText('End date').type('03/31/2025')
             cy.findAllByTestId('errorMessage').should('have.length', 0)
 
             // Continue button navigates to documents page
@@ -147,6 +142,7 @@ describe('State Submission', () => {
                 .then((nameText) => {
                     // Submit the form and navigate to the dashboard again
                     cy.navigateForm('Submit')
+                    cy.navigateForm('Confirm submit')
                     cy.findByRole('heading', { name: 'Submissions' }).should(
                         'exist'
                     )
@@ -426,7 +422,7 @@ describe('State Submission', () => {
             cy.findByLabelText('Annual rate update').should('be.checked')
         })
 
-        it.only('user can complete a contract submission and see submission summary', () => {
+        it('user can complete a contract submission and see submission summary', () => {
             cy.login()
 
             // Add a new contract only submission
@@ -506,7 +502,10 @@ describe('State Submission', () => {
                     'not.exist'
                 )
                 cy.findByTestId('submission-summary').should('exist')
-                cy.findByText(submissionName).should('exist')
+
+                cy.findByRole('heading', {
+                    name: `Minnesota ${submissionName}`,
+                }).should('exist')
                 cy.findByText('Back to state dashboard').should('exist')
                 cy.url({ timeout: 10_000 }).should('contain', submissionId)
             })

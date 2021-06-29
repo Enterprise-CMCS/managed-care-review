@@ -23,6 +23,7 @@ import {
 } from '../../../components/FileUpload/FileUpload'
 import { FileItemT } from '../../../components/FileUpload/FileItem'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
+import { MCRouterState } from '../../../constants/routerState'
 
 /* 
     Documents should error alerts for overall errors related to invalid documents for a submission, including no files added.
@@ -47,7 +48,7 @@ export const Documents = ({
     const redirectPath = React.useRef<string | null>(null)
     const [hasValidFiles, setHasValidFiles] = useState(false)
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
-    const history = useHistory()
+    const history = useHistory<MCRouterState>()
 
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         draftSubmission &&
@@ -143,7 +144,9 @@ export const Documents = ({
             })
             if (updatedSubmission) {
                 if (redirectPath.current) {
-                    history.push(redirectPath.current)
+                    history.push(redirectPath.current, {
+                        defaultProgramID: draftSubmission.programID,
+                    })
                 } else {
                     //fallback
                     history.push(
