@@ -502,7 +502,10 @@ describe('State Submission', () => {
                     'not.exist'
                 )
                 cy.findByTestId('submission-summary').should('exist')
-                cy.findByText(submissionName).should('exist')
+
+                cy.findByRole('heading', {
+                    name: `Minnesota ${submissionName}`,
+                }).should('exist')
                 cy.findByText('Back to state dashboard').should('exist')
                 cy.url({ timeout: 10_000 }).should('contain', submissionId)
             })
