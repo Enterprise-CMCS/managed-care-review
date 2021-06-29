@@ -1,5 +1,5 @@
 import React from 'react'
-import { screen, render } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import dayjs from 'dayjs'
 import {
     SubmissionCard,

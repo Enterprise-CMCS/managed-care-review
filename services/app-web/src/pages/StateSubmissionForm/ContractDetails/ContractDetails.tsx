@@ -43,6 +43,7 @@ import {
     ManagedCareEntityRecord,
     FederalAuthorityRecord,
 } from '../../../constants/submissions'
+import { MCRouterState } from '../../../constants/routerState'
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
@@ -160,7 +161,7 @@ export const ContractDetails = ({
 }): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const redirectToDashboard = React.useRef(false)
-    const history = useHistory()
+    const history = useHistory<MCRouterState>()
 
     const contractDetailsInitialValues: ContractDetailsFormValues = {
         contractType: draftSubmission?.contractType ?? undefined,
@@ -263,7 +264,7 @@ export const ContractDetails = ({
             })
             if (updatedSubmission) {
                 if (redirectToDashboard.current) {
-                    history.push(`/dashboard`)
+                    history.push(`/dashboard`, {defaultProgramID: draftSubmission.programID})
                 } else {
                     history.push(
                         `/submissions/${draftSubmission.id}/rate-details`
@@ -978,7 +979,7 @@ export const ContractDetails = ({
                                 unstyled
                                 onClick={() => {
                                     if (!dirty) {
-                                        history.push(`/dashboard`)
+                                        history.push(`/dashboard`, {defaultProgramID: draftSubmission.programID})
                                     } else {
                                         setShouldValidate(true)
                                         if (!isValidating) {

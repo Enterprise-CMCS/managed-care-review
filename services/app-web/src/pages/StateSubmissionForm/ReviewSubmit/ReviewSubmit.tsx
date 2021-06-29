@@ -31,6 +31,7 @@ import PageHeading from '../../../components/PageHeading'
 import { DataDetail } from '../../../components/DataDetail/DataDetail'
 import { DoubleColumnRow } from '../../../components/DoubleColumnRow/DoubleColumnRow'
 import { useS3 } from '../../../contexts/S3Context'
+import { MCRouterState } from '../../../constants/routerState'
 
 type DocumentWithLink = { url: string | null } & Document
 export const ReviewSubmit = ({
@@ -47,7 +48,7 @@ export const ReviewSubmit = ({
     const [userVisibleError, setUserVisibleError] = useState<
         string | undefined
     >(undefined)
-    const history = useHistory()
+    const history = useHistory<MCRouterState>()
     const [submitDraftSubmission] = useSubmitDraftSubmissionMutation({
         // An alternative to messing with the cache like we do with create, just zero it out.
         update(cache, { data }) {
@@ -473,7 +474,7 @@ export const ReviewSubmit = ({
                     asCustom={NavLink}
                     className="usa-button usa-button--unstyled"
                     variant="unstyled"
-                    to="/dashboard"
+                    to={{pathname: "/dashboard", state: {defaultProgramID: draftSubmission.programID}}}
                 >
                     Save as Draft
                 </Link>

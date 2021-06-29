@@ -1,5 +1,4 @@
 import { screen, waitFor } from '@testing-library/react'
-import dayjs from 'dayjs'
 import { within } from '@testing-library/react'
 import { act } from 'react-dom/test-utils'
 import { createMemoryHistory } from 'history'
@@ -8,7 +7,6 @@ import userEvent from '@testing-library/user-event'
 import {
     mockDraft,
     fetchCurrentUserMock,
-    updateDraftSubmissionMock,
 } from '../../../testHelpers/apolloHelpers'
 
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
@@ -25,7 +23,7 @@ describe('ContractDetails', () => {
         emptyDraft.id = '12'
         const history = createMemoryHistory()
 
-        renderWithProviders(<ContractDetails draftSubmission={emptyDraft} />, {
+        renderWithProviders(<ContractDetails draftSubmission={emptyDraft} updateDraft={ async (draft) => undefined } />, {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200 }),
