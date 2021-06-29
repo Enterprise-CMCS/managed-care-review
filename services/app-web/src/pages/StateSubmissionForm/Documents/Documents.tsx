@@ -157,12 +157,12 @@ export const Documents = ({
     const Hint = (): JSX.Element =>
         draftSubmission.submissionType === 'CONTRACT_AND_RATES' ? (
             <>
-                <strong>Must include:</strong> an executed contract and a signed
+                <strong>Must include:</strong> An executed contract and a signed
                 rate certification
             </>
         ) : (
             <>
-                <strong>Must include:</strong> an executed contract
+                <strong>Must include:</strong> An executed contract
             </>
         )
 
