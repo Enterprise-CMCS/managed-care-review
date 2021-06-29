@@ -238,7 +238,7 @@ export const Documents = ({
                             }
                         }}
                     >
-                        Save as Draft
+                        Save as draft
                     </Button>
                     <ButtonGroup type="default" className={styles.buttonGroup}>
                         <Link

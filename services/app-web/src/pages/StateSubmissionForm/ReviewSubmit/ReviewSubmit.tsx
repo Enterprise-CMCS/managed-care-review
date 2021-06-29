@@ -211,7 +211,7 @@ export const ReviewSubmit = ({
                 </Alert>
             )}
             <PageHeading className={stylesForm.formHeader} headingLevel="h2">
-                Review and Submit
+                Review and submit
             </PageHeading>
             <section id="submissionType" className={styles.reviewSection}>
                 <div className={styles.reviewSectionHeader}>
@@ -476,7 +476,7 @@ export const ReviewSubmit = ({
                     variant="unstyled"
                     to={{pathname: "/dashboard", state: {defaultProgramID: draftSubmission.programID}}}
                 >
-                    Save as Draft
+                    Save as draft
                 </Link>
                 <ButtonGroup type="default" className={stylesForm.buttonGroup}>
                     <Link
