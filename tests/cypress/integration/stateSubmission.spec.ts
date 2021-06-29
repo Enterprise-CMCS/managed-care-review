@@ -473,7 +473,7 @@ describe('State Submission', () => {
             cy.navigateForm('Continue')
             cy.findByText('Review and Submit').should('exist')
 
-            // s=Store submission name for reference later
+            // Store submission name for reference later
 
             let submissionId = ''
             cy.location().then((fullUrl) => {
@@ -483,7 +483,9 @@ describe('State Submission', () => {
             })
 
             // Submit
-            cy.navigateForm('Submit')
+            cy.findByRole('dialog')
+                .findByRole('button', { name: 'Confirm submit' })
+                .click()
 
             // User sent to dashboard
             cy.findByText('Dashboard').should('exist')
@@ -510,5 +512,7 @@ describe('State Submission', () => {
                 cy.url({ timeout: 10_000 }).should('contain', submissionId)
             })
         })
+
+        it('user can edit documents')
     })
 })
