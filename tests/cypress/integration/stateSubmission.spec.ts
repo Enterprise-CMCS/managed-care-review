@@ -194,10 +194,6 @@ describe('State Submission', () => {
                 name: 'Continue',
             }).safeClick()
 
-            cy.findByRole('heading', { name: 'Contract details' }).should(
-                'exist'
-            )
-
             // This will break eventually, but is fixing a weird bug in CI where the heading hasn't been
             // updated with the Submission.name even though we can see 'Contract details'
             cy.findByText(/^MN-MSHO-/).should('exist')
@@ -470,7 +466,6 @@ describe('State Submission', () => {
             cy.navigateForm('Continue')
 
             // Add documents
-            cy.findByRole('heading', { name: 'Documents' }).should('exist')
             cy.findByTestId('file-input-input').attachFile(
                 'documents/trussel-guide.pdf'
             )
@@ -498,7 +493,7 @@ describe('State Submission', () => {
 
             // User sent to dashboard
             cy.findByText('Dashboard').should('exist')
-            cy.findByRole('heading', { name: 'Submissions' }).should('exist')
+
             cy.location().then((loc) => {
                 expect(loc.search).to.match(/.*justSubmitted=*/)
                 const submissionName = loc.search.split('=').pop()
