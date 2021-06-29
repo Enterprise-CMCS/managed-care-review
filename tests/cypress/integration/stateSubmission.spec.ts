@@ -254,7 +254,7 @@ describe('State Submission', () => {
             cy.findByRole('heading', { name: 'Documents' }).should('exist')
             cy.findByTestId('documents-hint').should(
                 'contain.text',
-                'Must include: an executed contract and a signed rate certification'
+                'Must include: An executed contract and a signed rate certification'
             )
             cy.findByTestId('file-input-input').attachFile(
                 'documents/trussel-guide.pdf'
@@ -315,7 +315,7 @@ describe('State Submission', () => {
             cy.findByRole('heading', { name: 'Documents' }).should('exist')
             cy.findByTestId('documents-hint').should(
                 'contain.text',
-                'Must include: an executed contract'
+                'Must include: An executed contract'
             )
             cy.findByText('trussel-guide.pdf').should('exist')
         })
@@ -471,7 +471,7 @@ describe('State Submission', () => {
             )
             // Navigate review and submit pag
             cy.navigateForm('Continue')
-            cy.findByText('Review and Submit').should('exist')
+            cy.findByText('Review and submit').should('exist')
 
             // Store submission name for reference later
 
@@ -486,6 +486,9 @@ describe('State Submission', () => {
             cy.findByRole('dialog')
                 .findByRole('button', { name: 'Confirm submit' })
                 .click()
+
+            // Submit the Modal
+            cy.findByRole('dialog').findByRole('button', {'name': 'Confirm submit'}).click()
 
             // User sent to dashboard
             cy.findByText('Dashboard').should('exist')

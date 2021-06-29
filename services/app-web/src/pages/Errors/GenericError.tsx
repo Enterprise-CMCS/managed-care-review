@@ -14,8 +14,8 @@ export const GenericError = (): React.ReactElement => {
                 <p>Please try to refresh the page. </p>
                 <p>
                     <span>If the issue continues reach out to </span>
-                    <Link href="mailto:mcrrs-team@truss.works">
-                        mcrrs-team@truss.works
+                    <Link href="mailto:mc-review-team@truss.works">
+                    mc-review-team@truss.works
                     </Link>
                 </p>
             </GridContainer>
