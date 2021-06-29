@@ -30,7 +30,6 @@ import { updatesFromSubmission } from '../updateSubmissionTransform'
 */
 
 type DocumentProps = {
-    showValidations?: boolean
     draftSubmission: DraftSubmission
     formAlert?: React.ReactElement
     updateDraft: (
@@ -39,14 +38,13 @@ type DocumentProps = {
 }
 
 export const Documents = ({
-    showValidations,
     draftSubmission,
     updateDraft,
     formAlert = undefined,
 }: DocumentProps): React.ReactElement => {
     const { deleteFile, uploadFile, getKey, getS3URL } = useS3()
-    const [shouldValidate, setShouldValidate] = useState(showValidations)
-    const redirectToDashboard = React.useRef(false)
+    const [shouldValidate, setShouldValidate] = useState(false)
+    const redirectPath = React.useRef<string | null>(null)
     const [hasValidFiles, setHasValidFiles] = useState(false)
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
     const history = useHistory()
@@ -113,10 +111,15 @@ export const Documents = ({
         return { key: s3Key, s3URL: s3URL }
     }
 
-    const handleFormSubmit = async (e: React.FormEvent | React.MouseEvent) => {
+    const handleFormSubmit = (shouldValidate: boolean) => async (
+        e: React.FormEvent | React.MouseEvent
+    ) => {
         e.preventDefault()
-        setShouldValidate(true)
-        if (!hasValidFiles) return
+
+        if (shouldValidate) {
+            setShouldValidate(true)
+            if (!hasValidFiles) return
+        }
 
         const documents = fileItems.map((fileItem) => {
             if (!fileItem.s3URL)
@@ -139,17 +142,19 @@ export const Documents = ({
                 draftSubmissionUpdates: updatedDraft,
             })
             if (updatedSubmission) {
-                if (redirectToDashboard.current) {
-                    history.push(`/dashboard`)
+                if (redirectPath.current) {
+                    history.push(redirectPath.current)
                 } else {
+                    //fallback
                     history.push(
                         `/submissions/${draftSubmission.id}/review-and-submit`
                     )
                 }
             }
+            redirectPath.current = null
         } catch (error) {
             showError(error)
-            redirectToDashboard.current = false
+            redirectPath.current = null
         }
     }
 
@@ -174,7 +179,10 @@ export const Documents = ({
                 className={styles.formContainer}
                 id="DocumentsForm"
                 aria-label="Documents Form"
-                onSubmit={handleFormSubmit}
+                onSubmit={async (e) => {
+                    redirectPath.current = 'review-and-submit'
+                    await handleFormSubmit(true)(e)
+                }}
             >
                 <fieldset className="usa-fieldset">
                     <legend className="srOnly">Documents</legend>
@@ -227,14 +235,9 @@ export const Documents = ({
                     <Button
                         type="button"
                         unstyled
-                        disabled={shouldValidate && !hasValidFiles}
                         onClick={async (e) => {
-                            if (hasValidFiles) {
-                                history.push(`/dashboard`)
-                            } else {
-                                redirectToDashboard.current = true
-                                await handleFormSubmit(e)
-                            }
+                            redirectPath.current = '/dashboard'
+                            await handleFormSubmit(false)(e)
                         }}
                     >
                         Save as Draft
@@ -243,14 +246,9 @@ export const Documents = ({
                         <Button
                             type="button"
                             className="usa-button usa-button--outline"
-                            disabled={shouldValidate && !hasValidFiles}
                             onClick={async (e) => {
-                                if (hasValidFiles) {
-                                    history.push(`/rate-details`)
-                                } else {
-                                    redirectToDashboard.current = true
-                                    await handleFormSubmit(e)
-                                }
+                                redirectPath.current = 'rate-details'
+                                await handleFormSubmit(false)(e)
                             }}
                         >
                             Back
@@ -259,9 +257,6 @@ export const Documents = ({
                             type="submit"
                             secondary={shouldValidate && !hasValidFiles}
                             disabled={shouldValidate && !hasValidFiles}
-                            onClick={() =>
-                                (redirectToDashboard.current = false)
-                            }
                         >
                             Continue
                         </Button>
