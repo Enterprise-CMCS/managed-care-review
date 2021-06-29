@@ -54,7 +54,11 @@ const apolloClient = new ApolloClient({
         uri: '/graphql',
         fetch: authMode === 'LOCAL' ? localGQLFetch : fakeAmplifyFetch,
     }),
-    cache: new InMemoryCache(),
+    cache: new InMemoryCache({
+        possibleTypes: {
+            Submission: ['DraftSubmission', 'StateSubmission'],
+        },
+    }),
     typeDefs: gqlSchema,
 })
 

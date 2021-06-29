@@ -1,3 +1,5 @@
+import dayjs from 'dayjs'
+
 import {
     DraftSubmission,
     FetchCurrentUserDocument,
@@ -6,6 +8,7 @@ import {
     FetchDraftSubmissionDocument,
     UpdateDraftSubmissionDocument,
     SubmitDraftSubmissionDocument,
+    IndexSubmissionsDocument,
     DraftSubmissionUpdates,
     StateSubmission,
 } from '../gen/gqlClient'
@@ -29,6 +32,7 @@ const mockValidUser: UserType = {
 }
 
 const mockDraftSubmission: DraftSubmission = {
+    __typename: 'DraftSubmission',
     createdAt: new Date(),
     updatedAt: new Date(),
     id: 'test-abc-123',
@@ -44,7 +48,7 @@ const mockDraftSubmission: DraftSubmission = {
     documents: [],
     contractType: 'BASE',
     contractDateStart: new Date(),
-    contractDateEnd: new Date(),
+    contractDateEnd: dayjs().add(2, 'days').toDate(),
     contractAmendmentInfo: null,
     managedCareEntities: [],
     federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
@@ -79,6 +83,52 @@ const mockCompleteDraftSubmission: DraftSubmission = {
     rateDateEnd: new Date(),
     rateDateCertified: new Date(),
     rateAmendmentInfo: null,
+}
+
+const mockNewDraftSubmission: DraftSubmission = {
+    __typename: 'DraftSubmission',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    id: 'test-abc-124',
+    stateCode: 'MN',
+    programID: 'snbc',
+    program: {
+        id: 'snbc',
+        name: 'SNBC',
+    },
+    name: 'MN-MSHO-0002',
+    submissionType: 'CONTRACT_ONLY',
+    submissionDescription: 'A real submission',
+    documents: [],
+    contractType: null,
+    contractDateStart: null,
+    contractDateEnd: null,
+    contractAmendmentInfo: null,
+    managedCareEntities: [],
+    federalAuthorities: [],
+    rateType: null,
+    rateDateStart: null,
+    rateDateEnd: null,
+    rateDateCertified: null,
+}
+
+export function mockStateSubmission(): Partial<StateSubmission> {
+    return {
+        __typename: 'StateSubmission',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        id: 'test-abc-125',
+        stateCode: 'MN',
+        programID: 'snbc',
+        program: {
+            id: 'snbc',
+            name: 'SNBC',
+        },
+        name: 'MN-MSHO-0003',
+        submissionType: 'CONTRACT_ONLY',
+        submissionDescription: 'A submitted submission',
+        submittedAt: new Date(),
+    }
 }
 
 // Only export a function that returns the mockDraftSubmission so that
@@ -124,22 +174,32 @@ fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
 }
 
 type createDraftSubmissionMockProps = {
+    input: {
+        programID: string
+        submissionType: string
+        submissionDescription: string
+    }
     draftSubmission?: DraftSubmission | Partial<DraftSubmission>
     statusCode: 200 | 403 | 500
 }
 
 const createDraftSubmissionMock = ({
-    draftSubmission = mockDraftSubmission,
+    input,
+    draftSubmission = mockNewDraftSubmission,
     statusCode, // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }: createDraftSubmissionMockProps): MockedResponse<Record<string, any>> => {
+    const mergedDraftSubmission = Object.assign({}, draftSubmission, input)
     switch (statusCode) {
         case 200:
             return {
-                request: { query: CreateDraftSubmissionDocument },
+                request: {
+                    query: CreateDraftSubmissionDocument,
+                    variables: { input },
+                },
                 result: {
                     data: {
                         createDraftSubmission: {
-                            draftSubmission,
+                            draftSubmission: mergedDraftSubmission,
                         },
                     },
                 },
@@ -303,6 +363,33 @@ const submitDraftSubmissionMockError = ({
     }
 }
 
+// type indexSubmissionsMockSuccessProps = {
+//     stateSubmission?: StateSubmission | Partial<StateSubmission>
+//     id: string
+// }
+
+const indexSubmissionsMockSuccess = (): MockedResponse<Record<string, any>> => {
+    const submissionEdges = [mockDraft(), mockStateSubmission()].map((sub) => {
+        return {
+            node: sub,
+        }
+    })
+    console.log('subsl', submissionEdges)
+    return {
+        request: {
+            query: IndexSubmissionsDocument,
+        },
+        result: {
+            data: {
+                indexSubmissions: {
+                    totalCount: submissionEdges.length,
+                    edges: submissionEdges,
+                },
+            },
+        },
+    }
+}
+
 export {
     fetchCurrentUserMock,
     createDraftSubmissionMock,
@@ -311,4 +398,5 @@ export {
     mockDraftSubmission,
     submitDraftSubmissionMockSuccess,
     submitDraftSubmissionMockError,
+    indexSubmissionsMockSuccess,
 }

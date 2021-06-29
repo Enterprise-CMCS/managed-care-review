@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 
 import {
+    Alert,
     GridContainer,
     StepIndicator,
     StepIndicatorStep,
@@ -12,32 +13,81 @@ import { ErrorInvalidSubmissionStatus } from '../Errors/ErrorInvalidSubmissionSt
 import { GenericError } from '../Errors/GenericError'
 import { Loading } from '../../components/Loading/'
 import { usePage } from '../../contexts/PageContext'
-import { RoutesRecord, getRouteName, PageTitlesRecord, RouteT } from '../../constants/routes'
+import {
+    RoutesRecord,
+    STATE_SUBMISSION_FORM_ROUTES,
+    getRouteName,
+    PageTitlesRecord,
+    RouteT,
+} from '../../constants/routes'
 import { ContractDetails } from './ContractDetails/ContractDetails'
 import { RateDetails } from './RateDetails/RateDetails'
 import { Documents } from './Documents/Documents'
 import { ReviewSubmit } from './ReviewSubmit/ReviewSubmit'
 import { SubmissionType } from './SubmissionType/SubmissionType'
 
-import { useFetchDraftSubmissionQuery } from '../../gen/gqlClient'
+import {
+    DraftSubmission,
+    UpdateDraftSubmissionInput,
+    useUpdateDraftSubmissionMutation,
+    useFetchDraftSubmissionQuery,
+} from '../../gen/gqlClient'
+
+const GenericFormAlert = () => <Alert type="error">Something went wrong</Alert>
 
 export const StateSubmissionForm = (): React.ReactElement => {
     const { id } = useParams<{ id: string }>()
     const { pathname } = useLocation()
+    const routeConstant = getRouteName(pathname)
     const { updateHeading } = usePage()
+    const [showFormAlert, setShowFormAlert] = useState(false)
 
-    const { data, loading, error } = useFetchDraftSubmissionQuery({
+    // Set up graphql calls
+    const {
+        data: fetchData,
+        loading,
+        error: fetchError,
+    } = useFetchDraftSubmissionQuery({
         variables: {
             input: {
                 submissionID: id,
             },
         },
     })
-    const draft = data?.fetchDraftSubmission?.draftSubmission
 
+    const [
+        updateDraftSubmission,
+        { error: updateError },
+    ] = useUpdateDraftSubmissionMutation()
+
+    const updateDraft = async (
+        input: UpdateDraftSubmissionInput
+    ): Promise<DraftSubmission | undefined> => {
+        setShowFormAlert(false)
+        try {
+            const updateResult = await updateDraftSubmission({
+                variables: {
+                    input: input,
+                },
+            })
+            const updatedSubmission: DraftSubmission | undefined =
+                updateResult?.data?.updateDraftSubmission.draftSubmission
+
+            if (!updatedSubmission) setShowFormAlert(true)
+
+            return updatedSubmission
+        } catch (serverError) {
+            setShowFormAlert(true)
+            return undefined
+        }
+    }
+
+    const draft = fetchData?.fetchDraftSubmission?.draftSubmission
+
+    // Set up side effects
     useEffect(() => {
         updateHeading(pathname, draft?.name)
-    }, [updateHeading, pathname, draft])
+    }, [updateHeading, pathname, draft?.name])
 
     if (loading) {
         return (
@@ -89,18 +139,24 @@ export const StateSubmissionForm = (): React.ReactElement => {
         )
     }
 
-    if (error) {
-        console.log('error loading draft:', error)
+    if (updateError && !showFormAlert) {
+        setShowFormAlert(true)
+    }
 
-        // check to see if we have a specific submission error
-        let specificErr: React.ReactElement | undefined = undefined
-        error.graphQLErrors.forEach((err) => {
+    if (fetchError) {
+        /*  On fetch draft error, check if submission is already submitted
+            if so,  display summary page or already sent to CMS message depending on submissions/:id/route,
+            if not, display generic eror
+        */
+        let specificContent: React.ReactElement | undefined = undefined
+        fetchError.graphQLErrors.forEach((err) => {
             if (err?.extensions?.code === 'WRONG_STATUS') {
-                specificErr = <ErrorInvalidSubmissionStatus />
+                if (STATE_SUBMISSION_FORM_ROUTES.includes(routeConstant)) {
+                    specificContent = <ErrorInvalidSubmissionStatus />
+                }
             }
         })
-
-        return specificErr ?? <GenericError />
+        return specificContent ?? <GenericError />
     }
 
     if (draft === undefined || draft === null) {
@@ -117,13 +173,31 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     <SubmissionType draftSubmission={draft} />
                 </Route>
                 <Route path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}>
-                    <ContractDetails draftSubmission={draft} />
+                    <ContractDetails
+                        draftSubmission={draft}
+                        updateDraft={updateDraft}
+                        formAlert={
+                            showFormAlert ? GenericFormAlert() : undefined
+                        }
+                    />
                 </Route>
                 <Route path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}>
-                    <RateDetails draftSubmission={draft} />
+                    <RateDetails
+                        draftSubmission={draft}
+                        updateDraft={updateDraft}
+                        formAlert={
+                            showFormAlert ? GenericFormAlert() : undefined
+                        }
+                    />
                 </Route>
                 <Route path={RoutesRecord.SUBMISSIONS_DOCUMENTS}>
-                    <Documents draftSubmission={draft} />
+                    <Documents
+                        draftSubmission={draft}
+                        updateDraft={updateDraft}
+                        formAlert={
+                            showFormAlert ? GenericFormAlert() : undefined
+                        }
+                    />
                 </Route>
                 <Route path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}>
                     <ReviewSubmit draftSubmission={draft} />

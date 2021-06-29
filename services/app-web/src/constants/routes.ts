@@ -21,6 +21,14 @@ const ROUTES = [
 ] as const // iterable union type
 type RouteT = typeof ROUTES[number]
 
+const STATE_SUBMISSION_FORM_ROUTES = [
+    'SUBMISSIONS_TYPE',
+    'SUBMISSIONS_CONTRACT_DETAILS',
+    'SUBMISSIONS_RATE_DETAILS',
+    'SUBMISSIONS_CONTACTS',
+    'SUBMISSIONS_DOCUMENTS',
+] as string[]
+
 const RoutesRecord: Record<RouteT, string> = {
     ROOT: '/',
     AUTH: '/auth',
@@ -79,6 +87,7 @@ export {
     PageTitlesRecord,
     RoutesRecord,
     ROUTES,
+    STATE_SUBMISSION_FORM_ROUTES,
     getRouteName,
 }
 

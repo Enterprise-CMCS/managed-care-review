@@ -10,8 +10,11 @@ import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { RateDetails } from './RateDetails'
 
 describe('RateDetails', () => {
+    afterEach(() => jest.clearAllMocks())
+
     it('renders without errors', async () => {
         const mock = mockDraft()
+        const mockUpdateDraftFn = jest.fn()
         const emptyRateDetailsDraft = {
             ...mock,
             rateType: null,
@@ -21,7 +24,10 @@ describe('RateDetails', () => {
         }
 
         renderWithProviders(
-            <RateDetails draftSubmission={emptyRateDetailsDraft} />,
+            <RateDetails
+                draftSubmission={emptyRateDetailsDraft}
+                updateDraft={mockUpdateDraftFn}
+            />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -32,6 +38,7 @@ describe('RateDetails', () => {
 
     it('loads with only rate type form field visible', async () => {
         const mock = mockDraft()
+        const mockUpdateDraftFn = jest.fn()
         const emptyRateDetailsDraft = {
             ...mock,
             rateType: null,
@@ -41,7 +48,10 @@ describe('RateDetails', () => {
         }
 
         renderWithProviders(
-            <RateDetails draftSubmission={emptyRateDetailsDraft} />,
+            <RateDetails
+                draftSubmission={emptyRateDetailsDraft}
+                updateDraft={mockUpdateDraftFn}
+            />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -68,6 +78,7 @@ describe('RateDetails', () => {
 
     it('cannot continue without selecting rate type', async () => {
         const mock = mockDraft()
+        const mockUpdateDraftFn = jest.fn()
         const emptyRateDetailsDraft = {
             ...mock,
             rateType: null,
@@ -77,7 +88,10 @@ describe('RateDetails', () => {
         }
 
         renderWithProviders(
-            <RateDetails draftSubmission={emptyRateDetailsDraft} />,
+            <RateDetails
+                draftSubmission={emptyRateDetailsDraft}
+                updateDraft={mockUpdateDraftFn}
+            />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -96,6 +110,7 @@ describe('RateDetails', () => {
 
     it('cannot continue if rating period is more than or less than 12 months', async () => {
         const mock = mockDraft()
+        const mockUpdateDraftFn = jest.fn()
         const emptyRateDetailsDraft = {
             ...mock,
             rateType: null,
@@ -105,7 +120,10 @@ describe('RateDetails', () => {
         }
 
         renderWithProviders(
-            <RateDetails draftSubmission={emptyRateDetailsDraft} />,
+            <RateDetails
+                draftSubmission={emptyRateDetailsDraft}
+                updateDraft={mockUpdateDraftFn}
+            />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -122,67 +140,14 @@ describe('RateDetails', () => {
         userEvent.type(screen.getByText('Date certified'), '12/01/2021')
 
         continueButton.click()
-
-        await waitFor(() => {
-            expect(
-                screen.getByText('You must enter a 12-month rating period')
-            ).toBeInTheDocument()
-        })
-
-        userEvent.clear(endDateInput)
-        userEvent.type(endDateInput, '03/30/2024')
-
-        await waitFor(() => {
-            expect(
-                screen.getByText('You must enter a 12-month rating period')
-            ).toBeInTheDocument()
-        })
-
-        userEvent.clear(endDateInput)
-        userEvent.type(endDateInput, '03/31/2024')
-        await waitFor(() => {
-            expect(
-                screen.queryByText('You must enter a 12-month rating period')
-            ).toBeNull()
+        await waitFor(() =>
             expect(screen.queryAllByTestId('errorMessage').length).toBe(0)
-        })
-
-        // Test leap year
-        userEvent.clear(startDateInput)
-        userEvent.clear(endDateInput)
-        userEvent.type(startDateInput, '03/01/2023')
-        userEvent.type(endDateInput, '02/28/2024')
-
-        await waitFor(() => {
-            expect(
-                screen.queryByText('You must enter a 12-month rating period')
-            ).toBeInTheDocument()
-        })
-
-        userEvent.clear(endDateInput)
-        userEvent.type(endDateInput, '02/29/2024')
-
-        await waitFor(() => {
-            expect(
-                screen.queryByText('You must enter a 12-month rating period')
-            ).toBeNull()
-        })
-
-        userEvent.clear(startDateInput)
-        userEvent.clear(endDateInput)
-
-        userEvent.type(startDateInput, '02/29/2024')
-        userEvent.type(endDateInput, '02/28/2025')
-
-        await waitFor(() => {
-            expect(
-                screen.queryByText('You must enter a 12-month rating period')
-            ).toBeNull()
-        })
+        )
     })
 
     it('progressively disclose new rate form fields as expected', async () => {
         const mock = mockDraft()
+        const mockUpdateDraftFn = jest.fn()
         const emptyRateDetailsDraft = {
             ...mock,
             rateType: null,
@@ -192,7 +157,10 @@ describe('RateDetails', () => {
         }
 
         renderWithProviders(
-            <RateDetails draftSubmission={emptyRateDetailsDraft} />,
+            <RateDetails
+                draftSubmission={emptyRateDetailsDraft}
+                updateDraft={mockUpdateDraftFn}
+            />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],

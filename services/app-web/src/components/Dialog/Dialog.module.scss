@@ -1,0 +1,96 @@
+// taken from CMS design system settings
+
+$color-white: #fff !default;
+$color-black: #000 !default;
+$color-background-dialog: $color-white !default;
+$color-background-dialog-mask: rgba($color-black, 0.5) !default;
+
+$shadow-base-offset-x: 2px !default;
+$shadow-base-offset-y: 2px !default;
+$shadow-base-blur-radius: 4px !default;
+$shadow-base-color: rgba(0, 0, 0, 0.25) !default;
+$shadow-base: $shadow-base-offset-x $shadow-base-offset-y $shadow-base-blur-radius
+$shadow-base-color !default;
+
+
+$base-font-size: 16px !default;
+$measure-narrow: 45ex !default;
+$measure-base: 65ex !default;
+$measure-wide: 80ex !default;
+
+
+$site-max-width: 1040px !default;
+
+// .ds-base {
+//     // font-family: $font-sans;
+//     // font-size: $base-font-size;
+//     line-height: $base-line-height;
+//     // color: $color-base;
+//   }
+
+$multiple: 8px !default;
+
+$spacers: (
+    0,
+    $multiple,
+    $multiple * 2,
+    $multiple * 3,
+    $multiple * 4,
+    $multiple * 5,
+    $multiple * 6,
+    $multiple * 7
+) !default;
+
+$spacer-1: nth($spacers, 2) !default; // 8px
+$spacer-2: nth($spacers, 3) !default; // 16px
+$spacer-3: nth($spacers, 4) !default; // 24px
+$spacer-4: nth($spacers, 5) !default; // 32px
+$spacer-5: nth($spacers, 6) !default; // 40px
+$spacer-6: nth($spacers, 7) !default; // 48px
+$spacer-7: nth($spacers, 8) !default; // 56px
+$spacer-half: $spacer-1 / 2; // 4px
+
+$dialog-spacer: $spacer-4;
+
+.ds-c-dialog {
+  background-color: $color-background-dialog;
+  box-shadow: $shadow-base;
+  box-sizing: border-box;
+  display: inline-block;
+  font-size: $base-font-size;
+  max-width: $measure-base;
+  padding: $dialog-spacer;
+  text-align: left;
+  vertical-align: middle;
+  width: 95%; // provide space for the background layer to peek through
+}
+
+.ds-c-dialog--narrow {
+  max-width: $measure-narrow;
+}
+
+.ds-c-dialog--wide {
+  max-width: $measure-wide;
+}
+
+.ds-c-dialog--full {
+  max-width: $site-max-width;
+}
+
+.ds-c-dialog__actions {
+  margin-top: $spacer-5;
+  text-align: right;
+}
+
+.ds-c-dialog-wrap {
+  background-color: $color-background-dialog-mask;
+  bottom: 0;
+  left: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: $spacer-6 0;
+  position: fixed;
+  text-align: center;
+  top: 0;
+  width: 100%;
+}

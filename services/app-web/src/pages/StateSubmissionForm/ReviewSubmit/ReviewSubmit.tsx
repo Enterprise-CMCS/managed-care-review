@@ -13,6 +13,7 @@ import dayjs from 'dayjs'
 import styles from './ReviewSubmit.module.scss'
 import stylesForm from '../StateSubmissionForm.module.scss'
 
+import { Dialog } from '../../../components/Dialog/Dialog'
 import {
     DraftSubmission,
     Document,
@@ -22,6 +23,7 @@ import {
     AmendableItemsRecord,
     ContractTypeRecord,
     FederalAuthorityRecord,
+    RateChangeReasonRecord,
     ManagedCareEntityRecord,
     SubmissionTypeRecord,
 } from '../../../constants/submissions'
@@ -36,13 +38,30 @@ export const ReviewSubmit = ({
     draftSubmission: DraftSubmission
 }): React.ReactElement => {
     const [refreshedDocs, setRefreshedDocs] = useState<DocumentWithLink[]>([])
+    const [displayConfirmation, setDisplayConfirmation] = useState<boolean>(
+        false
+    )
     const { getURL, getKey } = useS3()
 
     const [userVisibleError, setUserVisibleError] = useState<
         string | undefined
     >(undefined)
     const history = useHistory()
-    const [submitDraftSubmission] = useSubmitDraftSubmissionMutation()
+    const [submitDraftSubmission] = useSubmitDraftSubmissionMutation({
+        // An alternative to messing with the cache like we do with create, just zero it out.
+        update(cache, { data }) {
+            if (data) {
+                cache.modify({
+                    id: 'ROOT_QUERY',
+                    fields: {
+                        indexSubmissions(_index, { DELETE }) {
+                            return DELETE
+                        },
+                    },
+                })
+            }
+        },
+    })
 
     useEffect(() => {
         const refreshDocuments = async () => {
@@ -102,6 +121,16 @@ export const ReviewSubmit = ({
         setUserVisibleError(error)
     }
 
+    const handleSubmitConfirmation = () => {
+        console.log('Confirmation Button Presssed')
+        setDisplayConfirmation(true)
+    }
+
+    const handleCancelSubmitConfirmation = () => {
+        console.log('cancel sub comf')
+        setDisplayConfirmation(false)
+    }
+
     const handleFormSubmit = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault()
 
@@ -114,9 +143,12 @@ export const ReviewSubmit = ({
                 },
             })
 
+            console.log('Got data: ', data)
+
             if (data.errors) {
                 console.log(data.errors)
                 showError('Error attempting to submit. Please try again.')
+                setDisplayConfirmation(false)
             }
 
             if (data.data?.submitDraftSubmission) {
@@ -125,20 +157,50 @@ export const ReviewSubmit = ({
         } catch (error) {
             console.log(error)
             showError('Error attempting to submit. Please try again.')
+            setDisplayConfirmation(false)
         }
     }
+
     // Array of values from a checkbox field is displayed in a comma-separated list
-    const createCheckboxList = (
-        items: string[], // Checkbox field array
-        itemRecord: Record<string, string> // A lang constant record like ManagedCareEntityRecord or FederalAuthorityRecord
-    ) => {
-        const userFriendlyItems = items.map((item) => {
-            return itemRecord[`${item}`]
+    const createCheckboxList = ({
+        list,
+        dict,
+        otherReasons = [],
+    }: {
+        list: string[] // Checkbox field array
+        dict: Record<string, string> // A lang constant dictionary like ManagedCareEntityRecord or FederalAuthorityRecord,
+        otherReasons?: (string | null)[] // additional "Other" text values
+    }) => {
+        const userFriendlyList = list.map((item) => {
+            return dict[item] ? dict[item] : null
         })
-        return userFriendlyItems.join(', ').replace(/,\s*$/, '')
+
+        const listToDisplay = otherReasons
+            ? userFriendlyList.concat(otherReasons)
+            : userFriendlyList
+
+        // strip nulls and leftover commas at the end
+        return listToDisplay
+            .filter((el) => {
+                return el !== null
+            })
+            .join(', ')
+            .replace(/,\s*$/, '')
+    }
+
+    const capitationRateChangeReason = (): string | null => {
+        const { reason, otherReason } =
+            draftSubmission?.contractAmendmentInfo
+                ?.capitationRatesAmendedInfo || {}
+        if (!reason) return null
+
+        return otherReason
+            ? `${AmendableItemsRecord['CAPITATION_RATES']} (${otherReason})`
+            : `${AmendableItemsRecord['CAPITATION_RATES']} (${RateChangeReasonRecord[reason]})`
     }
 
     const isContractAmendment = draftSubmission.contractType === 'AMENDMENT'
+
     return (
         <GridContainer className={styles.reviewSectionWrapper}>
             {userVisibleError && (
@@ -146,10 +208,8 @@ export const ReviewSubmit = ({
                     {userVisibleError}
                 </Alert>
             )}
-            <section
-                id="submissionType"
-                className={styles.reviewSection}
-            >
+
+            <section id="submissionType" className={styles.reviewSection}>
                 <div className={styles.reviewSectionHeader}>
                     <h2 className={styles.submissionName}>
                         {draftSubmission.name}
@@ -162,9 +222,7 @@ export const ReviewSubmit = ({
                             variant="unstyled"
                         >
                             Edit
-                            <span className="srOnly">
-                                Submission type
-                            </span>
+                            <span className="srOnly">Submission type</span>
                         </Link>
                     </div>
                 </div>
@@ -194,18 +252,13 @@ export const ReviewSubmit = ({
                             <DataDetail
                                 id="submissionDescription"
                                 label="Submission description"
-                                data={
-                                    draftSubmission.submissionDescription
-                                }
+                                data={draftSubmission.submissionDescription}
                             />
                         </Grid>
                     </Grid>
                 </dl>
             </section>
-            <section
-                id="contractDetails"
-                className={styles.reviewSection}
-            >
+            <section id="contractDetails" className={styles.reviewSection}>
                 <SectionHeader
                     header="Contract details"
                     to="contract-details"
@@ -219,9 +272,8 @@ export const ReviewSubmit = ({
                                 data={
                                     draftSubmission.contractType
                                         ? ContractTypeRecord[
-                                                draftSubmission
-                                                    .contractType
-                                            ]
+                                              draftSubmission.contractType
+                                          ]
                                         : ''
                                 }
                             />
@@ -243,20 +295,20 @@ export const ReviewSubmit = ({
                             <DataDetail
                                 id="managedCareEntities"
                                 label="Managed care entities"
-                                data={createCheckboxList(
-                                    draftSubmission.managedCareEntities,
-                                    ManagedCareEntityRecord
-                                )}
+                                data={createCheckboxList({
+                                    list: draftSubmission.managedCareEntities,
+                                    dict: ManagedCareEntityRecord,
+                                })}
                             />
                         }
                         right={
                             <DataDetail
                                 id="federalAuthorities"
                                 label="Federal authority your program operates under"
-                                data={createCheckboxList(
-                                    draftSubmission.federalAuthorities,
-                                    FederalAuthorityRecord
-                                )}
+                                data={createCheckboxList({
+                                    list: draftSubmission.federalAuthorities,
+                                    dict: FederalAuthorityRecord,
+                                })}
                             />
                         }
                     />
@@ -268,12 +320,27 @@ export const ReviewSubmit = ({
                                         <DataDetail
                                             id="itemsAmended"
                                             label="Items being amended"
-                                            data={createCheckboxList(
-                                                draftSubmission
-                                                    .contractAmendmentInfo
-                                                    .itemsBeingAmended,
-                                                AmendableItemsRecord
-                                            )}
+                                            data={createCheckboxList({
+                                                list: draftSubmission.contractAmendmentInfo.itemsBeingAmended.filter(
+                                                    (item) =>
+                                                        item !==
+                                                            'CAPITATION_RATES' &&
+                                                        item !== 'OTHER'
+                                                ),
+                                                dict: AmendableItemsRecord,
+                                                otherReasons: [
+                                                    draftSubmission.contractAmendmentInfo.itemsBeingAmended.includes(
+                                                        'CAPITATION_RATES'
+                                                    )
+                                                        ? capitationRateChangeReason()
+                                                        : null,
+                                                    draftSubmission
+                                                        .contractAmendmentInfo
+                                                        ?.otherItemBeingAmended
+                                                        ? `Other (${draftSubmission.contractAmendmentInfo?.otherItemBeingAmended})`
+                                                        : null,
+                                                ],
+                                            })}
                                         />
                                     }
                                     right={
@@ -314,10 +381,7 @@ export const ReviewSubmit = ({
             </section>
             <section id="rateDetails" className={styles.reviewSection}>
                 <dl>
-                    <SectionHeader
-                        header="Rate details"
-                        to="rate-details"
-                    />
+                    <SectionHeader header="Rate details" to="rate-details" />
                     <DoubleColumnRow
                         left={
                             <DataDetail
@@ -366,12 +430,10 @@ export const ReviewSubmit = ({
                                     id="effectiveRatingPeriod"
                                     label="Effective dates of rate amendment"
                                     data={`${dayjs(
-                                        draftSubmission
-                                            .rateAmendmentInfo
+                                        draftSubmission.rateAmendmentInfo
                                             .effectiveDateStart
                                     ).format('MM/DD/YYYY')} - ${dayjs(
-                                        draftSubmission
-                                            .rateAmendmentInfo
+                                        draftSubmission.rateAmendmentInfo
                                             .effectiveDateEnd
                                     ).format('MM/DD/YYYY')}`}
                                 />
@@ -412,10 +474,7 @@ export const ReviewSubmit = ({
                 >
                     Save as Draft
                 </Link>
-                <ButtonGroup
-                    type="default"
-                    className={stylesForm.buttonGroup}
-                >
+                <ButtonGroup type="default" className={stylesForm.buttonGroup}>
                     <Link
                         asCustom={NavLink}
                         className="usa-button usa-button--outline"
@@ -427,11 +486,42 @@ export const ReviewSubmit = ({
                     <Button
                         type="button"
                         className={styles.submitButton}
-                        onClick={handleFormSubmit}
+                        data-testId="pageSubmitButton"
+                        onClick={handleSubmitConfirmation}
                     >
                         Submit
                     </Button>
                 </ButtonGroup>
+
+                {displayConfirmation && (
+                    <Dialog
+                        heading="Ready to Submit?"
+                        actions={[
+                            <Button
+                                type="button"
+                                key="cancelButton"
+                                outline
+                                onClick={handleCancelSubmitConfirmation}
+                            >
+                                Cancel
+                            </Button>,
+                            <Button
+                                type="button"
+                                key="submitButton"
+                                aria-label="Confirm submit"
+                                className={styles.submitButton}
+                                onClick={handleFormSubmit}
+                            >
+                                Submit
+                            </Button>
+                        ]}
+                    >
+                        <p>
+                            Submitting this package will send it to CMS to begin
+                            their review.
+                        </p>
+                    </Dialog>
+                )}
             </div>
         </GridContainer>
     )
