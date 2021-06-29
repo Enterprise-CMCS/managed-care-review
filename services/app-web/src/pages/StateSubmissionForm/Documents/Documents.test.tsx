@@ -182,7 +182,7 @@ describe('Documents', () => {
             }
         )
         expect(screen.queryByTestId('documents-hint')).toHaveTextContent(
-            'Must include: an executed contract'
+            'Must include: An executed contract'
         )
     })
 
@@ -203,7 +203,7 @@ describe('Documents', () => {
             }
         )
         expect(screen.queryByTestId('documents-hint')).toHaveTextContent(
-            'Must include: an executed contract and a signed rate certification'
+            'Must include: An executed contract and a signed rate certification'
         )
     })
 })

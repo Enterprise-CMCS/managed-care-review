@@ -139,7 +139,7 @@ describe('ReviewSubmit', () => {
                 name: 'Confirm submit',
             })
             expect(confirmSubmit).toBeInTheDocument()
-            expect(screen.getByText('Ready to Submit?')).toBeInTheDocument()
+            expect(screen.getByText('Ready to submit?')).toBeInTheDocument()
             expect(
                 screen.getByText(
                     'Submitting this package will send it to CMS to begin their review.'
