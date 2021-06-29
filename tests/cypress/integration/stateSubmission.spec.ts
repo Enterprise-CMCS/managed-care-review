@@ -446,8 +446,10 @@ describe('State Submission', () => {
                 name: 'Continue',
             }).safeClick()
 
+            // Check Step Indicator loads with Contract Details heading
+            cy.findByTestId('step-indicator').findAllByText('Contract Details').should('have.length', 2)
+
             // Fill out contract details
-            cy.findByText('Contract details').should('exist')
             cy.findByText(/MN-MSHO-/).should('exist')
             cy.findByLabelText('Base contract').safeClick()
             cy.findByLabelText('Start date').type('04/01/2024')
