@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { GridContainer, Grid, Link } from '@trussworks/react-uswds'
-import { NavLink, useParams } from 'react-router-dom'
+import { NavLink, useParams, useLocation } from 'react-router-dom'
 import dayjs from 'dayjs'
 import sprite from 'uswds/src/img/sprite.svg'
 
@@ -21,13 +21,16 @@ import { DoubleColumnRow } from '../../../components/DoubleColumnRow/DoubleColum
 import { Loading } from '../../../components/Loading'
 import { GenericError } from '../../Errors/GenericError'
 import { useS3 } from '../../../contexts/S3Context'
+import { usePage } from '../../../contexts/PageContext'
 
 type DocumentWithLink = { url: string | null } & Document
 
 export const SubmissionSummary = (): React.ReactElement => {
     const { id } = useParams<{ id: string }>()
+    const { pathname } = useLocation()
     const [refreshedDocs, setRefreshedDocs] = useState<DocumentWithLink[]>([])
     const { getURL, getKey } = useS3()
+    const { updateHeading } = usePage()
 
     const { loading, error, data } = useFetchStateSubmissionQuery({
         variables: {
@@ -38,6 +41,10 @@ export const SubmissionSummary = (): React.ReactElement => {
     })
 
     const submission = data?.fetchStateSubmission.submission
+
+    useEffect(() => {
+        updateHeading(pathname, submission?.name)
+    }, [updateHeading, pathname, submission?.name])
 
     useEffect(() => {
         const refreshDocuments = async () => {

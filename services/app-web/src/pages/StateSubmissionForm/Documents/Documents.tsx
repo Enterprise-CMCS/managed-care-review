@@ -22,6 +22,7 @@ import {
 } from '../../../components/FileUpload/FileUpload'
 import { FileItemT } from '../../../components/FileUpload/FileItem'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
+import { MCRouterState } from '../../../constants/routerState'
 
 /*
     Documents should error alerts for overall errors related to invalid documents for a submission, including no files added.
@@ -48,7 +49,7 @@ export const Documents = ({
     const redirectToDashboard = React.useRef(false)
     const [hasValidFiles, setHasValidFiles] = useState(false)
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
-    const history = useHistory()
+    const history = useHistory<MCRouterState>()
 
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         draftSubmission &&
@@ -139,7 +140,7 @@ export const Documents = ({
             })
             if (updatedSubmission) {
                 if (redirectToDashboard.current) {
-                    history.push(`/dashboard`)
+                    history.push(`/dashboard`, {defaultProgramID: draftSubmission.programID})
                 } else {
                     history.push(
                         `/submissions/${draftSubmission.id}/review-and-submit`
@@ -226,7 +227,7 @@ export const Documents = ({
                         disabled={shouldValidate && !hasValidFiles}
                         onClick={async (e) => {
                             if (!hasValidFiles) {
-                                history.push(`/dashboard`)
+                                history.push(`/dashboard`, {defaultProgramID: draftSubmission.programID})
                             } else {
                                 redirectToDashboard.current = true
                                 await handleFormSubmit(e)
