@@ -460,7 +460,6 @@ describe('State Submission', () => {
             cy.navigateForm('Continue')
 
             //Fill out rate details
-            cy.findByText('Rate details').should('exist')
             cy.findByLabelText('New rate certification').safeClick()
             cy.findByLabelText('Start date').type('02/29/2024')
             cy.findByLabelText('End date').type('02/28/2025')
