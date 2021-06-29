@@ -108,35 +108,44 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
         const currentFormPage = getRouteName(pathname)
 
+        console.log(currentFormPage)
+
         let formStepCompleted = true;
         let formStepStatus: 'current' | 'complete' | undefined
 
-        return(
-          <>
-            <StepIndicator>
-                {FormPages.map((formPageName) => {
-                  if (formPageName === currentFormPage) {
-                    formStepCompleted = false;
-                    formStepStatus = 'current';
-                  }
-                  else if (formStepCompleted) {
-                    formStepStatus = 'complete'
-                  }
-                  else {
-                    formStepStatus = undefined;
-                  }
+        if (currentFormPage !== 'SUBMISSIONS_TYPE') {
+            return(
+              <>
+                <StepIndicator>
+                    {FormPages.map((formPageName) => {
+                      if (formPageName === currentFormPage) {
+                        formStepCompleted = false;
+                        formStepStatus = 'current';
+                      }
+                      else if (formStepCompleted) {
+                        formStepStatus = 'complete'
+                      }
+                      else {
+                        formStepStatus = undefined;
+                      }
 
-                  return (
-                      <StepIndicatorStep
-                          label={PageTitlesRecord[formPageName]}
-                          status={formStepStatus}
-                          key={PageTitlesRecord[formPageName]}
-                      />
-                  )
-                })}
-            </StepIndicator>
-          </>
-        )
+                      return (
+                          <StepIndicatorStep
+                              label={PageTitlesRecord[formPageName]}
+                              status={formStepStatus}
+                              key={PageTitlesRecord[formPageName]}
+                          />
+                      )
+                    })}
+                </StepIndicator>
+              </>
+            )
+          }
+        else {
+            return (
+                <></>
+            )
+        }
     }
 
     if (updateError && !showFormAlert) {
