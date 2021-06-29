@@ -473,7 +473,7 @@ export const ReviewSubmit = ({
                     variant="unstyled"
                     to={{pathname: "/dashboard", state: {defaultProgramID: draftSubmission.programID}}}
                 >
-                    Save as Draft
+                    Save as draft
                 </Link>
                 <ButtonGroup type="default" className={stylesForm.buttonGroup}>
                     <Link
@@ -496,7 +496,7 @@ export const ReviewSubmit = ({
 
                 {displayConfirmation && (
                     <Dialog
-                        heading="Ready to Submit?"
+                        heading="Ready to submit?"
                         actions={[
                             <Button
                                 type="button"

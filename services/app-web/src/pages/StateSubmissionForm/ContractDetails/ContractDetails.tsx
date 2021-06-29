@@ -982,7 +982,7 @@ export const ContractDetails = ({
                                     }
                                 }}
                             >
-                                Save as Draft
+                                Save as draft
                             </Button>
                             <ButtonGroup
                                 type="default"

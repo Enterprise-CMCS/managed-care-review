@@ -261,7 +261,7 @@ describe('State Submission', () => {
 
             cy.findByTestId('documents-hint').should(
                 'contain.text',
-                'Must include: an executed contract and a signed rate certification'
+                'Must include: An executed contract and a signed rate certification'
             )
             cy.findByTestId('file-input-input').attachFile(
                 'documents/trussel-guide.pdf'
@@ -321,7 +321,7 @@ describe('State Submission', () => {
             // Check that documents loads with correct data
             cy.findByTestId('documents-hint').should(
                 'contain.text',
-                'Must include: an executed contract'
+                'Must include: An executed contract'
             )
             cy.findByText('trussel-guide.pdf').should('exist')
         })
@@ -478,7 +478,7 @@ describe('State Submission', () => {
             )
             // Navigate review and submit pag
             cy.navigateForm('Continue')
-            cy.findByText('Review and Submit').should('exist')
+            cy.findByText('Review and submit').should('exist')
 
             // s=Store submission name for reference later
 

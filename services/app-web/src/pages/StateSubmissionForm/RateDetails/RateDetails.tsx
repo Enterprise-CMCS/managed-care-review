@@ -478,7 +478,7 @@ export const RateDetails = ({
                                         }
                                     }}
                                 >
-                                    Save as Draft
+                                    Save as draft
                                 </Button>
                                 <ButtonGroup
                                     type="default"
