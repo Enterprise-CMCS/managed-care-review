@@ -315,7 +315,7 @@ describe('State Submission', () => {
             cy.findByRole('heading', { name: 'Documents' }).should('exist')
             cy.findByTestId('documents-hint').should(
                 'contain.text',
-                'Must include: an executed contract'
+                'Must include: An executed contract'
             )
             cy.findByText('trussel-guide.pdf').should('exist')
         })
