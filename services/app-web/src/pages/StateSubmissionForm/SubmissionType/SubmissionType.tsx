@@ -13,6 +13,7 @@ import {
 import { Formik, FormikHelpers, FormikErrors, useFormikContext } from 'formik'
 import { NavLink, useHistory, Link as ReactRouterLink } from 'react-router-dom'
 
+import { MCRouterState } from "../../../constants/routerState"
 import PageHeading from '../../../components/PageHeading'
 import {
     CreateDraftSubmissionInput,
@@ -74,7 +75,7 @@ export const SubmissionType = ({
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const { loggedInUser: { state: { programs = [] } = {} } = {} } = useAuth()
 
-    const history = useHistory()
+    const history = useHistory<MCRouterState>()
     const location = history.location
     const isNewSubmission = location.pathname === '/submissions/new'
     const programOptions: Array<{ id: string; label: string }> = programs.map(
@@ -132,9 +133,7 @@ export const SubmissionType = ({
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
-    const defaultInitialProgramID = new URLSearchParams(
-        location.search
-    ).get('defaultProgram')
+    const defaultInitialProgramID = location.state?.defaultProgramID
 
     const submissionTypeInitialValues: SubmissionTypeFormValues = {
         programID: draftSubmission?.program.id ?? defaultInitialProgramID ?? programs[0]?.id,
@@ -362,7 +361,7 @@ export const SubmissionType = ({
                                 asCustom={NavLink}
                                 variant="unstyled"
                                 className="usa-button usa-button--outline"
-                                to="/dashboard"
+                                to={{pathname: "/dashboard", state: {defaultProgramID: defaultInitialProgramID}}}
                             >
                                 Cancel
                             </Link>

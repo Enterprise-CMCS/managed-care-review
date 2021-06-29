@@ -34,6 +34,7 @@ import {
 } from '../../../formHelpers'
 import { FieldRadio } from '../../../components/Form/FieldRadio/FieldRadio'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
+import { MCRouterState } from '../../../constants/routerState'
 
 // Dependency setup
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
@@ -133,7 +134,7 @@ export const RateDetails = ({
 }): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const redirectToDashboard = React.useRef(false)
-    const history = useHistory()
+    const history = useHistory<MCRouterState>()
 
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
@@ -196,7 +197,7 @@ export const RateDetails = ({
             })
             if (updatedSubmission) {
                 if (redirectToDashboard.current) {
-                    history.push(`/dashboard`)
+                    history.push(`/dashboard`, {defaultProgramID: draftSubmission.programID})
                 } else {
                     history.push(`/submissions/${draftSubmission.id}/documents`)
                 }
@@ -493,7 +494,7 @@ export const RateDetails = ({
                                     unstyled
                                     onClick={() => {
                                         if (!dirty) {
-                                            history.push(`/dashboard`)
+                                            history.push(`/dashboard`, {defaultProgramID: draftSubmission.programID})
                                         } else {
                                             setShouldValidate(true)
                                             if (!isValidating) {

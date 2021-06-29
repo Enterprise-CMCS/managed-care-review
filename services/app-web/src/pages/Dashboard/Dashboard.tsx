@@ -14,6 +14,7 @@ import {
     SubmissionType,
 } from '../../components/SubmissionCard/SubmissionCard'
 import { useAuth } from '../../contexts/AuthContext'
+import { MCRouterState } from "../../constants/routerState"
 import { Program, useIndexSubmissionsQuery } from '../../gen/gqlClient'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
 import { SubmissionType as DomainSubmissionType } from '../../../../app-web/src/common-code/domain-models'
@@ -70,7 +71,7 @@ function editUrlForSubmission(submission: {
 
 export const Dashboard = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
-    const location = useLocation()
+    const location = useLocation<MCRouterState>()
     let programs: Program[] = []
 
     const { loading, data, error } = useIndexSubmissionsQuery()
@@ -103,6 +104,9 @@ export const Dashboard = (): React.ReactElement => {
                 defaultTab = submission.program.name
             }
         }
+    } else if (location.state && location.state.defaultProgramID) {
+        const defaultProgram = loggedInUser.state.programs.find((program) => program.id === location.state?.defaultProgramID)
+        defaultTab = defaultProgram?.name
     }
 
 
@@ -140,7 +144,7 @@ export const Dashboard = (): React.ReactElement => {
                             asCustom={NavLink}
                             className="usa-button"
                             variant="unstyled"
-                            to={`/submissions/new?defaultProgram=${program.id}`}
+                            to={{pathname: "/submissions/new", state: {defaultProgramID: program.id}}}
                         >
                             Start new submission
                         </Link>

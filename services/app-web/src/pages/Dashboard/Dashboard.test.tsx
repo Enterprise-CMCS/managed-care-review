@@ -46,7 +46,7 @@ describe('Dashboard', () => {
                 name: 'Start new submission',
             })
             expect(links).toBeDefined()
-            expect(links[0]).toHaveAttribute('href', '/submissions/new?defaultProgram=msho')
+            expect(links[0]).toHaveAttribute('href', '/submissions/new')
         })
     })
 
