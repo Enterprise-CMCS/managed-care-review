@@ -254,7 +254,7 @@ describe('State Submission', () => {
             cy.findByRole('heading', { name: 'Documents' }).should('exist')
             cy.findByTestId('documents-hint').should(
                 'contain.text',
-                'Must include: an executed contract and a signed rate certification'
+                'Must include: An executed contract and a signed rate certification'
             )
             cy.findByTestId('file-input-input').attachFile(
                 'documents/trussel-guide.pdf'
