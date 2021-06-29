@@ -476,9 +476,8 @@ describe('State Submission', () => {
                 'not.have.class',
                 'is-loading'
             )
-            // Navigate review and submit pag
+            // Navigate review and submit page
             cy.navigateForm('Continue')
-            cy.findByText('Review and submit').should('exist')
 
             // s=Store submission name for reference later
 
