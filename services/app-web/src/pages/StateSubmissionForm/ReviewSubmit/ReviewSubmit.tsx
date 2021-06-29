@@ -499,7 +499,7 @@ export const ReviewSubmit = ({
 
                 {displayConfirmation && (
                     <Dialog
-                        heading="Ready to Submit?"
+                        heading="Ready to submit?"
                         actions={[
                             <Button
                                 type="button"
