@@ -512,7 +512,5 @@ describe('State Submission', () => {
                 cy.url({ timeout: 10_000 }).should('contain', submissionId)
             })
         })
-
-        it('user can edit documents')
     })
 })
