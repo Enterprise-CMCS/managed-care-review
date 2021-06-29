@@ -492,6 +492,9 @@ describe('State Submission', () => {
             // Submit
             cy.navigateForm('Submit')
 
+            // Submit the Modal
+            cy.findByRole('dialog').findByRole('button', {'name': 'Confirm submit'}).click()
+
             // User sent to dashboard
             cy.findByText('Dashboard').should('exist')
 
