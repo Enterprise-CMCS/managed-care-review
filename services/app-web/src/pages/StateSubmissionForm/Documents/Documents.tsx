@@ -16,7 +16,6 @@ import {
 } from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
-import PageHeading from '../../../components/PageHeading'
 import {
     FileUpload,
     S3FileData,
@@ -25,9 +24,9 @@ import { FileItemT } from '../../../components/FileUpload/FileItem'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
 import { MCRouterState } from '../../../constants/routerState'
 
-/* 
+/*
     Documents should error alerts for overall errors related to invalid documents for a submission, including no files added.
-    Inline errors, specific to the individual files as they upload,  should be handled in FileUpload. 
+    Inline errors, specific to the individual files as they upload,  should be handled in FileUpload.
 */
 
 type DocumentProps = {
@@ -168,9 +167,6 @@ export const Documents = ({
 
     return (
         <>
-            <PageHeading className={styles.formHeader} headingLevel="h2">
-                Documents
-            </PageHeading>
             <UswdsForm
                 className={styles.formContainer}
                 id="DocumentsForm"
