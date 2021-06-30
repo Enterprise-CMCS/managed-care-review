@@ -113,37 +113,35 @@ export const StateSubmissionForm = (): React.ReactElement => {
         let formStepCompleted = true;
         let formStepStatus: 'current' | 'complete' | undefined
 
-        if (currentFormPage !== 'SUBMISSIONS_TYPE') {
-            return(
-              <>
-                <StepIndicator>
-                    {FormPages.map((formPageName) => {
-                      if (formPageName === currentFormPage) {
-                        formStepCompleted = false;
-                        formStepStatus = 'current';
-                      }
-                      else if (formStepCompleted) {
-                        formStepStatus = 'complete'
-                      }
-                      else {
-                        formStepStatus = undefined;
-                      }
-
-                      return (
-                          <StepIndicatorStep
-                              label={PageTitlesRecord[formPageName]}
-                              status={formStepStatus}
-                              key={PageTitlesRecord[formPageName]}
-                          />
-                      )
-                    })}
-                </StepIndicator>
-              </>
-            )
-          }
+        if (currentFormPage === 'SUBMISSIONS_TYPE') {
+            return null
+        }
         else {
-            return (
-                <></>
+            return(
+                <>
+                    <StepIndicator>
+                        {FormPages.map((formPageName) => {
+                          if (formPageName === currentFormPage) {
+                            formStepCompleted = false;
+                            formStepStatus = 'current';
+                          }
+                          else if (formStepCompleted) {
+                            formStepStatus = 'complete'
+                          }
+                          else {
+                            formStepStatus = undefined;
+                          }
+
+                          return (
+                              <StepIndicatorStep
+                                  label={PageTitlesRecord[formPageName]}
+                                  status={formStepStatus}
+                                  key={PageTitlesRecord[formPageName]}
+                              />
+                          )
+                        })}
+                    </StepIndicator>
+                </>
             )
         }
     }
