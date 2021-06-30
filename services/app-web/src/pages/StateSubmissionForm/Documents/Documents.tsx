@@ -45,7 +45,6 @@ export const Documents = ({
 }: DocumentProps): React.ReactElement => {
     const { deleteFile, uploadFile, getKey, getS3URL } = useS3()
     const [shouldValidate, setShouldValidate] = useState(false)
-    const redirectPath = React.useRef<string | null>(null)
     const [hasValidFiles, setHasValidFiles] = useState(false)
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
     const history = useHistory<MCRouterState>()
@@ -112,9 +111,13 @@ export const Documents = ({
         return { key: s3Key, s3URL: s3URL }
     }
 
-    const handleFormSubmit = (shouldValidate: boolean) => async (
-        e: React.FormEvent | React.MouseEvent
-    ) => {
+    const handleFormSubmit = ({
+        shouldValidate,
+        redirectPath,
+    }: {
+        shouldValidate: boolean
+        redirectPath: string
+    }) => async (e: React.FormEvent | React.MouseEvent) => {
         e.preventDefault()
 
         if (shouldValidate) {
@@ -143,21 +146,12 @@ export const Documents = ({
                 draftSubmissionUpdates: updatedDraft,
             })
             if (updatedSubmission) {
-                if (redirectPath.current) {
-                    history.push(redirectPath.current, {
-                        defaultProgramID: draftSubmission.programID,
-                    })
-                } else {
-                    //fallback
-                    history.push(
-                        `/submissions/${draftSubmission.id}/review-and-submit`
-                    )
-                }
+                history.push(redirectPath, {
+                    defaultProgramID: draftSubmission.programID,
+                })
             }
-            redirectPath.current = null
         } catch (error) {
             showError(error)
-            redirectPath.current = null
         }
     }
 
@@ -183,8 +177,10 @@ export const Documents = ({
                 id="DocumentsForm"
                 aria-label="Documents Form"
                 onSubmit={async (e) => {
-                    redirectPath.current = 'review-and-submit'
-                    await handleFormSubmit(true)(e)
+                    await handleFormSubmit({
+                        shouldValidate: true,
+                        redirectPath: `review-and-submit`,
+                    })(e)
                 }}
             >
                 <fieldset className="usa-fieldset">
@@ -239,8 +235,10 @@ export const Documents = ({
                         type="button"
                         unstyled
                         onClick={async (e) => {
-                            redirectPath.current = '/dashboard'
-                            await handleFormSubmit(false)(e)
+                            await handleFormSubmit({
+                                shouldValidate: false,
+                                redirectPath: '/dashboard',
+                            })(e)
                         }}
                     >
                         Save as draft
@@ -250,8 +248,10 @@ export const Documents = ({
                             type="button"
                             className="usa-button usa-button--outline"
                             onClick={async (e) => {
-                                redirectPath.current = 'rate-details'
-                                await handleFormSubmit(false)(e)
+                                await handleFormSubmit({
+                                    shouldValidate: false,
+                                    redirectPath: 'rate-details',
+                                })(e)
                             }}
                         >
                             Back
