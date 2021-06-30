@@ -184,7 +184,7 @@ describe('ContractDetails', () => {
 
         // check error for not selected
         expect(
-            screen.getByText('You must enter the other item')
+            screen.getByText('You must enter a description')
         ).toBeInTheDocument()
 
         // click annual rate
@@ -194,7 +194,7 @@ describe('ContractDetails', () => {
         })
 
         // error should be gone
-        expect(screen.queryByText('You must enter the other item')).toBeNull()
+        expect(screen.queryByText('You must enter a description')).toBeNull()
     })
 
     it('progressively discloses option for covid', async () => {

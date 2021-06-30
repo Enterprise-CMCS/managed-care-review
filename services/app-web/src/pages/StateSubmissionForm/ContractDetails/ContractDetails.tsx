@@ -91,7 +91,7 @@ const ContractDetailsFormSchema = Yup.object().shape({
     }),
     otherItemAmended: Yup.string().when('itemsAmended', {
         is: (items: string[]) => items.includes('OTHER'),
-        then: Yup.string().defined('You must enter the other item'),
+        then: Yup.string().defined('You must enter a description'),
     }),
     capitationRates: Yup.string().when('itemsAmended', {
         is: (items: string[]) => items.includes('CAPITATION_RATES'),
