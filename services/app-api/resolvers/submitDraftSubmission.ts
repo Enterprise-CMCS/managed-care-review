@@ -4,6 +4,10 @@ import { MutationResolvers, State } from '../gen/gqlServer'
 import {
     DraftSubmissionType,
     StateSubmissionType,
+    hasValidContract,
+    hasValidDocuments,
+    hasValidRates,
+    isStateSubmission,
 } from '../../app-web/src/common-code/domain-models'
 
 export const SubmissionErrorCodes = ['INCOMPLETE'] as const
@@ -40,24 +44,39 @@ export function isSubmissionError(err: unknown): err is SubmissionError {
 function submit(
     draft: DraftSubmissionType
 ): StateSubmissionType | SubmissionError {
-    // If the documents array is empty, that's an error
-    if (draft.documents.length === 0) {
+    const maybeStateSubmission: Record<string, unknown> = {
+        ...draft,
+        status: 'SUBMITTED',
+        submittedAt: new Date(),
+    }
+
+    if (isStateSubmission(maybeStateSubmission)) return maybeStateSubmission
+    else if (!hasValidContract(maybeStateSubmission as StateSubmissionType)) {
+        return {
+            code: 'INCOMPLETE',
+            message: 'submissions is missing required contract fields',
+        }
+    } else if (!hasValidRates(maybeStateSubmission as StateSubmissionType)) {
+        return {
+            code: 'INCOMPLETE',
+            message: 'submissions is missing required rate fields',
+        }
+    } else if (
+        !hasValidDocuments(maybeStateSubmission as StateSubmissionType)
+    ) {
         return {
             code: 'INCOMPLETE',
             message: 'submissions must have documents',
         }
-    }
-
-    const stateSubmission: StateSubmissionType = {
-        ...draft,
-        submittedAt: new Date(),
-    }
-
-    return stateSubmission
+    } else
+        return {
+            code: 'INCOMPLETE',
+            message: 'submission is missing a required field',
+        }
 }
 
 // submitDraftSubmissionResolver is a state machine transition for Submission,
-// transforming it from a DraftSubmissinon to a StateSubmission
+// transforming it from a DraftSubmission to a StateSubmission
 export function submitDraftSubmissionResolver(
     store: Store
 ): MutationResolvers['submitDraftSubmission'] {
@@ -66,7 +85,6 @@ export function submitDraftSubmissionResolver(
         const result = await store.findDraftSubmission(input.submissionID)
 
         if (isStoreError(result)) {
-            console.log('Error finding a submission', result)
             throw new Error(
                 `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
             )
@@ -95,7 +113,6 @@ export function submitDraftSubmissionResolver(
         const submissionResult = submit(draft)
 
         if (isSubmissionError(submissionResult)) {
-            console.log('SubmissionResult Error', submissionResult)
             throw new UserInputError(
                 'Incomplete submission cannot be submitted',
                 {
@@ -108,7 +125,6 @@ export function submitDraftSubmissionResolver(
 
         // Save the submission!
         const updateResult = await store.updateStateSubmission(stateSubmission)
-
         if (isStoreError(updateResult)) {
             console.log(
                 `Issue updating a state submission of type ${updateResult.code}. Message: ${updateResult.message}`

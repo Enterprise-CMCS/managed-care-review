@@ -1,0 +1,40 @@
+query indexSubmissions {
+    indexSubmissions {
+        totalCount
+        edges {
+            node {
+                __typename
+                ... on DraftSubmission {
+                    id
+                    name
+                    createdAt
+                    updatedAt
+                    programID
+                    program {
+                        name
+                        id
+                    }
+                    stateCode
+                    submissionType
+                    submissionDescription
+                }
+                ... on StateSubmission {
+                    id
+                    name
+                    createdAt
+                    updatedAt
+                    submittedAt
+                    programID
+                    program {
+                        name
+                        id
+                    }
+                    stateCode
+                    submissionType
+                    submissionDescription
+                    submittedAt
+                }
+            }
+        }
+    }
+}

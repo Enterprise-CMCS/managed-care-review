@@ -1,5 +1,6 @@
 import React from 'react'
 import { Story } from '@storybook/react'
+import dayjs from 'dayjs'
 import styles from './SubmissionCard.module.scss'
 
 import {
@@ -49,5 +50,5 @@ Submitted.args = {
         'Rates are being adjusted to reflect revised capitation rates based on more recent data as well as benefit changes approved by the General Assembly.',
     submissionType: SubmissionType.ContractAndRates,
     status: SubmissionStatus.submitted,
-    date: new Date().getTime(),
+    date: dayjs(),
 }

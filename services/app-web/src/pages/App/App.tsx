@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import { BrowserRouter } from 'react-router-dom'
 import { ErrorBoundary } from 'react-error-boundary'
 import {
@@ -35,7 +35,10 @@ function App({
     apolloClient: ApolloClient<NormalizedCacheObject>
     s3Client: S3ClientT
 }): React.ReactElement {
-    logEvent('on_load', { success: true })
+
+    useEffect(() => {
+        logEvent('on_load', { success: true })
+      }, []);
 
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>

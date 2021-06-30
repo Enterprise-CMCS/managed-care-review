@@ -1,14 +1,14 @@
+import dayjs from 'dayjs'
+
 import {
     DraftSubmission,
     FetchCurrentUserDocument,
-    SubmissionType,
-    ContractType,
-    FederalAuthority,
     User as UserType,
     CreateDraftSubmissionDocument,
     FetchDraftSubmissionDocument,
     UpdateDraftSubmissionDocument,
     SubmitDraftSubmissionDocument,
+    IndexSubmissionsDocument,
     DraftSubmissionUpdates,
     StateSubmission,
 } from '../gen/gqlClient'
@@ -32,6 +32,7 @@ const mockValidUser: UserType = {
 }
 
 const mockDraftSubmission: DraftSubmission = {
+    __typename: 'DraftSubmission',
     createdAt: new Date(),
     updatedAt: new Date(),
     id: 'test-abc-123',
@@ -42,23 +43,102 @@ const mockDraftSubmission: DraftSubmission = {
         name: 'SNBC',
     },
     name: 'MN-MSHO-0001',
-    submissionType: SubmissionType.ContractOnly,
+    submissionType: 'CONTRACT_ONLY',
     submissionDescription: 'A real submission',
     documents: [],
-    contractType: ContractType.Base,
+    contractType: 'BASE',
+    contractDateStart: new Date(),
+    contractDateEnd: dayjs().add(2, 'days').toDate(),
+    contractAmendmentInfo: null,
+    managedCareEntities: [],
+    federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
+    rateType: null,
+    rateDateStart: null,
+    rateDateEnd: null,
+    rateDateCertified: null,
+    rateAmendmentInfo: null,
+}
+const mockCompleteDraftSubmission: DraftSubmission = {
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    id: 'test-abc-123',
+    stateCode: 'MN',
+    programID: 'snbc',
+    program: {
+        id: 'snbc',
+        name: 'SNBC',
+    },
+    name: 'MN-MSHO-0001',
+    submissionType: 'CONTRACT_ONLY',
+    submissionDescription: 'A real submission',
+    documents: [],
+    contractType: 'BASE',
     contractDateStart: new Date(),
     contractDateEnd: new Date(),
-    managedCareEntities: [''],
-    federalAuthorities: [
-        FederalAuthority.Voluntary,
-        FederalAuthority.Benchmark,
-    ],
+    contractAmendmentInfo: null,
+    managedCareEntities: [],
+    federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
+    rateType: 'NEW',
+    rateDateStart: new Date(),
+    rateDateEnd: new Date(),
+    rateDateCertified: new Date(),
+    rateAmendmentInfo: null,
+}
+
+const mockNewDraftSubmission: DraftSubmission = {
+    __typename: 'DraftSubmission',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    id: 'test-abc-124',
+    stateCode: 'MN',
+    programID: 'snbc',
+    program: {
+        id: 'snbc',
+        name: 'SNBC',
+    },
+    name: 'MN-MSHO-0002',
+    submissionType: 'CONTRACT_ONLY',
+    submissionDescription: 'A real submission',
+    documents: [],
+    contractType: null,
+    contractDateStart: null,
+    contractDateEnd: null,
+    contractAmendmentInfo: null,
+    managedCareEntities: [],
+    federalAuthorities: [],
+    rateType: null,
+    rateDateStart: null,
+    rateDateEnd: null,
+    rateDateCertified: null,
+}
+
+export function mockStateSubmission(): Partial<StateSubmission> {
+    return {
+        __typename: 'StateSubmission',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        id: 'test-abc-125',
+        stateCode: 'MN',
+        programID: 'snbc',
+        program: {
+            id: 'snbc',
+            name: 'SNBC',
+        },
+        name: 'MN-MSHO-0003',
+        submissionType: 'CONTRACT_ONLY',
+        submissionDescription: 'A submitted submission',
+        submittedAt: new Date(),
+    }
 }
 
 // Only export a function that returns the mockDraftSubmission so that
 // we don't ever accidentally modified the shared mock in tests.
 export function mockDraft(): DraftSubmission {
     return mockDraftSubmission
+}
+
+export function mockCompleteDraft(): DraftSubmission {
+    return mockCompleteDraftSubmission
 }
 
 type fetchCurrentUserMockProps = {
@@ -94,22 +174,32 @@ fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
 }
 
 type createDraftSubmissionMockProps = {
+    input: {
+        programID: string
+        submissionType: string
+        submissionDescription: string
+    }
     draftSubmission?: DraftSubmission | Partial<DraftSubmission>
     statusCode: 200 | 403 | 500
 }
 
 const createDraftSubmissionMock = ({
-    draftSubmission = mockDraftSubmission,
+    input,
+    draftSubmission = mockNewDraftSubmission,
     statusCode, // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }: createDraftSubmissionMockProps): MockedResponse<Record<string, any>> => {
+    const mergedDraftSubmission = Object.assign({}, draftSubmission, input)
     switch (statusCode) {
         case 200:
             return {
-                request: { query: CreateDraftSubmissionDocument },
+                request: {
+                    query: CreateDraftSubmissionDocument,
+                    variables: { input },
+                },
                 result: {
                     data: {
                         createDraftSubmission: {
-                            draftSubmission,
+                            draftSubmission: mergedDraftSubmission,
                         },
                     },
                 },
@@ -229,6 +319,7 @@ const submitDraftSubmissionMockSuccess = ({
     id,
     stateSubmission,
 }: submitDraftSubmissionMockSuccessProps): MockedResponse<
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
     Record<string, any>
 > => {
     const submission = stateSubmission ?? mockDraftSubmission
@@ -255,6 +346,7 @@ const submitDraftSubmissionMockError = ({
     id,
 }: {
     id: string
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 }): MockedResponse<Record<string, any>> => {
     return {
         request: {
@@ -273,6 +365,28 @@ const submitDraftSubmissionMockError = ({
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const indexSubmissionsMockSuccess = (): MockedResponse<Record<string, any>> => {
+    const submissionEdges = [mockDraft(), mockStateSubmission()].map((sub) => {
+        return {
+            node: sub,
+        }
+    })
+    return {
+        request: {
+            query: IndexSubmissionsDocument,
+        },
+        result: {
+            data: {
+                indexSubmissions: {
+                    totalCount: submissionEdges.length,
+                    edges: submissionEdges,
+                },
+            },
+        },
+    }
+}
+
 export {
     fetchCurrentUserMock,
     createDraftSubmissionMock,
@@ -281,4 +395,5 @@ export {
     mockDraftSubmission,
     submitDraftSubmissionMockSuccess,
     submitDraftSubmissionMockError,
+    indexSubmissionsMockSuccess,
 }

@@ -2,18 +2,25 @@ import { DataMapper } from '@aws/dynamodb-data-mapper'
 
 import { StoreError } from './storeError'
 import {
+    convertToDomainSubmission,
+    CapitationRatesAmendedInfo,
+    RateAmendmentInfoT,
+    ContractAmendmentInfoT,
     DocumentStoreT,
-    DraftSubmissionStoreType,
+    SubmissionStoreType,
     isDynamoError,
 } from './dynamoTypes'
 
-import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
+import {
+    DraftSubmissionType,
+    isDraftSubmission,
+} from '../../app-web/src/common-code/domain-models'
 
 export async function updateDraftSubmission(
     mapper: DataMapper,
     draftSubmission: DraftSubmissionType
 ): Promise<DraftSubmissionType | StoreError> {
-    const storeDraft = new DraftSubmissionStoreType()
+    const storeDraft = new SubmissionStoreType()
 
     storeDraft.id = draftSubmission.id
     storeDraft.createdAt = draftSubmission.createdAt
@@ -32,6 +39,41 @@ export async function updateDraftSubmission(
     storeDraft.contractType = draftSubmission.contractType
     storeDraft.federalAuthorities = draftSubmission.federalAuthorities
     storeDraft.managedCareEntities = draftSubmission.managedCareEntities
+    storeDraft.rateDateEnd = draftSubmission.rateDateEnd
+    storeDraft.rateDateStart = draftSubmission.rateDateStart
+    storeDraft.rateType = draftSubmission.rateType
+    storeDraft.rateDateCertified = draftSubmission.rateDateCertified
+
+    if (draftSubmission.contractAmendmentInfo) {
+        const draftInfo = draftSubmission.contractAmendmentInfo
+
+        const info = new ContractAmendmentInfoT()
+        info.itemsBeingAmended = draftInfo.itemsBeingAmended
+        info.otherItemBeingAmended = draftInfo.otherItemBeingAmended
+
+        if (draftInfo.capitationRatesAmendedInfo) {
+            const capRates = new CapitationRatesAmendedInfo()
+            capRates.reason = draftInfo.capitationRatesAmendedInfo.reason
+            capRates.otherReason =
+                draftInfo.capitationRatesAmendedInfo.otherReason
+
+            info.capitationRatesAmendedInfo = capRates
+        }
+
+        info.relatedToCovid19 = draftInfo.relatedToCovid19
+        info.relatedToVaccination = draftInfo.relatedToVaccination
+
+        storeDraft.contractAmendmentInfo = info
+    }
+
+    if (draftSubmission.rateAmendmentInfo) {
+        const draftInfo = draftSubmission.rateAmendmentInfo
+
+        const info = new RateAmendmentInfoT()
+        info.effectiveDateStart = draftInfo.effectiveDateStart
+        info.effectiveDateEnd = draftInfo.effectiveDateEnd
+        storeDraft.rateAmendmentInfo = info
+    }
 
     draftSubmission.documents.forEach((doc) => {
         const storeDocument = new DocumentStoreT()
@@ -43,7 +85,17 @@ export async function updateDraftSubmission(
     try {
         const putResult = await mapper.put(storeDraft)
 
-        return putResult
+        const domainResult = convertToDomainSubmission(putResult)
+
+        // if the result in the DB is a DRAFT, return an error
+        if (!isDraftSubmission(domainResult)) {
+            return {
+                code: 'WRONG_STATUS',
+                message: 'The updated submission is not a DraftSubmission',
+            }
+        }
+
+        return domainResult
     } catch (err) {
         if (isDynamoError(err)) {
             if (

@@ -8,7 +8,6 @@
 }
 
 .formContainer {
-
     > [class^='usa-fieldset'] {
         padding: units(4);
         background: $cms-color-white;
@@ -25,7 +24,7 @@
     }
 
     &[class^='usa-form'] {
-        min-width: 35rem;
+        min-width: 40rem;
     }
 }
 
@@ -34,25 +33,35 @@
         margin-top: 0;
     }
 }
+.pageActions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: units(4);
+    [class^='usa-label'] {
+        font-weight: normal;
+    }
+    button[class^='usa-button usa-button--unstyled'] {
+        margin-top: 0 !important;
+    }
+    a[class^='usa-button usa-button--unstyled'] {
+        margin-bottom: 1.5rem;
+    }
+}
+
 .buttonGroup {
     justify-content: flex-end;
     margin-right: 0;
     margin-left: 0;
     margin-bottom: units(3);
-
-    .outlineButtonLink {
-        // use this to remove styles from an outline button-styled link
-        text-decoration: none;
-        color: #1a4480 !important;
-    }
 }
 
 .dateRangePicker {
-    [class^='usa-label']{
+    [class^='usa-label'] {
         font-weight: normal;
     }
     [class^='usa-form-group'] {
-        margin-top: .75rem;
+        margin-top: 0.75rem;
     }
 }
 
@@ -61,7 +70,25 @@
     margin: units(2) 0;
     border-left: 4px solid $theme-color-primary;
 
-    legend, label {
+    legend,
+    label {
         font-weight: normal;
     }
+}
+
+.nestedOptionsError {
+    padding-left: units(4);
+    margin: units(2) 0;
+    border-left: 4px solid $theme-color-error-darker;
+}
+
+div[class^='usa-step-indicator'] {
+  background-color: transparent;
+  width: 60rem;
+  margin: 1.25rem auto;
+  text-align: center;
+}
+
+[class^='usa-step-indicator__header'] {
+  display: inline;
 }

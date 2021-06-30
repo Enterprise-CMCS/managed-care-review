@@ -1,10 +1,8 @@
 import { createTestClient } from 'apollo-server-testing'
-
 import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitDraftSubmission.graphql'
 import {
     constructTestServer,
-    createTestDraftSubmission,
-    createCompleteTestDraftSubmission,
+    createAndUpdateTestDraftSubmission,
     fetchTestStateSubmissionById,
 } from '../testHelpers/gqlHelpers'
 
@@ -14,12 +12,13 @@ describe('submitDraftSubmission', () => {
 
         const { query, mutate } = createTestClient(server)
 
-        const draft = await createCompleteTestDraftSubmission(mutate)
+        // setup
+        const draft = await createAndUpdateTestDraftSubmission(mutate)
         const draftID = draft.id
-        // In order to test updatedAt, we delay 2 seconds here.
-        await new Promise((resolve) => setTimeout(resolve, 2000))
 
-        const updateResult = await mutate({
+        // submit
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+        const submitResult = await mutate({
             mutation: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
@@ -28,16 +27,14 @@ describe('submitDraftSubmission', () => {
             },
         })
 
-        expect(updateResult.errors).toBeUndefined()
-
+        expect(submitResult.errors).toBeUndefined()
         const createdID =
-            updateResult?.data?.submitDraftSubmission.submission.id
+            submitResult?.data?.submitDraftSubmission.submission.id
 
-        // now we should be able to fetch it in its new state?
-
+        // test result
         const resultDraft = await fetchTestStateSubmissionById(query, createdID)
 
-        // The fields should still be set
+        // The submission fields should still be set
         expect(resultDraft.id).toEqual(createdID)
         expect(resultDraft.submissionType).toEqual('CONTRACT_AND_RATES')
         expect(resultDraft.program.id).toEqual('cnet')
@@ -47,6 +44,14 @@ describe('submitDraftSubmission', () => {
             'An updated submission'
         )
 
+        // Contract details fields should still be set
+        expect(resultDraft.contractType).toEqual(draft.contractType)
+        expect(resultDraft.contractDateStart).toEqual(draft.contractDateStart)
+        expect(resultDraft.contractDateEnd).toEqual(draft.contractDateEnd)
+        expect(resultDraft.managedCareEntities).toEqual(
+            draft.managedCareEntities
+        )
+        expect(resultDraft.federalAuthorities).toEqual(draft.federalAuthorities)
         // submittedAt should be set to today's date
         const today = new Date()
         const expectedDate = today.toISOString().split('T')[0]
@@ -65,10 +70,12 @@ describe('submitDraftSubmission', () => {
 
         const { mutate } = createTestClient(server)
 
-        const draft = await createTestDraftSubmission(mutate)
+        const draft = await createAndUpdateTestDraftSubmission(mutate, {
+            documents: [],
+        })
         const draftID = draft.id
 
-        const updateResult = await mutate({
+        const submitResult = await mutate({
             mutation: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
@@ -77,13 +84,44 @@ describe('submitDraftSubmission', () => {
             },
         })
 
-        expect(updateResult.errors).toBeDefined()
+        expect(submitResult.errors).toBeDefined()
 
-        expect(updateResult.errors?.[0].extensions?.code).toEqual(
+        expect(submitResult.errors?.[0].extensions?.code).toEqual(
             'BAD_USER_INPUT'
         )
-        expect(updateResult.errors?.[0].extensions?.message).toEqual(
+        expect(submitResult.errors?.[0].extensions?.message).toEqual(
             'submissions must have documents'
+        )
+    })
+
+    it('returns an error if there are no contract details fields', async () => {
+        const server = constructTestServer()
+
+        const { mutate } = createTestClient(server)
+
+        const draft = await createAndUpdateTestDraftSubmission(mutate, {
+            contractType: undefined,
+            managedCareEntities: [],
+            federalAuthorities: [],
+        })
+
+        const draftID = draft.id
+        const submitResult = await mutate({
+            mutation: SUBMIT_DRAFT_SUBMISSION,
+            variables: {
+                input: {
+                    submissionID: draftID,
+                },
+            },
+        })
+
+        expect(submitResult.errors).toBeDefined()
+
+        expect(submitResult.errors?.[0].extensions?.code).toEqual(
+            'BAD_USER_INPUT'
+        )
+        expect(submitResult.errors?.[0].extensions?.message).toEqual(
+            'submissions is missing required contract fields'
         )
     })
 })

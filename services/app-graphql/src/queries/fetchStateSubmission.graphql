@@ -18,6 +18,29 @@ query fetchStateSubmission($input: FetchStateSubmissionInput!) {
                 name
                 s3URL
             }
+            contractType
+            contractDateStart
+            contractDateEnd
+            managedCareEntities
+            federalAuthorities
+            contractAmendmentInfo {
+                itemsBeingAmended
+                otherItemBeingAmended
+                capitationRatesAmendedInfo {
+                    reason
+                    otherReason
+                }
+                relatedToCovid19
+                relatedToVaccination
+            }
+            rateType
+            rateDateStart
+            rateDateEnd
+            rateDateCertified
+            rateAmendmentInfo {
+                effectiveDateStart
+                effectiveDateEnd
+            }
         }
     }
 }

@@ -1,6 +1,10 @@
 import { createTestClient } from 'apollo-server-testing'
 
-import { CreateDraftSubmissionInput, SubmissionType } from '../gen/gqlServer'
+import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
+import {
+    DraftSubmissionUpdates,
+    CreateDraftSubmissionInput,
+} from '../gen/gqlServer'
 import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
 import UPDATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/updateDraftSubmission.graphql'
 import {
@@ -9,7 +13,185 @@ import {
     fetchTestDraftSubmissionById,
 } from '../testHelpers/gqlHelpers'
 
+import { applyUpdates } from './updateDraftSubmission'
+
 describe('updateDraftSubmission', () => {
+    describe('applyUpdates', () => {
+        it('correctly applies empty updates', () => {
+            // table test, given different inputs do we get what we expect?
+
+            const baseDraft: DraftSubmissionType = {
+                id: 'foo-bar',
+                status: 'DRAFT',
+                stateCode: 'FL',
+                stateNumber: 3,
+                programID: 'smmc',
+                submissionType: 'CONTRACT_ONLY' as const,
+                submissionDescription: 'an old submission',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                documents: [],
+                managedCareEntities: [],
+                federalAuthorities: [],
+                rateType: 'AMENDMENT',
+                rateDateStart: new Date(),
+                rateDateEnd: new Date(),
+                rateDateCertified: new Date(),
+                rateAmendmentInfo: {
+                    effectiveDateStart: new Date(),
+                    effectiveDateEnd: new Date(),
+                },
+            }
+
+            const updates: DraftSubmissionUpdates = {
+                programID: 'smmc',
+                submissionType: 'CONTRACT_ONLY',
+                submissionDescription: 'an updated draft',
+                documents: [],
+                contractType: null,
+                contractDateStart: null,
+                contractDateEnd: null,
+                managedCareEntities: [],
+                federalAuthorities: [],
+                contractAmendmentInfo: null,
+                rateType: null,
+                rateDateStart: null,
+                rateDateEnd: null,
+                rateDateCertified: null,
+                rateAmendmentInfo: undefined,
+            }
+
+            applyUpdates(baseDraft, updates)
+
+            expect(baseDraft.submissionDescription).toBe('an updated draft')
+            expect(baseDraft.contractType).toBeUndefined()
+            expect(baseDraft.contractDateStart).toBeUndefined()
+            expect(baseDraft.contractDateEnd).toBeUndefined()
+            expect(baseDraft.contractAmendmentInfo).toBeUndefined()
+            expect(baseDraft.rateType).toBeUndefined()
+            expect(baseDraft.rateDateStart).toBeUndefined()
+            expect(baseDraft.rateDateEnd).toBeUndefined()
+            expect(baseDraft.rateDateCertified).toBeUndefined()
+            expect(baseDraft.rateAmendmentInfo).toBeUndefined()
+        })
+
+        it('correctly applies empty amendment updates', () => {
+            // table test, given different inputs do we get what we expect?
+
+            const baseDraft: DraftSubmissionType = {
+                id: 'foo-bar',
+                status: 'DRAFT',
+                stateCode: 'FL',
+                stateNumber: 3,
+                programID: 'smmc',
+                submissionType: 'CONTRACT_ONLY' as const,
+                submissionDescription: 'an old submission',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                documents: [],
+                managedCareEntities: [],
+                federalAuthorities: [],
+            }
+
+            const updates: DraftSubmissionUpdates = {
+                programID: 'smmc',
+                submissionType: 'CONTRACT_ONLY',
+                submissionDescription: 'an updated draft',
+                documents: [],
+                contractType: null,
+                contractDateStart: null,
+                contractDateEnd: null,
+                managedCareEntities: [],
+                federalAuthorities: [],
+                contractAmendmentInfo: {
+                    itemsBeingAmended: [],
+                    otherItemBeingAmended: null,
+                    capitationRatesAmendedInfo: null,
+                    relatedToCovid19: null,
+                    relatedToVaccination: null,
+                },
+                rateType: null,
+                rateDateStart: null,
+                rateDateEnd: null,
+                rateDateCertified: null,
+                rateAmendmentInfo: {
+                    effectiveDateStart: null,
+                    effectiveDateEnd: null,
+                },
+            }
+
+            applyUpdates(baseDraft, updates)
+
+            expect(baseDraft.submissionDescription).toBe('an updated draft')
+            expect(baseDraft.contractAmendmentInfo).toStrictEqual({
+                itemsBeingAmended: [],
+                otherItemBeingAmended: undefined,
+                capitationRatesAmendedInfo: undefined,
+                relatedToCovid19: undefined,
+                relatedToVaccination: undefined,
+            })
+            expect(baseDraft.rateAmendmentInfo).toStrictEqual({
+                effectiveDateStart: undefined,
+                effectiveDateEnd: undefined,
+            })
+        })
+
+        it('correctly applies empty capitationRates updates', () => {
+            // table test, given different inputs do we get what we expect?
+
+            const baseDraft: DraftSubmissionType = {
+                id: 'foo-bar',
+                status: 'DRAFT',
+                stateCode: 'FL',
+                stateNumber: 3,
+                programID: 'smmc',
+                submissionType: 'CONTRACT_ONLY' as const,
+                submissionDescription: 'an old submission',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                documents: [],
+                managedCareEntities: [],
+                federalAuthorities: [],
+            }
+
+            const updates: DraftSubmissionUpdates = {
+                programID: 'smmc',
+                submissionType: 'CONTRACT_ONLY',
+                submissionDescription: 'an updated draft',
+                documents: [],
+                contractType: null,
+                contractDateStart: null,
+                contractDateEnd: null,
+                managedCareEntities: [],
+                federalAuthorities: [],
+                contractAmendmentInfo: {
+                    itemsBeingAmended: [],
+                    otherItemBeingAmended: null,
+                    capitationRatesAmendedInfo: {
+                        reason: null,
+                        otherReason: null,
+                    },
+                    relatedToCovid19: null,
+                    relatedToVaccination: null,
+                },
+                rateType: null,
+                rateDateStart: null,
+                rateDateEnd: null,
+                rateDateCertified: null,
+            }
+
+            applyUpdates(baseDraft, updates)
+
+            expect(baseDraft.submissionDescription).toBe('an updated draft')
+            expect(
+                baseDraft.contractAmendmentInfo?.capitationRatesAmendedInfo
+            ).toStrictEqual({
+                reason: undefined,
+                otherReason: undefined,
+            })
+        })
+    })
+
     it('updates a submission if the state matches', async () => {
         const server = constructTestServer()
 
@@ -19,7 +201,7 @@ describe('updateDraftSubmission', () => {
         const createdID = createdDraft.id
         const startDate = '2021-07-06'
         const endDate = '2021-07-12'
-
+        const certifiedDate = '2021-01-01'
         // In order to test updatedAt, we delay 2 seconds here.
         await new Promise((resolve) => setTimeout(resolve, 2000))
 
@@ -33,6 +215,9 @@ describe('updateDraftSubmission', () => {
             contractDateEnd: endDate,
             managedCareEntities: ['MCO'],
             federalAuthorities: ['VOLUNTARY'],
+            rateDateStart: startDate,
+            rateDateEnd: endDate,
+            rateDateCertified: certifiedDate,
         }
 
         const updateResult = await mutate({
@@ -74,6 +259,11 @@ describe('updateDraftSubmission', () => {
         expect(resultDraft.contractDateEnd).toBe(endDate)
         expect(resultDraft.managedCareEntities).toEqual(['MCO'])
         expect(resultDraft.federalAuthorities).toEqual(['VOLUNTARY'])
+
+        // Rate Details
+        expect(resultDraft.rateDateStart).toBe(startDate)
+        expect(resultDraft.rateDateEnd).toBe(endDate)
+        expect(resultDraft.rateDateCertified).toBe(certifiedDate)
     })
 
     it('updates a submission to have documents', async () => {
@@ -161,30 +351,32 @@ describe('updateDraftSubmission', () => {
         expect(resultDraft2.documents[0].name).toEqual('myfile2.pdf')
     })
 
-    it('updates a submission to remove existing documents', async () => {
+    it('updates a submission to have contract amendment details', async () => {
         const server = constructTestServer()
-        const { query, mutate } = createTestClient(server)
+        const { mutate } = createTestClient(server)
 
         const createdDraft = await createTestDraftSubmission(mutate)
         const createdID = createdDraft.id
         const startDate = '2021-07-06'
-        const endDate = '2021-07-12'
 
         const updatedDraft = {
             programID: 'cnet',
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
-            documents: [
-                {
-                    name: 'myfile.pdf',
-                    s3URL: 'fakeS3URL',
-                },
-            ],
-            contractType: 'BASE',
+            documents: [],
+            contractType: 'AMENDMENT',
             contractDateStart: startDate,
-            contractDateEnd: endDate,
             managedCareEntities: [],
             federalAuthorities: [],
+
+            // rate detail info
+            contractAmendmentInfo: {
+                itemsBeingAmended: [
+                    'BENEFITS_PROVIDED',
+                    'LENGTH_OF_CONTRACT_PERIOD',
+                ],
+                relatedToCovid19: false,
+            },
         }
 
         const updateResult = await mutate({
@@ -193,6 +385,239 @@ describe('updateDraftSubmission', () => {
                 input: {
                     submissionID: createdID,
                     draftSubmissionUpdates: updatedDraft,
+                },
+            },
+        })
+
+        expect(updateResult.errors).toBeUndefined()
+
+        const resultDraft =
+            updateResult.data.updateDraftSubmission.draftSubmission
+
+        expect(resultDraft.id).toEqual(createdID)
+        expect(resultDraft.contractAmendmentInfo.itemsBeingAmended).toEqual([
+            'BENEFITS_PROVIDED',
+            'LENGTH_OF_CONTRACT_PERIOD',
+        ])
+        expect(resultDraft.contractAmendmentInfo.relatedToCovid19).toEqual(
+            false
+        )
+        expect(resultDraft.contractAmendmentInfo.relatedToVaccination).toEqual(
+            null
+        )
+    })
+
+    it('updates a submission with conditionals in contract amendment details', async () => {
+        const server = constructTestServer()
+        const { query, mutate } = createTestClient(server)
+
+        const createdDraft = await createTestDraftSubmission(mutate)
+        const createdID = createdDraft.id
+        const startDate = '2021-07-06'
+
+        const updatedDraft = {
+            programID: 'cnet',
+            submissionType: 'CONTRACT_AND_RATES',
+            submissionDescription: 'An updated submission',
+            documents: [],
+            contractType: 'AMENDMENT',
+            contractDateStart: startDate,
+            managedCareEntities: [],
+            federalAuthorities: [],
+            contractAmendmentInfo: {
+                itemsBeingAmended: [
+                    'BENEFITS_PROVIDED',
+                    'LENGTH_OF_CONTRACT_PERIOD',
+                    'CAPITATION_RATES',
+                ],
+                otherItemBeingAmended: 'just having a laugh',
+                capitationRatesAmendedInfo: {
+                    reason: 'OTHER',
+                    otherReason: 'something for fun',
+                },
+                relatedToCovid19: true,
+            },
+        }
+
+        const updateResult = await mutate({
+            mutation: UPDATE_DRAFT_SUBMISSION,
+            variables: {
+                input: {
+                    submissionID: createdID,
+                    draftSubmissionUpdates: updatedDraft,
+                },
+            },
+        })
+
+        expect(updateResult.errors).toBeUndefined()
+
+        const resultDraft =
+            updateResult.data.updateDraftSubmission.draftSubmission
+
+        // also check on the fetch of the same
+        const fetchedDraft = await fetchTestDraftSubmissionById(
+            query,
+            createdID
+        )
+
+        const drafts = [resultDraft, fetchedDraft]
+
+        // for both the result of the update call, and the result of the fetch call, make sure
+        // our fields came through
+        drafts.forEach((draft) => {
+            expect(draft.id).toEqual(createdID)
+
+            const info = draft.contractAmendmentInfo
+            // todo should we sort these? // it should be a SET
+            expect(info.itemsBeingAmended).toEqual([
+                'BENEFITS_PROVIDED',
+                'LENGTH_OF_CONTRACT_PERIOD',
+                'CAPITATION_RATES',
+            ])
+            expect(info.otherItemBeingAmended).toEqual('just having a laugh')
+            expect(info.capitationRatesAmendedInfo.reason).toEqual('OTHER')
+            expect(info.capitationRatesAmendedInfo.otherReason).toEqual(
+                'something for fun'
+            )
+        })
+    })
+
+    it('updates a submission to have a new rate', async () => {
+        const server = constructTestServer()
+        const { mutate } = createTestClient(server)
+
+        const createdDraft = await createTestDraftSubmission(mutate)
+        const createdID = createdDraft.id
+        const startDate = '2021-07-01'
+        const endDate = '2022-06-30'
+        const rateDetails = {
+            rateType: 'NEW' as const,
+            rateDateStart: startDate,
+            rateDateEnd: endDate,
+            rateDateCertified: '2021-06-13',
+        }
+
+        const updatedDraft = {
+            programID: 'cnet',
+            submissionType: 'CONTRACT_AND_RATES',
+            submissionDescription: 'An updated submission',
+            documents: [],
+            managedCareEntities: [],
+            federalAuthorities: [],
+            ...rateDetails,
+        }
+
+        const updateResult = await mutate({
+            mutation: UPDATE_DRAFT_SUBMISSION,
+            variables: {
+                input: {
+                    submissionID: createdID,
+                    draftSubmissionUpdates: updatedDraft,
+                },
+            },
+        })
+
+        expect(updateResult.errors).toBeUndefined()
+
+        const resultDraft =
+            updateResult.data.updateDraftSubmission.draftSubmission
+
+        expect(resultDraft.id).toEqual(createdID)
+        expect(resultDraft.rateType).toEqual(rateDetails.rateType)
+        expect(resultDraft.rateDateStart).toEqual(rateDetails.rateDateStart)
+        expect(resultDraft.rateDateEnd).toEqual(rateDetails.rateDateEnd)
+        expect(resultDraft.rateDateCertified).toEqual(
+            rateDetails.rateDateCertified
+        )
+        expect(resultDraft.rateAmendmentInfo).toBeNull()
+    })
+
+    it('updates a submission to have a rate amendment', async () => {
+        const server = constructTestServer()
+        const { mutate } = createTestClient(server)
+
+        const createdDraft = await createTestDraftSubmission(mutate)
+        const createdID = createdDraft.id
+        const startDate = '2021-07-01'
+        const endDate = '2022-06-30'
+        const rateAmendment = {
+            rateType: 'AMENDMENT' as const,
+            rateDateStart: startDate,
+            rateDateEnd: endDate,
+            rateDateCertified: '2021-06-13',
+            rateAmendmentInfo: {
+                effectiveDateStart: startDate,
+                effectiveDateEnd: endDate,
+            },
+        }
+
+        const updatedDraft = {
+            programID: 'cnet',
+            submissionType: 'CONTRACT_AND_RATES',
+            submissionDescription: 'An updated submission',
+            documents: [],
+            managedCareEntities: [],
+            federalAuthorities: [],
+            ...rateAmendment,
+        }
+
+        const updateResult = await mutate({
+            mutation: UPDATE_DRAFT_SUBMISSION,
+            variables: {
+                input: {
+                    submissionID: createdID,
+                    draftSubmissionUpdates: updatedDraft,
+                },
+            },
+        })
+
+        expect(updateResult.errors).toBeUndefined()
+
+        const resultDraft =
+            updateResult.data.updateDraftSubmission.draftSubmission
+
+        expect(resultDraft.id).toEqual(createdID)
+        expect(resultDraft.rateType).toEqual(rateAmendment.rateType)
+        expect(resultDraft.rateDateStart).toEqual(rateAmendment.rateDateStart)
+        expect(resultDraft.rateDateEnd).toEqual(rateAmendment.rateDateEnd)
+        expect(resultDraft.rateDateCertified).toEqual(
+            rateAmendment.rateDateCertified
+        )
+        expect(resultDraft.rateAmendmentInfo.effectiveDateStart).toEqual(
+            rateAmendment.rateAmendmentInfo.effectiveDateStart
+        )
+        expect(resultDraft.rateAmendmentInfo.effectiveDateEnd).toEqual(
+            rateAmendment.rateAmendmentInfo.effectiveDateEnd
+        )
+    })
+
+    it('updates a submission to remove existing documents', async () => {
+        const server = constructTestServer()
+        const { query, mutate } = createTestClient(server)
+
+        const createdDraft = await createTestDraftSubmission(mutate)
+        const createdID = createdDraft.id
+
+        const updatedDraftWithDocs = {
+            programID: 'cnet',
+            submissionType: 'CONTRACT_AND_RATES',
+            submissionDescription: 'An updated submission',
+            managedCareEntities: [],
+            federalAuthorities: [],
+            documents: [
+                {
+                    name: 'myfile.pdf',
+                    s3URL: 'fakeS3URL',
+                },
+            ],
+        }
+
+        const updateResult = await mutate({
+            mutation: UPDATE_DRAFT_SUBMISSION,
+            variables: {
+                input: {
+                    submissionID: createdID,
+                    draftSubmissionUpdates: updatedDraftWithDocs,
                 },
             },
         })
@@ -209,16 +634,13 @@ describe('updateDraftSubmission', () => {
         ])
 
         // Remove documents
-        const updatedDraft2 = {
+        const updatedDraftWithoutDocs = {
             programID: resultDraft.programID,
             submissionType: resultDraft.submissionType,
             submissionDescription: resultDraft.submissionDescription,
+            managedCareEntities: [],
+            federalAuthorities: [],
             documents: [],
-            contractType: resultDraft.contractType,
-            contractDateStart: resultDraft.contractDateStart,
-            contractDateEnd: resultDraft.contractDateEnd,
-            managedCareEntities: resultDraft.managedCareEntities,
-            federalAuthorities: resultDraft.federalAuthorities,
         }
 
         const updateResult2 = await mutate({
@@ -226,7 +648,7 @@ describe('updateDraftSubmission', () => {
             variables: {
                 input: {
                     submissionID: createdID,
-                    draftSubmissionUpdates: updatedDraft2,
+                    draftSubmissionUpdates: updatedDraftWithoutDocs,
                 },
             },
         })
@@ -285,7 +707,7 @@ describe('updateDraftSubmission', () => {
         // SETUP: First, create a new submission
         const createInput: CreateDraftSubmissionInput = {
             programID: 'smmc',
-            submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
+            submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A created submission',
         }
         const createResult = await mutate({

@@ -2,28 +2,31 @@ import { DataMapper } from '@aws/dynamodb-data-mapper'
 
 import { StoreError, convertDynamoErrorToStoreError } from './storeError'
 import {
-    StateSubmissionStoreType,
-    isDynamoError,
+    convertToDomainSubmission,
+    CapitationRatesAmendedInfo,
+    RateAmendmentInfoT,
+    ContractAmendmentInfoT,
     DocumentStoreT,
+    SubmissionStoreType,
+    isDynamoError,
 } from './dynamoTypes'
-import { StateSubmissionType } from '../../app-web/src/common-code/domain-models'
+import {
+    isStateSubmission,
+    StateSubmissionType,
+} from '../../app-web/src/common-code/domain-models'
 
+// Initially called when we convert a draft submission to a state submission
 export async function updateStateSubmission(
     mapper: DataMapper,
     stateSubmission: StateSubmissionType
 ): Promise<StateSubmissionType | StoreError> {
-    // Copy over the values to our db model
-    const storeSubmission = new StateSubmissionStoreType()
-
+    const storeSubmission = new SubmissionStoreType()
     storeSubmission.id = stateSubmission.id
+    storeSubmission.status = 'SUBMITTED'
     storeSubmission.createdAt = stateSubmission.createdAt
     storeSubmission.updatedAt = new Date()
-
-    // these args carry over but aren't set explicitly
     storeSubmission.stateCode = stateSubmission.stateCode
     storeSubmission.stateNumber = stateSubmission.stateNumber
-
-    // SOME args can be set, others must be kept
     storeSubmission.submissionType = stateSubmission.submissionType
     storeSubmission.programID = stateSubmission.programID
     storeSubmission.submissionDescription =
@@ -36,12 +39,63 @@ export async function updateStateSubmission(
         storeSubmission.documents.push(storeDocument)
     })
 
-    // new fields
-    storeSubmission.submittedAt = new Date()
+    storeSubmission.contractType = stateSubmission.contractType
+    storeSubmission.contractDateStart = stateSubmission.contractDateStart
+    storeSubmission.contractDateEnd = stateSubmission.contractDateEnd
+    storeSubmission.managedCareEntities = stateSubmission.managedCareEntities
+    storeSubmission.federalAuthorities = stateSubmission.federalAuthorities
+
+    storeSubmission.rateType = stateSubmission.rateType
+    storeSubmission.rateDateStart = stateSubmission.rateDateStart
+    storeSubmission.rateDateEnd = stateSubmission.rateDateEnd
+    storeSubmission.rateDateCertified = stateSubmission.rateDateCertified
+
+    if (stateSubmission.contractAmendmentInfo) {
+        const draftInfo = stateSubmission.contractAmendmentInfo
+
+        const info = new ContractAmendmentInfoT()
+        info.itemsBeingAmended = draftInfo.itemsBeingAmended
+        info.otherItemBeingAmended = draftInfo.otherItemBeingAmended
+
+        if (draftInfo.capitationRatesAmendedInfo) {
+            const capRates = new CapitationRatesAmendedInfo()
+            capRates.reason = draftInfo.capitationRatesAmendedInfo.reason
+            capRates.otherReason =
+                draftInfo.capitationRatesAmendedInfo.otherReason
+
+            info.capitationRatesAmendedInfo = capRates
+        }
+
+        info.relatedToCovid19 = draftInfo.relatedToCovid19
+        info.relatedToVaccination = draftInfo.relatedToVaccination
+
+        storeSubmission.contractAmendmentInfo = info
+    }
+
+    if (stateSubmission.rateAmendmentInfo) {
+        const draftInfo = stateSubmission.rateAmendmentInfo
+
+        const info = new RateAmendmentInfoT()
+        info.effectiveDateStart = draftInfo.effectiveDateStart
+        info.effectiveDateEnd = draftInfo.effectiveDateEnd
+        storeSubmission.rateAmendmentInfo = info
+    }
+    // State submission only field
+    storeSubmission.submittedAt = stateSubmission.submittedAt
 
     try {
         const putResult = await mapper.put(storeSubmission)
-        return putResult
+
+        const domainResult = convertToDomainSubmission(putResult)
+
+        if (!isStateSubmission(domainResult)) {
+            return {
+                code: 'WRONG_STATUS',
+                message: 'the updated submission is not a StateSubmission',
+            }
+        }
+
+        return domainResult
     } catch (err) {
         if (isDynamoError(err)) {
             return convertDynamoErrorToStoreError(err.code)

@@ -11,13 +11,11 @@ import typeDefs from '../../app-graphql/src/schema.graphql'
 import { configureResolvers } from '../resolvers'
 import { Context } from '../handlers/apollo_gql'
 import {
+    UpdateDraftSubmissionInput,
     CreateDraftSubmissionInput,
     DraftSubmission,
     DraftSubmissionUpdates,
     StateSubmission,
-    SubmissionType,
-    ContractType,
-    FederalAuthority,
 } from '../gen/gqlServer'
 
 const store = getTestStore()
@@ -52,7 +50,7 @@ const createTestDraftSubmission = async (
 ): Promise<DraftSubmission> => {
     const input: CreateDraftSubmissionInput = {
         programID: 'smmc',
-        submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
+        submissionType: 'CONTRACT_ONLY' as const,
         submissionDescription: 'A created submission',
     }
     const result = await mutate({
@@ -88,18 +86,20 @@ const updateTestDraftSubmission = async (
     return updateResult.data.updateDraftSubmission.draftSubmission
 }
 
-const createCompleteTestDraftSubmission = async (
-    mutate: ApolloServerTestClient['mutate']
+const createAndUpdateTestDraftSubmission = async (
+    mutate: ApolloServerTestClient['mutate'],
+    partialDraftSubmissionUpdates?: Partial<
+        UpdateDraftSubmissionInput['draftSubmissionUpdates']
+    >
 ): Promise<DraftSubmission> => {
     const draft = await createTestDraftSubmission(mutate)
-    const startDate = new Date().toISOString().split('T')[0]
-    const endDate = new Date(new Date().getTime() + 5 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split('T')[0]
+    const startDate = '2025-05-01'
+    const endDate = '2026-04-30'
+    const dateCertified = '2025-03-15'
 
     const updates = {
         programID: 'cnet',
-        submissionType: 'CONTRACT_AND_RATES' as SubmissionType.ContractAndRates,
+        submissionType: 'CONTRACT_AND_RATES' as const,
         submissionDescription: 'An updated submission',
         documents: [
             {
@@ -107,11 +107,16 @@ const createCompleteTestDraftSubmission = async (
                 s3URL: 'fakeS3URL',
             },
         ],
-        contractType: 'BASE' as ContractType.Base,
+        contractType: 'BASE' as const,
         contractDateStart: startDate,
         contractDateEnd: endDate,
         managedCareEntities: ['MCO'],
-        federalAuthorities: ['STATE_PLAN' as FederalAuthority.StatePlan],
+        federalAuthorities: ['STATE_PLAN' as const],
+        rateType: 'NEW' as const,
+        rateDateStart: startDate,
+        rateDateEnd: endDate,
+        rateDateCertified: dateCertified,
+        ...partialDraftSubmissionUpdates,
     }
 
     const updatedDraft = await updateTestDraftSubmission(
@@ -146,8 +151,8 @@ const submitTestDraftSubmission = async (
 
 const createTestStateSubmission = async (
     mutate: ApolloServerTestClient['mutate']
-): Promise<DraftSubmission> => {
-    const draft = await createCompleteTestDraftSubmission(mutate)
+): Promise<StateSubmission> => {
+    const draft = await createAndUpdateTestDraftSubmission(mutate)
 
     const updatedSubmission = await submitTestDraftSubmission(mutate, draft.id)
 
@@ -193,7 +198,7 @@ export {
     createTestDraftSubmission,
     createTestStateSubmission,
     updateTestDraftSubmission,
-    createCompleteTestDraftSubmission,
+    createAndUpdateTestDraftSubmission,
     fetchTestDraftSubmissionById,
     fetchTestStateSubmissionById,
 }

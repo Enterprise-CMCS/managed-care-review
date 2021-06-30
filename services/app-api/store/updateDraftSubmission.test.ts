@@ -1,4 +1,4 @@
-import { DraftSubmissionStoreType } from './dynamoTypes'
+import { SubmissionStoreType } from './dynamoTypes'
 import { getTestStore, getTestDynamoMapper } from '../testHelpers/storeHelpers'
 
 import { isStoreError } from './storeError'
@@ -12,7 +12,7 @@ describe('updateDraftSubmission', () => {
         // create new submission
         const inputParams = {
             stateCode: 'FL',
-            programID: 'MCAC',
+            programID: 'smmc',
             submissionDescription: 'a new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
         }
@@ -33,8 +33,9 @@ describe('updateDraftSubmission', () => {
             expect(draftSubmission.documents.length).toEqual(0)
 
             // update submission
-            const startDate = new Date('2021-06-07T17:48:47.000Z')
-            const endDate = new Date('2021-06-12T17:48:47.000Z')
+            const startDate = new Date(2021, 5, 6)
+            const endDate = new Date(2022, 4, 31)
+            const dateCertified = new Date(2021, 3, 15)
             const updateSubResult = await store.updateDraftSubmission({
                 ...draftSubmission,
                 documents: [
@@ -48,6 +49,10 @@ describe('updateDraftSubmission', () => {
                 contractDateEnd: endDate,
                 managedCareEntities: ['MCO'],
                 federalAuthorities: ['VOLUNTARY'],
+                rateType: 'NEW',
+                rateDateStart: startDate,
+                rateDateEnd: endDate,
+                rateDateCertified: dateCertified,
             })
 
             if (isStoreError(updateSubResult)) {
@@ -58,7 +63,7 @@ describe('updateDraftSubmission', () => {
 
             try {
                 const getResult = await mapper.get(
-                    Object.assign(new DraftSubmissionStoreType(), {
+                    Object.assign(new SubmissionStoreType(), {
                         id: createdID,
                     })
                 )
@@ -73,6 +78,9 @@ describe('updateDraftSubmission', () => {
                 )
                 expect(getResult.contractDateStart).toEqual(startDate)
                 expect(getResult.contractDateEnd).toEqual(endDate)
+                expect(getResult.rateDateStart).toEqual(startDate)
+                expect(getResult.rateDateEnd).toEqual(endDate)
+                expect(getResult.rateDateCertified).toEqual(dateCertified)
             } catch (dynamoErr) {
                 throw new Error(dynamoErr)
             }

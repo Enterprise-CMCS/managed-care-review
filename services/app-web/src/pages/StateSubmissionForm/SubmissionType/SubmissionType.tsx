@@ -12,13 +12,14 @@ import {
 } from '@trussworks/react-uswds'
 import { Formik, FormikHelpers, FormikErrors, useFormikContext } from 'formik'
 import { NavLink, useHistory, Link as ReactRouterLink } from 'react-router-dom'
-import { useMutation } from '@apollo/client'
 
+import { MCRouterState } from "../../../constants/routerState"
 import PageHeading from '../../../components/PageHeading'
 import {
-    CreateDraftSubmissionDocument,
+    CreateDraftSubmissionInput,
     DraftSubmission,
     SubmissionType as SubmissionTypeT,
+    useCreateDraftSubmissionMutation,
     useUpdateDraftSubmissionMutation,
 } from '../../../gen/gqlClient'
 import { useAuth } from '../../../contexts/AuthContext'
@@ -74,7 +75,7 @@ export const SubmissionType = ({
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const { loggedInUser: { state: { programs = [] } = {} } = {} } = useAuth()
 
-    const history = useHistory()
+    const history = useHistory<MCRouterState>()
     const location = history.location
     const isNewSubmission = location.pathname === '/submissions/new'
     const programOptions: Array<{ id: string; label: string }> = programs.map(
@@ -83,8 +84,41 @@ export const SubmissionType = ({
         }
     )
 
-    const [createDraftSubmission, { error }] = useMutation(
-        CreateDraftSubmissionDocument
+    const [createDraftSubmission, { error }] = useCreateDraftSubmissionMutation(
+        {
+            // This function updates the Apollo Client Cache after we create a new DraftSubmission
+            // Without it, we wouldn't show this newly created submission on the dashboard page
+            // without a refresh. Anytime a mutation does more than "modify an existing object"
+            // you'll need to handle the cache.
+            update(cache, { data }) {
+                if (data) {
+                    cache.modify({
+                        fields: {
+                            indexSubmissions(
+                                index = { totalCount: 0, edges: [] }
+                            ) {
+                                const newID = cache.identify(
+                                    data.createDraftSubmission.draftSubmission
+                                )
+                                // This isn't quite what is documented, but it's clear this
+                                // is how things work from looking at the dev-tools
+                                const newRef = { __ref: newID }
+
+                                return {
+                                    totalCount: index.totalCount + 1,
+                                    edges: [
+                                        {
+                                            node: newRef,
+                                        },
+                                        ...index.edges,
+                                    ],
+                                }
+                            },
+                        },
+                    })
+                }
+            },
+        }
     )
     const [
         updateDraftSubmission,
@@ -99,8 +133,10 @@ export const SubmissionType = ({
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
+    const defaultInitialProgramID = location.state?.defaultProgramID
+
     const submissionTypeInitialValues: SubmissionTypeFormValues = {
-        programID: draftSubmission?.program.id ?? programs[0]?.id,
+        programID: draftSubmission?.program.id ?? defaultInitialProgramID ?? programs[0]?.id,
         submissionDescription: draftSubmission?.submissionDescription ?? '',
         submissionType: draftSubmission?.submissionType ?? '',
     }
@@ -111,12 +147,31 @@ export const SubmissionType = ({
     ) => {
         if (isNewSubmission) {
             try {
+                if (
+                    !(
+                        values.submissionType === 'CONTRACT_ONLY' ||
+                        values.submissionType === 'CONTRACT_AND_RATES'
+                    )
+                ) {
+                    console.log(
+                        'unexpected error, attempting to submit a submissionType of ',
+                        values.submissionType
+                    )
+                    return
+                }
+
+                const input: CreateDraftSubmissionInput = {
+                    programID: values.programID,
+                    submissionType: values.submissionType,
+                    submissionDescription: values.submissionDescription,
+                }
+
                 const result = await createDraftSubmission({
-                    variables: { input: values },
+                    variables: { input },
                 })
 
-                const draftSubmission: DraftSubmission =
-                    result.data.createDraftSubmission.draftSubmission
+                const draftSubmission: DraftSubmission | undefined =
+                    result?.data?.createDraftSubmission.draftSubmission
 
                 if (draftSubmission) {
                     history.push(
@@ -134,7 +189,7 @@ export const SubmissionType = ({
         } else {
             if (draftSubmission === undefined) {
                 // this is a sign that we should hoist the saving stuff out of this leaf
-                // let's reconsider once we have our second editiable component.
+                // let's reconsider once we have our second editable component.
                 console.log(
                     'ERROR, when editing a draft, one should always be passed in.'
                 )
@@ -176,8 +231,6 @@ export const SubmissionType = ({
             initialValues={submissionTypeInitialValues}
             onSubmit={handleFormSubmit}
             validationSchema={SubmissionTypeFormSchema}
-            validateOnChange={shouldValidate}
-            validateOnBlur={shouldValidate}
         >
             {({
                 values,
@@ -243,31 +296,31 @@ export const SubmissionType = ({
                                         aria-required
                                         checked={
                                             values.submissionType ===
-                                            SubmissionTypeT.ContractOnly
+                                            'CONTRACT_ONLY'
                                         }
                                         id="contractOnly"
                                         name="submissionType"
                                         label={
                                             SubmissionTypeRecord[
-                                                SubmissionTypeT.ContractOnly
+                                                'CONTRACT_ONLY'
                                             ]
                                         }
-                                        value={SubmissionTypeT.ContractOnly}
+                                        value={'CONTRACT_ONLY'}
                                     />
                                     <FieldRadio
                                         aria-required
                                         checked={
                                             values.submissionType ===
-                                            SubmissionTypeT.ContractAndRates
+                                            'CONTRACT_AND_RATES'
                                         }
                                         id="contractRate"
                                         name="submissionType"
                                         label={
                                             SubmissionTypeRecord[
-                                                SubmissionTypeT.ContractAndRates
+                                                'CONTRACT_AND_RATES'
                                             ]
                                         }
-                                        value={SubmissionTypeT.ContractAndRates}
+                                        value={'CONTRACT_AND_RATES'}
                                     />
                                 </Fieldset>
                             </FormGroup>
@@ -281,11 +334,13 @@ export const SubmissionType = ({
                                 hint={
                                     <>
                                         <Link
+                                            variant="external"
                                             asCustom={ReactRouterLink}
                                             to={{
                                                 pathname: '/help',
                                                 hash: '#submission-description',
                                             }}
+                                            target="_blank"
                                         >
                                             View description examples
                                         </Link>
@@ -304,8 +359,9 @@ export const SubmissionType = ({
                         >
                             <Link
                                 asCustom={NavLink}
-                                className={`${styles.outlineButtonLink} usa-button usa-button--outline`}
-                                to="/dashboard"
+                                variant="unstyled"
+                                className="usa-button usa-button--outline"
+                                to={{pathname: "/dashboard", state: {defaultProgramID: defaultInitialProgramID}}}
                             >
                                 Cancel
                             </Link>

@@ -11,6 +11,7 @@ export type {
     DraftSubmissionType,
     SubmissionType,
     SubmissionDocument,
+    RateType,
     ContractType,
     FederalAuthority,
     ManagedCareEntity,
@@ -18,8 +19,18 @@ export type {
 
 export type { StateSubmissionType } from './StateSubmissionType'
 
+export type { SubmissionUnionType } from './SubmissionUnionType'
+
 export type { ProgramT } from './ProgramT'
 
-// Typechecks
+// Type checks and type guards
 export { isCognitoUser } from './user'
-export { isContractOnly, isContractAndRates } from './submission'
+export {
+    hasValidContract,
+    hasValidDocuments,
+    hasValidRates,
+    isContractOnly,
+    isContractAndRates,
+    isStateSubmission,
+    isDraftSubmission,
+} from './submission'

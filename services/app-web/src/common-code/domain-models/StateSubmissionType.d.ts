@@ -1,7 +1,26 @@
-import { DraftSubmissionType } from './DraftSubmissionType'
-
 // StateSubmission is a health plan that has been submitted to CMS.
 
 export type StateSubmissionType = {
     submittedAt: Date
-} & DraftSubmissionType
+    id: string
+    status: 'SUBMITTED'
+    stateCode: string
+    stateNumber: number
+    programID: string
+    submissionDescription: string
+    submissionType: SubmissionType
+    createdAt: Date
+    updatedAt: DateTime
+    documents: SubmissionDocument[]
+    contractType: ContractType
+    contractDateStart: Date
+    contractDateEnd: Date
+    managedCareEntities: string[]
+    federalAuthorities: FederalAuthority[]
+    contractAmendmentInfo?: ContractAmendmentInfo
+    rateType?: RateType
+    rateDateStart?: Date
+    rateDateEnd?: Date
+    rateDateCertified?: Date
+    rateAmendmentInfo?: RateAmendmentInfo
+}

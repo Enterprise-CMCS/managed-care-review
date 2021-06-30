@@ -6,7 +6,10 @@ import {
     userClickSignIn,
 } from '../../testHelpers/jestHelpers'
 import { AppBody } from './AppBody'
-import { fetchCurrentUserMock } from '../../testHelpers/apolloHelpers'
+import {
+    fetchCurrentUserMock,
+    indexSubmissionsMockSuccess,
+} from '../../testHelpers/apolloHelpers'
 test('App renders without errors', () => {
     renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
     const mainElement = screen.getByRole('main')
@@ -22,7 +25,10 @@ describe('App Body and routes', () => {
         it('display dashboard when logged in', async () => {
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        indexSubmissionsMockSuccess(),
+                    ],
                 },
             })
 

@@ -2,12 +2,16 @@ import { DataMapper } from '@aws/dynamodb-data-mapper'
 
 import { StoreError } from './storeError'
 import {
-    StateSubmissionStoreType,
+    SubmissionStoreType,
     isDynamoError,
     isMapperError,
+    convertToDomainSubmission,
 } from './dynamoTypes'
 
-import { StateSubmissionType } from '../../app-web/src/common-code/domain-models'
+import {
+    isStateSubmission,
+    StateSubmissionType,
+} from '../../app-web/src/common-code/domain-models'
 
 export async function findStateSubmission(
     mapper: DataMapper,
@@ -15,20 +19,22 @@ export async function findStateSubmission(
 ): Promise<StateSubmissionType | undefined | StoreError> {
     try {
         const getResult = await mapper.get(
-            Object.assign(new StateSubmissionStoreType(), {
+            Object.assign(new SubmissionStoreType(), {
                 id,
             })
         )
 
+        const domainResult = convertToDomainSubmission(getResult)
+
         // if the result in the DB is a DRAFT, return an error
-        if (getResult.status !== 'SUBMITTED') {
+        if (!isStateSubmission(domainResult)) {
             return {
                 code: 'WRONG_STATUS',
                 message: 'The requested submission is not a StateSubmission',
             }
         }
 
-        return getResult
+        return domainResult
     } catch (err) {
         if (isMapperError(err)) {
             if (err.name === 'ItemNotFoundException') {

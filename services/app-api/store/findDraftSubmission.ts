@@ -2,12 +2,16 @@ import { DataMapper } from '@aws/dynamodb-data-mapper'
 
 import { StoreError } from './storeError'
 import {
-    DraftSubmissionStoreType,
+    convertToDomainSubmission,
+    SubmissionStoreType,
     isDynamoError,
     isMapperError,
 } from './dynamoTypes'
 
-import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
+import {
+    DraftSubmissionType,
+    isDraftSubmission,
+} from '../../app-web/src/common-code/domain-models'
 
 export async function findDraftSubmission(
     mapper: DataMapper,
@@ -15,20 +19,22 @@ export async function findDraftSubmission(
 ): Promise<DraftSubmissionType | undefined | StoreError> {
     try {
         const getResult = await mapper.get(
-            Object.assign(new DraftSubmissionStoreType(), {
+            Object.assign(new SubmissionStoreType(), {
                 id: draftUUID,
             })
         )
 
+        const domainResult = convertToDomainSubmission(getResult)
+
         // if the result in the DB is a DRAFT, return an error
-        if (getResult.status !== 'DRAFT') {
+        if (!isDraftSubmission(domainResult)) {
             return {
                 code: 'WRONG_STATUS',
                 message: 'The requested submission is not a DraftSubmission',
             }
         }
 
-        return getResult
+        return domainResult
     } catch (err) {
         if (isMapperError(err)) {
             if (err.name === 'ItemNotFoundException') {
@@ -61,7 +67,7 @@ export async function findDraftSubmissionByStateNumber(
 ): Promise<DraftSubmissionType | undefined | StoreError> {
     try {
         const getIterator = mapper.query(
-            DraftSubmissionStoreType,
+            SubmissionStoreType,
             {
                 stateCode: stateCode,
                 stateNumber: stateNumber,
@@ -79,7 +85,18 @@ export async function findDraftSubmissionByStateNumber(
         // on the Sort and Index keys for the index, which are always unique.
         for await (const draftSubmission of getIterator) {
             // do something with `record`
-            return draftSubmission
+            const domainResult = convertToDomainSubmission(draftSubmission)
+
+            // if the result in the DB is not a DRAFT, return an error
+            if (!isDraftSubmission(domainResult)) {
+                return {
+                    code: 'WRONG_STATUS',
+                    message:
+                        'The requested submission is not a DraftSubmission',
+                }
+            }
+
+            return domainResult
         }
 
         // if we get here, that means there were none

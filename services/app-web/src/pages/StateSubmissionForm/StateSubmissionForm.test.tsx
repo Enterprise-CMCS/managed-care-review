@@ -1,7 +1,9 @@
 import { screen, waitFor } from '@testing-library/react'
+import { within } from '@testing-library/react'
 import { Route } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 
+import { Document } from '../../gen/gqlClient'
 import { RoutesRecord } from '../../constants/routes'
 import {
     mockDraft,
@@ -9,13 +11,6 @@ import {
     fetchDraftSubmissionMock,
     updateDraftSubmissionMock,
 } from '../../testHelpers/apolloHelpers'
-import {
-    SubmissionType,
-    ContractType,
-    FederalAuthority,
-    DraftSubmission,
-    Document,
-} from '../../gen/gqlClient'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
 import { StateSubmissionForm } from './StateSubmissionForm'
@@ -23,6 +18,31 @@ import { updatesFromSubmission } from './updateSubmissionTransform'
 
 describe('StateSubmissionForm', () => {
     describe('loads draft submission', () => {
+      it('loads step indicator', async () => {
+          renderWithProviders(
+            <Route
+                path={RoutesRecord.SUBMISSIONS_FORM}
+                component={StateSubmissionForm}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchDraftSubmissionMock({
+                            id: '15',
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+                routerProvider: { route: '/submissions/15/contract-details' },
+            }
+        )
+
+        const stepIndicator = await screen.findByTestId('step-indicator')
+
+        expect(stepIndicator).toHaveClass('usa-step-indicator')
+      })
+
         it('loads submission type fields for /submissions/:id/type', async () => {
             renderWithProviders(
                 <Route
@@ -78,12 +98,86 @@ describe('StateSubmissionForm', () => {
                     },
                 }
             )
+        })
 
-            await waitFor(() =>
-                expect(
-                    screen.getByRole('heading', { name: 'Contract details' })
-                ).toBeInTheDocument()
+        it('loads contract details fields for /submissions/:id/contract-details with amendments', async () => {
+            const mockAmendment = mockDraft()
+
+            mockAmendment.contractType = 'AMENDMENT'
+            mockAmendment.contractAmendmentInfo = {
+                itemsBeingAmended: [
+                    'CAPITATION_RATES',
+                    'GEO_AREA_SERVED',
+                    'OTHER',
+                ],
+                otherItemBeingAmended: 'foobar',
+                capitationRatesAmendedInfo: {
+                    reason: 'MIDYEAR',
+                    otherReason: null,
+                },
+                relatedToCovid19: true,
+                relatedToVaccination: false,
+            }
+
+            renderWithProviders(
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_FORM}
+                    component={StateSubmissionForm}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchDraftSubmissionMock({
+                                id: '12',
+                                statusCode: 200,
+                                draftSubmission: mockAmendment,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/12/contract-details',
+                    },
+                }
             )
+
+            await waitFor(() => {
+                expect(screen.getByLabelText('Capitation rates')).toBeChecked()
+
+                expect(screen.getByLabelText('Mid-year update')).toBeChecked()
+
+                expect(
+                    screen.getByLabelText('Geographic area served')
+                ).toBeChecked()
+
+                expect(
+                    screen.getByLabelText('Other item description')
+                ).toHaveValue('foobar')
+
+                // narrow our search for the "Yes" label inside the covid question
+                const covid19Question = screen.getByText(
+                    'Is this contract action related to the COVID-19 public health emergency?'
+                ).parentElement
+
+                if (covid19Question === null) {
+                    throw new Error('this element should always have a parent')
+                }
+
+                expect(
+                    within(covid19Question).getByLabelText('Yes')
+                ).toBeChecked()
+
+                // narrow our search for the "Yes" label inside the vax question
+                const vaxQuestion = screen.getByText(
+                    'Is this related to coverage and reimbursement for vaccine administration?'
+                ).parentElement
+
+                if (vaxQuestion === null) {
+                    throw new Error('this element should always have a parent')
+                }
+
+                expect(within(vaxQuestion).getByLabelText('No')).toBeChecked()
+            })
         })
 
         it('loads documents fields for /submissions/:id/documents', async () => {
@@ -106,12 +200,6 @@ describe('StateSubmissionForm', () => {
                         route: '/submissions/12/documents',
                     },
                 }
-            )
-
-            await waitFor(() =>
-                expect(
-                    screen.getByRole('heading', { name: 'Documents' })
-                ).toBeInTheDocument()
             )
         })
     })
@@ -166,10 +254,6 @@ describe('StateSubmissionForm', () => {
                 name: 'Continue',
             })
             continueButton.click()
-
-            await screen.findByRole('heading', {
-                name: 'Contract details',
-            })
         })
 
         it('works even if other sections of the form have been filled out', async () => {
@@ -179,33 +263,11 @@ describe('StateSubmissionForm', () => {
                     s3URL: 's3://bucketName/key',
                 },
             ]
-            const mockDraftSubmissionWithDocs: DraftSubmission = {
-                createdAt: new Date(),
-                updatedAt: new Date(),
-                id: 'test-abc-123',
-                stateCode: 'MN',
-                programID: 'snbc',
-                program: {
-                    id: 'snbc',
-                    name: 'SNBC',
-                },
-                name: 'MN-MSHO-0001',
-                submissionType: 'CONTRACT_ONLY' as SubmissionType.ContractOnly,
-                submissionDescription: 'A real submission',
-                documents: mockDocs,
-                contractType: ContractType.Base,
-                contractDateStart: new Date(),
-                contractDateEnd: new Date(),
-                managedCareEntities: [''],
-                federalAuthorities: [
-                    FederalAuthority.Voluntary,
-                    FederalAuthority.Benchmark,
-                ],
-            }
+            const mockSubmission = mockDraft()
+            mockSubmission.id = '15'
+            mockSubmission.documents = mockDocs
 
-            const mockUpdate = updatesFromSubmission(
-                mockDraftSubmissionWithDocs
-            )
+            const mockUpdate = updatesFromSubmission(mockSubmission)
             mockUpdate.submissionDescription =
                 'A real submission but updated something'
 
@@ -220,7 +282,7 @@ describe('StateSubmissionForm', () => {
                             fetchCurrentUserMock({ statusCode: 200 }),
                             fetchDraftSubmissionMock({
                                 id: '15',
-                                draftSubmission: mockDraftSubmissionWithDocs,
+                                draftSubmission: mockSubmission,
                                 statusCode: 200,
                             }),
                             updateDraftSubmissionMock({
@@ -252,10 +314,6 @@ describe('StateSubmissionForm', () => {
                 name: 'Continue',
             })
             continueButton.click()
-
-            await screen.findByRole('heading', {
-                name: 'Contract details',
-            })
         })
     })
 

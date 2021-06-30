@@ -11,6 +11,8 @@ type Query {
     fetchStateSubmission(
         input: FetchStateSubmissionInput!
     ): FetchStateSubmissionPayload!
+
+    indexSubmissions: IndexSubmissionsPayload!
 }
 
 type Mutation {
@@ -49,6 +51,15 @@ input FetchStateSubmissionInput {
 
 type FetchStateSubmissionPayload {
     submission: StateSubmission
+}
+
+type SubmissionEdge {
+    node: Submission!
+}
+
+type IndexSubmissionsPayload {
+    totalCount: Int
+    edges: [SubmissionEdge!]!
 }
 
 input UpdateDraftSubmissionInput {
@@ -93,6 +104,53 @@ type Document {
     s3URL: String!
 }
 
+input DocumentInput {
+    name: String!
+    s3URL: String!
+}
+
+type CapitationRatesAmendedInfo {
+    reason: CapitationRatesAmendmentReason
+    otherReason: String
+}
+
+input CapitationRatesAmendedInfoInput {
+    reason: CapitationRatesAmendmentReason
+    otherReason: String
+}
+
+type ContractAmendmentInfo {
+    itemsBeingAmended: [String!]!
+    otherItemBeingAmended: String
+    capitationRatesAmendedInfo: CapitationRatesAmendedInfo
+    relatedToCovid19: Boolean
+    relatedToVaccination: Boolean
+}
+
+input ContractAmendmentInfoInput {
+    itemsBeingAmended: [String!]!
+    otherItemBeingAmended: String
+    capitationRatesAmendedInfo: CapitationRatesAmendedInfoInput
+    relatedToCovid19: Boolean
+    relatedToVaccination: Boolean
+}
+
+enum CapitationRatesAmendmentReason {
+    ANNUAL
+    MIDYEAR
+    OTHER
+}
+
+type RateAmendmentInfo {
+    effectiveDateStart: Date
+    effectiveDateEnd: Date
+}
+
+input RateAmendmentInfoInput {
+    effectiveDateStart: Date
+    effectiveDateEnd: Date
+}
+
 enum SubmissionType {
     CONTRACT_ONLY
     CONTRACT_AND_RATES
@@ -100,6 +158,11 @@ enum SubmissionType {
 
 enum ContractType {
     BASE
+    AMENDMENT
+}
+
+enum RateType {
+    NEW
     AMENDMENT
 }
 
@@ -128,6 +191,12 @@ type DraftSubmission {
     contractDateEnd: Date
     managedCareEntities: [String!]!
     federalAuthorities: [FederalAuthority!]!
+    contractAmendmentInfo: ContractAmendmentInfo
+    rateType: RateType
+    rateDateStart: Date
+    rateDateEnd: Date
+    rateDateCertified: Date
+    rateAmendmentInfo: RateAmendmentInfo
 }
 
 type StateSubmission {
@@ -141,13 +210,22 @@ type StateSubmission {
     createdAt: Date!
     updatedAt: DateTime!
     documents: [Document!]!
+    contractAmendmentInfo: ContractAmendmentInfo
     submittedAt: Date!
+    contractType: ContractType!
+    contractDateStart: Date!
+    contractDateEnd: Date!
+    managedCareEntities: [String!]!
+    federalAuthorities: [FederalAuthority!]!
+    rateType: RateType!
+    rateDateStart: Date!
+    rateDateEnd: Date!
+    rateDateCertified: Date!
+    rateAmendmentInfo: RateAmendmentInfo
 }
 
-input DocumentInput {
-    name: String!
-    s3URL: String!
-}
+union Submission = DraftSubmission | StateSubmission
+
 input DraftSubmissionUpdates {
     programID: String!
     submissionType: SubmissionType!
@@ -158,4 +236,10 @@ input DraftSubmissionUpdates {
     contractDateEnd: Date
     managedCareEntities: [String!]!
     federalAuthorities: [FederalAuthority!]!
+    contractAmendmentInfo: ContractAmendmentInfoInput
+    rateType: RateType
+    rateDateStart: Date
+    rateDateEnd: Date
+    rateDateCertified: Date
+    rateAmendmentInfo: RateAmendmentInfoInput
 }

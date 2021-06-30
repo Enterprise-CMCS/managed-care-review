@@ -64,7 +64,7 @@
             "programs": [
                 {
                     "id": "mississippi-can",
-                    "name": "MississippiCAN"
+                    "name": "Mississippi CAN"
                 }
             ]
         },
@@ -87,11 +87,11 @@
             "name": "American Samoa",
             "programs": [
                 {
-                    "id": "mc-review-test",
+                    "id": "mc-review-test-program",
                     "name": "MC Review Test Program"
                 },
                 {
-                    "id": "mcrtpp",
+                    "id": "tpplus",
                     "name": "TPPlus"
                 }
             ]

@@ -1,4 +1,4 @@
-import { DraftSubmissionStoreType } from './dynamoTypes'
+import { SubmissionStoreType } from './dynamoTypes'
 import { getTestStore, getTestDynamoMapper } from '../testHelpers/storeHelpers'
 import { storeWithDynamoConfig } from './store'
 
@@ -13,7 +13,7 @@ describe('insertDraftSubmission', () => {
 
         const inputParams = {
             stateCode: 'FL',
-            programID: 'MCAC',
+            programID: 'smmc',
             submissionDescription: 'a new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
         }
@@ -34,7 +34,7 @@ describe('insertDraftSubmission', () => {
             const createdID = draftSub.id
             try {
                 const getResult = await mapper.get(
-                    Object.assign(new DraftSubmissionStoreType(), {
+                    Object.assign(new SubmissionStoreType(), {
                         id: createdID,
                     })
                 )
@@ -45,7 +45,7 @@ describe('insertDraftSubmission', () => {
                     'a new great submission'
                 )
                 expect(getResult.stateCode).toEqual('FL')
-                expect(getResult.programID).toEqual('MCAC')
+                expect(getResult.programID).toEqual('smmc')
                 expect(getResult.documents).toEqual([])
                 expect(getResult.contractType).toEqual(undefined)
                 expect(getResult.contractDateStart).toEqual(undefined)
@@ -74,8 +74,8 @@ describe('insertDraftSubmission', () => {
 
         const inputParams = {
             stateCode: 'FL',
-            programID: 'MCAC',
-            submissionDescription: 'a new great submission',
+            programID: 'smmc',
+            submissionDescription: 'another new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
         }
 
@@ -97,7 +97,7 @@ describe('insertDraftSubmission', () => {
             try {
                 const subsOfID = []
                 for await (const foo of mapper.query(
-                    DraftSubmissionStoreType,
+                    SubmissionStoreType,
                     {
                         stateCode: 'FL',
                         stateNumber: createdStateNumber,
@@ -129,7 +129,7 @@ describe('insertDraftSubmission', () => {
 
         const inputParams = {
             stateCode: 'FL',
-            programID: 'MCAC',
+            programID: 'smmc',
             submissionDescription: 'a new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
         }
@@ -179,24 +179,24 @@ describe('insertDraftSubmission', () => {
 
             try {
                 const one = await mapper.get(
-                    Object.assign(new DraftSubmissionStoreType(), {
+                    Object.assign(new SubmissionStoreType(), {
                         id: idOne,
                     })
                 )
                 const two = await mapper.get(
-                    Object.assign(new DraftSubmissionStoreType(), {
+                    Object.assign(new SubmissionStoreType(), {
                         id: idTwo,
                     })
                 )
 
                 const oneIN = await mapper.get(
-                    Object.assign(new DraftSubmissionStoreType(), {
+                    Object.assign(new SubmissionStoreType(), {
                         id: idINOne,
                     })
                 )
 
                 const twoIN = await mapper.get(
-                    Object.assign(new DraftSubmissionStoreType(), {
+                    Object.assign(new SubmissionStoreType(), {
                         id: idINTwo,
                     })
                 )
@@ -221,7 +221,7 @@ describe('insertDraftSubmission', () => {
 
         const inputParams = {
             stateCode: 'FL',
-            programID: 'MCAC',
+            programID: 'smmc',
             submissionDescription: 'a new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
         }
@@ -290,7 +290,7 @@ describe('insertDraftSubmission', () => {
 
         const inputParams = {
             stateCode: 'FL',
-            programID: 'MCAC',
+            programID: 'smmc',
             submissionDescription: 'a new great submission',
             submissionType: 'CONTRACT_ONLY' as const,
         }

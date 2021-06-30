@@ -11,12 +11,14 @@ generates:
       - 'typescript-resolvers'
     config: # Go ahead and prettier it
       contextType: ../handlers/apollo_gql#Context
-      useIndexSignature: true # Don't forget this or Apollo will give an inscrutible error
+      useIndexSignature: true # Don't forget this or Apollo will give an inscrutable error
       defaultMapper: Partial<{T}>
+      enumsAsTypes: true
       mappers:
         User: ../../app-web/src/common-code/domain-models#CognitoUserType
         DraftSubmission: ../../app-web/src/common-code/domain-models#DraftSubmissionType
         StateSubmission: ../../app-web/src/common-code/domain-models#StateSubmissionType
+        Submission: ../../app-web/src/common-code/domain-models#SubmissionUnionType
   ../app-web/src/gen/gqlClient.tsx:
     documents:
       - src/queries/*.graphql
@@ -25,6 +27,8 @@ generates:
       - 'typescript'
       - 'typescript-operations'
       - 'typescript-react-apollo'
+    config:
+      enumsAsTypes: true
   # ./src/common-code/graphql/generated/graphql.schema.json:
   #   plugins:
   #     - 'introspection'

@@ -3,15 +3,21 @@ import userEvent from '@testing-library/user-event'
 import { createMemoryHistory } from 'history'
 import { screen, waitFor } from '@testing-library/react'
 
-import { Dashboard } from './Dashboard'
-import { fetchCurrentUserMock } from '../../testHelpers/apolloHelpers'
+import { Dashboard, sortDraftsToTop } from './Dashboard'
+import {
+    fetchCurrentUserMock,
+    indexSubmissionsMockSuccess,
+} from '../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
 describe('Dashboard', () => {
     it('display submission heading', async () => {
         renderWithProviders(<Dashboard />, {
             apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200 }),
+                    indexSubmissionsMockSuccess(),
+                ],
             },
         })
 
@@ -28,7 +34,10 @@ describe('Dashboard', () => {
     it('displays new submission link', async () => {
         renderWithProviders(<Dashboard />, {
             apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200 }),
+                    indexSubmissionsMockSuccess(),
+                ],
             },
         })
 
@@ -61,6 +70,7 @@ describe('Dashboard', () => {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
+                    indexSubmissionsMockSuccess(),
                 ],
             },
         })
@@ -76,7 +86,10 @@ describe('Dashboard', () => {
     it('loads first tab active', async () => {
         renderWithProviders(<Dashboard />, {
             apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200 }),
+                    indexSubmissionsMockSuccess(),
+                ],
             },
         })
 
@@ -94,7 +107,10 @@ describe('Dashboard', () => {
 
         renderWithProviders(<Dashboard />, {
             apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200 }),
+                    indexSubmissionsMockSuccess(),
+                ],
             },
             routerProvider: {
                 routerProps: { history: history },
@@ -117,7 +133,10 @@ describe('Dashboard', () => {
     it('shows the success message if set', async () => {
         renderWithProviders(<Dashboard />, {
             apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200 }),
+                    indexSubmissionsMockSuccess(),
+                ],
             },
             routerProvider: {
                 route: `dashboard?justSubmitted=MN-MSHO-0001`,
@@ -128,5 +147,69 @@ describe('Dashboard', () => {
             const title = screen.getByText('MN-MSHO-0001 was sent to CMS')
             expect(title).toBeInTheDocument()
         })
+    })
+
+    it('has a stable Draft sort', async () => {
+
+        type TestCase = [{ __typename: string; id: string, name: string }[], string | undefined, string[]]
+        const tests: TestCase[] = 
+            [     [[{
+                __typename: 'DraftSubmission',
+                id: '4',
+                name: 'MSHO-0005',
+            },
+            {
+                __typename: 'StateSubmission',
+                id: '3',
+                name: 'MSHO-0004',
+            },
+            {
+                __typename: 'DraftSubmission',
+                id: '2',
+                name: 'MSHO-0003',
+            },
+            {
+                __typename: 'StateSubmission',
+                id: '1',
+                name: 'MSHO-0002',
+            },
+            {
+                __typename: 'DraftSubmission',
+                id: '0',
+                name: 'MSHO-0001',
+            },], undefined, ['4', '2', '0', '3', '1']],
+
+           [[{
+                __typename: 'DraftSubmission',
+                id: '4',
+                name: 'MSHO-0005',
+            },
+            {
+                __typename: 'StateSubmission',
+                id: '3',
+                name: 'MSHO-0004',
+            },
+            {
+                __typename: 'DraftSubmission',
+                id: '2',
+                name: 'MSHO-0003',
+            },
+            {
+                __typename: 'StateSubmission',
+                id: '1',
+                name: 'MSHO-0002',
+            },
+            {
+                __typename: 'DraftSubmission',
+                id: '0',
+                name: 'MSHO-0001',
+            },], 'MSHO-0002', ['1', '4', '2', '0', '3']],
+        ]
+
+
+        for (const test of tests) {
+            sortDraftsToTop(test[0], test[1])
+            expect(test[0].map((i) => i.id)).toStrictEqual(test[2])
+        }
     })
 })

@@ -1,7 +1,9 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import { Tag } from '@trussworks/react-uswds'
 
 import styles from './SubmissionCard.module.scss'
+import dayjs from 'dayjs'
 
 export enum SubmissionType {
     ContractOnly = 'CONTRACT_ONLY',
@@ -13,31 +15,13 @@ export enum SubmissionStatus {
     submitted = 'SUBMITTED',
 }
 
-/**
- * Format a date to format YYYY-MM-DD
- *
- * @param {string} unixTimestamp the timestamp to format
- * @returns {string} the formatted date string
- */
-export const formatDateFromUnixTimestamp = (unixTimestamp: number): string => {
-    const date = new Date(unixTimestamp)
-    const padZeros = (value: number, length: number): string => {
-        return `0000${value}`.slice(-length)
-    }
-
-    const month = date.getMonth() + 1
-    const day = date.getDate()
-    const year = date.getFullYear()
-
-    return [padZeros(month, 2), padZeros(day, 2), padZeros(year, 4)].join('/')
-}
-
 export type SubmissionCardProps = {
     name: string
     description: string
     submissionType: SubmissionType
     status: SubmissionStatus
-    date?: number
+    date?: dayjs.Dayjs
+    href: string
 }
 
 export const SubmissionCard = ({
@@ -46,18 +30,19 @@ export const SubmissionCard = ({
     submissionType,
     status,
     date,
+    href,
 }: SubmissionCardProps): React.ReactElement => {
     const submitted = status === SubmissionStatus.submitted && date
 
     return (
         <li className={styles.cardContainer}>
             <div className={styles.cardLeft}>
-                <a href="/">{name}</a>
+                <Link to={href}>{name}</Link>
                 <p>{description}</p>
             </div>
             <div className={styles.cardRight}>
                 <span className={styles.submissionType}>
-                    {submissionType === SubmissionType.ContractOnly
+                    {submissionType === 'CONTRACT_ONLY'
                         ? 'Contract only'
                         : 'Contract and rate certification'}
                 </span>
@@ -66,10 +51,8 @@ export const SubmissionCard = ({
                         submitted ? styles.tagSuccess : styles.tagWarning
                     }
                 >
-                    {submitted
-                        ? `Submitted ${formatDateFromUnixTimestamp(
-                              date as number
-                          )}`
+                    {submitted && date
+                        ? `Submitted ${date.format('MM/DD/YYYY')}`
                         : 'Draft'}
                 </Tag>
             </div>

@@ -1,53 +1,52 @@
 import React, { useEffect, useState } from 'react'
 import {
+    Alert,
     Form as UswdsForm,
     Button,
     ButtonGroup,
-    Alert,
     Link,
 } from '@trussworks/react-uswds'
-import { NavLink, useHistory } from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
 import styles from '../StateSubmissionForm.module.scss'
 import {
     DraftSubmission,
-    useUpdateDraftSubmissionMutation,
+    UpdateDraftSubmissionInput,
 } from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
-import PageHeading from '../../../components/PageHeading'
-import { isContractAndRates } from '../submissionChecks'
 import {
     FileUpload,
     S3FileData,
 } from '../../../components/FileUpload/FileUpload'
 import { FileItemT } from '../../../components/FileUpload/FileItem'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
+import { MCRouterState } from '../../../constants/routerState'
 
-/* 
+/*
     Documents should error alerts for overall errors related to invalid documents for a submission, including no files added.
-    Inline errors, specific to the individual files as they upload,  should be handled in FileUpload. 
+    Inline errors, specific to the individual files as they upload,  should be handled in FileUpload.
 */
 
 type DocumentProps = {
-    showValidations?: boolean
     draftSubmission: DraftSubmission
+    formAlert?: React.ReactElement
+    updateDraft: (
+        input: UpdateDraftSubmissionInput
+    ) => Promise<DraftSubmission | undefined>
 }
 
 export const Documents = ({
-    showValidations,
     draftSubmission,
+    updateDraft,
+    formAlert = undefined,
 }: DocumentProps): React.ReactElement => {
     const { deleteFile, uploadFile, getKey, getS3URL } = useS3()
-    const [shouldValidate, setShouldValidate] = useState(showValidations)
+    const [shouldValidate, setShouldValidate] = useState(false)
     const [hasValidFiles, setHasValidFiles] = useState(false)
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
-    const history = useHistory()
-    const [
-        updateDraftSubmission,
-        { error: updateError },
-    ] = useUpdateDraftSubmissionMutation()
+    const history = useHistory<MCRouterState>()
 
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         draftSubmission &&
@@ -88,11 +87,6 @@ export const Documents = ({
         if (!shouldValidate) setShouldValidate(true)
     }
 
-    if (updateError) {
-        showError('Apollo error')
-        console.log(updateError)
-    }
-
     const onLoadComplete = ({ files }: { files: FileItemT[] }) => {
         setFileItems(files)
     }
@@ -116,10 +110,19 @@ export const Documents = ({
         return { key: s3Key, s3URL: s3URL }
     }
 
-    const handleFormSubmit = async (e: React.FormEvent) => {
+    const handleFormSubmit = ({
+        shouldValidate,
+        redirectPath,
+    }: {
+        shouldValidate: boolean
+        redirectPath: string
+    }) => async (e: React.FormEvent | React.MouseEvent) => {
         e.preventDefault()
-        setShouldValidate(true)
-        if (!hasValidFiles) return
+
+        if (shouldValidate) {
+            setShouldValidate(true)
+            if (!hasValidFiles) return
+        }
 
         const documents = fileItems.map((fileItem) => {
             if (!fileItem.s3URL)
@@ -137,50 +140,44 @@ export const Documents = ({
         updatedDraft.documents = documents
 
         try {
-            const data = await updateDraftSubmission({
-                variables: {
-                    input: {
-                        submissionID: draftSubmission.id,
-                        draftSubmissionUpdates: updatedDraft,
-                    },
-                },
+            const updatedSubmission = await updateDraft({
+                submissionID: draftSubmission.id,
+                draftSubmissionUpdates: updatedDraft,
             })
-
-            if (data.errors) {
-                showError('gql errors have occurred')
+            if (updatedSubmission) {
+                history.push(redirectPath, {
+                    defaultProgramID: draftSubmission.programID,
+                })
             }
-
-            if (data.data?.updateDraftSubmission)
-                history.push(
-                    `/submissions/${draftSubmission.id}/review-and-submit`
-                )
         } catch (error) {
             showError(error)
         }
     }
 
     const Hint = (): JSX.Element =>
-        isContractAndRates(draftSubmission) ? (
+        draftSubmission.submissionType === 'CONTRACT_AND_RATES' ? (
             <>
-                <strong>Must include:</strong> an executed contract and a signed
+                <strong>Must include:</strong> An executed contract and a signed
                 rate certification
             </>
         ) : (
             <>
-                <strong>Must include:</strong> an executed contract
+                <strong>Must include:</strong> An executed contract
             </>
         )
 
     return (
         <>
-            <PageHeading className={styles.formHeader} headingLevel="h2">
-                Documents
-            </PageHeading>
             <UswdsForm
                 className={styles.formContainer}
                 id="DocumentsForm"
                 aria-label="Documents Form"
-                onSubmit={handleFormSubmit}
+                onSubmit={async (e) => {
+                    await handleFormSubmit({
+                        shouldValidate: true,
+                        redirectPath: `review-and-submit`,
+                    })(e)
+                }}
             >
                 <fieldset className="usa-fieldset">
                     <legend className="srOnly">Documents</legend>
@@ -193,6 +190,7 @@ export const Documents = ({
                             You must upload at least one document
                         </Alert>
                     )}
+                    {formAlert && formAlert}
                     <FileUpload
                         id="documents"
                         name="documents"
@@ -227,22 +225,42 @@ export const Documents = ({
                         onLoadComplete={onLoadComplete}
                     />
                 </fieldset>
-                <ButtonGroup type="default" className={styles.buttonGroup}>
-                    <Link
-                        asCustom={NavLink}
-                        className={`${styles.outlineButtonLink} usa-button usa-button--outline`}
-                        to="/dashboard"
-                    >
-                        Cancel
-                    </Link>
+
+                <div className={styles.pageActions}>
                     <Button
-                        type="submit"
-                        secondary={shouldValidate && !hasValidFiles}
-                        disabled={shouldValidate && !hasValidFiles}
+                        type="button"
+                        unstyled
+                        onClick={async (e) => {
+                            await handleFormSubmit({
+                                shouldValidate: false,
+                                redirectPath: '/dashboard',
+                            })(e)
+                        }}
                     >
-                        Continue
+                        Save as draft
                     </Button>
-                </ButtonGroup>
+                    <ButtonGroup type="default" className={styles.buttonGroup}>
+                        <Button
+                            type="button"
+                            className="usa-button usa-button--outline"
+                            onClick={async (e) => {
+                                await handleFormSubmit({
+                                    shouldValidate: false,
+                                    redirectPath: 'rate-details',
+                                })(e)
+                            }}
+                        >
+                            Back
+                        </Button>
+                        <Button
+                            type="submit"
+                            secondary={shouldValidate && !hasValidFiles}
+                            disabled={shouldValidate && !hasValidFiles}
+                        >
+                            Continue
+                        </Button>
+                    </ButtonGroup>
+                </div>
             </UswdsForm>
         </>
     )
