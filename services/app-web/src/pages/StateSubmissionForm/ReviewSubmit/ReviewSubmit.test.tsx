@@ -23,14 +23,6 @@ describe('ReviewSubmit', () => {
         )
 
         await waitFor(() => {
-            expect(
-                screen.getByRole('heading', { name: 'Contract details' })
-            ).toBeInTheDocument()
-
-            expect(
-                screen.getByRole('heading', { name: 'Documents' })
-            ).toBeInTheDocument()
-
             const sectionHeadings = screen.queryAllByRole('heading', {
                 level: 2,
             })

@@ -19,7 +19,6 @@ import { NavLink, useHistory } from 'react-router-dom'
 
 import styles from '../StateSubmissionForm.module.scss'
 
-import PageHeading from '../../../components/PageHeading'
 import {
     DraftSubmission,
     RateType,
@@ -222,12 +221,6 @@ export const RateDetails = ({
                     setFieldValue,
                 }) => (
                     <>
-                        <PageHeading
-                            className={styles.formHeader}
-                            headingLevel="h2"
-                        >
-                            Rate details
-                        </PageHeading>
                         <UswdsForm
                             className={styles.formContainer}
                             id="RateDetailsForm"

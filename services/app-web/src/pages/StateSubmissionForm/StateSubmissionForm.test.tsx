@@ -18,6 +18,31 @@ import { updatesFromSubmission } from './updateSubmissionTransform'
 
 describe('StateSubmissionForm', () => {
     describe('loads draft submission', () => {
+      it('loads step indicator', async () => {
+          renderWithProviders(
+            <Route
+                path={RoutesRecord.SUBMISSIONS_FORM}
+                component={StateSubmissionForm}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchDraftSubmissionMock({
+                            id: '15',
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+                routerProvider: { route: '/submissions/15/contract-details' },
+            }
+        )
+
+        const stepIndicator = await screen.findByTestId('step-indicator')
+
+        expect(stepIndicator).toHaveClass('usa-step-indicator')
+      })
+
         it('loads submission type fields for /submissions/:id/type', async () => {
             renderWithProviders(
                 <Route
@@ -73,12 +98,6 @@ describe('StateSubmissionForm', () => {
                     },
                 }
             )
-
-            await waitFor(() =>
-                expect(
-                    screen.getByRole('heading', { name: 'Contract details' })
-                ).toBeInTheDocument()
-            )
         })
 
         it('loads contract details fields for /submissions/:id/contract-details with amendments', async () => {
@@ -123,10 +142,6 @@ describe('StateSubmissionForm', () => {
             )
 
             await waitFor(() => {
-                expect(
-                    screen.getByRole('heading', { name: 'Contract details' })
-                ).toBeInTheDocument()
-
                 expect(screen.getByLabelText('Capitation rates')).toBeChecked()
 
                 expect(screen.getByLabelText('Mid-year update')).toBeChecked()
@@ -186,12 +201,6 @@ describe('StateSubmissionForm', () => {
                     },
                 }
             )
-
-            await waitFor(() =>
-                expect(
-                    screen.getByRole('heading', { name: 'Documents' })
-                ).toBeInTheDocument()
-            )
         })
     })
 
@@ -245,10 +254,6 @@ describe('StateSubmissionForm', () => {
                 name: 'Continue',
             })
             continueButton.click()
-
-            await screen.findByRole('heading', {
-                name: 'Contract details',
-            })
         })
 
         it('works even if other sections of the form have been filled out', async () => {
@@ -309,10 +314,6 @@ describe('StateSubmissionForm', () => {
                 name: 'Continue',
             })
             continueButton.click()
-
-            await screen.findByRole('heading', {
-                name: 'Contract details',
-            })
         })
     })
 

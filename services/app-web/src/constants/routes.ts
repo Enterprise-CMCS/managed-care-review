@@ -1,7 +1,7 @@
 import { matchPath } from 'react-router'
 
-/* 
-    Every application route is named here. 
+/*
+    Every application route is named here.
     These types ensure we use valid routes throughout the application.
 */
 const ROUTES = [
@@ -55,20 +55,20 @@ const PageHeadingsRecord: Record<string, string> = {
 // Static page titles used in <title>.
 // Every route must have a fallback page title. Dynamic page title logic are set in AppRoutes.tsx
 const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
-    ROOT: 'Home - Managed Care Review',
-    AUTH: 'Login - Managed Care Review',
-    HELP: 'Help - Managed Care Review',
-    DASHBOARD: 'Dashboard - Managed Care Review',
-    SUBMISSIONS: 'Submissions - Managed Care Review',
-    SUBMISSIONS_NEW: 'New submission - Managed Care Review',
-    SUBMISSIONS_FORM: 'Submissions - Managed Care Review',
-    SUBMISSIONS_TYPE: 'Submission type - Managed Care Review',
-    SUBMISSIONS_CONTRACT_DETAILS: 'Contract Details - Managed Care Review',
-    SUBMISSIONS_RATE_DETAILS: 'Rate Details - Managed Care Review',
-    SUBMISSIONS_CONTACTS: 'Contacts - Managed Care Review',
-    SUBMISSIONS_DOCUMENTS: 'Documents - Managed Care Review',
-    SUBMISSIONS_REVIEW_SUBMIT: 'Review and Submit - Managed Care Review',
-    UNKNOWN_ROUTE: 'Not Found - Managed Care Review',
+    ROOT: 'Home',
+    AUTH: 'Login',
+    HELP: 'Help',
+    DASHBOARD: 'Dashboard',
+    SUBMISSIONS: 'Submissions',
+    SUBMISSIONS_NEW: 'New submission',
+    SUBMISSIONS_FORM: 'Submissions',
+    SUBMISSIONS_TYPE: 'Submission type',
+    SUBMISSIONS_CONTRACT_DETAILS: 'Contract Details',
+    SUBMISSIONS_RATE_DETAILS: 'Rate Details',
+    SUBMISSIONS_CONTACTS: 'Contacts',
+    SUBMISSIONS_DOCUMENTS: 'Documents',
+    SUBMISSIONS_REVIEW_SUBMIT: 'Review and Submit',
+    UNKNOWN_ROUTE: 'Not Found'
 }
 
 const getRouteName = (pathname: string): RouteT | 'UNKNOWN_ROUTE' => {
@@ -89,4 +89,8 @@ export {
     ROUTES,
     STATE_SUBMISSION_FORM_ROUTES,
     getRouteName,
+}
+
+export type {
+  RouteT,
 }

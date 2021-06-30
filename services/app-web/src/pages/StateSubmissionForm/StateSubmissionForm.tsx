@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react'
 
-import { Alert, GridContainer } from '@trussworks/react-uswds'
+import {
+    Alert,
+    GridContainer,
+    StepIndicator,
+    StepIndicatorStep,
+  } from '@trussworks/react-uswds'
 import { Switch, Route, useParams, useLocation } from 'react-router-dom'
 
 import { Error404 } from '../Errors/Error404'
@@ -12,6 +17,8 @@ import {
     RoutesRecord,
     STATE_SUBMISSION_FORM_ROUTES,
     getRouteName,
+    PageTitlesRecord,
+    RouteT,
 } from '../../constants/routes'
 import { ContractDetails } from './ContractDetails/ContractDetails'
 import { RateDetails } from './RateDetails/RateDetails'
@@ -90,12 +97,61 @@ export const StateSubmissionForm = (): React.ReactElement => {
         )
     }
 
+    const FormPages = [
+        'SUBMISSIONS_CONTRACT_DETAILS',
+        'SUBMISSIONS_RATE_DETAILS',
+        'SUBMISSIONS_DOCUMENTS',
+        'SUBMISSIONS_REVIEW_SUBMIT',
+    ] as RouteT[]
+
+    const DynamicStepIndicator = () => {
+
+        const currentFormPage = getRouteName(pathname)
+
+        console.log(currentFormPage)
+
+        let formStepCompleted = true;
+        let formStepStatus: 'current' | 'complete' | undefined
+
+        if (currentFormPage === 'SUBMISSIONS_TYPE') {
+            return null
+        }
+        else {
+            return(
+                <>
+                    <StepIndicator>
+                        {FormPages.map((formPageName) => {
+                          if (formPageName === currentFormPage) {
+                            formStepCompleted = false;
+                            formStepStatus = 'current';
+                          }
+                          else if (formStepCompleted) {
+                            formStepStatus = 'complete'
+                          }
+                          else {
+                            formStepStatus = undefined;
+                          }
+
+                          return (
+                              <StepIndicatorStep
+                                  label={PageTitlesRecord[formPageName]}
+                                  status={formStepStatus}
+                                  key={PageTitlesRecord[formPageName]}
+                              />
+                          )
+                        })}
+                    </StepIndicator>
+                </>
+            )
+        }
+    }
+
     if (updateError && !showFormAlert) {
         setShowFormAlert(true)
     }
 
     if (fetchError) {
-        /*  On fetch draft error, check if submission is already submitted 
+        /*  On fetch draft error, check if submission is already submitted
             if so,  display summary page or already sent to CMS message depending on submissions/:id/route,
             if not, display generic eror
         */
@@ -115,6 +171,9 @@ export const StateSubmissionForm = (): React.ReactElement => {
     }
 
     return (
+      <>
+        <DynamicStepIndicator />
+
         <GridContainer>
             <Switch>
                 <Route path={RoutesRecord.SUBMISSIONS_TYPE}>
@@ -152,5 +211,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
                 </Route>
             </Switch>
         </GridContainer>
+      </>
     )
 }
