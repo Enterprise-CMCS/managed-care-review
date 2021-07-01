@@ -194,7 +194,7 @@ resources:
               SampledRequestsEnabled: true
               CloudWatchMetricsEnabled: true
               MetricName: WafWebAcl
-        Scope: CLOUDFRONT
+        Scope: REGIONAL
         VisibilityConfig:
           CloudWatchMetricsEnabled: true
           SampledRequestsEnabled: true
