@@ -14,6 +14,8 @@ import { S3ClientT, newAmplifyS3Client, newLocalS3Client } from './s3'
 
 const gqlSchema = loader('../../app-web/src/gen/schema.graphql')
 
+// mojo: testing broken waf things. not a real change
+
 // We are using Amplify for communicating with Cognito, for now.
 Amplify.configure({
     Auth: {
