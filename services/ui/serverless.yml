@@ -168,12 +168,9 @@ resources:
         Ref: CloudFrontDistribution
     CloudFrontEndpointUrl:
       Value:
-        Fn::If:
-          - CreateCustomCloudFrontDomain
-          - https://${env:CLOUDFRONT_DOMAIN_NAME, ""}/
-          - Fn::Join:
-              - ''
-              - - https://
-                - Fn::GetAtt:
-                    - CloudFrontDistribution
-                    - DomainName
+        Fn::Join:
+          - ''
+          - - https://
+            - Fn::GetAtt:
+                - CloudFrontDistribution
+                - DomainName
