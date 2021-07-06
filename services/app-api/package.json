@@ -38,6 +38,7 @@
         "serverless-bundle": "^3.0.0",
         "serverless-dotenv-plugin": "^3.1.0",
         "serverless-offline": "^6.8.0",
-        "ts-jest": "^26.4.4"
+        "ts-jest": "^26.4.4",
+        "serverless-associate-waf": "^1.2.1"
     }
 }
