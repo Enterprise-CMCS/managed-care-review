@@ -6,7 +6,7 @@ import {
     ButtonGroup,
     Link,
 } from '@trussworks/react-uswds'
-import { NavLink, useHistory } from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
 import styles from '../StateSubmissionForm.module.scss'
@@ -16,7 +16,6 @@ import {
 } from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
-import PageHeading from '../../../components/PageHeading'
 import {
     FileUpload,
     S3FileData,
@@ -25,13 +24,12 @@ import { FileItemT } from '../../../components/FileUpload/FileItem'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
 import { MCRouterState } from '../../../constants/routerState'
 
-/* 
+/*
     Documents should error alerts for overall errors related to invalid documents for a submission, including no files added.
-    Inline errors, specific to the individual files as they upload,  should be handled in FileUpload. 
+    Inline errors, specific to the individual files as they upload,  should be handled in FileUpload.
 */
 
 type DocumentProps = {
-    showValidations?: boolean
     draftSubmission: DraftSubmission
     formAlert?: React.ReactElement
     updateDraft: (
@@ -40,14 +38,12 @@ type DocumentProps = {
 }
 
 export const Documents = ({
-    showValidations,
     draftSubmission,
     updateDraft,
     formAlert = undefined,
 }: DocumentProps): React.ReactElement => {
     const { deleteFile, uploadFile, getKey, getS3URL } = useS3()
-    const [shouldValidate, setShouldValidate] = useState(showValidations)
-    const redirectToDashboard = React.useRef(false)
+    const [shouldValidate, setShouldValidate] = useState(false)
     const [hasValidFiles, setHasValidFiles] = useState(false)
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
     const history = useHistory<MCRouterState>()
@@ -114,10 +110,19 @@ export const Documents = ({
         return { key: s3Key, s3URL: s3URL }
     }
 
-    const handleFormSubmit = async (e: React.FormEvent | React.MouseEvent) => {
+    const handleFormSubmit = ({
+        shouldValidate,
+        redirectPath,
+    }: {
+        shouldValidate: boolean
+        redirectPath: string
+    }) => async (e: React.FormEvent | React.MouseEvent) => {
         e.preventDefault()
-        setShouldValidate(true)
-        if (!hasValidFiles) return
+
+        if (shouldValidate) {
+            setShouldValidate(true)
+            if (!hasValidFiles) return
+        }
 
         const documents = fileItems.map((fileItem) => {
             if (!fileItem.s3URL)
@@ -140,17 +145,12 @@ export const Documents = ({
                 draftSubmissionUpdates: updatedDraft,
             })
             if (updatedSubmission) {
-                if (redirectToDashboard.current) {
-                    history.push(`/dashboard`, {defaultProgramID: draftSubmission.programID})
-                } else {
-                    history.push(
-                        `/submissions/${draftSubmission.id}/review-and-submit`
-                    )
-                }
+                history.push(redirectPath, {
+                    defaultProgramID: draftSubmission.programID,
+                })
             }
         } catch (error) {
             showError(error)
-            redirectToDashboard.current = false
         }
     }
 
@@ -168,14 +168,16 @@ export const Documents = ({
 
     return (
         <>
-            <PageHeading className={styles.formHeader} headingLevel="h2">
-                Documents
-            </PageHeading>
             <UswdsForm
                 className={styles.formContainer}
                 id="DocumentsForm"
                 aria-label="Documents Form"
-                onSubmit={handleFormSubmit}
+                onSubmit={async (e) => {
+                    await handleFormSubmit({
+                        shouldValidate: true,
+                        redirectPath: `review-and-submit`,
+                    })(e)
+                }}
             >
                 <fieldset className="usa-fieldset">
                     <legend className="srOnly">Documents</legend>
@@ -228,34 +230,32 @@ export const Documents = ({
                     <Button
                         type="button"
                         unstyled
-                        disabled={shouldValidate && !hasValidFiles}
                         onClick={async (e) => {
-                            if (!hasValidFiles) {
-                                history.push(`/dashboard`, {defaultProgramID: draftSubmission.programID})
-                            } else {
-                                redirectToDashboard.current = true
-                                await handleFormSubmit(e)
-                            }
+                            await handleFormSubmit({
+                                shouldValidate: false,
+                                redirectPath: '/dashboard',
+                            })(e)
                         }}
                     >
                         Save as draft
                     </Button>
                     <ButtonGroup type="default" className={styles.buttonGroup}>
-                        <Link
-                            asCustom={NavLink}
+                        <Button
+                            type="button"
                             className="usa-button usa-button--outline"
-                            variant="unstyled"
-                            to="rate-details"
+                            onClick={async (e) => {
+                                await handleFormSubmit({
+                                    shouldValidate: false,
+                                    redirectPath: 'rate-details',
+                                })(e)
+                            }}
                         >
                             Back
-                        </Link>
+                        </Button>
                         <Button
                             type="submit"
                             secondary={shouldValidate && !hasValidFiles}
                             disabled={shouldValidate && !hasValidFiles}
-                            onClick={() =>
-                                (redirectToDashboard.current = false)
-                            }
                         >
                             Continue
                         </Button>

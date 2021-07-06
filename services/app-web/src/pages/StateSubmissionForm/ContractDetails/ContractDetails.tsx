@@ -16,7 +16,6 @@ import { Formik, FormikHelpers, FormikErrors } from 'formik'
 
 import styles from '../StateSubmissionForm.module.scss'
 
-import PageHeading from '../../../components/PageHeading'
 import { FieldRadio } from '../../../components/Form/FieldRadio/FieldRadio'
 import { FieldCheckbox } from '../../../components/Form/FieldCheckbox/FieldCheckbox'
 import { FieldTextInput } from '../../../components/Form/FieldTextInput/FieldTextInput'
@@ -293,12 +292,6 @@ export const ContractDetails = ({
                 setFieldValue,
             }) => (
                 <>
-                    <PageHeading
-                        className={styles.formHeader}
-                        headingLevel="h2"
-                    >
-                        Contract details
-                    </PageHeading>
                     <UswdsForm
                         className={styles.formContainer}
                         id="ContractDetailsForm"

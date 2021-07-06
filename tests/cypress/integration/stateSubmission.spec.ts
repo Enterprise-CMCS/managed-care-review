@@ -37,8 +37,12 @@ describe('State Submission', () => {
                 name: 'Continue',
             }).safeClick()
 
+            // Check Step Indicator loads with Contract Details heading
+            cy.findByTestId('step-indicator')
+                .findAllByText('Contract Details')
+                .should('have.length', 2)
+
             // Fill out some base contract fields
-            cy.findByText('Contract details').should('exist')
             cy.findByText(/MN-MSHO-/).should('exist')
             cy.findByLabelText('Base contract').safeClick()
             cy.findByLabelText('Start date').type('04/01/2024')
@@ -57,15 +61,21 @@ describe('State Submission', () => {
             cy.findAllByTestId('errorMessage').should('have.length', 0)
             cy.navigateForm('Continue')
 
-            // Fill out some new rate details
-            cy.findByText('Rate details').should('exist')
             cy.findByText(/MN-MSHO-/).should('exist')
+
+            // Fill out some new rate details
             cy.findByLabelText('New rate certification').safeClick()
+
+            cy.findByTestId('step-indicator')
+                .findAllByText('Rate Details')
+                .should('have.length', 2)
+
             cy.findByLabelText('Start date').type('04/01/2024')
             cy.findByLabelText('End date').type('03/30/2025')
 
             // Continue button triggers rate details validation
             cy.navigateForm('Continue')
+
             cy.findByText(
                 'You must enter the date the document was certified'
             ).should('exist')
@@ -77,11 +87,16 @@ describe('State Submission', () => {
 
             // Continue button navigates to documents page
             cy.navigateForm('Continue')
-            cy.findByRole('heading', { name: 'Documents' }).should('exist')
-            cy.findByText(/MN-MSHO-/).should('exist')
 
-            // Continue button, without filling out form, triggers validation
+            cy.findByText(/MN-MSHO-/).should('exist')
+            cy.findByTestId('file-input-input').should('exist')
+
+            cy.findByTestId('step-indicator')
+                .findAllByText('Documents')
+                .should('have.length', 2)
+
             cy.navigateForm('Continue')
+
             cy.findByText('Missing documents').should('exist')
             cy.findByText('You must upload at least one document').should(
                 'exist'
@@ -185,10 +200,6 @@ describe('State Submission', () => {
                 name: 'Continue',
             }).safeClick()
 
-            cy.findByRole('heading', { name: 'Contract details' }).should(
-                'exist'
-            )
-
             // This will break eventually, but is fixing a weird bug in CI where the heading hasn't been
             // updated with the Submission.name even though we can see 'Contract details'
             cy.findByText(/^MN-MSHO-/).should('exist')
@@ -228,8 +239,12 @@ describe('State Submission', () => {
                 name: 'Continue',
             }).safeClick()
 
+            // Check Step Indicator loads with Contract Details heading
+            cy.findByTestId('step-indicator')
+                .findAllByText('Contract Details')
+                .should('have.length', 2)
+
             // Fill out contract details
-            cy.findByText('Contract details').should('exist')
             cy.findByText(/MN-MSHO-/).should('exist')
             cy.findByLabelText('Base contract').safeClick()
             cy.findByLabelText('Start date').type('04/01/2024')
@@ -237,21 +252,21 @@ describe('State Submission', () => {
             cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
             cy.findByLabelText('1932(a) State Plan Authority').safeClick()
             cy.findAllByTestId('errorMessage').should('have.length', 0)
+
             cy.navigateForm('Continue')
 
-            //Fill out rate details
-            cy.findByText('Rate details').should('exist')
             cy.findByLabelText('New rate certification').safeClick()
             cy.findByLabelText('Start date').type('02/29/2024')
             cy.findByLabelText('End date').type('02/28/2025')
             cy.findByLabelText('Date certified').type('03/01/2024')
+
             cy.navigateForm('Continue')
 
             // Add documents
             cy.findByRole('progressbar', { name: 'Loading' }).should(
                 'not.exist'
             )
-            cy.findByRole('heading', { name: 'Documents' }).should('exist')
+
             cy.findByTestId('documents-hint').should(
                 'contain.text',
                 'Must include: An executed contract and a signed rate certification'
@@ -289,7 +304,10 @@ describe('State Submission', () => {
             cy.navigateForm('Continue')
 
             // Change contract dates
-            cy.findByText('Contract details').should('exist')
+            cy.findByTestId('step-indicator')
+                .findAllByText('Contract Details')
+                .should('have.length', 2)
+
             cy.findByText(/MN-MSHO-/).should('exist')
             cy.findByLabelText('Base contract').should('be.checked')
             cy.findByLabelText('Start date').clear()
@@ -301,7 +319,6 @@ describe('State Submission', () => {
             }).safeClick()
 
             //Change rate details
-            cy.findByText('Rate details').should('exist')
             cy.findByLabelText('New rate certification').safeClick()
             cy.findByLabelText('Start date').clear()
             cy.findByLabelText('Start date').type('04/01/2024')
@@ -312,7 +329,6 @@ describe('State Submission', () => {
             cy.navigateForm('Continue')
 
             // Check that documents loads with correct data
-            cy.findByRole('heading', { name: 'Documents' }).should('exist')
             cy.findByTestId('documents-hint').should(
                 'contain.text',
                 'Must include: An executed contract'
@@ -335,7 +351,8 @@ describe('State Submission', () => {
                 name: 'Continue',
             }).safeClick()
 
-            cy.findByText('Contract details').should('exist')
+            // Shows step indicator
+            cy.findByTestId('step-indicator').should('exist')
 
             // Get draft submission id and navigate back to submission type form to edit existing draft
             cy.location().then((fullUrl) => {
@@ -374,7 +391,10 @@ describe('State Submission', () => {
             }).safeClick()
 
             // Fill out contract details
-            cy.findByText('Contract details').should('exist')
+            cy.findByTestId('step-indicator')
+                .findAllByText('Contract Details')
+                .should('have.length', 2)
+
             cy.findByLabelText('Amendment to base contract').safeClick()
             cy.findByRole('button', {
                 name: 'Continue',
@@ -390,8 +410,10 @@ describe('State Submission', () => {
             cy.navigateForm('Continue')
 
             //Fill out rate details
-            cy.findByText('Rate details').should('exist')
             cy.findByLabelText('New rate certification').safeClick()
+            cy.findByTestId('step-indicator')
+                .findAllByText('Rate Details')
+                .should('have.length', 2)
             cy.findByLabelText('Start date').type('04/01/2024')
             cy.findByLabelText('End date').type('04/01/2026')
             cy.findByLabelText('Date certified').type('03/01/2024')
@@ -406,7 +428,6 @@ describe('State Submission', () => {
             })
 
             // Check that contract details form loads with correct data
-            cy.findByText('Contract details').should('exist')
             cy.findByLabelText('Amendment to base contract').should(
                 'be.checked'
             )
@@ -439,8 +460,12 @@ describe('State Submission', () => {
                 name: 'Continue',
             }).safeClick()
 
+            // Check Step Indicator loads with Contract Details heading
+            cy.findByTestId('step-indicator')
+                .findAllByText('Contract Details')
+                .should('have.length', 2)
+
             // Fill out contract details
-            cy.findByText('Contract details').should('exist')
             cy.findByText(/MN-MSHO-/).should('exist')
             cy.findByLabelText('Base contract').safeClick()
             cy.findByLabelText('Start date').type('04/01/2024')
@@ -451,7 +476,6 @@ describe('State Submission', () => {
             cy.navigateForm('Continue')
 
             //Fill out rate details
-            cy.findByText('Rate details').should('exist')
             cy.findByLabelText('New rate certification').safeClick()
             cy.findByLabelText('Start date').type('02/29/2024')
             cy.findByLabelText('End date').type('02/28/2025')
@@ -459,7 +483,6 @@ describe('State Submission', () => {
             cy.navigateForm('Continue')
 
             // Add documents
-            cy.findByRole('heading', { name: 'Documents' }).should('exist')
             cy.findByTestId('file-input-input').attachFile(
                 'documents/trussel-guide.pdf'
             )
@@ -469,11 +492,10 @@ describe('State Submission', () => {
                 'not.have.class',
                 'is-loading'
             )
-            // Navigate review and submit pag
+            // Navigate review and submit page
             cy.navigateForm('Continue')
-            cy.findByText('Review and submit').should('exist')
 
-            // s=Store submission name for reference later
+            // Store submission name for reference later
 
             let submissionId = ''
             cy.location().then((fullUrl) => {
@@ -484,13 +506,18 @@ describe('State Submission', () => {
 
             // Submit
             cy.navigateForm('Submit')
+            cy.findByRole('dialog')
+                .findByRole('button', { name: 'Confirm submit' })
+                .click()
 
             // Submit the Modal
-            cy.findByRole('dialog').findByRole('button', {'name': 'Confirm submit'}).click()
+            cy.findByRole('dialog')
+                .findByRole('button', { name: 'Confirm submit' })
+                .click()
 
             // User sent to dashboard
             cy.findByText('Dashboard').should('exist')
-            cy.findByRole('heading', { name: 'Submissions' }).should('exist')
+
             cy.location().then((loc) => {
                 expect(loc.search).to.match(/.*justSubmitted=*/)
                 const submissionName = loc.search.split('=').pop()
