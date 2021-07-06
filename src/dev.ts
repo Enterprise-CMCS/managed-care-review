@@ -1,11 +1,9 @@
 import yargs from 'yargs'
-import * as dotenv from 'dotenv'
 import request from 'request'
 import { spawn, spawnSync } from 'child_process'
 
 import { commandMustSucceedSync } from './localProcess.js'
 import LabeledProcessRunner from './runner.js'
-import { envFileMissingExamples } from './env.js' // What the WHAT? why doesn't this import right without the `.js`??
 import { checkStageAccess, getWebAuthVars } from './serverless.js'
 import { parseRunFlags } from './flags.js'
 import { once, requireBinary } from './deps.js'
@@ -480,19 +478,6 @@ async function run_online_tests(runner: LabeledProcessRunner) {
 }
 
 function main() {
-    const missingExamples = envFileMissingExamples()
-    if (missingExamples.length !== 0) {
-        console.log(
-            `ERROR: Your .env file is missing the keys: ${missingExamples.join(
-                ', '
-            )}\nAt least set an empty value before continuing.`
-        )
-        process.exit(2)
-    }
-
-    // load .env
-    dotenv.config()
-
     // add git hash as APP_VERSION
     const appVersion = commandMustSucceedSync('scripts/app_version.sh')
     process.env.APP_VERSION = appVersion
