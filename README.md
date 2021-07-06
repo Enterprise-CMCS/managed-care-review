@@ -4,11 +4,83 @@
 
 Managed Care Review is an application that accepts Managed Care contract and rate submissions from states and packages them for review by CMS. It is still early days.
 
+## Application Requirements
+
+-   [ ] Node.js
+-   [ ] Serverless - Get help installing it here: [Serverless Getting Started page](https://www.serverless.com/framework/docs/providers/aws/guide/installation/). Learn more about serverless from the [Serverless Stack tutorial](https://serverless-stack.com/).
+-   [ ] Yarn - In order to install dependencies, you need to [install yarn](https://classic.yarnpkg.com/en/docs/install/).
+-   [ ] AWS Account - You'll need an AWS account with appropriate IAM permissions (admin recommended) to deploy this app in Amazon.
+-   [ ] Java - Our local database runner (which is a serverless plugin called `serverless-dynamodb-local`) requires java to run. You can install it here: https://www.oracle.com/java/technologies/javase-downloads.html
+-   [ ] NVM - If you are on a Mac using nvm, you should be able to install all the dependencies as [described below](#Installing-Node-and-Dependencies).
+-   [ ] envrc - Used to set environment variables locally
+
+### Local Tooling
+
+```bash
+brew install direnv pre-commit shellcheck
+pre-commit install --install-hooks
+```
+
+We use [direnv](https://direnv.net/) to automatically set required environment variables when you enter this directory or its children. This will be used when running the application locally, or when using tools like the `aws` or `serverless` CLIs locally.
+
+If you've never setup [direnv](https://direnv.net/) before, add the following to the bottom of your `.bashrc`.
+
+```bash
+if command -v direnv >/dev/null; then
+    eval "$(direnv hook bash)"
+fi
+```
+
+If using zsh, add the following to your `.zshrc`
+
+```bash
+eval "$(direnv hook zsh)"
+```
+
+After adding, start a new shell so the hook runs.
+
+The first time you enter a directory with an `.envrc` file, you'll receive a
+warning like:
+
+```text
+    direnv: error /some/path/to/.envrc is blocked. Run `direnv allow` to approve its content
+```
+
+Run `direnv allow` to allow the environment to load.
+
+### Installing Node and Dependencies
+
+```
+# install nvm
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
+
+# load nvm and restart terminal
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# double check your work.
+nvm    # should return a list of nvm commands
+node -v     # should return v12.20.0
+node which    # should return something like /Users/YOURUSER/.nvm/versions/node/v12.20.0/bin/node
+
+# if things aren't working you may need to manually adjust your ~/.bash_profile or ~/.zshrc. See [nvm docs](https://github.com/nvm-sh/nvm#troubleshooting-on-macos) for more.
+
+# install and use the node version specified in .nvmrc
+nvm install
+nvm use
+
+# install yarn for dependency manage
+brew install yarn
+
+# run the app and storybook
+./dev local
+```
+
 ## Local Dev
 
 Run all the services locally with the command `./dev local`
 
-See the Requirements section if the command asks for any prerequisites you don't have installed.
+See the above Requirements section if the command asks for any prerequisites you don't have installed.
 
 The ./dev script is written in typescript in `./src`. The entry-point is `./src/dev.ts`, it manages running the moving pieces locally: the API, the database, the file store, and the frontend.
 
@@ -56,41 +128,6 @@ In the Dev account, in addition to deploying the main branch, we deploy a full v
 
 You can see the deploys for review apps [here](https://github.com/CMSgov/managed-care-review/actions/workflows/deploy.yml)
 
-## Application Requirements
-
--   [ ] Node.js
--   [ ] Serverless - Get help installing it here: [Serverless Getting Started page](https://www.serverless.com/framework/docs/providers/aws/guide/installation/). Learn more about serverless from the [Serverless Stack tutorial](https://serverless-stack.com/).
--   [ ] Yarn - In order to install dependencies, you need to [install yarn](https://classic.yarnpkg.com/en/docs/install/).
--   [ ] AWS Account - You'll need an AWS account with appropriate IAM permissions (admin recommended) to deploy this app in Amazon.
--   [ ] Java - Our local database runner (which is a serverless plugin called `serverless-dynamodb-local`) requires java to run. You can install it here: https://www.oracle.com/java/technologies/javase-downloads.html
--   [ ] NVM - If you are on a Mac using nvm, you should be able to install all the dependencies like so:
-
-```
-# install nvm
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
-
-# load nvm and restart terminal
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-# double check your work.
-nvm    # should return a list of nvm commands
-node -v     # should return v12.20.0
-node which    # should return something like /Users/YOURUSER/.nvm/versions/node/v12.20.0/bin/node
-
-# if things aren't working you may need to manually adjust your ~/.bash_profile or ~/.zshrc. See [nvm docs](https://github.com/nvm-sh/nvm#troubleshooting-on-macos) for more.
-
-# install and use the node version specified in .nvmrc
-nvm install
-nvm use
-
-# install yarn for dependency manage
-brew install yarn
-
-# run the app and storybook
-./dev local
-```
-
 ## Infrastructure Dependencies
 
 These dependencies can be installed if you are wanting or needing to run `aws` or serverless `sls` commands locally.
@@ -106,38 +143,6 @@ The following should install everything you need on macOS:
 brew install awscli direnv pre-commit shellcheck
 pre-commit install --install-hooks
 ```
-
-### Direnv
-
-We use [direnv](https://direnv.net/) to automatically set `AWS_PROFILE` and
-other environment variables when you enter this directory or its children. This
-will be used by tools like the `aws` CLI.
-
-If you've never setup [direnv](https://direnv.net/) before, add the following to
-the bottom of your `.bashrc`.
-
-```bash
-if command -v direnv >/dev/null; then
-    eval "$(direnv hook bash)"
-fi
-```
-
-If using zsh, add the following to your `.zshrc`
-
-```bash
-eval "$(direnv hook zsh)"
-```
-
-After adding, start a new shell so the hook runs.
-
-The first time you enter a directory with an `.envrc` file, you'll receive a
-warning like:
-
-```text
-    direnv: error /some/path/to/.envrc is blocked. Run `direnv allow` to approve its content
-```
-
-Run `direnv allow` to allow the environment to load.
 
 ### AWS Access
 
