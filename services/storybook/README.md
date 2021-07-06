@@ -1,6 +1,6 @@
 # storybook
 
-This service is a lambda that deploys our Storybook instance to AWS S3.
+This service deploys our Storybook instance to AWS S3.
 
 ## Significant dependencies
 
