@@ -478,6 +478,15 @@ async function run_online_tests(runner: LabeledProcessRunner) {
 }
 
 function main() {
+    // check to see if local direnv vars have loaded
+    if (!process.env.REACT_APP_AUTH_MODE) {
+        console.log(
+            `ERROR: Could not find REACT_APP_AUTH_MODE environment variable.\n
+            Did you set your env vars locally? Hint: try running 'direnv allow'.`
+        )
+        process.exit(2)
+    }
+
     // add git hash as APP_VERSION
     const appVersion = commandMustSucceedSync('scripts/app_version.sh')
     process.env.APP_VERSION = appVersion
