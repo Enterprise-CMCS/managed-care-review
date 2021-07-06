@@ -1,6 +1,6 @@
 # storybook
 
-This service configures a service for file uploads to AWS S3.
+This service configures file uploads to AWS S3.
 
 ## Significant dependencies
 
