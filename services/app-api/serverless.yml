@@ -6,6 +6,7 @@ package:
 plugins:
   - serverless-bundle
   - serverless-offline
+  - serverless-associate-waf
 
 custom:
   stage: ${opt:stage, self:provider.stage}
@@ -15,6 +16,10 @@ custom:
   iamPath: ${env:IAM_PATH, "/"}
   reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
   dynamoConnection: ${env:DYNAMO_CONNECTION}
+  webAclName: ${self:service}-${self:custom.stage}-webacl
+  associateWaf:
+    name: ${self:custom.webAclName}
+    version: V2
   bundle:
     packager: yarn
 
@@ -198,22 +203,7 @@ resources:
         VisibilityConfig:
           CloudWatchMetricsEnabled: true
           SampledRequestsEnabled: true
-          MetricName: ${self:custom.stage}-webacl
-    ApiGwWebAclAssociation:
-      Type: AWS::WAFv2::WebACLAssociation
-      Properties:
-        ResourceArn:
-          Fn::Join:
-            - ''
-            - - 'arn:aws:apigateway:'
-              - Ref: AWS::Region
-              - '::/restapis/'
-              - Ref: ApiGatewayRestApi
-              - '/stages/${self:custom.stage}'
-        WebACLArn:
-          Fn::GetAtt:
-            - ApiGwWebAcl
-            - Arn
+          MetricName: ${self:custom.webAclName}
   Outputs:
     ApiGatewayRestApiName:
       Value:
