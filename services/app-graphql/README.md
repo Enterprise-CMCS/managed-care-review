@@ -1,9 +1,20 @@
-# GraphQL
+# app-graphql
 
-This service holds the schema for graphql communication between app-web and app-api. It has the tool `graphql-codegen` installed which generates typescript types from the schema and queries. These types are used by both app-web and app-api to bind their communication together.
+This service holds the schema for GraphQL communication between [`app-web`](../app-web) and [`app-api`](../app-web). It is a dependency to run either of those services successfully.
 
-There is a build step in ./dev that both app-api and app-web are dependent on that calls gqlgen.
+## Significant dependencies
 
-codegen.yml configures the code generation, code is generated into a gen/ package that is gitignored. no files there should ever be edited.
+- [GraphQL Code Generator](https://www.graphql-code-generator.com/docs/getting-started/index)
+- [GraphQL](https://graphql.org/learn/queries/)
 
-`yarn gqlgen` generates separate types for the client and the server. The client code includes the queries and it even validates that those queries match the schema.
+## Useful scripts
+
+### gqlgen
+
+Generates typescript types from the GraphQL schema and queries. These types are referenced by both app-web and app-api to bind their communication together
+
+## Organization and important files
+
+- `codegen.yml` configures code generation into a `gen/package` that is gitignored. *No files in this folder should be edited.*
+- `src/queries` and `src/mutations` contain files in the [GraphQL query language](https://graphql.org/learn/queries/).
+- The repo root level [`./dev`](../../dev) script has calls to `gqlgen` in both app-api and app-web.
