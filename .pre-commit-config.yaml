@@ -4,7 +4,7 @@ repos:
       rev: v0.27.1
       hooks:
           - id: markdownlint
-            entry: markdownlint
+            entry: markdownlint docs/
 
     - repo: git://github.com/detailyang/pre-commit-shell
       rev: 1.0.5
