@@ -1,11 +1,9 @@
 import yargs from 'yargs'
-import * as dotenv from 'dotenv'
 import request from 'request'
 import { spawn, spawnSync } from 'child_process'
 
 import { commandMustSucceedSync } from './localProcess.js'
 import LabeledProcessRunner from './runner.js'
-import { envFileMissingExamples } from './env.js' // What the WHAT? why doesn't this import right without the `.js`??
 import { checkStageAccess, getWebAuthVars } from './serverless.js'
 import { parseRunFlags } from './flags.js'
 import { once, requireBinary } from './deps.js'
@@ -480,18 +478,14 @@ async function run_online_tests(runner: LabeledProcessRunner) {
 }
 
 function main() {
-    const missingExamples = envFileMissingExamples()
-    if (missingExamples.length !== 0) {
+    // check to see if local direnv vars have loaded
+    if (!process.env.REACT_APP_AUTH_MODE) {
         console.log(
-            `ERROR: Your .env file is missing the keys: ${missingExamples.join(
-                ', '
-            )}\nAt least set an empty value before continuing.`
+            `ERROR: Could not find REACT_APP_AUTH_MODE environment variable.\n
+            Did you set your env vars locally? Hint: try running 'direnv allow'.`
         )
         process.exit(2)
     }
-
-    // load .env
-    dotenv.config()
 
     // add git hash as APP_VERSION
     const appVersion = commandMustSucceedSync('scripts/app_version.sh')
