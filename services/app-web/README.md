@@ -8,14 +8,14 @@ Note: Storybook `.stories` and configuration can also be found in this service a
 
 Familiarizing yourself with these dependencies will help you navigate the codebase.
 
-- [React](https://reactjs.org/)
-- [Create React App](https://facebook.github.io/create-react-app) - build and configures our React application, see also [react-scripts](https://github.com/facebook/create-react-app/tree/master/packages/react-scripts)
-- [React Router](https://reactrouter.com/) - declarative routing
-- [Apollo Client](https://www.apollographql.com/docs/react/) - state management library for data coming in from graphql
-- [Formik](https://formik.org/docs/overview) - form development and validation
-- [Storybook](https://storybook.js.org/docs/react/get-started/introduction) -  deployed UI component playground
-- [Yup](https://github.com/jquense/yup) - schema valication - used with Formik but can also be used alone
-  
+-   [React](https://reactjs.org/)
+-   [Create React App](https://facebook.github.io/create-react-app) - build and configures our React application, see also [react-scripts](https://github.com/facebook/create-react-app/tree/master/packages/react-scripts)
+-   [React Router](https://reactrouter.com/) - declarative routing
+-   [Apollo Client](https://www.apollographql.com/docs/react/) - state management library for data coming in from graphql
+-   [Formik](https://formik.org/docs/overview) - form development and validation
+-   [Storybook](https://storybook.js.org/docs/react/get-started/introduction) - deployed UI component playground
+-   [Yup](https://github.com/jquense/yup) - schema valication - used with Formik but can also be used alone
+
 ## Useful scripts
 
 In the project directory, you can run:
@@ -43,19 +43,19 @@ Open [http://localhost:6000](http://localhost:6000) to view in the browser.
 
 ### TSX files
 
-- **`src/index.tsx`** main React application entrypoint - configures authentication, api, s3. Further configuration can be found in `src/pages/App`/
-- `src/pages` folder is used for components and logic specific to a page (content that is inside `<main>`).
-- `src/components` folder is used abstracted, reuseable components. These are components without significant routing or page-specific logic. Often these components work well in storybook.
-- Follow guidance in the engineering playbook around [implementing UI](https://github.com/trussworks/Engineering-Playbook/blob/main/web/frontend/developing-ui.md)
-- Use nested folders named after the component. Tests are stored alongside components.
-- List file imports in this order: React imports, external imports, assets/styles imports, local imports. [needs automation]
+-   **`src/index.tsx`** main React application entrypoint - configures authentication, api, s3. Further configuration can be found in `src/pages/App`/
+-   `src/pages` folder is used for components and logic specific to a page (content that is inside `<main>`).
+-   `src/components` folder is used abstracted, reuseable components. These are components without significant routing or page-specific logic. Often these components work well in storybook.
+-   Follow guidance in the engineering playbook around [implementing UI](https://github.com/trussworks/Engineering-Playbook/blob/main/web/frontend/developing-ui.md)
+-   Use nested folders named after the component. Tests are stored alongside components.
+-   List file imports in this order: React imports, external imports, assets/styles imports, local imports. [needs automation]
 
 ### SCSS files
 
-- Use modular styles. This means creating`<component>.module.scss` or `<component>.module.css` files in your component folders.
-- Learn about [Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html) and [CSS modules](https://github.com/css-modules/css-modules) as well [uswds scss classes, tokens, and mixins](https://designsystem.digital.gov/design-tokens/).
-- Syntax: Sass styles should be written in camelCase. Import styles from a component's stylesheet using something like `import styles from 'InvoicePanel.module.scss'`. Access the styles with dot notation `styles.myclassname`. If fewer than 50% of the styles are used from a stylesheet, import only the styles used (ex. `import { myclassname } from 'MyComponent.module.scss'`).
-- To reference sass variables, bring in uswds scss or project/cms scss as `@import '../../styles/uswdsImports.scss';` and `@import '../../styles/custom'` accordingly.
+-   Use modular styles. This means creating`<component>.module.scss` or `<component>.module.css` files in your component folders.
+-   Learn about [Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html) and [CSS modules](https://github.com/css-modules/css-modules) as well [uswds scss classes, tokens, and mixins](https://designsystem.digital.gov/design-tokens/).
+-   Syntax: Sass styles should be written in camelCase. Import styles from a component's stylesheet using something like `import styles from 'InvoicePanel.module.scss'`. Access the styles with dot notation `styles.myclassname`. If fewer than 50% of the styles are used from a stylesheet, import only the styles used (ex. `import { myclassname } from 'MyComponent.module.scss'`).
+-   To reference sass variables, bring in uswds scss or project/cms scss as `@import '../../styles/uswdsImports.scss';` and `@import '../../styles/custom'` accordingly.
 
 ### `/gen`
 
@@ -65,6 +65,6 @@ This folder is auto-generated by the [`app-graphql`](../app-graphql) service.
 
 ### Jest and [testing-library](https://testing-library.com/)
 
-- We write unit and react component integration tests with these tools. For more, learn about `testing-library` [queries](https://testing-library.com/docs/queries/about) and [`waitFor`](https://testing-library.com/docs/dom-testing-library/api-async) as well as [`jest-dom` matchers](https://github.com/testing-library/jest-dom). Understanding these will make it much easier to write React tests.
-- If all seems lost try -  `console.log(prettyDOM(firstItem))` - to print the test html with attributes
-- Snapshot tests, written with [`react-test-renderer`](https://github.com/facebook/react/tree/master/packages/react-test-renderer) can be useful to guard against small regressions from unintended changes to markup. However, they should be used sparingly, since we have many other great testing tools in place. To override failing snapshot tests with the new markup run `jest --update-snapshots`.
+-   We write unit and react component integration tests with these tools. For more, learn about `testing-library` [queries](https://testing-library.com/docs/queries/about) and [`waitFor`](https://testing-library.com/docs/dom-testing-library/api-async) as well as [`jest-dom` matchers](https://github.com/testing-library/jest-dom). Understanding these will make it much easier to write React tests.
+-   If all seems lost try - `console.log(prettyDOM(firstItem))` - to print the test html with attributes
+-   Snapshot tests, written with [`react-test-renderer`](https://github.com/facebook/react/tree/master/packages/react-test-renderer) can be useful to guard against small regressions from unintended changes to markup. However, they should be used sparingly, since we have many other great testing tools in place. To override failing snapshot tests with the new markup run `jest --update-snapshots`.

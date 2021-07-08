@@ -18,8 +18,7 @@ jest.mock('formik', () => {
             },
             {
                 touched: true,
-                error:
-                    'You must provide a description of this document',
+                error: 'You must provide a description of this document',
             },
             { setValue: mockSetValue },
         ],
@@ -34,7 +33,7 @@ describe('FieldTextInput component', () => {
                 label="default label"
                 name="input1"
                 showError={false}
-                type='text'
+                type="text"
             />
         )
         expect(screen.getByLabelText('default label')).toBeInTheDocument()
@@ -48,7 +47,7 @@ describe('FieldTextInput component', () => {
                 name="input1"
                 aria-required
                 showError={false}
-                type='text'
+                type="text"
             />
         )
         expect(screen.getByLabelText('default label')).toHaveAttribute(
@@ -67,11 +66,12 @@ describe('FieldTextInput component', () => {
                 hint={
                     <>
                         <span>
-                            Provide a brief description of what this document is about
+                            Provide a brief description of what this document is
+                            about
                         </span>
                     </>
                 }
-                type='text'
+                type="text"
             />
         )
         expect(
@@ -88,13 +88,11 @@ describe('FieldTextInput component', () => {
                 label="default label"
                 name="input1"
                 showError={true}
-                type='text'
+                type="text"
             />
         )
         expect(
-            screen.getByText(
-                'You must provide a description of this document'
-            )
+            screen.getByText('You must provide a description of this document')
         ).toBeInTheDocument()
         expect(screen.getByTestId('errorMessage')).toBeInTheDocument()
     })
@@ -106,14 +104,12 @@ describe('FieldTextInput component', () => {
                 label="default label"
                 name="input1"
                 showError={true}
-                type='text'
+                type="text"
                 value="default value"
             />
         )
         expect(
-            screen.getByText(
-                'You must provide a description of this document'
-            )
+            screen.getByText('You must provide a description of this document')
         ).toBeInTheDocument()
         expect(screen.getByDisplayValue('default value')).toBeInTheDocument()
     })

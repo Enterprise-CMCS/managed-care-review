@@ -23,10 +23,10 @@ the expect matchers are from jest-dom: https://github.com/testing-library/jest-d
 
 This is a complicated tool. It handles all the GraphQL operations from the client side, and caches the data locally. The docs are good but it's complicated so building stuff and reading the docs at the same time is the most helpful. There are helpful debugging tools for chrome, pretty much required when getting into the nitty gritty of caching behavior.
 
-
 ### cypress
 
 We have end to end testing (in the live browser) with [cypress](https://www.cypress.io/). This is configured in the main application `/cypress`.
+
 ### pa11y
 
 `pa11y` is a tool for accessibility testing. `pa11y-ci` is a tool to against the list of urls declared in the config file or a sitemap (if configured). To run locally, you need to global install [pa11y-ci](https://github.com/pa11y/pa11y-ci) `yarn global add pa11y-ci`. For context, By default, pa11y uses the WCAG2AA standard.

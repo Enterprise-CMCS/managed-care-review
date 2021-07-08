@@ -44,7 +44,9 @@ Hint.args = {
     'aria-required': 'true',
     hint: (
         <>
-            <span>Provide a brief description of what this document is about</span>
+            <span>
+                Provide a brief description of what this document is about
+            </span>
         </>
     ),
 }

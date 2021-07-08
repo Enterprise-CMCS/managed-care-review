@@ -89,7 +89,8 @@ const RateDetailsFormSchema = Yup.object().shape({
     }),
 })
 
-type FormError = FormikErrors<RateDetailsFormValues>[keyof FormikErrors<RateDetailsFormValues>]
+type FormError =
+    FormikErrors<RateDetailsFormValues>[keyof FormikErrors<RateDetailsFormValues>]
 
 export interface RateDetailsFormValues {
     rateType: RateType | undefined
@@ -177,7 +178,9 @@ export const RateDetails = ({
             })
             if (updatedSubmission) {
                 if (redirectToDashboard.current) {
-                    history.push(`/dashboard`, {defaultProgramID: draftSubmission.programID})
+                    history.push(`/dashboard`, {
+                        defaultProgramID: draftSubmission.programID,
+                    })
                 } else {
                     history.push(`/submissions/${draftSubmission.id}/documents`)
                 }
@@ -376,10 +379,8 @@ export const RateDetails = ({
                                                             startDateLabel="Start date"
                                                             startDatePickerProps={{
                                                                 disabled: false,
-                                                                id:
-                                                                    'effectiveDateStart',
-                                                                name:
-                                                                    'effectiveDateStart',
+                                                                id: 'effectiveDateStart',
+                                                                name: 'effectiveDateStart',
                                                                 defaultValue:
                                                                     values.effectiveDateStart,
                                                                 onChange: (
@@ -396,10 +397,8 @@ export const RateDetails = ({
                                                             endDateLabel="End date"
                                                             endDatePickerProps={{
                                                                 disabled: false,
-                                                                id:
-                                                                    'effectiveDateEnd',
-                                                                name:
-                                                                    'effectiveDateEnd',
+                                                                id: 'effectiveDateEnd',
+                                                                name: 'effectiveDateEnd',
                                                                 defaultValue:
                                                                     values.effectiveDateEnd,
                                                                 onChange: (
@@ -468,11 +467,15 @@ export const RateDetails = ({
                                     unstyled
                                     onClick={() => {
                                         if (!dirty) {
-                                            history.push(`/dashboard`, {defaultProgramID: draftSubmission.programID})
+                                            history.push(`/dashboard`, {
+                                                defaultProgramID:
+                                                    draftSubmission.programID,
+                                            })
                                         } else {
                                             setShouldValidate(true)
                                             if (!isValidating) {
-                                                redirectToDashboard.current = true
+                                                redirectToDashboard.current =
+                                                    true
                                                 handleSubmit()
                                             }
                                         }

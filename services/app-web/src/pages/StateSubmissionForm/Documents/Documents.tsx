@@ -110,49 +110,51 @@ export const Documents = ({
         return { key: s3Key, s3URL: s3URL }
     }
 
-    const handleFormSubmit = ({
-        shouldValidate,
-        redirectPath,
-    }: {
-        shouldValidate: boolean
-        redirectPath: string
-    }) => async (e: React.FormEvent | React.MouseEvent) => {
-        e.preventDefault()
+    const handleFormSubmit =
+        ({
+            shouldValidate,
+            redirectPath,
+        }: {
+            shouldValidate: boolean
+            redirectPath: string
+        }) =>
+        async (e: React.FormEvent | React.MouseEvent) => {
+            e.preventDefault()
 
-        if (shouldValidate) {
-            setShouldValidate(true)
-            if (!hasValidFiles) return
-        }
-
-        const documents = fileItems.map((fileItem) => {
-            if (!fileItem.s3URL)
-                throw Error(
-                    'The file item has no s3url, this should not happen onSubmit'
-                )
-            return {
-                name: fileItem.name,
-                s3URL: fileItem.s3URL,
+            if (shouldValidate) {
+                setShouldValidate(true)
+                if (!hasValidFiles) return
             }
-        })
 
-        const updatedDraft = updatesFromSubmission(draftSubmission)
-
-        updatedDraft.documents = documents
-
-        try {
-            const updatedSubmission = await updateDraft({
-                submissionID: draftSubmission.id,
-                draftSubmissionUpdates: updatedDraft,
+            const documents = fileItems.map((fileItem) => {
+                if (!fileItem.s3URL)
+                    throw Error(
+                        'The file item has no s3url, this should not happen onSubmit'
+                    )
+                return {
+                    name: fileItem.name,
+                    s3URL: fileItem.s3URL,
+                }
             })
-            if (updatedSubmission) {
-                history.push(redirectPath, {
-                    defaultProgramID: draftSubmission.programID,
+
+            const updatedDraft = updatesFromSubmission(draftSubmission)
+
+            updatedDraft.documents = documents
+
+            try {
+                const updatedSubmission = await updateDraft({
+                    submissionID: draftSubmission.id,
+                    draftSubmissionUpdates: updatedDraft,
                 })
+                if (updatedSubmission) {
+                    history.push(redirectPath, {
+                        defaultProgramID: draftSubmission.programID,
+                    })
+                }
+            } catch (error) {
+                showError(error)
             }
-        } catch (error) {
-            showError(error)
         }
-    }
 
     const Hint = (): JSX.Element =>
         draftSubmission.submissionType === 'CONTRACT_AND_RATES' ? (

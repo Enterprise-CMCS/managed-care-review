@@ -20,8 +20,11 @@ const renderWithProviders = (
         authProvider?: Partial<AuthProviderProps>
     }
 ) => {
-    const { routerProvider = {}, apolloProvider = {}, authProvider = {} } =
-        options || {}
+    const {
+        routerProvider = {},
+        apolloProvider = {},
+        authProvider = {},
+    } = options || {}
 
     const { route, routerProps } = routerProvider
     const testHistory = routerProps?.history

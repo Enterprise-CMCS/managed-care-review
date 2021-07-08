@@ -64,9 +64,8 @@ describe('ReviewSubmit', () => {
                 editButtons.length
             )
 
-            const submissionDescription = screen.queryByText(
-                'A real submission'
-            )
+            const submissionDescription =
+                screen.queryByText('A real submission')
             expect(submissionDescription).toBeInTheDocument()
         })
     })

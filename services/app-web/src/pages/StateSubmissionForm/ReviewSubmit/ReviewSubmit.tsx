@@ -39,9 +39,8 @@ export const ReviewSubmit = ({
     draftSubmission: DraftSubmission
 }): React.ReactElement => {
     const [refreshedDocs, setRefreshedDocs] = useState<DocumentWithLink[]>([])
-    const [displayConfirmation, setDisplayConfirmation] = useState<boolean>(
-        false
-    )
+    const [displayConfirmation, setDisplayConfirmation] =
+        useState<boolean>(false)
     const { getURL, getKey } = useS3()
 
     const [userVisibleError, setUserVisibleError] = useState<
@@ -471,7 +470,10 @@ export const ReviewSubmit = ({
                     asCustom={NavLink}
                     className="usa-button usa-button--unstyled"
                     variant="unstyled"
-                    to={{pathname: "/dashboard", state: {defaultProgramID: draftSubmission.programID}}}
+                    to={{
+                        pathname: '/dashboard',
+                        state: { defaultProgramID: draftSubmission.programID },
+                    }}
                 >
                     Save as draft
                 </Link>
@@ -514,7 +516,7 @@ export const ReviewSubmit = ({
                                 onClick={handleFormSubmit}
                             >
                                 Submit
-                            </Button>
+                            </Button>,
                         ]}
                     >
                         <p>
