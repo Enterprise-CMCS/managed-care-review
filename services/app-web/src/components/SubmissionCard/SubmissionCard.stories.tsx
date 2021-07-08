@@ -1,7 +1,10 @@
 import React from 'react'
 import { Story } from '@storybook/react'
+import { createMemoryHistory } from 'history'
+import { Router } from 'react-router-dom'
 import dayjs from 'dayjs'
 import styles from './SubmissionCard.module.scss'
+
 
 import {
     SubmissionCard,
@@ -9,6 +12,7 @@ import {
     SubmissionType,
     SubmissionStatus,
 } from './SubmissionCard'
+
 
 export default {
     title: 'Components/SubmissionCard',
@@ -27,9 +31,11 @@ export default {
 }
 
 const Template: Story<SubmissionCardProps> = (args) => (
+  <Router history={createMemoryHistory()}>
     <ul className={styles.submissionList}>
         <SubmissionCard {...args} />
     </ul>
+  </Router>
 )
 
 export const Draft = Template.bind({})

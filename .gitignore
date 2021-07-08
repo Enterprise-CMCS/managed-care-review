@@ -18,6 +18,7 @@ coverage/
 gen/
 todo.txt
 notes/
+.tool-versions
 
 /tests/cypress/screenshots
 /tests/cypress/videos
