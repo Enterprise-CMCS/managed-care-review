@@ -1,4 +1,5 @@
 {
+    "root": true,
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
         "project": "./tsconfig.json",
@@ -12,9 +13,7 @@
         "prettier",
         "prettier/@typescript-eslint"
     ],
-    "ignorePatterns": [
-        "gen/*"
-    ],
+    "ignorePatterns": ["gen/*"],
     "rules": {
         "prefer-promise-reject-errors": "error",
         "no-throw-literal": "error",
