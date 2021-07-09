@@ -254,7 +254,6 @@ export const FileUpload = ({
                 aria-describedby={`${id}-error ${id}-hint`}
                 multiple
                 onChange={handleFileInputChangeOrDrop}
-                onDrop={handleFileInputChangeOrDrop}
                 accept={inputProps.accept}
                 ref={fileInputRef}
             />
