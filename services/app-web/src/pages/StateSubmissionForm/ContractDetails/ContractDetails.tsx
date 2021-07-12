@@ -68,7 +68,7 @@ const ContractDetailsFormSchema = Yup.object().shape({
             'contractDateStart',
             (contractDateStart: Date, schema: Yup.DateSchema) => {
                 const startDate = dayjs(contractDateStart)
-                if (startDate.isValid()){
+                if (startDate.isValid()) {
                     return schema.min(
                         startDate.add(1, 'day'),
                         'The end date must come after the start date'
@@ -143,7 +143,8 @@ export interface ContractDetailsFormValues {
     relatedToVaccination: string
     federalAuthorities: FederalAuthority[]
 }
-type FormError = FormikErrors<ContractDetailsFormValues>[keyof FormikErrors<ContractDetailsFormValues>]
+type FormError =
+    FormikErrors<ContractDetailsFormValues>[keyof FormikErrors<ContractDetailsFormValues>]
 
 export const ContractDetails = ({
     draftSubmission,
@@ -235,9 +236,8 @@ export const ContractDetails = ({
 
             const amendedOther = formatForApi(values.otherItemAmended)
 
-            let capitationInfo:
-                | CapitationRatesAmendedInfo
-                | undefined = undefined
+            let capitationInfo: CapitationRatesAmendedInfo | undefined =
+                undefined
             if (values.itemsAmended.includes('CAPITATION_RATES')) {
                 capitationInfo = {
                     reason: values.capitationRates,
@@ -263,7 +263,11 @@ export const ContractDetails = ({
             })
             if (updatedSubmission) {
                 if (redirectToDashboard.current) {
-                    history.push(`/dashboard`, {defaultProgramID: draftSubmission.programID})
+                    history.push(`/dashboard`, {
+                        defaultProgramID: draftSubmission.programID,
+                    })
+                } else if (draftSubmission.submissionType === 'CONTRACT_ONLY') {
+                    history.push(`/submissions/${draftSubmission.id}/documents`)
                 } else {
                     history.push(
                         `/submissions/${draftSubmission.id}/rate-details`
@@ -384,9 +388,10 @@ export const ContractDetails = ({
                                                     name: 'contractDateStart',
                                                     defaultValue:
                                                         values.contractDateStart,
-                                                    maxDate: formattedDateMinusOneDay(
-                                                        values.contractDateEnd
-                                                    ),
+                                                    maxDate:
+                                                        formattedDateMinusOneDay(
+                                                            values.contractDateEnd
+                                                        ),
                                                     onChange: (val) =>
                                                         setFieldValue(
                                                             'contractDateStart',
@@ -403,9 +408,10 @@ export const ContractDetails = ({
                                                     name: 'contractDateEnd',
                                                     defaultValue:
                                                         values.contractDateEnd,
-                                                    minDate: formattedDatePlusOneDay(
-                                                        values.contractDateStart
-                                                    ),
+                                                    minDate:
+                                                        formattedDatePlusOneDay(
+                                                            values.contractDateStart
+                                                        ),
                                                     onChange: (val) =>
                                                         setFieldValue(
                                                             'contractDateEnd',
@@ -602,8 +608,7 @@ export const ContractDetails = ({
                                                         }
                                                         to={{
                                                             pathname: '/help',
-                                                            hash:
-                                                                '#items-being-amended-definitions',
+                                                            hash: '#items-being-amended-definitions',
                                                         }}
                                                         target="_blank"
                                                     >
@@ -972,7 +977,10 @@ export const ContractDetails = ({
                                 unstyled
                                 onClick={() => {
                                     if (!dirty) {
-                                        history.push(`/dashboard`, {defaultProgramID: draftSubmission.programID})
+                                        history.push(`/dashboard`, {
+                                            defaultProgramID:
+                                                draftSubmission.programID,
+                                        })
                                     } else {
                                         setShouldValidate(true)
                                         if (!isValidating) {
