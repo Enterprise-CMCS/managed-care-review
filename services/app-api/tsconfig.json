@@ -1,10 +1,10 @@
 {
     "include": [
-        "authn",
-        "handlers",
-        "resolvers",
-        "store",
-        "testHelpers",
+        "authn/**/*",
+        "handlers/**/*",
+        "resolvers/**/*",
+        "store/**/*",
+        "testHelpers/**/*",
         "jest.config.ts"
     ],
     "compilerOptions": {
