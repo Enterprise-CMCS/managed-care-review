@@ -20,7 +20,7 @@ export function SubmissionSuccessMessage({
                         If you have questions about your submission, please
                         contact&nbsp;
                         <a href="mailto:mc-review-team@truss.works">
-                        mc-review-team@truss.works
+                            mc-review-team@truss.works
                         </a>
                     </div>
                     <div>Here’s what comes next:</div>

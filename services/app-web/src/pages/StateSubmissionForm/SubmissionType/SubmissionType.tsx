@@ -13,7 +13,7 @@ import {
 import { Formik, FormikHelpers, FormikErrors, useFormikContext } from 'formik'
 import { NavLink, useHistory, Link as ReactRouterLink } from 'react-router-dom'
 
-import { MCRouterState } from "../../../constants/routerState"
+import { MCRouterState } from '../../../constants/routerState'
 import PageHeading from '../../../components/PageHeading'
 import {
     CreateDraftSubmissionInput,
@@ -66,7 +66,8 @@ type SubmissionTypeProps = {
     draftSubmission?: DraftSubmission
 }
 
-type FormError = FormikErrors<SubmissionTypeFormValues>[keyof FormikErrors<SubmissionTypeFormValues>]
+type FormError =
+    FormikErrors<SubmissionTypeFormValues>[keyof FormikErrors<SubmissionTypeFormValues>]
 export const SubmissionType = ({
     showValidations = false,
     draftSubmission = undefined,
@@ -120,10 +121,8 @@ export const SubmissionType = ({
             },
         }
     )
-    const [
-        updateDraftSubmission,
-        { error: updateError },
-    ] = useUpdateDraftSubmissionMutation()
+    const [updateDraftSubmission, { error: updateError }] =
+        useUpdateDraftSubmissionMutation()
 
     if ((error || updateError) && !showFormAlert) {
         setShowFormAlert(true)
@@ -136,7 +135,10 @@ export const SubmissionType = ({
     const defaultInitialProgramID = location.state?.defaultProgramID
 
     const submissionTypeInitialValues: SubmissionTypeFormValues = {
-        programID: draftSubmission?.program.id ?? defaultInitialProgramID ?? programs[0]?.id,
+        programID:
+            draftSubmission?.program.id ??
+            defaultInitialProgramID ??
+            programs[0]?.id,
         submissionDescription: draftSubmission?.submissionDescription ?? '',
         submissionType: draftSubmission?.submissionType ?? '',
     }
@@ -199,7 +201,8 @@ export const SubmissionType = ({
             const updatedDraft = updatesFromSubmission(draftSubmission)
 
             updatedDraft.programID = values.programID
-            updatedDraft.submissionType = values.submissionType as SubmissionTypeT
+            updatedDraft.submissionType =
+                values.submissionType as SubmissionTypeT
             updatedDraft.submissionDescription = values.submissionDescription
 
             try {
@@ -361,7 +364,13 @@ export const SubmissionType = ({
                                 asCustom={NavLink}
                                 variant="unstyled"
                                 className="usa-button usa-button--outline"
-                                to={{pathname: "/dashboard", state: {defaultProgramID: defaultInitialProgramID}}}
+                                to={{
+                                    pathname: '/dashboard',
+                                    state: {
+                                        defaultProgramID:
+                                            defaultInitialProgramID,
+                                    },
+                                }}
                             >
                                 Cancel
                             </Link>

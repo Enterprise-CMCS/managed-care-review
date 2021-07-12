@@ -229,9 +229,8 @@ describe('insertDraftSubmission', () => {
         try {
             const draftSubOnePromise = store.insertDraftSubmission(inputParams)
             const draftSubTwoPromise = store.insertDraftSubmission(inputParams)
-            const draftSubThreePromise = store.insertDraftSubmission(
-                inputParams
-            )
+            const draftSubThreePromise =
+                store.insertDraftSubmission(inputParams)
             const draftSubFourPromise = store.insertDraftSubmission(inputParams)
             const draftSubFivePromise = store.insertDraftSubmission(inputParams)
             const draftSubSixPromise = store.insertDraftSubmission(inputParams)

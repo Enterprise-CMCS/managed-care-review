@@ -6,7 +6,7 @@ export async function userFromLocalAuthProvider(
 ): Promise<Result<CognitoUserType, Error>> {
     try {
         const localUser = JSON.parse(authProvider)
-        return ok(localUser) 
+        return ok(localUser)
     } catch (e) {
         return err(e)
     }

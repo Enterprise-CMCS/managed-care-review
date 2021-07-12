@@ -1,5 +1,7 @@
 import React from 'react'
 import { Story } from '@storybook/react'
+
+import ProvidersDecorator from '../../../.storybook/providersDecorator'
 import dayjs from 'dayjs'
 import styles from './SubmissionCard.module.scss'
 
@@ -9,6 +11,7 @@ import {
     SubmissionType,
     SubmissionStatus,
 } from './SubmissionCard'
+
 
 export default {
     title: 'Components/SubmissionCard',
@@ -27,24 +30,15 @@ export default {
 }
 
 const Template: Story<SubmissionCardProps> = (args) => (
-    <ul className={styles.submissionList}>
-        <SubmissionCard {...args} />
-    </ul>
+  <ul className={styles.submissionList}>
+      <SubmissionCard {...args} />
+  </ul>
 )
 
-export const Draft = Template.bind({})
+export const Example = Template.bind({})
+Example.decorators = [(Story) => ProvidersDecorator(Story, {})]
 
-Draft.args = {
-    name: 'VA-CCCPlus-0001',
-    description:
-        'Rates are being adjusted to reflect revised capitation rates based on more recent data as well as benefit changes approved by the General Assembly.',
-    submissionType: SubmissionType.ContractOnly,
-    status: SubmissionStatus.draft,
-}
-
-export const Submitted = Template.bind({})
-
-Submitted.args = {
+Example.args = {
     name: 'VA-CCCPlus-0001',
     description:
         'Rates are being adjusted to reflect revised capitation rates based on more recent data as well as benefit changes approved by the General Assembly.',

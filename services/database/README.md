@@ -1,6 +1,6 @@
 # database
 
-This service deploys our database to AWS DynamoDB. Anytime a new database table is added, it also needs to be set up here.  
+This service deploys our database to AWS DynamoDB. Anytime a new database table is added, it also needs to be set up here.
 
 ## Significant dependencies
 

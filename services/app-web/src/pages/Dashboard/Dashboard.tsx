@@ -14,7 +14,7 @@ import {
     SubmissionType,
 } from '../../components/SubmissionCard/SubmissionCard'
 import { useAuth } from '../../contexts/AuthContext'
-import { MCRouterState } from "../../constants/routerState"
+import { MCRouterState } from '../../constants/routerState'
 import { Program, useIndexSubmissionsQuery } from '../../gen/gqlClient'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
 import { SubmissionType as DomainSubmissionType } from '../../../../app-web/src/common-code/domain-models'
@@ -38,7 +38,10 @@ const submissionStatusMap: {
 // we want all the DraftSubmissions to rise above the StateSubmissions
 // but otherwise remain in numeric order  so we can compare their
 // typenames to sort them.
-export function sortDraftsToTop(submissions: { __typename: string, name: string }[], justSubmitted: string | undefined): void {
+export function sortDraftsToTop(
+    submissions: { __typename: string; name: string }[],
+    justSubmitted: string | undefined
+): void {
     submissions.sort((a, b) => {
         // if this one was justSubmitted, float it to the top.
         if (a.name === justSubmitted) {
@@ -105,10 +108,11 @@ export const Dashboard = (): React.ReactElement => {
             }
         }
     } else if (location.state && location.state.defaultProgramID) {
-        const defaultProgram = loggedInUser.state.programs.find((program) => program.id === location.state?.defaultProgramID)
+        const defaultProgram = loggedInUser.state.programs.find(
+            (program) => program.id === location.state?.defaultProgramID
+        )
         defaultTab = defaultProgram?.name
     }
-
 
     /* 
         Note: Program reference is passed within the submission name e.g. AS-TEST-PROGRAM-001
@@ -144,7 +148,10 @@ export const Dashboard = (): React.ReactElement => {
                             asCustom={NavLink}
                             className="usa-button"
                             variant="unstyled"
-                            to={{pathname: "/submissions/new", state: {defaultProgramID: program.id}}}
+                            to={{
+                                pathname: '/submissions/new',
+                                state: { defaultProgramID: program.id },
+                            }}
                         >
                             Start new submission
                         </Link>
