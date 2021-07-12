@@ -319,7 +319,7 @@ const submitDraftSubmissionMockSuccess = ({
     id,
     stateSubmission,
 }: submitDraftSubmissionMockSuccessProps): MockedResponse<
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Record<string, any>
 > => {
     const submission = stateSubmission ?? mockDraftSubmission
@@ -346,7 +346,7 @@ const submitDraftSubmissionMockError = ({
     id,
 }: {
     id: string
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }): MockedResponse<Record<string, any>> => {
     return {
         request: {

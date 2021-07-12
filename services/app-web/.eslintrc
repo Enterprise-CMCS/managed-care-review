@@ -17,9 +17,7 @@
         "react-app",
         "react-app/jest"
     ],
-    "ignorePatterns": [
-        "src/gen/*"
-    ],
+    "ignorePatterns": ["src/gen/*"],
     "rules": {
         "prefer-promise-reject-errors": "error",
         "no-throw-literal": "error",
@@ -29,12 +27,10 @@
     },
     "overrides": [
         {
-            "files": [
-              "src/**/*.stories.tsx"
-            ],
+            "files": ["src/**/*.stories.tsx"],
             "rules": {
-              "import/no-anonymous-default-export": "off"
+                "import/no-anonymous-default-export": "off"
             }
-          }
+        }
     ]
 }

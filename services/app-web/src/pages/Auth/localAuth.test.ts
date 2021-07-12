@@ -49,7 +49,7 @@ describe('localLogin', () => {
         // set a non-user in local storage
         store.setItem('localUser', '{"foo": "bar"}')
 
-       await expect(getLoggedInUser()).rejects.toEqual(
+        await expect(getLoggedInUser()).rejects.toEqual(
             new Error('garbled user stored in localStorage')
         )
     })

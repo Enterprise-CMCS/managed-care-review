@@ -150,62 +150,76 @@ describe('Dashboard', () => {
     })
 
     it('has a stable Draft sort', async () => {
-
-        type TestCase = [{ __typename: string; id: string, name: string }[], string | undefined, string[]]
-        const tests: TestCase[] = 
-            [     [[{
-                __typename: 'DraftSubmission',
-                id: '4',
-                name: 'MSHO-0005',
-            },
-            {
-                __typename: 'StateSubmission',
-                id: '3',
-                name: 'MSHO-0004',
-            },
-            {
-                __typename: 'DraftSubmission',
-                id: '2',
-                name: 'MSHO-0003',
-            },
-            {
-                __typename: 'StateSubmission',
-                id: '1',
-                name: 'MSHO-0002',
-            },
-            {
-                __typename: 'DraftSubmission',
-                id: '0',
-                name: 'MSHO-0001',
-            },], undefined, ['4', '2', '0', '3', '1']],
-
-           [[{
-                __typename: 'DraftSubmission',
-                id: '4',
-                name: 'MSHO-0005',
-            },
-            {
-                __typename: 'StateSubmission',
-                id: '3',
-                name: 'MSHO-0004',
-            },
-            {
-                __typename: 'DraftSubmission',
-                id: '2',
-                name: 'MSHO-0003',
-            },
-            {
-                __typename: 'StateSubmission',
-                id: '1',
-                name: 'MSHO-0002',
-            },
-            {
-                __typename: 'DraftSubmission',
-                id: '0',
-                name: 'MSHO-0001',
-            },], 'MSHO-0002', ['1', '4', '2', '0', '3']],
+        type TestCase = [
+            { __typename: string; id: string; name: string }[],
+            string | undefined,
+            string[]
         ]
+        const tests: TestCase[] = [
+            [
+                [
+                    {
+                        __typename: 'DraftSubmission',
+                        id: '4',
+                        name: 'MSHO-0005',
+                    },
+                    {
+                        __typename: 'StateSubmission',
+                        id: '3',
+                        name: 'MSHO-0004',
+                    },
+                    {
+                        __typename: 'DraftSubmission',
+                        id: '2',
+                        name: 'MSHO-0003',
+                    },
+                    {
+                        __typename: 'StateSubmission',
+                        id: '1',
+                        name: 'MSHO-0002',
+                    },
+                    {
+                        __typename: 'DraftSubmission',
+                        id: '0',
+                        name: 'MSHO-0001',
+                    },
+                ],
+                undefined,
+                ['4', '2', '0', '3', '1'],
+            ],
 
+            [
+                [
+                    {
+                        __typename: 'DraftSubmission',
+                        id: '4',
+                        name: 'MSHO-0005',
+                    },
+                    {
+                        __typename: 'StateSubmission',
+                        id: '3',
+                        name: 'MSHO-0004',
+                    },
+                    {
+                        __typename: 'DraftSubmission',
+                        id: '2',
+                        name: 'MSHO-0003',
+                    },
+                    {
+                        __typename: 'StateSubmission',
+                        id: '1',
+                        name: 'MSHO-0002',
+                    },
+                    {
+                        __typename: 'DraftSubmission',
+                        id: '0',
+                        name: 'MSHO-0001',
+                    },
+                ],
+                'MSHO-0002',
+                ['1', '4', '2', '0', '3'],
+            ],
+        ]
 
         for (const test of tests) {
             sortDraftsToTop(test[0], test[1])

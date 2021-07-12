@@ -26,9 +26,9 @@ export function parseAuthProvider(
 }
 
 // pulls the data from the cognito user into a dictionary
-function userAttrDict(
-    cognitoUser: CognitoIdentityServiceProvider.UserType
-): { [key: string]: string } {
+function userAttrDict(cognitoUser: CognitoIdentityServiceProvider.UserType): {
+    [key: string]: string
+} {
     const attributes: { [key: string]: string } = {}
 
     if (cognitoUser.Attributes) {
@@ -61,7 +61,8 @@ async function fetchUserFromCognito(
     const endRequest = performance.now()
     console.log('listUsers takes ms:', endRequest - startRequest)
 
-    const userResp: CognitoIdentityServiceProvider.ListUsersResponse = listUsersResponse
+    const userResp: CognitoIdentityServiceProvider.ListUsersResponse =
+        listUsersResponse
 
     if (userResp.Users === undefined || userResp.Users.length !== 1) {
         // logerror

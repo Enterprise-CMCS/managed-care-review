@@ -50,7 +50,6 @@
                 &.email::before {
                     content: url(../../assets/images/email-icon.svg);
                 }
-
             }
             ul > li span {
                 display: block;
@@ -63,9 +62,8 @@
         .detailsList {
             > li {
                 padding: units(1);
-                font-size: size('body', 'md')
+                font-size: size('body', 'md');
             }
         }
     }
-
 }

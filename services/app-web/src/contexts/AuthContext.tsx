@@ -35,9 +35,8 @@ function AuthProvider({
     const [loggedInUser, setLoggedInUser] = React.useState<
         UserType | undefined
     >(undefined)
-    const [loginStatus, setLoginStatus] = React.useState<LoginStatusType>(
-        'LOGGED_OUT'
-    )
+    const [loginStatus, setLoginStatus] =
+        React.useState<LoginStatusType>('LOGGED_OUT')
 
     const { loading, data, error, refetch } = useFetchCurrentUserQuery({
         notifyOnNetworkStatusChange: true,
