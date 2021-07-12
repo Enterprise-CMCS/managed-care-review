@@ -1,4 +1,12 @@
 {
+    "include": [
+        "authn",
+        "handlers",
+        "resolvers",
+        "store",
+        "testHelpers",
+        "jest.config.ts"
+    ],
     "compilerOptions": {
         "baseUrl": "/",
         "experimentalDecorators": true,
