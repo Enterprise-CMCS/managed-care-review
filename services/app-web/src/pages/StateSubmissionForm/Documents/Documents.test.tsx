@@ -1,5 +1,5 @@
 import React from 'react'
-import { screen, waitFor, fireEvent } from '@testing-library/react'
+import { screen, waitFor, fireEvent, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import {
@@ -13,7 +13,6 @@ import {
 import {
     fetchCurrentUserMock,
     mockDraft,
-    updateDraftSubmissionMock,
 } from '../../../testHelpers/apolloHelpers'
 import { Documents } from './Documents'
 
@@ -37,6 +36,14 @@ describe('Documents', () => {
             expect(screen.getByTestId('file-input')).toHaveClass(
                 'usa-file-input'
             )
+            expect(
+                screen.getByRole('button', { name: 'Continue' })
+            ).not.toBeDisabled()
+            expect(
+                within(
+                    screen.getByTestId('file-input-preview-list')
+                ).queryAllByRole('listitem').length
+            ).toBe(0)
         })
     })
 
@@ -50,22 +57,7 @@ describe('Documents', () => {
             />,
             {
                 apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        updateDraftSubmissionMock({
-                            id: mockDraft().id,
-                            updates: {
-                                ...mockDraft(),
-                                documents: [
-                                    {
-                                        name: 'test.txt',
-                                        s3URL: 'fakeS3URL',
-                                    },
-                                ],
-                            },
-                            statusCode: 200,
-                        }),
-                    ],
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
             }
         )
@@ -73,9 +65,8 @@ describe('Documents', () => {
         const input = screen.getByLabelText('Upload documents')
         expect(input).toBeInTheDocument()
         userEvent.upload(input, [TEST_DOC_FILE])
-        await waitFor(() =>
-            expect(screen.getByText(TEST_DOC_FILE.name)).toBeInTheDocument()
-        )
+
+        expect(await screen.findByText(TEST_DOC_FILE.name)).toBeInTheDocument()
     })
 
     it('accepts multiple pdf, word, excel documents', async () => {
@@ -87,22 +78,7 @@ describe('Documents', () => {
             />,
             {
                 apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        updateDraftSubmissionMock({
-                            id: mockDraft().id,
-                            updates: {
-                                ...mockDraft(),
-                                documents: [
-                                    {
-                                        name: 'test.txt',
-                                        s3URL: 'fakeS3URL',
-                                    },
-                                ],
-                            },
-                            statusCode: 200,
-                        }),
-                    ],
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
             }
         )
@@ -119,6 +95,39 @@ describe('Documents', () => {
             expect(screen.getByText(TEST_PDF_FILE.name)).toBeInTheDocument()
             expect(screen.getByText(TEST_XLS_FILE.name)).toBeInTheDocument()
         })
+    })
+
+    it('accepts documents added with different methods', async () => {
+        const mockUpdateDraftFn = jest.fn()
+
+        renderWithProviders(
+            <Documents
+                draftSubmission={mockDraft()}
+                updateDraft={mockUpdateDraftFn}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        const input = screen.getByLabelText('Upload documents')
+        const targetEl = screen.getByTestId('file-input-droptarget')
+
+        // simulate to drag and drop
+        fireEvent.dragOver(targetEl)
+        fireEvent.drop(targetEl, {
+            dataTransfer: {
+                files: [TEST_DOC_FILE],
+            },
+        })
+
+        //simulate to file select
+        userEvent.upload(input, [TEST_PDF_FILE])
+
+        expect(await screen.findByText(TEST_PDF_FILE.name)).toBeInTheDocument()
+        expect(await screen.findByText(TEST_DOC_FILE.name)).toBeInTheDocument()
     })
 
     it('does not accept image files', async () => {
@@ -201,5 +210,291 @@ describe('Documents', () => {
         expect(screen.queryByTestId('documents-hint')).toHaveTextContent(
             'Must include: An executed contract and a signed rate certification'
         )
+    })
+
+    it('error is shown in input when invalid file types dropped', async () => {
+        const mockUpdateDraftFn = jest.fn()
+        renderWithProviders(
+            <Documents
+                draftSubmission={{
+                    ...mockDraft(),
+                    submissionType: 'CONTRACT_AND_RATES',
+                }}
+                updateDraft={mockUpdateDraftFn}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        const inputEl = screen.getByTestId('file-input-input')
+        expect(inputEl).not.toHaveAttribute('accept', 'image/*')
+
+        const targetEl = screen.getByTestId('file-input-droptarget')
+        fireEvent.drop(targetEl, {
+            dataTransfer: {
+                files: [TEST_PNG_FILE],
+            },
+        })
+        await waitFor(() => {
+            expect(screen.getByTestId('file-input-error')).toHaveTextContent(
+                'This is not a valid file type'
+            )
+
+            expect(screen.getByTestId('file-input-droptarget')).toHaveClass(
+                'has-invalid-file'
+            )
+        })
+    })
+
+    it('error is shown in file items list when duplicate files added', async () => {
+        const mockUpdateDraftFn = jest.fn()
+        renderWithProviders(
+            <Documents
+                draftSubmission={{
+                    ...mockDraft(),
+                    submissionType: 'CONTRACT_AND_RATES',
+                }}
+                updateDraft={mockUpdateDraftFn}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+        const input = screen.getByLabelText('Upload documents')
+        userEvent.upload(input, [TEST_DOC_FILE, TEST_DOC_FILE])
+        await waitFor(() => {
+            expect(screen.queryAllByText('Duplicate File').length).toBe(1)
+            expect(screen.queryAllByText(TEST_DOC_FILE.name).length).toBe(2)
+        })
+    })
+
+    it('errors for duplicate files are added one at a time', async () => {
+        const mockUpdateDraftFn = jest.fn()
+        renderWithProviders(
+            <Documents
+                draftSubmission={{
+                    ...mockDraft(),
+                    submissionType: 'CONTRACT_AND_RATES',
+                }}
+                updateDraft={mockUpdateDraftFn}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+        const input = screen.getByLabelText('Upload documents')
+        userEvent.upload(input, [TEST_DOC_FILE])
+
+        await waitFor(() => {
+            expect(screen.queryAllByText('Duplicate File')).toBeNull()
+            expect(
+                within(
+                    screen.getByTestId('file-input-preview-list')
+                ).queryAllByRole('listitem').length
+            ).toBe(1)
+        })
+
+        userEvent.upload(input, [TEST_DOC_FILE])
+
+        await waitFor(() => {
+            expect(screen.queryAllByText('Duplicate File').length).toBe(1)
+            expect(
+                within(
+                    screen.getByTestId('file-input-preview-list')
+                ).queryAllByRole('listitem').length
+            ).toBe(2)
+        })
+
+        userEvent.upload(input, [TEST_DOC_FILE])
+
+        await waitFor(() => {
+            expect(screen.queryAllByText('Duplicate File').length).toBe(2)
+            expect(screen.queryAllByText(TEST_DOC_FILE.name).length).toBe(3)
+            expect(
+                within(
+                    screen.getByTestId('file-input-preview-list')
+                ).queryAllByRole('listitem').length
+            ).toBe(3)
+        })
+    })
+
+    describe('continue button', () => {
+        it('enabled when valid files are present', async () => {
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <Documents
+                    draftSubmission={{
+                        ...mockDraft(),
+                        submissionType: 'CONTRACT_AND_RATES',
+                    }}
+                    updateDraft={mockUpdateDraftFn}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+            const input = screen.getByLabelText('Upload documents')
+
+            userEvent.upload(input, [TEST_DOC_FILE])
+
+            await waitFor(() => {
+                expect(continueButton).not.toBeDisabled()
+            })
+        })
+
+        it('enabled when invalid files have been dropped but valid files are present', async () => {
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <Documents
+                    draftSubmission={{
+                        ...mockDraft(),
+                        submissionType: 'CONTRACT_AND_RATES',
+                    }}
+                    updateDraft={mockUpdateDraftFn}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+            const input = screen.getByLabelText('Upload documents')
+            const targetEl = screen.getByTestId('file-input-droptarget')
+
+            userEvent.upload(input, [TEST_DOC_FILE])
+
+            fireEvent.drop(targetEl, {
+                dataTransfer: {
+                    files: [TEST_PNG_FILE],
+                },
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.getByText('This is not a valid file type.')
+                ).toBeInTheDocument()
+                expect(continueButton).not.toBeDisabled()
+            })
+        })
+
+        it('disabled with alert after first attempt to continue with zero files', async () => {
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <Documents
+                    draftSubmission={{
+                        ...mockDraft(),
+                        submissionType: 'CONTRACT_AND_RATES',
+                    }}
+                    updateDraft={mockUpdateDraftFn}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+            expect(continueButton).not.toBeDisabled()
+
+            continueButton.click()
+
+            await waitFor(() => {
+                expect(
+                    screen.getByText('You must upload at least one document')
+                ).toBeInTheDocument()
+
+                expect(continueButton).toBeDisabled()
+            })
+        })
+
+        it('disabled with alert after first attempt to continue with invalid duplicate files', async () => {
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <Documents
+                    draftSubmission={{
+                        ...mockDraft(),
+                        submissionType: 'CONTRACT_AND_RATES',
+                    }}
+                    updateDraft={mockUpdateDraftFn}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+            const input = screen.getByLabelText('Upload documents')
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+
+            userEvent.upload(input, [TEST_DOC_FILE, TEST_DOC_FILE])
+
+            expect(continueButton).not.toBeDisabled()
+
+            continueButton.click()
+
+            await waitFor(() => {
+                expect(
+                    screen.getByText('You must address duplicate name errors')
+                ).toBeInTheDocument()
+
+                expect(continueButton).toBeDisabled()
+            })
+        })
+
+        it('disabled immediately when invalid files have been dropped and no other files present', async () => {
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <Documents
+                    draftSubmission={{
+                        ...mockDraft(),
+                        submissionType: 'CONTRACT_AND_RATES',
+                    }}
+                    updateDraft={mockUpdateDraftFn}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+            const targetEl = screen.getByTestId('file-input-droptarget')
+            fireEvent.drop(targetEl, {
+                dataTransfer: {
+                    files: [TEST_PNG_FILE],
+                },
+            })
+            await waitFor(() => {
+                expect(
+                    screen.getByText('This is not a valid file type.')
+                ).toBeInTheDocument()
+                expect(continueButton).toBeDisabled()
+            })
+        })
     })
 })

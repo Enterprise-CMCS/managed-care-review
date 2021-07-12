@@ -25,6 +25,7 @@ export type FileUploadProps = {
     uploadFile: (file: File) => Promise<S3FileData>
     deleteFile: (key: string) => Promise<void>
     onLoadComplete: ({ files }: { files: FileItemT[] }) => void
+    onInvalidDrop: () => void
 } & JSX.IntrinsicElements['input']
 
 /*  FileUpload handles async file upload to S3 and displays inline errors per file. 
@@ -44,6 +45,7 @@ export const FileUpload = ({
     uploadFile,
     deleteFile,
     onLoadComplete,
+    onInvalidDrop,
     ...inputProps
 }: FileUploadProps): React.ReactElement => {
     const [formError, setFormError] = useState<string | null>(null)
@@ -206,26 +208,25 @@ export const FileUpload = ({
 
         asyncS3Upload(item.file)
     }
-
-    const handleFileInputChangeOrDrop = (
-        e: React.DragEvent | React.ChangeEvent
-    ): void => {
-        // return early to ensure we display errors when invalid files are dropped
-        const files =
-            (fileInputRef.current?.input?.files &&
-                Array.from(fileInputRef.current?.input?.files)) ||
-            []
-        // return early to ensure we display errors when only invalid files are dropped
-        if (!files || files.length === 0) {
+    const handleInvalidDrop = (e: React.DragEvent) => {
+        // return early to ensure display of react-uswds FileInput native errors
+        const files = Array.from(fileInputRef.current?.input?.files || [])
+        if (files.length === 0) {
+            onInvalidDrop()
             return
         }
+    }
 
-        const items = generateFileItems(files)
-        // start upload and display pending files
+    const handleFileInputChangeOrValidDrop = (
+        e: React.DragEvent | React.ChangeEvent
+    ): void => {
+        const files = Array.from(fileInputRef.current?.input?.files || []) // Web API File objects
+        const items = generateFileItems(files) // UI data objects -  used to track file upload state in a list below the input
+
         setFileItems((array) => [...array, ...items])
         asyncS3Upload(files)
 
-        // reset input
+        // reset input immediately to prepare for next interaction
         fileInputRef.current?.clearFiles()
         setFormError(null)
     }
@@ -253,7 +254,8 @@ export const FileUpload = ({
                 className={styles.fileInput}
                 aria-describedby={`${id}-error ${id}-hint`}
                 multiple
-                onChange={handleFileInputChangeOrDrop}
+                onChange={handleFileInputChangeOrValidDrop}
+                onDrop={handleInvalidDrop}
                 accept={inputProps.accept}
                 ref={fileInputRef}
             />

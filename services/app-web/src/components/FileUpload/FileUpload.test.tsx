@@ -149,59 +149,68 @@ describe('FileUpload component', () => {
         expect(screen.queryByRole('listitem')).toBeNull()
     })
 
-    it('does not accept a drop file that has an invalid type', async () => {
-        const { getByTestId, queryByTestId } = render(
-            <FileUpload {...testProps} accept=".pdf" />
-        )
+    it.todo('displays a duplicate file error when expected')
+    // expect(screen.getByText('Duplicate file')).toBeInTheDocument()
 
-        const inputEl = getByTestId('file-input-input')
-        expect(inputEl).toHaveAttribute('accept', '.pdf')
+    describe('drag and drop behavior', () => {
+        it.todo('accepts an drop of a valid type')
 
-        const targetEl = getByTestId('file-input-droptarget')
-        fireEvent.drop(targetEl, {
-            dataTransfer: {
-                files: [TEST_PNG_FILE],
-            },
+        it('does not accept a drop file that has an invalid type', async () => {
+            const { getByTestId, queryByTestId } = render(
+                <FileUpload {...testProps} accept=".pdf" />
+            )
+
+            const inputEl = getByTestId('file-input-input')
+            expect(inputEl).toHaveAttribute('accept', '.pdf')
+
+            const targetEl = getByTestId('file-input-droptarget')
+            fireEvent.drop(targetEl, {
+                dataTransfer: {
+                    files: [TEST_PNG_FILE],
+                },
+            })
+
+            expect(getByTestId('file-input-error')).toHaveTextContent(
+                'This is not a valid file type'
+            )
+            expect(getByTestId('file-input-error')).toHaveClass(
+                'usa-file-input__accepted-files-message'
+            )
+            expect(getByTestId('file-input-droptarget')).toHaveClass(
+                'has-invalid-file'
+            )
+
+            expect(queryByTestId('file-input-preview')).not.toBeInTheDocument()
         })
 
-        expect(getByTestId('file-input-error')).toHaveTextContent(
-            'This is not a valid file type'
-        )
-        expect(getByTestId('file-input-error')).toHaveClass(
-            'usa-file-input__accepted-files-message'
-        )
-        expect(getByTestId('file-input-droptarget')).toHaveClass(
-            'has-invalid-file'
-        )
+        it('does not accept a drop that has valid and invalid files together', () => {
+            const { getByTestId, queryByTestId } = render(
+                <FileUpload {...testProps} accept=".pdf" />
+            )
 
-        expect(queryByTestId('file-input-preview')).not.toBeInTheDocument()
-    })
+            const inputEl = getByTestId('file-input-input')
+            expect(inputEl).toHaveAttribute('accept', '.pdf')
 
-    it('does not accept a drop that has valid and invalid files together', () => {
-        const { getByTestId, queryByTestId } = render(
-            <FileUpload {...testProps} accept=".pdf" />
-        )
+            const targetEl = getByTestId('file-input-droptarget')
+            fireEvent.drop(targetEl, {
+                dataTransfer: {
+                    files: [TEST_PDF_FILE, TEST_PNG_FILE],
+                },
+            })
 
-        const inputEl = getByTestId('file-input-input')
-        expect(inputEl).toHaveAttribute('accept', '.pdf')
+            expect(getByTestId('file-input-error')).toHaveTextContent(
+                'This is not a valid file type'
+            )
+            expect(getByTestId('file-input-error')).toHaveClass(
+                'usa-file-input__accepted-files-message'
+            )
+            expect(getByTestId('file-input-droptarget')).toHaveClass(
+                'has-invalid-file'
+            )
 
-        const targetEl = getByTestId('file-input-droptarget')
-        fireEvent.drop(targetEl, {
-            dataTransfer: {
-                files: [TEST_PDF_FILE, TEST_PNG_FILE],
-            },
+            expect(queryByTestId('file-input-preview')).not.toBeInTheDocument()
         })
 
-        expect(getByTestId('file-input-error')).toHaveTextContent(
-            'This is not a valid file type'
-        )
-        expect(getByTestId('file-input-error')).toHaveClass(
-            'usa-file-input__accepted-files-message'
-        )
-        expect(getByTestId('file-input-droptarget')).toHaveClass(
-            'has-invalid-file'
-        )
-
-        expect(queryByTestId('file-input-preview')).not.toBeInTheDocument()
+        it.todo('displays a duplicate file error when expected')
     })
 })

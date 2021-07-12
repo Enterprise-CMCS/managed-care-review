@@ -45,6 +45,7 @@ export const Documents = ({
     const { deleteFile, uploadFile, getKey, getS3URL } = useS3()
     const [shouldValidate, setShouldValidate] = useState(false)
     const [hasValidFiles, setHasValidFiles] = useState(false)
+    const [hasPendingFiles, setHasPendingFiles] = useState(false)
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
     const history = useHistory<MCRouterState>()
 
@@ -71,19 +72,20 @@ export const Documents = ({
         })
 
     useEffect(() => {
-        const hasNoPendingFiles: boolean = fileItems.every(
-            (item) => item.status !== 'PENDING'
+        const hasPendingFiles: boolean = fileItems.some(
+            (item) => item.status === 'PENDING'
         )
+        setHasPendingFiles(hasPendingFiles)
 
         const hasValidDocumentsForSubmission: boolean =
             fileItems.length > 0 &&
-            hasNoPendingFiles &&
-            fileItems.some((item) => item.status === 'UPLOAD_COMPLETE')
+            !hasPendingFiles &&
+            fileItems.every((item) => item.status === 'UPLOAD_COMPLETE')
         setHasValidFiles(hasValidDocumentsForSubmission)
     }, [fileItems])
 
-    const showError = (error: string) => {
-        console.log('Document error: ', error)
+    // If there is a submission error or an unhandled drag and drop error, ensure form is in validation state
+    const onError = () => {
         if (!shouldValidate) setShouldValidate(true)
     }
 
@@ -110,51 +112,50 @@ export const Documents = ({
         return { key: s3Key, s3URL: s3URL }
     }
 
-    const handleFormSubmit =
-        ({
-            shouldValidate,
-            redirectPath,
-        }: {
-            shouldValidate: boolean
-            redirectPath: string
-        }) =>
-        async (e: React.FormEvent | React.MouseEvent) => {
-            e.preventDefault()
+    const handleFormSubmit = ({
+        shouldValidate,
+        redirectPath,
+    }: {
+        shouldValidate: boolean
+        redirectPath: string
+    }) => async (e: React.FormEvent | React.MouseEvent) => {
+        e.preventDefault()
 
-            if (shouldValidate) {
-                setShouldValidate(true)
-                if (!hasValidFiles) return
-            }
-
-            const documents = fileItems.map((fileItem) => {
-                if (!fileItem.s3URL)
-                    throw Error(
-                        'The file item has no s3url, this should not happen onSubmit'
-                    )
-                return {
-                    name: fileItem.name,
-                    s3URL: fileItem.s3URL,
-                }
-            })
-
-            const updatedDraft = updatesFromSubmission(draftSubmission)
-
-            updatedDraft.documents = documents
-
-            try {
-                const updatedSubmission = await updateDraft({
-                    submissionID: draftSubmission.id,
-                    draftSubmissionUpdates: updatedDraft,
-                })
-                if (updatedSubmission) {
-                    history.push(redirectPath, {
-                        defaultProgramID: draftSubmission.programID,
-                    })
-                }
-            } catch (error) {
-                showError(error)
-            }
+        // if there are any errors present in the documents list, stop here
+        if (shouldValidate) {
+            setShouldValidate(true)
+            if (!hasValidFiles) return
         }
+
+        const documents = fileItems.map((fileItem) => {
+            if (!fileItem.s3URL)
+                throw Error(
+                    'The file item has no s3url, this should not happen onSubmit'
+                )
+            return {
+                name: fileItem.name,
+                s3URL: fileItem.s3URL,
+            }
+        })
+
+        const updatedDraft = updatesFromSubmission(draftSubmission)
+
+        updatedDraft.documents = documents
+
+        try {
+            const updatedSubmission = await updateDraft({
+                submissionID: draftSubmission.id,
+                draftSubmissionUpdates: updatedDraft,
+            })
+            if (updatedSubmission) {
+                history.push(redirectPath, {
+                    defaultProgramID: draftSubmission.programID,
+                })
+            }
+        } catch (error) {
+            onError()
+        }
+    }
 
     const Hint = (): JSX.Element =>
         draftSubmission.submissionType === 'CONTRACT_AND_RATES' ? (
@@ -166,6 +167,25 @@ export const Documents = ({
             <>
                 <strong>Must include:</strong> An executed contract
             </>
+        )
+
+    const FormError = (): JSX.Element =>
+        fileItems.length === 0 ? (
+            <Alert
+                type="error"
+                heading="Missing documents"
+                className="margin-bottom-2"
+            >
+                You must upload at least one document
+            </Alert>
+        ) : (
+            <Alert
+                type="warning"
+                heading="Documents error"
+                className="margin-bottom-2"
+            >
+                You must address duplicate name errors
+            </Alert>
         )
 
     return (
@@ -183,15 +203,7 @@ export const Documents = ({
             >
                 <fieldset className="usa-fieldset">
                     <legend className="srOnly">Documents</legend>
-                    {shouldValidate && !hasValidFiles && (
-                        <Alert
-                            type="error"
-                            heading="Missing documents"
-                            className="margin-bottom-2"
-                        >
-                            You must upload at least one document
-                        </Alert>
-                    )}
+                    {shouldValidate && !hasValidFiles && <FormError />}
                     {formAlert && formAlert}
                     <FileUpload
                         id="documents"
@@ -225,6 +237,7 @@ export const Documents = ({
                         uploadFile={handleUploadFile}
                         deleteFile={handleDeleteFile}
                         onLoadComplete={onLoadComplete}
+                        onInvalidDrop={onError}
                     />
                 </fieldset>
 
@@ -256,8 +269,10 @@ export const Documents = ({
                         </Button>
                         <Button
                             type="submit"
-                            secondary={shouldValidate && !hasValidFiles}
-                            disabled={shouldValidate && !hasValidFiles}
+                            disabled={
+                                hasPendingFiles ||
+                                (shouldValidate && !hasValidFiles)
+                            }
                         >
                             Continue
                         </Button>
