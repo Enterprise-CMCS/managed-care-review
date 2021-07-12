@@ -15,9 +15,10 @@ repos:
       hooks:
           - id: prettier
 
-    - repo: https://github.com/pre-commit/mirrors-eslint
-      rev: 'v7.30.0' # Use the sha / tag you want to point at
+    - repo: local
       hooks:
           - id: eslint
+            name: eslint
+            entry: scripts/pre-commit-eslint
+            language: script
             files: \.[jt]sx?$ # *.js, *.jsx, *.ts and *.tsx
-            types: [file]

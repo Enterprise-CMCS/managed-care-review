@@ -1,0 +1,5 @@
+#! /usr/bin/env bash
+
+git diff --cached --name-only --diff-filter=d | \
+  grep -E '\.tsx?$' | \
+  xargs yarn run eslint --ext .ts,.tsx --fix .
