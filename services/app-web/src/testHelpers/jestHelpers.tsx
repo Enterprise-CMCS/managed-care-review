@@ -1,7 +1,13 @@
 import { MockedProvider, MockedProviderProps } from '@apollo/client/testing'
 import { Router, RouterProps } from 'react-router-dom'
 import { createMemoryHistory } from 'history'
-import { render, Screen, queries, ByRoleMatcher } from '@testing-library/react'
+import {
+    fireEvent,
+    render,
+    Screen,
+    queries,
+    ByRoleMatcher,
+} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { AuthProvider, AuthProviderProps } from '../contexts/AuthContext'
@@ -70,6 +76,20 @@ const userClickSignIn = (screen: Screen<typeof queries>): void => {
     userEvent.click(signInButton)
 }
 
+function dragAndDrop(inputDropTarget: HTMLElement, files: File[]): void {
+    fireEvent.dragEnter(inputDropTarget)
+    fireEvent.dragOver(inputDropTarget)
+    fireEvent.drop(inputDropTarget, {
+        bubbles: true,
+        cancelable: true,
+        dataTransfer: {
+            files: files,
+        },
+    })
+
+    return
+}
+
 const TEST_TEXT_FILE = new File(['Test File Contents'], 'testFile.txt', {
     type: 'text/plain',
 })
@@ -95,6 +115,7 @@ const TEST_PNG_FILE = new File(['Test PNG Image'], 'testFile.png', {
 })
 
 export {
+    dragAndDrop,
     renderWithProviders,
     userClickByRole,
     userClickByTestId,

@@ -9,6 +9,7 @@ import {
     TEST_XLS_FILE,
     TEST_VIDEO_FILE,
     TEST_PNG_FILE,
+    dragAndDrop,
 } from '../../../testHelpers/jestHelpers'
 import {
     fetchCurrentUserMock,
@@ -97,39 +98,6 @@ describe('Documents', () => {
         })
     })
 
-    it.skip('accepts documents added with different methods', async () => {
-        const mockUpdateDraftFn = jest.fn()
-
-        renderWithProviders(
-            <Documents
-                draftSubmission={mockDraft()}
-                updateDraft={mockUpdateDraftFn}
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
-
-        const input = screen.getByLabelText('Upload documents')
-        const targetEl = screen.getByTestId('file-input-droptarget')
-
-        // simulate to drag and drop
-        fireEvent.dragOver(targetEl)
-        fireEvent.drop(targetEl, {
-            dataTransfer: {
-                files: [TEST_DOC_FILE],
-            },
-        })
-
-        //simulate to file select
-        userEvent.upload(input, [TEST_PDF_FILE])
-
-        expect(await screen.findByText(TEST_PDF_FILE.name)).toBeInTheDocument()
-        expect(await screen.findByText(TEST_DOC_FILE.name)).toBeInTheDocument()
-    })
-
     it('does not accept image files', async () => {
         const mockUpdateDraftFn = jest.fn()
         renderWithProviders(
@@ -146,11 +114,8 @@ describe('Documents', () => {
 
         // drop documents because accept (used for userEvent.upload) not allow invalid documents to upload in the first place
         const targetEl = screen.getByTestId('file-input-droptarget')
-        fireEvent.drop(targetEl, {
-            dataTransfer: {
-                files: [TEST_PNG_FILE, TEST_VIDEO_FILE],
-            },
-        })
+        dragAndDrop(targetEl, [TEST_PNG_FILE, TEST_VIDEO_FILE])
+
         expect(screen.queryByText(TEST_PNG_FILE.name)).not.toBeInTheDocument()
         expect(screen.queryByText(TEST_VIDEO_FILE.name)).not.toBeInTheDocument()
 
@@ -232,11 +197,8 @@ describe('Documents', () => {
         expect(inputEl).not.toHaveAttribute('accept', 'image/*')
 
         const targetEl = screen.getByTestId('file-input-droptarget')
-        fireEvent.drop(targetEl, {
-            dataTransfer: {
-                files: [TEST_PNG_FILE],
-            },
-        })
+        dragAndDrop(targetEl, [TEST_PNG_FILE])
+
         await waitFor(() => {
             expect(screen.getByTestId('file-input-error')).toHaveTextContent(
                 'This is not a valid file type'
@@ -291,7 +253,7 @@ describe('Documents', () => {
             }
         )
         const input = screen.getByLabelText('Upload documents')
-        console.log('upload')
+
         userEvent.upload(input, [TEST_XLS_FILE])
 
         await waitFor(() => {
@@ -382,12 +344,7 @@ describe('Documents', () => {
             const targetEl = screen.getByTestId('file-input-droptarget')
 
             userEvent.upload(input, [TEST_DOC_FILE])
-
-            fireEvent.drop(targetEl, {
-                dataTransfer: {
-                    files: [TEST_PNG_FILE],
-                },
-            })
+            dragAndDrop(targetEl, [TEST_PNG_FILE])
 
             await waitFor(() => {
                 expect(
@@ -466,7 +423,7 @@ describe('Documents', () => {
             })
         })
 
-        it('disabled immediately when invalid files have been dropped and no other files present', async () => {
+        it('disabled with alert after first attempt to continue with invalid dropped and no other files present', async () => {
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <Documents
@@ -482,22 +439,25 @@ describe('Documents', () => {
                     },
                 }
             )
-
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
+
             const targetEl = screen.getByTestId('file-input-droptarget')
-            fireEvent.drop(targetEl, {
-                dataTransfer: {
-                    files: [TEST_PNG_FILE],
-                },
-            })
-            await waitFor(() => {
-                expect(
-                    screen.getByText('This is not a valid file type.')
-                ).toBeInTheDocument()
-                expect(continueButton).toBeDisabled()
-            })
+            dragAndDrop(targetEl, [TEST_PNG_FILE])
+
+            expect(
+                await screen.findByText('This is not a valid file type.')
+            ).toBeInTheDocument()
+
+            expect(continueButton).not.toBeDisabled()
+            continueButton.click()
+
+            expect(
+                await screen.findByText('You must upload at least one document')
+            ).toBeInTheDocument()
+
+            expect(continueButton).toBeDisabled()
         })
     })
 })

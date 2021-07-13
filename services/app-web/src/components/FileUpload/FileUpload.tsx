@@ -25,7 +25,6 @@ export type FileUploadProps = {
     uploadFile: (file: File) => Promise<S3FileData>
     deleteFile: (key: string) => Promise<void>
     onLoadComplete: ({ files }: { files: FileItemT[] }) => void
-    onInvalidDrop: () => void
 } & JSX.IntrinsicElements['input']
 
 /*  FileUpload handles async file upload to S3 and displays inline errors per file. 
@@ -45,7 +44,6 @@ export const FileUpload = ({
     uploadFile,
     deleteFile,
     onLoadComplete,
-    onInvalidDrop,
     ...inputProps
 }: FileUploadProps): React.ReactElement => {
     const [formError, setFormError] = useState<string | null>(null)
@@ -208,14 +206,6 @@ export const FileUpload = ({
 
         asyncS3Upload(item.file)
     }
-    const handleInvalidDrop = (e: React.DragEvent) => {
-        // return early to ensure display of react-uswds FileInput native errors
-        const files = Array.from(fileInputRef.current?.input?.files || [])
-        if (files.length === 0) {
-            onInvalidDrop()
-            return
-        }
-    }
 
     const handleFileInputChangeOrValidDrop = (
         e: React.DragEvent | React.ChangeEvent
@@ -255,7 +245,6 @@ export const FileUpload = ({
                 aria-describedby={`${id}-error ${id}-hint`}
                 multiple
                 onChange={handleFileInputChangeOrValidDrop}
-                onDrop={handleInvalidDrop}
                 accept={inputProps.accept}
                 ref={fileInputRef}
             />

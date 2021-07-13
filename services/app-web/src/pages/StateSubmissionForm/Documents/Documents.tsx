@@ -84,7 +84,7 @@ export const Documents = ({
         setHasValidFiles(hasValidDocumentsForSubmission)
     }, [fileItems])
 
-    // If there is a submission error or an unhandled drag and drop error, ensure form is in validation state
+    // If there is a submission error, ensure form is in validation state
     const onError = () => {
         if (!shouldValidate) setShouldValidate(true)
     }
@@ -112,50 +112,52 @@ export const Documents = ({
         return { key: s3Key, s3URL: s3URL }
     }
 
-    const handleFormSubmit = ({
-        shouldValidate,
-        redirectPath,
-    }: {
-        shouldValidate: boolean
-        redirectPath: string
-    }) => async (e: React.FormEvent | React.MouseEvent) => {
-        e.preventDefault()
+    const handleFormSubmit =
+        ({
+            shouldValidate,
+            redirectPath,
+        }: {
+            shouldValidate: boolean
+            redirectPath: string
+        }) =>
+        async (e: React.FormEvent | React.MouseEvent) => {
+            e.preventDefault()
 
-        // if there are any errors present in the documents list, stop here
-        if (shouldValidate) {
-            setShouldValidate(true)
-            if (!hasValidFiles) return
-        }
-
-        const documents = fileItems.map((fileItem) => {
-            if (!fileItem.s3URL)
-                throw Error(
-                    'The file item has no s3url, this should not happen onSubmit'
-                )
-            return {
-                name: fileItem.name,
-                s3URL: fileItem.s3URL,
+            // if there are any errors present in the documents list, stop here
+            if (shouldValidate) {
+                setShouldValidate(true)
+                if (!hasValidFiles) return
             }
-        })
 
-        const updatedDraft = updatesFromSubmission(draftSubmission)
-
-        updatedDraft.documents = documents
-
-        try {
-            const updatedSubmission = await updateDraft({
-                submissionID: draftSubmission.id,
-                draftSubmissionUpdates: updatedDraft,
+            const documents = fileItems.map((fileItem) => {
+                if (!fileItem.s3URL)
+                    throw Error(
+                        'The file item has no s3url, this should not happen onSubmit'
+                    )
+                return {
+                    name: fileItem.name,
+                    s3URL: fileItem.s3URL,
+                }
             })
-            if (updatedSubmission) {
-                history.push(redirectPath, {
-                    defaultProgramID: draftSubmission.programID,
+
+            const updatedDraft = updatesFromSubmission(draftSubmission)
+
+            updatedDraft.documents = documents
+
+            try {
+                const updatedSubmission = await updateDraft({
+                    submissionID: draftSubmission.id,
+                    draftSubmissionUpdates: updatedDraft,
                 })
+                if (updatedSubmission) {
+                    history.push(redirectPath, {
+                        defaultProgramID: draftSubmission.programID,
+                    })
+                }
+            } catch (error) {
+                onError()
             }
-        } catch (error) {
-            onError()
         }
-    }
 
     const Hint = (): JSX.Element =>
         draftSubmission.submissionType === 'CONTRACT_AND_RATES' ? (
@@ -237,7 +239,6 @@ export const Documents = ({
                         uploadFile={handleUploadFile}
                         deleteFile={handleDeleteFile}
                         onLoadComplete={onLoadComplete}
-                        onInvalidDrop={onError}
                     />
                 </fieldset>
 

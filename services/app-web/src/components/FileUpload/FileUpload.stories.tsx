@@ -29,7 +29,6 @@ export const DemoFileUploadSuccess = (): React.ReactElement => {
                 return
             }}
             onLoadComplete={() => console.log('Async load complete')}
-            onInvalidDrop={() => console.log('Async on invalid drop')}
         />
     )
 }
@@ -46,7 +45,6 @@ export const DemoFileUploadFailure = (): React.ReactElement => {
                 return
             }}
             onLoadComplete={() => console.log('Async load complete')}
-            onInvalidDrop={() => console.log('Async on invalid drop')}
         />
     )
 }
