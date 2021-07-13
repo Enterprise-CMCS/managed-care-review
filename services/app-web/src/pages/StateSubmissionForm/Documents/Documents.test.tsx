@@ -97,7 +97,7 @@ describe('Documents', () => {
         })
     })
 
-    it('accepts documents added with different methods', async () => {
+    it.skip('accepts documents added with different methods', async () => {
         const mockUpdateDraftFn = jest.fn()
 
         renderWithProviders(
@@ -218,7 +218,6 @@ describe('Documents', () => {
             <Documents
                 draftSubmission={{
                     ...mockDraft(),
-                    submissionType: 'CONTRACT_AND_RATES',
                 }}
                 updateDraft={mockUpdateDraftFn}
             />,
@@ -255,7 +254,6 @@ describe('Documents', () => {
             <Documents
                 draftSubmission={{
                     ...mockDraft(),
-                    submissionType: 'CONTRACT_AND_RATES',
                 }}
                 updateDraft={mockUpdateDraftFn}
             />,
@@ -266,10 +264,14 @@ describe('Documents', () => {
             }
         )
         const input = screen.getByLabelText('Upload documents')
-        userEvent.upload(input, [TEST_DOC_FILE, TEST_DOC_FILE])
+        userEvent.upload(input, [TEST_DOC_FILE])
+        userEvent.upload(input, [TEST_PDF_FILE])
+        userEvent.upload(input, [TEST_DOC_FILE])
+
         await waitFor(() => {
-            expect(screen.queryAllByText('Duplicate File').length).toBe(1)
+            expect(screen.queryAllByText(TEST_PDF_FILE.name).length).toBe(1)
             expect(screen.queryAllByText(TEST_DOC_FILE.name).length).toBe(2)
+            expect(screen.queryAllByText('Duplicate file').length).toBe(1)
         })
     })
 
@@ -279,7 +281,6 @@ describe('Documents', () => {
             <Documents
                 draftSubmission={{
                     ...mockDraft(),
-                    submissionType: 'CONTRACT_AND_RATES',
                 }}
                 updateDraft={mockUpdateDraftFn}
             />,
@@ -290,33 +291,35 @@ describe('Documents', () => {
             }
         )
         const input = screen.getByLabelText('Upload documents')
-        userEvent.upload(input, [TEST_DOC_FILE])
+        console.log('upload')
+        userEvent.upload(input, [TEST_XLS_FILE])
 
         await waitFor(() => {
-            expect(screen.queryAllByText('Duplicate File')).toBeNull()
+            expect(screen.queryAllByText('Duplicate file').length).toBe(0)
             expect(
                 within(
                     screen.getByTestId('file-input-preview-list')
                 ).queryAllByRole('listitem').length
             ).toBe(1)
         })
-
-        userEvent.upload(input, [TEST_DOC_FILE])
+        // note: userEvent.upload does not re-trigger input event when selected files are the same as before, this is why we upload nothing in between
+        userEvent.upload(input, [])
+        userEvent.upload(input, [TEST_XLS_FILE])
 
         await waitFor(() => {
-            expect(screen.queryAllByText('Duplicate File').length).toBe(1)
             expect(
                 within(
                     screen.getByTestId('file-input-preview-list')
                 ).queryAllByRole('listitem').length
             ).toBe(2)
+            expect(screen.queryAllByText('Duplicate file').length).toBe(1)
         })
 
-        userEvent.upload(input, [TEST_DOC_FILE])
+        userEvent.upload(input, [])
+        userEvent.upload(input, [TEST_XLS_FILE])
 
         await waitFor(() => {
-            expect(screen.queryAllByText('Duplicate File').length).toBe(2)
-            expect(screen.queryAllByText(TEST_DOC_FILE.name).length).toBe(3)
+            expect(screen.queryAllByText('Duplicate file').length).toBe(2)
             expect(
                 within(
                     screen.getByTestId('file-input-preview-list')
