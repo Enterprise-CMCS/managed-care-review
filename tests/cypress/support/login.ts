@@ -1,7 +1,9 @@
 Cypress.Commands.add('login', () => {
     cy.visit('/')
     cy.findByRole('progressbar', { name: 'Loading' }).should('not.exist')
-    cy.findByRole('link', {name: 'Sign In'}).click()
+    cy.log('Clicking Sign In')
+    cy.findByRole('link', { name: 'Sign In' }).click()
+    cy.log('Clicked Sign In')
     const authMode = Cypress.env('AUTH_MODE')
     console.log(authMode, 'authmode')
     if (authMode === 'LOCAL') {
