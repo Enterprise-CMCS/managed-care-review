@@ -1,13 +1,15 @@
 {
     "include": [
-        "authn/**/*",
-        "handlers/**/*",
-        "resolvers/**/*",
-        "store/**/*",
-        "testHelpers/**/*",
+        "authn",
+        "handlers",
+        "resolvers",
+        "store",
+        "testHelpers",
         "jest.config.ts"
     ],
     "compilerOptions": {
+        "rootDir": ".",
+        "composite": false,
         "baseUrl": "/",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,

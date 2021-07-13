@@ -1,0 +1,7 @@
+services/app-api/gen/*
+services/app-web/gen
+tests
+
+node_modules
+services/app-api/node_modules
+services/app-web/node_modules
