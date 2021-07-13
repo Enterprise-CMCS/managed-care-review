@@ -18,7 +18,7 @@ import {
  * ReactUSWDS components directly.
  */
 
- export type TextInputProps = {
+export type TextInputProps = {
     label: string
     id: string
     hint?: React.ReactNode

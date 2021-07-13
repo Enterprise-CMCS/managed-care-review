@@ -15,7 +15,7 @@ export const GenericError = (): React.ReactElement => {
                 <p>
                     <span>If the issue continues reach out to </span>
                     <Link href="mailto:mc-review-team@truss.works">
-                    mc-review-team@truss.works
+                        mc-review-team@truss.works
                     </Link>
                 </p>
             </GridContainer>

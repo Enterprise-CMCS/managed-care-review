@@ -4,8 +4,8 @@ This service holds the schema for GraphQL communication between [`app-web`](../a
 
 ## Significant dependencies
 
-- [GraphQL Code Generator](https://www.graphql-code-generator.com/docs/getting-started/index)
-- [GraphQL](https://graphql.org/learn/queries/)
+-   [GraphQL Code Generator](https://www.graphql-code-generator.com/docs/getting-started/index)
+-   [GraphQL](https://graphql.org/learn/queries/)
 
 ## Useful scripts
 
@@ -15,6 +15,6 @@ Generates typescript types from the GraphQL schema and queries. These types are 
 
 ## Organization and important files
 
-- `codegen.yml` configures code generation into a `gen/package` that is gitignored. *No files in this folder should be edited.*
-- `src/queries` and `src/mutations` contain files in the [GraphQL query language](https://graphql.org/learn/queries/).
-- The repo root level [`./dev`](../../dev) script has calls to `gqlgen` in both app-api and app-web.
+-   `codegen.yml` configures code generation into a `gen/package` that is gitignored. _No files in this folder should be edited._
+-   `src/queries` and `src/mutations` contain files in the [GraphQL query language](https://graphql.org/learn/queries/).
+-   The repo root level [`./dev`](../../dev) script has calls to `gqlgen` in both app-api and app-web.
