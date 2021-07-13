@@ -100,7 +100,7 @@ export interface RateDetailsFormValues {
     effectiveDateStart: string
     effectiveDateEnd: string
 }
-export const RateDetails = ({
+export const Contacts = ({
     draftSubmission,
     showValidations = false,
     updateDraft,
@@ -182,7 +182,7 @@ export const RateDetails = ({
                         defaultProgramID: draftSubmission.programID,
                     })
                 } else {
-                    history.push(`/submissions/${draftSubmission.id}/contacts`)
+                    history.push(`/submissions/${draftSubmission.id}/documents`)
                 }
             }
         } catch (serverError) {

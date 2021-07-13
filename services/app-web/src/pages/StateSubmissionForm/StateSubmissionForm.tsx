@@ -22,6 +22,7 @@ import {
 } from '../../constants/routes'
 import { ContractDetails } from './ContractDetails/ContractDetails'
 import { RateDetails } from './RateDetails/RateDetails'
+import { Contacts } from './Contacts/Contacts'
 import { Documents } from './Documents/Documents'
 import { ReviewSubmit } from './ReviewSubmit/ReviewSubmit'
 import { SubmissionType } from './SubmissionType/SubmissionType'
@@ -98,6 +99,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
     const FormPages = [
         'SUBMISSIONS_CONTRACT_DETAILS',
         'SUBMISSIONS_RATE_DETAILS',
+        'SUBMISSIONS_CONTACTS',
         'SUBMISSIONS_DOCUMENTS',
         'SUBMISSIONS_REVIEW_SUBMIT',
     ] as RouteT[]
@@ -184,6 +186,15 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}>
                         <RateDetails
+                            draftSubmission={draft}
+                            updateDraft={updateDraft}
+                            formAlert={
+                                showFormAlert ? GenericFormAlert() : undefined
+                            }
+                        />
+                    </Route>
+                    <Route path={RoutesRecord.SUBMISSIONS_CONTACTS}>
+                        <Contacts
                             draftSubmission={draft}
                             updateDraft={updateDraft}
                             formAlert={
