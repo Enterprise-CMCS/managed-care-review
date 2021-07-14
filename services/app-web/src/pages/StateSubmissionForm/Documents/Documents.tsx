@@ -129,16 +129,26 @@ export const Documents = ({
                 if (!hasValidFiles) return
             }
 
-            const documents = fileItems.map((fileItem) => {
-                if (!fileItem.s3URL)
-                    throw Error(
-                        'The file item has no s3url, this should not happen onSubmit'
-                    )
-                return {
-                    name: fileItem.name,
-                    s3URL: fileItem.s3URL,
-                }
-            })
+            const documents = fileItems.reduce(
+                (formDataDocuments, fileItem) => {
+                    if (!fileItem.s3URL)
+                        throw Error(
+                            'The file item has no s3url, this should not happen on form submit'
+                        )
+                    else if (fileItem.status === 'DUPLICATE_NAME_ERROR')
+                        console.log(
+                            'Attempting to save duplicate files, discarding duplicate'
+                        )
+                    else {
+                        formDataDocuments.push({
+                            name: fileItem.name,
+                            s3URL: fileItem.s3URL,
+                        })
+                    }
+                    return formDataDocuments
+                },
+                [] as { name: string; s3URL: string }[]
+            )
 
             const updatedDraft = updatesFromSubmission(draftSubmission)
 
