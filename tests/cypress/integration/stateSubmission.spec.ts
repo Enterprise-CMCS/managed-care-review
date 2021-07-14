@@ -548,6 +548,10 @@ describe('State Submission', () => {
                 cy.findByTestId('file-input-input').attachFile(
                     'documents/trussel-guide.pdf'
                 )
+                cy.findAllByTestId('file-input-preview-image').should(
+                    'not.have.class',
+                    'is-loading'
+                )
                 cy.navigateForm('Save as draft')
                 cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
