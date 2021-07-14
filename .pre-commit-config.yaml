@@ -26,11 +26,3 @@ repos:
             language: script
             files: \.[jt]sx?$ # *.js, *.jsx, *.ts and *.tsx
             stages: [commit]
-
-    - repo: https://github.com/pre-commit/mirrors-eslint
-      rev: 'v7.30.0' # Use the sha / tag you want to point at
-      hooks:
-          - id: eslint
-            files: \.[jt]sx?$ # *.js, *.jsx, *.ts and *.tsx
-            types: [file]
-            stages: [push]
