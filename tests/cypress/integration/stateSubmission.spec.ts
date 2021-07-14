@@ -536,9 +536,10 @@ describe('State Submission', () => {
     })
 
     describe('documents page', () => {
-        it('state user can edit documents and save as draft', () => {
+        it('user can edit documents and save as draft', () => {
             cy.login()
             cy.startNewContractOnlySubmission()
+
             cy.location().then((fullUrl) => {
                 const { pathname } = fullUrl
                 const draftSubmissionID = pathname.split('/')[2]
@@ -557,28 +558,19 @@ describe('State Submission', () => {
 
                 // go back to documents page and remove file
                 cy.visit(`/submissions/${draftSubmissionID}/documents`)
-                cy.findByTestId('file-input-input').attachFile(
-                    'documents/trussel-guide.pdf'
-                )
                 cy.findAllByText('Remove').should('exist').first().safeClick()
+                cy.findAllByAltText('trussel-guide.pdf').should('not.exist')
 
                 // allow Save as Draft with no documents
                 cy.navigateForm('Save as draft')
-
                 cy.findByText('You must upload at least one document').should(
                     'not.exist'
                 )
                 cy.findByRole('heading', { level: 1, name: /Dashboard/ })
-                cy.findByTestId('file-input-preview-list').should(
-                    'have.length',
-                    0
-                )
 
-                // reload page,validate there are no documents,then add duplicate documents
+                // reload page,validate there are still no documents,then add duplicate documents
                 cy.visit(`/submissions/${draftSubmissionID}/documents`)
-                cy.findByTestId('file-input-preview-list')
-                    .findAllByRole('listitem')
-                    .should('not.exist')
+                cy.findAllByAltText('trussel-guide.pdf').should('not.exist')
 
                 cy.findByTestId('file-input-input').attachFile(
                     'documents/trussel-guide.pdf'
@@ -602,10 +594,11 @@ describe('State Submission', () => {
                 cy.findByTestId('file-input-preview-list')
                     .findAllByRole('listitem')
                     .should('have.length', 1)
+                cy.findAllByAltText('trussel-guide.pdf').should('exist')
             })
         })
 
-        it('state user can drag and drop as expected', () => {
+        it('user can drag and drop as expected', () => {
             cy.login()
             cy.startNewContractOnlySubmission()
 
