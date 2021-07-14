@@ -47,9 +47,8 @@ async function downloadAVDefinitions() {
                     `Downloading ${filenameToDownload} from S3 to ${destinationFile}`
                 );
 
-                let localFileWriteStream = fs.createWriteStream(
-                    destinationFile
-                );
+                let localFileWriteStream =
+                    fs.createWriteStream(destinationFile);
 
                 let options = {
                     Bucket: constants.CLAMAV_BUCKET_NAME,

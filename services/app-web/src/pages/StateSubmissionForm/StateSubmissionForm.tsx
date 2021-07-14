@@ -5,7 +5,7 @@ import {
     GridContainer,
     StepIndicator,
     StepIndicatorStep,
-  } from '@trussworks/react-uswds'
+} from '@trussworks/react-uswds'
 import { Switch, Route, useParams, useLocation } from 'react-router-dom'
 
 import { Error404 } from '../Errors/Error404'
@@ -55,10 +55,8 @@ export const StateSubmissionForm = (): React.ReactElement => {
         },
     })
 
-    const [
-        updateDraftSubmission,
-        { error: updateError },
-    ] = useUpdateDraftSubmissionMutation()
+    const [updateDraftSubmission, { error: updateError }] =
+        useUpdateDraftSubmissionMutation()
 
     const updateDraft = async (
         input: UpdateDraftSubmissionInput
@@ -105,40 +103,36 @@ export const StateSubmissionForm = (): React.ReactElement => {
     ] as RouteT[]
 
     const DynamicStepIndicator = () => {
-
         const currentFormPage = getRouteName(pathname)
 
         console.log(currentFormPage)
 
-        let formStepCompleted = true;
+        let formStepCompleted = true
         let formStepStatus: 'current' | 'complete' | undefined
 
         if (currentFormPage === 'SUBMISSIONS_TYPE') {
             return null
-        }
-        else {
-            return(
+        } else {
+            return (
                 <>
                     <StepIndicator>
                         {FormPages.map((formPageName) => {
-                          if (formPageName === currentFormPage) {
-                            formStepCompleted = false;
-                            formStepStatus = 'current';
-                          }
-                          else if (formStepCompleted) {
-                            formStepStatus = 'complete'
-                          }
-                          else {
-                            formStepStatus = undefined;
-                          }
+                            if (formPageName === currentFormPage) {
+                                formStepCompleted = false
+                                formStepStatus = 'current'
+                            } else if (formStepCompleted) {
+                                formStepStatus = 'complete'
+                            } else {
+                                formStepStatus = undefined
+                            }
 
-                          return (
-                              <StepIndicatorStep
-                                  label={PageTitlesRecord[formPageName]}
-                                  status={formStepStatus}
-                                  key={PageTitlesRecord[formPageName]}
-                              />
-                          )
+                            return (
+                                <StepIndicatorStep
+                                    label={PageTitlesRecord[formPageName]}
+                                    status={formStepStatus}
+                                    key={PageTitlesRecord[formPageName]}
+                                />
+                            )
                         })}
                     </StepIndicator>
                 </>
@@ -171,46 +165,46 @@ export const StateSubmissionForm = (): React.ReactElement => {
     }
 
     return (
-      <>
-        <DynamicStepIndicator />
+        <>
+            <DynamicStepIndicator />
 
-        <GridContainer>
-            <Switch>
-                <Route path={RoutesRecord.SUBMISSIONS_TYPE}>
-                    <SubmissionType draftSubmission={draft} />
-                </Route>
-                <Route path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}>
-                    <ContractDetails
-                        draftSubmission={draft}
-                        updateDraft={updateDraft}
-                        formAlert={
-                            showFormAlert ? GenericFormAlert() : undefined
-                        }
-                    />
-                </Route>
-                <Route path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}>
-                    <RateDetails
-                        draftSubmission={draft}
-                        updateDraft={updateDraft}
-                        formAlert={
-                            showFormAlert ? GenericFormAlert() : undefined
-                        }
-                    />
-                </Route>
-                <Route path={RoutesRecord.SUBMISSIONS_DOCUMENTS}>
-                    <Documents
-                        draftSubmission={draft}
-                        updateDraft={updateDraft}
-                        formAlert={
-                            showFormAlert ? GenericFormAlert() : undefined
-                        }
-                    />
-                </Route>
-                <Route path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}>
-                    <ReviewSubmit draftSubmission={draft} />
-                </Route>
-            </Switch>
-        </GridContainer>
-      </>
+            <GridContainer>
+                <Switch>
+                    <Route path={RoutesRecord.SUBMISSIONS_TYPE}>
+                        <SubmissionType draftSubmission={draft} />
+                    </Route>
+                    <Route path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}>
+                        <ContractDetails
+                            draftSubmission={draft}
+                            updateDraft={updateDraft}
+                            formAlert={
+                                showFormAlert ? GenericFormAlert() : undefined
+                            }
+                        />
+                    </Route>
+                    <Route path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}>
+                        <RateDetails
+                            draftSubmission={draft}
+                            updateDraft={updateDraft}
+                            formAlert={
+                                showFormAlert ? GenericFormAlert() : undefined
+                            }
+                        />
+                    </Route>
+                    <Route path={RoutesRecord.SUBMISSIONS_DOCUMENTS}>
+                        <Documents
+                            draftSubmission={draft}
+                            updateDraft={updateDraft}
+                            formAlert={
+                                showFormAlert ? GenericFormAlert() : undefined
+                            }
+                        />
+                    </Route>
+                    <Route path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}>
+                        <ReviewSubmit draftSubmission={draft} />
+                    </Route>
+                </Switch>
+            </GridContainer>
+        </>
     )
 }

@@ -51,11 +51,9 @@ describe('FileUpload component', () => {
         const initialItems: FileItemT[] = [
             {
                 id: '3cef7a28-bd28-47d7-b838-ddd3bfb7d405',
-                key:
-                    '1620164967212-Trussel Guide to Truss - trussels-guide.pdf',
+                key: '1620164967212-Trussel Guide to Truss - trussels-guide.pdf',
                 name: 'Trussel Guide to Truss - trussels-guide.pdf',
-                s3URL:
-                    "s3://local-uploads/1620164967212-Trussels' Guide to Truss - trussels-guide.pdf/Trussels' Guide to Truss - trussels-guide.pdf",
+                s3URL: "s3://local-uploads/1620164967212-Trussels' Guide to Truss - trussels-guide.pdf/Trussels' Guide to Truss - trussels-guide.pdf",
                 status: 'UPLOAD_COMPLETE',
             },
         ]

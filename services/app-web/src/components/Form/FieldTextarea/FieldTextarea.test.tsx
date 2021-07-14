@@ -19,8 +19,7 @@ jest.mock('formik', () => {
             },
             {
                 touched: true,
-                error:
-                    'You must provide a description of any major changes or updates',
+                error: 'You must provide a description of any major changes or updates',
             },
             { setValue: mockSetValue },
         ],

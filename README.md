@@ -6,8 +6,8 @@ Managed Care Review is an application that accepts Managed Care contract and rat
 
 Additional sources for documentation:
 
-- [Managed Care Review Confluence page](https://qmacbis.atlassian.net/wiki/spaces/OY2/pages/2465300483/Managed+Care+Review). Includes an overview of the project, information about planned features, and ADRs (architectural decision records).
-- [`./services`](./services) README files and [`./docs`](./docs)
+-   [Managed Care Review Confluence page](https://qmacbis.atlassian.net/wiki/spaces/OY2/pages/2465300483/Managed+Care+Review). Includes an overview of the project, information about planned features, and ADRs (architectural decision records).
+-   [`./services`](./services) README files and [`./docs`](./docs)
 
 ## Application Requirements
 

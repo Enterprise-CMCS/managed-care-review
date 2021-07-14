@@ -269,13 +269,8 @@ async function run_web_against_aws(
 
     // Now, we've confirmed we are configured to pull data out of serverless x cloudformation
     console.log('Access confirmed. Fetching config vars')
-    const {
-        region,
-        idPool,
-        userPool,
-        userPoolClient,
-        userPoolDomain,
-    } = getWebAuthVars(stageName)
+    const { region, idPool, userPool, userPoolClient, userPoolDomain } =
+        getWebAuthVars(stageName)
 
     const apiBase = commandMustSucceedSync(
         './output.sh',

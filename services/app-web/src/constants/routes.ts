@@ -68,7 +68,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     SUBMISSIONS_CONTACTS: 'Contacts',
     SUBMISSIONS_DOCUMENTS: 'Documents',
     SUBMISSIONS_REVIEW_SUBMIT: 'Review and Submit',
-    UNKNOWN_ROUTE: 'Not Found'
+    UNKNOWN_ROUTE: 'Not Found',
 }
 
 const getRouteName = (pathname: string): RouteT | 'UNKNOWN_ROUTE' => {
@@ -91,6 +91,4 @@ export {
     getRouteName,
 }
 
-export type {
-  RouteT,
-}
+export type { RouteT }

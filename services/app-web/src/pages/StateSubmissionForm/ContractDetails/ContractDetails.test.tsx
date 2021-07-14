@@ -23,17 +23,21 @@ describe('ContractDetails', () => {
         emptyDraft.id = '12'
         const history = createMemoryHistory()
 
-        renderWithProviders(<ContractDetails draftSubmission={emptyDraft} updateDraft={ async (draft) => undefined } />, {
-            apolloProvider: {
-                mocks: [
-                    fetchCurrentUserMock({ statusCode: 200 }),
-                ],
-            },
-            routerProvider: {
-                route: '/submissions/12/contract-details',
-                routerProps: { history: history },
-            },
-        })
+        renderWithProviders(
+            <ContractDetails
+                draftSubmission={emptyDraft}
+                updateDraft={async (draft) => undefined}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+                routerProvider: {
+                    route: '/submissions/12/contract-details',
+                    routerProps: { history: history },
+                },
+            }
+        )
 
         // should not be able to find hidden things
         // "Items being amended"
