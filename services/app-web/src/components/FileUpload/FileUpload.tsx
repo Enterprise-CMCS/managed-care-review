@@ -64,6 +64,17 @@ export const FileUpload = ({
         currentItem: FileItemT
     ) => Boolean(existingList.some((item) => item.name === currentItem.name))
 
+    const isAcceptableFile = (file: File): boolean => {
+        const acceptedTypes = inputProps?.accept?.split(',') || []
+        if (acceptedTypes === []) return true
+
+        return acceptedTypes.some(
+            (fileType) =>
+                file.name.indexOf(fileType) > 0 ||
+                file.type.includes(fileType.replace(/\*/g, ''))
+        )
+    }
+
     // Generate initial list of FileItem stored component state
     const generateFileItems = (files: File[]) => {
         const items: FileItemT[] = []
@@ -207,10 +218,7 @@ export const FileUpload = ({
         asyncS3Upload(item.file)
     }
 
-    const handleFileInputChangeOrValidDrop = (
-        e: React.DragEvent | React.ChangeEvent
-    ): void => {
-        const files = Array.from(fileInputRef.current?.input?.files || []) // Web API File objects
+    const addFilesAndUpdateList = (files: File[]) => {
         const items = generateFileItems(files) // UI data objects -  used to track file upload state in a list below the input
 
         setFileItems((array) => [...array, ...items])
@@ -219,6 +227,19 @@ export const FileUpload = ({
         // reset input immediately to prepare for next interaction
         fileInputRef.current?.clearFiles()
         setFormError(null)
+    }
+    const handleOnDrop = (e: React.DragEvent): void => {
+        e.preventDefault()
+        e.stopPropagation()
+        const files = Array.from(e.dataTransfer.files || []).filter(
+            (file: File) => isAcceptableFile(file)
+        )
+        addFilesAndUpdateList(files)
+    }
+
+    const handleOnChange = (e: React.ChangeEvent): void => {
+        const files = Array.from(fileInputRef.current?.input?.files || []) // Web API File objects
+        addFilesAndUpdateList(files)
     }
 
     return (
@@ -244,7 +265,8 @@ export const FileUpload = ({
                 className={styles.fileInput}
                 aria-describedby={`${id}-error ${id}-hint`}
                 multiple
-                onChange={handleFileInputChangeOrValidDrop}
+                onChange={handleOnChange}
+                onDrop={handleOnDrop}
                 accept={inputProps.accept}
                 ref={fileInputRef}
             />

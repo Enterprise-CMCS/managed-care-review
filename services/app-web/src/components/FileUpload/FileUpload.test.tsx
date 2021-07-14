@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, waitFor, fireEvent, screen } from '@testing-library/react'
+import { render, waitFor, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { FileUpload, FileUploadProps, S3FileData } from './FileUpload'
@@ -38,9 +38,6 @@ describe('FileUpload component', () => {
             return
         },
         onLoadComplete: () => {
-            return
-        },
-        onInvalidDrop: () => {
             return
         },
     }
@@ -166,6 +163,56 @@ describe('FileUpload component', () => {
             expect(screen.queryAllByText(TEST_PDF_FILE.name).length).toBe(1)
             expect(screen.queryAllByText(TEST_DOC_FILE.name).length).toBe(2)
             expect(screen.queryAllByText('Duplicate file').length).toBe(1)
+        })
+    })
+
+    describe('drag and drop behavior', () => {
+        it('does not accept a drop file that has an invalid type', async () => {
+            const { getByTestId, queryByTestId } = render(
+                <FileUpload {...testProps} accept=".pdf" />
+            )
+
+            const inputEl = getByTestId('file-input-input')
+            expect(inputEl).toHaveAttribute('accept', '.pdf')
+
+            const targetEl = getByTestId('file-input-droptarget')
+            dragAndDrop(targetEl, [TEST_PNG_FILE])
+
+            expect(getByTestId('file-input-error')).toHaveTextContent(
+                'This is not a valid file type'
+            )
+            expect(getByTestId('file-input-error')).toHaveClass(
+                'usa-file-input__accepted-files-message'
+            )
+            expect(getByTestId('file-input-droptarget')).toHaveClass(
+                'has-invalid-file'
+            )
+
+            expect(queryByTestId('file-input-preview')).not.toBeInTheDocument()
+        })
+
+        it('does not accept a drop that has valid and invalid files together', () => {
+            const { getByTestId, queryByTestId } = render(
+                <FileUpload {...testProps} accept=".pdf" />
+            )
+
+            const inputEl = getByTestId('file-input-input')
+            expect(inputEl).toHaveAttribute('accept', '.pdf')
+
+            const targetEl = getByTestId('file-input-droptarget')
+            dragAndDrop(targetEl, [TEST_PDF_FILE, TEST_PNG_FILE])
+
+            expect(getByTestId('file-input-error')).toHaveTextContent(
+                'This is not a valid file type'
+            )
+            expect(getByTestId('file-input-error')).toHaveClass(
+                'usa-file-input__accepted-files-message'
+            )
+            expect(getByTestId('file-input-droptarget')).toHaveClass(
+                'has-invalid-file'
+            )
+
+            expect(queryByTestId('file-input-preview')).not.toBeInTheDocument()
         })
     })
 })
