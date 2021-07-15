@@ -53,6 +53,10 @@ resources:
     DocumentUploadsBucket:
       Type: AWS::S3::Bucket
       Properties:
+        BucketEncryption:
+          ServerSideEncryptionConfiguration:
+            - ServerSideEncryptionByDefault:
+                SSEAlgorithm: AES256
         # Set the CORS policy
         CorsConfiguration:
           CorsRules:
