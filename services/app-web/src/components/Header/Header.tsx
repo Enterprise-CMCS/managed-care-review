@@ -15,7 +15,7 @@ import styles from './Header.module.scss'
 import { getRouteName } from '../../constants/routes'
 import { useHistory } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import { usePage } from '../../contexts/PageContext'
+// import { usePage } from '../../contexts/PageContext'
 import { AuthModeType } from '../../common-code/domain-models'
 import { Logo } from '../Logo/Logo'
 import { PageHeadingRow } from './PageHeadingRow'
@@ -34,8 +34,17 @@ export const Header = ({
 }: HeaderProps): React.ReactElement => {
     const { logout, loggedInUser, loginStatus } = useAuth()
     const history = useHistory()
-    const { heading } = usePage()
+    // const { heading } = usePage()
     const route = getRouteName(history.location.pathname)
+
+    console.log(
+        'REDER WHY',
+        authMode,
+        loggedInUser,
+        loginStatus,
+        authMode,
+        setAlert
+    )
 
     const handleLogout = (
         e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -94,12 +103,15 @@ export const Header = ({
     }
 
     const UserInfo = (): React.ReactElement | null => {
+        console.log('GETTING USER INFO,', loggedInUser, loginStatus)
         return loggedInUser
             ? LoggedInUserInfo(loggedInUser)
             : loginStatus === 'LOADING'
             ? null
             : LoggedOutUserInfo(authMode)
     }
+
+    console.log('RENDER HEADERINGIN')
 
     return (
         <header>
@@ -119,7 +131,7 @@ export const Header = ({
                 </GridContainer>
             </div>
             <PageHeadingRow
-                heading={route !== 'UNKNOWN_ROUTE' ? heading : undefined}
+                heading={route !== 'UNKNOWN_ROUTE' ? 'FAKE HEADING' : undefined}
                 isLoading={loginStatus === 'LOADING'}
                 loggedInUser={loggedInUser}
             />
