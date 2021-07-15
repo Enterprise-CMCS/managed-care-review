@@ -10,6 +10,7 @@
 .formContainer {
     > [class^='usa-fieldset'] {
         padding: units(4);
+        margin-bottom: units(2);
         background: $cms-color-white;
         border: 1px solid $theme-color-base-lighter;
         @include u-radius('md');
@@ -46,6 +47,11 @@
     }
     a[class^='usa-button usa-button--unstyled'] {
         margin-bottom: 1.5rem;
+    }
+    li[class^='usa-button-group__item'] {
+        a[class^='usa-button'], button[class^='usa-button'] {
+          margin-top: 0;
+        }
     }
 }
 

@@ -14,6 +14,10 @@ query fetchStateSubmission($input: FetchStateSubmissionInput!) {
             stateCode
             submissionType
             submissionDescription
+            stateContactName
+            stateContactTitleRole
+            stateContactEmail
+            stateContactPhone
             documents {
                 name
                 s3URL

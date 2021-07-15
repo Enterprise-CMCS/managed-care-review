@@ -1,16 +1,12 @@
 import React from 'react'
 import * as Yup from 'yup'
-import dayjs from 'dayjs'
-import isLeapYear from 'dayjs/plugin/isLeapYear'
 import {
-    ErrorMessage,
     Form as UswdsForm,
     FormGroup,
     Fieldset,
     Button,
     Link,
-    DateRangePicker,
-    DatePicker,
+    TextInput,
     ButtonGroup,
     Label,
 } from '@trussworks/react-uswds'
@@ -25,80 +21,17 @@ import {
     UpdateDraftSubmissionInput,
 } from '../../../gen/gqlClient'
 import {
-    formatForForm,
-    isDateRangeEmpty,
-    formatUserInputDate,
-    validateDateFormat,
+    formatForForm
 } from '../../../formHelpers'
 import { FieldRadio } from '../../../components/Form/FieldRadio/FieldRadio'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
 import { MCRouterState } from '../../../constants/routerState'
 
-// Dependency setup
-Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
-dayjs.extend(isLeapYear)
-
-// Formik setup
-const RateDetailsFormSchema = Yup.object().shape({
-    rateType: Yup.string().defined('You must choose a rate certification type'),
-    rateDateStart: Yup.date()
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore-next-line
-        .validateDateFormat('YYYY-MM-DD', true)
-        .defined('You must enter a start date')
-        .typeError('The start date must be in MM/DD/YYYY format'),
-    rateDateEnd: Yup.date()
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore-next-line
-        .validateDateFormat('YYYY-MM-DD', true)
-        .defined('You must enter an end date')
-        .typeError('The end date must be in MM/DD/YYYY format')
-        .min(
-            Yup.ref('rateDateStart'),
-            'The end date must come after the start date'
-        ),
-    rateDateCertified: Yup.date()
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore-next-line
-        .validateDateFormat('YYYY-MM-DD', true)
-        .defined('You must enter the date the document was certified')
-        .typeError('The certified date must be in MM/DD/YYYY format'),
-    effectiveDateStart: Yup.date().when('rateType', {
-        is: 'AMENDMENT',
-        then: Yup.date()
-            .nullable()
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore-next-line
-            .validateDateFormat('YYYY-MM-DD', true)
-            .defined('You must enter a start date')
-            .typeError('The start date must be in MM/DD/YYYY format'),
-    }),
-    effectiveDateEnd: Yup.date().when('rateType', {
-        is: 'AMENDMENT',
-        then: Yup.date()
-            .nullable()
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore-next-line
-            .validateDateFormat('YYYY-MM-DD', true)
-            .defined('You must enter an end date')
-            .typeError('The end date must be in MM/DD/YYYY format')
-            .min(
-                Yup.ref('effectiveDateStart'),
-                'The end date must come after the start date'
-            ),
-    }),
-})
-
-type FormError =
-    FormikErrors<RateDetailsFormValues>[keyof FormikErrors<RateDetailsFormValues>]
-
-export interface RateDetailsFormValues {
-    rateType: RateType | undefined
-    rateDateStart: string
-    rateDateEnd: string
-    rateDateCertified: string
-    effectiveDateStart: string
-    effectiveDateEnd: string
+export interface ContactsFormValues {
+    stateContactName: string
+    stateContactTitleRole: string
+    stateContactEmail: string
+    stateContactPhone: string
 }
 export const Contacts = ({
     draftSubmission,
@@ -117,59 +50,22 @@ export const Contacts = ({
     const redirectToDashboard = React.useRef(false)
     const history = useHistory<MCRouterState>()
 
-    const showFieldErrors = (error?: FormError) =>
-        shouldValidate && Boolean(error)
-
-    const rateDetailsInitialValues: RateDetailsFormValues = {
-        rateType: draftSubmission?.rateType ?? undefined,
-        rateDateStart:
-            (draftSubmission && formatForForm(draftSubmission.rateDateStart)) ??
-            '',
-        rateDateEnd:
-            (draftSubmission && formatForForm(draftSubmission.rateDateEnd)) ??
-            '',
-        rateDateCertified:
-            (draftSubmission &&
-                formatForForm(draftSubmission.rateDateCertified)) ??
-            '',
-        effectiveDateStart:
-            (draftSubmission &&
-                formatForForm(
-                    draftSubmission.rateAmendmentInfo?.effectiveDateStart
-                )) ??
-            '',
-        effectiveDateEnd:
-            (draftSubmission &&
-                formatForForm(
-                    draftSubmission.rateAmendmentInfo?.effectiveDateEnd
-                )) ??
-            '',
+    const contactsInitialValues: ContactsFormValues = {
+        stateContactName: draftSubmission?.stateContactName ?? undefined,
+        stateContactTitleRole: draftSubmission?.stateContactTitleRole ?? undefined,
+        stateContactEmail: draftSubmission?.stateContactEmail ?? undefined,
+        stateContactPhone: draftSubmission?.stateContactPhone ?? undefined,
     }
 
-    const isRateTypeEmpty = (values: RateDetailsFormValues): boolean =>
-        values.rateType === undefined
-
-    const isRateTypeAmendment = (values: RateDetailsFormValues): boolean =>
-        values.rateType === 'AMENDMENT'
-
     const handleFormSubmit = async (
-        values: RateDetailsFormValues,
-        formikHelpers: FormikHelpers<RateDetailsFormValues>
+        values: ContactsFormValues,
+        formikHelpers: FormikHelpers<ContactsFormValues>
     ) => {
         const updatedDraft = updatesFromSubmission(draftSubmission)
-        updatedDraft.rateType = values.rateType
-        updatedDraft.rateDateStart = values.rateDateStart
-        updatedDraft.rateDateEnd = values.rateDateEnd
-        updatedDraft.rateDateCertified = values.rateDateCertified
-
-        if (values.rateType === 'AMENDMENT') {
-            updatedDraft.rateAmendmentInfo = {
-                effectiveDateStart: values.effectiveDateStart,
-                effectiveDateEnd: values.effectiveDateEnd,
-            }
-        } else {
-            updatedDraft.rateAmendmentInfo = null
-        }
+        updatedDraft.stateContactName = values.stateContactName
+        updatedDraft.stateContactTitleRole = values.stateContactTitleRole
+        updatedDraft.stateContactEmail = values.stateContactEmail
+        updatedDraft.stateContactPhone = values.stateContactPhone
 
         try {
             const updatedSubmission = await updateDraft({
@@ -191,28 +87,11 @@ export const Contacts = ({
         }
     }
 
-    const RateDatesErrorMessage = ({
-        startDate,
-        endDate,
-        validationErrorMessage,
-    }: {
-        startDate: string
-        endDate: string
-        validationErrorMessage: string
-    }): React.ReactElement => (
-        <ErrorMessage>
-            {isDateRangeEmpty(startDate, endDate)
-                ? 'You must provide a start and an end date'
-                : validationErrorMessage}
-        </ErrorMessage>
-    )
-
     return (
         <>
             <Formik
-                initialValues={rateDetailsInitialValues}
+                initialValues={contactsInitialValues}
                 onSubmit={handleFormSubmit}
-                validationSchema={RateDetailsFormSchema}
             >
                 {({
                     values,
@@ -226,241 +105,138 @@ export const Contacts = ({
                     <>
                         <UswdsForm
                             className={styles.formContainer}
-                            id="RateDetailsForm"
-                            aria-label="Rate Details Form"
+                            id="ContactsForm"
+                            aria-label="Contacts Form"
                             onSubmit={(e) => {
                                 e.preventDefault()
                                 if (!isValidating) handleSubmit()
                             }}
                         >
                             <fieldset className="usa-fieldset">
-                                <legend className="srOnly">Rate Details</legend>
+                                <h3>State contacts</h3>
+                                <span>Provide contact information for the state personnel you'd like to recieve all CMS communication about this submission.</span>
+                                <legend className="srOnly">State contacts</legend>
                                 {formAlert && formAlert}
-                                <span>All fields are required</span>
-                                <FormGroup
-                                    error={showFieldErrors(errors.rateType)}
-                                >
-                                    <Fieldset
-                                        className={styles.radioGroup}
-                                        legend="Rate certification type"
-                                    >
-                                        {showFieldErrors(errors.rateType) && (
-                                            <ErrorMessage>
-                                                {errors.rateType}
-                                            </ErrorMessage>
-                                        )}
-                                        <FieldRadio
-                                            id="newRate"
-                                            name="rateType"
-                                            label="New rate certification"
-                                            value={'NEW'}
-                                            checked={values.rateType === 'NEW'}
-                                            aria-required
-                                        />
-                                        <FieldRadio
-                                            id="amendmentRate"
-                                            name="rateType"
-                                            label="Amendment to prior rate certification"
-                                            value={'AMENDMENT'}
-                                            checked={
-                                                values.rateType === 'AMENDMENT'
-                                            }
-                                            aria-required
-                                        />
-                                    </Fieldset>
-                                </FormGroup>
 
-                                {!isRateTypeEmpty(values) && (
-                                    <>
-                                        <FormGroup
-                                            error={
-                                                showFieldErrors(
-                                                    errors.rateDateStart
-                                                ) ||
-                                                showFieldErrors(
-                                                    errors.rateDateEnd
-                                                )
-                                            }
-                                        >
-                                            <Fieldset
-                                                legend={
-                                                    isRateTypeAmendment(values)
-                                                        ? 'Rating period of original rate certification'
-                                                        : 'Rating period'
-                                                }
-                                            >
-                                                {showFieldErrors(
-                                                    errors.rateDateStart ||
-                                                        errors.rateDateEnd
-                                                ) && (
-                                                    <RateDatesErrorMessage
-                                                        startDate={
-                                                            values.rateDateStart
-                                                        }
-                                                        endDate={
-                                                            values.rateDateEnd
-                                                        }
-                                                        validationErrorMessage={
-                                                            errors.rateDateStart ||
-                                                            errors.rateDateEnd ||
-                                                            'Invalid date'
-                                                        }
-                                                    />
-                                                )}
-
-                                                <DateRangePicker
-                                                    className={
-                                                        styles.dateRangePicker
-                                                    }
-                                                    startDateHint="mm/dd/yyyy"
-                                                    startDateLabel="Start date"
-                                                    startDatePickerProps={{
-                                                        disabled: false,
-                                                        id: 'rateDateStart',
-                                                        name: 'rateDateStart',
-                                                        defaultValue:
-                                                            values.rateDateStart,
-                                                        onChange: (val) =>
-                                                            setFieldValue(
-                                                                'rateDateStart',
-                                                                formatUserInputDate(
-                                                                    val
-                                                                )
-                                                            ),
-                                                    }}
-                                                    endDateHint="mm/dd/yyyy"
-                                                    endDateLabel="End date"
-                                                    endDatePickerProps={{
-                                                        disabled: false,
-                                                        id: 'rateDateEnd',
-                                                        name: 'rateDateEnd',
-                                                        defaultValue:
-                                                            values.rateDateEnd,
-                                                        onChange: (val) =>
-                                                            setFieldValue(
-                                                                'rateDateEnd',
-                                                                formatUserInputDate(
-                                                                    val
-                                                                )
-                                                            ),
-                                                    }}
-                                                />
-                                            </Fieldset>
-                                        </FormGroup>
-
-                                        {isRateTypeAmendment(values) && (
-                                            <>
-                                                <FormGroup>
-                                                    <Fieldset legend="Effective dates of rate amendment">
-                                                        {showFieldErrors(
-                                                            errors.effectiveDateStart ||
-                                                                errors.effectiveDateEnd
-                                                        ) && (
-                                                            <RateDatesErrorMessage
-                                                                startDate={
-                                                                    values.effectiveDateStart
-                                                                }
-                                                                endDate={
-                                                                    values.effectiveDateEnd
-                                                                }
-                                                                validationErrorMessage={
-                                                                    errors.effectiveDateStart ||
-                                                                    errors.effectiveDateEnd ||
-                                                                    'Invalid date'
-                                                                }
-                                                            />
-                                                        )}
-
-                                                        <DateRangePicker
-                                                            className={
-                                                                styles.dateRangePicker
-                                                            }
-                                                            startDateHint="mm/dd/yyyy"
-                                                            startDateLabel="Start date"
-                                                            startDatePickerProps={{
-                                                                disabled: false,
-                                                                id: 'effectiveDateStart',
-                                                                name: 'effectiveDateStart',
-                                                                defaultValue:
-                                                                    values.effectiveDateStart,
-                                                                onChange: (
-                                                                    val
-                                                                ) =>
-                                                                    setFieldValue(
-                                                                        'effectiveDateStart',
-                                                                        formatUserInputDate(
-                                                                            val
-                                                                        )
-                                                                    ),
-                                                            }}
-                                                            endDateHint="mm/dd/yyyy"
-                                                            endDateLabel="End date"
-                                                            endDatePickerProps={{
-                                                                disabled: false,
-                                                                id: 'effectiveDateEnd',
-                                                                name: 'effectiveDateEnd',
-                                                                defaultValue:
-                                                                    values.effectiveDateEnd,
-                                                                onChange: (
-                                                                    val
-                                                                ) =>
-                                                                    setFieldValue(
-                                                                        'effectiveDateEnd',
-                                                                        formatUserInputDate(
-                                                                            val
-                                                                        )
-                                                                    ),
-                                                            }}
-                                                        />
-                                                    </Fieldset>
-                                                </FormGroup>
-                                            </>
-                                        )}
-                                        <FormGroup
-                                            error={showFieldErrors(
-                                                errors.rateDateCertified
-                                            )}
-                                        >
+                                <>
+                                    <FormGroup>
+                                        <Fieldset legend="State contact 1 (required)">
                                             <Label
-                                                htmlFor="rateDateCertified"
-                                                id="rateDateCertifiedLabel"
+                                                htmlFor="stateContactName1"
+                                                id="stateContactName1"
                                             >
-                                                {isRateTypeAmendment(values)
-                                                    ? 'Date certified for rate amendment'
-                                                    : 'Date certified'}
+                                            Name
                                             </Label>
-                                            <div
-                                                className="usa-hint"
-                                                id="rateDateCertifiedHint"
-                                            >
-                                                mm/dd/yyyy
-                                            </div>
-                                            {showFieldErrors(
-                                                errors.rateDateCertified
-                                            ) && (
-                                                <ErrorMessage>
-                                                    {errors.rateDateCertified}
-                                                </ErrorMessage>
-                                            )}
-                                            <DatePicker
-                                                aria-required
-                                                aria-describedby="rateDateCertifiedLabel rateDateCertifiedHint"
-                                                id="rateDateCertified"
-                                                name="rateDateCertified"
-                                                defaultValue={
-                                                    values.rateDateCertified
-                                                }
-                                                onChange={(val) =>
-                                                    setFieldValue(
-                                                        'rateDateCertified',
-                                                        formatUserInputDate(val)
-                                                    )
-                                                }
+                                            <TextInput
+                                                id="stateContactName1"
+                                                name="stateContactName1"
+                                                type="text"
+                                                defaultValue=""
                                             />
-                                        </FormGroup>
-                                    </>
-                                )}
+                                            <Label
+                                                htmlFor="stateContactTitleRole1"
+                                                id="stateContactTitleRole1"
+                                            >
+                                            Title/Role
+                                            </Label>
+                                            <TextInput
+                                                id="stateContactTitleRole1"
+                                                name="stateContactTitleRole1"
+                                                type="text"
+                                                defaultValue=""
+                                            />
+                                            <Label
+                                                htmlFor="stateContactEmail1"
+                                                id="stateContactEmail1"
+                                            >
+                                            Email
+                                            </Label>
+                                            <TextInput
+                                                id="stateContactEmail1"
+                                                name="stateContactEmail1"
+                                                type="text"
+                                                defaultValue=""
+                                            />
+                                            <Label
+                                                htmlFor="stateContactPhone1"
+                                                id="stateContactPhone1"
+                                            >
+                                            Phone
+                                            </Label>
+                                            <TextInput
+                                                id="stateContactPhone1"
+                                                name="stateContactPhone1"
+                                                type="text"
+                                                defaultValue=""
+                                            />
+                                        </Fieldset>
+                                    </FormGroup>
+                                </>
                             </fieldset>
+
+                            // TODO: dont show when contract only
+                            <fieldset className="usa-fieldset">
+                                <h3>Actuary contacts</h3>
+                                <span>Provide contact information for actuaries who worked directly on this submission.</span>
+                                <legend className="srOnly">Actuary contacts</legend>
+                                {formAlert && formAlert}
+
+                                <>
+                                    <FormGroup>
+                                        <Fieldset legend="Certifying actuary (required)">
+                                            <Label
+                                                htmlFor="certifyingActuaryName1"
+                                                id="certifyingActuaryName1"
+                                            >
+                                            Name
+                                            </Label>
+                                            <TextInput
+                                                id="certifyingActuaryName1"
+                                                name="certifyingActuaryName1"
+                                                type="text"
+                                                defaultValue=""
+                                            />
+                                            <Label
+                                                htmlFor="certifyingActuaryTitleRole1"
+                                                id="certifyingActuaryTitleRole1"
+                                            >
+                                            Title/Role
+                                            </Label>
+                                            <TextInput
+                                                id="certifyingActuaryTitleRole1"
+                                                name="certifyingActuaryTitleRole1"
+                                                type="text"
+                                                defaultValue=""
+                                            />
+                                            <Label
+                                                htmlFor="certifyingActuaryEmail1"
+                                                id="certifyingActuaryEmail1"
+                                            >
+                                            Email
+                                            </Label>
+                                            <TextInput
+                                                id="certifyingActuaryEmail1"
+                                                name="certifyingActuaryEmail1"
+                                                type="text"
+                                                defaultValue=""
+                                            />
+                                            <Label
+                                                htmlFor="certifyingActuaryPhone1"
+                                                id="certifyingActuaryPhone1"
+                                            >
+                                            Phone
+                                            </Label>
+                                            <TextInput
+                                                id="certifyingActuaryPhone1"
+                                                name="certifyingActuaryPhone1"
+                                                type="text"
+                                                defaultValue=""
+                                            />
+                                        </Fieldset>
+                                    </FormGroup>
+                                </>
+                            </fieldset>
+
                             <div className={styles.pageActions}>
                                 <Button
                                     type="button"
@@ -491,7 +267,7 @@ export const Contacts = ({
                                         asCustom={NavLink}
                                         className="usa-button usa-button--outline"
                                         variant="unstyled"
-                                        to={`contract-details`}
+                                        to={`rate-details`}
                                     >
                                         Back
                                     </Link>

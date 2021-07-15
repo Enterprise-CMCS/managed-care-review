@@ -67,6 +67,10 @@ type DraftSubmissionType = {
     submissionType: SubmissionType
     createdAt: Date
     updatedAt: DateTime
+    stateContactName: string
+    stateContactTitleRole: string
+    stateContactEmail: string
+    stateContactPhone: string
     documents: SubmissionDocument[]
     contractType?: ContractType
     contractDateStart?: Date

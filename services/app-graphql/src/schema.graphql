@@ -99,6 +99,20 @@ type Program {
     name: String!
 }
 
+type StateContact {
+    name: String!
+    titleRole: String!
+    email: String!
+    phone: String!
+}
+
+type ActuaryContact {
+    name: String!
+    titleRole: String!
+    email: String!
+    phone: String!
+}
+
 type Document {
     name: String!
     s3URL: String!
@@ -185,6 +199,10 @@ type DraftSubmission {
     name: String!
     createdAt: Date!
     updatedAt: DateTime!
+    stateContactName: String!
+    stateContactTitleRole: String!
+    stateContactEmail: String!
+    stateContactPhone: String!
     documents: [Document!]!
     contractType: ContractType
     contractDateStart: Date
