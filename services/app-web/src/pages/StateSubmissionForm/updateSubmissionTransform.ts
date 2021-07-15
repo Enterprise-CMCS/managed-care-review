@@ -1,6 +1,6 @@
 import { DraftSubmission, DraftSubmissionUpdates } from '../../gen/gqlClient'
 
-/* 
+/*
     Clean out _typename from submission
     If you pass gql __typename within a mutation input things break; however,  __typename comes down on cached queries by default
     This function is needed to remove _typename  for optional objects such as contractAmendmentInfo and rateAmendmentInfo
@@ -36,5 +36,9 @@ export function updatesFromSubmission(
         rateDateEnd: draft.rateDateEnd,
         rateDateCertified: draft.rateDateCertified,
         rateAmendmentInfo: stripTypename(draft.rateAmendmentInfo),
+        stateContactName: draft.stateContactName,
+        stateContactTitleRole: draft.stateContactTitleRole,
+        stateContactEmail: draft.stateContactEmail,
+        stateContactPhone: draft.stateContactPhone,
     }
 }

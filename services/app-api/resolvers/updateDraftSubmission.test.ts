@@ -41,6 +41,10 @@ describe('updateDraftSubmission', () => {
                     effectiveDateStart: new Date(),
                     effectiveDateEnd: new Date(),
                 },
+                stateContactName: '',
+                stateContactTitleRole: '',
+                stateContactEmail: '',
+                stateContactPhone: '',
             }
 
             const updates: DraftSubmissionUpdates = {
@@ -59,6 +63,10 @@ describe('updateDraftSubmission', () => {
                 rateDateEnd: null,
                 rateDateCertified: null,
                 rateAmendmentInfo: undefined,
+                stateContactName: '',
+                stateContactTitleRole: '',
+                stateContactEmail: '',
+                stateContactPhone: '',
             }
 
             applyUpdates(baseDraft, updates)
@@ -91,6 +99,10 @@ describe('updateDraftSubmission', () => {
                 documents: [],
                 managedCareEntities: [],
                 federalAuthorities: [],
+                stateContactName: '',
+                stateContactTitleRole: '',
+                stateContactEmail: '',
+                stateContactPhone: '',
             }
 
             const updates: DraftSubmissionUpdates = {
@@ -118,6 +130,10 @@ describe('updateDraftSubmission', () => {
                     effectiveDateStart: null,
                     effectiveDateEnd: null,
                 },
+                stateContactName: '',
+                stateContactTitleRole: '',
+                stateContactEmail: '',
+                stateContactPhone: '',
             }
 
             applyUpdates(baseDraft, updates)
@@ -152,6 +168,10 @@ describe('updateDraftSubmission', () => {
                 documents: [],
                 managedCareEntities: [],
                 federalAuthorities: [],
+                stateContactName: '',
+                stateContactTitleRole: '',
+                stateContactEmail: '',
+                stateContactPhone: '',
             }
 
             const updates: DraftSubmissionUpdates = {
@@ -178,6 +198,10 @@ describe('updateDraftSubmission', () => {
                 rateDateStart: null,
                 rateDateEnd: null,
                 rateDateCertified: null,
+                stateContactName: '',
+                stateContactTitleRole: '',
+                stateContactEmail: '',
+                stateContactPhone: '',
             }
 
             applyUpdates(baseDraft, updates)

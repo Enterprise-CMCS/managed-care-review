@@ -58,6 +58,11 @@ export function applyUpdates(
     draft.submissionDescription = updates.submissionDescription
     draft.documents = updates.documents
 
+    draft.stateContactName = updates.stateContactName
+    draft.stateContactTitleRole = updates.stateContactTitleRole
+    draft.stateContactEmail = updates.stateContactEmail
+    draft.stateContactPhone = updates.stateContactPhone
+
     draft.contractType = updates.contractType ?? undefined
     draft.contractDateStart = updates.contractDateStart ?? undefined
     draft.contractDateEnd = updates.contractDateEnd ?? undefined

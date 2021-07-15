@@ -227,6 +227,10 @@ type StateSubmission {
     name: String!
     createdAt: Date!
     updatedAt: DateTime!
+    stateContactName: String!
+    stateContactTitleRole: String!
+    stateContactEmail: String!
+    stateContactPhone: String!
     documents: [Document!]!
     contractAmendmentInfo: ContractAmendmentInfo
     submittedAt: Date!
@@ -248,6 +252,10 @@ input DraftSubmissionUpdates {
     programID: String!
     submissionType: SubmissionType!
     submissionDescription: String!
+    stateContactName: String!
+    stateContactTitleRole: String!
+    stateContactEmail: String!
+    stateContactPhone: String!
     documents: [DocumentInput!]!
     contractType: ContractType
     contractDateStart: Date

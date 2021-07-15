@@ -442,6 +442,43 @@ export const ReviewSubmit = ({
                     />
                 </dl>
             </section>
+            <section id="stateContacts" className={styles.reviewSection}>
+                <dl>
+                    <SectionHeader header="State contacts" to="contacts" />
+                    <DoubleColumnRow
+                        left={
+                            <DataDetail
+                                id="stateContactName"
+                                label="State contact name"
+                                data={draftSubmission.stateContactName}
+                            />
+                        }
+                        right={
+                          <DataDetail
+                              id="stateContactTitleRole"
+                              label="State contact title/role"
+                              data={draftSubmission.stateContactTitleRole}
+                          />
+                        }
+                    />
+                    <DoubleColumnRow
+                        left={
+                          <DataDetail
+                              id="stateContactEmail"
+                              label="State contact email"
+                              data={draftSubmission.stateContactEmail}
+                          />
+                        }
+                        right={
+                          <DataDetail
+                              id="stateContactPhone"
+                              label="State contact phone"
+                              data={draftSubmission.stateContactPhone}
+                          />
+                        }
+                    />
+                </dl>
+            </section>
             <section id="documents" className={styles.reviewSection}>
                 <SectionHeader header="Documents" to="documents" />
                 <span className="text-bold">{documentsSummary}</span>

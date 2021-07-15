@@ -200,6 +200,18 @@ export class SubmissionStoreType {
     })
     stateNumber: number
 
+    @attribute()
+    stateContactName: string
+
+    @attribute()
+    stateContactTitleRole: string
+
+    @attribute()
+    stateContactEmail: string
+
+    @attribute()
+    stateContactPhone: string
+
     @attribute({ memberType: embed(DocumentStoreT) })
     documents: Array<DocumentStoreT>
 
@@ -219,6 +231,10 @@ export class SubmissionStoreType {
         this.stateCode = ''
         this.programID = ''
         this.stateNumber = -1
+        this.stateContactName = ''
+        this.stateContactTitleRole = ''
+        this.stateContactEmail = ''
+        this.stateContactPhone = ''
         this.documents = []
         this.contractType = undefined
         this.contractDateStart = undefined

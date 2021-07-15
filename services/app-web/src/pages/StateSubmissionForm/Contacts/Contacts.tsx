@@ -17,7 +17,6 @@ import styles from '../StateSubmissionForm.module.scss'
 
 import {
     DraftSubmission,
-    RateType,
     UpdateDraftSubmissionInput,
 } from '../../../gen/gqlClient'
 import {
@@ -33,6 +32,7 @@ export interface ContactsFormValues {
     stateContactEmail: string
     stateContactPhone: string
 }
+
 export const Contacts = ({
     draftSubmission,
     showValidations = false,
@@ -51,10 +51,10 @@ export const Contacts = ({
     const history = useHistory<MCRouterState>()
 
     const contactsInitialValues: ContactsFormValues = {
-        stateContactName: draftSubmission?.stateContactName ?? undefined,
-        stateContactTitleRole: draftSubmission?.stateContactTitleRole ?? undefined,
-        stateContactEmail: draftSubmission?.stateContactEmail ?? undefined,
-        stateContactPhone: draftSubmission?.stateContactPhone ?? undefined,
+        stateContactName: draftSubmission?.stateContactName,
+        stateContactTitleRole: draftSubmission?.stateContactTitleRole,
+        stateContactEmail: draftSubmission?.stateContactEmail,
+        stateContactPhone: draftSubmission?.stateContactPhone,
     }
 
     const handleFormSubmit = async (
@@ -122,59 +122,71 @@ export const Contacts = ({
                                     <FormGroup>
                                         <Fieldset legend="State contact 1 (required)">
                                             <Label
-                                                htmlFor="stateContactName1"
-                                                id="stateContactName1"
+                                                htmlFor="stateContactName"
+                                                id="stateContactName"
                                             >
                                             Name
                                             </Label>
                                             <TextInput
-                                                id="stateContactName1"
-                                                name="stateContactName1"
+                                                id="stateContactName"
+                                                name="stateContactName"
                                                 type="text"
-                                                defaultValue=""
+                                                defaultValue={values.stateContactName}
+                                                onChange={(e) =>
+                                                    setFieldValue('stateContactName', e.target.value)
+                                                }
                                             />
                                             <Label
-                                                htmlFor="stateContactTitleRole1"
-                                                id="stateContactTitleRole1"
+                                                htmlFor="stateContactTitleRole"
+                                                id="stateContactTitleRole"
                                             >
                                             Title/Role
                                             </Label>
                                             <TextInput
-                                                id="stateContactTitleRole1"
-                                                name="stateContactTitleRole1"
+                                                id="stateContactTitleRole"
+                                                name="stateContactTitleRole"
                                                 type="text"
-                                                defaultValue=""
+                                                defaultValue={values.stateContactTitleRole}
+                                                onChange={(e) =>
+                                                    setFieldValue('stateContactTitleRole', e.target.value)
+                                                }
                                             />
                                             <Label
-                                                htmlFor="stateContactEmail1"
-                                                id="stateContactEmail1"
+                                                htmlFor="stateContactEmail"
+                                                id="stateContactEmail"
                                             >
                                             Email
                                             </Label>
                                             <TextInput
-                                                id="stateContactEmail1"
-                                                name="stateContactEmail1"
+                                                id="stateContactEmail"
+                                                name="stateContactEmail"
                                                 type="text"
-                                                defaultValue=""
+                                                defaultValue={values.stateContactEmail}
+                                                onChange={(e) =>
+                                                    setFieldValue('stateContactEmail', e.target.value)
+                                                }
                                             />
                                             <Label
-                                                htmlFor="stateContactPhone1"
-                                                id="stateContactPhone1"
+                                                htmlFor="stateContactPhone"
+                                                id="stateContactPhone"
                                             >
                                             Phone
                                             </Label>
                                             <TextInput
-                                                id="stateContactPhone1"
-                                                name="stateContactPhone1"
+                                                id="stateContactPhone"
+                                                name="stateContactPhone"
                                                 type="text"
-                                                defaultValue=""
+                                                defaultValue={values.stateContactPhone}
+                                                onChange={(e) =>
+                                                    setFieldValue('stateContactPhone', e.target.value)
+                                                }
                                             />
                                         </Fieldset>
                                     </FormGroup>
                                 </>
                             </fieldset>
 
-                            // TODO: dont show when contract only
+                            {/* TODO: dont show when contract only */}
                             <fieldset className="usa-fieldset">
                                 <h3>Actuary contacts</h3>
                                 <span>Provide contact information for actuaries who worked directly on this submission.</span>

@@ -57,6 +57,10 @@ const mockDraftSubmission: DraftSubmission = {
     rateDateEnd: null,
     rateDateCertified: null,
     rateAmendmentInfo: null,
+    stateContactName: 'name',
+    stateContactTitleRole: 'title',
+    stateContactEmail: 'email',
+    stateContactPhone: '(555)555-5555',
 }
 const mockCompleteDraftSubmission: DraftSubmission = {
     createdAt: new Date(),
@@ -83,6 +87,10 @@ const mockCompleteDraftSubmission: DraftSubmission = {
     rateDateEnd: new Date(),
     rateDateCertified: new Date(),
     rateAmendmentInfo: null,
+    stateContactName: 'name',
+    stateContactTitleRole: 'title',
+    stateContactEmail: 'email',
+    stateContactPhone: '(555)555-5555',
 }
 
 const mockNewDraftSubmission: DraftSubmission = {
@@ -110,6 +118,10 @@ const mockNewDraftSubmission: DraftSubmission = {
     rateDateStart: null,
     rateDateEnd: null,
     rateDateCertified: null,
+    stateContactName: 'name',
+    stateContactTitleRole: 'title',
+    stateContactEmail: 'email',
+    stateContactPhone: '(555)555-5555',
 }
 
 export function mockStateSubmission(): Partial<StateSubmission> {
