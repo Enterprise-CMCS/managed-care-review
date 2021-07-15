@@ -87,6 +87,10 @@ div[class^='usa-step-indicator'] {
     width: 60rem;
     margin: 1.25rem auto;
     text-align: center;
+
+    ol {
+        justify-content: center;
+    }
 }
 
 [class^='usa-step-indicator__header'] {
