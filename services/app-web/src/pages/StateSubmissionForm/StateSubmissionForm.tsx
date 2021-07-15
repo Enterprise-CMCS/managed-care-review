@@ -110,9 +110,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
     }): React.ReactElement | null => {
         const currentFormPage = getRouteName(pathname)
 
-        console.log(currentFormPage)
-        console.log('test', submissionType)
-
         let formStepCompleted = true
         let formStepStatus: 'current' | 'complete' | undefined
 
