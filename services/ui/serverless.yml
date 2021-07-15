@@ -130,7 +130,7 @@ resources:
             ViewerProtocolPolicy: redirect-to-https
             FunctionAssociations:
               - EventType: viewer-response
-                FunctionARN: !GetAtt HstsCloudfrontFunction.FunctionMetadata.FunctionARN{}
+                FunctionARN: !GetAtt HstsCloudfrontFunction.FunctionMetadata.FunctionARN
           ViewerCertificate:
             Fn::If:
               - CreateCustomCloudFrontDomain
