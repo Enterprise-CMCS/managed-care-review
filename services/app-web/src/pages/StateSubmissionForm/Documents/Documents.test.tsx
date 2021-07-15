@@ -416,7 +416,9 @@ describe('Documents', () => {
 
             await waitFor(() => {
                 expect(
-                    screen.getByText('You must address duplicate name errors')
+                    screen.getByText(
+                        'You must remove all documents with error messages before continuing'
+                    )
                 ).toBeInTheDocument()
 
                 expect(continueButton).toBeDisabled()

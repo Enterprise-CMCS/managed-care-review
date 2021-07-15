@@ -559,7 +559,7 @@ describe('State Submission', () => {
                 // go back to documents page and remove file
                 cy.visit(`/submissions/${draftSubmissionID}/documents`)
                 cy.findAllByText('Remove').should('exist').first().safeClick()
-                cy.findAllByAltText('trussel-guide.pdf').should('not.exist')
+                cy.findAllByText('trussel-guide.pdf').should('not.exist')
 
                 // allow Save as Draft with no documents
                 cy.navigateForm('Save as draft')
@@ -570,7 +570,7 @@ describe('State Submission', () => {
 
                 // reload page,validate there are still no documents,then add duplicate documents
                 cy.visit(`/submissions/${draftSubmissionID}/documents`)
-                cy.findAllByAltText('trussel-guide.pdf').should('not.exist')
+                cy.findAllByText('trussel-guide.pdf').should('not.exist')
 
                 cy.findByTestId('file-input-input').attachFile(
                     'documents/trussel-guide.pdf'
@@ -594,7 +594,7 @@ describe('State Submission', () => {
                 cy.findByTestId('file-input-preview-list')
                     .findAllByRole('listitem')
                     .should('have.length', 1)
-                cy.findAllByAltText('trussel-guide.pdf').should('exist')
+                cy.findAllByText('trussel-guide.pdf').should('exist')
             })
         })
 

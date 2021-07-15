@@ -192,11 +192,12 @@ export const Documents = ({
             </Alert>
         ) : (
             <Alert
-                type="warning"
-                heading="Documents error"
+                type="error"
+                heading="Remove files with errors"
                 className="margin-bottom-2"
             >
-                You must address duplicate name errors
+                You must remove all documents with error messages before
+                continuing
             </Alert>
         )
 
