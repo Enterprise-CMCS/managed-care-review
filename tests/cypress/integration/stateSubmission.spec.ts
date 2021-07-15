@@ -547,7 +547,7 @@ describe('State Submission', () => {
 
                 // add valid file and save as draft
                 cy.findByTestId('file-input-input').attachFile(
-                    'documents/trussel-guide.pdf'
+                    'documents/how-to-open-source.pdf'
                 )
                 cy.findAllByTestId('file-input-preview-image').should(
                     'not.have.class',
@@ -559,7 +559,7 @@ describe('State Submission', () => {
                 // go back to documents page and remove file
                 cy.visit(`/submissions/${draftSubmissionID}/documents`)
                 cy.findAllByText('Remove').should('exist').first().safeClick()
-                cy.findAllByText('trussel-guide.pdf').should('not.exist')
+                cy.findAllByText('how-to-open-source.pdf').should('not.exist')
 
                 // allow Save as Draft with no documents
                 cy.navigateForm('Save as draft')
@@ -570,19 +570,26 @@ describe('State Submission', () => {
 
                 // reload page,validate there are still no documents,then add duplicate documents
                 cy.visit(`/submissions/${draftSubmissionID}/documents`)
-                cy.findAllByText('trussel-guide.pdf').should('not.exist')
+                cy.findAllByText('documents/how-to-open-source.pdf').should(
+                    'not.exist'
+                )
 
                 cy.findByTestId('file-input-input').attachFile(
                     'documents/trussel-guide.pdf'
                 )
-                cy.findByTestId('file-input-input').attachFile(
-                    'documents/trussel-guide.pdf'
-                )
-                cy.findByText('Duplicate file').should('exist')
                 cy.findAllByTestId('file-input-preview-image').should(
                     'not.have.class',
                     'is-loading'
                 )
+                cy.findByTestId('file-input-input').attachFile(
+                    'documents/trussel-guide.pdf'
+                )
+                cy.findAllByTestId('file-input-preview-image').should(
+                    'not.have.class',
+                    'is-loading'
+                )
+                cy.findByText('Duplicate file').should('exist')
+
                 // allow Save as Draft with duplicate files
                 cy.navigateForm('Save as draft')
                 cy.findByRole('heading', { level: 1, name: /Dashboard/ })

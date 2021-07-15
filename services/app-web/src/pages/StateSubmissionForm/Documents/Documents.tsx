@@ -132,7 +132,7 @@ export const Documents = ({
             const documents = fileItems.reduce(
                 (formDataDocuments, fileItem) => {
                     if (!fileItem.s3URL)
-                        throw Error(
+                        console.log(
                             'The file item has no s3url, this should not happen on form submit'
                         )
                     else if (fileItem.status === 'DUPLICATE_NAME_ERROR')
