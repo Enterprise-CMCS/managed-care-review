@@ -74,7 +74,7 @@ jobs:
       - name: read .nvmrc
         id: node_version
         run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v2.2.0
         with:
           node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
       - name: Combine yarn.lock files to single file
