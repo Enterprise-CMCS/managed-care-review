@@ -441,31 +441,24 @@ describe('State Submission', () => {
             cy.findByLabelText('Annual rate update').should('be.checked')
         })
 
-        it('user can complete a contract submission and see submission summary', () => {
+        it.only('user can complete a contract submission, load dashboard with default program, and see submission summary', () => {
             cy.login()
+            cy.startNewContractOnlySubmission()
 
-            // Add a new contract only submission
-            cy.findByRole('link', { name: 'Start new submission' }).click({
-                force: true,
-            })
-            cy.findByLabelText(
-                'Contract action and rate certification'
-            ).safeClick()
-            cy.findByRole('textbox', { name: 'Submission description' })
+            // Change program to something farther down list
+            cy.findByText('Back').click()
+            cy.findByRole('heading', { name: 'Submission type' }).should(
+                'exist'
+            )
+            cy.findByRole('combobox', { name: 'Program' })
                 .should('exist')
-                .type('description of submission')
+                .select('PMAP')
             cy.findByRole('button', {
                 name: 'Continue',
             }).safeClick()
 
-            // Check Step Indicator loads with Contract Details heading
-            cy.findByTestId('step-indicator')
-                .findAllByText('Contract Details')
-                .should('have.length', 2)
-
             // Fill out contract details
-            cy.findByText(/MN-MSHO-/).should('exist')
-            cy.findByLabelText('Base contract').safeClick()
+            cy.findByLabelText('Base contract').should('exist').safeClick()
             cy.findByLabelText('Start date').type('04/01/2024')
             cy.findByLabelText('End date').type('03/31/2025').blur()
             cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
@@ -502,35 +495,35 @@ describe('State Submission', () => {
                 submissionId = pathnameArray[2]
             })
 
-            // Submit
+            // Submit, sent to dashboard
             cy.navigateForm('Submit')
             cy.findByRole('dialog').should('exist')
-            // Submit the Modal
             cy.navigateForm('Confirm submit')
-
-            // User sent to dashboard
+            cy.findByRole('progressbar', { name: 'Loading' }).should(
+                'not.exist'
+            )
             cy.findByText('Dashboard').should('exist')
+            cy.findByText('PMAP').should('exist')
 
+            // Link to submission summary
             cy.location().then((loc) => {
                 expect(loc.search).to.match(/.*justSubmitted=*/)
                 const submissionName = loc.search.split('=').pop()
                 cy.findByText(`${submissionName} was sent to CMS`).should(
                     'exist'
                 )
-                cy.findByText(submissionName).should('exist')
-                cy.findByText(submissionName).click()
-
-                // Click submitted submission to view SubmissionSummary
-                cy.findByRole('progressbar', { name: 'Loading' }).should(
-                    'not.exist'
-                )
+                cy.findByText(submissionName).should('exist').click()
+                cy.url({ timeout: 10_000 }).should('contain', submissionId)
                 cy.findByTestId('submission-summary').should('exist')
-
                 cy.findByRole('heading', {
                     name: `Minnesota ${submissionName}`,
                 }).should('exist')
-                cy.findByText('Back to state dashboard').should('exist')
-                cy.url({ timeout: 10_000 }).should('contain', submissionId)
+
+                // Link back to dashboard, submission visible in default program
+                cy.findByText('Back to state dashboard').should('exist').click()
+                cy.findByText('Dashboard').should('exist')
+                cy.findByText('PMAP').should('exist')
+                cy.findByText(submissionName).should('exist')
             })
         })
     })
