@@ -15,7 +15,7 @@ import styles from './Header.module.scss'
 import { getRouteName } from '../../constants/routes'
 import { useHistory } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-// import { usePage } from '../../contexts/PageContext'
+import { usePage } from '../../contexts/PageContext'
 import { AuthModeType } from '../../common-code/domain-models'
 import { Logo } from '../Logo/Logo'
 import { PageHeadingRow } from './PageHeadingRow'
@@ -34,7 +34,7 @@ export const Header = ({
 }: HeaderProps): React.ReactElement => {
     const { logout, loggedInUser, loginStatus } = useAuth()
     const history = useHistory()
-    // const { heading } = usePage()
+    const { heading } = usePage()
     const route = getRouteName(history.location.pathname)
 
     console.log(
@@ -42,6 +42,7 @@ export const Header = ({
         authMode,
         loggedInUser,
         loginStatus,
+        heading,
         authMode,
         setAlert
     )
@@ -131,7 +132,7 @@ export const Header = ({
                 </GridContainer>
             </div>
             <PageHeadingRow
-                heading={route !== 'UNKNOWN_ROUTE' ? 'FAKE HEADING' : undefined}
+                heading={route !== 'UNKNOWN_ROUTE' ? heading : undefined}
                 isLoading={loginStatus === 'LOADING'}
                 loggedInUser={loggedInUser}
             />
