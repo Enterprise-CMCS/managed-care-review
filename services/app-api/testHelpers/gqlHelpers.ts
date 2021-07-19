@@ -107,10 +107,14 @@ const createAndUpdateTestDraftSubmission = async (
                 s3URL: 'fakeS3URL',
             },
         ],
-        stateContactName: 'name',
-        stateContactTitleRole: 'title',
-        stateContactEmail: 'email',
-        stateContactPhone: '(555)555-5555',
+        stateContacts: [
+            {
+                name: 'test name',
+                titleRole: 'test title',
+                email: 'email@test.com',
+                phone: '(555)555-5555',
+            }
+        ],
         contractType: 'BASE' as const,
         contractDateStart: startDate,
         contractDateEnd: endDate,

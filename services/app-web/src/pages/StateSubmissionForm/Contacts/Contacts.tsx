@@ -10,7 +10,7 @@ import {
     ButtonGroup,
     Label,
 } from '@trussworks/react-uswds'
-import { Formik, FormikErrors, FormikHelpers } from 'formik'
+import { Formik, FormikErrors, FormikHelpers, Field, FieldArray } from 'formik'
 import { NavLink, useHistory } from 'react-router-dom'
 
 import styles from '../StateSubmissionForm.module.scss'
@@ -23,14 +23,18 @@ import {
     formatForForm
 } from '../../../formHelpers'
 import { FieldRadio } from '../../../components/Form/FieldRadio/FieldRadio'
-import { updatesFromSubmission } from '../updateSubmissionTransform'
+import { updatesFromSubmission, stripTypename } from '../updateSubmissionTransform'
 import { MCRouterState } from '../../../constants/routerState'
 
 export interface ContactsFormValues {
-    stateContactName: string
-    stateContactTitleRole: string
-    stateContactEmail: string
-    stateContactPhone: string
+    stateContacts: StateContactValue[]
+}
+
+export interface StateContactValue {
+    name: string
+    titleRole: string
+    email: string
+    phone: string
 }
 
 export const Contacts = ({
@@ -51,10 +55,7 @@ export const Contacts = ({
     const history = useHistory<MCRouterState>()
 
     const contactsInitialValues: ContactsFormValues = {
-        stateContactName: draftSubmission?.stateContactName,
-        stateContactTitleRole: draftSubmission?.stateContactTitleRole,
-        stateContactEmail: draftSubmission?.stateContactEmail,
-        stateContactPhone: draftSubmission?.stateContactPhone,
+        stateContacts: stripTypename(draftSubmission.stateContacts)
     }
 
     const handleFormSubmit = async (
@@ -62,10 +63,7 @@ export const Contacts = ({
         formikHelpers: FormikHelpers<ContactsFormValues>
     ) => {
         const updatedDraft = updatesFromSubmission(draftSubmission)
-        updatedDraft.stateContactName = values.stateContactName
-        updatedDraft.stateContactTitleRole = values.stateContactTitleRole
-        updatedDraft.stateContactEmail = values.stateContactEmail
-        updatedDraft.stateContactPhone = values.stateContactPhone
+        updatedDraft.stateContacts = values.stateContacts
 
         try {
             const updatedSubmission = await updateDraft({
@@ -120,134 +118,144 @@ export const Contacts = ({
 
                                 <>
                                     <FormGroup>
-                                        <Fieldset legend="State contact 1 (required)">
-                                            <Label
-                                                htmlFor="stateContactName"
-                                                id="stateContactName"
-                                            >
-                                            Name
-                                            </Label>
-                                            <TextInput
-                                                id="stateContactName"
-                                                name="stateContactName"
-                                                type="text"
-                                                defaultValue={values.stateContactName}
-                                                onChange={(e) =>
-                                                    setFieldValue('stateContactName', e.target.value)
-                                                }
-                                            />
-                                            <Label
-                                                htmlFor="stateContactTitleRole"
-                                                id="stateContactTitleRole"
-                                            >
-                                            Title/Role
-                                            </Label>
-                                            <TextInput
-                                                id="stateContactTitleRole"
-                                                name="stateContactTitleRole"
-                                                type="text"
-                                                defaultValue={values.stateContactTitleRole}
-                                                onChange={(e) =>
-                                                    setFieldValue('stateContactTitleRole', e.target.value)
-                                                }
-                                            />
-                                            <Label
-                                                htmlFor="stateContactEmail"
-                                                id="stateContactEmail"
-                                            >
-                                            Email
-                                            </Label>
-                                            <TextInput
-                                                id="stateContactEmail"
-                                                name="stateContactEmail"
-                                                type="text"
-                                                defaultValue={values.stateContactEmail}
-                                                onChange={(e) =>
-                                                    setFieldValue('stateContactEmail', e.target.value)
-                                                }
-                                            />
-                                            <Label
-                                                htmlFor="stateContactPhone"
-                                                id="stateContactPhone"
-                                            >
-                                            Phone
-                                            </Label>
-                                            <TextInput
-                                                id="stateContactPhone"
-                                                name="stateContactPhone"
-                                                type="text"
-                                                defaultValue={values.stateContactPhone}
-                                                onChange={(e) =>
-                                                    setFieldValue('stateContactPhone', e.target.value)
-                                                }
-                                            />
-                                        </Fieldset>
+
+                                    <Fieldset legend="State contact 1 (required)">
+
+                                        <FieldArray name="stateContacts">
+                                        {({ insert, remove, push }) => (
+                                            <>
+                                            {values.stateContacts.length > 0 &&
+                                              values.stateContacts.map((stateContact, index) => (
+                                                <div key={index}>
+                                                    <label htmlFor={`stateContacts.${index}.name`}>
+                                                        Name
+                                                    </label>
+                                                    <Field
+                                                      name={`stateContacts.${index}.name`}
+                                                      type="text"
+                                                    />
+                                                    <label htmlFor={`stateContacts.${index}.titleRole`}>
+                                                        Title/Role
+                                                    </label>
+                                                    <Field
+                                                      name={`stateContacts.${index}.titleRole`}
+                                                      type="text"
+                                                    />
+                                                    <label htmlFor={`stateContacts.${index}.email`}>
+                                                        Email
+                                                    </label>
+                                                    <Field
+                                                      name={`stateContacts.${index}.email`}
+                                                      type="text"
+                                                    />
+                                                    <label htmlFor={`stateContacts.${index}.phone`}>
+                                                        Phone
+                                                    </label>
+                                                    <Field
+                                                      name={`stateContacts.${index}.phone`}
+                                                      type="text"
+                                                    />
+                                                </div>
+                                            ))}
+                                            {values.stateContacts.length === 0 &&
+                                              <>
+                                                  <label htmlFor={`stateContacts.0.name`}>
+                                                      Name
+                                                  </label>
+                                                  <Field
+                                                    name={`stateContacts.0.name`}
+                                                    type="text"
+                                                  />
+                                                  <label htmlFor={`stateContacts.0.titleRole`}>
+                                                      Title/Role
+                                                  </label>
+                                                  <Field
+                                                    name={`stateContacts.0.titleRole`}
+                                                    type="text"
+                                                  />
+                                                  <label htmlFor={`stateContacts.0.email`}>
+                                                      Email
+                                                  </label>
+                                                  <Field
+                                                    name={`stateContacts.0.email`}
+                                                    type="text"
+                                                  />
+                                                  <label htmlFor={`stateContacts.0.phone`}>
+                                                      Phone
+                                                  </label>
+                                                  <Field
+                                                    name={`stateContacts.0.phone`}
+                                                    type="text"
+                                                  />
+                                              </>
+                                            }
+                                            </>
+                                        )}
+                                        </FieldArray>
+
+                                    </Fieldset>
+
+{/*
+                                    {values.stateContacts.map((item) => (
+                                      <Fieldset legend="State contact 1 (required)">
+                                          <Label
+                                              htmlFor="stateContactName"
+                                              id="stateContactName"
+                                          >
+                                          Name
+                                          </Label>
+                                          <Field
+                                              id="stateContactName"
+                                              name="stateContactName"
+                                              type="text"
+                                              defaultValue={item.name}
+                                          />
+                                          <Label
+                                              htmlFor="stateContactTitleRole"
+                                              id="stateContactTitleRole"
+                                          >
+                                          Title/Role
+                                          </Label>
+                                          <TextInput
+                                              id="stateContactTitleRole"
+                                              name="stateContactTitleRole"
+                                              type="text"
+                                              defaultValue={item.titleRole}
+                                          />
+                                          <Label
+                                              htmlFor="stateContactEmail"
+                                              id="stateContactEmail"
+                                          >
+                                          Email
+                                          </Label>
+                                          <TextInput
+                                              id="stateContactEmail"
+                                              name="stateContactEmail"
+                                              type="text"
+                                              defaultValue={item.email}
+                                          />
+                                          <Label
+                                              htmlFor="stateContactPhone"
+                                              id="stateContactPhone"
+                                          >
+                                          Phone
+                                          </Label>
+                                          <TextInput
+                                              id="stateContactPhone"
+                                              name="stateContactPhone"
+                                              type="text"
+                                              defaultValue={item.phone}
+                                          />
+                                      </Fieldset>
+                                    ))}
+                                    */}
+
                                     </FormGroup>
                                 </>
                             </fieldset>
 
-                            {/* TODO: dont show when contract only */}
-                            <fieldset className="usa-fieldset">
-                                <h3>Actuary contacts</h3>
-                                <span>Provide contact information for actuaries who worked directly on this submission.</span>
-                                <legend className="srOnly">Actuary contacts</legend>
-                                {formAlert && formAlert}
 
-                                <>
-                                    <FormGroup>
-                                        <Fieldset legend="Certifying actuary (required)">
-                                            <Label
-                                                htmlFor="certifyingActuaryName1"
-                                                id="certifyingActuaryName1"
-                                            >
-                                            Name
-                                            </Label>
-                                            <TextInput
-                                                id="certifyingActuaryName1"
-                                                name="certifyingActuaryName1"
-                                                type="text"
-                                                defaultValue=""
-                                            />
-                                            <Label
-                                                htmlFor="certifyingActuaryTitleRole1"
-                                                id="certifyingActuaryTitleRole1"
-                                            >
-                                            Title/Role
-                                            </Label>
-                                            <TextInput
-                                                id="certifyingActuaryTitleRole1"
-                                                name="certifyingActuaryTitleRole1"
-                                                type="text"
-                                                defaultValue=""
-                                            />
-                                            <Label
-                                                htmlFor="certifyingActuaryEmail1"
-                                                id="certifyingActuaryEmail1"
-                                            >
-                                            Email
-                                            </Label>
-                                            <TextInput
-                                                id="certifyingActuaryEmail1"
-                                                name="certifyingActuaryEmail1"
-                                                type="text"
-                                                defaultValue=""
-                                            />
-                                            <Label
-                                                htmlFor="certifyingActuaryPhone1"
-                                                id="certifyingActuaryPhone1"
-                                            >
-                                            Phone
-                                            </Label>
-                                            <TextInput
-                                                id="certifyingActuaryPhone1"
-                                                name="certifyingActuaryPhone1"
-                                                type="text"
-                                                defaultValue=""
-                                            />
-                                        </Fieldset>
-                                    </FormGroup>
-                                </>
-                            </fieldset>
+                            {/* TODO: dont show actuary when contract only */}
 
                             <div className={styles.pageActions}>
                                 <Button

@@ -450,14 +450,14 @@ export const ReviewSubmit = ({
                             <DataDetail
                                 id="stateContactName"
                                 label="State contact name"
-                                data={draftSubmission.stateContactName}
+                                data={draftSubmission.stateContacts[0].name}
                             />
                         }
                         right={
                           <DataDetail
                               id="stateContactTitleRole"
                               label="State contact title/role"
-                              data={draftSubmission.stateContactTitleRole}
+                              data={draftSubmission.stateContacts[0].titleRole}
                           />
                         }
                     />
@@ -466,14 +466,14 @@ export const ReviewSubmit = ({
                           <DataDetail
                               id="stateContactEmail"
                               label="State contact email"
-                              data={draftSubmission.stateContactEmail}
+                              data={draftSubmission.stateContacts[0].email}
                           />
                         }
                         right={
                           <DataDetail
                               id="stateContactPhone"
                               label="State contact phone"
-                              data={draftSubmission.stateContactPhone}
+                              data={draftSubmission.stateContacts[0].phone}
                           />
                         }
                     />

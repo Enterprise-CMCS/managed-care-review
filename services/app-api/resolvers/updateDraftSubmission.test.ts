@@ -41,10 +41,7 @@ describe('updateDraftSubmission', () => {
                     effectiveDateStart: new Date(),
                     effectiveDateEnd: new Date(),
                 },
-                stateContactName: '',
-                stateContactTitleRole: '',
-                stateContactEmail: '',
-                stateContactPhone: '',
+                stateContacts: [],
             }
 
             const updates: DraftSubmissionUpdates = {
@@ -63,10 +60,7 @@ describe('updateDraftSubmission', () => {
                 rateDateEnd: null,
                 rateDateCertified: null,
                 rateAmendmentInfo: undefined,
-                stateContactName: '',
-                stateContactTitleRole: '',
-                stateContactEmail: '',
-                stateContactPhone: '',
+                stateContacts: [],
             }
 
             applyUpdates(baseDraft, updates)
@@ -99,10 +93,7 @@ describe('updateDraftSubmission', () => {
                 documents: [],
                 managedCareEntities: [],
                 federalAuthorities: [],
-                stateContactName: '',
-                stateContactTitleRole: '',
-                stateContactEmail: '',
-                stateContactPhone: '',
+                stateContacts: [],
             }
 
             const updates: DraftSubmissionUpdates = {
@@ -130,10 +121,7 @@ describe('updateDraftSubmission', () => {
                     effectiveDateStart: null,
                     effectiveDateEnd: null,
                 },
-                stateContactName: '',
-                stateContactTitleRole: '',
-                stateContactEmail: '',
-                stateContactPhone: '',
+                stateContacts: [],
             }
 
             applyUpdates(baseDraft, updates)
@@ -168,10 +156,7 @@ describe('updateDraftSubmission', () => {
                 documents: [],
                 managedCareEntities: [],
                 federalAuthorities: [],
-                stateContactName: '',
-                stateContactTitleRole: '',
-                stateContactEmail: '',
-                stateContactPhone: '',
+                stateContacts: [],
             }
 
             const updates: DraftSubmissionUpdates = {
@@ -198,10 +183,7 @@ describe('updateDraftSubmission', () => {
                 rateDateStart: null,
                 rateDateEnd: null,
                 rateDateCertified: null,
-                stateContactName: '',
-                stateContactTitleRole: '',
-                stateContactEmail: '',
-                stateContactPhone: '',
+                stateContacts: [],
             }
 
             applyUpdates(baseDraft, updates)
@@ -373,6 +355,70 @@ describe('updateDraftSubmission', () => {
             updateResult2.data.updateDraftSubmission.draftSubmission
         expect(resultDraft2.documents.length).toEqual(2)
         expect(resultDraft2.documents[0].name).toEqual('myfile2.pdf')
+    })
+
+    it('updates a submission to have state contacts', async () => {
+        const server = constructTestServer()
+        const { mutate, query } = createTestClient(server)
+
+        const createdDraft = await createTestDraftSubmission(mutate)
+        const createdID = createdDraft.id
+
+        const updatedDraft = {
+            programID: 'cnet',
+            submissionType: 'CONTRACT_AND_RATES',
+            submissionDescription: 'An updated submission',
+            stateContacts: [
+                {
+                    name: 'test name',
+                    titleRole: 'fancy person',
+                    email: 'test@test.com',
+                    phone: '(555)555-5555',
+                },
+            ],
+            documents: [],
+            contractType: 'BASE',
+            contractDateStart: null,
+            contractDateEnd: null,
+            managedCareEntities: [],
+            federalAuthorities: [],
+        }
+
+        const updateResult = await mutate({
+            mutation: UPDATE_DRAFT_SUBMISSION,
+            variables: {
+                input: {
+                    submissionID: createdID,
+                    draftSubmissionUpdates: updatedDraft,
+                },
+            },
+        })
+
+        expect(updateResult.errors).toBeUndefined()
+
+        const resultDraft1 =
+            updateResult.data.updateDraftSubmission.draftSubmission
+        expect(resultDraft1.id).toEqual(createdID)
+        expect(resultDraft1.stateContacts).toEqual([
+          {
+              name: 'test name',
+              titleRole: 'fancy person',
+              email: 'test@test.com',
+              phone: '(555)555-5555',
+          },
+        ])
+
+        const fetchedDraft = await fetchTestDraftSubmissionById(query, createdID)
+
+        expect(fetchedDraft.id).toEqual(createdID)
+        expect(fetchedDraft.stateContacts).toEqual([
+          {
+              name: 'test name',
+              titleRole: 'fancy person',
+              email: 'test@test.com',
+              phone: '(555)555-5555',
+          },
+        ])
     })
 
     it('updates a submission to have contract amendment details', async () => {

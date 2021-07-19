@@ -53,10 +53,6 @@ describe('updateDraftSubmission', () => {
                 rateDateStart: startDate,
                 rateDateEnd: endDate,
                 rateDateCertified: dateCertified,
-                stateContactName: 'name',
-                stateContactTitleRole: 'title',
-                stateContactEmail: 'email',
-                stateContactPhone: '(555)555-5555',
             })
 
             if (isStoreError(updateSubResult)) {

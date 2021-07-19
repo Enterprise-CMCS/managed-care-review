@@ -8,7 +8,7 @@ import { DraftSubmission, DraftSubmissionUpdates } from '../../gen/gqlClient'
 const omitTypename = (key: unknown, value: unknown) =>
     key === '__typename' ? undefined : value
 
-function stripTypename<T>(input: T): T {
+export function stripTypename<T>(input: T): T {
     return JSON.parse(JSON.stringify(input), omitTypename)
 }
 
@@ -36,9 +36,6 @@ export function updatesFromSubmission(
         rateDateEnd: draft.rateDateEnd,
         rateDateCertified: draft.rateDateCertified,
         rateAmendmentInfo: stripTypename(draft.rateAmendmentInfo),
-        stateContactName: draft.stateContactName,
-        stateContactTitleRole: draft.stateContactTitleRole,
-        stateContactEmail: draft.stateContactEmail,
-        stateContactPhone: draft.stateContactPhone,
+        stateContacts: stripTypename(draft.stateContacts),
     }
 }

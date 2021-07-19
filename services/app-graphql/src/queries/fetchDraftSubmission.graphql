@@ -13,10 +13,12 @@ query fetchDraftSubmission($input: FetchDraftSubmissionInput!) {
             stateCode
             submissionType
             submissionDescription
-            stateContactName
-            stateContactTitleRole
-            stateContactEmail
-            stateContactPhone
+            stateContacts {
+                name
+                titleRole
+                email
+                phone
+            }
             documents {
                 name
                 s3URL
