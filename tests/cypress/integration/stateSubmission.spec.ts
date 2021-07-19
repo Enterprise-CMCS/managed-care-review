@@ -441,7 +441,7 @@ describe('State Submission', () => {
             cy.findByLabelText('Annual rate update').should('be.checked')
         })
 
-        it.only('user can complete a contract submission, load dashboard with default program, and see submission summary', () => {
+        it('user can complete a contract submission, load dashboard with default program, and see submission summary', () => {
             cy.login()
             cy.startNewContractOnlySubmission()
 
@@ -458,6 +458,9 @@ describe('State Submission', () => {
             }).safeClick()
 
             // Fill out contract details
+            cy.findByTestId('step-indicator')
+                .findAllByText('Contract Details')
+                .should('have.length', 2)
             cy.findByLabelText('Base contract').should('exist').safeClick()
             cy.findByLabelText('Start date').type('04/01/2024')
             cy.findByLabelText('End date').type('03/31/2025').blur()
