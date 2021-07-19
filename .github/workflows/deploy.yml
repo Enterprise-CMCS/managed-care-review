@@ -6,6 +6,7 @@ on:
       - '*'
       - 'dependabot/**'
       - '!skipci*'
+      - '!main'
 
 jobs:
   deploy:
