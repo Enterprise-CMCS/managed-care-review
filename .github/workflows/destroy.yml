@@ -12,7 +12,7 @@ jobs:
           if [[ "$GITHUB_REF" =~ ^refs/heads/dependabot/.* ]]; then # Dependabot builds very long branch names.  This is a switch to make it shorter.
             echo "branch_name=`echo ${GITHUB_REF#refs/heads/} | md5sum | head -c 10 | sed 's/^/x/'`" >> $GITHUB_ENV
           else
-            echo "branch_name=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+            echo "branch_name=${{ github.event.ref }}" >> $GITHUB_ENV
           fi
       - uses: actions/checkout@v1
       - name: set branch specific variable names
