@@ -273,7 +273,11 @@ export const Documents = ({
                             onClick={async (e) => {
                                 await handleFormSubmit({
                                     shouldValidate: false,
-                                    redirectPath: 'rate-details',
+                                    redirectPath:
+                                        draftSubmission.submissionType ===
+                                        'CONTRACT_ONLY'
+                                            ? 'contract-details'
+                                            : 'rate-details',
                                 })(e)
                             }}
                         >

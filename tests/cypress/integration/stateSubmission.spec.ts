@@ -7,7 +7,7 @@ describe('State Submission', () => {
             cy.findByText('Dashboard').not('exist')
         })
 
-        it('user can start a new submission and continue with valid input', () => {
+        it('user can start a new contract and rates submission and continue with valid input', () => {
             cy.login()
             cy.findByTestId('dashboardPage').should('exist')
             cy.findByRole('link', { name: 'Start new submission' }).click({
@@ -17,7 +17,9 @@ describe('State Submission', () => {
             cy.findByText('New submission').should('exist')
 
             // Fill out some submission type fields but not all
-            cy.findByLabelText('Contract action only').safeClick()
+            cy.findByLabelText(
+                'Contract action and rate certification'
+            ).safeClick()
             cy.findByRole('combobox', { name: 'Program' }).select('msho')
 
             // Continue button triggers submission type validation
@@ -220,16 +222,14 @@ describe('State Submission', () => {
                 })
         })
 
-        it('user can edit a draft contract only submission', () => {
+        it('user can switch a draft contract only submission to be a draft contract and rates certification submission', () => {
             cy.login()
 
             // Add a new contract only submission
             cy.findByRole('link', { name: 'Start new submission' }).click({
                 force: true,
             })
-            cy.findByLabelText(
-                'Contract action and rate certification'
-            ).safeClick()
+            cy.findByLabelText('Contract action only').safeClick()
             cy.findByRole('textbox', { name: 'Submission description' })
                 .should('exist')
                 .type('description of submission')
@@ -253,13 +253,6 @@ describe('State Submission', () => {
 
             cy.navigateForm('Continue')
 
-            cy.findByLabelText('New rate certification').safeClick()
-            cy.findByLabelText('Start date').type('02/29/2024')
-            cy.findByLabelText('End date').type('02/28/2025')
-            cy.findByLabelText('Date certified').type('03/01/2024')
-
-            cy.navigateForm('Continue')
-
             // Add documents
             cy.findByRole('progressbar', { name: 'Loading' }).should(
                 'not.exist'
@@ -267,7 +260,7 @@ describe('State Submission', () => {
 
             cy.findByTestId('documents-hint').should(
                 'contain.text',
-                'Must include: An executed contract and a signed rate certification'
+                'Must include: An executed contract'
             )
             cy.findByTestId('file-input-input').attachFile(
                 'documents/trussel-guide.pdf'
@@ -291,14 +284,14 @@ describe('State Submission', () => {
             })
 
             // Change type to contract and rates submission
-            cy.findByLabelText('Contract action and rate certification').should(
-                'be.checked'
-            )
+            cy.findByLabelText('Contract action only').should('be.checked')
             cy.findByRole('textbox', { name: 'Submission description' }).should(
                 'have.value',
                 'description of submission'
             )
-            cy.findByLabelText('Contract action only').safeClick()
+            cy.findByLabelText(
+                'Contract action and rate certification'
+            ).safeClick()
             cy.navigateForm('Continue')
 
             // Change contract dates
@@ -373,14 +366,16 @@ describe('State Submission', () => {
             )
         })
 
-        it('user can add a draft contract submission with a rates amendment', () => {
+        it('user can a rates amendment', () => {
             cy.login()
 
             // Add a new submission
             cy.findByRole('link', { name: 'Start new submission' }).click({
                 force: true,
             })
-            cy.findByLabelText('Contract action only').safeClick()
+            cy.findByLabelText(
+                'Contract action and rate certification'
+            ).safeClick()
             cy.findByRole('textbox', { name: 'Submission description' })
                 .should('exist')
                 .type('description of submission')
