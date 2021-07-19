@@ -445,38 +445,20 @@ export const ReviewSubmit = ({
             <section id="stateContacts" className={styles.reviewSection}>
                 <dl>
                     <SectionHeader header="State contacts" to="contacts" />
-                    <DoubleColumnRow
-                        left={
-                            <DataDetail
-                                id="stateContactName"
-                                label="State contact name"
-                                data={draftSubmission.stateContacts[0].name}
-                            />
-                        }
-                        right={
-                          <DataDetail
-                              id="stateContactTitleRole"
-                              label="State contact title/role"
-                              data={draftSubmission.stateContacts[0].titleRole}
-                          />
-                        }
-                    />
-                    <DoubleColumnRow
-                        left={
-                          <DataDetail
-                              id="stateContactEmail"
-                              label="State contact email"
-                              data={draftSubmission.stateContacts[0].email}
-                          />
-                        }
-                        right={
-                          <DataDetail
-                              id="stateContactPhone"
-                              label="State contact phone"
-                              data={draftSubmission.stateContacts[0].phone}
-                          />
-                        }
-                    />
+
+                    <GridContainer>
+                        <Grid row>
+                            {draftSubmission.stateContacts.map((stateContact, index) => (
+                            <Grid tablet={{col: 6}}>
+                                <strong>Contact {index + 1}</strong><br/>
+                                {stateContact.name}<br/>
+                                {stateContact.titleRole}<br/>
+                                {stateContact.email}<br/>
+                                {stateContact.phone}<br/>
+                            </Grid>
+                            ))}
+                        </Grid>
+                    </GridContainer>
                 </dl>
             </section>
             <section id="documents" className={styles.reviewSection}>

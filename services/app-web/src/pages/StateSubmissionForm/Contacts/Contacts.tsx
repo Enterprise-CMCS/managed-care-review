@@ -6,7 +6,6 @@ import {
     Fieldset,
     Button,
     Link,
-    TextInput,
     ButtonGroup,
     Label,
 } from '@trussworks/react-uswds'
@@ -22,7 +21,7 @@ import {
 import {
     formatForForm
 } from '../../../formHelpers'
-import { FieldRadio } from '../../../components/Form/FieldRadio/FieldRadio'
+
 import { updatesFromSubmission, stripTypename } from '../updateSubmissionTransform'
 import { MCRouterState } from '../../../constants/routerState'
 
@@ -54,9 +53,27 @@ export const Contacts = ({
     const redirectToDashboard = React.useRef(false)
     const history = useHistory<MCRouterState>()
 
-    const contactsInitialValues: ContactsFormValues = {
-        stateContacts: stripTypename(draftSubmission.stateContacts)
+    let stateContactsCheck = []
+
+    if (draftSubmission.stateContacts.length === 0) {
+      stateContactsCheck =
+          [
+            {
+              name: '',
+              titleRole: '',
+              email: '',
+              phone: '',
+            }
+          ]
     }
+    else {
+        stateContactsCheck = stripTypename(draftSubmission.stateContacts)
+    }
+
+    const contactsInitialValues: ContactsFormValues = {
+      stateContacts: stateContactsCheck
+    }
+
 
     const handleFormSubmit = async (
         values: ContactsFormValues,
@@ -116,142 +133,78 @@ export const Contacts = ({
                                 <legend className="srOnly">State contacts</legend>
                                 {formAlert && formAlert}
 
-                                <>
-                                    <FormGroup>
-
-                                    <Fieldset legend="State contact 1 (required)">
-
-                                        <FieldArray name="stateContacts">
-                                        {({ insert, remove, push }) => (
-                                            <>
-                                            {values.stateContacts.length > 0 &&
-                                              values.stateContacts.map((stateContact, index) => (
-                                                <div key={index}>
+                                <FieldArray name="stateContacts">
+                                {({ insert, remove, push }) => (
+                                    <div className="row">
+                                        {values.stateContacts.length > 0 &&
+                                          values.stateContacts.map((stateContact, index) => (
+                                            <Fieldset legend={"State contact " + index + " (required)"} key={index}>
+                                                <FormGroup>
                                                     <label htmlFor={`stateContacts.${index}.name`}>
                                                         Name
                                                     </label>
                                                     <Field
                                                       name={`stateContacts.${index}.name`}
                                                       type="text"
+                                                      className="usa-input"
                                                     />
+                                                </FormGroup>
+                                                <FormGroup>
                                                     <label htmlFor={`stateContacts.${index}.titleRole`}>
                                                         Title/Role
                                                     </label>
                                                     <Field
                                                       name={`stateContacts.${index}.titleRole`}
                                                       type="text"
+                                                      className="usa-input"
                                                     />
+                                                </FormGroup>
+                                                <FormGroup>
                                                     <label htmlFor={`stateContacts.${index}.email`}>
                                                         Email
                                                     </label>
                                                     <Field
                                                       name={`stateContacts.${index}.email`}
                                                       type="text"
+                                                      className="usa-input"
                                                     />
+                                                </FormGroup>
+                                                <FormGroup>
                                                     <label htmlFor={`stateContacts.${index}.phone`}>
                                                         Phone
                                                     </label>
                                                     <Field
                                                       name={`stateContacts.${index}.phone`}
                                                       type="text"
+                                                      className="usa-input"
                                                     />
-                                                </div>
-                                            ))}
-                                            {values.stateContacts.length === 0 &&
-                                              <>
-                                                  <label htmlFor={`stateContacts.0.name`}>
-                                                      Name
-                                                  </label>
-                                                  <Field
-                                                    name={`stateContacts.0.name`}
-                                                    type="text"
-                                                  />
-                                                  <label htmlFor={`stateContacts.0.titleRole`}>
-                                                      Title/Role
-                                                  </label>
-                                                  <Field
-                                                    name={`stateContacts.0.titleRole`}
-                                                    type="text"
-                                                  />
-                                                  <label htmlFor={`stateContacts.0.email`}>
-                                                      Email
-                                                  </label>
-                                                  <Field
-                                                    name={`stateContacts.0.email`}
-                                                    type="text"
-                                                  />
-                                                  <label htmlFor={`stateContacts.0.phone`}>
-                                                      Phone
-                                                  </label>
-                                                  <Field
-                                                    name={`stateContacts.0.phone`}
-                                                    type="text"
-                                                  />
-                                              </>
-                                            }
-                                            </>
-                                        )}
-                                        </FieldArray>
+                                                </FormGroup>
+                                                <Button
+                                                  type="button"
+                                                  unstyled
+                                                  onClick={() => (remove(index))}
+                                                >
+                                                Remove contact
+                                                </Button>
+                                            </Fieldset>
+                                        ))}
 
-                                    </Fieldset>
+                                        <Button
+                                          type="button"
+                                          outline
+                                          onClick={() => push({
+                                            name: '',
+                                            titleRole: '',
+                                            email: '',
+                                            phone: '',
+                                          })}
+                                        >
+                                        Add state contact
+                                        </Button>
+                                    </div>
+                                )}
+                                </FieldArray>
 
-{/*
-                                    {values.stateContacts.map((item) => (
-                                      <Fieldset legend="State contact 1 (required)">
-                                          <Label
-                                              htmlFor="stateContactName"
-                                              id="stateContactName"
-                                          >
-                                          Name
-                                          </Label>
-                                          <Field
-                                              id="stateContactName"
-                                              name="stateContactName"
-                                              type="text"
-                                              defaultValue={item.name}
-                                          />
-                                          <Label
-                                              htmlFor="stateContactTitleRole"
-                                              id="stateContactTitleRole"
-                                          >
-                                          Title/Role
-                                          </Label>
-                                          <TextInput
-                                              id="stateContactTitleRole"
-                                              name="stateContactTitleRole"
-                                              type="text"
-                                              defaultValue={item.titleRole}
-                                          />
-                                          <Label
-                                              htmlFor="stateContactEmail"
-                                              id="stateContactEmail"
-                                          >
-                                          Email
-                                          </Label>
-                                          <TextInput
-                                              id="stateContactEmail"
-                                              name="stateContactEmail"
-                                              type="text"
-                                              defaultValue={item.email}
-                                          />
-                                          <Label
-                                              htmlFor="stateContactPhone"
-                                              id="stateContactPhone"
-                                          >
-                                          Phone
-                                          </Label>
-                                          <TextInput
-                                              id="stateContactPhone"
-                                              name="stateContactPhone"
-                                              type="text"
-                                              defaultValue={item.phone}
-                                          />
-                                      </Fieldset>
-                                    ))}
-                                    */}
-
-                                    </FormGroup>
-                                </>
                             </fieldset>
 
 
