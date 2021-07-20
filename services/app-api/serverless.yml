@@ -17,6 +17,7 @@ custom:
   draftSubmissionsTableArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:database-${self:custom.stage}.DraftSubmissionsTableArn}
   draftSubmissionsTableStreamArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:database-${self:custom.stage}.DraftSubmissionsTableStreamArn}
   iamPath: ${env:IAM_PATH, "/"}
+  iamPermissionsBoundaryPolicy: ${env:IAM_PERMISSIONS_BOUNDARY_POLICY}
   reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
   dynamoConnection: ${env:DYNAMO_CONNECTION}
   webAclName: ${self:service}-${self:custom.stage}-webacl
