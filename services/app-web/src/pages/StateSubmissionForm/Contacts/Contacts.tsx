@@ -160,10 +160,10 @@ export const Contacts = ({
 
                                 <FieldArray name="stateContacts">
                                 {({ remove, push }) => (
-                                    <div className="stateContacts">
+                                    <div className="stateContacts" data-testid="state-contacts">
                                         {values.stateContacts.length > 0 &&
                                           values.stateContacts.map((stateContact, index) => (
-                                              <div key={index}>
+                                              <div className="stateContact" key={index}>
                                                   <Fieldset legend={handleContactLegend(index)}>
 
                                                   <FormGroup
@@ -174,6 +174,7 @@ export const Contacts = ({
                                                       </label>
                                                       <Field
                                                         name={`stateContacts.${index}.name`}
+                                                        id={`stateContacts.${index}.name`}
                                                         type="text"
                                                         className="usa-input"
                                                       />
@@ -195,6 +196,7 @@ export const Contacts = ({
                                                       </label>
                                                       <Field
                                                         name={`stateContacts.${index}.titleRole`}
+                                                        id={`stateContacts.${index}.titleRole`}
                                                         type="text"
                                                         className="usa-input"
                                                       />
@@ -215,6 +217,7 @@ export const Contacts = ({
                                                       </label>
                                                       <Field
                                                         name={`stateContacts.${index}.email`}
+                                                        id={`stateContacts.${index}.email`}
                                                         type="text"
                                                         className="usa-input"
                                                       />
@@ -227,6 +230,7 @@ export const Contacts = ({
                                                       )}
                                                 </FormGroup>
 
+                                                {index > 0 && (
                                                 <Button
                                                   type="button"
                                                   unstyled
@@ -235,6 +239,7 @@ export const Contacts = ({
                                                 >
                                                     Remove contact
                                                 </Button>
+                                                )}
                                                 </Fieldset>
                                             </div>
                                         ))}

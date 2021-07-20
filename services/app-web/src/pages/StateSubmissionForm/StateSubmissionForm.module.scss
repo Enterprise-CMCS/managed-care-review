@@ -99,6 +99,10 @@ div[class^='usa-step-indicator'] {
     display: inline;
 }
 
+div[class^='stateContact'] {
+    margin-bottom: units(6);
+}
+
 div[class^='stateContacts'] {
     [class^='usa-input'] {
         margin-bottom: units(2);

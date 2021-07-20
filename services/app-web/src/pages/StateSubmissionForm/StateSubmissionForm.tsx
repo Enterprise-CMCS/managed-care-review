@@ -107,8 +107,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
     const DynamicStepIndicator = () => {
         const currentFormPage = getRouteName(pathname)
 
-        console.log(currentFormPage)
-
         let formStepCompleted = true
         let formStepStatus: 'current' | 'complete' | undefined
 
