@@ -13,8 +13,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: set branch_name
-        run: echo "branch_name=${{ github.event.ref }}" >> $GITHUB_ENV
-      - uses: actions/checkout@v1
+        run: |
+          if [[ "${{ github.event.ref }}" =~ ^dependabot/.* ]]; then # Dependabot builds very long branch names.  This is a switch to make it shorter.
+            echo "branch_name=`echo ${{ github.event.ref }} | md5sum | head -c 10 | sed 's/^/x/'`" >> $GITHUB_ENV
+          else
+            echo "branch_name=${{ github.event.ref }}" >> $GITHUB_ENV
+          fi
+      - uses: actions/checkout@v2.3.4
       - name: set branch specific variable names
         run: ./.github/build_vars.sh set_names
       - name: set variable values

@@ -45,6 +45,7 @@ export const Documents = ({
     const { deleteFile, uploadFile, getKey, getS3URL } = useS3()
     const [shouldValidate, setShouldValidate] = useState(false)
     const [hasValidFiles, setHasValidFiles] = useState(false)
+    const [hasPendingFiles, setHasPendingFiles] = useState(false)
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
     const history = useHistory<MCRouterState>()
 
@@ -71,19 +72,20 @@ export const Documents = ({
         })
 
     useEffect(() => {
-        const hasNoPendingFiles: boolean = fileItems.every(
-            (item) => item.status !== 'PENDING'
+        const hasPendingFiles: boolean = fileItems.some(
+            (item) => item.status === 'PENDING'
         )
+        setHasPendingFiles(hasPendingFiles)
 
         const hasValidDocumentsForSubmission: boolean =
             fileItems.length > 0 &&
-            hasNoPendingFiles &&
-            fileItems.some((item) => item.status === 'UPLOAD_COMPLETE')
+            !hasPendingFiles &&
+            fileItems.every((item) => item.status === 'UPLOAD_COMPLETE')
         setHasValidFiles(hasValidDocumentsForSubmission)
     }, [fileItems])
 
-    const showError = (error: string) => {
-        console.log('Document error: ', error)
+    // If there is a submission error, ensure form is in validation state
+    const onError = () => {
         if (!shouldValidate) setShouldValidate(true)
     }
 
@@ -121,21 +123,32 @@ export const Documents = ({
         async (e: React.FormEvent | React.MouseEvent) => {
             e.preventDefault()
 
+            // if there are any errors present in the documents list, stop here
             if (shouldValidate) {
                 setShouldValidate(true)
                 if (!hasValidFiles) return
             }
 
-            const documents = fileItems.map((fileItem) => {
-                if (!fileItem.s3URL)
-                    throw Error(
-                        'The file item has no s3url, this should not happen onSubmit'
-                    )
-                return {
-                    name: fileItem.name,
-                    s3URL: fileItem.s3URL,
-                }
-            })
+            const documents = fileItems.reduce(
+                (formDataDocuments, fileItem) => {
+                    if (!fileItem.s3URL)
+                        console.log(
+                            'The file item has no s3url, this should not happen on form submit'
+                        )
+                    else if (fileItem.status === 'DUPLICATE_NAME_ERROR')
+                        console.log(
+                            'Attempting to save duplicate files, discarding duplicate'
+                        )
+                    else {
+                        formDataDocuments.push({
+                            name: fileItem.name,
+                            s3URL: fileItem.s3URL,
+                        })
+                    }
+                    return formDataDocuments
+                },
+                [] as { name: string; s3URL: string }[]
+            )
 
             const updatedDraft = updatesFromSubmission(draftSubmission)
 
@@ -152,7 +165,7 @@ export const Documents = ({
                     })
                 }
             } catch (error) {
-                showError(error)
+                onError()
             }
         }
 
@@ -166,6 +179,26 @@ export const Documents = ({
             <>
                 <strong>Must include:</strong> An executed contract
             </>
+        )
+
+    const FormError = (): JSX.Element =>
+        fileItems.length === 0 ? (
+            <Alert
+                type="error"
+                heading="Missing documents"
+                className="margin-bottom-2"
+            >
+                You must upload at least one document
+            </Alert>
+        ) : (
+            <Alert
+                type="error"
+                heading="Remove files with errors"
+                className="margin-bottom-2"
+            >
+                You must remove all documents with error messages before
+                continuing
+            </Alert>
         )
 
     return (
@@ -183,15 +216,7 @@ export const Documents = ({
             >
                 <fieldset className="usa-fieldset">
                     <legend className="srOnly">Documents</legend>
-                    {shouldValidate && !hasValidFiles && (
-                        <Alert
-                            type="error"
-                            heading="Missing documents"
-                            className="margin-bottom-2"
-                        >
-                            You must upload at least one document
-                        </Alert>
-                    )}
+                    {shouldValidate && !hasValidFiles && <FormError />}
                     {formAlert && formAlert}
                     <FileUpload
                         id="documents"
@@ -256,8 +281,10 @@ export const Documents = ({
                         </Button>
                         <Button
                             type="submit"
-                            secondary={shouldValidate && !hasValidFiles}
-                            disabled={shouldValidate && !hasValidFiles}
+                            disabled={
+                                hasPendingFiles ||
+                                (shouldValidate && !hasValidFiles)
+                            }
                         >
                             Continue
                         </Button>

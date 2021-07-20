@@ -1,15 +1,17 @@
 import React from 'react'
-import { render, waitFor, fireEvent, screen } from '@testing-library/react'
+import { render, waitFor, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { FileUpload, FileUploadProps, S3FileData } from './FileUpload'
 import { FileItemT } from './FileItem'
 import { SPACER_GIF } from './constants'
 import {
+    TEST_DOC_FILE,
     TEST_PDF_FILE,
     TEST_PNG_FILE,
     TEST_TEXT_FILE,
     TEST_VIDEO_FILE,
+    dragAndDrop,
 } from '../../testHelpers/jestHelpers'
 
 const fakeApiRequest = (success: boolean): Promise<S3FileData> => {
@@ -36,7 +38,7 @@ describe('FileUpload component', () => {
             return
         },
         onLoadComplete: () => {
-            /*nothing*/
+            return
         },
     }
 
@@ -149,59 +151,68 @@ describe('FileUpload component', () => {
         expect(screen.queryByRole('listitem')).toBeNull()
     })
 
-    it('does not accept a drop file that has an invalid type', async () => {
-        const { getByTestId, queryByTestId } = render(
-            <FileUpload {...testProps} accept=".pdf" />
-        )
+    it('displays a duplicate file error when expected', async () => {
+        await render(<FileUpload {...testProps} accept=".pdf,.txt" />)
 
-        const inputEl = getByTestId('file-input-input')
-        expect(inputEl).toHaveAttribute('accept', '.pdf')
+        const input = screen.getByTestId('file-input-input')
+        userEvent.upload(input, [TEST_DOC_FILE])
+        userEvent.upload(input, [TEST_PDF_FILE])
+        userEvent.upload(input, [TEST_DOC_FILE])
 
-        const targetEl = getByTestId('file-input-droptarget')
-        fireEvent.drop(targetEl, {
-            dataTransfer: {
-                files: [TEST_PNG_FILE],
-            },
+        await waitFor(() => {
+            expect(screen.queryAllByText(TEST_PDF_FILE.name).length).toBe(1)
+            expect(screen.queryAllByText(TEST_DOC_FILE.name).length).toBe(2)
+            expect(screen.queryAllByText('Duplicate file').length).toBe(1)
         })
-
-        expect(getByTestId('file-input-error')).toHaveTextContent(
-            'This is not a valid file type'
-        )
-        expect(getByTestId('file-input-error')).toHaveClass(
-            'usa-file-input__accepted-files-message'
-        )
-        expect(getByTestId('file-input-droptarget')).toHaveClass(
-            'has-invalid-file'
-        )
-
-        expect(queryByTestId('file-input-preview')).not.toBeInTheDocument()
     })
 
-    it('does not accept a drop that has valid and invalid files together', () => {
-        const { getByTestId, queryByTestId } = render(
-            <FileUpload {...testProps} accept=".pdf" />
-        )
+    describe('drag and drop behavior', () => {
+        it('does not accept a drop file that has an invalid type', async () => {
+            const { getByTestId, queryByTestId } = render(
+                <FileUpload {...testProps} accept=".pdf" />
+            )
 
-        const inputEl = getByTestId('file-input-input')
-        expect(inputEl).toHaveAttribute('accept', '.pdf')
+            const inputEl = getByTestId('file-input-input')
+            expect(inputEl).toHaveAttribute('accept', '.pdf')
 
-        const targetEl = getByTestId('file-input-droptarget')
-        fireEvent.drop(targetEl, {
-            dataTransfer: {
-                files: [TEST_PDF_FILE, TEST_PNG_FILE],
-            },
+            const targetEl = getByTestId('file-input-droptarget')
+            dragAndDrop(targetEl, [TEST_PNG_FILE])
+
+            expect(getByTestId('file-input-error')).toHaveTextContent(
+                'This is not a valid file type'
+            )
+            expect(getByTestId('file-input-error')).toHaveClass(
+                'usa-file-input__accepted-files-message'
+            )
+            expect(getByTestId('file-input-droptarget')).toHaveClass(
+                'has-invalid-file'
+            )
+
+            expect(queryByTestId('file-input-preview')).not.toBeInTheDocument()
         })
 
-        expect(getByTestId('file-input-error')).toHaveTextContent(
-            'This is not a valid file type'
-        )
-        expect(getByTestId('file-input-error')).toHaveClass(
-            'usa-file-input__accepted-files-message'
-        )
-        expect(getByTestId('file-input-droptarget')).toHaveClass(
-            'has-invalid-file'
-        )
+        it('does not accept a drop that has valid and invalid files together', () => {
+            const { getByTestId, queryByTestId } = render(
+                <FileUpload {...testProps} accept=".pdf" />
+            )
 
-        expect(queryByTestId('file-input-preview')).not.toBeInTheDocument()
+            const inputEl = getByTestId('file-input-input')
+            expect(inputEl).toHaveAttribute('accept', '.pdf')
+
+            const targetEl = getByTestId('file-input-droptarget')
+            dragAndDrop(targetEl, [TEST_PDF_FILE, TEST_PNG_FILE])
+
+            expect(getByTestId('file-input-error')).toHaveTextContent(
+                'This is not a valid file type'
+            )
+            expect(getByTestId('file-input-error')).toHaveClass(
+                'usa-file-input__accepted-files-message'
+            )
+            expect(getByTestId('file-input-droptarget')).toHaveClass(
+                'has-invalid-file'
+            )
+
+            expect(queryByTestId('file-input-preview')).not.toBeInTheDocument()
+        })
     })
 })
