@@ -449,12 +449,16 @@ export const ReviewSubmit = ({
                     <GridContainer>
                         <Grid row>
                             {draftSubmission.stateContacts.map((stateContact, index) => (
-                            <Grid tablet={{col: 6}}>
+                            <Grid col={6}>
                                 <strong>Contact {index + 1}</strong><br/>
                                 {stateContact.name}<br/>
                                 {stateContact.titleRole}<br/>
                                 {stateContact.email}<br/>
+
+                                {index % 2 ? 'odd' : 'even'}
+
                             </Grid>
+
                             ))}
                         </Grid>
                     </GridContainer>
