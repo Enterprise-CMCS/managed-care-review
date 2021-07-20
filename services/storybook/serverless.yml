@@ -1,13 +1,15 @@
 service: storybook
 
+frameworkVersion: '2'
+
 custom:
   stage: ${opt:stage, self:provider.stage}
+  region: ${opt:region, self:provider.region}
 
 provider:
   name: aws
   runtime: nodejs12.x
   region: us-east-1
-  stage: dev
 
 resources:
   Conditions:
@@ -168,9 +170,4 @@ resources:
         Ref: CloudFrontDistribution
     CloudFrontEndpointUrl:
       Value:
-        Fn::Join:
-          - ''
-          - - https://
-            - Fn::GetAtt:
-                - CloudFrontDistribution
-                - DomainName
+        - !Sub https://${CloudFrontDistribution.DomainName}
