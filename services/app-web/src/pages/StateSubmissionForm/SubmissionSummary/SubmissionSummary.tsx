@@ -144,7 +144,16 @@ export const SubmissionSummary = (): React.ReactElement => {
                 data-testid="submission-summary"
                 className={styles.container}
             >
-                <Link asCustom={NavLink} variant="unstyled" to="/dashboard">
+                <Link
+                    asCustom={NavLink}
+                    variant="unstyled"
+                    to={{
+                        pathname: '/dashboard',
+                        state: {
+                            defaultProgramID: submission.programID,
+                        },
+                    }}
+                >
                     <svg
                         className="usa-icon"
                         aria-hidden="true"
