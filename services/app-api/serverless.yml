@@ -105,9 +105,10 @@ resources:
               Action: 'sts:AssumeRole'
         Path: ${self:custom.iamPath}
         PermissionsBoundary:
-          - CreatePermissionsBoundary
-          - !Sub arn:aws:iam::${AWS::AccountId}:policy${self:custom.iamPermissionsBoundaryPolicy}
-          - !Ref AWS::NoValue
+          Fn::If:
+            - CreatePermissionsBoundary
+            - !Sub arn:aws:iam::${AWS::AccountId}:policy${self:custom.iamPermissionsBoundaryPolicy}
+            - !Ref AWS::NoValue
         ManagedPolicyArns:
           - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
         Policies:
