@@ -178,7 +178,7 @@ export const Contacts = ({
                                                         className="usa-input"
                                                       />
 
-                                                      {showFieldErrors('True') && (
+                                                      {showFieldErrors(`True`) && (
                                                         <ErrorMessage
                                                             name={`stateContacts.${index}.name`}
                                                             component="div"
@@ -198,7 +198,7 @@ export const Contacts = ({
                                                         type="text"
                                                         className="usa-input"
                                                       />
-                                                      {showFieldErrors(`errors.stateContacts[${index}].titleRole`) && (
+                                                      {showFieldErrors(`True`) && (
                                                         <ErrorMessage
                                                             name={`stateContacts.${index}.titleRole`}
                                                             component="div"
@@ -218,7 +218,7 @@ export const Contacts = ({
                                                         type="text"
                                                         className="usa-input"
                                                       />
-                                                      {showFieldErrors(`errors.stateContacts[${index}].email`) && (
+                                                      {showFieldErrors(`True`) && (
                                                         <ErrorMessage
                                                             name={`stateContacts.${index}.email`}
                                                             component="div"
