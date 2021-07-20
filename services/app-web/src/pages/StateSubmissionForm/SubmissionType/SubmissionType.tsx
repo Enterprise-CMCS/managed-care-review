@@ -31,22 +31,6 @@ import { updatesFromSubmission } from '../updateSubmissionTransform'
 
 import styles from '../StateSubmissionForm.module.scss'
 
-/*
-    Add focus to "first" form element that is invalid when errors exist
-    Approx order of form inputs is determined by the Formik schema
-*/
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const FormikFocusOnErrors = () => {
-    const { errors } = useFormikContext()
-    const errorKeys = Object.keys(errors)
-    React.useEffect(() => {
-        if (errorKeys.length > 0) {
-            document.getElementsByName(errorKeys[0])[0].focus()
-        }
-    }, [errorKeys])
-    return null
-}
-
 // Formik setup
 // Should be listed in order of appearance on field to allow errors to focus as expected
 const SubmissionTypeFormSchema = Yup.object().shape({
