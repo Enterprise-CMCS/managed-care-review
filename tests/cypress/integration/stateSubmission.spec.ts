@@ -458,9 +458,7 @@ describe('State Submission', () => {
             }).safeClick()
 
             // Fill out contract details
-            cy.findByTestId('step-indicator')
-                .findAllByText('Contract Details')
-                .should('have.length', 2)
+            cy.findByText(/MN-PMAP-/).should('exist')
             cy.findByLabelText('Base contract').should('exist').safeClick()
             cy.findByLabelText('Start date').type('04/01/2024')
             cy.findByLabelText('End date').type('03/31/2025').blur()
