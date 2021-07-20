@@ -112,7 +112,7 @@ resources:
           MetadataURL: ${self:custom.okta_metadata_url}
         ProviderName: Okta
         ProviderType: SAML
-        UserPoolId: !Ref: CognitoUserPool
+        UserPoolId: !Ref CognitoUserPool
 
     CognitoIdentityPool:
       Type: AWS::Cognito::IdentityPool
