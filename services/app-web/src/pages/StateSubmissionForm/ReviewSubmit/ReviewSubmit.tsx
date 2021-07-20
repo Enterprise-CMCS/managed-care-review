@@ -454,7 +454,6 @@ export const ReviewSubmit = ({
                                 {stateContact.name}<br/>
                                 {stateContact.titleRole}<br/>
                                 {stateContact.email}<br/>
-                                {stateContact.phone}<br/>
                             </Grid>
                             ))}
                         </Grid>

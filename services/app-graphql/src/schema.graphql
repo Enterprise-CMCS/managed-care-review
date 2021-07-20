@@ -103,21 +103,18 @@ type StateContact {
     name: String!
     titleRole: String!
     email: String!
-    phone: String!
 }
 
 input StateContactInput {
   name: String!
   titleRole: String!
   email: String!
-  phone: String!
 }
 
 type ActuaryContact {
     name: String!
     titleRole: String!
     email: String!
-    phone: String!
 }
 
 type Document {

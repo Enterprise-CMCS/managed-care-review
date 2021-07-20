@@ -18,7 +18,6 @@ query fetchStateSubmission($input: FetchStateSubmissionInput!) {
                 name
                 titleRole
                 email
-                phone
             }
             documents {
                 name

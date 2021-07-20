@@ -373,7 +373,6 @@ describe('updateDraftSubmission', () => {
                     name: 'test name',
                     titleRole: 'fancy person',
                     email: 'test@test.com',
-                    phone: '(555)555-5555',
                 },
             ],
             documents: [],
@@ -404,7 +403,6 @@ describe('updateDraftSubmission', () => {
               name: 'test name',
               titleRole: 'fancy person',
               email: 'test@test.com',
-              phone: '(555)555-5555',
           },
         ])
 
@@ -416,7 +414,6 @@ describe('updateDraftSubmission', () => {
               name: 'test name',
               titleRole: 'fancy person',
               email: 'test@test.com',
-              phone: '(555)555-5555',
           },
         ])
     })

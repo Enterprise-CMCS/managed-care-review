@@ -37,7 +37,6 @@ type StateContact = {
     name: String
     titleRole: String
     email: String
-    phone: String
 }
 
 type RateType = 'NEW' | 'AMENDMENT'

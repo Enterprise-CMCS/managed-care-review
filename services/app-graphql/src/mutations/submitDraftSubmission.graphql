@@ -18,7 +18,6 @@ mutation submitDraftSubmission($input: SubmitDraftSubmissionInput!) {
                 name
                 titleRole
                 email
-                phone
             }
             documents {
                 name

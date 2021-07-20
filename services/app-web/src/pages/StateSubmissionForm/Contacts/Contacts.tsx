@@ -29,10 +29,7 @@ export interface StateContactValue {
     name: string
     titleRole: string
     email: string
-    phone: string
 }
-
-const phoneRegex = /\(?\d{3}\)?-? *\d{3}-? *-?\d{4}$/
 
 const StateContactSchema = Yup.object().shape({
     stateContacts: Yup.array()
@@ -44,9 +41,6 @@ const StateContactSchema = Yup.object().shape({
             email: Yup.string()
                 .email('You must enter a valid email address')
                 .required('You must provide an email address'),
-            phone: Yup.string()
-                .matches(phoneRegex, 'You must enter a valid phone number')
-                .required('You must provide a phone number')
         }))
 })
 
@@ -76,7 +70,6 @@ export const Contacts = ({
             name: '',
             titleRole: '',
             email: '',
-            phone: '',
         })
     }
 
@@ -202,20 +195,6 @@ export const Contacts = ({
                                                       component="div"
                                                       className="usa-error-message"
                                                   />
-
-                                                  <label htmlFor={`stateContacts.${index}.phone`}>
-                                                      Phone
-                                                  </label>
-                                                  <Field
-                                                    name={`stateContacts.${index}.phone`}
-                                                    type="text"
-                                                    className="usa-input"
-                                                  />
-                                                  <ErrorMessage
-                                                      name={`stateContacts.${index}.phone`}
-                                                      component="div"
-                                                      className="usa-error-message"
-                                                  />
                                                 <Button
                                                   type="button"
                                                   unstyled
@@ -235,7 +214,6 @@ export const Contacts = ({
                                             name: '',
                                             titleRole: '',
                                             email: '',
-                                            phone: '',
                                           })}
                                         >
                                         Add state contact

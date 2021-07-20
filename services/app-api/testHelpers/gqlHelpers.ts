@@ -112,7 +112,6 @@ const createAndUpdateTestDraftSubmission = async (
                 name: 'test name',
                 titleRole: 'test title',
                 email: 'email@test.com',
-                phone: '(555)555-5555',
             }
         ],
         contractType: 'BASE' as const,

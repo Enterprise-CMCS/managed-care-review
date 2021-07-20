@@ -17,7 +17,6 @@ query fetchDraftSubmission($input: FetchDraftSubmissionInput!) {
                 name
                 titleRole
                 email
-                phone
             }
             documents {
                 name
