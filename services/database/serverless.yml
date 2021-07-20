@@ -2,11 +2,17 @@ service: database
 
 frameworkVersion: '2'
 
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: us-east-1
+
 plugins:
   - serverless-dynamodb-local
 
 custom:
   stage: ${opt:stage, self:provider.stage}
+  region: ${opt:region, self:provider.region}
   draftSubmissionsTableName: ${self:custom.stage}-draft-submissions
   tableName: ${self:custom.stage}-amendments
   dynamodb:
@@ -16,12 +22,6 @@ custom:
       port: 8000
       inMemory: true
       migrate: true
-
-provider:
-  name: aws
-  runtime: nodejs12.x
-  stage: dev
-  region: us-east-1
 
 resources:
   Resources:
