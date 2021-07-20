@@ -1,11 +1,6 @@
-# Welcome to serverless. Read the docs
-# https://serverless.com/framework/docs/
-
-# Serverless.yml is the configuration the CLI
-# uses to deploy your code to your provider of choice
-
-# The `service` block is the name of the service
 service: uploads
+
+frameworkVersion: '2'
 
 plugins:
   - serverless-s3-local
@@ -15,10 +10,10 @@ provider:
   name: aws
   runtime: nodejs12.x
   region: us-east-1
-  stage: dev
 
 custom:
   stage: ${opt:stage, self:provider.stage}
+  region: ${opt:region, self:provider.region}
   s3:
     directory: ./local_buckets
     cors: ./local_cors.xml
@@ -36,8 +31,7 @@ resources:
           ServerSideEncryptionConfiguration:
             - ServerSideEncryptionByDefault:
                 SSEAlgorithm: AES256
-        # Set the CORS policy
-        CorsConfiguration:
+        CorsConfiguration: # Set the CORS policy
           CorsRules:
             - AllowedOrigins:
                 - '*'
@@ -51,13 +45,10 @@ resources:
                 - HEAD
               MaxAge: 3000
 
-  # Print out the name of the bucket that is created
   Outputs:
     DocumentUploadsBucketName:
-      Value:
-        Ref: DocumentUploadsBucket
+      Value: !Ref: DocumentUploadsBucket
     DocumentUploadsBucketArn:
       Value: !GetAtt DocumentUploadsBucket.Arn
     Region:
-      Value:
-        Ref: AWS::Region
+      Value: !Sub ${AWS::Region}
