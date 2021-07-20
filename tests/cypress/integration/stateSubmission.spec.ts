@@ -441,27 +441,29 @@ describe('State Submission', () => {
             cy.findByLabelText('Annual rate update').should('be.checked')
         })
 
-        it('user can complete a contract submission, load dashboard with default program, and see submission summary', () => {
+        it('user can complete a submission, load dashboard with default program, and see submission summary', () => {
             cy.login()
-            cy.startNewContractOnlySubmission()
+            cy.findByTestId('dashboardPage').should('exist')
+            cy.findByRole('link', { name: 'Start new submission' }).click({
+                force: true,
+            })
+            cy.location('pathname').should('eq', '/submissions/new')
+            cy.findByText('New submission').should('exist')
 
-            // Change program to something farther down list
-            cy.findByText('Back').click()
-            cy.findByRole('heading', { name: 'Submission type' }).should(
-                'exist'
-            )
-            cy.findByRole('combobox', { name: 'Program' })
+            cy.findByLabelText('Contract action only').safeClick()
+            cy.findByRole('combobox', { name: 'Program' }).select('pmap')
+
+            cy.findByRole('textbox', { name: 'Submission description' })
                 .should('exist')
-                .select('pmap')
+                .type('description of submission')
+
             cy.findByRole('button', {
                 name: 'Continue',
             }).safeClick()
-            cy.findByRole('progressbar', { name: 'Loading' }).should(
-                'not.exist'
-            )
+
+            cy.findByText(/^MN-PMAP-/).should('exist')
 
             // Fill out contract details
-            cy.findByText(/MN-PMAP-/).should('exist')
             cy.findByLabelText('Base contract').should('exist').safeClick()
             cy.findByLabelText('Start date').type('04/01/2024')
             cy.findByLabelText('End date').type('03/31/2025').blur()
