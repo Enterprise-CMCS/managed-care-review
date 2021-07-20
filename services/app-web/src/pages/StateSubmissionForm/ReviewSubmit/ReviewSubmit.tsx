@@ -453,12 +453,8 @@ export const ReviewSubmit = ({
                                 <strong>Contact {index + 1}</strong><br/>
                                 {stateContact.name}<br/>
                                 {stateContact.titleRole}<br/>
-                                {stateContact.email}<br/>
-
-                                {index % 2 ? 'odd' : 'even'}
-
+                                <a href="mailto:{stateContact.email}">{stateContact.email}</a><br/>
                             </Grid>
-
                             ))}
                         </Grid>
                     </GridContainer>
