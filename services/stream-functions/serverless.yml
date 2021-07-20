@@ -16,6 +16,7 @@ custom:
   emailSource: ${opt:emailSource, env:SES_SOURCE_EMAIL_ADDRESS, "admin@example.com"}
   reviewerEmail: ${opt:reviewTeamEmail, env:SES_REVIEW_TEAM_EMAIL_ADDRESS, "reviewteam@example.com"}
   iamPath: ${env:IAM_PATH, "/"}
+  iamPermissionsBoundaryPolicy: ${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
 
 provider:
   name: aws
