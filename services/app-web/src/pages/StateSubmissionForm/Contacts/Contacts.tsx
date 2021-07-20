@@ -36,13 +36,21 @@ export interface StateContactValue {
     phone: string
 }
 
+const phoneRegExpr = /^\(?([0-9]{3})\)?[-.●]?([0-9]{3})[-.●]?([0-9]{4})$/
+
 const StateContactSchema = Yup.object().shape({
     stateContacts: Yup.array()
         .of(Yup.object().shape({
-            name: Yup.string().required('You must provide a name'),
-            titleRole: Yup.string().required('You must provide a title/role'),
-            email: Yup.string().required('You must provide an email address'),
-            phone: Yup.string().required('You must provide a phone number'),
+            name: Yup.string()
+                .required('You must provide a name'),
+            titleRole: Yup.string()
+                .required('You must provide a title/role'),
+            email: Yup.string()
+                .email('You must enter a valid email address')
+                .required('You must provide an email address'),
+            phone: Yup.string()
+                .matches(phoneRegExpr, 'You must enter a valid phone number')
+                .required('You must provide a phone number')
         }))
 })
 
