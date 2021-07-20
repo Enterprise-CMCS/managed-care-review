@@ -84,7 +84,13 @@ const mockCompleteDraftSubmission: DraftSubmission = {
     rateDateEnd: new Date(),
     rateDateCertified: new Date(),
     rateAmendmentInfo: null,
-    stateContacts: [],
+    stateContacts: [
+        {
+          name: 'Test Person',
+          titleRole: 'A Role',
+          email: 'test@test.com',
+        }
+    ],
 }
 
 const mockNewDraftSubmission: DraftSubmission = {
