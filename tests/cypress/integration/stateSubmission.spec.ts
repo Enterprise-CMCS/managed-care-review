@@ -452,10 +452,13 @@ describe('State Submission', () => {
             )
             cy.findByRole('combobox', { name: 'Program' })
                 .should('exist')
-                .select('PMAP')
+                .select('pmap')
             cy.findByRole('button', {
                 name: 'Continue',
             }).safeClick()
+            cy.findByRole('progressbar', { name: 'Loading' }).should(
+                'not.exist'
+            )
 
             // Fill out contract details
             cy.findByText(/MN-PMAP-/).should('exist')
