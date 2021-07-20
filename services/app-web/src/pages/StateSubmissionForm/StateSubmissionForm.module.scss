@@ -98,3 +98,10 @@ div[class^='usa-step-indicator'] {
 [class^='usa-step-indicator__header'] {
     display: inline;
 }
+
+div[class^='stateContacts'] {
+    [class^='usa-legend'], [class^='usa-input'] {
+        margin-bottom: units(2);
+
+    }
+}

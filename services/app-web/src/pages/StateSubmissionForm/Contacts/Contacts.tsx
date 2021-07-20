@@ -7,7 +7,6 @@ import {
     Button,
     Link,
     ButtonGroup,
-    Label,
 } from '@trussworks/react-uswds'
 import { Formik, FormikErrors, FormikHelpers, Field, FieldArray, ErrorMessage } from 'formik'
 import { NavLink, useHistory } from 'react-router-dom'
@@ -18,9 +17,6 @@ import {
     DraftSubmission,
     UpdateDraftSubmissionInput,
 } from '../../../gen/gqlClient'
-import {
-    formatForForm
-} from '../../../formHelpers'
 
 import { updatesFromSubmission, stripTypename } from '../updateSubmissionTransform'
 import { MCRouterState } from '../../../constants/routerState'
@@ -73,9 +69,6 @@ export const Contacts = ({
     const redirectToDashboard = React.useRef(false)
     const history = useHistory<MCRouterState>()
 
-    const showFieldErrors = (error?: FormError) =>
-        shouldValidate && Boolean(error)
-
     const stateContacts = stripTypename(draftSubmission.stateContacts)
 
     if (stateContacts.length === 0) {
@@ -89,6 +82,15 @@ export const Contacts = ({
 
     const contactsInitialValues: ContactsFormValues = {
       stateContacts: stateContacts
+    }
+
+    const handleContactLegend = (index: number) => {
+        const count = index + 1
+        const required = index ? '' : ' (required)'
+
+        return (
+            'State contact ' + count + required
+        )
     }
 
     const handleFormSubmit = async (
@@ -147,84 +149,83 @@ export const Contacts = ({
                             <fieldset className="usa-fieldset">
                                 <h3>State contacts</h3>
                                 {formAlert && formAlert}
-                                <span>Provide contact information for the state personnel you'd like to recieve all CMS communication about this submission.</span>
+                                <p>Provide contact information for the state personnel you'd like to recieve all CMS communication about this submission.</p>
                                 <legend className="srOnly">State contacts</legend>
                                 {formAlert && formAlert}
 
                                 <FieldArray name="stateContacts">
                                 {({ insert, remove, push }) => (
-                                    <div className="row">
+                                    <div className="stateContacts">
                                         {values.stateContacts.length > 0 &&
                                           values.stateContacts.map((stateContact, index) => (
-                                            <Fieldset legend={"State contact " + index + " (required)"} key={index}>
-                                                <FormGroup>
-                                                    <label htmlFor={`stateContacts.${index}.name`}>
-                                                        Name
-                                                    </label>
-                                                    <Field
+                                              <FormGroup key={index}>
+                                                  <Fieldset legend={handleContactLegend(index)}>
+
+                                                  <label htmlFor={`stateContacts.${index}.name`}>
+                                                      Name
+                                                  </label>
+                                                  <Field
+                                                    name={`stateContacts.${index}.name`}
+                                                    type="text"
+                                                    className="usa-input"
+                                                  />
+                                                  <ErrorMessage
                                                       name={`stateContacts.${index}.name`}
-                                                      type="text"
-                                                      className="usa-input"
-                                                    />
-                                                    <ErrorMessage
-                                                        name={`stateContacts.${index}.name`}
-                                                        component="div"
-                                                        className="usa-error-message"
-                                                    />
-                                                </FormGroup>
-                                                <FormGroup>
-                                                    <label htmlFor={`stateContacts.${index}.titleRole`}>
-                                                        Title/Role
-                                                    </label>
-                                                    <Field
+                                                      component="div"
+                                                      className="usa-error-message"
+                                                  />
+
+                                                  <label htmlFor={`stateContacts.${index}.titleRole`}>
+                                                      Title/Role
+                                                  </label>
+                                                  <Field
+                                                    name={`stateContacts.${index}.titleRole`}
+                                                    type="text"
+                                                    className="usa-input"
+                                                  />
+                                                  <ErrorMessage
                                                       name={`stateContacts.${index}.titleRole`}
-                                                      type="text"
-                                                      className="usa-input"
-                                                    />
-                                                    <ErrorMessage
-                                                        name={`stateContacts.${index}.titleRole`}
-                                                        component="div"
-                                                        className="usa-error-message"
-                                                    />
-                                                </FormGroup>
-                                                <FormGroup>
-                                                    <label htmlFor={`stateContacts.${index}.email`}>
-                                                        Email
-                                                    </label>
-                                                    <Field
+                                                      component="div"
+                                                      className="usa-error-message"
+                                                  />
+
+                                                  <label htmlFor={`stateContacts.${index}.email`}>
+                                                      Email
+                                                  </label>
+                                                  <Field
+                                                    name={`stateContacts.${index}.email`}
+                                                    type="text"
+                                                    className="usa-input"
+                                                  />
+                                                  <ErrorMessage
                                                       name={`stateContacts.${index}.email`}
-                                                      type="text"
-                                                      className="usa-input"
-                                                    />
-                                                    <ErrorMessage
-                                                        name={`stateContacts.${index}.email`}
-                                                        component="div"
-                                                        className="usa-error-message"
-                                                    />
-                                                </FormGroup>
-                                                <FormGroup>
-                                                    <label htmlFor={`stateContacts.${index}.phone`}>
-                                                        Phone
-                                                    </label>
-                                                    <Field
+                                                      component="div"
+                                                      className="usa-error-message"
+                                                  />
+
+                                                  <label htmlFor={`stateContacts.${index}.phone`}>
+                                                      Phone
+                                                  </label>
+                                                  <Field
+                                                    name={`stateContacts.${index}.phone`}
+                                                    type="text"
+                                                    className="usa-input"
+                                                  />
+                                                  <ErrorMessage
                                                       name={`stateContacts.${index}.phone`}
-                                                      type="text"
-                                                      className="usa-input"
-                                                    />
-                                                    <ErrorMessage
-                                                        name={`stateContacts.${index}.phone`}
-                                                        component="div"
-                                                        className="usa-error-message"
-                                                    />
-                                                </FormGroup>
+                                                      component="div"
+                                                      className="usa-error-message"
+                                                  />
                                                 <Button
                                                   type="button"
                                                   unstyled
+                                                  className="text-secondary"
                                                   onClick={() => (remove(index))}
                                                 >
                                                 Remove contact
                                                 </Button>
-                                            </Fieldset>
+                                                </Fieldset>
+                                            </FormGroup>
                                         ))}
 
                                         <Button
