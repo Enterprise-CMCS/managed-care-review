@@ -192,6 +192,15 @@ export const SubmissionType = ({
                 values.submissionType as SubmissionTypeT
             updatedDraft.submissionDescription = values.submissionDescription
 
+            // remove rate data if submissionType is 'CONTRACT_ONLY'
+            if (updatedDraft.submissionType === 'CONTRACT_ONLY') {
+                delete updatedDraft.rateType
+                delete updatedDraft.rateDateStart
+                delete updatedDraft.rateDateEnd
+                delete updatedDraft.rateDateCertified
+                delete updatedDraft.rateAmendmentInfo
+            }
+
             try {
                 await updateDraft({
                     submissionID: draftSubmission.id,
