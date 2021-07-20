@@ -9,7 +9,7 @@ import {
     ButtonGroup,
     Label,
 } from '@trussworks/react-uswds'
-import { Formik, FormikErrors, FormikHelpers, Field, FieldArray } from 'formik'
+import { Formik, FormikErrors, FormikHelpers, Field, FieldArray, ErrorMessage } from 'formik'
 import { NavLink, useHistory } from 'react-router-dom'
 
 import styles from '../StateSubmissionForm.module.scss'
@@ -36,6 +36,18 @@ export interface StateContactValue {
     phone: string
 }
 
+const StateContactSchema = Yup.object().shape({
+    stateContacts: Yup.array()
+        .of(Yup.object().shape({
+            name: Yup.string().required('You must provide a name'),
+            titleRole: Yup.string().required('You must provide a title/role'),
+            email: Yup.string().required('You must provide an email address'),
+            phone: Yup.string().required('You must provide a phone number'),
+        }))
+})
+
+type FormError = FormikErrors<ContactsFormValues>[keyof FormikErrors<ContactsFormValues>]
+
 export const Contacts = ({
     draftSubmission,
     showValidations = false,
@@ -53,27 +65,23 @@ export const Contacts = ({
     const redirectToDashboard = React.useRef(false)
     const history = useHistory<MCRouterState>()
 
-    let stateContactsCheck = []
+    const showFieldErrors = (error?: FormError) =>
+        shouldValidate && Boolean(error)
 
-    if (draftSubmission.stateContacts.length === 0) {
-      stateContactsCheck =
-          [
-            {
-              name: '',
-              titleRole: '',
-              email: '',
-              phone: '',
-            }
-          ]
-    }
-    else {
-        stateContactsCheck = stripTypename(draftSubmission.stateContacts)
+    const stateContacts = stripTypename(draftSubmission.stateContacts)
+
+    if (stateContacts.length === 0) {
+        stateContacts.push({
+            name: '',
+            titleRole: '',
+            email: '',
+            phone: '',
+        })
     }
 
     const contactsInitialValues: ContactsFormValues = {
-      stateContacts: stateContactsCheck
+      stateContacts: stateContacts
     }
-
 
     const handleFormSubmit = async (
         values: ContactsFormValues,
@@ -107,6 +115,7 @@ export const Contacts = ({
             <Formik
                 initialValues={contactsInitialValues}
                 onSubmit={handleFormSubmit}
+                validationSchema={StateContactSchema}
             >
                 {({
                     values,
@@ -115,7 +124,6 @@ export const Contacts = ({
                     handleSubmit,
                     isSubmitting,
                     isValidating,
-                    setFieldValue,
                 }) => (
                     <>
                         <UswdsForm
@@ -124,11 +132,13 @@ export const Contacts = ({
                             aria-label="Contacts Form"
                             onSubmit={(e) => {
                                 e.preventDefault()
+                                console.log(errors)
                                 if (!isValidating) handleSubmit()
                             }}
                         >
                             <fieldset className="usa-fieldset">
                                 <h3>State contacts</h3>
+                                {formAlert && formAlert}
                                 <span>Provide contact information for the state personnel you'd like to recieve all CMS communication about this submission.</span>
                                 <legend className="srOnly">State contacts</legend>
                                 {formAlert && formAlert}
@@ -148,6 +158,11 @@ export const Contacts = ({
                                                       type="text"
                                                       className="usa-input"
                                                     />
+                                                    <ErrorMessage
+                                                        name={`stateContacts.${index}.name`}
+                                                        component="div"
+                                                        className="usa-error-message"
+                                                    />
                                                 </FormGroup>
                                                 <FormGroup>
                                                     <label htmlFor={`stateContacts.${index}.titleRole`}>
@@ -157,6 +172,11 @@ export const Contacts = ({
                                                       name={`stateContacts.${index}.titleRole`}
                                                       type="text"
                                                       className="usa-input"
+                                                    />
+                                                    <ErrorMessage
+                                                        name={`stateContacts.${index}.titleRole`}
+                                                        component="div"
+                                                        className="usa-error-message"
                                                     />
                                                 </FormGroup>
                                                 <FormGroup>
@@ -168,6 +188,11 @@ export const Contacts = ({
                                                       type="text"
                                                       className="usa-input"
                                                     />
+                                                    <ErrorMessage
+                                                        name={`stateContacts.${index}.email`}
+                                                        component="div"
+                                                        className="usa-error-message"
+                                                    />
                                                 </FormGroup>
                                                 <FormGroup>
                                                     <label htmlFor={`stateContacts.${index}.phone`}>
@@ -177,6 +202,11 @@ export const Contacts = ({
                                                       name={`stateContacts.${index}.phone`}
                                                       type="text"
                                                       className="usa-input"
+                                                    />
+                                                    <ErrorMessage
+                                                        name={`stateContacts.${index}.phone`}
+                                                        component="div"
+                                                        className="usa-error-message"
                                                     />
                                                 </FormGroup>
                                                 <Button
