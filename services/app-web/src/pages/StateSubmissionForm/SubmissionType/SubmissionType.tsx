@@ -30,7 +30,10 @@ import { FieldTextarea } from '../../../components/Form/FieldTextarea/FieldTexta
 import { FieldDropdown } from '../../../components/Form/FieldDropdown/FieldDropdown'
 import { FieldRadio } from '../../../components/Form/FieldRadio/FieldRadio'
 import { SubmissionTypeRecord } from '../../../constants/submissions'
-import { updatesFromSubmission } from '../updateSubmissionTransform'
+import {
+    cleanDraftSubmission,
+    updatesFromSubmission,
+} from '../updateSubmissionTransform'
 
 // Formik setup
 // Should be listed in order of appearance on field to allow errors to focus as expected
@@ -184,7 +187,6 @@ export const SubmissionType = ({
                 )
                 return
             }
-
             const updatedDraft = updatesFromSubmission(draftSubmission)
 
             updatedDraft.programID = values.programID
@@ -192,19 +194,11 @@ export const SubmissionType = ({
                 values.submissionType as SubmissionTypeT
             updatedDraft.submissionDescription = values.submissionDescription
 
-            // remove rate data if submissionType is 'CONTRACT_ONLY'
-            if (updatedDraft.submissionType === 'CONTRACT_ONLY') {
-                delete updatedDraft.rateType
-                delete updatedDraft.rateDateStart
-                delete updatedDraft.rateDateEnd
-                delete updatedDraft.rateDateCertified
-                delete updatedDraft.rateAmendmentInfo
-            }
-
+            const cleanSubmission = cleanDraftSubmission(updatedDraft)
             try {
                 await updateDraft({
                     submissionID: draftSubmission.id,
-                    draftSubmissionUpdates: updatedDraft,
+                    draftSubmissionUpdates: cleanSubmission,
                 })
 
                 history.push(
