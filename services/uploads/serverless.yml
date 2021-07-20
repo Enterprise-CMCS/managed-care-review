@@ -47,7 +47,7 @@ resources:
 
   Outputs:
     DocumentUploadsBucketName:
-      Value: !Ref: DocumentUploadsBucket
+      Value: !Ref DocumentUploadsBucket
     DocumentUploadsBucketArn:
       Value: !GetAtt DocumentUploadsBucket.Arn
     Region:
