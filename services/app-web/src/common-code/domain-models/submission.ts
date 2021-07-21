@@ -10,7 +10,7 @@ const isContractAndRates = (
 ): boolean => sub.submissionType === 'CONTRACT_AND_RATES'
 
 const isRateAmendment = (
-    sub: StateSubmissionType | StateSubmissionType
+    sub: DraftSubmissionType | StateSubmissionType
 ): boolean => sub.rateType === 'AMENDMENT'
 
 const hasValidContract = (sub: StateSubmissionType): boolean =>
