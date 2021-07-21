@@ -450,7 +450,7 @@ export const ReviewSubmit = ({
                         <Grid row>
                             {draftSubmission.stateContacts.map((stateContact, index) => (
                             <Grid col={6}>
-                                <strong>Contact {index + 1}</strong><br/>
+                                <span className="text-bold">Contact {index + 1}</span><br/>
                                 {stateContact.name}<br/>
                                 {stateContact.titleRole}<br/>
                                 <a href="mailto:{stateContact.email}">{stateContact.email}</a><br/>
