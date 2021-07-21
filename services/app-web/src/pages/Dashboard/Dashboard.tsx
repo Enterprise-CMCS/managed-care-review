@@ -131,7 +131,10 @@ const ProgramTabBody = ({
                 </div>
             </div>
             {programSubs.length > 0 ? (
-                <ul className="SubmissionCard_submissionList__1okWK">
+                <ul
+                    id="submissions-list"
+                    className="SubmissionCard_submissionList__1okWK"
+                >
                     {programSubs.map((submission) => (
                         <SubmissionCard
                             key={submission.name}

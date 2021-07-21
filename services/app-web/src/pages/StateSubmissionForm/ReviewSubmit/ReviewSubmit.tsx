@@ -492,7 +492,7 @@ export const ReviewSubmit = ({
                     <Button
                         type="button"
                         className={styles.submitButton}
-                        data-testId="pageSubmitButton"
+                        data-testid="pageSubmitButton"
                         onClick={handleSubmitConfirmation}
                     >
                         Submit

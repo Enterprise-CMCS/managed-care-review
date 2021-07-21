@@ -38,7 +38,7 @@ type DocumentProps = {
     ) => Promise<DraftSubmission | undefined>
 }
 
-const DocumentsRequirementsHint = ({
+const DocumentRequirementsHint = ({
     submissionType,
 }: {
     submissionType: SubmissionType
@@ -54,6 +54,25 @@ const DocumentsRequirementsHint = ({
         </>
     )
 
+const FormError = ({ isEmpty }: { isEmpty: boolean }): JSX.Element =>
+    isEmpty ? (
+        <Alert
+            type="error"
+            heading="Missing documents"
+            className="margin-bottom-2"
+        >
+            You must upload at least one document
+        </Alert>
+    ) : (
+        <Alert
+            type="error"
+            heading="Remove files with errors"
+            className="margin-bottom-2"
+        >
+            You must remove all documents with error messages before continuing
+        </Alert>
+    )
+
 export const Documents = ({
     draftSubmission,
     updateDraft,
@@ -62,6 +81,7 @@ export const Documents = ({
     const { deleteFile, uploadFile, getKey, getS3URL } = useS3()
     const [shouldValidate, setShouldValidate] = useState(false)
     const [hasValidFiles, setHasValidFiles] = useState(false)
+    const [hasPendingFiles, setHasPendingFiles] = useState(false)
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
     const history = useHistory<MCRouterState>()
 
@@ -88,19 +108,20 @@ export const Documents = ({
         })
 
     useEffect(() => {
-        const hasNoPendingFiles: boolean = fileItems.every(
-            (item) => item.status !== 'PENDING'
+        const hasPendingFiles: boolean = fileItems.some(
+            (item) => item.status === 'PENDING'
         )
+        setHasPendingFiles(hasPendingFiles)
 
         const hasValidDocumentsForSubmission: boolean =
             fileItems.length > 0 &&
-            hasNoPendingFiles &&
-            fileItems.some((item) => item.status === 'UPLOAD_COMPLETE')
+            !hasPendingFiles &&
+            fileItems.every((item) => item.status === 'UPLOAD_COMPLETE')
         setHasValidFiles(hasValidDocumentsForSubmission)
     }, [fileItems])
 
-    const showError = (error: string) => {
-        console.log('Document error: ', error)
+    // If there is a submission error, ensure form is in validation state
+    const onError = () => {
         if (!shouldValidate) setShouldValidate(true)
     }
 
@@ -136,21 +157,29 @@ export const Documents = ({
     }) => async (e: React.FormEvent | React.MouseEvent) => {
         e.preventDefault()
 
+        // if there are any errors present in the documents list, stop here
         if (shouldValidate) {
             setShouldValidate(true)
             if (!hasValidFiles) return
         }
 
-        const documents = fileItems.map((fileItem) => {
+        const documents = fileItems.reduce((formDataDocuments, fileItem) => {
             if (!fileItem.s3URL)
-                throw Error(
-                    'The file item has no s3url, this should not happen onSubmit'
+                console.log(
+                    'The file item has no s3url, this should not happen on form submit'
                 )
-            return {
-                name: fileItem.name,
-                s3URL: fileItem.s3URL,
+            else if (fileItem.status === 'DUPLICATE_NAME_ERROR')
+                console.log(
+                    'Attempting to save duplicate files, discarding duplicate'
+                )
+            else {
+                formDataDocuments.push({
+                    name: fileItem.name,
+                    s3URL: fileItem.s3URL,
+                })
             }
-        })
+            return formDataDocuments
+        }, [] as { name: string; s3URL: string }[])
 
         const updatedDraft = updatesFromSubmission(draftSubmission)
 
@@ -167,7 +196,7 @@ export const Documents = ({
                 })
             }
         } catch (error) {
-            showError(error)
+            onError()
         }
     }
 
@@ -187,13 +216,7 @@ export const Documents = ({
                 <fieldset className="usa-fieldset">
                     <legend className="srOnly">Documents</legend>
                     {shouldValidate && !hasValidFiles && (
-                        <Alert
-                            type="error"
-                            heading="Missing documents"
-                            className="margin-bottom-2"
-                        >
-                            You must upload at least one document
-                        </Alert>
+                        <FormError isEmpty={fileItems.length === 0} />
                     )}
                     {formAlert && formAlert}
                     <FileUpload
@@ -219,7 +242,7 @@ export const Documents = ({
                                     data-testid="documents-hint"
                                     className="text-base-darker"
                                 >
-                                    <DocumentsRequirementsHint
+                                    <DocumentRequirementsHint
                                         submissionType={
                                             draftSubmission.submissionType
                                         }
@@ -263,8 +286,10 @@ export const Documents = ({
                         </Button>
                         <Button
                             type="submit"
-                            secondary={shouldValidate && !hasValidFiles}
-                            disabled={shouldValidate && !hasValidFiles}
+                            disabled={
+                                hasPendingFiles ||
+                                (shouldValidate && !hasValidFiles)
+                            }
                         >
                             Continue
                         </Button>
