@@ -99,6 +99,16 @@ describe('State Submission', () => {
             cy.findByLabelText('Title/Role').type('Fancy Title')
             cy.findByLabelText('Email').type('test@test.com')
 
+            // add additional state contact
+            cy.findByRole('button', {
+                name: 'Add state contact',
+            }).safeClick()
+
+            // add second state contact
+            cy.findAllByLabelText('Name').eq(1).type('Test Person')
+            cy.findAllByLabelText('Title/Role').eq(1).type('Fancy Title')
+            cy.findAllByLabelText('Email').eq(1).type('test@test.com')
+
             // Continue button navigates to documents page
             cy.findByRole('button', {
                 name: 'Continue',
@@ -346,7 +356,7 @@ describe('State Submission', () => {
                 name: 'Continue',
             }).safeClick()
 
-            //Change rate details
+            // Change rate details
             cy.findByLabelText('New rate certification').safeClick()
             cy.findByLabelText('Start date').clear()
             cy.findByLabelText('Start date').type('04/01/2024')
