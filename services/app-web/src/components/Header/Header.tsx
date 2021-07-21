@@ -78,14 +78,6 @@ const UserInfo = ({
     authMode: AuthModeType
     logout: LogoutHandlerT
 }): React.ReactElement | null => {
-    useEffect(() => {
-        console.log("I'm MOUNTING")
-        return () => {
-            console.log("I'm UNMOUNTING")
-        }
-    }, [])
-
-    console.log('GETTING USER INFO,', user, loginStatus, authMode)
     return user
         ? LoggedInUserInfo(user, logout)
         : loginStatus === 'LOADING'
@@ -104,23 +96,6 @@ export const Header = ({
     const history = useHistory()
     const { heading } = usePage()
     const route = getRouteName(history.location.pathname)
-
-    useEffect(() => {
-        console.log('MOUNTING THE WHOLE HEADER')
-        return () => {
-            console.log('UNMOUNTING THE WHOLE HEADER')
-        }
-    }, [])
-
-    console.log(
-        'REDER WHY',
-        authMode,
-        loggedInUser,
-        loginStatus,
-        heading,
-        authMode,
-        setAlert
-    )
 
     const handleLogout = (
         e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -143,8 +118,6 @@ export const Header = ({
         })
         history.push('/')
     }
-
-    console.log('RENDER HEADERINGIN')
 
     return (
         <header>
