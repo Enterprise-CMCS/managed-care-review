@@ -10,7 +10,7 @@ import {
     FormGroup,
     Link,
 } from '@trussworks/react-uswds'
-import { Formik, FormikHelpers, FormikErrors, useFormikContext } from 'formik'
+import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { NavLink, useHistory, Link as ReactRouterLink } from 'react-router-dom'
 
 import { MCRouterState } from '../../../constants/routerState'
@@ -20,32 +20,20 @@ import {
     DraftSubmission,
     SubmissionType as SubmissionTypeT,
     useCreateDraftSubmissionMutation,
-    useUpdateDraftSubmissionMutation,
+    UpdateDraftSubmissionInput,
 } from '../../../gen/gqlClient'
+
+import styles from '../StateSubmissionForm.module.scss'
+
 import { useAuth } from '../../../contexts/AuthContext'
 import { FieldTextarea } from '../../../components/Form/FieldTextarea/FieldTextarea'
 import { FieldDropdown } from '../../../components/Form/FieldDropdown/FieldDropdown'
 import { FieldRadio } from '../../../components/Form/FieldRadio/FieldRadio'
 import { SubmissionTypeRecord } from '../../../constants/submissions'
-import { updatesFromSubmission } from '../updateSubmissionTransform'
-
-import styles from '../StateSubmissionForm.module.scss'
-
-/*
-    Add focus to "first" form element that is invalid when errors exist
-    Approx order of form inputs is determined by the Formik schema
-*/
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const FormikFocusOnErrors = () => {
-    const { errors } = useFormikContext()
-    const errorKeys = Object.keys(errors)
-    React.useEffect(() => {
-        if (errorKeys.length > 0) {
-            document.getElementsByName(errorKeys[0])[0].focus()
-        }
-    }, [errorKeys])
-    return null
-}
+import {
+    cleanDraftSubmission,
+    updatesFromSubmission,
+} from '../updateSubmissionTransform'
 
 // Formik setup
 // Should be listed in order of appearance on field to allow errors to focus as expected
@@ -64,13 +52,19 @@ export interface SubmissionTypeFormValues {
 type SubmissionTypeProps = {
     showValidations?: boolean
     draftSubmission?: DraftSubmission
+    updateDraft?: (
+        input: UpdateDraftSubmissionInput
+    ) => Promise<DraftSubmission | undefined>
+    formAlert?: React.ReactElement
 }
 
 type FormError =
     FormikErrors<SubmissionTypeFormValues>[keyof FormikErrors<SubmissionTypeFormValues>]
 export const SubmissionType = ({
     showValidations = false,
-    draftSubmission = undefined,
+    draftSubmission,
+    updateDraft,
+    formAlert,
 }: SubmissionTypeProps): React.ReactElement => {
     const [showFormAlert, setShowFormAlert] = React.useState(false)
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
@@ -121,12 +115,9 @@ export const SubmissionType = ({
             },
         }
     )
-    const [updateDraftSubmission, { error: updateError }] =
-        useUpdateDraftSubmissionMutation()
 
-    if ((error || updateError) && !showFormAlert) {
+    if ((error || formAlert) && !showFormAlert) {
         setShowFormAlert(true)
-        console.log('Log: creating new submission failed with gql error', error)
     }
 
     const showFieldErrors = (error?: FormError) =>
@@ -189,15 +180,13 @@ export const SubmissionType = ({
                 )
             }
         } else {
-            if (draftSubmission === undefined) {
-                // this is a sign that we should hoist the saving stuff out of this leaf
-                // let's reconsider once we have our second editable component.
+            if (draftSubmission === undefined || !updateDraft) {
+                console.log(draftSubmission, updateDraft)
                 console.log(
-                    'ERROR, when editing a draft, one should always be passed in.'
+                    'ERROR, SubmissionType for does not have props needed to update a draft.'
                 )
                 return
             }
-
             const updatedDraft = updatesFromSubmission(draftSubmission)
 
             updatedDraft.programID = values.programID
@@ -205,14 +194,11 @@ export const SubmissionType = ({
                 values.submissionType as SubmissionTypeT
             updatedDraft.submissionDescription = values.submissionDescription
 
+            const cleanSubmission = cleanDraftSubmission(updatedDraft)
             try {
-                await updateDraftSubmission({
-                    variables: {
-                        input: {
-                            submissionID: draftSubmission.id,
-                            draftSubmissionUpdates: updatedDraft,
-                        },
-                    },
+                await updateDraft({
+                    submissionID: draftSubmission.id,
+                    draftSubmissionUpdates: cleanSubmission,
                 })
 
                 history.push(
@@ -221,10 +207,6 @@ export const SubmissionType = ({
             } catch (serverError) {
                 setShowFormAlert(true)
                 formikHelpers.setSubmitting(false) // unblock submit button to allow resubmit
-                console.log(
-                    'Log: updating submission failed with server error',
-                    serverError
-                )
             }
         }
     }
@@ -272,9 +254,12 @@ export const SubmissionType = ({
                     >
                         <fieldset className="usa-fieldset">
                             <legend className="srOnly">Submission type</legend>
-                            {showFormAlert && (
-                                <Alert type="error">Something went wrong</Alert>
-                            )}
+                            {showFormAlert &&
+                                (formAlert || (
+                                    <Alert type="error">
+                                        Something went wrong
+                                    </Alert>
+                                ))}
                             <span>All fields are required</span>
                             <FieldDropdown
                                 id="programID"

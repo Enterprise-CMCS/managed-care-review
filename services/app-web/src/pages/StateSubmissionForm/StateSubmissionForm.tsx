@@ -30,6 +30,7 @@ import { SubmissionType } from './SubmissionType/SubmissionType'
 import {
     DraftSubmission,
     UpdateDraftSubmissionInput,
+    SubmissionType as SubmissionTypeT,
     useUpdateDraftSubmissionMutation,
     useFetchDraftSubmissionQuery,
 } from '../../gen/gqlClient'
@@ -104,11 +105,23 @@ export const StateSubmissionForm = (): React.ReactElement => {
         'SUBMISSIONS_REVIEW_SUBMIT',
     ] as RouteT[]
 
-    const DynamicStepIndicator = () => {
+    const DynamicStepIndicator = ({
+        submissionType = undefined,
+    }: {
+        submissionType?: SubmissionTypeT
+    }): React.ReactElement | null => {
         const currentFormPage = getRouteName(pathname)
 
         let formStepCompleted = true
         let formStepStatus: 'current' | 'complete' | undefined
+
+        // If submission type is contract only, rate details is left out of the step indicator
+        const reachableFormPages = FormPages.filter((formPage) => {
+            return !(
+                submissionType === 'CONTRACT_ONLY' &&
+                formPage === 'SUBMISSIONS_RATE_DETAILS'
+            )
+        })
 
         if (currentFormPage === 'SUBMISSIONS_TYPE') {
             return null
@@ -116,7 +129,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
             return (
                 <>
                     <StepIndicator>
-                        {FormPages.map((formPageName) => {
+                        {reachableFormPages.map((formPageName) => {
                             if (formPageName === currentFormPage) {
                                 formStepCompleted = false
                                 formStepStatus = 'current'
@@ -166,12 +179,18 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
     return (
         <>
-            <DynamicStepIndicator />
+            <DynamicStepIndicator submissionType={draft.submissionType} />
 
             <GridContainer>
                 <Switch>
                     <Route path={RoutesRecord.SUBMISSIONS_TYPE}>
-                        <SubmissionType draftSubmission={draft} />
+                        <SubmissionType
+                            draftSubmission={draft}
+                            updateDraft={updateDraft}
+                            formAlert={
+                                showFormAlert ? GenericFormAlert() : undefined
+                            }
+                        />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}>
                         <ContractDetails
