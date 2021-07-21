@@ -172,13 +172,6 @@ export const Contacts = ({
                                                       <label htmlFor={`stateContacts.${index}.name`}>
                                                           Name
                                                       </label>
-                                                      <Field
-                                                        name={`stateContacts.${index}.name`}
-                                                        id={`stateContacts.${index}.name`}
-                                                        type="text"
-                                                        className="usa-input"
-                                                      />
-
                                                       {showFieldErrors(`True`) && (
                                                         <ErrorMessage
                                                             name={`stateContacts.${index}.name`}
@@ -186,6 +179,12 @@ export const Contacts = ({
                                                             className="usa-error-message"
                                                         />
                                                       )}
+                                                      <Field
+                                                        name={`stateContacts.${index}.name`}
+                                                        id={`stateContacts.${index}.name`}
+                                                        type="text"
+                                                        className="usa-input"
+                                                      />
                                                   </FormGroup>
 
                                                   <FormGroup
@@ -194,12 +193,6 @@ export const Contacts = ({
                                                       <label htmlFor={`stateContacts.${index}.titleRole`}>
                                                           Title/Role
                                                       </label>
-                                                      <Field
-                                                        name={`stateContacts.${index}.titleRole`}
-                                                        id={`stateContacts.${index}.titleRole`}
-                                                        type="text"
-                                                        className="usa-input"
-                                                      />
                                                       {showFieldErrors(`True`) && (
                                                         <ErrorMessage
                                                             name={`stateContacts.${index}.titleRole`}
@@ -207,6 +200,12 @@ export const Contacts = ({
                                                             className="usa-error-message"
                                                         />
                                                       )}
+                                                      <Field
+                                                        name={`stateContacts.${index}.titleRole`}
+                                                        id={`stateContacts.${index}.titleRole`}
+                                                        type="text"
+                                                        className="usa-input"
+                                                      />
                                                   </FormGroup>
 
                                                   <FormGroup
@@ -215,12 +214,6 @@ export const Contacts = ({
                                                       <label htmlFor={`stateContacts.${index}.email`}>
                                                           Email
                                                       </label>
-                                                      <Field
-                                                        name={`stateContacts.${index}.email`}
-                                                        id={`stateContacts.${index}.email`}
-                                                        type="text"
-                                                        className="usa-input"
-                                                      />
                                                       {showFieldErrors(`True`) && (
                                                         <ErrorMessage
                                                             name={`stateContacts.${index}.email`}
@@ -228,6 +221,12 @@ export const Contacts = ({
                                                             className="usa-error-message"
                                                         />
                                                       )}
+                                                      <Field
+                                                        name={`stateContacts.${index}.email`}
+                                                        id={`stateContacts.${index}.email`}
+                                                        type="text"
+                                                        className="usa-input"
+                                                      />
                                                 </FormGroup>
 
                                                 {index > 0 && (

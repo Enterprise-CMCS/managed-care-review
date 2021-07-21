@@ -36,7 +36,7 @@ describe('Contacts', () => {
         })
     })
 
-    it('checks saving state contacts correctly', async () => {
+    it('checks saved mocked state contacts correctly', async () => {
         const mockUpdateDraftFn = jest.fn()
 
         renderWithProviders(
@@ -53,6 +53,7 @@ describe('Contacts', () => {
             }
         )
 
+        // checks the submission values in apollohelper mock
         expect(screen.getByLabelText('Name')).toHaveValue('Test Person')
         expect(screen.getByLabelText('Title/Role')).toHaveValue('A Role')
         expect(screen.getByLabelText('Email')).toHaveValue('test@test.com')
