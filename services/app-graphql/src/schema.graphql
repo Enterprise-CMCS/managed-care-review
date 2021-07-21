@@ -237,10 +237,10 @@ type StateSubmission {
     contractDateEnd: Date!
     managedCareEntities: [String!]!
     federalAuthorities: [FederalAuthority!]!
-    rateType: RateType!
-    rateDateStart: Date!
-    rateDateEnd: Date!
-    rateDateCertified: Date!
+    rateType: RateType
+    rateDateStart: Date
+    rateDateEnd: Date
+    rateDateCertified: Date
     rateAmendmentInfo: RateAmendmentInfo
 }
 

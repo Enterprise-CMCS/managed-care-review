@@ -266,6 +266,8 @@ export const ContractDetails = ({
                     history.push(`/dashboard`, {
                         defaultProgramID: draftSubmission.programID,
                     })
+                } else if (draftSubmission.submissionType === 'CONTRACT_ONLY') {
+                    history.push(`/submissions/${draftSubmission.id}/contacts`)
                 } else {
                     history.push(
                         `/submissions/${draftSubmission.id}/rate-details`

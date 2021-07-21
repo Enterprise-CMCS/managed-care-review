@@ -294,7 +294,10 @@ export const Contacts = ({
                                         asCustom={NavLink}
                                         className="usa-button usa-button--outline"
                                         variant="unstyled"
-                                        to={`rate-details`}
+                                        to={draftSubmission.submissionType ===
+                                        'CONTRACT_ONLY'
+                                            ? 'contract-details'
+                                            : 'rate-details'}
                                     >
                                         Back
                                     </Link>

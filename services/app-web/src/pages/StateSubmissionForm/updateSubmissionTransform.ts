@@ -12,14 +12,27 @@ export function stripTypename<T>(input: T): T {
     return JSON.parse(JSON.stringify(input), omitTypename)
 }
 
+// this function cleans a draft submissions values whenever the draft is updated
+function cleanDraftSubmission(
+    draftUpdate: DraftSubmissionUpdates
+): DraftSubmissionUpdates {
+    // remove rate data if submission type is not contract only
+    if (draftUpdate.submissionType === 'CONTRACT_ONLY') {
+        delete draftUpdate.rateType
+        delete draftUpdate.rateDateStart
+        delete draftUpdate.rateDateEnd
+        delete draftUpdate.rateDateCertified
+        delete draftUpdate.rateAmendmentInfo
+    }
+    return draftUpdate
+}
+
 // this function takes a DraftSubmission and picks off all the keys that are valid
 // keys for DraftSubmissionUpdates. This facilitates making an update request given
 // an extant draft
 // There's probably some Typescript Cleverness™ we could do for this mapping function
 // but for now the compiler complains if you forget anything so ¯\_(ツ)_/¯
-export function updatesFromSubmission(
-    draft: DraftSubmission
-): DraftSubmissionUpdates {
+function updatesFromSubmission(draft: DraftSubmission): DraftSubmissionUpdates {
     return {
         programID: draft.programID,
         submissionType: draft.submissionType,
@@ -39,3 +52,5 @@ export function updatesFromSubmission(
         stateContacts: stripTypename(draft.stateContacts),
     }
 }
+
+export { cleanDraftSubmission, updatesFromSubmission }
