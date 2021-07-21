@@ -99,13 +99,22 @@ div[class^='usa-step-indicator'] {
     display: inline;
 }
 
-div[class^='stateContact'] {
-    margin-bottom: units(6);
+.stateContact {
+    margin-bottom: units(5);
+
+    .removeContactBtn {
+        margin-top: .5rem;
+        @include u-text('secondary');
+    }
 }
 
-div[class^='stateContacts'] {
+.stateContacts {
     [class^='usa-input'] {
         margin-bottom: units(2);
 
+    }
+
+    .addContactBtn {
+        margin-top: .5rem;
     }
 }

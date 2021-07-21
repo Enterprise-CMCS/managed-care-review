@@ -160,10 +160,10 @@ export const Contacts = ({
 
                                 <FieldArray name="stateContacts">
                                 {({ remove, push }) => (
-                                    <div className="stateContacts" data-testid="state-contacts">
+                                    <div className={styles.stateContacts} data-testid="state-contacts">
                                         {values.stateContacts.length > 0 &&
                                           values.stateContacts.map((stateContact, index) => (
-                                              <div className="stateContact" key={index}>
+                                              <div className={styles.stateContact} key={index}>
                                                   <Fieldset legend={handleContactLegend(index)}>
 
                                                   <FormGroup
@@ -233,7 +233,7 @@ export const Contacts = ({
                                                 <Button
                                                   type="button"
                                                   unstyled
-                                                  className="text-secondary"
+                                                  className={styles.removeContactBtn}
                                                   onClick={() => (remove(index))}
                                                 >
                                                     Remove contact
@@ -246,6 +246,7 @@ export const Contacts = ({
                                         <Button
                                           type="button"
                                           outline
+                                          className={styles.addContactBtn}
                                           onClick={() => push({
                                             name: '',
                                             titleRole: '',
