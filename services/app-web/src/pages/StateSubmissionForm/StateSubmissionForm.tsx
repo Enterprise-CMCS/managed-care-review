@@ -182,7 +182,13 @@ export const StateSubmissionForm = (): React.ReactElement => {
             <GridContainer>
                 <Switch>
                     <Route path={RoutesRecord.SUBMISSIONS_TYPE}>
-                        <SubmissionType draftSubmission={draft} />
+                        <SubmissionType
+                            draftSubmission={draft}
+                            updateDraft={updateDraft}
+                            formAlert={
+                                showFormAlert ? GenericFormAlert() : undefined
+                            }
+                        />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}>
                         <ContractDetails
