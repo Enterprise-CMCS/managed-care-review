@@ -10,6 +10,8 @@ custom:
   application_endpoint_url: ${cf:ui-${self:custom.stage}.CloudFrontEndpointUrl}
   okta_metadata_url: ${env:OKTA_METADATA_URL}
   iamPath: ${env:IAM_PATH, "/"}
+  iamPermissionsBoundaryPolicy: ${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
+  sesSourceEmailAddress: ${env:SES_SOURCE_EMAIL_ADDRESS, ""}
 
 provider:
   name: aws
@@ -22,12 +24,12 @@ resources:
       Fn::Not:
         - Fn::Equals:
             - ''
-            - ${env:SES_SOURCE_EMAIL_ADDRESS, ""}
+            - ${self:custom.sesSourceEmailAddress}
     CreatePermissionsBoundary:
       Fn::Not:
         - Fn::Equals:
             - ''
-            - ${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
+            - ${self:custom.iamPermissionsBoundaryPolicy}
   Resources:
     CognitoUserPool:
       Type: AWS::Cognito::UserPool
@@ -175,7 +177,7 @@ resources:
                     # Must use Join here.  See: https://github.com/serverless/serverless/issues/3565
                     - Fn::Join:
                         - ''
-                        - - ${self:custom.attachments_bucket_arn}/private/
+                        - - ${self:custom.document_uploads_bucket_arn}/private/
                           - '$'
                           - '{cognito-identity.amazonaws.com:sub}/*'
 
