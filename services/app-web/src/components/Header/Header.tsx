@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
     Alert,
     Button,
@@ -14,7 +14,7 @@ import styles from './Header.module.scss'
 
 import { getRouteName } from '../../constants/routes'
 import { useHistory } from 'react-router-dom'
-import { useAuth } from '../../contexts/AuthContext'
+import { LoginStatusType, useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
 import { AuthModeType } from '../../common-code/domain-models'
 import { Logo } from '../Logo/Logo'
@@ -25,6 +25,74 @@ export type HeaderProps = {
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
 }
+
+type LogoutHandlerT = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+) => void
+
+const LoggedInUserInfo = (
+    user: User,
+    logout: LogoutHandlerT
+): React.ReactElement => {
+    return (
+        <div className={styles.userInfo}>
+            <span>{user.email}</span>
+            <span className={styles.divider}>|</span>
+
+            <Button type="button" unstyled onClick={logout}>
+                Sign out
+            </Button>
+        </div>
+    )
+}
+
+const LoggedOutUserInfo = (authMode: AuthModeType): React.ReactElement => {
+    return authMode === 'IDM' ? (
+        <Link
+            className="usa-button usa-button--outline usa-button--inverse"
+            variant="unstyled"
+            href={idmRedirectURL()}
+        >
+            Sign In
+        </Link>
+    ) : (
+        <Link
+            asCustom={NavLink}
+            className="usa-button usa-button--outline usa-button--inverse"
+            variant="unstyled"
+            to="/auth"
+        >
+            Sign In
+        </Link>
+    )
+}
+
+const UserInfo = ({
+    user,
+    loginStatus,
+    authMode,
+    logout,
+}: {
+    user: User | undefined
+    loginStatus: LoginStatusType
+    authMode: AuthModeType
+    logout: LogoutHandlerT
+}): React.ReactElement | null => {
+    useEffect(() => {
+        console.log("I'm MOUNTING")
+        return () => {
+            console.log("I'm UNMOUNTING")
+        }
+    }, [])
+
+    console.log('GETTING USER INFO,', user, loginStatus, authMode)
+    return user
+        ? LoggedInUserInfo(user, logout)
+        : loginStatus === 'LOADING'
+        ? null
+        : LoggedOutUserInfo(authMode)
+}
+
 /**
  * CMS Header
  */
@@ -36,6 +104,13 @@ export const Header = ({
     const history = useHistory()
     const { heading } = usePage()
     const route = getRouteName(history.location.pathname)
+
+    useEffect(() => {
+        console.log('MOUNTING THE WHOLE HEADER')
+        return () => {
+            console.log('UNMOUNTING THE WHOLE HEADER')
+        }
+    }, [])
 
     console.log(
         'REDER WHY',
@@ -69,49 +144,6 @@ export const Header = ({
         history.push('/')
     }
 
-    const LoggedInUserInfo = (user: User): React.ReactElement => {
-        return (
-            <div className={styles.userInfo}>
-                <span>{user.email}</span>
-                <span className={styles.divider}>|</span>
-
-                <Button type="button" unstyled onClick={handleLogout}>
-                    Sign out
-                </Button>
-            </div>
-        )
-    }
-
-    const LoggedOutUserInfo = (authMode: AuthModeType): React.ReactElement => {
-        return authMode === 'IDM' ? (
-            <Link
-                className="usa-button usa-button--outline usa-button--inverse"
-                variant="unstyled"
-                href={idmRedirectURL()}
-            >
-                Sign In
-            </Link>
-        ) : (
-            <Link
-                asCustom={NavLink}
-                className="usa-button usa-button--outline usa-button--inverse"
-                variant="unstyled"
-                to="/auth"
-            >
-                Sign In
-            </Link>
-        )
-    }
-
-    const UserInfo = (): React.ReactElement | null => {
-        console.log('GETTING USER INFO,', loggedInUser, loginStatus)
-        return loggedInUser
-            ? LoggedInUserInfo(loggedInUser)
-            : loginStatus === 'LOADING'
-            ? null
-            : LoggedOutUserInfo(authMode)
-    }
-
     console.log('RENDER HEADERINGIN')
 
     return (
@@ -127,7 +159,12 @@ export const Header = ({
                             />
                             <span>Managed Care Review</span>
                         </NavLink>
-                        <UserInfo />
+                        <UserInfo
+                            user={loggedInUser}
+                            loginStatus={loginStatus}
+                            authMode={authMode}
+                            logout={handleLogout}
+                        />
                     </Grid>
                 </GridContainer>
             </div>
