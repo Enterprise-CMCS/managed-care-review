@@ -33,14 +33,40 @@ import { useS3 } from '../../../contexts/S3Context'
 import { MCRouterState } from '../../../constants/routerState'
 
 type DocumentWithLink = { url: string | null } & Document
+
+const SectionHeader = ({
+    header,
+    to,
+}: {
+    header: string
+    to: string
+}): React.ReactElement => {
+    return (
+        <div className={styles.reviewSectionHeader}>
+            <h2>{header}</h2>
+            <div>
+                <Link
+                    variant="unstyled"
+                    asCustom={NavLink}
+                    className="usa-button usa-button--outline"
+                    to={to}
+                >
+                    Edit <span className="srOnly">{header}</span>
+                </Link>
+            </div>
+        </div>
+    )
+}
+
 export const ReviewSubmit = ({
     draftSubmission,
 }: {
     draftSubmission: DraftSubmission
 }): React.ReactElement => {
     const [refreshedDocs, setRefreshedDocs] = useState<DocumentWithLink[]>([])
-    const [displayConfirmation, setDisplayConfirmation] =
-        useState<boolean>(false)
+    const [displayConfirmation, setDisplayConfirmation] = useState<boolean>(
+        false
+    )
     const { getURL, getKey } = useS3()
 
     const [userVisibleError, setUserVisibleError] = useState<
@@ -90,29 +116,6 @@ export const ReviewSubmit = ({
         void refreshDocuments()
     }, [draftSubmission.documents, getKey, getURL])
 
-    const SectionHeader = ({
-        header,
-        to,
-    }: {
-        header: string
-        to: string
-    }): React.ReactElement => {
-        return (
-            <div className={styles.reviewSectionHeader}>
-                <h2>{header}</h2>
-                <div>
-                    <Link
-                        variant="unstyled"
-                        asCustom={NavLink}
-                        className="usa-button usa-button--outline"
-                        to={to}
-                    >
-                        Edit <span className="srOnly">{header}</span>
-                    </Link>
-                </div>
-            </div>
-        )
-    }
     const documentsSummary = `${draftSubmission.documents.length} ${
         draftSubmission.documents.length === 1 ? 'file' : 'files'
     }`
@@ -528,10 +531,4 @@ export const ReviewSubmit = ({
             </div>
         </GridContainer>
     )
-}
-
-export type SectionHeaderProps = {
-    header: string
-    submissionName?: boolean
-    href: string
 }

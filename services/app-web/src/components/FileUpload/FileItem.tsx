@@ -20,6 +20,53 @@ export type FileItemT = {
     status: FileStatus
 }
 
+const DocumentError = ({
+    hasDuplicateNameError,
+    hasUploadError,
+    hasUnexpectedError,
+}: {
+    hasDuplicateNameError: boolean
+    hasUploadError: boolean
+    hasUnexpectedError: boolean
+}): React.ReactElement | null => {
+    if (hasDuplicateNameError)
+        return (
+            <>
+                <span className={styles.fileItemErrorMessage}>
+                    Duplicate file
+                </span>
+                <span className={styles.fileItemErrorMessage}>
+                    Please remove
+                </span>
+            </>
+        )
+    else if (hasUploadError && !hasUnexpectedError)
+        return (
+            <>
+                <span className={styles.fileItemErrorMessage}>
+                    Upload failed
+                </span>
+                <span className={styles.fileItemErrorMessage}>
+                    Please remove or retry
+                </span>
+            </>
+        )
+    else if (hasUnexpectedError) {
+        return (
+            <>
+                <span className={styles.fileItemErrorMessage}>
+                    Upload failed
+                </span>
+                <span className={styles.fileItemErrorMessage}>
+                    Unexpected error. Please remove.
+                </span>
+            </>
+        )
+    } else {
+        return null
+    }
+}
+
 export type FileItemProps = {
     item: FileItemT
     deleteItem: (item: FileItemT) => void
@@ -51,51 +98,12 @@ export const FileItem = ({
         'usa-file-input__preview-image--generic': isGeneric,
     })
 
-    const handleDelete = (e: React.MouseEvent) => {
+    const handleDelete = (_e: React.MouseEvent) => {
         deleteItem(item)
     }
 
-    const handleRetry = (e: React.MouseEvent) => {
+    const handleRetry = (_e: React.MouseEvent) => {
         retryItem(item)
-    }
-
-    const Error = (): React.ReactElement | null => {
-        if (hasDuplicateNameError)
-            return (
-                <>
-                    <span className={styles.fileItemErrorMessage}>
-                        Duplicate file
-                    </span>
-                    <span className={styles.fileItemErrorMessage}>
-                        Please remove
-                    </span>
-                </>
-            )
-        else if (hasUploadError && !hasUnexpectedError)
-            return (
-                <>
-                    <span className={styles.fileItemErrorMessage}>
-                        Upload failed
-                    </span>
-                    <span className={styles.fileItemErrorMessage}>
-                        Please remove or retry
-                    </span>
-                </>
-            )
-        else if (hasUnexpectedError) {
-            return (
-                <>
-                    <span className={styles.fileItemErrorMessage}>
-                        Upload failed
-                    </span>
-                    <span className={styles.fileItemErrorMessage}>
-                        Unexpected error. Please remove.
-                    </span>
-                </>
-            )
-        } else {
-            return null
-        }
     }
 
     return (
@@ -115,7 +123,11 @@ export const FileItem = ({
                         fontSize: 'inherit',
                     }}
                 >
-                    <Error />
+                    <DocumentError
+                        hasDuplicateNameError={hasDuplicateNameError}
+                        hasUploadError={hasUploadError}
+                        hasUnexpectedError={hasUnexpectedError}
+                    />
                     <span>{name}</span>
                 </span>
             </div>

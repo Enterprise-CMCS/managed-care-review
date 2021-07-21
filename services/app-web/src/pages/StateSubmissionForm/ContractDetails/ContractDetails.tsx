@@ -130,6 +130,20 @@ function formattedDateMinusOneDay(initialValue: string): string {
         : initialValue // preserve undefined to show validations later
 }
 
+const ContractDatesErrorMessage = ({
+    values,
+    validationErrorMessage,
+}: {
+    values: ContractDetailsFormValues
+    validationErrorMessage: string
+}): React.ReactElement => (
+    <ErrorMessage>
+        {isDateRangeEmpty(values.contractDateStart, values.contractDateEnd)
+            ? 'You must provide a start and an end date'
+            : validationErrorMessage}
+    </ErrorMessage>
+)
+
 export interface ContractDetailsFormValues {
     contractType: ContractType | undefined
     contractDateStart: string
@@ -143,8 +157,7 @@ export interface ContractDetailsFormValues {
     relatedToVaccination: string
     federalAuthorities: FederalAuthority[]
 }
-type FormError =
-    FormikErrors<ContractDetailsFormValues>[keyof FormikErrors<ContractDetailsFormValues>]
+type FormError = FormikErrors<ContractDetailsFormValues>[keyof FormikErrors<ContractDetailsFormValues>]
 
 export const ContractDetails = ({
     draftSubmission,
@@ -204,19 +217,6 @@ export const ContractDetails = ({
         values: ContractDetailsFormValues
     ): boolean => values.contractType === 'AMENDMENT'
 
-    const ContractDatesErrorMessage = ({
-        values,
-        validationErrorMessage,
-    }: {
-        values: ContractDetailsFormValues
-        validationErrorMessage: string
-    }): React.ReactElement => (
-        <ErrorMessage>
-            {isDateRangeEmpty(values.contractDateStart, values.contractDateEnd)
-                ? 'You must provide a start and an end date'
-                : validationErrorMessage}
-        </ErrorMessage>
-    )
     const handleFormSubmit = async (
         values: ContractDetailsFormValues,
         formikHelpers: FormikHelpers<ContractDetailsFormValues>
@@ -236,8 +236,9 @@ export const ContractDetails = ({
 
             const amendedOther = formatForApi(values.otherItemAmended)
 
-            let capitationInfo: CapitationRatesAmendedInfo | undefined =
-                undefined
+            let capitationInfo:
+                | CapitationRatesAmendedInfo
+                | undefined = undefined
             if (values.itemsAmended.includes('CAPITATION_RATES')) {
                 capitationInfo = {
                     reason: values.capitationRates,
@@ -386,10 +387,9 @@ export const ContractDetails = ({
                                                     name: 'contractDateStart',
                                                     defaultValue:
                                                         values.contractDateStart,
-                                                    maxDate:
-                                                        formattedDateMinusOneDay(
-                                                            values.contractDateEnd
-                                                        ),
+                                                    maxDate: formattedDateMinusOneDay(
+                                                        values.contractDateEnd
+                                                    ),
                                                     onChange: (val) =>
                                                         setFieldValue(
                                                             'contractDateStart',
@@ -406,10 +406,9 @@ export const ContractDetails = ({
                                                     name: 'contractDateEnd',
                                                     defaultValue:
                                                         values.contractDateEnd,
-                                                    minDate:
-                                                        formattedDatePlusOneDay(
-                                                            values.contractDateStart
-                                                        ),
+                                                    minDate: formattedDatePlusOneDay(
+                                                        values.contractDateStart
+                                                    ),
                                                     onChange: (val) =>
                                                         setFieldValue(
                                                             'contractDateEnd',
@@ -606,7 +605,8 @@ export const ContractDetails = ({
                                                         }
                                                         to={{
                                                             pathname: '/help',
-                                                            hash: '#items-being-amended-definitions',
+                                                            hash:
+                                                                '#items-being-amended-definitions',
                                                         }}
                                                         target="_blank"
                                                     >

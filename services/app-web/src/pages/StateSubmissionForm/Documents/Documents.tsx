@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from 'uuid'
 import styles from '../StateSubmissionForm.module.scss'
 import {
     DraftSubmission,
+    SubmissionType,
     UpdateDraftSubmissionInput,
 } from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
@@ -36,6 +37,22 @@ type DocumentProps = {
         input: UpdateDraftSubmissionInput
     ) => Promise<DraftSubmission | undefined>
 }
+
+const DocumentsRequirementsHint = ({
+    submissionType,
+}: {
+    submissionType: SubmissionType
+}): JSX.Element =>
+    submissionType === 'CONTRACT_AND_RATES' ? (
+        <>
+            <strong>Must include:</strong> An executed contract and a signed
+            rate certification
+        </>
+    ) : (
+        <>
+            <strong>Must include:</strong> An executed contract
+        </>
+    )
 
 export const Documents = ({
     draftSubmission,
@@ -110,63 +127,49 @@ export const Documents = ({
         return { key: s3Key, s3URL: s3URL }
     }
 
-    const handleFormSubmit =
-        ({
-            shouldValidate,
-            redirectPath,
-        }: {
-            shouldValidate: boolean
-            redirectPath: string
-        }) =>
-        async (e: React.FormEvent | React.MouseEvent) => {
-            e.preventDefault()
+    const handleFormSubmit = ({
+        shouldValidate,
+        redirectPath,
+    }: {
+        shouldValidate: boolean
+        redirectPath: string
+    }) => async (e: React.FormEvent | React.MouseEvent) => {
+        e.preventDefault()
 
-            if (shouldValidate) {
-                setShouldValidate(true)
-                if (!hasValidFiles) return
-            }
-
-            const documents = fileItems.map((fileItem) => {
-                if (!fileItem.s3URL)
-                    throw Error(
-                        'The file item has no s3url, this should not happen onSubmit'
-                    )
-                return {
-                    name: fileItem.name,
-                    s3URL: fileItem.s3URL,
-                }
-            })
-
-            const updatedDraft = updatesFromSubmission(draftSubmission)
-
-            updatedDraft.documents = documents
-
-            try {
-                const updatedSubmission = await updateDraft({
-                    submissionID: draftSubmission.id,
-                    draftSubmissionUpdates: updatedDraft,
-                })
-                if (updatedSubmission) {
-                    history.push(redirectPath, {
-                        defaultProgramID: draftSubmission.programID,
-                    })
-                }
-            } catch (error) {
-                showError(error)
-            }
+        if (shouldValidate) {
+            setShouldValidate(true)
+            if (!hasValidFiles) return
         }
 
-    const Hint = (): JSX.Element =>
-        draftSubmission.submissionType === 'CONTRACT_AND_RATES' ? (
-            <>
-                <strong>Must include:</strong> An executed contract and a signed
-                rate certification
-            </>
-        ) : (
-            <>
-                <strong>Must include:</strong> An executed contract
-            </>
-        )
+        const documents = fileItems.map((fileItem) => {
+            if (!fileItem.s3URL)
+                throw Error(
+                    'The file item has no s3url, this should not happen onSubmit'
+                )
+            return {
+                name: fileItem.name,
+                s3URL: fileItem.s3URL,
+            }
+        })
+
+        const updatedDraft = updatesFromSubmission(draftSubmission)
+
+        updatedDraft.documents = documents
+
+        try {
+            const updatedSubmission = await updateDraft({
+                submissionID: draftSubmission.id,
+                draftSubmissionUpdates: updatedDraft,
+            })
+            if (updatedSubmission) {
+                history.push(redirectPath, {
+                    defaultProgramID: draftSubmission.programID,
+                })
+            }
+        } catch (error) {
+            showError(error)
+        }
+    }
 
     return (
         <>
@@ -216,7 +219,11 @@ export const Documents = ({
                                     data-testid="documents-hint"
                                     className="text-base-darker"
                                 >
-                                    <Hint />
+                                    <DocumentsRequirementsHint
+                                        submissionType={
+                                            draftSubmission.submissionType
+                                        }
+                                    />
                                 </p>
                             </>
                         }

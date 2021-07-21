@@ -35,6 +35,52 @@ import {
 
 const GenericFormAlert = () => <Alert type="error">Something went wrong</Alert>
 
+// this Definitely wants to be its own component.
+const DynamicStepIndicator = ({ pathname }: { pathname: string }) => {
+    const formPages = [
+        'SUBMISSIONS_CONTRACT_DETAILS',
+        'SUBMISSIONS_RATE_DETAILS',
+        'SUBMISSIONS_DOCUMENTS',
+        'SUBMISSIONS_REVIEW_SUBMIT',
+    ] as RouteT[]
+
+    const currentFormPage = getRouteName(pathname)
+
+    console.log(currentFormPage)
+
+    let formStepCompleted = true
+    let formStepStatus: 'current' | 'complete' | undefined
+
+    if (currentFormPage === 'SUBMISSIONS_TYPE') {
+        return null
+    } else {
+        return (
+            <>
+                <StepIndicator>
+                    {formPages.map((formPageName) => {
+                        if (formPageName === currentFormPage) {
+                            formStepCompleted = false
+                            formStepStatus = 'current'
+                        } else if (formStepCompleted) {
+                            formStepStatus = 'complete'
+                        } else {
+                            formStepStatus = undefined
+                        }
+
+                        return (
+                            <StepIndicatorStep
+                                label={PageTitlesRecord[formPageName]}
+                                status={formStepStatus}
+                                key={PageTitlesRecord[formPageName]}
+                            />
+                        )
+                    })}
+                </StepIndicator>
+            </>
+        )
+    }
+}
+
 export const StateSubmissionForm = (): React.ReactElement => {
     const { id } = useParams<{ id: string }>()
     const { pathname } = useLocation()
@@ -55,8 +101,10 @@ export const StateSubmissionForm = (): React.ReactElement => {
         },
     })
 
-    const [updateDraftSubmission, { error: updateError }] =
-        useUpdateDraftSubmissionMutation()
+    const [
+        updateDraftSubmission,
+        { error: updateError },
+    ] = useUpdateDraftSubmissionMutation()
 
     const updateDraft = async (
         input: UpdateDraftSubmissionInput
@@ -95,51 +143,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
         )
     }
 
-    const FormPages = [
-        'SUBMISSIONS_CONTRACT_DETAILS',
-        'SUBMISSIONS_RATE_DETAILS',
-        'SUBMISSIONS_DOCUMENTS',
-        'SUBMISSIONS_REVIEW_SUBMIT',
-    ] as RouteT[]
-
-    const DynamicStepIndicator = () => {
-        const currentFormPage = getRouteName(pathname)
-
-        console.log(currentFormPage)
-
-        let formStepCompleted = true
-        let formStepStatus: 'current' | 'complete' | undefined
-
-        if (currentFormPage === 'SUBMISSIONS_TYPE') {
-            return null
-        } else {
-            return (
-                <>
-                    <StepIndicator>
-                        {FormPages.map((formPageName) => {
-                            if (formPageName === currentFormPage) {
-                                formStepCompleted = false
-                                formStepStatus = 'current'
-                            } else if (formStepCompleted) {
-                                formStepStatus = 'complete'
-                            } else {
-                                formStepStatus = undefined
-                            }
-
-                            return (
-                                <StepIndicatorStep
-                                    label={PageTitlesRecord[formPageName]}
-                                    status={formStepStatus}
-                                    key={PageTitlesRecord[formPageName]}
-                                />
-                            )
-                        })}
-                    </StepIndicator>
-                </>
-            )
-        }
-    }
-
     if (updateError && !showFormAlert) {
         setShowFormAlert(true)
     }
@@ -166,7 +169,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
     return (
         <>
-            <DynamicStepIndicator />
+            <DynamicStepIndicator pathname={pathname} />
 
             <GridContainer>
                 <Switch>
