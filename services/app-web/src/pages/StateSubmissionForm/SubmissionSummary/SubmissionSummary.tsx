@@ -138,6 +138,9 @@ export const SubmissionSummary = (): React.ReactElement => {
     }
 
     const isContractAmendment = submission.contractType === 'AMENDMENT'
+    const isContractActionAndRateCertification =
+        submission.submissionType === 'CONTRACT_AND_RATES'
+
     return (
         <div className={styles.background}>
             <GridContainer
@@ -323,72 +326,74 @@ export const SubmissionSummary = (): React.ReactElement => {
                             )}
                     </dl>
                 </section>
-                <section id="rateDetails">
-                    <dl>
-                        <SectionHeader
-                            header="Rate details"
-                            to="rate-details"
-                        />
-                        <DoubleColumnRow
-                            left={
-                                <DataDetail
-                                    id="rateType"
-                                    label="Rate certification type"
-                                    data={
-                                        submission.rateAmendmentInfo
-                                            ? 'Amendment to prior rate certification'
-                                            : 'New rate certification'
-                                    }
-                                />
-                            }
-                            right={
-                                <DataDetail
-                                    id="ratingPeriod"
-                                    label={
-                                        submission.rateAmendmentInfo
-                                            ? 'Rating period of original rate certification'
-                                            : 'Rating period'
-                                    }
-                                    data={`${dayjs(
-                                        submission.rateDateStart
-                                    ).format('MM/DD/YYYY')} - ${dayjs(
-                                        submission.rateDateEnd
-                                    ).format('MM/DD/YYYY')}`}
-                                />
-                            }
-                        />
-                        <DoubleColumnRow
-                            left={
-                                <DataDetail
-                                    id="dateCertified"
-                                    label={
-                                        submission.rateAmendmentInfo
-                                            ? 'Date certified for rate amendment'
-                                            : 'Date certified'
-                                    }
-                                    data={dayjs(
-                                        submission.rateDateCertified
-                                    ).format('MM/DD/YYYY')}
-                                />
-                            }
-                            right={
-                                submission.rateAmendmentInfo ? (
+                {isContractActionAndRateCertification && (
+                    <section id="rateDetails">
+                        <dl>
+                            <SectionHeader
+                                header="Rate details"
+                                to="rate-details"
+                            />
+                            <DoubleColumnRow
+                                left={
                                     <DataDetail
-                                        id="effectiveRatingPeriod"
-                                        label="Effective dates of rate amendment"
+                                        id="rateType"
+                                        label="Rate certification type"
+                                        data={
+                                            submission.rateAmendmentInfo
+                                                ? 'Amendment to prior rate certification'
+                                                : 'New rate certification'
+                                        }
+                                    />
+                                }
+                                right={
+                                    <DataDetail
+                                        id="ratingPeriod"
+                                        label={
+                                            submission.rateAmendmentInfo
+                                                ? 'Rating period of original rate certification'
+                                                : 'Rating period'
+                                        }
                                         data={`${dayjs(
-                                            submission.rateAmendmentInfo
-                                                .effectiveDateStart
+                                            submission.rateDateStart
                                         ).format('MM/DD/YYYY')} - ${dayjs(
-                                            submission.rateAmendmentInfo
-                                                .effectiveDateEnd
+                                            submission.rateDateEnd
                                         ).format('MM/DD/YYYY')}`}
                                     />
-                                ) : null
-                            }
-                        />
-                    </dl>
-                </section>
+                                }
+                            />
+                            <DoubleColumnRow
+                                left={
+                                    <DataDetail
+                                        id="dateCertified"
+                                        label={
+                                            submission.rateAmendmentInfo
+                                                ? 'Date certified for rate amendment'
+                                                : 'Date certified'
+                                        }
+                                        data={dayjs(
+                                            submission.rateDateCertified
+                                        ).format('MM/DD/YYYY')}
+                                    />
+                                }
+                                right={
+                                    submission.rateAmendmentInfo ? (
+                                        <DataDetail
+                                            id="effectiveRatingPeriod"
+                                            label="Effective dates of rate amendment"
+                                            data={`${dayjs(
+                                                submission.rateAmendmentInfo
+                                                    .effectiveDateStart
+                                            ).format('MM/DD/YYYY')} - ${dayjs(
+                                                submission.rateAmendmentInfo
+                                                    .effectiveDateEnd
+                                            ).format('MM/DD/YYYY')}`}
+                                        />
+                                    ) : null
+                                }
+                            />
+                        </dl>
+                    </section>
+                )}
                 <section id="documents">
                     <SectionHeader header="Documents" to="documents" />
                     <span className="text-bold">{documentsSummary}</span>

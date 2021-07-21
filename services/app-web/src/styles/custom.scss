@@ -47,3 +47,18 @@ a[class^='usa-button usa-button--outline'] {
     text-decoration: none !important;
     color: #1a4480 !important;
 }
+
+div[class^='usa-step-indicator'] {
+    background-color: transparent;
+    width: 60rem;
+    margin: 1.25rem auto;
+    text-align: center;
+
+    ol {
+        justify-content: center;
+    }
+}
+
+[class^='usa-step-indicator__header'] {
+    display: inline;
+}

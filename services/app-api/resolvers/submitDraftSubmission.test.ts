@@ -124,4 +124,69 @@ describe('submitDraftSubmission', () => {
             'submissions is missing required contract fields'
         )
     })
+
+    it('returns an error if there are missing rate details fields for submission type', async () => {
+        const server = constructTestServer()
+
+        const { mutate } = createTestClient(server)
+
+        const draft = await createAndUpdateTestDraftSubmission(mutate, {
+            submissionType: 'CONTRACT_AND_RATES',
+            rateType: undefined,
+            rateDateStart: undefined,
+            rateDateEnd: undefined,
+            rateDateCertified: undefined,
+        })
+
+        const draftID = draft.id
+        const submitResult = await mutate({
+            mutation: SUBMIT_DRAFT_SUBMISSION,
+            variables: {
+                input: {
+                    submissionID: draftID,
+                },
+            },
+        })
+
+        expect(submitResult.errors).toBeDefined()
+
+        expect(submitResult.errors?.[0].extensions?.code).toEqual(
+            'BAD_USER_INPUT'
+        )
+        expect(submitResult.errors?.[0].extensions?.message).toEqual(
+            'submission is missing required rate fields'
+        )
+    })
+
+    it('returns an error if there are invalid rate details fields for submission type', async () => {
+        const server = constructTestServer()
+
+        const { mutate } = createTestClient(server)
+
+        const draft = await createAndUpdateTestDraftSubmission(mutate, {
+            submissionType: 'CONTRACT_ONLY',
+            rateDateStart: '2025-05-01',
+            rateDateEnd: '2026-04-30',
+            rateDateCertified: '2025-03-15',
+        })
+
+        const draftID = draft.id
+        const submitResult = await mutate({
+            mutation: SUBMIT_DRAFT_SUBMISSION,
+            variables: {
+                input: {
+                    submissionID: draftID,
+                },
+            },
+        })
+
+        expect(submitResult.errors).toBeDefined()
+
+        expect(submitResult.errors?.[0].extensions?.code).toEqual(
+            'BAD_USER_INPUT'
+        )
+        expect(submitResult.errors?.[0].extensions?.message).toEqual(
+            'submission includes invalid rate fields'
+        )
+    })
 })

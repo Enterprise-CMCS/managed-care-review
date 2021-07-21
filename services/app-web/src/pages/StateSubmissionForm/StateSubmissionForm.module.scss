@@ -81,14 +81,3 @@
     margin: units(2) 0;
     border-left: 4px solid $theme-color-error-darker;
 }
-
-div[class^='usa-step-indicator'] {
-    background-color: transparent;
-    width: 60rem;
-    margin: 1.25rem auto;
-    text-align: center;
-}
-
-[class^='usa-step-indicator__header'] {
-    display: inline;
-}
