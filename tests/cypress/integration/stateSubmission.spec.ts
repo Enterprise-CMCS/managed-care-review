@@ -254,7 +254,6 @@ describe('State Submission', () => {
 
             // Continue button navigates to state contacts page
             cy.navigateForm('Continue')
-            cy.findByText(/MN-MSHO-/).should('exist')
 
             // fill out state contacts
             cy.findByLabelText('Name').type('Test Person')
@@ -321,23 +320,12 @@ describe('State Submission', () => {
                 name: 'Continue',
             }).safeClick()
 
-            // Change rate details
-            cy.findByLabelText('New rate certification').safeClick()
-            cy.findByLabelText('Start date').clear()
-            cy.findByLabelText('Start date').type('04/01/2024')
-            cy.findByLabelText('End date').clear()
-            cy.findByLabelText('End date').type('03/31/2025')
-            cy.findByLabelText('Date certified').clear()
-            cy.findByLabelText('Date certified').type('03/01/2024')
-            cy.navigateForm('Continue')
-
             // change state contacts
             cy.findByLabelText('Name').clear()
             cy.findByLabelText('Name').type('Different Person')
 
             cy.findByLabelText('Email').clear()
             cy.findByLabelText('Email').type('test2@test.com')
-
 
             cy.findByRole('button', {
                 name: 'Continue',
