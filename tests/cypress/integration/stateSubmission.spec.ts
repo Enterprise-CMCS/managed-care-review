@@ -234,8 +234,6 @@ describe('State Submission', () => {
             cy.findByTestId('submission-name')
                 .invoke('text')
                 .then((nameText) => {
-                    console.log('GOT TEXT', nameText)
-
                     // Navigate to the dashboard again
                     cy.findByRole('link', {
                         name: 'One Mac Managed Care Review',
@@ -493,31 +491,30 @@ describe('State Submission', () => {
             cy.findByLabelText('Annual rate update').should('be.checked')
         })
 
-        it('user can complete a contract submission and see submission summary', () => {
+        it('user can complete a submission, load dashboard with default program, and see submission summary', () => {
             cy.login()
-
-            // Add a new contract only submission
+            cy.findByTestId('dashboardPage').should('exist')
             cy.findByRole('link', { name: 'Start new submission' }).click({
                 force: true,
             })
-            cy.findByLabelText(
-                'Contract action and rate certification'
-            ).safeClick()
+            cy.location('pathname').should('eq', '/submissions/new')
+            cy.findByText('New submission').should('exist')
+
+            cy.findByLabelText('Contract action only').safeClick()
+            cy.findByRole('combobox', { name: 'Program' }).select('pmap')
+
             cy.findByRole('textbox', { name: 'Submission description' })
                 .should('exist')
                 .type('description of submission')
+
             cy.findByRole('button', {
                 name: 'Continue',
             }).safeClick()
 
-            // Check Step Indicator loads with Contract Details heading
-            cy.findByTestId('step-indicator')
-                .findAllByText('Contract Details')
-                .should('have.length', 2)
+            cy.findByText(/^MN-PMAP-/).should('exist')
 
             // Fill out contract details
-            cy.findByText(/MN-MSHO-/).should('exist')
-            cy.findByLabelText('Base contract').safeClick()
+            cy.findByLabelText('Base contract').should('exist').safeClick()
             cy.findByLabelText('Start date').type('04/01/2024')
             cy.findByLabelText('End date').type('03/31/2025').blur()
             cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
@@ -564,35 +561,196 @@ describe('State Submission', () => {
                 submissionId = pathnameArray[2]
             })
 
-            // Submit
+            // Submit, sent to dashboard
             cy.navigateForm('Submit')
             cy.findByRole('dialog').should('exist')
-            // Submit the Modal
             cy.navigateForm('Confirm submit')
-
-            // User sent to dashboard
+            cy.findByRole('progressbar', { name: 'Loading' }).should(
+                'not.exist'
+            )
             cy.findByText('Dashboard').should('exist')
+            cy.findByText('PMAP').should('exist')
 
+            // Link to submission summary
             cy.location().then((loc) => {
                 expect(loc.search).to.match(/.*justSubmitted=*/)
                 const submissionName = loc.search.split('=').pop()
                 cy.findByText(`${submissionName} was sent to CMS`).should(
                     'exist'
                 )
-                cy.findByText(submissionName).should('exist')
-                cy.findByText(submissionName).click()
-
-                // Click submitted submission to view SubmissionSummary
-                cy.findByRole('progressbar', { name: 'Loading' }).should(
-                    'not.exist'
-                )
+                cy.findByText(submissionName).should('exist').click()
+                cy.url({ timeout: 10_000 }).should('contain', submissionId)
                 cy.findByTestId('submission-summary').should('exist')
-
                 cy.findByRole('heading', {
                     name: `Minnesota ${submissionName}`,
                 }).should('exist')
-                cy.findByText('Back to state dashboard').should('exist')
-                cy.url({ timeout: 10_000 }).should('contain', submissionId)
+
+                // Link back to dashboard, submission visible in default program
+                cy.findByText('Back to state dashboard').should('exist').click()
+                cy.findByText('Dashboard').should('exist')
+                cy.findByText('PMAP').should('exist')
+                cy.findByText(submissionName).should('exist')
+            })
+        })
+    })
+
+    describe('documents page', () => {
+        it('user can edit documents and save as draft', () => {
+            cy.login()
+            cy.startNewContractOnlySubmission()
+
+            cy.location().then((fullUrl) => {
+                const { pathname } = fullUrl
+                const draftSubmissionID = pathname.split('/')[2]
+                cy.visit(`/submissions/${draftSubmissionID}/documents`)
+
+                // add valid file and save as draft
+                cy.findByTestId('file-input-input').attachFile(
+                    'documents/how-to-open-source.pdf'
+                )
+                cy.findAllByTestId('file-input-preview-image')
+                    .should('exist')
+                    .should('not.have.class', 'is-loading')
+                cy.navigateForm('Save as draft')
+                cy.findByRole('heading', { level: 1, name: /Dashboard/ })
+
+                // go back to documents page and remove file
+                cy.visit(`/submissions/${draftSubmissionID}/documents`)
+                cy.findAllByText('Remove').should('exist').first().safeClick()
+                cy.findAllByText('how-to-open-source.pdf').should('not.exist')
+
+                // allow Save as Draft with no documents
+                cy.navigateForm('Save as draft')
+                cy.findByText('You must upload at least one document').should(
+                    'not.exist'
+                )
+                cy.findByRole('heading', { level: 1, name: /Dashboard/ })
+
+                // reload page,validate there are still no documents,then add duplicate documents
+                cy.visit(`/submissions/${draftSubmissionID}/documents`)
+                cy.findAllByText('documents/how-to-open-source.pdf').should(
+                    'not.exist'
+                )
+
+                cy.findByTestId('file-input-input').attachFile(
+                    'documents/trussel-guide.pdf'
+                )
+                cy.findAllByTestId('file-input-preview-image')
+                    .should('exist')
+                    .should('not.have.class', 'is-loading')
+                cy.findByTestId('file-input-input').attachFile(
+                    'documents/trussel-guide.pdf'
+                )
+                cy.findAllByTestId('file-input-preview-image')
+                    .should('exist')
+                    .should('not.have.class', 'is-loading')
+                cy.findByText('Duplicate file').should('exist')
+
+                // allow Save as Draft with duplicate files
+                cy.navigateForm('Save as draft')
+                cy.findByRole('heading', { level: 1, name: /Dashboard/ })
+
+                // reload page, see only one file because the duplicate was discarded after Save as Draft
+                cy.visit(`/submissions/${draftSubmissionID}/documents`)
+
+                cy.findByText('Duplicate file').should('not.exist')
+                cy.findByTestId('file-input-preview-list')
+                    .findAllByRole('listitem')
+                    .should('have.length', 1)
+                cy.findAllByText('trussel-guide.pdf').should('exist')
+            })
+        })
+
+        it('user can drag and drop as expected', () => {
+            cy.login()
+            cy.startNewContractOnlySubmission()
+
+            // visit documents page
+            cy.location().then((fullUrl) => {
+                const { pathname } = fullUrl
+                const draftSubmissionId = pathname.split('/')[2]
+                cy.visit(`/submissions/${draftSubmissionId}/documents`)
+
+                // Drop invalid files and invalid type message appears
+                cy.findByTestId('file-input-droptarget')
+                    .should('exist')
+                    .attachFile(['images/trussel-guide-screenshot.png'], {
+                        subjectType: 'drag-n-drop',
+                        force: true,
+                    })
+                cy.findByTestId('file-input-error').should(
+                    'have.text',
+                    'This is not a valid file type.'
+                )
+
+                // Continue button shows error, no documents
+                cy.navigateForm('Continue')
+                cy.findByText('You must upload at least one document').should(
+                    'exist'
+                )
+
+                // Drop multiple valid files
+                cy.findByTestId('file-input-droptarget')
+                    .should('exist')
+                    .attachFile(
+                        [
+                            'documents/how-to-open-source.pdf',
+                            'documents/testing.docx',
+                        ],
+                        {
+                            subjectType: 'drag-n-drop',
+                            force: true,
+                        }
+                    )
+                cy.findAllByTestId('file-input-preview-image').should(
+                    'have.length',
+                    2
+                )
+                cy.findAllByTestId('file-input-preview-image').should(
+                    'not.have.class',
+                    'is-loading'
+                )
+                // Correct number of files added, no errors
+                cy.findByTestId('file-input-preview-list')
+                    .findAllByRole('listitem')
+                    .should('have.length', 2)
+                cy.findByText('Upload failed').should('not.exist')
+                cy.findByText('Duplicate file').should('not.exist')
+
+                // Drop one more valid file
+                cy.findByTestId('file-input-droptarget')
+                    .should('exist')
+                    .attachFile(['documents/testing.csv'], {
+                        subjectType: 'drag-n-drop',
+                    })
+                cy.findByTestId('file-input-preview-list')
+                    .findAllByRole('listitem')
+                    .should('have.length', 3)
+
+                // Add one duplicate file, show one duplicate document error
+                cy.findByTestId('file-input-input').attachFile(
+                    ['documents/how-to-open-source.pdf'],
+                    {
+                        subjectType: 'drag-n-drop',
+                        force: true,
+                    }
+                )
+                cy.findByTestId('file-input-preview-list')
+                    .findAllByRole('listitem')
+                    .should('have.length', 4)
+                cy.findAllByText('how-to-open-source.pdf').should(
+                    'have.length',
+                    2
+                )
+                cy.findAllByText('Duplicate file').should('have.length', 1)
+
+                // Remove duplicate documents and continue with valid input
+                cy.findAllByText('Remove').should('exist').first().safeClick()
+                cy.findAllByText('Remove').should('exist').first().safeClick()
+                cy.findByTestId('file-input-preview-list')
+                    .findAllByRole('listitem')
+                    .should('have.length', 2)
+                cy.findAllByText('Duplicate file').should('not.exist')
             })
         })
     })
