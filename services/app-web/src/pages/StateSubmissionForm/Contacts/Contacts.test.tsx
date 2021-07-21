@@ -5,7 +5,6 @@ import {
     mockDraft,
     mockCompleteDraft,
     fetchCurrentUserMock,
-    updateDraftSubmissionMock,
 } from '../../../testHelpers/apolloHelpers'
 
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
@@ -57,6 +56,49 @@ describe('Contacts', () => {
         expect(screen.getByLabelText('Name')).toHaveValue('Test Person')
         expect(screen.getByLabelText('Title/Role')).toHaveValue('A Role')
         expect(screen.getByLabelText('Email')).toHaveValue('test@test.com')
+    })
+
+    it('it should error and not continue if state contacts are not filled out', async () => {
+        const mock = mockDraft()
+        const mockUpdateDraftFn = jest.fn()
+        const emptyContactsDraft = {
+            ...mock,
+            stateContacts : [
+                {
+                    name: '',
+                    titleRole: '',
+                    email: '',
+                }
+            ]
+        }
+
+        renderWithProviders(
+            <Contacts
+                draftSubmission={emptyContactsDraft}
+                updateDraft={mockUpdateDraftFn}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        const continueButton = screen.getByRole('button', { name: 'Continue' })
+
+        continueButton.click()
+
+        await waitFor(() => {
+            expect(
+                screen.getByText('You must provide a name')
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText('You must provide a title/role')
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText('You must provide an email address')
+            ).toBeInTheDocument()
+        })
     })
 
 })
