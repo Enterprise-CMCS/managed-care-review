@@ -189,6 +189,11 @@ resources:
           CloudWatchMetricsEnabled: true
           SampledRequestsEnabled: true
           MetricName: ${self:custom.webAclName}
+    ApiGwWebAclAssociation:
+      Type: AWS::WAFv2::WebACLAssociation
+      Properties:
+        ResourceArn: !Sub arn:aws:apigateway:${AWS::Region}::/restapis/${ApiGatewayRestApi}/stages/${self:custom.stage}
+        WebACLArn: !GetAtt ApiGwWebAcl.Arn
   Outputs:
     ApiGatewayRestApiName:
       Value: !Ref ApiGatewayRestApi
