@@ -194,3 +194,7 @@ resources:
       Value: !Ref ApiGatewayRestApi
     ApiAuthMode:
       Value: ${self:custom.reactAppAuthMode}
+    ApiGatewayRestApiUrl:
+      Value: !Sub https://${ApiGatewayRestApi}.execute-api.${self:provider.region}.amazonaws.com/${self:custom.stage}
+    Region:
+      Value: !Sub ${AWS::Region}
