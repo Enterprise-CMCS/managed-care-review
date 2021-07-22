@@ -109,8 +109,6 @@ describe('Dashboard', () => {
         submissions[2].id = 'test-abc-122'
         submissions[2].name = 'MN-MSHO-0002' // the names collide otherwise
 
-        console.log(submissions)
-
         renderWithProviders(<Dashboard />, {
             apolloProvider: {
                 mocks: [
@@ -125,7 +123,6 @@ describe('Dashboard', () => {
         expect(cardsList.children.length).toEqual(3)
 
         const links = within(cardsList).getAllByRole('link')
-        console.log(links)
         expect(links.length).toEqual(3)
 
         const names = links.map((link) => link.textContent)
