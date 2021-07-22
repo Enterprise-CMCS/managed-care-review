@@ -90,12 +90,15 @@ export const Contacts = ({
       stateContacts: stateContacts
     }
 
+    // Handler for Contacts legends so that contacts show up as
+    // State contacts 1 instead of State contacts 0 for first contact
+    // and show (required) for only the first contact
     const handleContactLegend = (index: number) => {
         const count = index + 1
         const required = index ? '' : ' (required)'
 
         return (
-            'State contact ' + count + required
+            `State contact ${count} ${required}`
         )
     }
 
