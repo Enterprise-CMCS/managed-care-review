@@ -77,6 +77,7 @@ export const Contacts = ({
     const redirectToDashboard = React.useRef(false)
     const history = useHistory<MCRouterState>()
 
+    // TODO: refactor this into reusable component that is more understandable
     const showFieldErrors = (error?: FormError) : boolean | undefined =>
         shouldValidate && Boolean(error)
 
