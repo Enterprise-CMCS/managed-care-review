@@ -82,12 +82,14 @@ export const Contacts = ({
 
     const stateContacts = stripTypename(draftSubmission.stateContacts)
 
+    const emptyStateContact = {
+        name: '',
+        titleRole: '',
+        email: '',
+    }
+
     if (stateContacts.length === 0) {
-        stateContacts.push({
-            name: '',
-            titleRole: '',
-            email: '',
-        })
+        stateContacts.push(emptyStateContact)
     }
 
     const contactsInitialValues: ContactsFormValues = {
@@ -254,11 +256,7 @@ export const Contacts = ({
                                           type="button"
                                           outline
                                           className={styles.addContactBtn}
-                                          onClick={() => push({
-                                            name: '',
-                                            titleRole: '',
-                                            email: '',
-                                          })}
+                                          onClick={() => push(emptyStateContact)}
                                         >
                                         Add state contact
                                         </Button>
