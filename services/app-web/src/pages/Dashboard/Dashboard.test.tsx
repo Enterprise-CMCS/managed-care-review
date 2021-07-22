@@ -1,12 +1,14 @@
 import React from 'react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryHistory } from 'history'
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 
 import { Dashboard, sortDraftsToTop } from './Dashboard'
 import {
     fetchCurrentUserMock,
     indexSubmissionsMockSuccess,
+    mockDraft,
+    mockStateSubmission,
 } from '../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
@@ -81,6 +83,59 @@ describe('Dashboard', () => {
             expect(tabs[0].textContent).toBe('MSHO')
             expect(tabs[1].textContent).toBe('PMAP')
         })
+    })
+
+    it('displays submission cards', async () => {
+        const mockUser = {
+            state: {
+                name: 'Minnesota',
+                code: 'MN',
+                programs: [
+                    { id: 'msho', name: 'MSHO' },
+                    { id: 'pmap', name: 'PMAP' },
+                    { id: 'snbc', name: 'SNBC' },
+                ],
+            },
+            role: 'State User',
+            name: 'Bob it user',
+            email: 'bob@dmas.mn.gov',
+        }
+
+        const submissions = [
+            mockDraft(),
+            mockStateSubmission(),
+            mockDraft(),
+        ]
+        submissions[2].id = 'test-abc-122'
+        submissions[2].name = 'MN-MSHO-0002' // the names collide otherwise
+
+        console.log(submissions)
+
+        renderWithProviders(<Dashboard />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
+                    indexSubmissionsMockSuccess(submissions),
+                ],
+            },
+        })
+
+        // we want to check that there are three submissions and in the right order.
+        const cardsList = await screen.findByTestId('submissions-list')
+        expect(cardsList.children.length).toEqual(3)
+
+        const links = within(cardsList).getAllByRole('link')
+        console.log(links)
+        expect(links.length).toEqual(3)
+
+        const names = links.map((link) => link.textContent)
+
+        expect(names).toEqual([
+            'MN-MSHO-0001',
+            'MN-MSHO-0002',
+            'MN-MSHO-0003',
+        ])
+
     })
 
     it('loads first tab active', async () => {
