@@ -46,6 +46,10 @@ const StateContactSchema = Yup.object().shape({
 
 type FormError = FormikErrors<ContactsFormValues>[keyof FormikErrors<ContactsFormValues>]
 
+// We want to make sure we are returning the specific error
+// for a given field when we pass it through showFieldErrors
+// so this makes sure we return the actual error and if its
+// anything else we return undefined to not show it
 const stateContactErrorHandling = (error: string | FormikErrors<StateContactValue> | undefined) : FormikErrors<StateContactValue> | undefined => {
 
     if (typeof(error) === 'string') {
