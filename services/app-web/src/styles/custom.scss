@@ -2,6 +2,12 @@
 @import 'theme/_cms';
 @import 'theme/_color';
 
+h3 {
+  margin-top: 0;
+  font-weight: normal;
+  font-size: 1.3em;
+}
+
 .usa-label,
 .usa-legend {
     font-weight: bold;

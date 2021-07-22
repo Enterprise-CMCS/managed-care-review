@@ -31,6 +31,24 @@
             padding: units(1) 0;
         }
     }
+
+    // align state contacts
+    dl div[class^='grid-container'] {
+        padding: 0;
+
+        div {
+            padding-bottom: units(2);
+        }
+
+        div:nth-child(2) {
+            padding: 0 units(2);
+        }
+
+        // dont bottom pad last two grid items
+        div:nth-last-child(-n+2)  {
+            padding-bottom: 0;
+        }
+    }
 }
 
 .reviewSectionHeader {

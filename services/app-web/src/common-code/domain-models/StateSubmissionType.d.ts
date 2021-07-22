@@ -23,4 +23,5 @@ export type StateSubmissionType = {
     rateDateEnd?: Date
     rateDateCertified?: Date
     rateAmendmentInfo?: RateAmendmentInfo
+    stateContacts: StateContact[]
 }

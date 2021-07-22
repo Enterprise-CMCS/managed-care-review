@@ -41,6 +41,7 @@ export function fetchDraftSubmissionResolver(
             )
         }
 
+
         return { draftSubmission: draft }
     }
 }

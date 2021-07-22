@@ -87,8 +87,34 @@ describe('State Submission', () => {
             cy.findByLabelText('Date certified').type('03/15/2024')
             cy.findAllByTestId('errorMessage').should('have.length', 0)
 
-            // Continue button navigates to documents page
+            // Continue button navigates to state contacts page
             cy.navigateForm('Continue')
+            cy.findByText(/MN-MSHO-/).should('exist')
+            cy.findByTestId('state-contacts').should('exist')
+
+            cy.findByTestId('step-indicator')
+                .findAllByText('Contacts')
+                .should('have.length', 2)
+
+            // fill out state contacts
+            cy.findByLabelText('Name').type('Test Person')
+            cy.findByLabelText('Title/Role').type('Fancy Title')
+            cy.findByLabelText('Email').type('test@test.com')
+
+            // add additional state contact
+            cy.findByRole('button', {
+                name: 'Add state contact',
+            }).safeClick()
+
+            // add second state contact
+            cy.findAllByLabelText('Name').eq(1).type('Test Person')
+            cy.findAllByLabelText('Title/Role').eq(1).type('Fancy Title')
+            cy.findAllByLabelText('Email').eq(1).type('test@test.com')
+
+            // Continue button navigates to documents page
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).safeClick()
 
             cy.findByText(/MN-MSHO-/).should('exist')
             cy.findByTestId('file-input-input').should('exist')
@@ -225,7 +251,19 @@ describe('State Submission', () => {
             cy.findByLabelText('Start date').type('04/01/2024')
             cy.findByLabelText('End date').type('03/31/2025')
             cy.findByLabelText('Date certified').type('03/01/2024')
+
+            // Continue button navigates to state contacts page
             cy.navigateForm('Continue')
+
+            // fill out state contacts
+            cy.findByLabelText('Name').type('Test Person')
+            cy.findByLabelText('Title/Role').type('Fancy Title')
+            cy.findByLabelText('Email').type('test@test.com')
+
+            // Continue button navigates to documents page
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).safeClick()
 
             // Add documents
             cy.findByRole('progressbar', { name: 'Loading' }).should(
@@ -282,9 +320,18 @@ describe('State Submission', () => {
                 name: 'Continue',
             }).safeClick()
 
-            // Skip Rates, Check that documents loads with correct data
-            cy.findAllByText('Documents').should('exist')
+            // change state contacts
+            cy.findByLabelText('Name').clear()
+            cy.findByLabelText('Name').type('Different Person')
 
+            cy.findByLabelText('Email').clear()
+            cy.findByLabelText('Email').type('test2@test.com')
+
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).safeClick()
+
+            // Check that documents loads with correct data
             cy.findByTestId('documents-hint').should(
                 'contain.text',
                 'Must include: An executed contract'
@@ -390,6 +437,16 @@ describe('State Submission', () => {
             cy.findByLabelText('End date').type('02/28/2025')
             cy.findByLabelText('Date certified').type('03/01/2024')
             cy.navigateForm('Continue')
+
+            // Fill out state contact details
+            cy.findByLabelText('Name').type('Test Person')
+            cy.findByLabelText('Title/Role').type('Fancy Title')
+            cy.findByLabelText('Email').type('test@test.com')
+
+            // Continue button navigates to documents page
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).safeClick()
 
             // Add documents
             cy.findByTestId('file-input-input').attachFile(

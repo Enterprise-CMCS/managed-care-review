@@ -13,6 +13,11 @@ mutation createDraftSubmission($input: CreateDraftSubmissionInput!) {
             stateCode
             submissionType
             submissionDescription
+            stateContacts {
+                name
+                titleRole
+                email
+            }
             documents {
                 name
                 s3URL

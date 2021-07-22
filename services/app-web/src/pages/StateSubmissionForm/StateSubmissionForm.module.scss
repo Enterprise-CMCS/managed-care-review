@@ -10,6 +10,7 @@
 .formContainer {
     > [class^='usa-fieldset'] {
         padding: units(4);
+        margin-bottom: units(2);
         background: $cms-color-white;
         border: 1px solid $theme-color-base-lighter;
         @include u-radius('md');
@@ -47,6 +48,11 @@
     a[class^='usa-button usa-button--unstyled'] {
         margin-bottom: 1.5rem;
     }
+    li[class^='usa-button-group__item'] {
+        a[class^='usa-button'], button[class^='usa-button'] {
+          margin-top: 0;
+        }
+    }
 }
 
 .buttonGroup {
@@ -80,4 +86,24 @@
     padding-left: units(4);
     margin: units(2) 0;
     border-left: 4px solid $theme-color-error-darker;
+}
+
+.stateContact {
+    margin-bottom: units(5);
+
+    .removeContactBtn {
+        margin-top: .5rem;
+        @include u-text('secondary');
+    }
+}
+
+.stateContacts {
+    [class^='usa-input'] {
+        margin-bottom: units(2);
+
+    }
+
+    .addContactBtn {
+        margin-top: .5rem;
+    }
 }

@@ -450,7 +450,24 @@ export const ReviewSubmit = ({
                     </dl>
                 </section>
             )}
+            <section id="stateContacts" className={styles.reviewSection}>
+                <dl>
+                    <SectionHeader header="State contacts" to="contacts" />
 
+                    <GridContainer>
+                        <Grid row>
+                            {draftSubmission.stateContacts.map((stateContact, index) => (
+                            <Grid col={6}>
+                                <span className="text-bold">Contact {index + 1}</span><br/>
+                                {stateContact.name}<br/>
+                                {stateContact.titleRole}<br/>
+                                <a href={`mailto:${stateContact.email}`}>{stateContact.email}</a><br/>
+                            </Grid>
+                            ))}
+                        </Grid>
+                    </GridContainer>
+                </dl>
+            </section>
             <section id="documents" className={styles.reviewSection}>
                 <SectionHeader header="Documents" to="documents" />
                 <span className="text-bold">{documentsSummary}</span>

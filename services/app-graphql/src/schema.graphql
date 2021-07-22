@@ -99,6 +99,24 @@ type Program {
     name: String!
 }
 
+type StateContact {
+    name: String!
+    titleRole: String!
+    email: String!
+}
+
+input StateContactInput {
+  name: String!
+  titleRole: String!
+  email: String!
+}
+
+type ActuaryContact {
+    name: String!
+    titleRole: String!
+    email: String!
+}
+
 type Document {
     name: String!
     s3URL: String!
@@ -185,6 +203,7 @@ type DraftSubmission {
     name: String!
     createdAt: Date!
     updatedAt: DateTime!
+    stateContacts: [StateContact!]!
     documents: [Document!]!
     contractType: ContractType
     contractDateStart: Date
@@ -209,6 +228,7 @@ type StateSubmission {
     name: String!
     createdAt: Date!
     updatedAt: DateTime!
+    stateContacts: [StateContact!]!
     documents: [Document!]!
     contractAmendmentInfo: ContractAmendmentInfo
     submittedAt: Date!
@@ -230,6 +250,7 @@ input DraftSubmissionUpdates {
     programID: String!
     submissionType: SubmissionType!
     submissionDescription: String!
+    stateContacts: [StateContactInput!]!
     documents: [DocumentInput!]!
     contractType: ContractType
     contractDateStart: Date

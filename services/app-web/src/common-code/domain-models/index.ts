@@ -14,6 +14,7 @@ export type {
     RateType,
     ContractType,
     FederalAuthority,
+    StateContact,
     ManagedCareEntity,
 } from './DraftSubmissionType'
 

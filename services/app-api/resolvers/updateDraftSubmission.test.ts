@@ -41,6 +41,7 @@ describe('updateDraftSubmission', () => {
                     effectiveDateStart: new Date(),
                     effectiveDateEnd: new Date(),
                 },
+                stateContacts: [],
             }
 
             const updates: DraftSubmissionUpdates = {
@@ -59,6 +60,7 @@ describe('updateDraftSubmission', () => {
                 rateDateEnd: null,
                 rateDateCertified: null,
                 rateAmendmentInfo: undefined,
+                stateContacts: [],
             }
 
             applyUpdates(baseDraft, updates)
@@ -91,6 +93,7 @@ describe('updateDraftSubmission', () => {
                 documents: [],
                 managedCareEntities: [],
                 federalAuthorities: [],
+                stateContacts: [],
             }
 
             const updates: DraftSubmissionUpdates = {
@@ -118,6 +121,7 @@ describe('updateDraftSubmission', () => {
                     effectiveDateStart: null,
                     effectiveDateEnd: null,
                 },
+                stateContacts: [],
             }
 
             applyUpdates(baseDraft, updates)
@@ -152,6 +156,7 @@ describe('updateDraftSubmission', () => {
                 documents: [],
                 managedCareEntities: [],
                 federalAuthorities: [],
+                stateContacts: [],
             }
 
             const updates: DraftSubmissionUpdates = {
@@ -178,6 +183,7 @@ describe('updateDraftSubmission', () => {
                 rateDateStart: null,
                 rateDateEnd: null,
                 rateDateCertified: null,
+                stateContacts: [],
             }
 
             applyUpdates(baseDraft, updates)
@@ -218,6 +224,7 @@ describe('updateDraftSubmission', () => {
             rateDateStart: startDate,
             rateDateEnd: endDate,
             rateDateCertified: certifiedDate,
+            stateContacts: [],
         }
 
         const updateResult = await mutate({
@@ -290,6 +297,13 @@ describe('updateDraftSubmission', () => {
             contractDateEnd: endDate,
             managedCareEntities: [],
             federalAuthorities: [],
+            stateContacts: [
+                {
+                    name: 'Test Person',
+                    titleRole: 'A Role',
+                    email: 'test@test.com',
+                }
+            ]
         }
 
         const updateResult = await mutate({
@@ -334,6 +348,18 @@ describe('updateDraftSubmission', () => {
             contractDateEnd: resultDraft1.contractDateEnd,
             managedCareEntities: [],
             federalAuthorities: [],
+            stateContacts: [
+                {
+                    name: 'John Smith',
+                    titleRole: 'Fancy Title',
+                    email: 'john@test.com',
+                },
+                {
+                    name: 'Jane Doe',
+                    titleRole: 'Doctor',
+                    email: 'jane@test.com',
+                },
+            ]
         }
 
         const updateResult2 = await mutate({
@@ -349,6 +375,67 @@ describe('updateDraftSubmission', () => {
             updateResult2.data.updateDraftSubmission.draftSubmission
         expect(resultDraft2.documents.length).toEqual(2)
         expect(resultDraft2.documents[0].name).toEqual('myfile2.pdf')
+    })
+
+    it('updates a submission to have state contacts', async () => {
+        const server = constructTestServer()
+        const { mutate, query } = createTestClient(server)
+
+        const createdDraft = await createTestDraftSubmission(mutate)
+        const createdID = createdDraft.id
+
+        const updatedDraft = {
+            programID: 'cnet',
+            submissionType: 'CONTRACT_AND_RATES',
+            submissionDescription: 'An updated submission',
+            stateContacts: [
+                {
+                    name: 'test name',
+                    titleRole: 'fancy person',
+                    email: 'test@test.com',
+                },
+            ],
+            documents: [],
+            contractType: 'BASE',
+            contractDateStart: null,
+            contractDateEnd: null,
+            managedCareEntities: [],
+            federalAuthorities: [],
+        }
+
+        const updateResult = await mutate({
+            mutation: UPDATE_DRAFT_SUBMISSION,
+            variables: {
+                input: {
+                    submissionID: createdID,
+                    draftSubmissionUpdates: updatedDraft,
+                },
+            },
+        })
+
+        expect(updateResult.errors).toBeUndefined()
+
+        const resultDraft1 =
+            updateResult.data.updateDraftSubmission.draftSubmission
+        expect(resultDraft1.id).toEqual(createdID)
+        expect(resultDraft1.stateContacts).toEqual([
+          {
+              name: 'test name',
+              titleRole: 'fancy person',
+              email: 'test@test.com',
+          },
+        ])
+
+        const fetchedDraft = await fetchTestDraftSubmissionById(query, createdID)
+
+        expect(fetchedDraft.id).toEqual(createdID)
+        expect(fetchedDraft.stateContacts).toEqual([
+          {
+              name: 'test name',
+              titleRole: 'fancy person',
+              email: 'test@test.com',
+          },
+        ])
     })
 
     it('updates a submission to have contract amendment details', async () => {
@@ -368,6 +455,7 @@ describe('updateDraftSubmission', () => {
             contractDateStart: startDate,
             managedCareEntities: [],
             federalAuthorities: [],
+            stateContacts: [],
 
             // rate detail info
             contractAmendmentInfo: {
@@ -437,6 +525,7 @@ describe('updateDraftSubmission', () => {
                 },
                 relatedToCovid19: true,
             },
+            stateContacts: [],
         }
 
         const updateResult = await mutate({
@@ -504,6 +593,7 @@ describe('updateDraftSubmission', () => {
             documents: [],
             managedCareEntities: [],
             federalAuthorities: [],
+            stateContacts: [],
             ...rateDetails,
         }
 
@@ -558,6 +648,7 @@ describe('updateDraftSubmission', () => {
             documents: [],
             managedCareEntities: [],
             federalAuthorities: [],
+            stateContacts: [],
             ...rateAmendment,
         }
 
@@ -610,6 +701,13 @@ describe('updateDraftSubmission', () => {
                     s3URL: 'fakeS3URL',
                 },
             ],
+            stateContacts: [
+                {
+                    name: 'Test Person',
+                    titleRole: 'Role',
+                    email: 'test@test.com',
+                },
+            ],
         }
 
         const updateResult = await mutate({
@@ -641,6 +739,13 @@ describe('updateDraftSubmission', () => {
             managedCareEntities: [],
             federalAuthorities: [],
             documents: [],
+            stateContacts: [
+                {
+                    name: 'Test Person',
+                    titleRole: 'Role',
+                    email: 'test@test.com',
+                },
+            ],
         }
 
         const updateResult2 = await mutate({
@@ -674,6 +779,7 @@ describe('updateDraftSubmission', () => {
             contractDateEnd: endDate,
             managedCareEntities: [],
             federalAuthorities: [],
+            stateContacts: [],
         }
 
         const updateResult = await mutate({
@@ -748,6 +854,7 @@ describe('updateDraftSubmission', () => {
             contractDateEnd: endDate,
             managedCareEntities: [],
             federalAuthorities: [],
+            stateContacts: [],
         }
 
         const updateResult = await otherMutate({
@@ -789,6 +896,7 @@ describe('updateDraftSubmission', () => {
             contractDateEnd: endDate,
             managedCareEntities: [],
             federalAuthorities: [],
+            stateContacts: [],
         }
 
         const updateResult = await mutate({
