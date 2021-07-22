@@ -405,7 +405,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                                     <strong>Contact {index + 1}</strong><br/>
                                     {stateContact.name}<br/>
                                     {stateContact.titleRole}<br/>
-                                    <a href="mailto:{stateContact.email}">{stateContact.email}</a><br/>
+                                    <a href={`mailto:${stateContact.email}`}>{stateContact.email}</a><br/>
                                 </Grid>
                                 ))}
                             </Grid>
