@@ -9,6 +9,7 @@ plugins:
   - serverless-bundle
   - serverless-offline
   - serverless-associate-waf
+  - serverless-stack-termination-protection
 
 custom:
   stage: ${opt:stage, self:provider.stage}
@@ -26,6 +27,12 @@ custom:
     version: V2
   bundle:
     packager: yarn
+  serverlessTerminationProtection:
+    stages:
+      - dev
+      - val
+      - prod
+      - main
 
 provider:
   name: aws
