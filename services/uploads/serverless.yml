@@ -44,6 +44,23 @@ resources:
                 - DELETE
                 - HEAD
               MaxAge: 3000
+    DocumentsUploadsBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref DocumentUploadsBucket
+        PolicyDocument:
+          Statement:
+            - Action: 's3:PutObject'
+              Effect: Deny
+              Principal: '*'
+              NotResource:
+                - !Sub ${DocumentUploadsBucket.Arn}/*.csv
+                - !Sub ${DocumentUploadsBucket.Arn}/*.doc
+                - !Sub ${DocumentUploadsBucket.Arn}/*.docx
+                - !Sub ${DocumentUploadsBucket.Arn}/*.pdf
+                - !Sub ${DocumentUploadsBucket.Arn}/*.txt
+                - !Sub ${DocumentUploadsBucket.Arn}/*.xls
+                - !Sub ${DocumentUploadsBucket.Arn}/*.xlsx
 
   Outputs:
     DocumentUploadsBucketName:
