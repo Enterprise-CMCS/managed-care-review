@@ -369,7 +369,7 @@ describe('State Submission', () => {
 
         it('user can add a rates amendment', () => {
             cy.login()
-            cy.startNewContractOnlySubmission()
+            cy.startNewContractAndRatesSubmission()
 
             // Fill out contract details
             cy.findByRole('heading', { name: /Contract Details/ })
