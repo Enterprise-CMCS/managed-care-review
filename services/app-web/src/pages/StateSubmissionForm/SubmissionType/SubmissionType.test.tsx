@@ -5,7 +5,7 @@ import { screen, waitFor } from '@testing-library/react'
 
 import {
     fetchCurrentUserMock,
-    mockDraftSubmission,
+    mockDraft,
 } from '../../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { SubmissionType, SubmissionTypeFormValues } from './SubmissionType'
@@ -67,7 +67,7 @@ describe('SubmissionType', () => {
 
     it('displays with draft submission when expected', async () => {
         renderWithProviders(
-            <SubmissionType draftSubmission={mockDraftSubmission} />,
+            <SubmissionType draftSubmission={mockDraft()} />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],

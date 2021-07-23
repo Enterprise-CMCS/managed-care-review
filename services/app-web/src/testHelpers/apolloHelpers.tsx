@@ -2,6 +2,7 @@ import dayjs from 'dayjs'
 
 import {
     DraftSubmission,
+    Submission,
     FetchCurrentUserDocument,
     User as UserType,
     CreateDraftSubmissionDocument,
@@ -31,97 +32,104 @@ const mockValidUser: UserType = {
     email: 'bob@dmas.mn.gov',
 }
 
-const mockDraftSubmission: DraftSubmission = {
-    __typename: 'DraftSubmission',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    id: 'test-abc-123',
-    stateCode: 'MN',
-    programID: 'snbc',
-    program: {
-        id: 'snbc',
-        name: 'SNBC',
-    },
-    name: 'MN-MSHO-0001',
-    submissionType: 'CONTRACT_ONLY',
-    submissionDescription: 'A real submission',
-    documents: [],
-    contractType: 'BASE',
-    contractDateStart: new Date(),
-    contractDateEnd: dayjs().add(2, 'days').toDate(),
-    contractAmendmentInfo: null,
-    managedCareEntities: [],
-    federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
-    rateType: null,
-    rateDateStart: null,
-    rateDateEnd: null,
-    rateDateCertified: null,
-    rateAmendmentInfo: null,
-    stateContacts: [],
-}
-const mockCompleteDraftSubmission: DraftSubmission = {
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    id: 'test-abc-123',
-    stateCode: 'MN',
-    programID: 'snbc',
-    program: {
-        id: 'snbc',
-        name: 'SNBC',
-    },
-    name: 'MN-MSHO-0001',
-    submissionType: 'CONTRACT_ONLY',
-    submissionDescription: 'A real submission',
-    documents: [],
-    contractType: 'BASE',
-    contractDateStart: new Date(),
-    contractDateEnd: new Date(),
-    contractAmendmentInfo: null,
-    managedCareEntities: [],
-    federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
-    rateType: 'NEW',
-    rateDateStart: new Date(),
-    rateDateEnd: new Date(),
-    rateDateCertified: new Date(),
-    rateAmendmentInfo: null,
-    stateContacts: [
-        {
-          name: 'Test Person',
-          titleRole: 'A Role',
-          email: 'test@test.com',
-        }
-    ],
+export function mockDraft(): DraftSubmission {
+    return {
+        __typename: 'DraftSubmission',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        id: 'test-abc-123',
+        stateCode: 'MN',
+        programID: 'snbc',
+        program: {
+            id: 'snbc',
+            name: 'SNBC',
+        },
+        name: 'MN-MSHO-0001',
+        submissionType: 'CONTRACT_ONLY',
+        submissionDescription: 'A real submission',
+        documents: [],
+        contractType: 'BASE',
+        contractDateStart: new Date(),
+        contractDateEnd: dayjs().add(2, 'days').toDate(),
+        contractAmendmentInfo: null,
+        managedCareEntities: [],
+        federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
+        rateType: null,
+        rateDateStart: null,
+        rateDateEnd: null,
+        rateDateCertified: null,
+        rateAmendmentInfo: null,
+        stateContacts: [],
+    }
 }
 
-const mockNewDraftSubmission: DraftSubmission = {
-    __typename: 'DraftSubmission',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    id: 'test-abc-124',
-    stateCode: 'MN',
-    programID: 'snbc',
-    program: {
-        id: 'snbc',
-        name: 'SNBC',
-    },
-    name: 'MN-MSHO-0002',
-    submissionType: 'CONTRACT_ONLY',
-    submissionDescription: 'A real submission',
-    documents: [],
-    contractType: null,
-    contractDateStart: null,
-    contractDateEnd: null,
-    contractAmendmentInfo: null,
-    managedCareEntities: [],
-    federalAuthorities: [],
-    rateType: null,
-    rateDateStart: null,
-    rateDateEnd: null,
-    rateDateCertified: null,
-    stateContacts: [],
+export function mockCompleteDraft(): DraftSubmission {
+    return {
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        id: 'test-abc-123',
+        stateCode: 'MN',
+        programID: 'snbc',
+        program: {
+            id: 'snbc',
+            name: 'SNBC',
+        },
+        name: 'MN-MSHO-0001',
+        submissionType: 'CONTRACT_ONLY',
+        submissionDescription: 'A real submission',
+        documents: [],
+        contractType: 'BASE',
+        contractDateStart: new Date(),
+        contractDateEnd: new Date(),
+        contractAmendmentInfo: null,
+        managedCareEntities: [],
+        federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
+        rateType: 'NEW',
+        rateDateStart: new Date(),
+        rateDateEnd: new Date(),
+        rateDateCertified: new Date(),
+        rateAmendmentInfo: null,
+        stateContacts: [
+            {
+                name: 'Test Person',
+                titleRole: 'A Role',
+                email: 'test@test.com',
+            }
+        ],
+    }
 }
 
-export function mockStateSubmission(): Partial<StateSubmission> {
+function mockNewDraft(): DraftSubmission {
+    return {
+        __typename: 'DraftSubmission',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        id: 'test-abc-124',
+        stateCode: 'MN',
+        programID: 'snbc',
+        program: {
+            id: 'snbc',
+            name: 'SNBC',
+        },
+        name: 'MN-MSHO-0002',
+        submissionType: 'CONTRACT_ONLY',
+        submissionDescription: 'A real submission',
+        documents: [],
+        contractType: null,
+        contractDateStart: null,
+        contractDateEnd: null,
+        contractAmendmentInfo: null,
+        managedCareEntities: [],
+        federalAuthorities: [],
+        rateType: null,
+        rateDateStart: null,
+        rateDateEnd: null,
+        rateDateCertified: null,
+        stateContacts: [],
+    }
+}
+
+export function mockStateSubmission(): StateSubmission {
     return {
         __typename: 'StateSubmission',
         createdAt: new Date(),
@@ -137,17 +145,24 @@ export function mockStateSubmission(): Partial<StateSubmission> {
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A submitted submission',
         submittedAt: new Date(),
+        documents: [{ s3URL: 'bar', name: 'foo' }],
+        contractType: 'BASE',
+        contractDateStart: new Date(),
+        contractDateEnd: new Date(),
+        contractAmendmentInfo: null,
+        managedCareEntities: [],
+        federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
+        rateType: 'NEW',
+        rateDateStart: new Date(),
+        rateDateEnd: new Date(),
+        rateDateCertified: new Date(),
+        rateAmendmentInfo: null,
+        stateContacts: [{
+            name: 'Test Person',
+            titleRole: 'A Role',
+            email: 'test@test.com',
+        }]
     }
-}
-
-// Only export a function that returns the mockDraftSubmission so that
-// we don't ever accidentally modified the shared mock in tests.
-export function mockDraft(): DraftSubmission {
-    return mockDraftSubmission
-}
-
-export function mockCompleteDraft(): DraftSubmission {
-    return mockCompleteDraftSubmission
 }
 
 type fetchCurrentUserMockProps = {
@@ -158,7 +173,7 @@ const fetchCurrentUserMock = ({
     user = mockValidUser,
     statusCode,
 }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
+    fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
     switch (statusCode) {
         case 200:
             return {
@@ -194,7 +209,7 @@ type createDraftSubmissionMockProps = {
 
 const createDraftSubmissionMock = ({
     input,
-    draftSubmission = mockNewDraftSubmission,
+    draftSubmission = mockNewDraft(),
     statusCode, // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }: createDraftSubmissionMockProps): MockedResponse<Record<string, any>> => {
     const mergedDraftSubmission = Object.assign({}, draftSubmission, input)
@@ -233,7 +248,7 @@ type fetchDraftSubmissionMockProps = {
 }
 
 const fetchDraftSubmissionMock = ({
-    draftSubmission = mockDraftSubmission,
+    draftSubmission = mockDraft(),
     id,
     statusCode, // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }: fetchDraftSubmissionMockProps): MockedResponse<Record<string, any>> => {
@@ -281,7 +296,7 @@ const updateDraftSubmissionMock = ({
 }: updateDraftSubmissionMockProps): MockedResponse<Record<string, any>> => {
     const mergedDraftSubmission = Object.assign(
         {},
-        mockDraftSubmission,
+        mockDraft(),
         updates,
         { id } // make sure the id matches what we queried
     )
@@ -331,52 +346,22 @@ const submitDraftSubmissionMockSuccess = ({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Record<string, any>
 > => {
-    const submission = stateSubmission ?? mockDraftSubmission
+    const submission = stateSubmission ?? mockDraft()
     return {
-        request: {
-            query: SubmitDraftSubmissionDocument,
-            variables: {
-                input: {
-                    submissionID: id,
-                },
-            },
-        },
-        result: {
-            data: {
-                submitDraftSubmission: {
-                    submission: submission,
-                },
-            },
-        },
+        request: { query: SubmitDraftSubmissionDocument, variables: { input: { submissionID: id, }, }, }, result: { data: { submitDraftSubmission: { submission: submission, }, }, },
     }
 }
 
-const submitDraftSubmissionMockError = ({
-    id,
+const submitDraftSubmissionMockError = ({ id,
 }: {
-    id: string
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    id: string         // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }): MockedResponse<Record<string, any>> => {
-    return {
-        request: {
-            query: SubmitDraftSubmissionDocument,
-            variables: {
-                input: {
-                    submissionID: id,
-                },
-            },
-        },
-        result: {
-            errors: [
-                new GraphQLError('Incomplete submission cannot be submitted'),
-            ],
-        },
-    }
+    return { request: { query: SubmitDraftSubmissionDocument, variables: { input: { submissionID: id, }, }, }, result: { errors: [new GraphQLError('Incomplete submission cannot be submitted'),], }, }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const indexSubmissionsMockSuccess = (): MockedResponse<Record<string, any>> => {
-    const submissionEdges = [mockDraft(), mockStateSubmission()].map((sub) => {
+const indexSubmissionsMockSuccess = (submissions: Submission[] = [mockDraft(), mockStateSubmission()]): MockedResponse<Record<string, any>> => {
+    const submissionEdges = submissions.map((sub) => {
         return {
             node: sub,
         }
@@ -401,7 +386,6 @@ export {
     createDraftSubmissionMock,
     fetchDraftSubmissionMock,
     updateDraftSubmissionMock,
-    mockDraftSubmission,
     submitDraftSubmissionMockSuccess,
     submitDraftSubmissionMockError,
     indexSubmissionsMockSuccess,

@@ -1,5 +1,4 @@
 import { screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 
 import {
     mockDraft,
@@ -58,12 +57,12 @@ describe('Contacts', () => {
         expect(screen.getByLabelText('Email')).toHaveValue('test@test.com')
     })
 
-    it('it should error and not continue if state contacts are not filled out', async () => {
+    it('should error and not continue if state contacts are not filled out', async () => {
         const mock = mockDraft()
         const mockUpdateDraftFn = jest.fn()
         const emptyContactsDraft = {
             ...mock,
-            stateContacts : [
+            stateContacts: [
                 {
                     name: '',
                     titleRole: '',

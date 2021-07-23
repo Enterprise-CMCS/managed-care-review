@@ -34,6 +34,8 @@ describe('RateDetails', () => {
                 },
             }
         )
+
+        expect(screen.getByText('Rate certification type')).toBeInTheDocument()
     })
 
     it('loads with only rate type form field visible', async () => {

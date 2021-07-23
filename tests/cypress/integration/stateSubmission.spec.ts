@@ -276,6 +276,7 @@ describe('State Submission', () => {
             cy.findByTestId('file-input-input').attachFile(
                 'documents/trussel-guide.pdf'
             )
+            cy.findByText('trussel-guide.pdf').should('exist')
             cy.findByText('Upload failed').should('not.exist')
             cy.findByText('Duplicate file').should('not.exist')
 
@@ -332,6 +333,7 @@ describe('State Submission', () => {
             }).safeClick()
 
             // Check that documents loads with correct data
+            cy.findByRole('heading', { name: /Documents/ })
             cy.findByTestId('documents-hint').should(
                 'contain.text',
                 'Must include: An executed contract'
@@ -370,11 +372,17 @@ describe('State Submission', () => {
             cy.startNewContractAndRatesSubmission()
 
             // Fill out contract details
-            cy.findByLabelText('Amendment to base contract').safeClick()
+            cy.findByRole('heading', { name: /Contract Details/ })
+            cy.findByLabelText('Amendment to base contract')
+                .should('exist')
+                .safeClick()
+            cy.findByLabelText('Amendment to base contract').should(
+                'be.checked'
+            )
             cy.findByRole('button', {
                 name: 'Continue',
             }).safeClick()
-            cy.findByLabelText('Start date').type('03/01/2024')
+            cy.findByLabelText('Start date').should('exist').type('03/01/2024')
             cy.findByLabelText('End date').type('03/31/2026')
             cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
             cy.findByLabelText('1932(a) State Plan Authority').safeClick()
@@ -539,10 +547,11 @@ describe('State Submission', () => {
 
                 // reload page,validate there are still no documents,then add duplicate documents
                 cy.visit(`/submissions/${draftSubmissionID}/documents`)
+                cy.findByRole('heading', { name: /Documents/ })
+
                 cy.findAllByText('documents/how-to-open-source.pdf').should(
                     'not.exist'
                 )
-
                 cy.findByTestId('file-input-input').attachFile(
                     'documents/trussel-guide.pdf'
                 )

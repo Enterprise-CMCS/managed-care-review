@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from 'uuid'
 import styles from '../StateSubmissionForm.module.scss'
 import {
     DraftSubmission,
+    SubmissionType,
     UpdateDraftSubmissionInput,
 } from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
@@ -36,6 +37,41 @@ type DocumentProps = {
         input: UpdateDraftSubmissionInput
     ) => Promise<DraftSubmission | undefined>
 }
+
+const DocumentRequirementsHint = ({
+    submissionType,
+}: {
+    submissionType: SubmissionType
+}): JSX.Element =>
+    submissionType === 'CONTRACT_AND_RATES' ? (
+        <>
+            <strong>Must include:</strong> An executed contract and a signed
+            rate certification
+        </>
+    ) : (
+        <>
+            <strong>Must include:</strong> An executed contract
+        </>
+    )
+
+const FormError = ({ isEmpty }: { isEmpty: boolean }): JSX.Element =>
+    isEmpty ? (
+        <Alert
+            type="error"
+            heading="Missing documents"
+            className="margin-bottom-2"
+        >
+            You must upload at least one document
+        </Alert>
+    ) : (
+        <Alert
+            type="error"
+            heading="Remove files with errors"
+            className="margin-bottom-2"
+        >
+            You must remove all documents with error messages before continuing
+        </Alert>
+    )
 
 export const Documents = ({
     draftSubmission,
@@ -112,94 +148,57 @@ export const Documents = ({
         return { key: s3Key, s3URL: s3URL }
     }
 
-    const handleFormSubmit =
-        ({
-            shouldValidate,
-            redirectPath,
-        }: {
-            shouldValidate: boolean
-            redirectPath: string
-        }) =>
-        async (e: React.FormEvent | React.MouseEvent) => {
-            e.preventDefault()
+    const handleFormSubmit = ({
+        shouldValidate,
+        redirectPath,
+    }: {
+        shouldValidate: boolean
+        redirectPath: string
+    }) => async (e: React.FormEvent | React.MouseEvent) => {
+        e.preventDefault()
 
-            // if there are any errors present in the documents list, stop here
-            if (shouldValidate) {
-                setShouldValidate(true)
-                if (!hasValidFiles) return
-            }
-
-            const documents = fileItems.reduce(
-                (formDataDocuments, fileItem) => {
-                    if (!fileItem.s3URL)
-                        console.log(
-                            'The file item has no s3url, this should not happen on form submit'
-                        )
-                    else if (fileItem.status === 'DUPLICATE_NAME_ERROR')
-                        console.log(
-                            'Attempting to save duplicate files, discarding duplicate'
-                        )
-                    else {
-                        formDataDocuments.push({
-                            name: fileItem.name,
-                            s3URL: fileItem.s3URL,
-                        })
-                    }
-                    return formDataDocuments
-                },
-                [] as { name: string; s3URL: string }[]
-            )
-
-            const updatedDraft = updatesFromSubmission(draftSubmission)
-
-            updatedDraft.documents = documents
-
-            try {
-                const updatedSubmission = await updateDraft({
-                    submissionID: draftSubmission.id,
-                    draftSubmissionUpdates: updatedDraft,
-                })
-                if (updatedSubmission) {
-                    history.push(redirectPath, {
-                        defaultProgramID: draftSubmission.programID,
-                    })
-                }
-            } catch (error) {
-                onError()
-            }
+        // if there are any errors present in the documents list, stop here
+        if (shouldValidate) {
+            setShouldValidate(true)
+            if (!hasValidFiles) return
         }
 
-    const Hint = (): JSX.Element =>
-        draftSubmission.submissionType === 'CONTRACT_AND_RATES' ? (
-            <>
-                <strong>Must include:</strong> An executed contract and a signed
-                rate certification
-            </>
-        ) : (
-            <>
-                <strong>Must include:</strong> An executed contract
-            </>
-        )
+        const documents = fileItems.reduce((formDataDocuments, fileItem) => {
+            if (!fileItem.s3URL)
+                console.log(
+                    'The file item has no s3url, this should not happen on form submit'
+                )
+            else if (fileItem.status === 'DUPLICATE_NAME_ERROR')
+                console.log(
+                    'Attempting to save duplicate files, discarding duplicate'
+                )
+            else {
+                formDataDocuments.push({
+                    name: fileItem.name,
+                    s3URL: fileItem.s3URL,
+                })
+            }
+            return formDataDocuments
+        }, [] as { name: string; s3URL: string }[])
 
-    const FormError = (): JSX.Element =>
-        fileItems.length === 0 ? (
-            <Alert
-                type="error"
-                heading="Missing documents"
-                className="margin-bottom-2"
-            >
-                You must upload at least one document
-            </Alert>
-        ) : (
-            <Alert
-                type="error"
-                heading="Remove files with errors"
-                className="margin-bottom-2"
-            >
-                You must remove all documents with error messages before
-                continuing
-            </Alert>
-        )
+        const updatedDraft = updatesFromSubmission(draftSubmission)
+
+        updatedDraft.documents = documents
+
+        try {
+            const updatedSubmission = await updateDraft({
+                submissionID: draftSubmission.id,
+                draftSubmissionUpdates: updatedDraft,
+            })
+            if (updatedSubmission) {
+                history.push(redirectPath, {
+                    defaultProgramID: draftSubmission.programID,
+                })
+            }
+        } catch (error) {
+            onError()
+        }
+    }
 
     return (
         <>
@@ -216,7 +215,9 @@ export const Documents = ({
             >
                 <fieldset className="usa-fieldset">
                     <legend className="srOnly">Documents</legend>
-                    {shouldValidate && !hasValidFiles && <FormError />}
+                    {shouldValidate && !hasValidFiles && (
+                        <FormError isEmpty={fileItems.length === 0} />
+                    )}
                     {formAlert && formAlert}
                     <FileUpload
                         id="documents"
@@ -241,7 +242,11 @@ export const Documents = ({
                                     data-testid="documents-hint"
                                     className="text-base-darker"
                                 >
-                                    <Hint />
+                                    <DocumentRequirementsHint
+                                        submissionType={
+                                            draftSubmission.submissionType
+                                        }
+                                    />
                                 </p>
                             </>
                         }

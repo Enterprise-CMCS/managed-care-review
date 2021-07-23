@@ -25,6 +25,19 @@ import { usePage } from '../../../contexts/PageContext'
 
 type DocumentWithLink = { url: string | null } & Document
 
+const SectionHeader = ({
+    header,
+}: {
+    header: string
+    to: string
+}): React.ReactElement => {
+    return (
+        <div className={styles.sectionHeader}>
+            <h2>{header}</h2>
+        </div>
+    )
+}
+
 export const SubmissionSummary = (): React.ReactElement => {
     const { id } = useParams<{ id: string }>()
     const { pathname } = useLocation()
@@ -65,7 +78,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                         url: documentLink,
                     }
                 })
-            ).catch((err) => {
+            ).catch((_err) => {
                 return []
             })
             setRefreshedDocs(newDocs)
@@ -84,19 +97,6 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     if (error || !submission) return <GenericError />
 
-    const SectionHeader = ({
-        header,
-        to,
-    }: {
-        header: string
-        to: string
-    }): React.ReactElement => {
-        return (
-            <div className={styles.sectionHeader}>
-                <h2>{header}</h2>
-            </div>
-        )
-    }
     const documentsSummary = `${submission.documents.length} ${
         submission.documents.length === 1 ? 'file' : 'files'
     }`

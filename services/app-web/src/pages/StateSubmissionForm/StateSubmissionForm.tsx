@@ -37,6 +37,67 @@ import {
 
 const GenericFormAlert = () => <Alert type="error">Something went wrong</Alert>
 
+// this Definitely wants to be its own component.
+const DynamicStepIndicator = ({
+    submissionType = undefined,
+    pathname,
+}: {
+    submissionType?: SubmissionTypeT
+    pathname: string,
+}): React.ReactElement | null => {
+
+    const FormPages = [
+        'SUBMISSIONS_CONTRACT_DETAILS',
+        'SUBMISSIONS_RATE_DETAILS',
+        'SUBMISSIONS_CONTACTS',
+        'SUBMISSIONS_DOCUMENTS',
+        'SUBMISSIONS_REVIEW_SUBMIT',
+    ] as RouteT[]
+
+
+    const currentFormPage = getRouteName(pathname)
+
+    let formStepCompleted = true
+    let formStepStatus: 'current' | 'complete' | undefined
+
+    // If submission type is contract only, rate details is left out of the step indicator
+    const reachableFormPages = FormPages.filter((formPage) => {
+        return !(
+            submissionType === 'CONTRACT_ONLY' &&
+            formPage === 'SUBMISSIONS_RATE_DETAILS'
+        )
+    })
+
+    if (currentFormPage === 'SUBMISSIONS_TYPE') {
+        return null
+    } else {
+        return (
+            <>
+                <StepIndicator>
+                    {reachableFormPages.map((formPageName) => {
+                        if (formPageName === currentFormPage) {
+                            formStepCompleted = false
+                            formStepStatus = 'current'
+                        } else if (formStepCompleted) {
+                            formStepStatus = 'complete'
+                        } else {
+                            formStepStatus = undefined
+                        }
+
+                        return (
+                            <StepIndicatorStep
+                                label={PageTitlesRecord[formPageName]}
+                                status={formStepStatus}
+                                key={PageTitlesRecord[formPageName]}
+                            />
+                        )
+                    })}
+                </StepIndicator>
+            </>
+        )
+    }
+}
+
 export const StateSubmissionForm = (): React.ReactElement => {
     const { id } = useParams<{ id: string }>()
     const { pathname } = useLocation()
@@ -57,8 +118,10 @@ export const StateSubmissionForm = (): React.ReactElement => {
         },
     })
 
-    const [updateDraftSubmission, { error: updateError }] =
-        useUpdateDraftSubmissionMutation()
+    const [
+        updateDraftSubmission,
+        { error: updateError },
+    ] = useUpdateDraftSubmissionMutation()
 
     const updateDraft = async (
         input: UpdateDraftSubmissionInput
@@ -97,62 +160,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
         )
     }
 
-    const FormPages = [
-        'SUBMISSIONS_CONTRACT_DETAILS',
-        'SUBMISSIONS_RATE_DETAILS',
-        'SUBMISSIONS_CONTACTS',
-        'SUBMISSIONS_DOCUMENTS',
-        'SUBMISSIONS_REVIEW_SUBMIT',
-    ] as RouteT[]
-
-    const DynamicStepIndicator = ({
-        submissionType = undefined,
-    }: {
-        submissionType?: SubmissionTypeT
-    }): React.ReactElement | null => {
-        const currentFormPage = getRouteName(pathname)
-
-        let formStepCompleted = true
-        let formStepStatus: 'current' | 'complete' | undefined
-
-        // If submission type is contract only, rate details is left out of the step indicator
-        const reachableFormPages = FormPages.filter((formPage) => {
-            return !(
-                submissionType === 'CONTRACT_ONLY' &&
-                formPage === 'SUBMISSIONS_RATE_DETAILS'
-            )
-        })
-
-        if (currentFormPage === 'SUBMISSIONS_TYPE') {
-            return null
-        } else {
-            return (
-                <>
-                    <StepIndicator>
-                        {reachableFormPages.map((formPageName) => {
-                            if (formPageName === currentFormPage) {
-                                formStepCompleted = false
-                                formStepStatus = 'current'
-                            } else if (formStepCompleted) {
-                                formStepStatus = 'complete'
-                            } else {
-                                formStepStatus = undefined
-                            }
-
-                            return (
-                                <StepIndicatorStep
-                                    label={PageTitlesRecord[formPageName]}
-                                    status={formStepStatus}
-                                    key={PageTitlesRecord[formPageName]}
-                                />
-                            )
-                        })}
-                    </StepIndicator>
-                </>
-            )
-        }
-    }
-
     if (updateError && !showFormAlert) {
         setShowFormAlert(true)
     }
@@ -179,7 +186,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
     return (
         <>
-            <DynamicStepIndicator submissionType={draft.submissionType} />
+            <DynamicStepIndicator submissionType={draft.submissionType} pathname={pathname} />
 
             <GridContainer>
                 <Switch>
