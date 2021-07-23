@@ -272,6 +272,7 @@ describe('State Submission', () => {
             cy.findByTestId('file-input-input').attachFile(
                 'documents/trussel-guide.pdf'
             )
+            cy.findByText('trussel-guide.pdf').should('exist')
             cy.findByText('Upload failed').should('not.exist')
             cy.findByText('Duplicate file').should('not.exist')
 
@@ -327,6 +328,7 @@ describe('State Submission', () => {
             cy.navigateForm('Continue')
 
             // Check that documents loads with correct data
+            cy.findByRole('heading', { name: /Documents/ })
             cy.findByTestId('documents-hint').should(
                 'contain.text',
                 'Must include: An executed contract'
@@ -375,29 +377,20 @@ describe('State Submission', () => {
 
         it('user can add a draft contract submission with a rates amendment', () => {
             cy.login()
-
-            // Add a new submission
-            cy.findByRole('link', { name: 'Start new submission' }).click({
-                force: true,
-            })
-            cy.findByLabelText('Contract action only').safeClick()
-            cy.findByRole('textbox', { name: 'Submission description' })
-                .should('exist')
-                .type('description of submission')
-            cy.findByRole('button', {
-                name: 'Continue',
-            }).safeClick()
+            cy.startNewContractOnlySubmission()
 
             // Fill out contract details
-            cy.findByTestId('step-indicator')
-                .findAllByText('Contract Details')
-                .should('have.length', 2)
-
-            cy.findByLabelText('Amendment to base contract').safeClick()
+            cy.findByRole('heading', { name: /Contract Details/ })
+            cy.findByLabelText('Amendment to base contract')
+                .should('exist')
+                .safeClick()
+            cy.findByLabelText('Amendment to base contract').should(
+                'be.checked'
+            )
             cy.findByRole('button', {
                 name: 'Continue',
             }).safeClick()
-            cy.findByLabelText('Start date').type('03/01/2024')
+            cy.findByLabelText('Start date').should('exist').type('03/01/2024')
             cy.findByLabelText('End date').type('03/31/2026')
             cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
             cy.findByLabelText('1932(a) State Plan Authority').safeClick()
@@ -568,11 +561,11 @@ describe('State Submission', () => {
 
                 // reload page,validate there are still no documents,then add duplicate documents
                 cy.visit(`/submissions/${draftSubmissionID}/documents`)
+                cy.findByRole('heading', { name: /Documents/ })
+
                 cy.findAllByText('documents/how-to-open-source.pdf').should(
                     'not.exist'
                 )
-
-                cy.findByRole('heading', { level: 1, name: /Dashboard/ })
                 cy.findByTestId('file-input-input').attachFile(
                     'documents/trussel-guide.pdf'
                 )
