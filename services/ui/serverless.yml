@@ -2,14 +2,23 @@ service: ui
 
 frameworkVersion: '2'
 
-custom:
-  stage: ${opt:stage, self:provider.stage}
-  region: ${opt:region, self:provider.region}
-
 provider:
   name: aws
   runtime: nodejs12.x
   region: us-east-1
+
+plugins:
+  - serverless-stack-termination-protection
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  region: ${opt:region, self:provider.region}
+  serverlessTerminationProtection:
+    stages:
+      - dev
+      - val
+      - prod
+      - main
 
 resources:
   Conditions:

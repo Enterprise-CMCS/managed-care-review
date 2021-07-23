@@ -10,5 +10,8 @@
     "license": "CC0-1.0",
     "dependencies": {
         "prettier": "^2.2.1"
+    },
+    "devDependencies": {
+        "serverless-stack-termination-protection": "^1.0.4"
     }
 }
