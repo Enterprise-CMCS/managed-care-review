@@ -14,7 +14,7 @@ repos:
       rev: v2.2.1
       hooks:
           - id: no-commit-to-branch
-            args: ['--pattern', '^(?!([a-zA-Z0-9\-\/]{1,64})$).*']
+            args: ['--pattern', '^(?!([a-zA-Z0-9\-\/]{1,47})$).*']
 
     - repo: https://github.com/pre-commit/mirrors-prettier
       rev: 'v2.3.2' # Use the sha / tag you want to point at
