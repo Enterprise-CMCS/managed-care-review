@@ -34,9 +34,9 @@ type FederalAuthority =
     | 'TITLE_XXI'
 
 type StateContact = {
-    name: String
-    titleRole: String
-    email: String
+    name: string
+    titleRole: string
+    email: string
 }
 
 type RateType = 'NEW' | 'AMENDMENT'
