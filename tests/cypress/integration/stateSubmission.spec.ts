@@ -572,6 +572,7 @@ describe('State Submission', () => {
                     'not.exist'
                 )
 
+                cy.findByRole('heading', { level: 1, name: /Dashboard/ })
                 cy.findByTestId('file-input-input').attachFile(
                     'documents/trussel-guide.pdf'
                 )
