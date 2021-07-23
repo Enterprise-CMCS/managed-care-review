@@ -59,6 +59,7 @@ export function mockDraft(): DraftSubmission {
         rateDateEnd: null,
         rateDateCertified: null,
         rateAmendmentInfo: null,
+        stateContacts: [],
     }
 }
 
@@ -88,6 +89,13 @@ export function mockCompleteDraft(): DraftSubmission {
         rateDateEnd: new Date(),
         rateDateCertified: new Date(),
         rateAmendmentInfo: null,
+        stateContacts: [
+            {
+                name: 'Test Person',
+                titleRole: 'A Role',
+                email: 'test@test.com',
+            }
+        ],
     }
 }
 
@@ -117,6 +125,7 @@ function mockNewDraft(): DraftSubmission {
         rateDateStart: null,
         rateDateEnd: null,
         rateDateCertified: null,
+        stateContacts: [],
     }
 }
 
@@ -148,6 +157,11 @@ export function mockStateSubmission(): StateSubmission {
         rateDateEnd: new Date(),
         rateDateCertified: new Date(),
         rateAmendmentInfo: null,
+        stateContacts: [{
+            name: 'Test Person',
+            titleRole: 'A Role',
+            email: 'test@test.com',
+        }]
     }
 }
 

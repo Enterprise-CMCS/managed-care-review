@@ -278,7 +278,7 @@ export const Documents = ({
                             onClick={async (e) => {
                                 await handleFormSubmit({
                                     shouldValidate: false,
-                                    redirectPath: 'rate-details',
+                                    redirectPath: 'contacts',
                                 })(e)
                             }}
                         >

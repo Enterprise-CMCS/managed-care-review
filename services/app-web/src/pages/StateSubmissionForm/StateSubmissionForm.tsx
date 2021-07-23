@@ -22,6 +22,7 @@ import {
 } from '../../constants/routes'
 import { ContractDetails } from './ContractDetails/ContractDetails'
 import { RateDetails } from './RateDetails/RateDetails'
+import { Contacts } from './Contacts/Contacts'
 import { Documents } from './Documents/Documents'
 import { ReviewSubmit } from './ReviewSubmit/ReviewSubmit'
 import { SubmissionType } from './SubmissionType/SubmissionType'
@@ -29,6 +30,7 @@ import { SubmissionType } from './SubmissionType/SubmissionType'
 import {
     DraftSubmission,
     UpdateDraftSubmissionInput,
+    SubmissionType as SubmissionTypeT,
     useUpdateDraftSubmissionMutation,
     useFetchDraftSubmissionQuery,
 } from '../../gen/gqlClient'
@@ -36,20 +38,35 @@ import {
 const GenericFormAlert = () => <Alert type="error">Something went wrong</Alert>
 
 // this Definitely wants to be its own component.
-const DynamicStepIndicator = ({ pathname }: { pathname: string }) => {
-    const formPages = [
+const DynamicStepIndicator = ({
+    submissionType = undefined,
+    pathname,
+}: {
+    submissionType?: SubmissionTypeT
+    pathname: string,
+}): React.ReactElement | null => {
+
+    const FormPages = [
         'SUBMISSIONS_CONTRACT_DETAILS',
         'SUBMISSIONS_RATE_DETAILS',
+        'SUBMISSIONS_CONTACTS',
         'SUBMISSIONS_DOCUMENTS',
         'SUBMISSIONS_REVIEW_SUBMIT',
     ] as RouteT[]
 
-    const currentFormPage = getRouteName(pathname)
 
-    console.log(currentFormPage)
+    const currentFormPage = getRouteName(pathname)
 
     let formStepCompleted = true
     let formStepStatus: 'current' | 'complete' | undefined
+
+    // If submission type is contract only, rate details is left out of the step indicator
+    const reachableFormPages = FormPages.filter((formPage) => {
+        return !(
+            submissionType === 'CONTRACT_ONLY' &&
+            formPage === 'SUBMISSIONS_RATE_DETAILS'
+        )
+    })
 
     if (currentFormPage === 'SUBMISSIONS_TYPE') {
         return null
@@ -57,7 +74,7 @@ const DynamicStepIndicator = ({ pathname }: { pathname: string }) => {
         return (
             <>
                 <StepIndicator>
-                    {formPages.map((formPageName) => {
+                    {reachableFormPages.map((formPageName) => {
                         if (formPageName === currentFormPage) {
                             formStepCompleted = false
                             formStepStatus = 'current'
@@ -169,12 +186,18 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
     return (
         <>
-            <DynamicStepIndicator pathname={pathname} />
+            <DynamicStepIndicator submissionType={draft.submissionType} pathname={pathname} />
 
             <GridContainer>
                 <Switch>
                     <Route path={RoutesRecord.SUBMISSIONS_TYPE}>
-                        <SubmissionType draftSubmission={draft} />
+                        <SubmissionType
+                            draftSubmission={draft}
+                            updateDraft={updateDraft}
+                            formAlert={
+                                showFormAlert ? GenericFormAlert() : undefined
+                            }
+                        />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}>
                         <ContractDetails
@@ -187,6 +210,15 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}>
                         <RateDetails
+                            draftSubmission={draft}
+                            updateDraft={updateDraft}
+                            formAlert={
+                                showFormAlert ? GenericFormAlert() : undefined
+                            }
+                        />
+                    </Route>
+                    <Route path={RoutesRecord.SUBMISSIONS_CONTACTS}>
+                        <Contacts
                             draftSubmission={draft}
                             updateDraft={updateDraft}
                             formAlert={

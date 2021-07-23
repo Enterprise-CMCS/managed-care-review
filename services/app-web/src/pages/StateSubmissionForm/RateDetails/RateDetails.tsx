@@ -197,7 +197,7 @@ export const RateDetails = ({
                         defaultProgramID: draftSubmission.programID,
                     })
                 } else {
-                    history.push(`/submissions/${draftSubmission.id}/documents`)
+                    history.push(`/submissions/${draftSubmission.id}/contacts`)
                 }
             }
         } catch (serverError) {

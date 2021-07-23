@@ -7,7 +7,7 @@ describe('State Submission', () => {
             cy.findByText('Dashboard').not('exist')
         })
 
-        it('user can start a new submission and continue with valid input', () => {
+        it('user can start a new contract and rates submission and continue with valid input', () => {
             cy.login()
             cy.findByTestId('dashboardPage').should('exist')
             cy.findByRole('link', { name: 'Start new submission' }).click({
@@ -17,7 +17,9 @@ describe('State Submission', () => {
             cy.findByText('New submission').should('exist')
 
             // Fill out some submission type fields but not all
-            cy.findByLabelText('Contract action only').safeClick()
+            cy.findByLabelText(
+                'Contract action and rate certification'
+            ).safeClick()
             cy.findByRole('combobox', { name: 'Program' }).select('msho')
 
             // Continue button triggers submission type validation
@@ -85,8 +87,34 @@ describe('State Submission', () => {
             cy.findByLabelText('Date certified').type('03/15/2024')
             cy.findAllByTestId('errorMessage').should('have.length', 0)
 
-            // Continue button navigates to documents page
+            // Continue button navigates to state contacts page
             cy.navigateForm('Continue')
+            cy.findByText(/MN-MSHO-/).should('exist')
+            cy.findByTestId('state-contacts').should('exist')
+
+            cy.findByTestId('step-indicator')
+                .findAllByText('Contacts')
+                .should('have.length', 2)
+
+            // fill out state contacts
+            cy.findByLabelText('Name').type('Test Person')
+            cy.findByLabelText('Title/Role').type('Fancy Title')
+            cy.findByLabelText('Email').type('test@test.com')
+
+            // add additional state contact
+            cy.findByRole('button', {
+                name: 'Add state contact',
+            }).safeClick()
+
+            // add second state contact
+            cy.findAllByLabelText('Name').eq(1).type('Test Person')
+            cy.findAllByLabelText('Title/Role').eq(1).type('Fancy Title')
+            cy.findAllByLabelText('Email').eq(1).type('test@test.com')
+
+            // Continue button navigates to documents page
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).safeClick()
 
             cy.findByText(/MN-MSHO-/).should('exist')
             cy.findByTestId('file-input-input').should('exist')
@@ -182,27 +210,11 @@ describe('State Submission', () => {
 
         it('user can start a new submission and see it on the dashboard', () => {
             cy.login()
-            cy.findByTestId('dashboardPage').should('exist')
-            cy.findByRole('link', { name: 'Start new submission' }).click({
-                force: true,
-            })
-            cy.location('pathname').should('eq', '/submissions/new')
-            cy.findByText('New submission').should('exist')
-
-            cy.findByLabelText('Contract action only').safeClick()
-            cy.findByRole('combobox', { name: 'Program' }).select('msho')
-
-            cy.findByRole('textbox', { name: 'Submission description' })
-                .should('exist')
-                .type('description of submission')
-
-            cy.findByRole('button', {
-                name: 'Continue',
-            }).safeClick()
+            cy.startNewContractOnlySubmission()
 
             // This will break eventually, but is fixing a weird bug in CI where the heading hasn't been
             // updated with the Submission.name even though we can see 'Contract details'
-            cy.findByText(/^MN-MSHO-/).should('exist')
+            cy.findByText(/^MN-PMAP-/).should('exist')
 
             // see that the submission appears on the dashboard
             cy.findByTestId('submission-name')
@@ -220,30 +232,11 @@ describe('State Submission', () => {
                 })
         })
 
-        it('user can edit a draft contract only submission', () => {
+        it('user can switch a draft contract and rates submission to be contract only', () => {
             cy.login()
-
-            // Add a new contract only submission
-            cy.findByRole('link', { name: 'Start new submission' }).click({
-                force: true,
-            })
-            cy.findByLabelText(
-                'Contract action and rate certification'
-            ).safeClick()
-            cy.findByRole('textbox', { name: 'Submission description' })
-                .should('exist')
-                .type('description of submission')
-            cy.findByRole('button', {
-                name: 'Continue',
-            }).safeClick()
-
-            // Check Step Indicator loads with Contract Details heading
-            cy.findByTestId('step-indicator')
-                .findAllByText('Contract Details')
-                .should('have.length', 2)
+            cy.startNewContractAndRatesSubmission()
 
             // Fill out contract details
-            cy.findByText(/MN-MSHO-/).should('exist')
             cy.findByLabelText('Base contract').safeClick()
             cy.findByLabelText('Start date').type('04/01/2024')
             cy.findByLabelText('End date').type('03/31/2025').blur()
@@ -253,21 +246,32 @@ describe('State Submission', () => {
 
             cy.navigateForm('Continue')
 
+            //Add rate details
             cy.findByLabelText('New rate certification').safeClick()
-            cy.findByLabelText('Start date').type('02/29/2024')
-            cy.findByLabelText('End date').type('02/28/2025')
+            cy.findByLabelText('Start date').type('04/01/2024')
+            cy.findByLabelText('End date').type('03/31/2025')
             cy.findByLabelText('Date certified').type('03/01/2024')
 
+            // Continue button navigates to state contacts page
             cy.navigateForm('Continue')
+
+            // fill out state contacts
+            cy.findByLabelText('Name').type('Test Person')
+            cy.findByLabelText('Title/Role').type('Fancy Title')
+            cy.findByLabelText('Email').type('test@test.com')
+
+            // Continue button navigates to documents page
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).safeClick()
 
             // Add documents
             cy.findByRole('progressbar', { name: 'Loading' }).should(
                 'not.exist'
             )
-
             cy.findByTestId('documents-hint').should(
                 'contain.text',
-                'Must include: An executed contract and a signed rate certification'
+                'Must include: An executed contract'
             )
             cy.findByTestId('file-input-input').attachFile(
                 'documents/trussel-guide.pdf'
@@ -297,7 +301,7 @@ describe('State Submission', () => {
             )
             cy.findByRole('textbox', { name: 'Submission description' }).should(
                 'have.value',
-                'description of submission'
+                'description of rates submission'
             )
             cy.findByLabelText('Contract action only').safeClick()
             cy.navigateForm('Continue')
@@ -307,7 +311,7 @@ describe('State Submission', () => {
                 .findAllByText('Contract Details')
                 .should('have.length', 2)
 
-            cy.findByText(/MN-MSHO-/).should('exist')
+            cy.findByText(/MN-PMAP/).should('exist')
             cy.findByLabelText('Base contract').should('be.checked')
             cy.findByLabelText('Start date').clear()
             cy.findByLabelText('Start date').type('04/15/2024')
@@ -317,15 +321,16 @@ describe('State Submission', () => {
                 name: 'Continue',
             }).safeClick()
 
-            //Change rate details
-            cy.findByLabelText('New rate certification').safeClick()
-            cy.findByLabelText('Start date').clear()
-            cy.findByLabelText('Start date').type('04/01/2024')
-            cy.findByLabelText('End date').clear()
-            cy.findByLabelText('End date').type('03/31/2025')
-            cy.findByLabelText('Date certified').clear()
-            cy.findByLabelText('Date certified').type('03/01/2024')
-            cy.navigateForm('Continue')
+            // change state contacts
+            cy.findByLabelText('Name').clear()
+            cy.findByLabelText('Name').type('Different Person')
+
+            cy.findByLabelText('Email').clear()
+            cy.findByLabelText('Email').type('test2@test.com')
+
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).safeClick()
 
             // Check that documents loads with correct data
             cy.findByRole('heading', { name: /Documents/ })
@@ -336,22 +341,9 @@ describe('State Submission', () => {
             cy.findByText('trussel-guide.pdf').should('exist')
         })
 
-        it('user can edit a draft contract and rates submission', () => {
+        it('user can edit a contact only submission', () => {
             cy.login()
-
-            // Add a new submission (use default selected program)
-            cy.findByRole('link', { name: 'Start new submission' }).click({
-                force: true,
-            })
-            cy.findByLabelText('Contract action only').safeClick()
-            cy.findByRole('textbox', { name: 'Submission description' })
-                .should('exist')
-                .type('description of submission')
-            cy.findByRole('button', {
-                name: 'Continue',
-            }).safeClick()
-
-            // Shows step indicator
+            cy.startNewContractOnlySubmission()
             cy.findByTestId('step-indicator').should('exist')
 
             // Get draft submission id and navigate back to submission type form to edit existing draft
@@ -366,16 +358,16 @@ describe('State Submission', () => {
             cy.findByText('404 / Page not found').should('not.exist')
             cy.findByRole('combobox', { name: 'Program' }).should(
                 'have.value',
-                'msho'
+                'pmap'
             )
             cy.findByLabelText('Contract action only').should('be.checked')
             cy.findByRole('textbox', { name: 'Submission description' }).should(
                 'have.value',
-                'description of submission'
+                'description of contract only submission'
             )
         })
 
-        it('user can add a draft contract submission with a rates amendment', () => {
+        it('user can add a rates amendment', () => {
             cy.login()
             cy.startNewContractOnlySubmission()
 
@@ -436,28 +428,10 @@ describe('State Submission', () => {
 
         it('user can complete a submission, load dashboard with default program, and see submission summary', () => {
             cy.login()
-            cy.findByTestId('dashboardPage').should('exist')
-            cy.findByRole('link', { name: 'Start new submission' }).click({
-                force: true,
-            })
-            cy.location('pathname').should('eq', '/submissions/new')
-            cy.findByText('New submission').should('exist')
-
-            cy.findByLabelText('Contract action only').safeClick()
-            cy.findByRole('combobox', { name: 'Program' }).select('pmap')
-
-            cy.findByRole('textbox', { name: 'Submission description' })
-                .should('exist')
-                .type('description of submission')
-
-            cy.findByRole('button', {
-                name: 'Continue',
-            }).safeClick()
-
-            cy.findByText(/^MN-PMAP-/).should('exist')
+            cy.startNewContractAndRatesSubmission()
 
             // Fill out contract details
-            cy.findByLabelText('Base contract').should('exist').safeClick()
+            cy.findByLabelText('Base contract').safeClick()
             cy.findByLabelText('Start date').type('04/01/2024')
             cy.findByLabelText('End date').type('03/31/2025').blur()
             cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
@@ -471,6 +445,16 @@ describe('State Submission', () => {
             cy.findByLabelText('End date').type('02/28/2025')
             cy.findByLabelText('Date certified').type('03/01/2024')
             cy.navigateForm('Continue')
+
+            // Fill out state contact details
+            cy.findByLabelText('Name').type('Test Person')
+            cy.findByLabelText('Title/Role').type('Fancy Title')
+            cy.findByLabelText('Email').type('test@test.com')
+
+            // Continue button navigates to documents page
+            cy.findByRole('button', {
+                name: 'Continue',
+            }).safeClick()
 
             // Add documents
             cy.findByTestId('file-input-input').attachFile(
@@ -504,7 +488,7 @@ describe('State Submission', () => {
             cy.findByText('Dashboard').should('exist')
             cy.findByText('PMAP').should('exist')
 
-            // Link to submission summary
+            // View submission summary
             cy.location().then((loc) => {
                 expect(loc.search).to.match(/.*justSubmitted=*/)
                 const submissionName = loc.search.split('=').pop()
@@ -517,12 +501,14 @@ describe('State Submission', () => {
                 cy.findByRole('heading', {
                     name: `Minnesota ${submissionName}`,
                 }).should('exist')
+                cy.findByText('Rate details').should('exist')
+                cy.findByText('New rate certification').should('exist')
+                cy.findByText('02/29/2024 - 02/28/2025').should('exist')
 
                 // Link back to dashboard, submission visible in default program
                 cy.findByText('Back to state dashboard').should('exist').click()
                 cy.findByText('Dashboard').should('exist')
                 cy.findByText('PMAP').should('exist')
-                cy.findByText(submissionName).should('exist')
             })
         })
     })

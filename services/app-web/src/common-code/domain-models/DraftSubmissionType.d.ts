@@ -33,6 +33,12 @@ type FederalAuthority =
     | 'BENCHMARK'
     | 'TITLE_XXI'
 
+type StateContact = {
+    name: String
+    titleRole: String
+    email: String
+}
+
 type RateType = 'NEW' | 'AMENDMENT'
 
 // CLIENT_SIDE ONLY TYPES
@@ -67,6 +73,7 @@ type DraftSubmissionType = {
     submissionType: SubmissionType
     createdAt: Date
     updatedAt: DateTime
+    stateContacts: StateContact[]
     documents: SubmissionDocument[]
     contractType?: ContractType
     contractDateStart?: Date
@@ -85,6 +92,7 @@ export type {
     SubmissionType,
     SubmissionDocument,
     RateType,
+    StateContact,
     ContractType,
     FederalAuthority,
     ManagedCareEntity,

@@ -1,14 +1,17 @@
 import { DraftSubmissionType } from './DraftSubmissionType'
 import { StateSubmissionType } from './StateSubmissionType'
 
-const isContractOnly = (sub: DraftSubmissionType): boolean =>
-    sub.submissionType === 'CONTRACT_ONLY'
+const isContractOnly = (
+    sub: DraftSubmissionType | StateSubmissionType
+): boolean => sub.submissionType === 'CONTRACT_ONLY'
 
-const isContractAndRates = (sub: DraftSubmissionType): boolean =>
-    sub.submissionType === 'CONTRACT_AND_RATES'
+const isContractAndRates = (
+    sub: DraftSubmissionType | StateSubmissionType
+): boolean => sub.submissionType === 'CONTRACT_AND_RATES'
 
-const isRateAmendment = (sub: StateSubmissionType): boolean =>
-    sub.rateType === 'AMENDMENT'
+const isRateAmendment = (
+    sub: DraftSubmissionType | StateSubmissionType
+): boolean => sub.rateType === 'AMENDMENT'
 
 const hasValidContract = (sub: StateSubmissionType): boolean =>
     sub.contractType !== undefined &&
@@ -20,22 +23,25 @@ const hasValidContract = (sub: StateSubmissionType): boolean =>
     sub.federalAuthorities.length !== 0
 
 const hasValidRates = (sub: StateSubmissionType): boolean => {
-    if (sub.submissionType === 'CONTRACT_ONLY') return true
-
     const validBaseRate =
         sub.rateType !== undefined &&
         sub.rateDateCertified !== undefined &&
         sub.rateDateStart !== undefined &&
         sub.rateDateEnd !== undefined
 
-    return isRateAmendment(sub)
-        ? validBaseRate &&
-              Boolean(
-                  sub.rateAmendmentInfo &&
-                      sub.rateAmendmentInfo.effectiveDateEnd &&
-                      sub.rateAmendmentInfo.effectiveDateStart
-              )
-        : validBaseRate
+    // Contract only should have no rate fields
+    if (sub.submissionType === 'CONTRACT_ONLY') {
+        return !validBaseRate ? true : false
+    } else {
+        return isRateAmendment(sub)
+            ? validBaseRate &&
+                  Boolean(
+                      sub.rateAmendmentInfo &&
+                          sub.rateAmendmentInfo.effectiveDateEnd &&
+                          sub.rateAmendmentInfo.effectiveDateStart
+                  )
+            : validBaseRate
+    }
 }
 
 const hasValidDocuments = (sub: StateSubmissionType): boolean =>

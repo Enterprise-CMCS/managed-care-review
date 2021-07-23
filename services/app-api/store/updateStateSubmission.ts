@@ -39,6 +39,8 @@ export async function updateStateSubmission(
         storeSubmission.documents.push(storeDocument)
     })
 
+    storeSubmission.stateContacts = stateSubmission.stateContacts
+
     storeSubmission.contractType = stateSubmission.contractType
     storeSubmission.contractDateStart = stateSubmission.contractDateStart
     storeSubmission.contractDateEnd = stateSubmission.contractDateEnd
