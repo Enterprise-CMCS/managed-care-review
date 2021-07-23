@@ -13,3 +13,15 @@
 import './commands'
 import './login'
 import './newSubmission'
+
+declare global {
+    namespace Cypress {
+        interface Chainable<Subject = any> {
+            login(): void
+            safeClick(): void
+            navigateForm(buttonName: string): Chainable<Element>
+            startNewContractAndRatesSubmission()
+            startNewContractOnlySubmission()
+        }
+    }
+}
