@@ -4,6 +4,7 @@ frameworkVersion: '2'
 
 plugins:
   - serverless-s3-local
+  - serverless-stack-termination-protection
 
 # The `provider` block defines where your service will be deployed
 provider:
@@ -21,6 +22,12 @@ custom:
       - local-uploads # This is a little silly, but I've spent enough time on it.
         # the serverless-s3-local plugin starts any bucket with a BucketName
         # the attachments bucket has no name, so we need to make one up on our own
+  serverlessTerminationProtection:
+    stages:
+      - dev
+      - val
+      - prod
+      - main
 
 resources:
   Resources:
