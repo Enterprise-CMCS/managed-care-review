@@ -9,6 +9,7 @@ provider:
 
 plugins:
   - serverless-dynamodb-local
+  - serverless-stack-termination-protection
 
 custom:
   stage: ${opt:stage, self:provider.stage}
@@ -22,6 +23,12 @@ custom:
       port: 8000
       inMemory: true
       migrate: true
+  serverlessTerminationProtection:
+    stages:
+      - dev
+      - val
+      - prod
+      - main
 
 resources:
   Resources:
