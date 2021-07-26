@@ -5,7 +5,7 @@ import { spawnSync } from 'child_process'
 // This is a node script that tests stage_name_for_branch
 
 function testStageNames() {
-    // Rules:
+    // The Rules:
     // 1. Only lowercase alphanumeric characters and hyphens
     // 2. Minimum of 3 characters and maximum of 30
     // 3. First character must be a letter, cannot end with a hyphen or contain two consecutive hyphens
