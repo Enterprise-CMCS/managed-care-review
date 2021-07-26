@@ -2,9 +2,18 @@ service: storybook
 
 frameworkVersion: '2'
 
+plugins:
+  - serverless-stack-termination-protection
+
 custom:
   stage: ${opt:stage, self:provider.stage}
   region: ${opt:region, self:provider.region}
+  serverlessTerminationProtection:
+    stages:
+      - dev
+      - val
+      - prod
+      - main
 
 provider:
   name: aws

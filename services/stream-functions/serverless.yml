@@ -8,6 +8,7 @@ package:
 plugins:
   - serverless-bundle
   - serverless-dotenv-plugin
+  - serverless-stack-termination-protection
 
 custom:
   stage: ${opt:stage, self:provider.stage}
@@ -17,6 +18,12 @@ custom:
   reviewerEmail: ${opt:reviewTeamEmail, env:SES_REVIEW_TEAM_EMAIL_ADDRESS, "reviewteam@example.com"}
   iamPath: ${env:IAM_PATH, "/"}
   iamPermissionsBoundaryPolicy: ${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
+  serverlessTerminationProtection:
+    stages:
+      - dev
+      - val
+      - prod
+      - main
 
 provider:
   name: aws
