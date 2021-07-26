@@ -3,8 +3,6 @@ import React, { useState, useEffect } from 'react'
 import {
     Alert,
     GridContainer,
-    StepIndicator,
-    StepIndicatorStep,
 } from '@trussworks/react-uswds'
 import { Switch, Route, useParams, useLocation } from 'react-router-dom'
 
@@ -12,13 +10,12 @@ import { Error404 } from '../Errors/Error404'
 import { ErrorInvalidSubmissionStatus } from '../Errors/ErrorInvalidSubmissionStatus'
 import { GenericError } from '../Errors/GenericError'
 import { Loading } from '../../components/Loading/'
+import { DynamicStepIndicator } from '../../components/DynamicStepIndicator/'
 import { usePage } from '../../contexts/PageContext'
 import {
     RoutesRecord,
     STATE_SUBMISSION_FORM_ROUTES,
     getRouteName,
-    PageTitlesRecord,
-    RouteT,
 } from '../../constants/routes'
 import { ContractDetails } from './ContractDetails/ContractDetails'
 import { RateDetails } from './RateDetails/RateDetails'
@@ -30,73 +27,11 @@ import { SubmissionType } from './SubmissionType/SubmissionType'
 import {
     DraftSubmission,
     UpdateDraftSubmissionInput,
-    SubmissionType as SubmissionTypeT,
     useUpdateDraftSubmissionMutation,
     useFetchDraftSubmissionQuery,
 } from '../../gen/gqlClient'
 
 const GenericFormAlert = () => <Alert type="error">Something went wrong</Alert>
-
-// this Definitely wants to be its own component.
-const DynamicStepIndicator = ({
-    submissionType = undefined,
-    pathname,
-}: {
-    submissionType?: SubmissionTypeT
-    pathname: string,
-}): React.ReactElement | null => {
-
-    const FormPages = [
-        'SUBMISSIONS_CONTRACT_DETAILS',
-        'SUBMISSIONS_RATE_DETAILS',
-        'SUBMISSIONS_CONTACTS',
-        'SUBMISSIONS_DOCUMENTS',
-        'SUBMISSIONS_REVIEW_SUBMIT',
-    ] as RouteT[]
-
-
-    const currentFormPage = getRouteName(pathname)
-
-    let formStepCompleted = true
-    let formStepStatus: 'current' | 'complete' | undefined
-
-    // If submission type is contract only, rate details is left out of the step indicator
-    const reachableFormPages = FormPages.filter((formPage) => {
-        return !(
-            submissionType === 'CONTRACT_ONLY' &&
-            formPage === 'SUBMISSIONS_RATE_DETAILS'
-        )
-    })
-
-    if (currentFormPage === 'SUBMISSIONS_TYPE') {
-        return null
-    } else {
-        return (
-            <>
-                <StepIndicator>
-                    {reachableFormPages.map((formPageName) => {
-                        if (formPageName === currentFormPage) {
-                            formStepCompleted = false
-                            formStepStatus = 'current'
-                        } else if (formStepCompleted) {
-                            formStepStatus = 'complete'
-                        } else {
-                            formStepStatus = undefined
-                        }
-
-                        return (
-                            <StepIndicatorStep
-                                label={PageTitlesRecord[formPageName]}
-                                status={formStepStatus}
-                                key={PageTitlesRecord[formPageName]}
-                            />
-                        )
-                    })}
-                </StepIndicator>
-            </>
-        )
-    }
-}
 
 export const StateSubmissionForm = (): React.ReactElement => {
     const { id } = useParams<{ id: string }>()
