@@ -23,6 +23,8 @@
 
 branch_name="$1"
 
+>&2 echo "converting $branch_name"
+
 if [ -z "$branch_name" ]; then
     echo "Must pass a branch name as an argument"
     exit 1
@@ -57,5 +59,7 @@ if [[ "$branch_name" = [0-9-]* ]]; then
     echo "can't start with a number"
     exit 1
 fi
+
+>&2 echo "returning $branch_name"
 
 echo "$branch_name"
