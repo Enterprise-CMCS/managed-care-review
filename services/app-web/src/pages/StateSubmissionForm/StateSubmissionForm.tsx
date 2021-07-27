@@ -37,13 +37,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
     const routeConstant = getRouteName(pathname)
     const { updateHeading } = usePage()
     const [showFormAlert, setShowFormAlert] = useState(false)
-    const formPages = [
-        'SUBMISSIONS_CONTRACT_DETAILS',
-        'SUBMISSIONS_RATE_DETAILS',
-        'SUBMISSIONS_CONTACTS',
-        'SUBMISSIONS_DOCUMENTS',
-        'SUBMISSIONS_REVIEW_SUBMIT',
-    ] as RouteT[]
 
     // Set up graphql calls
     const {
@@ -84,6 +77,19 @@ export const StateSubmissionForm = (): React.ReactElement => {
     }
 
     const draft = fetchData?.fetchDraftSubmission?.draftSubmission
+    const formPages = [
+        'SUBMISSIONS_CONTRACT_DETAILS',
+        'SUBMISSIONS_RATE_DETAILS',
+        'SUBMISSIONS_CONTACTS',
+        'SUBMISSIONS_DOCUMENTS',
+        'SUBMISSIONS_REVIEW_SUBMIT',
+    ] as RouteT[]
+    const activeFormPages = formPages.filter((formPage) => {
+        return !(
+            draft?.submissionType === 'CONTRACT_ONLY' &&
+            formPage === 'SUBMISSIONS_RATE_DETAILS'
+        )
+    })
 
     // Set up side effects
     useEffect(() => {
@@ -125,8 +131,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
     return (
         <>
             <DynamicStepIndicator
-                formPages={formPages}
-                submissionType={draft.submissionType}
+                activeFormPages={activeFormPages}
                 pathname={pathname}
             />
 
