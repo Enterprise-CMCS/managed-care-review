@@ -33,21 +33,33 @@ fi
 # translate _ and / into -
 branch_name=${branch_name//[_\/]/-}
 
+>&2 echo "translate $branch_name"
+
 # get rid of special characters
 branch_name=${branch_name//[^a-zA-Z0-9-]/}
+
+>&2 echo "rid $branch_name"
 
 # remove doubled dashes
 # shellcheck disable=SC2001
 branch_name=$(echo "$branch_name" | sed "s/---*/-/g")
 
+>&2 echo "dash $branch_name"
+
 # downcase everything
 branch_name=$(echo "$branch_name" | awk '{print tolower($0)}')
+
+>&2 echo "down $branch_name"
 
 # If it's too long, chop off the end and replace it with a hash of the whole thing
 if [ ${#branch_name} -gt 30 ]; then
     branch_hash=$(echo "$branch_name" | openssl sha1)
 
+    >&2 echo "hash $branch_hash"
+
     branch_name="${branch_name:0:24}-${branch_hash:0:5}"
+
+    >&2 echo "combined $branch_name"
 
     # remove doubled dashes, again
     # shellcheck disable=SC2001
