@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react'
 
-import {
-    Alert,
-    GridContainer,
-} from '@trussworks/react-uswds'
+import { Alert, GridContainer } from '@trussworks/react-uswds'
 import { Switch, Route, useParams, useLocation } from 'react-router-dom'
 
 import { Error404 } from '../Errors/Error404'
@@ -16,6 +13,7 @@ import {
     RoutesRecord,
     STATE_SUBMISSION_FORM_ROUTES,
     getRouteName,
+    RouteT,
 } from '../../constants/routes'
 import { ContractDetails } from './ContractDetails/ContractDetails'
 import { RateDetails } from './RateDetails/RateDetails'
@@ -39,6 +37,13 @@ export const StateSubmissionForm = (): React.ReactElement => {
     const routeConstant = getRouteName(pathname)
     const { updateHeading } = usePage()
     const [showFormAlert, setShowFormAlert] = useState(false)
+    const formPages = [
+        'SUBMISSIONS_CONTRACT_DETAILS',
+        'SUBMISSIONS_RATE_DETAILS',
+        'SUBMISSIONS_CONTACTS',
+        'SUBMISSIONS_DOCUMENTS',
+        'SUBMISSIONS_REVIEW_SUBMIT',
+    ] as RouteT[]
 
     // Set up graphql calls
     const {
@@ -53,10 +58,8 @@ export const StateSubmissionForm = (): React.ReactElement => {
         },
     })
 
-    const [
-        updateDraftSubmission,
-        { error: updateError },
-    ] = useUpdateDraftSubmissionMutation()
+    const [updateDraftSubmission, { error: updateError }] =
+        useUpdateDraftSubmissionMutation()
 
     const updateDraft = async (
         input: UpdateDraftSubmissionInput
@@ -121,7 +124,11 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
     return (
         <>
-            <DynamicStepIndicator submissionType={draft.submissionType} pathname={pathname} />
+            <DynamicStepIndicator
+                formPages={formPages}
+                submissionType={draft.submissionType}
+                pathname={pathname}
+            />
 
             <GridContainer>
                 <Switch>

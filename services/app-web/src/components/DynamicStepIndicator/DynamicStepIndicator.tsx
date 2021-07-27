@@ -4,18 +4,12 @@ import { getRouteName, PageTitlesRecord, RouteT } from '../../constants/routes'
 
 import { SubmissionType as SubmissionTypeT } from '../../gen/gqlClient'
 
-const FormPages = [
-    'SUBMISSIONS_CONTRACT_DETAILS',
-    'SUBMISSIONS_RATE_DETAILS',
-    'SUBMISSIONS_CONTACTS',
-    'SUBMISSIONS_DOCUMENTS',
-    'SUBMISSIONS_REVIEW_SUBMIT',
-] as RouteT[]
-
 export const DynamicStepIndicator = ({
+    formPages,
     submissionType,
     pathname,
 }: {
+    formPages: RouteT[]
     submissionType?: SubmissionTypeT
     pathname: string
 }): React.ReactElement | null => {
@@ -24,7 +18,7 @@ export const DynamicStepIndicator = ({
     let formStepCompleted = true
     let formStepStatus: 'current' | 'complete' | undefined
 
-    const activeFormPages = FormPages.filter((formPage) => {
+    const activeFormPages = formPages.filter((formPage) => {
         return !(
             submissionType === 'CONTRACT_ONLY' &&
             formPage === 'SUBMISSIONS_RATE_DETAILS'
