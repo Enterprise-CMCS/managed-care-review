@@ -53,7 +53,14 @@ branch_name=$(echo "$branch_name" | awk '{print tolower($0)}')
 
 # If it's too long, chop off the end and replace it with a hash of the whole thing
 if [ ${#branch_name} -gt 30 ]; then
-    branch_hash=$(echo "$branch_name" | openssl sha1)
+
+    # macOS and Linux use different programs to calculate hashes
+    shabin=sha1sum
+    if [ "$(uname -s)" = "Darwin" ]; then
+        shabin=shasum
+    fi
+
+    branch_hash=$(echo -n "$branch_name" | "$shabin")
 
     >&2 echo "hash $branch_hash"
 

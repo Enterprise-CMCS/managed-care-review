@@ -15,18 +15,18 @@ function testStageNames() {
         ['wml-foo-bar', 'wml-foo-bar'],
         ['mIxEdCaSe', 'mixedcase'],
         ['ch@ra☃️ters', 'chraters'],
-        ['a-very-very-long-so-long-too-long-branch-name', 'a-very-very-long-so-long-95994'],
-        ['dependabot/github_actions/actions/setup-node-2.3.0', 'dependabot-github-action-2eb7e'],
+        ['a-very-very-long-so-long-too-long-branch-name', 'a-very-very-long-so-long-3de28'],
+        ['dependabot/github_actions/actions/setup-node-2.3.0', 'dependabot-github-action-8e1c0'],
         ['this/that', 'this-that'],
         ['under_score', 'under-score'],
         ['under-hyphen-_score', 'under-hyphen-score'],
         ['under__under____score', 'under-under-score'],
         ['thirty-characters-is-just-fine', 'thirty-characters-is-just-fine'],
-        ['thirty-one-is-one-char-too-many', 'thirty-one-is-one-char-t-3f2ff'],
-        ['jf-items-amended-definitions-help', 'jf-items-amended-definit-1695b'],
-        ['jf-contract-rate-details-reorder', 'jf-contract-rate-details-271a1'],
+        ['thirty-one-is-one-char-too-many', 'thirty-one-is-one-char-t-faa2e'],
+        ['jf-items-amended-definitions-help', 'jf-items-amended-definit-8ba2a'],
+        ['jf-contract-rate-details-reorder', 'jf-contract-rate-details-a349e'],
         ['two3four5', 'two3four5'],
-        ['dependabot/npm_and_yarn/testing-library/cypress-8.0.0', 'dependabot-npm-and-yarn-fc069']
+        ['dependabot/npm_and_yarn/testing-library/cypress-8.0.0', 'dependabot-npm-and-yarn-bf9f1']
     ]
 
     const testErrors = []
