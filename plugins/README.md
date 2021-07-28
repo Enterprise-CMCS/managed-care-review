@@ -1,0 +1,1 @@
+These are plugins from the shared [MacPro quickstart](https://github.com/CMSgov/macpro-quickstart-serverless/tree/master/plugins). They have not published these in NPM, so we have to use them as local modules.
