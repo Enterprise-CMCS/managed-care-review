@@ -3,18 +3,53 @@ service: uploads
 frameworkVersion: '2'
 
 plugins:
+  - serverless-plugin-scripts
   - serverless-s3-local
   - serverless-stack-termination-protection
+  - serverless-iam-helper
+  - serverless-s3-bucket-helper
 
 # The `provider` block defines where your service will be deployed
 provider:
   name: aws
   runtime: nodejs12.x
   region: us-east-1
+  iam:
+    role:
+      path: ${env:IAM_PATH, "/"}
+      permissionsBoundary: ${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
+      statements:
+        - Effect: 'Allow'
+          Action:
+            - s3:GetObject
+            - s3:GetObjectTagging
+            - s3:PutObject
+            - s3:PutObjectAcl
+            - s3:PutObjectTagging
+            - s3:PutObjectVersionTagging
+            - s3:ListBucket
+          Resource:
+            - !Sub arn:aws:s3:::${self:service.name}-${self:custom.stage}-attachments-${AWS::AccountId}/*
+            - !Sub arn:aws:s3:::${self:service.name}-${self:custom.stage}-avscan-${AWS::AccountId}/*
+        - Effect: 'Allow'
+          Action:
+            - s3:ListBucket
+          Resource:
+            - !Sub arn:aws:s3:::${self:service.name}-${self:custom.stage}-attachments-${AWS::AccountId}
+            - !Sub arn:aws:s3:::${self:service.name}-${self:custom.stage}-avscan-${AWS::AccountId}/*
 
 custom:
   stage: ${opt:stage, self:provider.stage}
   region: ${opt:region, self:provider.region}
+  scripts:
+    hooks:
+      # This script is run locally when running 'serverless deploy'
+      package:initialize: |
+        set -e
+        curl -L --output lambda_layer.zip https://github.com/CMSgov/lambda-clamav-layer/releases/download/0.5/lambda_layer.zip
+      deploy:finalize: |
+        rm lambda_layer.zip
+        serverless invoke --stage ${self:custom.stage} --function avDownloadDefinitions -t Event
   s3:
     directory: ./local_buckets
     cors: ./local_cors.xml
@@ -28,6 +63,34 @@ custom:
       - val
       - prod
       - main
+
+layers:
+  clamDefs:
+    package:
+      artifact: lambda_layer.zip
+
+functions:
+  avScan:
+    handler: src/antivirus.lambdaHandleEvent
+    name: ${self:service.name}-${self:custom.stage}-avScan
+    timeout: 300 # 300 seconds = 5 minutes. Average scan is 25 seconds.
+    memorySize: 3008
+    layers:
+      - !Ref ClamDefsLambdaLayer
+    environment:
+      CLAMAV_BUCKET_NAME: !Ref ClamDefsBucket
+      PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions'
+  avDownloadDefinitions:
+    handler: src/download-definitions.lambdaHandleEvent
+    events:
+      - schedule: cron(0 */6 * * ? *)
+    timeout: 300 # 300 seconds = 5 minutes
+    memorySize: 1024
+    layers:
+      - !Ref ClamDefsLambdaLayer
+    environment:
+      CLAMAV_BUCKET_NAME: !Ref ClamDefsBucket
+      PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions'
 
 resources:
   Resources:
@@ -68,6 +131,23 @@ resources:
                 - !Sub ${DocumentUploadsBucket.Arn}/*.txt
                 - !Sub ${DocumentUploadsBucket.Arn}/*.xls
                 - !Sub ${DocumentUploadsBucket.Arn}/*.xlsx
+    LambdaInvokePermission:
+      Type: AWS::Lambda::Permission
+      Properties:
+        FunctionName: !GetAtt AvScanLambdaFunction.Arn
+        Action: lambda:InvokeFunction
+        Principal: s3.amazonaws.com
+        SourceAccount: !Sub ${AWS::AccountId}
+        SourceArn: !Sub arn:aws:s3:::${self:service.name}-${self:custom.stage}-attachments-${AWS::AccountId}
+    ClamDefsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: !Sub ${self:service.name}-${self:custom.stage}-avscan-${AWS::AccountId}
+        BucketEncryption:
+          ServerSideEncryptionConfiguration:
+            - ServerSideEncryptionByDefault:
+                SSEAlgorithm: AES256
+        AccessControl: Private
 
   Outputs:
     DocumentUploadsBucketName:
