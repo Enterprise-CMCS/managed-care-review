@@ -114,12 +114,26 @@ resources:
                 - DELETE
                 - HEAD
               MaxAge: 3000
+        NotificationConfiguration:
+          LambdaConfigurations:
+            - Event: s3:ObjectCreated:Put
+              Function: !GetAtt AvScanLambdaFunction.Arn
     DocumentsUploadsBucketPolicy:
       Type: AWS::S3::BucketPolicy
       Properties:
         Bucket: !Ref DocumentUploadsBucket
         PolicyDocument:
           Statement:
+            - Action:
+                - 's3:GetObject'
+              Effect: 'Deny'
+              Resource: !Sub ${DocumentUploadsBucket.Arn}/*
+              Principal: '*'
+              Condition:
+                StringNotEquals:
+                  s3:ExistingObjectTag/virusScanStatus:
+                    - 'CLEAN'
+                  aws:PrincipalArn: !GetAtt IamRoleLambdaExecution.Arn
             - Action: 's3:PutObject'
               Effect: Deny
               Principal: '*'
@@ -138,7 +152,7 @@ resources:
         Action: lambda:InvokeFunction
         Principal: s3.amazonaws.com
         SourceAccount: !Sub ${AWS::AccountId}
-        SourceArn: !Sub arn:aws:s3:::${self:service.name}-${self:custom.stage}-attachments-${AWS::AccountId}
+        SourceArn: !Sub ${DocumentUploadsBucket.Arn}
     ClamDefsBucket:
       Type: AWS::S3::Bucket
       Properties:
