@@ -154,7 +154,7 @@ resources:
         Action: lambda:InvokeFunction
         Principal: s3.amazonaws.com
         SourceAccount: !Sub ${AWS::AccountId}
-        SourceArn: !Sub ${DocumentUploadsBucket.Arn}
+        SourceArn: !Sub arn:aws:s3:::${self:service.name}-${self:custom.stage}-uploads-${AWS::AccountId}
     ClamDefsBucket:
       Type: AWS::S3::Bucket
       Properties:
