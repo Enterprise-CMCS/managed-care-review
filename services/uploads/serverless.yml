@@ -119,6 +119,7 @@ resources:
           LambdaConfigurations:
             - Event: s3:ObjectCreated:Put
               Function: !GetAtt AvScanLambdaFunction.Arn
+      DependsOn: LambdaInvokePermission
     DocumentsUploadsBucketPolicy:
       Type: AWS::S3::BucketPolicy
       Properties:
