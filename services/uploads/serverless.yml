@@ -97,6 +97,7 @@ resources:
     DocumentUploadsBucket:
       Type: AWS::S3::Bucket
       Properties:
+        BucketName: !Sub ${self:service.name}-${self:custom.stage}-uploads-${AWS::AccountId}
         BucketEncryption:
           ServerSideEncryptionConfiguration:
             - ServerSideEncryptionByDefault:
@@ -156,6 +157,7 @@ resources:
     ClamDefsBucket:
       Type: AWS::S3::Bucket
       Properties:
+        BucketName: !Sub ${self:service.name}-${self:custom.stage}-avscan-${AWS::AccountId}
         BucketEncryption:
           ServerSideEncryptionConfiguration:
             - ServerSideEncryptionByDefault:
