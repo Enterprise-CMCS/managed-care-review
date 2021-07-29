@@ -16,8 +16,8 @@ provider:
   region: us-east-1
   iam:
     role:
-      path: ${env:IAM_PATH, "/"}
-      permissionsBoundary: ${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
+      path: ${self:custom.iamPath}
+      premissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy${self:custom.iamPermissionsBoundaryPolicy}
       statements:
         - Effect: 'Allow'
           Action:
@@ -41,6 +41,8 @@ provider:
 custom:
   stage: ${opt:stage, self:provider.stage}
   region: ${opt:region, self:provider.region}
+  iamPermissionsBoundaryPolicy: ${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
+  iamPath: ${env:IAM_PATH, "/"}
   scripts:
     hooks:
       # This script is run locally when running 'serverless deploy'
