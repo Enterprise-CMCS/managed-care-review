@@ -8,7 +8,7 @@ fi
 stage=$1
 
 # A list of protected/important branches/environments/stages.
-protected_stage_regex="(^main$|^val$|^production)"
+protected_stage_regex="(^main$|^val$|^prod)"
 if [[ $stage =~ $protected_stage_regex ]] ; then
     echo """
       ---------------------------------------------------------------------------------------------
