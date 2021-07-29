@@ -35,7 +35,7 @@ provider:
           Action:
             - s3:ListBucket
           Resource:
-            - !Sub ${self:service.name}-${self:custom.stage}-uploads-${AWS::AccountId}/*
+            - !Sub ${self:service.name}-${self:custom.stage}-uploads-${AWS::AccountId}
             - !Sub ${self:service.name}-${self:custom.stage}-avscan-${AWS::AccountId}/*
 
 custom:
