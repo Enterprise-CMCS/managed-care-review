@@ -9,3 +9,8 @@ updates:
     directory: '/'
     schedule:
       interval: 'weekly'
+
+  - package-ecosystem: 'npm'
+    directory: '/tests/nightwatch'
+    schedule:
+      interval: 'weekly'
