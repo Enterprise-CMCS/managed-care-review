@@ -591,6 +591,8 @@ describe('State Submission', () => {
                 const draftSubmissionId = pathname.split('/')[2]
                 cy.visit(`/submissions/${draftSubmissionId}/documents`)
 
+                cy.log("trying to drag a bad file in")
+
                 // Drop invalid files and invalid type message appears
                 cy.findByTestId('file-input-droptarget')
                     .should('exist')
@@ -598,6 +600,8 @@ describe('State Submission', () => {
                         subjectType: 'drag-n-drop',
                         force: true,
                     })
+
+                cy.log("dragged a bad file in")
                 cy.findByTestId('file-input-error').should(
                     'have.text',
                     'This is not a valid file type.'
