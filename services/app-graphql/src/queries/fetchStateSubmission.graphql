@@ -19,6 +19,11 @@ query fetchStateSubmission($input: FetchStateSubmissionInput!) {
                 titleRole
                 email
             }
+            actuaryContacts {
+                name
+                titleRole
+                email
+            }
             documents {
                 name
                 s3URL

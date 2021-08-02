@@ -22,10 +22,10 @@ import { updatesFromSubmission, stripTypename } from '../updateSubmissionTransfo
 import { MCRouterState } from '../../../constants/routerState'
 
 export interface ContactsFormValues {
-    stateContacts: StateContactValue[]
+    stateContacts: ContactValue[]
 }
 
-export interface StateContactValue {
+export interface ContactValue {
     name: string
     titleRole: string
     email: string
@@ -50,7 +50,7 @@ type FormError = FormikErrors<ContactsFormValues>[keyof FormikErrors<ContactsFor
 // for a given field when we pass it through showFieldErrors
 // so this makes sure we return the actual error and if its
 // anything else we return undefined to not show it
-const stateContactErrorHandling = (error: string | FormikErrors<StateContactValue> | undefined) : FormikErrors<StateContactValue> | undefined => {
+const stateContactErrorHandling = (error: string | FormikErrors<ContactValue> | undefined) : FormikErrors<ContactValue> | undefined => {
 
     if (typeof(error) === 'string') {
         return undefined
@@ -83,18 +83,18 @@ export const Contacts = ({
 
     const stateContacts = stripTypename(draftSubmission.stateContacts)
 
-    const emptyStateContact = {
+    const emptyContact = {
         name: '',
         titleRole: '',
         email: '',
     }
 
     if (stateContacts.length === 0) {
-        stateContacts.push(emptyStateContact)
+        stateContacts.push(emptyContact)
     }
 
     const contactsInitialValues: ContactsFormValues = {
-      stateContacts: stateContacts
+      stateContacts: stateContacts,
     }
 
     // Handler for Contacts legends so that contacts show up as
@@ -257,7 +257,7 @@ export const Contacts = ({
                                           type="button"
                                           outline
                                           className={styles.addContactBtn}
-                                          onClick={() => push(emptyStateContact)}
+                                          onClick={() => push(emptyContact)}
                                         >
                                         Add state contact
                                         </Button>

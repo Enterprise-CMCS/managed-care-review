@@ -50,6 +50,7 @@ function updatesFromSubmission(draft: DraftSubmission): DraftSubmissionUpdates {
         rateDateCertified: draft.rateDateCertified,
         rateAmendmentInfo: stripTypename(draft.rateAmendmentInfo),
         stateContacts: stripTypename(draft.stateContacts),
+        actuaryContacts: stripTypename(draft.actuaryContacts),
     }
 }
 

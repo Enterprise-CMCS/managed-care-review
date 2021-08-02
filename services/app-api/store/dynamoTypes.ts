@@ -10,6 +10,7 @@ import {
     SubmissionType,
     FederalAuthority,
     StateContact,
+    ActuaryContact,
     DraftSubmissionType,
     StateSubmissionType,
     SubmissionUnionType,
@@ -204,6 +205,9 @@ export class SubmissionStoreType {
     @attribute()
     stateContacts: Array<StateContact>
 
+    @attribute()
+    actuaryContacts: Array<ActuaryContact>
+
     @attribute({ memberType: embed(DocumentStoreT) })
     documents: Array<DocumentStoreT>
 
@@ -224,6 +228,7 @@ export class SubmissionStoreType {
         this.programID = ''
         this.stateNumber = -1
         this.stateContacts = []
+        this.actuaryContacts = []
         this.documents = []
         this.contractType = undefined
         this.contractDateStart = undefined

@@ -39,6 +39,12 @@ type StateContact = {
     email: string
 }
 
+type ActuaryContact = {
+  name: string
+  titleRole: string
+  email: string
+}
+
 type RateType = 'NEW' | 'AMENDMENT'
 
 // CLIENT_SIDE ONLY TYPES
@@ -74,6 +80,7 @@ type DraftSubmissionType = {
     createdAt: Date
     updatedAt: DateTime
     stateContacts: StateContact[]
+    actuaryContacts: ActuaryContact[]
     documents: SubmissionDocument[]
     contractType?: ContractType
     contractDateStart?: Date
@@ -93,6 +100,7 @@ export type {
     SubmissionDocument,
     RateType,
     StateContact,
+    ActuaryContact,
     ContractType,
     FederalAuthority,
     ManagedCareEntity,

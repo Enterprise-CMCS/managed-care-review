@@ -114,6 +114,7 @@ const createAndUpdateTestDraftSubmission = async (
                 email: 'email@test.com',
             }
         ],
+        actuaryContacts: [],
         contractType: 'BASE' as const,
         contractDateStart: startDate,
         contractDateEnd: endDate,
