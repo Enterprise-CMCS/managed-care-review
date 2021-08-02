@@ -31,6 +31,24 @@ import {
 
 const GenericFormAlert = () => <Alert type="error">Something went wrong</Alert>
 
+const activeFormPages = (draft: DraftSubmission): RouteT[] => {
+    const allFormPages = [
+        'SUBMISSIONS_CONTRACT_DETAILS',
+        'SUBMISSIONS_RATE_DETAILS',
+        'SUBMISSIONS_CONTACTS',
+        'SUBMISSIONS_DOCUMENTS',
+        'SUBMISSIONS_REVIEW_SUBMIT',
+    ] as RouteT[]
+
+    return allFormPages.filter(
+        (formPage) =>
+            !(
+                draft?.submissionType === 'CONTRACT_ONLY' &&
+                formPage === 'SUBMISSIONS_RATE_DETAILS'
+            )
+    )
+}
+
 export const StateSubmissionForm = (): React.ReactElement => {
     const { id } = useParams<{ id: string }>()
     const { pathname } = useLocation()
@@ -77,19 +95,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
     }
 
     const draft = fetchData?.fetchDraftSubmission?.draftSubmission
-    const formPages = [
-        'SUBMISSIONS_CONTRACT_DETAILS',
-        'SUBMISSIONS_RATE_DETAILS',
-        'SUBMISSIONS_CONTACTS',
-        'SUBMISSIONS_DOCUMENTS',
-        'SUBMISSIONS_REVIEW_SUBMIT',
-    ] as RouteT[]
-    const activeFormPages = formPages.filter((formPage) => {
-        return !(
-            draft?.submissionType === 'CONTRACT_ONLY' &&
-            formPage === 'SUBMISSIONS_RATE_DETAILS'
-        )
-    })
+    const currentFormPage = getRouteName(pathname)
 
     // Set up side effects
     useEffect(() => {
@@ -131,8 +137,8 @@ export const StateSubmissionForm = (): React.ReactElement => {
     return (
         <>
             <DynamicStepIndicator
-                activeFormPages={activeFormPages}
-                pathname={pathname}
+                formPages={activeFormPages(draft)}
+                currentFormPage={currentFormPage}
             />
 
             <GridContainer>

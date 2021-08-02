@@ -1,26 +1,27 @@
 import { StepIndicator, StepIndicatorStep } from '@trussworks/react-uswds'
 
-import { getRouteName, PageTitlesRecord, RouteT } from '../../constants/routes'
+import { PageTitlesRecord, RouteT } from '../../constants/routes'
 
 export const DynamicStepIndicator = ({
-    activeFormPages,
-    pathname,
+    formPages,
+    currentFormPage,
 }: {
-    activeFormPages: RouteT[]
-    pathname: string
+    formPages: RouteT[]
+    currentFormPage: RouteT | 'UNKNOWN_ROUTE'
 }): React.ReactElement | null => {
-    const currentFormPage = getRouteName(pathname)
-
     let formStepCompleted = true
     let formStepStatus: 'current' | 'complete' | undefined
 
-    if (currentFormPage === 'SUBMISSIONS_TYPE') {
+    if (
+        currentFormPage === 'UNKNOWN_ROUTE' ||
+        !formPages.includes(currentFormPage)
+    ) {
         return null
     } else {
         return (
             <>
                 <StepIndicator>
-                    {activeFormPages.map((formPageName) => {
+                    {formPages.map((formPageName) => {
                         if (formPageName === currentFormPage) {
                             formStepCompleted = false
                             formStepStatus = 'current'
