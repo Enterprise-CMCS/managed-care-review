@@ -112,9 +112,15 @@ input StateContactInput {
 }
 
 type ActuaryContact {
-    name: String!
-    titleRole: String!
-    email: String!
+    name: String
+    titleRole: String
+    email: String
+}
+
+input ActuaryContactInput {
+  name: String
+  titleRole: String
+  email: String
 }
 
 type Document {
@@ -204,6 +210,7 @@ type DraftSubmission {
     createdAt: Date!
     updatedAt: DateTime!
     stateContacts: [StateContact!]!
+    actuaryContacts: [ActuaryContact]
     documents: [Document!]!
     contractType: ContractType
     contractDateStart: Date
@@ -229,6 +236,7 @@ type StateSubmission {
     createdAt: Date!
     updatedAt: DateTime!
     stateContacts: [StateContact!]!
+    actuaryContacts: [ActuaryContact]
     documents: [Document!]!
     contractAmendmentInfo: ContractAmendmentInfo
     submittedAt: Date!
@@ -251,6 +259,7 @@ input DraftSubmissionUpdates {
     submissionType: SubmissionType!
     submissionDescription: String!
     stateContacts: [StateContactInput!]!
+    actuaryContacts: [ActuaryContactInput]
     documents: [DocumentInput!]!
     contractType: ContractType
     contractDateStart: Date

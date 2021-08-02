@@ -35,12 +35,12 @@ const StateContactSchema = Yup.object().shape({
     stateContacts: Yup.array()
         .of(Yup.object().shape({
             name: Yup.string()
-                .required('You must enter a name'),
+                .required('You must provide a name'),
             titleRole: Yup.string()
-                .required('You must enter a title/role'),
+                .required('You must provide a title/role'),
             email: Yup.string()
                 .email('You must enter a valid email address')
-                .required('You must enter an email address'),
+                .required('You must provide an email address'),
         }))
 })
 
@@ -164,7 +164,7 @@ export const Contacts = ({
                             <fieldset className="usa-fieldset">
                                 <h3>State contacts</h3>
                                 {formAlert && formAlert}
-                                <p>Enter contact information for the state personnel you'd like to receive all CMS communication about this submission.</p>
+                                <p>Provide contact information for the state personnel you'd like to recieve all CMS communication about this submission.</p>
                                 <legend className="srOnly">State contacts</legend>
                                 {formAlert && formAlert}
 
