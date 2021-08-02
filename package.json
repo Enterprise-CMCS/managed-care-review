@@ -41,6 +41,7 @@
         "nightwatch": "^1.7.7",
         "prettier": "^2.3.2",
         "serverless": "^2.52.1",
+        "serverless-plugin-scripts": "^1.0.2",
         "typescript": "^4.3.5",
         "yargs": "^17.0.1"
     },
