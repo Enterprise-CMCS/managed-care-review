@@ -6,8 +6,6 @@ plugins:
   - serverless-plugin-scripts
   - serverless-s3-local
   - serverless-stack-termination-protection
-  - serverless-iam-helper
-  - serverless-s3-bucket-helper
 
 # The `provider` block defines where your service will be deployed
 provider:
