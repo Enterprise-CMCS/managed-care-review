@@ -2,13 +2,15 @@ import { StepIndicator, StepIndicatorStep } from '@trussworks/react-uswds'
 
 import { PageTitlesRecord, RouteT } from '../../constants/routes'
 
+export type DynamicStepIndicatorProps = {
+    formPages: RouteT[]
+    currentFormPage: RouteT | 'UNKNOWN_ROUTE'
+}
+
 export const DynamicStepIndicator = ({
     formPages,
     currentFormPage,
-}: {
-    formPages: RouteT[]
-    currentFormPage: RouteT | 'UNKNOWN_ROUTE'
-}): React.ReactElement | null => {
+}: DynamicStepIndicatorProps): React.ReactElement | null => {
     let formStepCompleted = true
     let formStepStatus: 'current' | 'complete' | undefined
 
