@@ -44,6 +44,7 @@ const SectionHeader = ({
     return (
         <div className={styles.reviewSectionHeader}>
             <h2>{header}</h2>
+            {to && (
             <div>
                 <Link
                     variant="unstyled"
@@ -54,6 +55,7 @@ const SectionHeader = ({
                     Edit <span className="srOnly">{header}</span>
                 </Link>
             </div>
+            )}
         </div>
     )
 }
@@ -474,7 +476,7 @@ export const ReviewSubmit = ({
 
                 {draftSubmission.actuaryContacts && (
                   <dl>
-                      <SectionHeader header="Actuary contacts" to="contacts" />
+                  <SectionHeader header="Actuary contacts" to="" />
 
                       <GridContainer>
                           <Grid row>

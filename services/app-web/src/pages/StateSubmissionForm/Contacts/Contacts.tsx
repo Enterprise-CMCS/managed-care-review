@@ -106,7 +106,7 @@ export const Contacts = ({
     }
 
     if (actuaryContacts.length === 0) {
-        stateContacts.push(emptyContact)
+        actuaryContacts.push(emptyContact)
     }
 
     const contactsInitialValues: ContactsFormValues = {
@@ -117,13 +117,22 @@ export const Contacts = ({
     // Handler for Contacts legends so that contacts show up as
     // State contacts 1 instead of State contacts 0 for first contact
     // and show (required) for only the first contact
+    // Also handles the difference between State Contacts and Actuary Contacts
     const handleContactLegend = (index: number, contactText: string) => {
         const count = index + 1
         const required = index ? '' : ' (required)'
 
-        return (
-            `${contactText} ${count} ${required}`
-        )
+        if (contactText === 'State') {
+            return (
+                `State contacts ${count} ${required}`
+            )
+        }
+        else if (contactText === 'Actuary') {
+            if (!index)
+                return `Certifying actuary ${required}`
+            else
+                return `Additional actuary contact`
+        }
     }
 
     const handleFormSubmit = async (
@@ -192,7 +201,7 @@ export const Contacts = ({
                                         {values.stateContacts.length > 0 &&
                                           values.stateContacts.map((stateContact, index) => (
                                               <div className={styles.stateContact} key={index}>
-                                                  <Fieldset legend={handleContactLegend(index, 'State contact')}>
+                                                  <Fieldset legend={handleContactLegend(index, 'State')}>
 
                                                   <FormGroup
                                                     error={showFieldErrors(stateContactErrorHandling(errors?.stateContacts?.[index])?.name)}
@@ -301,7 +310,7 @@ export const Contacts = ({
                                           {values.actuaryContacts.length > 0 &&
                                             values.actuaryContacts.map((actuaryContact, index) => (
                                                 <div className={styles.actuaryContact} key={index}>
-                                                    <Fieldset legend={handleContactLegend(index, 'Certifying actuary')}>
+                                                    <Fieldset legend={handleContactLegend(index, 'Actuary')}>
 
                                                     <FormGroup
                                                       error={showFieldErrors(stateContactErrorHandling(errors?.actuaryContacts?.[index])?.name)}
