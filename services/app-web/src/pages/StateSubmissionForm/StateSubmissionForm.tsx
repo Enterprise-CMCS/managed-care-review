@@ -52,7 +52,7 @@ const activeFormPages = (draft: DraftSubmission): RouteT[] => {
 export const StateSubmissionForm = (): React.ReactElement => {
     const { id } = useParams<{ id: string }>()
     const { pathname } = useLocation()
-    const routeConstant = getRouteName(pathname)
+    const currentRoute = getRouteName(pathname)
     const { updateHeading } = usePage()
     const [showFormAlert, setShowFormAlert] = useState(false)
 
@@ -95,7 +95,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
     }
 
     const draft = fetchData?.fetchDraftSubmission?.draftSubmission
-    const currentFormPage = getRouteName(pathname)
 
     // Set up side effects
     useEffect(() => {
@@ -122,7 +121,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
         let specificContent: React.ReactElement | undefined = undefined
         fetchError.graphQLErrors.forEach((err) => {
             if (err?.extensions?.code === 'WRONG_STATUS') {
-                if (STATE_SUBMISSION_FORM_ROUTES.includes(routeConstant)) {
+                if (STATE_SUBMISSION_FORM_ROUTES.includes(currentRoute)) {
                     specificContent = <ErrorInvalidSubmissionStatus />
                 }
             }
@@ -138,7 +137,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
         <>
             <DynamicStepIndicator
                 formPages={activeFormPages(draft)}
-                currentFormPage={currentFormPage}
+                currentFormPage={currentRoute}
             />
 
             <GridContainer>
