@@ -28,7 +28,7 @@ const STATE_SUBMISSION_FORM_ROUTES = [
     'SUBMISSIONS_CONTACTS',
     'SUBMISSIONS_DOCUMENTS',
     'SUBMISSIONS_REVIEW_SUBMIT',
-] as string[]
+] as RouteT[]
 
 const RoutesRecord: Record<RouteT, string> = {
     ROOT: '/',

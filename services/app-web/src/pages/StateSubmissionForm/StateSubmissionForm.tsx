@@ -32,15 +32,7 @@ import {
 const GenericFormAlert = () => <Alert type="error">Something went wrong</Alert>
 
 const activeFormPages = (draft: DraftSubmission): RouteT[] => {
-    const allFormPages = [
-        'SUBMISSIONS_CONTRACT_DETAILS',
-        'SUBMISSIONS_RATE_DETAILS',
-        'SUBMISSIONS_CONTACTS',
-        'SUBMISSIONS_DOCUMENTS',
-        'SUBMISSIONS_REVIEW_SUBMIT',
-    ] as RouteT[]
-
-    return allFormPages.filter(
+    return STATE_SUBMISSION_FORM_ROUTES.filter(
         (formPage) =>
             !(
                 draft?.submissionType === 'CONTRACT_ONLY' &&
@@ -121,7 +113,10 @@ export const StateSubmissionForm = (): React.ReactElement => {
         let specificContent: React.ReactElement | undefined = undefined
         fetchError.graphQLErrors.forEach((err) => {
             if (err?.extensions?.code === 'WRONG_STATUS') {
-                if (STATE_SUBMISSION_FORM_ROUTES.includes(currentRoute)) {
+                if (
+                    currentRoute !== 'UNKNOWN_ROUTE' &&
+                    STATE_SUBMISSION_FORM_ROUTES.includes(currentRoute)
+                ) {
                     specificContent = <ErrorInvalidSubmissionStatus />
                 }
             }
