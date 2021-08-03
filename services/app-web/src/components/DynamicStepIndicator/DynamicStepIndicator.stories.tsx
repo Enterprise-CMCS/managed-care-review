@@ -15,7 +15,7 @@ export default {
     component: DynamicStepIndicator,
     parameters: {
         componentSubtitle:
-            'DynamicStepIndicator displays a users progress through a multi-step process. If an unkown or invalid route is passed in as the CurrentFormPage, DynamicStepIndicator will render null.',
+            'DynamicStepIndicator displays a users progress through a multi-step process. If an unknown or invalid route is passed in as the current page, DynamicStepIndicator will render null.',
     },
 }
 
