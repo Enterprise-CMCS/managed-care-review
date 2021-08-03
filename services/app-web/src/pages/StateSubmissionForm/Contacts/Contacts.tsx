@@ -23,6 +23,7 @@ import { MCRouterState } from '../../../constants/routerState'
 
 export interface ContactsFormValues {
     stateContacts: ContactValue[]
+    actuaryContacts: ContactValue[]
 }
 
 export interface ContactValue {
@@ -31,8 +32,18 @@ export interface ContactValue {
     email: string
 }
 
-const StateContactSchema = Yup.object().shape({
+const ContactSchema = Yup.object().shape({
     stateContacts: Yup.array()
+        .of(Yup.object().shape({
+            name: Yup.string()
+                .required('You must provide a name'),
+            titleRole: Yup.string()
+                .required('You must provide a title/role'),
+            email: Yup.string()
+                .email('You must enter a valid email address')
+                .required('You must provide an email address'),
+        })),
+    actuaryContacts: Yup.array()
         .of(Yup.object().shape({
             name: Yup.string()
                 .required('You must provide a name'),
@@ -82,6 +93,7 @@ export const Contacts = ({
         shouldValidate && Boolean(error)
 
     const stateContacts = stripTypename(draftSubmission.stateContacts)
+    const actuaryContacts = stripTypename(draftSubmission.actuaryContacts)
 
     const emptyContact = {
         name: '',
@@ -93,19 +105,24 @@ export const Contacts = ({
         stateContacts.push(emptyContact)
     }
 
+    if (actuaryContacts.length === 0) {
+        stateContacts.push(emptyContact)
+    }
+
     const contactsInitialValues: ContactsFormValues = {
       stateContacts: stateContacts,
+      actuaryContacts: actuaryContacts,
     }
 
     // Handler for Contacts legends so that contacts show up as
     // State contacts 1 instead of State contacts 0 for first contact
     // and show (required) for only the first contact
-    const handleContactLegend = (index: number) => {
+    const handleContactLegend = (index: number, contactText: string) => {
         const count = index + 1
         const required = index ? '' : ' (required)'
 
         return (
-            `State contact ${count} ${required}`
+            `${contactText} ${count} ${required}`
         )
     }
 
@@ -115,6 +132,7 @@ export const Contacts = ({
     ) => {
         const updatedDraft = updatesFromSubmission(draftSubmission)
         updatedDraft.stateContacts = values.stateContacts
+        updatedDraft.actuaryContacts = values.actuaryContacts
 
         try {
             const updatedSubmission = await updateDraft({
@@ -141,7 +159,7 @@ export const Contacts = ({
             <Formik
                 initialValues={contactsInitialValues}
                 onSubmit={handleFormSubmit}
-                validationSchema={StateContactSchema}
+                validationSchema={ContactSchema}
             >
                 {({
                     values,
@@ -174,7 +192,7 @@ export const Contacts = ({
                                         {values.stateContacts.length > 0 &&
                                           values.stateContacts.map((stateContact, index) => (
                                               <div className={styles.stateContact} key={index}>
-                                                  <Fieldset legend={handleContactLegend(index)}>
+                                                  <Fieldset legend={handleContactLegend(index, 'State contact')}>
 
                                                   <FormGroup
                                                     error={showFieldErrors(stateContactErrorHandling(errors?.stateContacts?.[index])?.name)}
@@ -267,8 +285,115 @@ export const Contacts = ({
 
                             </fieldset>
 
+                            {draftSubmission.submissionType !==
+                            'CONTRACT_ONLY' && (
 
-                            {/* TODO: dont show actuary contacts when contract only */}
+                              <fieldset className="usa-fieldset">
+                                  <h3>Actuary contacts</h3>
+                                  {formAlert && formAlert}
+                                  <p>Provide contact information for the actuaries who worked directly on this submission.</p>
+                                  <legend className="srOnly">Actuary contacts</legend>
+                                  {formAlert && formAlert}
+
+                                  <FieldArray name="actuaryContacts">
+                                  {({ remove, push }) => (
+                                      <div className={styles.actuaryContacts} data-testid="state-contacts">
+                                          {values.actuaryContacts.length > 0 &&
+                                            values.actuaryContacts.map((actuaryContact, index) => (
+                                                <div className={styles.actuaryContact} key={index}>
+                                                    <Fieldset legend={handleContactLegend(index, 'Certifying actuary')}>
+
+                                                    <FormGroup
+                                                      error={showFieldErrors(stateContactErrorHandling(errors?.actuaryContacts?.[index])?.name)}
+                                                    >
+                                                        <label htmlFor={`actuaryContacts.${index}.name`}>
+                                                            Name
+                                                        </label>
+                                                        {showFieldErrors(`True`) && (
+                                                          <ErrorMessage
+                                                              name={`actuaryContacts.${index}.name`}
+                                                              component="div"
+                                                              className="usa-error-message"
+                                                          />
+                                                        )}
+                                                        <Field
+                                                          name={`actuaryContacts.${index}.name`}
+                                                          id={`actuaryContacts.${index}.name`}
+                                                          type="text"
+                                                          className="usa-input"
+                                                        />
+                                                    </FormGroup>
+
+                                                    <FormGroup
+                                                    error={showFieldErrors(stateContactErrorHandling(errors?.stateContacts?.[index])?.titleRole)}
+                                                    >
+                                                        <label htmlFor={`actuaryContacts.${index}.titleRole`}>
+                                                            Title/Role
+                                                        </label>
+                                                        {showFieldErrors(`True`) && (
+                                                          <ErrorMessage
+                                                              name={`actuaryContacts.${index}.titleRole`}
+                                                              component="div"
+                                                              className="usa-error-message"
+                                                          />
+                                                        )}
+                                                        <Field
+                                                          name={`actuaryContacts.${index}.titleRole`}
+                                                          id={`actuaryContacts.${index}.titleRole`}
+                                                          type="text"
+                                                          className="usa-input"
+                                                        />
+                                                    </FormGroup>
+
+                                                    <FormGroup
+                                                    error={showFieldErrors(stateContactErrorHandling(errors?.actuaryContacts?.[index])?.email)}
+                                                    >
+                                                        <label htmlFor={`actuaryContacts.${index}.email`}>
+                                                            Email
+                                                        </label>
+                                                        {showFieldErrors(`True`) && (
+                                                          <ErrorMessage
+                                                              name={`actuaryContacts.${index}.email`}
+                                                              component="div"
+                                                              className="usa-error-message"
+                                                          />
+                                                        )}
+                                                        <Field
+                                                          name={`actuaryContacts.${index}.email`}
+                                                          id={`actuaryContacts.${index}.email`}
+                                                          type="text"
+                                                          className="usa-input"
+                                                        />
+                                                  </FormGroup>
+
+                                                  {index > 0 && (
+                                                  <Button
+                                                    type="button"
+                                                    unstyled
+                                                    className={styles.removeContactBtn}
+                                                    onClick={() => (remove(index))}
+                                                  >
+                                                      Remove contact
+                                                  </Button>
+                                                  )}
+                                                  </Fieldset>
+                                              </div>
+                                          ))}
+
+                                          <Button
+                                            type="button"
+                                            outline
+                                            className={styles.addContactBtn}
+                                            onClick={() => push(emptyContact)}
+                                          >
+                                          Add actuary contact
+                                          </Button>
+                                      </div>
+                                  )}
+                                  </FieldArray>
+
+                                </fieldset>
+                            )}
 
                             <div className={styles.pageActions}>
                                 <Button

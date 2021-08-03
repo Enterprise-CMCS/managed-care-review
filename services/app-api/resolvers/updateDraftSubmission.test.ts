@@ -42,6 +42,7 @@ describe('updateDraftSubmission', () => {
                     effectiveDateEnd: new Date(),
                 },
                 stateContacts: [],
+                actuaryContacts: [],
             }
 
             const updates: DraftSubmissionUpdates = {
@@ -61,6 +62,7 @@ describe('updateDraftSubmission', () => {
                 rateDateCertified: null,
                 rateAmendmentInfo: undefined,
                 stateContacts: [],
+                actuaryContacts: [],
             }
 
             applyUpdates(baseDraft, updates)
@@ -94,6 +96,7 @@ describe('updateDraftSubmission', () => {
                 managedCareEntities: [],
                 federalAuthorities: [],
                 stateContacts: [],
+                actuaryContacts: [],
             }
 
             const updates: DraftSubmissionUpdates = {
@@ -122,6 +125,7 @@ describe('updateDraftSubmission', () => {
                     effectiveDateEnd: null,
                 },
                 stateContacts: [],
+                actuaryContacts: [],
             }
 
             applyUpdates(baseDraft, updates)
@@ -157,6 +161,7 @@ describe('updateDraftSubmission', () => {
                 managedCareEntities: [],
                 federalAuthorities: [],
                 stateContacts: [],
+                actuaryContacts: [],
             }
 
             const updates: DraftSubmissionUpdates = {
@@ -184,6 +189,7 @@ describe('updateDraftSubmission', () => {
                 rateDateEnd: null,
                 rateDateCertified: null,
                 stateContacts: [],
+                actuaryContacts: [],
             }
 
             applyUpdates(baseDraft, updates)
@@ -225,6 +231,7 @@ describe('updateDraftSubmission', () => {
             rateDateEnd: endDate,
             rateDateCertified: certifiedDate,
             stateContacts: [],
+            actuaryContacts: [],
         }
 
         const updateResult = await mutate({
@@ -298,6 +305,13 @@ describe('updateDraftSubmission', () => {
             managedCareEntities: [],
             federalAuthorities: [],
             stateContacts: [
+                {
+                    name: 'Test Person',
+                    titleRole: 'A Role',
+                    email: 'test@test.com',
+                }
+            ],
+            actuaryContacts: [
                 {
                     name: 'Test Person',
                     titleRole: 'A Role',
