@@ -38,7 +38,7 @@
         "cypress": "^8.1.0",
         "cypress-pipe": "^2.0.0",
         "dotenv": "^10.0.0",
-        "nightwatch": "^1.7.7",
+        "nightwatch": "^1.7.8",
         "prettier": "^2.3.2",
         "serverless": "^2.52.1",
         "serverless-plugin-scripts": "^1.0.2",
