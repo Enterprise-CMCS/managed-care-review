@@ -25,6 +25,7 @@ import {
     FederalAuthorityRecord,
     RateChangeReasonRecord,
     ManagedCareEntityRecord,
+    ActuaryFirmsRecord,
     SubmissionTypeRecord,
 } from '../../../constants/submissions'
 import { DataDetail } from '../../../components/DataDetail/DataDetail'
@@ -44,7 +45,6 @@ const SectionHeader = ({
     return (
         <div className={styles.reviewSectionHeader}>
             <h2>{header}</h2>
-            {to && (
             <div>
                 <Link
                     variant="unstyled"
@@ -55,7 +55,18 @@ const SectionHeader = ({
                     Edit <span className="srOnly">{header}</span>
                 </Link>
             </div>
-            )}
+        </div>
+    )
+}
+
+const SectionSubHeader = ({
+    header,
+}: {
+    header: string
+}): React.ReactElement => {
+    return (
+        <div className={styles.reviewSectionSubHeader}>
+            <h2>{header}</h2>
         </div>
     )
 }
@@ -476,17 +487,22 @@ export const ReviewSubmit = ({
 
                 {draftSubmission.actuaryContacts && (
                   <dl>
-                  <SectionHeader header="Actuary contacts" to="" />
-
+                  <SectionSubHeader header="Actuary contacts" />
                       <GridContainer>
                           <Grid row>
                               {draftSubmission.actuaryContacts.map((actuaryContact, index) => (
                               <Grid col={6}>
-                                  <span className="text-bold">Contact {index + 1}</span><br/>
+                                  <span className="text-bold">
+                                  {index ? 'Additional actuary contact' : 'Certifying actuary'}
+                                  </span><br/>
                                   {actuaryContact.name}<br/>
                                   {actuaryContact.titleRole}<br/>
                                   <a href={`mailto:${actuaryContact.email}`}>{actuaryContact.email}</a><br/>
-                                  Firm: {actuaryContact.actuarialFirm}
+                                  {actuaryContact.actuarialFirm
+                                      ? ActuaryFirmsRecord[
+                                            actuaryContact.actuarialFirm
+                                          ]
+                                      : ''}
                               </Grid>
                               ))}
                           </Grid>

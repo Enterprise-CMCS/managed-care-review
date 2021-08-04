@@ -4,6 +4,7 @@ import {
     FederalAuthority,
     ManagedCareEntity,
     AmendableItems,
+    ActuarialFirmType,
 } from '../common-code/domain-models/DraftSubmissionType'
 
 const SubmissionTypeRecord: Record<SubmissionType, string> = {
@@ -48,6 +49,16 @@ const AmendableItemsRecord: Record<AmendableItems, string> = {
     RISK_SHARING_MECHANISM: 'Risk sharing mechanisms',
 }
 
+const ActuaryFirmsRecord: Record<ActuarialFirmType, string> = {
+    MERCER: 'Mercer',
+    MILLIMAN: 'Milliman',
+    OPTUMAS: 'Optumas',
+    GUIDEHOUSE: 'Guidehouse',
+    DELOITTE: 'Deloitte',
+    STATE_IN_HOUSE: 'State in-house',
+    OTHER: 'Other',
+  }
+
 const RateChangeReasonRecord: Record<'ANNUAL' | 'MIDYEAR' | 'OTHER', string> = {
     ANNUAL: 'Annual rate update',
     MIDYEAR: 'Mid-year update',
@@ -61,4 +72,5 @@ export {
     SubmissionTypeRecord,
     FederalAuthorityRecord,
     ManagedCareEntityRecord,
+    ActuaryFirmsRecord,
 }

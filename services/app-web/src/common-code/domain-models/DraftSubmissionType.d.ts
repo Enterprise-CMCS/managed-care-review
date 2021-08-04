@@ -112,6 +112,7 @@ export type {
     StateContact,
     ActuaryContact,
     ActuaryContactType,
+    ActuarialFirmType,
     ContractType,
     FederalAuthority,
     ManagedCareEntity,

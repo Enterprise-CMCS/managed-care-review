@@ -14,6 +14,7 @@ import {
     FederalAuthorityRecord,
     RateChangeReasonRecord,
     ManagedCareEntityRecord,
+    ActuaryFirmsRecord,
     SubmissionTypeRecord,
 } from '../../../constants/submissions'
 import { DataDetail } from '../../../components/DataDetail/DataDetail'
@@ -411,6 +412,30 @@ export const SubmissionSummary = (): React.ReactElement => {
                             </Grid>
                         </GridContainer>
                     </dl>
+                    {submission.actuaryContacts && (
+                      <dl>
+                      <SectionHeader header="Actuary contacts" to="contacts" />
+                          <GridContainer>
+                              <Grid row>
+                                  {submission.actuaryContacts.map((actuaryContact, index) => (
+                                  <Grid col={6}>
+                                      <span className="text-bold">
+                                      {index ? 'Additional actuary contact' : 'Certifying actuary'}
+                                      </span><br/>
+                                      {actuaryContact.name}<br/>
+                                      {actuaryContact.titleRole}<br/>
+                                      <a href={`mailto:${actuaryContact.email}`}>{actuaryContact.email}</a><br/>
+                                      {actuaryContact.actuarialFirm
+                                          ? ActuaryFirmsRecord[
+                                                actuaryContact.actuarialFirm
+                                              ]
+                                          : ''}
+                                  </Grid>
+                                  ))}
+                              </Grid>
+                          </GridContainer>
+                      </dl>
+                    )}
                 </section>
                 <section id="documents">
                     <SectionHeader header="Documents" to="documents" />

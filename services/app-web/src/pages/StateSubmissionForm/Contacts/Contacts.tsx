@@ -417,15 +417,18 @@ export const Contacts = ({
                                                     />
                                                   )}
                                                   <FieldRadio
-                                                      id="mercerFirm"
+                                                      id={`mercer-${index}`}
                                                       name={`actuaryContacts.${index}.actuarialFirm`}
                                                       label="Mercer"
                                                       value={'MERCER'}
                                                       checked={values.actuaryContacts[index].actuarialFirm === 'MERCER'}
                                                       aria-required
                                                   />
+                                                  {/*
+                                                    checked={values.actuaryContacts[index].actuarialFirm === 'MERCER'}
+                                                    */}
                                                   <FieldRadio
-                                                      id="millimanFirm"
+                                                      id={`milliman-${index}`}
                                                       name={`actuaryContacts.${index}.actuarialFirm`}
                                                       label="Milliman"
                                                       value={'MILLIMAN'}
@@ -433,31 +436,30 @@ export const Contacts = ({
                                                       aria-required
                                                   />
                                                   <FieldRadio
-                                                      id="optumasFirm"
+                                                      id={`optumas-${index}`}
                                                       name={`actuaryContacts.${index}.actuarialFirm`}
                                                       label="Optumas"
                                                       value={'OPTUMAS'}
+                                                      checked={values.actuaryContacts[index].actuarialFirm === 'OPTUMAS'}
                                                       aria-required
                                                   />
                                                   <FieldRadio
-                                                      id="guidehouseFirm"
+                                                      id={`guidehouse-${index}`}
                                                       name={`actuaryContacts.${index}.actuarialFirm`}
                                                       label="Guidehouse"
                                                       value={'GUIDEHOUSE'}
-                                                      checked={values.actuaryContacts[index].actuarialFirm === 'GUIDEHOUSE'}
                                                       aria-required
                                                   />
                                                   <FieldRadio
-                                                      id="deloiteeFirm"
+                                                      id={`deloitte-${index}`}
                                                       name={`actuaryContacts.${index}.actuarialFirm`}
                                                       label="Deloitte"
                                                       value={'DELOITTE'}
                                                       checked={values.actuaryContacts[index].actuarialFirm === 'DELOITTE'}
-
                                                       aria-required
                                                   />
                                                   <FieldRadio
-                                                      id="stateInHouseFirm"
+                                                      id={`stateInHouse-${index}`}
                                                       name={`actuaryContacts.${index}.actuarialFirm`}
                                                       label="State in-house"
                                                       value={'STATE_IN_HOUSE'}
@@ -465,12 +467,11 @@ export const Contacts = ({
                                                       aria-required
                                                   />
                                                   <FieldRadio
-                                                      id="otherFirm"
+                                                      id={`other-${index}`}
                                                       name={`actuaryContacts.${index}.actuarialFirm`}
                                                       label="Other"
                                                       value={'OTHER'}
                                                       checked={values.actuaryContacts[index].actuarialFirm === 'OTHER'}
-
                                                       aria-required
                                                   />
 
