@@ -50,7 +50,7 @@ const RoutesRecord: Record<RouteT, string> = {
 const PageHeadingsRecord: Record<string, string> = {
     ROOT: 'Dashboard',
     DASHBOARD: 'Dashboard',
-    SUBMISSIONS_NEW: 'New Submission',
+    SUBMISSIONS_NEW: 'New submission',
 }
 
 // Static page titles used in <title>.
@@ -61,15 +61,15 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     HELP: 'Help',
     DASHBOARD: 'Dashboard',
     SUBMISSIONS: 'Submissions',
-    SUBMISSIONS_NEW: 'New Submission',
+    SUBMISSIONS_NEW: 'New submission',
     SUBMISSIONS_FORM: 'Submissions',
-    SUBMISSIONS_TYPE: 'Submission Type',
-    SUBMISSIONS_CONTRACT_DETAILS: 'Contract Details',
-    SUBMISSIONS_RATE_DETAILS: 'Rate Details',
+    SUBMISSIONS_TYPE: 'Submission type',
+    SUBMISSIONS_CONTRACT_DETAILS: 'Contract details',
+    SUBMISSIONS_RATE_DETAILS: 'Rate details',
     SUBMISSIONS_CONTACTS: 'Contacts',
     SUBMISSIONS_DOCUMENTS: 'Documents',
-    SUBMISSIONS_REVIEW_SUBMIT: 'Review and Submit',
-    UNKNOWN_ROUTE: 'Not Found',
+    SUBMISSIONS_REVIEW_SUBMIT: 'Review and submit',
+    UNKNOWN_ROUTE: 'Not found',
 }
 
 const getRouteName = (pathname: string): RouteT | 'UNKNOWN_ROUTE' => {
