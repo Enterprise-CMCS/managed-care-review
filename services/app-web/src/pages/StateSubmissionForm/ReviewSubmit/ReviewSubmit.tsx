@@ -486,6 +486,7 @@ export const ReviewSubmit = ({
                                   {actuaryContact.name}<br/>
                                   {actuaryContact.titleRole}<br/>
                                   <a href={`mailto:${actuaryContact.email}`}>{actuaryContact.email}</a><br/>
+                                  Firm: {actuaryContact.actuarialFirm}
                               </Grid>
                               ))}
                           </Grid>

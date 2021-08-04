@@ -111,16 +111,33 @@ input StateContactInput {
     email: String!
 }
 
+enum actuarialFirmType {
+    MERCER
+    MILLIMAN
+    OPTUMAS
+    GUIDEHOUSE
+    DELOITTE
+    STATE_IN_HOUSE
+    OTHER
+}
+
 type ActuaryContact {
     name: String!
     titleRole: String!
     email: String!
+    actuarialFirm: actuarialFirmType
 }
 
 input ActuaryContactInput {
     name: String!
     titleRole: String!
     email: String!
+    actuarialFirm: actuarialFirmType
+}
+
+enum actuaryCommuncationType {
+    OACT_TO_ACTUARY
+    OACT_TO_STATE
 }
 
 type Document {
@@ -211,6 +228,7 @@ type DraftSubmission {
     updatedAt: DateTime!
     stateContacts: [StateContact!]!
     actuaryContacts: [ActuaryContact!]!
+    actuaryCommuncation: actuaryCommuncationType
     documents: [Document!]!
     contractType: ContractType
     contractDateStart: Date

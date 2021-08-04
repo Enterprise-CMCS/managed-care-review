@@ -23,6 +23,7 @@ query fetchStateSubmission($input: FetchStateSubmissionInput!) {
                 name
                 titleRole
                 email
+                actuarialFirm
             }
             documents {
                 name

@@ -25,6 +25,15 @@ type RateAmendmentInfo = {
 
 type ContractType = 'BASE' | 'AMENDMENT'
 
+type ActuarialFirmType =
+    | 'MERCER'
+    | 'MILLIMAN'
+    | 'OPTUMAS'
+    | 'GUIDEHOUSE'
+    | 'DELOITTE'
+    | 'STATE_IN_HOUSE'
+    | 'OTHER'
+
 type FederalAuthority =
     | 'STATE_PLAN'
     | 'WAIVER_1915B'
@@ -40,9 +49,10 @@ type StateContact = {
 }
 
 type ActuaryContact = {
-  name: string
-  titleRole: string
-  email: string
+    name: string
+    titleRole: string
+    email: string
+    actuarialFirm?: ActuarialFirmType
 }
 
 type RateType = 'NEW' | 'AMENDMENT'
@@ -101,6 +111,7 @@ export type {
     RateType,
     StateContact,
     ActuaryContact,
+    ActuaryContactType,
     ContractType,
     FederalAuthority,
     ManagedCareEntity,

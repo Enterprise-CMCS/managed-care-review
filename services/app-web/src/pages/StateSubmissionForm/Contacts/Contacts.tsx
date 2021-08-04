@@ -14,22 +14,32 @@ import { NavLink, useHistory } from 'react-router-dom'
 import styles from '../StateSubmissionForm.module.scss'
 
 import {
+    ActuarialFirmType,
     DraftSubmission,
     UpdateDraftSubmissionInput,
 } from '../../../gen/gqlClient'
+
+import { FieldRadio } from '../../../components/Form/FieldRadio/FieldRadio'
 
 import { updatesFromSubmission, stripTypename } from '../updateSubmissionTransform'
 import { MCRouterState } from '../../../constants/routerState'
 
 export interface ContactsFormValues {
-    stateContacts: ContactValue[]
-    actuaryContacts: ContactValue[]
+    stateContacts: stateContactValue[]
+    actuaryContacts: actuaryContactValue[]
 }
 
-export interface ContactValue {
+export interface stateContactValue {
     name: string
     titleRole: string
     email: string
+}
+
+export interface actuaryContactValue {
+    name: string
+    titleRole: string
+    email: string
+    actuarialFirm?: ActuarialFirmType | null | undefined
 }
 
 const ContactSchema = Yup.object().shape({
@@ -52,6 +62,9 @@ const ContactSchema = Yup.object().shape({
             email: Yup.string()
                 .email('You must enter a valid email address')
                 .required('You must provide an email address'),
+            actuarialFirm: Yup.string()
+                .required('You must select an actuarial firm')
+                .nullable()
         }))
 })
 
@@ -61,7 +74,17 @@ type FormError = FormikErrors<ContactsFormValues>[keyof FormikErrors<ContactsFor
 // for a given field when we pass it through showFieldErrors
 // so this makes sure we return the actual error and if its
 // anything else we return undefined to not show it
-const stateContactErrorHandling = (error: string | FormikErrors<ContactValue> | undefined) : FormikErrors<ContactValue> | undefined => {
+const stateContactErrorHandling = (error: string | FormikErrors<stateContactValue> | undefined) : FormikErrors<stateContactValue> | undefined => {
+
+    if (typeof(error) === 'string') {
+        return undefined
+    }
+    return (
+      error
+    )
+}
+
+const actuaryContactErrorHandling = (error: string | FormikErrors<actuaryContactValue> | undefined) : FormikErrors<actuaryContactValue> | undefined => {
 
     if (typeof(error) === 'string') {
         return undefined
@@ -95,18 +118,25 @@ export const Contacts = ({
     const stateContacts = stripTypename(draftSubmission.stateContacts)
     const actuaryContacts = stripTypename(draftSubmission.actuaryContacts)
 
-    const emptyContact = {
+    const emptyStateContact = {
         name: '',
         titleRole: '',
         email: '',
     }
 
+    const emptyActuaryContact = {
+        name: '',
+        titleRole: '',
+        email: '',
+        actuarialFirm: null,
+    }
+
     if (stateContacts.length === 0) {
-        stateContacts.push(emptyContact)
+        stateContacts.push(emptyStateContact)
     }
 
     if (actuaryContacts.length === 0) {
-        actuaryContacts.push(emptyContact)
+        actuaryContacts.push(emptyActuaryContact)
     }
 
     const contactsInitialValues: ContactsFormValues = {
@@ -177,6 +207,7 @@ export const Contacts = ({
                     handleSubmit,
                     isSubmitting,
                     isValidating,
+                    setFieldValue,
                 }) => (
                     <>
                         <UswdsForm
@@ -284,7 +315,7 @@ export const Contacts = ({
                                           type="button"
                                           outline
                                           className={styles.addContactBtn}
-                                          onClick={() => push(emptyContact)}
+                                          onClick={() => push(emptyStateContact)}
                                         >
                                         Add state contact
                                         </Button>
@@ -313,7 +344,7 @@ export const Contacts = ({
                                                     <Fieldset legend={handleContactLegend(index, 'Actuary')}>
 
                                                     <FormGroup
-                                                      error={showFieldErrors(stateContactErrorHandling(errors?.actuaryContacts?.[index])?.name)}
+                                                      error={showFieldErrors(actuaryContactErrorHandling(errors?.actuaryContacts?.[index])?.name)}
                                                     >
                                                         <label htmlFor={`actuaryContacts.${index}.name`}>
                                                             Name
@@ -334,7 +365,7 @@ export const Contacts = ({
                                                     </FormGroup>
 
                                                     <FormGroup
-                                                    error={showFieldErrors(stateContactErrorHandling(errors?.stateContacts?.[index])?.titleRole)}
+                                                    error={showFieldErrors(actuaryContactErrorHandling(errors?.stateContacts?.[index])?.titleRole)}
                                                     >
                                                         <label htmlFor={`actuaryContacts.${index}.titleRole`}>
                                                             Title/Role
@@ -355,7 +386,7 @@ export const Contacts = ({
                                                     </FormGroup>
 
                                                     <FormGroup
-                                                    error={showFieldErrors(stateContactErrorHandling(errors?.actuaryContacts?.[index])?.email)}
+                                                    error={showFieldErrors(actuaryContactErrorHandling(errors?.actuaryContacts?.[index])?.email)}
                                                     >
                                                         <label htmlFor={`actuaryContacts.${index}.email`}>
                                                             Email
@@ -375,6 +406,74 @@ export const Contacts = ({
                                                         />
                                                   </FormGroup>
 
+                                                  <label htmlFor={`actuaryContacts.${index}.actuarialFirm`}>
+                                                      Actuarial firm
+                                                  </label>
+                                                  {showFieldErrors(`True`) && (
+                                                    <ErrorMessage
+                                                        name={`actuaryContacts.${index}.actuarialFirm`}
+                                                        component="div"
+                                                        className="usa-error-message"
+                                                    />
+                                                  )}
+                                                  <FieldRadio
+                                                      id="mercerFirm"
+                                                      name={`actuaryContacts.${index}.actuarialFirm`}
+                                                      label="Mercer"
+                                                      value={'MERCER'}
+                                                      checked={values.actuaryContacts[index].actuarialFirm === 'MERCER'}
+                                                      aria-required
+                                                  />
+                                                  <FieldRadio
+                                                      id="millimanFirm"
+                                                      name={`actuaryContacts.${index}.actuarialFirm`}
+                                                      label="Milliman"
+                                                      value={'MILLIMAN'}
+                                                      checked={values.actuaryContacts[index].actuarialFirm === 'MILLIMAN'}
+                                                      aria-required
+                                                  />
+                                                  <FieldRadio
+                                                      id="optumasFirm"
+                                                      name={`actuaryContacts.${index}.actuarialFirm`}
+                                                      label="Optumas"
+                                                      value={'OPTUMAS'}
+                                                      aria-required
+                                                  />
+                                                  <FieldRadio
+                                                      id="guidehouseFirm"
+                                                      name={`actuaryContacts.${index}.actuarialFirm`}
+                                                      label="Guidehouse"
+                                                      value={'GUIDEHOUSE'}
+                                                      checked={values.actuaryContacts[index].actuarialFirm === 'GUIDEHOUSE'}
+                                                      aria-required
+                                                  />
+                                                  <FieldRadio
+                                                      id="deloiteeFirm"
+                                                      name={`actuaryContacts.${index}.actuarialFirm`}
+                                                      label="Deloitte"
+                                                      value={'DELOITTE'}
+                                                      checked={values.actuaryContacts[index].actuarialFirm === 'DELOITTE'}
+
+                                                      aria-required
+                                                  />
+                                                  <FieldRadio
+                                                      id="stateInHouseFirm"
+                                                      name={`actuaryContacts.${index}.actuarialFirm`}
+                                                      label="State in-house"
+                                                      value={'STATE_IN_HOUSE'}
+                                                      checked={values.actuaryContacts[index].actuarialFirm === 'STATE_IN_HOUSE'}
+                                                      aria-required
+                                                  />
+                                                  <FieldRadio
+                                                      id="otherFirm"
+                                                      name={`actuaryContacts.${index}.actuarialFirm`}
+                                                      label="Other"
+                                                      value={'OTHER'}
+                                                      checked={values.actuaryContacts[index].actuarialFirm === 'OTHER'}
+
+                                                      aria-required
+                                                  />
+
                                                   {index > 0 && (
                                                   <Button
                                                     type="button"
@@ -393,7 +492,7 @@ export const Contacts = ({
                                             type="button"
                                             outline
                                             className={styles.addContactBtn}
-                                            onClick={() => push(emptyContact)}
+                                            onClick={() => push(emptyActuaryContact)}
                                           >
                                           Add actuary contact
                                           </Button>
@@ -445,6 +544,7 @@ export const Contacts = ({
                                         type="submit"
                                         disabled={isSubmitting}
                                         onClick={() => {
+                                          console.log(values)
                                             redirectToDashboard.current = false
                                             setShouldValidate(true)
                                         }}

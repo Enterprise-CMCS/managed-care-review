@@ -119,6 +119,7 @@ const createAndUpdateTestDraftSubmission = async (
                 name: 'test name',
                 titleRole: 'test title',
                 email: 'email@test.com',
+                actuarialFirm: 'MERCER' as const,
             }
         ],
         contractType: 'BASE' as const,
