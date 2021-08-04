@@ -26,6 +26,7 @@ import {
     RateChangeReasonRecord,
     ManagedCareEntityRecord,
     ActuaryFirmsRecord,
+    ActuaryCommunicationRecord,
     SubmissionTypeRecord,
 } from '../../../constants/submissions'
 import { DataDetail } from '../../../components/DataDetail/DataDetail'
@@ -509,7 +510,18 @@ export const ReviewSubmit = ({
                       </GridContainer>
                   </dl>
                 )}
-
+                <dl>
+                    <GridContainer>
+                        <Grid row>
+                            <span className="text-bold">Actuary communication preference</span>
+                            {draftSubmission.actuaryCommunicationPreference
+                                ? ActuaryCommunicationRecord[
+                                      draftSubmission.actuaryCommunicationPreference
+                                    ]
+                                : ''}
+                        </Grid>
+                    </GridContainer>
+                </dl>
             </section>
 
             <section id="documents" className={styles.reviewSection}>

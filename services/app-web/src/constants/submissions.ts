@@ -5,6 +5,7 @@ import {
     ManagedCareEntity,
     AmendableItems,
     ActuarialFirmType,
+    ActuaryCommunicationType,
 } from '../common-code/domain-models/DraftSubmissionType'
 
 const SubmissionTypeRecord: Record<SubmissionType, string> = {
@@ -59,6 +60,15 @@ const ActuaryFirmsRecord: Record<ActuarialFirmType, string> = {
     OTHER: 'Other',
   }
 
+const ActuaryCommunicationRecord: Record<ActuaryCommunicationType, string> = {
+    OACT_TO_ACTUARY: `The CMS Office of the Actuary can communicate directly with the state’s actuary
+but should copy the state on all written communication
+and all appointments for verbal discussions.`,
+    OACT_TO_STATE: `The CMS Office of the Actuary can communicate directly with the state, and the
+state will relay all written communication to their actuary
+and set up time for any potential verbal discussions.`,
+}
+
 const RateChangeReasonRecord: Record<'ANNUAL' | 'MIDYEAR' | 'OTHER', string> = {
     ANNUAL: 'Annual rate update',
     MIDYEAR: 'Mid-year update',
@@ -73,4 +83,5 @@ export {
     FederalAuthorityRecord,
     ManagedCareEntityRecord,
     ActuaryFirmsRecord,
+    ActuaryCommunicationRecord,
 }

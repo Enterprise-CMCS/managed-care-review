@@ -135,7 +135,7 @@ input ActuaryContactInput {
     actuarialFirm: actuarialFirmType
 }
 
-enum actuaryCommuncationType {
+enum ActuaryCommunicationType {
     OACT_TO_ACTUARY
     OACT_TO_STATE
 }
@@ -228,7 +228,7 @@ type DraftSubmission {
     updatedAt: DateTime!
     stateContacts: [StateContact!]!
     actuaryContacts: [ActuaryContact!]!
-    actuaryCommuncation: actuaryCommuncationType
+    actuaryCommunicationPreference: ActuaryCommunicationType
     documents: [Document!]!
     contractType: ContractType
     contractDateStart: Date
@@ -255,6 +255,7 @@ type StateSubmission {
     updatedAt: DateTime!
     stateContacts: [StateContact!]!
     actuaryContacts: [ActuaryContact!]!
+    actuaryCommunicationPreference: ActuaryCommunicationType
     documents: [Document!]!
     contractAmendmentInfo: ContractAmendmentInfo
     submittedAt: Date!
@@ -278,6 +279,7 @@ input DraftSubmissionUpdates {
     submissionDescription: String!
     stateContacts: [StateContactInput!]!
     actuaryContacts: [ActuaryContactInput!]!
+    actuaryCommunicationPreference: ActuaryCommunicationType
     documents: [DocumentInput!]!
     contractType: ContractType
     contractDateStart: Date

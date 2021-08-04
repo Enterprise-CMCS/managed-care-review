@@ -11,6 +11,7 @@ import {
     FederalAuthority,
     StateContact,
     ActuaryContact,
+    ActuaryCommuncationType,
     DraftSubmissionType,
     StateSubmissionType,
     SubmissionUnionType,
@@ -208,6 +209,9 @@ export class SubmissionStoreType {
     @attribute()
     actuaryContacts: Array<ActuaryContact>
 
+    @attribute()
+    actuaryCommunicationPreference?: ActuaryCommuncationType
+
     @attribute({ memberType: embed(DocumentStoreT) })
     documents: Array<DocumentStoreT>
 
@@ -229,6 +233,7 @@ export class SubmissionStoreType {
         this.stateNumber = -1
         this.stateContacts = []
         this.actuaryContacts = []
+        this.actuaryCommunicationPreference = undefined
         this.documents = []
         this.contractType = undefined
         this.contractDateStart = undefined

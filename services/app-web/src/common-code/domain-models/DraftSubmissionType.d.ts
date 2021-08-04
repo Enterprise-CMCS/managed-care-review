@@ -34,6 +34,10 @@ type ActuarialFirmType =
     | 'STATE_IN_HOUSE'
     | 'OTHER'
 
+type ActuaryCommunicationType =
+    | 'OACT_TO_ACTUARY'
+    | 'OACT_TO_STATE'
+
 type FederalAuthority =
     | 'STATE_PLAN'
     | 'WAIVER_1915B'
@@ -91,6 +95,7 @@ type DraftSubmissionType = {
     updatedAt: DateTime
     stateContacts: StateContact[]
     actuaryContacts: ActuaryContact[]
+    actuaryCommunicationPreference: ActuaryCommunicationType
     documents: SubmissionDocument[]
     contractType?: ContractType
     contractDateStart?: Date
@@ -113,6 +118,7 @@ export type {
     ActuaryContact,
     ActuaryContactType,
     ActuarialFirmType,
+    ActuaryCommunicationType,
     ContractType,
     FederalAuthority,
     ManagedCareEntity,

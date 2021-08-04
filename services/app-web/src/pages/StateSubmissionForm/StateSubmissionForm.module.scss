@@ -98,12 +98,11 @@
 }
 
 .stateContacts, .actuaryContacts {
-    [class^='usa-input'] {
-        margin-bottom: units(2);
-
-    }
-
     .addContactBtn {
         margin-top: .5rem;
+    }
+
+    .removeContactBtn {
+        margin-top: units(4);
     }
 }

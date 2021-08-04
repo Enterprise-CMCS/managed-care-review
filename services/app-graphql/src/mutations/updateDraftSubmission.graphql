@@ -24,6 +24,7 @@ mutation updateDraftSubmission($input: UpdateDraftSubmissionInput!) {
                 email
                 actuarialFirm
             }
+            actuaryCommunicationPreference
             documents {
                 name
                 s3URL

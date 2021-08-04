@@ -15,6 +15,7 @@ import {
     RateChangeReasonRecord,
     ManagedCareEntityRecord,
     ActuaryFirmsRecord,
+    ActuaryCommunicationRecord,
     SubmissionTypeRecord,
 } from '../../../constants/submissions'
 import { DataDetail } from '../../../components/DataDetail/DataDetail'
@@ -432,6 +433,16 @@ export const SubmissionSummary = (): React.ReactElement => {
                                           : ''}
                                   </Grid>
                                   ))}
+                              </Grid>
+                              <Grid>
+                                  <p>
+                                      <span className="text-bold">Actuary communication preference</span><br/>
+                                      {submission.actuaryCommunicationPreference
+                                          ? ActuaryCommunicationRecord[
+                                                submission.actuaryCommunicationPreference
+                                              ]
+                                          : ''}
+                                  </p>
                               </Grid>
                           </GridContainer>
                       </dl>

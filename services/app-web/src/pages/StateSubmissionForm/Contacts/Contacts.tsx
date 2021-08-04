@@ -15,6 +15,7 @@ import styles from '../StateSubmissionForm.module.scss'
 
 import {
     ActuarialFirmType,
+    ActuaryCommunicationType,
     DraftSubmission,
     UpdateDraftSubmissionInput,
 } from '../../../gen/gqlClient'
@@ -27,6 +28,7 @@ import { MCRouterState } from '../../../constants/routerState'
 export interface ContactsFormValues {
     stateContacts: stateContactValue[]
     actuaryContacts: actuaryContactValue[]
+    actuaryCommunicationPreference: ActuaryCommunicationType | undefined
 }
 
 export interface stateContactValue {
@@ -65,7 +67,10 @@ const ContactSchema = Yup.object().shape({
             actuarialFirm: Yup.string()
                 .required('You must select an actuarial firm')
                 .nullable()
-        }))
+        })),
+    actuaryCommunicationPreference: Yup.string()
+        .required('You must select a communication preference')
+        .nullable()
 })
 
 type FormError = FormikErrors<ContactsFormValues>[keyof FormikErrors<ContactsFormValues>]
@@ -142,6 +147,7 @@ export const Contacts = ({
     const contactsInitialValues: ContactsFormValues = {
       stateContacts: stateContacts,
       actuaryContacts: actuaryContacts,
+      actuaryCommunicationPreference: draftSubmission?.actuaryCommunicationPreference ?? undefined,
     }
 
     // Handler for Contacts legends so that contacts show up as
@@ -172,6 +178,9 @@ export const Contacts = ({
         const updatedDraft = updatesFromSubmission(draftSubmission)
         updatedDraft.stateContacts = values.stateContacts
         updatedDraft.actuaryContacts = values.actuaryContacts
+        updatedDraft.actuaryCommunicationPreference = values.actuaryCommunicationPreference
+
+        console.log(updatedDraft)
 
         try {
             const updatedSubmission = await updateDraft({
@@ -406,74 +415,75 @@ export const Contacts = ({
                                                         />
                                                   </FormGroup>
 
-                                                  <label htmlFor={`actuaryContacts.${index}.actuarialFirm`}>
-                                                      Actuarial firm
-                                                  </label>
-                                                  {showFieldErrors(`True`) && (
-                                                    <ErrorMessage
-                                                        name={`actuaryContacts.${index}.actuarialFirm`}
-                                                        component="div"
-                                                        className="usa-error-message"
-                                                    />
-                                                  )}
-                                                  <FieldRadio
-                                                      id={`mercer-${index}`}
-                                                      name={`actuaryContacts.${index}.actuarialFirm`}
-                                                      label="Mercer"
-                                                      value={'MERCER'}
-                                                      checked={values.actuaryContacts[index].actuarialFirm === 'MERCER'}
-                                                      aria-required
-                                                  />
-                                                  {/*
-                                                    checked={values.actuaryContacts[index].actuarialFirm === 'MERCER'}
-                                                    */}
-                                                  <FieldRadio
-                                                      id={`milliman-${index}`}
-                                                      name={`actuaryContacts.${index}.actuarialFirm`}
-                                                      label="Milliman"
-                                                      value={'MILLIMAN'}
-                                                      checked={values.actuaryContacts[index].actuarialFirm === 'MILLIMAN'}
-                                                      aria-required
-                                                  />
-                                                  <FieldRadio
-                                                      id={`optumas-${index}`}
-                                                      name={`actuaryContacts.${index}.actuarialFirm`}
-                                                      label="Optumas"
-                                                      value={'OPTUMAS'}
-                                                      checked={values.actuaryContacts[index].actuarialFirm === 'OPTUMAS'}
-                                                      aria-required
-                                                  />
-                                                  <FieldRadio
-                                                      id={`guidehouse-${index}`}
-                                                      name={`actuaryContacts.${index}.actuarialFirm`}
-                                                      label="Guidehouse"
-                                                      value={'GUIDEHOUSE'}
-                                                      aria-required
-                                                  />
-                                                  <FieldRadio
-                                                      id={`deloitte-${index}`}
-                                                      name={`actuaryContacts.${index}.actuarialFirm`}
-                                                      label="Deloitte"
-                                                      value={'DELOITTE'}
-                                                      checked={values.actuaryContacts[index].actuarialFirm === 'DELOITTE'}
-                                                      aria-required
-                                                  />
-                                                  <FieldRadio
-                                                      id={`stateInHouse-${index}`}
-                                                      name={`actuaryContacts.${index}.actuarialFirm`}
-                                                      label="State in-house"
-                                                      value={'STATE_IN_HOUSE'}
-                                                      checked={values.actuaryContacts[index].actuarialFirm === 'STATE_IN_HOUSE'}
-                                                      aria-required
-                                                  />
-                                                  <FieldRadio
-                                                      id={`other-${index}`}
-                                                      name={`actuaryContacts.${index}.actuarialFirm`}
-                                                      label="Other"
-                                                      value={'OTHER'}
-                                                      checked={values.actuaryContacts[index].actuarialFirm === 'OTHER'}
-                                                      aria-required
-                                                  />
+                                                  <FormGroup
+                                                  error={showFieldErrors(actuaryContactErrorHandling(errors?.actuaryContacts?.[index])?.actuarialFirm)}
+                                                  >
+                                                      <label htmlFor={`actuaryContacts.${index}.actuarialFirm`}>
+                                                          Actuarial firm
+                                                      </label>
+                                                      {showFieldErrors(`True`) && (
+                                                        <ErrorMessage
+                                                            name={`actuaryContacts.${index}.actuarialFirm`}
+                                                            component="div"
+                                                            className="usa-error-message"
+                                                        />
+                                                      )}
+                                                      <FieldRadio
+                                                          id={`mercer-${index}`}
+                                                          name={`actuaryContacts.${index}.actuarialFirm`}
+                                                          label="Mercer"
+                                                          value={'MERCER'}
+                                                          checked={values.actuaryContacts[index].actuarialFirm === 'MERCER'}
+                                                          aria-required
+                                                      />
+                                                      <FieldRadio
+                                                          id={`milliman-${index}`}
+                                                          name={`actuaryContacts.${index}.actuarialFirm`}
+                                                          label="Milliman"
+                                                          value={'MILLIMAN'}
+                                                          checked={values.actuaryContacts[index].actuarialFirm === 'MILLIMAN'}
+                                                          aria-required
+                                                      />
+                                                      <FieldRadio
+                                                          id={`optumas-${index}`}
+                                                          name={`actuaryContacts.${index}.actuarialFirm`}
+                                                          label="Optumas"
+                                                          value={'OPTUMAS'}
+                                                          checked={values.actuaryContacts[index].actuarialFirm === 'OPTUMAS'}
+                                                          aria-required
+                                                      />
+                                                      <FieldRadio
+                                                          id={`guidehouse-${index}`}
+                                                          name={`actuaryContacts.${index}.actuarialFirm`}
+                                                          label="Guidehouse"
+                                                          value={'GUIDEHOUSE'}
+                                                          aria-required
+                                                      />
+                                                      <FieldRadio
+                                                          id={`deloitte-${index}`}
+                                                          name={`actuaryContacts.${index}.actuarialFirm`}
+                                                          label="Deloitte"
+                                                          value={'DELOITTE'}
+                                                          checked={values.actuaryContacts[index].actuarialFirm === 'DELOITTE'}
+                                                          aria-required
+                                                      />
+                                                      <FieldRadio
+                                                          id={`stateInHouse-${index}`}
+                                                          name={`actuaryContacts.${index}.actuarialFirm`}
+                                                          label="State in-house"
+                                                          value={'STATE_IN_HOUSE'}
+                                                          checked={values.actuaryContacts[index].actuarialFirm === 'STATE_IN_HOUSE'}
+                                                          aria-required
+                                                      />
+                                                      <FieldRadio
+                                                          id={`other-${index}`}
+                                                          name={`actuaryContacts.${index}.actuarialFirm`}
+                                                          label="Other"
+                                                          value={'OTHER'}
+                                                          checked={values.actuaryContacts[index].actuarialFirm === 'OTHER'}
+                                                          aria-required
+                                                      />
+                                                  </FormGroup>
 
                                                   {index > 0 && (
                                                   <Button
@@ -501,9 +511,49 @@ export const Contacts = ({
                                   )}
                                   </FieldArray>
 
-                                </fieldset>
-                            )}
+                                  <legend className="srOnly">Actuarial communication preference</legend>
+                                  <FormGroup
+                                      error={showFieldErrors(errors.actuaryCommunicationPreference)}
+                                  >
+                                      <Fieldset
+                                          className={styles.radioGroup}
+                                          legend="Communication preference between CMS Office of the Actuary (OACT) and the state’s actuary"
+                                      >
+                                      {showFieldErrors(`True`) && (
+                                        <ErrorMessage
+                                            name={`actuaryCommunicationPreference`}
+                                            component="div"
+                                            className="usa-error-message"
+                                        />
+                                      )}
+                                          <FieldRadio
+                                              id="OACTtoActuary"
+                                              name="actuaryCommunicationPreference"
+                                              label={`OACT can communicate directly with the state’s actuary
+but should copy the state on all written communication
+and all appointments for verbal discussions.`}
+                                              value={'OACT_TO_ACTUARY'}
+                                              checked={values.actuaryCommunicationPreference === 'OACT_TO_ACTUARY'}
+                                              aria-required
+                                          />
+                                          <FieldRadio
+                                              id="OACTtoState"
+                                              name="actuaryCommunicationPreference"
+                                              label={`OACT can communicate directly with the state, and the
+state will relay all written communication to their actuary
+and set up time for any potential verbal discussions.`}
+                                              value={'OACT_TO_STATE'}
+                                              checked={values.actuaryCommunicationPreference === 'OACT_TO_STATE'}
+                                              aria-required
+                                          />
+                                      </Fieldset>
 
+                                  </FormGroup>
+
+                                </fieldset>
+
+
+                            )}
                             <div className={styles.pageActions}>
                                 <Button
                                     type="button"
@@ -545,7 +595,6 @@ export const Contacts = ({
                                         type="submit"
                                         disabled={isSubmitting}
                                         onClick={() => {
-                                          console.log(values)
                                             redirectToDashboard.current = false
                                             setShouldValidate(true)
                                         }}

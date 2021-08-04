@@ -51,6 +51,8 @@ function updatesFromSubmission(draft: DraftSubmission): DraftSubmissionUpdates {
         rateAmendmentInfo: stripTypename(draft.rateAmendmentInfo),
         stateContacts: stripTypename(draft.stateContacts),
         actuaryContacts: stripTypename(draft.actuaryContacts),
+        actuaryCommunicationPreference: draft.actuaryCommunicationPreference,
+
     }
 }
 

@@ -25,6 +25,7 @@ query fetchStateSubmission($input: FetchStateSubmissionInput!) {
                 email
                 actuarialFirm
             }
+            actuaryCommunicationPreference
             documents {
                 name
                 s3URL

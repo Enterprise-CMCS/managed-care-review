@@ -24,6 +24,7 @@ query fetchDraftSubmission($input: FetchDraftSubmissionInput!) {
                 email
                 actuarialFirm
             }
+            actuaryCommunicationPreference
             documents {
                 name
                 s3URL

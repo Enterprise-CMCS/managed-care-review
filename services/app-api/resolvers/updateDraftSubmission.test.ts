@@ -43,6 +43,7 @@ describe('updateDraftSubmission', () => {
                 },
                 stateContacts: [],
                 actuaryContacts: [],
+                actuaryCommunicationPreference: null,
             }
 
             const updates: DraftSubmissionUpdates = {
@@ -63,6 +64,7 @@ describe('updateDraftSubmission', () => {
                 rateAmendmentInfo: undefined,
                 stateContacts: [],
                 actuaryContacts: [],
+                actuaryCommunicationPreference: null,
             }
 
             applyUpdates(baseDraft, updates)

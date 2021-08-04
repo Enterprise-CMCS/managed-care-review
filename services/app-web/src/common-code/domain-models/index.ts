@@ -16,6 +16,7 @@ export type {
     FederalAuthority,
     StateContact,
     ActuaryContact,
+    ActuaryCommunicationType,
     ManagedCareEntity,
 } from './DraftSubmissionType'
 
