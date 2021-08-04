@@ -17,7 +17,7 @@ Cypress.Commands.add('startNewContractOnlySubmission', () => {
         name: 'Continue',
     }).safeClick()
     cy.findByTestId('step-indicator')
-        .findAllByText('Contract Details')
+        .findAllByText('Contract details')
         .should('have.length', 2)
     cy.findByText(/^MN-PMAP-/).should('exist')
 })
@@ -42,7 +42,7 @@ Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
     }).safeClick()
 
     cy.findByTestId('step-indicator')
-        .findAllByText('Contract Details')
+        .findAllByText('Contract details')
         .should('have.length', 2)
     cy.findByText(/^MN-PMAP-/).should('exist')
 })

@@ -39,9 +39,9 @@ describe('State Submission', () => {
                 name: 'Continue',
             }).safeClick()
 
-            // Check Step Indicator loads with Contract Details heading
+            // Check Step Indicator loads with contract details heading
             cy.findByTestId('step-indicator')
-                .findAllByText('Contract Details')
+                .findAllByText('Contract details')
                 .should('have.length', 2)
 
             // Fill out some base contract fields
@@ -69,7 +69,7 @@ describe('State Submission', () => {
             cy.findByLabelText('New rate certification').safeClick()
 
             cy.findByTestId('step-indicator')
-                .findAllByText('Rate Details')
+                .findAllByText('Rate details')
                 .should('have.length', 2)
 
             cy.findByLabelText('Start date').type('04/01/2024')
@@ -213,7 +213,7 @@ describe('State Submission', () => {
             cy.startNewContractOnlySubmission()
 
             // This will break eventually, but is fixing a weird bug in CI where the heading hasn't been
-            // updated with the Submission.name even though we can see 'Contract details'
+            // updated with the Submission.name even though we can see 'contract details'
             cy.findByText(/^MN-PMAP-/).should('exist')
 
             // see that the submission appears on the dashboard
@@ -307,9 +307,9 @@ describe('State Submission', () => {
             cy.navigateForm('Continue')
 
             // Change contract dates
-            cy.findByTestId('step-indicator')
-                .findAllByText('Contract Details')
-                .should('have.length', 2)
+            // cy.findByTestId('step-indicator')
+            //     .findAllByText('Contract details')
+            //     .should('have.length', 2)
 
             cy.findByText(/MN-PMAP/).should('exist')
             cy.findByLabelText('Base contract').should('be.checked')
@@ -371,8 +371,8 @@ describe('State Submission', () => {
             cy.login()
             cy.startNewContractAndRatesSubmission()
 
-            // Fill out contract details
-            cy.findByRole('heading', { name: /Contract Details/ })
+            // Fill out Contract details
+            cy.findByRole('heading', { name: /Contract details/ })
             cy.findByLabelText('Amendment to base contract')
                 .should('exist')
                 .safeClick()
@@ -395,7 +395,7 @@ describe('State Submission', () => {
             //Fill out rate details
             cy.findByLabelText('New rate certification').safeClick()
             cy.findByTestId('step-indicator')
-                .findAllByText('Rate Details')
+                .findAllByText('Rate details')
                 .should('have.length', 2)
             cy.findByLabelText('Start date').type('04/01/2024')
             cy.findByLabelText('End date').type('04/01/2026')
