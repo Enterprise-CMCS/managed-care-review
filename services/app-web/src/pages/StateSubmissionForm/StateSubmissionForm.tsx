@@ -30,8 +30,8 @@ import {
 } from '../../gen/gqlClient'
 
 const GenericFormAlert = () => <Alert type="error">Something went wrong</Alert>
-
 const activeFormPages = (draft: DraftSubmission): RouteT[] => {
+    // If submission type is contract only, rate details is left out of the step indicator
     return STATE_SUBMISSION_FORM_ROUTES.filter(
         (formPage) =>
             !(

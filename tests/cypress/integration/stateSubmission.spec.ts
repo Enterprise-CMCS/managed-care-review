@@ -306,17 +306,18 @@ describe('State Submission', () => {
             cy.findByLabelText('Contract action only').safeClick()
             cy.navigateForm('Continue')
 
-            // Change contract dates
-            // cy.findByTestId('step-indicator')
-            //     .findAllByText('Contract details')
-            //     .should('have.length', 2)
-
             cy.findByText(/MN-PMAP/).should('exist')
             cy.findByLabelText('Base contract').should('be.checked')
             cy.findByLabelText('Start date').clear()
             cy.findByLabelText('Start date').type('04/15/2024')
             cy.findByLabelText('End date').clear()
             cy.findByLabelText('End date').type('04/15/2026')
+
+            // Change contract dates
+            cy.findByTestId('step-indicator')
+                .findAllByText('Contract details')
+                .should('have.length', 2)
+
             cy.findByRole('button', {
                 name: 'Continue',
             }).safeClick()

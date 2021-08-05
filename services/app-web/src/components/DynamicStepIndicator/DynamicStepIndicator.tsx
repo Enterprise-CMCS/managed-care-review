@@ -21,28 +21,26 @@ export const DynamicStepIndicator = ({
         return null
     } else {
         return (
-            <>
-                <StepIndicator>
-                    {formPages.map((formPageName) => {
-                        if (formPageName === currentFormPage) {
-                            formStepCompleted = false
-                            formStepStatus = 'current'
-                        } else if (formStepCompleted) {
-                            formStepStatus = 'complete'
-                        } else {
-                            formStepStatus = undefined
-                        }
+            <StepIndicator>
+                {formPages.map((formPageName) => {
+                    if (formPageName === currentFormPage) {
+                        formStepCompleted = false
+                        formStepStatus = 'current'
+                    } else if (formStepCompleted) {
+                        formStepStatus = 'complete'
+                    } else {
+                        formStepStatus = undefined
+                    }
 
-                        return (
-                            <StepIndicatorStep
-                                label={PageTitlesRecord[formPageName]}
-                                status={formStepStatus}
-                                key={PageTitlesRecord[formPageName]}
-                            />
-                        )
-                    })}
-                </StepIndicator>
-            </>
+                    return (
+                        <StepIndicatorStep
+                            label={PageTitlesRecord[formPageName]}
+                            status={formStepStatus}
+                            key={PageTitlesRecord[formPageName]}
+                        />
+                    )
+                })}
+            </StepIndicator>
         )
     }
 }
