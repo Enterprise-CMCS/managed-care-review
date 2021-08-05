@@ -1,0 +1,23 @@
+service: postgres
+
+frameworkVersion: '2'
+
+plugins:
+  - serverless-stack-termination-protection
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: us-east-1
+
+custom:
+  stage: ${opt:stage, self:provider.stage)
+
+resources:
+  Resources:
+    PostgresRDS:
+      Type: AWS::RDS::DBCluster
+      Properties:
+        DatabaseName: !Sub ${self:service.name}-${self:custom.stage}-aurora-${AWS::AccountId}
+        Engine: aurora-postgresql
+        EngineMode: serverless
