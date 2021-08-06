@@ -6,8 +6,8 @@ stage=${1:-dev}
 
 services=(
   'database'
+  'postgres'
   'uploads'
-  # 'uploads-scan'
   'app-api'
   'stream-functions'
   'ui'
@@ -28,29 +28,30 @@ install_deps() {
 
 deploy() {
   service=$1
-  pushd services/$service
+  pushd services/"$service"
   install_deps
-  serverless deploy  --stage $stage
+  serverless deploy  --stage "$stage"
   popd
 }
 
 install_deps
-export PATH=$(pwd)/node_modules/.bin/:$PATH
+PATH=$(pwd)/node_modules/.bin/:$PATH
+export PATH
 
 for i in "${services[@]}"
 do
-	deploy $i
+	deploy "$i"
 done
 
 pushd services
 echo """
 ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------
-Application endpoint:  `./output.sh ui CloudFrontEndpointUrl $stage`
-Storybook endpoint:  `./output.sh storybook CloudFrontEndpointUrl $stage`
+Application endpoint:  $(./output.sh ui CloudFrontEndpointUrl "$stage")
+Storybook endpoint:  $(./output.sh storybook CloudFrontEndpointUrl "$stage")
 
-SSO URL: `./output.sh ui-auth UserPoolSingleSignOnURL $stage`
-AudienceRestriction: `./output.sh ui-auth AudienceRestrictionURI $stage`
+SSO URL: $(./output.sh ui-auth UserPoolSingleSignOnURL "$stage")
+AudienceRestriction: $(./output.sh ui-auth AudienceRestrictionURI "$stage")
 ------------------------------------------------------------------------------------------------
 """
 popd
