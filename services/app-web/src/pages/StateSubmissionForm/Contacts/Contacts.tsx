@@ -30,7 +30,6 @@ import {
     stripTypename,
 } from '../updateSubmissionTransform'
 import { MCRouterState } from '../../../constants/routerState'
-
 export interface ContactsFormValues {
     stateContacts: StateContactValue[]
 }
@@ -84,7 +83,16 @@ export const Contacts = ({
 }): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const redirectToDashboard = React.useRef(false)
+    const autoFocusRef = React.useRef<HTMLElement | null>(null)
+    const [focusNewContact, setFocusNewContact] = React.useState(false)
     const history = useHistory<MCRouterState>()
+
+    React.useEffect(() => {
+        if (focusNewContact) {
+            autoFocusRef.current && autoFocusRef.current.focus()
+            setFocusNewContact(false)
+        }
+    }, [focusNewContact])
 
     // TODO: refactor this into reusable component that is more understandable
     const showFieldErrors = (error?: FormError): boolean | undefined =>
@@ -230,6 +238,12 @@ export const Contacts = ({
                                                                         id={`stateContacts.${index}.name`}
                                                                         type="text"
                                                                         className="usa-input"
+                                                                        innerRef={(
+                                                                            el: HTMLElement
+                                                                        ) =>
+                                                                            (autoFocusRef.current =
+                                                                                el)
+                                                                        }
                                                                     />
                                                                 </FormGroup>
 
@@ -324,9 +338,10 @@ export const Contacts = ({
                                                 type="button"
                                                 outline
                                                 className={styles.addContactBtn}
-                                                onClick={() =>
+                                                onClick={() => {
                                                     push(emptyStateContact)
-                                                }
+                                                    setFocusNewContact(true)
+                                                }}
                                             >
                                                 Add state contact
                                             </Button>

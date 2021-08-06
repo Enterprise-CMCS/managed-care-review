@@ -8,6 +8,7 @@ import {
 
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { Contacts } from './Contacts'
+import userEvent from '@testing-library/user-event'
 
 describe('Contacts', () => {
     afterEach(() => jest.clearAllMocks())
@@ -44,9 +45,7 @@ describe('Contacts', () => {
             />,
             {
                 apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                    ],
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
             }
         )
@@ -67,8 +66,8 @@ describe('Contacts', () => {
                     name: '',
                     titleRole: '',
                     email: '',
-                }
-            ]
+                },
+            ],
         }
 
         renderWithProviders(
@@ -100,4 +99,36 @@ describe('Contacts', () => {
         })
     })
 
+    it('when clicking "Add state contact" button, should focus on the field name of the new contact', async () => {
+        const mock = mockDraft()
+        const mockUpdateDraftFn = jest.fn()
+
+        renderWithProviders(
+            <Contacts draftSubmission={mock} updateDraft={mockUpdateDraftFn} />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+        const addStateContactButton = screen.getByRole('button', {
+            name: 'Add state contact',
+        })
+        const firstContactName = screen.getByLabelText('Name')
+
+        userEvent.type(firstContactName, 'First person')
+        expect(firstContactName).toHaveFocus()
+
+        addStateContactButton.click()
+
+        await waitFor(() => {
+            expect(screen.getAllByLabelText('Name').length).toBe(2)
+            const secondContactName = screen.getAllByLabelText('Name')[1]
+            expect(firstContactName).toHaveValue('First person')
+            expect(firstContactName).not.toHaveFocus()
+
+            expect(secondContactName).toHaveValue('')
+            expect(secondContactName).toHaveFocus()
+        })
+    })
 })
