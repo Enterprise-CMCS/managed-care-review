@@ -9,7 +9,12 @@ import { GenericError } from '../Errors/GenericError'
 import { Loading } from '../../components/Loading/'
 import { DynamicStepIndicator } from '../../components/DynamicStepIndicator/'
 import { usePage } from '../../contexts/PageContext'
-import { RoutesRecord, getRouteName, RouteT } from '../../constants/routes'
+import {
+    RoutesRecord,
+    getRouteName,
+    STATE_SUBMISSION_FORM_ROUTES,
+    RouteT,
+} from '../../constants/routes'
 import { ContractDetails } from './ContractDetails/ContractDetails'
 import { RateDetails } from './RateDetails/RateDetails'
 import { Contacts } from './Contacts/Contacts'
@@ -26,16 +31,9 @@ import {
 
 const GenericFormAlert = () => <Alert type="error">Something went wrong</Alert>
 
-const StateSubmissionFormRoutes = [
-    'SUBMISSIONS_CONTRACT_DETAILS',
-    'SUBMISSIONS_RATE_DETAILS',
-    'SUBMISSIONS_CONTACTS',
-    'SUBMISSIONS_DOCUMENTS',
-    'SUBMISSIONS_REVIEW_SUBMIT',
-] as RouteT[]
 const activeFormPages = (draft: DraftSubmission): RouteT[] => {
     // If submission type is contract only, rate details is left out of the step indicator
-    return StateSubmissionFormRoutes.filter(
+    return STATE_SUBMISSION_FORM_ROUTES.filter(
         (formPage) =>
             !(
                 draft?.submissionType === 'CONTRACT_ONLY' &&
@@ -118,7 +116,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
             if (err?.extensions?.code === 'WRONG_STATUS') {
                 if (
                     currentRoute !== 'UNKNOWN_ROUTE' &&
-                    StateSubmissionFormRoutes.includes(currentRoute)
+                    STATE_SUBMISSION_FORM_ROUTES.includes(currentRoute)
                 ) {
                     specificContent = <ErrorInvalidSubmissionStatus />
                 }
