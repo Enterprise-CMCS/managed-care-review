@@ -226,12 +226,6 @@ export const SubmissionType = ({
                 validateForm,
             }) => (
                 <>
-                    <PageHeading
-                        className={styles.formHeader}
-                        headingLevel="h2"
-                    >
-                        Submission type
-                    </PageHeading>
                     <UswdsForm
                         className={styles.formContainer}
                         id="SubmissionTypeForm"
