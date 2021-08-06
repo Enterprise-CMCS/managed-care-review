@@ -30,6 +30,8 @@ import {
     stripTypename,
 } from '../updateSubmissionTransform'
 import { MCRouterState } from '../../../constants/routerState'
+import { useFocus } from '../../../hooks/useFocus'
+
 export interface ContactsFormValues {
     stateContacts: StateContactValue[]
 }
@@ -82,15 +84,24 @@ export const Contacts = ({
     ) => Promise<DraftSubmission | undefined>
 }): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
-    const redirectToDashboard = React.useRef(false)
-    const autoFocusRef = React.useRef<HTMLElement | null>(null)
     const [focusNewContact, setFocusNewContact] = React.useState(false)
+
+    const redirectToDashboard = React.useRef(false)
+    const newStateContactNameRef = React.useRef<HTMLElement | null>(null) // This ref.current is reset to the newest contact name field each time new contact is added
+    const [newStateContactButtonRef, setNewStateContactButtonFocus] = useFocus() // This ref.current is always the same element
+
     const history = useHistory<MCRouterState>()
 
+    /* 
+     Set focus to contact name field when adding new contacts. 
+     Clears ref and focusNewContact component state immediately after. The reset allows additional contacts to be added and preserves expected focus behavior.
+    */
     React.useEffect(() => {
         if (focusNewContact) {
-            autoFocusRef.current && autoFocusRef.current.focus()
+            newStateContactNameRef.current &&
+                newStateContactNameRef.current.focus()
             setFocusNewContact(false)
+            newStateContactNameRef.current = null
         }
     }, [focusNewContact])
 
@@ -241,7 +252,7 @@ export const Contacts = ({
                                                                         innerRef={(
                                                                             el: HTMLElement
                                                                         ) =>
-                                                                            (autoFocusRef.current =
+                                                                            (newStateContactNameRef.current =
                                                                                 el)
                                                                         }
                                                                     />
@@ -319,11 +330,12 @@ export const Contacts = ({
                                                                         className={
                                                                             styles.removeContactBtn
                                                                         }
-                                                                        onClick={() =>
+                                                                        onClick={() => {
                                                                             remove(
                                                                                 index
                                                                             )
-                                                                        }
+                                                                            setNewStateContactButtonFocus()
+                                                                        }}
                                                                     >
                                                                         Remove
                                                                         contact
@@ -334,17 +346,17 @@ export const Contacts = ({
                                                     )
                                                 )}
 
-                                            <Button
+                                            <button
                                                 type="button"
-                                                outline
-                                                className={styles.addContactBtn}
+                                                className={`usa-button usa-button---outline ${styles.addContactBtn}`}
                                                 onClick={() => {
                                                     push(emptyStateContact)
                                                     setFocusNewContact(true)
                                                 }}
+                                                ref={newStateContactButtonRef}
                                             >
                                                 Add state contact
-                                            </Button>
+                                            </button>
                                         </div>
                                     )}
                                 </FieldArray>

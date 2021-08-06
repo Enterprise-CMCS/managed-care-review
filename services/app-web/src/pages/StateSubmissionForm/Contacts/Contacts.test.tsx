@@ -99,7 +99,7 @@ describe('Contacts', () => {
         })
     })
 
-    it('when clicking "Add state contact" button, should focus on the field name of the new contact', async () => {
+    it('after "Add state contact" button click, should focus on the field name of the new contact', async () => {
         const mock = mockDraft()
         const mockUpdateDraftFn = jest.fn()
 
@@ -129,6 +129,36 @@ describe('Contacts', () => {
 
             expect(secondContactName).toHaveValue('')
             expect(secondContactName).toHaveFocus()
+        })
+    })
+
+    it('after "Remove contact" button click, should focus on add new contact button', async () => {
+        const mock = mockDraft()
+        const mockUpdateDraftFn = jest.fn()
+
+        renderWithProviders(
+            <Contacts draftSubmission={mock} updateDraft={mockUpdateDraftFn} />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+        const addStateContactButton = screen.getByRole('button', {
+            name: 'Add state contact',
+        })
+        addStateContactButton.click()
+
+        await waitFor(() => {
+            expect(
+                screen.getByRole('button', { name: 'Remove contact' })
+            ).toBeInTheDocument()
+
+            userEvent.click(
+                screen.getByRole('button', { name: 'Remove contact' })
+            )
+
+            expect(addStateContactButton).toHaveFocus()
         })
     })
 })
