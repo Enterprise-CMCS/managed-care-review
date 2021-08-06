@@ -11,7 +11,7 @@ provider:
   region: us-east-1
 
 custom:
-  stage: ${opt:stage, self:provider.stage)
+  stage: ${opt:stage, self:provider.stage}
 
 resources:
   Resources:
