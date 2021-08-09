@@ -51,7 +51,7 @@ resources:
         SubnetIds:
           - Ref: PostgresSubnet00
           - Ref: PostgresSubnet01
-        SecurityGroupIds: !GetAtt PostgresVPC.DefaultSecurityGroup
+        SecurityGroupIds: [!GetAtt PostgresVPC.DefaultSecurityGroup]
         VpcEndpointType: Interface
         ServiceName:
           Fn::Sub: com.amazonaws.${AWS::Region}.secretsmanager
