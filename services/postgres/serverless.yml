@@ -71,12 +71,13 @@ resources:
     PostgresRDS:
       Type: AWS::RDS::DBCluster
       Properties:
+        Engine: aurora-postgresql
+        EngineMode: serverless
         DatabaseName: !Sub ${self:service.name}-${self:custom.stage}-aurora-${AWS::AccountId}
         MasterUsername: !Sub '{{resolve:secretsmanager:${PostgresSecret}::username}}'
         MasterUserPassword: !Sub '{{resolve:secretsmanager:${PostgresSecret}::password}}'
-        Engine: aurora-postgresql
-        EngineMode: serverless
-        VPCSecurityGroupIds: !GetAtt PostgresVPC.DefaultSecurityGroup
+        DBSubnetGroupName: !Ref PostgresSubnetGroup
+        VpcSecurityGroupIds: [!GetAtt PostgresVPC.DefaultSecurityGroup]
 
     PostgresSubnetGroup:
       Type: AWS::RDS::DBSubnetGroup
