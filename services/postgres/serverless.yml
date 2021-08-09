@@ -31,8 +31,7 @@ resources:
             - '0'
             - Fn::GetAZs:
                 Ref: AWS::Region
-        VpcId:
-          Ref: PostgresVpc
+        VpcId: !Ref PostgresVpc
 
     PostgresSubnet01:
       Type: AWS::EC2::Subnet
@@ -43,8 +42,7 @@ resources:
             - '1'
             - Fn::GetAZs:
                 Ref: AWS::Region
-        VpcId:
-          Ref: PostgresVPC
+        VpcId: !Ref PostgresVPC
 
     # VPC endpoint for rotation lambda
     SecretsManagerVPCEndpoint:
@@ -53,15 +51,12 @@ resources:
         SubnetIds:
           - Ref: PostgresSubnet00
           - Ref: PostgresSubnet01
-        SecurityGroupIds:
-          - Fn::GetAtt:
-              - PostgresVPC
+        SecurityGroupIds: !GetAtt PostgresVPC.DefaultSecurityGroup
         VpcEndpointType: Interface
         ServiceName:
           Fn::Sub: com.amazonaws.${AWS::Region}.secretsmanager
         PrivateDnsEnabled: true
-        VpcId:
-          Ref: PostgresVPC
+        VpcId: !Ref PostgresVPC
 
     PostgresSecret:
       Type: AWS::SecretsManager::Secret
@@ -81,9 +76,7 @@ resources:
         MasterUserPassword: !Sub '{{resolve:secretsmanager:${PostgresSecret}::password}}'
         Engine: aurora-postgresql
         EngineMode: serverless
-        VPCSecurityGroupIds:
-          - Fn::GetAtt:
-              - PostgresVPC
+        VPCSecurityGroupIds: !GetAtt PostgresVPC.DefaultSecurityGroup
 
     PostgresSubnetGroup:
       Type: AWS::RDS::DBSubnetGroup
@@ -96,10 +89,8 @@ resources:
     SecretsRDSAttachment:
       Type: AWS::SecretsManager::SecretTargetAttachment
       Properties:
-        SecretId:
-          Ref: PostgresSecret
-        TargetId:
-          Ref: PostgresRDS
+        SecretId: !Ref PostgresSecret
+        TargetId: !Ref PostgresRDS
         TargetType: AWS::RDS::DBInstance
 
     PostgresSecretsRotationSchedule:
@@ -111,9 +102,7 @@ resources:
         HostedRotationLambda:
           RotationType: MySQLSingleUser
           RotationLambdaName: SecretsManagerRotation
-          VpcSecurityGroupIds:
-            Fn::GetAtt:
-              - PostgresVPC
+          VpcSecurityGroupIds: !GetAtt PostgresVPC.DefaultSecurityGroup
           VpcSubnetIds:
             Fn::Join:
               - ','
