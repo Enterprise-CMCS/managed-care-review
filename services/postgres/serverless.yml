@@ -56,7 +56,6 @@ resources:
         SecurityGroupIds:
           - Fn::GetAtt:
               - PostgresVPC
-              - DefaultSecurityGroup
         VpcEndpointType: Interface
         ServiceName:
           Fn::Sub: com.amazonaws.${AWS::Region}.secretsmanager
@@ -83,7 +82,8 @@ resources:
         Engine: aurora-postgresql
         EngineMode: serverless
         VPCSecurityGroupIds:
-          Value: !Ref PostgresVPC
+          - Fn::GetAtt:
+              - PostgresVPC
 
     PostgresSubnetGroup:
       Type: AWS::RDS::DBSubnetGroup
