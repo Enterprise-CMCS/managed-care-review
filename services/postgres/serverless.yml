@@ -15,9 +15,109 @@ custom:
 
 resources:
   Resources:
+    PostgresVPC:
+      Type: AWS::EC2::VPC
+      Properties:
+        CidrBlock: 10.0.0.0/16
+        EnableDnsHostnames: true
+        EnableDnsSupport: true
+
+    PostgresSubnet00:
+      Type: AWS::EC2::Subnet
+      Properties:
+        CidrBlock: 10.0.96.0/19
+        AvailabilityZone:
+          Fn::Select:
+            - '0'
+            - Fn::GetAZs:
+                Ref: AWS::Region
+        VpcId:
+          Ref: PostgresVpc
+
+    PostgresSubnet01:
+      Type: AWS::EC2::Subnet
+      Properties:
+        CidrBlock: 10.0.128.0/19
+        AvailabilityZone:
+          Fn::Select:
+            - '1'
+            - Fn::GetAZs:
+                Ref: AWS::Region
+        VpcId:
+          Ref: PostgresVPC
+
+    # VPC endpoint for rotation lambda
+    SecretsManagerVPCEndpoint:
+      Type: AWS::EC2::VPCEndpoint
+      Properties:
+        SubnetIds:
+          - Ref: PostgresSubnet00
+          - Ref: PostgresSubnet01
+        SecurityGroupIds:
+          - Fn::GetAtt:
+              - PostgresVPC
+              - DefaultSecurityGroup
+        VpcEndpointType: Interface
+        ServiceName:
+          Fn::Sub: com.amazonaws.${AWS::Region}.secretsmanager
+        PrivateDnsEnabled: true
+        VpcId:
+          Ref: PostgresVPC
+
+    PostgresSecret:
+      Type: AWS::SecretsManager::Secret
+      Properties:
+        Description: 'Dynamically generated password for aurora serverless postgres'
+        GenerateSecretString:
+          SecretStringTemplate: '{"username": "admin"}'
+          GenerateStringKey: password
+          PasswordLength: 30
+          ExcludeCharacters: "\"@/\\"
+
     PostgresRDS:
       Type: AWS::RDS::DBCluster
       Properties:
         DatabaseName: !Sub ${self:service.name}-${self:custom.stage}-aurora-${AWS::AccountId}
+        MasterUsername: !Sub '{{resolve:secretsmanager:${PostgresSecret}::username}}'
+        MasterUserPassword: !Sub '{{resolve:secretsmanager:${PostgresSecret}::password}}'
         Engine: aurora-postgresql
         EngineMode: serverless
+        VPCSecurityGroupIds:
+          Value: !Ref PostgresVPC
+
+    PostgresSubnetGroup:
+      Type: AWS::RDS::DBSubnetGroup
+      Properties:
+        DBSubnetGroupDescription: postgres aurora serverless
+        SubnetIds:
+          - Ref: PostgresSubnet00
+          - Ref: PostgresSubnet01
+
+    SecretsRDSAttachment:
+      Type: AWS::SecretsManager::SecretTargetAttachment
+      Properties:
+        SecretId:
+          Ref: PostgresSecret
+        TargetId:
+          Ref: PostgresRDS
+        TargetType: AWS::RDS::DBInstance
+
+    PostgresSecretsRotationSchedule:
+      Type: AWS::SecretsManager::RotationSchedule
+      DependsOn: SecretsRDSAttachment
+      Properties:
+        SecretId:
+          Ref: PostgresSecret
+        HostedRotationLambda:
+          RotationType: MySQLSingleUser
+          RotationLambdaName: SecretsManagerRotation
+          VpcSecurityGroupIds:
+            Fn::GetAtt:
+              - PostgresVPC
+          VpcSubnetIds:
+            Fn::Join:
+              - ','
+              - - Ref: PostgresSubnet00
+                - Ref: PostgresSubnet01
+        RotationRules:
+          AutomaticallyAfterDays: 30
