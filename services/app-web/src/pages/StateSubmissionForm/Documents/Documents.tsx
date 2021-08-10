@@ -16,7 +16,7 @@ import {
     UpdateDraftSubmissionInput,
 } from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
-import { S3Error, isS3Error } from '../../../s3'
+import { isS3Error } from '../../../s3'
 import {
     FileUpload,
     S3FileData,
@@ -73,29 +73,12 @@ const FormError = ({ isEmpty }: { isEmpty: boolean }): JSX.Element =>
         </Alert>
     )
 
-const waitFor = (delay: 1000) =>
-    new Promise((resolve) => setTimeout(resolve, delay))
-
-function retry(
-    fn: () => Promise<void | S3Error>,
-    retries = 5,
-    err = null
-): Promise<void | S3Error> {
-    if (!retries) {
-        console.log('REJECTED')
-        return Promise.reject(err)
-    }
-    return fn().catch((err) => {
-        return retry(fn, retries - 1, err)
-    })
-}
-
 export const Documents = ({
     draftSubmission,
     updateDraft,
     formAlert = undefined,
 }: DocumentProps): React.ReactElement => {
-    const { deleteFile, uploadFile, fetchFile, getKey, getS3URL } = useS3()
+    const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
     const [shouldValidate, setShouldValidate] = useState(false)
     const [hasValidFiles, setHasValidFiles] = useState(false)
     const [hasPendingFiles, setHasPendingFiles] = useState(false)
@@ -165,21 +148,10 @@ export const Documents = ({
         return { key: s3Key, s3URL: s3URL }
     }
 
-    /*  
-        Poll for scanning completion
-        - File scanning is an async action for each file.
-        - The file scanning service can take up up to 20 seconds to start up.
-        - We poll up to 60 times, with 1 second pause, for scanning completion. This means each file could be up to 1 min in a loading state.
-        - While the file is scanning, returns 403. When scanning is complete, the resource returns 200
-    */
     const handleScanFile = async (key: string): Promise<void | Error> => {
         try {
-            await retry(async () => {
-                await waitFor(1000)
-                return await fetchFile(key)
-            }, 60)
+            await scanFile(key)
         } catch (e) {
-            console.log('rejected in handleScanFile')
             if (isS3Error(e)) {
                 throw new Error(`Error in S3: ${key}`)
             }

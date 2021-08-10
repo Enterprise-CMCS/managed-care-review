@@ -3,6 +3,20 @@ import { parseKey } from '../common-code/s3URLEncoding'
 import type { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
 
+const waitFor = (delay: 1000) =>
+    new Promise((resolve) => setTimeout(resolve, delay))
+
+function retry(
+    fn: () => Promise<void | S3Error>,
+    retries = 5,
+    err = null
+): Promise<void | S3Error> {
+    if (!retries) {
+        return Promise.reject(err)
+    }
+    return fn().catch((err) => retry(fn, retries - 1, err))
+}
+
 type s3PutResponse = {
     key: string
 }
@@ -56,11 +70,19 @@ export function newAmplifyS3Client(bucketName: string): S3ClientT {
                 throw err
             }
         },
-        fetchFile: async (filename: string): Promise<void | S3Error> => {
+        /*  
+            Poll for scanning completion
+            - We poll up to 60 times, with 1 second pause, for scanning completion. This means each file could be up to 1 min in a loading state.
+            - While the file is scanning, returns 403. When scanning is complete, the resource returns 200
+        */
+        scanFile: async (filename: string): Promise<void | S3Error> => {
             try {
-                await Storage.vault.get(filename, {
-                    download: true,
-                })
+                await retry(async () => {
+                    await waitFor(1000)
+                    await Storage.vault.get(filename, {
+                        download: true,
+                    })
+                }, 60)
                 return
             } catch (err) {
                 if (err.name === 'Error' && err.message === 'Network Error') {

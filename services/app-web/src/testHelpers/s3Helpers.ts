@@ -8,7 +8,7 @@ export const testS3Client: S3ClientT = {
     deleteFile: async (filename: string): Promise<void> => {
         return
     },
-    fetchFile: async (filename: string): Promise<void> => {
+    scanFile: async (filename: string): Promise<void> => {
         return
     },
     getKey: (s3URL: string) => {

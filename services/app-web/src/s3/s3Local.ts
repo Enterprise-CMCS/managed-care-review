@@ -66,7 +66,7 @@ export function newLocalS3Client(
                 return err
             }
         },
-        fetchFile: async (s3Key: string): Promise<void | S3Error> => {
+        scanFile: async (s3Key: string): Promise<void | S3Error> => {
             return
         },
         getKey: (s3URL: string) => {
