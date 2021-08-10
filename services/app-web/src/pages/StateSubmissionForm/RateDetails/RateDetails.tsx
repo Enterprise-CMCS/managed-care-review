@@ -89,8 +89,23 @@ const RateDetailsFormSchema = Yup.object().shape({
     }),
 })
 
-type FormError =
-    FormikErrors<RateDetailsFormValues>[keyof FormikErrors<RateDetailsFormValues>]
+type FormError = FormikErrors<RateDetailsFormValues>[keyof FormikErrors<RateDetailsFormValues>]
+
+const RateDatesErrorMessage = ({
+    startDate,
+    endDate,
+    validationErrorMessage,
+}: {
+    startDate: string
+    endDate: string
+    validationErrorMessage: string
+}): React.ReactElement => (
+    <ErrorMessage>
+        {isDateRangeEmpty(startDate, endDate)
+            ? 'You must provide a start and an end date'
+            : validationErrorMessage}
+    </ErrorMessage>
+)
 
 export interface RateDetailsFormValues {
     rateType: RateType | undefined
@@ -182,7 +197,7 @@ export const RateDetails = ({
                         defaultProgramID: draftSubmission.programID,
                     })
                 } else {
-                    history.push(`/submissions/${draftSubmission.id}/documents`)
+                    history.push(`/submissions/${draftSubmission.id}/contacts`)
                 }
             }
         } catch (serverError) {
@@ -190,22 +205,6 @@ export const RateDetails = ({
             redirectToDashboard.current = false
         }
     }
-
-    const RateDatesErrorMessage = ({
-        startDate,
-        endDate,
-        validationErrorMessage,
-    }: {
-        startDate: string
-        endDate: string
-        validationErrorMessage: string
-    }): React.ReactElement => (
-        <ErrorMessage>
-            {isDateRangeEmpty(startDate, endDate)
-                ? 'You must provide a start and an end date'
-                : validationErrorMessage}
-        </ErrorMessage>
-    )
 
     return (
         <>
@@ -379,8 +378,10 @@ export const RateDetails = ({
                                                             startDateLabel="Start date"
                                                             startDatePickerProps={{
                                                                 disabled: false,
-                                                                id: 'effectiveDateStart',
-                                                                name: 'effectiveDateStart',
+                                                                id:
+                                                                    'effectiveDateStart',
+                                                                name:
+                                                                    'effectiveDateStart',
                                                                 defaultValue:
                                                                     values.effectiveDateStart,
                                                                 onChange: (
@@ -397,8 +398,10 @@ export const RateDetails = ({
                                                             endDateLabel="End date"
                                                             endDatePickerProps={{
                                                                 disabled: false,
-                                                                id: 'effectiveDateEnd',
-                                                                name: 'effectiveDateEnd',
+                                                                id:
+                                                                    'effectiveDateEnd',
+                                                                name:
+                                                                    'effectiveDateEnd',
                                                                 defaultValue:
                                                                     values.effectiveDateEnd,
                                                                 onChange: (
@@ -474,8 +477,7 @@ export const RateDetails = ({
                                         } else {
                                             setShouldValidate(true)
                                             if (!isValidating) {
-                                                redirectToDashboard.current =
-                                                    true
+                                                redirectToDashboard.current = true
                                                 handleSubmit()
                                             }
                                         }

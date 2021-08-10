@@ -1,5 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
-import { within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import { act } from 'react-dom/test-utils'
 import { createMemoryHistory } from 'history'
 import userEvent from '@testing-library/user-event'

@@ -4,17 +4,18 @@ on: delete
 
 jobs:
   destroy:
-    if: github.event.ref_type == 'branch'
+    # Protected branches should be designated as such in the GitHub UI.
+    # So, a protected branch should never have this workflow run, since the branch should never be deleted.
+    # This conditional is a backup mechanism to help prevent mistakes from becoming disasters.
+    # This is a list of branch names that are commonly used for protected branches/environments.
+    # Add/remove names from this list as appropriate.
+    if: github.event.ref_type == 'branch' && !contains(fromJson('["develop", "main", "master", "impl", "val", "prod", "production"]'), github.event.ref)
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2.3.4
       - name: set branch_name
         run: |
-          if [[ "$GITHUB_REF" =~ ^refs/heads/dependabot/.* ]]; then # Dependabot builds very long branch names.  This is a switch to make it shorter.
-            echo "branch_name=`echo ${GITHUB_REF#refs/heads/} | md5sum | head -c 10 | sed 's/^/x/'`" >> $GITHUB_ENV
-          else
-            echo "branch_name=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-          fi
-      - uses: actions/checkout@v1
+          echo "branch_name=$(./scripts/stage_name_for_branch.sh ${{ github.event.ref }})" >> $GITHUB_ENV
       - name: set branch specific variable names
         run: ./.github/build_vars.sh set_names
       - name: set variable values

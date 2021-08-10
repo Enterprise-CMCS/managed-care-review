@@ -1,11 +1,21 @@
 service: app-web
 
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: us-east-1
+
 plugins:
   - serverless-plugin-scripts
   - serverless-s3-sync
   - serverless-cloudfront-invalidate
+  - serverless-stack-termination-protection
+
 custom:
   stage: ${opt:stage, self:provider.stage}
+  region: ${opt:region, self:provider.region}
   api_url: ${cf:app-api-${self:custom.stage}.ApiGatewayRestApiUrl}
   application_endpoint_url: ${cf:ui-${self:custom.stage}.CloudFrontEndpointUrl}
   cognito_region: ${cf:ui-auth-${self:custom.stage}.Region}
@@ -20,6 +30,12 @@ custom:
   storybook_s3_bucket_name: ${cf:storybook-${self:custom.stage}.S3BucketName}
   storybook_cloudfront_distribution_id: ${cf:storybook-${self:custom.stage}.CloudFrontDistributionId}
   react_app_auth_mode: ${env:REACT_APP_AUTH_MODE}
+  serverlessTerminationProtection:
+    stages:
+      - dev
+      - val
+      - prod
+      - main
 
   s3Sync:
     - bucketName: ${self:custom.ui_s3_bucket_name}
@@ -54,10 +70,3 @@ custom:
         export REACT_APP_S3_DOCUMENTS_BUCKET=${self:custom.s3_documents_bucket_name}
         yarn run build
         yarn build-storybook
-
-# The `provider` block defines where your service will be deployed
-provider:
-  name: aws
-  runtime: nodejs12.x
-  region: us-east-1
-  stage: dev

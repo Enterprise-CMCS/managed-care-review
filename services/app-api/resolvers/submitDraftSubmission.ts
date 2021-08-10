@@ -8,9 +8,10 @@ import {
     hasValidDocuments,
     hasValidRates,
     isStateSubmission,
+    isContractAndRates,
 } from '../../app-web/src/common-code/domain-models'
 
-export const SubmissionErrorCodes = ['INCOMPLETE'] as const
+export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = typeof SubmissionErrorCodes[number] // iterable union type
 
 type SubmissionError = {
@@ -57,10 +58,15 @@ function submit(
             message: 'submissions is missing required contract fields',
         }
     } else if (!hasValidRates(maybeStateSubmission as StateSubmissionType)) {
-        return {
-            code: 'INCOMPLETE',
-            message: 'submissions is missing required rate fields',
-        }
+        return isContractAndRates(draft)
+            ? {
+                  code: 'INCOMPLETE',
+                  message: 'submission is missing required rate fields',
+              }
+            : {
+                  code: 'INVALID',
+                  message: 'submission includes invalid rate fields',
+              }
     } else if (
         !hasValidDocuments(maybeStateSubmission as StateSubmissionType)
     ) {

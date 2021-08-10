@@ -1,13 +1,24 @@
 service: storybook
 
+frameworkVersion: '2'
+
+plugins:
+  - serverless-stack-termination-protection
+
 custom:
   stage: ${opt:stage, self:provider.stage}
+  region: ${opt:region, self:provider.region}
+  serverlessTerminationProtection:
+    stages:
+      - dev
+      - val
+      - prod
+      - main
 
 provider:
   name: aws
   runtime: nodejs12.x
   region: us-east-1
-  stage: dev
 
 resources:
   Conditions:
@@ -161,16 +172,8 @@ resources:
 
   Outputs:
     S3BucketName:
-      Value:
-        Ref: S3Bucket
+      Value: !Ref S3Bucket
     CloudFrontDistributionId:
-      Value:
-        Ref: CloudFrontDistribution
+      Value: !Ref CloudFrontDistribution
     CloudFrontEndpointUrl:
-      Value:
-        Fn::Join:
-          - ''
-          - - https://
-            - Fn::GetAtt:
-                - CloudFrontDistribution
-                - DomainName
+      Value: !Sub https://${CloudFrontDistribution.DomainName}

@@ -1,17 +1,19 @@
-# Welcome to serverless. Read the docs
-# https://serverless.com/framework/docs/
-
-# Serverless.yml is the configuration the CLI
-# uses to deploy your code to your provider of choice
-
-# The `service` block is the name of the service
 service: database
+
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: us-east-1
 
 plugins:
   - serverless-dynamodb-local
+  - serverless-stack-termination-protection
 
 custom:
   stage: ${opt:stage, self:provider.stage}
+  region: ${opt:region, self:provider.region}
   draftSubmissionsTableName: ${self:custom.stage}-draft-submissions
   tableName: ${self:custom.stage}-amendments
   dynamodb:
@@ -21,12 +23,12 @@ custom:
       port: 8000
       inMemory: true
       migrate: true
-
-# The `provider` block defines where your service will be deployed
-provider:
-  name: aws
-  runtime: nodejs12.x
-  stage: dev
+  serverlessTerminationProtection:
+    stages:
+      - dev
+      - val
+      - prod
+      - main
 
 resources:
   Resources:
@@ -55,8 +57,7 @@ resources:
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
-        # Set the capacity to auto-scale
-        BillingMode: PAY_PER_REQUEST
+        BillingMode: PAY_PER_REQUEST # Set the capacity to auto-scale
     AmendmentsTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -73,8 +74,7 @@ resources:
             KeyType: HASH
           - AttributeName: amendmentId
             KeyType: RANGE
-        # Set the capacity to auto-scale
-        BillingMode: PAY_PER_REQUEST
+        BillingMode: PAY_PER_REQUEST # Set the capacity to auto-scale
     AmendmentsAtomicCounterTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -93,17 +93,14 @@ resources:
     DraftSubmissionsTableStreamArn:
       Value: !GetAtt DraftSubmissionsTable.StreamArn
     AmendmentsTableName:
-      Value:
-        Ref: AmendmentsTable
+      Value: !Ref AmendmentsTable
     AmendmentsTableArn:
       Value: !GetAtt AmendmentsTable.Arn
     AmendmentsTableStreamArn:
       Value: !GetAtt AmendmentsTable.StreamArn
     AmendmentsAtomicCounterTableName:
-      Value:
-        Ref: AmendmentsAtomicCounterTable
+      Value: !Ref AmendmentsAtomicCounterTable
     AmendmentsAtomicCounterTableArn:
       Value: !GetAtt AmendmentsAtomicCounterTable.Arn
     Region:
-      Value:
-        Ref: AWS::Region
+      Value: !Sub ${AWS::Region}

@@ -33,14 +33,40 @@ import { useS3 } from '../../../contexts/S3Context'
 import { MCRouterState } from '../../../constants/routerState'
 
 type DocumentWithLink = { url: string | null } & Document
+
+const SectionHeader = ({
+    header,
+    to,
+}: {
+    header: string
+    to: string
+}): React.ReactElement => {
+    return (
+        <div className={styles.reviewSectionHeader}>
+            <h2>{header}</h2>
+            <div>
+                <Link
+                    variant="unstyled"
+                    asCustom={NavLink}
+                    className="usa-button usa-button--outline"
+                    to={to}
+                >
+                    Edit <span className="srOnly">{header}</span>
+                </Link>
+            </div>
+        </div>
+    )
+}
+
 export const ReviewSubmit = ({
     draftSubmission,
 }: {
     draftSubmission: DraftSubmission
 }): React.ReactElement => {
     const [refreshedDocs, setRefreshedDocs] = useState<DocumentWithLink[]>([])
-    const [displayConfirmation, setDisplayConfirmation] =
-        useState<boolean>(false)
+    const [displayConfirmation, setDisplayConfirmation] = useState<boolean>(
+        false
+    )
     const { getURL, getKey } = useS3()
 
     const [userVisibleError, setUserVisibleError] = useState<
@@ -90,29 +116,6 @@ export const ReviewSubmit = ({
         void refreshDocuments()
     }, [draftSubmission.documents, getKey, getURL])
 
-    const SectionHeader = ({
-        header,
-        to,
-    }: {
-        header: string
-        to: string
-    }): React.ReactElement => {
-        return (
-            <div className={styles.reviewSectionHeader}>
-                <h2>{header}</h2>
-                <div>
-                    <Link
-                        variant="unstyled"
-                        asCustom={NavLink}
-                        className="usa-button usa-button--outline"
-                        to={to}
-                    >
-                        Edit <span className="srOnly">{header}</span>
-                    </Link>
-                </div>
-            </div>
-        )
-    }
     const documentsSummary = `${draftSubmission.documents.length} ${
         draftSubmission.documents.length === 1 ? 'file' : 'files'
     }`
@@ -200,6 +203,8 @@ export const ReviewSubmit = ({
     }
 
     const isContractAmendment = draftSubmission.contractType === 'AMENDMENT'
+    const isContractActionAndRateCertification =
+        draftSubmission.submissionType === 'CONTRACT_AND_RATES'
 
     return (
         <GridContainer className={styles.reviewSectionWrapper}>
@@ -379,67 +384,91 @@ export const ReviewSubmit = ({
                         )}
                 </dl>
             </section>
-            <section id="rateDetails" className={styles.reviewSection}>
-                <dl>
-                    <SectionHeader header="Rate details" to="rate-details" />
-                    <DoubleColumnRow
-                        left={
-                            <DataDetail
-                                id="rateType"
-                                label="Rate certification type"
-                                data={
-                                    draftSubmission.rateAmendmentInfo
-                                        ? 'Amendment to prior rate certification'
-                                        : 'New rate certification'
-                                }
-                            />
-                        }
-                        right={
-                            <DataDetail
-                                id="ratingPeriod"
-                                label={
-                                    draftSubmission.rateAmendmentInfo
-                                        ? 'Rating period of original rate certification'
-                                        : 'Rating period'
-                                }
-                                data={`${dayjs(
-                                    draftSubmission.rateDateStart
-                                ).format('MM/DD/YYYY')} - ${dayjs(
-                                    draftSubmission.rateDateEnd
-                                ).format('MM/DD/YYYY')}`}
-                            />
-                        }
-                    />
-                    <DoubleColumnRow
-                        left={
-                            <DataDetail
-                                id="dateCertified"
-                                label={
-                                    draftSubmission.rateAmendmentInfo
-                                        ? 'Date certified for rate amendment'
-                                        : 'Date certified'
-                                }
-                                data={dayjs(
-                                    draftSubmission.rateDateCertified
-                                ).format('MM/DD/YYYY')}
-                            />
-                        }
-                        right={
-                            draftSubmission.rateAmendmentInfo ? (
+
+            {isContractActionAndRateCertification && (
+                <section id="rateDetails" className={styles.reviewSection}>
+                    <dl>
+                        <SectionHeader
+                            header="Rate details"
+                            to="rate-details"
+                        />
+                        <DoubleColumnRow
+                            left={
                                 <DataDetail
-                                    id="effectiveRatingPeriod"
-                                    label="Effective dates of rate amendment"
+                                    id="rateType"
+                                    label="Rate certification type"
+                                    data={
+                                        draftSubmission.rateAmendmentInfo
+                                            ? 'Amendment to prior rate certification'
+                                            : 'New rate certification'
+                                    }
+                                />
+                            }
+                            right={
+                                <DataDetail
+                                    id="ratingPeriod"
+                                    label={
+                                        draftSubmission.rateAmendmentInfo
+                                            ? 'Rating period of original rate certification'
+                                            : 'Rating period'
+                                    }
                                     data={`${dayjs(
-                                        draftSubmission.rateAmendmentInfo
-                                            .effectiveDateStart
+                                        draftSubmission.rateDateStart
                                     ).format('MM/DD/YYYY')} - ${dayjs(
-                                        draftSubmission.rateAmendmentInfo
-                                            .effectiveDateEnd
+                                        draftSubmission.rateDateEnd
                                     ).format('MM/DD/YYYY')}`}
                                 />
-                            ) : null
-                        }
-                    />
+                            }
+                        />
+                        <DoubleColumnRow
+                            left={
+                                <DataDetail
+                                    id="dateCertified"
+                                    label={
+                                        draftSubmission.rateAmendmentInfo
+                                            ? 'Date certified for rate amendment'
+                                            : 'Date certified'
+                                    }
+                                    data={dayjs(
+                                        draftSubmission.rateDateCertified
+                                    ).format('MM/DD/YYYY')}
+                                />
+                            }
+                            right={
+                                draftSubmission.rateAmendmentInfo ? (
+                                    <DataDetail
+                                        id="effectiveRatingPeriod"
+                                        label="Effective dates of rate amendment"
+                                        data={`${dayjs(
+                                            draftSubmission.rateAmendmentInfo
+                                                .effectiveDateStart
+                                        ).format('MM/DD/YYYY')} - ${dayjs(
+                                            draftSubmission.rateAmendmentInfo
+                                                .effectiveDateEnd
+                                        ).format('MM/DD/YYYY')}`}
+                                    />
+                                ) : null
+                            }
+                        />
+                    </dl>
+                </section>
+            )}
+            <section id="stateContacts" className={styles.reviewSection}>
+                <dl>
+                    <SectionHeader header="State contacts" to="contacts" />
+
+                    <GridContainer>
+                        <Grid row>
+                            {draftSubmission.stateContacts.map((stateContact, index) => (
+                            <Grid col={6}>
+                                <span className="text-bold">Contact {index + 1}</span><br/>
+                                {stateContact.name}<br/>
+                                {stateContact.titleRole}<br/>
+                                <a href={`mailto:${stateContact.email}`}>{stateContact.email}</a><br/>
+                            </Grid>
+                            ))}
+                        </Grid>
+                    </GridContainer>
                 </dl>
             </section>
             <section id="documents" className={styles.reviewSection}>
@@ -528,10 +557,4 @@ export const ReviewSubmit = ({
             </div>
         </GridContainer>
     )
-}
-
-export type SectionHeaderProps = {
-    header: string
-    submissionName?: boolean
-    href: string
 }
