@@ -457,6 +457,12 @@ export const Contacts = ({
                                                           id={`actuaryContacts.${index}.name`}
                                                           type="text"
                                                           className="usa-input"
+                                                          innerRef={(
+                                                               el: HTMLElement
+                                                           ) =>
+                                                               (newStateContactNameRef.current =
+                                                                   el)
+                                                           }
                                                         />
                                                     </FormGroup>
 
@@ -602,7 +608,10 @@ export const Contacts = ({
                                                     type="button"
                                                     unstyled
                                                     className={styles.removeContactBtn}
-                                                    onClick={() => (remove(index))}
+                                                    onClick={() => {
+                                                         remove(index)
+                                                         setNewStateContactButtonFocus()
+                                                     }}
                                                   >
                                                       Remove contact
                                                   </Button>
@@ -611,14 +620,17 @@ export const Contacts = ({
                                               </div>
                                           ))}
 
-                                          <Button
+                                          <button
                                             type="button"
-                                            outline
-                                            className={styles.addContactBtn}
-                                            onClick={() => push(emptyActuaryContact)}
+                                            className={`usa-button usa-button---outline ${styles.addContactBtn}`}
+                                            onClick={() => {
+                                                push(emptyActuaryContact)
+                                                setFocusNewContact(true)
+                                            }}
+                                            ref={newStateContactButtonRef}
                                           >
                                           Add actuary contact
-                                          </Button>
+                                          </button>
                                       </div>
                                   )}
                                   </FieldArray>
