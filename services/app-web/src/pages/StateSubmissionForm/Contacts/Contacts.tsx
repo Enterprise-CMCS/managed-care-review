@@ -224,8 +224,6 @@ export const Contacts = ({
         updatedDraft.actuaryContacts = values.actuaryContacts
         updatedDraft.actuaryCommunicationPreference = values.actuaryCommunicationPreference
 
-        console.log(updatedDraft)
-
         try {
             const updatedSubmission = await updateDraft({
                 submissionID: draftSubmission.id,
@@ -724,11 +722,7 @@ export const Contacts = ({
                                     </Link>
                                     <Button
                                         type="submit"
-                                        disabled={isSubmitting}
-                                        onClick={() => {
-                                            redirectToDashboard.current = false
-                                            setShouldValidate(true)
-                                        }}
+                                        disabled={shouldValidate}
                                     >
                                         Continue
                                     </Button>
