@@ -24,7 +24,6 @@ export function newAmplifyS3Client(bucketName: string): S3ClientT {
                 })
 
                 assertIsS3PutResponse(stored)
-
                 return stored.key
             } catch (err) {
                 if (err.name === 'Error' && err.message === 'Network Error') {
@@ -42,8 +41,7 @@ export function newAmplifyS3Client(bucketName: string): S3ClientT {
 
         deleteFile: async (filename: string): Promise<void | S3Error> => {
             try {
-                const deleteResult = await Storage.vault.remove(filename)
-                console.log(deleteResult)
+                await Storage.vault.remove(filename)
                 return
             } catch (err) {
                 if (err.name === 'Error' && err.message === 'Network Error') {
@@ -55,6 +53,22 @@ export function newAmplifyS3Client(bucketName: string): S3ClientT {
                 }
 
                 console.log('Unexpected Error deleting file from S3', err)
+                throw err
+            }
+        },
+        fetchFile: async (filename: string): Promise<void | S3Error> => {
+            try {
+                await Storage.vault.get(filename, {
+                    download: true,
+                })
+                return
+            } catch (err) {
+                if (err.name === 'Error' && err.message === 'Network Error') {
+                    return {
+                        code: 'NETWORK_ERROR',
+                        message: 'Error fetching file from the cloud.',
+                    }
+                }
                 throw err
             }
         },

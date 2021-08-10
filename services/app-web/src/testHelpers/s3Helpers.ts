@@ -8,6 +8,9 @@ export const testS3Client: S3ClientT = {
     deleteFile: async (filename: string): Promise<void> => {
         return
     },
+    fetchFile: async (filename: string): Promise<void> => {
+        return
+    },
     getKey: (s3URL: string) => {
         const key = parseKey(s3URL)
         return key instanceof Error ? null : key
