@@ -43,7 +43,7 @@ describe('updateDraftSubmission', () => {
                 },
                 stateContacts: [],
                 actuaryContacts: [],
-                actuaryCommunicationPreference: null,
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
             }
 
             const updates: DraftSubmissionUpdates = {
@@ -64,7 +64,7 @@ describe('updateDraftSubmission', () => {
                 rateAmendmentInfo: undefined,
                 stateContacts: [],
                 actuaryContacts: [],
-                actuaryCommunicationPreference: null,
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
             }
 
             applyUpdates(baseDraft, updates)
@@ -99,6 +99,7 @@ describe('updateDraftSubmission', () => {
                 federalAuthorities: [],
                 stateContacts: [],
                 actuaryContacts: [],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
             }
 
             const updates: DraftSubmissionUpdates = {
@@ -128,6 +129,7 @@ describe('updateDraftSubmission', () => {
                 },
                 stateContacts: [],
                 actuaryContacts: [],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
             }
 
             applyUpdates(baseDraft, updates)
@@ -164,6 +166,7 @@ describe('updateDraftSubmission', () => {
                 federalAuthorities: [],
                 stateContacts: [],
                 actuaryContacts: [],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
             }
 
             const updates: DraftSubmissionUpdates = {
@@ -192,6 +195,7 @@ describe('updateDraftSubmission', () => {
                 rateDateCertified: null,
                 stateContacts: [],
                 actuaryContacts: [],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
             }
 
             applyUpdates(baseDraft, updates)
@@ -318,8 +322,11 @@ describe('updateDraftSubmission', () => {
                     name: 'Test Person',
                     titleRole: 'A Role',
                     email: 'test@test.com',
+                    actuarialFirm: 'MERCER' as const,
+                    actuarialFirmOther: '',
                 }
-            ]
+            ],
+            actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
         }
 
         const updateResult = await mutate({
@@ -375,7 +382,17 @@ describe('updateDraftSubmission', () => {
                     titleRole: 'Doctor',
                     email: 'jane@test.com',
                 },
-            ]
+            ],
+            actuaryContacts: [
+                {
+                    name: 'Test Person',
+                    titleRole: 'A Role',
+                    email: 'test@test.com',
+                    actuarialFirm: 'MERCER' as const,
+                    actuarialFirmOther: '',
+                }
+            ],
+            actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
         }
 
         const updateResult2 = await mutate({
@@ -411,6 +428,16 @@ describe('updateDraftSubmission', () => {
                     email: 'test@test.com',
                 },
             ],
+            actuaryContacts: [
+                {
+                    name: 'Act Person',
+                    titleRole: 'A Role',
+                    email: 'test@test.com',
+                    actuarialFirm: 'MERCER' as const,
+                    actuarialFirmOther: '',
+                }
+            ],
+            actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
             documents: [],
             contractType: 'BASE',
             contractDateStart: null,
@@ -435,11 +462,21 @@ describe('updateDraftSubmission', () => {
             updateResult.data.updateDraftSubmission.draftSubmission
         expect(resultDraft1.id).toEqual(createdID)
         expect(resultDraft1.stateContacts).toEqual([
-          {
-              name: 'test name',
-              titleRole: 'fancy person',
-              email: 'test@test.com',
-          },
+            {
+                name: 'test name',
+                titleRole: 'fancy person',
+                email: 'test@test.com',
+            },
+        ])
+
+        expect(resultDraft1.actuaryContacts).toEqual([
+            {
+                name: 'Act Person',
+                titleRole: 'A Role',
+                email: 'test@test.com',
+                actuarialFirm: 'MERCER' as const,
+                actuarialFirmOther: null,
+            },
         ])
 
         const fetchedDraft = await fetchTestDraftSubmissionById(query, createdID)
@@ -472,6 +509,7 @@ describe('updateDraftSubmission', () => {
             managedCareEntities: [],
             federalAuthorities: [],
             stateContacts: [],
+            actuaryContacts: [],
 
             // rate detail info
             contractAmendmentInfo: {
@@ -542,6 +580,7 @@ describe('updateDraftSubmission', () => {
                 relatedToCovid19: true,
             },
             stateContacts: [],
+            actuaryContacts: [],
         }
 
         const updateResult = await mutate({
@@ -610,6 +649,7 @@ describe('updateDraftSubmission', () => {
             managedCareEntities: [],
             federalAuthorities: [],
             stateContacts: [],
+            actuaryContacts: [],
             ...rateDetails,
         }
 
@@ -665,6 +705,7 @@ describe('updateDraftSubmission', () => {
             managedCareEntities: [],
             federalAuthorities: [],
             stateContacts: [],
+            actuaryContacts: [],
             ...rateAmendment,
         }
 
@@ -724,6 +765,16 @@ describe('updateDraftSubmission', () => {
                     email: 'test@test.com',
                 },
             ],
+            actuaryContacts: [
+                {
+                    name: 'Test Person',
+                    titleRole: 'A Role',
+                    email: 'test@test.com',
+                    actuarialFirm: 'MERCER' as const,
+                    actuarialFirmOther: '',
+                }
+            ],
+            actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
         }
 
         const updateResult = await mutate({
@@ -762,6 +813,16 @@ describe('updateDraftSubmission', () => {
                     email: 'test@test.com',
                 },
             ],
+            actuaryContacts: [
+                {
+                    name: 'Test Person',
+                    titleRole: 'A Role',
+                    email: 'test@test.com',
+                    actuarialFirm: 'MERCER' as const,
+                    actuarialFirmOther: '',
+                }
+            ],
+            actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
         }
 
         const updateResult2 = await mutate({
@@ -796,6 +857,7 @@ describe('updateDraftSubmission', () => {
             managedCareEntities: [],
             federalAuthorities: [],
             stateContacts: [],
+            actuaryContacts: [],
         }
 
         const updateResult = await mutate({
@@ -871,6 +933,7 @@ describe('updateDraftSubmission', () => {
             managedCareEntities: [],
             federalAuthorities: [],
             stateContacts: [],
+            actuaryContacts: [],
         }
 
         const updateResult = await otherMutate({
@@ -913,6 +976,7 @@ describe('updateDraftSubmission', () => {
             managedCareEntities: [],
             federalAuthorities: [],
             stateContacts: [],
+            actuaryContacts: [],
         }
 
         const updateResult = await mutate({

@@ -120,9 +120,10 @@ const createAndUpdateTestDraftSubmission = async (
                 titleRole: 'test title',
                 email: 'email@test.com',
                 actuarialFirm: 'MERCER' as const,
+                actuarialFirmOther: '',
             }
         ],
-        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
         contractType: 'BASE' as const,
         contractDateStart: startDate,
         contractDateEnd: endDate,

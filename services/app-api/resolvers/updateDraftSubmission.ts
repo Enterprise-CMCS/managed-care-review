@@ -60,7 +60,7 @@ export function applyUpdates(
 
     draft.stateContacts = updates.stateContacts
     draft.actuaryContacts = updates.actuaryContacts
-    draft.actuaryCommunicationPreference = updates.actuaryCommunicationPreference ?? undefined
+    draft.actuaryCommunicationPreference = updates.actuaryCommunicationPreference
 
     draft.contractType = updates.contractType ?? undefined
     draft.contractDateStart = updates.contractDateStart ?? undefined

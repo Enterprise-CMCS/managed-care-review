@@ -11,7 +11,7 @@ import {
     FederalAuthority,
     StateContact,
     ActuaryContact,
-    ActuaryCommuncationType,
+    ActuaryCommunicationType,
     DraftSubmissionType,
     StateSubmissionType,
     SubmissionUnionType,
@@ -210,7 +210,7 @@ export class SubmissionStoreType {
     actuaryContacts: Array<ActuaryContact>
 
     @attribute()
-    actuaryCommunicationPreference?: ActuaryCommuncationType
+    actuaryCommunicationPreference?: ActuaryCommunicationType
 
     @attribute({ memberType: embed(DocumentStoreT) })
     documents: Array<DocumentStoreT>
