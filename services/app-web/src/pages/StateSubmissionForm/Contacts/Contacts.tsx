@@ -29,7 +29,11 @@ import {
 
 import { FieldRadio } from '../../../components/Form/FieldRadio/FieldRadio'
 
-import { updatesFromSubmission, stripTypename } from '../updateSubmissionTransform'
+import {
+    updatesFromSubmission,
+    stripTypename
+} from '../updateSubmissionTransform'
+
 import { MCRouterState } from '../../../constants/routerState'
 import { useFocus } from '../../../hooks/useFocus'
 
@@ -54,8 +58,8 @@ export interface actuaryContactValue {
 }
 
 const ContactSchema = Yup.object().shape({
-    stateContacts: Yup.array()
-        .of(Yup.object().shape({
+    stateContacts: Yup.array().of(
+        Yup.object().shape({
             name: Yup.string()
                 .required('You must provide a name'),
             titleRole: Yup.string()
@@ -64,8 +68,8 @@ const ContactSchema = Yup.object().shape({
                 .email('You must enter a valid email address')
                 .required('You must provide an email address'),
         })),
-    actuaryContacts: Yup.array()
-        .of(Yup.object().shape({
+    actuaryContacts: Yup.array().of(
+        Yup.object().shape({
             name: Yup.string()
                 .required('You must provide a name'),
             titleRole: Yup.string()
@@ -95,14 +99,13 @@ type FormError =
 // for a given field when we pass it through showFieldErrors
 // so this makes sure we return the actual error and if its
 // anything else we return undefined to not show it
-const stateContactErrorHandling = (error: string | FormikErrors<stateContactValue> | undefined) : FormikErrors<stateContactValue> | undefined => {
+const stateContactErrorHandling = (
+    error: string | FormikErrors<stateContactValue> | undefined) : FormikErrors<stateContactValue> | undefined => {
 
     if (typeof(error) === 'string') {
         return undefined
     }
-    return (
-      error
-    )
+    return error
 }
 
 const actuaryContactErrorHandling = (error: string | FormikErrors<actuaryContactValue> | undefined) : FormikErrors<actuaryContactValue> | undefined => {
@@ -178,9 +181,9 @@ export const Contacts = ({
     }
 
     const contactsInitialValues: ContactsFormValues = {
-      stateContacts: stateContacts,
-      actuaryContacts: actuaryContacts,
-      actuaryCommunicationPreference: draftSubmission?.actuaryCommunicationPreference ?? undefined,
+        stateContacts: stateContacts,
+        actuaryContacts: actuaryContacts,
+        actuaryCommunicationPreference: draftSubmission?.actuaryCommunicationPreference ?? undefined,
     }
 
     // Handler for Contacts legends so that contacts show up as
@@ -192,9 +195,7 @@ export const Contacts = ({
         const required = index ? '' : ' (required)'
 
         if (contactText === 'State') {
-            return (
-                `State contacts ${count} ${required}`
-            )
+            return `State contacts ${count} ${required}`
         }
         else if (contactText === 'Actuary') {
             if (!index)
@@ -276,10 +277,17 @@ export const Contacts = ({
 
                                 <FieldArray name="stateContacts">
                                 {({ remove, push }) => (
-                                    <div className={styles.stateContacts} data-testid="state-contacts">
+                                    <div
+                                        className={styles.stateContacts}
+                                        data-testid="state-contacts"
+                                    >
                                         {values.stateContacts.length > 0 &&
-                                          values.stateContacts.map((stateContact, index) => (
-                                              <div className={styles.stateContact} key={index}>
+                                          values.stateContacts.map(
+                                            (stateContact, index) => (
+                                              <div
+                                                  className={styles.stateContact}
+                                                  key={index}
+                                              >
                                                   <Fieldset legend={handleContactLegend(index, 'State')}>
 
                                                   <FormGroup
@@ -300,96 +308,102 @@ export const Contacts = ({
                                                         id={`stateContacts.${index}.name`}
                                                         type="text"
                                                         className="usa-input"
+                                                        innerRef={(
+                                                           el: HTMLElement
+                                                        ) =>
+                                                           (newStateContactNameRef.current = el)
+                                                        }
                                                       />
                                                   </FormGroup>
 
-                                                                <FormGroup
-                                                                    error={showFieldErrors(
-                                                                        stateContactErrorHandling(
-                                                                            errors
-                                                                                ?.stateContacts?.[
-                                                                                index
-                                                                            ]
-                                                                        )
-                                                                            ?.titleRole
-                                                                    )}
-                                                                >
-                                                                    <label
-                                                                        htmlFor={`stateContacts.${index}.titleRole`}
-                                                                    >
-                                                                        Title/Role
-                                                                    </label>
-                                                                    {showFieldErrors(
-                                                                        `True`
-                                                                    ) && (
-                                                                        <ErrorMessage
-                                                                            name={`stateContacts.${index}.titleRole`}
-                                                                            component="div"
-                                                                            className="usa-error-message"
-                                                                        />
-                                                                    )}
-                                                                    <Field
-                                                                        name={`stateContacts.${index}.titleRole`}
-                                                                        id={`stateContacts.${index}.titleRole`}
-                                                                        type="text"
-                                                                        className="usa-input"
-                                                                    />
-                                                                </FormGroup>
+                                                  <FormGroup
+                                                      error={showFieldErrors(
+                                                          stateContactErrorHandling(
+                                                              errors
+                                                                  ?.stateContacts?.[
+                                                                  index
+                                                              ]
+                                                          )
+                                                              ?.titleRole
+                                                      )}
+                                                  >
+                                                      <label
+                                                          htmlFor={`stateContacts.${index}.titleRole`}
+                                                      >
+                                                          Title/Role
+                                                      </label>
+                                                      {showFieldErrors(
+                                                          `True`
+                                                      ) && (
+                                                          <ErrorMessage
+                                                              name={`stateContacts.${index}.titleRole`}
+                                                              component="div"
+                                                              className="usa-error-message"
+                                                          />
+                                                      )}
+                                                      <Field
+                                                          name={`stateContacts.${index}.titleRole`}
+                                                          id={`stateContacts.${index}.titleRole`}
+                                                          type="text"
+                                                          className="usa-input"
+                                                      />
+                                                  </FormGroup>
 
-                                                                <FormGroup
-                                                                    error={showFieldErrors(
-                                                                        stateContactErrorHandling(
-                                                                            errors
-                                                                                ?.stateContacts?.[
-                                                                                index
-                                                                            ]
-                                                                        )?.email
-                                                                    )}
-                                                                >
-                                                                    <label
-                                                                        htmlFor={`stateContacts.${index}.email`}
-                                                                    >
-                                                                        Email
-                                                                    </label>
-                                                                    {showFieldErrors(
-                                                                        `True`
-                                                                    ) && (
-                                                                        <ErrorMessage
-                                                                            name={`stateContacts.${index}.email`}
-                                                                            component="div"
-                                                                            className="usa-error-message"
-                                                                        />
-                                                                    )}
-                                                                    <Field
-                                                                        name={`stateContacts.${index}.email`}
-                                                                        id={`stateContacts.${index}.email`}
-                                                                        type="text"
-                                                                        className="usa-input"
-                                                                    />
-                                                                </FormGroup>
+                                                  <FormGroup
+                                                      error={showFieldErrors(
+                                                          stateContactErrorHandling(
+                                                              errors
+                                                                  ?.stateContacts?.[
+                                                                  index
+                                                              ]
+                                                          )?.email
+                                                      )}
+                                                  >
+                                                      <label
+                                                          htmlFor={`stateContacts.${index}.email`}
+                                                      >
+                                                          Email
+                                                      </label>
+                                                      {showFieldErrors(
+                                                          `True`
+                                                      ) && (
+                                                          <ErrorMessage
+                                                              name={`stateContacts.${index}.email`}
+                                                              component="div"
+                                                              className="usa-error-message"
+                                                          />
+                                                      )}
+                                                      <Field
+                                                          name={`stateContacts.${index}.email`}
+                                                          id={`stateContacts.${index}.email`}
+                                                          type="text"
+                                                          className="usa-input"
+                                                      />
+                                                  </FormGroup>
 
-                                                                {index > 0 && (
-                                                                    <Button
-                                                                        type="button"
-                                                                        unstyled
-                                                                        className={
-                                                                            styles.removeContactBtn
-                                                                        }
-                                                                        onClick={() => {
-                                                                            remove(
-                                                                                index
-                                                                            )
-                                                                            setNewStateContactButtonFocus()
-                                                                        }}
-                                                                    >
-                                                                        Remove
-                                                                        contact
-                                                                    </Button>
-                                                                )}
-                                                            </Fieldset>
-                                                        </div>
-                                                    )
-                                                )}
+                                                  {index > 0 && (
+                                                      <Button
+                                                          type="button"
+                                                          unstyled
+                                                          className={
+                                                              styles.removeContactBtn
+                                                          }
+                                                          onClick={() => {
+                                                              remove(
+                                                                  index
+                                                              )
+                                                              setNewStateContactButtonFocus()
+                                                          }}
+                                                      >
+                                                          Remove
+                                                          contact
+                                                      </Button>
+                                                  )}
+                                                  </Fieldset>
+
+                                                </div>
+                                              )
+                                            )}
 
                                             <button
                                                 type="button"

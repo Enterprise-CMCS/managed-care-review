@@ -61,6 +61,7 @@ export function mockDraft(): DraftSubmission {
         rateAmendmentInfo: null,
         stateContacts: [],
         actuaryContacts: [],
+        actuaryCommunicationPreference: null,
     }
 }
 
@@ -98,6 +99,7 @@ export function mockCompleteDraft(): DraftSubmission {
             }
         ],
         actuaryContacts: [],
+        actuaryCommunicationPreference: null,
     }
 }
 
@@ -129,6 +131,7 @@ function mockNewDraft(): DraftSubmission {
         rateDateCertified: null,
         stateContacts: [],
         actuaryContacts: [],
+        actuaryCommunicationPreference: null,
     }
 }
 
@@ -166,6 +169,7 @@ export function mockStateSubmission(): StateSubmission {
             email: 'test@test.com',
         }],
         actuaryContacts: [],
+        actuaryCommunicationPreference: null,
     }
 }
 

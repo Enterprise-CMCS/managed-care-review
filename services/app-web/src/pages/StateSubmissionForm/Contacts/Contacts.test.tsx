@@ -88,13 +88,13 @@ describe('Contacts', () => {
 
         await waitFor(() => {
             expect(
-                screen.getByText('You must enter a name')
+                screen.getByText('You must provide a name')
             ).toBeInTheDocument()
             expect(
-                screen.getByText('You must enter a title/role')
+                screen.getByText('You must provide a title/role')
             ).toBeInTheDocument()
             expect(
-                screen.getByText('You must enter an email address')
+                screen.getByText('You must provide an email address')
             ).toBeInTheDocument()
         })
     })
