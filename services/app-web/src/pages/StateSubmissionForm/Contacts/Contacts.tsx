@@ -131,10 +131,14 @@ export const Contacts = ({
 }): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const [focusNewContact, setFocusNewContact] = React.useState(false)
+    const [focusNewActuaryContact, setFocusNewActuaryContact] = React.useState(false)
 
     const redirectToDashboard = React.useRef(false)
     const newStateContactNameRef = React.useRef<HTMLElement | null>(null) // This ref.current is reset to the newest contact name field each time new contact is added
     const [newStateContactButtonRef, setNewStateContactButtonFocus] = useFocus() // This ref.current is always the same element
+
+    const newActuaryContactNameRef = React.useRef<HTMLElement | null>(null)
+    const [newActuaryContactButtonRef, setNewActuaryContactButtonFocus] = useFocus()
 
     const history = useHistory<MCRouterState>()
 
@@ -149,7 +153,13 @@ export const Contacts = ({
             setFocusNewContact(false)
             newStateContactNameRef.current = null
         }
-    }, [focusNewContact])
+        if (focusNewActuaryContact) {
+            newActuaryContactNameRef.current &&
+                newActuaryContactNameRef.current.focus()
+            setFocusNewActuaryContact(false)
+            newActuaryContactNameRef.current = null
+        }
+    }, [focusNewContact, focusNewActuaryContact])
 
     // TODO: refactor this into reusable component that is more understandable
     const showFieldErrors = (error?: FormError): boolean | undefined =>
@@ -250,7 +260,6 @@ export const Contacts = ({
                     handleSubmit,
                     isSubmitting,
                     isValidating,
-                    setFieldValue,
                 }) => (
                     <>
                         <UswdsForm
@@ -460,7 +469,7 @@ export const Contacts = ({
                                                           innerRef={(
                                                                el: HTMLElement
                                                            ) =>
-                                                               (newStateContactNameRef.current =
+                                                               (newActuaryContactNameRef.current =
                                                                    el)
                                                            }
                                                         />
@@ -610,7 +619,7 @@ export const Contacts = ({
                                                     className={styles.removeContactBtn}
                                                     onClick={() => {
                                                          remove(index)
-                                                         setNewStateContactButtonFocus()
+                                                         setNewActuaryContactButtonFocus()
                                                      }}
                                                   >
                                                       Remove contact
@@ -625,9 +634,9 @@ export const Contacts = ({
                                             className={`usa-button usa-button---outline ${styles.addContactBtn}`}
                                             onClick={() => {
                                                 push(emptyActuaryContact)
-                                                setFocusNewContact(true)
+                                                setFocusNewActuaryContact(true)
                                             }}
-                                            ref={newStateContactButtonRef}
+                                            ref={newActuaryContactButtonRef}
                                           >
                                           Add actuary contact
                                           </button>
@@ -653,9 +662,7 @@ export const Contacts = ({
                                           <FieldRadio
                                               id="OACTtoActuary"
                                               name="actuaryCommunicationPreference"
-                                              label={`OACT can communicate directly with the state’s actuary
-but should copy the state on all written communication
-and all appointments for verbal discussions.`}
+                                              label={`OACT can communicate directly with the state’s actuary but should copy the state on all written communication and all appointments for verbal discussions.`}
                                               value={'OACT_TO_ACTUARY'}
                                               checked={values.actuaryCommunicationPreference === 'OACT_TO_ACTUARY'}
                                               aria-required
@@ -663,9 +670,7 @@ and all appointments for verbal discussions.`}
                                           <FieldRadio
                                               id="OACTtoState"
                                               name="actuaryCommunicationPreference"
-                                              label={`OACT can communicate directly with the state, and the
-state will relay all written communication to their actuary
-and set up time for any potential verbal discussions.`}
+                                              label={`OACT can communicate directly with the state, and the state will relay all written communication to their actuary and set up time for any potential verbal discussions.`}
                                               value={'OACT_TO_STATE'}
                                               checked={values.actuaryCommunicationPreference === 'OACT_TO_STATE'}
                                               aria-required
