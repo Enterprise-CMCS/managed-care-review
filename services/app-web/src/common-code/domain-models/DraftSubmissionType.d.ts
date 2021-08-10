@@ -57,6 +57,7 @@ type ActuaryContact = {
     titleRole: string
     email: string
     actuarialFirm?: ActuarialFirmType
+    actuarialFirmOther?: string
 }
 
 type RateType = 'NEW' | 'AMENDMENT'

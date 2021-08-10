@@ -42,6 +42,7 @@ export interface actuaryContactValue {
     titleRole: string
     email: string
     actuarialFirm?: ActuarialFirmType | null | undefined
+    actuarialFirmOther?: string | null
 }
 
 const ContactSchema = Yup.object().shape({
@@ -66,7 +67,7 @@ const ContactSchema = Yup.object().shape({
                 .required('You must provide an email address'),
             actuarialFirm: Yup.string()
                 .required('You must select an actuarial firm')
-                .nullable()
+                .nullable(),
         })),
     actuaryCommunicationPreference: Yup.string()
         .required('You must select a communication preference')
@@ -134,6 +135,7 @@ export const Contacts = ({
         titleRole: '',
         email: '',
         actuarialFirm: null,
+        actuarialFirmOther: '',
     }
 
     if (stateContacts.length === 0) {
@@ -483,6 +485,31 @@ export const Contacts = ({
                                                           checked={values.actuaryContacts[index].actuarialFirm === 'OTHER'}
                                                           aria-required
                                                       />
+
+                                                      {values.actuaryContacts[index].actuarialFirm === 'OTHER' && (
+                                                          <FormGroup
+                                                          error={showFieldErrors(actuaryContactErrorHandling(errors?.actuaryContacts?.[index])?.actuarialFirmOther)}
+                                                          >
+                                                              <label htmlFor={`actuaryContacts.${index}.actuarialFirmOther`}>
+                                                                  Other actuarial firm
+                                                              </label>
+                                                              {showFieldErrors(`True`) && (
+                                                                <ErrorMessage
+                                                                    name={`actuaryContacts.${index}.actuarialFirmOther`}
+                                                                    component="div"
+                                                                    className="usa-error-message"
+                                                                />
+                                                              )}
+                                                              <Field
+                                                                name={`actuaryContacts.${index}.actuarialFirmOther`}
+                                                                id={`actuaryContacts.${index}.actuarialFirmOther`}
+                                                                type="text"
+                                                                className="usa-input"
+                                                              />
+                                                        </FormGroup>
+
+                                                      )}
+
                                                   </FormGroup>
 
                                                   {index > 0 && (

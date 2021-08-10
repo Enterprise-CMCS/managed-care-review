@@ -23,6 +23,7 @@ query fetchDraftSubmission($input: FetchDraftSubmissionInput!) {
                 titleRole
                 email
                 actuarialFirm
+                actuarialFirmOther
             }
             actuaryCommunicationPreference
             documents {

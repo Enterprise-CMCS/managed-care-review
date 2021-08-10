@@ -24,6 +24,7 @@ query fetchStateSubmission($input: FetchStateSubmissionInput!) {
                 titleRole
                 email
                 actuarialFirm
+                actuarialFirmOther
             }
             actuaryCommunicationPreference
             documents {

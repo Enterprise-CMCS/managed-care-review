@@ -426,11 +426,19 @@ export const SubmissionSummary = (): React.ReactElement => {
                                       {actuaryContact.name}<br/>
                                       {actuaryContact.titleRole}<br/>
                                       <a href={`mailto:${actuaryContact.email}`}>{actuaryContact.email}</a><br/>
-                                      {actuaryContact.actuarialFirm
-                                          ? ActuaryFirmsRecord[
-                                                actuaryContact.actuarialFirm
-                                              ]
-                                          : ''}
+                                      {actuaryContact.actuarialFirm === 'OTHER' ? (
+                                          <>
+                                          {actuaryContact.actuarialFirmOther}
+                                          </>
+                                      ) : (
+                                          <>
+                                          {actuaryContact.actuarialFirm
+                                              ? ActuaryFirmsRecord[
+                                                    actuaryContact.actuarialFirm
+                                                  ]
+                                              : ''}
+                                          </>
+                                      )}
                                   </Grid>
                                   ))}
                               </Grid>

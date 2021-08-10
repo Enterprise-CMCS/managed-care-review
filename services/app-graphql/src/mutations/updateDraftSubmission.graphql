@@ -23,6 +23,7 @@ mutation updateDraftSubmission($input: UpdateDraftSubmissionInput!) {
                 titleRole
                 email
                 actuarialFirm
+                actuarialFirmOther
             }
             actuaryCommunicationPreference
             documents {
