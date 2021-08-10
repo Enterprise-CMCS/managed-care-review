@@ -25,5 +25,5 @@ export type StateSubmissionType = {
     rateAmendmentInfo?: RateAmendmentInfo
     stateContacts: StateContact[]
     actuaryContacts: ActuaryContact[]
-    actuaryCommunicationPreference: ActuaryCommunicationType
+    actuaryCommunicationPreference?: ActuaryCommunicationType
 }

@@ -53,14 +53,23 @@ export function applyUpdates(
           }
         : undefined
 
+    const actuaryContactsUpdates = updates.actuaryContacts.map((actuaryContact) => {
+        return {
+            name: actuaryContact.name,
+            titleRole: actuaryContact.titleRole,
+            email: actuaryContact.email,
+            actuarialFirm: actuaryContact.actuarialFirm ?? undefined,
+            actuarialFirmOther: actuaryContact.actuarialFirmOther ?? undefined}
+    })
+
     draft.programID = updates.programID
     draft.submissionType = updates.submissionType
     draft.submissionDescription = updates.submissionDescription
     draft.documents = updates.documents
 
     draft.stateContacts = updates.stateContacts
-    draft.actuaryContacts = updates.actuaryContacts
-    draft.actuaryCommunicationPreference = updates.actuaryCommunicationPreference
+    draft.actuaryContacts = actuaryContactsUpdates
+    draft.actuaryCommunicationPreference = updates.actuaryCommunicationPreference ?? undefined
 
     draft.contractType = updates.contractType ?? undefined
     draft.contractDateStart = updates.contractDateStart ?? undefined

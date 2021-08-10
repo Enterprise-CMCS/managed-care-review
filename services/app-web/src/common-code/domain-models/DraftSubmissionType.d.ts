@@ -96,7 +96,7 @@ type DraftSubmissionType = {
     updatedAt: DateTime
     stateContacts: StateContact[]
     actuaryContacts: ActuaryContact[]
-    actuaryCommunicationPreference: ActuaryCommunicationType
+    actuaryCommunicationPreference?: ActuaryCommunicationType
     documents: SubmissionDocument[]
     contractType?: ContractType
     contractDateStart?: Date
