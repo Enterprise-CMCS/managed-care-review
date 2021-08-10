@@ -8,6 +8,7 @@ import {
 
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { Contacts } from './Contacts'
+import userEvent from '@testing-library/user-event'
 
 describe('Contacts', () => {
     afterEach(() => jest.clearAllMocks())
@@ -44,9 +45,7 @@ describe('Contacts', () => {
             />,
             {
                 apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                    ],
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
             }
         )
@@ -67,8 +66,8 @@ describe('Contacts', () => {
                     name: '',
                     titleRole: '',
                     email: '',
-                }
-            ]
+                },
+            ],
         }
 
         renderWithProviders(
@@ -89,15 +88,77 @@ describe('Contacts', () => {
 
         await waitFor(() => {
             expect(
-                screen.getByText('You must provide a name')
+                screen.getByText('You must enter a name')
             ).toBeInTheDocument()
             expect(
-                screen.getByText('You must provide a title/role')
+                screen.getByText('You must enter a title/role')
             ).toBeInTheDocument()
             expect(
-                screen.getByText('You must provide an email address')
+                screen.getByText('You must enter an email address')
             ).toBeInTheDocument()
         })
     })
 
+    it('after "Add state contact" button click, should focus on the field name of the new contact', async () => {
+        const mock = mockDraft()
+        const mockUpdateDraftFn = jest.fn()
+
+        renderWithProviders(
+            <Contacts draftSubmission={mock} updateDraft={mockUpdateDraftFn} />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+        const addStateContactButton = screen.getByRole('button', {
+            name: 'Add state contact',
+        })
+        const firstContactName = screen.getByLabelText('Name')
+
+        userEvent.type(firstContactName, 'First person')
+        expect(firstContactName).toHaveFocus()
+
+        addStateContactButton.click()
+
+        await waitFor(() => {
+            expect(screen.getAllByLabelText('Name').length).toBe(2)
+            const secondContactName = screen.getAllByLabelText('Name')[1]
+            expect(firstContactName).toHaveValue('First person')
+            expect(firstContactName).not.toHaveFocus()
+
+            expect(secondContactName).toHaveValue('')
+            expect(secondContactName).toHaveFocus()
+        })
+    })
+
+    it('after "Remove contact" button click, should focus on add new contact button', async () => {
+        const mock = mockDraft()
+        const mockUpdateDraftFn = jest.fn()
+
+        renderWithProviders(
+            <Contacts draftSubmission={mock} updateDraft={mockUpdateDraftFn} />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+        const addStateContactButton = screen.getByRole('button', {
+            name: 'Add state contact',
+        })
+        addStateContactButton.click()
+
+        await waitFor(() => {
+            expect(
+                screen.getByRole('button', { name: 'Remove contact' })
+            ).toBeInTheDocument()
+
+            userEvent.click(
+                screen.getByRole('button', { name: 'Remove contact' })
+            )
+
+            expect(addStateContactButton).toHaveFocus()
+        })
+    })
 })
