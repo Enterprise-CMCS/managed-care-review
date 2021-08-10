@@ -90,26 +90,20 @@ describe('State Submission', () => {
             // Continue button navigates to state contacts page
             cy.navigateForm('Continue')
             cy.findByText(/MN-MSHO-/).should('exist')
-            cy.findByTestId('state-contacts').should('exist')
-
-            cy.findByTestId('step-indicator')
-                .findAllByText('Contacts')
-                .should('have.length', 2)
 
             // fill out state contacts
-            cy.findByLabelText('Name').type('Test Person')
-            cy.findByLabelText('Title/Role').type('Fancy Title')
-            cy.findByLabelText('Email').type('test@test.com')
+            cy.findAllByLabelText('Name').eq(0).type('Test Person')
+            cy.findAllByLabelText('Title/Role').eq(0).type('Fancy Title')
+            cy.findAllByLabelText('Email').eq(0).type('test@test.com')
 
-            // add additional state contact
-            cy.findByRole('button', {
-                name: 'Add state contact',
-            }).safeClick()
+            // add actuary contact
+            cy.findAllByLabelText('Name').eq(1).type('Act Person')
+            cy.findAllByLabelText('Title/Role').eq(1).type('Act Title')
+            cy.findAllByLabelText('Email').eq(1).type('act@test.com')
+            cy.findByLabelText('Mercer').safeClick()
 
-            // add second state contact
-            cy.findAllByLabelText('Name').eq(1).type('Test Person')
-            cy.findAllByLabelText('Title/Role').eq(1).type('Fancy Title')
-            cy.findAllByLabelText('Email').eq(1).type('test@test.com')
+            // actuary communication preference
+            cy.findByLabelText(`OACT can communicate directly with the state’s actuary but should copy the state on all written communication and all appointments for verbal discussions.`).safeClick()
 
             // Continue button navigates to documents page
             cy.findByRole('button', {
@@ -256,9 +250,18 @@ describe('State Submission', () => {
             cy.navigateForm('Continue')
 
             // fill out state contacts
-            cy.findByLabelText('Name').type('Test Person')
-            cy.findByLabelText('Title/Role').type('Fancy Title')
-            cy.findByLabelText('Email').type('test@test.com')
+            cy.findAllByLabelText('Name').eq(0).type('Test Person')
+            cy.findAllByLabelText('Title/Role').eq(0).type('Fancy Title')
+            cy.findAllByLabelText('Email').eq(0).type('test@test.com')
+
+            // add actuary contact
+            cy.findAllByLabelText('Name').eq(1).type('Act Person')
+            cy.findAllByLabelText('Title/Role').eq(1).type('Act Title')
+            cy.findAllByLabelText('Email').eq(1).type('act@test.com')
+            cy.findByLabelText('Mercer').safeClick()
+
+            // actuary communication preference
+            cy.findByLabelText(`OACT can communicate directly with the state’s actuary but should copy the state on all written communication and all appointments for verbal discussions.`).safeClick()
 
             // Continue button navigates to documents page
             cy.findByRole('button', {
@@ -342,7 +345,7 @@ describe('State Submission', () => {
             cy.findByText('trussel-guide.pdf').should('exist')
         })
 
-        it('user can edit a contact only submission', () => {
+        it('user can edit a contract only submission', () => {
             cy.login()
             cy.startNewContractOnlySubmission()
             cy.findByTestId('step-indicator').should('exist')
@@ -447,10 +450,19 @@ describe('State Submission', () => {
             cy.findByLabelText('Date certified').type('03/01/2024')
             cy.navigateForm('Continue')
 
-            // Fill out state contact details
-            cy.findByLabelText('Name').type('Test Person')
-            cy.findByLabelText('Title/Role').type('Fancy Title')
-            cy.findByLabelText('Email').type('test@test.com')
+            // fill out state contacts
+            cy.findAllByLabelText('Name').eq(0).type('Test Person')
+            cy.findAllByLabelText('Title/Role').eq(0).type('Fancy Title')
+            cy.findAllByLabelText('Email').eq(0).type('test@test.com')
+
+            // add actuary contact
+            cy.findAllByLabelText('Name').eq(1).type('Act Person')
+            cy.findAllByLabelText('Title/Role').eq(1).type('Act Title')
+            cy.findAllByLabelText('Email').eq(1).type('act@test.com')
+            cy.findByLabelText('Mercer').safeClick()
+
+            // actuary communication preference
+            cy.findByLabelText(`OACT can communicate directly with the state’s actuary but should copy the state on all written communication and all appointments for verbal discussions.`).safeClick()
 
             // Continue button navigates to documents page
             cy.findByRole('button', {
