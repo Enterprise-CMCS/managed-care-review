@@ -68,6 +68,12 @@ const ContactSchema = Yup.object().shape({
             actuarialFirm: Yup.string()
                 .required('You must select an actuarial firm')
                 .nullable(),
+            actuarialFirmOther: Yup.string()
+                .when('actuarialFirm', {
+                    is: 'OTHER',
+                    then: Yup.string().required('You must enter a description').nullable()
+                })
+                .nullable()
         })),
     actuaryCommunicationPreference: Yup.string()
         .required('You must select a communication preference')
