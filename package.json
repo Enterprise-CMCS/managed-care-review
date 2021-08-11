@@ -32,7 +32,7 @@
     "devDependencies": {
         "@testing-library/cypress": "^8.0.0",
         "@types/dotenv": "^8.2.0",
-        "@types/node": "^14.14.35",
+        "@types/node": "^14.17.9",
         "@types/yargs": "^17.0.2",
         "chromedriver": "^92.0.1",
         "cypress": "^8.2.0",
@@ -40,7 +40,7 @@
         "dotenv": "^10.0.0",
         "nightwatch": "^1.7.8",
         "prettier": "^2.3.2",
-        "serverless": "^2.52.1",
+        "serverless": "^2.53.1",
         "serverless-plugin-scripts": "^1.0.2",
         "typescript": "^4.3.5",
         "yargs": "^17.1.0"
