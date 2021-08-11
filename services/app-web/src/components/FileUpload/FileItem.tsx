@@ -143,13 +143,7 @@ export const FileItem = ({
                         hasUploadError={hasUploadError}
                         hasUnexpectedError={hasUnexpectedError}
                     />
-                    <span>{`${name}${
-                        isLoading
-                            ? ' - [loading]'
-                            : isScanning
-                            ? ' - [scanning]'
-                            : ''
-                    }`}</span>
+                    <span>{`${name}`}</span>
                 </span>
             </div>
             <div className={styles.fileItemButtons}>

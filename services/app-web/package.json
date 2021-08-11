@@ -44,6 +44,7 @@
         "lint": "tsc --noEmit && eslint src/",
         "test:a11y": "pa11y-ci",
         "test:once": "react-scripts test --watchAll=false",
+        "test:update": "react-scripts test -u",
         "storybook": "start-storybook -p 6006 -s public --quiet",
         "build-storybook": "build-storybook -s public --quiet"
     },
