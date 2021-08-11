@@ -477,9 +477,11 @@ export const ReviewSubmit = ({
                             {draftSubmission.stateContacts.map((stateContact, index) => (
                             <Grid col={6}>
                                 <span className="text-bold">Contact {index + 1}</span><br/>
-                                {stateContact.name}<br/>
-                                {stateContact.titleRole}<br/>
-                                <a href={`mailto:${stateContact.email}`}>{stateContact.email}</a><br/>
+                                <address>
+                                    {stateContact.name}<br/>
+                                    {stateContact.titleRole}<br/>
+                                    <a href={`mailto:${stateContact.email}`}>{stateContact.email}</a><br/>
+                                </address>
                             </Grid>
                             ))}
                         </Grid>
@@ -496,15 +498,17 @@ export const ReviewSubmit = ({
                                   <span className="text-bold">
                                   {index ? 'Additional actuary contact' : 'Certifying actuary'}
                                   </span><br/>
-                                  {actuaryContact.name}<br/>
-                                  {actuaryContact.titleRole}<br/>
-                                  <a href={`mailto:${actuaryContact.email}`}>{actuaryContact.email}</a><br/>
+                                  <address>
+                                      {actuaryContact.name}<br/>
+                                      {actuaryContact.titleRole}<br/>
+                                      <a href={`mailto:${actuaryContact.email}`}>{actuaryContact.email}</a><br/>
                                   {actuaryContact.actuarialFirm === 'OTHER' ? (
                                       <>
                                       {actuaryContact.actuarialFirmOther}
                                       </>
                                   ) : (
                                       <>
+                                      {/*TODO: make this more clear, a const or something */}
                                       {actuaryContact.actuarialFirm
                                           ? ActuaryFirmsRecord[
                                                 actuaryContact.actuarialFirm
@@ -512,6 +516,7 @@ export const ReviewSubmit = ({
                                           : ''}
                                       </>
                                   )}
+                                  </address>
                               </Grid>
                               ))}
                           </Grid>

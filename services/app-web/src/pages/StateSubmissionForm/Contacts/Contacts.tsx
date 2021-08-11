@@ -474,7 +474,7 @@ export const Contacts = ({
                                                     </FormGroup>
 
                                                     <FormGroup
-                                                    error={showFieldErrors(actuaryContactErrorHandling(errors?.stateContacts?.[index])?.titleRole)}
+                                                    error={showFieldErrors(actuaryContactErrorHandling(errors?.actuaryContacts?.[index])?.titleRole)}
                                                     >
                                                         <label htmlFor={`actuaryContacts.${index}.titleRole`}>
                                                             Title/Role
@@ -724,8 +724,7 @@ export const Contacts = ({
                                         type="submit"
                                         disabled={isSubmitting}
                                         onClick={() => {
-                                            redirectToDashboard.current = false
-                                            setShouldValidate(true)
+                                          setShouldValidate(true)
                                         }}
                                     >
                                         Continue

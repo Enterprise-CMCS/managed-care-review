@@ -405,9 +405,11 @@ export const SubmissionSummary = (): React.ReactElement => {
                                 {submission.stateContacts.map((stateContact, index) => (
                                 <Grid col={6}>
                                     <strong>Contact {index + 1}</strong><br/>
-                                    {stateContact.name}<br/>
-                                    {stateContact.titleRole}<br/>
-                                    <a href={`mailto:${stateContact.email}`}>{stateContact.email}</a><br/>
+                                    <address>
+                                        {stateContact.name}<br/>
+                                        {stateContact.titleRole}<br/>
+                                        <a href={`mailto:${stateContact.email}`}>{stateContact.email}</a><br/>
+                                    </address>
                                 </Grid>
                                 ))}
                             </Grid>
@@ -423,22 +425,25 @@ export const SubmissionSummary = (): React.ReactElement => {
                                       <span className="text-bold">
                                       {index ? 'Additional actuary contact' : 'Certifying actuary'}
                                       </span><br/>
-                                      {actuaryContact.name}<br/>
-                                      {actuaryContact.titleRole}<br/>
-                                      <a href={`mailto:${actuaryContact.email}`}>{actuaryContact.email}</a><br/>
-                                      {actuaryContact.actuarialFirm === 'OTHER' ? (
-                                          <>
-                                          {actuaryContact.actuarialFirmOther}
-                                          </>
-                                      ) : (
-                                          <>
-                                          {actuaryContact.actuarialFirm
-                                              ? ActuaryFirmsRecord[
-                                                    actuaryContact.actuarialFirm
-                                                  ]
-                                              : ''}
-                                          </>
-                                      )}
+                                      <address>
+                                          {actuaryContact.name}<br/>
+                                          {actuaryContact.titleRole}<br/>
+                                          <a href={`mailto:${actuaryContact.email}`}>{actuaryContact.email}</a><br/>
+                                          {actuaryContact.actuarialFirm === 'OTHER' ? (
+                                              <>
+                                              {actuaryContact.actuarialFirmOther}
+                                              </>
+                                          ) : (
+                                              <>
+                                              {/*TODO: make this more clear, a const or something */}
+                                              {actuaryContact.actuarialFirm
+                                                  ? ActuaryFirmsRecord[
+                                                        actuaryContact.actuarialFirm
+                                                      ]
+                                                  : ''}
+                                              </>
+                                          )}
+                                      </address>
                                   </Grid>
                                   ))}
                               </Grid>
