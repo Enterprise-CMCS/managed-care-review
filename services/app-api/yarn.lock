@@ -10327,10 +10327,10 @@ serverless-bundle@^3.0.0:
     webpack "^4.44.1"
     webpack-node-externals "^2.5.2"
 
-serverless-dotenv-plugin@^3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/serverless-dotenv-plugin/-/serverless-dotenv-plugin-3.1.0.tgz#f1482a5e69b01cc4de8c6439bdd8c134fc923534"
-  integrity sha512-R9Jld4a/hDDd0lHiSq9xQuFlhtfgXqKKmODrYp7115iQ9kgf16SMxZbxJ0Cb9GqL6/4+5GlS42iHxsqv8GxZeQ==
+serverless-dotenv-plugin@^3.9.0:
+  version "3.9.0"
+  resolved "https://registry.yarnpkg.com/serverless-dotenv-plugin/-/serverless-dotenv-plugin-3.9.0.tgz#0d82704a3911c1051a1f566a30aaa5f278ad4ae3"
+  integrity sha512-T2fso08DSVfBVMUQX4UxjaCzB32IMD0GOTqncuLUek77YMPrJTmJlKOGr5z64Oe/ySZhR7SJZF9Jn0FJCq7cIg==
   dependencies:
     chalk "^4.1.0"
     dotenv "^8.2.0"
