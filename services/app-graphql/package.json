@@ -12,7 +12,7 @@
         "@graphql-codegen/introspection": "^1.18.1",
         "@graphql-codegen/typescript": "^1.21.0",
         "@graphql-codegen/typescript-operations": "^1.17.14",
-        "@graphql-codegen/typescript-react-apollo": "^2.2.1",
+        "@graphql-codegen/typescript-react-apollo": "^3.0.0",
         "@graphql-codegen/typescript-resolvers": "^1.18.2",
         "graphql": "^15.5.0"
     }
