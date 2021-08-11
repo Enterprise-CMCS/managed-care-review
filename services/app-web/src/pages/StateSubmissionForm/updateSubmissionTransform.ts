@@ -23,6 +23,8 @@ function cleanDraftSubmission(
         delete draftUpdate.rateDateEnd
         delete draftUpdate.rateDateCertified
         delete draftUpdate.rateAmendmentInfo
+        draftUpdate.actuaryContacts = []
+        delete draftUpdate.actuaryCommunicationPreference
     }
     return draftUpdate
 }
@@ -52,7 +54,6 @@ function updatesFromSubmission(draft: DraftSubmission): DraftSubmissionUpdates {
         stateContacts: stripTypename(draft.stateContacts),
         actuaryContacts: stripTypename(draft.actuaryContacts),
         actuaryCommunicationPreference: draft.actuaryCommunicationPreference,
-
     }
 }
 
