@@ -722,7 +722,11 @@ export const Contacts = ({
                                     </Link>
                                     <Button
                                         type="submit"
-                                        disabled={shouldValidate}
+                                        disabled={isSubmitting}
+                                        onClick={() => {
+                                            redirectToDashboard.current = false
+                                            setShouldValidate(true)
+                                        }}
                                     >
                                         Continue
                                     </Button>
