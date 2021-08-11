@@ -24,7 +24,7 @@
         "graphql-scalars": "^1.9.0",
         "neverthrow": "^4.0.1",
         "request": "^2.88.2",
-        "serverless": "^2.20.0",
+        "serverless": "^2.53.1",
         "uuid": "^8.3.2"
     },
     "devDependencies": {
