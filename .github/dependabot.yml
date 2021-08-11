@@ -19,3 +19,13 @@ updates:
     directory: '/services/app-api'
     schedule:
       interval: 'weekly'
+
+  - package-ecosystem: 'npm'
+    directory: '/services/app-graphql'
+    schedule:
+      interval: 'weekly'
+
+  - package-ecosystem: 'npm'
+    directory: '/services/app-web'
+    schedule:
+      interval: 'weekly'
