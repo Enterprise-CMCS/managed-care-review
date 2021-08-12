@@ -5,6 +5,11 @@ on:
     workflows: ['Test']
     types:
       - completed
+    branches:
+      - '*'
+      - 'dependabot/**'
+      - '!skipci*'
+      - '!main'
 
 jobs:
   deploy:

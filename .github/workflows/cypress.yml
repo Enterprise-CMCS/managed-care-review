@@ -5,6 +5,11 @@ on:
     workflows: ['Deploy']
     types:
       - completed
+    branches:
+      - '*'
+      - 'dependabot/**'
+      - '!skipci*'
+      - '!main'
 
 jobs:
   cypress:
