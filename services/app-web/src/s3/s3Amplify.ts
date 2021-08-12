@@ -3,7 +3,7 @@ import { parseKey } from '../common-code/s3URLEncoding'
 import type { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
 
-const waitFor = (delay: 1000) =>
+const waitFor = (delay = 1000) =>
     new Promise((resolve) => setTimeout(resolve, delay))
 
 function retry(
@@ -77,6 +77,7 @@ export function newAmplifyS3Client(bucketName: string): S3ClientT {
         */
         scanFile: async (filename: string): Promise<void | S3Error> => {
             try {
+                await waitFor(20000)
                 await retry(async () => {
                     await waitFor(1000)
                     await Storage.vault.get(filename, {
