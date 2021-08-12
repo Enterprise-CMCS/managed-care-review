@@ -1,20 +1,44 @@
-name: Deploy
+name: Test
 
 on:
-  workflow_run:
-    workflows: ['Test']
-    types:
-      - completed
+  push:
+    branches:
+      - '*'
+      - 'dependabot/**'
+      - '!skipci*'
+      - '!main'
 
 jobs:
-  deploy:
+  test:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v2.3.4
       - name: set branch_name
         run: |
           echo "branch_name=$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
+      - name: Check branch name is a legal serverless stage name
+        run: |
+          if [[ ! $branch_name =~ ^[a-zA-Z][a-zA-Z0-9-]*$ ]] || [[ $branch_name -gt 128 ]]; then
+            echo """
+              ------------------------------------------------------------------------------------------------------------------------------
+              ERROR:  Please read below
+              ------------------------------------------------------------------------------------------------------------------------------
+              Bad branch name detected; cannot continue.
+
+              The Serverless Application Framework has a concept of stages that facilitate multiple deployments of the same service.
+              In this setup, the git branch name gets passed to Serverless to serve as the stage name.
+              The stage name (branch name in this case) is tacked onto the end of the service name by Serverless.
+              Therefore, the branch name must be a valid service name.
+
+              From Serverless:
+                A service name should only contain alphanumeric (case sensitive) and hyphens. It should start with an alphabetic character and shouldnt exceed 128 characters.
+
+              For Github Actions support, please push your code to a new branch with a name that meets Serverless' service name requirements.
+              So, make a new branch with a name that begins with a letter and is made up of only letters, numbers, and hyphens... then delete this branch.
+              ------------------------------------------------------------------------------------------------------------------------------
+            """
+            exit 1
+          fi
       - name: set app version
         run: echo "APP_VERSION=$(scripts/app_version.sh)" >> $GITHUB_ENV
       - name: set branch specific variable names
@@ -58,8 +82,14 @@ jobs:
         run: |
           echo "PATH=$(pwd)/node_modules/.bin/:$PATH" >> $GITHUB_ENV
 
-      - name: deploy
-        run: |
-          # When deploying multiple copies of this quickstart to the same AWS Account (not ideal), a prefix helps prevent stepping on each other.
-          # This can optionally be set as an GitHub Actions Secret
-          ./deploy.sh $STAGE_PREFIX$branch_name
+      - name: Unit Tests
+        run: ./dev test --unit --run-db
+      - name: publish code coverage
+        uses: paambaati/codeclimate-action@v2.7.5
+        env:
+          CC_TEST_REPORTER_ID: 364fbdd9d65e41f3ed5f70b6a295f5f76f7288a3930e738b010cad0c218df37c
+        with:
+          debug: true
+          coverageLocations: |
+            ${{github.workspace}}/services/app-api/coverage/lcov.info:lcov
+            ${{github.workspace}}/services/app-web/coverage/lcov.info:lcov
