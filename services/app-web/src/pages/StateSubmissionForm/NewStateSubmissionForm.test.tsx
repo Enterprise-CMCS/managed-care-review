@@ -19,7 +19,11 @@ describe('NewStateSubmissionForm', () => {
 
         await waitFor(() =>
             expect(
-                screen.getByRole('heading', { name: 'Submission type' })
+                screen.getByRole(
+                    'heading',
+                    { level: 2 },
+                    { name: 'Submission type' }
+                )
             ).toBeInTheDocument()
         )
     })
