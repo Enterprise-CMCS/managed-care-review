@@ -5,6 +5,9 @@ Cypress.Commands.add('startNewContractOnlySubmission', () => {
     })
     cy.location('pathname').should('eq', '/submissions/new')
     cy.findByText('New submission').should('exist')
+    cy.findByTestId('step-indicator')
+        .findAllByText('Submission type')
+        .should('have.length', 2)
 
     cy.findByLabelText('Contract action only').safeClick()
     cy.findByRole('combobox', { name: 'Program' }).select('pmap')
