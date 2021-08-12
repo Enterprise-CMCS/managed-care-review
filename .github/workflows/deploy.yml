@@ -12,6 +12,8 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v2.3.4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
       - name: set branch_name
         run: |
           echo "branch_name=$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
