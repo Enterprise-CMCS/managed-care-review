@@ -106,15 +106,40 @@ type StateContact {
 }
 
 input StateContactInput {
-  name: String!
-  titleRole: String!
-  email: String!
+    name: String!
+    titleRole: String!
+    email: String!
+}
+
+enum actuarialFirmType {
+    MERCER
+    MILLIMAN
+    OPTUMAS
+    GUIDEHOUSE
+    DELOITTE
+    STATE_IN_HOUSE
+    OTHER
 }
 
 type ActuaryContact {
     name: String!
     titleRole: String!
     email: String!
+    actuarialFirm: actuarialFirmType
+    actuarialFirmOther: String
+}
+
+input ActuaryContactInput {
+    name: String!
+    titleRole: String!
+    email: String!
+    actuarialFirm: actuarialFirmType
+    actuarialFirmOther: String
+}
+
+enum ActuaryCommunicationType {
+    OACT_TO_ACTUARY
+    OACT_TO_STATE
 }
 
 type Document {
@@ -204,6 +229,8 @@ type DraftSubmission {
     createdAt: Date!
     updatedAt: DateTime!
     stateContacts: [StateContact!]!
+    actuaryContacts: [ActuaryContact!]!
+    actuaryCommunicationPreference: ActuaryCommunicationType
     documents: [Document!]!
     contractType: ContractType
     contractDateStart: Date
@@ -229,6 +256,8 @@ type StateSubmission {
     createdAt: Date!
     updatedAt: DateTime!
     stateContacts: [StateContact!]!
+    actuaryContacts: [ActuaryContact!]!
+    actuaryCommunicationPreference: ActuaryCommunicationType
     documents: [Document!]!
     contractAmendmentInfo: ContractAmendmentInfo
     submittedAt: Date!
@@ -251,6 +280,8 @@ input DraftSubmissionUpdates {
     submissionType: SubmissionType!
     submissionDescription: String!
     stateContacts: [StateContactInput!]!
+    actuaryContacts: [ActuaryContactInput!]!
+    actuaryCommunicationPreference: ActuaryCommunicationType
     documents: [DocumentInput!]!
     contractType: ContractType
     contractDateStart: Date

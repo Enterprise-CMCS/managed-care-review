@@ -88,7 +88,7 @@
     border-left: 4px solid $theme-color-error-darker;
 }
 
-.stateContact {
+.stateContact, .actuaryContact {
     margin-bottom: units(5);
 
     .removeContactBtn {
@@ -97,13 +97,12 @@
     }
 }
 
-.stateContacts {
-    [class^='usa-input'] {
-        margin-bottom: units(2);
-
-    }
-
+.stateContacts, .actuaryContacts {
     .addContactBtn {
         margin-top: .5rem;
+    }
+
+    .removeContactBtn {
+        margin-top: units(4);
     }
 }
