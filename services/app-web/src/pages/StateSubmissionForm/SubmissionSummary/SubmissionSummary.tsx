@@ -143,9 +143,6 @@ export const SubmissionSummary = (): React.ReactElement => {
     const isContractActionAndRateCertification =
         submission.submissionType === 'CONTRACT_AND_RATES'
 
-    const isContractAndRates =
-        submission.submissionType === 'CONTRACT_AND_RATES'
-
     return (
         <div className={styles.background}>
             <GridContainer
@@ -428,7 +425,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                             </Grid>
                         </GridContainer>
                     </dl>
-                    {isContractAndRates && (
+                    {isContractActionAndRateCertification && (
                         <dl>
                             <SectionHeader
                                 header="Actuary contacts"

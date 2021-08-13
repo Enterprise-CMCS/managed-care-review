@@ -220,9 +220,6 @@ export const ReviewSubmit = ({
     const isContractActionAndRateCertification =
         draftSubmission.submissionType === 'CONTRACT_AND_RATES'
 
-    const isContractAndRates =
-        draftSubmission.submissionType === 'CONTRACT_AND_RATES'
-
     return (
         <GridContainer className={styles.reviewSectionWrapper}>
             {userVisibleError && (
@@ -503,7 +500,7 @@ export const ReviewSubmit = ({
                     </GridContainer>
                 </dl>
 
-                {isContractAndRates && (
+                {isContractActionAndRateCertification && (
                     <>
                         <dl>
                             <SectionSubHeader header="Actuary contacts" />
