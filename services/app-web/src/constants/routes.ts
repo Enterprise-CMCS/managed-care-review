@@ -27,7 +27,8 @@ const STATE_SUBMISSION_FORM_ROUTES = [
     'SUBMISSIONS_RATE_DETAILS',
     'SUBMISSIONS_CONTACTS',
     'SUBMISSIONS_DOCUMENTS',
-] as string[]
+    'SUBMISSIONS_REVIEW_SUBMIT',
+] as RouteT[]
 
 const RoutesRecord: Record<RouteT, string> = {
     ROOT: '/',
@@ -63,12 +64,12 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     SUBMISSIONS_NEW: 'New submission',
     SUBMISSIONS_FORM: 'Submissions',
     SUBMISSIONS_TYPE: 'Submission type',
-    SUBMISSIONS_CONTRACT_DETAILS: 'Contract Details',
-    SUBMISSIONS_RATE_DETAILS: 'Rate Details',
+    SUBMISSIONS_CONTRACT_DETAILS: 'Contract details',
+    SUBMISSIONS_RATE_DETAILS: 'Rate details',
     SUBMISSIONS_CONTACTS: 'Contacts',
     SUBMISSIONS_DOCUMENTS: 'Documents',
-    SUBMISSIONS_REVIEW_SUBMIT: 'Review and Submit',
-    UNKNOWN_ROUTE: 'Not Found',
+    SUBMISSIONS_REVIEW_SUBMIT: 'Review and submit',
+    UNKNOWN_ROUTE: 'Not found',
 }
 
 const getRouteName = (pathname: string): RouteT | 'UNKNOWN_ROUTE' => {
