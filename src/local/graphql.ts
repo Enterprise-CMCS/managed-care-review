@@ -2,34 +2,34 @@ import LabeledProcessRunner from '../runner.js'
 import { once } from '../deps.js'
 
 // run the graphql compiler with --watch
-async function compile_graphql_types_watch(runner: LabeledProcessRunner) {
-    await runner.run_command_and_output(
+async function compileGraphQLTypesWatch(runner: LabeledProcessRunner) {
+    await runner.runCommandAndOutput(
         'gql deps',
         ['yarn', 'install'],
         'services/app-graphql'
     )
 
-    return runner.run_command_and_output(
+    return runner.runCommandAndOutput(
         'gqlgen',
         ['yarn', 'gqlgen', '--watch'],
         'services/app-graphql'
     )
 }
 
-export const compile_graphql_types_watch_once = once(compile_graphql_types_watch)
+export const compileGraphQLTypesWatchOnce = once(compileGraphQLTypesWatch)
 
-async function compile_graphql_types(runner: LabeledProcessRunner) {
-    await runner.run_command_and_output(
+async function compileGraphQLTypes(runner: LabeledProcessRunner) {
+    await runner.runCommandAndOutput(
         'gql deps',
         ['yarn', 'install'],
         'services/app-graphql'
     )
 
-    return runner.run_command_and_output(
+    return runner.runCommandAndOutput(
         'gqlgen',
         ['yarn', 'gqlgen'],
         'services/app-graphql'
     )
 }
 
-export const compile_graphql_types_once = once(compile_graphql_types)
+export const compileGraphQLTypesOnce = once(compileGraphQLTypes)

@@ -1,14 +1,14 @@
 import LabeledProcessRunner from '../runner.js'
-import { compile_graphql_types_watch_once } from './graphql.js'
-import { install_web_deps_once } from './web.js'
+import { compileGraphQLTypesWatchOnce } from './graphql.js'
+import { installWebDepsOnce } from './web.js'
 
 
-export async function run_sb_locally(runner: LabeledProcessRunner) {
-    compile_graphql_types_watch_once(runner)
+export async function runStorybookLocally(runner: LabeledProcessRunner) {
+    compileGraphQLTypesWatchOnce(runner)
 
-    await install_web_deps_once(runner)
+    await installWebDepsOnce(runner)
 
-    runner.run_command_and_output(
+    runner.runCommandAndOutput(
         'storybook',
         ['yarn', 'storybook'],
         'services/app-web'

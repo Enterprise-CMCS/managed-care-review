@@ -6,66 +6,66 @@ import LabeledProcessRunner from './runner.js'
 import { parseRunFlags } from './flags.js'
 
 import {
-    run_db_locally,
-    run_api_locally,
-    run_web_locally,
-    run_sb_locally,
-    run_s3_locally,
-    run_web_against_aws,
-    compile_graphql_types_once,
+    runDBLocally,
+    runAPILocally,
+    runWebLocally,
+    runStorybookLocally,
+    runS3Locally,
+    runWebAgainstAWS,
+    compileGraphQLTypesOnce,
  } from './local/index.js'
 
  import {
-     run_api_tests,
-     run_api_tests_watch,
-     run_web_tests,
-     run_web_tests_watch,
-     run_browser_tests,
+     runAPITests,
+     runAPITestsWatch,
+     runWebTests,
+     runWebTestsWatch,
+     runBrowserTests,
  } from './test/index.js'
 
-async function run_all_clean() {
+async function runAllClean() {
     const runner = new LabeledProcessRunner()
-    runner.run_command_and_output(
+    runner.runCommandAndOutput(
         'web clean',
         ['yarn', 'clean'],
         'services/app-web'
     )
-    runner.run_command_and_output(
+    runner.runCommandAndOutput(
         'api clean',
         ['yarn', 'clean'],
         'services/app-api'
     )
 }
 
-async function run_all_lint() {
+async function runAllLint() {
     const runner = new LabeledProcessRunner()
-    await runner.run_command_and_output(
+    await runner.runCommandAndOutput(
         'web lint',
         ['yarn', 'lint'],
         'services/app-web'
     )
-    await runner.run_command_and_output(
+    await runner.runCommandAndOutput(
         'api lint',
         ['yarn', 'lint'],
         'services/app-api'
     )
 }
 
-async function run_all_format() {
+async function runAllFormat() {
     const runner = new LabeledProcessRunner()
-    await runner.run_command_and_output(
+    await runner.runCommandAndOutput(
         'format',
         ['prettier', '.', '-w', '-u', '--ignore-path', '.gitignore'],
         '.'
     )
 }
 
-async function run_all_generate() {
+async function runAllGenerate() {
     const runner = new LabeledProcessRunner()
-    await compile_graphql_types_once(runner)
+    await compileGraphQLTypesOnce(runner)
 }
 
-// run_all_locally runs all of our services locally
+// runAllLocally runs all of our services locally
 type runLocalFlags = {
     runAPI: boolean
     runWeb: boolean
@@ -73,7 +73,7 @@ type runLocalFlags = {
     runS3: boolean
     runStoryBook: boolean
 }
-async function run_all_locally({
+async function runAllLocally({
     runAPI,
     runWeb,
     runDB,
@@ -82,14 +82,14 @@ async function run_all_locally({
 }: runLocalFlags) {
     const runner = new LabeledProcessRunner()
 
-    runDB && run_db_locally(runner)
-    runS3 && run_s3_locally(runner)
-    runAPI && run_api_locally(runner)
-    runWeb && run_web_locally(runner)
-    runStoryBook && run_sb_locally(runner)
+    runDB && runDBLocally(runner)
+    runS3 && runS3Locally(runner)
+    runAPI && runAPILocally(runner)
+    runWeb && runWebLocally(runner)
+    runStoryBook && runStorybookLocally(runner)
 }
 
-function check_url_is_up(url: string): Promise<boolean> {
+function checkURLIsUp(url: string): Promise<boolean> {
     return new Promise<boolean>((resolve) => {
         request(url, {}, (err) => {
             if (err) {
@@ -100,7 +100,7 @@ function check_url_is_up(url: string): Promise<boolean> {
     })
 }
 
-async function run_all_tests({
+async function runAllTests({
     runUnit,
     runOnline,
     runDBInBackground,
@@ -112,16 +112,16 @@ async function run_all_tests({
     const runner = new LabeledProcessRunner()
 
     if (runDBInBackground) {
-        run_db_locally(runner)
+        runDBLocally(runner)
     }
 
     try {
         if (runUnit) {
-            await run_unit_tests(runner)
+            await runUnitTests(runner)
         }
 
         if (runOnline) {
-            await run_online_tests(runner)
+            await runOnlineTests(runner)
         }
     } catch (e) {
         console.log('Testing Error', e)
@@ -132,38 +132,38 @@ async function run_all_tests({
     process.exit(0)
 }
 
-// run_unit_tests runs the api and web tests once, including coverage.
-async function run_unit_tests(runner: LabeledProcessRunner) {
-    const webCode = await run_web_tests(runner)
+// runUnitTests runs the api and web tests once, including coverage.
+async function runUnitTests(runner: LabeledProcessRunner) {
+    const webCode = await runWebTests(runner)
 
     if (webCode != 0) {
         throw new Error('web - unit FAILED')
     }
 
-    const apiCode = await run_api_tests(runner)
+    const apiCode = await runAPITests(runner)
 
     if (apiCode != 0) {
         throw new Error('api - unit failed')
     }
 }
 
-// DEPRECATED run_online_tests runs nightwatch once.
-async function run_online_tests(runner: LabeledProcessRunner) {
-    const base_url = process.env.APPLICATION_ENDPOINT
+// DEPRECATED runOnlineTests runs nightwatch once.
+async function runOnlineTests(runner: LabeledProcessRunner) {
+    const baseURL = process.env.APPLICATION_ENDPOINT
 
-    if (base_url == undefined) {
+    if (baseURL == undefined) {
         console.log('You must set APPLICATION_ENDPOINT to run online tests.')
         return
     }
 
-    const isUp = await check_url_is_up(base_url)
+    const isUp = await checkURLIsUp(baseURL)
     if (!isUp) {
         throw new Error(
-            `the URL ${base_url} does not resolve, make sure the system is running before runnin online tests`
+            `the URL ${baseURL} does not resolve, make sure the system is running before runnin online tests`
         )
     }
 
-    const nightCode = await runner.run_command_and_output(
+    const nightCode = await runner.runCommandAndOutput(
         'nightwatch',
         ['./test.sh'],
         'tests'
@@ -195,7 +195,7 @@ function main() {
     yargs(process.argv.slice(2))
         .scriptName('dev')
         .command('clean', 'clean node dependencies', {}, () => {
-            run_all_clean()
+            runAllClean()
         })
 
         .command(
@@ -242,7 +242,7 @@ function main() {
                     process.exit(1)
                 }
 
-                run_all_locally(parsedFlags)
+                runAllLocally(parsedFlags)
             }
         )
         .command(
@@ -256,7 +256,7 @@ function main() {
                 })
             },
             (args) => {
-                run_web_against_aws(args.stage)
+                runWebAgainstAWS(args.stage)
             }
         )
         .command(
@@ -308,7 +308,7 @@ function main() {
                                 runDBInBackground: args['run-db'],
                             }
 
-                            run_all_tests(testingFlags)
+                            runAllTests(testingFlags)
                         }
                     )
                     .command(
@@ -338,7 +338,7 @@ function main() {
                                     return intOrString.toString()
                                 }
                             )
-                            run_api_tests_watch(unparsedJestArgs, args['run-db'])
+                            runAPITestsWatch(unparsedJestArgs, args['run-db'])
                         }
                     )
                     .command(
@@ -368,7 +368,7 @@ function main() {
                                     return intOrString.toString()
                                 }
                             )
-                            run_web_tests_watch(unparsedJestArgs)
+                            runWebTestsWatch(unparsedJestArgs)
                         }
                     )
                     .command(
@@ -394,7 +394,7 @@ function main() {
                                     return intOrString.toString()
                                 }
                             )
-                            run_browser_tests(unparsedCypressArgs)
+                            runBrowserTests(unparsedCypressArgs)
                         }
                     )
             },
@@ -409,7 +409,7 @@ function main() {
             'run format. This will be replaced by pre-commit',
             {},
             () => {
-                run_all_format()
+                runAllFormat()
             }
         )
         .command(
@@ -417,7 +417,7 @@ function main() {
             'run all linters. This will be replaced by pre-commit.',
             {},
             () => {
-                run_all_lint()
+                runAllLint()
             }
         )
         .command(
@@ -425,7 +425,7 @@ function main() {
             'generate any code required for building. For now thats just GraphQL types.',
             {},
             () => {
-                run_all_generate()
+                runAllGenerate()
             }
         )
         .demandCommand(1, '')

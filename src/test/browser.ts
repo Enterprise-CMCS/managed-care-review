@@ -1,6 +1,6 @@
 import { spawnSync } from 'child_process'
 
-export async function run_browser_tests(cypressArgs: string[]) {
+export async function runBrowserTests(cypressArgs: string[]) {
     let args = ['open']
     if (cypressArgs.length > 0) {
         args = cypressArgs

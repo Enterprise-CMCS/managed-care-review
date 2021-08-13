@@ -1,21 +1,21 @@
 import LabeledProcessRunner from '../runner.js'
-import { compile_graphql_types_watch_once } from './graphql.js'
+import { compileGraphQLTypesWatchOnce } from './graphql.js'
 
-export async function install_api_deps(runner: LabeledProcessRunner) {
-    return runner.run_command_and_output(
+export async function installAPIDeps(runner: LabeledProcessRunner) {
+    return runner.runCommandAndOutput(
         'api deps',
         ['yarn', 'install'],
         'services/app-api'
     )
 }
 
-// run_api_locally uses the serverless-offline plugin to run the api lambdas locally
-export async function run_api_locally(runner: LabeledProcessRunner) {
-    compile_graphql_types_watch_once(runner)
+// runAPILocally uses the serverless-offline plugin to run the api lambdas locally
+export async function runAPILocally(runner: LabeledProcessRunner) {
+    compileGraphQLTypesWatchOnce(runner)
 
-    await install_api_deps(runner)
+    await installAPIDeps(runner)
 
-    runner.run_command_and_output(
+    runner.runCommandAndOutput(
         'api',
         [
             'serverless',

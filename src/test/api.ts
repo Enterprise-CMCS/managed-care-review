@@ -2,22 +2,22 @@ import LabeledProcessRunner from '../runner.js'
 import { spawn } from 'child_process'
 
 import {
-    compile_graphql_types_watch_once,
-    compile_graphql_types_once,
-    run_db_locally,
-    install_api_deps
+    compileGraphQLTypesWatchOnce,
+    compileGraphQLTypesOnce,
+    runDBLocally,
+    installAPIDeps
  } from '../local/index.js'
 
-export async function run_api_tests_watch(jestArgs: string[], runDB: boolean) {
+export async function runAPITestsWatch(jestArgs: string[], runDB: boolean) {
     const runner = new LabeledProcessRunner()
 
-    compile_graphql_types_watch_once(runner)
+    compileGraphQLTypesWatchOnce(runner)
 
     if (runDB) {
-        run_db_locally(runner)
+        runDBLocally(runner)
     }
 
-    await install_api_deps(runner)
+    await installAPIDeps(runner)
 
     // because we are inheriting stdio for this process,
     // we need to not run spawnSync or else all the output
@@ -32,11 +32,11 @@ export async function run_api_tests_watch(jestArgs: string[], runDB: boolean) {
     })
 }
 
-export async function run_api_tests(runner: LabeledProcessRunner): Promise<number> {
-    await compile_graphql_types_once(runner)
-    await install_api_deps(runner)
+export async function runAPITests(runner: LabeledProcessRunner): Promise<number> {
+    await compileGraphQLTypesOnce(runner)
+    await installAPIDeps(runner)
 
-    return await runner.run_command_and_output(
+    return await runner.runCommandAndOutput(
         'api - unit',
         ['yarn', 'test:once', '--coverage'],
         'services/app-api'
