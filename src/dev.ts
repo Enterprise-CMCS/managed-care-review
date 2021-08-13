@@ -1,146 +1,27 @@
 import yargs from 'yargs'
 import request from 'request'
-import { spawn, spawnSync } from 'child_process'
-
 import { commandMustSucceedSync } from './localProcess.js'
 import LabeledProcessRunner from './runner.js'
-import { checkStageAccess, getWebAuthVars } from './serverless.js'
+
 import { parseRunFlags } from './flags.js'
-import { once, requireBinary } from './deps.js'
 
-// run_db_locally runs the local db
-async function run_db_locally(runner: LabeledProcessRunner) {
-    requireBinary(
-        ['java', '-version'],
-        'Java is required in order to run the database locally.\nInstall Java Standard Edition (SE) here: https://www.oracle.com/java/technologies/javase-downloads.html'
-    )
+import {
+    run_db_locally,
+    run_api_locally,
+    run_web_locally,
+    run_sb_locally,
+    run_s3_locally,
+    run_web_against_aws,
+    compile_graphql_types_once,
+ } from './local/index.js'
 
-    await runner.run_command_and_output(
-        'db yarn',
-        ['yarn', 'install'],
-        'services/database'
-    )
-    await runner.run_command_and_output(
-        'db svls',
-        ['serverless', 'dynamodb', 'install'],
-        'services/database'
-    )
-
-    runner.run_command_and_output(
-        'db',
-        ['serverless', '--stage', 'local', 'dynamodb', 'start', '--migrate'],
-        'services/database'
-    )
-}
-
-async function install_api_deps(runner: LabeledProcessRunner) {
-    return runner.run_command_and_output(
-        'api deps',
-        ['yarn', 'install'],
-        'services/app-api'
-    )
-}
-
-// run_api_locally uses the serverless-offline plugin to run the api lambdas locally
-async function run_api_locally(runner: LabeledProcessRunner) {
-    compile_graphql_types_watch_once(runner)
-
-    await install_api_deps(runner)
-
-    runner.run_command_and_output(
-        'api',
-        [
-            'serverless',
-            '--stage',
-            'local',
-            '--region',
-            'us-east-1',
-            'offline',
-            '--httpPort',
-            '3030',
-            'start',
-        ],
-        'services/app-api'
-    )
-}
-
-// run_s3_locally runs s3 locally
-async function run_s3_locally(runner: LabeledProcessRunner) {
-    await runner.run_command_and_output(
-        's3 yarn',
-        ['yarn', 'install'],
-        'services/uploads'
-    )
-    runner.run_command_and_output(
-        's3',
-        ['serverless', '--stage', 'local', 's3', 'start'],
-        'services/uploads'
-    )
-}
-
-// run the graphql compiler with --watch
-async function compile_graphql_types_watch(runner: LabeledProcessRunner) {
-    await runner.run_command_and_output(
-        'gql deps',
-        ['yarn', 'install'],
-        'services/app-graphql'
-    )
-
-    return runner.run_command_and_output(
-        'gqlgen',
-        ['yarn', 'gqlgen', '--watch'],
-        'services/app-graphql'
-    )
-}
-
-const compile_graphql_types_watch_once = once(compile_graphql_types_watch)
-
-async function compile_graphql_types(runner: LabeledProcessRunner) {
-    await runner.run_command_and_output(
-        'gql deps',
-        ['yarn', 'install'],
-        'services/app-graphql'
-    )
-
-    return runner.run_command_and_output(
-        'gqlgen',
-        ['yarn', 'gqlgen'],
-        'services/app-graphql'
-    )
-}
-
-const install_web_deps_once = once(install_web_deps)
-
-async function install_web_deps(runner: LabeledProcessRunner) {
-    return runner.run_command_and_output(
-        'web deps',
-        ['yarn', 'install'],
-        'services/app-web'
-    )
-}
-
-const compile_graphql_types_once = once(compile_graphql_types)
-
-// run_web_locally runs app-web locally
-async function run_web_locally(runner: LabeledProcessRunner) {
-    compile_graphql_types_watch_once(runner)
-
-    await install_web_deps_once(runner)
-
-    runner.run_command_and_output('web', ['yarn', 'start'], 'services/app-web')
-}
-
-async function run_sb_locally(runner: LabeledProcessRunner) {
-    compile_graphql_types_watch_once(runner)
-
-    await install_web_deps_once(runner)
-
-    runner.run_command_and_output(
-        'storybook',
-        ['yarn', 'storybook'],
-        'services/app-web'
-    )
-}
+ import {
+     run_api_tests,
+     run_api_tests_watch,
+     run_web_tests,
+     run_web_tests_watch,
+     run_browser_tests,
+ } from './test/index.js'
 
 async function run_all_clean() {
     const runner = new LabeledProcessRunner()
@@ -181,7 +62,7 @@ async function run_all_format() {
 
 async function run_all_generate() {
     const runner = new LabeledProcessRunner()
-    await compile_graphql_types(runner)
+    await compile_graphql_types_once(runner)
 }
 
 // run_all_locally runs all of our services locally
@@ -219,110 +100,6 @@ function check_url_is_up(url: string): Promise<boolean> {
     })
 }
 
-// Pulls a bunch of configuration out of a given AWS environment and sets it as env vars for app-web to run against
-// Note: The environment is made up of the _stage_ which defaults to your current git branch
-// and the AWS Account, which is determined by which AWS credentials you get out of cloudtamer (dev, val, or prod) usually dev
-async function run_web_against_aws(
-    stageNameOpt: string | undefined = undefined
-) {
-    // by default, review apps are created with the stage name set as the current branch name
-    const stageName =
-        stageNameOpt !== undefined
-            ? stageNameOpt
-            : commandMustSucceedSync('git', ['branch', '--show-current'])
-
-    if (stageName === '') {
-        console.log(
-            'Error: you do not appear to be on a git branch so we cannot auto-detect what stage to attach to.\n',
-            'Either checkout the deployed branch or specify --stage explicitly.'
-        )
-        process.exit(1)
-    }
-
-    console.log('Attempting to access stage:', stageName)
-    // Test to see if we can read info from serverless. This is likely to trip folks up who haven't
-    // configured their AWS keys correctly or if they have an invalid stage name.
-    const serverlessConnection = checkStageAccess(stageName)
-    switch (serverlessConnection) {
-        case 'AWS_TOKEN_ERROR': {
-            console.log(
-                'Error: Invalid token attempting to read AWS Cloudformation\n',
-                'Likely, you do not have aws configured right. You will need AWS tokens from cloudwatch configured\n',
-                'See the AWS Token section of the README for more details.\n\n'
-            )
-            process.exit(1)
-        }
-        case 'STAGE_ERROR': {
-            console.log(
-                `Error: stack with id ${stageName} does not exist or is not done deploying\n`,
-                "If you didn't set one explicitly, maybe you haven't pushed this branch yet to deploy a review app?"
-            )
-            process.exit(1)
-        }
-        case 'UNKNOWN_ERROR': {
-            console.log(
-                'Unexpected Error attempting to read AWS Cloudformation.'
-            )
-            process.exit(2)
-        }
-    }
-
-    // Now, we've confirmed we are configured to pull data out of serverless x cloudformation
-    console.log('Access confirmed. Fetching config vars')
-    const { region, idPool, userPool, userPoolClient, userPoolDomain } =
-        getWebAuthVars(stageName)
-
-    const apiBase = commandMustSucceedSync(
-        './output.sh',
-        ['app-api', 'ApiGatewayRestApiUrl', stageName],
-        {
-            cwd: './services',
-        }
-    )
-
-    const apiAuthMode = commandMustSucceedSync(
-        './output.sh',
-        ['app-api', 'ApiAuthMode', stageName],
-        {
-            cwd: './services',
-        }
-    )
-
-    const s3Region = commandMustSucceedSync(
-        './output.sh',
-        ['uploads', 'Region', stageName],
-        {
-            cwd: './services',
-        }
-    )
-
-    const s3DocsBucket = commandMustSucceedSync(
-        './output.sh',
-        ['uploads', 'DocumentUploadsBucketName', stageName],
-        {
-            cwd: './services',
-        }
-    )
-
-    // set them
-    process.env.PORT = '3003' // run hybrid on a different port
-    process.env.REACT_APP_AUTH_MODE = apiAuthMode // override local_login in .env
-    process.env.REACT_APP_API_URL = apiBase
-    process.env.REACT_APP_COGNITO_REGION = region
-    process.env.REACT_APP_COGNITO_ID_POOL_ID = idPool
-    process.env.REACT_APP_COGNITO_USER_POOL_ID = userPool
-    process.env.REACT_APP_COGNITO_USER_POOL_CLIENT_ID = userPoolClient
-    process.env.REACT_APP_COGNITO_USER_POOL_CLIENT_DOMAIN = userPoolDomain
-    process.env.REACT_APP_S3_REGION = s3Region
-    delete process.env.REACT_APP_S3_LOCAL_URL
-    process.env.REACT_APP_S3_DOCUMENTS_BUCKET = s3DocsBucket
-    process.env.REACT_APP_APPLICATION_ENDPOINT = 'http://localhost:3003/'
-
-    // run it
-    const runner = new LabeledProcessRunner()
-    await run_web_locally(runner)
-}
-
 async function run_all_tests({
     runUnit,
     runOnline,
@@ -355,98 +132,22 @@ async function run_all_tests({
     process.exit(0)
 }
 
-async function run_api_tests(jestArgs: string[], runDB: boolean) {
-    const runner = new LabeledProcessRunner()
-
-    compile_graphql_types_watch_once(runner)
-
-    if (runDB) {
-        run_db_locally(runner)
-    }
-
-    await install_api_deps(runner)
-
-    // because we are inheriting stdio for this process,
-    // we need to not run spawnSync or else all the output
-    // for the graphql compiler & db will be swallowed.
-    const proc = spawn('yarn', ['test'].concat(jestArgs), {
-        cwd: 'services/app-api',
-        stdio: 'inherit',
-    })
-
-    proc.on('close', (code) => {
-        process.exit(code ? code : 0)
-    })
-}
-
-async function run_web_tests(jestArgs: string[]) {
-    const runner = new LabeledProcessRunner()
-
-    compile_graphql_types_watch_once(runner)
-
-    await install_web_deps_once(runner)
-
-    // because we are inheriting stdio for this process,
-    // we need to not run spawnSync or else all the output
-    // for the graphql compiler will be swallowed.
-    const proc = spawn('yarn', ['test'].concat(jestArgs), {
-        cwd: 'services/app-web',
-        stdio: 'inherit',
-    })
-
-    proc.on('close', (code) => {
-        process.exit(code ? code : 0)
-    })
-}
-
-async function run_browser_tests(cypressArgs: string[]) {
-    let args = ['open']
-    if (cypressArgs.length > 0) {
-        args = cypressArgs
-    }
-
-    args = ['cypress'].concat(args)
-
-    console.log(`running: npx ${args.join(' ')}`)
-    spawnSync('npx', args, {
-        stdio: 'inherit',
-    })
-}
-
+// run_unit_tests runs the api and web tests once, including coverage.
 async function run_unit_tests(runner: LabeledProcessRunner) {
-    await compile_graphql_types_once(runner)
+    const webCode = await run_web_tests(runner)
 
-    await runner.run_command_and_output(
-        'web deps',
-        ['yarn', 'install'],
-        'services/app-web'
-    )
-
-    const webCode = await runner.run_command_and_output(
-        'web - unit',
-        ['yarn', 'test:once', '--coverage'],
-        'services/app-web'
-    )
     if (webCode != 0) {
         throw new Error('web - unit FAILED')
     }
 
-    await runner.run_command_and_output(
-        'api deps',
-        ['yarn', 'install'],
-        'services/app-api'
-    )
+    const apiCode = await run_api_tests(runner)
 
-    const apiCode = await runner.run_command_and_output(
-        'api - unit',
-        ['yarn', 'test:once', '--coverage'],
-        'services/app-api'
-    )
     if (apiCode != 0) {
         throw new Error('api - unit failed')
     }
 }
 
+// DEPRECATED run_online_tests runs nightwatch once.
 async function run_online_tests(runner: LabeledProcessRunner) {
     const base_url = process.env.APPLICATION_ENDPOINT
 
@@ -488,7 +189,7 @@ function main() {
 
     /* AVAILABLE COMMANDS
       The command definitions in yargs
-      All valid arguments to dev should be enumerated here, this is the entrypoint to the script 
+      All valid arguments to dev should be enumerated here, this is the entrypoint to the script
     */
 
     yargs(process.argv.slice(2))
@@ -637,7 +338,7 @@ function main() {
                                     return intOrString.toString()
                                 }
                             )
-                            run_api_tests(unparsedJestArgs, args['run-db'])
+                            run_api_tests_watch(unparsedJestArgs, args['run-db'])
                         }
                     )
                     .command(
@@ -667,7 +368,7 @@ function main() {
                                     return intOrString.toString()
                                 }
                             )
-                            run_web_tests(unparsedJestArgs)
+                            run_web_tests_watch(unparsedJestArgs)
                         }
                     )
                     .command(
