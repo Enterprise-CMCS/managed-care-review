@@ -264,58 +264,14 @@ export const Contacts = ({
         }
     }
 
-    // const contactShape = {
-    //     stateContacts: Yup.array().of(
-    //         Yup.object().shape({
-    //             name: Yup.string().required('You must provide a name'),
-    //             titleRole: Yup.string().required(
-    //                 'You must provide a title/role'
-    //             ),
-    //             email: Yup.string()
-    //                 .email('You must enter a valid email address')
-    //                 .required('You must provide an email address'),
-    //         })
-    //     ),
-    //     actuaryContacts: Yup.array(),
-    //     actuaryCommunicationPreference: Yup.string().nullable(),
-    // }
-    //
-    // if (draftSubmission.submissionType !== 'CONTRACT_ONLY') {
-    //     contactShape.actuaryContacts = Yup.array().of(
-    //         Yup.object().shape({
-    //             name: Yup.string().required('You must provide a name'),
-    //             titleRole: Yup.string().required(
-    //                 'You must provide a title/role'
-    //             ),
-    //             email: Yup.string()
-    //                 .email('You must enter a valid email address')
-    //                 .required('You must provide an email address'),
-    //             actuarialFirm: Yup.string()
-    //                 .required('You must select an actuarial firm')
-    //                 .nullable(),
-    //             actuarialFirmOther: Yup.string()
-    //                 .when('actuarialFirm', {
-    //                     is: 'OTHER',
-    //                     then: Yup.string()
-    //                         .required('You must enter a description')
-    //                         .nullable(),
-    //                 })
-    //                 .nullable(),
-    //         })
-    //     )
-    //     contactShape.actuaryCommunicationPreference = Yup.string().required(
-    //         'You must select a communication preference'
-    //     )
-    // }
-
-    const ContactSchema = yupValidation(draftSubmission.submissionType)
+    const contactSchema = yupValidation(draftSubmission.submissionType)
 
     return (
         <>
             <Formik
                 initialValues={contactsInitialValues}
                 onSubmit={handleFormSubmit}
-                validationSchema={ContactSchema}
+                validationSchema={contactSchema}
             >
                 {({
                     values,
@@ -332,7 +288,15 @@ export const Contacts = ({
                             aria-label="Contacts Form"
                             onSubmit={(e) => {
                                 e.preventDefault()
-                                if (!isValidating) handleSubmit()
+                                // I don't really understand why we have been checking isValidating in all these
+                                // handlers, so I'm going to ask Hana about that.
+                                // From the docs it seems like isValidating should only be set while we are in the
+                                // middle of submitting anyway.
+                                // HOWEVER. for some reason. On this page of the form, only in linux,
+                                // isValidating is set as soon as we start editing something on the page.
+                                // Might have to do with FieldArray b/c this is the only place we use it.
+                                // So I'm removing the if !isValidating for now and letting Formik handle things.
+                                handleSubmit()
                             }}
                         >
                             <fieldset className="usa-fieldset">
