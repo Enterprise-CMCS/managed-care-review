@@ -57,6 +57,54 @@ export interface actuaryContactValue {
     actuarialFirmOther?: string | null
 }
 
+const yupValidation = (submissionType: string) => {
+    const contactShape = {
+        stateContacts: Yup.array().of(
+            Yup.object().shape({
+                name: Yup.string().required('You must provide a name'),
+                titleRole: Yup.string().required(
+                    'You must provide a title/role'
+                ),
+                email: Yup.string()
+                    .email('You must enter a valid email address')
+                    .required('You must provide an email address'),
+            })
+        ),
+        actuaryContacts: Yup.array(),
+        actuaryCommunicationPreference: Yup.string().nullable(),
+    }
+
+    if (submissionType !== 'CONTRACT_ONLY') {
+        contactShape.actuaryContacts = Yup.array().of(
+            Yup.object().shape({
+                name: Yup.string().required('You must provide a name'),
+                titleRole: Yup.string().required(
+                    'You must provide a title/role'
+                ),
+                email: Yup.string()
+                    .email('You must enter a valid email address')
+                    .required('You must provide an email address'),
+                actuarialFirm: Yup.string()
+                    .required('You must select an actuarial firm')
+                    .nullable(),
+                actuarialFirmOther: Yup.string()
+                    .when('actuarialFirm', {
+                        is: 'OTHER',
+                        then: Yup.string()
+                            .required('You must enter a description')
+                            .nullable(),
+                    })
+                    .nullable(),
+            })
+        )
+        contactShape.actuaryCommunicationPreference = Yup.string().required(
+            'You must select a communication preference'
+        )
+    }
+
+    return Yup.object().shape(contactShape)
+}
+
 type FormError = FormikErrors<ContactsFormValues>[keyof FormikErrors<ContactsFormValues>]
 
 // We want to make sure we are returning the specific error
@@ -216,51 +264,51 @@ export const Contacts = ({
         }
     }
 
-    const contactShape = {
-        stateContacts: Yup.array().of(
-            Yup.object().shape({
-                name: Yup.string().required('You must provide a name'),
-                titleRole: Yup.string().required(
-                    'You must provide a title/role'
-                ),
-                email: Yup.string()
-                    .email('You must enter a valid email address')
-                    .required('You must provide an email address'),
-            })
-        ),
-        actuaryContacts: Yup.array(),
-        actuaryCommunicationPreference: Yup.string().nullable(),
-    }
+    // const contactShape = {
+    //     stateContacts: Yup.array().of(
+    //         Yup.object().shape({
+    //             name: Yup.string().required('You must provide a name'),
+    //             titleRole: Yup.string().required(
+    //                 'You must provide a title/role'
+    //             ),
+    //             email: Yup.string()
+    //                 .email('You must enter a valid email address')
+    //                 .required('You must provide an email address'),
+    //         })
+    //     ),
+    //     actuaryContacts: Yup.array(),
+    //     actuaryCommunicationPreference: Yup.string().nullable(),
+    // }
+    //
+    // if (draftSubmission.submissionType !== 'CONTRACT_ONLY') {
+    //     contactShape.actuaryContacts = Yup.array().of(
+    //         Yup.object().shape({
+    //             name: Yup.string().required('You must provide a name'),
+    //             titleRole: Yup.string().required(
+    //                 'You must provide a title/role'
+    //             ),
+    //             email: Yup.string()
+    //                 .email('You must enter a valid email address')
+    //                 .required('You must provide an email address'),
+    //             actuarialFirm: Yup.string()
+    //                 .required('You must select an actuarial firm')
+    //                 .nullable(),
+    //             actuarialFirmOther: Yup.string()
+    //                 .when('actuarialFirm', {
+    //                     is: 'OTHER',
+    //                     then: Yup.string()
+    //                         .required('You must enter a description')
+    //                         .nullable(),
+    //                 })
+    //                 .nullable(),
+    //         })
+    //     )
+    //     contactShape.actuaryCommunicationPreference = Yup.string().required(
+    //         'You must select a communication preference'
+    //     )
+    // }
 
-    if (draftSubmission.submissionType !== 'CONTRACT_ONLY') {
-        contactShape.actuaryContacts = Yup.array().of(
-            Yup.object().shape({
-                name: Yup.string().required('You must provide a name'),
-                titleRole: Yup.string().required(
-                    'You must provide a title/role'
-                ),
-                email: Yup.string()
-                    .email('You must enter a valid email address')
-                    .required('You must provide an email address'),
-                actuarialFirm: Yup.string()
-                    .required('You must select an actuarial firm')
-                    .nullable(),
-                actuarialFirmOther: Yup.string()
-                    .when('actuarialFirm', {
-                        is: 'OTHER',
-                        then: Yup.string()
-                            .required('You must enter a description')
-                            .nullable(),
-                    })
-                    .nullable(),
-            })
-        )
-        contactShape.actuaryCommunicationPreference = Yup.string().required(
-            'You must select a communication preference'
-        )
-    }
-
-    const ContactSchema = Yup.object().shape(contactShape)
+    const ContactSchema = yupValidation(draftSubmission.submissionType)
 
     return (
         <>
