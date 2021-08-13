@@ -199,4 +199,34 @@ describe('Contacts', () => {
             expect(addStateContactButton).toHaveFocus()
         })
     })
+
+    it('after actuary contact "Remove contact" button click, should focus on add new actuary contact button', async () => {
+        const mock = mockContactAndRatesDraft()
+        const mockUpdateDraftFn = jest.fn()
+
+        renderWithProviders(
+            <Contacts draftSubmission={mock} updateDraft={mockUpdateDraftFn} />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+        const addActuaryContactButton = screen.getByRole('button', {
+            name: 'Add actuary contact',
+        })
+        addActuaryContactButton.click()
+
+        await waitFor(() => {
+            expect(
+                screen.getByRole('button', { name: 'Remove contact' })
+            ).toBeInTheDocument()
+
+            userEvent.click(
+                screen.getByRole('button', { name: 'Remove contact' })
+            )
+
+            expect(addActuaryContactButton).toHaveFocus()
+        })
+    })
 })
