@@ -969,6 +969,7 @@ export const Contacts = ({
                                         type="submit"
                                         disabled={isSubmitting}
                                         onClick={() => {
+                                            redirectToDashboard.current = false
                                             setShouldValidate(true)
                                         }}
                                     >
