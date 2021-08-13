@@ -65,6 +65,39 @@ export function mockDraft(): DraftSubmission {
     }
 }
 
+export function mockContactAndRatesDraft(): DraftSubmission {
+    return {
+        __typename: 'DraftSubmission',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        id: 'test-abc-123',
+        stateCode: 'MN',
+        programID: 'snbc',
+        program: {
+            id: 'snbc',
+            name: 'SNBC',
+        },
+        name: 'MN-MSHO-0001',
+        submissionType: 'CONTRACT_AND_RATES',
+        submissionDescription: 'A real submission',
+        documents: [],
+        contractType: 'BASE',
+        contractDateStart: new Date(),
+        contractDateEnd: dayjs().add(2, 'days').toDate(),
+        contractAmendmentInfo: null,
+        managedCareEntities: [],
+        federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
+        rateType: null,
+        rateDateStart: null,
+        rateDateEnd: null,
+        rateDateCertified: null,
+        rateAmendmentInfo: null,
+        stateContacts: [],
+        actuaryContacts: [],
+        actuaryCommunicationPreference: null,
+    }
+}
+
 export function mockCompleteDraft(): DraftSubmission {
     return {
         createdAt: new Date(),
@@ -96,7 +129,7 @@ export function mockCompleteDraft(): DraftSubmission {
                 name: 'Test Person',
                 titleRole: 'A Role',
                 email: 'test@test.com',
-            }
+            },
         ],
         actuaryContacts: [],
         actuaryCommunicationPreference: null,
@@ -163,11 +196,13 @@ export function mockStateSubmission(): StateSubmission {
         rateDateEnd: new Date(),
         rateDateCertified: new Date(),
         rateAmendmentInfo: null,
-        stateContacts: [{
-            name: 'Test Person',
-            titleRole: 'A Role',
-            email: 'test@test.com',
-        }],
+        stateContacts: [
+            {
+                name: 'Test Person',
+                titleRole: 'A Role',
+                email: 'test@test.com',
+            },
+        ],
         actuaryContacts: [],
         actuaryCommunicationPreference: null,
     }
@@ -181,7 +216,7 @@ const fetchCurrentUserMock = ({
     user = mockValidUser,
     statusCode,
 }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
+fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
     switch (statusCode) {
         case 200:
             return {
@@ -356,19 +391,36 @@ const submitDraftSubmissionMockSuccess = ({
 > => {
     const submission = stateSubmission ?? mockDraft()
     return {
-        request: { query: SubmitDraftSubmissionDocument, variables: { input: { submissionID: id, }, }, }, result: { data: { submitDraftSubmission: { submission: submission, }, }, },
+        request: {
+            query: SubmitDraftSubmissionDocument,
+            variables: { input: { submissionID: id } },
+        },
+        result: { data: { submitDraftSubmission: { submission: submission } } },
     }
 }
 
-const submitDraftSubmissionMockError = ({ id,
+const submitDraftSubmissionMockError = ({
+    id,
 }: {
-    id: string         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    id: string // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }): MockedResponse<Record<string, any>> => {
-    return { request: { query: SubmitDraftSubmissionDocument, variables: { input: { submissionID: id, }, }, }, result: { errors: [new GraphQLError('Incomplete submission cannot be submitted'),], }, }
+    return {
+        request: {
+            query: SubmitDraftSubmissionDocument,
+            variables: { input: { submissionID: id } },
+        },
+        result: {
+            errors: [
+                new GraphQLError('Incomplete submission cannot be submitted'),
+            ],
+        },
+    }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const indexSubmissionsMockSuccess = (submissions: Submission[] = [mockDraft(), mockStateSubmission()]): MockedResponse<Record<string, any>> => {
+const indexSubmissionsMockSuccess = (
+    submissions: Submission[] = [mockDraft(), mockStateSubmission()]
+): MockedResponse<Record<string, any>> => {
     const submissionEdges = submissions.map((sub) => {
         return {
             node: sub,
