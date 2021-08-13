@@ -220,6 +220,9 @@ export const ReviewSubmit = ({
     const isContractActionAndRateCertification =
         draftSubmission.submissionType === 'CONTRACT_AND_RATES'
 
+    const isContractAndRates =
+        draftSubmission.submissionType === 'CONTRACT_AND_RATES'
+
     return (
         <GridContainer className={styles.reviewSectionWrapper}>
             {userVisibleError && (
@@ -474,67 +477,100 @@ export const ReviewSubmit = ({
 
                     <GridContainer>
                         <Grid row>
-                            {draftSubmission.stateContacts.map((stateContact, index) => (
-                            <Grid col={6}>
-                                <span className="text-bold">Contact {index + 1}</span><br/>
-                                <address>
-                                    {stateContact.name}<br/>
-                                    {stateContact.titleRole}<br/>
-                                    <a href={`mailto:${stateContact.email}`}>{stateContact.email}</a><br/>
-                                </address>
-                            </Grid>
-                            ))}
+                            {draftSubmission.stateContacts.map(
+                                (stateContact, index) => (
+                                    <Grid col={6}>
+                                        <span className="text-bold">
+                                            Contact {index + 1}
+                                        </span>
+                                        <br />
+                                        <address>
+                                            {stateContact.name}
+                                            <br />
+                                            {stateContact.titleRole}
+                                            <br />
+                                            <a
+                                                href={`mailto:${stateContact.email}`}
+                                            >
+                                                {stateContact.email}
+                                            </a>
+                                            <br />
+                                        </address>
+                                    </Grid>
+                                )
+                            )}
                         </Grid>
                     </GridContainer>
                 </dl>
 
-                {draftSubmission.actuaryContacts && (
-                  <dl>
-                  <SectionSubHeader header="Actuary contacts" />
-                      <GridContainer>
-                          <Grid row>
-                              {draftSubmission.actuaryContacts.map((actuaryContact, index) => (
-                              <Grid col={6}>
-                                  <span className="text-bold">
-                                  {index ? 'Additional actuary contact' : 'Certifying actuary'}
-                                  </span><br/>
-                                  <address>
-                                      {actuaryContact.name}<br/>
-                                      {actuaryContact.titleRole}<br/>
-                                      <a href={`mailto:${actuaryContact.email}`}>{actuaryContact.email}</a><br/>
-                                  {actuaryContact.actuarialFirm === 'OTHER' ? (
-                                      <>
-                                      {actuaryContact.actuarialFirmOther}
-                                      </>
-                                  ) : (
-                                      <>
-                                      {/*TODO: make this more clear, a const or something */}
-                                      {actuaryContact.actuarialFirm
-                                          ? ActuaryFirmsRecord[
-                                                actuaryContact.actuarialFirm
-                                              ]
-                                          : ''}
-                                      </>
-                                  )}
-                                  </address>
-                              </Grid>
-                              ))}
-                          </Grid>
-                      </GridContainer>
-                  </dl>
+                {isContractAndRates && (
+                    <>
+                        <dl>
+                            <SectionSubHeader header="Actuary contacts" />
+                            <GridContainer>
+                                <Grid row>
+                                    {draftSubmission.actuaryContacts.map(
+                                        (actuaryContact, index) => (
+                                            <Grid col={6}>
+                                                <span className="text-bold">
+                                                    {index
+                                                        ? 'Additional actuary contact'
+                                                        : 'Certifying actuary'}
+                                                </span>
+                                                <br />
+                                                <address>
+                                                    {actuaryContact.name}
+                                                    <br />
+                                                    {actuaryContact.titleRole}
+                                                    <br />
+                                                    <a
+                                                        href={`mailto:${actuaryContact.email}`}
+                                                    >
+                                                        {actuaryContact.email}
+                                                    </a>
+                                                    <br />
+                                                    {actuaryContact.actuarialFirm ===
+                                                    'OTHER' ? (
+                                                        <>
+                                                            {
+                                                                actuaryContact.actuarialFirmOther
+                                                            }
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            {/*TODO: make this more clear, a const or something */}
+                                                            {actuaryContact.actuarialFirm
+                                                                ? ActuaryFirmsRecord[
+                                                                      actuaryContact
+                                                                          .actuarialFirm
+                                                                  ]
+                                                                : ''}
+                                                        </>
+                                                    )}
+                                                </address>
+                                            </Grid>
+                                        )
+                                    )}
+                                </Grid>
+                            </GridContainer>
+                        </dl>
+                        <dl>
+                            <GridContainer>
+                                <Grid row>
+                                    <span className="text-bold">
+                                        Actuary communication preference
+                                    </span>
+                                    {draftSubmission.actuaryCommunicationPreference
+                                        ? ActuaryCommunicationRecord[
+                                              draftSubmission
+                                                  .actuaryCommunicationPreference
+                                          ]
+                                        : ''}
+                                </Grid>
+                            </GridContainer>
+                        </dl>
+                    </>
                 )}
-                <dl>
-                    <GridContainer>
-                        <Grid row>
-                            <span className="text-bold">Actuary communication preference</span>
-                            {draftSubmission.actuaryCommunicationPreference
-                                ? ActuaryCommunicationRecord[
-                                      draftSubmission.actuaryCommunicationPreference
-                                    ]
-                                : ''}
-                        </Grid>
-                    </GridContainer>
-                </dl>
             </section>
 
             <section id="documents" className={styles.reviewSection}>
