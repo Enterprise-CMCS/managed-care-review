@@ -13,7 +13,7 @@ provider:
 
 custom:
   stage: ${opt:stage, self:provider.stage}
-  databaseName: !Sub 'aurora_${self:service}_${self:custom.stage}_${AWS::AccountId}}'
+  databaseName: aurora_${self:service}_${self:custom.stage}_${AWS::AccountId}}
   vpcId: ${ssm:/configuration/${self:custom.stage}/vpc/id, ssm:/configuration/default/vpc/id}
   sgId:
     - ${ssm:/configuration/${self:custom.stage}/vpc/sg/id, ssm:/configuration/default/vpc/sg/id}
