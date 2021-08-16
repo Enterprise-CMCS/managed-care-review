@@ -2,7 +2,7 @@
 
 export { runDBLocally } from './db.js'
 export { runAPILocally, installAPIDeps } from './api.js'
-export { runWebLocally, runWebAgainstAWS, installWebDepsOnce } from './web.js'
+export { runWebLocally, runWebAgainstAWS, installWebDepsOnce, runWebAgainstDocker } from './web.js'
 export { runStorybookLocally } from './storybook.js'
 export { runS3Locally } from './s3.js'
 export { compileGraphQLTypesWatchOnce, compileGraphQLTypesOnce } from './graphql.js'

@@ -13,6 +13,7 @@ import {
     runS3Locally,
     runWebAgainstAWS,
     compileGraphQLTypesOnce,
+    runWebAgainstDocker,
  } from './local/index.js'
 
  import {
@@ -21,6 +22,7 @@ import {
      runWebTests,
      runWebTestsWatch,
      runBrowserTests,
+     runBrowserTestsInDocker,
  } from './test/index.js'
 
 async function runAllClean() {
@@ -197,52 +199,148 @@ function main() {
         .command('clean', 'clean node dependencies', {}, () => {
             runAllClean()
         })
-
         .command(
             'local',
             'run system locally. If no flags are passed, runs all services',
             (yargs) => {
                 return yargs
-                    .option('storybook', {
-                        type: 'boolean',
-                        describe: 'run storybook locally',
-                    })
-                    .option('web', {
-                        type: 'boolean',
-                        describe: 'run web locally',
-                    })
-                    .option('api', {
-                        type: 'boolean',
-                        describe: 'run api locally',
-                    })
-                    .option('s3', {
-                        type: 'boolean',
-                        describe: 'run s3 locally',
-                    })
-                    .option('db', {
-                        type: 'boolean',
-                        describe: 'run database locally',
-                    })
-            },
-            (args) => {
-                const inputFlags = {
-                    runAPI: args.api,
-                    runWeb: args.web,
-                    runDB: args.db,
-                    runS3: args.s3,
-                    runStoryBook: args.storybook,
-                }
+                    .command(
+                        ['all', '*'], // adding '*' here makes this subcommand the default command
+                        'runs all local services. You can exclude specific services with --no-* like --no-storybook',
+                        (yargs) => {
+                            return yargs
+                                .option('storybook', {
+                                    type: 'boolean',
+                                    describe: 'run storybook locally',
+                                })
+                                .option('web', {
+                                    type: 'boolean',
+                                    describe: 'run web locally',
+                                })
+                                .option('api', {
+                                    type: 'boolean',
+                                    describe: 'run api locally',
+                                })
+                                .option('s3', {
+                                    type: 'boolean',
+                                    describe: 'run s3 locally',
+                                })
+                                .option('db', {
+                                    type: 'boolean',
+                                    describe: 'run database locally',
+                                })
+                                .example([
+                                    [
+                                        '$0 local',
+                                        'run all local services',
+                                    ],
+                                    [
+                                        '$0 local --no-storybook',
+                                        'run all services except storybook',
+                                    ],
+                                    [
+                                        '$0 local --api --db',
+                                        'run app-api and the databse',
+                                    ],
+                                ])
+                        },
+                        (args) => {
+                            const inputFlags = {
+                                runAPI: args.api,
+                                runWeb: args.web,
+                                runDB: args.db,
+                                runS3: args.s3,
+                                runStoryBook: args.storybook,
+                            }
 
-                const parsedFlags = parseRunFlags(inputFlags)
+                            const parsedFlags = parseRunFlags(inputFlags)
 
-                if (parsedFlags === undefined) {
-                    console.log(
-                        "Error: Don't mix and match positive and negative boolean flags"
+                            if (parsedFlags === undefined) {
+                                console.log(
+                                    "Error: Don't mix and match positive and negative boolean flags"
+                                )
+                                process.exit(1)
+                            }
+
+                            runAllLocally(parsedFlags)
+                        }
                     )
-                    process.exit(1)
-                }
+                    .command(
+                        'api',
+                        'run app-api locally. Will run the graphql compiler too.',
+                        () => {
+                            const runner = new LabeledProcessRunner()
 
-                runAllLocally(parsedFlags)
+                            runAPILocally(runner)
+                        }
+                    )
+                    .command(
+                        'web',
+                        'run app-web locally. Will run the graphql compiler too. Has options to configure it to run against AWS or Docker',
+                        (yargs) => {
+                            return yargs
+                                .option('hybrid', {
+                                    type: 'boolean',
+                                    describe: 'run app-web locally configured to talk to a backend deployed in AWS. Defaults to the review app associated with the current branch.',
+                                })
+                                .option('hybrid-stage', {
+                                    type: 'string',
+                                    describe: 'an alternative Serverless stage in your AWS account to run against',
+                                })
+                                .option('for-docker', {
+                                    type: 'boolean',
+                                    describe: 'run app-web locally configured to be called from within a docker container. This is designed to be paired with `./dev test browser --in-docker`',
+                                })
+                        },
+                        (args) => {
+                            if (args['for-docker'] && args.hybrid) {
+                                console.log("Error: --hybrid and --for-docker are mutually exclusive")
+                                process.exit(2)
+                            }
+
+                            if (args.hybrid) {
+                                runWebAgainstAWS(args['hybrid-stage'])
+                            } else if (args['for-docker']) {
+                                console.log("run against docker")
+                                runWebAgainstDocker()
+                            } else {
+                                const runner = new LabeledProcessRunner()
+                                runWebLocally(runner)
+                            }
+                        }
+                    )
+                    .command(
+                        'storybook',
+                        'run storybook locally. Will run the graphql compiler too.',
+                        () => {
+                            const runner = new LabeledProcessRunner()
+
+                            runStorybookLocally(runner)
+                        }
+                    )
+                    .command(
+                        's3',
+                        'run s3 locally',
+                        () => {
+                            const runner = new LabeledProcessRunner()
+
+                            runS3Locally(runner)
+                        }
+                    )
+                    .command(
+                        'db',
+                        'run the databse locally.',
+                        () => {
+                            const runner = new LabeledProcessRunner()
+
+                            runDBLocally(runner)
+                        }
+                    )
+            },
+            () => {
+                console.log(
+                    "with a default subcommand, I don't think this code can be reached"
+                )
             }
         )
         .command(
@@ -286,8 +384,6 @@ function main() {
                                 })
                         },
                         (args) => {
-                            // all args that come after a `--` hang out in args._, along with the command name(s)
-                            // they can be strings or numbers so we map them before passing them on
                             // If no test flags are passed, default to running everything.
                             const inputRunFlags = {
                                 runUnit: args.unit,
@@ -375,7 +471,10 @@ function main() {
                         'browser',
                         'run & watch cypress browser tests. Default command is `cypress open`. Any args passed after a -- will be passed to cypress instead. This requires a URL to run against, configured with APPLICATION_ENDPOINT',
                         (yargs) => {
-                            return yargs.example([
+                            return yargs.option('in-docker', {
+                                type: 'boolean',
+                                describe: 'run cypress in a linux docker container that better matches the environment cypress is run in in CI. N.B. requires running app-web with --for-docker in order to work.',
+                            }).example([
                                 [
                                     '$0 test browser',
                                     'launch the cypress test runner',
@@ -383,6 +482,10 @@ function main() {
                                 [
                                     '$0 test browser -- run',
                                     'run all the cypress tests once from the CLI',
+                                ],
+                                [
+                                    '$0 test browser --in-docker',
+                                    'run all the cypress tests once in a CI-like docker container',
                                 ],
                             ])
                         },
@@ -394,7 +497,12 @@ function main() {
                                     return intOrString.toString()
                                 }
                             )
-                            runBrowserTests(unparsedCypressArgs)
+
+                            if (args['in-docker']) {
+                                runBrowserTestsInDocker(unparsedCypressArgs)
+                            } else {
+                                runBrowserTests(unparsedCypressArgs)
+                            }
                         }
                     )
             },
