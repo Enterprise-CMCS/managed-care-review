@@ -12,51 +12,26 @@ provider:
 
 custom:
   stage: ${opt:stage, self:provider.stage}
+  vpcId: ${ssm:/configuration/${self:custom.stage}/vpc/id~true, ssm:/configuration/default/vpc/id~true}
+  sgId: ${ssm:/configuration/${self:custom.stage}/vpc/sg/id~true, ssm:/configuration/default/vpc/sg/id~true}
+  privateSubnets:
+    - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/a/id~true, ssm:/configuration/default/vpc/subnets/private/a/id~true}
+    - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/b/id~true, ssm:/configuration/default/vpc/subnets/private/b/id~true}
+    - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/c/id~true, ssm:/configuration/default/vpc/subnets/private/c/id~true}
 
 resources:
   Resources:
-    PostgresVPC:
-      Type: AWS::EC2::VPC
-      Properties:
-        CidrBlock: 10.0.0.0/16
-        EnableDnsHostnames: true
-        EnableDnsSupport: true
-
-    PostgresSubnet00:
-      Type: AWS::EC2::Subnet
-      Properties:
-        CidrBlock: 10.0.96.0/19
-        AvailabilityZone:
-          Fn::Select:
-            - '0'
-            - Fn::GetAZs:
-                Ref: AWS::Region
-        VpcId: !Ref PostgresVPC
-
-    PostgresSubnet01:
-      Type: AWS::EC2::Subnet
-      Properties:
-        CidrBlock: 10.0.128.0/19
-        AvailabilityZone:
-          Fn::Select:
-            - '1'
-            - Fn::GetAZs:
-                Ref: AWS::Region
-        VpcId: !Ref PostgresVPC
-
     # VPC endpoint for rotation lambda
     SecretsManagerVPCEndpoint:
       Type: AWS::EC2::VPCEndpoint
       Properties:
-        SubnetIds:
-          - Ref: PostgresSubnet00
-          - Ref: PostgresSubnet01
-        SecurityGroupIds: [!GetAtt PostgresVPC.DefaultSecurityGroup]
+        SubnetIds: ${self:custom.privateSubnets}
+        SecurityGroupIds: ${self:custom.sgId}
         VpcEndpointType: Interface
         ServiceName:
           Fn::Sub: com.amazonaws.${AWS::Region}.secretsmanager
         PrivateDnsEnabled: true
-        VpcId: !Ref PostgresVPC
+        VpcId: ${self:custom.vpcId}
 
     PostgresSecret:
       Type: AWS::SecretsManager::Secret
@@ -77,15 +52,13 @@ resources:
         MasterUsername: !Sub '{{resolve:secretsmanager:${PostgresSecret}::username}}'
         MasterUserPassword: !Sub '{{resolve:secretsmanager:${PostgresSecret}::password}}'
         DBSubnetGroupName: !Ref PostgresSubnetGroup
-        VpcSecurityGroupIds: [!GetAtt PostgresVPC.DefaultSecurityGroup]
+        VpcSecurityGroupIds: ${self:custom.sgId}
 
     PostgresSubnetGroup:
       Type: AWS::RDS::DBSubnetGroup
       Properties:
         DBSubnetGroupDescription: postgres aurora serverless
-        SubnetIds:
-          - Ref: PostgresSubnet00
-          - Ref: PostgresSubnet01
+        SubnetIds: ${self:custom.privateSubnets}
 
     SecretsRDSAttachment:
       Type: AWS::SecretsManager::SecretTargetAttachment
@@ -103,11 +76,7 @@ resources:
         HostedRotationLambda:
           RotationType: MySQLSingleUser
           RotationLambdaName: SecretsManagerRotation
-          VpcSecurityGroupIds: !GetAtt PostgresVPC.DefaultSecurityGroup
-          VpcSubnetIds:
-            Fn::Join:
-              - ','
-              - - Ref: PostgresSubnet00
-                - Ref: PostgresSubnet01
+          VpcSecurityGroupIds: ${self:custom.sgId}
+          VpcSubnetIds: ${self:custom.privateSubnets}
         RotationRules:
           AutomaticallyAfterDays: 30
