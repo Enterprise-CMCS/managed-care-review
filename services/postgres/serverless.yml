@@ -26,7 +26,7 @@ resources:
     SecretsManagerVPCEndpoint:
       Type: AWS::EC2::VPCEndpoint
       Properties:
-        SubnetIds: ${self:custom.privateSubnets}
+        SubnetIds: ['${self:custom.privateSubnets}']
         SecurityGroupIds: ${self:custom.sgId}
         VpcEndpointType: Interface
         ServiceName:
@@ -59,7 +59,7 @@ resources:
       Type: AWS::RDS::DBSubnetGroup
       Properties:
         DBSubnetGroupDescription: postgres aurora serverless
-        SubnetIds: ${self:custom.privateSubnets}
+        SubnetIds: ['${self:custom.privateSubnets}']
 
     SecretsRDSAttachment:
       Type: AWS::SecretsManager::SecretTargetAttachment
@@ -78,6 +78,6 @@ resources:
           RotationType: MySQLSingleUser
           RotationLambdaName: SecretsManagerRotation
           VpcSecurityGroupIds: ${self:custom.sgId}
-          VpcSubnetIds: ${self:custom.privateSubnets}
+          VpcSubnetIds: ['${self:custom.privateSubnets}']
         RotationRules:
           AutomaticallyAfterDays: 30
