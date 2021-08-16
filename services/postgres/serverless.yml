@@ -13,7 +13,8 @@ provider:
 custom:
   stage: ${opt:stage, self:provider.stage}
   vpcId: ${ssm:/configuration/${self:custom.stage}/vpc/id~true, ssm:/configuration/default/vpc/id~true}
-  sgId: ${ssm:/configuration/${self:custom.stage}/vpc/sg/id~true, ssm:/configuration/default/vpc/sg/id~true}
+  sgId:
+    - ${ssm:/configuration/${self:custom.stage}/vpc/sg/id~true, ssm:/configuration/default/vpc/sg/id~true}
   privateSubnets:
     - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/a/id~true, ssm:/configuration/default/vpc/subnets/private/a/id~true}
     - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/b/id~true, ssm:/configuration/default/vpc/subnets/private/b/id~true}
