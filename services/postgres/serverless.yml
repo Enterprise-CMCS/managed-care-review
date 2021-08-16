@@ -13,6 +13,7 @@ provider:
 
 custom:
   stage: ${opt:stage, self:provider.stage}
+  databaseName: !Sub 'aurora_${self:service.name}_${self:custom.stage}_${AWS::AccountId}}'
   vpcId: ${ssm:/configuration/${self:custom.stage}/vpc/id, ssm:/configuration/default/vpc/id}
   sgId:
     - ${ssm:/configuration/${self:custom.stage}/vpc/sg/id, ssm:/configuration/default/vpc/sg/id}
@@ -50,7 +51,7 @@ resources:
       Properties:
         Engine: aurora-postgresql
         EngineMode: serverless
-        DatabaseName: !Sub '${self:service}_${self:custom.stage}_aurora_${AWS::AccountId}'
+        DatabaseName: '${self:custom.databaseName}'
         MasterUsername: !Sub '{{resolve:secretsmanager:${PostgresSecret}::username}}'
         MasterUserPassword: !Sub '{{resolve:secretsmanager:${PostgresSecret}::password}}'
         DBSubnetGroupName: !Ref PostgresSubnetGroup
