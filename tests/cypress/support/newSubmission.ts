@@ -19,9 +19,11 @@ Cypress.Commands.add('startNewContractOnlySubmission', () => {
     cy.findByRole('button', {
         name: 'Continue',
     }).safeClick()
-    cy.findByTestId('step-indicator')
-        .findAllByText('Contract details')
-        .should('have.length', 2)
+
+    // cy.findByTestId('step-indicator')
+    //     .findAllByText('Contract details')
+    //     .should('have.length', 2)
+
     cy.findByText(/^MN-PMAP-/).should('exist')
 })
 
@@ -44,8 +46,9 @@ Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
         name: 'Continue',
     }).safeClick()
 
-    cy.findByTestId('step-indicator')
-        .findAllByText('Contract details')
-        .should('have.length', 2)
+    // cy.findByTestId('step-indicator')
+    //     .findAllByText('Contract details')
+    //     .should('have.length', 2)
+
     cy.findByText(/^MN-PMAP-/).should('exist')
 })
