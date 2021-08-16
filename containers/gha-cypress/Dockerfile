@@ -14,6 +14,4 @@ RUN apt-get update && apt-get install -y \
     xauth \
     xvfb
 
-WORKDIR /cypress
-
 RUN cd /cypress && npm install cypress
