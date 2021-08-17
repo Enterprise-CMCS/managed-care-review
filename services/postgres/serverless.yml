@@ -41,7 +41,7 @@ resources:
       Properties:
         Description: 'Dynamically generated password for aurora serverless postgres'
         GenerateSecretString:
-          SecretStringTemplate: '{"username": "admin"}'
+          SecretStringTemplate: '{"username": "mcreview-admin"}'
           GenerateStringKey: password
           PasswordLength: 30
           ExcludeCharacters: "\"@/\\"
