@@ -14,7 +14,6 @@ import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { NavLink, useHistory, Link as ReactRouterLink } from 'react-router-dom'
 
 import { MCRouterState } from '../../../constants/routerState'
-import PageHeading from '../../../components/PageHeading'
 import {
     CreateDraftSubmissionInput,
     DraftSubmission,
