@@ -242,10 +242,15 @@ describe('StateSubmissionForm', () => {
                 }
             )
 
-            const heading = await screen.findByRole('heading', {
-                name: 'Submission type',
-            })
-            expect(heading).toBeInTheDocument()
+            await waitFor(() =>
+                expect(
+                    screen.getByRole(
+                        'heading',
+                        { level: 2 },
+                        { name: 'Submission type' }
+                    )
+                ).toBeInTheDocument()
+            )
 
             const textarea = await screen.findByRole('textbox', {
                 name: 'Submission description',
@@ -302,10 +307,15 @@ describe('StateSubmissionForm', () => {
                 }
             )
 
-            const heading = await screen.findByRole('heading', {
-                name: 'Submission type',
-            })
-            expect(heading).toBeInTheDocument()
+            await waitFor(() =>
+                expect(
+                    screen.getByRole(
+                        'heading',
+                        { level: 2 },
+                        { name: 'Submission type' }
+                    )
+                ).toBeInTheDocument()
+            )
 
             const textarea = await screen.findByRole('textbox', {
                 name: 'Submission description',
