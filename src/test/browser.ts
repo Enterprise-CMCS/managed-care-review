@@ -39,7 +39,11 @@ export async function runBrowserTestsInDocker(cypressArgs: string[]) {
 
     const runner = new LabeledProcessRunner()
 
-    await buildCypressDockerImage(runner)
+    const buildResult = await buildCypressDockerImage(runner)
+    if (buildResult !== 0) {
+        console.log("ERROR: building the CI docker image failed")
+        process.exit(buildResult)
+    }
 
     // check to see if you're running ./dev local --for-docker
     const isUp = await checkURLIsUp('http://localhost:3005')
@@ -47,8 +51,6 @@ export async function runBrowserTestsInDocker(cypressArgs: string[]) {
         console.log('in order to run cypress in docker, you need to run the front end configured correctly for docker. Run `./dev local web --for-docker` before running cypress.')
         process.exit(2)
     }
-
-    // invoke docker command: docker run -v "$(pwd)":/mc-review --workdir /mc-review --env REACT_APP_AUTH_MODE=LOCAL b20d989f2035 /cypress/node_modules/.bin/cypress run --config baseUrl=http://host.docker.internal:3000 --spec tests/cypress/integration/stateSubmission.spec.ts
 
     await runner.runCommandAndOutput(
         'docker cypress',
