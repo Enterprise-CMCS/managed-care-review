@@ -1,6 +1,6 @@
 import { spawnSync } from 'child_process'
 import LabeledProcessRunner from '../runner.js'
-import { requireBinary } from '../deps.js'
+import { requireBinary, checkURLIsUp } from '../deps.js'
 
 export async function runBrowserTests(cypressArgs: string[]) {
     let args = ['open']
@@ -37,13 +37,16 @@ async function buildCypressDockerImage(runner: LabeledProcessRunner) {
 
 export async function runBrowserTestsInDocker(cypressArgs: string[]) {
 
-    console.log('cyrpes args: ', cypressArgs)
-
     const runner = new LabeledProcessRunner()
 
     await buildCypressDockerImage(runner)
 
     // check to see if you're running ./dev local --for-docker
+    const isUp = await checkURLIsUp('http://localhost:3005')
+    if (!isUp) {
+        console.log('in order to run cypress in docker, you need to run the front end configured correctly for docker. Run `./dev local web --for-docker` before running cypress.')
+        process.exit(2)
+    }
 
     // invoke docker command: docker run -v "$(pwd)":/mc-review --workdir /mc-review --env REACT_APP_AUTH_MODE=LOCAL b20d989f2035 /cypress/node_modules/.bin/cypress run --config baseUrl=http://host.docker.internal:3000 --spec tests/cypress/integration/stateSubmission.spec.ts
 
@@ -59,7 +62,7 @@ export async function runBrowserTestsInDocker(cypressArgs: string[]) {
 
             '/cypress/node_modules/.bin/cypress',
             'run',
-            '--config', 'baseUrl=http://host.docker.internal:3000',
+            '--config', 'baseUrl=http://host.docker.internal:3005',
             ...cypressArgs,
         ],
         '.'

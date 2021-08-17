@@ -1,9 +1,9 @@
 import yargs from 'yargs'
-import request from 'request'
 import { commandMustSucceedSync } from './localProcess.js'
 import LabeledProcessRunner from './runner.js'
 
 import { parseRunFlags } from './flags.js'
+import { checkURLIsUp } from './deps.js'
 
 import {
     runDBLocally,
@@ -89,17 +89,6 @@ async function runAllLocally({
     runAPI && runAPILocally(runner)
     runWeb && runWebLocally(runner)
     runStoryBook && runStorybookLocally(runner)
-}
-
-function checkURLIsUp(url: string): Promise<boolean> {
-    return new Promise<boolean>((resolve) => {
-        request(url, {}, (err) => {
-            if (err) {
-                resolve(false)
-            }
-            resolve(true)
-        })
-    })
 }
 
 async function runAllTests({

@@ -131,13 +131,16 @@ export async function runWebAgainstAWS(
 
 // runWebAgainstDocker spins up web conifigured to be called from inside a local
 // docker container. localhost does not resolve inside a local docker container, so everything
-// needs to be routed according to the correct hostname instead.
+// needs to be routed according to the custom docker hostname instead.
 export async function runWebAgainstDocker() {
 
     // configure all the right env vars
-    // export REACT_APP_API_URL='http://host.docker.internal:3030/local'
-    // export REACT_APP_S3_LOCAL_URL='http://host.docker.internal:4569' // this isn't actually working
+    process.env.PORT = '3005' // run docker-web on a different port
+    process.env.REACT_APP_AUTH_MODE = 'LOCAL'
+    process.env.REACT_APP_API_URL = 'http://host.docker.internal:3030/local'
+    process.env.REACT_APP_S3_LOCAL_URL ='http://host.docker.internal:4569'
 
-    // runWebLocally(runner)
+    const runner = new LabeledProcessRunner()
+    await runWebLocally(runner)
 
 }
