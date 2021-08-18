@@ -79,6 +79,6 @@ resources:
           RotationType: PostgreSQLSingleUser
           RotationLambdaName: SecretsManagerRotation
           VpcSecurityGroupIds: ${self:custom.sgId}
-          VpcSubnetIds: '${self:custom.privateSubnets}'
+          VpcSubnetIds: !Join [',', '${self:custom.privateSubnets}']
         RotationRules:
           AutomaticallyAfterDays: 30
