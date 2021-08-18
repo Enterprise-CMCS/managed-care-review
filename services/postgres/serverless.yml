@@ -102,7 +102,7 @@ resources:
           Ref: PostgresSecret
         HostedRotationLambda:
           RotationType: PostgreSQLSingleUser
-          RotationLambdaName: SecretsManagerRotation
+          RotationLambdaName: 'testName'
           VpcSecurityGroupIds: ${self:custom.sgId}
           VpcSubnetIds: !Join [',', '${self:custom.privateSubnets}']
         RotationRules:
