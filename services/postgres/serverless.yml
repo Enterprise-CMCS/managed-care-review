@@ -54,7 +54,7 @@ resources:
         MasterUsername: !Sub '{{resolve:secretsmanager:${PostgresSecret}::username}}'
         MasterUserPassword: !Sub '{{resolve:secretsmanager:${PostgresSecret}::password}}'
         DBSubnetGroupName: !Ref PostgresSubnetGroup
-        VpcSecurityGroupIds: ${self:custom.sgId}
+        VpcSecurityGroupIds: ['${self:custom.sgId}']
 
     PostgresSubnetGroup:
       Type: AWS::RDS::DBSubnetGroup
