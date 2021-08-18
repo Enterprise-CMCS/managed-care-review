@@ -28,7 +28,7 @@ resources:
       Type: AWS::EC2::VPCEndpoint
       Properties:
         SubnetIds: '${self:custom.privateSubnets}'
-        SecurityGroupIds: ${self:custom.sgId}
+        SecurityGroupIds: ['${self:custom.sgId}']
         VpcEndpointType: Interface
         ServiceName:
           Fn::Sub: com.amazonaws.${AWS::Region}.secretsmanager
