@@ -6,15 +6,21 @@ import type { S3Error } from './s3Error'
 const waitFor = (delay = 1000) =>
     new Promise((resolve) => setTimeout(resolve, delay))
 
-function retry(
+// Retry with exponential backoff - with defaults, ends after ~ 32 seconds
+const retryWithBackoff = async (
     fn: () => Promise<void | S3Error>,
-    retries = 5,
+    retryCount = 0,
+    maxRetries = 4,
     err = null
-): Promise<void | S3Error> {
-    if (!retries) {
+): Promise<void | S3Error> => {
+    if (retryCount >= maxRetries) {
         return Promise.reject(err)
     }
-    return fn().catch((err) => retry(fn, retries - 1, err))
+    const nextDelay = 2 ** retryCount * 1000
+    await waitFor(nextDelay)
+    return fn().catch((err) =>
+        retryWithBackoff(fn, retryCount + 1, maxRetries, err)
+    )
 }
 
 type s3PutResponse = {
@@ -78,12 +84,11 @@ export function newAmplifyS3Client(bucketName: string): S3ClientT {
         scanFile: async (filename: string): Promise<void | S3Error> => {
             try {
                 await waitFor(20000)
-                await retry(async () => {
-                    await waitFor(1000)
+                await retryWithBackoff(async () => {
                     await Storage.vault.get(filename, {
                         download: true,
                     })
-                }, 60)
+                })
                 return
             } catch (err) {
                 if (err.name === 'Error' && err.message === 'Network Error') {
