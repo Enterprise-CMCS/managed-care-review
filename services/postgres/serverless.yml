@@ -10,9 +10,19 @@ provider:
   name: aws
   runtime: nodejs12.x
   region: us-east-1
+  iam:
+    role:
+      path: ${self:custom.iamPath}
+      permissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy${self:custom.iamPermissionsBoundaryPolicy}
+      statements:
+        - Effect: 'Allow'
+          Resource: '*'
+          Action: 'iam:CreateRole'
 
 custom:
   stage: ${opt:stage, self:provider.stage}
+  iamPermissionsBoundaryPolicy: ${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
+  iamPath: ${env:IAM_PATH, "/"}
   databaseName: !Sub aurora_${self:service}_${self:custom.stage}_${AWS::AccountId}
   vpcId: ${ssm:/configuration/${self:custom.stage}/vpc/id, ssm:/configuration/default/vpc/id}
   sgId: ${ssm:/configuration/${self:custom.stage}/vpc/sg/id, ssm:/configuration/default/vpc/sg/id}
