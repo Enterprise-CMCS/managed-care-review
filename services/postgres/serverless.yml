@@ -15,8 +15,7 @@ custom:
   stage: ${opt:stage, self:provider.stage}
   databaseName: !Sub aurora_${self:service}_${self:custom.stage}_${AWS::AccountId}
   vpcId: ${ssm:/configuration/${self:custom.stage}/vpc/id, ssm:/configuration/default/vpc/id}
-  sgId:
-    - ${ssm:/configuration/${self:custom.stage}/vpc/sg/id, ssm:/configuration/default/vpc/sg/id}
+  sgId: ${ssm:/configuration/${self:custom.stage}/vpc/sg/id, ssm:/configuration/default/vpc/sg/id}
   privateSubnets:
     - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/a/id, ssm:/configuration/default/vpc/subnets/private/a/id}
     - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/b/id, ssm:/configuration/default/vpc/subnets/private/b/id}
@@ -77,7 +76,7 @@ resources:
         SecretId:
           Ref: PostgresSecret
         HostedRotationLambda:
-          RotationType: MySQLSingleUser
+          RotationType: PostgreSQLSingleUser
           RotationLambdaName: SecretsManagerRotation
           VpcSecurityGroupIds: ${self:custom.sgId}
           VpcSubnetIds: '${self:custom.privateSubnets}'
