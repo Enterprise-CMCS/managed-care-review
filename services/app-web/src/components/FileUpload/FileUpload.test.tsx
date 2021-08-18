@@ -84,22 +84,41 @@ describe('FileUpload component', () => {
         expect(screen.getByText('testFile.pdf')).toBeInTheDocument()
     })
 
-    it('renders a loading image while file is loading', async () => {
+    it('renders a loading state while file is loading', async () => {
         render(<FileUpload {...testProps} />)
         const inputEl = screen.getByTestId('file-input-input')
         userEvent.upload(inputEl, TEST_PDF_FILE)
+        await screen.findByText(/Uploading/)
 
         const imageEl = screen.getByTestId('file-input-preview-image')
         expect(imageEl).toHaveClass('is-loading')
         expect(imageEl).toHaveAttribute('src', SPACER_GIF)
     })
 
-    it('removes loading state when file is finished loading', async () => {
+    it('moves to scanning state when file is finished loading', async () => {
+        render(<FileUpload {...testProps} />)
+        const inputEl = screen.getByTestId('file-input-input')
+        userEvent.upload(inputEl, TEST_PDF_FILE)
+        await screen.findByText(/Uploading/)
+        await screen.findByText(/Scanning/)
+
+        expect(screen.queryByText(/Uploading/)).toBeNull()
+        expect(screen.getByTestId('file-input-preview-image')).toHaveClass(
+            'is-loading'
+        )
+    })
+
+    it('removes loading and scanning styles when file is complete', async () => {
         render(<FileUpload {...testProps} />)
         const inputEl = screen.getByTestId('file-input-input')
         userEvent.upload(inputEl, TEST_PDF_FILE)
 
+        await screen.findByText(/Uploading/)
+        await screen.findByText(/Scanning/)
+
         await waitFor(() => {
+            expect(screen.queryByText(/Uploading/)).toBeNull()
+            expect(screen.queryByText(/Scanning/)).toBeNull()
             expect(
                 screen.getByTestId('file-input-preview-image')
             ).not.toHaveClass('is-loading')

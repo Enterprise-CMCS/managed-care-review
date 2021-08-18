@@ -78,8 +78,9 @@ describe('FileItem component', () => {
         expect(buttonActionProps.deleteItem).toHaveBeenCalled()
     })
 
-    it('displays loading image and remove button when status is LOADING', () => {
+    it('displays loading image, loading text, and remove button when status is LOADING', () => {
         render(<FileItem item={pending} {...buttonActionProps} />)
+        expect(screen.getByText('Step 1 of 2: Uploading')).toBeInTheDocument()
         const imageEl = screen.getByTestId('file-input-preview-image')
         expect(imageEl).toHaveClass('is-loading')
         expect(
@@ -88,8 +89,9 @@ describe('FileItem component', () => {
         expect(screen.queryByRole('button', { name: 'Retry' })).toBeNull()
     })
 
-    it('displays loading image and remove button when status is SCANNING', () => {
+    it('displays loading image, scanning text, and remove button when status is SCANNING', () => {
         render(<FileItem item={scanning} {...buttonActionProps} />)
+        expect(screen.getByText('Step 2 of 2: Scanning')).toBeInTheDocument()
         const imageEl = screen.getByTestId('file-input-preview-image')
         expect(imageEl).toHaveClass('is-loading')
         expect(
