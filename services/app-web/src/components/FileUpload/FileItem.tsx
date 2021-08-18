@@ -36,10 +36,10 @@ const DocumentError = ({
     if (hasDuplicateNameError)
         return (
             <>
-                <span className={styles.fileItemErrorMessage}>
+                <span className={styles.fileItemBoldMessage}>
                     Duplicate file
                 </span>
-                <span className={styles.fileItemErrorMessage}>
+                <span className={styles.fileItemBoldMessage}>
                     Please remove
                 </span>
             </>
@@ -47,7 +47,7 @@ const DocumentError = ({
     else if (hasScanningError && !hasUnexpectedError)
         return (
             <>
-                <span className={styles.fileItemErrorMessage}>
+                <span className={styles.fileItemBoldMessage}>
                     Failed security scan, please remove
                 </span>
             </>
@@ -55,10 +55,10 @@ const DocumentError = ({
     else if (hasUploadError && !hasUnexpectedError)
         return (
             <>
-                <span className={styles.fileItemErrorMessage}>
+                <span className={styles.fileItemBoldMessage}>
                     Upload failed
                 </span>
-                <span className={styles.fileItemErrorMessage}>
+                <span className={styles.fileItemBoldMessage}>
                     Please remove or retry
                 </span>
             </>
@@ -66,10 +66,10 @@ const DocumentError = ({
     else if (hasUnexpectedError) {
         return (
             <>
-                <span className={styles.fileItemErrorMessage}>
+                <span className={styles.fileItemBoldMessage}>
                     Upload failed
                 </span>
-                <span className={styles.fileItemErrorMessage}>
+                <span className={styles.fileItemBoldMessage}>
                     Unexpected error. Please remove.
                 </span>
             </>
@@ -143,7 +143,16 @@ export const FileItem = ({
                         hasUploadError={hasUploadError}
                         hasUnexpectedError={hasUnexpectedError}
                     />
-                    <span>{`${name}`}</span>
+                    <>
+                        {(isLoading || isScanning) && (
+                            <span className={styles.fileItemBoldMessage}>
+                                {isLoading
+                                    ? 'Step 1 of 2: Uploading'
+                                    : 'Step 2 of 2: Scanning'}
+                            </span>
+                        )}
+                        <span>{name}</span>
+                    </>
                 </span>
             </div>
             <div className={styles.fileItemButtons}>
