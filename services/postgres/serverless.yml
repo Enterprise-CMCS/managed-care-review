@@ -68,7 +68,7 @@ resources:
       Properties:
         SecretId: !Ref PostgresSecret
         TargetId: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${PostgresRDS}'
-        TargetType: AWS::RDS::DBInstance
+        TargetType: AWS::RDS::DBCluster
 
     PostgresSecretsRotationSchedule:
       Type: AWS::SecretsManager::RotationSchedule
