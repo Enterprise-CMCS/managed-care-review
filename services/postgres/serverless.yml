@@ -15,9 +15,23 @@ provider:
       path: ${self:custom.iamPath}
       permissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy${self:custom.iamPermissionsBoundaryPolicy}
       statements:
-        - Effect: 'Allow'
+        - Effect: Allow
+          Action:
+            - secretsmanager:DescribeSecret
+            - secretsmanager:GetSecretValue
+            - secretsmanager:PutSecretValue
+            - secretsmanager:UpdateSecretVersionStage
           Resource: '*'
-          Action: 'iam:CreateRole'
+        - Effect: Allow
+          Action:
+            - secretsmanager:GetRandomPassword
+          Resource: '*'
+        - Effect: Allow
+          Action:
+            - ec2:CreateNetworkInterface
+            - ec2:DeleteNetworkInterface
+            - ec2:DescribeNetworkInterfaces
+          Resource: '*'
 
 custom:
   stage: ${opt:stage, self:provider.stage}
