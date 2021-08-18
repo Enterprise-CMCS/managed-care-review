@@ -28,6 +28,11 @@ exports[`FileItemList component renders correctly 1`] = `
           }
         }
       >
+        <span
+          className="fileItemBoldMessage"
+        >
+          Step 1 of 2: Uploading
+        </span>
         <span>
           testFile.pdf
         </span>
@@ -70,12 +75,12 @@ exports[`FileItemList component renders correctly 1`] = `
         }
       >
         <span
-          className="fileItemErrorMessage"
+          className="fileItemBoldMessage"
         >
           Upload failed
         </span>
         <span
-          className="fileItemErrorMessage"
+          className="fileItemBoldMessage"
         >
           Please remove or retry
         </span>
@@ -129,7 +134,7 @@ exports[`FileItemList component renders correctly 1`] = `
         }
       >
         <span
-          className="fileItemErrorMessage"
+          className="fileItemBoldMessage"
         >
           Failed security scan, please remove
         </span>
@@ -216,12 +221,12 @@ exports[`FileItemList component renders correctly 1`] = `
         }
       >
         <span
-          className="fileItemErrorMessage"
+          className="fileItemBoldMessage"
         >
           Duplicate file
         </span>
         <span
-          className="fileItemErrorMessage"
+          className="fileItemBoldMessage"
         >
           Please remove
         </span>
