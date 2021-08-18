@@ -22,6 +22,7 @@ custom:
     - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/c/id, ssm:/configuration/default/vpc/subnets/private/c/id}
 
 resources:
+  Transform: AWS::SecretsManager-2020-07-23
   Resources:
     # VPC endpoint for rotation lambda
     SecretsManagerVPCEndpoint:
