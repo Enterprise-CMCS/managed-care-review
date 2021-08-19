@@ -17,21 +17,8 @@ provider:
       statements:
         - Effect: Allow
           Action:
-            - secretsmanager:DescribeSecret
-            - secretsmanager:GetSecretValue
-            - secretsmanager:PutSecretValue
-            - secretsmanager:UpdateSecretVersionStage
-          Resource: '*'
-        - Effect: Allow
-          Action:
-            - secretsmanager:GetRandomPassword
-          Resource: '*'
-        - Effect: Allow
-          Action:
-            - ec2:CreateNetworkInterface
-            - ec2:DeleteNetworkInterface
-            - ec2:DescribeNetworkInterfaces
-          Resource: '*'
+            - iam:CreateRole
+          Resource: 'arn:aws:cloudformation:*:aws:transform/SecretsManager-2020-07-23'
 
 custom:
   stage: ${opt:stage, self:provider.stage}
@@ -70,7 +57,7 @@ resources:
           PasswordLength: 30
           ExcludeCharacters: "\"@/\\"
 
-    PostgresRDS:
+    PostgresAurora:
       Type: AWS::RDS::DBCluster
       Properties:
         Engine: aurora-postgresql
@@ -91,12 +78,14 @@ resources:
       Type: AWS::SecretsManager::SecretTargetAttachment
       Properties:
         SecretId: !Ref PostgresSecret
-        TargetId: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${PostgresRDS}'
+        TargetId: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${PostgresAurora}'
         TargetType: AWS::RDS::DBCluster
 
     PostgresSecretsRotationSchedule:
       Type: AWS::SecretsManager::RotationSchedule
-      DependsOn: SecretsRDSAttachment
+      DependsOn:
+        - PostgresAurora
+        - SecretsRDSAttachment
       Properties:
         SecretId:
           Ref: PostgresSecret
