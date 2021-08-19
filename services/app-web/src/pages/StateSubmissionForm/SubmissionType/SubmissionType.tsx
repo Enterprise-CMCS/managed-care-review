@@ -20,6 +20,7 @@ import {
     SubmissionType as SubmissionTypeT,
     useCreateDraftSubmissionMutation,
     UpdateDraftSubmissionInput,
+    Program,
 } from '../../../gen/gqlClient'
 
 import styles from '../StateSubmissionForm.module.scss'
@@ -67,7 +68,12 @@ export const SubmissionType = ({
 }: SubmissionTypeProps): React.ReactElement => {
     const [showFormAlert, setShowFormAlert] = React.useState(false)
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
-    const { loggedInUser: { state: { programs = [] } = {} } = {} } = useAuth()
+    const { loggedInUser } = useAuth()
+
+    let programs: Program[] = []
+    if (loggedInUser && loggedInUser.__typename === 'StateUser') {
+        programs = loggedInUser.state.programs
+    }
 
     const history = useHistory<MCRouterState>()
     const location = history.location

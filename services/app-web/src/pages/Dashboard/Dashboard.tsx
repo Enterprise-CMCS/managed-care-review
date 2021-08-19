@@ -94,7 +94,6 @@ type SubmissionCardInfo = {
 export const Dashboard = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
     const location = useLocation<MCRouterState>()
-    let programs: Program[] = []
 
     const { loading, data, error } = useIndexSubmissionsQuery()
 
@@ -109,9 +108,13 @@ export const Dashboard = (): React.ReactElement => {
 
     if (loginStatus === 'LOADING' || !loggedInUser || loading || !data) {
         return <Loading />
-    } else {
-        programs = loggedInUser.state.programs
     }
+
+    if (loggedInUser.__typename !== 'StateUser') {
+        return <div>CMS Users not supported yet.</div>
+    }
+
+    const programs = loggedInUser.state.programs
 
     const submissionList = data.indexSubmissions.edges.map((edge) => edge.node)
 

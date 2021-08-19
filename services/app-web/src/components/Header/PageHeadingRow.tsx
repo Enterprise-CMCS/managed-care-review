@@ -5,33 +5,27 @@ import styles from './Header.module.scss'
 
 import PageHeading from '../../components/PageHeading'
 import { StateIcon, StateIconProps } from './StateIcon'
-import { User } from '../../gen/gqlClient'
+import { User, CmsUser, StateUser } from '../../gen/gqlClient'
 
-type PageHeadingProps = {
-    isLoading?: boolean
-    loggedInUser?: User
-    heading?: string
+const CMSUserRow = ({user}: {user: CmsUser} ) => {
+    return (<div>CMS USER</div>)
 }
 
-export const PageHeadingRow = ({
-    isLoading = false,
-    heading,
-    loggedInUser,
-}: PageHeadingProps): React.ReactElement => {
-    return loggedInUser ? (
+const StateUserRow = ({user, heading}: {user: StateUser, heading?: string} ) => {
+    return (
         <div className={styles.dashboardHeading}>
             <GridContainer>
                 <Grid row className="flex-align-center">
                     <div>
                         <StateIcon
                             code={
-                                loggedInUser.state
+                                user.state
                                     .code as StateIconProps['code']
                             }
                         />
                     </div>
                     <PageHeading>
-                        <span>{loggedInUser.state.name}&nbsp;</span>
+                        <span>{user.state.name}&nbsp;</span>
                         {heading && (
                             <span
                                 className="font-heading-lg text-light"
@@ -44,7 +38,11 @@ export const PageHeadingRow = ({
                 </Grid>
             </GridContainer>
         </div>
-    ) : (
+    )
+}
+
+const LandingRow = ({isLoading}: {isLoading: boolean}) => {
+    return (
         <div className={styles.landingPageHeading}>
             <GridContainer>
                 <h1>
@@ -63,4 +61,28 @@ export const PageHeadingRow = ({
             </GridContainer>
         </div>
     )
+}
+
+type PageHeadingProps = {
+    isLoading: boolean
+    loggedInUser?: User
+    heading?: string
+}
+
+export const PageHeadingRow = ({
+    isLoading = false,
+    heading,
+    loggedInUser,
+}: PageHeadingProps): React.ReactElement => {
+    if (!loggedInUser) {
+        return (<LandingRow isLoading={isLoading} />)
+    }
+
+    if (loggedInUser.__typename === 'CMSUser') {
+        return (<CMSUserRow user={loggedInUser} />)
+    } else if (loggedInUser.__typename === 'StateUser') {
+        return (<StateUserRow user={loggedInUser} heading={heading} />)
+    } else {
+        throw new Error(`Unexpected user type: ${loggedInUser}`)
+    }
 }

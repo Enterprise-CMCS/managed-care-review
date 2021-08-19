@@ -32,6 +32,11 @@ const localUsers: CognitoUserType[] = [
         role: 'STATE_USER',
         state_code: 'VA',
     },
+    {
+        email: 'iroh@cmcs.cms.gov',
+        name: 'Iroh',
+        role: 'CMS_USER',
+    },
 ]
 
 const userAvatars: { [key: string]: string } = {
@@ -64,6 +69,8 @@ export function LocalLogin(): React.ReactElement {
             {showFormAlert && <Alert type="error">Something went wrong</Alert>}
             <CardGroup>
                 {localUsers.map((user) => {
+                    const fromString = user.role === 'STATE_USER' ? user.state_code : 'CMS'
+
                     return (
                         <Card key={user.email}>
                             <CardMedia>
@@ -78,7 +85,7 @@ export function LocalLogin(): React.ReactElement {
                                 </h2>
                             </CardHeader>
                             <CardBody>
-                                <p>From {user.state_code}</p>
+                                <p>From {fromString}</p>
                             </CardBody>
                             <CardFooter>
                                 <Button
