@@ -89,6 +89,14 @@ export function updateDraftSubmissionResolver(
     store: Store
 ): MutationResolvers['updateDraftSubmission'] {
     return async (_parent, { input }, context) => {
+
+        // This resolver is only callable by state users
+        if (context.user.role !== 'STATE_USER') {
+            throw new ForbiddenError(
+                'user not authorized to modify state data'
+            )
+        }
+
         // fetch the current submission, put the updated stuff on it?
         const result = await store.findDraftSubmission(input.submissionID)
         if (isStoreError(result)) {

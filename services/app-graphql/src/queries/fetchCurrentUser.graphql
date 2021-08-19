@@ -1,15 +1,22 @@
 query fetchCurrentUser {
     fetchCurrentUser {
-        email
-        state {
-            code
+        ... on CMSUser {
+            email
+            role
             name
-            programs {
-                id
+        }
+        ... on StateUser {
+            email
+            role
+            name
+            state {
+                code
                 name
+                programs {
+                    id
+                    name
+                }
             }
         }
-        role
-        name
     }
 }

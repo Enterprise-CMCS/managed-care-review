@@ -81,10 +81,18 @@ type SubmitDraftSubmissionPayload {
 scalar Date
 scalar DateTime
 
-type User {
+union User = StateUser | CMSUser
+
+type StateUser {
     role: String!
     email: String!
     state: State!
+    name: String!
+}
+
+type CMSUser {
+    role: String!
+    email: String!
     name: String!
 }
 

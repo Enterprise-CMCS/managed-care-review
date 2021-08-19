@@ -5,7 +5,11 @@ export type { AuthModeType } from './config'
 export { assertIsAuthMode, assertNever } from './config'
 
 // Domain Types
-export type { CognitoUserType } from './cognitoUserType'
+export type {
+    CognitoUserType,
+    CognitoStateUserType,
+    CognitoCMSUserType
+} from './cognitoUserType'
 
 export type {
     DraftSubmissionType,

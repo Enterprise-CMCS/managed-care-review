@@ -4,7 +4,7 @@ import type { Store } from '../store'
 import { Resolvers } from '../gen/gqlServer'
 
 import { fetchCurrentUserResolver } from './fetchCurrentUser'
-import { userResolver } from './userResolver'
+import { stateUserResolver } from './userResolver'
 import { fetchDraftSubmissionResolver } from './fetchDraftSubmission'
 import { createDraftSubmissionResolver } from './createDraftSubmission'
 import { updateDraftSubmissionResolver } from './updateDraftSubmission'
@@ -39,7 +39,17 @@ export function configureResolvers(store: Store): Resolvers {
                 }
             },
         },
-        User: userResolver,
+        User: {
+            // resolveType is required to differentiate Unions
+            __resolveType(obj) {
+                if ('state' in obj) {
+                    return 'StateUser'
+                } else {
+                    return 'CMSUser'
+                }
+            },
+        },
+        StateUser: stateUserResolver,
         DraftSubmission: draftSubmissionResolver(store),
         StateSubmission: stateSubmissionResolver(store),
     }
