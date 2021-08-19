@@ -6,14 +6,18 @@ import type { S3Error } from './s3Error'
 const waitFor = (delay = 1000) =>
     new Promise((resolve) => setTimeout(resolve, delay))
 
-// Retry with exponential backoff - with defaults, ends after ~ 32 seconds
+/* 
+    Retry async function up to limit of maxRetries
+    increase the time elapsed between retries each cycle by order of 2^n (exponential backoff)
+    e.g. with defaults values for retryCount and maxRetries, attempt request at 2s, 4s, and 8s.
+*/
 const retryWithBackoff = async (
     fn: () => Promise<void | S3Error>,
     retryCount = 0,
-    maxRetries = 4,
+    maxRetries = 3,
     err = null
 ): Promise<void | S3Error> => {
-    if (retryCount >= maxRetries) {
+    if (retryCount > maxRetries) {
         return Promise.reject(err)
     }
     const nextDelay = 2 ** retryCount * 1000
@@ -78,7 +82,8 @@ export function newAmplifyS3Client(bucketName: string): S3ClientT {
         },
         /*  
             Poll for scanning completion
-            - We poll up to 60 times, with 1 second pause, for scanning completion. This means each file could be up to 1 min in a loading state.
+            - We start polling after 20s, which is the estimated time it takes scanning to start to resolve.
+            - In total, each file could be up to 45 sec in a loading state (5s for initial file upload + 20s wait for scanning + 16s of retries + extra time for api requests to resolve)
             - While the file is scanning, returns 403. When scanning is complete, the resource returns 200
         */
         scanFile: async (filename: string): Promise<void | S3Error> => {
