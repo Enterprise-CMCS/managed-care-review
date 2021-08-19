@@ -49,7 +49,7 @@ Cypress.Commands.add('navigateForm', (buttonAccessibleName: 'string') => {
 
 Cypress.Commands.add('waitForDocumentsToLoad', () => {
     cy.wait(20000)
-    cy.findAllByTestId('file-input-preview-image', { timeout: 15000 }).should(
+    cy.findAllByTestId('file-input-preview-image', { timeout: 20000 }).should(
         'not.have.class',
         'is-loading'
     )
