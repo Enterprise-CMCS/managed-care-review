@@ -46,3 +46,11 @@ Cypress.Commands.add('navigateForm', (buttonAccessibleName: 'string') => {
 
     cy.findByRole('progressbar', { name: 'Loading' }).should('not.exist')
 })
+
+Cypress.Commands.add('waitForDocumentsToLoad', () => {
+    cy.wait(20000)
+    cy.findAllByTestId('file-input-preview-image', { timeout: 15000 }).should(
+        'not.have.class',
+        'is-loading'
+    )
+})

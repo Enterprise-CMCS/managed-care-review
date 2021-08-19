@@ -22,6 +22,7 @@ declare global {
             navigateForm(buttonName: string): Chainable<Element>
             startNewContractAndRatesSubmission()
             startNewContractOnlySubmission()
+            waitForDocumentsToLoad()
         }
     }
 }

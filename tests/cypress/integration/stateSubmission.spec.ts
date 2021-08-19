@@ -144,10 +144,8 @@ describe('State Submission', () => {
             cy.findByTestId('file-input-preview-list')
                 .findAllByRole('listitem')
                 .should('have.length', 3)
-            cy.findAllByTestId('file-input-preview-image').should(
-                'not.have.class',
-                'is-loading'
-            )
+
+            cy.waitForDocumentsToLoad()
 
             // No errors
             cy.findByText('Upload failed').should('not.exist')
@@ -281,10 +279,7 @@ describe('State Submission', () => {
             cy.findByText('Duplicate file').should('not.exist')
 
             // Continue button with valid documents navigates to review and submit page
-            cy.findAllByTestId('file-input-preview-image').should(
-                'not.have.class',
-                'is-loading'
-            )
+            cy.waitForDocumentsToLoad()
             cy.navigateForm('Continue')
 
             // Get draft submission id and navigate back to submission type form to edit existing draft
@@ -463,10 +458,8 @@ describe('State Submission', () => {
             )
             cy.findByText('Upload failed').should('not.exist')
             cy.findByText('Duplicate file').should('not.exist')
-            cy.findAllByTestId('file-input-preview-image').should(
-                'not.have.class',
-                'is-loading'
-            )
+            cy.waitForDocumentsToLoad()
+
             // Navigate review and submit page
             cy.navigateForm('Continue')
 
@@ -528,9 +521,7 @@ describe('State Submission', () => {
                 cy.findByTestId('file-input-input').attachFile(
                     'documents/how-to-open-source.pdf'
                 )
-                cy.findAllByTestId('file-input-preview-image')
-                    .should('exist')
-                    .should('not.have.class', 'is-loading')
+                cy.waitForDocumentsToLoad()
                 cy.navigateForm('Save as draft')
                 cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
@@ -556,15 +547,10 @@ describe('State Submission', () => {
                 cy.findByTestId('file-input-input').attachFile(
                     'documents/trussel-guide.pdf'
                 )
-                cy.findAllByTestId('file-input-preview-image')
-                    .should('exist')
-                    .should('not.have.class', 'is-loading')
                 cy.findByTestId('file-input-input').attachFile(
                     'documents/trussel-guide.pdf'
                 )
-                cy.findAllByTestId('file-input-preview-image')
-                    .should('exist')
-                    .should('not.have.class', 'is-loading')
+                cy.waitForDocumentsToLoad()
                 cy.findByText('Duplicate file').should('exist')
 
                 // allow Save as Draft with duplicate files
@@ -627,10 +613,7 @@ describe('State Submission', () => {
                     'have.length',
                     2
                 )
-                cy.findAllByTestId('file-input-preview-image').should(
-                    'not.have.class',
-                    'is-loading'
-                )
+                cy.waitForDocumentsToLoad()
                 // Correct number of files added, no errors
                 cy.findByTestId('file-input-preview-list')
                     .findAllByRole('listitem')
