@@ -5,6 +5,7 @@ frameworkVersion: '2'
 
 plugins:
   - serverless-stack-termination-protection
+  - serverless-iam-helper
 
 provider:
   name: aws
