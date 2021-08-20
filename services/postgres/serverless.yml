@@ -106,4 +106,3 @@ resources:
         Action: lambda:InvokeFunction
         FunctionName: !GetAtt RotatorLambdaFunction.Arn
         Principal: 'secretsmanager.amazonaws.com'
-        SourceAccount: !Sub ${AWS::AccountId}
