@@ -25,7 +25,7 @@ provider:
           Resource: '*'
           Condition:
             StringEquals:
-              'secretsmanager:resource/AllowRotationLambdaArn': 'arn:aws:lambda:${self:custom.region}:${self:custom.accountId}:function:${self:service}-${self:provider.stage}-rotator'
+              'secretsmanager:resource/AllowRotationLambdaArn': '${self:custom.rotatorArn}'
         - Effect: Allow
           Action:
             - secretsmanager:GetRandomPassword
@@ -48,6 +48,7 @@ custom:
     - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/a/id, ssm:/configuration/default/vpc/subnets/private/a/id}
     - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/b/id, ssm:/configuration/default/vpc/subnets/private/b/id}
     - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/c/id, ssm:/configuration/default/vpc/subnets/private/c/id}
+  rotatorArn: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${self:custom.stage}-rotator'
 
 functions:
   rotator:
