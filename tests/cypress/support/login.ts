@@ -16,7 +16,7 @@ Cypress.Commands.add('login', () => {
         cy.findByTestId('loginPassword').type(testUsersPassword)
         cy.findByRole('button', { name: 'Login' }).click()
     } else {
-        console.log('Auth mode is not defined or is IDM')
+        throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
     }
     // this login/initial fetch can take a little while.
     cy.findByRole('progressbar', { name: 'Loading' }).should('not.exist')

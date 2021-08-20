@@ -97,11 +97,19 @@ When run locally (with LOCAL_LOGIN=true), auth bypasses Cognito and uses [`serve
 
 `./dev` is a program for doing development on Managed Care Review. It can run services locally, run tests, lint, and more. Discover everything it can do with `./dev --help`. Anything you find yourself doing as a developer on this project, feel free to add to `./dev`.
 
-Run app locally
+Run whole app locally
 
 -   `./dev local` to run the entire app and storybook
 -   Available flags: `--storybook`, `--web`, `--api`, `--s3`, '--db' for running services individually
 -   (you can also exclude services by using the yargs 'no' standard: `./dev local --no-storybook`)
+
+Run individual services locally
+
+-   `./dev local web`
+-   `./dev local api`
+-   etc
+
+Some of those services have their own options as well, namely app-web, see below for more info
 
 Run tests locally
 
@@ -117,9 +125,21 @@ Clear dependencies
 
 Run web app locally, but configured to run against a deployed backend
 
--   `./dev hybrid`
--   For local dev testing, you should push your local branch to deploy a review app and then `./dev hybrid` will connect to that running review app by default.
--   If you want to specify a different instance to run against, you can set the `--stage` parameter. For more info about stages/accounts take a gander at the Deploy section below.
+-   `./dev local web --hybrid`
+-   For local dev testing, you should push your local branch to deploy a review app and then `./dev local web --hybrid` will connect to that running review app by default.
+-   If you want to specify a different instance to run against, you can set the `--hybrid-stage` parameter. For more info about stages/accounts take a gander at the Deploy section below.
+
+#### Run cypress tests in a linux docker container
+
+We've had a number of issues only reproduce in cypress being run in Github Actions. We've added tooling to dev to run our cypress tests locally in a linux docker container which has been able to reproduce those issues. To do so, you'll need to have docker installed and running and run the app locally with `./dev local` like normal to provide the api & db & s3 (you could just run those three services if you like). Unfortunately, docker networking is a little weird, so we have to run a separate `web` in order for the cypress tests to be able to reach our app correctly. That's started with `./dev local web --for-docker`. Finally you can run the tests themselves with `./dev test browser --in-docker`. So minimally:
+
+```bash
+./dev local --api --db --s3
+./dev local web --for-docker
+./dev test browser --in-docker
+```
+
+And since this has to run headless b/c it's in docker, you can see how the test actually worked by opening the video that Cypress records in ./tests/cypress/videos
 
 ## Build & Deploy
 

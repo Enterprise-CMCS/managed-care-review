@@ -33,6 +33,48 @@ function componentForAuthMode(
     }
 }
 
+
+const AuthenticatedRoutes = (): React.ReactElement => {
+    return (
+        <Switch>
+            <Route path={RoutesRecord.ROOT} exact component={Dashboard} />
+            <Route path={RoutesRecord.DASHBOARD} component={Dashboard} />
+            <Route
+                path={RoutesRecord.SUBMISSIONS_NEW}
+                component={NewStateSubmissionForm}
+            />
+            <Route
+                path={RoutesRecord.SUBMISSIONS_FORM}
+                component={SubmissionSummary}
+                exact
+            />
+            <Route
+                path={RoutesRecord.SUBMISSIONS_FORM}
+                component={StateSubmissionForm}
+            />
+            <Route path={RoutesRecord.HELP} component={Help} />
+            <Route path="*" component={Error404} />
+        </Switch>
+    )
+}
+
+const UnauthenticatedRoutes = ({authMode}: {authMode: AuthModeType}): React.ReactElement => {
+
+    const authComponent = componentForAuthMode(authMode)
+
+    return (
+        <Switch>
+            <Route path={RoutesRecord.ROOT} exact component={Landing} />
+            {/* no /auth page for IDM auth, we just have the login redirect link */}
+            {authComponent && (
+                <Route path={RoutesRecord.AUTH} component={authComponent} />
+            )}
+            <Route path="*" component={Landing} />
+        </Switch>
+    )
+}
+
+
 export const AppRoutes = ({
     authMode,
 }: {
@@ -56,48 +98,10 @@ export const AppRoutes = ({
         updateHeading(pathname)
     }, [pathname, updateHeading])
 
-    const authComponent = componentForAuthMode(authMode)
-
-    const AuthenticatedRoutes = (): React.ReactElement => {
-        return (
-            <Switch>
-                <Route path={RoutesRecord.ROOT} exact component={Dashboard} />
-                <Route path={RoutesRecord.DASHBOARD} component={Dashboard} />
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_NEW}
-                    component={NewStateSubmissionForm}
-                />
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={SubmissionSummary}
-                    exact
-                />
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={StateSubmissionForm}
-                />
-                <Route path={RoutesRecord.HELP} component={Help} />
-                <Route path="*" component={Error404} />
-            </Switch>
-        )
-    }
-
-    const UnauthenticatedRoutes = (): React.ReactElement => {
-        return (
-            <Switch>
-                <Route path={RoutesRecord.ROOT} exact component={Landing} />
-                {/* no /auth page for IDM auth, we just have the login redirect link */}
-                {authComponent && (
-                    <Route path={RoutesRecord.AUTH} component={authComponent} />
-                )}
-                <Route path="*" component={Landing} />
-            </Switch>
-        )
-    }
     return (
         <>
             {!loggedInUser ? (
-                <UnauthenticatedRoutes />
+                <UnauthenticatedRoutes authMode={authMode} />
             ) : (
                 <AuthenticatedRoutes />
             )}
