@@ -5,8 +5,8 @@ set -e
 stage=${1:-dev}
 
 services=(
-  'database'
   'postgres'
+  'database'
   'uploads'
   'app-api'
   'stream-functions'
