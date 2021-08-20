@@ -5,6 +5,9 @@ Cypress.Commands.add('startNewContractOnlySubmission', () => {
     })
     cy.location('pathname').should('eq', '/submissions/new')
     cy.findByText('New submission').should('exist')
+    cy.findByTestId('step-indicator')
+        .findAllByText('Submission type')
+        .should('have.length', 2)
 
     cy.findByLabelText('Contract action only').safeClick()
     cy.findByRole('combobox', { name: 'Program' }).select('pmap')
@@ -16,9 +19,11 @@ Cypress.Commands.add('startNewContractOnlySubmission', () => {
     cy.findByRole('button', {
         name: 'Continue',
     }).safeClick()
-    cy.findByTestId('step-indicator')
-        .findAllByText('Contract details')
-        .should('have.length', 2)
+
+    // cy.findByTestId('step-indicator')
+    //     .findAllByText('Contract details')
+    //     .should('have.length', 2)
+
     cy.findByText(/^MN-PMAP-/).should('exist')
 })
 
@@ -41,8 +46,9 @@ Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
         name: 'Continue',
     }).safeClick()
 
-    cy.findByTestId('step-indicator')
-        .findAllByText('Contract details')
-        .should('have.length', 2)
+    // cy.findByTestId('step-indicator')
+    //     .findAllByText('Contract details')
+    //     .should('have.length', 2)
+
     cy.findByText(/^MN-PMAP-/).should('exist')
 })

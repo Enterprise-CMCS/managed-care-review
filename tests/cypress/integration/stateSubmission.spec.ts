@@ -16,6 +16,11 @@ describe('State Submission', () => {
             cy.location('pathname').should('eq', '/submissions/new')
             cy.findByText('New submission').should('exist')
 
+            // Check Step Indicator loads with submission type heading on new submission page
+            cy.findByTestId('step-indicator')
+                .findAllByText('Submission type')
+                .should('have.length', 2)
+
             // Fill out some submission type fields but not all
             cy.findByLabelText(
                 'Contract action and rate certification'
@@ -39,10 +44,10 @@ describe('State Submission', () => {
                 name: 'Continue',
             }).safeClick()
 
-            // Check Step Indicator loads with contract details heading
-            cy.findByTestId('step-indicator')
-                .findAllByText('Contract details')
-                .should('have.length', 2)
+            // // Check Step Indicator loads with contract details heading
+            // cy.findByTestId('step-indicator')
+            //     .findAllByText('Contract details')
+            //     .should('have.length', 2)
 
             // Fill out some base contract fields
             cy.findByText(/MN-MSHO-/).should('exist')
@@ -297,6 +302,11 @@ describe('State Submission', () => {
                 const draftSubmissionId = pathnameArray[2]
                 cy.visit(`/submissions/${draftSubmissionId}/type`)
             })
+
+            // Check Step Indicator loads with submission type heading
+            cy.findByTestId('step-indicator')
+                .findAllByText('Submission type')
+                .should('have.length', 2)
 
             // Change type to contract and rates submission
             cy.findByLabelText('Contract action and rate certification').should(
