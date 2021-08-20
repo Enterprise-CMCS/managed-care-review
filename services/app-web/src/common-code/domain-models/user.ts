@@ -7,7 +7,7 @@ export function isCognitoUser(user: unknown): user is CognitoUserType {
             if (typeof roleUser.role === 'string') {
                 if (
                     roleUser.role === 'STATE_USER' ||
-                    roleUser.role === 'ADMIN'
+                    roleUser.role === 'CMS_USER'
                 ) {
                     return true
                 }

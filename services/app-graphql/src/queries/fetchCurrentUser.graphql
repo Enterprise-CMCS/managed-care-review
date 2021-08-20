@@ -1,5 +1,6 @@
 query fetchCurrentUser {
     fetchCurrentUser {
+        __typename
         ... on CMSUser {
             email
             role

@@ -135,7 +135,7 @@ describe('Auth', () => {
             window.localStorage.clear()
         })
 
-        it('displays ang and toph when logged out', () => {
+        it('displays ang and toph and zuko when logged out', () => {
             renderWithProviders(<LocalLogin />, {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 403 })],
@@ -155,10 +155,16 @@ describe('Auth', () => {
             ).toBeInTheDocument()
 
             expect(
+                screen.getByRole('img', {
+                    name: /Zuko/i,
+                })
+            ).toBeInTheDocument()
+
+            expect(
                 screen.getAllByRole('button', {
                     name: /Login/i,
                 }).length
-            ).toBe(2)
+            ).toBe(3)
         })
 
         it('when login is successful, redirect to dashboard', async () => {

@@ -64,7 +64,7 @@ const LandingRow = ({isLoading}: {isLoading: boolean}) => {
 }
 
 type PageHeadingProps = {
-    isLoading: boolean
+    isLoading?: boolean
     loggedInUser?: User
     heading?: string
 }

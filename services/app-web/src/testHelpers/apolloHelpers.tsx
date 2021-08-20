@@ -18,6 +18,7 @@ import { GraphQLError } from 'graphql'
 
 /* For use with Apollo MockedProvider in jest tests */
 const mockValidUser: UserType = {
+    __typename: 'StateUser' as const,
     state: {
         name: 'Minnesota',
         code: 'MN',

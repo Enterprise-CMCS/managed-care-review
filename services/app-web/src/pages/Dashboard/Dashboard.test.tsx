@@ -54,6 +54,7 @@ describe('Dashboard', () => {
 
     it('displays tabs for available programs based on loggedInUser state', async () => {
         const mockUser = {
+            __typename: 'StateUser' as const,
             state: {
                 name: 'Minnesota',
                 code: 'MN',
@@ -87,6 +88,7 @@ describe('Dashboard', () => {
 
     it('displays submission cards', async () => {
         const mockUser = {
+            __typename: 'StateUser' as const,
             state: {
                 name: 'Minnesota',
                 code: 'MN',
