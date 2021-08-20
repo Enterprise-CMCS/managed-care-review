@@ -37,11 +37,15 @@ describe('FileUpload component', () => {
             await fakeApiRequest(true)
             return
         },
+        scanFile: async (key: string) => {
+            await fakeApiRequest(true)
+            return
+        },
         onLoadComplete: () => {
             return
         },
     }
-
+    beforeEach(() => jest.clearAllMocks())
     it('renders without errors', async () => {
         await render(<FileUpload {...testProps} />)
         expect(screen.getByTestId('file-input')).toBeInTheDocument()
@@ -80,22 +84,41 @@ describe('FileUpload component', () => {
         expect(screen.getByText('testFile.pdf')).toBeInTheDocument()
     })
 
-    it('renders a loading image while file is loading', async () => {
+    it('renders a loading state while file is loading', async () => {
         render(<FileUpload {...testProps} />)
         const inputEl = screen.getByTestId('file-input-input')
         userEvent.upload(inputEl, TEST_PDF_FILE)
+        await screen.findByText(/Uploading/)
 
         const imageEl = screen.getByTestId('file-input-preview-image')
         expect(imageEl).toHaveClass('is-loading')
         expect(imageEl).toHaveAttribute('src', SPACER_GIF)
     })
 
-    it('removes loading state when file is finished loading', async () => {
+    it('moves to scanning state when file is finished loading', async () => {
+        render(<FileUpload {...testProps} />)
+        const inputEl = screen.getByTestId('file-input-input')
+        userEvent.upload(inputEl, TEST_PDF_FILE)
+        await screen.findByText(/Uploading/)
+        await screen.findByText(/Scanning/)
+
+        expect(screen.queryByText(/Uploading/)).toBeNull()
+        expect(screen.getByTestId('file-input-preview-image')).toHaveClass(
+            'is-loading'
+        )
+    })
+
+    it('removes loading and scanning styles when file is complete', async () => {
         render(<FileUpload {...testProps} />)
         const inputEl = screen.getByTestId('file-input-input')
         userEvent.upload(inputEl, TEST_PDF_FILE)
 
+        await screen.findByText(/Uploading/)
+        await screen.findByText(/Scanning/)
+
         await waitFor(() => {
+            expect(screen.queryByText(/Uploading/)).toBeNull()
+            expect(screen.queryByText(/Scanning/)).toBeNull()
             expect(
                 screen.getByTestId('file-input-preview-image')
             ).not.toHaveClass('is-loading')
@@ -163,6 +186,58 @@ describe('FileUpload component', () => {
             expect(screen.queryAllByText(TEST_PDF_FILE.name).length).toBe(1)
             expect(screen.queryAllByText(TEST_DOC_FILE.name).length).toBe(2)
             expect(screen.queryAllByText('Duplicate file').length).toBe(1)
+        })
+    })
+
+    it('calls uploadFile, scanFile and onLoadComplete when file is successfully added', async () => {
+        const props: FileUploadProps = {
+            id: 'Default',
+            name: 'Default Input',
+            label: 'File input label',
+            uploadFile: jest
+                .fn()
+                .mockResolvedValue({ key: '12313', s3Url: 's3:/12313' }),
+            deleteFile: jest.fn().mockResolvedValue(undefined),
+            scanFile: jest.fn().mockResolvedValue(undefined),
+            onLoadComplete: jest.fn().mockResolvedValue(undefined),
+            accept: '.pdf,.txt',
+        }
+
+        render(<FileUpload {...props} />)
+
+        const input = screen.getByTestId('file-input-input')
+        userEvent.upload(input, [TEST_PDF_FILE])
+        await waitFor(() => {
+            expect(props.uploadFile).toHaveBeenCalled()
+            expect(props.scanFile).toHaveBeenCalled()
+            expect(props.onLoadComplete).toHaveBeenCalled()
+            expect(props.deleteFile).not.toHaveBeenCalled()
+        })
+    })
+
+    it('calls uploadFile, scanFile, deleteFile when file scanning fails', async () => {
+        const props: FileUploadProps = {
+            id: 'Default',
+            name: 'Default Input',
+            label: 'File input label',
+            uploadFile: jest
+                .fn()
+                .mockResolvedValue({ key: '12313', s3Url: 's3:/12313' }),
+            deleteFile: jest.fn().mockResolvedValue(undefined),
+            scanFile: jest.fn().mockRejectedValue(new Error('failed')),
+            onLoadComplete: jest.fn().mockResolvedValue(undefined),
+            accept: '.pdf,.txt',
+        }
+
+        render(<FileUpload {...props} />)
+
+        const input = screen.getByTestId('file-input-input')
+        userEvent.upload(input, [TEST_PDF_FILE])
+        await waitFor(() => {
+            expect(props.uploadFile).toHaveBeenCalled()
+            expect(props.scanFile).toHaveBeenCalled()
+            expect(props.deleteFile).toHaveBeenCalled()
+            expect(props.onLoadComplete).toHaveBeenCalled()
         })
     })
 

@@ -3,6 +3,30 @@ import { parseKey } from '../common-code/s3URLEncoding'
 import type { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
 
+const waitFor = (delay = 1000) =>
+    new Promise((resolve) => setTimeout(resolve, delay))
+
+/* 
+    Retry async function up to limit of maxRetries
+    increase the time elapsed between retries each cycle by order of 2^n (exponential backoff)
+    e.g. with defaults values for retryCount and maxRetries, attempt request at 1s, 2s, 4s.
+*/
+const retryWithBackoff = async (
+    fn: () => Promise<void | S3Error>,
+    retryCount = 0,
+    maxRetries = 3,
+    err = null
+): Promise<void | S3Error> => {
+    if (retryCount > maxRetries) {
+        return Promise.reject(err)
+    }
+    const nextDelay = 2 ** retryCount * 1000
+    await waitFor(nextDelay)
+    return fn().catch((err) =>
+        retryWithBackoff(fn, retryCount + 1, maxRetries, err)
+    )
+}
+
 type s3PutResponse = {
     key: string
 }
@@ -24,7 +48,6 @@ export function newAmplifyS3Client(bucketName: string): S3ClientT {
                 })
 
                 assertIsS3PutResponse(stored)
-
                 return stored.key
             } catch (err) {
                 if (err.name === 'Error' && err.message === 'Network Error') {
@@ -42,8 +65,7 @@ export function newAmplifyS3Client(bucketName: string): S3ClientT {
 
         deleteFile: async (filename: string): Promise<void | S3Error> => {
             try {
-                const deleteResult = await Storage.vault.remove(filename)
-                console.log(deleteResult)
+                await Storage.vault.remove(filename)
                 return
             } catch (err) {
                 if (err.name === 'Error' && err.message === 'Network Error') {
@@ -55,6 +77,31 @@ export function newAmplifyS3Client(bucketName: string): S3ClientT {
                 }
 
                 console.log('Unexpected Error deleting file from S3', err)
+                throw err
+            }
+        },
+        /*  
+            Poll for scanning completion
+            - We start polling after 20s, which is the estimated time it takes scanning to start to resolve.
+            - In total, each file could be up to 40 sec in a loading state (20s wait for scanning + 8s of retries + extra time for uploading and scanning api requests to resolve)
+            - While the file is scanning, returns 403. When scanning is complete, the resource returns 200
+        */
+        scanFile: async (filename: string): Promise<void | S3Error> => {
+            try {
+                await waitFor(20000)
+                await retryWithBackoff(async () => {
+                    await Storage.vault.get(filename, {
+                        download: true,
+                    })
+                })
+                return
+            } catch (err) {
+                if (err.name === 'Error' && err.message === 'Network Error') {
+                    return {
+                        code: 'NETWORK_ERROR',
+                        message: 'Error fetching file from the cloud.',
+                    }
+                }
                 throw err
             }
         },
