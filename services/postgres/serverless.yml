@@ -31,8 +31,10 @@ custom:
 resources:
   extensions:
     SecretsManagerRDSPostgreSQLRotationSingleUserRole:
+      Type: AWS::IAM::Role
       Properties:
         PermissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy${self:custom.iamPermissionsBoundaryPolicy}
+
   Transform: AWS::SecretsManager-2020-07-23
   Resources:
     # VPC endpoint for rotation lambda
@@ -91,7 +93,7 @@ resources:
           Ref: PostgresSecret
         HostedRotationLambda:
           RotationType: PostgreSQLSingleUser
-          RotationLambdaName: 'testName'
+          RotationLambdaName: SecretsManagerRotation
           VpcSecurityGroupIds: ${self:custom.sgId}
           VpcSubnetIds: !Join [',', '${self:custom.privateSubnets}']
         RotationRules:
