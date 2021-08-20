@@ -25,11 +25,7 @@ describe('SubmissionType', () => {
             },
         })
 
-        await waitFor(() =>
-            expect(
-                screen.getByRole('heading', { name: 'Submission type' })
-            ).toBeInTheDocument()
-        )
+        // Now that SumbissionType heading is no longer in the DOM, how can we test that SumbissionType renders without errors?
     })
 
     it('displays submission type form when expected', async () => {
@@ -66,14 +62,11 @@ describe('SubmissionType', () => {
     })
 
     it('displays with draft submission when expected', async () => {
-        renderWithProviders(
-            <SubmissionType draftSubmission={mockDraft()} />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
+        renderWithProviders(<SubmissionType draftSubmission={mockDraft()} />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
 
         await waitFor(() =>
             expect(
@@ -240,10 +233,6 @@ describe('SubmissionType', () => {
             })
 
             await waitFor(() => {
-                expect(
-                    screen.getByRole('heading', { name: 'Submission type' })
-                ).toBeInTheDocument()
-
                 expect(screen.getByRole('textbox')).not.toHaveClass(
                     'usa-input--error'
                 )
@@ -320,11 +309,6 @@ describe('SubmissionType', () => {
                 },
             })
 
-            await waitFor(() => {
-                expect(
-                    screen.getByRole('heading', { name: 'Submission type' })
-                ).toBeInTheDocument()
-            })
             userEvent.click(
                 screen.getByRole('button', {
                     name: 'Continue',

@@ -40,6 +40,8 @@ export async function updateStateSubmission(
     })
 
     storeSubmission.stateContacts = stateSubmission.stateContacts
+    storeSubmission.actuaryContacts = stateSubmission.actuaryContacts
+    storeSubmission.actuaryCommunicationPreference = stateSubmission.actuaryCommunicationPreference
 
     storeSubmission.contractType = stateSubmission.contractType
     storeSubmission.contractDateStart = stateSubmission.contractDateStart

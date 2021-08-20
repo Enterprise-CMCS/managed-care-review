@@ -18,6 +18,14 @@ mutation createDraftSubmission($input: CreateDraftSubmissionInput!) {
                 titleRole
                 email
             }
+            actuaryContacts {
+                name
+                titleRole
+                email
+                actuarialFirm
+                actuarialFirmOther
+            }
+            actuaryCommunicationPreference
             documents {
                 name
                 s3URL

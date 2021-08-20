@@ -2,6 +2,7 @@ import { screen, waitFor } from '@testing-library/react'
 
 import {
     mockDraft,
+    mockContactAndRatesDraft,
     mockCompleteDraft,
     fetchCurrentUserMock,
 } from '../../../testHelpers/apolloHelpers'
@@ -88,13 +89,13 @@ describe('Contacts', () => {
 
         await waitFor(() => {
             expect(
-                screen.getByText('You must enter a name')
+                screen.getByText('You must provide a name')
             ).toBeInTheDocument()
             expect(
-                screen.getByText('You must enter a title/role')
+                screen.getByText('You must provide a title/role')
             ).toBeInTheDocument()
             expect(
-                screen.getByText('You must enter an email address')
+                screen.getByText('You must provide an email address')
             ).toBeInTheDocument()
         })
     })
@@ -132,7 +133,44 @@ describe('Contacts', () => {
         })
     })
 
-    it('after "Remove contact" button click, should focus on add new contact button', async () => {
+    it('after "Add actuary contact" button click, it should focus on the field name of the new actuarycontact', async () => {
+        const mock = mockContactAndRatesDraft()
+        const mockUpdateDraftFn = jest.fn()
+
+        renderWithProviders(
+            <Contacts draftSubmission={mock} updateDraft={mockUpdateDraftFn} />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        const addActuaryContactButton = screen.getByRole('button', {
+            name: 'Add actuary contact',
+        })
+        const firstActuaryContactName = screen.getAllByLabelText('Name')[1]
+
+        userEvent.type(firstActuaryContactName, 'First actuary person')
+        expect(firstActuaryContactName).toHaveFocus()
+
+        addActuaryContactButton.click()
+
+        await waitFor(() => {
+            expect(screen.getByText('Add actuary contact')).toBeInTheDocument()
+
+            expect(screen.getAllByLabelText('Name').length).toBe(3)
+
+            const secondActuaryContactName = screen.getAllByLabelText('Name')[2]
+            expect(firstActuaryContactName).toHaveValue('First actuary person')
+            expect(firstActuaryContactName).not.toHaveFocus()
+
+            expect(secondActuaryContactName).toHaveValue('')
+            expect(secondActuaryContactName).toHaveFocus()
+        })
+    })
+
+    it('after state contact "Remove contact" button click, should focus on add new contact button', async () => {
         const mock = mockDraft()
         const mockUpdateDraftFn = jest.fn()
 
@@ -159,6 +197,36 @@ describe('Contacts', () => {
             )
 
             expect(addStateContactButton).toHaveFocus()
+        })
+    })
+
+    it('after actuary contact "Remove contact" button click, should focus on add new actuary contact button', async () => {
+        const mock = mockContactAndRatesDraft()
+        const mockUpdateDraftFn = jest.fn()
+
+        renderWithProviders(
+            <Contacts draftSubmission={mock} updateDraft={mockUpdateDraftFn} />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+        const addActuaryContactButton = screen.getByRole('button', {
+            name: 'Add actuary contact',
+        })
+        addActuaryContactButton.click()
+
+        await waitFor(() => {
+            expect(
+                screen.getByRole('button', { name: 'Remove contact' })
+            ).toBeInTheDocument()
+
+            userEvent.click(
+                screen.getByRole('button', { name: 'Remove contact' })
+            )
+
+            expect(addActuaryContactButton).toHaveFocus()
         })
     })
 })

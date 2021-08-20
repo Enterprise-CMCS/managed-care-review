@@ -24,4 +24,6 @@ export type StateSubmissionType = {
     rateDateCertified?: Date
     rateAmendmentInfo?: RateAmendmentInfo
     stateContacts: StateContact[]
+    actuaryContacts: ActuaryContact[]
+    actuaryCommunicationPreference?: ActuaryCommunicationType
 }
