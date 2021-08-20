@@ -1,5 +1,3 @@
-import { createTestClient } from 'apollo-server-testing'
-
 import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
 import {
     DraftSubmissionUpdates,
@@ -213,9 +211,7 @@ describe('updateDraftSubmission', () => {
     it('updates a submission if the state matches', async () => {
         const server = constructTestServer()
 
-        const { query, mutate } = createTestClient(server)
-
-        const createdDraft = await createTestDraftSubmission(mutate)
+        const createdDraft = await createTestDraftSubmission(server)
         const createdID = createdDraft.id
         const startDate = '2021-07-06'
         const endDate = '2021-07-12'
@@ -240,8 +236,8 @@ describe('updateDraftSubmission', () => {
             actuaryContacts: [],
         }
 
-        const updateResult = await mutate({
-            mutation: UPDATE_DRAFT_SUBMISSION,
+        const updateResult = await server.executeOperation({
+            query: UPDATE_DRAFT_SUBMISSION,
             variables: {
                 input: {
                     submissionID: createdID,
@@ -252,7 +248,10 @@ describe('updateDraftSubmission', () => {
 
         expect(updateResult.errors).toBeUndefined()
 
-        const resultDraft = await fetchTestDraftSubmissionById(query, createdID)
+        const resultDraft = await fetchTestDraftSubmissionById(
+            server,
+            createdID
+        )
         // General
         expect(resultDraft.id).toEqual(createdID)
         expect(resultDraft.submissionType).toEqual('CONTRACT_AND_RATES')
@@ -288,9 +287,8 @@ describe('updateDraftSubmission', () => {
 
     it('updates a submission to have documents', async () => {
         const server = constructTestServer()
-        const { mutate } = createTestClient(server)
 
-        const createdDraft = await createTestDraftSubmission(mutate)
+        const createdDraft = await createTestDraftSubmission(server)
         const createdID = createdDraft.id
         const startDate = '2021-07-06'
         const endDate = '2021-07-12'
@@ -315,7 +313,7 @@ describe('updateDraftSubmission', () => {
                     name: 'Test Person',
                     titleRole: 'A Role',
                     email: 'test@test.com',
-                }
+                },
             ],
             actuaryContacts: [
                 {
@@ -324,13 +322,13 @@ describe('updateDraftSubmission', () => {
                     email: 'test@test.com',
                     actuarialFirm: 'MERCER' as const,
                     actuarialFirmOther: '',
-                }
+                },
             ],
             actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
         }
 
-        const updateResult = await mutate({
-            mutation: UPDATE_DRAFT_SUBMISSION,
+        const updateResult = await server.executeOperation({
+            query: UPDATE_DRAFT_SUBMISSION,
             variables: {
                 input: {
                     submissionID: createdID,
@@ -342,7 +340,7 @@ describe('updateDraftSubmission', () => {
         expect(updateResult.errors).toBeUndefined()
 
         const resultDraft1 =
-            updateResult.data.updateDraftSubmission.draftSubmission
+            updateResult.data?.updateDraftSubmission.draftSubmission
         expect(resultDraft1.id).toEqual(createdID)
         expect(resultDraft1.documents).toEqual([
             {
@@ -390,13 +388,13 @@ describe('updateDraftSubmission', () => {
                     email: 'test@test.com',
                     actuarialFirm: 'MERCER' as const,
                     actuarialFirmOther: '',
-                }
+                },
             ],
             actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
         }
 
-        const updateResult2 = await mutate({
-            mutation: UPDATE_DRAFT_SUBMISSION,
+        const updateResult2 = await server.executeOperation({
+            query: UPDATE_DRAFT_SUBMISSION,
             variables: {
                 input: {
                     submissionID: createdID,
@@ -405,16 +403,15 @@ describe('updateDraftSubmission', () => {
             },
         })
         const resultDraft2 =
-            updateResult2.data.updateDraftSubmission.draftSubmission
+            updateResult2.data?.updateDraftSubmission.draftSubmission
         expect(resultDraft2.documents.length).toEqual(2)
         expect(resultDraft2.documents[0].name).toEqual('myfile2.pdf')
     })
 
     it('updates a submission to have state contacts', async () => {
         const server = constructTestServer()
-        const { mutate, query } = createTestClient(server)
 
-        const createdDraft = await createTestDraftSubmission(mutate)
+        const createdDraft = await createTestDraftSubmission(server)
         const createdID = createdDraft.id
 
         const updatedDraft = {
@@ -435,7 +432,7 @@ describe('updateDraftSubmission', () => {
                     email: 'test@test.com',
                     actuarialFirm: 'MERCER' as const,
                     actuarialFirmOther: '',
-                }
+                },
             ],
             actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
             documents: [],
@@ -446,8 +443,8 @@ describe('updateDraftSubmission', () => {
             federalAuthorities: [],
         }
 
-        const updateResult = await mutate({
-            mutation: UPDATE_DRAFT_SUBMISSION,
+        const updateResult = await server.executeOperation({
+            query: UPDATE_DRAFT_SUBMISSION,
             variables: {
                 input: {
                     submissionID: createdID,
@@ -459,7 +456,7 @@ describe('updateDraftSubmission', () => {
         expect(updateResult.errors).toBeUndefined()
 
         const resultDraft1 =
-            updateResult.data.updateDraftSubmission.draftSubmission
+            updateResult.data?.updateDraftSubmission.draftSubmission
         expect(resultDraft1.id).toEqual(createdID)
         expect(resultDraft1.stateContacts).toEqual([
             {
@@ -479,23 +476,25 @@ describe('updateDraftSubmission', () => {
             },
         ])
 
-        const fetchedDraft = await fetchTestDraftSubmissionById(query, createdID)
+        const fetchedDraft = await fetchTestDraftSubmissionById(
+            server,
+            createdID
+        )
 
         expect(fetchedDraft.id).toEqual(createdID)
         expect(fetchedDraft.stateContacts).toEqual([
-          {
-              name: 'test name',
-              titleRole: 'fancy person',
-              email: 'test@test.com',
-          },
+            {
+                name: 'test name',
+                titleRole: 'fancy person',
+                email: 'test@test.com',
+            },
         ])
     })
 
     it('updates a submission to have contract amendment details', async () => {
         const server = constructTestServer()
-        const { mutate } = createTestClient(server)
 
-        const createdDraft = await createTestDraftSubmission(mutate)
+        const createdDraft = await createTestDraftSubmission(server)
         const createdID = createdDraft.id
         const startDate = '2021-07-06'
 
@@ -521,8 +520,8 @@ describe('updateDraftSubmission', () => {
             },
         }
 
-        const updateResult = await mutate({
-            mutation: UPDATE_DRAFT_SUBMISSION,
+        const updateResult = await server.executeOperation({
+            query: UPDATE_DRAFT_SUBMISSION,
             variables: {
                 input: {
                     submissionID: createdID,
@@ -534,7 +533,7 @@ describe('updateDraftSubmission', () => {
         expect(updateResult.errors).toBeUndefined()
 
         const resultDraft =
-            updateResult.data.updateDraftSubmission.draftSubmission
+            updateResult.data?.updateDraftSubmission.draftSubmission
 
         expect(resultDraft.id).toEqual(createdID)
         expect(resultDraft.contractAmendmentInfo.itemsBeingAmended).toEqual([
@@ -551,9 +550,8 @@ describe('updateDraftSubmission', () => {
 
     it('updates a submission with conditionals in contract amendment details', async () => {
         const server = constructTestServer()
-        const { query, mutate } = createTestClient(server)
 
-        const createdDraft = await createTestDraftSubmission(mutate)
+        const createdDraft = await createTestDraftSubmission(server)
         const createdID = createdDraft.id
         const startDate = '2021-07-06'
 
@@ -583,8 +581,8 @@ describe('updateDraftSubmission', () => {
             actuaryContacts: [],
         }
 
-        const updateResult = await mutate({
-            mutation: UPDATE_DRAFT_SUBMISSION,
+        const updateResult = await server.executeOperation({
+            query: UPDATE_DRAFT_SUBMISSION,
             variables: {
                 input: {
                     submissionID: createdID,
@@ -596,11 +594,11 @@ describe('updateDraftSubmission', () => {
         expect(updateResult.errors).toBeUndefined()
 
         const resultDraft =
-            updateResult.data.updateDraftSubmission.draftSubmission
+            updateResult.data?.updateDraftSubmission.draftSubmission
 
         // also check on the fetch of the same
         const fetchedDraft = await fetchTestDraftSubmissionById(
-            query,
+            server,
             createdID
         )
 
@@ -628,9 +626,8 @@ describe('updateDraftSubmission', () => {
 
     it('updates a submission to have a new rate', async () => {
         const server = constructTestServer()
-        const { mutate } = createTestClient(server)
 
-        const createdDraft = await createTestDraftSubmission(mutate)
+        const createdDraft = await createTestDraftSubmission(server)
         const createdID = createdDraft.id
         const startDate = '2021-07-01'
         const endDate = '2022-06-30'
@@ -653,8 +650,8 @@ describe('updateDraftSubmission', () => {
             ...rateDetails,
         }
 
-        const updateResult = await mutate({
-            mutation: UPDATE_DRAFT_SUBMISSION,
+        const updateResult = await server.executeOperation({
+            query: UPDATE_DRAFT_SUBMISSION,
             variables: {
                 input: {
                     submissionID: createdID,
@@ -666,7 +663,7 @@ describe('updateDraftSubmission', () => {
         expect(updateResult.errors).toBeUndefined()
 
         const resultDraft =
-            updateResult.data.updateDraftSubmission.draftSubmission
+            updateResult.data?.updateDraftSubmission.draftSubmission
 
         expect(resultDraft.id).toEqual(createdID)
         expect(resultDraft.rateType).toEqual(rateDetails.rateType)
@@ -680,9 +677,8 @@ describe('updateDraftSubmission', () => {
 
     it('updates a submission to have a rate amendment', async () => {
         const server = constructTestServer()
-        const { mutate } = createTestClient(server)
 
-        const createdDraft = await createTestDraftSubmission(mutate)
+        const createdDraft = await createTestDraftSubmission(server)
         const createdID = createdDraft.id
         const startDate = '2021-07-01'
         const endDate = '2022-06-30'
@@ -709,8 +705,8 @@ describe('updateDraftSubmission', () => {
             ...rateAmendment,
         }
 
-        const updateResult = await mutate({
-            mutation: UPDATE_DRAFT_SUBMISSION,
+        const updateResult = await server.executeOperation({
+            query: UPDATE_DRAFT_SUBMISSION,
             variables: {
                 input: {
                     submissionID: createdID,
@@ -722,7 +718,7 @@ describe('updateDraftSubmission', () => {
         expect(updateResult.errors).toBeUndefined()
 
         const resultDraft =
-            updateResult.data.updateDraftSubmission.draftSubmission
+            updateResult.data?.updateDraftSubmission.draftSubmission
 
         expect(resultDraft.id).toEqual(createdID)
         expect(resultDraft.rateType).toEqual(rateAmendment.rateType)
@@ -741,9 +737,8 @@ describe('updateDraftSubmission', () => {
 
     it('updates a submission to remove existing documents', async () => {
         const server = constructTestServer()
-        const { query, mutate } = createTestClient(server)
 
-        const createdDraft = await createTestDraftSubmission(mutate)
+        const createdDraft = await createTestDraftSubmission(server)
         const createdID = createdDraft.id
 
         const updatedDraftWithDocs = {
@@ -772,13 +767,13 @@ describe('updateDraftSubmission', () => {
                     email: 'test@test.com',
                     actuarialFirm: 'MERCER' as const,
                     actuarialFirmOther: '',
-                }
+                },
             ],
             actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
         }
 
-        const updateResult = await mutate({
-            mutation: UPDATE_DRAFT_SUBMISSION,
+        const updateResult = await server.executeOperation({
+            query: UPDATE_DRAFT_SUBMISSION,
             variables: {
                 input: {
                     submissionID: createdID,
@@ -789,7 +784,10 @@ describe('updateDraftSubmission', () => {
 
         expect(updateResult.errors).toBeUndefined()
 
-        const resultDraft = await fetchTestDraftSubmissionById(query, createdID)
+        const resultDraft = await fetchTestDraftSubmissionById(
+            server,
+            createdID
+        )
         expect(resultDraft.id).toEqual(createdID)
         expect(resultDraft.documents).toEqual([
             {
@@ -820,13 +818,13 @@ describe('updateDraftSubmission', () => {
                     email: 'test@test.com',
                     actuarialFirm: 'MERCER' as const,
                     actuarialFirmOther: '',
-                }
+                },
             ],
             actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
         }
 
-        const updateResult2 = await mutate({
-            mutation: UPDATE_DRAFT_SUBMISSION,
+        const updateResult2 = await server.executeOperation({
+            query: UPDATE_DRAFT_SUBMISSION,
             variables: {
                 input: {
                     submissionID: createdID,
@@ -835,14 +833,13 @@ describe('updateDraftSubmission', () => {
             },
         })
         const resultDraft2 =
-            updateResult2.data.updateDraftSubmission.draftSubmission
+            updateResult2.data?.updateDraftSubmission.draftSubmission
         expect(resultDraft2.documents).toEqual([])
     })
 
     it('errors if the ID does not exist', async () => {
         const server = constructTestServer()
 
-        const { mutate } = createTestClient(server)
         const startDate = '2021-07-06'
         const endDate = '2021-07-12'
 
@@ -860,8 +857,8 @@ describe('updateDraftSubmission', () => {
             actuaryContacts: [],
         }
 
-        const updateResult = await mutate({
-            mutation: UPDATE_DRAFT_SUBMISSION,
+        const updateResult = await server.executeOperation({
+            query: UPDATE_DRAFT_SUBMISSION,
             variables: {
                 input: {
                     submissionID: 'foo-bar-123',
@@ -886,23 +883,21 @@ describe('updateDraftSubmission', () => {
     it('returns an error if you are requesting for a different state (403)', async () => {
         const server = constructTestServer()
 
-        const { mutate } = createTestClient(server)
-
         // SETUP: First, create a new submission
         const createInput: CreateDraftSubmissionInput = {
             programID: 'smmc',
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A created submission',
         }
-        const createResult = await mutate({
-            mutation: CREATE_DRAFT_SUBMISSION,
+        const createResult = await server.executeOperation({
+            query: CREATE_DRAFT_SUBMISSION,
             variables: { input: createInput },
         })
 
         expect(createResult.errors).toBeUndefined()
 
         const createdDraft =
-            createResult.data.createDraftSubmission.draftSubmission
+            createResult.data?.createDraftSubmission.draftSubmission
 
         // ACT: next, update that submission but from a user from a diferent state
         const createdID = createdDraft.id
@@ -919,7 +914,6 @@ describe('updateDraftSubmission', () => {
             },
         })
 
-        const { mutate: otherMutate } = createTestClient(otherUserServer)
         const startDate = '2021-07-06'
         const endDate = '2021-07-12'
         const updatedDraft = {
@@ -936,8 +930,8 @@ describe('updateDraftSubmission', () => {
             actuaryContacts: [],
         }
 
-        const updateResult = await otherMutate({
-            mutation: UPDATE_DRAFT_SUBMISSION,
+        const updateResult = await otherUserServer.executeOperation({
+            query: UPDATE_DRAFT_SUBMISSION,
             variables: {
                 input: {
                     submissionID: createdID,
@@ -958,9 +952,7 @@ describe('updateDraftSubmission', () => {
     it('returns an error if you try and set a programID thats not valid', async () => {
         const server = constructTestServer()
 
-        const { mutate } = createTestClient(server)
-
-        const createdDraft = await createTestDraftSubmission(mutate)
+        const createdDraft = await createTestDraftSubmission(server)
         const createdID = createdDraft.id
         const startDate = '2021-07-06'
         const endDate = '2021-07-12'
@@ -979,8 +971,8 @@ describe('updateDraftSubmission', () => {
             actuaryContacts: [],
         }
 
-        const updateResult = await mutate({
-            mutation: UPDATE_DRAFT_SUBMISSION,
+        const updateResult = await server.executeOperation({
+            query: UPDATE_DRAFT_SUBMISSION,
             variables: {
                 input: {
                     submissionID: createdID,
