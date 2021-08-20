@@ -56,12 +56,8 @@ export const FileUpload = ({
     const fileInputRef = useRef<FileInputRef>(null) // reference to the HTML input which has files
 
     React.useEffect(() => {
-        let isMounted = true
-        if (loadingStatus !== 'UPLOADING' && isMounted) {
+        if (loadingStatus !== 'UPLOADING') {
             onLoadComplete({ files: fileItems })
-        }
-        return () => {
-            isMounted = false
         }
     }, [fileItems, loadingStatus, onLoadComplete])
 

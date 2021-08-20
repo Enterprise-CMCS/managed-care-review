@@ -45,7 +45,7 @@ describe('FileUpload component', () => {
             return
         },
     }
-
+    beforeEach(() => jest.clearAllMocks())
     it('renders without errors', async () => {
         await render(<FileUpload {...testProps} />)
         expect(screen.getByTestId('file-input')).toBeInTheDocument()

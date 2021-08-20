@@ -63,6 +63,7 @@ describe('FileItem component', () => {
         retryItem: jest.fn(),
     }
 
+    beforeEach(() => jest.clearAllMocks())
     it('renders without errors', () => {
         render(<FileItem item={uploadComplete} {...buttonActionProps} />)
 

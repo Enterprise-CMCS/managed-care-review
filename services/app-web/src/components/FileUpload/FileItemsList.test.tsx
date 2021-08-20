@@ -64,6 +64,7 @@ describe('FileItemList component', () => {
         retryItem: jest.fn(),
     }
 
+    beforeEach(() => jest.clearAllMocks())
     it('renders without errors', () => {
         const fileItems = [pending, uploadError]
         render(<FileItemsList fileItems={fileItems} {...buttonActionProps} />)
