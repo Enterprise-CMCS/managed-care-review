@@ -14,16 +14,16 @@ import {
     runWebAgainstAWS,
     compileGraphQLTypesOnce,
     runWebAgainstDocker,
- } from './local/index.js'
+} from './local/index.js'
 
- import {
-     runAPITests,
-     runAPITestsWatch,
-     runWebTests,
-     runWebTestsWatch,
-     runBrowserTests,
-     runBrowserTestsInDocker,
- } from './test/index.js'
+import {
+    runAPITests,
+    runAPITestsWatch,
+    runWebTests,
+    runWebTestsWatch,
+    runBrowserTests,
+    runBrowserTestsInDocker,
+} from './test/index.js'
 
 async function runAllClean() {
     const runner = new LabeledProcessRunner()
@@ -185,9 +185,6 @@ function main() {
 
     yargs(process.argv.slice(2))
         .scriptName('dev')
-        .command('clean', 'clean node dependencies', {}, () => {
-            runAllClean()
-        })
         .command(
             'local',
             'run system locally. If no flags are passed, runs all services',
@@ -219,10 +216,7 @@ function main() {
                                     describe: 'run database locally',
                                 })
                                 .example([
-                                    [
-                                        '$0 local',
-                                        'run all local services',
-                                    ],
+                                    ['$0 local', 'run all local services'],
                                     [
                                         '$0 local --no-storybook',
                                         'run all services except storybook',
@@ -270,27 +264,32 @@ function main() {
                             return yargs
                                 .option('hybrid', {
                                     type: 'boolean',
-                                    describe: 'run app-web locally configured to talk to a backend deployed in AWS. Defaults to the review app associated with the current branch.',
+                                    describe:
+                                        'run app-web locally configured to talk to a backend deployed in AWS. Defaults to the review app associated with the current branch.',
                                 })
                                 .option('hybrid-stage', {
                                     type: 'string',
-                                    describe: 'an alternative Serverless stage in your AWS account to run against',
+                                    describe:
+                                        'an alternative Serverless stage in your AWS account to run against',
                                 })
                                 .option('for-docker', {
                                     type: 'boolean',
-                                    describe: 'run app-web locally configured to be called from within a docker container. This is designed to be paired with `./dev test browser --in-docker`',
+                                    describe:
+                                        'run app-web locally configured to be called from within a docker container. This is designed to be paired with `./dev test browser --in-docker`',
                                 })
                         },
                         (args) => {
                             if (args['for-docker'] && args.hybrid) {
-                                console.log("Error: --hybrid and --for-docker are mutually exclusive")
+                                console.log(
+                                    'Error: --hybrid and --for-docker are mutually exclusive'
+                                )
                                 process.exit(2)
                             }
 
                             if (args.hybrid) {
                                 runWebAgainstAWS(args['hybrid-stage'])
                             } else if (args['for-docker']) {
-                                console.log("run against docker")
+                                console.log('run against docker')
                                 runWebAgainstDocker()
                             } else {
                                 const runner = new LabeledProcessRunner()
@@ -307,43 +306,21 @@ function main() {
                             runStorybookLocally(runner)
                         }
                     )
-                    .command(
-                        's3',
-                        'run s3 locally',
-                        () => {
-                            const runner = new LabeledProcessRunner()
+                    .command('s3', 'run s3 locally', () => {
+                        const runner = new LabeledProcessRunner()
 
-                            runS3Locally(runner)
-                        }
-                    )
-                    .command(
-                        'db',
-                        'run the databse locally.',
-                        () => {
-                            const runner = new LabeledProcessRunner()
+                        runS3Locally(runner)
+                    })
+                    .command('db', 'run the databse locally.', () => {
+                        const runner = new LabeledProcessRunner()
 
-                            runDBLocally(runner)
-                        }
-                    )
+                        runDBLocally(runner)
+                    })
             },
             () => {
                 console.log(
                     "with a default subcommand, I don't think this code can be reached"
                 )
-            }
-        )
-        .command(
-            'hybrid',
-            'run app-web locally connected to the review app deployed for this branch',
-            (yargs) => {
-                return yargs.option('stage', {
-                    type: 'string',
-                    describe:
-                        'an alternative Serverless stage in your AWS account to run against',
-                })
-            },
-            (args) => {
-                runWebAgainstAWS(args.stage)
             }
         )
         .command(
@@ -458,29 +435,32 @@ function main() {
                     )
                     .command(
                         'browser',
-                        'run & watch cypress browser tests. Default command is `cypress open`. Any args passed after a -- will be passed to cypress instead. This requires a URL to run against, configured with APPLICATION_ENDPOINT',
+                        'run & watch cypress browser tests. Default command is `cypress open`. Any args passed after a -- will be used as the cypress cmd instead. This requires a URL to run against, configured with APPLICATION_ENDPOINT',
                         (yargs) => {
-                            return yargs.option('in-docker', {
-                                type: 'boolean',
-                                describe: 'run cypress in a linux docker container that better matches the environment cypress is run in in CI. N.B. requires running app-web with --for-docker in order to work.',
-                            }).example([
-                                [
-                                    '$0 test browser',
-                                    'launch the cypress test runner',
-                                ],
-                                [
-                                    '$0 test browser -- run',
-                                    'run all the cypress tests once from the CLI',
-                                ],
-                                [
-                                    '$0 test browser --in-docker',
-                                    'run all the cypress tests once in a CI-like docker container',
-                                ],
-                                [
-                                    '$0 test browser --in-docker -- --spec tests/cypress/integration/stateSubmission.spec.ts',
-                                    'run the stateSubmission cypress tests once in a CI-like docker container',
-                                ],
-                            ])
+                            return yargs
+                                .option('in-docker', {
+                                    type: 'boolean',
+                                    describe:
+                                        'run cypress in a linux docker container that better matches the environment cypress is run in in CI. N.B. requires running app-web with --for-docker in order to work. Ignores APPLICATION_ENDPOINT in favor of docker networking.',
+                                })
+                                .example([
+                                    [
+                                        '$0 test browser',
+                                        'launch the cypress test runner',
+                                    ],
+                                    [
+                                        '$0 test browser -- run',
+                                        'run all the cypress tests once from the CLI',
+                                    ],
+                                    [
+                                        '$0 test browser --in-docker',
+                                        'run all the cypress tests once in a CI-like docker container',
+                                    ],
+                                    [
+                                        '$0 test browser --in-docker -- run --spec tests/cypress/integration/stateSubmission.spec.ts',
+                                        'run the stateSubmission cypress tests once in a CI-like docker container',
+                                    ],
+                                ])
                         },
                         (args) => {
                             // all args that come after a `--` hang out in args._, along with the command name(s)
@@ -505,6 +485,9 @@ function main() {
                 )
             }
         )
+        .command('clean', 'clean node dependencies', {}, () => {
+            runAllClean()
+        })
         .command(
             'format',
             'run format. This will be replaced by pre-commit',
@@ -527,6 +510,20 @@ function main() {
             {},
             () => {
                 runAllGenerate()
+            }
+        )
+        .command(
+            'hybrid',
+            '[deprecated use ./dev local web --hybrid instead] run app-web locally connected to the review app deployed for this branch',
+            (yargs) => {
+                return yargs.option('stage', {
+                    type: 'string',
+                    describe:
+                        'an alternative Serverless stage in your AWS account to run against',
+                })
+            },
+            (args) => {
+                runWebAgainstAWS(args.stage)
             }
         )
         .demandCommand(1, '')

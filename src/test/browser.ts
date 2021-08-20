@@ -17,13 +17,18 @@ export async function runBrowserTests(cypressArgs: string[]) {
 }
 
 async function checkDockerInstalledAndRunning() {
-    requireBinary(['docker'], 'Docker is required to run Cypress in a CI-like environment. Install Docker Desktop here: https://www.docker.com/products/docker-desktop')
+    requireBinary(
+        ['docker'],
+        'Docker is required to run Cypress in a CI-like environment. Install Docker Desktop here: https://www.docker.com/products/docker-desktop'
+    )
 
-    requireBinary(['docker', 'ps'], 'Docker must be running in order to continue. Please start Docker Desktop.')
+    requireBinary(
+        ['docker', 'ps'],
+        'Docker must be running in order to continue. Please start Docker Desktop.'
+    )
 }
 
 async function buildCypressDockerImage(runner: LabeledProcessRunner) {
-
     await checkDockerInstalledAndRunning()
 
     // Docker caching means we can just run this every time for now.
@@ -36,20 +41,35 @@ async function buildCypressDockerImage(runner: LabeledProcessRunner) {
 }
 
 export async function runBrowserTestsInDocker(cypressArgs: string[]) {
-
     const runner = new LabeledProcessRunner()
 
     const buildResult = await buildCypressDockerImage(runner)
     if (buildResult !== 0) {
-        console.log("ERROR: building the CI docker image failed")
+        console.log('ERROR: building the CI docker image failed')
         process.exit(buildResult)
     }
 
     // check to see if you're running ./dev local --for-docker
     const isUp = await checkURLIsUp('http://localhost:3005')
     if (!isUp) {
-        console.log('in order to run cypress in docker, you need to run the front end configured correctly for docker. Run `./dev local web --for-docker` before running cypress.')
+        console.log(
+            'in order to run cypress in docker, you need to run the front end configured correctly for docker. Run `./dev local web --for-docker` before running cypress.'
+        )
         process.exit(2)
+    }
+
+    const baseUrlArgs = ['--config', 'baseUrl=http://host.docker.internal:3005']
+    let cypressCommandArgs = ['run'].concat(baseUrlArgs)
+    if (cypressArgs.length > 0) {
+        for (const arg of cypressArgs) {
+            if (arg.startsWith('baseUrl')) {
+                console.log(
+                    'WARNING: you have passed baseUrl into cypress but we override that in order to talk to our local app-web'
+                )
+            }
+        }
+
+        cypressCommandArgs = cypressArgs.concat(baseUrlArgs)
     }
 
     await runner.runCommandAndOutput(
@@ -57,17 +77,18 @@ export async function runBrowserTestsInDocker(cypressArgs: string[]) {
         [
             'docker',
             'run',
-            '-v', `${process.cwd()}:/mc-review`,
-            '--workdir', '/mc-review',
-            '--env', 'REACT_APP_AUTH_MODE=LOCAL',
+            '-v',
+            `${process.cwd()}:/mc-review`,
+            '--workdir',
+            '/mc-review',
+            '--env',
+            'REACT_APP_AUTH_MODE=LOCAL',
             'gha-cypress:latest',
 
             '/cypress/node_modules/.bin/cypress',
-            'run',
-            '--config', 'baseUrl=http://host.docker.internal:3005',
-            ...cypressArgs,
+
+            ...cypressCommandArgs,
         ],
         '.'
     )
-
 }
