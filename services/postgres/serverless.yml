@@ -102,6 +102,7 @@ resources:
 
     LambdaInvokePermission:
       Type: AWS::Lambda::Permission
+      DependsOn: RotatorLambdaFunction
       Properties:
         Action: lambda:InvokeFunction
         FunctionName: !GetAtt RotatorLambdaFunction.Arn
