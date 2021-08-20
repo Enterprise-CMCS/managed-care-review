@@ -15,6 +15,27 @@ provider:
     role:
       path: ${self:custom.iamPath}
       permissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy${self:custom.iamPermissionsBoundaryPolicy}
+      statements:
+        - Effect: 'Allow'
+          Action:
+            - secretsmanager:DescribeSecret
+            - secretsmanager:GetSecretValue
+            - secretsmanager:PutSecretValue
+            - secretsmanager:UpdateSecretVersionStage
+          Resource: '*'
+          Condition:
+            StringEquals:
+              'secretsmanager:resource/AllowRotationLambdaArn': 'arn:aws:lambda:${self:custom.region}:${self:custom.accountId}:function:${self:service}-${self:provider.stage}-rotator'
+        - Effect: Allow
+          Action:
+            - secretsmanager:GetRandomPassword
+          Resource: '*'
+        - Effect: Allow
+          Action:
+            - ec2:CreateNetworkInterface
+            - ec2:DeleteNetworkInterface
+            - ec2:DescribeNetworkInterfaces
+          Resource: '*'
 
 custom:
   stage: ${opt:stage, self:provider.stage}
