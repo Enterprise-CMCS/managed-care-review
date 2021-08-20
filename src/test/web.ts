@@ -4,7 +4,7 @@ import { spawn } from 'child_process'
 import {
     compileGraphQLTypesWatchOnce,
     compileGraphQLTypesOnce,
-    installWebDepsOnce
+    installWebDepsOnce,
 } from '../local/index.js'
 
 export async function runWebTestsWatch(jestArgs: string[]) {
@@ -27,7 +27,9 @@ export async function runWebTestsWatch(jestArgs: string[]) {
     })
 }
 
-export async function runWebTests(runner: LabeledProcessRunner): Promise<number> {
+export async function runWebTests(
+    runner: LabeledProcessRunner
+): Promise<number> {
     await compileGraphQLTypesOnce(runner)
     await installWebDepsOnce(runner)
 

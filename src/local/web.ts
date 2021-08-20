@@ -24,7 +24,6 @@ export async function runWebLocally(runner: LabeledProcessRunner) {
     runner.runCommandAndOutput('web', ['yarn', 'start'], 'services/app-web')
 }
 
-
 // Pulls a bunch of configuration out of a given AWS environment and sets it as env vars for app-web to run against
 // Note: The environment is made up of the _stage_ which defaults to your current git branch
 // and the AWS Account, which is determined by which AWS credentials you get out of cloudtamer (dev, val, or prod) usually dev
@@ -133,14 +132,12 @@ export async function runWebAgainstAWS(
 // docker container. localhost does not resolve inside a local docker container, so everything
 // needs to be routed according to the custom docker hostname instead.
 export async function runWebAgainstDocker() {
-
     // configure all the right env vars
     process.env.PORT = '3005' // run docker-web on a different port
     process.env.REACT_APP_AUTH_MODE = 'LOCAL'
     process.env.REACT_APP_API_URL = 'http://host.docker.internal:3030/local'
-    process.env.REACT_APP_S3_LOCAL_URL ='http://host.docker.internal:4569'
+    process.env.REACT_APP_S3_LOCAL_URL = 'http://host.docker.internal:4569'
 
     const runner = new LabeledProcessRunner()
     await runWebLocally(runner)
-
 }

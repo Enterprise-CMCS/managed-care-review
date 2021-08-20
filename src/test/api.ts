@@ -5,8 +5,8 @@ import {
     compileGraphQLTypesWatchOnce,
     compileGraphQLTypesOnce,
     runDBLocally,
-    installAPIDeps
- } from '../local/index.js'
+    installAPIDeps,
+} from '../local/index.js'
 
 export async function runAPITestsWatch(jestArgs: string[], runDB: boolean) {
     const runner = new LabeledProcessRunner()
@@ -32,7 +32,9 @@ export async function runAPITestsWatch(jestArgs: string[], runDB: boolean) {
     })
 }
 
-export async function runAPITests(runner: LabeledProcessRunner): Promise<number> {
+export async function runAPITests(
+    runner: LabeledProcessRunner
+): Promise<number> {
     await compileGraphQLTypesOnce(runner)
     await installAPIDeps(runner)
 
