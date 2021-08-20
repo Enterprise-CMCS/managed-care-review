@@ -9,6 +9,7 @@ import {
     hasValidRates,
     isStateSubmission,
     isContractAndRates,
+    isStateUser,
 } from '../../app-web/src/common-code/domain-models'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
@@ -87,12 +88,9 @@ export function submitDraftSubmissionResolver(
     store: Store
 ): MutationResolvers['submitDraftSubmission'] {
     return async (_parent, { input }, context) => {
-
         // This resolver is only callable by state users
-        if (context.user.role !== 'STATE_USER') {
-            throw new ForbiddenError(
-                'user not authorized to fetch state data'
-            )
+        if (!isStateUser(context.user)) {
+            throw new ForbiddenError('user not authorized to fetch state data')
         }
 
         // fetch from the store

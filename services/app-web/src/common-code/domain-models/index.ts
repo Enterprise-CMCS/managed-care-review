@@ -8,7 +8,7 @@ export { assertIsAuthMode, assertNever } from './config'
 export type {
     CognitoUserType,
     CognitoStateUserType,
-    CognitoCMSUserType
+    CognitoCMSUserType,
 } from './cognitoUserType'
 
 export type {
@@ -31,7 +31,7 @@ export type { SubmissionUnionType } from './SubmissionUnionType'
 export type { ProgramT } from './ProgramT'
 
 // Type checks and type guards
-export { isCognitoUser } from './user'
+export { isCognitoUser, isStateUser } from './user'
 export {
     hasValidContract,
     hasValidDocuments,

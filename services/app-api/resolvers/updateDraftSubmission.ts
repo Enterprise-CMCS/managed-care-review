@@ -8,7 +8,10 @@ import {
     DraftSubmissionUpdates,
 } from '../gen/gqlServer'
 
-import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
+import {
+    DraftSubmissionType,
+    isStateUser,
+} from '../../app-web/src/common-code/domain-models'
 
 // This MUTATES the passed in draft, overwriting all the current fields with the updated fields
 export function applyUpdates(
@@ -53,14 +56,18 @@ export function applyUpdates(
           }
         : undefined
 
-    const actuaryContactsUpdates = updates.actuaryContacts.map((actuaryContact) => {
-        return {
-            name: actuaryContact.name,
-            titleRole: actuaryContact.titleRole,
-            email: actuaryContact.email,
-            actuarialFirm: actuaryContact.actuarialFirm ?? undefined,
-            actuarialFirmOther: actuaryContact.actuarialFirmOther ?? undefined}
-    })
+    const actuaryContactsUpdates = updates.actuaryContacts.map(
+        (actuaryContact) => {
+            return {
+                name: actuaryContact.name,
+                titleRole: actuaryContact.titleRole,
+                email: actuaryContact.email,
+                actuarialFirm: actuaryContact.actuarialFirm ?? undefined,
+                actuarialFirmOther:
+                    actuaryContact.actuarialFirmOther ?? undefined,
+            }
+        }
+    )
 
     draft.programID = updates.programID
     draft.submissionType = updates.submissionType
@@ -69,7 +76,8 @@ export function applyUpdates(
 
     draft.stateContacts = updates.stateContacts
     draft.actuaryContacts = actuaryContactsUpdates
-    draft.actuaryCommunicationPreference = updates.actuaryCommunicationPreference ?? undefined
+    draft.actuaryCommunicationPreference =
+        updates.actuaryCommunicationPreference ?? undefined
 
     draft.contractType = updates.contractType ?? undefined
     draft.contractDateStart = updates.contractDateStart ?? undefined
@@ -89,12 +97,9 @@ export function updateDraftSubmissionResolver(
     store: Store
 ): MutationResolvers['updateDraftSubmission'] {
     return async (_parent, { input }, context) => {
-
         // This resolver is only callable by state users
-        if (context.user.role !== 'STATE_USER') {
-            throw new ForbiddenError(
-                'user not authorized to modify state data'
-            )
+        if (!isStateUser(context.user)) {
+            throw new ForbiddenError('user not authorized to modify state data')
         }
 
         // fetch the current submission, put the updated stuff on it?

@@ -42,7 +42,7 @@ export function configureResolvers(store: Store): Resolvers {
         User: {
             // resolveType is required to differentiate Unions
             __resolveType(obj) {
-                if ('state' in obj) {
+                if (obj.role === 'STATE_USER') {
                     return 'StateUser'
                 } else {
                     return 'CMSUser'

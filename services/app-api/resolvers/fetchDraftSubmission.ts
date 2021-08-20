@@ -1,18 +1,18 @@
 import { ForbiddenError, ApolloError } from 'apollo-server-lambda'
 import { isStoreError, Store } from '../store/index'
 import { QueryResolvers, State } from '../gen/gqlServer'
-import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
+import {
+    DraftSubmissionType,
+    isStateUser,
+} from '../../app-web/src/common-code/domain-models'
 
 export function fetchDraftSubmissionResolver(
     store: Store
 ): QueryResolvers['fetchDraftSubmission'] {
     return async (_parent, { input }, context) => {
-
         // This resolver is only callable by state users
-        if (context.user.role !== 'STATE_USER') {
-            throw new ForbiddenError(
-                'user not authorized to fetch state data'
-            )
+        if (!isStateUser(context.user)) {
+            throw new ForbiddenError('user not authorized to fetch state data')
         }
 
         // fetch from the store
@@ -48,7 +48,6 @@ export function fetchDraftSubmissionResolver(
                 'user not authorized to fetch data from a different state'
             )
         }
-
 
         return { draftSubmission: draft }
     }
