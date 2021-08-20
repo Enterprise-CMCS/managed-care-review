@@ -28,14 +28,20 @@ custom:
     - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/b/id, ssm:/configuration/default/vpc/subnets/private/b/id}
     - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/c/id, ssm:/configuration/default/vpc/subnets/private/c/id}
 
-resources:
-  extensions:
-    SecretsManagerRDSPostgreSQLRotationSingleUserRole:
-      Type: AWS::Serverless::Function
-      Properties:
-        PermissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy${self:custom.iamPermissionsBoundaryPolicy}
+functions:
+  rotator:
+    runtime: python3.7
+    handler: handlers/rds_postgres_rotate.lambda_handler
+    description: Conducts an AWS SecretsManager secret rotation for RDS PostgreSQL using single user rotation scheme
+    timeout: 30
+    vpc:
+      securityGroupIds: ${self:custom.sgId}
+      subnetIds: ${self:custom.privateSubnets}
+    environment:
+      SECRETS_MANAGER_ENDPOINT: !Sub 'secretsmanager.${AWS::Region}.amazonaws.com'
+      EXCLUDE_CHARACTERS: ":/@\"'\\"
 
-  Transform: AWS::SecretsManager-2020-07-23
+resources:
   Resources:
     # VPC endpoint for rotation lambda
     SecretsManagerVPCEndpoint:
@@ -91,10 +97,14 @@ resources:
       Properties:
         SecretId:
           Ref: PostgresSecret
-        HostedRotationLambda:
-          RotationType: PostgreSQLSingleUser
-          RotationLambdaName: SecretsManagerRotation
-          VpcSecurityGroupIds: ${self:custom.sgId}
-          VpcSubnetIds: !Join [',', '${self:custom.privateSubnets}']
+        RotationLambdaARN: !GetAtt RotatorLambdaFunction.Arn
         RotationRules:
           AutomaticallyAfterDays: 30
+
+    LambdaInvokePermission:
+      Type: AWS::Lambda::Permission
+      Properties:
+        Action: lambda:InvokeFunction
+        FunctionName: !GetAtt RotatorLambdaFunction.Arn
+        Principal: 'secretsmanager.amazonaws.com'
+        SourceAccount: !Sub ${AWS::AccountId}
