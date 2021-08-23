@@ -10,7 +10,6 @@
     "license": "CC0-1.0",
     "devDependencies": {
         "serverless": "^2.52.1",
-        "serverless-stack-termination-protection": "^1.0.4",
-        "serverless-iam-helper": "../../plugins/serverless-iam-helper"
+        "serverless-stack-termination-protection": "^1.0.4"
     }
 }
