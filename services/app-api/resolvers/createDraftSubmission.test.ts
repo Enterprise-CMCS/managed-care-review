@@ -1,5 +1,3 @@
-import { createTestClient } from 'apollo-server-testing'
-
 import { CreateDraftSubmissionInput } from '../gen/gqlServer'
 import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
 import { constructTestServer } from '../testHelpers/gqlHelpers'
@@ -8,21 +6,19 @@ describe('createDraftSubmission', () => {
     it('returns draft submission payload with a draft submission', async () => {
         const server = constructTestServer()
 
-        const { mutate } = createTestClient(server)
-
         const input: CreateDraftSubmissionInput = {
             programID: 'managed-medical-assistance',
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
         }
-        const res = await mutate({
-            mutation: CREATE_DRAFT_SUBMISSION,
+        const res = await server.executeOperation({
+            query: CREATE_DRAFT_SUBMISSION,
             variables: { input },
         })
 
         expect(res.errors).toBeUndefined()
 
-        const draft = res.data.createDraftSubmission.draftSubmission
+        const draft = res.data?.createDraftSubmission.draftSubmission
 
         expect(draft.submissionDescription).toBe('A real submission')
         expect(draft.submissionType).toBe('CONTRACT_ONLY')
@@ -38,14 +34,13 @@ describe('createDraftSubmission', () => {
 
     it('returns an error if the program id is not in valid', async () => {
         const server = constructTestServer()
-        const { mutate } = createTestClient(server)
         const input: CreateDraftSubmissionInput = {
             programID: 'xyz123',
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
         }
-        const res = await mutate({
-            mutation: CREATE_DRAFT_SUBMISSION,
+        const res = await server.executeOperation({
+            query: CREATE_DRAFT_SUBMISSION,
             variables: { input },
         })
 
