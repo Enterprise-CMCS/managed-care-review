@@ -22,7 +22,7 @@
         "eslint-plugin-prettier": "^3.4.0",
         "graphql": "^15.5.1",
         "graphql-scalars": "^1.10.0",
-        "neverthrow": "^4.0.1",
+        "neverthrow": "^4.2.2",
         "request": "^2.88.2",
         "uuid": "^8.3.2"
     },
