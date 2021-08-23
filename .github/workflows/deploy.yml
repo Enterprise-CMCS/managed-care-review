@@ -98,36 +98,21 @@ jobs:
           # This can optionally be set as an GitHub Actions Secret
           ./deploy.sh $STAGE_PREFIX$branch_name
 
-      - name: Run nightwatch tests
-        run: |
-          pushd services
-          export APPLICATION_ENDPOINT=`./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name`
-          popd
-          ./dev test --online
-      - name: Store nightwatch results
-        uses: actions/upload-artifact@v2
-        with:
-          name: test_results
-          path: tests/nightwatch/tests_output
-
       - name: Set application endpoint
         run: |
           cd services
           endpoint=$(./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name)
           echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
 
-      # - name: Cypress setup
-      #   run: |
-      #     yarn cypress install
-      #     yarn cypress verify
-      #     ./scripts/add_cypress_test_users.sh $STAGE_PREFIX$branch_name
+      - name: Cypress setup
+        run: |
+          ./scripts/add_cypress_test_users.sh $STAGE_PREFIX$branch_name
 
       - name: Cypress run
         id: cypress
         uses: cypress-io/github-action@v2
         with:
           config: baseUrl=${{env.APPLICATION_ENDPOINT}}
-          spec: tests/cypress/integration/app.spec.ts
 
       - name: Upload cypress screenshots
         uses: actions/upload-artifact@v1
