@@ -23,6 +23,7 @@ export type FileUploadProps = {
     hint?: React.ReactNode
     initialItems?: FileItemT[]
     uploadFile: (file: File) => Promise<S3FileData>
+    scanFile?: (key: string) => Promise<void | Error> // optional function to be called after uploading (used for scanning)
     deleteFile: (key: string) => Promise<void>
     onLoadComplete: ({ files }: { files: FileItemT[] }) => void
 } & JSX.IntrinsicElements['input']
@@ -42,6 +43,7 @@ export const FileUpload = ({
     hint,
     initialItems,
     uploadFile,
+    scanFile,
     deleteFile,
     onLoadComplete,
     ...inputProps
@@ -161,13 +163,56 @@ export const FileUpload = ({
                                     status:
                                         item.status === 'DUPLICATE_NAME_ERROR'
                                             ? item.status
-                                            : 'UPLOAD_COMPLETE',
+                                            : 'SCANNING',
                                 } as FileItemT
                             } else {
                                 return item
                             }
                         })
                     })
+                    return data
+                })
+                .then(async (data) => {
+                    if (scanFile && data) {
+                        try {
+                            await scanFile(data.key)
+                            setFileItems((prevItems) => {
+                                const newItems = [...prevItems]
+                                return newItems.map((item) => {
+                                    if (item.key === data.key) {
+                                        return {
+                                            ...item,
+                                            status:
+                                                item.status ===
+                                                'DUPLICATE_NAME_ERROR'
+                                                    ? item.status
+                                                    : 'UPLOAD_COMPLETE',
+                                        } as FileItemT
+                                    } else {
+                                        return item
+                                    }
+                                })
+                            })
+                            return
+                        } catch (e) {
+                            setFileItems((prevItems) => {
+                                const newItems = [...prevItems]
+                                return newItems.map((item) => {
+                                    if (item.key === data.key) {
+                                        return {
+                                            ...item,
+                                            status: 'SCANNING_ERROR',
+                                        } as FileItemT
+                                    } else {
+                                        return item
+                                    }
+                                })
+                            })
+                            deleteFile(data.key).catch(() =>
+                                console.log('Error deleting from s3')
+                            )
+                        }
+                    }
                 })
                 .catch((e) => {
                     setFileItems((prevItems) => {

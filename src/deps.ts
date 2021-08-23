@@ -1,4 +1,5 @@
 import { spawnSync } from 'child_process'
+import request from 'request'
 
 // once lets you wrap a function so that if you call the wrapper multiple times the
 // wrapped function is only called once. This gives the ability to define a function as being
@@ -20,4 +21,15 @@ export function requireBinary(checkCmd: string[], helpText: string) {
         console.log(helpText)
         process.exit(1)
     }
+}
+
+export function checkURLIsUp(url: string): Promise<boolean> {
+    return new Promise<boolean>((resolve) => {
+        request(url, {}, (err) => {
+            if (err) {
+                resolve(false)
+            }
+            resolve(true)
+        })
+    })
 }

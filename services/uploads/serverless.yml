@@ -51,6 +51,9 @@ custom:
         rm lambda_layer.zip
         serverless invoke --stage ${self:custom.stage} --function avDownloadDefinitions -t Event
   s3:
+    # when vhostBuckets are enabled all non-localhost hostnames are re-written as buckets
+    # setting this false allows the workaround for docker to work.
+    vhostBuckets: false
     directory: ./local_buckets
     cors: ./local_cors.xml
     buckets:

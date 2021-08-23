@@ -57,10 +57,7 @@ describe('submission type', () => {
         cy.findByText('Duplicate file').should('not.exist')
 
         // Continue button with valid documents navigates to review and submit page
-        cy.findAllByTestId('file-input-preview-image').should(
-            'not.have.class',
-            'is-loading'
-        )
+        cy.waitForDocumentsToLoad()
         cy.navigateForm('Continue')
 
         // Get draft submission id and navigate back to submission type form to edit existing draft

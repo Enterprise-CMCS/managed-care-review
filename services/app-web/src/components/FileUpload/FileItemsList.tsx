@@ -14,7 +14,9 @@ export const FileItemsList = ({
 }): React.ReactElement => {
     const liClasses = (status: FileStatus): string => {
         const hasError =
-            status === 'UPLOAD_ERROR' || status === 'DUPLICATE_NAME_ERROR'
+            status === 'UPLOAD_ERROR' ||
+            status === 'SCANNING_ERROR' ||
+            status === 'DUPLICATE_NAME_ERROR'
         return classnames(styles.fileItem, {
             'bg-secondary-lighter border-secondary margin-top-1px': hasError,
             'usa-file-input__preview': !hasError,

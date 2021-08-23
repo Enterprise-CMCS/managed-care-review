@@ -78,7 +78,7 @@ export const Documents = ({
     updateDraft,
     formAlert = undefined,
 }: DocumentProps): React.ReactElement => {
-    const { deleteFile, uploadFile, getKey, getS3URL } = useS3()
+    const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
     const [shouldValidate, setShouldValidate] = useState(false)
     const [hasValidFiles, setHasValidFiles] = useState(false)
     const [hasPendingFiles, setHasPendingFiles] = useState(false)
@@ -125,7 +125,7 @@ export const Documents = ({
         if (!shouldValidate) setShouldValidate(true)
     }
 
-    const onLoadComplete = ({ files }: { files: FileItemT[] }) => {
+    const onLoadComplete = async ({ files }: { files: FileItemT[] }) => {
         setFileItems(files)
     }
     const handleDeleteFile = async (key: string) => {
@@ -141,64 +141,80 @@ export const Documents = ({
         const s3Key = await uploadFile(file)
 
         if (isS3Error(s3Key)) {
-            throw new Error(`Error in S3 filename: ${file.name}`)
+            throw new Error(`Error in S3: ${file.name}`)
         }
 
         const s3URL = await getS3URL(s3Key, file.name)
         return { key: s3Key, s3URL: s3URL }
     }
 
-    const handleFormSubmit = ({
-        shouldValidate,
-        redirectPath,
-    }: {
-        shouldValidate: boolean
-        redirectPath: string
-    }) => async (e: React.FormEvent | React.MouseEvent) => {
-        e.preventDefault()
-
-        // if there are any errors present in the documents list, stop here
-        if (shouldValidate) {
-            setShouldValidate(true)
-            if (!hasValidFiles) return
-        }
-
-        const documents = fileItems.reduce((formDataDocuments, fileItem) => {
-            if (!fileItem.s3URL)
-                console.log(
-                    'The file item has no s3url, this should not happen on form submit'
-                )
-            else if (fileItem.status === 'DUPLICATE_NAME_ERROR')
-                console.log(
-                    'Attempting to save duplicate files, discarding duplicate'
-                )
-            else {
-                formDataDocuments.push({
-                    name: fileItem.name,
-                    s3URL: fileItem.s3URL,
-                })
-            }
-            return formDataDocuments
-        }, [] as { name: string; s3URL: string }[])
-
-        const updatedDraft = updatesFromSubmission(draftSubmission)
-
-        updatedDraft.documents = documents
-
+    const handleScanFile = async (key: string): Promise<void | Error> => {
         try {
-            const updatedSubmission = await updateDraft({
-                submissionID: draftSubmission.id,
-                draftSubmissionUpdates: updatedDraft,
-            })
-            if (updatedSubmission) {
-                history.push(redirectPath, {
-                    defaultProgramID: draftSubmission.programID,
-                })
+            await scanFile(key)
+        } catch (e) {
+            if (isS3Error(e)) {
+                throw new Error(`Error in S3: ${key}`)
             }
-        } catch (error) {
-            onError()
+            throw new Error('Scanning error: Scanning retry timed out')
         }
     }
+
+    const handleFormSubmit =
+        ({
+            shouldValidate,
+            redirectPath,
+        }: {
+            shouldValidate: boolean
+            redirectPath: string
+        }) =>
+        async (e: React.FormEvent | React.MouseEvent) => {
+            e.preventDefault()
+
+            // if there are any errors present in the documents list, stop here
+            if (shouldValidate) {
+                setShouldValidate(true)
+                if (!hasValidFiles) return
+            }
+
+            const documents = fileItems.reduce(
+                (formDataDocuments, fileItem) => {
+                    if (!fileItem.s3URL)
+                        console.log(
+                            'The file item has no s3url, this should not happen on form submit'
+                        )
+                    else if (fileItem.status === 'DUPLICATE_NAME_ERROR')
+                        console.log(
+                            'Attempting to save duplicate files, discarding duplicate'
+                        )
+                    else {
+                        formDataDocuments.push({
+                            name: fileItem.name,
+                            s3URL: fileItem.s3URL,
+                        })
+                    }
+                    return formDataDocuments
+                },
+                [] as { name: string; s3URL: string }[]
+            )
+
+            const updatedDraft = updatesFromSubmission(draftSubmission)
+
+            updatedDraft.documents = documents
+
+            try {
+                const updatedSubmission = await updateDraft({
+                    submissionID: draftSubmission.id,
+                    draftSubmissionUpdates: updatedDraft,
+                })
+                if (updatedSubmission) {
+                    history.push(redirectPath, {
+                        defaultProgramID: draftSubmission.programID,
+                    })
+                }
+            } catch (error) {
+                onError()
+            }
+        }
 
     return (
         <>
@@ -253,6 +269,7 @@ export const Documents = ({
                         accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                         initialItems={fileItemsFromDraftSubmission}
                         uploadFile={handleUploadFile}
+                        scanFile={handleScanFile}
                         deleteFile={handleDeleteFile}
                         onLoadComplete={onLoadComplete}
                     />

@@ -46,10 +46,8 @@ describe('submission summary', () => {
         )
         cy.findByText('Upload failed').should('not.exist')
         cy.findByText('Duplicate file').should('not.exist')
-        cy.findAllByTestId('file-input-preview-image').should(
-            'not.have.class',
-            'is-loading'
-        )
+        cy.waitForDocumentsToLoad()
+
         // Navigate review and submit page
         cy.navigateForm('Continue')
 

@@ -138,10 +138,8 @@ describe('state submission', () => {
         cy.findByTestId('file-input-preview-list')
             .findAllByRole('listitem')
             .should('have.length', 3)
-        cy.findAllByTestId('file-input-preview-image').should(
-            'not.have.class',
-            'is-loading'
-        )
+
+        cy.waitForDocumentsToLoad()
 
         // No errors
         cy.findByText('Upload failed').should('not.exist')
