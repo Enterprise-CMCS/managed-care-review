@@ -62,7 +62,7 @@ functions:
       securityGroupIds: ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
     environment:
-      SECRETS_MANAGER_ENDPOINT: !Sub 'secretsmanager.${AWS::Region}.amazonaws.com'
+      SECRETS_MANAGER_ENDPOINT: !Sub 'https://secretsmanager.${AWS::Region}.amazonaws.com'
       EXCLUDE_CHARACTERS: ":/@\"'\\"
     package:
       artifact: s3://secrets-manager-rotation-apps-c0de1e0412b469545054417cc38af3c3/SecretsManagerRDSPostgreSQLRotationSingleUser/SecretsManagerRDSPostgreSQLRotationSingleUser.zip
