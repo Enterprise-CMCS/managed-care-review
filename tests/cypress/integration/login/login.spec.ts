@@ -1,4 +1,4 @@
-describe('Login', () => {
+describe('login', () => {
     it('user can login and logout as expected', () => {
         cy.login()
         cy.url().should('eq', Cypress.config().baseUrl + '/dashboard')

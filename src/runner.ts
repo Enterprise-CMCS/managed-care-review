@@ -44,7 +44,7 @@ export default class LabeledProcessRunner {
         return `\x1b[38;5;${color}m ${prefix.padStart(maxLength)}|\x1b[0m`
     }
 
-    async run_command_and_output(
+    async runCommandAndOutput(
         prefix: string,
         cmd: string[],
         cwd: string | null

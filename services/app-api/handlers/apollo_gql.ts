@@ -84,9 +84,6 @@ const context = async ({
 const server = new ApolloServer({
     typeDefs,
     resolvers,
-    playground: {
-        endpoint: '/local/graphql',
-    },
     context,
 })
 
@@ -101,7 +98,8 @@ function localAuthMiddleware(
             console.log('NO_USER info set, returning 403')
             return Promise.resolve({
                 statusCode: 403,
-                body: '{ "error": "No User Sent in cognitoAuthenticationProvider header"}\n',
+                body:
+                    '{ "error": "No User Sent in cognitoAuthenticationProvider header"}\n',
                 headers: {
                     'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Credentials': true,
@@ -114,9 +112,11 @@ function localAuthMiddleware(
 }
 
 const gqlHandler = server.createHandler({
-    cors: {
-        origin: true,
-        credentials: true,
+    expressGetMiddlewareOptions: {
+        cors: {
+            origin: true,
+            credentials: true,
+        },
     },
 })
 
