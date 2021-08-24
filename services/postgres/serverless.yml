@@ -49,12 +49,13 @@ custom:
     - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/c/id, ssm:/configuration/default/vpc/subnets/private/c/id}
   rotatorArn: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${self:custom.stage}-rotator'
 
+package:
+  individually: true
+
 functions:
   rotator:
     runtime: python3.7
     handler: lambda_function.lambda_handler
-    package:
-      artifact: s3://secrets-manager-rotation-apps-c0de1e0412b469545054417cc38af3c3/SecretsManagerRDSPostgreSQLRotationSingleUser/SecretsManagerRDSPostgreSQLRotationSingleUser.zip
     description: Conducts an AWS SecretsManager secret rotation for RDS PostgreSQL using single user rotation scheme
     timeout: 30
     vpc:
@@ -63,6 +64,8 @@ functions:
     environment:
       SECRETS_MANAGER_ENDPOINT: !Sub 'secretsmanager.${AWS::Region}.amazonaws.com'
       EXCLUDE_CHARACTERS: ":/@\"'\\"
+    package:
+      artifact: s3://secrets-manager-rotation-apps-c0de1e0412b469545054417cc38af3c3/SecretsManagerRDSPostgreSQLRotationSingleUser/SecretsManagerRDSPostgreSQLRotationSingleUser.zip
 
 resources:
   Resources:
