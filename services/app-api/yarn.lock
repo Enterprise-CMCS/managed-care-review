@@ -8367,10 +8367,10 @@ nested-error-stacks@^2.0.0:
   resolved "https://registry.yarnpkg.com/nested-error-stacks/-/nested-error-stacks-2.1.0.tgz#0fbdcf3e13fe4994781280524f8b96b0cdff9c61"
   integrity sha512-AO81vsIO1k1sM4Zrd6Hu7regmJN1NSiAja10gc4bX3F0wd+9rQmcuHQaHVQCYIEC8iFXnE+mavh23GOt7wBgug==
 
-neverthrow@^4.0.1:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/neverthrow/-/neverthrow-4.0.1.tgz#74a264db31ef771dc3288b8a03d0cff7d7131345"
-  integrity sha512-qQfNyQWZx6cJsJu4pndtF4S1frUCqxBNVEdFEcdwlGgh09ToSTgOI6du+rb0Veh8TwalW1mIKqk4rg/9yzzr7A==
+neverthrow@^4.2.2:
+  version "4.2.2"
+  resolved "https://registry.yarnpkg.com/neverthrow/-/neverthrow-4.2.2.tgz#cf333a8ab37398bc0c7a0349b9ea3c67de0ff880"
+  integrity sha512-zmJ1Oo368VlI7Fp2p+uD3ekkEEYzHr4ZlTE/4vfjA+TPtstftvJ3meIS2EReKy604wVXb+N+8XtwN98Mc1jJsA==
 
 next-tick@1, next-tick@^1.0.0, next-tick@^1.1.0:
   version "1.1.0"
