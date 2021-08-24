@@ -11,7 +11,7 @@
     },
     "dependencies": {
         "@aws/dynamodb-data-mapper-annotations": "^0.7.3",
-        "@types/aws-lambda": "^8.10.71",
+        "@types/aws-lambda": "^8.10.83",
         "@types/request": "^2.48.7",
         "@types/uuid": "^8.3.1",
         "apollo-server-lambda": "^3.1.2",
