@@ -46,6 +46,7 @@
         "yargs": "^17.1.1"
     },
     "dependencies": {
+        "aws-amplify": "^4.2.4",
         "cypress-file-upload": "^5.0.8"
     }
 }
