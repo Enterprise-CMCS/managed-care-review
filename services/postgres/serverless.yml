@@ -83,6 +83,7 @@ resources:
     PostgresSecret:
       Type: AWS::SecretsManager::Secret
       Properties:
+        Name: 'aurora-${self:service}-${self:custom.stage}'
         Description: 'Dynamically generated password for aurora serverless postgres'
         GenerateSecretString:
           SecretStringTemplate: '{"username": "mcreviewadmin"}'
