@@ -1,0 +1,136 @@
+service: postgres
+variablesResolutionMode: 20210326
+
+frameworkVersion: '2'
+
+plugins:
+  - serverless-stack-termination-protection
+
+provider:
+  name: aws
+  runtime: python3.7
+  region: us-east-1
+  iam:
+    role:
+      path: ${self:custom.iamPath}
+      permissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy${self:custom.iamPermissionsBoundaryPolicy}
+      statements:
+        - Effect: 'Allow'
+          Action:
+            - secretsmanager:DescribeSecret
+            - secretsmanager:GetSecretValue
+            - secretsmanager:PutSecretValue
+            - secretsmanager:UpdateSecretVersionStage
+          Resource: '*'
+          Condition:
+            StringEquals:
+              'secretsmanager:resource/AllowRotationLambdaArn': '${self:custom.rotatorArn}'
+        - Effect: Allow
+          Action:
+            - secretsmanager:GetRandomPassword
+          Resource: '*'
+        - Effect: Allow
+          Action:
+            - ec2:CreateNetworkInterface
+            - ec2:DeleteNetworkInterface
+            - ec2:DescribeNetworkInterfaces
+          Resource: '*'
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  iamPermissionsBoundaryPolicy: ${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
+  iamPath: ${env:IAM_PATH, "/"}
+  databaseName: !Sub aurora_${self:service}_${self:custom.stage}_${AWS::AccountId}
+  vpcId: ${ssm:/configuration/${self:custom.stage}/vpc/id, ssm:/configuration/default/vpc/id}
+  sgId: ${ssm:/configuration/${self:custom.stage}/vpc/sg/id, ssm:/configuration/default/vpc/sg/id}
+  privateSubnets:
+    - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/a/id, ssm:/configuration/default/vpc/subnets/private/a/id}
+    - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/b/id, ssm:/configuration/default/vpc/subnets/private/b/id}
+    - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/c/id, ssm:/configuration/default/vpc/subnets/private/c/id}
+  rotatorArn: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${self:custom.stage}-rotator'
+
+package:
+  individually: true
+
+functions:
+  rotator:
+    runtime: python3.7
+    handler: lambda_function.lambda_handler
+    description: Conducts an AWS SecretsManager secret rotation for RDS PostgreSQL using single user rotation scheme
+    timeout: 30
+    vpc:
+      securityGroupIds: ${self:custom.sgId}
+      subnetIds: ${self:custom.privateSubnets}
+    environment:
+      SECRETS_MANAGER_ENDPOINT: !Sub 'https://secretsmanager.${AWS::Region}.amazonaws.com'
+      EXCLUDE_CHARACTERS: ":/@\"'\\"
+    package:
+      artifact: s3://secrets-manager-rotation-apps-c0de1e0412b469545054417cc38af3c3/SecretsManagerRDSPostgreSQLRotationSingleUser/SecretsManagerRDSPostgreSQLRotationSingleUser.zip
+
+resources:
+  Resources:
+    # VPC endpoint for rotation lambda
+    SecretsManagerVPCEndpoint:
+      Type: AWS::EC2::VPCEndpoint
+      Properties:
+        SubnetIds: '${self:custom.privateSubnets}'
+        SecurityGroupIds: ['${self:custom.sgId}']
+        VpcEndpointType: Interface
+        ServiceName:
+          Fn::Sub: com.amazonaws.${AWS::Region}.secretsmanager
+        VpcId: ${self:custom.vpcId}
+
+    PostgresSecret:
+      Type: AWS::SecretsManager::Secret
+      Properties:
+        Name: 'aurora-${self:service}-${self:custom.stage}'
+        Description: 'Dynamically generated password for aurora serverless postgres'
+        GenerateSecretString:
+          SecretStringTemplate: '{"username": "mcreviewadmin"}'
+          GenerateStringKey: password
+          PasswordLength: 30
+          ExcludeCharacters: "\"@/\\"
+
+    PostgresAurora:
+      Type: AWS::RDS::DBCluster
+      Properties:
+        Engine: aurora-postgresql
+        EngineMode: serverless
+        DatabaseName: '${self:custom.databaseName}'
+        MasterUsername: !Sub '{{resolve:secretsmanager:${PostgresSecret}::username}}'
+        MasterUserPassword: !Sub '{{resolve:secretsmanager:${PostgresSecret}::password}}'
+        DBSubnetGroupName: !Ref PostgresSubnetGroup
+        VpcSecurityGroupIds: ['${self:custom.sgId}']
+
+    PostgresSubnetGroup:
+      Type: AWS::RDS::DBSubnetGroup
+      Properties:
+        DBSubnetGroupDescription: postgres aurora serverless
+        SubnetIds: '${self:custom.privateSubnets}'
+
+    SecretsRDSAttachment:
+      Type: AWS::SecretsManager::SecretTargetAttachment
+      Properties:
+        SecretId: !Ref PostgresSecret
+        TargetId: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${PostgresAurora}'
+        TargetType: AWS::RDS::DBCluster
+
+    PostgresSecretsRotationSchedule:
+      Type: AWS::SecretsManager::RotationSchedule
+      DependsOn:
+        - PostgresAurora
+        - SecretsRDSAttachment
+      Properties:
+        SecretId:
+          Ref: PostgresSecret
+        RotationLambdaARN: !GetAtt RotatorLambdaFunction.Arn
+        RotationRules:
+          AutomaticallyAfterDays: 30
+
+    LambdaInvokePermission:
+      Type: AWS::Lambda::Permission
+      DependsOn: RotatorLambdaFunction
+      Properties:
+        Action: lambda:InvokeFunction
+        FunctionName: !GetAtt RotatorLambdaFunction.Arn
+        Principal: 'secretsmanager.amazonaws.com'
