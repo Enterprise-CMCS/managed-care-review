@@ -19,6 +19,7 @@ custom:
   draftSubmissionsTableStreamArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:database-${self:custom.stage}.DraftSubmissionsTableStreamArn}
   iamPath: ${env:IAM_PATH, "/"}
   iamPermissionsBoundaryPolicy: ${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
+  secretsManagerSecret: aurora-postgres-${self:custom.stage}
   reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
   dynamoConnection: ${env:DYNAMO_CONNECTION}
   webAclName: ${self:service}-${self:custom.stage}-webacl
@@ -47,6 +48,7 @@ provider:
     appVersion: ${self:custom.appVersion}
     DYNAMO_CONNECTION: ${self:custom.dynamoConnection}
     REACT_APP_AUTH_MODE: ${self:custom.reactAppAuthMode}
+    SECRETS_MANAGER_SECRET: ${self:custom.secretsManagerSecret}
 
 functions:
   health:
