@@ -2,10 +2,31 @@ import { APIGatewayProxyHandler } from 'aws-lambda'
 import { SecretsManager } from 'aws-sdk'
 import { GetSecretValueResponse } from 'aws-sdk/clients/secretsmanager'
 
+import { PrismaClient } from '@prisma/client'
+
 export const main: APIGatewayProxyHandler = async () => {
+    const secret = await getSecretValue()
+
+    const postgresURL = `postgresql://${secret.username}:${secret.password}@${secret.host}:${secret.port}/${secret.dbname}?connection_limit=1`
+
+    const prisma = new PrismaClient({
+        datasources: { db: { postgresURL } },
+    })
+
+    // just do a rando query for now to test this connection out
+    // since we don't have a store for this yet
+    const result = await prisma.$queryRaw(`
+        select pid as process_id, 
+            usename as username, 
+            datname as database_name, 
+            application_name,
+            backend_start,
+        from pg_stat_activity;
+    `)
+
     return {
         statusCode: 200,
-        body: JSON.stringify('postgres db connection success') + '\n',
+        body: JSON.stringify(result) + '\n',
         headers: {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Credentials': true,
