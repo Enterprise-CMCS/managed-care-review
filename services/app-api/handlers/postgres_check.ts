@@ -52,7 +52,7 @@ async function getSecretValue(): Promise<Secret> {
 
     // connect to secrets manager and grab the secrets
     const secretsManager = new SecretsManager({
-        region: 'REGION',
+        region: 'us-east-1',
     })
 
     const secretResponse = await secretsManager.getSecretValue(params).promise()
