@@ -94,6 +94,15 @@ functions:
           cors: true
           authorizer: aws_iam
 
+  postgres:
+    handler: handlers/postgres_check.main
+    role: LambdaApiRole
+    events:
+      - http:
+          path: postgres_check
+          method: get
+          cors: true
+
 resources:
   Conditions:
     CreatePermissionsBoundary:
