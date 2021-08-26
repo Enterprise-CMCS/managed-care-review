@@ -54,9 +54,8 @@ async function getSecretValue(): Promise<Secret> {
     const secretsManager = new SecretsManager({
         region: 'REGION',
     })
-    let secretResponse: GetSecretValueResponse
 
-    secretResponse = await secretsManager.getSecretValue(params).promise()
+    const secretResponse = await secretsManager.getSecretValue(params).promise()
     const secret = JSON.parse(secretResponse.SecretString!) as Secret
 
     if (!secret.username || !secret.password) {
