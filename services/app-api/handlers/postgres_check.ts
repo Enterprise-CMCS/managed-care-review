@@ -59,13 +59,18 @@ async function getSecretValue(): Promise<Secret> {
         region: 'us-east-1',
     })
 
-    const secretResponse = await secretsManager.getSecretValue(params).promise()
-    const secret = JSON.parse(secretResponse.SecretString!) as Secret
+    const secretResponse: GetSecretValueResponse = await secretsManager
+        .getSecretValue(params)
+        .promise()
+
+    // parse the secrets. we store as a string.
+    const secret = JSON.parse(secretResponse.SecretString ?? '') as Secret
 
     if (!secret.username || !secret.password) {
         throw Error(
             'Could not retreive postgres credentials from secrets manager'
         )
     }
+
     return secret
 }
