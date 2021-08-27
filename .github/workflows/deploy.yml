@@ -85,7 +85,7 @@ jobs:
         run: |
           yarn install
           ./node_modules/.bin/tsc
-          node /build_dev/scripts/add_cypress_test_users.js $STAGE_PREFIX$branch_name
+          node ./build_dev/scripts/add_cypress_test_users.js $STAGE_PREFIX$branch_name
       - name: Unit Tests
         run: ./dev test --unit --run-db
       - name: publish code coverage
