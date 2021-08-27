@@ -78,9 +78,17 @@ async function createUser({
         ],
     }
 
-    const createUser = await cognito.adminCreateUser(userProps).promise()
+    const createdUser = await cognito.adminCreateUser(userProps).promise()
+    console.log('CRESTed USer', createdUser)
 
-    console.log('CRESTed USer', createUser)
+    var passwordParams = {
+        Password: 'STRING_VALUE',
+        UserPoolId: userPoolID,
+        Username: email,
+        Permanent: true,
+    }
+
+    await cognito.adminSetUserPassword(passwordParams).promise()
 }
 
 async function main() {
@@ -128,7 +136,7 @@ async function main() {
     const userState = 'MN'
 
     try {
-        createUser({
+        await createUser({
             userPoolID,
             name: userName,
             email: userEmail,
