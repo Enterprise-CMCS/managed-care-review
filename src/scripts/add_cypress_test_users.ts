@@ -30,6 +30,59 @@ async function getUserPoolID(stageName: string): Promise<string> {
     return userPoolID
 }
 
+async function createUser({
+    userPoolID,
+    name,
+    email,
+    role,
+    state,
+}: {
+    userPoolID: string
+    name: string
+    email: string
+    role: string
+    state?: string
+}) {
+    const cognito = new AWS.CognitoIdentityServiceProvider({
+        apiVersion: '2016-04-19',
+        region: 'us-east-1',
+    })
+
+    var userProps = {
+        UserPoolId: userPoolID,
+        Username: email,
+        MessageAction: 'SUPPRESS',
+        //TemporaryPassword: 'Password!1',
+        DesiredDeliveryMediums: ['EMAIL'],
+        UserAttributes: [
+            {
+                Name: 'given_name',
+                Value: name,
+            },
+            {
+                Name: 'family_name' /* required */,
+                Value: 'TestLastName',
+            },
+            {
+                Name: 'email' /* required */,
+                Value: email,
+            },
+            {
+                Name: 'custom:role' /* required */,
+                Value: role,
+            },
+            {
+                Name: 'custom:state_code' /* required */,
+                Value: state,
+            },
+        ],
+    }
+
+    const createUser = await cognito.adminCreateUser(userProps).promise()
+
+    console.log('CRESTed USer', createUser)
+}
+
 async function main() {
     console.log('Main Execute')
 
@@ -42,13 +95,6 @@ async function main() {
         console.log('ERROR: Will not set test cognito users in this stage')
         process.exit(1)
     }
-
-    const cognito = new AWS.CognitoIdentityServiceProvider({
-        apiVersion: '2016-04-19',
-        region: 'us-east-1',
-    })
-
-    console.log('cong', cognito)
 
     try {
         const userPoolID = await getUserPoolID(stageName)
@@ -70,7 +116,9 @@ async function main() {
         throw userPoolProc.error
     }
 
-    const userPoolID = userPoolProc.stdout
+    const userPoolID = userPoolProc.stdout.toString()
+
+    console.log('COMPARE OLD: ', userPoolID)
 
     // const foo: number = 4
 
@@ -79,43 +127,21 @@ async function main() {
     const userRole = 'STATE_USER'
     const userState = 'MN'
 
-    var userProps = {
-        UserPoolId: userPoolID,
-        Username: userEmail,
-        MessageAction: 'SUPPRESS',
-        //TemporaryPassword: 'Password!1',
-        DesiredDeliveryMediums: ['EMAIL'],
-        UserAttributes: [
-            {
-                Name: 'given_name',
-                Value: userName,
-            },
-            {
-                Name: 'family_name' /* required */,
-                Value: 'TestLastName',
-            },
-            {
-                Name: 'email' /* required */,
-                Value: userEmail,
-            },
-            {
-                Name: 'custom:role' /* required */,
-                Value: userRole,
-            },
-            {
-                Name: 'custom:state_code' /* required */,
-                Value: userState,
-            },
-        ],
+    try {
+        createUser({
+            userPoolID,
+            name: userName,
+            email: userEmail,
+            role: userRole,
+            state: userState,
+        })
+    } catch (e) {
+        console.log('Error creating user: ', e)
+        process.exit(1)
     }
 
-    const createUser = await cognito.adminCreateUser(userProps).promise()
-
-    console.log('CRESTed USer', createUser)
-
-    // console.log(Auth)
-
-    console.log("I'm in NODE", stageName, userPoolProc.stdout.toString())
+    console.log('FIN')
+    process.exit(99)
 }
 
 main()
