@@ -104,8 +104,9 @@ async function main() {
         process.exit(1)
     }
 
+    let userPoolID = ''
     try {
-        const userPoolID = await getUserPoolID(stageName)
+        userPoolID = await getUserPoolID(stageName)
         console.log('THATS A USER', userPoolID)
     } catch (e) {
         console.log('Error fetching User Pool ID: ', e)
@@ -113,22 +114,6 @@ async function main() {
     }
 
     console.log('INFO: Creating test users...')
-
-    const userPoolProc = spawnSync('services/output.sh', [
-        'services/ui-auth',
-        'UserPoolId',
-        stageName,
-    ])
-
-    if (userPoolProc.error) {
-        throw userPoolProc.error
-    }
-
-    const userPoolID = userPoolProc.stdout.toString()
-
-    console.log('COMPARE OLD: ', userPoolID)
-
-    // const foo: number = 4
 
     const userName = 'Aang'
     const userEmail = 'aang@dhs.state.mn.us'
