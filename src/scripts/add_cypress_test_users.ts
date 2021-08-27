@@ -1,5 +1,4 @@
 import AWS from 'aws-sdk'
-import { spawnSync } from 'child_process'
 
 console.log('FIlE LOAD')
 
