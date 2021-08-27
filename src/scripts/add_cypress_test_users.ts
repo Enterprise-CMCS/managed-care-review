@@ -28,11 +28,13 @@ async function main() {
         region: 'us-east-1',
     })
 
-    const describe = await cf.describeStacks({ StackName: 'ui-auth' }).promise()
+    const describe = await cf.describeStacks().promise()
 
     if (describe.Stacks === undefined) {
         throw new Error('got back nothing')
     }
+
+    console.log(describe.Stacks.map((s) => s.StackName))
 
     const myUsrplkeID = describe.Stacks[0].Outputs?.filter(
         (o) => o.OutputKey === 'UserPoolId'
