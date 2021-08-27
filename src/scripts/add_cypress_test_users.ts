@@ -3,6 +3,33 @@ import { spawnSync } from 'child_process'
 
 console.log('FIlE LOAD')
 
+async function getUserPoolID(stageName: string): Promise<string> {
+    const uiAuthStackName = `ui-auth-${stageName}`
+
+    const cf = new AWS.CloudFormation({
+        apiVersion: '2016-04-19',
+        region: 'us-east-1',
+    })
+
+    const describe = await cf
+        .describeStacks({ StackName: uiAuthStackName })
+        .promise()
+
+    if (describe.Stacks === undefined) {
+        throw new Error('got back nothing')
+    }
+
+    const userPoolID = describe.Stacks[0].Outputs?.filter(
+        (o) => o.OutputKey === 'UserPoolId'
+    )[0].OutputValue
+
+    if (userPoolID === undefined) {
+        throw new Error(`No UserPoolID defined in ${uiAuthStackName}`)
+    }
+
+    return userPoolID
+}
+
 async function main() {
     console.log('Main Execute')
 
@@ -23,24 +50,13 @@ async function main() {
 
     console.log('cong', cognito)
 
-    const cf = new AWS.CloudFormation({
-        apiVersion: '2016-04-19',
-        region: 'us-east-1',
-    })
-
-    const describe = await cf.describeStacks().promise()
-
-    if (describe.Stacks === undefined) {
-        throw new Error('got back nothing')
+    try {
+        const userPoolID = await getUserPoolID(stageName)
+        console.log('THATS A USER', userPoolID)
+    } catch (e) {
+        console.log('Error fetching User Pool ID: ', e)
+        process.exit(1)
     }
-
-    console.log(describe.Stacks.map((s) => s.StackName))
-
-    const myUsrplkeID = describe.Stacks[0].Outputs?.filter(
-        (o) => o.OutputKey === 'UserPoolId'
-    )[0].OutputValue
-
-    console.log('USER POID', myUsrplkeID)
 
     console.log('INFO: Creating test users...')
 
