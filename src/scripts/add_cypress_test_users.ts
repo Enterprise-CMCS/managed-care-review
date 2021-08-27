@@ -113,6 +113,8 @@ async function createUser({
     }
 
     await cognito.adminSetUserPassword(passwordParams).promise()
+
+    console.log('set password for ', name)
 }
 
 async function main() {
@@ -163,6 +165,7 @@ async function main() {
 
     for (const user of testUsers) {
         try {
+            console.log('USER', user.name)
             await createUser({
                 userPoolID,
                 name: user.name,
@@ -171,6 +174,7 @@ async function main() {
                 password: testUserPassword,
                 state: user.state,
             })
+            console.log('out')
         } catch (e) {
             console.log('Error creating user: ', e)
             process.exit(1)
