@@ -162,6 +162,11 @@ resources:
                   Action:
                     - cognito-idp:ListUsers
                   Resource: '*'
+                - Effect: 'Allow'
+                  Action:
+                    - secretsmanager:GetSecretValue
+                    - secretsmanager:DescribeSecret
+                  Resource: '*'
     GatewayResponseDefault4XX:
       Type: 'AWS::ApiGateway::GatewayResponse'
       Properties:
