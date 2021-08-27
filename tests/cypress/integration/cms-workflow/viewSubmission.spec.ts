@@ -1,6 +1,7 @@
 describe('CMS User can view submission', () => {
     it('logs in without error', () => {
-        cy.visit('/')
-        cy.get('#App').should('exist')
+        cy.cmsLogin()
+
+        cy.findByText('CMS USER').should('exist')
     })
 })
