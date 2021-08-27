@@ -84,11 +84,15 @@ async function createUser({
                 Name: 'custom:role',
                 Value: IDMRole(role),
             },
-            {
-                Name: 'custom:state_code',
-                Value: state,
-            },
         ],
+    }
+
+    // only set state for STATE_USERS
+    if (state) {
+        userProps.UserAttributes.push({
+            Name: 'custom:state_code',
+            Value: state,
+        })
     }
 
     try {
