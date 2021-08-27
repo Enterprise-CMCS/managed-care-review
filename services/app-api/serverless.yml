@@ -28,6 +28,12 @@ custom:
     version: V2
   bundle:
     packager: yarn
+    externals:
+      - '@prisma/client'
+      - '@prisma/cli'
+    copyFiles:
+      - from: 'prisma/schema.prisma'
+        to: './'
     packagerOptions:
       scripts:
         - yarn prisma generate
