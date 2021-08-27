@@ -29,6 +29,18 @@ async function getUserPoolID(stageName: string): Promise<string> {
     return userPoolID
 }
 
+type UserRole = 'CMS_USER' | 'STATE_USER'
+
+// these are the exact roles as they are set by IDM
+function IDMRole(role: UserRole): string {
+    switch (role) {
+        case 'CMS_USER':
+            return 'macmcrrs-cms-user'
+        case 'STATE_USER':
+            return 'macmcrrs-state-user'
+    }
+}
+
 async function createUser({
     userPoolID,
     name,
@@ -39,7 +51,7 @@ async function createUser({
     userPoolID: string
     name: string
     email: string
-    role: string
+    role: UserRole
     state?: string
 }) {
     const cognito = new AWS.CognitoIdentityServiceProvider({
@@ -59,26 +71,33 @@ async function createUser({
                 Value: name,
             },
             {
-                Name: 'family_name' /* required */,
+                Name: 'family_name',
                 Value: 'TestLastName',
             },
             {
-                Name: 'email' /* required */,
+                Name: 'email',
                 Value: email,
             },
             {
-                Name: 'custom:role' /* required */,
-                Value: role,
+                Name: 'custom:role',
+                Value: IDMRole(role),
             },
             {
-                Name: 'custom:state_code' /* required */,
+                Name: 'custom:state_code',
                 Value: state,
             },
         ],
     }
 
-    const createdUser = await cognito.adminCreateUser(userProps).promise()
-    console.log('CRESTed USer', createdUser)
+    try {
+        const createdUser = await cognito.adminCreateUser(userProps).promise()
+        console.log('CRESTed USer', createdUser)
+    } catch (e) {
+        // swallow username exists errors. this script is meant to be run repeatedly.
+        if (e.code !== 'UsernameExistsException') {
+            throw e
+        }
+    }
 
     var passwordParams = {
         Password: 'STRING_VALUE',
@@ -114,22 +133,40 @@ async function main() {
 
     console.log('INFO: Creating test users...')
 
-    const userName = 'Aang'
-    const userEmail = 'aang@dhs.state.mn.us'
-    const userRole = 'STATE_USER'
-    const userState = 'MN'
+    const testUsers = [
+        {
+            name: 'Aang',
+            email: 'aang@dhs.state.mn.us',
+            role: 'STATE_USER',
+            state: 'MN',
+        },
+        {
+            name: 'Toph',
+            email: 'toph@dmas.virginia.gov',
+            role: 'STATE_USER',
+            state: 'VA',
+        },
+        {
+            name: 'Zuko',
+            email: 'zuko@cms.hhs.gov',
+            role: 'CMS_USER',
+            state: undefined,
+        },
+    ]
 
-    try {
-        await createUser({
-            userPoolID,
-            name: userName,
-            email: userEmail,
-            role: userRole,
-            state: userState,
-        })
-    } catch (e) {
-        console.log('Error creating user: ', e)
-        process.exit(1)
+    for (const user of testUsers) {
+        try {
+            await createUser({
+                userPoolID,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                state: user.state,
+            })
+        } catch (e) {
+            console.log('Error creating user: ', e)
+            process.exit(1)
+        }
     }
 
     console.log('FIN')
