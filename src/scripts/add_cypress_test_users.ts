@@ -127,7 +127,6 @@ async function main() {
     let userPoolID = ''
     try {
         userPoolID = await getUserPoolID(stageName)
-        console.log('THATS A USER', userPoolID)
     } catch (e) {
         console.log('Error fetching User Pool ID: ', e)
         process.exit(1)
