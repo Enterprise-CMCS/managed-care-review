@@ -10,7 +10,11 @@ export const main: APIGatewayProxyHandler = async () => {
     const postgresURL = `postgresql://${secret.username}:${secret.password}@${secret.host}:${secret.port}/${secret.dbname}?connection_limit=1`
 
     const prisma = new PrismaClient({
-        datasources: { db: { postgresURL } },
+        datasources: {
+            db: {
+                url: postgresURL,
+            },
+        },
     })
 
     // just do a rando query for now to test this connection out
