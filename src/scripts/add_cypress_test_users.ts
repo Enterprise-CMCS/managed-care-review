@@ -1,7 +1,5 @@
 import AWS from 'aws-sdk'
 
-console.log('FIlE LOAD')
-
 async function getUserPoolID(stageName: string): Promise<string> {
     const uiAuthStackName = `ui-auth-${stageName}`
 
@@ -96,8 +94,7 @@ async function createUser({
     }
 
     try {
-        const createdUser = await cognito.adminCreateUser(userProps).promise()
-        console.log('CRESTed USer', createdUser)
+        await cognito.adminCreateUser(userProps).promise()
     } catch (e) {
         // swallow username exists errors. this script is meant to be run repeatedly.
         if (e.code !== 'UsernameExistsException') {
@@ -113,17 +110,13 @@ async function createUser({
     }
 
     await cognito.adminSetUserPassword(passwordParams).promise()
-
-    console.log('set password for ', name)
 }
 
 async function main() {
-    console.log('Main Execute')
+    console.log('INFO: Create Test Users')
 
     const stageName = process.argv[2]
     const testUserPassword = process.argv[3]
-
-    console.log('SATEG', stageName)
 
     const excludedStages = ['main', 'val', 'prod']
     if (excludedStages.includes(stageName)) {
@@ -140,7 +133,7 @@ async function main() {
         process.exit(1)
     }
 
-    console.log('INFO: Creating test users...')
+    console.log('INFO: Got UserPoolID')
 
     const testUsers = [
         {
@@ -165,7 +158,7 @@ async function main() {
 
     for (const user of testUsers) {
         try {
-            console.log('USER', user.name)
+            console.log('Creating User:', user.name)
             await createUser({
                 userPoolID,
                 name: user.name,
@@ -174,15 +167,11 @@ async function main() {
                 password: testUserPassword,
                 state: user.state,
             })
-            console.log('out')
         } catch (e) {
             console.log('Error creating user: ', e)
             process.exit(1)
         }
     }
-
-    console.log('FIN')
-    process.exit(99)
 }
 
 main()

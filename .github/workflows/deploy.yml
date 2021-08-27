@@ -81,11 +81,6 @@ jobs:
       - name: set path
         run: |
           echo "PATH=$(pwd)/node_modules/.bin/:$PATH" >> $GITHUB_ENV
-      - name: testing our user setupss
-        run: |
-          yarn install
-          ./node_modules/.bin/tsc
-          node ./build_dev/scripts/add_cypress_test_users.js $STAGE_PREFIX$branch_name $TEST_USERS_PASS
       - name: Unit Tests
         run: ./dev test --unit --run-db
       - name: publish code coverage
@@ -121,11 +116,10 @@ jobs:
           endpoint=$(./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name)
           echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
 
-      - name: Cypress setup
+      - name: Create Test Users
         run: |
-          yarn cypress install
-          yarn cypress verify
-          ./scripts/add_cypress_test_users.sh $STAGE_PREFIX$branch_name
+          # this script was compiled along with ./dev above. If that changes, run `tsc` to compile it
+          node ./build_dev/scripts/add_cypress_test_users.js $STAGE_PREFIX$branch_name $TEST_USERS_PASS
 
       - name: Cypress run
         id: cypress
