@@ -34,11 +34,6 @@ custom:
       - val
       - prod
       - main
-  scripts:
-    hooks:
-      package:initialize: |
-        set -e
-        yarn run prisma generate
 
 provider:
   name: aws
