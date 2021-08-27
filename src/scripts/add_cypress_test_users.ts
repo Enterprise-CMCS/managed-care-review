@@ -137,19 +137,19 @@ async function main() {
         {
             name: 'Aang',
             email: 'aang@dhs.state.mn.us',
-            role: 'STATE_USER',
+            role: 'STATE_USER' as const,
             state: 'MN',
         },
         {
             name: 'Toph',
             email: 'toph@dmas.virginia.gov',
-            role: 'STATE_USER',
+            role: 'STATE_USER' as const,
             state: 'VA',
         },
         {
             name: 'Zuko',
             email: 'zuko@cms.hhs.gov',
-            role: 'CMS_USER',
+            role: 'CMS_USER' as const,
             state: undefined,
         },
     ]
