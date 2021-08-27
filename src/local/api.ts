@@ -9,11 +9,20 @@ export async function installAPIDeps(runner: LabeledProcessRunner) {
     )
 }
 
+export async function installPrismaDeps(runner: LabeledProcessRunner) {
+    return runner.runCommandAndOutput(
+        'api prisma',
+        ['yarn', 'prisma', 'generate'],
+        'services/app-api'
+    )
+}
+
 // runAPILocally uses the serverless-offline plugin to run the api lambdas locally
 export async function runAPILocally(runner: LabeledProcessRunner) {
     compileGraphQLTypesWatchOnce(runner)
 
     await installAPIDeps(runner)
+    await installPrismaDeps(runner)
 
     runner.runCommandAndOutput(
         'api',
