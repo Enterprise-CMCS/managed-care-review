@@ -13,6 +13,7 @@ import {
     runS3Locally,
     runWebAgainstAWS,
     compileGraphQLTypesOnce,
+    installPrismaDepsOnce,
     runWebAgainstDocker,
 } from './local/index.js'
 
@@ -65,6 +66,7 @@ async function runAllFormat() {
 async function runAllGenerate() {
     const runner = new LabeledProcessRunner()
     await compileGraphQLTypesOnce(runner)
+    await installPrismaDepsOnce(runner)
 }
 
 // runAllLocally runs all of our services locally
