@@ -81,6 +81,10 @@ jobs:
       - name: set path
         run: |
           echo "PATH=$(pwd)/node_modules/.bin/:$PATH" >> $GITHUB_ENV
+      - name: Cypress setup
+        run: |
+          ./dev
+          node /build_dev/scripts/add_cypress_test_users.js $STAGE_PREFIX$branch_name
       - name: Unit Tests
         run: ./dev test --unit --run-db
       - name: publish code coverage
