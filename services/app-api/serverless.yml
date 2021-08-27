@@ -28,6 +28,9 @@ custom:
     version: V2
   bundle:
     packager: yarn
+    packagerOptions:
+      scripts:
+        - yarn prisma generate
   serverlessTerminationProtection:
     stages:
       - dev

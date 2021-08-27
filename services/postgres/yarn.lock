@@ -3426,11 +3426,6 @@ semver@^7.3.4, semver@^7.3.5:
   dependencies:
     lru-cache "^6.0.0"
 
-serverless-iam-helper@../../plugins/serverless-iam-helper:
-  version "1.0.0"
-  dependencies:
-    lodash "^4.17.21"
-
 serverless-stack-termination-protection@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/serverless-stack-termination-protection/-/serverless-stack-termination-protection-1.0.4.tgz#e0430108cfc8f4d72a63138ef5781c6fe9707868"

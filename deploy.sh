@@ -24,7 +24,7 @@ install_deps() {
   else # We're not in a CI system, let's yarn install
     yarn install
   fi
-}
+ }
 
 deploy() {
   service=$1
