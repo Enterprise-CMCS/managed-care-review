@@ -1,8 +1,14 @@
 import AWS from 'aws-sdk'
 import { spawnSync } from 'child_process'
 
+console.log('FIlE LOAD')
+
 async function main() {
+    console.log('Main Execute')
+
     const stageName = process.argv[2]
+
+    console.log('SATEG', stageName)
 
     const excludedStages = ['main', 'val', 'prod']
     if (excludedStages.includes(stageName)) {
