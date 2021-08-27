@@ -46,12 +46,14 @@ async function createUser({
     name,
     email,
     role,
+    password,
     state,
 }: {
     userPoolID: string
     name: string
     email: string
     role: UserRole
+    password: string
     state?: string
 }) {
     const cognito = new AWS.CognitoIdentityServiceProvider({
@@ -100,7 +102,7 @@ async function createUser({
     }
 
     var passwordParams = {
-        Password: 'STRING_VALUE',
+        Password: password,
         UserPoolId: userPoolID,
         Username: email,
         Permanent: true,
@@ -113,6 +115,7 @@ async function main() {
     console.log('Main Execute')
 
     const stageName = process.argv[2]
+    const testUserPassword = process.argv[3]
 
     console.log('SATEG', stageName)
 
@@ -161,6 +164,7 @@ async function main() {
                 name: user.name,
                 email: user.email,
                 role: user.role,
+                password: testUserPassword,
                 state: user.state,
             })
         } catch (e) {
