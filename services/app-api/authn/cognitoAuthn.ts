@@ -80,7 +80,6 @@ const STATE_ROLE_ATTRIBUTE = 'macmcrrs-state-user'
 export function userTypeFromAttributes(attributes: {
     [key: string]: string
 }): Result<CognitoUserType, Error> {
-
     // check for all the shared attrs here
     if (
         !(
@@ -98,8 +97,7 @@ export function userTypeFromAttributes(attributes: {
         )
     }
 
-    //'custom:state_code' in attributes &&
-    const roleAttribute =attributes['custom:role']
+    const roleAttribute = attributes['custom:role']
     const fullName = attributes.given_name + ' ' + attributes.family_name
 
     switch (roleAttribute) {
@@ -122,12 +120,11 @@ export function userTypeFromAttributes(attributes: {
                 role: 'STATE_USER',
                 email: attributes.email,
                 name: fullName,
-                state_code: attributes['custom:state_code']
+                state_code: attributes['custom:state_code'],
             })
         default:
             return err(new Error('Unsupported user role:  +' + roleAttribute))
     }
-
 }
 
 // userFromCognitoAuthProvider hits the Cogntio API to get the information in the authProvider

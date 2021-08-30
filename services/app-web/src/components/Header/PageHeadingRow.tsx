@@ -7,21 +7,24 @@ import PageHeading from '../../components/PageHeading'
 import { StateIcon, StateIconProps } from './StateIcon'
 import { User, CmsUser, StateUser } from '../../gen/gqlClient'
 
-const CMSUserRow = ({user}: {user: CmsUser} ) => {
-    return (<div>CMS USER</div>)
+const CMSUserRow = ({ user }: { user: CmsUser }) => {
+    return <div>CMS USER</div>
 }
 
-const StateUserRow = ({user, heading}: {user: StateUser, heading?: string} ) => {
+const StateUserRow = ({
+    user,
+    heading,
+}: {
+    user: StateUser
+    heading?: string
+}) => {
     return (
         <div className={styles.dashboardHeading}>
             <GridContainer>
                 <Grid row className="flex-align-center">
                     <div>
                         <StateIcon
-                            code={
-                                user.state
-                                    .code as StateIconProps['code']
-                            }
+                            code={user.state.code as StateIconProps['code']}
                         />
                     </div>
                     <PageHeading>
@@ -41,7 +44,7 @@ const StateUserRow = ({user, heading}: {user: StateUser, heading?: string} ) => 
     )
 }
 
-const LandingRow = ({isLoading}: {isLoading: boolean}) => {
+const LandingRow = ({ isLoading }: { isLoading: boolean }) => {
     return (
         <div className={styles.landingPageHeading}>
             <GridContainer>
@@ -75,14 +78,14 @@ export const PageHeadingRow = ({
     loggedInUser,
 }: PageHeadingProps): React.ReactElement => {
     if (!loggedInUser) {
-        return (<LandingRow isLoading={isLoading} />)
+        return <LandingRow isLoading={isLoading} />
     }
 
     if (loggedInUser.__typename === 'CMSUser') {
-        return (<CMSUserRow user={loggedInUser} />)
+        return <CMSUserRow user={loggedInUser} />
     } else if (loggedInUser.__typename === 'StateUser') {
-        return (<StateUserRow user={loggedInUser} heading={heading} />)
+        return <StateUserRow user={loggedInUser} heading={heading} />
     } else {
-        throw new Error(`Unexpected user type: ${loggedInUser}`)
+        return <h1>Programming Error: Unkown User Type: {loggedInUser}</h1>
     }
 }
