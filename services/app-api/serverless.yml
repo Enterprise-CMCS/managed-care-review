@@ -28,6 +28,7 @@ custom:
     version: V2
   bundle:
     packager: yarn
+    linting: false
     externals:
       - '@prisma/client'
     copyFiles:
