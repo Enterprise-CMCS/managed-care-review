@@ -8,6 +8,6 @@
 
 #### Screenshots
 
-## Testing guidance
+## QA guidance
 
 <!---These are developer instructions on how to test or validate the work -->
