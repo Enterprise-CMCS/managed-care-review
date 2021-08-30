@@ -2,11 +2,11 @@
 
 #### Related issues
 
+#### Screenshots
+
 #### Test cases covered
 
 <!---These are the tests written in this PR and the cases they cover -->
-
-#### Screenshots
 
 ## QA guidance
 
