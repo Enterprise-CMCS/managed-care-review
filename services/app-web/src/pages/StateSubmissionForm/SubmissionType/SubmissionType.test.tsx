@@ -131,7 +131,8 @@ describe('SubmissionType', () => {
 
     it('displays program options based on current user state', async () => {
         const mockUser = {
-            role: 'State User',
+            __typename: 'StateUser' as const,
+            role: 'STATE_USER',
             name: 'Sheena in Minnesota',
             email: 'Sheena@dmas.mn.gov',
             state: {

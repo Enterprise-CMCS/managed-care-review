@@ -1,4 +1,4 @@
-import { UserInputError } from 'apollo-server-lambda'
+import { UserInputError, ForbiddenError } from 'apollo-server-lambda'
 
 import {
     InsertDraftSubmissionArgsType,
@@ -6,12 +6,19 @@ import {
     Store,
 } from '../store/index'
 
+import { isStateUser } from '../../app-web/src/common-code/domain-models'
+
 import { MutationResolvers, State } from '../gen/gqlServer'
 
 export function createDraftSubmissionResolver(
     store: Store
 ): MutationResolvers['createDraftSubmission'] {
     return async (_parent, { input }, context) => {
+        // This resolver is only callable by state users
+        if (!isStateUser(context.user)) {
+            throw new ForbiddenError('user not authorized to create state data')
+        }
+
         const stateFromCurrentUser: State['code'] = context.user.state_code
 
         const program = store.findProgram(stateFromCurrentUser, input.programID)
@@ -29,8 +36,7 @@ export function createDraftSubmissionResolver(
             stateCode: stateFromCurrentUser,
             programID: input.programID,
             submissionDescription: input.submissionDescription,
-            submissionType:
-                input.submissionType as InsertDraftSubmissionArgsType['submissionType'],
+            submissionType: input.submissionType as InsertDraftSubmissionArgsType['submissionType'],
         }
 
         try {

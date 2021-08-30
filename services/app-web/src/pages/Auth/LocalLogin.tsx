@@ -16,6 +16,8 @@ import { loginLocalUser } from './localAuth'
 
 import aangAvatar from '../../assets/images/aang.png'
 import tophAvatar from '../../assets/images/toph.png'
+import zukoAvatar from '../../assets/images/zuko.png'
+
 import { useAuth } from '../../contexts/AuthContext'
 import { CognitoUserType } from '../../common-code/domain-models'
 
@@ -32,11 +34,17 @@ const localUsers: CognitoUserType[] = [
         role: 'STATE_USER',
         state_code: 'VA',
     },
+    {
+        email: 'zuko@cms.hhs.gov',
+        name: 'Zuko',
+        role: 'CMS_USER',
+    },
 ]
 
 const userAvatars: { [key: string]: string } = {
     'aang@dhs.state.mn.us': aangAvatar,
     'toph@dmas.virginia.gov': tophAvatar,
+    'zuko@cms.hhs.gov': zukoAvatar,
 }
 
 export function LocalLogin(): React.ReactElement {
@@ -64,6 +72,9 @@ export function LocalLogin(): React.ReactElement {
             {showFormAlert && <Alert type="error">Something went wrong</Alert>}
             <CardGroup>
                 {localUsers.map((user) => {
+                    const fromString =
+                        user.role === 'STATE_USER' ? user.state_code : 'CMS'
+
                     return (
                         <Card key={user.email}>
                             <CardMedia>
@@ -78,7 +89,7 @@ export function LocalLogin(): React.ReactElement {
                                 </h2>
                             </CardHeader>
                             <CardBody>
-                                <p>From {user.state_code}</p>
+                                <p>From {fromString}</p>
                             </CardBody>
                             <CardFooter>
                                 <Button

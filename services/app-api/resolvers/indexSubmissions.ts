@@ -1,13 +1,21 @@
-import { ApolloError } from 'apollo-server-lambda'
+import { ApolloError, ForbiddenError } from 'apollo-server-lambda'
 import { isStoreError, Store } from '../store/index'
 import { QueryResolvers } from '../gen/gqlServer'
 
-import { SubmissionUnionType } from '../../app-web/src/common-code/domain-models'
+import {
+    SubmissionUnionType,
+    isStateUser,
+} from '../../app-web/src/common-code/domain-models'
 
 export function indexSubmissionsResolver(
     store: Store
 ): QueryResolvers['indexSubmissions'] {
     return async (_parent, _args, context) => {
+        // This resolver is only callable by state users
+        if (!isStateUser(context.user)) {
+            throw new ForbiddenError('user not authorized to fetch state data')
+        }
+
         // fetch from the store
         const result = await store.findAllSubmissions(context.user.state_code)
 

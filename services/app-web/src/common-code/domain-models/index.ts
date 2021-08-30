@@ -5,7 +5,11 @@ export type { AuthModeType } from './config'
 export { assertIsAuthMode, assertNever } from './config'
 
 // Domain Types
-export type { CognitoUserType } from './cognitoUserType'
+export type {
+    CognitoUserType,
+    CognitoStateUserType,
+    CognitoCMSUserType,
+} from './cognitoUserType'
 
 export type {
     DraftSubmissionType,
@@ -27,7 +31,7 @@ export type { SubmissionUnionType } from './SubmissionUnionType'
 export type { ProgramT } from './ProgramT'
 
 // Type checks and type guards
-export { isCognitoUser } from './user'
+export { isCognitoUser, isStateUser } from './user'
 export {
     hasValidContract,
     hasValidDocuments,

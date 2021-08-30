@@ -16,6 +16,8 @@ generates:
       enumsAsTypes: true
       mappers:
         User: ../../app-web/src/common-code/domain-models#CognitoUserType
+        StateUser: ../../app-web/src/common-code/domain-models#CognitoStateUserType
+        CMSUser: ../../app-web/src/common-code/domain-models#CognitoCMSUserType
         DraftSubmission: ../../app-web/src/common-code/domain-models#DraftSubmissionType
         StateSubmission: ../../app-web/src/common-code/domain-models#StateSubmissionType
         Submission: ../../app-web/src/common-code/domain-models#SubmissionUnionType

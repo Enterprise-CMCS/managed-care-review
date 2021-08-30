@@ -25,7 +25,7 @@ describe('ContractDetails', () => {
         renderWithProviders(
             <ContractDetails
                 draftSubmission={emptyDraft}
-                updateDraft={async (draft) => undefined}
+                updateDraft={async (_) => undefined}
             />,
             {
                 apolloProvider: {

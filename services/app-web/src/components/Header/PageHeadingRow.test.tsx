@@ -5,6 +5,7 @@ import { PageHeadingRow } from './PageHeadingRow'
 
 describe('Page Heading Row', () => {
     const loggedInUser = {
+        __typename: 'StateUser' as const,
         state: {
             name: 'Minnesota',
             code: 'MN',

@@ -153,6 +153,10 @@ In the Dev account, in addition to deploying the main branch, we deploy a full v
 
 You can see the deploys for review apps [here](https://github.com/CMSgov/managed-care-review/actions/workflows/deploy.yml)
 
+### Building scripts
+
+When a script gets too complicated, we prefer it not be written in Bash. Since we're using typescript for everything else, we're writing scripts in typescript as well. They are located in /src/scripts and are compiled along with dev.ts any time you execute `./dev`. They can be invoked like `node build_dev/scripts/add_cypress_test_users.js`
+
 ## Infrastructure Dependencies
 
 These dependencies can be installed if you are wanting or needing to run `aws` or serverless `sls` commands locally.
