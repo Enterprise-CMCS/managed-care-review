@@ -29,6 +29,7 @@ custom:
   bundle:
     packager: yarn
     linting: false
+    tsConfig: 'tsconfig.json'
     externals:
       - '@prisma/client'
     copyFiles:

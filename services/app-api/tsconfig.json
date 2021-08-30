@@ -4,7 +4,7 @@
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "preserveConstEnums": true,
-        "strict": true,
+        "strict": false,
         "sourceMap": true,
         "target": "es5",
         "skipLibCheck": true,
