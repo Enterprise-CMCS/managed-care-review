@@ -1,5 +1,3 @@
-import { createTestClient } from 'apollo-server-testing'
-
 import INDEX_SUBMISSIONS from '../../app-graphql/src/queries/indexSubmissions.graphql'
 import {
     constructTestServer,
@@ -17,20 +15,18 @@ describe('indexDraftSubmission', () => {
     it('returns some submissions', async () => {
         const server = constructTestServer()
 
-        const { query, mutate } = createTestClient(server)
-
         // First, create a new submission
-        const draftSub = await createTestDraftSubmission(mutate)
-        const stateSub = await createTestStateSubmission(mutate)
+        const draftSub = await createTestDraftSubmission(server)
+        const stateSub = await createTestStateSubmission(server)
 
         // then see if we can get that same submission back from the index
-        const result = await query({
+        const result = await server.executeOperation({
             query: INDEX_SUBMISSIONS,
         })
 
         expect(result.errors).toBeUndefined()
 
-        const submissionsIndex = result.data.indexSubmissions
+        const submissionsIndex = result.data?.indexSubmissions
 
         expect(submissionsIndex.totalCount).toBeGreaterThan(1)
 
@@ -69,11 +65,9 @@ describe('indexDraftSubmission', () => {
     it('returns no submissions for a different user', async () => {
         const server = constructTestServer()
 
-        const { mutate } = createTestClient(server)
-
         // First, create a new submission
-        const draftSub = await createTestDraftSubmission(mutate)
-        const stateSub = await createTestStateSubmission(mutate)
+        const draftSub = await createTestDraftSubmission(server)
+        const stateSub = await createTestStateSubmission(server)
 
         const otherUserServer = constructTestServer({
             context: {
@@ -86,16 +80,14 @@ describe('indexDraftSubmission', () => {
             },
         })
 
-        const { query: otherStateQuery } = createTestClient(otherUserServer)
-
         // then see if we can get that same submission back from the index
-        const result = await otherStateQuery({
+        const result = await otherUserServer.executeOperation({
             query: INDEX_SUBMISSIONS,
         })
 
         expect(result.errors).toBeUndefined()
 
-        const submissionsIndex = result.data.indexSubmissions
+        const submissionsIndex = result.data?.indexSubmissions
 
         // Since we don't wipe the DB between tests, here we filter out all
         // the extraneous submissions and grab the two we started with.

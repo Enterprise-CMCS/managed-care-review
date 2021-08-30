@@ -1,5 +1,3 @@
-import { createTestClient } from 'apollo-server-testing'
-
 import FETCH_STATE_SUBMISSION from '../../app-graphql/src/queries/fetchStateSubmission.graphql'
 import {
     constructTestServer,
@@ -11,10 +9,8 @@ describe('fetchStateSubmission', () => {
     it('returns draft submission payload with a draft submission', async () => {
         const server = constructTestServer()
 
-        const { query, mutate } = createTestClient(server)
-
         // First, create a new submission
-        const stateSubmission = await createTestStateSubmission(mutate)
+        const stateSubmission = await createTestStateSubmission(server)
 
         const createdID = stateSubmission.id
 
@@ -23,14 +19,14 @@ describe('fetchStateSubmission', () => {
             submissionID: createdID,
         }
 
-        const result = await query({
+        const result = await server.executeOperation({
             query: FETCH_STATE_SUBMISSION,
             variables: { input },
         })
 
         expect(result.errors).toBeUndefined()
 
-        const resultSub = result.data.fetchStateSubmission.submission
+        const resultSub = result.data?.fetchStateSubmission.submission
         expect(resultSub.id).toEqual(createdID)
         expect(resultSub.program.id).toEqual('cnet')
         expect(resultSub.program.name).toBe('CNET')
@@ -50,17 +46,15 @@ describe('fetchStateSubmission', () => {
     it('returns an error if the submission is a draft', async () => {
         const server = constructTestServer()
 
-        const { query, mutate } = createTestClient(server)
-
         // First, create a new submission
-        const draft = await createAndUpdateTestDraftSubmission(mutate)
+        const draft = await createAndUpdateTestDraftSubmission(server)
 
         // then see if we can fetch that same submission
         const input = {
             submissionID: draft.id,
         }
 
-        const result = await query({
+        const result = await server.executeOperation({
             query: FETCH_STATE_SUBMISSION,
             variables: { input },
         })
@@ -81,29 +75,25 @@ describe('fetchStateSubmission', () => {
     it('returns null if the ID does not exist', async () => {
         const server = constructTestServer()
 
-        const { query } = createTestClient(server)
-
         // then see if we can fetch that same submission
         const input = {
             submissionID: 'deadbeef-3292323-foo-bar',
         }
 
-        const result = await query({
+        const result = await server.executeOperation({
             query: FETCH_STATE_SUBMISSION,
             variables: { input },
         })
 
         expect(result.errors).toBeUndefined()
-        expect(result.data.fetchStateSubmission.submission).toBeNull()
+        expect(result.data?.fetchStateSubmission.submission).toBeNull()
     })
 
     it('a different user from the same state can fetch the draft', async () => {
         const server = constructTestServer()
 
-        const { mutate } = createTestClient(server)
-
         // First, create a new submission
-        const stateSubmission = await createTestStateSubmission(mutate)
+        const stateSubmission = await createTestStateSubmission(server)
 
         const createdID = stateSubmission.id
 
@@ -124,9 +114,7 @@ describe('fetchStateSubmission', () => {
             },
         })
 
-        const { query } = createTestClient(otherUserServer)
-
-        const result = await query({
+        const result = await otherUserServer.executeOperation({
             query: FETCH_STATE_SUBMISSION,
             variables: { input },
         })
@@ -139,10 +127,8 @@ describe('fetchStateSubmission', () => {
     it('returns an error if you are requesting for a different state (403)', async () => {
         const server = constructTestServer()
 
-        const { mutate } = createTestClient(server)
-
         // First, create a new submission
-        const stateSubmission = await createTestStateSubmission(mutate)
+        const stateSubmission = await createTestStateSubmission(server)
 
         const createdID = stateSubmission.id
 
@@ -163,9 +149,7 @@ describe('fetchStateSubmission', () => {
             },
         })
 
-        const { query } = createTestClient(otherUserServer)
-
-        const result = await query({
+        const result = await otherUserServer.executeOperation({
             query: FETCH_STATE_SUBMISSION,
             variables: { input },
         })

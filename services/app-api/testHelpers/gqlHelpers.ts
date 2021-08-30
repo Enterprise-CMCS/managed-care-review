@@ -1,5 +1,4 @@
 import { ApolloServer } from 'apollo-server-lambda'
-import { ApolloServerTestClient } from 'apollo-server-testing'
 
 import { getTestStore } from '../testHelpers/storeHelpers'
 import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
@@ -39,37 +38,39 @@ const constructTestServer = (
     new ApolloServer({
         typeDefs,
         resolvers: testResolvers,
-        playground: {
-            endpoint: '/local/graphql',
-        },
         context,
     })
 
 const createTestDraftSubmission = async (
-    mutate: ApolloServerTestClient['mutate']
+    server: ApolloServer
 ): Promise<DraftSubmission> => {
     const input: CreateDraftSubmissionInput = {
         programID: 'smmc',
         submissionType: 'CONTRACT_ONLY' as const,
         submissionDescription: 'A created submission',
     }
-    const result = await mutate({
-        mutation: CREATE_DRAFT_SUBMISSION,
+    const result = await server.executeOperation({
+        query: CREATE_DRAFT_SUBMISSION,
         variables: { input },
     })
-    if (result.errors)
+    if (result.errors) {
         throw new Error('createTestDraftSubmission mutation failed with errors')
+    }
+
+    if (!result.data) {
+        throw new Error('createTestDraftSubmission returned nothing')
+    }
 
     return result.data.createDraftSubmission.draftSubmission
 }
 
 const updateTestDraftSubmission = async (
-    mutate: ApolloServerTestClient['mutate'],
+    server: ApolloServer,
     id: string,
     updates: DraftSubmissionUpdates
 ): Promise<DraftSubmission> => {
-    const updateResult = await mutate({
-        mutation: UPDATE_DRAFT_SUBMISSION,
+    const updateResult = await server.executeOperation({
+        query: UPDATE_DRAFT_SUBMISSION,
         variables: {
             input: {
                 submissionID: id,
@@ -83,16 +84,20 @@ const updateTestDraftSubmission = async (
         throw new Error('updateTestDraftSubmission mutation failed with errors')
     }
 
+    if (!updateResult.data) {
+        throw new Error('updateTestDraftSubmission returned nothing')
+    }
+
     return updateResult.data.updateDraftSubmission.draftSubmission
 }
 
 const createAndUpdateTestDraftSubmission = async (
-    mutate: ApolloServerTestClient['mutate'],
+    server: ApolloServer,
     partialDraftSubmissionUpdates?: Partial<
         UpdateDraftSubmissionInput['draftSubmissionUpdates']
     >
 ): Promise<DraftSubmission> => {
-    const draft = await createTestDraftSubmission(mutate)
+    const draft = await createTestDraftSubmission(server)
     const startDate = '2025-05-01'
     const endDate = '2026-04-30'
     const dateCertified = '2025-03-15'
@@ -112,7 +117,7 @@ const createAndUpdateTestDraftSubmission = async (
                 name: 'test name',
                 titleRole: 'test title',
                 email: 'email@test.com',
-            }
+            },
         ],
         actuaryContacts: [
             {
@@ -121,7 +126,7 @@ const createAndUpdateTestDraftSubmission = async (
                 email: 'email@test.com',
                 actuarialFirm: 'MERCER' as const,
                 actuarialFirmOther: '',
-            }
+            },
         ],
         actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
         contractType: 'BASE' as const,
@@ -137,7 +142,7 @@ const createAndUpdateTestDraftSubmission = async (
     }
 
     const updatedDraft = await updateTestDraftSubmission(
-        mutate,
+        server,
         draft.id,
         updates
     )
@@ -146,11 +151,11 @@ const createAndUpdateTestDraftSubmission = async (
 }
 
 const submitTestDraftSubmission = async (
-    mutate: ApolloServerTestClient['mutate'],
+    server: ApolloServer,
     submissionID: string
 ) => {
-    const updateResult = await mutate({
-        mutation: SUBMIT_DRAFT_SUBMISSION,
+    const updateResult = await server.executeOperation({
+        query: SUBMIT_DRAFT_SUBMISSION,
         variables: {
             input: {
                 submissionID,
@@ -163,25 +168,29 @@ const submitTestDraftSubmission = async (
         throw new Error('updateTestDraftSubmission mutation failed with errors')
     }
 
+    if (updateResult.data === undefined || updateResult.data === null) {
+        throw new Error('updateTestDraftSubmission returned nothing')
+    }
+
     return updateResult.data.submitDraftSubmission.submission
 }
 
 const createTestStateSubmission = async (
-    mutate: ApolloServerTestClient['mutate']
+    server: ApolloServer
 ): Promise<StateSubmission> => {
-    const draft = await createAndUpdateTestDraftSubmission(mutate)
+    const draft = await createAndUpdateTestDraftSubmission(server)
 
-    const updatedSubmission = await submitTestDraftSubmission(mutate, draft.id)
+    const updatedSubmission = await submitTestDraftSubmission(server, draft.id)
 
     return updatedSubmission
 }
 
 const fetchTestDraftSubmissionById = async (
-    query: ApolloServerTestClient['query'],
+    server: ApolloServer,
     submissionID: string
 ): Promise<DraftSubmission> => {
     const input = { submissionID }
-    const result = await query({
+    const result = await server.executeOperation({
         query: FETCH_DRAFT_SUBMISSION,
         variables: { input },
     })
@@ -189,15 +198,19 @@ const fetchTestDraftSubmissionById = async (
     if (result.errors)
         throw new Error('fetchTestDraftSubmission query failed with errors')
 
+    if (!result.data) {
+        throw new Error('fetchTestDraftSubmission returned nothing')
+    }
+
     return result.data.fetchDraftSubmission.draftSubmission
 }
 
 const fetchTestStateSubmissionById = async (
-    query: ApolloServerTestClient['query'],
+    server: ApolloServer,
     submissionID: string
 ): Promise<StateSubmission> => {
     const input = { submissionID }
-    const result = await query({
+    const result = await server.executeOperation({
         query: FETCH_STATE_SUBMISSION,
         variables: { input },
     })
@@ -205,6 +218,10 @@ const fetchTestStateSubmissionById = async (
     if (result.errors) {
         console.log('err fetching state submission: ', result.errors)
         throw new Error('fetchTestStateSubmissionById query failed with errors')
+    }
+
+    if (!result.data) {
+        throw new Error('fetchTestStateSubmissionById returned nothing')
     }
 
     return result.data.fetchStateSubmission.submission

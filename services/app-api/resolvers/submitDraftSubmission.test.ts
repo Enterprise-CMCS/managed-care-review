@@ -1,4 +1,3 @@
-import { createTestClient } from 'apollo-server-testing'
 import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitDraftSubmission.graphql'
 import {
     constructTestServer,
@@ -10,16 +9,14 @@ describe('submitDraftSubmission', () => {
     it('returns a StateSubmission if complete', async () => {
         const server = constructTestServer()
 
-        const { query, mutate } = createTestClient(server)
-
         // setup
-        const draft = await createAndUpdateTestDraftSubmission(mutate)
+        const draft = await createAndUpdateTestDraftSubmission(server)
         const draftID = draft.id
 
         // submit
         await new Promise((resolve) => setTimeout(resolve, 2000))
-        const submitResult = await mutate({
-            mutation: SUBMIT_DRAFT_SUBMISSION,
+        const submitResult = await server.executeOperation({
+            query: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
                     submissionID: draftID,
@@ -32,7 +29,10 @@ describe('submitDraftSubmission', () => {
             submitResult?.data?.submitDraftSubmission.submission.id
 
         // test result
-        const resultDraft = await fetchTestStateSubmissionById(query, createdID)
+        const resultDraft = await fetchTestStateSubmissionById(
+            server,
+            createdID
+        )
 
         // The submission fields should still be set
         expect(resultDraft.id).toEqual(createdID)
@@ -68,15 +68,13 @@ describe('submitDraftSubmission', () => {
     it('returns an error if there are no documents attached', async () => {
         const server = constructTestServer()
 
-        const { mutate } = createTestClient(server)
-
-        const draft = await createAndUpdateTestDraftSubmission(mutate, {
+        const draft = await createAndUpdateTestDraftSubmission(server, {
             documents: [],
         })
         const draftID = draft.id
 
-        const submitResult = await mutate({
-            mutation: SUBMIT_DRAFT_SUBMISSION,
+        const submitResult = await server.executeOperation({
+            query: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
                     submissionID: draftID,
@@ -97,17 +95,15 @@ describe('submitDraftSubmission', () => {
     it('returns an error if there are no contract details fields', async () => {
         const server = constructTestServer()
 
-        const { mutate } = createTestClient(server)
-
-        const draft = await createAndUpdateTestDraftSubmission(mutate, {
+        const draft = await createAndUpdateTestDraftSubmission(server, {
             contractType: undefined,
             managedCareEntities: [],
             federalAuthorities: [],
         })
 
         const draftID = draft.id
-        const submitResult = await mutate({
-            mutation: SUBMIT_DRAFT_SUBMISSION,
+        const submitResult = await server.executeOperation({
+            query: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
                     submissionID: draftID,
@@ -128,9 +124,7 @@ describe('submitDraftSubmission', () => {
     it('returns an error if there are missing rate details fields for submission type', async () => {
         const server = constructTestServer()
 
-        const { mutate } = createTestClient(server)
-
-        const draft = await createAndUpdateTestDraftSubmission(mutate, {
+        const draft = await createAndUpdateTestDraftSubmission(server, {
             submissionType: 'CONTRACT_AND_RATES',
             rateType: undefined,
             rateDateStart: undefined,
@@ -139,8 +133,8 @@ describe('submitDraftSubmission', () => {
         })
 
         const draftID = draft.id
-        const submitResult = await mutate({
-            mutation: SUBMIT_DRAFT_SUBMISSION,
+        const submitResult = await server.executeOperation({
+            query: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
                     submissionID: draftID,
@@ -161,9 +155,7 @@ describe('submitDraftSubmission', () => {
     it('returns an error if there are invalid rate details fields for submission type', async () => {
         const server = constructTestServer()
 
-        const { mutate } = createTestClient(server)
-
-        const draft = await createAndUpdateTestDraftSubmission(mutate, {
+        const draft = await createAndUpdateTestDraftSubmission(server, {
             submissionType: 'CONTRACT_ONLY',
             rateDateStart: '2025-05-01',
             rateDateEnd: '2026-04-30',
@@ -171,8 +163,8 @@ describe('submitDraftSubmission', () => {
         })
 
         const draftID = draft.id
-        const submitResult = await mutate({
-            mutation: SUBMIT_DRAFT_SUBMISSION,
+        const submitResult = await server.executeOperation({
+            query: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
                     submissionID: draftID,
