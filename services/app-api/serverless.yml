@@ -30,7 +30,6 @@ custom:
     packager: yarn
     externals:
       - '@prisma/client'
-      - 'prisma'
     copyFiles:
       - from: 'prisma/schema.prisma'
         to: './'
