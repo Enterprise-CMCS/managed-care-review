@@ -12,7 +12,7 @@
 // Import commands.js using ES2015 syntax:
 import './commands'
 import './login'
-import './submission'
+import './stateSubmissionForm'
 
 declare global {
     namespace Cypress {
