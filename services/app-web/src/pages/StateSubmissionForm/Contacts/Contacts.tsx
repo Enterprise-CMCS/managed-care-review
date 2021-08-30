@@ -105,7 +105,8 @@ const yupValidation = (submissionType: string) => {
     return Yup.object().shape(contactShape)
 }
 
-type FormError = FormikErrors<ContactsFormValues>[keyof FormikErrors<ContactsFormValues>]
+type FormError =
+    FormikErrors<ContactsFormValues>[keyof FormikErrors<ContactsFormValues>]
 
 // We want to make sure we are returning the specific error
 // for a given field when we pass it through showFieldErrors
@@ -144,19 +145,16 @@ export const Contacts = ({
 }): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const [focusNewContact, setFocusNewContact] = React.useState(false)
-    const [focusNewActuaryContact, setFocusNewActuaryContact] = React.useState(
-        false
-    )
+    const [focusNewActuaryContact, setFocusNewActuaryContact] =
+        React.useState(false)
 
     const redirectToDashboard = React.useRef(false)
     const newStateContactNameRef = React.useRef<HTMLElement | null>(null) // This ref.current is reset to the newest contact name field each time new contact is added
     const [newStateContactButtonRef, setNewStateContactButtonFocus] = useFocus() // This ref.current is always the same element
 
     const newActuaryContactNameRef = React.useRef<HTMLElement | null>(null)
-    const [
-        newActuaryContactButtonRef,
-        setNewActuaryContactButtonFocus,
-    ] = useFocus()
+    const [newActuaryContactButtonRef, setNewActuaryContactButtonFocus] =
+        useFocus()
 
     const history = useHistory<MCRouterState>()
 
@@ -230,7 +228,7 @@ export const Contacts = ({
             return `State contacts ${count} ${required}`
         } else if (contactText === 'Actuary') {
             if (!index) return `Certifying actuary ${required}`
-            else return `Additional actuary contact`
+            else return `Additional actuary contact ${index}`
         }
     }
 
@@ -365,7 +363,8 @@ export const Contacts = ({
                                                                         innerRef={(
                                                                             el: HTMLElement
                                                                         ) =>
-                                                                            (newStateContactNameRef.current = el)
+                                                                            (newStateContactNameRef.current =
+                                                                                el)
                                                                         }
                                                                     />
                                                                 </FormGroup>
@@ -549,7 +548,8 @@ export const Contacts = ({
                                                                             innerRef={(
                                                                                 el: HTMLElement
                                                                             ) =>
-                                                                                (newActuaryContactNameRef.current = el)
+                                                                                (newActuaryContactNameRef.current =
+                                                                                    el)
                                                                             }
                                                                         />
                                                                     </FormGroup>
@@ -904,7 +904,8 @@ export const Contacts = ({
                                         } else {
                                             setShouldValidate(true)
                                             if (!isValidating) {
-                                                redirectToDashboard.current = true
+                                                redirectToDashboard.current =
+                                                    true
                                                 handleSubmit()
                                             }
                                         }
