@@ -48,9 +48,6 @@
         "storybook": "start-storybook -p 6006 -s public --quiet",
         "build-storybook": "build-storybook -s public --quiet"
     },
-    "resolutions": {
-        "@storybook/react/babel-loader": "8.1.0"
-    },
     "jest": {
         "coveragePathIgnorePatterns": [
             "src/pages/Auth/Signup",
