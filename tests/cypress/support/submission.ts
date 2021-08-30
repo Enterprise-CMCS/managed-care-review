@@ -3,7 +3,9 @@ Cypress.Commands.add('startNewContractOnlySubmission', () => {
     cy.findByRole('link', { name: 'Start new submission' }).click({
         force: true,
     })
+    // HM-TODO: Move this check to dashboard page
     cy.location('pathname').should('eq', '/submissions/new')
+    // HM-TODO: Move this check to dashboard page
     cy.findByText('New submission').should('exist')
 
     // Fill out Submission type
@@ -13,8 +15,8 @@ Cypress.Commands.add('startNewContractOnlySubmission', () => {
         .should('exist')
         .type('description of contract only submission')
 
+    // HM-TODO: This navigation and check should happen in submissionType.spec
     cy.navigateForm('Continue')
-
     cy.findByText(/^MN-PMAP-/).should('exist')
 })
 
@@ -23,22 +25,26 @@ Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
     cy.findByRole('link', { name: 'Start new submission' }).click({
         force: true,
     })
+    // HM-TODO: Move this check to dashboard page
     cy.location('pathname').should('eq', '/submissions/new')
+    // HM-TODO: Move this check to dashboard page
     cy.findByText('New submission').should('exist')
 
     // Fill out Submission type
     cy.findByLabelText('Contract action and rate certification').safeClick()
     cy.findByRole('combobox', { name: 'Program' }).select('pmap')
+    // HM-TODO: Move this check to dashboard page
     cy.findByRole('textbox', { name: 'Submission description' })
         .should('exist')
         .type('description of contract and rates submission')
 
+    // HM-TODO: This navigation and check should happen in submissionType.spec
     cy.navigateForm('Continue')
-
     cy.findByText(/^MN-PMAP-/).should('exist')
 })
 
 Cypress.Commands.add('fillOutContractDetails', () => {
+    // Must be on '/submissions/:id/contract-details'
     cy.findByLabelText('Base contract').safeClick()
     cy.findByLabelText('Start date').type('04/01/2024')
     cy.findByLabelText('End date').type('03/31/2025').blur()
@@ -48,13 +54,16 @@ Cypress.Commands.add('fillOutContractDetails', () => {
 })
 
 Cypress.Commands.add('fillOutRateDetails', () => {
+    // Must be on '/submissions/:id/rate-details'
     cy.findByLabelText('New rate certification').safeClick()
     cy.findByLabelText('Start date').type('02/29/2024')
     cy.findByLabelText('End date').type('02/28/2025')
     cy.findByLabelText('Date certified').type('03/01/2024')
+    cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
 Cypress.Commands.add('fillOutContacts', () => {
+    // Must be on '/submissions/:id/contacts'
     // State contact
     cy.findAllByLabelText('Name').eq(0).type('Test Person')
     cy.findAllByLabelText('Title/Role').eq(0).type('Fancy Title')
@@ -70,13 +79,27 @@ Cypress.Commands.add('fillOutContacts', () => {
     cy.findByLabelText(
         `OACT can communicate directly with the state’s actuary but should copy the state on all written communication and all appointments for verbal discussions.`
     ).safeClick()
+    cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
 Cypress.Commands.add('fillOutDocuments', () => {
+    // Must be on '/submissions/:id/documents'
     cy.findByTestId('file-input-input').attachFile(
         'documents/trussel-guide.pdf'
     )
+
+    // HM-TODO: Move to documents specific Cypress test
     cy.findByText('Upload failed').should('not.exist')
     cy.findByText('Duplicate file').should('not.exist')
+
     cy.waitForDocumentsToLoad()
+    cy.findAllByTestId('errorMessage').should('have.length', 0)
+})
+
+Cypress.Commands.add('reviewAndSubmitStateSubmissionForm', () => {
+    // Must be on '/submissions/:id/review-and-submit'
+    cy.navigateForm('Submit')
+    // HM-TODO: Move this check to dashboard page
+    cy.findByRole('dialog').should('exist')
+    cy.navigateForm('Confirm submit')
 })

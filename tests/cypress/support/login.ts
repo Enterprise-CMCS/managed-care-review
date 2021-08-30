@@ -1,5 +1,6 @@
-Cypress.Commands.add('login', () => {
+Cypress.Commands.add('loginAsStateUser', () => {
     cy.visit('/')
+    // HM-TODO: Understand why this check should be happening here
     cy.findByRole('progressbar', { name: 'Loading' }).should('not.exist')
     cy.findByRole('link', { name: 'Sign In' }).click()
     const authMode = Cypress.env('AUTH_MODE')

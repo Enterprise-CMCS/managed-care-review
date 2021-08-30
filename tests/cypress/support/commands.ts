@@ -42,9 +42,7 @@ Cypress.Commands.add('safeClick', { prevSubject: 'element' }, ($element) => {
 Cypress.Commands.add('navigateForm', (buttonAccessibleName: 'string') => {
     cy.findByRole('button', {
         name: buttonAccessibleName,
-    }).click()
-
-    cy.findByRole('progressbar', { name: 'Loading' }).should('not.exist')
+    }).safeClick()
 })
 
 Cypress.Commands.add('waitForDocumentsToLoad', () => {
