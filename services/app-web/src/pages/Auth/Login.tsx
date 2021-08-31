@@ -25,7 +25,7 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
 
     const history = useHistory()
     const { loginStatus, checkAuth } = useAuth()
-    if (loginStatus === 'LOGGED_IN') history.push('/dashboard')
+    if (loginStatus === 'LOGGED_IN') history.push('/')
 
     const onFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = event.target

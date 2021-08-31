@@ -24,6 +24,7 @@ import { Loading } from '../../../components/Loading'
 import { GenericError } from '../../Errors/GenericError'
 import { useS3 } from '../../../contexts/S3Context'
 import { usePage } from '../../../contexts/PageContext'
+import { useAuth } from '../../../contexts/AuthContext'
 
 type DocumentWithLink = { url: string | null } & Document
 
@@ -43,6 +44,7 @@ const SectionHeader = ({
 export const SubmissionSummary = (): React.ReactElement => {
     const { id } = useParams<{ id: string }>()
     const { pathname } = useLocation()
+    const { loggedInUser } = useAuth()
     const [refreshedDocs, setRefreshedDocs] = useState<DocumentWithLink[]>([])
     const { getURL, getKey } = useS3()
     const { updateHeading } = usePage()
@@ -149,26 +151,28 @@ export const SubmissionSummary = (): React.ReactElement => {
                 data-testid="submission-summary"
                 className={styles.container}
             >
-                <Link
-                    asCustom={NavLink}
-                    variant="unstyled"
-                    to={{
-                        pathname: '/dashboard',
-                        state: {
-                            defaultProgramID: submission.programID,
-                        },
-                    }}
-                >
-                    <svg
-                        className="usa-icon"
-                        aria-hidden="true"
-                        focusable="false"
-                        role="img"
+                {loggedInUser?.__typename === 'StateUser' ? (
+                    <Link
+                        asCustom={NavLink}
+                        variant="unstyled"
+                        to={{
+                            pathname: '/dashboard',
+                            state: {
+                                defaultProgramID: submission.programID,
+                            },
+                        }}
                     >
-                        <use xlinkHref={`${sprite}#arrow_back`}></use>
-                    </svg>
-                    <span>&nbsp;Back to state dashboard</span>
-                </Link>
+                        <svg
+                            className="usa-icon"
+                            aria-hidden="true"
+                            focusable="false"
+                            role="img"
+                        >
+                            <use xlinkHref={`${sprite}#arrow_back`}></use>
+                        </svg>
+                        <span>&nbsp;Back to state dashboard</span>
+                    </Link>
+                ) : null}
                 <section id="submissionType">
                     <div className={styles.firstHeader}>
                         <h2 className={stylesForm.submissionName}>
@@ -404,7 +408,10 @@ export const SubmissionSummary = (): React.ReactElement => {
                             <Grid row>
                                 {submission.stateContacts.map(
                                     (stateContact, index) => (
-                                        <Grid col={6}>
+                                        <Grid
+                                            col={6}
+                                            key={'statecontact_' + index}
+                                        >
                                             <strong>Contact {index + 1}</strong>
                                             <br />
                                             <address>
@@ -435,7 +442,10 @@ export const SubmissionSummary = (): React.ReactElement => {
                                 <Grid row>
                                     {submission.actuaryContacts.map(
                                         (actuaryContact, index) => (
-                                            <Grid col={6}>
+                                            <Grid
+                                                col={6}
+                                                key={'actuarycontact_' + index}
+                                            >
                                                 <span className="text-bold">
                                                     {index
                                                         ? 'Additional actuary contact'
