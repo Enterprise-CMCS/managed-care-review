@@ -19,18 +19,16 @@ export function newLocalS3Client(
 
     return {
         uploadFile: async (file: File): Promise<string | S3Error> => {
-            const filename = `${Date.now()}-${file.name}`
-
             try {
                 await s3Client
                     .putObject({
                         Bucket: bucketName,
-                        Key: filename,
+                        Key: file.name,
                         Body: file,
                     })
                     .promise()
 
-                return filename
+                return file.name
             } catch (err) {
                 if (err.code === 'NetworkingError') {
                     return {
