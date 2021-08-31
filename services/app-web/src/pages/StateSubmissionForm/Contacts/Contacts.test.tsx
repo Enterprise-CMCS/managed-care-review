@@ -1,5 +1,4 @@
 import { screen, waitFor } from '@testing-library/react'
-import { logRoles } from '@testing-library/dom'
 
 import {
     mockDraft,
