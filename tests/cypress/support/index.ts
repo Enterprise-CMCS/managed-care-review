@@ -17,13 +17,18 @@ import './stateSubmissionForm'
 declare global {
     namespace Cypress {
         interface Chainable<Subject = any> {
-            login(): void
-            cmsLogin(args?: { initialURL?: string }): void
+            logInAsStateUser(): void
+            logInAsCMSUser(args?: { initialURL?: string }): void
             safeClick(): void
             navigateForm(buttonName: string): Chainable<Element>
-            startNewContractAndRatesSubmission(): void
-            startNewContractOnlySubmission(): void
-            waitForDocumentsToLoad(): void
+            waitForDocumentsToLoad()
+            startNewContractOnlySubmission()
+            startNewContractAndRatesSubmission()
+            fillOutContractDetails()
+            fillOutRateDetails()
+            fillOutContacts()
+            fillOutDocuments()
+            reviewAndSubmitStateSubmissionForm()
         }
     }
 }
