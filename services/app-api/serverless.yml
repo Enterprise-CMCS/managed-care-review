@@ -27,6 +27,7 @@ custom:
     name: ${self:custom.webAclName}
     version: V2
   bundle:
+    packager: yarn
     externals:
       - '@prisma/client'
     copyFiles:
