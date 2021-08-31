@@ -19,6 +19,7 @@ custom:
   draftSubmissionsTableStreamArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:database-${self:custom.stage}.DraftSubmissionsTableStreamArn}
   iamPath: ${env:IAM_PATH, "/"}
   iamPermissionsBoundaryPolicy: ${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
+  secretsManagerSecret: aurora-postgres-${self:custom.stage}
   reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
   dynamoConnection: ${env:DYNAMO_CONNECTION}
   webAclName: ${self:service}-${self:custom.stage}-webacl
@@ -27,6 +28,14 @@ custom:
     version: V2
   bundle:
     packager: yarn
+    externals:
+      - '@prisma/client'
+    copyFiles:
+      - from: 'prisma/schema.prisma'
+        to: './'
+    packagerOptions:
+      scripts:
+        - yarn prisma generate
   serverlessTerminationProtection:
     stages:
       - dev
@@ -47,6 +56,7 @@ provider:
     appVersion: ${self:custom.appVersion}
     DYNAMO_CONNECTION: ${self:custom.dynamoConnection}
     REACT_APP_AUTH_MODE: ${self:custom.reactAppAuthMode}
+    SECRETS_MANAGER_SECRET: ${self:custom.secretsManagerSecret}
 
 functions:
   health:
@@ -91,6 +101,15 @@ functions:
           method: get
           cors: true
           authorizer: aws_iam
+
+  postgres:
+    handler: handlers/postgres_check.main
+    role: LambdaApiRole
+    events:
+      - http:
+          path: postgres_check
+          method: get
+          cors: true
 
 resources:
   Conditions:
@@ -150,6 +169,11 @@ resources:
                 - Effect: 'Allow'
                   Action:
                     - cognito-idp:ListUsers
+                  Resource: '*'
+                - Effect: 'Allow'
+                  Action:
+                    - secretsmanager:GetSecretValue
+                    - secretsmanager:DescribeSecret
                   Resource: '*'
     GatewayResponseDefault4XX:
       Type: 'AWS::ApiGateway::GatewayResponse'

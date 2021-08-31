@@ -1,0 +1,18 @@
+// datasource requires a url. we override this with connection
+// details from secrets manager in the application
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+// A model is required for prisma. Dummy model for our testing.
+model TestUser {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    email     String   @unique
+    name      String?
+}
