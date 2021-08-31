@@ -48,6 +48,12 @@ custom:
     - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/b/id, ssm:/configuration/default/vpc/subnets/private/b/id}
     - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/c/id, ssm:/configuration/default/vpc/subnets/private/c/id}
   rotatorArn: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${self:custom.stage}-rotator'
+  serverlessTerminationProtection:
+    stages:
+      - dev
+      - val
+      - prod
+      - main
 
 package:
   individually: true
