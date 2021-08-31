@@ -28,6 +28,7 @@ custom:
     version: V2
   bundle:
     packager: yarn
+    esbuild: true
     externals:
       - '@prisma/client'
     copyFiles:
