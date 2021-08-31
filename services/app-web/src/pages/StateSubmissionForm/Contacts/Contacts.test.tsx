@@ -1,4 +1,5 @@
 import { screen, waitFor } from '@testing-library/react'
+import { logRoles } from '@testing-library/dom'
 
 import {
     mockDraft,
@@ -227,6 +228,52 @@ describe('Contacts', () => {
             )
 
             expect(addActuaryContactButton).toHaveFocus()
+        })
+    })
+    it('when there are multiple state contacts, they should numbered', async () => {
+        const mock = mockContactAndRatesDraft()
+        const mockUpdateDraftFn = jest.fn()
+
+        renderWithProviders(
+            <Contacts draftSubmission={mock} updateDraft={mockUpdateDraftFn} />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+        const addStateContactButton = screen.getByRole('button', {
+            name: 'Add state contact',
+        })
+        addStateContactButton.click()
+
+        await waitFor(() => {
+            expect(screen.getByText(/State contacts 1/)).toBeInTheDocument()
+            expect(screen.getByText('State contacts 2')).toBeInTheDocument()
+        })
+    })
+
+    it('when there are multiple actuary contacts, they should numbered', async () => {
+        const mock = mockContactAndRatesDraft()
+        const mockUpdateDraftFn = jest.fn()
+
+        renderWithProviders(
+            <Contacts draftSubmission={mock} updateDraft={mockUpdateDraftFn} />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+        const addActuaryContactButton = screen.getByRole('button', {
+            name: 'Add actuary contact',
+        })
+        addActuaryContactButton.click()
+        addActuaryContactButton.click()
+        await waitFor(() => {
+            expect(
+                screen.getByText('Additional actuary contact 1')
+            ).toBeInTheDocument()
         })
     })
 })
