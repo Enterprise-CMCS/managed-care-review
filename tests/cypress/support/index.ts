@@ -26,7 +26,8 @@ declare global {
             startNewContractAndRatesSubmission()
             fillOutContractDetails()
             fillOutRateDetails()
-            fillOutContacts()
+            fillOutStateContact()
+            fillOutActuaryContact()
             fillOutDocuments()
             reviewAndSubmitStateSubmissionForm()
         }

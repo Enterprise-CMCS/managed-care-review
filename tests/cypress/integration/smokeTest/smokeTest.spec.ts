@@ -15,7 +15,8 @@ describe('smoke test', () => {
         cy.fillOutRateDetails()
         cy.navigateForm('Continue')
 
-        cy.fillOutContacts()
+        cy.fillOutStateContact()
+        cy.fillOutActuaryContact()
         cy.navigateForm('Continue')
 
         cy.fillOutDocuments()
@@ -24,7 +25,7 @@ describe('smoke test', () => {
         cy.reviewAndSubmitStateSubmissionForm()
 
         cy.findByText('Dashboard').should('exist')
-        cy.findByText('PMAP').should('exist')
+        cy.findByText(/was sent to CMS/).should('exist')
     })
 
     // HM-TODO: Write test to log in as a CMS user

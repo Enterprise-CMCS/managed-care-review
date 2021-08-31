@@ -62,20 +62,25 @@ Cypress.Commands.add('fillOutRateDetails', () => {
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
-Cypress.Commands.add('fillOutContacts', () => {
+Cypress.Commands.add('fillOutStateContact', () => {
     // Must be on '/submissions/:id/contacts'
     // State contact
-    cy.findAllByLabelText('Name').eq(0).type('Test Person')
-    cy.findAllByLabelText('Title/Role').eq(0).type('Fancy Title')
-    cy.findAllByLabelText('Email').eq(0).type('test@test.com')
+    cy.findAllByLabelText('Name').eq(0).type('State Contact Person')
+    cy.findAllByLabelText('Title/Role').eq(0).type('State Contact Title')
+    cy.findAllByLabelText('Email').eq(0).type('statecontact@test.com')
+    cy.findAllByTestId('errorMessage').should('have.length', 0)
+})
 
+Cypress.Commands.add('fillOutActuaryContact', () => {
     // Actuary contact
-    cy.findAllByLabelText('Name').eq(1).type('Act Person')
-    cy.findAllByLabelText('Title/Role').eq(1).type('Act Title')
-    cy.findAllByLabelText('Email').eq(1).type('act@test.com')
+    cy.findAllByLabelText('Name').eq(1).type('Actuary Contact Person')
+    cy.findAllByLabelText('Title/Role').eq(1).type('Actuary Contact Title')
+    cy.findAllByLabelText('Email').eq(1).type('actuarycontact@test.com')
+
+    // Actuarial firm
     cy.findByLabelText('Mercer').safeClick()
 
-    // Select actuary communication preference
+    // Actuary communication preference
     cy.findByLabelText(
         `OACT can communicate directly with the state’s actuary but should copy the state on all written communication and all appointments for verbal discussions.`
     ).safeClick()
