@@ -1,13 +1,13 @@
 describe('state submission', () => {
     it('user encounters Not Found message when navigating to non-existent submission', () => {
-        cy.login()
+        cy.loginAsStateUser()
         cy.visit('/submissions/not-a-draft-submission/type')
         cy.findByText('404 / Page not found').should('exist')
         cy.findByText('Dashboard').not('exist')
     })
 
     it('user can start a new contract and rates submission and continue with valid input', () => {
-        cy.login()
+        cy.loginAsStateUser()
         cy.findByTestId('dashboardPage').should('exist')
         cy.findByRole('link', { name: 'Start new submission' }).click({
             force: true,
@@ -199,7 +199,7 @@ describe('state submission', () => {
     })
 
     it('user can start a new submission and see it on the dashboard', () => {
-        cy.login()
+        cy.loginAsStateUser()
         cy.startNewContractOnlySubmission()
 
         // This will break eventually, but is fixing a weird bug in CI where the heading hasn't been

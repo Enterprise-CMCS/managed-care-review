@@ -1,6 +1,6 @@
 describe('login', () => {
     it('user can login and logout as expected', () => {
-        cy.login()
+        cy.logInAsStateUser()
         cy.url().should('eq', Cypress.config().baseUrl + '/')
         cy.findByRole('button', { name: /Sign out/i })
             .should('exist')
@@ -10,7 +10,7 @@ describe('login', () => {
     })
 
     it('user can login and see personal dashboard for their state', () => {
-        cy.login()
+        cy.logInAsStateUser()
         cy.findByText('aang@dhs.state.mn.us').should('exist')
         cy.findByRole('heading', { name: 'Minnesota Dashboard' }).should(
             'exist'

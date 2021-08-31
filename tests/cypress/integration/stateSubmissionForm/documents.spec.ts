@@ -1,6 +1,6 @@
 describe('documents', () => {
     it('user can edit documents and save as draft', () => {
-        cy.login()
+        cy.loginAsStateUser()
         cy.startNewContractOnlySubmission()
 
         cy.location().then((fullUrl) => {
@@ -59,7 +59,7 @@ describe('documents', () => {
         })
 
         it('user can drag and drop as expected', () => {
-            cy.login()
+            cy.loginAsStateUser()
             cy.startNewContractOnlySubmission()
 
             // visit documents page

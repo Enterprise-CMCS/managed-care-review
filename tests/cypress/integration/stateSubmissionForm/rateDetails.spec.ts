@@ -1,6 +1,6 @@
 describe('rate details', () => {
     it('user can add a rates amendment', () => {
-        cy.login()
+        cy.loginAsStateUser()
         cy.startNewContractAndRatesSubmission()
 
         // Fill out Contract details

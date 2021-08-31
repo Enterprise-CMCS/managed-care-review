@@ -1,6 +1,6 @@
 describe('submission type', () => {
     it('user can switch a draft contract and rates submission to be contract only', () => {
-        cy.login()
+        cy.loginAsStateUser()
         cy.startNewContractAndRatesSubmission()
 
         // Fill out contract details
@@ -121,7 +121,7 @@ describe('submission type', () => {
     })
 
     it('user can edit a contract only submission', () => {
-        cy.login()
+        cy.loginAsStateUser()
         cy.startNewContractOnlySubmission()
         cy.findByTestId('step-indicator').should('exist')
 

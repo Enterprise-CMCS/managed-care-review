@@ -1,6 +1,6 @@
 describe('submission summary', () => {
     it('user can complete a submission, load dashboard with default program, and see submission summary', () => {
-        cy.login()
+        cy.loginAsStateUser()
         cy.startNewContractAndRatesSubmission()
 
         // Fill out contract details
