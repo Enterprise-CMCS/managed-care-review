@@ -116,7 +116,7 @@ describe('Cognito Login', () => {
         await waitFor(() => expect(loginSpy).toHaveBeenCalledTimes(1))
     })
 
-    it('when login is successful, redirect to dashboard', async () => {
+    it('when login is successful, redirect to /', async () => {
         const loginSpy = jest.spyOn(CognitoAuthApi, 'signIn').mockResolvedValue(
             new CognitoUser({
                 Username: 'foo@example.com',
@@ -134,9 +134,7 @@ describe('Cognito Login', () => {
         await userLogin(screen)
 
         await waitFor(() => expect(loginSpy).toHaveBeenCalledTimes(1))
-        await waitFor(() =>
-            expect(history.location.pathname).toBe('/dashboard')
-        )
+        await waitFor(() => expect(history.location.pathname).toBe('/'))
     })
 
     it('when login fails, stay on page and display error alert', async () => {

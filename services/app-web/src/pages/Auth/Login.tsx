@@ -65,7 +65,7 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
                     setShowFormAlert(true)
                 }
 
-                history.push('/dashboard')
+                history.push('/')
             }
         } catch (err) {
             console.log('Unexpected error signing in:', err)
