@@ -12,29 +12,28 @@ function testStageNames() {
 
     const tests = [
         ['main', 'main'],
-        ['wml-foo-bar', 'wml-foo-bar'],
+        ['wml-foo-bar', 'wmlfoobar'],
         ['mIxEdCaSe', 'mixedcase'],
         ['ch@ra☃️ters', 'chraters'],
         [
             'a-very-very-long-so-long-too-long-branch-name',
-            'a-very-very-long-so-long-3de28',
+            'averyverylongsolongtoolo0bb6d',
         ],
         [
             'dependabot/github_actions/actions/setup-node-2.3.0',
-            'dependabot-github-action-8e1c0',
+            'dependabotgithubactionsa291dc',
         ],
-        ['this/that', 'this-that'],
-        ['under_score', 'under-score'],
-        ['under-hyphen-_score', 'under-hyphen-score'],
-        ['under__under____score', 'under-under-score'],
-        ['thirty-characters-is-just-fine', 'thirty-characters-is-just-fine'],
-        ['thirty-one-is-one-char-too-many', 'thirty-one-is-one-char-t-faa2e'],
-        ['jf-items-amended-definitions-help', 'jf-items-amended-definit-8ba2a'],
-        ['jf-contract-rate-details-reorder', 'jf-contract-rate-details-a349e'],
+        ['this/that', 'thisthat'],
+        ['under_score', 'underscore'],
+        ['under-hyphen-_score', 'underhyphenscore'],
+        ['under__under____score', 'underunderscore'],
+        ['thirtycharactersnodashesisfine', 'thirtycharactersnodashesisfine'],
+        ['thirtyonewithoutdashesistoolong', 'thirtyonewithoutdashesis763ba'],
+        ['jf-items-amended-definitions-help', 'jfitemsamendeddefinitionshelp'],
         ['two3four5', 'two3four5'],
         [
             'dependabot/npm_and_yarn/testing-library/cypress-8.0.0',
-            'dependabot-npm-and-yarn-bf9f1',
+            'dependabotnpmandyarntest37b10',
         ],
     ];
 
@@ -62,7 +61,7 @@ function testStageNames() {
     }
 
     // these inputs should all error
-    const errorCases = ['3fourfive', '-start-with', ''];
+    const errorCases = ['3fourfive', ''];
 
     for (const errCase of errorCases) {
         const testProc = spawnSync('stage_name_for_branch.sh', [errCase]);

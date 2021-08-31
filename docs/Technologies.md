@@ -10,6 +10,7 @@ A great conceptual intro into how tables/indicies work:
 
 -   https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.CoreComponents.html
 -   https://www.dynamodbguide.com/what-is-dynamo-db
+-   https://www.youtube.com/watch?v=HaEPXoXVf2k&t=57s
 
 ## React Testing Library
 

@@ -1,7 +1,7 @@
 import { Resolvers } from '../gen/gqlServer'
 import statePrograms from '../data/statePrograms.json'
 
-export const userResolver: Resolvers['User'] = {
+export const stateUserResolver: Resolvers['StateUser'] = {
     state(parent) {
         const userState = parent.state_code
         const state = statePrograms.states.find((st) => st.code === userState)

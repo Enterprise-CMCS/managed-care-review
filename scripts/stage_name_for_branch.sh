@@ -5,7 +5,9 @@
 
 # Based on [this writeup](https://stackoverflow.com/questions/46052869/what-are-the-most-restrictive-aws-resource-name-limitations-e-g-characters-and), the rules we are going to enforce are as follows:
 
-# 1. Only lowercase alphanumeric characters and hyphens
+# Additionaly, AWS Aurora does not allow for _ or - in database names
+
+# 1. Only lowercase alphanumeric characters
 # 2. Minimum of 3 characters and maximum of 30
 # 3. First character must be a letter, cannot end with a hyphen or contain two consecutive hyphens
 
@@ -30,8 +32,8 @@ if [ -z "$branch_name" ]; then
     exit 1
 fi
 
-# translate _ and / into -
-branch_name=${branch_name//[_\/]/-}
+# delete _, - and /
+branch_name=${branch_name//[_\/\-]/}
 
 >&2 echo "translate $branch_name"
 
@@ -64,7 +66,7 @@ if [ ${#branch_name} -gt 30 ]; then
 
     >&2 echo "hash $branch_hash"
 
-    branch_name="${branch_name:0:24}-${branch_hash:0:5}"
+    branch_name="${branch_name:0:24}${branch_hash:0:5}"
 
     >&2 echo "combined $branch_name"
 

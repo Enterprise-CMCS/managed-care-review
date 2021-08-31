@@ -18,11 +18,12 @@ declare global {
     namespace Cypress {
         interface Chainable<Subject = any> {
             login(): void
+            cmsLogin(): void
             safeClick(): void
             navigateForm(buttonName: string): Chainable<Element>
-            startNewContractAndRatesSubmission()
-            startNewContractOnlySubmission()
-            waitForDocumentsToLoad()
+            startNewContractAndRatesSubmission(): void
+            startNewContractOnlySubmission(): void
+            waitForDocumentsToLoad(): void
         }
     }
 }

@@ -1,4 +1,4 @@
-import { CognitoUserType } from './cognitoUserType'
+import { CognitoStateUserType, CognitoUserType } from './cognitoUserType'
 
 export function isCognitoUser(user: unknown): user is CognitoUserType {
     if (user && typeof user === 'object') {
@@ -7,7 +7,7 @@ export function isCognitoUser(user: unknown): user is CognitoUserType {
             if (typeof roleUser.role === 'string') {
                 if (
                     roleUser.role === 'STATE_USER' ||
-                    roleUser.role === 'ADMIN'
+                    roleUser.role === 'CMS_USER'
                 ) {
                     return true
                 }
@@ -16,4 +16,10 @@ export function isCognitoUser(user: unknown): user is CognitoUserType {
     }
 
     return false
+}
+
+export function isStateUser(
+    user: CognitoUserType
+): user is CognitoStateUserType {
+    return user.role === 'STATE_USER'
 }

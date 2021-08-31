@@ -104,9 +104,10 @@ jobs:
           endpoint=$(./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name)
           echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
 
-      - name: Cypress setup
+      - name: Create Test Users
         run: |
-          ./scripts/add_cypress_test_users.sh $STAGE_PREFIX$branch_name
+          # this script was compiled along with ./dev above. If that changes, run `tsc` to compile it
+          node ./build_dev/scripts/add_cypress_test_users.js $STAGE_PREFIX$branch_name $TEST_USERS_PASS
 
       - name: Cypress run
         id: cypress

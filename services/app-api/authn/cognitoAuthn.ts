@@ -73,6 +73,60 @@ async function fetchUserFromCognito(
     return currentUser
 }
 
+// these are the strings sent for the "role" by IDM.
+const CMS_ROLE_ATTRIBUTE = 'macmcrrs-cms-user'
+const STATE_ROLE_ATTRIBUTE = 'macmcrrs-state-user'
+
+export function userTypeFromAttributes(attributes: {
+    [key: string]: string
+}): Result<CognitoUserType, Error> {
+    // check for all the shared attrs here
+    if (
+        !(
+            'custom:role' in attributes &&
+            'email' in attributes &&
+            'given_name' in attributes &&
+            'family_name' in attributes
+        )
+    ) {
+        return err(
+            new Error(
+                'User does not have all the required attributes: ' +
+                    JSON.stringify(attributes)
+            )
+        )
+    }
+
+    const roleAttribute = attributes['custom:role']
+    const fullName = attributes.given_name + ' ' + attributes.family_name
+
+    switch (roleAttribute) {
+        case CMS_ROLE_ATTRIBUTE:
+            return ok({
+                role: 'CMS_USER',
+                email: attributes.email,
+                name: fullName,
+            })
+        case STATE_ROLE_ATTRIBUTE:
+            if (!('custom:state_code' in attributes)) {
+                return err(
+                    new Error(
+                        'State User does not have all the required attributes: ' +
+                            JSON.stringify(attributes)
+                    )
+                )
+            }
+            return ok({
+                role: 'STATE_USER',
+                email: attributes.email,
+                name: fullName,
+                state_code: attributes['custom:state_code'],
+            })
+        default:
+            return err(new Error('Unsupported user role:  +' + roleAttribute))
+    }
+}
+
 // userFromCognitoAuthProvider hits the Cogntio API to get the information in the authProvider
 export async function userFromCognitoAuthProvider(
     authProvider: string
@@ -91,6 +145,7 @@ export async function userFromCognitoAuthProvider(
             userInfo.poolId
         )
 
+        // this is asserting that this is an error object, probably a better way to do that.
         if ('name' in fetchResult) {
             return err(fetchResult)
         }
@@ -99,34 +154,11 @@ export async function userFromCognitoAuthProvider(
 
         // we lose type safety here...
         const attributes = userAttrDict(currentUser)
-        if (
-            !(
-                'email' in attributes &&
-                'custom:state_code' in attributes &&
-                'given_name' in attributes &&
-                'family_name' in attributes
-            )
-        ) {
-            return err(
-                new Error(
-                    'User does not have all the required attributes: ' +
-                        JSON.stringify(attributes)
-                )
-            )
-        }
-
         console.log('got user attr dict: ', attributes)
 
-        const fullName = attributes.given_name + ' ' + attributes.family_name
+        const user = userTypeFromAttributes(attributes)
 
-        const user: CognitoUserType = {
-            email: attributes.email,
-            name: fullName,
-            state_code: attributes['custom:state_code'],
-            role: 'STATE_USER',
-        }
-
-        return ok(user)
+        return user
     } catch (e) {
         console.log('cognito ERR', e)
         return err(e)
