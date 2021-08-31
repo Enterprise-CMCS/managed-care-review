@@ -27,7 +27,6 @@ custom:
     name: ${self:custom.webAclName}
     version: V2
   bundle:
-    packager: yarn
     externals:
       - '@prisma/client'
     copyFiles:
@@ -35,7 +34,7 @@ custom:
         to: './'
     packagerOptions:
       scripts:
-        - yarn prisma generate
+        - prisma generate
   serverlessTerminationProtection:
     stages:
       - dev
