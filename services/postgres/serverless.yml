@@ -96,6 +96,7 @@ resources:
       Properties:
         Engine: aurora-postgresql
         EngineMode: serverless
+        EngineVersion: '13.3'
         DatabaseName: '${self:custom.databaseName}'
         MasterUsername: !Sub '{{resolve:secretsmanager:${PostgresSecret}::username}}'
         MasterUserPassword: !Sub '{{resolve:secretsmanager:${PostgresSecret}::password}}'
