@@ -44,7 +44,7 @@ describe('submission type', () => {
         }).safeClick()
 
         // Add documents
-        cy.findByRole('progressbar', { name: 'Loading' }).should('not.exist')
+        cy.waitForLoadingToComplete()
         cy.findByTestId('documents-hint').should(
             'contain.text',
             'Must include: An executed contract'

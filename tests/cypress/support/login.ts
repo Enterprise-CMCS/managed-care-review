@@ -1,7 +1,6 @@
-Cypress.Commands.add('loginAsStateUser', () => {
+Cypress.Commands.add('logInAsStateUser', () => {
     cy.visit('/')
-    // HM-TODO: Understand why this check should be happening here
-    cy.findByRole('progressbar', { name: 'Loading' }).should('not.exist')
+    cy.waitForLoadingToComplete()
     cy.findByRole('link', { name: 'Sign In' }).click()
     const authMode = Cypress.env('AUTH_MODE')
     console.log(authMode, 'authmode')
@@ -22,14 +21,22 @@ Cypress.Commands.add('loginAsStateUser', () => {
     }
 
     // this login/initial fetch can take a little while.
-    cy.findByRole('progressbar', { name: 'Loading' }).should('not.exist')
+    cy.waitForLoadingToComplete()
     cy.location('pathname', { timeout: 10_000 }).should('eq', '/')
     cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 })
 
 Cypress.Commands.add('cmsLogin', ({ initialURL } = { initialURL: '/' }) => {
     cy.visit(initialURL)
-    cy.findByRole('progressbar', { name: 'Loading' }).should('not.exist')
+    cy.waitForLoadingToComplete()
+    cy.waitForLoadingToComplete()
+    cy.url({ timeout: 10_000 }).should('match', /.*dashboard$/)
+    cy.findByRole('heading', { level: 1, name: /Dashboard/ })
+})
+
+Cypress.Commands.add('logInAsCMSUser', ({ initialURL } = { initialURL: '/' }) => {
+    cy.visit(initialURL)
+    cy.waitForLoadingToComplete()
     cy.findByRole('link', { name: 'Sign In' }).click()
     const authMode = Cypress.env('AUTH_MODE')
     console.log(authMode, 'authmode')
@@ -50,6 +57,6 @@ Cypress.Commands.add('cmsLogin', ({ initialURL } = { initialURL: '/' }) => {
     }
 
     // this login/initial fetch can take a little while.
-    cy.findByRole('progressbar', { name: 'Loading' }).should('not.exist')
+    cy.waitForLoadingToComplete()
     cy.url({ timeout: 10_000 }).should('contain', initialURL)
 })

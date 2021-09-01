@@ -64,7 +64,7 @@ describe('submission summary', () => {
         cy.navigateForm('Submit')
         cy.findByRole('dialog').should('exist')
         cy.navigateForm('Confirm submit')
-        cy.findByRole('progressbar', { name: 'Loading' }).should('not.exist')
+        cy.waitForLoadingToComplete()
         cy.findByText('Dashboard').should('exist')
         cy.findByText('PMAP').should('exist')
 
