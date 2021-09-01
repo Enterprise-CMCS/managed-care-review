@@ -40,8 +40,10 @@ function assertIsS3PutResponse(val: unknown): asserts val is s3PutResponse {
 export function newAmplifyS3Client(bucketName: string): S3ClientT {
     return {
         uploadFile: async (file: File): Promise<string | S3Error> => {
+            const filename = `${Date.now()}-${file.name}`
+
             try {
-                const stored = await Storage.vault.put(file.name, file, {
+                const stored = await Storage.vault.put(filename, file, {
                     contentType: file.type,
                 })
 
