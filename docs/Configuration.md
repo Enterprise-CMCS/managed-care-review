@@ -46,12 +46,11 @@ These four env vars configure cognito auth from the browser. They are ignored if
 
 ### `REACT_APP_APPLICATION_ENDPOINT`
 
-Read by nightwatch and app-web
+Read by app-web
 
 valid values: A URL where a running app-web can be reached
 
-This is used by nightwatch to configure where it tries to reach the app to conduct its testing. Run it locally with ./dev test
-It's also used as the redirects for login by app-web
+It's used as the redirects for login by app-web when it configures login via IDM.
 
 ### `APP_VERSION`
 
