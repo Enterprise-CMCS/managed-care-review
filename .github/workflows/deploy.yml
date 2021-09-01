@@ -99,7 +99,7 @@ jobs:
         with:
           token: '${{ github.token }}'
           environment: review-app
-          description: stack $branch_name
+          description: stack ${{ env.branch_name }}
           initial_status: in_progress
 
       - name: deploy
@@ -120,7 +120,7 @@ jobs:
         uses: chrnorm/deployment-status@releases/v1
         with:
           token: '${{ github.token }}'
-          target_url: ${{env.APPLICATION_ENDPOINT}}
+          environment_url: ${{env.APPLICATION_ENDPOINT}}
           state: 'success'
           deployment_id: ${{ steps.ghdeployment.outputs.deployment_id }}
 
