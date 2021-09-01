@@ -43,6 +43,9 @@ Cypress.Commands.add('navigateForm', (buttonAccessibleName: 'string') => {
     cy.findByRole('button', {
         name: buttonAccessibleName,
     }).safeClick()
+
+    // HM-TODO: Understand why this check should be happening here
+    cy.findByRole('progressbar', { name: 'Loading' }).should('not.exist')
 })
 
 Cypress.Commands.add('waitForDocumentsToLoad', () => {
