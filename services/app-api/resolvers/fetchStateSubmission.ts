@@ -11,11 +11,6 @@ export function fetchStateSubmissionResolver(
     store: Store
 ): QueryResolvers['fetchStateSubmission'] {
     return async (_parent, { input }, context) => {
-        // This resolver is only callable by state users
-        if (!isStateUser(context.user)) {
-            throw new ForbiddenError('user not authorized to fetch state data')
-        }
-
         // fetch from the store
         const result = await store.findStateSubmission(input.submissionID)
 
