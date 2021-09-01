@@ -79,7 +79,7 @@ describe('submission type', () => {
         )
         cy.findByRole('textbox', { name: 'Submission description' }).should(
             'have.value',
-            'description of rates submission'
+            'description of contract and rates submission'
         )
         cy.findByLabelText('Contract action only').safeClick()
         cy.navigateForm('Continue')
