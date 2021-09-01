@@ -27,13 +27,9 @@ custom:
     name: ${self:custom.webAclName}
     version: V2
   bundle:
-    packager: yarn
-    esbuild: true
+    packager: npm
     externals:
       - '@prisma/client'
-    copyFiles:
-      - from: 'prisma/schema.prisma'
-        to: './'
     packagerOptions:
       scripts:
         - prisma generate
