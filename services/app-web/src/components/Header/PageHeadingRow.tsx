@@ -82,6 +82,6 @@ export const PageHeadingRow = ({
     } else if (loggedInUser.__typename === 'StateUser') {
         return <StateUserRow user={loggedInUser} heading={heading} />
     } else {
-        throw new Error(`Unexpected user type: ${loggedInUser}`)
+        return <h1>Programming Error: Unkown User Type: {loggedInUser}</h1>
     }
 }

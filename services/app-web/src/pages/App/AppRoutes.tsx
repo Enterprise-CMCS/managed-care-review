@@ -7,6 +7,7 @@ import { LocalLogin } from '../Auth/LocalLogin'
 import { Error404 } from '../Errors/Error404'
 import { useAuth } from '../../contexts/AuthContext'
 import { Dashboard } from '../Dashboard/Dashboard'
+import { CMSDashboard } from '../Dashboard/CMSDashboard'
 import { Landing } from '../Landing/Landing'
 import { RoutesRecord } from '../../constants/routes'
 import { StateSubmissionForm } from '../StateSubmissionForm/StateSubmissionForm'
@@ -64,6 +65,8 @@ const StateUserRoutes = (): React.ReactElement => {
 const CMSUserRoutes = (): React.ReactElement => {
     return (
         <Switch>
+            <Route path={RoutesRecord.ROOT} exact component={CMSDashboard} />
+            <Route path={RoutesRecord.DASHBOARD} component={CMSDashboard} />
             <Route
                 path={RoutesRecord.SUBMISSIONS_FORM}
                 component={SubmissionSummary}
