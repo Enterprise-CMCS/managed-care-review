@@ -9,9 +9,10 @@ Cypress.Commands.add('startNewContractOnlySubmission', () => {
     cy.findByText('New submission').should('exist')
 
     // Fill out Submission type
-    cy.findByLabelText('Contract action only').safeClick()
     cy.findByRole('combobox', { name: 'Program' }).select('pmap')
+    cy.findByLabelText('Contract action only').safeClick()
     cy.findByRole('textbox', { name: 'Submission description' })
+        // HM-TODO: Move this check to dashboard page
         .should('exist')
         .type('description of contract only submission')
 
@@ -31,10 +32,10 @@ Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
     cy.findByText('New submission').should('exist')
 
     // Fill out Submission type
-    cy.findByLabelText('Contract action and rate certification').safeClick()
     cy.findByRole('combobox', { name: 'Program' }).select('pmap')
-    // HM-TODO: Move this check to dashboard page
+    cy.findByLabelText('Contract action and rate certification').safeClick()
     cy.findByRole('textbox', { name: 'Submission description' })
+        // HM-TODO: Move this check to dashboard page
         .should('exist')
         .type('description of contract and rates submission')
 
