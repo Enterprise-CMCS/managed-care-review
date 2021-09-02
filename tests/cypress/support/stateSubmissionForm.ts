@@ -15,10 +15,7 @@ Cypress.Commands.add('startNewContractOnlySubmission', () => {
         // HM-TODO: Move this check to dashboard page
         .should('exist')
         .type('description of contract only submission')
-
-    // HM-TODO: This navigation and check should happen in submissionType.spec
-    cy.navigateForm('Continue')
-    cy.findByText(/^MN-PMAP-/).should('exist')
+    cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
 Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
@@ -38,10 +35,7 @@ Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
         // HM-TODO: Move this check to dashboard page
         .should('exist')
         .type('description of contract and rates submission')
-
-    // HM-TODO: This navigation and check should happen in submissionType.spec
-    cy.navigateForm('Continue')
-    cy.findByText(/^MN-PMAP-/).should('exist')
+    cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
 Cypress.Commands.add('fillOutContractDetails', () => {
