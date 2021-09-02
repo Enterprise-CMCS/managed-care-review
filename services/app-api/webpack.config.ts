@@ -1,9 +1,8 @@
 import glob from 'glob'
 import path from 'path'
-import { Configuration, IgnorePlugin } from 'webpack'
+import { IgnorePlugin } from 'webpack'
 import { CleanWebpackPlugin } from 'clean-webpack-plugin'
-import CopyPlugin from 'copy-webpack-plugin'
-import PermissionsPlugin from 'webpack-permissions-plugin'
+import CopyWebpackPlugin from 'copy-webpack-plugin'
 
 interface EntryOutput {
     entry: string
@@ -29,7 +28,7 @@ const entries: EntryOutput[] = glob
         ]
     }, [])
 
-const config: Configuration[] = entries.map(({ entry, output }) => ({
+const config = entries.map(({ entry, output }) => ({
     entry,
     output: {
         ...output,
@@ -59,7 +58,7 @@ const config: Configuration[] = entries.map(({ entry, output }) => ({
         new IgnorePlugin({
             resourceRegExp: /encoding/,
         }),
-        new CopyPlugin({
+        new CopyWebpackPlugin({
             patterns: [
                 {
                     from: path.resolve(
@@ -74,17 +73,6 @@ const config: Configuration[] = entries.map(({ entry, output }) => ({
                         './node_modules/.prisma/client/schema.prisma'
                     ),
                     to: output.path,
-                },
-            ],
-        }),
-        new PermissionsPlugin({
-            buildFiles: [
-                {
-                    path: path.resolve(
-                        __dirname,
-                        `${output.path}/query-engine-rhel-openssl-1.0.x`
-                    ),
-                    fileMode: '755',
                 },
             ],
         }),
