@@ -29,6 +29,7 @@ custom:
   bundle:
     externals:
       - '@prisma/client'
+      - '@prisma/cli'
     copyFiles:
       - from: 'prisma/schema.prisma'
         to: './'
