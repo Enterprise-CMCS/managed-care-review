@@ -1,10 +1,7 @@
 describe('submission summary', () => {
     it('user can complete a submission, load dashboard with default program, and see submission summary', () => {
         cy.loginAsStateUser()
-
         cy.startNewContractAndRatesSubmission()
-        cy.navigateForm('Continue')
-        cy.findByText(/^MN-PMAP-/).should('exist')
 
         // Fill out contract details
         cy.findByLabelText('Base contract').safeClick()

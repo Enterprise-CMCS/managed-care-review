@@ -1,10 +1,7 @@
 describe('rate details', () => {
     it('user can add a rates amendment', () => {
         cy.loginAsStateUser()
-
         cy.startNewContractAndRatesSubmission()
-        cy.navigateForm('Continue')
-        cy.findByText(/^MN-PMAP-/).should('exist')
 
         // Fill out Contract details
         cy.findByRole('heading', { name: /Contract details/ })
