@@ -1,10 +1,10 @@
 describe('state submission', () => {
-    it('user encounters Not Found message when navigating to non-existent submission', () => {
-        cy.logInAsStateUser()
-        cy.visit('/submissions/not-a-draft-submission/type')
-        cy.findByText('404 / Page not found').should('exist')
-        cy.findByText('Dashboard').not('exist')
-    })
+    // it('user encounters Not Found message when navigating to non-existent submission', () => {
+    //     cy.logInAsStateUser()
+    //     cy.visit('/submissions/not-a-draft-submission/type')
+    //     cy.findByText('404 / Page not found').should('exist')
+    //     cy.findByText('Dashboard').not('exist')
+    // })
 
     it('user can start a new contract and rates submission and continue with valid input', () => {
         cy.logInAsStateUser()
