@@ -18,7 +18,7 @@
         "aws-sdk": "^2.975.0",
         "eslint-config-prettier": "^8.3.0",
         "eslint-plugin-jest": "^24.4.0",
-        "eslint-plugin-prettier": "^3.4.0",
+        "eslint-plugin-prettier": "^4.0.0",
         "graphql": "^15.5.1",
         "graphql-scalars": "^1.10.0",
         "neverthrow": "^4.2.2",
