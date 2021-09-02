@@ -36,9 +36,7 @@ describe('submission summary', () => {
         ).safeClick()
 
         // Continue button navigates to documents page
-        cy.findByRole('button', {
-            name: 'Continue',
-        }).safeClick()
+        cy.navigateForm('Continue')
 
         // Add documents
         cy.findByTestId('file-input-input').attachFile(

@@ -37,9 +37,7 @@ describe('state submission', () => {
         cy.findByText(
             'You must provide a description of any major changes or updates'
         ).should('not.exist')
-        cy.findByRole('button', {
-            name: 'Continue',
-        }).safeClick()
+        cy.navigateForm('Continue')
 
         // // Check Step Indicator loads with contract details heading
         // cy.findByTestId('step-indicator')
@@ -108,9 +106,7 @@ describe('state submission', () => {
         ).safeClick()
 
         // Continue button navigates to documents page
-        cy.findByRole('button', {
-            name: 'Continue',
-        }).safeClick()
+        cy.navigateForm('Continue')
 
         cy.findByText(/MN-MSHO-/).should('exist')
         cy.findByTestId('file-input-input').should('exist')

@@ -39,9 +39,7 @@ describe('submission type', () => {
         ).safeClick()
 
         // Continue button navigates to documents page
-        cy.findByRole('button', {
-            name: 'Continue',
-        }).safeClick()
+        cy.navigateForm('Continue')
 
         // Add documents
         cy.waitForLoadingToComplete()
@@ -96,9 +94,7 @@ describe('submission type', () => {
             .findAllByText('Contract details')
             .should('have.length', 2)
 
-        cy.findByRole('button', {
-            name: 'Continue',
-        }).safeClick()
+        cy.navigateForm('Continue')
 
         // change state contacts
         cy.findByLabelText('Name').clear()
@@ -107,9 +103,7 @@ describe('submission type', () => {
         cy.findByLabelText('Email').clear()
         cy.findByLabelText('Email').type('test2@test.com')
 
-        cy.findByRole('button', {
-            name: 'Continue',
-        }).safeClick()
+        cy.navigateForm('Continue')
 
         // Check that documents loads with correct data
         cy.findByRole('heading', { name: /Documents/ })
