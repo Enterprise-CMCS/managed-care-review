@@ -1,6 +1,7 @@
 describe('CMS User can view submission', () => {
     it('state user can complete a submission, CMS user can retrieve it', () => {
         cy.logInAsStateUser()
+        cy.waitForLoadingToComplete()
         cy.startNewContractAndRatesSubmission()
         cy.navigateForm('Continue')
         cy.findByText(/^MN-PMAP-/).should('exist')
