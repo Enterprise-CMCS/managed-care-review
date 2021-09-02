@@ -1,7 +1,9 @@
 describe('submission summary', () => {
     //     it('user can complete a submission, load dashboard with default program, and see submission summary', () => {
-    //         cy.loginAsStateUser()
+    //         cy.logInAsStateUser()
     //         cy.startNewContractAndRatesSubmission()
+    //         cy.navigateForm('Continue')
+    //         cy.findByText(/^MN-PMAP-/).should('exist')
     //         // Fill out contract details
     //         cy.findByLabelText('Base contract').safeClick()
     //         cy.findByLabelText('Start date').type('04/01/2024')

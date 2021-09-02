@@ -1,7 +1,9 @@
 describe('CMS User can view submission', () => {
     it('state user can complete a submission, CMS user can retrieve it', () => {
-        cy.login()
+        cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
+        cy.navigateForm('Continue')
+        cy.findByText(/^MN-PMAP-/).should('exist')
 
         // Fill out contract details
         cy.findByLabelText('Base contract').safeClick()
@@ -93,7 +95,7 @@ describe('CMS User can view submission', () => {
             const submissionPath = `/submissions/${submissionId}`
             cy.log('GOING TO', submissionPath)
             cy.visit(submissionPath)
-            cy.cmsLogin({ initialURL: submissionPath })
+            cy.logInAsCMSUser({ initialURL: submissionPath })
 
             cy.findByTestId('submission-summary').should('exist')
         })
