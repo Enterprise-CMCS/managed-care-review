@@ -22,12 +22,12 @@ Cypress.Commands.add('login', () => {
 
     // this login/initial fetch can take a little while.
     cy.findByRole('progressbar', { name: 'Loading' }).should('not.exist')
-    cy.url({ timeout: 10_000 }).should('match', /.*dashboard$/)
+    cy.location('pathname', { timeout: 10_000 }).should('eq', '/')
     cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 })
 
-Cypress.Commands.add('cmsLogin', () => {
-    cy.visit('/')
+Cypress.Commands.add('cmsLogin', ({ initialURL } = { initialURL: '/' }) => {
+    cy.visit(initialURL)
     cy.findByRole('progressbar', { name: 'Loading' }).should('not.exist')
     cy.findByRole('link', { name: 'Sign In' }).click()
     const authMode = Cypress.env('AUTH_MODE')
@@ -50,5 +50,5 @@ Cypress.Commands.add('cmsLogin', () => {
 
     // this login/initial fetch can take a little while.
     cy.findByRole('progressbar', { name: 'Loading' }).should('not.exist')
-    cy.url({ timeout: 10_000 }).should('match', /.*dashboard$/)
+    cy.url({ timeout: 10_000 }).should('contain', initialURL)
 })

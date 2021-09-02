@@ -1,7 +1,7 @@
 describe('login', () => {
     it('user can login and logout as expected', () => {
         cy.login()
-        cy.url().should('eq', Cypress.config().baseUrl + '/dashboard')
+        cy.url().should('eq', Cypress.config().baseUrl + '/')
         cy.findByRole('button', { name: /Sign out/i })
             .should('exist')
             .safeClick()

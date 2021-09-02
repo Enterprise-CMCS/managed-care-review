@@ -57,7 +57,7 @@ export function LocalLogin(): React.ReactElement {
 
         try {
             await checkAuth()
-            history.push('/dashboard')
+            history.push('/')
         } catch (error) {
             setShowFormAlert(true)
             console.log('Log: Server Error')

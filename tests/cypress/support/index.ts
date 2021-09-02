@@ -18,7 +18,7 @@ declare global {
     namespace Cypress {
         interface Chainable<Subject = any> {
             login(): void
-            cmsLogin(): void
+            cmsLogin(args?: { initialURL?: string }): void
             safeClick(): void
             navigateForm(buttonName: string): Chainable<Element>
             startNewContractAndRatesSubmission(): void
