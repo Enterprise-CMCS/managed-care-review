@@ -459,7 +459,7 @@ export const Contacts = ({
 
                                             <button
                                                 type="button"
-                                                className={`usa-button usa-button---outline ${styles.addContactBtn}`}
+                                                className={`usa-button usa-button--outline ${styles.addContactBtn}`}
                                                 onClick={() => {
                                                     push(emptyStateContact)
                                                     setFocusNewContact(true)
@@ -827,7 +827,7 @@ export const Contacts = ({
 
                                                 <button
                                                     type="button"
-                                                    className={`usa-button usa-button---outline ${styles.addContactBtn}`}
+                                                    className={`usa-button usa-button--outline ${styles.addContactBtn}`}
                                                     onClick={() => {
                                                         push(
                                                             emptyActuaryContact
