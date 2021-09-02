@@ -224,7 +224,7 @@ Cloudtamer credentials are updated.
 
 Currently, `ctkey-wrapper` requires the user to be running the openconnect-tinyproxy
 container [here](https://github.com/trussworks/openconnect-tinyproxy) to connect
-to Cloudtamer..
+to Cloudtamer.
 
 ## License
 
