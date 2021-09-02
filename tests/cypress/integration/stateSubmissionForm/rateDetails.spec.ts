@@ -1,7 +1,9 @@
 describe('rate details', () => {
     it('user can add a rates amendment', () => {
-        cy.login()
+        cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
+        cy.navigateForm('Continue')
+        cy.findByText(/^MN-PMAP-/).should('exist')
 
         // Fill out Contract details
         cy.findByRole('heading', { name: /Contract details/ })
@@ -9,9 +11,7 @@ describe('rate details', () => {
             .should('exist')
             .safeClick()
         cy.findByLabelText('Amendment to base contract').should('be.checked')
-        cy.findByRole('button', {
-            name: 'Continue',
-        }).safeClick()
+        cy.navigateForm('Continue')
         cy.findByLabelText('Start date').should('exist').type('03/01/2024')
         cy.findByLabelText('End date').type('03/31/2026')
         cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
