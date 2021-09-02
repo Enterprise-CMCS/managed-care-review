@@ -98,7 +98,7 @@ jobs:
         id: ghdeployment
         with:
           token: '${{ github.token }}'
-          environment: review-app
+          environment: review-apps
           description: stack ${{ env.branch_name }}
           initial_status: in_progress
 
