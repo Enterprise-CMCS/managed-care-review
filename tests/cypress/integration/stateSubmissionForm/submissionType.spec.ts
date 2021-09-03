@@ -1,21 +1,12 @@
 describe('submission type', () => {
     it('user can switch a draft contract and rates submission to be contract only', () => {
-        cy.loginAsStateUser()
+        cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
+        cy.navigateForm('Continue')
 
         // Fill out contract details
-        cy.findByLabelText('Base contract').safeClick()
-        cy.findByLabelText('Start date').type('04/01/2024')
-        cy.findByLabelText('End date').type('03/31/2025').blur()
-        cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
-        cy.findByLabelText('1932(a) State Plan Authority').safeClick()
-        cy.findAllByTestId('errorMessage').should('have.length', 0)
-
-        // MUST USE CLICK NOT SAFE CLICK TO AVOID FLAKES
-        cy.findByRole('button', {
-            name: 'Continue',
-        }).click()
-        cy.waitForLoadingToComplete()
+        cy.fillOutContractDetails()
+        cy.navigateForm('Continue')
 
         //Add rate details
         cy.findByLabelText('New rate certification').safeClick()

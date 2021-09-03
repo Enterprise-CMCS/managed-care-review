@@ -1,19 +1,13 @@
 describe('submission summary', () => {
     it('user can complete a submission, load dashboard with default program, and see submission summary', () => {
-        cy.loginAsStateUser()
+        cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
-        // Fill out contract details
-        cy.findByLabelText('Base contract').safeClick()
-        cy.findByLabelText('Start date').type('04/01/2024')
-        cy.findByLabelText('End date').type('03/31/2025').blur()
-        cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
-        cy.findByLabelText('1932(a) State Plan Authority').safeClick()
-        cy.findAllByTestId('errorMessage').should('have.length', 0)
-        cy.findByRole('button', {
-            name: 'Continue',
-        }).click()
+        cy.navigateForm('Continue')
 
-        cy.waitForLoadingToComplete()
+        // Fill out contract details
+        cy.fillOutContractDetails()
+        cy.navigateForm('Continue')
+
         //Fill out rate details
         cy.findByLabelText('New rate certification').safeClick()
         cy.findByLabelText('Start date').type('02/29/2024')
