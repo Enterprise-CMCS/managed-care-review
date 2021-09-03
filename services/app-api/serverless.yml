@@ -32,7 +32,7 @@ custom:
     packager: 'yarn'
     packagerOptions:
       scripts:
-        - yarn run prisma generate
+        - yarn prisma generate
   serverlessTerminationProtection:
     stages:
       - dev
