@@ -27,7 +27,7 @@ custom:
     name: ${self:custom.webAclName}
     version: V2
   webpack:
-    webpackConfig: 'webpack.config.ts'
+    webpackConfig: 'webpack.config.js'
     includeModules: true
     packager: 'yarn'
     packagerOptions:
