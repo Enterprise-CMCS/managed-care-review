@@ -1,40 +1,56 @@
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const nodeExternals = require('webpack-node-externals');
 const path = require('path');
 const slsw = require('serverless-webpack');
 
 const isLocal = slsw.lib.webpack.isLocal;
 
+const tsConfigPath = 'tsconfig.json';
+const extensions = ['.js', '.jsx', '.json', '.ts', '.tsx', '.graphql', '.gql'];
+const servicePath = '';
+
 module.exports = {
-    mode: isLocal ? 'development' : 'production',
     entry: slsw.lib.entries,
+    target: 'node',
+    mode: isLocal ? 'development' : 'production',
     externals: [nodeExternals()],
     devtool: 'source-map',
     resolve: {
-        extensions: ['.ts', '.tsx', '.js'],
+        modules: [path.resolve(__dirname, 'node_modules'), 'node_modules'],
+        extensions: extensions,
+        plugins: [
+            new TsconfigPathsPlugin({
+                configFile: tsConfigPath,
+                extensions: extensions,
+            }),
+        ],
     },
-    output: {
-        libraryTarget: 'commonjs2',
-        path: path.join(__dirname, '.webpack'),
-        filename: '[name].js',
-    },
-    target: 'node',
-
     module: {
         rules: [
             {
                 // Include ts, tsx, js, and jsx files.
-                test: /\.(ts|js)x?$/,
-                exclude: /node_modules|testHelpers/,
+                test: /\.(ts|tsx)$/,
                 use: [
                     {
                         loader: 'ts-loader',
                         options: {
-                            transpileOnly: false,
                             projectReferences: true,
+                            configFile: tsConfigPath,
+                            experimentalWatchApi: true,
                         },
                     },
                 ],
+                exclude: [
+                    path.resolve(servicePath, 'node_modules'),
+                    path.resolve(servicePath, '.serverless'),
+                    path.resolve(servicePath, '.webpack'),
+                ],
+            },
+            {
+                test: /\.(graphql|gql)$/,
+                exclude: /node_modules/,
+                loader: 'graphql-tag/loader',
             },
         ],
     },
