@@ -157,7 +157,8 @@ export interface ContractDetailsFormValues {
     relatedToVaccination: string
     federalAuthorities: FederalAuthority[]
 }
-type FormError = FormikErrors<ContractDetailsFormValues>[keyof FormikErrors<ContractDetailsFormValues>]
+type FormError =
+    FormikErrors<ContractDetailsFormValues>[keyof FormikErrors<ContractDetailsFormValues>]
 
 export const ContractDetails = ({
     draftSubmission,
@@ -236,9 +237,8 @@ export const ContractDetails = ({
 
             const amendedOther = formatForApi(values.otherItemAmended)
 
-            let capitationInfo:
-                | CapitationRatesAmendedInfo
-                | undefined = undefined
+            let capitationInfo: CapitationRatesAmendedInfo | undefined =
+                undefined
             if (values.itemsAmended.includes('CAPITATION_RATES')) {
                 capitationInfo = {
                     reason: values.capitationRates,
@@ -301,10 +301,7 @@ export const ContractDetails = ({
                         className={styles.formContainer}
                         id="ContractDetailsForm"
                         aria-label="Contract Details Form"
-                        onSubmit={(e) => {
-                            e.preventDefault()
-                            if (!isValidating) handleSubmit()
-                        }}
+                        onSubmit={handleSubmit}
                     >
                         <fieldset className="usa-fieldset">
                             <legend className="srOnly">Contract Details</legend>
@@ -389,9 +386,10 @@ export const ContractDetails = ({
                                                     name: 'contractDateStart',
                                                     defaultValue:
                                                         values.contractDateStart,
-                                                    maxDate: formattedDateMinusOneDay(
-                                                        values.contractDateEnd
-                                                    ),
+                                                    maxDate:
+                                                        formattedDateMinusOneDay(
+                                                            values.contractDateEnd
+                                                        ),
                                                     onChange: (val) =>
                                                         setFieldValue(
                                                             'contractDateStart',
@@ -408,9 +406,10 @@ export const ContractDetails = ({
                                                     name: 'contractDateEnd',
                                                     defaultValue:
                                                         values.contractDateEnd,
-                                                    minDate: formattedDatePlusOneDay(
-                                                        values.contractDateStart
-                                                    ),
+                                                    minDate:
+                                                        formattedDatePlusOneDay(
+                                                            values.contractDateStart
+                                                        ),
                                                     onChange: (val) =>
                                                         setFieldValue(
                                                             'contractDateEnd',
@@ -607,8 +606,7 @@ export const ContractDetails = ({
                                                         }
                                                         to={{
                                                             pathname: '/help',
-                                                            hash:
-                                                                '#items-being-amended-definitions',
+                                                            hash: '#items-being-amended-definitions',
                                                         }}
                                                         target="_blank"
                                                     >

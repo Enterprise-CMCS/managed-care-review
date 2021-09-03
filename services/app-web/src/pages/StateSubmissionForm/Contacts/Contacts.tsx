@@ -284,18 +284,7 @@ export const Contacts = ({
                             className={styles.formContainer}
                             id="ContactsForm"
                             aria-label="Contacts Form"
-                            onSubmit={(e) => {
-                                e.preventDefault()
-                                // I don't really understand why we have been checking isValidating in all these
-                                // handlers, so I'm going to ask Hana about that.
-                                // From the docs it seems like isValidating should only be set while we are in the
-                                // middle of submitting anyway.
-                                // HOWEVER. for some reason. On this page of the form, only in linux,
-                                // isValidating is set as soon as we start editing something on the page.
-                                // Might have to do with FieldArray b/c this is the only place we use it.
-                                // So I'm removing the if !isValidating for now and letting Formik handle things.
-                                handleSubmit()
-                            }}
+                            onSubmit={handleSubmit}
                         >
                             <fieldset className="usa-fieldset">
                                 <h3>State contacts</h3>

@@ -222,14 +222,7 @@ export const SubmissionType = ({
             onSubmit={handleFormSubmit}
             validationSchema={SubmissionTypeFormSchema}
         >
-            {({
-                values,
-                errors,
-                handleSubmit,
-                isSubmitting,
-                isValidating,
-                validateForm,
-            }) => (
+            {({ values, errors, handleSubmit, isSubmitting }) => (
                 <>
                     <UswdsForm
                         className={styles.formContainer}
@@ -239,17 +232,7 @@ export const SubmissionType = ({
                                 ? 'New Submission Form'
                                 : 'Submission Type Form'
                         }
-                        onSubmit={(e) => {
-                            e.preventDefault()
-                            validateForm()
-                                .then(() => {
-                                    setShouldValidate(true)
-                                })
-                                .catch(() =>
-                                    console.warn('Log: Validation Error')
-                                )
-                            if (!isValidating) handleSubmit()
-                        }}
+                        onSubmit={handleSubmit}
                     >
                         <fieldset className="usa-fieldset">
                             <legend className="srOnly">Submission type</legend>
@@ -358,7 +341,13 @@ export const SubmissionType = ({
                             >
                                 Cancel
                             </Link>
-                            <Button type="submit" disabled={isSubmitting}>
+                            <Button
+                                type="submit"
+                                disabled={isSubmitting}
+                                onClick={() => {
+                                    setShouldValidate(true)
+                                }}
+                            >
                                 Continue
                             </Button>
                         </ButtonGroup>
