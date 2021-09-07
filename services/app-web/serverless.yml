@@ -12,6 +12,7 @@ plugins:
   - serverless-s3-sync
   - serverless-cloudfront-invalidate
   - serverless-stack-termination-protection
+  - serverless-s3-bucket-helper
 
 custom:
   stage: ${opt:stage, self:provider.stage}

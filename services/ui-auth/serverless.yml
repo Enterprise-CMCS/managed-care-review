@@ -2,6 +2,9 @@ service: ui-auth
 
 frameworkVersion: '2'
 
+plugins:
+  - serverless-s3-bucket-helper
+
 custom:
   stage: ${opt:stage, self:provider.stage}
   region: ${opt:region, self:provider.region}

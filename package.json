@@ -41,6 +41,7 @@
         "prettier": "^2.3.2",
         "serverless": "^2.57.0",
         "serverless-plugin-scripts": "^1.0.2",
+        "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",
         "typescript": "^4.3.5",
         "yargs": "^17.1.1"
     },

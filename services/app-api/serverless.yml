@@ -10,6 +10,7 @@ plugins:
   - serverless-offline
   - serverless-associate-waf
   - serverless-stack-termination-protection
+  - serverless-s3-bucket-helper
 
 custom:
   stage: ${opt:stage, self:provider.stage}
