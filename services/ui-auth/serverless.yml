@@ -3,6 +3,7 @@ service: ui-auth
 frameworkVersion: '2'
 
 plugins:
+  - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
 
 custom:
