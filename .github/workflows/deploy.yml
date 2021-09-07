@@ -92,7 +92,18 @@ jobs:
           coverageLocations: |
             ${{github.workspace}}/services/app-api/coverage/lcov.info:lcov
             ${{github.workspace}}/services/app-web/coverage/lcov.info:lcov
+
+      - uses: chrnorm/deployment-action@releases/v1
+        name: Create GitHub deployment
+        id: ghdeployment
+        with:
+          token: '${{ github.token }}'
+          environment: review-apps
+          description: stack ${{ env.branch_name }}
+          initial_status: in_progress
+
       - name: deploy
+        id: deploy
         run: |
           # When deploying multiple copies of this quickstart to the same AWS Account (not ideal), a prefix helps prevent stepping on each other.
           # This can optionally be set as an GitHub Actions Secret
@@ -103,6 +114,23 @@ jobs:
           cd services
           endpoint=$(./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name)
           echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
+
+      - name: Update deployment status (success)
+        if: success()
+        uses: chrnorm/deployment-status@releases/v1
+        with:
+          token: '${{ github.token }}'
+          environment_url: ${{env.APPLICATION_ENDPOINT}}
+          state: 'success'
+          deployment_id: ${{ steps.ghdeployment.outputs.deployment_id }}
+
+      - name: Update deployment status (failure)
+        if: failure() && steps.deploy.outcome == 'failure'
+        uses: chrnorm/deployment-status@releases/v1
+        with:
+          token: '${{ github.token }}'
+          state: 'failure'
+          deployment_id: ${{ steps.ghdeployment.outputs.deployment_id }}
 
       - name: Create Test Users
         run: |
