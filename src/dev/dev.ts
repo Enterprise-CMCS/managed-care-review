@@ -3,7 +3,6 @@ import { commandMustSucceedSync } from './localProcess.js'
 import LabeledProcessRunner from './runner.js'
 
 import { parseRunFlags } from './flags.js'
-import { checkURLIsUp } from './deps.js'
 
 import {
     runDBLocally,
@@ -112,7 +111,7 @@ async function runAllTests({
         }
 
         if (runOnline) {
-            await runOnlineTests(runner)
+            await runOnlineTests()
         }
     } catch (e) {
         console.log('Testing Error', e)
@@ -138,30 +137,10 @@ async function runUnitTests(runner: LabeledProcessRunner) {
     }
 }
 
-// DEPRECATED runOnlineTests runs nightwatch once.
-async function runOnlineTests(runner: LabeledProcessRunner) {
-    const baseURL = process.env.APPLICATION_ENDPOINT
-
-    if (baseURL == undefined) {
-        console.log('You must set APPLICATION_ENDPOINT to run online tests.')
-        return
-    }
-
-    const isUp = await checkURLIsUp(baseURL)
-    if (!isUp) {
-        throw new Error(
-            `the URL ${baseURL} does not resolve, make sure the system is running before runnin online tests`
-        )
-    }
-
-    const nightCode = await runner.runCommandAndOutput(
-        'nightwatch',
-        ['./test.sh'],
-        'tests'
-    )
-    if (nightCode != 0) {
-        throw new Error('nightwatch tests FAILED')
-    }
+// runOnlineTests runs cypress once
+async function runOnlineTests() {
+    // passing run changes the command from cypress open to cypress run.
+    await runBrowserTests(['run'])
 }
 
 function main() {

@@ -42,9 +42,9 @@ Cypress.Commands.add('safeClick', { prevSubject: 'element' }, ($element) => {
 Cypress.Commands.add('navigateForm', (buttonAccessibleName: 'string') => {
     cy.findByRole('button', {
         name: buttonAccessibleName,
-    }).click()
+    }).safeClick()
 
-    cy.findByRole('progressbar', { name: 'Loading' }).should('not.exist')
+    cy.waitForLoadingToComplete()
 })
 
 Cypress.Commands.add('waitForDocumentsToLoad', () => {
@@ -53,4 +53,9 @@ Cypress.Commands.add('waitForDocumentsToLoad', () => {
         'not.have.class',
         'is-loading'
     )
+})
+
+// HM-TODO: Is this actually waiting for the loading to complete?/What if the loader never appears?
+Cypress.Commands.add('waitForLoadingToComplete', () => {
+    cy.findByRole('progressbar', { name: 'Loading' }).should('not.exist')
 })

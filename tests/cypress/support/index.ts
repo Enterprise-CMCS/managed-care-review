@@ -12,18 +12,25 @@
 // Import commands.js using ES2015 syntax:
 import './commands'
 import './login'
-import './newSubmission'
+import './stateSubmissionForm'
 
 declare global {
     namespace Cypress {
         interface Chainable<Subject = any> {
-            login(): void
-            cmsLogin(): void
+            logInAsStateUser(): void
+            logInAsCMSUser(args?: { initialURL?: string }): void
             safeClick(): void
             navigateForm(buttonName: string): Chainable<Element>
-            startNewContractAndRatesSubmission(): void
-            startNewContractOnlySubmission(): void
             waitForDocumentsToLoad(): void
+            waitForLoadingToComplete(): void
+            startNewContractOnlySubmission(): void
+            startNewContractAndRatesSubmission(): void
+            fillOutContractDetails(): void
+            fillOutRateDetails(): void
+            fillOutStateContact(): void
+            fillOutActuaryContact(): void
+            fillOutDocuments(): void
+            reviewAndSubmitStateSubmissionForm(): void
         }
     }
 }

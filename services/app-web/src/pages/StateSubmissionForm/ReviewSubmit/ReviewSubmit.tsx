@@ -78,9 +78,8 @@ export const ReviewSubmit = ({
     draftSubmission: DraftSubmission
 }): React.ReactElement => {
     const [refreshedDocs, setRefreshedDocs] = useState<DocumentWithLink[]>([])
-    const [displayConfirmation, setDisplayConfirmation] = useState<boolean>(
-        false
-    )
+    const [displayConfirmation, setDisplayConfirmation] =
+        useState<boolean>(false)
     const { getURL, getKey } = useS3()
 
     const [userVisibleError, setUserVisibleError] = useState<
@@ -476,7 +475,7 @@ export const ReviewSubmit = ({
                         <Grid row>
                             {draftSubmission.stateContacts.map(
                                 (stateContact, index) => (
-                                    <Grid col={6}>
+                                    <Grid col={6} key={'statecontact_' + index}>
                                         <span className="text-bold">
                                             Contact {index + 1}
                                         </span>
@@ -508,7 +507,10 @@ export const ReviewSubmit = ({
                                 <Grid row>
                                     {draftSubmission.actuaryContacts.map(
                                         (actuaryContact, index) => (
-                                            <Grid col={6}>
+                                            <Grid
+                                                col={6}
+                                                key={'actuarycontact_' + index}
+                                            >
                                                 <span className="text-bold">
                                                     {index
                                                         ? 'Additional actuary contact'

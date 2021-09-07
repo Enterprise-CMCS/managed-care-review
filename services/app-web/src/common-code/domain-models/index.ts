@@ -31,7 +31,7 @@ export type { SubmissionUnionType } from './SubmissionUnionType'
 export type { ProgramT } from './ProgramT'
 
 // Type checks and type guards
-export { isCognitoUser, isStateUser } from './user'
+export { isCognitoUser, isStateUser, isCMSUser } from './user'
 export {
     hasValidContract,
     hasValidDocuments,

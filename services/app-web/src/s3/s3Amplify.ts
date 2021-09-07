@@ -45,6 +45,7 @@ export function newAmplifyS3Client(bucketName: string): S3ClientT {
             try {
                 const stored = await Storage.vault.put(filename, file, {
                     contentType: file.type,
+                    contentDisposition: `attachment; filename=${file.name}`,
                 })
 
                 assertIsS3PutResponse(stored)

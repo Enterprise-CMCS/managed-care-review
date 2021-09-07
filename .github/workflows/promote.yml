@@ -112,17 +112,20 @@ jobs:
           # When deploying multiple copies of this quickstart to the same AWS Account (not ideal), a prefix helps prevent stepping on each other.
           # This can optionally be set as an GitHub Actions Secret
           ./deploy.sh $STAGE_PREFIX$branch_name
-      - name: Run Nightwatch suite
-        run: |
-          pushd services
-          export APPLICATION_ENDPOINT=`./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name`
-          popd
-          ./test.sh
-      - name: Store test reults
-        uses: actions/upload-artifact@v2
+
+      - name: Cypress on dev
+        id: cypressdev
+        uses: cypress-io/github-action@v2
         with:
-          name: test_results
-          path: tests/nightwatch/tests_output
+          config: baseUrl=https://mc-review-dev.onemac.cms.gov
+          spec: tests/cypress/integration/landing/landing.spec.ts
+      - name: Upload cypress video
+        uses: actions/upload-artifact@v1
+        if: failure() && steps.cypressdev.outcome == 'failure'
+        with:
+          name: cypress-videos
+          path: tests/cypress/videos
+
       - name: set val env vars
         run: ./.github/build_vars.sh set_values
         env:
@@ -135,17 +138,20 @@ jobs:
           REACT_APP_AUTH_MODE: IDM
       - name: Deploy to val
         run: ./deploy.sh val
-      - name: Run Nightwatch suite on val
-        run: |
-          pushd services
-          export APPLICATION_ENDPOINT=`./output.sh ui CloudFrontEndpointUrl val`
-          popd
-          ./test.sh
-      - name: Store test reults
-        uses: actions/upload-artifact@v2
+
+      - name: Cypress on val
+        id: cypressval
+        uses: cypress-io/github-action@v2
         with:
-          name: test_results
-          path: tests/nightwatch/tests_output
+          config: baseUrl=https://mc-review-val.onemac.cms.gov
+          spec: tests/cypress/integration/landing/landing.spec.ts
+      - name: Upload cypress video
+        uses: actions/upload-artifact@v1
+        if: failure() && steps.cypressval.outcome == 'failure'
+        with:
+          name: cypress-videos
+          path: tests/cypress/videos
+
       - name: set prod env vars
         run: ./.github/build_vars.sh set_values
         env:
@@ -158,17 +164,20 @@ jobs:
           REACT_APP_AUTH_MODE: IDM
       - name: Deploy to prod
         run: ./deploy.sh prod
-      - name: Run Nightwatch suite on prod
-        run: |
-          pushd services
-          export APPLICATION_ENDPOINT=`./output.sh ui CloudFrontEndpointUrl prod`
-          popd
-          ./test.sh
-      - name: Store test reults
-        uses: actions/upload-artifact@v2
+
+      - name: Cypress on prod
+        id: cypressprod
+        uses: cypress-io/github-action@v2
         with:
-          name: test_results
-          path: tests/nightwatch/tests_output
+          config: baseUrl=https://mc-review.onemac.cms.gov
+          spec: tests/cypress/integration/landing/landing.spec.ts
+      - name: Upload cypress video
+        uses: actions/upload-artifact@v1
+        if: failure() && steps.cypressprod.outcome == 'failure'
+        with:
+          name: cypress-videos
+          path: tests/cypress/videos
+
       - name: Alert Slack On Failure
         uses: rtCamp/action-slack-notify@v2
         if: failure()

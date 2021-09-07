@@ -5,11 +5,7 @@ import styles from './Header.module.scss'
 
 import PageHeading from '../../components/PageHeading'
 import { StateIcon, StateIconProps } from './StateIcon'
-import { User, CmsUser, StateUser } from '../../gen/gqlClient'
-
-const CMSUserRow = ({ user }: { user: CmsUser }) => {
-    return <div>CMS USER</div>
-}
+import { User, StateUser } from '../../gen/gqlClient'
 
 const StateUserRow = ({
     user,
@@ -76,13 +72,13 @@ export const PageHeadingRow = ({
     isLoading = false,
     heading,
     loggedInUser,
-}: PageHeadingProps): React.ReactElement => {
+}: PageHeadingProps): React.ReactElement | null => {
     if (!loggedInUser) {
         return <LandingRow isLoading={isLoading} />
     }
 
     if (loggedInUser.__typename === 'CMSUser') {
-        return <CMSUserRow user={loggedInUser} />
+        return null
     } else if (loggedInUser.__typename === 'StateUser') {
         return <StateUserRow user={loggedInUser} heading={heading} />
     } else {
