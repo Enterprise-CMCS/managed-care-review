@@ -293,7 +293,6 @@ export const ContractDetails = ({
                 dirty,
                 handleSubmit,
                 isSubmitting,
-                isValidating,
                 setFieldValue,
             }) => (
                 <>
@@ -981,10 +980,9 @@ export const ContractDetails = ({
                                         })
                                     } else {
                                         setShouldValidate(true)
-                                        if (!isValidating) {
-                                            redirectToDashboard.current = true
-                                            handleSubmit()
-                                        }
+
+                                        redirectToDashboard.current = true
+                                        handleSubmit()
                                     }
                                 }}
                             >

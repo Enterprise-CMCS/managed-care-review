@@ -271,14 +271,7 @@ export const Contacts = ({
                 onSubmit={handleFormSubmit}
                 validationSchema={contactSchema}
             >
-                {({
-                    values,
-                    errors,
-                    dirty,
-                    handleSubmit,
-                    isSubmitting,
-                    isValidating,
-                }) => (
+                {({ values, errors, dirty, handleSubmit, isSubmitting }) => (
                     <>
                         <UswdsForm
                             className={styles.formContainer}
@@ -892,11 +885,9 @@ export const Contacts = ({
                                             })
                                         } else {
                                             setShouldValidate(true)
-                                            if (!isValidating) {
-                                                redirectToDashboard.current =
-                                                    true
-                                                handleSubmit()
-                                            }
+
+                                            redirectToDashboard.current = true
+                                            handleSubmit()
                                         }
                                     }}
                                 >

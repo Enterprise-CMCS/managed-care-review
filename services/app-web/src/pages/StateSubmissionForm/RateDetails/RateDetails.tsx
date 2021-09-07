@@ -220,7 +220,7 @@ export const RateDetails = ({
                     dirty,
                     handleSubmit,
                     isSubmitting,
-                    isValidating,
+
                     setFieldValue,
                 }) => (
                     <>
@@ -470,11 +470,8 @@ export const RateDetails = ({
                                             })
                                         } else {
                                             setShouldValidate(true)
-                                            if (!isValidating) {
-                                                redirectToDashboard.current =
-                                                    true
-                                                handleSubmit()
-                                            }
+                                            redirectToDashboard.current = true
+                                            handleSubmit()
                                         }
                                     }}
                                 >
