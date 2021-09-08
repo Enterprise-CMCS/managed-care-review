@@ -34,6 +34,7 @@ custom:
       noFrozenLockfile: true
       scripts:
         - npx prisma generate
+      excludeRegex: 'query-engine-darwin'
   serverlessTerminationProtection:
     stages:
       - dev
