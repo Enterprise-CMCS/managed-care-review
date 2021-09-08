@@ -28,13 +28,13 @@ custom:
     version: V2
   webpack:
     webpackConfig: 'webpack.config.js'
-    includeModules: true
     packager: 'yarn'
+    includeModules: true
+    excludeRegex: 'query-engine-darwin'
     packagerOptions:
       noFrozenLockfile: true
       scripts:
         - npx prisma generate
-      excludeRegex: 'query-engine-darwin'
   serverlessTerminationProtection:
     stages:
       - dev
