@@ -4,9 +4,6 @@ frameworkVersion: '2'
 
 package:
   individually: true
-  patterns:
-    - '!node_modules/.prisma/client/query-engine-*'
-    - 'node_modules/.prisma/client/query-engine-rhel-*'
 
 plugins:
   - serverless-webpack
@@ -34,7 +31,6 @@ custom:
     includeModules: true
     packager: 'yarn'
     packagerOptions:
-      noFrozenLockfile: true
       scripts:
         - prisma generate
   serverlessTerminationProtection:

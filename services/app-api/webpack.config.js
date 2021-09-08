@@ -60,12 +60,7 @@ module.exports = {
     },
     plugins: [
         new CopyWebpackPlugin({
-            patterns: [
-                { from: './prisma/schema.prisma' },
-                {
-                    from: './node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x',
-                },
-            ],
+            patterns: [{ from: './prisma/schema.prisma' }],
         }),
     ],
 };
