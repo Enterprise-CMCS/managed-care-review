@@ -11,7 +11,7 @@
     },
     "dependencies": {
         "@aws/dynamodb-data-mapper-annotations": "^0.7.3",
-        "@prisma/client": "^2.30.2",
+        "@prisma/client": "^3.0.1",
         "apollo-server-lambda": "^3.1.2",
         "aws-sdk": "^2.982.0",
         "copy-webpack-plugin": "^9.0.1",
