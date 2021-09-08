@@ -4,7 +4,6 @@ Cypress.Commands.add('logInAsStateUser', () => {
     cy.findByRole('link', { name: 'Sign In' }).click()
     const authMode = Cypress.env('AUTH_MODE')
     console.log(authMode, 'authmode')
-    cy.waitForLoadingToComplete()
 
     if (authMode === 'LOCAL') {
         cy.findByTestId('AangButton').click()
@@ -20,6 +19,7 @@ Cypress.Commands.add('logInAsStateUser', () => {
     } else {
         throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
     }
+    cy.waitForLoadingToComplete()
 })
 
 Cypress.Commands.add(
@@ -30,7 +30,6 @@ Cypress.Commands.add(
         cy.findByRole('link', { name: 'Sign In' }).click()
         const authMode = Cypress.env('AUTH_MODE')
         console.log(authMode, 'authmode')
-        cy.waitForLoadingToComplete()
 
         if (authMode === 'LOCAL') {
             cy.findByTestId('ZukoButton').click()
@@ -46,5 +45,6 @@ Cypress.Commands.add(
         } else {
             throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
         }
+        cy.waitForLoadingToComplete()
     }
 )
