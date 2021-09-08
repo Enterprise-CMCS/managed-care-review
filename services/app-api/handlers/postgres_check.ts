@@ -19,14 +19,14 @@ export const main: APIGatewayProxyHandler = async () => {
 
     // just do a rando query for now to test this connection out
     // since we don't have a store for this yet
-    const result = await prisma.$queryRaw(`
+    const result = await prisma.$queryRaw`
         select pid as process_id, 
             usename as username, 
             datname as database_name, 
             application_name,
             backend_start,
         from pg_stat_activity;
-    `)
+    `
 
     return {
         statusCode: 200,
