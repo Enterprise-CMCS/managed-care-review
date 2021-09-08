@@ -89,7 +89,8 @@ const RateDetailsFormSchema = Yup.object().shape({
     }),
 })
 
-type FormError = FormikErrors<RateDetailsFormValues>[keyof FormikErrors<RateDetailsFormValues>]
+type FormError =
+    FormikErrors<RateDetailsFormValues>[keyof FormikErrors<RateDetailsFormValues>]
 
 const RateDatesErrorMessage = ({
     startDate,
@@ -219,7 +220,7 @@ export const RateDetails = ({
                     dirty,
                     handleSubmit,
                     isSubmitting,
-                    isValidating,
+
                     setFieldValue,
                 }) => (
                     <>
@@ -227,10 +228,7 @@ export const RateDetails = ({
                             className={styles.formContainer}
                             id="RateDetailsForm"
                             aria-label="Rate Details Form"
-                            onSubmit={(e) => {
-                                e.preventDefault()
-                                if (!isValidating) handleSubmit()
-                            }}
+                            onSubmit={handleSubmit}
                         >
                             <fieldset className="usa-fieldset">
                                 <legend className="srOnly">Rate Details</legend>
@@ -378,10 +376,8 @@ export const RateDetails = ({
                                                             startDateLabel="Start date"
                                                             startDatePickerProps={{
                                                                 disabled: false,
-                                                                id:
-                                                                    'effectiveDateStart',
-                                                                name:
-                                                                    'effectiveDateStart',
+                                                                id: 'effectiveDateStart',
+                                                                name: 'effectiveDateStart',
                                                                 defaultValue:
                                                                     values.effectiveDateStart,
                                                                 onChange: (
@@ -398,10 +394,8 @@ export const RateDetails = ({
                                                             endDateLabel="End date"
                                                             endDatePickerProps={{
                                                                 disabled: false,
-                                                                id:
-                                                                    'effectiveDateEnd',
-                                                                name:
-                                                                    'effectiveDateEnd',
+                                                                id: 'effectiveDateEnd',
+                                                                name: 'effectiveDateEnd',
                                                                 defaultValue:
                                                                     values.effectiveDateEnd,
                                                                 onChange: (
@@ -476,10 +470,8 @@ export const RateDetails = ({
                                             })
                                         } else {
                                             setShouldValidate(true)
-                                            if (!isValidating) {
-                                                redirectToDashboard.current = true
-                                                handleSubmit()
-                                            }
+                                            redirectToDashboard.current = true
+                                            handleSubmit()
                                         }
                                     }}
                                 >

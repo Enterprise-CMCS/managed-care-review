@@ -48,14 +48,18 @@ Cypress.Commands.add('navigateForm', (buttonAccessibleName: 'string') => {
 })
 
 Cypress.Commands.add('waitForDocumentsToLoad', () => {
-    cy.wait(20000)
-    cy.findAllByTestId('file-input-preview-image', { timeout: 20000 }).should(
-        'not.have.class',
-        'is-loading'
-    )
+    const authMode = Cypress.env('AUTH_MODE')
+    if (authMode !== 'LOCAL') {
+        // when we are in AWS environments we need to wait for scanning to complete
+        cy.wait(20000)
+    }
+    cy.findAllByTestId('file-input-preview-image', {
+        timeout: 20000,
+    }).should('not.have.class', 'is-loading')
 })
 
 // HM-TODO: Is this actually waiting for the loading to complete?/What if the loader never appears?
+// HW: FYI another way to wait for something to complete is to use cypress.intercept and wait for some request to resolve.
 Cypress.Commands.add('waitForLoadingToComplete', () => {
     cy.findByRole('progressbar', { name: 'Loading' }).should('not.exist')
 })
