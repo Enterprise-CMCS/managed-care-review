@@ -4,6 +4,7 @@ Cypress.Commands.add('logInAsStateUser', () => {
     cy.findByRole('link', { name: 'Sign In' }).click()
     const authMode = Cypress.env('AUTH_MODE')
     console.log(authMode, 'authmode')
+    cy.waitForLoadingToComplete()
 
     if (authMode === 'LOCAL') {
         cy.findByTestId('AangButton').click()
@@ -29,6 +30,7 @@ Cypress.Commands.add(
         cy.findByRole('link', { name: 'Sign In' }).click()
         const authMode = Cypress.env('AUTH_MODE')
         console.log(authMode, 'authmode')
+        cy.waitForLoadingToComplete()
 
         if (authMode === 'LOCAL') {
             cy.findByTestId('ZukoButton').click()
