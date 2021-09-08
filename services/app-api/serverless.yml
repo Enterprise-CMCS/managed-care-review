@@ -33,7 +33,7 @@ custom:
     packagerOptions:
       noFrozenLockfile: true
       scripts:
-        - prisma generate
+        - yarn prisma generate
   serverlessTerminationProtection:
     stages:
       - dev
