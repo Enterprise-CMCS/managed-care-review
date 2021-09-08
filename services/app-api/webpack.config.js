@@ -67,12 +67,6 @@ module.exports = {
                         './node_modules/.prisma/client/schema.prisma'
                     ),
                 },
-                {
-                    from: path.resolve(
-                        __dirname,
-                        './node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x'
-                    ),
-                },
             ],
         }),
     ],
