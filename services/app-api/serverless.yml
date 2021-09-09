@@ -4,9 +4,6 @@ frameworkVersion: '2'
 
 package:
   individually: true
-  patterns:
-    - '!node_modules/.prisma/client/query-engine-*'
-    - 'node_modules/.prisma/client/query-engine-rhel-*'
 
 plugins:
   - serverless-webpack
@@ -33,7 +30,7 @@ custom:
     webpackConfig: 'webpack.config.js'
     packager: 'yarn'
     includeModules: true
-    excludeRegex: 'query-engine-darwin'
+    excludeRegex: 'darwin'
     packagerOptions:
       noFrozenLockfile: true
       scripts:
