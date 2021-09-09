@@ -15,6 +15,8 @@ Cypress.Commands.add('startNewContractOnlySubmission', () => {
         // HM-TODO: Move this check to dashboard page
         .should('exist')
         .type('description of contract only submission')
+    cy.navigateForm('Continue')
+    cy.findByRole('heading', { level: 2, name: /Contract details/ })
 })
 
 Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
@@ -34,6 +36,8 @@ Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
         // HM-TODO: Move this check to dashboard page
         .should('exist')
         .type('description of contract and rates submission')
+    cy.navigateForm('Continue')
+    cy.findByRole('heading', { level: 2, name: /Contract details/ })
 })
 
 Cypress.Commands.add('fillOutContractDetails', () => {
@@ -94,7 +98,7 @@ Cypress.Commands.add('fillOutDocuments', () => {
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
-Cypress.Commands.add('reviewAndSubmitStateSubmissionForm', () => {
+Cypress.Commands.add('submitStateSubmissionForm', () => {
     // Must be on '/submissions/:id/review-and-submit'
     cy.navigateForm('Submit')
     // HM-TODO: Move this check to dashboard page
