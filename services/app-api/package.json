@@ -35,7 +35,7 @@
         "prettier": "^2.3.2",
         "serverless": "^2.57.0",
         "serverless-associate-waf": "^1.2.1",
-        "serverless-bundle": "^4.4.0",
+        "serverless-bundle": "^5.0.1",
         "serverless-dotenv-plugin": "^3.9.0",
         "serverless-offline": "^8.0.0",
         "serverless-stack-termination-protection": "^1.0.4",
