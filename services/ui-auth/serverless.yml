@@ -25,6 +25,11 @@ provider:
   role:
     path: ${self:custom.iamPath}
     permissionsBoundary: ${self:custom.iamPermissionsBoundaryPolicy}
+    statements:
+      - Effect: 'Allow'
+        Action:
+          - '*'
+        Resource: !GetAtt CognitoUserPool.Arn
 
 resources:
   Conditions:
