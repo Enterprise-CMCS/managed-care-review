@@ -2,8 +2,6 @@ describe('documents', () => {
     it('user can edit documents and save as draft', () => {
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmission()
-        cy.navigateForm('Continue')
-        cy.findByText(/^MN-PMAP-/).should('exist')
 
         cy.location().then((fullUrl) => {
             const { pathname } = fullUrl
@@ -63,8 +61,6 @@ describe('documents', () => {
         it('user can drag and drop as expected', () => {
             cy.logInAsStateUser()
             cy.startNewContractOnlySubmission()
-            cy.navigateForm('Continue')
-            cy.findByText(/^MN-PMAP-/).should('exist')
 
             // visit documents page
             cy.location().then((fullUrl) => {
