@@ -22,14 +22,15 @@ provider:
   name: aws
   runtime: nodejs12.x
   region: us-east-1
-  role:
-    path: ${self:custom.iamPath}
-    permissionsBoundary: ${self:custom.iamPermissionsBoundaryPolicy}
-    statements:
-      - Effect: 'Allow'
-        Action:
-          - '*'
-        Resource: !GetAtt CognitoUserPool.Arn
+  iam:
+    role:
+      path: ${self:custom.iamPath}
+      permissionsBoundary: ${self:custom.iamPermissionsBoundaryPolicy}
+      statements:
+        - Effect: 'Allow'
+          Action:
+            - '*'
+          Resource: !GetAtt CognitoUserPool.Arn
 
 resources:
   Conditions:
