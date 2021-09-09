@@ -42,6 +42,12 @@ custom:
       - val
       - prod
       - main
+  vpcId: ${ssm:/configuration/${self:custom.stage}/vpc/id, ssm:/configuration/default/vpc/id}
+  sgId: ${ssm:/configuration/${self:custom.stage}/vpc/sg/id, ssm:/configuration/default/vpc/sg/id}
+  privateSubnets:
+    - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/a/id, ssm:/configuration/default/vpc/subnets/private/a/id}
+    - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/b/id, ssm:/configuration/default/vpc/subnets/private/b/id}
+    - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/c/id, ssm:/configuration/default/vpc/subnets/private/c/id}
 
 provider:
   name: aws
@@ -111,6 +117,10 @@ functions:
           path: postgres_check
           method: get
           cors: true
+    vpc:
+      securityGroupIds:
+        - ${self.custom:sgId}
+      subnetIds: ${self.custom:privateSubnets}
 
 resources:
   Conditions:
