@@ -30,7 +30,7 @@ custom:
     webpackConfig: 'webpack.config.js'
     packager: 'yarn'
     includeModules: true
-    excludeRegex: 'darwin'
+    excludeRegex: 'darwin|debian'
     packagerOptions:
       noFrozenLockfile: true
       scripts:
