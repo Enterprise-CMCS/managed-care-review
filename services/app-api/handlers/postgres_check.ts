@@ -24,7 +24,7 @@ export const main: APIGatewayProxyHandler = async () => {
             usename as username, 
             datname as database_name, 
             application_name,
-            backend_start,
+            backend_start
         from pg_stat_activity;
     `
 
