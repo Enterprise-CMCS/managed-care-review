@@ -140,3 +140,7 @@ resources:
         Action: lambda:InvokeFunction
         FunctionName: !GetAtt RotatorLambdaFunction.Arn
         Principal: 'secretsmanager.amazonaws.com'
+
+  Outputs:
+    PostgresAuroraArn:
+      Value: !GetAtt PostgresAurora.Arn
