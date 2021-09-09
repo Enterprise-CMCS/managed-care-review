@@ -139,7 +139,9 @@ export const Dashboard = (): React.ReactElement => {
     // Go through the list of programs and create a list of submissions in the right order
     const programSubmissions: { [progID: string]: SubmissionCardInfo[] } = {}
     for (const program of programs) {
-        const submissions = submissionList.filter((sub) => sub.programID === program.id)
+        const submissions = submissionList.filter(
+            (sub) => sub.programID === program.id
+        )
         sortDraftsToTop(submissions, justSubmittedSubmissionName ?? undefined)
 
         programSubmissions[program.id] = submissions
@@ -147,7 +149,7 @@ export const Dashboard = (): React.ReactElement => {
 
     return (
         <>
-            <div className={styles.container} data-testid="dashboardPage">
+            <div className={styles.container} data-testid="dashboard-page">
                 {programs.length ? (
                     <Tabs className={styles.tabs} defaultActiveTab={defaultTab}>
                         {programs.map((program: Program) => (
@@ -157,12 +159,18 @@ export const Dashboard = (): React.ReactElement => {
                                 tabName={program.name}
                             >
                                 <GridContainer>
-                                    <section key={program.name} className={styles.panel}>
+                                    <section
+                                        key={program.name}
+                                        className={styles.panel}
+                                    >
                                         {justSubmittedSubmissionName &&
-                                            programIDFromSubmissionName(justSubmittedSubmissionName) ===
-                                            program.id && (
+                                            programIDFromSubmissionName(
+                                                justSubmittedSubmissionName
+                                            ) === program.id && (
                                                 <SubmissionSuccessMessage
-                                                    submissionName={justSubmittedSubmissionName}
+                                                    submissionName={
+                                                        justSubmittedSubmissionName
+                                                    }
                                                 />
                                             )}
                                         <div className={styles.panelHeader}>
@@ -173,36 +181,56 @@ export const Dashboard = (): React.ReactElement => {
                                                     className="usa-button"
                                                     variant="unstyled"
                                                     to={{
-                                                        pathname: '/submissions/new',
-                                                        state: { defaultProgramID: program.id },
+                                                        pathname:
+                                                            '/submissions/new',
+                                                        state: {
+                                                            defaultProgramID:
+                                                                program.id,
+                                                        },
                                                     }}
                                                 >
                                                     Start new submission
                                                 </Link>
                                             </div>
                                         </div>
-                                        {programSubmissions[program.id].length > 0 ? (
+                                        {programSubmissions[program.id].length >
+                                        0 ? (
                                             <ul
                                                 id="submissions-list"
                                                 data-testid="submissions-list"
                                                 className="SubmissionCard_submissionList__1okWK"
                                             >
-                                                {programSubmissions[program.id].map((submission) => (
+                                                {programSubmissions[
+                                                    program.id
+                                                ].map((submission) => (
                                                     <SubmissionCard
                                                         key={submission.name}
-                                                        href={editUrlForSubmission(submission)}
-                                                        description={submission.submissionDescription}
+                                                        href={editUrlForSubmission(
+                                                            submission
+                                                        )}
+                                                        description={
+                                                            submission.submissionDescription
+                                                        }
                                                         name={submission.name}
                                                         date={
-                                                            submission.__typename === 'StateSubmission' &&
-                                                                submission.submittedAt
-                                                                ? dayjs(submission.submittedAt)
+                                                            submission.__typename ===
+                                                                'StateSubmission' &&
+                                                            submission.submittedAt
+                                                                ? dayjs(
+                                                                      submission.submittedAt
+                                                                  )
                                                                 : undefined
                                                         }
-                                                        status={submissionStatusMap[submission.__typename]}
+                                                        status={
+                                                            submissionStatusMap[
+                                                                submission
+                                                                    .__typename
+                                                            ]
+                                                        }
                                                         submissionType={
                                                             domainSubmissionTypeMap[
-                                                            submission.submissionType
+                                                                submission
+                                                                    .submissionType
                                                             ]
                                                         }
                                                     />
@@ -210,7 +238,10 @@ export const Dashboard = (): React.ReactElement => {
                                             </ul>
                                         ) : (
                                             <div className={styles.panelEmpty}>
-                                                <h3>You have no submissions for {program.name} yet.</h3>
+                                                <h3>
+                                                    You have no submissions for{' '}
+                                                    {program.name} yet.
+                                                </h3>
                                             </div>
                                         )}
                                     </section>

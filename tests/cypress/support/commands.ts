@@ -43,6 +43,7 @@ Cypress.Commands.add('navigateForm', (buttonAccessibleName: 'string') => {
     cy.findByRole('button', {
         name: buttonAccessibleName,
     }).safeClick()
+    cy.findByTestId('state-submission-form-page').should('exist')
 
     cy.waitForLoadingToComplete()
 })

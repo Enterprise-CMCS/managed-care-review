@@ -1,5 +1,5 @@
 Cypress.Commands.add('startNewContractOnlySubmission', () => {
-    cy.findByTestId('dashboardPage').should('exist')
+    cy.findByTestId('dashboard-page').should('exist')
     cy.findByRole('link', { name: 'Start new submission' }).click({
         force: true,
     })
@@ -18,7 +18,7 @@ Cypress.Commands.add('startNewContractOnlySubmission', () => {
 })
 
 Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
-    cy.findByTestId('dashboardPage').should('exist')
+    cy.findByTestId('dashboard-page').should('exist')
     cy.findByRole('link', { name: 'Start new submission' }).click({
         force: true,
     })

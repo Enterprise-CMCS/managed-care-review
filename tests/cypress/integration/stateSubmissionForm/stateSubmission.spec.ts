@@ -8,7 +8,7 @@ describe('state submission', () => {
 
     it('user can start a new contract and rates submission and continue with valid input', () => {
         cy.logInAsStateUser()
-        cy.findByTestId('dashboardPage').should('exist')
+        cy.findByTestId('dashboard-page').should('exist')
         cy.findByRole('link', { name: 'Start new submission' }).click({
             force: true,
         })
