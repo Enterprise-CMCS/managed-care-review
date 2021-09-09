@@ -143,4 +143,4 @@ resources:
 
   Outputs:
     PostgresAuroraArn:
-      Value: !GetAtt PostgresAurora.Arn
+      Value: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${PostgresAurora}'
