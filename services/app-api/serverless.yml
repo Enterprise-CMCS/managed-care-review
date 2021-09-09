@@ -119,8 +119,8 @@ functions:
           cors: true
     vpc:
       securityGroupIds:
-        - ${self.custom:sgId}
-      subnetIds: ${self.custom:privateSubnets}
+        - ${self:custom.sgId}
+      subnetIds: ${self:custom.privateSubnets}
 
 resources:
   Conditions:
