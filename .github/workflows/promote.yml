@@ -120,7 +120,7 @@ jobs:
           config: baseUrl=https://mc-review-dev.onemac.cms.gov
           spec: tests/cypress/integration/landing/landing.spec.ts
       - name: Upload cypress video
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2.2.4
         if: failure() && steps.cypressdev.outcome == 'failure'
         with:
           name: cypress-videos
@@ -146,7 +146,7 @@ jobs:
           config: baseUrl=https://mc-review-val.onemac.cms.gov
           spec: tests/cypress/integration/landing/landing.spec.ts
       - name: Upload cypress video
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2.2.4
         if: failure() && steps.cypressval.outcome == 'failure'
         with:
           name: cypress-videos
@@ -172,7 +172,7 @@ jobs:
           config: baseUrl=https://mc-review.onemac.cms.gov
           spec: tests/cypress/integration/landing/landing.spec.ts
       - name: Upload cypress video
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2.2.4
         if: failure() && steps.cypressprod.outcome == 'failure'
         with:
           name: cypress-videos

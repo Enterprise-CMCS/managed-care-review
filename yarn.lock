@@ -446,10 +446,10 @@
   resolved "https://registry.yarnpkg.com/@testim/chrome-version/-/chrome-version-1.0.7.tgz#0cd915785ec4190f08a3a6acc9b61fc38fb5f1a9"
   integrity sha512-8UT/J+xqCYfn3fKtOznAibsHpiuDshCb0fwgWxRazTT19Igp9ovoXMPhXyLD6m3CKQGTMHgqoxaFfMWaL40Rnw==
 
-"@testing-library/cypress@^8.0.0":
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/@testing-library/cypress/-/cypress-8.0.0.tgz#290d9bd7d60a3398e9fd965cb45764023f8fcc05"
-  integrity sha512-hx1YYzS6oqQTMiQcTCqoEpB/sYOZWXDDyPw1Akr+LVLDFLRbvOG/lLVI4wpb12dJ2AzPm5dYjLGh5w3hbx/mGQ==
+"@testing-library/cypress@^8.0.1":
+  version "8.0.1"
+  resolved "https://registry.yarnpkg.com/@testing-library/cypress/-/cypress-8.0.1.tgz#46bf2ae45ba8599a5f77b1dc2386444564cad3ce"
+  integrity sha512-JCGy8u4ia+OQQJxVqKqjqpb0i4kmHQhu5jKFVBp+v/YSICnf52fil2MWIJqO+tH9ZQXtp3aF7uKHsVipWaI0BQ==
   dependencies:
     "@babel/runtime" "^7.14.6"
     "@testing-library/dom" "^8.1.0"
@@ -546,10 +546,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-16.6.1.tgz#aee62c7b966f55fc66c7b6dfa1d58db2a616da61"
   integrity sha512-Sr7BhXEAer9xyGuCN3Ek9eg9xPviCF2gfu9kTfuU2HkTVAMYSDeX40fvpmo72n5nansg3nsBjuQBrsS28r+NUw==
 
-"@types/node@^14.14.31", "@types/node@^14.17.14":
-  version "14.17.14"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.17.14.tgz#6fda9785b41570eb628bac27be4b602769a3f938"
-  integrity sha512-rsAj2u8Xkqfc332iXV12SqIsjVi07H479bOP4q94NAcjzmAvapumEhuVIt53koEf7JFrpjgNKjBga5Pnn/GL8A==
+"@types/node@^14.14.31", "@types/node@^14.17.15":
+  version "14.17.15"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.17.15.tgz#d5ebfb62a69074ebb85cbe0529ad917bb8f2bae8"
+  integrity sha512-D1sdW0EcSCmNdLKBGMYb38YsHUS6JcM7yQ6sLQ9KuZ35ck7LYCKE7kYFHOO59ayFOY3zobWVZxf4KXhYHcHYFA==
 
 "@types/request-promise-native@^1.0.17":
   version "1.0.18"
@@ -850,10 +850,25 @@ at-least-node@^1.0.0:
   resolved "https://registry.yarnpkg.com/at-least-node/-/at-least-node-1.0.0.tgz#602cd4b46e844ad4effc92a8011a3c46e0238dc2"
   integrity sha512-+q/t7Ekv1EDY2l6Gda6LLiX14rU9TV20Wa3ofeQmwPFZbOMo9DXrLbOjFaaclkXKWidIaopwAObQDqwWtGUjqg==
 
-aws-sdk@^2.975.0, aws-sdk@^2.979.0:
+aws-sdk@^2.979.0:
   version "2.981.0"
   resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.981.0.tgz#b2e6205db23d755e1c8fcbd0618e8309e69d3767"
   integrity sha512-Itrj9O1zmPm/HupwUiWBhoMTuSjLQzsBcEpxHgLQmUPRv2pxud8kq5DbuKdS2tLlBFMuKx4OLcs9x5RbNOfj5A==
+  dependencies:
+    buffer "4.9.2"
+    events "1.1.1"
+    ieee754 "1.1.13"
+    jmespath "0.15.0"
+    querystring "0.2.0"
+    sax "1.2.1"
+    url "0.10.3"
+    uuid "3.3.2"
+    xml2js "0.4.19"
+
+aws-sdk@^2.984.0:
+  version "2.985.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.985.0.tgz#d2831aaf091d685f0e53589eba236fa27f3f75e1"
+  integrity sha512-Al1oFENrrDeKRpxlklk5sONqzCgEkrhaJ1vtIfpLYYqhNlAY+ku/z1hG1+qSlvgmljGyn7T6/zAb2EcbbAFZLQ==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -881,6 +896,13 @@ axios@^0.21.1:
   integrity sha512-dKQiRHxGD9PPRIUNIWvZhPTPpl1rf/OxTYKsqKUDjBwYylTvV7SjSHJb9ratfyzM6wCdLCOYLzs73qpg5c4iGA==
   dependencies:
     follow-redirects "^1.10.0"
+
+axios@^0.21.2:
+  version "0.21.4"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-0.21.4.tgz#c67b90dc0568e5c1cf2b0b858c43ba28e2eda575"
+  integrity sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==
+  dependencies:
+    follow-redirects "^1.14.0"
 
 backo2@1.0.2:
   version "1.0.2"
@@ -1190,13 +1212,13 @@ chownr@^2.0.0:
   resolved "https://registry.yarnpkg.com/chownr/-/chownr-2.0.0.tgz#15bfbe53d2eab4cf70f18a8cd68ebe5b3cb1dece"
   integrity sha512-bIomtDF5KGpdogkLd9VspvFzk9KfpyyGlS8YFVZl7TGPBHL5snIOnxeshwVgPteQ9b4Eydl+pVbIyE1DcvCWgQ==
 
-chromedriver@^92.0.1:
-  version "92.0.1"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-92.0.1.tgz#3e28b7e0c9fb94d693cf74d51af0c29d57f18dca"
-  integrity sha512-LptlDVCs1GgyFNVbRoHzzy948JDVzTgGiVPXjNj385qXKQP3hjAVBIgyvb/Hco0xSEW8fjwJfsm1eQRmu6t4pQ==
+chromedriver@^93.0.1:
+  version "93.0.1"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-93.0.1.tgz#3ed1f7baa98a754fc1788c42ac8e4bb1ab27db32"
+  integrity sha512-KDzbW34CvQLF5aTkm3b5VdlTrvdIt4wEpCzT2p4XJIQWQZEPco5pNce7Lu9UqZQGkhQ4mpZt4Ky6NKVyIS2N8A==
   dependencies:
     "@testim/chrome-version" "^1.0.7"
-    axios "^0.21.1"
+    axios "^0.21.2"
     del "^6.0.0"
     extract-zip "^2.0.1"
     https-proxy-agent "^5.0.0"
@@ -2242,6 +2264,11 @@ follow-redirects@^1.10.0:
   version "1.14.0"
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.14.0.tgz#f5d260f95c5f8c105894491feee5dc8993b402fe"
   integrity sha512-0vRwd7RKQBTt+mgu87mtYeofLFZpTas2S9zY+jIeuLJMNvudIgF52nr19q40HOwH5RrhWIPuj9puybzSJiRrVg==
+
+follow-redirects@^1.14.0:
+  version "1.14.3"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.14.3.tgz#6ada78118d8d24caee595595accdc0ac6abd022e"
+  integrity sha512-3MkHxknWMUtb23apkgz/83fDoe+y+qr0TdgacGIA7bew+QLBo3vdgEN2xEsuXNivpFy4CyDhBBZnNZOtalmenw==
 
 forever-agent@~0.6.1:
   version "0.6.1"

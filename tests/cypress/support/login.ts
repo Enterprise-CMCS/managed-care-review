@@ -1,6 +1,5 @@
 Cypress.Commands.add('logInAsStateUser', () => {
     cy.visit('/')
-    cy.waitForLoadingToComplete()
     cy.findByRole('link', { name: 'Sign In' }).click()
     const authMode = Cypress.env('AUTH_MODE')
     console.log(authMode, 'authmode')
@@ -19,13 +18,13 @@ Cypress.Commands.add('logInAsStateUser', () => {
     } else {
         throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
     }
+    cy.wait(1000)
 })
 
 Cypress.Commands.add(
     'logInAsCMSUser',
     ({ initialURL } = { initialURL: '/' }) => {
         cy.visit(initialURL)
-        cy.waitForLoadingToComplete()
         cy.findByRole('link', { name: 'Sign In' }).click()
         const authMode = Cypress.env('AUTH_MODE')
         console.log(authMode, 'authmode')
@@ -44,5 +43,6 @@ Cypress.Commands.add(
         } else {
             throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
         }
+        cy.wait(1000)
     }
 )
