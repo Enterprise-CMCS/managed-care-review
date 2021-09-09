@@ -58,6 +58,10 @@ Cypress.Commands.add('waitForDocumentsToLoad', () => {
     }).should('not.have.class', 'is-loading')
 })
 
+Cypress.Commands.add('verifyDocumentsHaveNoErrors', () => {
+    cy.findByText('Upload failed').should('not.exist')
+    cy.findByText('Duplicate file').should('not.exist')
+})
 // HM-TODO: Is this actually waiting for the loading to complete?/What if the loader never appears?
 // HW: FYI another way to wait for something to complete is to use cypress.intercept and wait for some request to resolve.
 Cypress.Commands.add('waitForLoadingToComplete', () => {

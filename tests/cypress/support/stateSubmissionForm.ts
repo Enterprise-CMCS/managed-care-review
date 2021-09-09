@@ -86,10 +86,7 @@ Cypress.Commands.add('fillOutDocuments', () => {
         'documents/trussel-guide.pdf'
     )
 
-    // HM-TODO: Move to documents specific Cypress test
-    cy.findByText('Upload failed').should('not.exist')
-    cy.findByText('Duplicate file').should('not.exist')
-
+    cy.verifyDocumentsHaveNoErrors()
     cy.waitForDocumentsToLoad()
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
