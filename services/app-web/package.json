@@ -48,7 +48,7 @@
         "build-storybook": "build-storybook -s public --quiet"
     },
     "resolutions": {
-        "@storybook/react/babel-loader": "8.1.0"
+        "babel-loader": "8.1.0"
     },
     "jest": {
         "coveragePathIgnorePatterns": [
