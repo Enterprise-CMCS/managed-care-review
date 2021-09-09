@@ -1,5 +1,5 @@
 describe('review and submit', () => {
-    it('can navigate to and from the review and submit page', () => {
+    it('can navigate to and from the review and submit page successfully', () => {
         cy.logInAsStateUser()
 
         cy.startNewContractAndRatesSubmission()
