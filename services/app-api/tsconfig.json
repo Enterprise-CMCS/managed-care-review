@@ -12,7 +12,6 @@
         "resolveJsonModule": true,
         "forceConsistentCasingInFileNames": true,
         "noFallthroughCasesInSwitch": true,
-        "module": "esnext",
         "moduleResolution": "node",
         "lib": ["esnext"]
     }
