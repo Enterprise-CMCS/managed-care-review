@@ -6,7 +6,6 @@ frameworkVersion: '2'
 plugins:
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
-  - serverless-idempotency-helper
   - serverless-iam-helper
 
 provider:
