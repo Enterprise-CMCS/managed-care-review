@@ -7,6 +7,8 @@ plugins:
   - serverless-s3-local
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
+  - serverless-idempotency-helper
+  - serverless-iam-helper
 
 # The `provider` block defines where your service will be deployed
 provider:
@@ -16,7 +18,7 @@ provider:
   iam:
     role:
       path: ${self:custom.iamPath}
-      permissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy${self:custom.iamPermissionsBoundaryPolicy}
+      permissionsBoundary: ${self:custom.iamPermissionsBoundaryPolicy}
       statements:
         - Effect: 'Allow'
           Action:
@@ -40,7 +42,7 @@ provider:
 custom:
   stage: ${opt:stage, self:provider.stage}
   region: ${opt:region, self:provider.region}
-  iamPermissionsBoundaryPolicy: ${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
+  iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
   iamPath: ${env:IAM_PATH, "/"}
   scripts:
     hooks:

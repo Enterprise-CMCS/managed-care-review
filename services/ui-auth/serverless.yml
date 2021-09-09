@@ -5,6 +5,8 @@ frameworkVersion: '2'
 plugins:
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
+  - serverless-idempotency-helper
+  - serverless-iam-helper
 
 custom:
   stage: ${opt:stage, self:provider.stage}
@@ -14,13 +16,16 @@ custom:
   application_endpoint_url: ${cf:ui-${self:custom.stage}.CloudFrontEndpointUrl}
   okta_metadata_url: ${env:OKTA_METADATA_URL}
   iamPath: ${env:IAM_PATH, "/"}
-  iamPermissionsBoundaryPolicy: ${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
+  iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
   sesSourceEmailAddress: ${env:SES_SOURCE_EMAIL_ADDRESS, ""}
 
 provider:
   name: aws
   runtime: nodejs12.x
   region: us-east-1
+  role:
+    path: ${self:custom.iamPath}
+    permissionsBoundary: ${self:custom.iamPermissionsBoundaryPolicy}
 
 resources:
   Conditions:
@@ -29,11 +34,6 @@ resources:
         - Fn::Equals:
             - ''
             - ${self:custom.sesSourceEmailAddress}
-    CreatePermissionsBoundary:
-      Fn::Not:
-        - Fn::Equals:
-            - ''
-            - ${self:custom.iamPermissionsBoundaryPolicy}
   Resources:
     CognitoUserPool:
       Type: AWS::Cognito::UserPool
@@ -143,12 +143,6 @@ resources:
     CognitoAuthRole:
       Type: AWS::IAM::Role
       Properties:
-        Path: ${self:custom.iamPath}
-        PermissionsBoundary:
-          Fn::If:
-            - CreatePermissionsBoundary
-            - !Sub arn:aws:iam::${AWS::AccountId}:policy${self:custom.iamPermissionsBoundaryPolicy}
-            - !Ref AWS::NoValue
         AssumeRolePolicyDocument:
           Version: '2012-10-17'
           Statement:
