@@ -11,13 +11,15 @@
         "postinstall": "yarn run prisma generate"
     },
     "dependencies": {
+        "@aws/dynamodb-data-mapper": "0.7.3",
         "@aws/dynamodb-data-mapper-annotations": "^0.7.3",
-        "@prisma/client": "^3.0.1",
+        "@prisma/client": "^3.0.2",
         "apollo-server-lambda": "^3.1.2",
         "aws-sdk": "^2.984.0",
         "graphql": "^15.5.1",
         "graphql-scalars": "^1.10.0",
         "neverthrow": "^4.2.2",
+        "prisma": "^3.0.2",
         "request": "^2.88.2",
         "uuid": "^8.3.2"
     },
@@ -39,7 +41,6 @@
         "jest": "^26.6.3",
         "jest-raw-loader": "^1.0.1",
         "prettier": "^2.3.2",
-        "prisma": "^3.0.1",
         "serverless": "^2.57.0",
         "serverless-associate-waf": "^1.2.1",
         "serverless-dotenv-plugin": "^3.9.0",

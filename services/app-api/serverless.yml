@@ -33,7 +33,6 @@ custom:
     includeModules: true
     excludeRegex: 'darwin|debian'
     packagerOptions:
-      noFrozenLockfile: true
       scripts:
         - npx prisma generate
   serverlessTerminationProtection:
