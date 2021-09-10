@@ -8,7 +8,7 @@ describe('state submission', () => {
 
     it('user can start a new contract and rates submission and continue with valid input', () => {
         cy.logInAsStateUser()
-        cy.findByTestId('dashboardPage').should('exist')
+        cy.findByTestId('dashboard-page').should('exist')
         cy.findByRole('link', { name: 'Start new submission' }).click({
             force: true,
         })
@@ -142,8 +142,6 @@ describe('state submission', () => {
     it('user can start a new submission and see it on the dashboard', () => {
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmission()
-        cy.navigateForm('Continue')
-        cy.findByText(/^MN-PMAP-/).should('exist')
 
         // This will break eventually, but is fixing a weird bug in CI where the heading hasn't been
         // updated with the Submission.name even though we can see 'contract details'

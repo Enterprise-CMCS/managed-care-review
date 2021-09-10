@@ -15,6 +15,7 @@ import {
     STATE_SUBMISSION_FORM_ROUTES,
     RouteT,
 } from '../../constants/routes'
+import { StateSubmissionContainer } from './StateSubmissionContainer'
 import { ContractDetails } from './ContractDetails/ContractDetails'
 import { RateDetails } from './RateDetails/RateDetails'
 import { Contacts } from './Contacts/Contacts'
@@ -135,8 +136,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                 formPages={activeFormPages(draft)}
                 currentFormPage={currentRoute}
             />
-
-            <GridContainer>
+            <StateSubmissionContainer>
                 <Switch>
                     <Route path={RoutesRecord.SUBMISSIONS_TYPE}>
                         <SubmissionType
@@ -187,7 +187,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         <ReviewSubmit draftSubmission={draft} />
                     </Route>
                 </Switch>
-            </GridContainer>
+            </StateSubmissionContainer>
         </>
     )
 }

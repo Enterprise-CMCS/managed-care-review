@@ -1,5 +1,5 @@
 Cypress.Commands.add('startNewContractOnlySubmission', () => {
-    cy.findByTestId('dashboardPage').should('exist')
+    cy.findByTestId('dashboard-page').should('exist')
     cy.findByRole('link', { name: 'Start new submission' }).click({
         force: true,
     })
@@ -15,10 +15,12 @@ Cypress.Commands.add('startNewContractOnlySubmission', () => {
         // HM-TODO: Move this check to dashboard page
         .should('exist')
         .type('description of contract only submission')
+    cy.navigateForm('Continue')
+    cy.findByRole('heading', { level: 2, name: /Contract details/ })
 })
 
 Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
-    cy.findByTestId('dashboardPage').should('exist')
+    cy.findByTestId('dashboard-page').should('exist')
     cy.findByRole('link', { name: 'Start new submission' }).click({
         force: true,
     })
@@ -34,11 +36,14 @@ Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
         // HM-TODO: Move this check to dashboard page
         .should('exist')
         .type('description of contract and rates submission')
+    cy.navigateForm('Continue')
+    cy.findByRole('heading', { level: 2, name: /Contract details/ })
 })
 
 Cypress.Commands.add('fillOutContractDetails', () => {
     // Must be on '/submissions/:id/contract-details'
     cy.findByLabelText('Base contract').safeClick()
+    cy.wait(1000) // wait to be sure that React renders the appropriate sub fields for contract type
     cy.findByLabelText('Start date').type('04/01/2024')
     cy.findByLabelText('End date').type('03/31/2025').blur()
     cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
@@ -49,6 +54,7 @@ Cypress.Commands.add('fillOutContractDetails', () => {
 Cypress.Commands.add('fillOutRateDetails', () => {
     // Must be on '/submissions/:id/rate-details'
     cy.findByLabelText('New rate certification').safeClick()
+    cy.wait(1000) // wait to be sure that React renders the appropriate sub fields for contract type
     cy.findByLabelText('Start date').type('02/29/2024')
     cy.findByLabelText('End date').type('02/28/2025')
     cy.findByLabelText('Date certified').type('03/01/2024')
@@ -91,7 +97,7 @@ Cypress.Commands.add('fillOutDocuments', () => {
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
-Cypress.Commands.add('reviewAndSubmitStateSubmissionForm', () => {
+Cypress.Commands.add('submitStateSubmissionForm', () => {
     // Must be on '/submissions/:id/review-and-submit'
     cy.navigateForm('Submit')
     // HM-TODO: Move this check to dashboard page

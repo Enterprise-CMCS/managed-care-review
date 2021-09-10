@@ -2,8 +2,6 @@ describe('documents', () => {
     it('can navigate to and from the documents page, saving documents but discarding duplicates on both "Back" and "Save as Draft" actions ', () => {
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmission()
-        cy.navigateForm('Continue')
-        cy.findByText(/^MN-PMAP-/).should('exist')
 
         cy.location().then((fullUrl) => {
             const { pathname } = fullUrl
@@ -66,8 +64,6 @@ describe('documents', () => {
     it('can drag and drop as expected and continue to review and submit', () => {
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmission()
-        cy.navigateForm('Continue')
-        cy.findByText(/^MN-PMAP-/).should('exist')
 
         // visit documents page
         cy.location().then((fullUrl) => {

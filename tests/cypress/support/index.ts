@@ -30,7 +30,7 @@ declare global {
             fillOutStateContact(): void
             fillOutActuaryContact(): void
             fillOutDocuments(): void
-            reviewAndSubmitStateSubmissionForm(): void
+            submitStateSubmissionForm(): void
             verifyDocumentsHaveNoErrors(): void
         }
     }
