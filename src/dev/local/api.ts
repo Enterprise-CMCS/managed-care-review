@@ -1,6 +1,6 @@
 import LabeledProcessRunner from '../runner.js'
 import { compileGraphQLTypesWatchOnce } from './graphql.js'
-import { installPrismaDepsOnce } from './postgres.js'
+import { installPrismaDeps } from './postgres.js'
 
 export async function installAPIDeps(runner: LabeledProcessRunner) {
     await runner.runCommandAndOutput(
@@ -10,7 +10,7 @@ export async function installAPIDeps(runner: LabeledProcessRunner) {
     )
 
     // prisma requires that prisma generate is run after any yarn install
-    return installPrismaDepsOnce(runner)
+    return installPrismaDeps(runner)
 }
 
 // runAPILocally uses the serverless-offline plugin to run the api lambdas locally
