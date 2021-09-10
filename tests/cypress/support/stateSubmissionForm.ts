@@ -43,6 +43,7 @@ Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
 Cypress.Commands.add('fillOutContractDetails', () => {
     // Must be on '/submissions/:id/contract-details'
     cy.findByLabelText('Base contract').safeClick()
+    cy.wait(1000) // let React render the appropriate fields for type
     cy.findByLabelText('Start date').type('04/01/2024')
     cy.findByLabelText('End date').type('03/31/2025').blur()
     cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
