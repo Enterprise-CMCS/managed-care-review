@@ -1,5 +1,5 @@
 describe('documents', () => {
-    it('user can edit documents and save as draft', () => {
+    it('can navigate to and from the documents page, saving documents but discarding duplicates on both "Back" and "Save as Draft" actions ', () => {
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmission()
 
@@ -8,144 +8,146 @@ describe('documents', () => {
             const draftSubmissionID = pathname.split('/')[2]
             cy.visit(`/submissions/${draftSubmissionID}/documents`)
 
-            // add valid file and save as draft
-            cy.findByTestId('file-input-input').attachFile(
-                'documents/how-to-open-source.pdf'
-            )
-            cy.waitForDocumentsToLoad()
-            cy.navigateForm('Save as draft')
-            cy.findByRole('heading', { level: 1, name: /Dashboard/ })
-
-            // go back to documents page and remove file
-            cy.visit(`/submissions/${draftSubmissionID}/documents`)
-            cy.findAllByText('Remove').should('exist').first().safeClick()
-            cy.findAllByText('how-to-open-source.pdf').should('not.exist')
-
-            // allow Save as Draft with no documents
-            cy.navigateForm('Save as draft')
-            cy.findByText('You must upload at least one document').should(
-                'not.exist'
-            )
-            cy.findByRole('heading', { level: 1, name: /Dashboard/ })
-
-            // reload page,validate there are still no documents,then add duplicate documents
+            //  add two valid documents and one duplicate, then navigate back
             cy.visit(`/submissions/${draftSubmissionID}/documents`)
             cy.findByRole('heading', { name: /Documents/ })
-
-            cy.findAllByText('documents/how-to-open-source.pdf').should(
-                'not.exist'
-            )
-            cy.findByTestId('file-input-input').attachFile(
-                'documents/trussel-guide.pdf'
-            )
+            cy.findByTestId('file-input-input').attachFile([
+                'documents/trussel-guide.pdf',
+                'documents/how-to-open-source.pdf',
+            ])
             cy.findByTestId('file-input-input').attachFile(
                 'documents/trussel-guide.pdf'
             )
             cy.waitForDocumentsToLoad()
             cy.findByText('Duplicate file').should('exist')
+            cy.findByTestId('file-input-preview-list')
+                .findAllByRole('listitem')
+                .should('have.length', 3)
+            cy.navigateForm('Back')
+            cy.findByRole('heading', { level: 2, name: /Contacts/ })
 
-            // allow Save as Draft with duplicate files
+            // reload page, see two documents,  duplicate was discarded
+            cy.visit(`/submissions/${draftSubmissionID}/documents`)
+            cy.findByTestId('file-input-preview-list')
+                .findAllByRole('listitem')
+                .should('have.length', 2)
+            cy.verifyDocumentsHaveNoErrors()
+
+            //  add a new valid document and another duplicate document, and hit Save as draft
+            cy.visit(`/submissions/${draftSubmissionID}/documents`)
+            cy.findByRole('heading', { name: /Documents/ })
+            cy.findByTestId('file-input-input').attachFile([
+                'documents/how-to-open-source.pdf',
+                'documents/testing.csv',
+            ])
+            cy.waitForDocumentsToLoad()
+            cy.findByText('Duplicate file').should('exist')
+            cy.findByTestId('file-input-preview-list')
+                .findAllByRole('listitem')
+                .should('have.length', 4)
             cy.navigateForm('Save as draft')
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
-            // reload page, see only one file because the duplicate was discarded after Save as Draft
+            // reload page, see duplicate was discarded
             cy.visit(`/submissions/${draftSubmissionID}/documents`)
-
-            cy.findByText('Duplicate file').should('not.exist')
             cy.findByTestId('file-input-preview-list')
                 .findAllByRole('listitem')
-                .should('have.length', 1)
-            cy.findAllByText('trussel-guide.pdf').should('exist')
+                .should('have.length', 3)
+            cy.verifyDocumentsHaveNoErrors()
         })
+    })
 
-        it('user can drag and drop as expected', () => {
-            cy.logInAsStateUser()
-            cy.startNewContractOnlySubmission()
+    /* 
+         We test much of the same behavior for the file selector in our jest component tests,
+         however drag and drop functionality is only working well in Cypress so we must re-implement many of those tests here
+    */
+    it('can drag and drop as expected and continue to review and submit', () => {
+        cy.logInAsStateUser()
+        cy.startNewContractOnlySubmission()
 
-            // visit documents page
-            cy.location().then((fullUrl) => {
-                const { pathname } = fullUrl
-                const draftSubmissionId = pathname.split('/')[2]
-                cy.visit(`/submissions/${draftSubmissionId}/documents`)
+        // visit documents page
+        cy.location().then((fullUrl) => {
+            const { pathname } = fullUrl
+            const draftSubmissionId = pathname.split('/')[2]
+            cy.visit(`/submissions/${draftSubmissionId}/documents`)
 
-                // Drop invalid files and invalid type message appears
-                cy.findByTestId('file-input-droptarget')
-                    .should('exist')
-                    .attachFile(['images/trussel-guide-screenshot.png'], {
-                        subjectType: 'drag-n-drop',
-                        force: true,
-                    })
-                cy.findByTestId('file-input-error').should(
-                    'have.text',
-                    'This is not a valid file type.'
-                )
+            // Drop invalid files and invalid type message appears
+            cy.findByTestId('file-input-droptarget')
+                .should('exist')
+                .attachFile(['images/trussel-guide-screenshot.png'], {
+                    subjectType: 'drag-n-drop',
+                    force: true,
+                })
+            cy.findByTestId('file-input-error').should(
+                'have.text',
+                'This is not a valid file type.'
+            )
 
-                // Continue button shows error, no documents
-                cy.navigateForm('Continue')
-                cy.findByText('You must upload at least one document').should(
-                    'exist'
-                )
+            // Continue button shows error, no documents
+            cy.navigateForm('Continue')
+            cy.findByText('You must upload at least one document').should(
+                'exist'
+            )
 
-                // Drop multiple valid files
-                cy.findByTestId('file-input-droptarget')
-                    .should('exist')
-                    .attachFile(
-                        [
-                            'documents/how-to-open-source.pdf',
-                            'documents/testing.docx',
-                        ],
-                        {
-                            subjectType: 'drag-n-drop',
-                            force: true,
-                        }
-                    )
-                cy.findAllByTestId('file-input-preview-image').should(
-                    'have.length',
-                    2
-                )
-                cy.waitForDocumentsToLoad()
-                // Correct number of files added, no errors
-                cy.findByTestId('file-input-preview-list')
-                    .findAllByRole('listitem')
-                    .should('have.length', 2)
-                cy.findByText('Upload failed').should('not.exist')
-                cy.findByText('Duplicate file').should('not.exist')
-
-                // Drop one more valid file
-                cy.findByTestId('file-input-droptarget')
-                    .should('exist')
-                    .attachFile(['documents/testing.csv'], {
-                        subjectType: 'drag-n-drop',
-                    })
-                cy.findByTestId('file-input-preview-list')
-                    .findAllByRole('listitem')
-                    .should('have.length', 3)
-
-                // Add one duplicate file, show one duplicate document error
-                cy.findByTestId('file-input-input').attachFile(
-                    ['documents/how-to-open-source.pdf'],
+            // Drop multiple valid files
+            cy.findByTestId('file-input-droptarget')
+                .should('exist')
+                .attachFile(
+                    [
+                        'documents/how-to-open-source.pdf',
+                        'documents/testing.docx',
+                    ],
                     {
                         subjectType: 'drag-n-drop',
                         force: true,
                     }
                 )
-                cy.findByTestId('file-input-preview-list')
-                    .findAllByRole('listitem')
-                    .should('have.length', 4)
-                cy.findAllByText('how-to-open-source.pdf').should(
-                    'have.length',
-                    2
-                )
-                cy.findAllByText('Duplicate file').should('have.length', 1)
+            cy.findAllByTestId('file-input-preview-image').should(
+                'have.length',
+                2
+            )
+            cy.waitForDocumentsToLoad()
+            cy.verifyDocumentsHaveNoErrors()
 
-                // Remove duplicate documents and continue with valid input
-                cy.findAllByText('Remove').should('exist').first().safeClick()
-                cy.findAllByText('Remove').should('exist').first().safeClick()
-                cy.findByTestId('file-input-preview-list')
-                    .findAllByRole('listitem')
-                    .should('have.length', 2)
-                cy.findAllByText('Duplicate file').should('not.exist')
-            })
+            // Correct number of files added, no errors
+            cy.findByTestId('file-input-preview-list')
+                .findAllByRole('listitem')
+                .should('have.length', 2)
+
+            // Drop one more valid file
+            cy.findByTestId('file-input-droptarget')
+                .should('exist')
+                .attachFile(['documents/testing.csv'], {
+                    subjectType: 'drag-n-drop',
+                })
+            cy.findByTestId('file-input-preview-list')
+                .findAllByRole('listitem')
+                .should('have.length', 3)
+
+            // Add a duplicate file, should show a duplicate document error
+            cy.findByTestId('file-input-input').attachFile(
+                ['documents/how-to-open-source.pdf'],
+                {
+                    subjectType: 'drag-n-drop',
+                    force: true,
+                }
+            )
+            cy.findByTestId('file-input-preview-list')
+                .findAllByRole('listitem')
+                .should('have.length', 4)
+            cy.findAllByText('how-to-open-source.pdf').should('have.length', 2)
+            cy.findAllByText('Duplicate file').should('have.length', 1)
+
+            // Remove duplicate documents and continue with valid input
+            cy.findAllByText('Remove').should('exist').first().safeClick()
+            cy.findAllByText('Remove').should('exist').first().safeClick()
+            cy.findByTestId('file-input-preview-list')
+                .findAllByRole('listitem')
+                .should('have.length', 2)
+            cy.verifyDocumentsHaveNoErrors()
+
+            cy.navigateForm('Continue')
+            cy.findByRole('heading', { level: 2, name: /Review and submit/ })
         })
     })
 })

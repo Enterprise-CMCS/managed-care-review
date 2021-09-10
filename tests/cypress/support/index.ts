@@ -31,6 +31,7 @@ declare global {
             fillOutActuaryContact(): void
             fillOutDocuments(): void
             submitStateSubmissionForm(): void
+            verifyDocumentsHaveNoErrors(): void
         }
     }
 }
