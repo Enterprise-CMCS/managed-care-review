@@ -34,3 +34,23 @@ Cypress.Commands.add('restoreLocalStorage', () => {
  * problem for the time being.
  * https://www.cypress.io/blog/2019/01/22/when-can-the-test-click/
  */
+
+Cypress.Commands.add('safeClick', { prevSubject: 'element' }, ($element) => {
+    const click = ($el) => $el.click()
+    return cy.wrap($element).should('exist').should('be.visible').pipe(click)
+})
+
+Cypress.Commands.add('navigateForm', (buttonAccessibleName: 'string') => {
+    cy.findByRole('button', {
+        name: buttonAccessibleName,
+    }).safeClick()
+    cy.findByTestId('state-submission-form-page').should('exist')
+
+    cy.waitForLoadingToComplete()
+})
+
+// HM-TODO: Is this actually waiting for the loading to complete?/What if the loader never appears?
+// HW-TODO: FYI another way to wait for something to complete is to use cypress.intercept and wait for some request to resolve.
+Cypress.Commands.add('waitForLoadingToComplete', () => {
+    cy.wait(2000)
+})
