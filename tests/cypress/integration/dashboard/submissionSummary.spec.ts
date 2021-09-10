@@ -27,15 +27,9 @@ describe('submission summary', () => {
         cy.findByLabelText(
             `OACT can communicate directly with the state’s actuary but should copy the state on all written communication and all appointments for verbal discussions.`
         ).safeClick()
-        // Continue button navigates to documents page
+        // Continue to documents page
         cy.navigateForm('Continue')
-        // Add documents
-        cy.findByTestId('file-input-input').attachFile(
-            'documents/trussel-guide.pdf'
-        )
-        cy.findByText('Upload failed').should('not.exist')
-        cy.findByText('Duplicate file').should('not.exist')
-        cy.waitForDocumentsToLoad()
+        cy.fillOutDocuments()
         // Navigate review and submit page
         cy.navigateForm('Continue')
         // Store submission name for reference later

@@ -289,6 +289,38 @@ describe('Documents', () => {
         })
     })
 
+    it('errors for duplicate files are cleared when duplicate file is removed', async () => {
+        const mockUpdateDraftFn = jest.fn()
+        renderWithProviders(
+            <Documents
+                draftSubmission={{
+                    ...mockDraft(),
+                }}
+                updateDraft={mockUpdateDraftFn}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+        const input = screen.getByLabelText('Upload documents')
+        userEvent.upload(input, [TEST_DOC_FILE])
+        userEvent.upload(input, [TEST_PDF_FILE])
+        userEvent.upload(input, [TEST_DOC_FILE])
+
+        await waitFor(() => {
+            expect(screen.queryAllByText(TEST_PDF_FILE.name).length).toBe(1)
+            expect(screen.queryAllByText(TEST_DOC_FILE.name).length).toBe(2)
+            expect(screen.queryAllByText('Duplicate file').length).toBe(1)
+        })
+
+        // Remove duplicate document and remove error
+        userEvent.click(screen.queryAllByText('Remove')[0])
+        expect(screen.queryAllByText(TEST_DOC_FILE.name).length).toBe(1)
+        expect(screen.queryByText('Duplicate file')).toBeNull()
+    })
+
     describe('Continue button', () => {
         it('enabled when valid files are present', async () => {
             const mockUpdateDraftFn = jest.fn()
@@ -408,11 +440,9 @@ describe('Documents', () => {
             })
 
             userEvent.upload(input, [TEST_DOC_FILE, TEST_DOC_FILE])
-
             expect(continueButton).not.toBeDisabled()
 
             continueButton.click()
-
             await waitFor(() => {
                 expect(
                     screen.getByText(
@@ -509,8 +539,8 @@ describe('Documents', () => {
                 }
             )
 
-            const continueButton = screen.getByRole('button', {
-                name: 'Continue',
+            const saveAsDraftButton = screen.getByRole('button', {
+                name: 'Save as draft',
             })
             const input = screen.getByLabelText('Upload documents')
             const targetEl = screen.getByTestId('file-input-droptarget')
@@ -519,11 +549,11 @@ describe('Documents', () => {
             dragAndDrop(targetEl, [TEST_PNG_FILE])
 
             await waitFor(() => {
-                expect(continueButton).not.toBeDisabled()
+                expect(saveAsDraftButton).not.toBeDisabled()
             })
         })
 
-        it('enabled when zero files present', async () => {
+        it('enabled when zero files present and when clicked does not trigger alert', async () => {
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <Documents
@@ -544,8 +574,12 @@ describe('Documents', () => {
                 name: 'Save as draft',
             })
             expect(saveAsDraftButton).not.toBeDisabled()
-        })
 
+            userEvent.click(saveAsDraftButton)
+            expect(
+                screen.queryByText('You must upload at least one document')
+            ).toBeNull()
+        })
         it('enabled when duplicate files present', async () => {
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
@@ -568,8 +602,126 @@ describe('Documents', () => {
             })
 
             userEvent.upload(input, [TEST_DOC_FILE, TEST_DOC_FILE])
+            await waitFor(() => {
+                expect(saveAsDraftButton).not.toBeDisabled()
+            })
+        })
+    })
 
-            expect(saveAsDraftButton).not.toBeDisabled()
+    describe('Back button', () => {
+        it('enabled when valid files are present', async () => {
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <Documents
+                    draftSubmission={{
+                        ...mockDraft(),
+                        submissionType: 'CONTRACT_AND_RATES',
+                    }}
+                    updateDraft={mockUpdateDraftFn}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const backButton = screen.getByRole('button', {
+                name: 'Back',
+            })
+            const input = screen.getByLabelText('Upload documents')
+
+            userEvent.upload(input, [TEST_DOC_FILE])
+
+            await waitFor(() => {
+                expect(backButton).not.toBeDisabled()
+            })
+        })
+
+        it('enabled when invalid files have been dropped but valid files are present', async () => {
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <Documents
+                    draftSubmission={{
+                        ...mockDraft(),
+                        submissionType: 'CONTRACT_AND_RATES',
+                    }}
+                    updateDraft={mockUpdateDraftFn}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const backButton = screen.getByRole('button', {
+                name: 'Back',
+            })
+            const input = screen.getByLabelText('Upload documents')
+            const targetEl = screen.getByTestId('file-input-droptarget')
+
+            userEvent.upload(input, [TEST_DOC_FILE])
+            dragAndDrop(targetEl, [TEST_PNG_FILE])
+
+            await waitFor(() => {
+                expect(backButton).not.toBeDisabled()
+            })
+        })
+
+        it('enabled when zero files present and when clicked does not trigger alert', async () => {
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <Documents
+                    draftSubmission={{
+                        ...mockDraft(),
+                        submissionType: 'CONTRACT_AND_RATES',
+                    }}
+                    updateDraft={mockUpdateDraftFn}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const backButton = screen.getByRole('button', {
+                name: 'Back',
+            })
+            expect(backButton).not.toBeDisabled()
+
+            userEvent.click(backButton)
+            expect(
+                screen.queryByText('You must upload at least one document')
+            ).toBeNull()
+        })
+
+        it('enabled when duplicate files present', async () => {
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <Documents
+                    draftSubmission={{
+                        ...mockDraft(),
+                        submissionType: 'CONTRACT_AND_RATES',
+                    }}
+                    updateDraft={mockUpdateDraftFn}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+            const input = screen.getByLabelText('Upload documents')
+            const backButton = screen.getByRole('button', {
+                name: 'Save as draft',
+            })
+
+            userEvent.upload(input, [TEST_DOC_FILE, TEST_DOC_FILE])
+            waitFor(() => {
+                expect(backButton).not.toBeDisabled()
+            })
         })
     })
 })

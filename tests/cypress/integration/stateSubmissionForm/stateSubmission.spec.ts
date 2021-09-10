@@ -108,63 +108,8 @@ describe('state submission', () => {
         // Continue button navigates to documents page
         cy.navigateForm('Continue')
 
-        cy.findByText(/MN-MSHO-/).should('exist')
-        cy.findByTestId('file-input-input').should('exist')
+        cy.fillOutDocuments()
 
-        cy.findByTestId('step-indicator')
-            .findAllByText('Documents')
-            .should('have.length', 2)
-
-        cy.navigateForm('Continue')
-
-        cy.findByText('Missing documents').should('exist')
-        cy.findByText('You must upload at least one document').should('exist')
-
-        // Add multiple documents, show loading indicators
-        cy.findByTestId('file-input-input').attachFile([
-            'documents/how-to-open-source.pdf',
-            'documents/testing.docx',
-            'documents/testing.csv',
-        ])
-
-        cy.findAllByTestId('file-input-preview-image').should(
-            'have.class',
-            'is-loading'
-        )
-        cy.findByTestId('file-input-preview-list')
-            .findAllByRole('listitem')
-            .should('have.length', 3)
-
-        cy.waitForDocumentsToLoad()
-
-        // No errors
-        cy.findByText('Upload failed').should('not.exist')
-        cy.findByText('Duplicate file').should('not.exist')
-
-        // Show duplicate document error for last item in list when expected
-        cy.findByTestId('file-input-input').attachFile(
-            'documents/how-to-open-source.pdf'
-        )
-        cy.findByTestId('file-input-preview-list')
-            .findAllByRole('listitem')
-            .should('have.length', 4)
-        cy.findAllByText('how-to-open-source.pdf').should('have.length', 2)
-        cy.findByTestId('file-input-preview-list')
-            .findAllByRole('listitem')
-            .last()
-            .findAllByText('Duplicate file')
-            .should('exist')
-        cy.findAllByText('Duplicate file').should('have.length', 1)
-
-        // Remove duplicate document and remove error
-        cy.findAllByText('Remove').should('exist').first().safeClick()
-        cy.findByTestId('file-input-preview-list')
-            .findAllByRole('listitem')
-            .should('have.length', 3)
-        cy.findAllByText('how-to-open-source.pdf').should('have.length', 1)
-        cy.findAllByText('Duplicate file').should('not.exist')
-
-        // Continue button with valid documents navigates to review and submit page
         cy.navigateForm('Continue')
         cy.url({ timeout: 10_000 }).should('match', /.*review-and-submit$/)
 
