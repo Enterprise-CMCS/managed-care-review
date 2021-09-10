@@ -11,8 +11,8 @@
 
 // Import commands.js using ES2015 syntax:
 import './commands'
-import './login'
-import './stateSubmissionForm'
+import './loginCommands'
+import './stateSubmissionFormCommands'
 
 declare global {
     namespace Cypress {
@@ -27,8 +27,8 @@ declare global {
             startNewContractAndRatesSubmission(): void
             fillOutContractDetails(): void
             fillOutRateDetails(): void
-            fillOutStateContact(): void
-            fillOutActuaryContact(): void
+            fillOutStateContacts(): void
+            fillOutActuaryContacts(): void
             fillOutDocuments(): void
             submitStateSubmissionForm(): void
             verifyDocumentsHaveNoErrors(): void

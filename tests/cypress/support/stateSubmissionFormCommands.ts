@@ -61,7 +61,7 @@ Cypress.Commands.add('fillOutRateDetails', () => {
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
-Cypress.Commands.add('fillOutStateContact', () => {
+Cypress.Commands.add('fillOutStateContacts', () => {
     // Must be on '/submissions/:id/contacts'
     // State contact
     cy.findAllByLabelText('Name').eq(0).type('State Contact Person')
@@ -70,7 +70,7 @@ Cypress.Commands.add('fillOutStateContact', () => {
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
-Cypress.Commands.add('fillOutActuaryContact', () => {
+Cypress.Commands.add('fillOutActuaryContacts', () => {
     // Actuary contact
     cy.findAllByLabelText('Name').eq(1).type('Actuary Contact Person')
     cy.findAllByLabelText('Title/Role').eq(1).type('Actuary Contact Title')
@@ -103,4 +103,41 @@ Cypress.Commands.add('submitStateSubmissionForm', () => {
     // HM-TODO: Move this check to dashboard page
     cy.findByRole('dialog').should('exist')
     cy.navigateForm('Confirm submit')
+})
+
+Cypress.Commands.add('safeClick', { prevSubject: 'element' }, ($element) => {
+    const click = ($el) => $el.click()
+    return cy.wrap($element).should('exist').should('be.visible').pipe(click)
+})
+
+Cypress.Commands.add('navigateForm', (buttonAccessibleName: 'string') => {
+    cy.findByRole('button', {
+        name: buttonAccessibleName,
+    }).safeClick()
+    cy.findByTestId('state-submission-form-page').should('exist')
+
+    cy.waitForLoadingToComplete()
+})
+
+Cypress.Commands.add('waitForDocumentsToLoad', () => {
+    const authMode = Cypress.env('AUTH_MODE')
+    if (authMode !== 'LOCAL') {
+        // when we are in AWS environments we need to wait for scanning to complete
+        cy.wait(20000)
+    }
+    cy.findAllByTestId('file-input-preview-image', {
+        timeout: 20000,
+    }).should('not.have.class', 'is-loading')
+})
+
+Cypress.Commands.add('verifyDocumentsHaveNoErrors', () => {
+    cy.findByText('Upload failed').should('not.exist')
+    cy.findByText('Duplicate file').should('not.exist')
+    cy.findByText('Failed security scan, please remove').should('not.exist')
+})
+
+// HM-TODO: Is this actually waiting for the loading to complete?/What if the loader never appears?
+// HW-TODO: FYI another way to wait for something to complete is to use cypress.intercept and wait for some request to resolve.
+Cypress.Commands.add('waitForLoadingToComplete', () => {
+    cy.wait(2000)
 })

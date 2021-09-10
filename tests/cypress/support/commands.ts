@@ -34,39 +34,3 @@ Cypress.Commands.add('restoreLocalStorage', () => {
  * problem for the time being.
  * https://www.cypress.io/blog/2019/01/22/when-can-the-test-click/
  */
-Cypress.Commands.add('safeClick', { prevSubject: 'element' }, ($element) => {
-    const click = ($el) => $el.click()
-    return cy.wrap($element).should('exist').should('be.visible').pipe(click)
-})
-
-Cypress.Commands.add('navigateForm', (buttonAccessibleName: 'string') => {
-    cy.findByRole('button', {
-        name: buttonAccessibleName,
-    }).safeClick()
-    cy.findByTestId('state-submission-form-page').should('exist')
-
-    cy.waitForLoadingToComplete()
-})
-
-Cypress.Commands.add('waitForDocumentsToLoad', () => {
-    const authMode = Cypress.env('AUTH_MODE')
-    if (authMode !== 'LOCAL') {
-        // when we are in AWS environments we need to wait for scanning to complete
-        cy.wait(20000)
-    }
-    cy.findAllByTestId('file-input-preview-image', {
-        timeout: 20000,
-    }).should('not.have.class', 'is-loading')
-})
-
-Cypress.Commands.add('verifyDocumentsHaveNoErrors', () => {
-    cy.findByText('Upload failed').should('not.exist')
-    cy.findByText('Duplicate file').should('not.exist')
-    cy.findByText('Failed security scan, please remove').should('not.exist')
-})
-
-// HM-TODO: Is this actually waiting for the loading to complete?/What if the loader never appears?
-// HW-TODO: FYI another way to wait for something to complete is to use cypress.intercept and wait for some request to resolve.
-Cypress.Commands.add('waitForLoadingToComplete', () => {
-    cy.wait(2000)
-})
