@@ -180,6 +180,7 @@ resources:
                     - 's3:*'
                   Resource:
                     # Must use Join here.  See: https://github.com/serverless/serverless/issues/3565
+                    - ${self:custom.document_uploads_bucket_arn}/allusers/*
                     - Fn::Join:
                         - ''
                         - - ${self:custom.document_uploads_bucket_arn}/private/
