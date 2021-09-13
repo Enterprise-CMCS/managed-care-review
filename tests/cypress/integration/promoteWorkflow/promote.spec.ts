@@ -1,15 +1,15 @@
-describe('landing', () => {
-    it('loads without errors', () => {
+describe('promote', () => {
+    it('can load without errors', () => {
         cy.visit('/')
         cy.get('#App').should('exist')
     })
 
-    it('displays header', () => {
+    it('can display header', () => {
         cy.visit('/')
         cy.get('header').should('exist')
     })
 
-    it('displays heading at root path', () => {
+    it('can display heading at root path', () => {
         cy.visit('/')
         cy.findByRole('heading', {
             name: /How it works/i,
@@ -17,12 +17,12 @@ describe('landing', () => {
         })
     })
 
-    it('displays main', () => {
+    it('can displays main', () => {
         cy.visit('/')
         cy.get('main').should('exist')
     })
 
-    it('display expected headings that describe how Managed Care Review works', () => {
+    it('can display expected headings that describe how Managed Care Review works', () => {
         cy.visit('/')
         cy.get('#App').should('exist')
         cy.findByRole('heading', {
@@ -35,7 +35,7 @@ describe('landing', () => {
         })
     })
 
-    it('displays footer', () => {
+    it('can display footer', () => {
         cy.visit('/')
         cy.get('footer').should('exist')
     })
