@@ -14,4 +14,10 @@ export async function runPostgresLocally(runner: LabeledProcessRunner) {
         ['docker-compose', 'up', '-d'],
         '.'
     )
+
+    runner.runCommandAndOutput(
+        'postgres migrate',
+        ['npx', 'prisma', 'migrate', 'dev'],
+        'services/app-api'
+    )
 }
