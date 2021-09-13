@@ -1,8 +1,8 @@
 import React from 'react'
 
 import { DynamicStepIndicator } from '../../components/DynamicStepIndicator/'
-import { GridContainer } from '@trussworks/react-uswds'
 import { STATE_SUBMISSION_FORM_ROUTES } from '../../constants/routes'
+import { StateSubmissionContainer } from './StateSubmissionContainer'
 import { SubmissionType } from './SubmissionType/SubmissionType'
 
 export const NewStateSubmissionForm = (): React.ReactElement => {
@@ -13,9 +13,9 @@ export const NewStateSubmissionForm = (): React.ReactElement => {
                 currentFormPage={'SUBMISSIONS_TYPE'}
             />
 
-            <GridContainer>
+            <StateSubmissionContainer>
                 <SubmissionType />
-            </GridContainer>
+            </StateSubmissionContainer>
         </>
     )
 }

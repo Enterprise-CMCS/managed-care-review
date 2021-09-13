@@ -9,8 +9,6 @@ describe('smoke test', () => {
     it('can contact the API and connect to the database', () => {
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmission()
-        cy.navigateForm('Continue')
-        cy.findByText(/^MN-PMAP-/).should('exist')
     })
 
     // HM-TODO: Write test to log in as a CMS user

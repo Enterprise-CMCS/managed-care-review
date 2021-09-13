@@ -36,7 +36,7 @@ describe('App Body and routes', () => {
                 screen.queryByRole('heading', { level: 1 })
             ).toBeInTheDocument()
             await waitFor(() => {
-                expect(screen.getByTestId('dashboardPage')).toBeInTheDocument()
+                expect(screen.getByTestId('dashboard-page')).toBeInTheDocument()
                 expect(
                     screen.queryByRole('heading', {
                         name: /Page not found/i,

@@ -11,7 +11,7 @@
         "plugin:@typescript-eslint/recommended",
         "prettier"
     ],
-    "ignorePatterns": ["gen/*"],
+    "ignorePatterns": ["gen/*", "webpack.config.js"],
     "rules": {
         "prefer-promise-reject-errors": "error",
         "no-throw-literal": "error",

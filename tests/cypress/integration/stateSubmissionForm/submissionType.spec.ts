@@ -2,7 +2,6 @@ describe('submission type', () => {
     it('user can switch a draft contract and rates submission to be contract only', () => {
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
-        cy.navigateForm('Continue')
 
         // Fill out contract details
         cy.fillOutContractDetails()
@@ -37,20 +36,7 @@ describe('submission type', () => {
         cy.navigateForm('Continue')
 
         // Add documents
-        cy.waitForLoadingToComplete()
-        cy.findByTestId('documents-hint').should(
-            'contain.text',
-            'Must include: An executed contract'
-        )
-        cy.findByTestId('file-input-input').attachFile(
-            'documents/trussel-guide.pdf'
-        )
-        cy.findByText('trussel-guide.pdf').should('exist')
-        cy.findByText('Upload failed').should('not.exist')
-        cy.findByText('Duplicate file').should('not.exist')
-
-        // Continue button with valid documents navigates to review and submit page
-        cy.waitForDocumentsToLoad()
+        cy.fillOutDocuments()
         cy.navigateForm('Continue')
 
         // Get draft submission id and navigate back to submission type form to edit existing draft
@@ -112,8 +98,6 @@ describe('submission type', () => {
     it('user can edit a contract only submission', () => {
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmission()
-        cy.navigateForm('Continue')
-        cy.findByText(/^MN-PMAP-/).should('exist')
 
         cy.findByTestId('step-indicator').should('exist')
 

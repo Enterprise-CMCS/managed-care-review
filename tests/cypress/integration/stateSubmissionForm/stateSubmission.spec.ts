@@ -8,7 +8,7 @@ describe('state submission', () => {
 
     it('user can start a new contract and rates submission and continue with valid input', () => {
         cy.logInAsStateUser()
-        cy.findByTestId('dashboardPage').should('exist')
+        cy.findByTestId('dashboard-page').should('exist')
         cy.findByRole('link', { name: 'Start new submission' }).click({
             force: true,
         })
@@ -108,63 +108,8 @@ describe('state submission', () => {
         // Continue button navigates to documents page
         cy.navigateForm('Continue')
 
-        cy.findByText(/MN-MSHO-/).should('exist')
-        cy.findByTestId('file-input-input').should('exist')
+        cy.fillOutDocuments()
 
-        cy.findByTestId('step-indicator')
-            .findAllByText('Documents')
-            .should('have.length', 2)
-
-        cy.navigateForm('Continue')
-
-        cy.findByText('Missing documents').should('exist')
-        cy.findByText('You must upload at least one document').should('exist')
-
-        // Add multiple documents, show loading indicators
-        cy.findByTestId('file-input-input').attachFile([
-            'documents/how-to-open-source.pdf',
-            'documents/testing.docx',
-            'documents/testing.csv',
-        ])
-
-        cy.findAllByTestId('file-input-preview-image').should(
-            'have.class',
-            'is-loading'
-        )
-        cy.findByTestId('file-input-preview-list')
-            .findAllByRole('listitem')
-            .should('have.length', 3)
-
-        cy.waitForDocumentsToLoad()
-
-        // No errors
-        cy.findByText('Upload failed').should('not.exist')
-        cy.findByText('Duplicate file').should('not.exist')
-
-        // Show duplicate document error for last item in list when expected
-        cy.findByTestId('file-input-input').attachFile(
-            'documents/how-to-open-source.pdf'
-        )
-        cy.findByTestId('file-input-preview-list')
-            .findAllByRole('listitem')
-            .should('have.length', 4)
-        cy.findAllByText('how-to-open-source.pdf').should('have.length', 2)
-        cy.findByTestId('file-input-preview-list')
-            .findAllByRole('listitem')
-            .last()
-            .findAllByText('Duplicate file')
-            .should('exist')
-        cy.findAllByText('Duplicate file').should('have.length', 1)
-
-        // Remove duplicate document and remove error
-        cy.findAllByText('Remove').should('exist').first().safeClick()
-        cy.findByTestId('file-input-preview-list')
-            .findAllByRole('listitem')
-            .should('have.length', 3)
-        cy.findAllByText('how-to-open-source.pdf').should('have.length', 1)
-        cy.findAllByText('Duplicate file').should('not.exist')
-
-        // Continue button with valid documents navigates to review and submit page
         cy.navigateForm('Continue')
         cy.url({ timeout: 10_000 }).should('match', /.*review-and-submit$/)
 
@@ -197,8 +142,6 @@ describe('state submission', () => {
     it('user can start a new submission and see it on the dashboard', () => {
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmission()
-        cy.navigateForm('Continue')
-        cy.findByText(/^MN-PMAP-/).should('exist')
 
         // This will break eventually, but is fixing a weird bug in CI where the heading hasn't been
         // updated with the Submission.name even though we can see 'contract details'
