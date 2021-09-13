@@ -7,3 +7,11 @@ export async function installPrismaDeps(runner: LabeledProcessRunner) {
         'services/app-api'
     )
 }
+
+export async function runPostgresLocally(runner: LabeledProcessRunner) {
+    await runner.runCommandAndOutput(
+        'postgres',
+        ['docker-compose', 'up', '-d'],
+        '.'
+    )
+}
