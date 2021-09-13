@@ -1,5 +1,7 @@
-import { Storage } from 'aws-amplify'
+var sanitize = require('sanitize-filename')
 import { parseKey } from '../common-code/s3URLEncoding'
+import { Storage } from 'aws-amplify'
+
 import type { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
 
@@ -8,8 +10,8 @@ const waitFor = (delay = 1000) =>
 
 /* 
     Retry async function up to limit of maxRetries
-    increase the time elapsed between retries each cycle by order of 2^n (exponential backoff)
-    e.g. with defaults values for retryCount and maxRetries, attempt request at 1s, 2s, 4s.
+    - increase the time elapsed between retries each cycle by order of 2^n (exponential backoff)
+    - e.g. with defaults values for retryCount and maxRetries, attempt request at 1s, 2s, 4s.
 */
 const retryWithBackoff = async (
     fn: () => Promise<void | S3Error>,
@@ -27,6 +29,20 @@ const retryWithBackoff = async (
     )
 }
 
+/*
+    Clean filename string for use as S3 key object 
+    - S3 key objects have special restricted characters https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-keys.html
+    - also sanitize filenames for file system prohibited values
+    - i18n or localization of file names is currently not handled
+*/
+const sanitizeFilename = (filename: string) => {
+    return sanitize(filename)
+        .toLowerCase()
+        .trim()
+        .replace(/[^0-9a-zA-Z! _\\.\\*'\\(\\)\\-]/g, '')
+        .replace(/\s+/g, '-')
+}
+
 type s3PutResponse = {
     key: string
 }
@@ -37,7 +53,7 @@ function assertIsS3PutResponse(val: unknown): asserts val is s3PutResponse {
     }
 }
 
-export function newAmplifyS3Client(bucketName: string): S3ClientT {
+function newAmplifyS3Client(bucketName: string): S3ClientT {
     return {
         uploadFile: async (file: File): Promise<string | S3Error> => {
             const filename = `${Date.now()}-${file.name}`
@@ -83,9 +99,9 @@ export function newAmplifyS3Client(bucketName: string): S3ClientT {
         },
         /*  
             Poll for scanning completion
-            - We start polling after 20s, which is the estimated time it takes scanning to start to resolve.
-            - In total, each file could be up to 40 sec in a loading state (20s wait for scanning + 8s of retries + extra time for uploading and scanning api requests to resolve)
-            - While the file is scanning, returns 403. When scanning is complete, the resource returns 200
+            - start polling after 20s, which is the estimated time it takes scanning to start to resolve.
+            - each file could be up to 40 sec in a loading state (20s wait for scanning + 8s of retries + extra time for uploading and scanning api requests to resolve)
+            - while the file is scanning, returns 403. When scanning is complete, the resource returns 200
         */
         scanFile: async (filename: string): Promise<void | S3Error> => {
             try {
@@ -125,3 +141,5 @@ export function newAmplifyS3Client(bucketName: string): S3ClientT {
         },
     }
 }
+
+export { newAmplifyS3Client, sanitizeFilename }

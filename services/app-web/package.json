@@ -100,6 +100,7 @@
         "pa11y-ci": "^2.4.0",
         "prettier": "^2.3.2",
         "react-test-renderer": "^17.0.2",
+        "sanitize-filename": "^1.6.3",
         "serverless": "^2.54.0",
         "serverless-cloudfront-invalidate": "^1.5.0",
         "serverless-plugin-scripts": "^1.0.2",
