@@ -18,6 +18,7 @@ Additional sources for documentation:
 -   [ ] Java - Our local database runner (which is a serverless plugin called `serverless-dynamodb-local`) requires java to run. You can install it here: https://www.oracle.com/java/technologies/javase-downloads.html
 -   [ ] NVM - If you are on a Mac using nvm, you should be able to install all the dependencies as [described below](#Installing-Node-and-Dependencies).
 -   [ ] envrc - Used to set environment variables locally
+-   [ ] docker - Used to run postgres locally
 
 ### Local Tooling
 
