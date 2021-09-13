@@ -49,7 +49,6 @@ export function newAmplifyS3Client(bucketName: string): S3ClientT {
                 })
 
                 assertIsS3PutResponse(stored)
-                console.log('STORED IN', stored.key)
                 return stored.key
             } catch (err) {
                 if (err.name === 'Error' && err.message === 'Network Error') {
@@ -116,7 +115,6 @@ export function newAmplifyS3Client(bucketName: string): S3ClientT {
         },
         getURL: async (key: string): Promise<string> => {
             const result = await Storage.get(key)
-            console.log('GOT URL', result)
             if (typeof result === 'string') {
                 return result
             } else {

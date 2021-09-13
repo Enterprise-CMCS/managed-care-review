@@ -15,6 +15,7 @@ Familiarizing yourself with these dependencies will help you navigate the codeba
 -   [Formik](https://formik.org/docs/overview) - form development and validation
 -   [Storybook](https://storybook.js.org/docs/react/get-started/introduction) - deployed UI component playground
 -   [Yup](https://github.com/jquense/yup) - schema valication - used with Formik but can also be used alone
+-   [Amplify](https://docs.amplify.aws/) - All our comms from app-web to AWS are mediated by Amplify. It handles cognito auth, s3 uploads, and authenticates our API calls.
 
 ## Useful scripts
 

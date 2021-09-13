@@ -181,6 +181,8 @@ resources:
                   Resource:
                     # Must use Join here.  See: https://github.com/serverless/serverless/issues/3565
                     - ${self:custom.document_uploads_bucket_arn}/allusers/*
+                    # This private bucket is used by any files stored "private" by Amplify
+                    # https://docs.amplify.aws/lib/storage/configureaccess/q/platform/js/
                     - Fn::Join:
                         - ''
                         - - ${self:custom.document_uploads_bucket_arn}/private/
