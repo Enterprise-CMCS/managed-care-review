@@ -1,5 +1,5 @@
 describe('documents', () => {
-    it('can navigate to and from the documents page, saving documents but discarding duplicates on both "Back" and "Save as Draft" actions ', () => {
+    it('can navigate to and from the documents page, saving documents each time', () => {
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmission()
 
@@ -33,27 +33,9 @@ describe('documents', () => {
                 .should('have.length', 2)
             cy.verifyDocumentsHaveNoErrors()
 
-            //  add a new valid document and another duplicate document, and hit Save as draft
-            cy.visit(`/submissions/${draftSubmissionID}/documents`)
-            cy.findByRole('heading', { name: /Documents/ })
-            cy.findByTestId('file-input-input').attachFile([
-                'documents/how-to-open-source.pdf',
-                'documents/testing.csv',
-            ])
-            cy.waitForDocumentsToLoad()
-            cy.findByText('Duplicate file').should('exist')
-            cy.findByTestId('file-input-preview-list')
-                .findAllByRole('listitem')
-                .should('have.length', 4)
+            //  Save as draft
             cy.navigateForm('Save as draft')
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
-
-            // reload page, see duplicate was discarded
-            cy.visit(`/submissions/${draftSubmissionID}/documents`)
-            cy.findByTestId('file-input-preview-list')
-                .findAllByRole('listitem')
-                .should('have.length', 3)
-            cy.verifyDocumentsHaveNoErrors()
         })
     })
 
