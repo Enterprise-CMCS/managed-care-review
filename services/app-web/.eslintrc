@@ -10,7 +10,6 @@
         "plugin:jest/recommended",
         "plugin:jsx-a11y/recommended",
         "plugin:@typescript-eslint/recommended",
-        "plugin:testing-library/recommended",
         "prettier",
         "prettier/react",
         "prettier/@typescript-eslint",
