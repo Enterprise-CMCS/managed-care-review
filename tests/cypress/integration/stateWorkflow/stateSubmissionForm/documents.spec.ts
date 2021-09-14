@@ -26,7 +26,7 @@ describe('documents', () => {
             cy.navigateForm('Back')
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
 
-            // reload page, see two documents,  duplicate was discarded
+            // reload page, see two documents,  duplicate was discarded on Back
             cy.visit(`/submissions/${draftSubmissionID}/documents`)
             cy.findByTestId('file-input-preview-list')
                 .findAllByRole('listitem')
@@ -89,43 +89,6 @@ describe('documents', () => {
                 2
             )
             cy.waitForDocumentsToLoad()
-            cy.verifyDocumentsHaveNoErrors()
-
-            // Correct number of files added, no errors
-            cy.findByTestId('file-input-preview-list')
-                .findAllByRole('listitem')
-                .should('have.length', 2)
-
-            // Drop one more valid file
-            cy.findByTestId('file-input-droptarget')
-                .should('exist')
-                .attachFile(['documents/testing.csv'], {
-                    subjectType: 'drag-n-drop',
-                })
-            cy.findByTestId('file-input-preview-list')
-                .findAllByRole('listitem')
-                .should('have.length', 3)
-
-            // Add a duplicate file, should show a duplicate document error
-            cy.findByTestId('file-input-input').attachFile(
-                ['documents/how-to-open-source.pdf'],
-                {
-                    subjectType: 'drag-n-drop',
-                    force: true,
-                }
-            )
-            cy.findByTestId('file-input-preview-list')
-                .findAllByRole('listitem')
-                .should('have.length', 4)
-            cy.findAllByText('how-to-open-source.pdf').should('have.length', 2)
-            cy.findAllByText('Duplicate file').should('have.length', 1)
-
-            // Remove duplicate documents and continue with valid input
-            cy.findAllByText('Remove').should('exist').first().safeClick()
-            cy.findAllByText('Remove').should('exist').first().safeClick()
-            cy.findByTestId('file-input-preview-list')
-                .findAllByRole('listitem')
-                .should('have.length', 2)
             cy.verifyDocumentsHaveNoErrors()
 
             cy.navigateForm('Continue')
