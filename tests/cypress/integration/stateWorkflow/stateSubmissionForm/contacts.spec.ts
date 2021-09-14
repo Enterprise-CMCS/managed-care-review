@@ -104,29 +104,4 @@ describe('contacts', () => {
             cy.findByText('Additional actuary contact 1').should('not.exist')
         })
     })
-
-    it('can display correct validation errors', () => {
-        cy.logInAsStateUser()
-        cy.startNewContractAndRatesSubmission()
-
-        // Navigate to contacts page
-        cy.location().then((fullUrl) => {
-            const { pathname } = fullUrl
-            const pathnameArray = pathname.split('/')
-            const draftSubmissionId = pathnameArray[2]
-            cy.visit(`/submissions/${draftSubmissionId}/contacts`)
-        })
-
-        cy.findAllByLabelText('Email').eq(0).type('invalid@email')
-        cy.navigateForm('Continue')
-        cy.findAllByText('You must provide a name').should('have.length', 2)
-        cy.findAllByText('You must provide a title/role').should(
-            'have.length',
-            2
-        )
-        cy.findByText('You must enter a valid email address')
-        cy.findByText('You must provide an email address')
-        cy.findByText('You must select an actuarial firm')
-        cy.findByText('You must select a communication preference')
-    })
 })
