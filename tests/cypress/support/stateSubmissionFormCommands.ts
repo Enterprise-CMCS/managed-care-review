@@ -71,13 +71,14 @@ Cypress.Commands.add('fillOutStateContacts', () => {
 })
 
 Cypress.Commands.add('fillOutActuaryContacts', () => {
+    // Must be a contract and rates submission
     // Actuary contact
     cy.findAllByLabelText('Name').eq(1).type('Actuary Contact Person')
     cy.findAllByLabelText('Title/Role').eq(1).type('Actuary Contact Title')
     cy.findAllByLabelText('Email').eq(1).type('actuarycontact@test.com')
 
     // Actuarial firm
-    cy.findByLabelText('Mercer').safeClick()
+    cy.findAllByLabelText('Mercer').eq(0).safeClick()
 
     // Actuary communication preference
     cy.findByLabelText(
@@ -108,7 +109,7 @@ Cypress.Commands.add('submitStateSubmissionForm', () => {
 Cypress.Commands.add('waitForDocumentsToLoad', () => {
     const authMode = Cypress.env('AUTH_MODE')
     if (authMode !== 'LOCAL') {
-        // when we are in AWS environments we need to wait for scanning to complete
+        // Must wait for scanning to complete in AWS environments
         cy.wait(20000)
     }
     cy.findAllByTestId('file-input-preview-image', {
