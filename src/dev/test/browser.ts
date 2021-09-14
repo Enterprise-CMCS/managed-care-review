@@ -1,6 +1,6 @@
 import { spawnSync } from 'child_process'
 import LabeledProcessRunner from '../runner.js'
-import { requireBinary, checkURLIsUp } from '../deps.js'
+import { checkDockerInstalledAndRunning, checkURLIsUp } from '../deps.js'
 
 export async function runBrowserTests(cypressArgs: string[]) {
     let args = ['open']
@@ -14,18 +14,6 @@ export async function runBrowserTests(cypressArgs: string[]) {
     spawnSync('npx', args, {
         stdio: 'inherit',
     })
-}
-
-async function checkDockerInstalledAndRunning() {
-    requireBinary(
-        ['docker'],
-        'Docker is required to run Cypress in a CI-like environment. Install Docker Desktop here: https://www.docker.com/products/docker-desktop'
-    )
-
-    requireBinary(
-        ['docker', 'ps'],
-        'Docker must be running in order to continue. Please start Docker Desktop.'
-    )
 }
 
 async function buildCypressDockerImage(runner: LabeledProcessRunner) {

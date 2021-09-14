@@ -6,6 +6,7 @@ import { parseRunFlags } from './flags.js'
 
 import {
     runDBLocally,
+    runPostgresLocally,
     runAPILocally,
     runWebLocally,
     runStorybookLocally,
@@ -70,6 +71,7 @@ async function runAllGenerate() {
 type runLocalFlags = {
     runAPI: boolean
     runWeb: boolean
+    runPostgres: boolean
     runDB: boolean
     runS3: boolean
     runStoryBook: boolean
@@ -77,6 +79,7 @@ type runLocalFlags = {
 async function runAllLocally({
     runAPI,
     runWeb,
+    runPostgres,
     runDB,
     runS3,
     runStoryBook,
@@ -84,6 +87,7 @@ async function runAllLocally({
     const runner = new LabeledProcessRunner()
 
     runDB && runDBLocally(runner)
+    runPostgres && runPostgresLocally(runner)
     runS3 && runS3Locally(runner)
     runAPI && runAPILocally(runner)
     runWeb && runWebLocally(runner)
@@ -194,6 +198,10 @@ function main() {
                                     type: 'boolean',
                                     describe: 'run database locally',
                                 })
+                                .option('postgres', {
+                                    type: 'boolean',
+                                    describe: 'run postgres locally',
+                                })
                                 .example([
                                     ['$0 local', 'run all local services'],
                                     [
@@ -210,6 +218,7 @@ function main() {
                             const inputFlags = {
                                 runAPI: args.api,
                                 runWeb: args.web,
+                                runPostgres: args.postgres,
                                 runDB: args.db,
                                 runS3: args.s3,
                                 runStoryBook: args.storybook,
@@ -294,6 +303,11 @@ function main() {
                         const runner = new LabeledProcessRunner()
 
                         runDBLocally(runner)
+                    })
+                    .command('postgres', 'run postgres locally.', () => {
+                        const runner = new LabeledProcessRunner()
+
+                        runPostgresLocally(runner)
                     })
             },
             () => {

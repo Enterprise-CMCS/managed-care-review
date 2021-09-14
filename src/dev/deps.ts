@@ -33,3 +33,15 @@ export function checkURLIsUp(url: string): Promise<boolean> {
         })
     })
 }
+
+export async function checkDockerInstalledAndRunning() {
+    requireBinary(
+        ['docker'],
+        'Docker is required. Install Docker Desktop here: https://www.docker.com/products/docker-desktop'
+    )
+
+    requireBinary(
+        ['docker', 'ps'],
+        'Docker must be running in order to continue. Please start Docker Desktop.'
+    )
+}

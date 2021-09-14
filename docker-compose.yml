@@ -1,0 +1,9 @@
+---
+version: '3.8'
+services:
+  db:
+    image: postgres:13.3
+    environment:
+      - POSTGRES_PASSWORD=shhhsecret
+    ports:
+      - '5432:5432'
