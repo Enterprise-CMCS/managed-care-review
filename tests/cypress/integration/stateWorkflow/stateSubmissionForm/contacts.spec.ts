@@ -117,16 +117,15 @@ describe('contacts', () => {
             cy.visit(`/submissions/${draftSubmissionId}/contacts`)
         })
 
+        cy.findAllByLabelText('Email').eq(0).type('invalid@email')
         cy.navigateForm('Continue')
         cy.findAllByText('You must provide a name').should('have.length', 2)
         cy.findAllByText('You must provide a title/role').should(
             'have.length',
             2
         )
-        cy.findAllByText('You must provide an email address').should(
-            'have.length',
-            2
-        )
+        cy.findByText('You must enter a valid email address')
+        cy.findByText('You must provide an email address')
         cy.findByText('You must select an actuarial firm')
         cy.findByText('You must select a communication preference')
     })
