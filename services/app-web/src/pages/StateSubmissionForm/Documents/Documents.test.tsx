@@ -553,7 +553,7 @@ describe('Documents', () => {
             })
         })
 
-        it('when zero files present,  does not trigger missing documents alert on click', async () => {
+        it('when zero files present, does not trigger missing documents alert on click', async () => {
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <Documents
@@ -576,6 +576,7 @@ describe('Documents', () => {
             expect(saveAsDraftButton).not.toBeDisabled()
 
             userEvent.click(saveAsDraftButton)
+            expect(mockUpdateDraftFn).toHaveBeenCalled()
             expect(
                 screen.queryByText('You must upload at least one document')
             ).toBeNull()
@@ -601,13 +602,19 @@ describe('Documents', () => {
                 name: 'Save as draft',
             })
 
-            userEvent.upload(input, [TEST_DOC_FILE, TEST_DOC_FILE])
+            userEvent.upload(input, [TEST_DOC_FILE])
+            userEvent.upload(input, [TEST_PDF_FILE])
+            userEvent.upload(input, [TEST_DOC_FILE])
+
+            await waitFor(() => {
+                expect(screen.queryAllByText('Duplicate file').length).toBe(1)
+            })
             userEvent.click(saveAsDraftButton)
             await waitFor(() => {
+                expect(mockUpdateDraftFn).not.toHaveBeenCalled()
                 expect(
                     screen.queryByText('Remove files with errors')
                 ).toBeInTheDocument()
-                expect(screen.queryByText('Duplicate file')).toBeInTheDocument()
             })
         })
     })
@@ -700,6 +707,7 @@ describe('Back button', () => {
         expect(
             screen.queryByText('You must upload at least one document')
         ).toBeNull()
+        expect(mockUpdateDraftFn).toHaveBeenCalled()
     })
 
     it('when duplicate files present, does not trigger alert on click', async () => {
@@ -720,12 +728,18 @@ describe('Back button', () => {
         )
         const input = screen.getByLabelText('Upload documents')
         const backButton = screen.getByRole('button', {
-            name: 'Save as draft',
+            name: 'Back',
         })
 
-        userEvent.upload(input, [TEST_DOC_FILE, TEST_DOC_FILE])
+        userEvent.upload(input, [TEST_DOC_FILE])
+        userEvent.upload(input, [TEST_PDF_FILE])
+        userEvent.upload(input, [TEST_DOC_FILE])
         await waitFor(() => {
             expect(backButton).not.toBeDisabled()
+            expect(screen.queryAllByText('Duplicate file').length).toBe(1)
         })
+        userEvent.click(backButton)
+        expect(screen.queryByText('Remove files with errors')).toBeNull()
+        expect(mockUpdateDraftFn).toHaveBeenCalled()
     })
 })
