@@ -1,4 +1,5 @@
 import LabeledProcessRunner from '../runner.js'
+import { checkDockerInstalledAndRunning } from '../deps.js'
 
 export async function installPrismaDeps(runner: LabeledProcessRunner) {
     await runner.runCommandAndOutput(
@@ -9,14 +10,30 @@ export async function installPrismaDeps(runner: LabeledProcessRunner) {
 }
 
 export async function runPostgresLocally(runner: LabeledProcessRunner) {
+    await checkDockerInstalledAndRunning()
+
     await runner.runCommandAndOutput(
-        'postgres',
-        ['docker-compose', 'up', '-d'],
+        'docker postgres',
+        [
+            'docker',
+            'run',
+            '--name',
+            'mc-postgres',
+            '--env',
+            'REACT_APP_AUTH_MODE=LOCAL',
+            '--env',
+            'POSTGRES_PASSWORD=shhhsecret',
+            '-p',
+            '5432:5432',
+            '-d',
+            'postgres:13.3',
+        ],
+
         '.'
     )
 
-    runner.runCommandAndOutput(
-        'postgres migrate',
+    await runner.runCommandAndOutput(
+        'prisma migrate',
         ['npx', 'prisma', 'migrate', 'dev'],
         'services/app-api'
     )
