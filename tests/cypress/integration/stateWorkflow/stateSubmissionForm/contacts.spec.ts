@@ -1,7 +1,133 @@
 describe('contacts', () => {
-    // HM-TODO: persists contact data when submission is saved as draft
-    // HM-TODO: Can fill out additional state contact
-    // HM-TODO: Can fill out additional actuary contact
-    // HM-TODO: navigates to X page when back is clicked
-    // HM-TODO: navigates to X page when continue is clicked
+    it('can navigate to and from contacts page', () => {
+        cy.logInAsStateUser()
+        cy.startNewContractOnlySubmission()
+
+        // Navigate to contacts page
+        cy.location().then((fullUrl) => {
+            const { pathname } = fullUrl
+            const pathnameArray = pathname.split('/')
+            const draftSubmissionId = pathnameArray[2]
+            cy.visit(`/submissions/${draftSubmissionId}/contacts`)
+
+            // Navigate to contract details page by clicking back for a contract only submission
+            cy.findByRole('link', { name: /Back/ }).click()
+            cy.findByRole('heading', { level: 2, name: /Contract details/ })
+
+            // Navigate to submission type page to switch to contract and rates submission
+            cy.visit(`/submissions/${draftSubmissionId}/type`)
+            cy.findByLabelText(
+                'Contract action and rate certification'
+            ).safeClick()
+            cy.navigateForm('Continue')
+
+            // Navigate to contacts page
+            cy.visit(`/submissions/${draftSubmissionId}/contacts`)
+
+            // Navigate to rate details page by clicking back for a contract and rates submission
+            cy.findByRole('link', { name: /Back/ }).click()
+            cy.findByRole('heading', { level: 2, name: /Rate details/ })
+
+            // Navigate to contacts page
+            cy.visit(`/submissions/${draftSubmissionId}/contacts`)
+
+            cy.fillOutStateContacts()
+            cy.fillOutActuaryContacts()
+
+            // Navigate to documents page by clicking continue
+            cy.navigateForm('Continue')
+            // HM-TODO: Why doesn't level attribute work here?
+            cy.findByRole('heading', { name: /Documents/ })
+
+            // Navigate to contacts page
+            cy.visit(`/submissions/${draftSubmissionId}/contacts`)
+
+            // Navigate to dashboard page by clicking save as draft
+            cy.findByRole('button', { name: /Save as draft/ }).click()
+            cy.findByRole('heading', { level: 1, name: /Dashboard/ })
+        })
+    })
+
+    it('can add and remove additional state and actuary contacts', () => {
+        cy.logInAsStateUser()
+        cy.startNewContractAndRatesSubmission()
+
+        // Navigate to contacts page
+        cy.location().then((fullUrl) => {
+            const { pathname } = fullUrl
+            const pathnameArray = pathname.split('/')
+            const draftSubmissionId = pathnameArray[2]
+            cy.visit(`/submissions/${draftSubmissionId}/contacts`)
+
+            cy.fillOutStateContacts()
+            cy.fillOutActuaryContacts()
+
+            // Add additional state contact
+            cy.findByRole('button', { name: /Add state contact/ }).click()
+            cy.findAllByLabelText('Name').eq(1).type('State Contact Person 2')
+            cy.findAllByLabelText('Title/Role')
+                .eq(1)
+                .type('State Contact Title 2')
+            cy.findAllByLabelText('Email').eq(1).type('statecontact2@test.com')
+
+            // Add additional actuary contact
+            cy.findByRole('button', { name: /Add actuary contact/ }).click()
+            cy.findAllByLabelText('Name').eq(3).type('Actuary Contact Person 2')
+            cy.findAllByLabelText('Title/Role')
+                .eq(3)
+                .type('Actuary Contact Title 2')
+            cy.findAllByLabelText('Email')
+                .eq(3)
+                .type('actuarycontact2@test.com')
+
+            // Select additional actuarial firm
+            cy.findAllByLabelText('Mercer').eq(1).safeClick()
+
+            // Navigate to documents page by clicking continue
+            cy.navigateForm('Continue')
+            // HM-TODO: Why doesn't level attribute work here?
+            cy.findByRole('heading', { name: /Documents/ })
+
+            // Navigate to contacts page
+            cy.visit(`/submissions/${draftSubmissionId}/contacts`)
+
+            // Remove additional state contact
+            cy.findAllByRole('button', { name: /Remove contact/ })
+                .eq(0)
+                .click()
+            cy.findByText('State contacts 2').should('not.exist')
+
+            // Remove additional actuary contact
+            cy.findAllByRole('button', { name: /Remove contact/ })
+                .eq(0)
+                .click()
+            cy.findByText('Additional actuary contact 1').should('not.exist')
+        })
+    })
+
+    it('can display correct validation errors', () => {
+        cy.logInAsStateUser()
+        cy.startNewContractAndRatesSubmission()
+
+        // Navigate to contacts page
+        cy.location().then((fullUrl) => {
+            const { pathname } = fullUrl
+            const pathnameArray = pathname.split('/')
+            const draftSubmissionId = pathnameArray[2]
+            cy.visit(`/submissions/${draftSubmissionId}/contacts`)
+        })
+
+        cy.navigateForm('Continue')
+        cy.findAllByText('You must provide a name').should('have.length', 2)
+        cy.findAllByText('You must provide a title/role').should(
+            'have.length',
+            2
+        )
+        cy.findAllByText('You must provide an email address').should(
+            'have.length',
+            2
+        )
+        cy.findByText('You must select an actuarial firm')
+        cy.findByText('You must select a communication preference')
+    })
 })

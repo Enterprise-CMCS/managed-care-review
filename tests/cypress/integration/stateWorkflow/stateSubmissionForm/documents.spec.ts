@@ -11,6 +11,7 @@ describe('documents', () => {
 
             // Add two valid documents and one duplicate, then navigate back
             cy.visit(`/submissions/${draftSubmissionID}/documents`)
+            // HM-TODO: Why doesn't level attribute work here?
             cy.findByRole('heading', { name: /Documents/ })
             cy.findByTestId('file-input-input').attachFile([
                 'documents/trussel-guide.pdf',
