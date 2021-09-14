@@ -201,6 +201,7 @@ export const FileUpload = ({
                                     if (item.key === data.key) {
                                         return {
                                             ...item,
+                                            S3URL: null,
                                             status: 'SCANNING_ERROR',
                                         } as FileItemT
                                     } else {
@@ -208,6 +209,7 @@ export const FileUpload = ({
                                     }
                                 })
                             })
+                            // immediately delete this bad file
                             deleteFile(data.key).catch(() =>
                                 console.log('Error deleting from s3')
                             )

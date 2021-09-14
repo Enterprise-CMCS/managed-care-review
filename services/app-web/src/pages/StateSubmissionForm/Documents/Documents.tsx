@@ -26,9 +26,9 @@ import { updatesFromSubmission } from '../updateSubmissionTransform'
 import { MCRouterState } from '../../../constants/routerState'
 
 /*
-    Documents should error alerts for overall errors related to invalid documents for a submission, including no files added.
-    Inline errors, specific to the individual files as they upload,  should be handled in FileUpload.
-*/
+ * Documents is responsible for setting up api requests, redirects, and handling page level alert for overall errors related to invalid documents for a submission
+ * Inline error that are specific to the individual files as they upload are handled in FileUpload and FileItem.
+ */
 
 type DocumentProps = {
     draftSubmission: DraftSubmission
@@ -54,8 +54,12 @@ const DocumentRequirementsHint = ({
         </>
     )
 
-const FormError = ({ isEmpty }: { isEmpty: boolean }): JSX.Element =>
-    isEmpty ? (
+const PageLevelErrorAlert = ({
+    hasNoDocuments,
+}: {
+    hasNoDocuments: boolean
+}): JSX.Element =>
+    hasNoDocuments ? (
         <Alert
             type="error"
             heading="Missing documents"
@@ -121,7 +125,7 @@ export const Documents = ({
     }, [fileItems])
 
     // If there is a submission error, ensure form is in validation state
-    const onError = () => {
+    const onUpdateDraftSubmissionError = () => {
         if (!shouldValidate) setShouldValidate(true)
     }
 
@@ -159,6 +163,15 @@ export const Documents = ({
         }
     }
 
+    /*
+     * handleFormSubmit is used by all page actions
+     * @param shouldValidate - if true prevent submission while validation errors are present; if false silently discard errors but allow submission
+     * @param redirectPath - relative path within '/submissions/:id/' where application will redirect if submission succeeds
+     *
+     * Documents form changes are always persisted; all page action buttons trigger updateDraftSubmission
+     * Back button will persist changes without validation
+     * Save as Draft and Continue buttons requires user to clear validation errors
+     */
     const handleFormSubmit =
         ({
             shouldValidate,
@@ -170,7 +183,8 @@ export const Documents = ({
         async (e: React.FormEvent | React.MouseEvent) => {
             e.preventDefault()
 
-            // if there are any errors present in the documents list, stop here
+            // if there are any errors present in the documents and we are in a validation state (relevant for Save as Draft and Continue buttons), stop here.
+            // Force user to clear validations to continue
             if (shouldValidate) {
                 setShouldValidate(true)
                 if (!hasValidFiles) return
@@ -178,13 +192,21 @@ export const Documents = ({
 
             const documents = fileItems.reduce(
                 (formDataDocuments, fileItem) => {
-                    if (!fileItem.s3URL)
+                    if (fileItem.status === 'UPLOAD_ERROR') {
                         console.log(
-                            'The file item has no s3url, this should not happen on form submit'
+                            'Attempting to save files that failed upload, discarding invalid files'
                         )
-                    else if (fileItem.status === 'DUPLICATE_NAME_ERROR')
+                    } else if (fileItem.status === 'SCANNING_ERROR') {
                         console.log(
-                            'Attempting to save duplicate files, discarding duplicate'
+                            'Attempting to save files that failed scanning, discarding invalid files'
+                        )
+                    } else if (fileItem.status === 'DUPLICATE_NAME_ERROR') {
+                        console.log(
+                            'Attempting to save files that are duplicate names, discarding duplicate'
+                        )
+                    } else if (!fileItem.s3URL)
+                        console.log(
+                            'Attempting to save a seemingly valid file item is not yet uploaded to S3, this should not happen on form submit. Discarding file.'
                         )
                     else {
                         formDataDocuments.push({
@@ -212,7 +234,7 @@ export const Documents = ({
                     })
                 }
             } catch (error) {
-                onError()
+                onUpdateDraftSubmissionError()
             }
         }
 
@@ -232,7 +254,9 @@ export const Documents = ({
                 <fieldset className="usa-fieldset">
                     <legend className="srOnly">Documents</legend>
                     {shouldValidate && !hasValidFiles && (
-                        <FormError isEmpty={fileItems.length === 0} />
+                        <PageLevelErrorAlert
+                            hasNoDocuments={fileItems.length === 0}
+                        />
                     )}
                     {formAlert && formAlert}
                     <FileUpload
@@ -280,10 +304,18 @@ export const Documents = ({
                         type="button"
                         unstyled
                         onClick={async (e) => {
-                            await handleFormSubmit({
-                                shouldValidate: false,
-                                redirectPath: '/dashboard',
-                            })(e)
+                            // do not need to validate empty file list or force user to add at least one file for Save as Draft
+                            if (fileItems.length === 0) {
+                                await handleFormSubmit({
+                                    shouldValidate: false,
+                                    redirectPath: '/dashboard',
+                                })(e)
+                            } else {
+                                await handleFormSubmit({
+                                    shouldValidate: true,
+                                    redirectPath: '/dashboard',
+                                })(e)
+                            }
                         }}
                     >
                         Save as draft
