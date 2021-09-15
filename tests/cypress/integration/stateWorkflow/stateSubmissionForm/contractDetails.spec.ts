@@ -45,7 +45,7 @@ describe('contract details', () => {
         })
     })
 
-    it('can add ammendment to prior base contract', () => {
+    it('can add amendment to prior base contract', () => {
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmission()
 
