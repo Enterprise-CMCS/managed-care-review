@@ -60,6 +60,7 @@ async function prismaClientAurora(): Promise<Result<PrismaClient, Error>> {
         const secret = await getSecretValue()
 
         const postgresURL = `postgresql://${secret.username}:${secret.password}@${secret.host}:${secret.port}/${secret.dbname}?schema=public&connection_limit=5`
+        console.log('prismaClientAurora: ' + postgresURL)
 
         const prisma = new PrismaClient({
             datasources: {
