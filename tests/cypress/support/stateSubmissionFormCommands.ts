@@ -51,6 +51,20 @@ Cypress.Commands.add('fillOutBaseContractDetails', () => {
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
+Cypress.Commands.add('fillOutAmmendmentToBaseContractDetails', () => {
+    // Must be on '/submissions/:id/contract-details'
+    cy.findByLabelText('Amendment to base contract').safeClick()
+    cy.wait(1000) // wait to be sure that React renders the appropriate sub fields for contract type
+    cy.findByLabelText('Start date').type('04/01/2024')
+    cy.findByLabelText('End date').type('03/31/2025').blur()
+    cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
+    cy.findByLabelText('1932(a) State Plan Authority').safeClick()
+    cy.findByLabelText('Benefits provided').safeClick()
+    cy.findByLabelText('Financial incentives').safeClick()
+    cy.findByLabelText('No').safeClick()
+    cy.findAllByTestId('errorMessage').should('have.length', 0)
+})
+
 Cypress.Commands.add('fillOutNewRateCertification', () => {
     // Must be on '/submissions/:id/rate-details'
     // Must be a contract and rates submission

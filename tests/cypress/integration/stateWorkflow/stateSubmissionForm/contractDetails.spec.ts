@@ -44,4 +44,15 @@ describe('contract details', () => {
             cy.findByRole('heading', { level: 2, name: /Rate details/ })
         })
     })
+
+    it('can add ammendment to prior base contract', () => {
+        cy.logInAsStateUser()
+        cy.startNewContractOnlySubmission()
+
+        cy.fillOutAmmendmentToBaseContractDetails()
+
+        // Navigate to contacts page by clicking continue for a contract only submission
+        cy.navigateForm('Continue')
+        cy.findByRole('heading', { level: 2, name: /Contacts/ })
+    })
 })
