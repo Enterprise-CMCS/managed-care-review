@@ -51,8 +51,9 @@ Cypress.Commands.add('fillOutContractDetails', () => {
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
-Cypress.Commands.add('fillOutRateDetails', () => {
+Cypress.Commands.add('fillOutNewRateCertification', () => {
     // Must be on '/submissions/:id/rate-details'
+    // Must be a contract and rates submission
     cy.findByLabelText('New rate certification').safeClick()
     cy.wait(1000) // wait to be sure that React renders the appropriate sub fields for contract type
     cy.findByLabelText('Start date').type('02/29/2024')
@@ -61,18 +62,17 @@ Cypress.Commands.add('fillOutRateDetails', () => {
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
-Cypress.Commands.add('fillOutStateContacts', () => {
+Cypress.Commands.add('fillOutStateContact', () => {
     // Must be on '/submissions/:id/contacts'
-    // State contact
     cy.findAllByLabelText('Name').eq(0).type('State Contact Person')
     cy.findAllByLabelText('Title/Role').eq(0).type('State Contact Title')
     cy.findAllByLabelText('Email').eq(0).type('statecontact@test.com')
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
-Cypress.Commands.add('fillOutActuaryContacts', () => {
+Cypress.Commands.add('fillOutActuaryContact', () => {
+    // Must be on '/submissions/:id/contacts'
     // Must be a contract and rates submission
-    // Actuary contact
     cy.findAllByLabelText('Name').eq(1).type('Actuary Contact Person')
     cy.findAllByLabelText('Title/Role').eq(1).type('Actuary Contact Title')
     cy.findAllByLabelText('Email').eq(1).type('actuarycontact@test.com')

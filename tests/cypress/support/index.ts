@@ -26,9 +26,9 @@ declare global {
             startNewContractOnlySubmission(): void
             startNewContractAndRatesSubmission(): void
             fillOutContractDetails(): void
-            fillOutRateDetails(): void
-            fillOutStateContacts(): void
-            fillOutActuaryContacts(): void
+            fillOutNewRateCertification(): void
+            fillOutStateContact(): void
+            fillOutActuaryContact(): void
             fillOutDocuments(): void
             submitStateSubmissionForm(): void
             verifyDocumentsHaveNoErrors(): void

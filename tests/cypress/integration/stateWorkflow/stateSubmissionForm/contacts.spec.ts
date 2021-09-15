@@ -38,8 +38,8 @@ describe('contacts', () => {
             // Navigate to contacts page
             cy.visit(`/submissions/${draftSubmissionId}/contacts`)
 
-            cy.fillOutStateContacts()
-            cy.fillOutActuaryContacts()
+            cy.fillOutStateContact()
+            cy.fillOutActuaryContact()
 
             // Navigate to documents page by clicking continue
             cy.navigateForm('Continue')
@@ -59,8 +59,8 @@ describe('contacts', () => {
             const draftSubmissionId = pathnameArray[2]
             cy.visit(`/submissions/${draftSubmissionId}/contacts`)
 
-            cy.fillOutStateContacts()
-            cy.fillOutActuaryContacts()
+            cy.fillOutStateContact()
+            cy.fillOutActuaryContact()
 
             // Add additional state contact
             cy.findByRole('button', { name: /Add state contact/ }).click()
