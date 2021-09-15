@@ -546,10 +546,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-16.6.1.tgz#aee62c7b966f55fc66c7b6dfa1d58db2a616da61"
   integrity sha512-Sr7BhXEAer9xyGuCN3Ek9eg9xPviCF2gfu9kTfuU2HkTVAMYSDeX40fvpmo72n5nansg3nsBjuQBrsS28r+NUw==
 
-"@types/node@^14.14.31", "@types/node@^14.17.15":
-  version "14.17.15"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.17.15.tgz#d5ebfb62a69074ebb85cbe0529ad917bb8f2bae8"
-  integrity sha512-D1sdW0EcSCmNdLKBGMYb38YsHUS6JcM7yQ6sLQ9KuZ35ck7LYCKE7kYFHOO59ayFOY3zobWVZxf4KXhYHcHYFA==
+"@types/node@^14.14.31", "@types/node@^14.17.16":
+  version "14.17.16"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.17.16.tgz#2b9252bd4fdf0393696190cd9550901dd967c777"
+  integrity sha512-WiFf2izl01P1CpeY8WqFAeKWwByMueBEkND38EcN8N68qb0aDG3oIS1P5MhAX5kUdr469qRyqsY/MjanLjsFbQ==
 
 "@types/request-promise-native@^1.0.17":
   version "1.0.18"
@@ -1515,10 +1515,10 @@ cypress-pipe@^2.0.0:
   resolved "https://registry.yarnpkg.com/cypress-pipe/-/cypress-pipe-2.0.0.tgz#577df7a70a8603d89a96dfe4092a605962181af8"
   integrity sha512-KW9s+bz4tFLucH3rBGfjW+Q12n7S4QpUSSyxiGrgPOfoHlbYWzAGB3H26MO0VTojqf9NVvfd5Kt0MH5XMgbfyg==
 
-cypress@^8.3.0:
-  version "8.3.1"
-  resolved "https://registry.yarnpkg.com/cypress/-/cypress-8.3.1.tgz#c6760dbb907df2570b0e1ac235fa31c30f9260a6"
-  integrity sha512-1v6pfx+/5cXhaT5T6QKOvnkawmEHWHLiVzm3MYMoQN1fkX2Ma1C32STd3jBStE9qT5qPSTILjGzypVRxCBi40g==
+cypress@^8.4.0:
+  version "8.4.0"
+  resolved "https://registry.yarnpkg.com/cypress/-/cypress-8.4.0.tgz#09ec06a73f1cb10121c103cba15076e659e24876"
+  integrity sha512-RtVgGFR06ikyMaq/VqapeqOjGaIA42PpK7F0qe1MCiFArfUuJECsLmeYaOA+1TlmNUgJNMSF5fWKkZIJr5Uc7w==
   dependencies:
     "@cypress/request" "^2.88.6"
     "@cypress/xvfb" "^1.2.4"
