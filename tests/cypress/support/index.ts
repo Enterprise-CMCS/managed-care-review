@@ -27,6 +27,7 @@ declare global {
             startNewContractAndRatesSubmission(): void
             fillOutContractDetails(): void
             fillOutNewRateCertification(): void
+            fillOutAmendmentToPriorRateCertification(): void
             fillOutStateContact(): void
             fillOutActuaryContact(): void
             fillOutDocuments(): void
