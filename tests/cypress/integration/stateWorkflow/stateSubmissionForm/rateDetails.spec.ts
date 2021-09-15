@@ -10,7 +10,7 @@ describe('rate details', () => {
             const draftSubmissionId = pathnameArray[2]
             cy.visit(`/submissions/${draftSubmissionId}/rate-details`)
 
-            // Navigate to contract details page by clicking back for a contract only submission
+            // Navigate to contract details page by clicking back
             cy.findByRole('link', { name: /Back/ }).click()
             cy.findByRole('heading', { level: 2, name: /Contract details/ })
 
