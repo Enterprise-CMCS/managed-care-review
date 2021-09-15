@@ -1,15 +1,17 @@
 describe('documents', () => {
-    it('can navigate to and from the documents page, saving documents but discarding duplicates on both "Back" and "Save as Draft" actions ', () => {
+    it('can navigate to and from documents page, saving documents but discarding duplicates on both "Back" and "Save as draft" actions', () => {
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmission()
 
+        // Navigate to documents page
         cy.location().then((fullUrl) => {
             const { pathname } = fullUrl
             const draftSubmissionID = pathname.split('/')[2]
             cy.visit(`/submissions/${draftSubmissionID}/documents`)
 
-            //  add two valid documents and one duplicate, then navigate back
+            // Add two valid documents and one duplicate, then navigate back
             cy.visit(`/submissions/${draftSubmissionID}/documents`)
+            // HM-TODO: Why doesn't level attribute work here?
             cy.findByRole('heading', { name: /Documents/ })
             cy.findByTestId('file-input-input').attachFile([
                 'documents/trussel-guide.pdf',
@@ -26,14 +28,14 @@ describe('documents', () => {
             cy.navigateForm('Back')
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
 
-            // reload page, see two documents,  duplicate was discarded
+            // reload page, see two documents, duplicate was discarded
             cy.visit(`/submissions/${draftSubmissionID}/documents`)
             cy.findByTestId('file-input-preview-list')
                 .findAllByRole('listitem')
                 .should('have.length', 2)
             cy.verifyDocumentsHaveNoErrors()
 
-            //  add a new valid document and another duplicate document, and hit Save as draft
+            // Add a new valid document and another duplicate document, and click Save as draft
             cy.visit(`/submissions/${draftSubmissionID}/documents`)
             cy.findByRole('heading', { name: /Documents/ })
             cy.findByTestId('file-input-input').attachFile([
@@ -48,7 +50,7 @@ describe('documents', () => {
             cy.navigateForm('Save as draft')
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
-            // reload page, see duplicate was discarded
+            // Reload page, see duplicate was discarded
             cy.visit(`/submissions/${draftSubmissionID}/documents`)
             cy.findByTestId('file-input-preview-list')
                 .findAllByRole('listitem')
@@ -57,15 +59,15 @@ describe('documents', () => {
         })
     })
 
-    /* 
+    /*
          We test much of the same behavior for the file selector in our jest component tests,
          however drag and drop functionality is only working well in Cypress so we must re-implement many of those tests here
     */
-    it('can drag and drop as expected and continue to review and submit', () => {
+    it('can drag and drop and navigate to review and submit', () => {
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmission()
 
-        // visit documents page
+        // Navigate to documents page
         cy.location().then((fullUrl) => {
             const { pathname } = fullUrl
             const draftSubmissionId = pathname.split('/')[2]

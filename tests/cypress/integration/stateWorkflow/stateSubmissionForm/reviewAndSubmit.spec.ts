@@ -1,7 +1,6 @@
 describe('review and submit', () => {
-    it('can navigate to and from the review and submit page successfully', () => {
+    it('can navigate to and from review and submit page', () => {
         cy.logInAsStateUser()
-
         cy.startNewContractAndRatesSubmission()
 
         // Navigate to review and submit page
@@ -25,7 +24,7 @@ describe('review and submit', () => {
         })
         cy.findByRole('heading', { level: 2, name: /Review and submit/ })
 
-        // Navigate to dashboard page by clicking save as draft link
+        // Navigate to dashboard page by clicking save as draft
         cy.findByRole('link', { name: /Save as draft/ }).click()
         cy.findByRole('heading', { level: 1, name: /Dashboard/ })
     })
