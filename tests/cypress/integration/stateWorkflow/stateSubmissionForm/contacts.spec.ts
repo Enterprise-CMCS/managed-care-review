@@ -31,6 +31,13 @@ describe('contacts', () => {
             // Navigate to contacts page
             cy.visit(`/submissions/${draftSubmissionId}/contacts`)
 
+            // Navigate to dashboard page by clicking save as draft
+            cy.findByRole('button', { name: /Save as draft/ }).click()
+            cy.findByRole('heading', { level: 1, name: /Dashboard/ })
+
+            // Navigate to contacts page
+            cy.visit(`/submissions/${draftSubmissionId}/contacts`)
+
             cy.fillOutStateContacts()
             cy.fillOutActuaryContacts()
 
@@ -38,13 +45,6 @@ describe('contacts', () => {
             cy.navigateForm('Continue')
             // HM-TODO: Why doesn't level attribute work here?
             cy.findByRole('heading', { name: /Documents/ })
-
-            // Navigate to contacts page
-            cy.visit(`/submissions/${draftSubmissionId}/contacts`)
-
-            // Navigate to dashboard page by clicking save as draft
-            cy.findByRole('button', { name: /Save as draft/ }).click()
-            cy.findByRole('heading', { level: 1, name: /Dashboard/ })
         })
     })
 
