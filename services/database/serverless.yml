@@ -10,6 +10,7 @@ provider:
 plugins:
   - serverless-dynamodb-local
   - serverless-stack-termination-protection
+  - serverless-s3-bucket-helper
 
 custom:
   stage: ${opt:stage, self:provider.stage}
