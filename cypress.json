@@ -6,5 +6,9 @@
     "screenshotsFolder": "tests/cypress/screenshots",
     "videosFolder": "tests/cypress/videos",
     "supportFile": "tests/cypress/support",
-    "projectId": "tt5hbz"
+    "projectId": "tt5hbz",
+    "retries": {
+        "runMode": 2,
+        "openMode": 0
+    }
 }
