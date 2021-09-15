@@ -65,17 +65,13 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
 Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', () => {
     // Must be on '/submissions/:id/rate-details'
     // Must be a contract and rates submission
-    // Must have filled out a new rate certification
     cy.findByLabelText('Amendment to prior rate certification').safeClick()
     cy.wait(1000) // wait to be sure that React renders the appropriate sub fields for contract type
-    cy.findAllByLabelText('Start date').eq(0).should('have.value', '02/29/2024')
-    cy.findAllByLabelText('End date').eq(0).should('have.value', '02/28/2025')
-    cy.findByLabelText('Date certified for rate amendment').should(
-        'have.value',
-        '03/01/2024'
-    )
+    cy.findAllByLabelText('Start date').eq(0).type('02/29/2024')
+    cy.findAllByLabelText('End date').eq(0).type('02/28/2025')
     cy.findAllByLabelText('Start date').eq(1).type('03/01/2024')
     cy.findAllByLabelText('End date').eq(1).type('03/01/2025')
+    cy.findByLabelText('Date certified for rate amendment').type('03/01/2024')
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 

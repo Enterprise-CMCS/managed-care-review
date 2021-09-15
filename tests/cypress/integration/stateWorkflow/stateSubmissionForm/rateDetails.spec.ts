@@ -43,7 +43,6 @@ describe('rate details', () => {
             const draftSubmissionId = pathnameArray[2]
             cy.visit(`/submissions/${draftSubmissionId}/rate-details`)
 
-            cy.fillOutNewRateCertification()
             cy.fillOutAmendmentToPriorRateCertification()
 
             // Navigate to contacts page by clicking continue
