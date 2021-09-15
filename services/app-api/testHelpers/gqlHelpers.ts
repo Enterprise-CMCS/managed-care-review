@@ -54,7 +54,9 @@ const createTestDraftSubmission = async (
         variables: { input },
     })
     if (result.errors) {
-        throw new Error('createTestDraftSubmission mutation failed with errors')
+        throw new Error(
+            `createTestDraftSubmission mutation failed with errors ${result.errors}`
+        )
     }
 
     if (!result.data) {
@@ -81,7 +83,9 @@ const updateTestDraftSubmission = async (
 
     if (updateResult.errors) {
         console.log('errors', updateResult.errors)
-        throw new Error('updateTestDraftSubmission mutation failed with errors')
+        throw new Error(
+            `updateTestDraftSubmission mutation failed with errors ${updateResult.errors}`
+        )
     }
 
     if (!updateResult.data) {
@@ -165,7 +169,9 @@ const submitTestDraftSubmission = async (
 
     if (updateResult.errors) {
         console.log('errors', updateResult.errors)
-        throw new Error('updateTestDraftSubmission mutation failed with errors')
+        throw new Error(
+            `updateTestDraftSubmission mutation failed with errors ${updateResult.errors}`
+        )
     }
 
     if (updateResult.data === undefined || updateResult.data === null) {
@@ -196,7 +202,9 @@ const fetchTestDraftSubmissionById = async (
     })
 
     if (result.errors)
-        throw new Error('fetchTestDraftSubmission query failed with errors')
+        throw new Error(
+            `fetchTestDraftSubmission query failed with errors ${result.errors}`
+        )
 
     if (!result.data) {
         throw new Error('fetchTestDraftSubmission returned nothing')

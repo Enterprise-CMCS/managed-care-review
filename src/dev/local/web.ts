@@ -24,6 +24,21 @@ export async function runWebLocally(runner: LabeledProcessRunner) {
     runner.runCommandAndOutput('web', ['yarn', 'start'], 'services/app-web')
 }
 
+// By default, we transform the current branch name into a valid stage name
+export function stageNameFromBranch(): string {
+    const branchName = commandMustSucceedSync('git', [
+        'branch',
+        '--show-current',
+    ])
+
+    const transformedName = commandMustSucceedSync(
+        'scripts/stage_name_for_branch.sh',
+        [branchName]
+    )
+
+    return transformedName
+}
+
 // Pulls a bunch of configuration out of a given AWS environment and sets it as env vars for app-web to run against
 // Note: The environment is made up of the _stage_ which defaults to your current git branch
 // and the AWS Account, which is determined by which AWS credentials you get out of cloudtamer (dev, val, or prod) usually dev
@@ -32,9 +47,7 @@ export async function runWebAgainstAWS(
 ) {
     // by default, review apps are created with the stage name set as the current branch name
     const stageName =
-        stageNameOpt !== undefined
-            ? stageNameOpt
-            : commandMustSucceedSync('git', ['branch', '--show-current'])
+        stageNameOpt !== undefined ? stageNameOpt : stageNameFromBranch()
 
     if (stageName === '') {
         console.log(
