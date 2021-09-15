@@ -25,7 +25,7 @@ declare global {
             waitForLoadingToComplete(): void
             startNewContractOnlySubmission(): void
             startNewContractAndRatesSubmission(): void
-            fillOutContractDetails(): void
+            fillOutBaseContractDetails(): void
             fillOutNewRateCertification(): void
             fillOutAmendmentToPriorRateCertification(): void
             fillOutStateContact(): void

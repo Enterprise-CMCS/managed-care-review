@@ -40,7 +40,7 @@ Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
     cy.findByRole('heading', { level: 2, name: /Contract details/ })
 })
 
-Cypress.Commands.add('fillOutContractDetails', () => {
+Cypress.Commands.add('fillOutBaseContractDetails', () => {
     // Must be on '/submissions/:id/contract-details'
     cy.findByLabelText('Base contract').safeClick()
     cy.wait(1000) // wait to be sure that React renders the appropriate sub fields for contract type
