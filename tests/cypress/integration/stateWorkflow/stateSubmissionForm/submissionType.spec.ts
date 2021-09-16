@@ -1,124 +1,45 @@
 describe('submission type', () => {
-    it('user can switch a draft contract and rates submission to be contract only', () => {
+    it('can navigate to and from new page', () => {
         cy.logInAsStateUser()
-        cy.startNewContractAndRatesSubmission()
 
-        // Fill out contract details
-        cy.fillOutBaseContractDetails()
+        // Navigate to new page
+        cy.visit(`/submissions/new`)
+
+        // Navigate to dashboard page by clicking cancel
+        cy.findByRole('link', { name: /Cancel/ }).click()
+        cy.findByRole('heading', { level: 1, name: /Dashboard/ })
+
+        // Navigate to new page
+        cy.visit(`/submissions/new`)
+
+        cy.fillOutContractActionOnlySubmissionType()
+
+        // Navigate to contract details page by clicking continue for a contract only submission
         cy.navigateForm('Continue')
-
-        //Add rate details
-        cy.findByLabelText('New rate certification').safeClick()
-        cy.findByLabelText('Start date').type('04/01/2024')
-        cy.findByLabelText('End date').type('03/31/2025')
-        cy.findByLabelText('Date certified').type('03/01/2024')
-
-        // Continue button navigates to state contacts page
-        cy.navigateForm('Continue')
-
-        // fill out state contacts
-        cy.findAllByLabelText('Name').eq(0).type('Test Person')
-        cy.findAllByLabelText('Title/Role').eq(0).type('Fancy Title')
-        cy.findAllByLabelText('Email').eq(0).type('test@test.com')
-
-        // add actuary contact
-        cy.findAllByLabelText('Name').eq(1).type('Act Person')
-        cy.findAllByLabelText('Title/Role').eq(1).type('Act Title')
-        cy.findAllByLabelText('Email').eq(1).type('act@test.com')
-        cy.findByLabelText('Mercer').safeClick()
-
-        // actuary communication preference
-        cy.findByLabelText(
-            `OACT can communicate directly with the state’s actuary but should copy the state on all written communication and all appointments for verbal discussions.`
-        ).safeClick()
-
-        // Continue button navigates to documents page
-        cy.navigateForm('Continue')
-
-        // Add documents
-        cy.fillOutDocuments()
-        cy.navigateForm('Continue')
-
-        // Get draft submission id and navigate back to submission type form to edit existing draft
-        cy.location().then((fullUrl) => {
-            const { pathname } = fullUrl
-            const pathnameArray = pathname.split('/')
-            const draftSubmissionId = pathnameArray[2]
-            cy.visit(`/submissions/${draftSubmissionId}/type`)
-        })
-
-        // Check Step Indicator loads with submission type heading
-        cy.findByTestId('step-indicator')
-            .findAllByText('Submission type')
-            .should('have.length', 2)
-
-        // Change type to contract and rates submission
-        cy.findByLabelText('Contract action and rate certification').should(
-            'be.checked'
-        )
-        cy.findByRole('textbox', { name: 'Submission description' }).should(
-            'have.value',
-            'description of contract and rates submission'
-        )
-        cy.findByLabelText('Contract action only').safeClick()
-        cy.navigateForm('Continue')
-
-        cy.findByText(/MN-PMAP/).should('exist')
-        cy.findByLabelText('Base contract').should('be.checked')
-        cy.findByLabelText('Start date').clear()
-        cy.findByLabelText('Start date').type('04/15/2024')
-        cy.findByLabelText('End date').clear()
-        cy.findByLabelText('End date').type('04/15/2026')
-
-        // Change contract dates
-        cy.findByTestId('step-indicator')
-            .findAllByText('Contract details')
-            .should('have.length', 2)
-
-        cy.navigateForm('Continue')
-
-        // change state contacts
-        cy.findByLabelText('Name').clear()
-        cy.findByLabelText('Name').type('Different Person')
-
-        cy.findByLabelText('Email').clear()
-        cy.findByLabelText('Email').type('test2@test.com')
-
-        cy.navigateForm('Continue')
-
-        // Check that documents loads with correct data
-        cy.findByRole('heading', { name: /Documents/ })
-        cy.findByTestId('documents-hint').should(
-            'contain.text',
-            'Must include: An executed contract'
-        )
-        cy.findByText('trussel-guide.pdf').should('exist')
+        cy.findByRole('heading', { level: 2, name: /Contract details/ })
     })
 
-    it('user can edit a contract only submission', () => {
+    it.only('can navigate to and from type page', () => {
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmission()
 
-        cy.findByTestId('step-indicator').should('exist')
-
-        // Get draft submission id and navigate back to submission type form to edit existing draft
+        // Navigate to type page
         cy.location().then((fullUrl) => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[2]
             cy.visit(`/submissions/${draftSubmissionId}/type`)
-        })
 
-        // Check that submission type form loads with correct data
-        cy.findByText('404 / Page not found').should('not.exist')
-        cy.findByRole('combobox', { name: 'Program' }).should(
-            'have.value',
-            'pmap'
-        )
-        cy.findByLabelText('Contract action only').should('be.checked')
-        cy.findByRole('textbox', { name: 'Submission description' }).should(
-            'have.value',
-            'description of contract only submission'
-        )
+            // Navigate to dashboard page by clicking cancel
+            cy.findByRole('link', { name: /Cancel/ }).click()
+            cy.findByRole('heading', { level: 1, name: /Dashboard/ })
+
+            // Navigate to type page
+            cy.visit(`/submissions/${draftSubmissionId}/type`)
+
+            // Navigate to contract details page by clicking continue for a contract only submission
+            cy.navigateForm('Continue')
+            cy.findByRole('heading', { level: 2, name: /Contract details/ })
+        })
     })
 })

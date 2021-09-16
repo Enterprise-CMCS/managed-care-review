@@ -14,7 +14,7 @@ describe('contacts', () => {
             cy.findByRole('link', { name: /Back/ }).click()
             cy.findByRole('heading', { level: 2, name: /Contract details/ })
 
-            // Navigate to submission type page to switch to contract and rates submission
+            // Navigate to type page to switch to contract and rates submission
             cy.visit(`/submissions/${draftSubmissionId}/type`)
             cy.findByLabelText(
                 'Contract action and rate certification'

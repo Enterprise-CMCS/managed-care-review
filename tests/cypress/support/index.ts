@@ -21,10 +21,10 @@ declare global {
             logInAsCMSUser(args?: { initialURL?: string }): void
             safeClick(): void
             navigateForm(buttonName: string): Chainable<Element>
-            waitForDocumentsToLoad(): void
             waitForLoadingToComplete(): void
             startNewContractOnlySubmission(): void
             startNewContractAndRatesSubmission(): void
+            fillOutContractActionOnlySubmissionType(): void
             fillOutBaseContractDetails(): void
             fillOutAmendmentToBaseContractDetails(): void
             fillOutNewRateCertification(): void
@@ -32,8 +32,9 @@ declare global {
             fillOutStateContact(): void
             fillOutActuaryContact(): void
             fillOutDocuments(): void
-            submitStateSubmissionForm(): void
+            waitForDocumentsToLoad(): void
             verifyDocumentsHaveNoErrors(): void
+            submitStateSubmissionForm(): void
         }
     }
 }
