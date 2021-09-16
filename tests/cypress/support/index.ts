@@ -29,7 +29,8 @@ declare global {
             // state submission form commands
             startNewContractOnlySubmission(): void
             startNewContractAndRatesSubmission(): void
-            fillOutContractActionOnlySubmissionType(): void
+            fillOutContractActionOnly(): void
+            fillOutContractActionAndRateCertification(): void
             fillOutBaseContractDetails(): void
             fillOutAmendmentToBaseContractDetails(): void
             fillOutNewRateCertification(): void

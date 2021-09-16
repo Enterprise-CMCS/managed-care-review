@@ -12,7 +12,7 @@ describe('new submission', () => {
         // Navigate to new page
         cy.visit(`/submissions/new`)
 
-        cy.fillOutContractActionOnlySubmissionType()
+        cy.fillOutContractActionOnly()
 
         // Navigate to contract details page by clicking continue for a contract only submission
         cy.navigateForm('Continue')

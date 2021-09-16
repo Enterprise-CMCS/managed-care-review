@@ -6,7 +6,7 @@ Cypress.Commands.add('startNewContractOnlySubmission', () => {
     })
     cy.findByRole('heading', { level: 1, name: /New submission/ })
 
-    cy.fillOutContractActionOnlySubmissionType()
+    cy.fillOutContractActionOnly()
 
     cy.navigateForm('Continue')
     cy.findByRole('heading', { level: 2, name: /Contract details/ })
@@ -20,22 +20,27 @@ Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
     })
     cy.findByRole('heading', { level: 1, name: /New submission/ })
 
-    // Fill out Submission type
-    cy.findByRole('combobox', { name: 'Program' }).select('pmap')
-    cy.findByLabelText('Contract action and rate certification').safeClick()
-    cy.findByRole('textbox', { name: 'Submission description' }).type(
-        'description of contract and rates submission'
-    )
+    cy.fillOutContractActionAndRateCertification()
+
     cy.navigateForm('Continue')
     cy.findByRole('heading', { level: 2, name: /Contract details/ })
 })
 
-Cypress.Commands.add('fillOutContractActionOnlySubmissionType', () => {
+Cypress.Commands.add('fillOutContractActionOnly', () => {
     // Must be on '/submissions/new'
     cy.findByRole('combobox', { name: 'Program' }).select('pmap')
     cy.findByLabelText('Contract action only').safeClick()
     cy.findByRole('textbox', { name: 'Submission description' }).type(
         'description of contract only submission'
+    )
+})
+
+Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
+    // Must be on '/submissions/new'
+    cy.findByRole('combobox', { name: 'Program' }).select('pmap')
+    cy.findByLabelText('Contract action and rate certification').safeClick()
+    cy.findByRole('textbox', { name: 'Submission description' }).type(
+        'description of contract and rates submission'
     )
 })
 
