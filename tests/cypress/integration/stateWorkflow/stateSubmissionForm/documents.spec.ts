@@ -3,13 +3,15 @@ describe('documents', () => {
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmission()
 
+        // Navigate to documents page
         cy.location().then((fullUrl) => {
             const { pathname } = fullUrl
             const draftSubmissionID = pathname.split('/')[2]
             cy.visit(`/submissions/${draftSubmissionID}/documents`)
 
-            //  add two valid documents and one duplicate, then navigate back
+            // Add two valid documents and one duplicate, then navigate back
             cy.visit(`/submissions/${draftSubmissionID}/documents`)
+            // HM-TODO: Why doesn't level attribute work here?
             cy.findByRole('heading', { name: /Documents/ })
             cy.findByTestId('file-input-input').attachFile([
                 'documents/trussel-guide.pdf',
@@ -39,15 +41,15 @@ describe('documents', () => {
         })
     })
 
-    /* 
+    /*
          We test much of the same behavior for the file selector in our jest component tests,
          however drag and drop functionality is only working well in Cypress so we must re-implement many of those tests here
     */
-    it('can drag and drop as expected and continue to review and submit', () => {
+    it('can drag and drop and navigate to review and submit', () => {
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmission()
 
-        // visit documents page
+        // Navigate to documents page
         cy.location().then((fullUrl) => {
             const { pathname } = fullUrl
             const draftSubmissionId = pathname.split('/')[2]

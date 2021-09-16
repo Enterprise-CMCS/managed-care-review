@@ -25,10 +25,12 @@ declare global {
             waitForLoadingToComplete(): void
             startNewContractOnlySubmission(): void
             startNewContractAndRatesSubmission(): void
-            fillOutContractDetails(): void
-            fillOutRateDetails(): void
-            fillOutStateContacts(): void
-            fillOutActuaryContacts(): void
+            fillOutBaseContractDetails(): void
+            fillOutAmmendmentToBaseContractDetails(): void
+            fillOutNewRateCertification(): void
+            fillOutAmendmentToPriorRateCertification(): void
+            fillOutStateContact(): void
+            fillOutActuaryContact(): void
             fillOutDocuments(): void
             submitStateSubmissionForm(): void
             verifyDocumentsHaveNoErrors(): void

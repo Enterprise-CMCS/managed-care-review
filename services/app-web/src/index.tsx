@@ -34,6 +34,9 @@ Amplify.configure({
         region: process.env.REACT_APP_S3_REGION,
         bucket: process.env.REACT_APP_S3_DOCUMENTS_BUCKET,
         identityPoolId: process.env.REACT_APP_COGNITO_ID_POOL_ID,
+        customPrefix: {
+            public: 'allusers/',
+        },
     },
     API: {
         endpoints: [

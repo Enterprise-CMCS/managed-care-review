@@ -39,7 +39,7 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
             const filename = uuidv4()
 
             try {
-                const stored = await Storage.vault.put(filename, file, {
+                const stored = await Storage.put(filename, file, {
                     contentType: file.type,
                     contentDisposition: `attachment; filename=${file.name}`,
                 })
@@ -63,7 +63,7 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
 
         deleteFile: async (filename: string): Promise<void | S3Error> => {
             try {
-                await Storage.vault.remove(filename)
+                await Storage.remove(filename)
                 return
             } catch (err) {
                 assertIsS3PutError(err)
@@ -89,7 +89,7 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
             try {
                 await waitFor(20000)
                 await retryWithBackoff(async () => {
-                    await Storage.vault.get(filename, {
+                    await Storage.get(filename, {
                         download: true,
                     })
                 })
@@ -113,7 +113,7 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
             return key instanceof Error ? null : key
         },
         getURL: async (key: string): Promise<string> => {
-            const result = await Storage.vault.get(key)
+            const result = await Storage.get(key)
             if (typeof result === 'string') {
                 return result
             } else {

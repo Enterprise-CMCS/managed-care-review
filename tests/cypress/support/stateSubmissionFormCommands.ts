@@ -40,7 +40,7 @@ Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
     cy.findByRole('heading', { level: 2, name: /Contract details/ })
 })
 
-Cypress.Commands.add('fillOutContractDetails', () => {
+Cypress.Commands.add('fillOutBaseContractDetails', () => {
     // Must be on '/submissions/:id/contract-details'
     cy.findByLabelText('Base contract').safeClick()
     cy.wait(1000) // wait to be sure that React renders the appropriate sub fields for contract type
@@ -51,8 +51,23 @@ Cypress.Commands.add('fillOutContractDetails', () => {
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
-Cypress.Commands.add('fillOutRateDetails', () => {
+Cypress.Commands.add('fillOutAmmendmentToBaseContractDetails', () => {
+    // Must be on '/submissions/:id/contract-details'
+    cy.findByLabelText('Amendment to base contract').safeClick()
+    cy.wait(1000) // wait to be sure that React renders the appropriate sub fields for contract type
+    cy.findByLabelText('Start date').type('04/01/2024')
+    cy.findByLabelText('End date').type('03/31/2025').blur()
+    cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
+    cy.findByLabelText('1932(a) State Plan Authority').safeClick()
+    cy.findByLabelText('Benefits provided').safeClick()
+    cy.findByLabelText('Financial incentives').safeClick()
+    cy.findByLabelText('No').safeClick()
+    cy.findAllByTestId('errorMessage').should('have.length', 0)
+})
+
+Cypress.Commands.add('fillOutNewRateCertification', () => {
     // Must be on '/submissions/:id/rate-details'
+    // Must be a contract and rates submission
     cy.findByLabelText('New rate certification').safeClick()
     cy.wait(1000) // wait to be sure that React renders the appropriate sub fields for contract type
     cy.findByLabelText('Start date').type('02/29/2024')
@@ -61,23 +76,36 @@ Cypress.Commands.add('fillOutRateDetails', () => {
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
-Cypress.Commands.add('fillOutStateContacts', () => {
+Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', () => {
+    // Must be on '/submissions/:id/rate-details'
+    // Must be a contract and rates submission
+    cy.findByLabelText('Amendment to prior rate certification').safeClick()
+    cy.wait(1000) // wait to be sure that React renders the appropriate sub fields for contract type
+    cy.findAllByLabelText('Start date').eq(0).type('02/29/2024')
+    cy.findAllByLabelText('End date').eq(0).type('02/28/2025')
+    cy.findAllByLabelText('Start date').eq(1).type('03/01/2024')
+    cy.findAllByLabelText('End date').eq(1).type('03/01/2025')
+    cy.findByLabelText('Date certified for rate amendment').type('03/01/2024')
+    cy.findAllByTestId('errorMessage').should('have.length', 0)
+})
+
+Cypress.Commands.add('fillOutStateContact', () => {
     // Must be on '/submissions/:id/contacts'
-    // State contact
     cy.findAllByLabelText('Name').eq(0).type('State Contact Person')
     cy.findAllByLabelText('Title/Role').eq(0).type('State Contact Title')
     cy.findAllByLabelText('Email').eq(0).type('statecontact@test.com')
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
-Cypress.Commands.add('fillOutActuaryContacts', () => {
-    // Actuary contact
+Cypress.Commands.add('fillOutActuaryContact', () => {
+    // Must be on '/submissions/:id/contacts'
+    // Must be a contract and rates submission
     cy.findAllByLabelText('Name').eq(1).type('Actuary Contact Person')
     cy.findAllByLabelText('Title/Role').eq(1).type('Actuary Contact Title')
     cy.findAllByLabelText('Email').eq(1).type('actuarycontact@test.com')
 
     // Actuarial firm
-    cy.findByLabelText('Mercer').safeClick()
+    cy.findAllByLabelText('Mercer').eq(0).safeClick()
 
     // Actuary communication preference
     cy.findByLabelText(
@@ -108,7 +136,7 @@ Cypress.Commands.add('submitStateSubmissionForm', () => {
 Cypress.Commands.add('waitForDocumentsToLoad', () => {
     const authMode = Cypress.env('AUTH_MODE')
     if (authMode !== 'LOCAL') {
-        // when we are in AWS environments we need to wait for scanning to complete
+        // Must wait for scanning to complete in AWS environments
         cy.wait(20000)
     }
     cy.findAllByTestId('file-input-preview-image', {
