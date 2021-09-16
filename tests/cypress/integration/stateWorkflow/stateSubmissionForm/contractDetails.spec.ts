@@ -25,7 +25,7 @@ describe('contract details', () => {
 
             cy.fillOutBaseContractDetails()
 
-            // Navigate to contacts page by clicking continue for a contract only submission
+            // Navigate to contacts page by clicking continue for contract only submission
             cy.navigateForm('Continue')
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
 
@@ -39,7 +39,7 @@ describe('contract details', () => {
             // Navigate to contract details page
             cy.visit(`/submissions/${draftSubmissionId}/contract-details`)
 
-            // Navigate to contacts page by clicking continue for a contract and rates submission
+            // Navigate to contacts page by clicking continue for contract and rates submission
             cy.navigateForm('Continue')
             cy.findByRole('heading', { level: 2, name: /Rate details/ })
         })
@@ -51,7 +51,7 @@ describe('contract details', () => {
 
         cy.fillOutAmendmentToBaseContractDetails()
 
-        // Navigate to contacts page by clicking continue for a contract only submission
+        // Navigate to contacts page by clicking continue for contract only submission
         cy.navigateForm('Continue')
         cy.findByRole('heading', { level: 2, name: /Contacts/ })
     })
