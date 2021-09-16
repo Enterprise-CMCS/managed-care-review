@@ -4,7 +4,7 @@ describe('submission type', () => {
         cy.startNewContractAndRatesSubmission()
 
         // Fill out contract details
-        cy.fillOutContractDetails()
+        cy.fillOutBaseContractDetails()
         cy.navigateForm('Continue')
 
         //Add rate details
