@@ -1,5 +1,5 @@
 describe('dashboard', () => {
-    it.only('can navigate to and from dashboard page', () => {
+    it('can navigate to and from dashboard page', () => {
         cy.logInAsStateUser()
         cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
