@@ -1,4 +1,4 @@
-describe('submission summary', () => {
+describe('dashboard', () => {
     it('can complete a submission, load dashboard with default program, and see submission summary', () => {
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
