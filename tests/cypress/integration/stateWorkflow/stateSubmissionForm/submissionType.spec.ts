@@ -23,7 +23,7 @@ describe('submission type', () => {
         })
     })
 
-    it.only('can switch from contract action only to contract action and rate certification', () => {
+    it('can switch from contract action only to contract action and rate certification', () => {
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmission()
 
