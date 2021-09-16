@@ -1,5 +1,5 @@
-describe('type', () => {
-    it.only('can navigate to and from type page', () => {
+describe('submission type', () => {
+    it('can navigate to and from type page', () => {
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmission()
 
