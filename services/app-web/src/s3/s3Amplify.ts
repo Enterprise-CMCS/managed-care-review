@@ -1,5 +1,7 @@
 import { parseKey } from '../common-code/s3URLEncoding'
 import { Storage } from 'aws-amplify'
+import { v4 as uuidv4 } from 'uuid'
+
 import type { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
 
@@ -34,7 +36,7 @@ function assertIsS3PutError(val: unknown): asserts val is s3PutError {
 function newAmplifyS3Client(bucketName: string): S3ClientT {
     return {
         uploadFile: async (file: File): Promise<string | S3Error> => {
-            const filename = `${Date.now()}-${file.name}`
+            const filename = uuidv4()
 
             try {
                 const stored = await Storage.vault.put(filename, file, {
