@@ -1,5 +1,15 @@
 describe('dashboard', () => {
-    it('can complete a submission, load dashboard with default program, and see submission summary', () => {
+    it.only('can navigate to and from dashboard page', () => {
+        cy.logInAsStateUser()
+        cy.findByRole('heading', { level: 1, name: /Dashboard/ })
+
+        cy.findByRole('link', { name: 'Start new submission' }).click({
+            force: true,
+        })
+        cy.findByRole('heading', { level: 1, name: /New submission/ })
+    })
+
+    it('can see submission summary', () => {
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
 
