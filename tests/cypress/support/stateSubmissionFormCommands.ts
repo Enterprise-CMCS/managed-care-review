@@ -1,4 +1,5 @@
 Cypress.Commands.add('startNewContractOnlySubmission', () => {
+    // Must be on '/submissions/new'
     cy.findByTestId('dashboard-page').should('exist')
     cy.findByRole('link', { name: 'Start new submission' }).click({
         force: true,
@@ -20,6 +21,7 @@ Cypress.Commands.add('startNewContractOnlySubmission', () => {
 })
 
 Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
+    // Must be on '/submissions/new'
     cy.findByTestId('dashboard-page').should('exist')
     cy.findByRole('link', { name: 'Start new submission' }).click({
         force: true,
@@ -51,7 +53,7 @@ Cypress.Commands.add('fillOutBaseContractDetails', () => {
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
-Cypress.Commands.add('fillOutAmmendmentToBaseContractDetails', () => {
+Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
     // Must be on '/submissions/:id/contract-details'
     cy.findByLabelText('Amendment to base contract').safeClick()
     cy.wait(1000) // wait to be sure that React renders the appropriate sub fields for contract type

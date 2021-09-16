@@ -49,7 +49,7 @@ describe('contract details', () => {
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmission()
 
-        cy.fillOutAmmendmentToBaseContractDetails()
+        cy.fillOutAmendmentToBaseContractDetails()
 
         // Navigate to contacts page by clicking continue for a contract only submission
         cy.navigateForm('Continue')
