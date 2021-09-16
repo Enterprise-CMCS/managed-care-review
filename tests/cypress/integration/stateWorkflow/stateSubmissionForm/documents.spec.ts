@@ -1,5 +1,5 @@
 describe('documents', () => {
-    it('can navigate to and from documents page, saving documents but discarding duplicates on both "Back" and "Save as draft" actions', () => {
+    it('can navigate to and from documents page, save documents and discard duplicates on both "Back" and "Save as draft" actions', () => {
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmission()
 
