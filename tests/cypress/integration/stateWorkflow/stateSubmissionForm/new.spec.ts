@@ -1,4 +1,4 @@
-describe('submission type', () => {
+describe('new', () => {
     it('can navigate to and from new page', () => {
         cy.logInAsStateUser()
 
