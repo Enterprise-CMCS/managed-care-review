@@ -19,7 +19,7 @@ Cypress.Commands.add('logInAsStateUser', () => {
         throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
     }
     // HW-TODO: Find another way to wait for login to complete - maybe  cypress.intercept
-    cy.wait(2000)
+    cy.waitForLoadingToComplete()
 })
 
 Cypress.Commands.add(
@@ -45,6 +45,6 @@ Cypress.Commands.add(
             throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
         }
         // HW-TODO: Find another way to wait for login to complete - maybe  cypress.intercept
-        cy.wait(2000)
+        cy.waitForLoadingToComplete()
     }
 )

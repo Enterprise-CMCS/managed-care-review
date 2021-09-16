@@ -49,7 +49,6 @@ Cypress.Commands.add('navigateForm', (buttonAccessibleName: 'string') => {
     cy.waitForLoadingToComplete()
 })
 
-// HM-TODO: Is this actually waiting for the loading to complete?/What if the loader never appears?
 // HW-TODO: FYI another way to wait for something to complete is to use cypress.intercept and wait for some request to resolve.
 Cypress.Commands.add('waitForLoadingToComplete', () => {
     cy.wait(2000)
