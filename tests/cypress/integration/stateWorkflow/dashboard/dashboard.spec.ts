@@ -42,7 +42,7 @@ describe('submission summary', () => {
         cy.navigateForm('Submit')
         cy.findByRole('dialog').should('exist')
         cy.navigateForm('Confirm submit')
-        cy.waitForLoadingToComplete()
+        cy.waitForApiToLoad()
         cy.findByText('Dashboard').should('exist')
         cy.findByText('PMAP').should('exist')
         // View submission summary

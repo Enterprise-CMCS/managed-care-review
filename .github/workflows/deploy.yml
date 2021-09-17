@@ -142,6 +142,8 @@ jobs:
         uses: cypress-io/github-action@v2
         with:
           config: baseUrl=${{env.APPLICATION_ENDPOINT}}
+        env:
+          DEBUG: 'cypress:*'
 
       - name: Upload cypress screenshots
         uses: actions/upload-artifact@v2.2.4

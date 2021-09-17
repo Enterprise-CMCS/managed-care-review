@@ -22,7 +22,7 @@ declare global {
             safeClick(): void
             navigateForm(buttonName: string): Chainable<Element>
             waitForDocumentsToLoad(): void
-            waitForLoadingToComplete(): void
+            waitForApiToLoad(): void
             startNewContractOnlySubmission(): void
             startNewContractAndRatesSubmission(): void
             fillOutBaseContractDetails(): void

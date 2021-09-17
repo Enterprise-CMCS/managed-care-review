@@ -25,7 +25,7 @@ describe('state submission', () => {
         cy.findByRole('combobox', { name: 'Program' }).select('msho')
 
         // Continue button triggers submission type validation
-        cy.navigateForm('Continue')
+        cy.navigateForm('Continue', false)
         cy.findByText(
             'You must provide a description of any major changes or updates'
         ).should('exist')
@@ -52,7 +52,7 @@ describe('state submission', () => {
         cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
 
         // Continue button triggers contract details validation
-        cy.navigateForm('Continue')
+        cy.navigateForm('Continue', false)
         cy.findByText('You must select at least one authority').should('exist')
         cy.findAllByTestId('errorMessage').should('have.length', 1)
 
@@ -74,7 +74,7 @@ describe('state submission', () => {
         cy.findByLabelText('End date').type('03/30/2025')
 
         // Continue button triggers rate details validation
-        cy.navigateForm('Continue')
+        cy.navigateForm('Continue', false)
 
         cy.findByText(
             'You must enter the date the document was certified'
