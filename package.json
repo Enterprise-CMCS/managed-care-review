@@ -35,7 +35,7 @@
         "@types/node": "^14.17.16",
         "@types/yargs": "^17.0.2",
         "chromedriver": "^93.0.1",
-        "cypress": "^8.3.0",
+        "cypress": "^8.4.0",
         "cypress-pipe": "^2.0.0",
         "dotenv": "^10.0.0",
         "prettier": "^2.3.2",
@@ -45,7 +45,7 @@
         "yargs": "^17.1.1"
     },
     "dependencies": {
-        "aws-sdk": "^2.987.0",
+        "aws-sdk": "^2.990.0",
         "cypress-file-upload": "^5.0.8"
     }
 }
