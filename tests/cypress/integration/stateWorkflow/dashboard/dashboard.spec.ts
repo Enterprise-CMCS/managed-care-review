@@ -37,7 +37,7 @@ describe('dashboard', () => {
 
         // Submit, sent to dashboard
         cy.submitStateSubmissionForm()
-        cy.waitForLoadingToComplete()
+        cy.waitForApiToLoad()
         cy.findByText('Dashboard').should('exist')
         cy.findByText('PMAP').should('exist')
 

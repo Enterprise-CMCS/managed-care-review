@@ -40,16 +40,23 @@ Cypress.Commands.add('safeClick', { prevSubject: 'element' }, ($element) => {
     return cy.wrap($element).should('exist').should('be.visible').pipe(click)
 })
 
-Cypress.Commands.add('navigateForm', (buttonAccessibleName: 'string') => {
-    cy.findByRole('button', {
-        name: buttonAccessibleName,
-    }).safeClick()
-    cy.findByTestId('state-submission-form-page').should('exist')
-
-    cy.waitForLoadingToComplete()
-})
+Cypress.Commands.add(
+    'navigateForm',
+    (buttonAccessibleName: string, waitForLoad = true) => {
+        cy.findByRole('button', {
+            name: buttonAccessibleName,
+        }).safeClick()
+        if (waitForLoad) cy.waitForApiToLoad()
+        cy.findByTestId('state-submission-form-page').should('exist')
+    }
+)
 
 // HW-TODO: FYI another way to wait for something to complete is to use cypress.intercept and wait for some request to resolve.
 Cypress.Commands.add('waitForLoadingToComplete', () => {
     cy.wait(2000)
+})
+
+Cypress.Commands.add('waitForApiToLoad', () => {
+    cy.intercept('POST', '*/graphql').as('gqlRequest')
+    cy.wait('@gqlRequest')
 })

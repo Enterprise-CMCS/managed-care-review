@@ -21,12 +21,14 @@ declare global {
             safeClick(): void
             navigateForm(buttonName: string): Chainable<Element>
             waitForLoadingToComplete(): void
+            waitForApiToLoad(): void
 
             // login commands
             logInAsStateUser(): void
             logInAsCMSUser(args?: { initialURL?: string }): void
 
             // state submission form commands
+            waitForDocumentsToLoad(): void
             startNewContractOnlySubmission(): void
             startNewContractAndRatesSubmission(): void
             fillOutContractActionOnly(): void
