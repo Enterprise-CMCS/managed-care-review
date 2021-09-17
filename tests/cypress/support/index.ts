@@ -20,7 +20,6 @@ declare global {
             // commands
             safeClick(): void
             navigateForm(buttonName: string): Chainable<Element>
-            waitForLoadingToComplete(): void
             waitForApiToLoad(): void
 
             // login commands

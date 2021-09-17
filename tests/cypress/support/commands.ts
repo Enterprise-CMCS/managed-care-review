@@ -51,11 +51,6 @@ Cypress.Commands.add(
     }
 )
 
-// HW-TODO: FYI another way to wait for something to complete is to use cypress.intercept and wait for some request to resolve.
-Cypress.Commands.add('waitForLoadingToComplete', () => {
-    cy.wait(2000)
-})
-
 Cypress.Commands.add('waitForApiToLoad', () => {
     cy.intercept('POST', '*/graphql').as('gqlRequest')
     cy.wait('@gqlRequest')

@@ -47,7 +47,7 @@ Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
 Cypress.Commands.add('fillOutBaseContractDetails', () => {
     // Must be on '/submissions/:id/contract-details'
     cy.findByLabelText('Base contract').safeClick()
-    cy.waitForLoadingToComplete()
+    cy.wait(2000)
     cy.findByLabelText('Start date').type('04/01/2024')
     cy.findByLabelText('End date').type('03/31/2025').blur()
     cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
@@ -58,7 +58,7 @@ Cypress.Commands.add('fillOutBaseContractDetails', () => {
 Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
     // Must be on '/submissions/:id/contract-details'
     cy.findByLabelText('Amendment to base contract').safeClick()
-    cy.waitForLoadingToComplete()
+    cy.wait(2000)
     cy.findByLabelText('Start date').type('04/01/2024')
     cy.findByLabelText('End date').type('03/31/2025').blur()
     cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
@@ -73,7 +73,7 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
     // Must be on '/submissions/:id/rate-details'
     // Must be a contract and rates submission
     cy.findByLabelText('New rate certification').safeClick()
-    cy.waitForLoadingToComplete()
+    cy.wait(2000)
     cy.findByLabelText('Start date').type('02/29/2024')
     cy.findByLabelText('End date').type('02/28/2025')
     cy.findByLabelText('Date certified').type('03/01/2024')
@@ -84,7 +84,7 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', () => {
     // Must be on '/submissions/:id/rate-details'
     // Must be a contract and rates submission
     cy.findByLabelText('Amendment to prior rate certification').safeClick()
-    cy.waitForLoadingToComplete()
+    cy.wait(2000)
     cy.findAllByLabelText('Start date').eq(0).type('02/29/2024')
     cy.findAllByLabelText('End date').eq(0).type('02/28/2025')
     cy.findAllByLabelText('Start date').eq(1).type('03/01/2024')

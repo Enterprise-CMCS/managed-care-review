@@ -13,7 +13,6 @@ describe('dashboard', () => {
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
 
-        // Fill out contract details
         cy.fillOutBaseContractDetails()
         cy.navigateForm('Continue')
 
