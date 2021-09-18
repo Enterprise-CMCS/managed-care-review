@@ -17,23 +17,31 @@ import './stateSubmissionFormCommands'
 declare global {
     namespace Cypress {
         interface Chainable<Subject = any> {
-            logInAsStateUser(): void
-            logInAsCMSUser(args?: { initialURL?: string }): void
+            // commands
             safeClick(): void
             navigateForm(buttonName: string): Chainable<Element>
-            waitForDocumentsToLoad(): void
             waitForApiToLoad(): void
+
+            // login commands
+            logInAsStateUser(): void
+            logInAsCMSUser(args?: { initialURL?: string }): void
+
+            // state submission form commands
+            waitForDocumentsToLoad(): void
             startNewContractOnlySubmission(): void
             startNewContractAndRatesSubmission(): void
+            fillOutContractActionOnly(): void
+            fillOutContractActionAndRateCertification(): void
             fillOutBaseContractDetails(): void
-            fillOutAmmendmentToBaseContractDetails(): void
+            fillOutAmendmentToBaseContractDetails(): void
             fillOutNewRateCertification(): void
             fillOutAmendmentToPriorRateCertification(): void
             fillOutStateContact(): void
             fillOutActuaryContact(): void
             fillOutDocuments(): void
-            submitStateSubmissionForm(): void
+            waitForDocumentsToLoad(): void
             verifyDocumentsHaveNoErrors(): void
+            submitStateSubmissionForm(): void
         }
     }
 }

@@ -1,16 +1,17 @@
 describe('login', () => {
-    it('user can login and logout as expected', () => {
+    it('can log in and log out as expected', () => {
         cy.logInAsStateUser()
+
         cy.url().should('eq', Cypress.config().baseUrl + '/')
-        cy.findByRole('button', { name: /Sign out/i })
-            .should('exist')
-            .safeClick()
+        cy.findByRole('button', { name: /Sign out/i }).safeClick()
+
         cy.location('pathname').should('eq', '/')
         cy.findByRole('link', { name: /Sign In/i }).should('exist')
     })
 
-    it('user can login and see personal dashboard for their state', () => {
+    it('can log in and see personal dashboard for their state', () => {
         cy.logInAsStateUser()
+
         cy.findByText('aang@dhs.state.mn.us').should('exist')
         cy.findByRole('heading', { name: 'Minnesota Dashboard' }).should(
             'exist'

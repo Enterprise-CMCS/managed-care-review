@@ -1,49 +1,53 @@
 Cypress.Commands.add('startNewContractOnlySubmission', () => {
+    // Must be on '/submissions/new'
     cy.findByTestId('dashboard-page').should('exist')
     cy.findByRole('link', { name: 'Start new submission' }).click({
         force: true,
     })
-    // HM-TODO: Move this check to dashboard page
-    cy.location('pathname').should('eq', '/submissions/new')
-    // HM-TODO: Move this check to dashboard page
-    cy.findByText('New submission').should('exist')
+    cy.findByRole('heading', { level: 1, name: /New submission/ })
 
-    // Fill out Submission type
-    cy.findByRole('combobox', { name: 'Program' }).select('pmap')
-    cy.findByLabelText('Contract action only').safeClick()
-    cy.findByRole('textbox', { name: 'Submission description' })
-        // HM-TODO: Move this check to dashboard page
-        .should('exist')
-        .type('description of contract only submission')
+    cy.fillOutContractActionOnly()
+
     cy.navigateForm('Continue')
     cy.findByRole('heading', { level: 2, name: /Contract details/ })
 })
 
 Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
+    // Must be on '/submissions/new'
     cy.findByTestId('dashboard-page').should('exist')
     cy.findByRole('link', { name: 'Start new submission' }).click({
         force: true,
     })
-    // HM-TODO: Move this check to dashboard page
-    cy.location('pathname').should('eq', '/submissions/new')
-    // HM-TODO: Move this check to dashboard page
-    cy.findByText('New submission').should('exist')
+    cy.findByRole('heading', { level: 1, name: /New submission/ })
 
-    // Fill out Submission type
-    cy.findByRole('combobox', { name: 'Program' }).select('pmap')
-    cy.findByLabelText('Contract action and rate certification').safeClick()
-    cy.findByRole('textbox', { name: 'Submission description' })
-        // HM-TODO: Move this check to dashboard page
-        .should('exist')
-        .type('description of contract and rates submission')
+    cy.fillOutContractActionAndRateCertification()
+
     cy.navigateForm('Continue')
     cy.findByRole('heading', { level: 2, name: /Contract details/ })
+})
+
+Cypress.Commands.add('fillOutContractActionOnly', () => {
+    // Must be on '/submissions/new'
+    cy.findByRole('combobox', { name: 'Program' }).select('pmap')
+    cy.findByLabelText('Contract action only').safeClick()
+    cy.findByRole('textbox', { name: 'Submission description' }).type(
+        'description of contract only submission'
+    )
+})
+
+Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
+    // Must be on '/submissions/new'
+    cy.findByRole('combobox', { name: 'Program' }).select('pmap')
+    cy.findByLabelText('Contract action and rate certification').safeClick()
+    cy.findByRole('textbox', { name: 'Submission description' }).type(
+        'description of contract and rates submission'
+    )
 })
 
 Cypress.Commands.add('fillOutBaseContractDetails', () => {
     // Must be on '/submissions/:id/contract-details'
     cy.findByLabelText('Base contract').safeClick()
-    cy.wait(1000) // wait to be sure that React renders the appropriate sub fields for contract type
+    cy.wait(2000)
     cy.findByLabelText('Start date').type('04/01/2024')
     cy.findByLabelText('End date').type('03/31/2025').blur()
     cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
@@ -51,10 +55,10 @@ Cypress.Commands.add('fillOutBaseContractDetails', () => {
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
-Cypress.Commands.add('fillOutAmmendmentToBaseContractDetails', () => {
+Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
     // Must be on '/submissions/:id/contract-details'
     cy.findByLabelText('Amendment to base contract').safeClick()
-    cy.wait(1000) // wait to be sure that React renders the appropriate sub fields for contract type
+    cy.wait(2000)
     cy.findByLabelText('Start date').type('04/01/2024')
     cy.findByLabelText('End date').type('03/31/2025').blur()
     cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
@@ -69,7 +73,7 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
     // Must be on '/submissions/:id/rate-details'
     // Must be a contract and rates submission
     cy.findByLabelText('New rate certification').safeClick()
-    cy.wait(1000) // wait to be sure that React renders the appropriate sub fields for contract type
+    cy.wait(2000)
     cy.findByLabelText('Start date').type('02/29/2024')
     cy.findByLabelText('End date').type('02/28/2025')
     cy.findByLabelText('Date certified').type('03/01/2024')
@@ -80,7 +84,7 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', () => {
     // Must be on '/submissions/:id/rate-details'
     // Must be a contract and rates submission
     cy.findByLabelText('Amendment to prior rate certification').safeClick()
-    cy.wait(1000) // wait to be sure that React renders the appropriate sub fields for contract type
+    cy.wait(2000)
     cy.findAllByLabelText('Start date').eq(0).type('02/29/2024')
     cy.findAllByLabelText('End date').eq(0).type('02/28/2025')
     cy.findAllByLabelText('Start date').eq(1).type('03/01/2024')
@@ -125,14 +129,6 @@ Cypress.Commands.add('fillOutDocuments', () => {
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
-Cypress.Commands.add('submitStateSubmissionForm', () => {
-    // Must be on '/submissions/:id/review-and-submit'
-    cy.navigateForm('Submit')
-    // HM-TODO: Move this check to dashboard page
-    cy.findByRole('dialog').should('exist')
-    cy.navigateForm('Confirm submit')
-})
-
 Cypress.Commands.add('waitForDocumentsToLoad', () => {
     const authMode = Cypress.env('AUTH_MODE')
     if (authMode !== 'LOCAL') {
@@ -148,4 +144,12 @@ Cypress.Commands.add('verifyDocumentsHaveNoErrors', () => {
     cy.findByText('Upload failed').should('not.exist')
     cy.findByText('Duplicate file').should('not.exist')
     cy.findByText('Failed security scan, please remove').should('not.exist')
+})
+
+Cypress.Commands.add('submitStateSubmissionForm', () => {
+    // Must be on '/submissions/:id/review-and-submit'
+    cy.navigateForm('Submit')
+    // HM-TODO: Move this check to dashboard page
+    cy.findByRole('dialog').should('exist')
+    cy.navigateForm('Confirm submit')
 })
