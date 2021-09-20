@@ -36,10 +36,11 @@ function assertIsS3PutError(val: unknown): asserts val is s3PutError {
 function newAmplifyS3Client(bucketName: string): S3ClientT {
     return {
         uploadFile: async (file: File): Promise<string | S3Error> => {
-            const filename = uuidv4()
+            const uuid = uuidv4()
+            const ext = file.name.split('.').pop()
 
             try {
-                const stored = await Storage.put(filename, file, {
+                const stored = await Storage.put(`${uuid}.${ext}`, file, {
                     contentType: file.type,
                     contentDisposition: `attachment; filename=${file.name}`,
                 })
