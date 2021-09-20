@@ -33,7 +33,7 @@ export const main: APIGatewayProxyHandler = async () => {
     }?schema=public&connection_limit=5`
 
     const { stdout } = await execa(
-        `${process.execPath} npx migrate deploy --preview-feature`,
+        `${process.execPath} npx prisma migrate deploy --preview-feature`,
         {
             env: {
                 DATABASE_URL: postgresURL,
