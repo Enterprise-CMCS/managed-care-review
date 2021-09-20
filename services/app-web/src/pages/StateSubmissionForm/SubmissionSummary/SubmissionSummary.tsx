@@ -21,6 +21,7 @@ import {
 import { DataDetail } from '../../../components/DataDetail/DataDetail'
 import { DoubleColumnRow } from '../../../components/DoubleColumnRow/DoubleColumnRow'
 import { Loading } from '../../../components/Loading'
+import { SubmissionTypeSummary } from '../../../components/SubmissionSummary/submissionType'
 import { GenericError } from '../../Errors/GenericError'
 import { useS3 } from '../../../contexts/S3Context'
 import { usePage } from '../../../contexts/PageContext'
@@ -173,6 +174,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                         <span>&nbsp;Back to state dashboard</span>
                     </Link>
                 ) : null}
+                <SubmissionTypeSummary submission={submission} />
                 <section id="submissionType">
                     <div className={styles.firstHeader}>
                         <h2 className={stylesForm.submissionName}>
