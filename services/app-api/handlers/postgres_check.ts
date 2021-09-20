@@ -88,7 +88,7 @@ interface Secret {
     username: string
 }
 
-async function getSecretValue(): Promise<Secret> {
+export async function getSecretValue(): Promise<Secret> {
     // lookup secrets manager secret from env
     const params = {
         SecretId: process.env.SECRETS_MANAGER_SECRET || 'no secret set',
