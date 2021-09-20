@@ -48,6 +48,11 @@ branch_name=$(echo "$branch_name" | sed "s/---*/-/g")
 
 >&2 echo "dash $branch_name"
 
+# remove aws string from branch name
+branch_name=${branch_name//aws/}
+
+>&2 echo "aws $branch_name"
+
 # downcase everything
 branch_name=$(echo "$branch_name" | awk '{print tolower($0)}')
 
