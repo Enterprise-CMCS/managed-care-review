@@ -99,10 +99,11 @@ export function userTypeFromAttributes(attributes: {
 
     const fullName = attributes.given_name + ' ' + attributes.family_name
     // Roles are a list of all the roles a user has in IDM.
-    // as of September 2021, it shouldn't be possible for someone to have more than one MC Review role
     const roleAttribute = attributes['custom:role']
     const roles = roleAttribute.split(',')
 
+    // Arbitrarily, we check for the state user role first. If a user managed to have both roles, this is a little weird.
+    // but as of September 2021, it shouldn't be possible for someone to have more than one MC Review role
     if (roles.includes(STATE_ROLE_ATTRIBUTE)) {
         if (!('custom:state_code' in attributes)) {
             return err(
