@@ -229,55 +229,7 @@ export const ReviewSubmit = ({
             )}
 
             <SubmissionTypeSummary submission={draftSubmission} />
-            <section id="submissionType" className={styles.reviewSection}>
-                <div className={styles.reviewSectionHeader}>
-                    <h2 className={styles.submissionName}>
-                        {draftSubmission.name}
-                    </h2>
-                    <div>
-                        <Link
-                            asCustom={NavLink}
-                            to="type"
-                            className="usa-button usa-button--outline"
-                            variant="unstyled"
-                        >
-                            Edit
-                            <span className="srOnly">Submission type</span>
-                        </Link>
-                    </div>
-                </div>
-                <dl>
-                    <DoubleColumnRow
-                        left={
-                            <DataDetail
-                                id="program"
-                                label="Program"
-                                data={draftSubmission.program.name}
-                            />
-                        }
-                        right={
-                            <DataDetail
-                                id="submissionType"
-                                label="Submission type"
-                                data={
-                                    SubmissionTypeRecord[
-                                        draftSubmission.submissionType
-                                    ]
-                                }
-                            />
-                        }
-                    />
-                    <Grid row gap className={styles.reviewDataRow}>
-                        <Grid col={12}>
-                            <DataDetail
-                                id="submissionDescription"
-                                label="Submission description"
-                                data={draftSubmission.submissionDescription}
-                            />
-                        </Grid>
-                    </Grid>
-                </dl>
-            </section>
+
             <section id="contractDetails" className={styles.reviewSection}>
                 <SectionHeader
                     header="Contract details"
