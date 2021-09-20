@@ -1,16 +1,14 @@
 import { Grid, Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import styles from '../../pages/StateSubmissionForm/ReviewSubmit/ReviewSubmit.module.scss'
-import { DraftSubmission, StateSubmission } from '../../gen/gqlClient'
+import { SubmissionSectionSummaryProps } from './submissionSummary'
 import { SubmissionTypeRecord } from '../../constants/submissions'
 import { DataDetail } from '../DataDetail/DataDetail'
 import { DoubleColumnRow } from '../DoubleColumnRow/DoubleColumnRow'
 
 export const SubmissionTypeSummary = ({
     submission,
-}: {
-    submission: DraftSubmission | StateSubmission
-}): React.ReactElement => {
+}: SubmissionSectionSummaryProps): React.ReactElement | null => {
     return (
         <section id="submissionType" className={styles.reviewSection}>
             <div className={styles.reviewSectionHeader}>
