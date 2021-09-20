@@ -7,7 +7,10 @@ describe('cognitoAuthn', () => {
         it('parses valid and invalid strings', () => {
             type authProviderTest = {
                 provider: string
-                expectedResult: Result<{ userId: string; poolId: string }, Error>
+                expectedResult: Result<
+                    { userId: string; poolId: string },
+                    Error
+                >
             }
 
             const tests: authProviderTest[] = [
@@ -36,11 +39,9 @@ describe('cognitoAuthn', () => {
     })
 
     describe('userTypeFromAttributes', () => {
-
         it('parses SAML attributes as expected', () => {
-
             type samlAttrTest = {
-                attributes: {[name: string]: string}
+                attributes: { [name: string]: string }
                 expectedResult: Result<CognitoUserType, Error>
             }
 
@@ -49,9 +50,9 @@ describe('cognitoAuthn', () => {
                     attributes: {
                         'custom:role': 'macmcrrs-state-user',
                         'custom:state_code': 'VA',
-                        'given_name': 'Generic',
-                        'family_name': 'Person',
-                        'email': 'gp@example.com',
+                        given_name: 'Generic',
+                        family_name: 'Person',
+                        email: 'gp@example.com',
                     },
                     expectedResult: ok({
                         role: 'STATE_USER',
@@ -63,9 +64,9 @@ describe('cognitoAuthn', () => {
                 {
                     attributes: {
                         'custom:role': 'macmcrrs-cms-user',
-                        'given_name': 'Generic',
-                        'family_name': 'Person',
-                        'email': 'gp@example.com',
+                        given_name: 'Generic',
+                        family_name: 'Person',
+                        email: 'gp@example.com',
                     },
                     expectedResult: ok({
                         role: 'CMS_USER',
@@ -74,9 +75,42 @@ describe('cognitoAuthn', () => {
                     }),
                 },
                 {
-                    attributes: {'foo': 'bar'},
+                    attributes: {
+                        'custom:role':
+                            'SOME_OPE User,neid-lame-user,smacfi-enduser,twoell-mmc-user,wefoi-mmc-ab-auth-user,POSS_ENDUSER,strongweak-user,macmcrrs-state-user',
+                        'custom:state_code': 'FL',
+                        given_name: 'Generic',
+                        family_name: 'Person',
+                        email: 'gp@example.com',
+                    },
+                    expectedResult: ok({
+                        role: 'STATE_USER',
+                        email: 'gp@example.com',
+                        name: 'Generic Person',
+                        state_code: 'FL',
+                    }),
+                },
+                {
+                    attributes: {
+                        'custom:role':
+                            'SOME_OPE User,neid-lame-user,smacfi-enduser,twoell-mmc-user,wefoi-mmc-ab-auth-user,POSS_ENDUSER,strongweak-user,ma-user',
+                        'custom:state_code': 'FL',
+                        given_name: 'Generic',
+                        family_name: 'Person',
+                        email: 'gp@example.com',
+                    },
                     expectedResult: err(
-                        new Error('User does not have all the required attributes: {"foo":"bar"}')
+                        new Error(
+                            'Unsupported user role:  SOME_OPE User,neid-lame-user,smacfi-enduser,twoell-mmc-user,wefoi-mmc-ab-auth-user,POSS_ENDUSER,strongweak-user,ma-user'
+                        )
+                    ),
+                },
+                {
+                    attributes: { foo: 'bar' },
+                    expectedResult: err(
+                        new Error(
+                            'User does not have all the required attributes: {"foo":"bar"}'
+                        )
                     ),
                 },
             ]
