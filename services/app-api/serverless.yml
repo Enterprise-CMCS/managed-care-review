@@ -121,6 +121,19 @@ functions:
         - ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
 
+  postgres_migrate:
+    handler: handlers/postgres_migrate.main
+    role: LambdaApiRole
+    events:
+      - http:
+          path: postgres_migrate
+          method: get
+          cors: true
+    vpc:
+      securityGroupIds:
+        - ${self:custom.sgId}
+      subnetIds: ${self:custom.privateSubnets}
+
 resources:
   Conditions:
     CreatePermissionsBoundary:
