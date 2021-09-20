@@ -14,6 +14,7 @@ import styles from './ReviewSubmit.module.scss'
 import stylesForm from '../StateSubmissionForm.module.scss'
 
 import { Dialog } from '../../../components/Dialog/Dialog'
+import { SubmissionTypeSummary } from '../../../components/SubmissionSummary/submissionType'
 import {
     DraftSubmission,
     Document,
@@ -227,6 +228,7 @@ export const ReviewSubmit = ({
                 </Alert>
             )}
 
+            <SubmissionTypeSummary submission={draftSubmission} />
             <section id="submissionType" className={styles.reviewSection}>
                 <div className={styles.reviewSectionHeader}>
                     <h2 className={styles.submissionName}>
