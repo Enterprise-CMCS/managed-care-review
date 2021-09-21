@@ -21,7 +21,7 @@ import {
 import { DataDetail } from '../../../components/DataDetail/DataDetail'
 import { DoubleColumnRow } from '../../../components/DoubleColumnRow/DoubleColumnRow'
 import { Loading } from '../../../components/Loading'
-import { SubmissionTypeSummary } from '../../../components/SubmissionSummary/submissionType'
+import { SubmissionTypeSummaryCard } from '../../../components/SubmissionSummaryCard'
 import { GenericError } from '../../Errors/GenericError'
 import { useS3 } from '../../../contexts/S3Context'
 import { usePage } from '../../../contexts/PageContext'
@@ -175,7 +175,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                     </Link>
                 ) : null}
 
-                <SubmissionTypeSummary
+                <SubmissionTypeSummaryCard
                     submission={submission}
                     editable={false}
                     to="type"

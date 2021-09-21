@@ -1,25 +1,18 @@
 import { Grid } from '@trussworks/react-uswds'
-import styles from '../../pages/StateSubmissionForm/ReviewSubmit/ReviewSubmit.module.scss'
-import {
-    SubmissionSectionSummaryProps,
-    SectionHeader,
-} from './submissionSummary'
-import { SubmissionTypeRecord } from '../../constants/submissions'
-import { DataDetail } from '../DataDetail/DataDetail'
-import { DoubleColumnRow } from '../DoubleColumnRow/DoubleColumnRow'
+import styles from '../SubmissionSummaryCard.module.scss'
+import { SubmissionSummaryCardProps, CardHeader } from '..'
+import { SubmissionTypeRecord } from '../../../constants/submissions'
+import { DataDetail } from '../../DataDetail/DataDetail'
+import { DoubleColumnRow } from '../../DoubleColumnRow/DoubleColumnRow'
 
-export const SubmissionTypeSummary = ({
+export const SubmissionTypeSummaryCard = ({
     submission,
     editable,
     to,
-}: SubmissionSectionSummaryProps): React.ReactElement => {
+}: SubmissionSummaryCardProps): React.ReactElement => {
     return (
         <section id="submissionType" className={styles.reviewSection}>
-            <SectionHeader
-                header={submission.name}
-                editable={editable}
-                to={to}
-            />
+            <CardHeader header={submission.name} editable={editable} to={to} />
 
             <dl>
                 <DoubleColumnRow

@@ -14,7 +14,7 @@ import styles from './ReviewSubmit.module.scss'
 import stylesForm from '../StateSubmissionForm.module.scss'
 
 import { Dialog } from '../../../components/Dialog/Dialog'
-import { SubmissionTypeSummary } from '../../../components/SubmissionSummary/submissionType'
+import { SubmissionTypeSummaryCard } from '../../../components/SubmissionSummaryCard'
 import {
     DraftSubmission,
     Document,
@@ -28,7 +28,6 @@ import {
     ManagedCareEntityRecord,
     ActuaryFirmsRecord,
     ActuaryCommunicationRecord,
-    SubmissionTypeRecord,
 } from '../../../constants/submissions'
 import { DataDetail } from '../../../components/DataDetail/DataDetail'
 import { DoubleColumnRow } from '../../../components/DoubleColumnRow/DoubleColumnRow'
@@ -228,7 +227,7 @@ export const ReviewSubmit = ({
                 </Alert>
             )}
 
-            <SubmissionTypeSummary
+            <SubmissionTypeSummaryCard
                 submission={draftSubmission}
                 editable={true}
                 to="type"
