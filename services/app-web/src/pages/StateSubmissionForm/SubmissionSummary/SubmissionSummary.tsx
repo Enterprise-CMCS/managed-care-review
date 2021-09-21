@@ -174,7 +174,13 @@ export const SubmissionSummary = (): React.ReactElement => {
                         <span>&nbsp;Back to state dashboard</span>
                     </Link>
                 ) : null}
-                <SubmissionTypeSummary submission={submission} />
+
+                <SubmissionTypeSummary
+                    submission={submission}
+                    editable={false}
+                    to="type"
+                />
+
                 <section id="submissionType">
                     <div className={styles.firstHeader}>
                         <h2 className={stylesForm.submissionName}>

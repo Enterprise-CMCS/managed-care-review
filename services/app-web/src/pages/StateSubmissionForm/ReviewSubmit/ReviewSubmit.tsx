@@ -228,7 +228,11 @@ export const ReviewSubmit = ({
                 </Alert>
             )}
 
-            <SubmissionTypeSummary submission={draftSubmission} />
+            <SubmissionTypeSummary
+                submission={draftSubmission}
+                editable={true}
+                to="type"
+            />
 
             <section id="contractDetails" className={styles.reviewSection}>
                 <SectionHeader

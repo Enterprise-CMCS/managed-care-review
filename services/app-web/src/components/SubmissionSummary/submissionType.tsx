@@ -1,30 +1,26 @@
-import { Grid, Link } from '@trussworks/react-uswds'
-import { NavLink } from 'react-router-dom'
+import { Grid } from '@trussworks/react-uswds'
 import styles from '../../pages/StateSubmissionForm/ReviewSubmit/ReviewSubmit.module.scss'
-import { SubmissionSectionSummaryProps } from './submissionSummary'
+import {
+    SubmissionSectionSummaryProps,
+    SectionHeader,
+} from './submissionSummary'
 import { SubmissionTypeRecord } from '../../constants/submissions'
 import { DataDetail } from '../DataDetail/DataDetail'
 import { DoubleColumnRow } from '../DoubleColumnRow/DoubleColumnRow'
 
 export const SubmissionTypeSummary = ({
     submission,
-}: SubmissionSectionSummaryProps): React.ReactElement | null => {
+    editable,
+    to,
+}: SubmissionSectionSummaryProps): React.ReactElement => {
     return (
         <section id="submissionType" className={styles.reviewSection}>
-            <div className={styles.reviewSectionHeader}>
-                <h2 className={styles.submissionName}>{submission.name}</h2>
-                <div>
-                    <Link
-                        asCustom={NavLink}
-                        to="type"
-                        className="usa-button usa-button--outline"
-                        variant="unstyled"
-                    >
-                        Edit
-                        <span className="srOnly">Submission type</span>
-                    </Link>
-                </div>
-            </div>
+            <SectionHeader
+                header={submission.name}
+                editable={editable}
+                to={to}
+            />
+
             <dl>
                 <DoubleColumnRow
                     left={
