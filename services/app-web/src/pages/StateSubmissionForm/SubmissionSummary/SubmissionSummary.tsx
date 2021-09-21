@@ -4,7 +4,6 @@ import { NavLink, useParams, useLocation } from 'react-router-dom'
 import dayjs from 'dayjs'
 import sprite from 'uswds/src/img/sprite.svg'
 
-import stylesForm from '../ReviewSubmit/ReviewSubmit.module.scss'
 import styles from './SubmissionSummary.module.scss'
 
 import { Document, useFetchStateSubmissionQuery } from '../../../gen/gqlClient'
@@ -16,12 +15,14 @@ import {
     ManagedCareEntityRecord,
     ActuaryFirmsRecord,
     ActuaryCommunicationRecord,
-    SubmissionTypeRecord,
 } from '../../../constants/submissions'
 import { DataDetail } from '../../../components/DataDetail/DataDetail'
 import { DoubleColumnRow } from '../../../components/DoubleColumnRow/DoubleColumnRow'
 import { Loading } from '../../../components/Loading'
-import { SubmissionTypeSummaryCard } from '../../../components/SubmissionSummaryCard'
+import {
+    SubmissionTypeSummaryCard,
+    RateDetailsSummaryCard,
+} from '../../../components/SubmissionSummaryCard'
 import { GenericError } from '../../Errors/GenericError'
 import { useS3 } from '../../../contexts/S3Context'
 import { usePage } from '../../../contexts/PageContext'
@@ -181,44 +182,6 @@ export const SubmissionSummary = (): React.ReactElement => {
                     to="type"
                 />
 
-                <section id="submissionType">
-                    <div className={styles.firstHeader}>
-                        <h2 className={stylesForm.submissionName}>
-                            {submission.name}
-                        </h2>
-                    </div>
-                    <dl>
-                        <DoubleColumnRow
-                            left={
-                                <DataDetail
-                                    id="program"
-                                    label="Program"
-                                    data={submission.program.name}
-                                />
-                            }
-                            right={
-                                <DataDetail
-                                    id="submissionType"
-                                    label="Submission type"
-                                    data={
-                                        SubmissionTypeRecord[
-                                            submission.submissionType
-                                        ]
-                                    }
-                                />
-                            }
-                        />
-                        <Grid row gap className={stylesForm.reviewDataRow}>
-                            <Grid col={12}>
-                                <DataDetail
-                                    id="submissionDescription"
-                                    label="Submission description"
-                                    data={submission.submissionDescription}
-                                />
-                            </Grid>
-                        </Grid>
-                    </dl>
-                </section>
                 <section id="contractDetails">
                     <SectionHeader
                         header="Contract details"
@@ -340,74 +303,15 @@ export const SubmissionSummary = (): React.ReactElement => {
                             )}
                     </dl>
                 </section>
+
                 {isContractActionAndRateCertification && (
-                    <section id="rateDetails">
-                        <dl>
-                            <SectionHeader
-                                header="Rate details"
-                                to="rate-details"
-                            />
-                            <DoubleColumnRow
-                                left={
-                                    <DataDetail
-                                        id="rateType"
-                                        label="Rate certification type"
-                                        data={
-                                            submission.rateAmendmentInfo
-                                                ? 'Amendment to prior rate certification'
-                                                : 'New rate certification'
-                                        }
-                                    />
-                                }
-                                right={
-                                    <DataDetail
-                                        id="ratingPeriod"
-                                        label={
-                                            submission.rateAmendmentInfo
-                                                ? 'Rating period of original rate certification'
-                                                : 'Rating period'
-                                        }
-                                        data={`${dayjs(
-                                            submission.rateDateStart
-                                        ).format('MM/DD/YYYY')} - ${dayjs(
-                                            submission.rateDateEnd
-                                        ).format('MM/DD/YYYY')}`}
-                                    />
-                                }
-                            />
-                            <DoubleColumnRow
-                                left={
-                                    <DataDetail
-                                        id="dateCertified"
-                                        label={
-                                            submission.rateAmendmentInfo
-                                                ? 'Date certified for rate amendment'
-                                                : 'Date certified'
-                                        }
-                                        data={dayjs(
-                                            submission.rateDateCertified
-                                        ).format('MM/DD/YYYY')}
-                                    />
-                                }
-                                right={
-                                    submission.rateAmendmentInfo ? (
-                                        <DataDetail
-                                            id="effectiveRatingPeriod"
-                                            label="Effective dates of rate amendment"
-                                            data={`${dayjs(
-                                                submission.rateAmendmentInfo
-                                                    .effectiveDateStart
-                                            ).format('MM/DD/YYYY')} - ${dayjs(
-                                                submission.rateAmendmentInfo
-                                                    .effectiveDateEnd
-                                            ).format('MM/DD/YYYY')}`}
-                                        />
-                                    ) : null
-                                }
-                            />
-                        </dl>
-                    </section>
+                    <RateDetailsSummaryCard
+                        submission={submission}
+                        editable={false}
+                        to="type"
+                    />
                 )}
+
                 <section id="stateContacts" className={styles.reviewSection}>
                     <dl>
                         <SectionHeader header="State contacts" to="contacts" />

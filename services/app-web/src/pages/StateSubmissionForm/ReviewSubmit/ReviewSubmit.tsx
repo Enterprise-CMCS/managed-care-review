@@ -14,7 +14,10 @@ import styles from './ReviewSubmit.module.scss'
 import stylesForm from '../StateSubmissionForm.module.scss'
 
 import { Dialog } from '../../../components/Dialog/Dialog'
-import { SubmissionTypeSummaryCard } from '../../../components/SubmissionSummaryCard'
+import {
+    SubmissionTypeSummaryCard,
+    RateDetailsSummaryCard,
+} from '../../../components/SubmissionSummaryCard'
 import {
     DraftSubmission,
     Document,
@@ -356,72 +359,11 @@ export const ReviewSubmit = ({
             </section>
 
             {isContractActionAndRateCertification && (
-                <section id="rateDetails" className={styles.reviewSection}>
-                    <dl>
-                        <SectionHeader
-                            header="Rate details"
-                            to="rate-details"
-                        />
-                        <DoubleColumnRow
-                            left={
-                                <DataDetail
-                                    id="rateType"
-                                    label="Rate certification type"
-                                    data={
-                                        draftSubmission.rateAmendmentInfo
-                                            ? 'Amendment to prior rate certification'
-                                            : 'New rate certification'
-                                    }
-                                />
-                            }
-                            right={
-                                <DataDetail
-                                    id="ratingPeriod"
-                                    label={
-                                        draftSubmission.rateAmendmentInfo
-                                            ? 'Rating period of original rate certification'
-                                            : 'Rating period'
-                                    }
-                                    data={`${dayjs(
-                                        draftSubmission.rateDateStart
-                                    ).format('MM/DD/YYYY')} - ${dayjs(
-                                        draftSubmission.rateDateEnd
-                                    ).format('MM/DD/YYYY')}`}
-                                />
-                            }
-                        />
-                        <DoubleColumnRow
-                            left={
-                                <DataDetail
-                                    id="dateCertified"
-                                    label={
-                                        draftSubmission.rateAmendmentInfo
-                                            ? 'Date certified for rate amendment'
-                                            : 'Date certified'
-                                    }
-                                    data={dayjs(
-                                        draftSubmission.rateDateCertified
-                                    ).format('MM/DD/YYYY')}
-                                />
-                            }
-                            right={
-                                draftSubmission.rateAmendmentInfo ? (
-                                    <DataDetail
-                                        id="effectiveRatingPeriod"
-                                        label="Effective dates of rate amendment"
-                                        data={`${dayjs(
-                                            draftSubmission.rateAmendmentInfo
-                                                .effectiveDateStart
-                                        ).format('MM/DD/YYYY')} - ${dayjs(
-                                            draftSubmission.rateAmendmentInfo
-                                                .effectiveDateEnd
-                                        ).format('MM/DD/YYYY')}`}
-                                    />
-                                ) : null
-                            }
-                        />
-                    </dl>
-                </section>
+                <RateDetailsSummaryCard
+                    submission={draftSubmission}
+                    editable={true}
+                    to="rate-details"
+                />
             )}
 
             <section id="stateContacts" className={styles.reviewSection}>

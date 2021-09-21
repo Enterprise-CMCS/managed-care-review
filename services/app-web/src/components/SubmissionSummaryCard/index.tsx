@@ -39,3 +39,4 @@ export const CardHeader = ({
 }
 
 export { SubmissionTypeSummaryCard } from './SubmissionTypeSummaryCard/SubmissionTypeSummaryCard'
+export { RateDetailsSummaryCard } from './RateDetailsSummaryCard/RateDetailsSummaryCard'
