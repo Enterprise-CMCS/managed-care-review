@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { GridContainer, Grid, Link } from '@trussworks/react-uswds'
+import { GridContainer, Link } from '@trussworks/react-uswds'
 import { NavLink, useParams, useLocation } from 'react-router-dom'
 import dayjs from 'dayjs'
 import sprite from 'uswds/src/img/sprite.svg'
@@ -13,8 +13,6 @@ import {
     FederalAuthorityRecord,
     RateChangeReasonRecord,
     ManagedCareEntityRecord,
-    ActuaryFirmsRecord,
-    ActuaryCommunicationRecord,
 } from '../../../constants/submissions'
 import { DataDetail } from '../../../components/DataDetail/DataDetail'
 import { DoubleColumnRow } from '../../../components/DoubleColumnRow/DoubleColumnRow'
@@ -22,6 +20,7 @@ import { Loading } from '../../../components/Loading'
 import {
     SubmissionTypeSummaryCard,
     RateDetailsSummaryCard,
+    ContactsSummaryCard,
 } from '../../../components/SubmissionSummaryCard'
 import { GenericError } from '../../Errors/GenericError'
 import { useS3 } from '../../../contexts/S3Context'
@@ -308,114 +307,16 @@ export const SubmissionSummary = (): React.ReactElement => {
                     <RateDetailsSummaryCard
                         submission={submission}
                         editable={false}
-                        to="type"
+                        to="rate-details"
                     />
                 )}
 
-                <section id="stateContacts" className={styles.reviewSection}>
-                    <dl>
-                        <SectionHeader header="State contacts" to="contacts" />
+                <ContactsSummaryCard
+                    submission={submission}
+                    editable={false}
+                    to="contacts"
+                />
 
-                        <GridContainer>
-                            <Grid row>
-                                {submission.stateContacts.map(
-                                    (stateContact, index) => (
-                                        <Grid
-                                            col={6}
-                                            key={'statecontact_' + index}
-                                        >
-                                            <strong>Contact {index + 1}</strong>
-                                            <br />
-                                            <address>
-                                                {stateContact.name}
-                                                <br />
-                                                {stateContact.titleRole}
-                                                <br />
-                                                <a
-                                                    href={`mailto:${stateContact.email}`}
-                                                >
-                                                    {stateContact.email}
-                                                </a>
-                                                <br />
-                                            </address>
-                                        </Grid>
-                                    )
-                                )}
-                            </Grid>
-                        </GridContainer>
-                    </dl>
-                    {isContractActionAndRateCertification && (
-                        <dl>
-                            <SectionHeader
-                                header="Actuary contacts"
-                                to="contacts"
-                            />
-                            <GridContainer>
-                                <Grid row>
-                                    {submission.actuaryContacts.map(
-                                        (actuaryContact, index) => (
-                                            <Grid
-                                                col={6}
-                                                key={'actuarycontact_' + index}
-                                            >
-                                                <span className="text-bold">
-                                                    {index
-                                                        ? 'Additional actuary contact'
-                                                        : 'Certifying actuary'}
-                                                </span>
-                                                <br />
-                                                <address>
-                                                    {actuaryContact.name}
-                                                    <br />
-                                                    {actuaryContact.titleRole}
-                                                    <br />
-                                                    <a
-                                                        href={`mailto:${actuaryContact.email}`}
-                                                    >
-                                                        {actuaryContact.email}
-                                                    </a>
-                                                    <br />
-                                                    {actuaryContact.actuarialFirm ===
-                                                    'OTHER' ? (
-                                                        <>
-                                                            {
-                                                                actuaryContact.actuarialFirmOther
-                                                            }
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            {/*TODO: make this more clear, a const or something */}
-                                                            {actuaryContact.actuarialFirm
-                                                                ? ActuaryFirmsRecord[
-                                                                      actuaryContact
-                                                                          .actuarialFirm
-                                                                  ]
-                                                                : ''}
-                                                        </>
-                                                    )}
-                                                </address>
-                                            </Grid>
-                                        )
-                                    )}
-                                </Grid>
-                                <Grid>
-                                    <p>
-                                        <span className="text-bold">
-                                            Actuary communication preference
-                                        </span>
-                                        <br />
-                                        {submission.actuaryCommunicationPreference
-                                            ? ActuaryCommunicationRecord[
-                                                  submission
-                                                      .actuaryCommunicationPreference
-                                              ]
-                                            : ''}
-                                    </p>
-                                </Grid>
-                            </GridContainer>
-                        </dl>
-                    )}
-                </section>
                 <section id="documents">
                     <SectionHeader header="Documents" to="documents" />
                     <span className="text-bold">{documentsSummary}</span>
