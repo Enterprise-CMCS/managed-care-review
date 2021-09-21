@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { GridContainer, Link } from '@trussworks/react-uswds'
 import { NavLink, useParams, useLocation } from 'react-router-dom'
 import dayjs from 'dayjs'
@@ -6,7 +6,7 @@ import sprite from 'uswds/src/img/sprite.svg'
 
 import styles from './SubmissionSummary.module.scss'
 
-import { Document, useFetchStateSubmissionQuery } from '../../../gen/gqlClient'
+import { useFetchStateSubmissionQuery } from '../../../gen/gqlClient'
 import {
     AmendableItemsRecord,
     ContractTypeRecord,
@@ -21,13 +21,11 @@ import {
     SubmissionTypeSummaryCard,
     RateDetailsSummaryCard,
     ContactsSummaryCard,
+    DocumentsSummaryCard,
 } from '../../../components/SubmissionSummaryCard'
 import { GenericError } from '../../Errors/GenericError'
-import { useS3 } from '../../../contexts/S3Context'
 import { usePage } from '../../../contexts/PageContext'
 import { useAuth } from '../../../contexts/AuthContext'
-
-type DocumentWithLink = { url: string | null } & Document
 
 const SectionHeader = ({
     header,
@@ -46,8 +44,6 @@ export const SubmissionSummary = (): React.ReactElement => {
     const { id } = useParams<{ id: string }>()
     const { pathname } = useLocation()
     const { loggedInUser } = useAuth()
-    const [refreshedDocs, setRefreshedDocs] = useState<DocumentWithLink[]>([])
-    const { getURL, getKey } = useS3()
     const { updateHeading } = usePage()
 
     const { loading, error, data } = useFetchStateSubmissionQuery({
@@ -64,34 +60,6 @@ export const SubmissionSummary = (): React.ReactElement => {
         updateHeading(pathname, submission?.name)
     }, [updateHeading, pathname, submission?.name])
 
-    useEffect(() => {
-        const refreshDocuments = async () => {
-            if (!submission) return
-
-            const newDocs = await Promise.all(
-                submission.documents.map(async (doc) => {
-                    const key = getKey(doc.s3URL)
-                    if (!key)
-                        return {
-                            ...doc,
-                            url: null,
-                        }
-
-                    const documentLink = await getURL(key)
-                    return {
-                        ...doc,
-                        url: documentLink,
-                    }
-                })
-            ).catch((_err) => {
-                return []
-            })
-            setRefreshedDocs(newDocs)
-        }
-
-        void refreshDocuments()
-    }, [submission, getKey, getURL])
-
     if (loading) {
         return (
             <GridContainer>
@@ -102,9 +70,6 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     if (error || !submission) return <GenericError />
 
-    const documentsSummary = `${submission.documents.length} ${
-        submission.documents.length === 1 ? 'file' : 'files'
-    }`
     // Array of values from a checkbox field is displayed in a comma-separated list
     const createCheckboxList = ({
         list,
@@ -317,28 +282,11 @@ export const SubmissionSummary = (): React.ReactElement => {
                     to="contacts"
                 />
 
-                <section id="documents">
-                    <SectionHeader header="Documents" to="documents" />
-                    <span className="text-bold">{documentsSummary}</span>
-                    <ul>
-                        {refreshedDocs.map((doc) => (
-                            <li key={doc.name}>
-                                {doc.url ? (
-                                    <Link
-                                        aria-label={`${doc.name} (opens in new window)`}
-                                        href={doc.url}
-                                        variant="external"
-                                        target="_blank"
-                                    >
-                                        {doc.name}
-                                    </Link>
-                                ) : (
-                                    <span>{doc.name}</span>
-                                )}
-                            </li>
-                        ))}
-                    </ul>
-                </section>
+                <DocumentsSummaryCard
+                    submission={submission}
+                    editable={false}
+                    to="documents"
+                />
             </GridContainer>
         </div>
     )

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import {
     Button,
     ButtonGroup,
@@ -17,10 +17,10 @@ import {
     SubmissionTypeSummaryCard,
     RateDetailsSummaryCard,
     ContactsSummaryCard,
+    DocumentsSummaryCard,
 } from '../../../components/SubmissionSummaryCard'
 import {
     DraftSubmission,
-    Document,
     useSubmitDraftSubmissionMutation,
 } from '../../../gen/gqlClient'
 import {
@@ -32,10 +32,7 @@ import {
 } from '../../../constants/submissions'
 import { DataDetail } from '../../../components/DataDetail/DataDetail'
 import { DoubleColumnRow } from '../../../components/DoubleColumnRow/DoubleColumnRow'
-import { useS3 } from '../../../contexts/S3Context'
 import { MCRouterState } from '../../../constants/routerState'
-
-type DocumentWithLink = { url: string | null } & Document
 
 const SectionHeader = ({
     header,
@@ -66,10 +63,8 @@ export const ReviewSubmit = ({
 }: {
     draftSubmission: DraftSubmission
 }): React.ReactElement => {
-    const [refreshedDocs, setRefreshedDocs] = useState<DocumentWithLink[]>([])
     const [displayConfirmation, setDisplayConfirmation] =
         useState<boolean>(false)
-    const { getURL, getKey } = useS3()
 
     const [userVisibleError, setUserVisibleError] = useState<
         string | undefined
@@ -90,37 +85,6 @@ export const ReviewSubmit = ({
             }
         },
     })
-
-    useEffect(() => {
-        const refreshDocuments = async () => {
-            const newDocs = await Promise.all(
-                draftSubmission.documents.map(async (doc) => {
-                    const key = getKey(doc.s3URL)
-                    if (!key)
-                        return {
-                            ...doc,
-                            url: null,
-                        }
-
-                    const documentLink = await getURL(key)
-                    return {
-                        ...doc,
-                        url: documentLink,
-                    }
-                })
-            ).catch((err) => {
-                console.log(err)
-                return []
-            })
-            setRefreshedDocs(newDocs)
-        }
-
-        void refreshDocuments()
-    }, [draftSubmission.documents, getKey, getURL])
-
-    const documentsSummary = `${draftSubmission.documents.length} ${
-        draftSubmission.documents.length === 1 ? 'file' : 'files'
-    }`
 
     const showError = (error: string) => {
         setUserVisibleError(error)
@@ -358,28 +322,11 @@ export const ReviewSubmit = ({
                 to="contacts"
             />
 
-            <section id="documents" className={styles.reviewSection}>
-                <SectionHeader header="Documents" to="documents" />
-                <span className="text-bold">{documentsSummary}</span>
-                <ul>
-                    {refreshedDocs.map((doc) => (
-                        <li key={doc.name}>
-                            {doc.url ? (
-                                <Link
-                                    aria-label={`${doc.name} (opens in new window)`}
-                                    href={doc.url}
-                                    variant="external"
-                                    target="_blank"
-                                >
-                                    {doc.name}
-                                </Link>
-                            ) : (
-                                <span>{doc.name}</span>
-                            )}
-                        </li>
-                    ))}
-                </ul>
-            </section>
+            <DocumentsSummaryCard
+                submission={draftSubmission}
+                editable={true}
+                to="documents"
+            />
 
             <div className={stylesForm.pageActions}>
                 <Link
