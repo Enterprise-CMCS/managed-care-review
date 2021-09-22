@@ -93,6 +93,12 @@ module.exports = {
                 {
                     from: path.resolve(
                         __dirname,
+                        './node_modules/@prisma/engines/libquery_engine-rhel-openssl-1.0.x.so.node'
+                    ),
+                },
+                {
+                    from: path.resolve(
+                        __dirname,
                         './node_modules/@prisma/engines/migration-engine-rhel-openssl-1.0.x'
                     ),
                 },
