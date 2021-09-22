@@ -4,6 +4,7 @@ const nodeExternals = require('webpack-node-externals');
 const path = require('path');
 const slsw = require('serverless-webpack');
 const webpack = require('webpack');
+const WebpackShellPlugin = require('webpack-shell-plugin');
 
 const isLocal = slsw.lib.webpack.isLocal;
 
@@ -65,6 +66,7 @@ module.exports = {
             PRISMA_CLI_QUERY_ENGINE_TYPE: 'binary',
             PRISMA_CLIENT_ENGINE_TYPE: 'binary',
         }),
+        new WebpackShellPlugin({ onBuildStart: ['yarn install'] }),
         new CopyWebpackPlugin({
             patterns: [
                 {
