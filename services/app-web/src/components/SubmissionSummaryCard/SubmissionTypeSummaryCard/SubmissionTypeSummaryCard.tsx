@@ -1,6 +1,9 @@
 import { Grid } from '@trussworks/react-uswds'
 import styles from '../SubmissionSummaryCard.module.scss'
-import { SubmissionSummaryCardProps, CardHeader } from '..'
+import {
+    SubmissionSummaryCardProps,
+    CardHeader,
+} from '../SubmissionSummaryCard'
 import { SubmissionTypeRecord } from '../../../constants/submissions'
 import { DataDetail } from '../../DataDetail/DataDetail'
 import { DoubleColumnRow } from '../../DoubleColumnRow/DoubleColumnRow'

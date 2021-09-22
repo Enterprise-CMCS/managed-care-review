@@ -1,6 +1,9 @@
 import dayjs from 'dayjs'
 import styles from '../SubmissionSummaryCard.module.scss'
-import { SubmissionSummaryCardProps, CardHeader } from '..'
+import {
+    SubmissionSummaryCardProps,
+    CardHeader,
+} from '../SubmissionSummaryCard'
 import {
     AmendableItemsRecord,
     ContractTypeRecord,

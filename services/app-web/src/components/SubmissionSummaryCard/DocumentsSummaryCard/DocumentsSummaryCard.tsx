@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import styles from '../SubmissionSummaryCard.module.scss'
 import { Document } from '../../../gen/gqlClient'
-import { SubmissionSummaryCardProps, CardHeader } from '..'
+import {
+    SubmissionSummaryCardProps,
+    CardHeader,
+} from '../SubmissionSummaryCard'
 import { Link } from '@trussworks/react-uswds'
 import { useS3 } from '../../../contexts/S3Context'
 

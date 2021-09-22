@@ -1,6 +1,9 @@
 import { Grid, GridContainer } from '@trussworks/react-uswds'
 import styles from '../SubmissionSummaryCard.module.scss'
-import { SubmissionSummaryCardProps, CardHeader } from '..'
+import {
+    SubmissionSummaryCardProps,
+    CardHeader,
+} from '../SubmissionSummaryCard'
 import {
     ActuaryFirmsRecord,
     ActuaryCommunicationRecord,
