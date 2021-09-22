@@ -59,6 +59,9 @@ module.exports = {
         ],
     },
     plugins: [
+        new webpack.EnvironmentPlugin({
+            PRISMA_CLI_BINARY_TARGETS: 'rhel-openssl-1.0.x',
+        }),
         new CopyWebpackPlugin({
             patterns: [
                 {
