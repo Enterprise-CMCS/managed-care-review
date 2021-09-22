@@ -7,14 +7,12 @@ import {
     Alert,
 } from '@trussworks/react-uswds'
 import { NavLink, useHistory } from 'react-router-dom'
-import dayjs from 'dayjs'
-
 import styles from './ReviewSubmit.module.scss'
 import stylesForm from '../StateSubmissionForm.module.scss'
-
 import { Dialog } from '../../../components/Dialog/Dialog'
 import {
     SubmissionTypeSummaryCard,
+    ContractDetailsSummaryCard,
     RateDetailsSummaryCard,
     ContactsSummaryCard,
     DocumentsSummaryCard,
@@ -23,40 +21,7 @@ import {
     DraftSubmission,
     useSubmitDraftSubmissionMutation,
 } from '../../../gen/gqlClient'
-import {
-    AmendableItemsRecord,
-    ContractTypeRecord,
-    FederalAuthorityRecord,
-    RateChangeReasonRecord,
-    ManagedCareEntityRecord,
-} from '../../../constants/submissions'
-import { DataDetail } from '../../../components/DataDetail/DataDetail'
-import { DoubleColumnRow } from '../../../components/DoubleColumnRow/DoubleColumnRow'
 import { MCRouterState } from '../../../constants/routerState'
-
-const SectionHeader = ({
-    header,
-    to,
-}: {
-    header: string
-    to: string
-}): React.ReactElement => {
-    return (
-        <div className={styles.reviewSectionHeader}>
-            <h2>{header}</h2>
-            <div>
-                <Link
-                    variant="unstyled"
-                    asCustom={NavLink}
-                    className="usa-button usa-button--outline"
-                    to={to}
-                >
-                    Edit <span className="srOnly">{header}</span>
-                </Link>
-            </div>
-        </div>
-    )
-}
 
 export const ReviewSubmit = ({
     draftSubmission,
@@ -130,45 +95,6 @@ export const ReviewSubmit = ({
         }
     }
 
-    // Array of values from a checkbox field is displayed in a comma-separated list
-    const createCheckboxList = ({
-        list,
-        dict,
-        otherReasons = [],
-    }: {
-        list: string[] // Checkbox field array
-        dict: Record<string, string> // A lang constant dictionary like ManagedCareEntityRecord or FederalAuthorityRecord,
-        otherReasons?: (string | null)[] // additional "Other" text values
-    }) => {
-        const userFriendlyList = list.map((item) => {
-            return dict[item] ? dict[item] : null
-        })
-
-        const listToDisplay = otherReasons
-            ? userFriendlyList.concat(otherReasons)
-            : userFriendlyList
-
-        // strip nulls and leftover commas at the end
-        return listToDisplay
-            .filter((el) => {
-                return el !== null
-            })
-            .join(', ')
-            .replace(/,\s*$/, '')
-    }
-
-    const capitationRateChangeReason = (): string | null => {
-        const { reason, otherReason } =
-            draftSubmission?.contractAmendmentInfo
-                ?.capitationRatesAmendedInfo || {}
-        if (!reason) return null
-
-        return otherReason
-            ? `${AmendableItemsRecord['CAPITATION_RATES']} (${otherReason})`
-            : `${AmendableItemsRecord['CAPITATION_RATES']} (${RateChangeReasonRecord[reason]})`
-    }
-
-    const isContractAmendment = draftSubmission.contractType === 'AMENDMENT'
     const isContractActionAndRateCertification =
         draftSubmission.submissionType === 'CONTRACT_AND_RATES'
 
@@ -186,127 +112,11 @@ export const ReviewSubmit = ({
                 to="type"
             />
 
-            <section id="contractDetails" className={styles.reviewSection}>
-                <SectionHeader
-                    header="Contract details"
-                    to="contract-details"
-                />
-                <dl>
-                    <DoubleColumnRow
-                        left={
-                            <DataDetail
-                                id="contractType"
-                                label="Contract action type"
-                                data={
-                                    draftSubmission.contractType
-                                        ? ContractTypeRecord[
-                                              draftSubmission.contractType
-                                          ]
-                                        : ''
-                                }
-                            />
-                        }
-                        right={
-                            <DataDetail
-                                id="contractEffectiveDates"
-                                label="Contract effective dates"
-                                data={`${dayjs(
-                                    draftSubmission.contractDateStart
-                                ).format('MM/DD/YYYY')} - ${dayjs(
-                                    draftSubmission.contractDateEnd
-                                ).format('MM/DD/YYYY')}`}
-                            />
-                        }
-                    />
-                    <DoubleColumnRow
-                        left={
-                            <DataDetail
-                                id="managedCareEntities"
-                                label="Managed care entities"
-                                data={createCheckboxList({
-                                    list: draftSubmission.managedCareEntities,
-                                    dict: ManagedCareEntityRecord,
-                                })}
-                            />
-                        }
-                        right={
-                            <DataDetail
-                                id="federalAuthorities"
-                                label="Federal authority your program operates under"
-                                data={createCheckboxList({
-                                    list: draftSubmission.federalAuthorities,
-                                    dict: FederalAuthorityRecord,
-                                })}
-                            />
-                        }
-                    />
-                    {isContractAmendment &&
-                        draftSubmission.contractAmendmentInfo && (
-                            <>
-                                <DoubleColumnRow
-                                    left={
-                                        <DataDetail
-                                            id="itemsAmended"
-                                            label="Items being amended"
-                                            data={createCheckboxList({
-                                                list: draftSubmission.contractAmendmentInfo.itemsBeingAmended.filter(
-                                                    (item) =>
-                                                        item !==
-                                                            'CAPITATION_RATES' &&
-                                                        item !== 'OTHER'
-                                                ),
-                                                dict: AmendableItemsRecord,
-                                                otherReasons: [
-                                                    draftSubmission.contractAmendmentInfo.itemsBeingAmended.includes(
-                                                        'CAPITATION_RATES'
-                                                    )
-                                                        ? capitationRateChangeReason()
-                                                        : null,
-                                                    draftSubmission
-                                                        .contractAmendmentInfo
-                                                        ?.otherItemBeingAmended
-                                                        ? `Other (${draftSubmission.contractAmendmentInfo?.otherItemBeingAmended})`
-                                                        : null,
-                                                ],
-                                            })}
-                                        />
-                                    }
-                                    right={
-                                        <DataDetail
-                                            id="covidRelated"
-                                            label="Is this contract action related to the COVID-19 public health emergency"
-                                            data={
-                                                draftSubmission
-                                                    .contractAmendmentInfo
-                                                    .relatedToCovid19
-                                                    ? 'Yes'
-                                                    : 'No'
-                                            }
-                                        />
-                                    }
-                                />
-                                {draftSubmission.contractAmendmentInfo
-                                    .relatedToCovid19 && (
-                                    <DoubleColumnRow
-                                        left={
-                                            <DataDetail
-                                                id="vaccineRelated"
-                                                label="Is this related to coverage and reimbursement for vaccine administration?"
-                                                data={
-                                                    draftSubmission
-                                                        .contractAmendmentInfo
-                                                        .relatedToVaccination
-                                                        ? 'Yes'
-                                                        : 'No'
-                                                }
-                                            />
-                                        }
-                                    />
-                                )}
-                            </>
-                        )}
-                </dl>
-            </section>
+            <ContractDetailsSummaryCard
+                submission={draftSubmission}
+                editable={true}
+                to="contract-details"
+            />
 
             {isContractActionAndRateCertification && (
                 <RateDetailsSummaryCard
