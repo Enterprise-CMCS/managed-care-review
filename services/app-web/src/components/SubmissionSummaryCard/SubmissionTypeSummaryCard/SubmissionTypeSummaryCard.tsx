@@ -10,12 +10,11 @@ import { DoubleColumnRow } from '../../DoubleColumnRow/DoubleColumnRow'
 
 export const SubmissionTypeSummaryCard = ({
     submission,
-    editable,
-    to,
+    navigateTo,
 }: SubmissionSummaryCardProps): React.ReactElement => {
     return (
         <section id="submissionType" className={styles.reviewSection}>
-            <CardHeader header={submission.name} editable={editable} to={to} />
+            <CardHeader header={submission.name} navigateTo={navigateTo} />
 
             <dl>
                 <DoubleColumnRow

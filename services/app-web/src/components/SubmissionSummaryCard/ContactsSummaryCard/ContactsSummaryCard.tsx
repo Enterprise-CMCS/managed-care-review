@@ -11,17 +11,12 @@ import {
 
 export const ContactsSummaryCard = ({
     submission,
-    editable,
-    to,
+    navigateTo,
 }: SubmissionSummaryCardProps): React.ReactElement => {
     return (
         <section id="stateContacts" className={styles.reviewSection}>
             <dl>
-                <CardHeader
-                    header="State contacts"
-                    editable={editable}
-                    to={to}
-                />
+                <CardHeader header="State contacts" navigateTo={navigateTo} />
 
                 <GridContainer>
                     <Grid row>

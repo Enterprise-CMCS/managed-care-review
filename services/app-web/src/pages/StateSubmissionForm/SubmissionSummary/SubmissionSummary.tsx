@@ -78,37 +78,17 @@ export const SubmissionSummary = (): React.ReactElement => {
                     </Link>
                 ) : null}
 
-                <SubmissionTypeSummaryCard
-                    submission={submission}
-                    editable={false}
-                    to="type"
-                />
+                <SubmissionTypeSummaryCard submission={submission} />
 
-                <ContractDetailsSummaryCard
-                    submission={submission}
-                    editable={false}
-                    to="contract-details"
-                />
+                <ContractDetailsSummaryCard submission={submission} />
 
                 {isContractActionAndRateCertification && (
-                    <RateDetailsSummaryCard
-                        submission={submission}
-                        editable={false}
-                        to="rate-details"
-                    />
+                    <RateDetailsSummaryCard submission={submission} />
                 )}
 
-                <ContactsSummaryCard
-                    submission={submission}
-                    editable={false}
-                    to="contacts"
-                />
+                <ContactsSummaryCard submission={submission} />
 
-                <DocumentsSummaryCard
-                    submission={submission}
-                    editable={false}
-                    to="documents"
-                />
+                <DocumentsSummaryCard submission={submission} />
             </GridContainer>
         </div>
     )

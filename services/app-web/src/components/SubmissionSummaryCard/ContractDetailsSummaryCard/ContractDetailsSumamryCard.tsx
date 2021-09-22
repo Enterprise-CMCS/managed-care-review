@@ -16,8 +16,7 @@ import { DoubleColumnRow } from '../../DoubleColumnRow/DoubleColumnRow'
 
 export const ContractDetailsSummaryCard = ({
     submission,
-    editable,
-    to,
+    navigateTo,
 }: SubmissionSummaryCardProps): React.ReactElement => {
     // Array of values from a checkbox field is displayed in a comma-separated list
     const createCheckboxList = ({
@@ -58,7 +57,7 @@ export const ContractDetailsSummaryCard = ({
 
     return (
         <section id="contractDetails" className={styles.reviewSection}>
-            <CardHeader header="Contract details" editable={editable} to={to} />
+            <CardHeader header="Contract details" navigateTo={navigateTo} />
             <dl>
                 <DoubleColumnRow
                     left={

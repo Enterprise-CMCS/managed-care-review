@@ -5,31 +5,28 @@ import { DraftSubmission, StateSubmission } from '../../gen/gqlClient'
 
 export type SubmissionSummaryCardProps = {
     submission: DraftSubmission | StateSubmission
-    editable: boolean
-    to: string
+    navigateTo?: string
 }
 
 type cardHeaderProps = {
     header: string
-    editable: boolean
-    to: string
+    navigateTo?: string
 }
 
 export const CardHeader = ({
     header,
-    editable,
-    to,
+    navigateTo,
 }: cardHeaderProps): React.ReactElement => {
     return (
         <div className={styles.reviewSectionHeader}>
             <h2>{header}</h2>
-            {editable && (
+            {navigateTo && (
                 <div>
                     <Link
                         variant="unstyled"
                         asCustom={NavLink}
                         className="usa-button usa-button--outline"
-                        to={to}
+                        to={navigateTo}
                     >
                         Edit <span className="srOnly">{header}</span>
                     </Link>

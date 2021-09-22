@@ -9,13 +9,12 @@ import { DoubleColumnRow } from '../../DoubleColumnRow/DoubleColumnRow'
 
 export const RateDetailsSummaryCard = ({
     submission,
-    editable,
-    to,
+    navigateTo,
 }: SubmissionSummaryCardProps): React.ReactElement => {
     return (
         <section id="rateDetails" className={styles.reviewSection}>
             <dl>
-                <CardHeader header="Rate details" editable={editable} to={to} />
+                <CardHeader header="Rate details" navigateTo={navigateTo} />
                 <DoubleColumnRow
                     left={
                         <DataDetail

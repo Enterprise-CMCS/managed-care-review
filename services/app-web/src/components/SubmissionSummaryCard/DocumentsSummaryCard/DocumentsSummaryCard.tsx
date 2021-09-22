@@ -12,8 +12,7 @@ type DocumentWithLink = { url: string | null } & Document
 
 export const DocumentsSummaryCard = ({
     submission,
-    editable,
-    to,
+    navigateTo,
 }: SubmissionSummaryCardProps): React.ReactElement => {
     const { getURL, getKey } = useS3()
 
@@ -52,7 +51,7 @@ export const DocumentsSummaryCard = ({
 
     return (
         <section id="documents" className={styles.reviewSection}>
-            <CardHeader header="Documents" editable={editable} to={to} />
+            <CardHeader header="Documents" navigateTo={navigateTo} />
             <span className="text-bold">{documentsSummary}</span>
             <ul>
                 {refreshedDocs.map((doc) => (

@@ -108,34 +108,29 @@ export const ReviewSubmit = ({
 
             <SubmissionTypeSummaryCard
                 submission={draftSubmission}
-                editable={true}
-                to="type"
+                navigateTo="type"
             />
 
             <ContractDetailsSummaryCard
                 submission={draftSubmission}
-                editable={true}
-                to="contract-details"
+                navigateTo="contract-details"
             />
 
             {isContractActionAndRateCertification && (
                 <RateDetailsSummaryCard
                     submission={draftSubmission}
-                    editable={true}
-                    to="rate-details"
+                    navigateTo="rate-details"
                 />
             )}
 
             <ContactsSummaryCard
                 submission={draftSubmission}
-                editable={true}
-                to="contacts"
+                navigateTo="contacts"
             />
 
             <DocumentsSummaryCard
                 submission={draftSubmission}
-                editable={true}
-                to="documents"
+                navigateTo="documents"
             />
 
             <div className={stylesForm.pageActions}>
