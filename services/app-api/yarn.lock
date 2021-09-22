@@ -9485,10 +9485,10 @@ webpack-node-externals@^3.0.0:
   resolved "https://registry.yarnpkg.com/webpack-node-externals/-/webpack-node-externals-3.0.0.tgz#1a3407c158d547a9feb4229a9e3385b7b60c9917"
   integrity sha512-LnL6Z3GGDPht/AigwRh2dvL9PQPFQ8skEpVrWZXLWBYmqcaojHNN0onvHzie6rq7EWKrrBfPYqNEzTJgiwEQDQ==
 
-webpack-shell-plugin@^0.5.0:
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/webpack-shell-plugin/-/webpack-shell-plugin-0.5.0.tgz#29b8a1d80ddeae0ddb10e729667f728653c2c742"
-  integrity sha1-Kbih2A3erg3bEOcpZn9yhlPCx0I=
+webpack-shell-plugin-next@^2.2.2:
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/webpack-shell-plugin-next/-/webpack-shell-plugin-next-2.2.2.tgz#35e1bf7fa070b6472be8199cf08012e866f0eea0"
+  integrity sha512-2HeC1e0cCvTgA3SD4XPAD69DnILM92mCschrtKdlLRORHCR+oG7xnibQMkVySxTAYWTQOcBRHlqa88x4syWwhQ==
 
 webpack-sources@^3.2.0:
   version "3.2.0"
