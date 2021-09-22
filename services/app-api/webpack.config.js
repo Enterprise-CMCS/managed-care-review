@@ -62,6 +62,8 @@ module.exports = {
     plugins: [
         new webpack.EnvironmentPlugin({
             PRISMA_CLI_BINARY_TARGETS: 'rhel-openssl-1.0.x',
+            PRISMA_CLI_QUERY_ENGINE_TYPE: 'binary',
+            PRISMA_CLIENT_ENGINE_TYPE: 'binary',
         }),
         new CopyWebpackPlugin({
             patterns: [
@@ -93,7 +95,7 @@ module.exports = {
                 {
                     from: path.resolve(
                         __dirname,
-                        './node_modules/@prisma/engines/libquery_engine-rhel-openssl-1.0.x.so.node'
+                        './node_modules/@prisma/engines/query-engine-rhel-openssl-1.0.x'
                     ),
                 },
                 {
