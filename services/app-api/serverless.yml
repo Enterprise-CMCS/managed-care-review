@@ -34,6 +34,7 @@ custom:
     excludeRegex: 'darwin|debian'
     packagerOptions:
       scripts:
+        - PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn install
         - npx prisma generate
   serverlessTerminationProtection:
     stages:
@@ -63,7 +64,6 @@ provider:
     DYNAMO_CONNECTION: ${self:custom.dynamoConnection}
     REACT_APP_AUTH_MODE: ${self:custom.reactAppAuthMode}
     SECRETS_MANAGER_SECRET: ${self:custom.secretsManagerSecret}
-    PRISMA_CLI_BINARY_TARGETS: 'darwin,rhel-openssl-1.0.x'
 
 functions:
   health:
