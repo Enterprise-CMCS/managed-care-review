@@ -63,6 +63,7 @@ provider:
     DYNAMO_CONNECTION: ${self:custom.dynamoConnection}
     REACT_APP_AUTH_MODE: ${self:custom.reactAppAuthMode}
     SECRETS_MANAGER_SECRET: ${self:custom.secretsManagerSecret}
+    PRISMA_CLI_BINARY_TARGETS: 'darwin,rhel-openssl-1.0.x'
 
 functions:
   health:
