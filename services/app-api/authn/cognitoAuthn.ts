@@ -97,34 +97,39 @@ export function userTypeFromAttributes(attributes: {
         )
     }
 
-    const roleAttribute = attributes['custom:role']
     const fullName = attributes.given_name + ' ' + attributes.family_name
+    // Roles are a list of all the roles a user has in IDM.
+    const roleAttribute = attributes['custom:role']
+    const roles = roleAttribute.split(',')
 
-    switch (roleAttribute) {
-        case CMS_ROLE_ATTRIBUTE:
-            return ok({
-                role: 'CMS_USER',
-                email: attributes.email,
-                name: fullName,
-            })
-        case STATE_ROLE_ATTRIBUTE:
-            if (!('custom:state_code' in attributes)) {
-                return err(
-                    new Error(
-                        'State User does not have all the required attributes: ' +
-                            JSON.stringify(attributes)
-                    )
+    // Arbitrarily, we check for the state user role first. If a user managed to have both roles, this is a little weird.
+    // but as of September 2021, it shouldn't be possible for someone to have more than one MC Review role
+    if (roles.includes(STATE_ROLE_ATTRIBUTE)) {
+        if (!('custom:state_code' in attributes)) {
+            return err(
+                new Error(
+                    'State User does not have all the required attributes: ' +
+                        JSON.stringify(attributes)
                 )
-            }
-            return ok({
-                role: 'STATE_USER',
-                email: attributes.email,
-                name: fullName,
-                state_code: attributes['custom:state_code'],
-            })
-        default:
-            return err(new Error('Unsupported user role:  +' + roleAttribute))
+            )
+        }
+        return ok({
+            role: 'STATE_USER',
+            email: attributes.email,
+            name: fullName,
+            state_code: attributes['custom:state_code'],
+        })
     }
+
+    if (roles.includes(CMS_ROLE_ATTRIBUTE)) {
+        return ok({
+            role: 'CMS_USER',
+            email: attributes.email,
+            name: fullName,
+        })
+    }
+
+    return err(new Error('Unsupported user role:  ' + roleAttribute))
 }
 
 // userFromCognitoAuthProvider hits the Cogntio API to get the information in the authProvider
@@ -152,9 +157,8 @@ export async function userFromCognitoAuthProvider(
 
         const currentUser: CognitoIdentityServiceProvider.UserType = fetchResult
 
-        // we lose type safety here...
+        // we lose some type safety here...
         const attributes = userAttrDict(currentUser)
-        console.log('got user attr dict: ', attributes)
 
         const user = userTypeFromAttributes(attributes)
 
