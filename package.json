@@ -32,7 +32,7 @@
     "devDependencies": {
         "@testing-library/cypress": "^8.0.1",
         "@types/dotenv": "^8.2.0",
-        "@types/node": "^14.17.17",
+        "@types/node": "^14.17.18",
         "@types/yargs": "^17.0.2",
         "chromedriver": "^93.0.1",
         "cypress": "^8.4.1",
@@ -45,7 +45,7 @@
         "serverless-iam-helper": "CMSgov/serverless-iam-helper",
         "serverless-idempotency-helper": "CMSgov/serverless-idempotency-helper",
         "typescript": "^4.3.5",
-        "yargs": "^17.1.1"
+        "yargs": "^17.2.0"
     },
     "dependencies": {
         "aws-sdk": "^2.991.0",
