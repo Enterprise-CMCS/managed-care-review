@@ -83,13 +83,6 @@ module.exports = {
                         './node_modules/.prisma/client/schema.prisma'
                     ),
                 },
-                { from: path.resolve(__dirname, './node_modules/prisma') },
-                {
-                    from: path.resolve(
-                        __dirname,
-                        './node_modules/@prisma/client'
-                    ),
-                },
                 {
                     from: path.resolve(
                         __dirname,
@@ -114,7 +107,6 @@ module.exports = {
                         './node_modules/@prisma/engines/migration-engine-rhel-openssl-1.0.x'
                     ),
                 },
-                { from: path.resolve(__dirname, './node_modules/.prisma') },
             ],
         }),
     ],
