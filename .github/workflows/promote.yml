@@ -135,6 +135,7 @@ jobs:
           CLOUDFRONT_DOMAIN_NAME: ${{ secrets.VAL_CLOUDFRONT_DOMAIN_NAME }}
           CLOUDFRONT_STORYBOOK_DOMAIN_NAME: ${{ secrets.VAL_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
           OKTA_METADATA_URL: ${{ secrets.VAL_OKTA_METADATA_URL }}
+          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.VAL_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
           REACT_APP_AUTH_MODE: IDM
       - name: Deploy to val
         run: ./deploy.sh val
@@ -161,6 +162,7 @@ jobs:
           CLOUDFRONT_DOMAIN_NAME: ${{ secrets.PROD_CLOUDFRONT_DOMAIN_NAME }}
           CLOUDFRONT_STORYBOOK_DOMAIN_NAME: ${{ secrets.PROD_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
           OKTA_METADATA_URL: ${{ secrets.PROD_OKTA_METADATA_URL }}
+          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.PROD_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
           REACT_APP_AUTH_MODE: IDM
       - name: Deploy to prod
         run: ./deploy.sh prod
