@@ -137,6 +137,56 @@ export function mockCompleteDraft(): DraftSubmission {
     }
 }
 
+export function mockContractAndRatesDraft(): DraftSubmission {
+    return {
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        id: 'test-abc-123',
+        stateCode: 'MN',
+        programID: 'pmap',
+        program: {
+            id: 'pmap',
+            name: 'PMAP',
+        },
+        name: 'MN-PMAP-0001',
+        submissionType: 'CONTRACT_AND_RATES',
+        submissionDescription: 'A real submission',
+        documents: [],
+        contractType: 'BASE',
+        contractDateStart: new Date(),
+        contractDateEnd: new Date(),
+        contractAmendmentInfo: null,
+        managedCareEntities: ['MCO'],
+        federalAuthorities: ['STATE_PLAN'],
+        rateType: 'NEW',
+        rateDateStart: new Date(),
+        rateDateEnd: new Date(),
+        rateDateCertified: new Date(),
+        rateAmendmentInfo: null,
+        stateContacts: [
+            {
+                name: 'State Contact 1',
+                titleRole: 'Contact',
+                email: 'statecontact1@test.com',
+            },
+            {
+                name: 'State Contact 2',
+                titleRole: 'Contact',
+                email: 'statecontact2@test.com',
+            },
+        ],
+        actuaryContacts: [
+            {
+                actuarialFirm: 'DELOITTE',
+                name: 'Actuary Contact 1',
+                titleRole: 'Contact',
+                email: 'actuarycontact1@test.com',
+            },
+        ],
+        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+    }
+}
+
 function mockNewDraft(): DraftSubmission {
     return {
         __typename: 'DraftSubmission',
