@@ -32,8 +32,10 @@ export const main: APIGatewayProxyHandler = async () => {
         secret.dbname
     }?schema=public&connection_limit=5`
 
+    console.log(path.resolve('node_modules/prisma/build/index.js'))
+
     const { stdout } = await execa(
-        `${process.execPath} /opt/nodejs/node_modules/prisma/build/index.js migrate deploy --preview-feature`,
+        `${process.execPath} node_modules/prisma/build/index.js migrate deploy --preview-feature`,
         {
             env: {
                 DATABASE_URL: postgresURL,
