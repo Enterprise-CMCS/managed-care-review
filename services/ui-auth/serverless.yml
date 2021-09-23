@@ -126,6 +126,7 @@ resources:
           - IdpIdentifier
         ProviderDetails:
           MetadataURL: ${self:custom.okta_metadata_url}
+          IDPSignout: 'true'
         ProviderName: Okta
         ProviderType: SAML
         UserPoolId: !Ref CognitoUserPool
