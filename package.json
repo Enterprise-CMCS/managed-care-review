@@ -45,7 +45,7 @@
         "yargs": "^17.2.0"
     },
     "dependencies": {
-        "aws-sdk": "^2.991.0",
+        "aws-sdk": "^2.994.0",
         "cypress-file-upload": "^5.0.8"
     }
 }
