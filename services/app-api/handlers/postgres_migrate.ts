@@ -2,6 +2,7 @@ import { APIGatewayProxyHandler } from 'aws-lambda'
 import { getSecretValue } from './postgres_check'
 import { assertIsAuthMode } from '../../app-web/src/common-code/domain-models'
 import execa from 'execa'
+import path from 'path'
 
 const authMode = process.env.REACT_APP_AUTH_MODE
 assertIsAuthMode(authMode)
