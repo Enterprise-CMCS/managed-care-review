@@ -10,11 +10,11 @@ describe('contacts', () => {
             const draftSubmissionId = pathnameArray[2]
             cy.visit(`/submissions/${draftSubmissionId}/contacts`)
 
-            // Navigate to contract details page by clicking back for a contract only submission
+            // Navigate to contract details page by clicking back for contract only submission
             cy.findByRole('link', { name: /Back/ }).click()
             cy.findByRole('heading', { level: 2, name: /Contract details/ })
 
-            // Navigate to submission type page to switch to contract and rates submission
+            // Navigate to type page to switch to contract and rates submission
             cy.visit(`/submissions/${draftSubmissionId}/type`)
             cy.findByLabelText(
                 'Contract action and rate certification'
@@ -24,7 +24,7 @@ describe('contacts', () => {
             // Navigate to contacts page
             cy.visit(`/submissions/${draftSubmissionId}/contacts`)
 
-            // Navigate to rate details page by clicking back for a contract and rates submission
+            // Navigate to rate details page by clicking back for contract and rates submission
             cy.findByRole('link', { name: /Back/ }).click()
             cy.findByRole('heading', { level: 2, name: /Rate details/ })
 

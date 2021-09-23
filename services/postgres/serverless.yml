@@ -71,7 +71,6 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     environment:
       SECRETS_MANAGER_ENDPOINT: !Sub 'https://secretsmanager.${AWS::Region}.amazonaws.com'
-      EXCLUDE_CHARACTERS: ":/@\"'\\"
     package:
       artifact: s3://secrets-manager-rotation-apps-c0de1e0412b469545054417cc38af3c3/SecretsManagerRDSPostgreSQLRotationSingleUser/SecretsManagerRDSPostgreSQLRotationSingleUser.zip
 
@@ -97,7 +96,7 @@ resources:
           SecretStringTemplate: '{"username": "mcreviewadmin"}'
           GenerateStringKey: password
           PasswordLength: 30
-          ExcludeCharacters: "\"@/\\"
+          ExcludePunctuation: true
 
     PostgresAurora:
       Type: AWS::RDS::DBCluster

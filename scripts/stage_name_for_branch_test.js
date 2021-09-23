@@ -35,6 +35,10 @@ function testStageNames() {
             'dependabot/npm_and_yarn/testing-library/cypress-8.0.0',
             'dependabotnpmandyarntest37b10',
         ],
+        [
+            'dependabot/npm_and_yarn/aws-sdk-2.991.0',
+            'dependabotnpmandyarnsdk29910',
+        ],
     ];
 
     const testErrors = [];

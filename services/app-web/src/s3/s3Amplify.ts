@@ -1,30 +1,14 @@
-import { Storage } from 'aws-amplify'
 import { parseKey } from '../common-code/s3URLEncoding'
+import { Storage } from 'aws-amplify'
+import { v4 as uuidv4 } from 'uuid'
+
 import type { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
 
-const waitFor = (delay = 1000) =>
-    new Promise((resolve) => setTimeout(resolve, delay))
-
-/* 
-    Retry async function up to limit of maxRetries
-    increase the time elapsed between retries each cycle by order of 2^n (exponential backoff)
-    e.g. with defaults values for retryCount and maxRetries, attempt request at 1s, 2s, 4s.
-*/
-const retryWithBackoff = async (
-    fn: () => Promise<void | S3Error>,
-    retryCount = 0,
-    maxRetries = 3,
-    err = null
-): Promise<void | S3Error> => {
-    if (retryCount > maxRetries) {
-        return Promise.reject(err)
-    }
-    const nextDelay = 2 ** retryCount * 1000
-    await waitFor(nextDelay)
-    return fn().catch((err) =>
-        retryWithBackoff(fn, retryCount + 1, maxRetries, err)
-    )
+// TYPES AND TYPE GUARDS
+type s3PutError = {
+    name: string
+    message: string
 }
 
 type s3PutResponse = {
@@ -37,13 +21,26 @@ function assertIsS3PutResponse(val: unknown): asserts val is s3PutResponse {
     }
 }
 
-export function newAmplifyS3Client(bucketName: string): S3ClientT {
+function assertIsS3PutError(val: unknown): asserts val is s3PutError {
+    if (
+        typeof val === 'object' &&
+        val &&
+        !('name' in val) &&
+        !('message' in val)
+    ) {
+        throw new Error('We dont have a name and message in this response')
+    }
+}
+
+// MAIN
+function newAmplifyS3Client(bucketName: string): S3ClientT {
     return {
         uploadFile: async (file: File): Promise<string | S3Error> => {
-            const filename = `${Date.now()}-${file.name}`
+            const uuid = uuidv4()
+            const ext = file.name.split('.').pop()
 
             try {
-                const stored = await Storage.put(filename, file, {
+                const stored = await Storage.put(`${uuid}.${ext}`, file, {
                     contentType: file.type,
                     contentDisposition: `attachment; filename=${file.name}`,
                 })
@@ -51,6 +48,7 @@ export function newAmplifyS3Client(bucketName: string): S3ClientT {
                 assertIsS3PutResponse(stored)
                 return stored.key
             } catch (err) {
+                assertIsS3PutError(err)
                 if (err.name === 'Error' && err.message === 'Network Error') {
                     console.log('Error uploading file', err)
                     return {
@@ -69,6 +67,7 @@ export function newAmplifyS3Client(bucketName: string): S3ClientT {
                 await Storage.remove(filename)
                 return
             } catch (err) {
+                assertIsS3PutError(err)
                 if (err.name === 'Error' && err.message === 'Network Error') {
                     console.log('Error deleting file', err)
                     return {
@@ -97,6 +96,7 @@ export function newAmplifyS3Client(bucketName: string): S3ClientT {
                 })
                 return
             } catch (err) {
+                assertIsS3PutError(err)
                 if (err.name === 'Error' && err.message === 'Network Error') {
                     return {
                         code: 'NETWORK_ERROR',
@@ -125,3 +125,36 @@ export function newAmplifyS3Client(bucketName: string): S3ClientT {
         },
     }
 }
+
+// HELPERS
+const waitFor = (delay = 1000) =>
+    new Promise((resolve) => setTimeout(resolve, delay))
+
+/* 
+ * Retry an asynchronous S3 function using exponential backoff approach
+ * @param fn - async S3 function to retry recursively
+ * @maxRetries - retr until this limit
+ * @retryCount - counter of retries already attempted
+ * @err - S3Error if Promise.rejects
+ 
+ * Retries will continue until fn succeeds (Promise.resolve) or until maxRetries limit is reached
+ * increase the time elapsed between retries in each cycle by order of 2^n; 
+ * e.g. with default values for retryCount and maxRetries, attempt the request at 1s, 2s, 4s.
+*/
+const retryWithBackoff = async (
+    fn: () => Promise<void | S3Error>,
+    retryCount = 0,
+    maxRetries = 3,
+    err: null | S3Error = null
+): Promise<void | S3Error> => {
+    if (retryCount > maxRetries) {
+        return Promise.reject(err)
+    }
+    const nextDelay = 2 ** retryCount * 1000
+    await waitFor(nextDelay)
+    return fn().catch((err) =>
+        retryWithBackoff(fn, retryCount + 1, maxRetries, err)
+    )
+}
+
+export { newAmplifyS3Client }

@@ -1,7 +1,7 @@
 describe('CMS User can view submission', () => {
     //     it('state user can complete a submission, CMS user can retrieve it', () => {
     //         cy.logInAsStateUser()
-    //         cy.waitForLoadingToComplete()
+    //         cy.waitForApiToLoad()
     //         cy.startNewContractAndRatesSubmission()
     //         cy.navigateForm('Continue')
     //         cy.findByText(/^MN-PMAP-/).should('exist')
@@ -56,7 +56,7 @@ describe('CMS User can view submission', () => {
     //         cy.navigateForm('Submit')
     //         cy.findByRole('dialog').should('exist')
     //         cy.navigateForm('Confirm submit')
-    //         cy.waitForLoadingToComplete()
+    //         cy.waitForApiToLoad()
     //         cy.findByText('Dashboard').should('exist')
     //         cy.findByText('PMAP').should('exist')
     //         // View submission summary
