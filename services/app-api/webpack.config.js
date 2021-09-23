@@ -69,7 +69,7 @@ module.exports = {
         new WebpackShellPluginNext({
             onBuildStart: {
                 scripts: [
-                    'PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x PRISMA_CLIENT_ENGINE_TYPE=binary PRISMA_CLI_QUERY_ENGINE_TYPE=binary yarn install',
+                    'PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x PRISMA_CLI_QUERY_ENGINE_TYPE=binary yarn install',
                 ],
                 blocking: true,
                 parallel: false,
