@@ -30,7 +30,9 @@ custom:
   webpack:
     webpackConfig: 'webpack.config.js'
     packager: 'yarn'
-    includeModules: true
+    includeModules:
+      forceExclude:
+        - aws-sdk
     excludeRegex: 'darwin|debian'
     packagerOptions:
       scripts:
