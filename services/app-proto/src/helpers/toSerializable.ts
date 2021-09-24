@@ -1,4 +1,3 @@
-import * as protobufjs from 'protobufjs'
 import { submission } from '../../gen/submissionProto'
 
 const toSerializable = (domainData: any) => {

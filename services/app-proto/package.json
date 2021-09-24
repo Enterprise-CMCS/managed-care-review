@@ -5,7 +5,7 @@
     "main": "index.ts",
     "scripts": {
         "protogen": "yarn proto:compile && yarn proto:ts",
-        "proto:compile": "rm -rf gen && mkdir gen && pbjs -t static-module -w commonjs -o gen/submissionProto.js src/submission.proto",
+        "proto:compile": "rm -rf gen && mkdir gen && pbjs -t static-module -w commonjs -o gen/submissionProto.js src/proto/submission.proto",
         "proto:ts": "pbts -o gen/submissionProto.d.ts gen/submissionProto.js",
         "test": "jest --watch",
         "test:once": "jest"
