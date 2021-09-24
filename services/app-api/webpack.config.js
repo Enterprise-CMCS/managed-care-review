@@ -61,11 +61,6 @@ module.exports = {
         ],
     },
     plugins: [
-        new webpack.EnvironmentPlugin({
-            PRISMA_CLI_BINARY_TARGETS: 'rhel-openssl-1.0.x',
-            PRISMA_CLI_QUERY_ENGINE_TYPE: 'binary',
-            PRISMA_CLIENT_ENGINE_TYPE: 'binary',
-        }),
         new WebpackShellPluginNext({
             onBuildStart: {
                 scripts: [
@@ -81,6 +76,18 @@ module.exports = {
                     from: path.resolve(
                         __dirname,
                         './node_modules/.prisma/client/schema.prisma'
+                    ),
+                },
+                {
+                    from: path.resolve(__dirname, 'node_modules/prisma'),
+                },
+                {
+                    from: path.resolve(__dirname, 'node_modules/.prisma'),
+                },
+                {
+                    from: path.resolve(
+                        __dirname,
+                        'node_modules/@prisma/client'
                     ),
                 },
                 {
