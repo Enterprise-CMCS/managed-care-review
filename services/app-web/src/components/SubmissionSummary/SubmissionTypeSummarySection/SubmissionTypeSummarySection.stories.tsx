@@ -1,22 +1,22 @@
 import { Story } from '@storybook/react'
-
 import ProvidersDecorator from '../../../../.storybook/providersDecorator'
-
-import { SubmissionSummaryCardProps } from '../SubmissionSummaryCard'
-import { ContactsSummaryCard } from '..'
+import {
+    SubmissionTypeSummarySectionProps,
+    SubmissionTypeSummarySection,
+} from '..'
 import { mockContractAndRatesDraft } from '../../../testHelpers/apolloHelpers'
 
 export default {
-    title: 'Components/SubmissionSummaryCard/ContactsSummaryCard',
-    component: ContactsSummaryCard,
+    title: 'Components/SubmissionSummary/SubmissionTypeSummarySection',
+    component: SubmissionTypeSummarySection,
     parameters: {
         componentSubtitle:
-            'DynamicStepIndicator displays a users progress through a multi-step process. If an invalid route is passed in as the current page, DynamicStepIndicator will render null.',
+            'SubmissionTypeSummarySection displays the Submission Type data for a Draft or State Submission',
     },
 }
 
-const Template: Story<SubmissionSummaryCardProps> = (args) => (
-    <ContactsSummaryCard {...args} />
+const Template: Story<SubmissionTypeSummarySectionProps> = (args) => (
+    <SubmissionTypeSummarySection {...args} />
 )
 
 export const WithAction = Template.bind({})
@@ -24,7 +24,7 @@ WithAction.decorators = [(Story) => ProvidersDecorator(Story, {})]
 
 WithAction.args = {
     submission: mockContractAndRatesDraft(),
-    navigateTo: 'contract-details',
+    navigateTo: 'submission-type',
 }
 
 export const WithoutAction = Template.bind({})

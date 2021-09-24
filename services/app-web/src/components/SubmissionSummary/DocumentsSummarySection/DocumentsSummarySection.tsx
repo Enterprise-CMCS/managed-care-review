@@ -1,19 +1,22 @@
 import React, { useEffect, useState } from 'react'
-import styles from '../SubmissionSummaryCard.module.scss'
+import styles from '../SubmissionSummary.module.scss'
 import { Document } from '../../../gen/gqlClient'
-import {
-    SubmissionSummaryCardProps,
-    CardHeader,
-} from '../SubmissionSummaryCard'
+import { SectionHeader } from '../../SectionHeader/SectionHeader'
 import { Link } from '@trussworks/react-uswds'
 import { useS3 } from '../../../contexts/S3Context'
+import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 
 type DocumentWithLink = { url: string | null } & Document
 
-export const DocumentsSummaryCard = ({
+export type DocumentsSummarySectionProps = {
+    submission: DraftSubmission | StateSubmission
+    navigateTo?: string
+}
+
+export const DocumentsSummarySection = ({
     submission,
     navigateTo,
-}: SubmissionSummaryCardProps): React.ReactElement => {
+}: DocumentsSummarySectionProps): React.ReactElement => {
     const { getURL, getKey } = useS3()
 
     useEffect(() => {
@@ -51,7 +54,7 @@ export const DocumentsSummaryCard = ({
 
     return (
         <section id="documents" className={styles.reviewSection}>
-            <CardHeader header="Documents" navigateTo={navigateTo} />
+            <SectionHeader header="Documents" navigateTo={navigateTo} />
             <span className="text-bold">{documentsSummary}</span>
             <ul>
                 {refreshedDocs.map((doc) => (

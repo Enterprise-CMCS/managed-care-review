@@ -6,12 +6,12 @@ import styles from './SubmissionSummary.module.scss'
 import { useFetchStateSubmissionQuery } from '../../../gen/gqlClient'
 import { Loading } from '../../../components/Loading'
 import {
-    SubmissionTypeSummaryCard,
-    ContractDetailsSummaryCard,
-    RateDetailsSummaryCard,
-    ContactsSummaryCard,
-    DocumentsSummaryCard,
-} from '../../../components/SubmissionSummaryCard'
+    SubmissionTypeSummarySection,
+    ContractDetailsSummarySection,
+    RateDetailsSummarySection,
+    ContactsSummarySection,
+    DocumentsSummarySection,
+} from '../../../components/SubmissionSummary'
 import { GenericError } from '../../Errors/GenericError'
 import { usePage } from '../../../contexts/PageContext'
 import { useAuth } from '../../../contexts/AuthContext'
@@ -78,17 +78,17 @@ export const SubmissionSummary = (): React.ReactElement => {
                     </Link>
                 ) : null}
 
-                <SubmissionTypeSummaryCard submission={submission} />
+                <SubmissionTypeSummarySection submission={submission} />
 
-                <ContractDetailsSummaryCard submission={submission} />
+                <ContractDetailsSummarySection submission={submission} />
 
                 {isContractActionAndRateCertification && (
-                    <RateDetailsSummaryCard submission={submission} />
+                    <RateDetailsSummarySection submission={submission} />
                 )}
 
-                <ContactsSummaryCard submission={submission} />
+                <ContactsSummarySection submission={submission} />
 
-                <DocumentsSummaryCard submission={submission} />
+                <DocumentsSummarySection submission={submission} />
             </GridContainer>
         </div>
     )

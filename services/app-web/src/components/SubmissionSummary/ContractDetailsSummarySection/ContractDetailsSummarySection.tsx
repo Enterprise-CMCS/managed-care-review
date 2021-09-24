@@ -1,9 +1,6 @@
 import dayjs from 'dayjs'
-import styles from '../SubmissionSummaryCard.module.scss'
-import {
-    SubmissionSummaryCardProps,
-    CardHeader,
-} from '../SubmissionSummaryCard'
+import styles from '../SubmissionSummary.module.scss'
+import { SectionHeader } from '../../SectionHeader/SectionHeader'
 import {
     AmendableItemsRecord,
     ContractTypeRecord,
@@ -13,11 +10,17 @@ import {
 } from '../../../constants/submissions'
 import { DataDetail } from '../../DataDetail/DataDetail'
 import { DoubleColumnRow } from '../../DoubleColumnRow/DoubleColumnRow'
+import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 
-export const ContractDetailsSummaryCard = ({
+export type ContractDetailsSummarySectionProps = {
+    submission: DraftSubmission | StateSubmission
+    navigateTo?: string
+}
+
+export const ContractDetailsSummarySection = ({
     submission,
     navigateTo,
-}: SubmissionSummaryCardProps): React.ReactElement => {
+}: ContractDetailsSummarySectionProps): React.ReactElement => {
     // Array of values from a checkbox field is displayed in a comma-separated list
     const createCheckboxList = ({
         list,
@@ -57,7 +60,7 @@ export const ContractDetailsSummaryCard = ({
 
     return (
         <section id="contractDetails" className={styles.reviewSection}>
-            <CardHeader header="Contract details" navigateTo={navigateTo} />
+            <SectionHeader header="Contract details" navigateTo={navigateTo} />
             <dl>
                 <DoubleColumnRow
                     left={

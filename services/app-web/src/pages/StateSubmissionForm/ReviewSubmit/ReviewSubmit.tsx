@@ -11,12 +11,12 @@ import styles from './ReviewSubmit.module.scss'
 import stylesForm from '../StateSubmissionForm.module.scss'
 import { Dialog } from '../../../components/Dialog/Dialog'
 import {
-    SubmissionTypeSummaryCard,
-    ContractDetailsSummaryCard,
-    RateDetailsSummaryCard,
-    ContactsSummaryCard,
-    DocumentsSummaryCard,
-} from '../../../components/SubmissionSummaryCard'
+    SubmissionTypeSummarySection,
+    ContractDetailsSummarySection,
+    RateDetailsSummarySection,
+    ContactsSummarySection,
+    DocumentsSummarySection,
+} from '../../../components/SubmissionSummary'
 import {
     DraftSubmission,
     useSubmitDraftSubmissionMutation,
@@ -106,29 +106,29 @@ export const ReviewSubmit = ({
                 </Alert>
             )}
 
-            <SubmissionTypeSummaryCard
+            <SubmissionTypeSummarySection
                 submission={draftSubmission}
                 navigateTo="type"
             />
 
-            <ContractDetailsSummaryCard
+            <ContractDetailsSummarySection
                 submission={draftSubmission}
                 navigateTo="contract-details"
             />
 
             {isContractActionAndRateCertification && (
-                <RateDetailsSummaryCard
+                <RateDetailsSummarySection
                     submission={draftSubmission}
                     navigateTo="rate-details"
                 />
             )}
 
-            <ContactsSummaryCard
+            <ContactsSummarySection
                 submission={draftSubmission}
                 navigateTo="contacts"
             />
 
-            <DocumentsSummaryCard
+            <DocumentsSummarySection
                 submission={draftSubmission}
                 navigateTo="documents"
             />

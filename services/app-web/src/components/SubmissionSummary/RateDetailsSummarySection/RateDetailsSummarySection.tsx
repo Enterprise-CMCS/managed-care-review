@@ -1,20 +1,23 @@
 import dayjs from 'dayjs'
-import styles from '../SubmissionSummaryCard.module.scss'
-import {
-    SubmissionSummaryCardProps,
-    CardHeader,
-} from '../SubmissionSummaryCard'
+import styles from '../SubmissionSummary.module.scss'
+import { SectionHeader } from '../../SectionHeader/SectionHeader'
 import { DataDetail } from '../../DataDetail/DataDetail'
 import { DoubleColumnRow } from '../../DoubleColumnRow/DoubleColumnRow'
+import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 
-export const RateDetailsSummaryCard = ({
+export type RateDetailsSummarySectionProps = {
+    submission: DraftSubmission | StateSubmission
+    navigateTo?: string
+}
+
+export const RateDetailsSummarySection = ({
     submission,
     navigateTo,
-}: SubmissionSummaryCardProps): React.ReactElement => {
+}: RateDetailsSummarySectionProps): React.ReactElement => {
     return (
         <section id="rateDetails" className={styles.reviewSection}>
             <dl>
-                <CardHeader header="Rate details" navigateTo={navigateTo} />
+                <SectionHeader header="Rate details" navigateTo={navigateTo} />
                 <DoubleColumnRow
                     left={
                         <DataDetail

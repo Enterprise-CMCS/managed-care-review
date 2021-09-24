@@ -1,20 +1,23 @@
 import { Grid } from '@trussworks/react-uswds'
-import styles from '../SubmissionSummaryCard.module.scss'
-import {
-    SubmissionSummaryCardProps,
-    CardHeader,
-} from '../SubmissionSummaryCard'
+import styles from '../SubmissionSummary.module.scss'
+import { SectionHeader } from '../../SectionHeader/SectionHeader'
 import { SubmissionTypeRecord } from '../../../constants/submissions'
 import { DataDetail } from '../../DataDetail/DataDetail'
 import { DoubleColumnRow } from '../../DoubleColumnRow/DoubleColumnRow'
+import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 
-export const SubmissionTypeSummaryCard = ({
+export type SubmissionTypeSummarySectionProps = {
+    submission: DraftSubmission | StateSubmission
+    navigateTo?: string
+}
+
+export const SubmissionTypeSummarySection = ({
     submission,
     navigateTo,
-}: SubmissionSummaryCardProps): React.ReactElement => {
+}: SubmissionTypeSummarySectionProps): React.ReactElement => {
     return (
         <section id="submissionType" className={styles.reviewSection}>
-            <CardHeader header={submission.name} navigateTo={navigateTo} />
+            <SectionHeader header={submission.name} navigateTo={navigateTo} />
 
             <dl>
                 <DoubleColumnRow

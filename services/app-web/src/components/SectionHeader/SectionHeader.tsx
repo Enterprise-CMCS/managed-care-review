@@ -1,22 +1,16 @@
 import { Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
-import styles from './SubmissionSummaryCard.module.scss'
-import { DraftSubmission, StateSubmission } from '../../gen/gqlClient'
+import styles from './SectionHeader.module.scss'
 
-export type SubmissionSummaryCardProps = {
-    submission: DraftSubmission | StateSubmission
-    navigateTo?: string
-}
-
-type cardHeaderProps = {
+type SectionHeaderProps = {
     header: string
     navigateTo?: string
 }
 
-export const CardHeader = ({
+export const SectionHeader = ({
     header,
     navigateTo,
-}: cardHeaderProps): React.ReactElement => {
+}: SectionHeaderProps): React.ReactElement => {
     return (
         <div className={styles.reviewSectionHeader}>
             <h2>{header}</h2>

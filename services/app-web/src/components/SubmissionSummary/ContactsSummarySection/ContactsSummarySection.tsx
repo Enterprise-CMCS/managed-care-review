@@ -1,22 +1,28 @@
 import { Grid, GridContainer } from '@trussworks/react-uswds'
-import styles from '../SubmissionSummaryCard.module.scss'
-import {
-    SubmissionSummaryCardProps,
-    CardHeader,
-} from '../SubmissionSummaryCard'
+import styles from '../SubmissionSummary.module.scss'
+import { SectionHeader } from '../../SectionHeader/SectionHeader'
 import {
     ActuaryFirmsRecord,
     ActuaryCommunicationRecord,
 } from '../../../constants/submissions'
+import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 
-export const ContactsSummaryCard = ({
+export type ContactsSummarySectionProps = {
+    submission: DraftSubmission | StateSubmission
+    navigateTo?: string
+}
+
+export const ContactsSummarySection = ({
     submission,
     navigateTo,
-}: SubmissionSummaryCardProps): React.ReactElement => {
+}: ContactsSummarySectionProps): React.ReactElement => {
     return (
         <section id="stateContacts" className={styles.reviewSection}>
             <dl>
-                <CardHeader header="State contacts" navigateTo={navigateTo} />
+                <SectionHeader
+                    header="State contacts"
+                    navigateTo={navigateTo}
+                />
 
                 <GridContainer>
                     <Grid row>
