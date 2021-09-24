@@ -125,9 +125,9 @@ message RateInfo {
         STATE_IN_HOUSE = 6;
         OTHER = 7;
     }
-   message AcutaryContact {
+   message ActuaryContact {
         optional Contact contact = 1;
-        optional ActuarialFirmTpe actuarialFirmType = 2;
+        optional ActuarialFirmType actuarialFirmType = 2;
         optional string actuarialFirmOther= 3;
     }
 
