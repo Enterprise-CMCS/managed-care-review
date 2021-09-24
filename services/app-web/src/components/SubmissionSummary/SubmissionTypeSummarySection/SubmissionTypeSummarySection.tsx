@@ -1,0 +1,53 @@
+import { Grid } from '@trussworks/react-uswds'
+import styles from '../SubmissionSummary.module.scss'
+import { SectionHeader } from '../../SectionHeader/SectionHeader'
+import { SubmissionTypeRecord } from '../../../constants/submissions'
+import { DataDetail } from '../../DataDetail/DataDetail'
+import { DoubleColumnRow } from '../../DoubleColumnRow/DoubleColumnRow'
+import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
+
+export type SubmissionTypeSummarySectionProps = {
+    submission: DraftSubmission | StateSubmission
+    navigateTo?: string
+}
+
+export const SubmissionTypeSummarySection = ({
+    submission,
+    navigateTo,
+}: SubmissionTypeSummarySectionProps): React.ReactElement => {
+    return (
+        <section id="submissionType" className={styles.reviewSection}>
+            <SectionHeader header={submission.name} navigateTo={navigateTo} />
+
+            <dl>
+                <DoubleColumnRow
+                    left={
+                        <DataDetail
+                            id="program"
+                            label="Program"
+                            data={submission.program.name}
+                        />
+                    }
+                    right={
+                        <DataDetail
+                            id="submissionType"
+                            label="Submission type"
+                            data={
+                                SubmissionTypeRecord[submission.submissionType]
+                            }
+                        />
+                    }
+                />
+                <Grid row gap className={styles.reviewDataRow}>
+                    <Grid col={12}>
+                        <DataDetail
+                            id="submissionDescription"
+                            label="Submission description"
+                            data={submission.submissionDescription}
+                        />
+                    </Grid>
+                </Grid>
+            </dl>
+        </section>
+    )
+}
