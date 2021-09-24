@@ -4,7 +4,6 @@ const nodeExternals = require('webpack-node-externals');
 const path = require('path');
 const slsw = require('serverless-webpack');
 const webpack = require('webpack');
-const WebpackShellPluginNext = require('webpack-shell-plugin-next');
 
 const isLocal = slsw.lib.webpack.isLocal;
 
@@ -65,16 +64,6 @@ module.exports = {
             PRISMA_CLI_BINARY_TARGETS: 'rhel-openssl-1.0.x',
             PRISMA_CLI_QUERY_ENGINE_TYPE: 'binary',
             PRISMA_CLIENT_ENGINE_TYPE: 'binary',
-        }),
-        new WebpackShellPluginNext({
-            onBuildStart: {
-                scripts: [
-                    'PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x PRISMA_CLIENT_ENGINE_TYPE=binary PRISMA_CLI_QUERY_ENGINE_TYPE=binary yarn install',
-                    'npx prisma generate',
-                ],
-                blocking: true,
-                parallel: false,
-            },
         }),
         new CopyWebpackPlugin({
             patterns: [

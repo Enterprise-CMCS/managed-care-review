@@ -30,12 +30,11 @@ custom:
   webpack:
     webpackConfig: 'webpack.config.js'
     packager: 'yarn'
-    includeModules:
-      forceExclude:
-        - aws-sdk
+    includeModules: true
     excludeRegex: 'darwin|debian'
     packagerOptions:
       scripts:
+        - PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x PRISMA_CLIENT_ENGINE_TYPE=binary PRISMA_CLI_QUERY_ENGINE_TYPE=binary yarn install
         - npx prisma generate
   serverlessTerminationProtection:
     stages:
