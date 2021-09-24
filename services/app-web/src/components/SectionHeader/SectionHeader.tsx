@@ -2,7 +2,7 @@ import { Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import styles from './SectionHeader.module.scss'
 
-type SectionHeaderProps = {
+export type SectionHeaderProps = {
     header: string
     navigateTo?: string
 }
