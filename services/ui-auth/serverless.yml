@@ -17,6 +17,12 @@ custom:
   iamPath: ${env:IAM_PATH, "/"}
   iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
   sesSourceEmailAddress: ${env:SES_SOURCE_EMAIL_ADDRESS, ""}
+  serverlessTerminationProtection:
+    stages:
+      - dev
+      - val
+      - prod
+      - main
 
 provider:
   name: aws
