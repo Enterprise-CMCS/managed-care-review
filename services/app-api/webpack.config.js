@@ -19,7 +19,11 @@ module.exports = {
     performance: {
         hints: false,
     },
-    externals: [nodeExternals()],
+    externals: [
+        nodeExternals({
+            allowlist: ['prisma', '.prisma', '@prisma'],
+        }),
+    ],
     devtool: 'source-map',
     resolve: {
         symlinks: false,
