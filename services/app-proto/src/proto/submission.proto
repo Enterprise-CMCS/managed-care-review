@@ -1,236 +1,224 @@
 syntax = "proto3";
-import "google/protobuf/timestamp.proto";
 package submission;
+import "google/protobuf/timestamp.proto";
 
 message StateSubmissionInfo {
-    string id = 1;
-    google.protobuf.Timestamp createdAt = 2;
-    google.protobuf.Timestamp updatedAt = 3;
-    StateCode stateCode = 4;
-    repeated string programId = 5;
-    string submissionName = 6;
-    SubmissionType submissionType = 7;
-    string submissionDescription = 8;
-    repeated Contact stateContacts = 9;
-    repeated Document documents = 10;
+  string id = 1;
+  google.protobuf.Timestamp created_at = 2;
+  google.protobuf.Timestamp updated_at = 3;
+  StateCode state_code = 4;
+  repeated string program_ids = 5;
+  string submission_name = 6;
+  SubmissionType submission_type = 7;
+  string submission_description = 8;
+  repeated Contact state_contacts = 9;
+  ContractInfo contract_info = 10;
+  repeated Document documents = 11;
 
-    ContractInfo contractInfo = 50;
-    repeated RateInfo rateInfo = 51;
+  repeated RateInfo rate_infos = 50;
 }
 
 /// Submission related enums
 message SubmissionType {
-    enum SubmissionType {
-        UNKNOWN = 0; 
-        CONTRACT_ONLY = 1; 
-        CONTRACT_AND_RATES = 3;
-    }
+  enum SubmissionType {
+    SUBMISSION_TYPE_UNSPECIFIED = 0; 
+    SUBMISSION_TYPE_CONTRACT_ONLY = 1; 
+    SUBMISSION_TYPE_CONTRACT_AND_RATES = 3;
+  }
 }
 
 message Contact {
-    string name = 1;
-    string titleRole = 2;
-    string email = 3;
+  string name = 1;
+  string title_role = 2;
+  string email = 3;
 }
 
 /// ContractInfo subtypes
 message ContractInfo {
-    ContractType contractType = 1;
-    string contractDateStart = 2;
-    string contractDateEnd = 3;
-    repeated ManagedCareEntity managedCareEntities = 4;
-    repeated FederalAuthority federalAuthorities = 5;
+  ContractType contract_type = 1;
+  string contract_date_start = 2;
+  string contract_date_end = 3;
+  repeated ManagedCareEntity managed_care_entities = 4;
+  repeated FederalAuthority federal_authorities = 5;
 
-    ContractAmendmentInfo contractAmendmentInfo  = 50;
+  ContractAmendmentInfo contract_amendment_info  = 50;
 
-    message ContractAmendmentInfo  {
-        message CapitationRatesAmendedInfo {
-            CapitationRateAmendmentReason reason = 1;
-            string otherReason = 2;
-        }
-    
-        repeated AmendedItem itemsBeingAmended = 1;
-        string otherItemBeingAmended = 2;
-        CapitationRatesAmendedInfo capitationRatesAmendedInfo = 3;
-        bool relatedToCovid19 = 4;
-        bool relatedToVaccination = 5;
+  message ContractAmendmentInfo  {
+    message CapitationRatesAmendedInfo {
+      CapitationRateAmendmentReason reason = 1;
+      string other_reason = 2;
     }
+    
+    repeated AmendedItem being_amended_items = 1;
+    string other_being_amended_items = 2;
+    CapitationRatesAmendedInfo capitation_rates_amended_info = 3;
+    bool related_to_covid_19 = 4;
+    bool related_to_vaccination = 5;
+  }
 }
 
 /// Contract related enums
 message AmendedItem {
-    enum AmendedItem {
-        UNKNOWN = 0;
-        BENEFITS_PROVIDED = 1;
-        CAPITATION_RATES = 2;
-        ENCOUNTER_DATA = 3;
-        ENROLLEE_ACCESS = 4;
-        ENROLLMENT_PROCESS = 5;
-        FINANCIAL_INCENTIVES = 6;
-        GEO_AREA_SERVED = 7;
-        GRIEVANCES_AND_APPEALS_SYSTEM = 8;
-        LENGTH_OF_CONTRACT_PERIOD = 9;
-        NON_RISK_PAYMENT = 10;
-        PROGRAM_INTEGRITY =11;
-        QUALITY_STANDARDS =12;
-        RISK_SHARING_MECHANISM =13;
-        OTHER=14;
-        }
+  enum AmendedItem {
+    AMENDED_ITEM_UNSPECIFIED = 0;
+    AMENDED_ITEM_BENEFITS_PROVIDED = 1;
+    AMENDED_ITEM_CAPITATION_RATES = 2;
+    AMENDED_ITEM_ENCOUNTER_DATA = 3;
+    AMENDED_ITEM_ENROLLEE_ACCESS = 4;
+    AMENDED_ITEM_ENROLLMENT_PROCESS = 5;
+    AMENDED_ITEM_FINANCIAL_INCENTIVES = 6;
+    AMENDED_ITEM_GEO_AREA_SERVED = 7;
+    AMENDED_ITEM_GRIEVANCES_AND_APPEALS_SYSTEM = 8;
+    AMENDED_ITEM_LENGTH_OF_CONTRACT_PERIOD = 9;
+    AMENDED_ITEM_NON_RISK_PAYMENT = 10;
+    AMENDED_ITEM_PROGRAM_INTEGRITY =11;
+    AMENDED_ITEM_QUALITY_STANDARDS =12;
+    AMENDED_ITEM_RISK_SHARING_MECHANISM =13;
+    AMENDED_ITEM_OTHER=14;
+  }
 }
 
-message CapitationRateAmendmentReason {
-    enum CapitationRateAmendmentReason{
-        UNKNOWN = 0;
-        ANNUAL = 1;
-        MIDYEAR = 2;
-        OTHER = 3;
-    }
+enum CapitationRateAmendmentReason{
+  CAPITATION_RATE_AMENDMENT_REASON_UNSPECIFIED = 0;
+  CAPITATION_RATE_AMENDMENT_REASON_ANNUAL = 1;
+  CAPITATION_RATE_AMENDMENT_REASON_MIDYEAR = 2;
+  CAPITATION_RATE_AMENDMENT_REASON_OTHER = 3;
 }
 
-message ContractType {
-    enum ContractType {
-        UNKNOWN = 0;
-        BASE = 1;
-        AMENDMENT = 2;
-    } 
+enum ContractType {
+  CONTRACT_TYPE_UNSPECIFIED = 0;
+  CONTRACT_TYPE_BASE = 1;
+  CONTRACT_TYPE_AMENDMENT = 2;
+} 
+
+
+enum FederalAuthority {
+  FEDERAL_AUTHORITY_UNSPECIFIED = 0;
+  FEDERAL_AUTHORITY_STATE_PLAN = 1;
+  FEDERAL_AUTHORITY_WAIVER_1915B = 2;
+  FEDERAL_AUTHORITY_WAIVER_1115 = 3;
+  FEDERAL_AUTHORITY_VOLUNTARY = 4;
+  FEDERAL_AUTHORITY_BENCHMARK = 5;
+  FEDERAL_AUTHORITY_TITLE_XXI = 6;
 }
 
-message FederalAuthority {
-    enum FederalAuthority {
-        UNKNOWN = 0;
-        STATE_PLAN = 1;
-        WAIVER_1915B = 2;
-        WAIVER_1115 = 3;
-        VOLUNTARY = 4;
-        BENCHMARK = 5;
-        TITLE_XXI = 6;
-    }
-}  
-
-message ManagedCareEntity {
-    enum ManagedCareEntity {
-        UNKNOWN = 0;
-        MCO = 1;
-        PIHP = 2;
-        PAHP= 3; 
-        PCCM = 4;
-    }
+enum ManagedCareEntity {
+  MANAGED_CARE_ENTITY_UNSPECIFIED = 0;
+  MANAGED_CARE_ENTITY_MCO = 1;
+  MANAGED_CARE_ENTITY_PIHP = 2;
+  MANAGED_CARE_ENTITY_PAHP= 3; 
+  MANAGED_CARE_ENTITY_PCCM = 4;
 }
+
 
 
 
 /// Rate Info subtypes
 message RateInfo {
-    string id = 1;
-    RateType rateType = 2;
-    string rateDateStart = 3;
-    string rateDateEnd = 4;
-    string rateDateCertified = 5;
-    ActuaryContact actuaryContacts = 6;
-    ActuaryCommunicationType actuaryCommunicationPreference = 7;
-    RateAmendmentInfo rateAmendmentInfo = 50;
+  string id = 1;
+  RateType rate_type = 2;
+  string rate_date_start = 3;
+  string rate_date_end = 4;
+  string rate_date_certified = 5;
+  ActuaryContact actuary_contacts = 6;
+  ActuaryCommunicationType actuary_communication_preference = 7;
+    
+  RateAmendmentInfo rate_amendment_info = 50;
 
-   message ActuaryContact {
-        Contact contact = 1;
-        ActuarialFirmType actuarialFirmType = 2;
-        string actuarialFirmOther= 3;
-    }
+  message ActuaryContact {
+    Contact contact = 1;
+    ActuarialFirmType actuarial_firm_type = 2;
+    string actuarial_firm_other= 3;
+  }
 
-    message RateAmendmentInfo {
-        string effectiveDateStart = 1;
-        string effectiveDateEnd = 2;
-    }
+  message RateAmendmentInfo {
+    string effective_date_start = 1;
+    string effective_date_end = 2;
+  }
 }
 /// Rate related enums
-message RateType {
-    enum RateType {
-        UNKNOWN = 0;
-        NEW = 1;
-        AMENDMEMT = 2;
-    }
+enum RateType {
+  RATE_TYPE_UNSPECIFIED = 0;
+  RATE_TYPE_NEW = 1;
+  RATE_TYPE_AMENDMEMT = 2;
 }
 
-message ActuaryCommunicationType {
-    enum ActuaryCommunicationType {
-        UNKNOWN = 0;
-        OACT_TO_ACTUARY = 1;
-        OACT_TO_STATE = 2;
-    }
+enum ActuaryCommunicationType {
+  ACTUARY_COMMUNICATION_TYPE_UNSPECIFIED = 0;
+  ACTUARY_COMMUNICATION_TYPE_OACT_TO_ACTUARY = 1;
+  ACTUARY_COMMUNICATION_TYPE_OACT_TO_STATE = 2;
 }
-   
-message ActuarialFirmType {
-    enum ActuarialFirmType {
-        UNKNOWN = 0;
-        MERCER = 1;
-        MILLIMAN = 2;
-        OPTUMAS = 3;
-        GUIDEHOUSE = 4;
-        DELOITTE = 5;
-        STATE_IN_HOUSE = 6;
-        OTHER = 7;
-    }
+
+enum ActuarialFirmType {
+  ACTUARIAL_FIRM_TYPE_UNSPECIFIED = 0;
+  ACTUARIAL_FIRM_TYPE_MERCER = 1;
+  ACTUARIAL_FIRM_TYPE_MILLIMAN = 2;
+  ACTUARIAL_FIRM_TYPE_OPTUMAS = 3;
+  ACTUARIAL_FIRM_TYPE_GUIDEHOUSE = 4;
+  ACTUARIAL_FIRM_TYPE_DELOITTE = 5;
+  ACTUARIAL_FIRM_TYPE_STATE_IN_HOUSE = 6;
+  ACTUARIAL_FIRM_TYPE_OTHER = 7;
 }
+
     
-/// Generic sub types (potentionally not state submission related and could be used elsewhere in the app)
+/// Generic sub types
 message Document {
-    string name = 1;
-    string s3URL = 2;
+  string name = 1;
+  string s3_url = 2;
 }
 
-message StateCode {
-    enum StateCode {
-    UNKNOWN = 0;
-    AS = 1 ;
-    AK = 2;
-    AL = 3;
-    AR = 4;
-    AZ = 5;
-    CA = 6;
-    CO = 7;
-    CT = 8;
-    DC = 9;
-    DE = 10;
-    FL = 11;
-    GA = 12;
-    HI = 13;
-    IA = 14;
-    ID = 15;
-    IL = 16;
-    IN = 17;
-    KS = 18;
-    LA = 19;
-    MA = 20;
-    MD = 21;
-    ME = 22;
-    MI = 23;
-    MN = 24;
-    MO = 25;
-    MS = 26;
-    MT = 27;
-    NC = 28;
-    ND = 29;
-    NE = 30;
-    NH = 31;
-    NJ = 32;
-    NM = 33;
-    NV = 34;
-    NY = 35;
-    OH = 36;
-    OK = 37;
-    OR = 38;
-    PA = 39;
-    PR = 40;
-    RI = 41;
-    SC = 42;
-    SD = 43;
-    TN = 44;
-    TX = 45;
-    UT = 46;
-    VA = 47;
-    VT = 48;
-    WA = 49;
-    WI = 50;
-    WV = 51;
-    WY= 52;
-    }
+enum StateCode {
+  STATE_CODE_UNSPECIFIED = 0;
+  STATE_CODE_AS = 1 ;
+  STATE_CODE_AK = 2;
+  STATE_CODE_AL = 3;
+  STATE_CODE_AR = 4;
+  STATE_CODE_AZ = 5;
+  STATE_CODE_CA = 6;
+  STATE_CODE_CO = 7;
+  STATE_CODE_CT = 8;
+  STATE_CODE_DC = 9;
+  STATE_CODE_DE = 10;
+  STATE_CODE_FL = 11;
+  STATE_CODE_GA = 12;
+  STATE_CODE_HI = 13;
+  STATE_CODE_IA = 14;
+  STATE_CODE_ID = 15;
+  STATE_CODE_IL = 16;
+  STATE_CODE_IN = 17;
+  STATE_CODE_KS = 18;
+  STATE_CODE_LA = 19;
+  STATE_CODE_MA = 20;
+  STATE_CODE_MD = 21;
+  STATE_CODE_ME = 22;
+  STATE_CODE_MI = 23;
+  STATE_CODE_MN = 24;
+  STATE_CODE_MO = 25;
+  STATE_CODE_MS = 26;
+  STATE_CODE_MT = 27;
+  STATE_CODE_NC = 28;
+  STATE_CODE_ND = 29;
+  STATE_CODE_NE = 30;
+  STATE_CODE_NH = 31;
+  STATE_CODE_NJ = 32;
+  STATE_CODE_NM = 33;
+  STATE_CODE_NV = 34;
+  STATE_CODE_NY = 35;
+  STATE_CODE_OH = 36;
+  STATE_CODE_OK = 37;
+  STATE_CODE_OR = 38;
+  STATE_CODE_PA = 39;
+  STATE_CODE_PR = 40;
+  STATE_CODE_RI = 41;
+  STATE_CODE_SC = 42;
+  STATE_CODE_SD = 43;
+  STATE_CODE_TN = 44;
+  STATE_CODE_TX = 45;
+  STATE_CODE_UT = 46;
+  STATE_CODE_VA = 47;
+  STATE_CODE_VT = 48;
+  STATE_CODE_WA = 49;
+  STATE_CODE_WI = 50;
+  STATE_CODE_WV = 51;
+  STATE_CODE_WY= 52;
 }
