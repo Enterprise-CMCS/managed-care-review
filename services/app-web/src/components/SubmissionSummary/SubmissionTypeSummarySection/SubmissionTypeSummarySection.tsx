@@ -1,10 +1,11 @@
 import { Grid } from '@trussworks/react-uswds'
+import dayjs from 'dayjs'
 import styles from '../SubmissionSummary.module.scss'
-import { SectionHeader } from '../../SectionHeader/SectionHeader'
 import { SubmissionTypeRecord } from '../../../constants/submissions'
 import { DataDetail } from '../../DataDetail/DataDetail'
 import { DoubleColumnRow } from '../../DoubleColumnRow/DoubleColumnRow'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
+import { isStateSubmission } from '../../../gqlHelpers'
 
 export type SubmissionTypeSummarySectionProps = {
     submission: DraftSubmission | StateSubmission
@@ -13,11 +14,16 @@ export type SubmissionTypeSummarySectionProps = {
 
 export const SubmissionTypeSummarySection = ({
     submission,
-    navigateTo,
 }: SubmissionTypeSummarySectionProps): React.ReactElement => {
     return (
         <section id="submissionType" className={styles.reviewSection}>
-            <SectionHeader header={submission.name} navigateTo={navigateTo} />
+            <h2>{submission.name}</h2>
+            {isStateSubmission(submission) && (
+                <span>
+                    Submitted:{' '}
+                    {dayjs(submission.submittedAt).format('MM/DD/YY')}
+                </span>
+            )}
 
             <dl>
                 <DoubleColumnRow
