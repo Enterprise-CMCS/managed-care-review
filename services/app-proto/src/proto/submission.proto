@@ -1,34 +1,33 @@
-import "google/protobuf/timestamp.proto";
-
-package submission;
 syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+package submission;
 
 message StateSubmissionInfo {
-    optional string id = 1;
-    optional google.protobuf.Timestamp createdAt = 2;
-    optional google.protobuf.Timestamp updatedAt = 3;
-    optional StateCode stateCode = 4;
+    string id = 1;
+    google.protobuf.Timestamp createdAt = 2;
+    google.protobuf.Timestamp updatedAt = 3;
+    StateCode stateCode = 4;
     repeated string programId = 5;
-    optional string submissionName = 6;
-    optional SubmissionType submissionType = 7;
-    optional string submissionDescription = 8;
+    string submissionName = 6;
+    SubmissionType submissionType = 7;
+    string submissionDescription = 8;
     repeated Contact stateContacts = 9;
     repeated Document documents = 10;
 
-    optional ContractInfo contractInfo = 50;
+    ContractInfo contractInfo = 50;
     repeated RateInfo rateInfo = 51;
 }
 
 
 /// Contract specific sub types
 message ContractInfo {
-    optional ContractType contractType = 1;
-    optional string contractDateStart = 2;
-    optional string contractDateEnd = 3;
+    ContractType contractType = 1;
+    string contractDateStart = 2;
+    string contractDateEnd = 3;
     repeated ManagedCareEntity managedCareEntities = 4;
     repeated FederalAuthority federalAuthorities = 5;
 
-    optional ContractAmendmentInfo contractAmendmentInfo  = 50;
+    ContractAmendmentInfo contractAmendmentInfo  = 50;
 
     /// nested sub types
     enum ContractType {
@@ -81,27 +80,27 @@ message ContractInfo {
                 OTHER = 3;
         }
         message CapitationRatesAmendedInfo {
-            optional CapitationRateAmendmentReason reason = 1;
-            optional string otherReason = 2;
+            CapitationRateAmendmentReason reason = 1;
+            string otherReason = 2;
         }
     
         repeated AmendedItem itemsBeingAmended = 1;
-        optional string otherItemBeingAmended = 2;
-        optional CapitationRatesAmendedInfo capitationRatesAmendedInfo = 3;
-        optional bool relatedToCovid19 = 4;
-        optional bool relatedToVaccination = 5;
+        string otherItemBeingAmended = 2;
+        CapitationRatesAmendedInfo capitationRatesAmendedInfo = 3;
+        bool relatedToCovid19 = 4;
+        bool relatedToVaccination = 5;
     }
 }
 /// Rate specific sub types
 message RateInfo {
-    optional string id = 1;
-    optional RateType rateType = 2;
-    optional string rateDateStart = 3;
-    optional string rateDateEnd = 4;
-    optional string rateDateCertified = 5;
-    optional ActuaryContact actuaryContacts = 6;
-    optional ActuaryCommunicationType actuaryCommunicationPreference = 7;
-    optional RateAmendmentInfo rateAmendmentInfo = 50;
+    string id = 1;
+    RateType rateType = 2;
+    string rateDateStart = 3;
+    string rateDateEnd = 4;
+    string rateDateCertified = 5;
+    ActuaryContact actuaryContacts = 6;
+    ActuaryCommunicationType actuaryCommunicationPreference = 7;
+    RateAmendmentInfo rateAmendmentInfo = 50;
 
     /// nested sub types 
     enum RateType {
@@ -126,14 +125,14 @@ message RateInfo {
         OTHER = 7;
     }
    message ActuaryContact {
-        optional Contact contact = 1;
-        optional ActuarialFirmType actuarialFirmType = 2;
-        optional string actuarialFirmOther= 3;
+        Contact contact = 1;
+        ActuarialFirmType actuarialFirmType = 2;
+        string actuarialFirmOther= 3;
     }
 
     message RateAmendmentInfo {
-        optional string effectiveDateStart = 1;
-        optional string effectiveDateEnd = 2;
+        string effectiveDateStart = 1;
+        string effectiveDateEnd = 2;
     }
 }
 
@@ -145,15 +144,15 @@ enum SubmissionType {
 }
 
 message Contact {
-    optional string name = 1;
-    optional string titleRole = 2;
-    optional string email = 3;
+    string name = 1;
+    string titleRole = 2;
+    string email = 3;
 }
 
 /// Generic sub types (potentionally not state submission related and could be used elsewhere in the app)
 message Document {
-    optional string name = 1;
-    optional string s3URL = 2;
+    string name = 1;
+    string s3URL = 2;
 }
 
 enum StateCode {
