@@ -27,9 +27,9 @@ function testStageNames() {
         ['under_score', 'underscore'],
         ['under-hyphen-_score', 'underhyphenscore'],
         ['under__under____score', 'underunderscore'],
-        ['thirtycharactersnodashesisfine', 'thirtycharactersnodashesisfine'],
-        ['thirtyonewithoutdashesistoolong', 'thirtyonewithoutdashesis763ba'],
-        ['jf-items-amended-definitions-help', 'jfitemsamendeddefinitionshelp'],
+        ['twentythreecharactersok', 'twentythreecharactersok'],
+        ['twentyfourcharactersnope', 'twentyfourcharactersnope9497e'],
+        ['jf-items-amended-definitions-help', 'jfitemsamendeddefinition19712'],
         ['two3four5', 'two3four5'],
         [
             'dependabot/npm_and_yarn/testing-library/cypress-8.0.0',
@@ -37,7 +37,11 @@ function testStageNames() {
         ],
         [
             'dependabot/npm_and_yarn/aws-sdk-2.991.0',
-            'dependabotnpmandyarnsdk29910',
+            'dependabotnpmandyarnsdk289abe',
+        ],
+        [
+            'dependabot/npm_and_yarn/yargs-17.2.1',
+            'dependabotnpmandyarnyarga596a',
         ],
     ];
 
