@@ -74,7 +74,7 @@ if [ ${#branch_name} -gt 23 ]; then
 
     >&2 echo "hash $branch_hash"
 
-    branch_name="${branch_name:0:17}${branch_hash:0:5}"
+    branch_name="${branch_name:0:18}${branch_hash:0:5}"
 
     >&2 echo "combined $branch_name"
 

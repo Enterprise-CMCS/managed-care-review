@@ -17,32 +17,25 @@ function testStageNames() {
         ['ch@ra☃️ters', 'chraters'],
         [
             'a-very-very-long-so-long-too-long-branch-name',
-            'averyverylongsolongtoolo0bb6d',
+            'averyverylongsolon0bb6d',
         ],
         [
             'dependabot/github_actions/actions/setup-node-2.3.0',
-            'dependabotgithubactionsa291dc',
+            'dependabotgithubac291dc',
         ],
         ['this/that', 'thisthat'],
         ['under_score', 'underscore'],
         ['under-hyphen-_score', 'underhyphenscore'],
         ['under__under____score', 'underunderscore'],
         ['twentythreecharactersok', 'twentythreecharactersok'],
-        ['twentyfourcharactersnope', 'twentyfourcharactersnope9497e'],
-        ['jf-items-amended-definitions-help', 'jfitemsamendeddefinition19712'],
+        ['twentyfourcharactersnope', 'twentyfourcharacte9497e'],
+        ['jf-items-amended-definitions-help', 'jfitemsamendeddefi19712'],
         ['two3four5', 'two3four5'],
         [
             'dependabot/npm_and_yarn/testing-library/cypress-8.0.0',
-            'dependabotnpmandyarntest37b10',
+            'dependabotnpmandya37b10',
         ],
-        [
-            'dependabot/npm_and_yarn/aws-sdk-2.991.0',
-            'dependabotnpmandyarnsdk289abe',
-        ],
-        [
-            'dependabot/npm_and_yarn/yargs-17.2.1',
-            'dependabotnpmandyarnyarga596a',
-        ],
+        ['dependabot/npm_and_yarn/aws-sdk-2.991.0', 'dependabotnpmandya89abe'],
     ];
 
     const testErrors = [];
