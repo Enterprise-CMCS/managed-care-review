@@ -127,17 +127,9 @@ module.exports = {
                         __dirname,
                         './node_modules/@prisma/engines/query-engine-rhel-openssl-1.0.x'
                     ),
-                    to: path.resolve(
-                        __dirname,
-                        './node_modules/@prisma/engines/query-engine-rhel-openssl-1.0.x'
-                    ),
                 },
                 {
                     from: path.resolve(
-                        __dirname,
-                        './node_modules/@prisma/engines/migration-engine-rhel-openssl-1.0.x'
-                    ),
-                    to: path.resolve(
                         __dirname,
                         './node_modules/@prisma/engines/migration-engine-rhel-openssl-1.0.x'
                     ),
