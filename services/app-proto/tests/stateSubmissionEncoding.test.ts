@@ -1,34 +1,75 @@
-import { toSerializable } from '../src/helpers'
+import { toProtoBuffer } from '../src/stateSubmissionEncoding'
+import { toDomain } from '../src/stateSubmissionEncoding'
+import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
 
-const draftSubmission = {
+const newSubmission: DraftSubmissionType = {
     createdAt: new Date(),
     updatedAt: new Date(),
+    status: 'DRAFT',
+    stateNumber: 5,
     id: 'test-abc-123',
     stateCode: 'MN',
     programID: 'snbc',
-    program: {
-        id: 'snbc',
-        name: 'SNBC',
-    },
-    name: 'MN-MSHO-0001',
     submissionType: 'CONTRACT_ONLY',
     submissionDescription: 'A real submission',
     documents: [],
     contractType: 'BASE',
     contractDateStart: new Date(),
     contractDateEnd: new Date(),
-    contractAmendmentInfo: null,
     managedCareEntities: [],
     federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
-    rateType: null,
-    rateDateStart: null,
-    rateDateEnd: null,
-    rateDateCertified: null,
-    rateAmendmentInfo: null,
     stateContacts: [],
     actuaryContacts: [],
-    actuaryCommunicationPreference: null,
 }
+
+describe('toProtoBuffer', () => {
+    test.each([
+        [newSubmission, ''],
+        // [validDomain1, )],
+        // [validDomain2, ],
+    ])('given valid domain model %j expect %o)', (domainObject) => {
+        expect(toDomain(toProtoBuffer(domainObject))).toBe(domainObject)
+    })
+
+    // test.each([[invalidDomain1]])(
+    //     'given invalid object %o expect error)',
+    //     (invalidDomainObject) => {
+    //         expect(toProtoBuffer(invalidDomainObject)).toThrowError()
+    //     }
+    // )
+})
+
+// DRAFT SUBMISSIONS
+
+// const draftSubmission = {
+//     createdAt: new Date(),
+//     updatedAt: new Date(),
+//     id: 'test-abc-123',
+//     stateCode: 'MN',
+//     programID: 'snbc',
+//     program: {
+//         id: 'snbc',
+//         name: 'SNBC',
+//     },
+//     name: 'MN-MSHO-0001',
+//     submissionType: 'CONTRACT_ONLY',
+//     submissionDescription: 'A real submission',
+//     documents: [],
+//     contractType: 'BASE',
+//     contractDateStart: new Date(),
+//     contractDateEnd: new Date(),
+//     contractAmendmentInfo: null,
+//     managedCareEntities: [],
+//     federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
+//     rateType: null,
+//     rateDateStart: null,
+//     rateDateEnd: null,
+//     rateDateCertified: null,
+//     rateAmendmentInfo: null,
+//     stateContacts: [],
+//     actuaryContacts: [],
+//     actuaryCommunicationPreference: null,
+// }
 
 // export function mockContactAndRatesDraft(): DraftSubmission {
 //     return {
@@ -132,28 +173,3 @@ const draftSubmission = {
 //         actuaryCommunicationPreference: null,
 //     }
 // }
-
-describe('toSerializable', () => {
-    const invalidDomain1 = {
-        contractAmendmentInfo: {
-            itemsBeingAmended: ['INVALID_ENUM', 'OTHER'],
-            otherItemBeingAmended: 'This is why items amended',
-            relatedToCovid19: 'a boolean',
-        },
-    }
-
-    test.each([
-        [draftSubmission, JSON.stringify(draftSubmission)],
-        // [validDomain1, JSON.stringify(validDomain1)],
-        // [validDomain2, JSON.stringify(validDomain2)],
-    ])('given valid domain model %j expect %o)', (domainObject, expected) => {
-        expect(toSerializable(domainObject)).toBe(expected)
-    })
-
-    // test.each([[invalidDomain1]])(
-    //     'given invalid object %o expect error)',
-    //     (invalidDomainObject) => {
-    //         expect(toSerializable(invalidDomainObject)).toThrowError()
-    //     }
-    // )
-})

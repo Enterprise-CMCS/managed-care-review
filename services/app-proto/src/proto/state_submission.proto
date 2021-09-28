@@ -1,5 +1,5 @@
 syntax = "proto3";
-package submission;
+package statesubmission;
 import "google/protobuf/timestamp.proto";
 
 message StateSubmissionInfo {
@@ -19,12 +19,10 @@ message StateSubmissionInfo {
 }
 
 /// Submission related enums
-message SubmissionType {
-  enum SubmissionType {
-    SUBMISSION_TYPE_UNSPECIFIED = 0; 
-    SUBMISSION_TYPE_CONTRACT_ONLY = 1; 
-    SUBMISSION_TYPE_CONTRACT_AND_RATES = 3;
-  }
+enum SubmissionType {
+  SUBMISSION_TYPE_UNSPECIFIED = 0; 
+  SUBMISSION_TYPE_CONTRACT_ONLY = 1; 
+  SUBMISSION_TYPE_CONTRACT_AND_RATES = 3;
 }
 
 message Contact {
@@ -49,8 +47,8 @@ message ContractInfo {
       string other_reason = 2;
     }
     
-    repeated AmendedItem being_amended_items = 1;
-    string other_being_amended_items = 2;
+    repeated AmendedItem amendable_items = 1;
+    string other_amendable_item = 2;
     CapitationRatesAmendedInfo capitation_rates_amended_info = 3;
     bool related_to_covid_19 = 4;
     bool related_to_vaccination = 5;
@@ -120,7 +118,7 @@ message RateInfo {
   string rate_date_start = 3;
   string rate_date_end = 4;
   string rate_date_certified = 5;
-  ActuaryContact actuary_contacts = 6;
+  repeated ActuaryContact actuary_contacts = 6;
   ActuaryCommunicationType actuary_communication_preference = 7;
     
   RateAmendmentInfo rate_amendment_info = 50;
