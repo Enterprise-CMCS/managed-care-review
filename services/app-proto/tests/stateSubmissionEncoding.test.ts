@@ -10,7 +10,7 @@ const newSubmission: DraftSubmissionType = {
     id: 'test-abc-123',
     stateCode: 'MN',
     programID: 'snbc',
-    submissionType: 'CONTRACT_ONLY',
+    submissionType: 'CONTRACT_AND_RATES',
     submissionDescription: 'A real submission',
     documents: [],
     contractType: 'BASE',

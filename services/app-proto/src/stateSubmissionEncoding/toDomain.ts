@@ -14,8 +14,11 @@ const toDomain = (buff: Uint8Array): DraftSubmissionType => {
     )
     const modified = {
         ...stateSubmissionMessage,
-        submissionType: 'CONTACT_ONLY',
+        submissionType: statesubmission.SubmissionType[1],
     }
+
+    console.log('MODIFIED??', modified)
+
     return modified as any
 }
 

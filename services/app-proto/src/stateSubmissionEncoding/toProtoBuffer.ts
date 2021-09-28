@@ -11,13 +11,29 @@ function camelToUnderscore(str: string) {
     return result.split(' ').join('_').toLowerCase()
 }
 
-const domainEnumToProto = (
+// //             statesubmission.SubmissionType[
+//                 domainEnumToProto(
+//                     'submissionType',
+//                     domainData.submissionType
+//                 ) as keyof typeof statesubmission.SubmissionType
+//             ],
+
+function genericDomainEnumToProto<T>(
     domainKey: string,
-    domainEnum?: string
-): string | undefined =>
+    domainEnum: string
+): keyof typeof T {
+    const protoEnumString = domainEnumToProto(domainKey, domainEnum)
+    return protoEnumString as keyof typeof T
+}
+
+{
+    genericDomainEnumToProto<statesubmission.SubmissionType>('foo', 'bar')
+}
+
+const domainEnumToProto = (domainKey: string, domainEnum?: string): string =>
     domainEnum
         ? `${camelToUnderscore(domainKey).toUpperCase()}_${domainEnum}`
-        : undefined
+        : ''
 
 const domainEnumArrayToProto = (
     domainKey: string,
@@ -89,6 +105,31 @@ const toProtoBuffer = (domainData: DraftSubmissionType): Uint8Array => {
         contractAmendmentInfo: modifiedContractAmendmentInfo,
         rateInfos: [modifiedRateAmendmentInfo],
     }
+
+    // IStateSubmissionInfo
+
+    const convertDate = (
+        domainDate: Date
+    ): statesubmission.IStateSubmissionInfo['createdAt'] => {
+        return {}
+    }
+
+    const literalMessage: any = {
+        ...domainData,
+        createdAt: convertDate(domainData.createdAt),
+        submissionType:
+            statesubmission.SubmissionType[
+                domainEnumToProto(
+                    'submissionType',
+                    domainData.submissionType
+                ) as keyof typeof statesubmission.SubmissionType
+            ],
+    }
+
+    const protoMessage = new statesubmission.StateSubmissionInfo(literalMessage)
+    console.log('WHAT DID WE GET???', protoMessage)
+    console.log('is this a string??', statesubmission.SubmissionType[1])
+
     const stateSubmissionMessage =
         statesubmission.StateSubmissionInfo.fromObject(modified)
     console.log(stateSubmissionMessage)
