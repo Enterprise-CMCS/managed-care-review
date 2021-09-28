@@ -45,7 +45,7 @@
         "serverless-iam-helper": "CMSgov/serverless-iam-helper",
         "serverless-idempotency-helper": "CMSgov/serverless-idempotency-helper",
         "typescript": "^4.3.5",
-        "yargs": "^17.2.0"
+        "yargs": "^17.2.1"
     },
     "dependencies": {
         "aws-sdk": "^2.994.0",
