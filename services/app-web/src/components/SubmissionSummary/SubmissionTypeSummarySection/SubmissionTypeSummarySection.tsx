@@ -1,6 +1,7 @@
 import { Grid } from '@trussworks/react-uswds'
 import dayjs from 'dayjs'
 import styles from '../SubmissionSummary.module.scss'
+import { SectionHeader } from '../../SectionHeader/SectionHeader'
 import { SubmissionTypeRecord } from '../../../constants/submissions'
 import { DataDetail } from '../../DataDetail/DataDetail'
 import { DoubleColumnRow } from '../../DoubleColumnRow/DoubleColumnRow'
@@ -14,18 +15,45 @@ export type SubmissionTypeSummarySectionProps = {
 
 export const SubmissionTypeSummarySection = ({
     submission,
+    navigateTo,
 }: SubmissionTypeSummarySectionProps): React.ReactElement => {
     return (
         <section id="submissionType" className={styles.reviewSection}>
-            <h2>{submission.name}</h2>
-            {isStateSubmission(submission) && (
-                <span>
-                    Submitted:{' '}
-                    {dayjs(submission.submittedAt).format('MM/DD/YY')}
-                </span>
-            )}
+            <SectionHeader header={submission.name} navigateTo={navigateTo} />
 
             <dl>
+                <DoubleColumnRow
+                    left={
+                        <DataDetail
+                            id="submitted"
+                            label="Submitted"
+                            data={
+                                isStateSubmission(submission) && (
+                                    <span>
+                                        {dayjs(submission.submittedAt).format(
+                                            'MM/DD/YY'
+                                        )}
+                                    </span>
+                                )
+                            }
+                        />
+                    }
+                    right={
+                        <DataDetail
+                            id="lastUpdated"
+                            label="Last updated"
+                            data={
+                                isStateSubmission(submission) && (
+                                    <span>
+                                        {dayjs(submission.updatedAt).format(
+                                            'MM/DD/YY'
+                                        )}
+                                    </span>
+                                )
+                            }
+                        />
+                    }
+                />
                 <DoubleColumnRow
                     left={
                         <DataDetail
