@@ -22,38 +22,36 @@ export const SubmissionTypeSummarySection = ({
             <SectionHeader header={submission.name} navigateTo={navigateTo} />
 
             <dl>
-                <DoubleColumnRow
-                    left={
-                        <DataDetail
-                            id="submitted"
-                            label="Submitted"
-                            data={
-                                isStateSubmission(submission) && (
+                {isStateSubmission(submission) && (
+                    <DoubleColumnRow
+                        left={
+                            <DataDetail
+                                id="submitted"
+                                label="Submitted"
+                                data={
                                     <span>
                                         {dayjs(submission.submittedAt).format(
                                             'MM/DD/YY'
                                         )}
                                     </span>
-                                )
-                            }
-                        />
-                    }
-                    right={
-                        <DataDetail
-                            id="lastUpdated"
-                            label="Last updated"
-                            data={
-                                isStateSubmission(submission) && (
+                                }
+                            />
+                        }
+                        right={
+                            <DataDetail
+                                id="lastUpdated"
+                                label="Last updated"
+                                data={
                                     <span>
                                         {dayjs(submission.updatedAt).format(
                                             'MM/DD/YY'
                                         )}
                                     </span>
-                                )
-                            }
-                        />
-                    }
-                />
+                                }
+                            />
+                        }
+                    />
+                )}
                 <DoubleColumnRow
                     left={
                         <DataDetail
