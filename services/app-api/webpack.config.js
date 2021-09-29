@@ -19,6 +19,7 @@ module.exports = {
         hints: false,
     },
     externals: {
+        _http_common: 'commonjs2 _http_common',
         'aws-sdk': 'commonjs2 aws-sdk',
     },
     devtool: 'source-map',
