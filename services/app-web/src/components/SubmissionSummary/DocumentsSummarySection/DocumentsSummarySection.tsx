@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import styles from '../SubmissionSummary.module.scss'
+import styles from './DocumentsSummarySection.module.scss'
 import { Document } from '../../../gen/gqlClient'
 import { SectionHeader } from '../../SectionHeader/SectionHeader'
 import { Link } from '@trussworks/react-uswds'
