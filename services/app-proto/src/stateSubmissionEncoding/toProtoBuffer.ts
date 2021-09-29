@@ -3,7 +3,6 @@ import {
     DraftSubmissionType,
     ActuaryContact,
 } from '../../../app-web/src/common-code/domain-models'
-import { String } from 'aws-sdk/clients/acm'
 
 /*
     Convert domain date to proto timestamp
