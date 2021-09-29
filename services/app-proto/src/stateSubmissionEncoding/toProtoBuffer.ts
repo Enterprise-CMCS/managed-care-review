@@ -3,136 +3,162 @@ import {
     DraftSubmissionType,
     ActuaryContact,
 } from '../../../app-web/src/common-code/domain-models'
-import { ConnectContactLens } from 'aws-sdk'
+import { String } from 'aws-sdk/clients/acm'
 
-// Add adaptors for dates
-function camelToUnderscore(str: string) {
-    var result = str.replace(/([A-Z])/g, ' $1')
-    return result.split(' ').join('_').toLowerCase()
+/*
+    Convert domain date to proto timestamp
+*/
+const domainDateTimeToProto = (
+    domainDateTime: Date
+): statesubmission.IStateSubmissionInfo['createdAt'] => {
+    return {}
 }
 
-// //             statesubmission.SubmissionType[
-//                 domainEnumToProto(
-//                     'submissionType',
-//                     domainData.submissionType
-//                 ) as keyof typeof statesubmission.SubmissionType
-//             ],
-
-function genericDomainEnumToProto<T>(
-    domainKey: string,
+/*
+    Convert domain date string to proto data 
+*/
+const domainDateStringToProto = (domainDate: Date): string => {
+    return '01-01-1000'
+}
+/*
+    Convert domain enum (e.g. CONTRACT_ONLY) to proto enum (e.g. SUBMISSION_TYPE_CONTRACT_ONLY)
+*/
+function domainEnumToProto<T>(
+    defaultProtoValue: string,
     domainEnum: string
-): keyof typeof T {
-    const protoEnumString = domainEnumToProto(domainKey, domainEnum)
-    return protoEnumString as keyof typeof T
+): T {
+    const prefix = getEnumPrefix(defaultProtoValue)
+
+    const protoEnumString = `${prefix}_${domainEnum}`
+    return protoEnumString as unknown as T
 }
 
-{
-    genericDomainEnumToProto<statesubmission.SubmissionType>('foo', 'bar')
+/*
+    Convert array of domain enums to proto enums 
+*/
+function domainEnumArrayToProto<T>(
+    defaultProtoValue: string,
+    domainEnumArray: string[]
+): T[] {
+    return domainEnumArray.map((enumVal) =>
+        domainEnumToProto<T>(defaultProtoValue, enumVal)
+    )
 }
 
-const domainEnumToProto = (domainKey: string, domainEnum?: string): string =>
-    domainEnum
-        ? `${camelToUnderscore(domainKey).toUpperCase()}_${domainEnum}`
-        : ''
+/* 
+Return the prefix for proto enum based on the default value of that field
+    - (e.g. return SUBMISSION_TYPE from the default value SUBMISSION_TYPE_UNSPECIFIED)
+    - the prefix is a substring of the default value without _UNSPECIFIED
+*/
+const getEnumPrefix = (defaultValue: string) => {
+    const lastUnderscoreIndex = defaultValue.lastIndexOf('_')
+    return defaultValue.substring(0, lastUnderscoreIndex)
+}
 
-const domainEnumArrayToProto = (
-    domainKey: string,
-    domainEnumArray?: string[]
-): string[] =>
-    domainEnumArray
-        ? domainEnumArray.map(
-              (enumVal) => domainEnumToProto(domainKey, enumVal) || 'ERROR'
-          )
-        : []
-
-const modifiedActuaryContacts = (
-    actuaryContactsArray: ActuaryContact[]
-): any[] =>
-    actuaryContactsArray.map((contact) => {
-        return {
-            ...contact,
-            actuaryCommunicationType: domainEnumToProto(
-                'actuaryCommunicationType',
-                contact.actuarialFirm
-            ),
-        }
-    }) || []
-
+// MAIN
 const toProtoBuffer = (domainData: DraftSubmissionType): Uint8Array => {
     const { contractAmendmentInfo, rateAmendmentInfo } = domainData
-    const modifiedContractAmendmentInfo = {
-        ...contractAmendmentInfo,
-        amendableItems: domainEnumArrayToProto(
-            'amendableItems',
-            contractAmendmentInfo?.itemsBeingAmended
-        ),
-        capitationRatesAmendedInfo: {
-            ...contractAmendmentInfo?.capitationRatesAmendedInfo,
-            reason: domainEnumToProto(
-                'capitationRateAmendmentReason',
-                contractAmendmentInfo?.capitationRatesAmendedInfo?.reason
-            ),
-        },
-    }
-    const modifiedRateAmendmentInfo = {
-        ...rateAmendmentInfo,
-        rateType: domainEnumToProto('rateType', domainData.rateType),
-        actuaryContacts: modifiedActuaryContacts,
-        actuaryCommunicationPreference: domainEnumToProto(
-            'actuaryCommunicationType',
-            domainData.rateType
-        ),
-    }
-    const modified = {
+
+    const literalMessage: statesubmission.IStateSubmissionInfo = {
         ...domainData,
-        submissionType: domainEnumToProto(
-            'submissionType',
+        createdAt: domainDateTimeToProto(domainData.createdAt),
+        updatedAt: domainDateTimeToProto(domainData.updatedAt),
+        submissionType: domainEnumToProto<statesubmission.SubmissionType>(
+            statesubmission.SubmissionType[0],
             domainData.submissionType
         ),
-        contractType: domainEnumToProto(
-            'contractType',
-            domainData.contractType
-        ),
-        managedCareEntities: domainEnumToProto(
-            'managedCareEntities',
-            domainData.contractType
-        ),
-        federalAuthorities: domainEnumToProto(
-            'federalAuthorities',
-            domainData.contractType
-        ),
-        stateCode: domainEnumToProto('stateCode', domainData.contractType),
-        contractAmendmentInfo: modifiedContractAmendmentInfo,
-        rateInfos: [modifiedRateAmendmentInfo],
-    }
 
-    // IStateSubmissionInfo
-
-    const convertDate = (
-        domainDate: Date
-    ): statesubmission.IStateSubmissionInfo['createdAt'] => {
-        return {}
-    }
-
-    const literalMessage: any = {
-        ...domainData,
-        createdAt: convertDate(domainData.createdAt),
-        submissionType:
-            statesubmission.SubmissionType[
-                domainEnumToProto(
-                    'submissionType',
-                    domainData.submissionType
-                ) as keyof typeof statesubmission.SubmissionType
-            ],
+        stateCode: domainData.stateCode
+            ? domainEnumToProto<statesubmission.StateCode>(
+                  statesubmission.StateCode[0],
+                  domainData.stateCode
+              )
+            : undefined,
+        contractInfo: {
+            contractType: domainData.contractType
+                ? domainEnumToProto<statesubmission.ContractType>(
+                      statesubmission.ContractType[0],
+                      domainData.contractType
+                  )
+                : undefined,
+            contractDateStart: domainDateStringToProto(
+                domainData.contractDateStart || new Date()
+            ),
+            contractDateEnd: domainDateStringToProto(
+                domainData.contractDateEnd || new Date()
+            ),
+            managedCareEntities: domainData.managedCareEntities
+                ? domainEnumArrayToProto<statesubmission.ManagedCareEntity>(
+                      statesubmission.ManagedCareEntity[0],
+                      domainData.managedCareEntities
+                  )
+                : [],
+            federalAuthorities: domainData.federalAuthorities
+                ? domainEnumArrayToProto<statesubmission.FederalAuthority>(
+                      statesubmission.FederalAuthority[0],
+                      domainData.federalAuthorities
+                  )
+                : [],
+            contractAmendmentInfo: {
+                ...contractAmendmentInfo,
+                amendableItems: contractAmendmentInfo?.itemsBeingAmended
+                    ? domainEnumArrayToProto<statesubmission.AmendedItem>(
+                          'amendableItems',
+                          contractAmendmentInfo?.itemsBeingAmended
+                      )
+                    : undefined,
+                capitationRatesAmendedInfo: {
+                    ...contractAmendmentInfo?.capitationRatesAmendedInfo,
+                    reason: contractAmendmentInfo?.capitationRatesAmendedInfo
+                        ?.reason
+                        ? domainEnumToProto<statesubmission.CapitationRateAmendmentReason>(
+                              'capitationRateAmendmentReason',
+                              contractAmendmentInfo?.capitationRatesAmendedInfo
+                                  ?.reason
+                          )
+                        : undefined,
+                },
+            },
+        },
+        // 9.21 currently only ever one rate on a domain model, eventually this will be a map
+        rateInfos: [
+            {
+                rateType: domainData.rateType
+                    ? domainEnumToProto<statesubmission.RateType>(
+                          statesubmission.RateType[0],
+                          domainData.rateType
+                      )
+                    : undefined,
+                actuaryContacts: domainData.actuaryContacts
+                    ? domainData.actuaryContacts.map((contact) => {
+                          return {
+                              ...contact,
+                              actuaryCommunicationType: domainEnumToProto<
+                                  statesubmission.RateInfo['actuaryCommunicationPreference']
+                              >(
+                                  statesubmission.ActuaryCommunicationType[0],
+                                  contact.actuarialFirm || ''
+                              ),
+                          }
+                      }) || []
+                    : undefined,
+                actuaryCommunicationPreference:
+                    domainData.actuaryCommunicationPreference
+                        ? domainEnumToProto<statesubmission.ActuaryCommunicationType>(
+                              statesubmission.ActuaryCommunicationType[0],
+                              domainData.actuaryCommunicationPreference
+                          )
+                        : undefined,
+                ...rateAmendmentInfo,
+            },
+        ],
     }
 
     const protoMessage = new statesubmission.StateSubmissionInfo(literalMessage)
-    console.log('WHAT DID WE GET???', protoMessage)
-    console.log('is this a string??', statesubmission.SubmissionType[1])
 
     const stateSubmissionMessage =
-        statesubmission.StateSubmissionInfo.fromObject(modified)
-    console.log(stateSubmissionMessage)
+        statesubmission.StateSubmissionInfo.fromObject(protoMessage)
+
     return statesubmission.StateSubmissionInfo.encode(
         stateSubmissionMessage
     ).finish()
