@@ -18,11 +18,9 @@ module.exports = {
     performance: {
         hints: false,
     },
-    externals: [
-        nodeExternals({
-            allowlist: ['prisma', '.prisma', '@prisma'],
-        }),
-    ],
+    externals: {
+        'aws-sdk': 'commonjs2 aws-sdk',
+    },
     devtool: 'source-map',
     resolve: {
         symlinks: false,
@@ -108,6 +106,10 @@ module.exports = {
                 },
                 {
                     from: path.resolve(
+                        __dirname,
+                        './node_modules/prisma/libquery_engine-rhel-openssl-1.0.x.so.node'
+                    ),
+                    to: path.resolve(
                         __dirname,
                         './node_modules/prisma/libquery_engine-rhel-openssl-1.0.x.so.node'
                     ),
