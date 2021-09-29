@@ -21,7 +21,8 @@ export const ContractDetailsSummarySection = ({
     submission,
     navigateTo,
 }: ContractDetailsSummarySectionProps): React.ReactElement => {
-    // Array of values from a checkbox field is displayed in a comma-separated list
+    // Array of values from a checkbox field is displayed in an unordered list
+    // TODO: create component if used elsewhere?
     const createCheckboxList = ({
         list,
         dict,
@@ -39,13 +40,14 @@ export const ContractDetailsSummarySection = ({
             ? userFriendlyList.concat(otherReasons)
             : userFriendlyList
 
-        // strip nulls and leftover commas at the end
-        return listToDisplay
-            .filter((el) => {
-                return el !== null
-            })
-            .join(', ')
-            .replace(/,\s*$/, '')
+        return (
+            <ul>
+                {listToDisplay.map((item) => (
+                    // TODO: protect from nulls?
+                    <li key={item}>{item}</li>
+                ))}
+            </ul>
+        )
     }
 
     const capitationRateChangeReason = (): string | null => {
