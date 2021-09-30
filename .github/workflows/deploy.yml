@@ -40,7 +40,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: lambda-layers-prisma-client
-          path: ./lambda-layers-prisma-client
+          path: ./services/app-api/lambda-layers-prisma-client
 
   deploy:
     needs: [build-prisma-client-lambda-layer]
