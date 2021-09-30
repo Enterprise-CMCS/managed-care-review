@@ -1,17 +1,7 @@
 import { APIGatewayProxyHandler } from 'aws-lambda'
-import { SecretsManager } from 'aws-sdk'
-import { GetSecretValueResponse } from 'aws-sdk/clients/secretsmanager'
-import { PrismaClient } from '@prisma/client'
-import { assertIsAuthMode } from '../../app-web/src/common-code/domain-models'
-import { Result, ok, err } from 'neverthrow'
-
-const authMode = process.env.REACT_APP_AUTH_MODE
-assertIsAuthMode(authMode)
-const prismaConnect =
-    authMode === 'LOCAL' ? prismaClientLocal : prismaClientAurora
-
+import { NewPrismaClient } from '../lib/prisma'
 export const main: APIGatewayProxyHandler = async () => {
-    const prismaResult = await prismaConnect()
+    const prismaResult = await NewPrismaClient()
     if (prismaResult.isErr()) {
         return {
             statusCode: 400,
@@ -46,71 +36,4 @@ export const main: APIGatewayProxyHandler = async () => {
             'Access-Control-Allow-Credentials': true,
         },
     }
-}
-
-function prismaClientLocal(): Result<PrismaClient, Error> {
-    try {
-        return ok(new PrismaClient())
-    } catch (e) {
-        return err(new Error('Could not connect to local postgres: ' + e))
-    }
-}
-async function prismaClientAurora(): Promise<Result<PrismaClient, Error>> {
-    try {
-        const secret = await getSecretValue()
-
-        const postgresURL = `postgresql://${
-            secret.username
-        }:${encodeURIComponent(secret.password)}@${secret.host}:${
-            secret.port
-        }/${secret.dbname}?schema=public&connection_limit=5`
-
-        const prisma = new PrismaClient({
-            datasources: {
-                db: {
-                    url: postgresURL,
-                },
-            },
-        })
-        return ok(prisma)
-    } catch (e) {
-        return err(new Error('Could not connect to aurora: ' + e))
-    }
-}
-
-interface Secret {
-    dbClusterIdentifier: string
-    password: string
-    dbname: string
-    engine: string
-    port: number
-    host: string
-    username: string
-}
-
-async function getSecretValue(): Promise<Secret> {
-    // lookup secrets manager secret from env
-    const params = {
-        SecretId: process.env.SECRETS_MANAGER_SECRET || 'no secret set',
-    }
-
-    // connect to secrets manager and grab the secrets
-    const secretsManager = new SecretsManager({
-        region: 'us-east-1',
-    })
-
-    const secretResponse: GetSecretValueResponse = await secretsManager
-        .getSecretValue(params)
-        .promise()
-
-    // parse the secrets. we store as a string.
-    const secret = JSON.parse(secretResponse.SecretString ?? '') as Secret
-
-    if (!secret.username || !secret.password) {
-        throw Error(
-            'Could not retreive postgres credentials from secrets manager'
-        )
-    }
-
-    return secret
 }
