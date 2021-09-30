@@ -10,7 +10,7 @@ on:
 
 jobs:
   build-prisma-client-lambda-layer:
-    name: Build Prisma Client
+    name: build prisma layer
     runs-on: ubuntu-18.04
     steps:
       - name: Check out repository
@@ -135,6 +135,16 @@ jobs:
           environment: review-apps
           description: stack ${{ env.branch_name }}
           initial_status: in_progress
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: lambda-layers-prisma-client
+          path: ./services/app-api/lambda-layers-prisma-client
+
+      - name: Unzip prisma layer
+        run: |
+          tar -C ./services/app-api/lambda-layers-prisma-client -xf ./services/app-api/lambda-layers-prisma-client/nodejs.tar.gz
+          rm -rf ./services/app-api/lambda-layers-prisma-client/nodejs.tar.gz
 
       - name: deploy
         id: deploy
