@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 
-import { DataDetail } from './DataDetail'
+import { DataDetail } from './'
 
 describe('DataDetail', () => {
     it('renders without errors', () => {

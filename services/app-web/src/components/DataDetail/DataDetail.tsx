@@ -7,7 +7,7 @@ export type DataDetailProps = {
     data: React.ReactNode
 }
 
-/*  
+/*
     DataDetail displays definition terms and descriptions using semantic HTML.
     This is useful for summarizing static data. Should be used inside a <dl>
 */
