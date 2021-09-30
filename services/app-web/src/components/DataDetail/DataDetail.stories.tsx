@@ -1,5 +1,5 @@
 import React from 'react'
-import { DataDetail } from './'
+import { DataDetail } from './DataDetail'
 
 export default {
     title: 'Components/DataDetail',

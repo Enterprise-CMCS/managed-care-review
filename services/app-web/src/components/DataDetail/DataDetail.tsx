@@ -1,7 +1,7 @@
 import React from 'react'
 import styles from './DataDetail.module.scss'
 
-export type DataDetailProps = {
+type DataDetailProps = {
     id: string
     label: string
     data: React.ReactNode
