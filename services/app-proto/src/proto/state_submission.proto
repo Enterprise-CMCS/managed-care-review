@@ -1,19 +1,21 @@
 syntax = "proto3";
 package statesubmission;
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/timestamp.proto";
 
 message StateSubmissionInfo {
   string id = 1;
   google.protobuf.Timestamp created_at = 2;
   google.protobuf.Timestamp updated_at = 3;
-  StateCode state_code = 4;
-  repeated string program_ids = 5;
-  string submission_name = 6;
-  SubmissionType submission_type = 7;
-  string submission_description = 8;
-  repeated Contact state_contacts = 9;
-  ContractInfo contract_info = 10;
-  repeated Document documents = 11;
+  SubmissionStatus submission_status = 4;
+  StateCode state_code = 5;
+  int32 state_number = 6;
+  repeated string program_ids = 7;
+  SubmissionType submission_type = 8;
+  string submission_description = 9;
+  repeated Contact state_contacts = 10;
+  ContractInfo contract_info = 11;
+  repeated Document documents = 12;
 
   repeated RateInfo rate_infos = 50;
 }
@@ -24,6 +26,13 @@ enum SubmissionType {
   SUBMISSION_TYPE_CONTRACT_ONLY = 1; 
   SUBMISSION_TYPE_CONTRACT_AND_RATES = 3;
 }
+
+enum SubmissionStatus{
+  SUBMISSION_STATUS_UNSPECIFIED = 0; 
+  SUBMISSION_STATUS_DRAFT = 1; 
+  SUBMISSION_STATUS_SUBMITTED = 2;
+}
+
 
 message Contact {
   string name = 1;

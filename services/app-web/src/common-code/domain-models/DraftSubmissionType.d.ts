@@ -34,9 +34,7 @@ type ActuarialFirmType =
     | 'STATE_IN_HOUSE'
     | 'OTHER'
 
-type ActuaryCommunicationType =
-    | 'OACT_TO_ACTUARY'
-    | 'OACT_TO_STATE'
+type ActuaryCommunicationType = 'OACT_TO_ACTUARY' | 'OACT_TO_STATE'
 
 type FederalAuthority =
     | 'STATE_PLAN'
@@ -86,14 +84,14 @@ export type AmendableItems = typeof AMENDABLE_ITEMS[number]
 // MAIN
 type DraftSubmissionType = {
     id: string
+    createdAt: Date
+    updatedAt: DateTime
     status: 'DRAFT'
     stateCode: string
     stateNumber: number
     programID: string
-    submissionDescription: string
     submissionType: SubmissionType
-    createdAt: Date
-    updatedAt: DateTime
+    submissionDescription: string
     stateContacts: StateContact[]
     actuaryContacts: ActuaryContact[]
     actuaryCommunicationPreference?: ActuaryCommunicationType
