@@ -60,7 +60,7 @@ jobs:
           serverless deploy --stage $STAGE_PREFIX$branch_name
 
   deploy:
-    needs: [build-prisma-client-lambda-layer]
+    needs: [build-prisma-client-lambda-layer, deploy-postgres]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4
