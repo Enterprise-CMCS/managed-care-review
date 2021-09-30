@@ -59,7 +59,7 @@ const toProtoBuffer = (domainData: DraftSubmissionType): Uint8Array => {
     const { contractAmendmentInfo, rateAmendmentInfo } = domainData
 
     const literalMessage: statesubmission.IStateSubmissionInfo = {
-        ...domainData,
+        ...domainData, // For this conversion, we  can spread unnecessary fields because protobuf discards of them
         createdAt: domainDateTimeToProto(domainData.createdAt),
         updatedAt: domainDateTimeToProto(domainData.updatedAt),
         submissionType: domainEnumToProto<statesubmission.SubmissionType>(
