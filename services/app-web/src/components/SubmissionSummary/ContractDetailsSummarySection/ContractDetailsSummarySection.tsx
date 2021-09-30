@@ -17,38 +17,38 @@ export type ContractDetailsSummarySectionProps = {
     navigateTo?: string
 }
 
+const createCheckboxList = ({
+    list,
+    dict,
+    otherReasons = [],
+}: {
+    list: string[] // Checkbox field array
+    dict: Record<string, string> // A lang constant dictionary like ManagedCareEntityRecord or FederalAuthorityRecord,
+    otherReasons?: (string | null)[] // additional "Other" text values
+}) => {
+    const userFriendlyList = list.map((item) => {
+        return dict[item] ? dict[item] : null
+    })
+
+    const listToDisplay = otherReasons
+        ? userFriendlyList.concat(otherReasons)
+        : userFriendlyList
+
+    return (
+        <ul>
+            {listToDisplay.map((item) => (
+                // TODO: protect from nulls?
+                <li key={item}>{item}</li>
+            ))}
+        </ul>
+    )
+}
+
 export const ContractDetailsSummarySection = ({
     submission,
     navigateTo,
 }: ContractDetailsSummarySectionProps): React.ReactElement => {
     // Array of values from a checkbox field is displayed in an unordered list
-    // TODO: create component if used elsewhere?
-    const createCheckboxList = ({
-        list,
-        dict,
-        otherReasons = [],
-    }: {
-        list: string[] // Checkbox field array
-        dict: Record<string, string> // A lang constant dictionary like ManagedCareEntityRecord or FederalAuthorityRecord,
-        otherReasons?: (string | null)[] // additional "Other" text values
-    }) => {
-        const userFriendlyList = list.map((item) => {
-            return dict[item] ? dict[item] : null
-        })
-
-        const listToDisplay = otherReasons
-            ? userFriendlyList.concat(otherReasons)
-            : userFriendlyList
-
-        return (
-            <ul>
-                {listToDisplay.map((item) => (
-                    // TODO: protect from nulls?
-                    <li key={item}>{item}</li>
-                ))}
-            </ul>
-        )
-    }
 
     const capitationRateChangeReason = (): string | null => {
         const { reason, otherReason } =
