@@ -31,7 +31,7 @@ jobs:
       # Generate Prisma Client and binary that can run in a lambda environment
       - name: Prepare prisma client
         working-directory: services/app-api
-        run: yarn PRISMA_BINARY_TARGET=rhel-openssl-1.0.x prisma generate
+        run: PRISMA_BINARY_TARGET=rhel-openssl-1.0.x yarn prisma generate
 
       - name: Prepare "@prisma/client" lambda layer
         working-directory: services/app-api
