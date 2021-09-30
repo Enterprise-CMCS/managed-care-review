@@ -55,8 +55,9 @@ describe('SubmissionTypeSummarySection', () => {
         expect(
             screen.getByRole('definition', { name: 'Program' })
         ).toBeInTheDocument()
-        // Why is the name of the element not Submission type
-        // expect(screen.getByRole('definitions', { name: 'Submission type' })).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', { name: 'Submission type' })
+        ).toBeInTheDocument()
         expect(
             screen.getByRole('definition', { name: 'Submission description' })
         ).toBeInTheDocument()
