@@ -5,7 +5,6 @@ set -e
 stage=${1:-dev}
 
 services=(
-  'postgres'
   'database'
   'uploads'
   'app-api'

@@ -42,6 +42,23 @@ jobs:
           name: lambda-layers-prisma-client
           path: ./services/app-api/lambda-layers-prisma-client
 
+  deploy-postgres:
+    name: deploy postgres aurora
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: set branch_name
+        run: |
+          echo "branch_name=$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
+
+      - name: deploy aurora
+        id: deploy-aurora
+        working-directory: services/app-api
+        run: |
+          serverless deploy --stage $STAGE_PREFIX$branch_name
+
   deploy:
     needs: [build-prisma-client-lambda-layer]
     runs-on: ubuntu-latest
