@@ -4,6 +4,10 @@ import { DataDetail } from './'
 export default {
     title: 'Components/DataDetail',
     component: DataDetail,
+    parameters: {
+        componentSubtitle:
+            'DataDetail displays definition terms and descriptions using semantic HTML. This is useful for summarizing static data.',
+    },
 }
 
 export const WithString = (): React.ReactElement => (
