@@ -53,11 +53,22 @@ jobs:
         run: |
           echo "branch_name=$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
 
+      - name: set variable values
+        run: ./.github/build_vars.sh set_values
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_ACCESS_KEY_ID] || secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_SECRET_ACCESS_KEY] || secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_DEFAULT_REGION] || secrets.AWS_DEFAULT_REGION }}
+
+      - name: Install packages
+        working-directory: services/app-api
+        run: yarn --frozen-lockfile
+
       - name: deploy aurora
         id: deploy-aurora
         working-directory: services/app-api
         run: |
-          serverless deploy --stage $STAGE_PREFIX$branch_name
+          yarn run serverless deploy --stage $STAGE_PREFIX$branch_name
 
   deploy:
     needs: [build-prisma-client-lambda-layer, deploy-postgres]
