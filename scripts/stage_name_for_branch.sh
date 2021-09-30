@@ -8,18 +8,21 @@
 # Additionaly, AWS Aurora does not allow for _ or - in database names
 
 # 1. Only lowercase alphanumeric characters
-# 2. Minimum of 3 characters and maximum of 30
+# 2. Minimum of 3 characters and maximum of 23
 # 3. First character must be a letter, cannot end with a hyphen or contain two consecutive hyphens
 
 # Rule 2 is a little more constricted than the docs above indicate. Since we generate a bunch of resource names based on the stage prefix, the max overall length is 63 characters, so our actual stage minimum is going to be 30 chars. Any longer and we will truncate.
 
-# I picked 30 based on these two errors:
+# We originally picked 30 based on these two errors:
 # this was a lambda name I think
 # stream-functions-jf-items-amended-definitions-help-emailSubmitter <= 64
 # 33 branch -> 65 resource
 # this was a userpooldomain
 # jf-contract-rate-details-reorder-login-5ct1nomca6uri0lab4dif4a702  <= 63
 # 32 branch -> 65 resource
+
+# We had to turn that down to 23 because the quickstart team's IAM plugin adds a role to stream-functions that creates:
+# stream-functions-dependabotnpmandyarntypea717e-us-east-1-lambdaRole == 67
 
 # *If you make changes to this script* please run the test file by running ./stage_name_for_branch_test.js
 
@@ -59,7 +62,7 @@ branch_name=$(echo "$branch_name" | awk '{print tolower($0)}')
 >&2 echo "down $branch_name"
 
 # If it's too long, chop off the end and replace it with a hash of the whole thing
-if [ ${#branch_name} -gt 30 ]; then
+if [ ${#branch_name} -gt 23 ]; then
 
     # macOS and Linux use different programs to calculate hashes
     shabin=sha1sum
@@ -71,7 +74,7 @@ if [ ${#branch_name} -gt 30 ]; then
 
     >&2 echo "hash $branch_hash"
 
-    branch_name="${branch_name:0:24}${branch_hash:0:5}"
+    branch_name="${branch_name:0:18}${branch_hash:0:5}"
 
     >&2 echo "combined $branch_name"
 
