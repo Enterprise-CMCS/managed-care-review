@@ -17,8 +17,10 @@ describe('review and submit', () => {
             // Navigate to review and submit page
             cy.visit(`/submissions/${draftSubmissionId}/review-and-submit`)
 
+            // Submitted and Last updated dates should not appear
+            // (should only appear on Submission Summary)
+            cy.findByText('Submitted').should('not.exist')
             cy.findByText('Last updated').should('not.exist')
-            cy.findByText('Rate details').should('not.exist')
 
             // Navigate to dashboard page by clicking save as draft
             cy.findByRole('link', { name: /Save as draft/ }).click()
