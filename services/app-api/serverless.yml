@@ -37,7 +37,7 @@ custom:
     excludeRegex: 'darwin|debian'
     packagerOptions:
       scripts:
-        - npx prisma generate
+        - PRISMA_BINARY_TARGET=rhel-openssl-1.0.x npx prisma generate
   serverlessTerminationProtection:
     stages:
       - dev
@@ -100,6 +100,10 @@ provider:
     REACT_APP_AUTH_MODE: ${self:custom.reactAppAuthMode}
     SECRETS_MANAGER_SECRET: ${self:custom.secretsManagerSecret}
 
+layers:
+  PrismaClient:
+    path: lambda-layers-prisma-client
+
 functions:
   health:
     handler: handlers/health_check.main
@@ -151,6 +155,8 @@ functions:
       securityGroupIds:
         - ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
+    layers:
+      - { Ref: PrismaClient }
 
 resources:
   Resources:
