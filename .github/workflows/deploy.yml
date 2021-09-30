@@ -142,8 +142,11 @@ jobs:
         uses: cypress-io/github-action@v2
         with:
           config: baseUrl=${{env.APPLICATION_ENDPOINT}}
+          record: true
         env:
           DEBUG: 'cypress:*'
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload cypress screenshots
         uses: actions/upload-artifact@v2.2.4
