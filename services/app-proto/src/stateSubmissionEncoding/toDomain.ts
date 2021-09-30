@@ -8,25 +8,27 @@ type GenericSubmissionType = DraftSubmissionType | StateSubmissionType
 /*
     Convert proto timestamp to domain date
 */
-const protoDateTimeToDomain = (
+const protoTimestampToDomain = (
     protoDateTime: statesubmission.IStateSubmissionInfo['createdAt']
 ): Date => {
-    return new Date()
+    return protoDateTime
 }
 
 /*
     Convert proto date string to domain data string
 */
-const protoDateStringToDomain = (protoDate: Date): string => {
-    return '01-01-1000'
+const protoDateToDomain = (protoDate: statesubmission.Date): Date => {
+    return new Date(protoDate.year, protoDate.month, protoDate.day)
 }
 /*
     Convert proto enum (e.g. SUBMISSION_TYPE_CONTRACT_ONLY) to domain enum (e.g. CONTRACT_ONLY)
 */
-function protoEnumToDomain<T>(defaultProtoValue: string, protoEnum: string): T {
+function protoEnumToDomain(
+    defaultProtoValue: string,
+    protoEnum: string
+): string {
     const protoEnumString = removeEnumPrefix(defaultProtoValue, protoEnum)
-
-    return protoEnumString as unknown as T
+    return protoEnumString
 }
 
 /*
@@ -50,9 +52,8 @@ function removeEnumPrefix(defaultValue: string, protoEnum: string): string {
     const prefix = defaultValue.substring(0, lastUnderscoreIndex)
     return protoEnum.replace(prefix, '')
 }
-const toDomain = (
-    buff: Uint8Array
-): GenericSubmissionType | StateSubmissionType => {
+// TO CONSIDER: determine what type we have - draft submission or state submission and construct accordingly
+const toDomain = (buff: Uint8Array): DraftSubmissionType | Error => {
     const stateSubmissionMessage =
         statesubmission.StateSubmissionInfo.decode(buff)
 
@@ -71,37 +72,46 @@ const toDomain = (
         documents,
         rateInfos,
     } = stateSubmissionMessage
-    const domainModel: GenericSubmissionType = {
+    const domainModel: DraftSubmissionType = {
         id: id,
-        status: submissionStatus,
-        createdAt: protoDateTimeToDomain(createdAt),
-        updatedAt: protoDateTimeToDomain(updatedAt),
-        submissionType: protoEnumToDomain<
-            GenericSubmissionType['submissionType']
-        >(
+        // status:
+        //     submissionStatus ===
+        //     statesubmission.SubmissionStatus.SUBMISSION_STATUS_DRAFT
+        //         ? 'DRAFT'
+        //         : 'SUBMITTED',
+        createdAt: protoDateToDomain(createdAt),
+        updatedAt: protoTimestampToDomain(updatedAt),
+        submissionType: protoEnumToDomain(
             statesubmission.SubmissionType[0],
-            submissionType as unknown as string // type coercion bc we know these fields cannot be undefined
-        ),
+            statesubmission.SubmissionType[submissionType]
+        ) as DraftSubmissionType['submissionType'],
 
-        stateCode: protoEnumToDomain<GenericSubmissionType['stateCode']>(
+        stateCode: protoEnumToDomain(
             statesubmission.StateCode[0],
-            stateCode as unknown as string // type coercion bc we know these fields cannot be undefined
-        ),
+            statesubmission.StateCode[stateCode]
+        ) as DraftSubmissionType['stateCode'],
         submissionDescription: submissionDescription,
 
         contractType: stateSubmissionMessage?.contractInfo?.contractType
-            ? protoEnumToDomain<GenericSubmissionType['contractType']>(
+            ? (protoEnumToDomain(
                   statesubmission.ContractType[0],
-                  stateSubmissionMessage?.contractInfo?.contractType
-              )
+                  statesubmission.ContractType[
+                      stateSubmissionMessage.contractInfo.contractType
+                  ]
+              ) as DraftSubmissionType['contractType'])
             : undefined,
 
-        contractDateStart: protoDateStringToDomain(
-            stateSubmissionMessage?.contractInfo?.contractDateStart
-        ),
-        contractDateEnd: protoDateStringToDomain(
-            stateSubmissionMessage?.contractInfo?.contractDateEnd
-        ),
+        contractDateStart: stateSubmissionMessage?.contractInfo
+            ?.contractDateStart
+            ? protoDateToDomain(
+                  stateSubmissionMessage.contractInfo.contractDateStart
+              )
+            : undefined,
+        contractDateEnd: stateSubmissionMessage?.contractInfo?.contractDateEnd
+            ? protoDateToDomain(
+                  stateSubmissionMessage.contractInfo.contractDateEnd
+              )
+            : undefined,
         managedCareEntities: stateSubmissionMessage?.contractInfo
             ?.managedCareEntities
             ? protoEnumArrayToDomain<statesubmission.ManagedCareEntity>(
@@ -116,59 +126,77 @@ const toDomain = (
                   stateSubmissionMessage?.contractInfo?.federalAuthorities
               )
             : [],
-        contractAmendmentInfo: {
-            ...contractAmendmentInfo,
-            amendableItems: contractAmendmentInfo?.itemsBeingAmended
-                ? protoEnumArrayToDomain<statesubmission.AmendedItem>(
-                      'amendableItems',
-                      contractAmendmentInfo?.itemsBeingAmended
-                  )
-                : undefined,
-            capitationRatesAmendedInfo: {
-                ...contractAmendmentInfo?.capitationRatesAmendedInfo,
-                reason: contractAmendmentInfo?.capitationRatesAmendedInfo
-                    ?.reason
-                    ? protoEnumToDomain<statesubmission.CapitationRateAmendmentReason>(
-                          'capitationRateAmendmentReason',
-                          contractAmendmentInfo?.capitationRatesAmendedInfo
-                              ?.reason
-                      )
-                    : undefined,
-            },
-        },
 
         // TO DO -  MAP THROUGH WHATEVER IS IN RATE INFO
-        rateInfos: [
-            {
-                rateType: stateSubmissionMessage.rateType
-                    ? protoEnumToDomain<statesubmission.RateType>(
-                          statesubmission.RateType[0],
-                          stateSubmissionMessage.rateType
-                      )
-                    : undefined,
-                actuaryContacts: stateSubmissionMessage.actuaryContacts
-                    ? stateSubmissionMessage.actuaryContacts.map((contact) => {
-                          return {
-                              ...contact,
-                              actuaryCommunicationType: protoEnumToDomain<
-                                  statesubmission.RateInfo['actuaryCommunicationPreference']
-                              >(
-                                  statesubmission.ActuaryCommunicationType[0],
-                                  contact.actuarialFirm || ''
-                              ),
-                          }
-                      }) || []
-                    : undefined,
-                actuaryCommunicationPreference:
-                    stateSubmissionMessage.actuaryCommunicationPreference
-                        ? protoEnumToDomain<statesubmission.ActuaryCommunicationType>(
-                              statesubmission.ActuaryCommunicationType[0],
-                              stateSubmissionMessage.actuaryCommunicationPreference
-                          )
-                        : undefined,
-                ...rateAmendmentInfo,
-            },
-        ],
+        // rateInfos: [
+        //     {
+        //         rateType: stateSubmissionMessage.rateType
+        //             ? protoEnumToDomain<statesubmission.RateType>(
+        //                   statesubmission.RateType[0],
+        //                   stateSubmissionMessage.rateType
+        //               )
+        //             : undefined,
+        //         actuaryContacts: stateSubmissionMessage.actuaryContacts
+        //             ? stateSubmissionMessage.actuaryContacts.map((contact) => {
+        //                   return {
+        //                       ...contact,
+        //                       actuaryCommunicationType: protoEnumToDomain<
+        //                           statesubmission.RateInfo['actuaryCommunicationPreference']
+        //                       >(
+        //                           statesubmission.ActuaryCommunicationType[0],
+        //                           contact.actuarialFirm || ''
+        //                       ),
+        //                   }
+        //               }) || []
+        //             : undefined,
+        //         actuaryCommunicationPreference:
+        //             stateSubmissionMessage.actuaryCommunicationPreference
+        //                 ? protoEnumToDomain<statesubmission.ActuaryCommunicationType>(
+        //                       statesubmission.ActuaryCommunicationType[0],
+        //                       stateSubmissionMessage.actuaryCommunicationPreference
+        //                   )
+        //                 : undefined,
+        //         ...rateAmendmentInfo,
+        //     },
+        // ],
+    }
+
+    if (domainModel.contractType == 'AMENDMENT') {
+        if (
+            stateSubmissionMessage.contractAmendmentInfo.relatedToCovid_19 ==
+                null &&
+            stateSubmissionMessage.contractAmendmentInfo.relatedToVaccination ==
+                null
+        )
+            return new Error('Contract amended info')
+
+        domainModel.contractAmendmentInfo = {
+            // itemsBeingAmended: statesubmission.contractAmendmentInfo
+            //     ?.itemsBeingAmended
+            //     ? protoEnumArrayToDomain<statesubmission.AmendedItem>(
+            //           'amendableItems',
+            //           statesubmission.contractAmendmentInfo?.itemsBeingAmend
+            //       )
+            //     : undefined,
+            // otherItemBeingAmended
+            // capitationRatesAmendedInfo: {
+            //     ...contractAmendmentInfo?.capitationRatesAmendedInfo,
+            //     reason: contractAmendmentInfo?.capitationRatesAmendedInfo
+            //         ?.reason
+            //         ? protoEnumToDomain<statesubmission.CapitationRateAmendmentReason>(
+            //               'capitationRateAmendmentReason',
+            //               contractAmendmentInfo?.capitationRatesAmendedInfo
+            //                   ?.reason
+            //           )
+            //         : undefined,
+            //         otherReason:
+            // },
+            relatedToCovid19:
+                stateSubmissionMessage.contractAmendmentInfo.relatedToCovid_19,
+            relatedToVaccination:
+                stateSubmissionMessage.contractAmendmentInfo
+                    .relatedToVaccination,
+        }
     }
 
     return domainModel

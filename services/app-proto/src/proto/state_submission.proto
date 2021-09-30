@@ -1,7 +1,6 @@
 syntax = "proto3";
 package statesubmission;
 import "google/protobuf/timestamp.proto";
-import "google/protobuf/timestamp.proto";
 
 message StateSubmissionInfo {
   string id = 1;
@@ -27,6 +26,21 @@ enum SubmissionType {
   SUBMISSION_TYPE_CONTRACT_AND_RATES = 3;
 }
 
+message Date {
+  // Year of the date. Must be from 1 to 9999, or 0 to specify a date without
+  // a year.
+  int32 year = 1;
+
+  // Month of a year. Must be from 1 to 12, or 0 to specify a year without a
+  // month and day.
+  int32 month = 2;
+
+  // Day of a month. Must be from 1 to 31 and valid for the year and month, or 0
+  // to specify a year by itself or a year and month where the day isn't
+  // significant.
+  int32 day = 3;
+}
+
 enum SubmissionStatus{
   SUBMISSION_STATUS_UNSPECIFIED = 0; 
   SUBMISSION_STATUS_DRAFT = 1; 
@@ -43,8 +57,8 @@ message Contact {
 /// ContractInfo subtypes
 message ContractInfo {
   ContractType contract_type = 1;
-  string contract_date_start = 2;
-  string contract_date_end = 3;
+  Date contract_date_start = 2;
+  Date contract_date_end = 3;
   repeated ManagedCareEntity managed_care_entities = 4;
   repeated FederalAuthority federal_authorities = 5;
 
@@ -124,9 +138,9 @@ enum ManagedCareEntity {
 message RateInfo {
   string id = 1;
   RateType rate_type = 2;
-  string rate_date_start = 3;
-  string rate_date_end = 4;
-  string rate_date_certified = 5;
+  Date rate_date_start = 3;
+  Date rate_date_end = 4;
+  Date rate_date_certified = 5;
   repeated ActuaryContact actuary_contacts = 6;
   ActuaryCommunicationType actuary_communication_preference = 7;
     
@@ -139,8 +153,8 @@ message RateInfo {
   }
 
   message RateAmendmentInfo {
-    string effective_date_start = 1;
-    string effective_date_end = 2;
+    Date effective_date_start = 1;
+    Date effective_date_end = 2;
   }
 }
 /// Rate related enums
