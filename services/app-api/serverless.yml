@@ -34,9 +34,7 @@ custom:
     webpackConfig: 'webpack.config.js'
     packager: 'yarn'
     includeModules: true
-    packagerOptions:
-      scripts:
-        - PRISMA_BINARY_TARGET=rhel-openssl-1.0.x npx prisma generate
+    excludeRegex: 'darwin|debian'
   serverlessTerminationProtection:
     stages:
       - dev
