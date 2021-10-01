@@ -81,26 +81,26 @@ jobs:
       - name: set path
         run: |
           echo "PATH=$(pwd)/node_modules/.bin/:$PATH" >> $GITHUB_ENV
-      - name: Unit Tests
-        run: ./dev test --unit --run-db
-      - name: publish code coverage
-        uses: paambaati/codeclimate-action@v2.7.5
-        env:
-          CC_TEST_REPORTER_ID: 364fbdd9d65e41f3ed5f70b6a295f5f76f7288a3930e738b010cad0c218df37c
-        with:
-          debug: true
-          coverageLocations: |
-            ${{github.workspace}}/services/app-api/coverage/lcov.info:lcov
-            ${{github.workspace}}/services/app-web/coverage/lcov.info:lcov
+      # # - name: Unit Tests
+      # #   run: ./dev test --unit --run-db
+      # # - name: publish code coverage
+      # #   uses: paambaati/codeclimate-action@v2.7.5
+      # #   env:
+      # #     CC_TEST_REPORTER_ID: 364fbdd9d65e41f3ed5f70b6a295f5f76f7288a3930e738b010cad0c218df37c
+      # #   with:
+      # #     debug: true
+      # #     coverageLocations: |
+      # #       ${{github.workspace}}/services/app-api/coverage/lcov.info:lcov
+      # #       ${{github.workspace}}/services/app-web/coverage/lcov.info:lcov
 
-      - uses: chrnorm/deployment-action@releases/v1
-        name: Create GitHub deployment
-        id: ghdeployment
-        with:
-          token: '${{ github.token }}'
-          environment: review-apps
-          description: stack ${{ env.branch_name }}
-          initial_status: in_progress
+      # - uses: chrnorm/deployment-action@releases/v1
+      #   name: Create GitHub deployment
+      #   id: ghdeployment
+      #   with:
+      #     token: '${{ github.token }}'
+      #     environment: review-apps
+      #     description: stack ${{ env.branch_name }}
+      #     initial_status: in_progress
 
       - name: deploy
         id: deploy

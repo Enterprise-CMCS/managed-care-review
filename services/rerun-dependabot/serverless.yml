@@ -7,40 +7,21 @@ plugins:
   - serverless-plugin-scripts
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
-  # - serverless-iam-helper
+  - serverless-iam-helper
 
 provider:
   name: aws
   runtime: python3.7
   region: us-east-1
-  # iam:
-  #   role:
-  #     path: ${self:custom.iamPath}
-  #     permissionsBoundary: ${self:custom.iamPermissionsBoundaryPolicy}
-  #     statements:
-  #       - Effect: 'Allow'
-  #         Action:
-  #           - secretsmanager:DescribeSecret
-  #           - secretsmanager:GetSecretValue
-  #           - secretsmanager:PutSecretValue
-  #           - secretsmanager:UpdateSecretVersionStage
-  #         Resource: '*'
-  #         Condition:
-  #           StringEquals:
-  #             'secretsmanager:resource/AllowRotationLambdaArn': '${self:custom.rotatorArn}'
-  #       - Effect: Allow
-  #         Action:
-  #           - secretsmanager:GetRandomPassword
-  #         Resource: '*'
-  #       - Effect: Allow
-  #         Action:
-  #           - ec2:CreateNetworkInterface
-  #           - ec2:DeleteNetworkInterface
-  #           - ec2:DescribeNetworkInterfaces
-  #         Resource: '*'
+  iam:
+    role:
+      path: ${self:custom.iamPath}
+      permissionsBoundary: ${self:custom.iamPermissionsBoundaryPolicy}
 
 custom:
   stage: ${opt:stage, self:provider.stage}
+  iamPath: ${env:IAM_PATH, "/"}
+  iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
   serverlessTerminationProtection:
     stages:
       - dev
