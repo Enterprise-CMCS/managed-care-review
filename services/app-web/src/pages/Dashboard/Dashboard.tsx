@@ -6,8 +6,8 @@ import { NavLink, useLocation } from 'react-router-dom'
 import styles from './Dashboard.module.scss'
 
 import { Loading } from '../../components/Loading'
-import { Tabs } from '../../components/Tabs/Tabs'
-import { TabPanel } from '../../components/Tabs/TabPanel'
+import { Tabs } from '../../components/Tabs'
+import { TabPanel } from '../../components/Tabs'
 import {
     SubmissionCard,
     SubmissionStatus,
