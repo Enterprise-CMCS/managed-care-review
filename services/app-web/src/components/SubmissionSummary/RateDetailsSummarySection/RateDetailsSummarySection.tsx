@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import styles from '../SubmissionSummary.module.scss'
-import { SectionHeader } from '../../SectionHeader/SectionHeader'
+import { SectionHeader } from '../../SectionHeader'
 import { DataDetail } from '../../DataDetail'
 import { DoubleColumnRow } from '../../DoubleColumnRow'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
