@@ -76,6 +76,8 @@ jobs:
           AWS_DEFAULT_REGION: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_DEFAULT_REGION] || secrets.AWS_DEFAULT_REGION }}
           DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
           REACT_APP_AUTH_MODE: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_REACT_APP_AUTH_MODE] || secrets.REACT_APP_AUTH_MODE }}
+          IAM_PATH: ${{ secrets.IAM_PATH }}
+          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY] || secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
 
       - name: Generate graphql
         run: ./dev generate
