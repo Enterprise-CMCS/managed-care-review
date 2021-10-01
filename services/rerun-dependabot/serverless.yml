@@ -47,6 +47,13 @@ custom:
       - val
       - prod
       - main
+  scripts:
+    hooks:
+      # curl down the artifacts for deployment
+      package:initialize: |
+        echo "Curling Down lambda-dependabot"
+        curl -L https://github.com/trussworks/lambda-dependabot/releases/download/v0.0.1/lambda-dependabot.zip --output lambda-dependabot.zip
+        curl -L https://github.com/trussworks/lambda-dependabot/releases/download/v0.0.1/pygh-layer.zip --output pygh-layer.zip
 
 package:
   individually: true
@@ -73,11 +80,3 @@ functions:
       FOO: bar
     package:
       artifact: lambda-dependabot.zip
-
-scripts:
-  hooks:
-    # curl down the artifacts for deployment
-    package:initialize: |
-      echo "Curling Down lambda-dependabot"
-      curl -L https://github.com/trussworks/lambda-dependabot/releases/download/v0.0.1/lambda-dependabot.zip --output lambda-dependabot.zip
-      curl -L https://github.com/trussworks/lambda-dependabot/releases/download/v0.0.1/pygh-layer.zip --output pygh-layer.zip
