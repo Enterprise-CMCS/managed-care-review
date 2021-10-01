@@ -1,0 +1,12 @@
+{
+    "name": "rerun-dependabot",
+    "version": "1.0.0",
+    "description": "a lambda that reruns dependabot actions that failed for lack of secrets",
+    "main": "index.js",
+    "license": "CC0-1.0",
+    "private": false,
+    "devDependencies": {
+        "serverless": "^2.60.3",
+        "serverless-stack-termination-protection": "^1.0.4"
+    }
+}

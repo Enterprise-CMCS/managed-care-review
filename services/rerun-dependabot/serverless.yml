@@ -1,0 +1,74 @@
+service: postgres
+variablesResolutionMode: 20210326
+
+frameworkVersion: '2'
+
+plugins:
+  - serverless-stack-termination-protection
+  - serverless-s3-bucket-helper
+  # - serverless-iam-helper
+
+provider:
+  name: aws
+  runtime: python3.7
+  region: us-east-1
+  # iam:
+  #   role:
+  #     path: ${self:custom.iamPath}
+  #     permissionsBoundary: ${self:custom.iamPermissionsBoundaryPolicy}
+  #     statements:
+  #       - Effect: 'Allow'
+  #         Action:
+  #           - secretsmanager:DescribeSecret
+  #           - secretsmanager:GetSecretValue
+  #           - secretsmanager:PutSecretValue
+  #           - secretsmanager:UpdateSecretVersionStage
+  #         Resource: '*'
+  #         Condition:
+  #           StringEquals:
+  #             'secretsmanager:resource/AllowRotationLambdaArn': '${self:custom.rotatorArn}'
+  #       - Effect: Allow
+  #         Action:
+  #           - secretsmanager:GetRandomPassword
+  #         Resource: '*'
+  #       - Effect: Allow
+  #         Action:
+  #           - ec2:CreateNetworkInterface
+  #           - ec2:DeleteNetworkInterface
+  #           - ec2:DescribeNetworkInterfaces
+  #         Resource: '*'
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  serverlessTerminationProtection:
+    stages:
+      - dev
+      - val
+      - prod
+      - main
+
+package:
+  individually: true
+
+layers:
+  pygithub:
+    package:
+      artifact: https://github.com/trussworks/lambda-dependabot/releases/download/v0.0.1/pygh-layer.zip
+
+functions:
+  rerun-dependabot:
+    runtime: python3.7
+    handler: lambda_function.lambda_handler
+    layers:
+      - { Ref: PygithubLambdaLayer }
+    events:
+      - schedule:
+          name: re-run dependabot event
+          description: 'time to check if there are dependabot prs to retry'
+          rate: rate(20 minutes)
+    description: Reruns dependabot github actions that fail for lack of secrets access
+    timeout: 30
+    environment:
+      FOO: bar
+    package:
+      artifact: https://github.com/trussworks/lambda-dependabot/releases/download/v0.0.1/lambda-dependabot.zip
