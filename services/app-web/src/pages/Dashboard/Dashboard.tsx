@@ -12,14 +12,14 @@ import {
     SubmissionCard,
     SubmissionStatus,
     SubmissionType,
-} from '../../components/SubmissionCard/SubmissionCard'
+} from '../../components/SubmissionCard'
 import { useAuth } from '../../contexts/AuthContext'
 import { MCRouterState } from '../../constants/routerState'
 import { Program, useIndexSubmissionsQuery } from '../../gen/gqlClient'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
 import { SubmissionType as DomainSubmissionType } from '../../../../app-web/src/common-code/domain-models'
 
-// The SubmissionCard uses some enums, which I think might be a storybook think but I haven't looked too deeply in it
+// The SubmissionCard uses some enums, which I think might be a storybook thing but I haven't looked too deeply in it
 // so we map our types to the enums.
 const domainSubmissionTypeMap: {
     [Property in DomainSubmissionType]: SubmissionType
