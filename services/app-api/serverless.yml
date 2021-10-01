@@ -100,7 +100,7 @@ provider:
     SECRETS_MANAGER_SECRET: ${self:custom.secretsManagerSecret}
 
 layers:
-  PrismaClient:
+  prismaClient:
     path: lambda-layers-prisma-client
 
 functions:
