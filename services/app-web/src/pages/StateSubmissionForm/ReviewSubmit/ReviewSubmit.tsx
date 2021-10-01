@@ -9,7 +9,7 @@ import {
 import { NavLink, useHistory } from 'react-router-dom'
 import styles from './ReviewSubmit.module.scss'
 import stylesForm from '../StateSubmissionForm.module.scss'
-import { Dialog } from '../../../components/Dialog/Dialog'
+import { Dialog } from '../../../components/Dialog'
 import {
     SubmissionTypeSummarySection,
     ContractDetailsSummarySection,
