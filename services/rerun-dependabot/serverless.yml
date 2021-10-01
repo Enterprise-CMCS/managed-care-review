@@ -52,7 +52,7 @@ functions:
       - { Ref: PygithubLambdaLayer }
     events:
       - schedule:
-          name: re-run dependabot event
+          name: re-run-dependabot-event
           description: 'time to check if there are dependabot prs to retry'
           rate: rate(20 minutes)
     description: Reruns dependabot github actions that fail for lack of secrets access
