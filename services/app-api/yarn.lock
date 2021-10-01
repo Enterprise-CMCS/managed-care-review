@@ -8207,6 +8207,12 @@ serverless-dotenv-plugin@^3.9.0:
     dotenv "^8.2.0"
     dotenv-expand "^5.1.0"
 
+serverless-iam-helper@CMSgov/serverless-iam-helper:
+  version "1.0.0"
+  resolved "https://codeload.github.com/CMSgov/serverless-iam-helper/tar.gz/e51709dfbb9461c18712cc429f489504d543c4c7"
+  dependencies:
+    lodash "^4.17.21"
+
 serverless-offline@^8.0.0:
   version "8.0.0"
   resolved "https://registry.yarnpkg.com/serverless-offline/-/serverless-offline-8.0.0.tgz#66ffb69d8f631b096957b9cc657cc5c66600f1b8"
@@ -8241,6 +8247,10 @@ serverless-offline@^8.0.0:
     update-notifier "^5.0.1"
     velocityjs "^2.0.3"
     ws "^7.4.2"
+
+serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
+  version "1.0.0"
+  resolved "https://codeload.github.com/CMSgov/serverless-s3-bucket-helper/tar.gz/f0f6d6a1ffe54e292f0afc93777764bce16a4037"
 
 serverless-stack-termination-protection@^1.0.4:
   version "1.0.4"
