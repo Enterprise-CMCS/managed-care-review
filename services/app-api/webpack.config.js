@@ -18,7 +18,7 @@ module.exports = {
     performance: {
         hints: false,
     },
-    externals: [nodeExternals()],
+    externals: [nodeExternals(), 'aws-sdk'],
     devtool: 'source-map',
     resolve: {
         symlinks: false,
