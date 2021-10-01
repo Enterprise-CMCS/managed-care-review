@@ -44,6 +44,7 @@ jobs:
 
   deploy-app-api:
     name: deploy - app-api
+    needs: [build-prisma-client-lambda-layer]
     runs-on: ubuntu-18.04
     steps:
       - name: Check out repository
@@ -83,6 +84,16 @@ jobs:
         working-directory: services/app-api
         run: yarn --frozen-lockfile
 
+      - uses: actions/download-artifact@v2
+        with:
+          name: lambda-layers-prisma-client
+          path: ./services/app-api/lambda-layers-prisma-client
+
+      - name: Unzip prisma layer
+        run: |
+          tar -C ./services/app-api/lambda-layers-prisma-client -xf ./services/app-api/lambda-layers-prisma-client/nodejs.tar.gz
+          rm -rf ./services/app-api/lambda-layers-prisma-client/nodejs.tar.gz
+
       - name: deploy app-api
         id: deploy-app-api
         run: |
@@ -90,7 +101,7 @@ jobs:
 
   deploy:
     name: deploy - all
-    needs: [build-prisma-client-lambda-layer, deploy-app-api]
+    needs: [deploy-app-api]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4
@@ -182,16 +193,6 @@ jobs:
           environment: review-apps
           description: stack ${{ env.branch_name }}
           initial_status: in_progress
-
-      - uses: actions/download-artifact@v2
-        with:
-          name: lambda-layers-prisma-client
-          path: ./services/app-api/lambda-layers-prisma-client
-
-      - name: Unzip prisma layer
-        run: |
-          tar -C ./services/app-api/lambda-layers-prisma-client -xf ./services/app-api/lambda-layers-prisma-client/nodejs.tar.gz
-          rm -rf ./services/app-api/lambda-layers-prisma-client/nodejs.tar.gz
 
       - name: deploy
         id: deploy
