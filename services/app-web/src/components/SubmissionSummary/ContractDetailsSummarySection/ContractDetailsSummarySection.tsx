@@ -8,7 +8,7 @@ import {
     RateChangeReasonRecord,
     ManagedCareEntityRecord,
 } from '../../../constants/submissions'
-import { DataDetail } from '../../DataDetail/DataDetail'
+import { DataDetail } from '../../DataDetail'
 import { DoubleColumnRow } from '../../DoubleColumnRow/DoubleColumnRow'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 

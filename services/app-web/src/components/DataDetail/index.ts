@@ -1,0 +1,1 @@
+export { DataDetail } from './DataDetail'
