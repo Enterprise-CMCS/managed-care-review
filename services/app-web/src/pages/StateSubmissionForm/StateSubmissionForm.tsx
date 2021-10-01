@@ -7,7 +7,7 @@ import { Error404 } from '../Errors/Error404'
 import { ErrorInvalidSubmissionStatus } from '../Errors/ErrorInvalidSubmissionStatus'
 import { GenericError } from '../Errors/GenericError'
 import { Loading } from '../../components/Loading/'
-import { DynamicStepIndicator } from '../../components/DynamicStepIndicator/'
+import { DynamicStepIndicator } from '../../components/DynamicStepIndicator'
 import { usePage } from '../../contexts/PageContext'
 import {
     RoutesRecord,
