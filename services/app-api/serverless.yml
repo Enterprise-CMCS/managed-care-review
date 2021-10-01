@@ -155,7 +155,7 @@ functions:
         - ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
     layers:
-      - { Ref: PrismaClient }
+      - !Ref PrismaClientLambdaLayer
 
 resources:
   Resources:
