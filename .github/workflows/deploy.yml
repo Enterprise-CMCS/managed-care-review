@@ -49,6 +49,14 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v2
 
+      - name: read .nvmrc
+        id: node_version
+        run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
+
+      - uses: actions/setup-node@v2.4.0
+        with:
+          node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
+
       - name: set branch_name
         run: |
           echo "branch_name=$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
