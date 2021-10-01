@@ -7,6 +7,7 @@
     "private": false,
     "devDependencies": {
         "serverless": "^2.60.3",
+        "serverless-plugin-scripts": "^1.0.2",
         "serverless-stack-termination-protection": "^1.0.4"
     }
 }

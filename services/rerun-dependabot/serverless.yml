@@ -4,6 +4,7 @@ variablesResolutionMode: 20210326
 frameworkVersion: '2'
 
 plugins:
+  - serverless-plugin-scripts
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
   # - serverless-iam-helper
@@ -77,5 +78,6 @@ scripts:
   hooks:
     # curl down the artifacts for deployment
     package:initialize: |
+      echo "Curling Down lambda-dependabot"
       curl -L https://github.com/trussworks/lambda-dependabot/releases/download/v0.0.1/lambda-dependabot.zip --output lambda-dependabot.zip
       curl -L https://github.com/trussworks/lambda-dependabot/releases/download/v0.0.1/pygh-layer.zip --output pygh-layer.zip
