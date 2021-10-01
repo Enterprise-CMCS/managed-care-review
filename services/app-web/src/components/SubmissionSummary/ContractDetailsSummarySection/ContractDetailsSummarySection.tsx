@@ -9,7 +9,7 @@ import {
     ManagedCareEntityRecord,
 } from '../../../constants/submissions'
 import { DataDetail } from '../../DataDetail'
-import { DoubleColumnRow } from '../../DoubleColumnRow/DoubleColumnRow'
+import { DoubleColumnRow } from '../../DoubleColumnRow'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 
 export type ContractDetailsSummarySectionProps = {
