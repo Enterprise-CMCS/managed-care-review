@@ -10,7 +10,7 @@ on:
 
 jobs:
   build-prisma-client-lambda-layer:
-    name: build prisma layer
+    name: build - prisma layer
     runs-on: ubuntu-18.04
     steps:
       - name: Check out repository
@@ -43,7 +43,7 @@ jobs:
           path: ./services/app-api/lambda-layers-prisma-client
 
   deploy-postgres:
-    name: deploy postgres aurora
+    name: deploy - postgres aurora
     runs-on: ubuntu-18.04
     steps:
       - name: Check out repository
@@ -71,6 +71,7 @@ jobs:
           npx serverless deploy --stage $STAGE_PREFIX$branch_name
 
   deploy:
+    name: deploy - all
     needs: [build-prisma-client-lambda-layer, deploy-postgres]
     runs-on: ubuntu-latest
     steps:
