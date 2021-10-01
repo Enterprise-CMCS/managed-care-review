@@ -1,4 +1,4 @@
-service: postgres
+service: rerundependabot
 variablesResolutionMode: 20210326
 
 frameworkVersion: '2'
