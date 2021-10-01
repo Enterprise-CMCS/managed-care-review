@@ -3,7 +3,7 @@ import { GovBanner } from '@trussworks/react-uswds'
 import styles from './AppBody.module.scss'
 
 import { AppRoutes } from './AppRoutes'
-import { Footer } from '../../components/Footer/Footer'
+import { Footer } from '../../components/Footer'
 import { Header } from '../../components/Header/Header'
 import { Loading } from '../../components/Loading'
 
