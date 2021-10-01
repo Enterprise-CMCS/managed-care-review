@@ -7,10 +7,8 @@ import {
 } from '../../../testHelpers/apolloHelpers'
 
 describe('SubmissionTypeSummarySection', () => {
-    const draftSubmission = mockContractAndRatesDraft()
-    const stateSubmission = mockStateSubmission()
-
     it('can render draft submission without errors', () => {
+        const draftSubmission = mockContractAndRatesDraft()
         renderWithProviders(
             <SubmissionTypeSummarySection
                 submission={draftSubmission}
@@ -30,6 +28,7 @@ describe('SubmissionTypeSummarySection', () => {
     })
 
     it('can render state submission without errors', () => {
+        const stateSubmission = mockStateSubmission()
         renderWithProviders(
             <SubmissionTypeSummarySection submission={stateSubmission} />
         )
@@ -40,11 +39,11 @@ describe('SubmissionTypeSummarySection', () => {
                 name: stateSubmission.name,
             })
         ).toBeInTheDocument()
-        // Is this the best way to check that the link is not present?
-        expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+        expect(screen.queryByRole('link', { name: 'Edit' })).toBeNull()
     })
 
     it('can render all submission type fields', () => {
+        const draftSubmission = mockContractAndRatesDraft()
         renderWithProviders(
             <SubmissionTypeSummarySection
                 submission={draftSubmission}

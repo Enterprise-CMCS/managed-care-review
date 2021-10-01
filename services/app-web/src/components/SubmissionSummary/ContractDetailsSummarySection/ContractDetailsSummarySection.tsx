@@ -79,7 +79,7 @@ export const ContractDetailsSummarySection = ({
     }
 
     return (
-        <section id="contractDetails" className={styles.reviewSection}>
+        <section id="contractDetailsSection" className={styles.reviewSection}>
             <SectionHeader header="Contract details" navigateTo={navigateTo} />
             <dl>
                 <DoubleColumnRow
