@@ -42,8 +42,8 @@ jobs:
           name: lambda-layers-prisma-client
           path: ./services/app-api/lambda-layers-prisma-client
 
-  deploy-postgres:
-    name: deploy - postgres aurora
+  deploy-app-api:
+    name: deploy - app-api
     runs-on: ubuntu-18.04
     steps:
       - name: Check out repository
@@ -68,18 +68,21 @@ jobs:
           DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
           REACT_APP_AUTH_MODE: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_REACT_APP_AUTH_MODE] || secrets.REACT_APP_AUTH_MODE }}
 
+      - name: Generate graphql
+        run: ./dev generate
+
       - name: Install packages
         working-directory: services/app-api
         run: yarn --frozen-lockfile
 
-      - name: deploy aurora
-        id: deploy-aurora
+      - name: deploy app-api
+        id: deploy-app-api
         run: |
           pushd services/app-api && npx serverless deploy --stage $STAGE_PREFIX$branch_name
 
   deploy:
     name: deploy - all
-    needs: [build-prisma-client-lambda-layer, deploy-postgres]
+    needs: [build-prisma-client-lambda-layer, deploy-app-api]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4
