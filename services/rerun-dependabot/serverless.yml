@@ -46,7 +46,7 @@ layers:
 
 functions:
   rerun-dependabot:
-    runtime: python3.7
+    runtime: python3.8
     handler: lambda_function.lambda_handler
     layers:
       - { Ref: PygithubLambdaLayer }
