@@ -79,6 +79,19 @@ jobs:
           IAM_PATH: ${{ secrets.IAM_PATH }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY] || secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
 
+      - name: AWS Secrets Manager Action
+        uses: abhilash1in/aws-secrets-manager-action@v1.1.0
+        with:
+          aws-access-key-id: ${{  secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_ACCESS_KEY_ID] || secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{  secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_SECRET_ACCESS_KEY] || secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_DEFAULT_REGION] || secrets.AWS_DEFAULT_REGION }}
+          secrets: |
+            aurora_postgres_${branch_name}
+          parse_json: true
+
+      - name: Test - check if env variable is set after fetching secrets
+        run: if [ -z ${AURORA_POSTGRES_MTPRISMAINLAYER_ENGINE+x} ]; then echo "secret is unset"; else echo "secret is set to '$AURORA_POSTGRES_MTPRISMAINLAYER_ENGINE'"; fi
+
       - name: Generate graphql
         run: ./dev generate
 
