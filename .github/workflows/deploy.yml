@@ -362,6 +362,9 @@ jobs:
           description: stack ${{ env.branch_name }}
           initial_status: in_progress
 
+      - name: Generate graphql
+        run: ./dev generate
+
       - name: deploy
         id: deploy
         run: |
