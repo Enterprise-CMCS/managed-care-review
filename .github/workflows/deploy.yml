@@ -138,7 +138,7 @@ jobs:
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY] || secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
 
       - name: Install packages
-        working-directory: services/app-api
+        working-directory: services/postgres
         run: yarn --frozen-lockfile
 
       - name: deploy postgres
@@ -183,7 +183,7 @@ jobs:
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY] || secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
 
       - name: Install packages
-        working-directory: services/app-api
+        working-directory: services/database
         run: yarn --frozen-lockfile
 
       - name: deploy dynamodb
