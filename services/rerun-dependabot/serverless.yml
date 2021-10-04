@@ -60,7 +60,7 @@ functions:
     timeout: 30
     environment:
       GITHUB_ACTOR: dependabot[bot]
-      GITHUB_REPO: cmsgov/managed-care-review
+      GITHUB_REPO: CMSgov/managed-care-review
       GITHUB_TOKEN: ${self:custom.ghToken}
       WORKFLOW_NAME: Deploy
       JOB_NAME: deploy
