@@ -1,0 +1,8 @@
+name: 'Aurora Postgres URL'
+description: 'Creates an aurora connection string from secrets manager'
+outputs:
+  database_url:
+    description: 'Aurora URL to be used for a postgres connection'
+runs:
+  using: 'node12'
+  main: 'index.js'
