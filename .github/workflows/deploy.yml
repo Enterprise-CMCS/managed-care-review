@@ -87,7 +87,7 @@ jobs:
           aws-region: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_DEFAULT_REGION] || secrets.AWS_DEFAULT_REGION }}
           secrets: |
             aurora_postgres_${branch_name}
-          parse_json: true
+          parse-json: true
 
       - name: Test - check if env variable is set after fetching secrets
         run: if [ -z ${AURORA_POSTGRES_MTPRISMAINLAYER_ENGINE+x} ]; then echo "secret is unset"; else echo "secret is set to '$AURORA_POSTGRES_MTPRISMAINLAYER_ENGINE'"; fi
