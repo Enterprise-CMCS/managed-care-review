@@ -68,6 +68,7 @@ jobs:
           STAGE_PREFIX: ${{ secrets.STAGE_PREFIX }}
           DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
+          DEPENDABOT_BOT_TOKEN: ${{ secrets.DEPENDABOT_BOT_TOKEN }}
       - name: lock this branch to prevent concurrent builds
         run: ./.github/github-lock.sh
         env:
