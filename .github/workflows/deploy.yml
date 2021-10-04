@@ -193,7 +193,7 @@ jobs:
 
   deploy:
     name: deploy
-    needs: [deploy-app-api, deploy-postgres, deploy-dynamodb]
+    needs: [deploy-app-api]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4
