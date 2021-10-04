@@ -168,7 +168,7 @@ jobs:
         run: if [ -z ${AURORA_POSTGRES_MTPRISMAINLAYER_ENGINE+x} ]; then echo "secret is unset"; else echo "secret is set to '$AURORA_POSTGRES_MTPRISMAINLAYER_ENGINE'"; fi
 
       - name: Get url
-        uses: ./.github/aurora/
+        uses: ./.github/actions/aurora/
         id: dbenv
 
       - name: Set aurora db url
