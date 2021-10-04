@@ -39,7 +39,7 @@
         "cypress-pipe": "^2.0.0",
         "dotenv": "^10.0.0",
         "prettier": "^2.4.1",
-        "serverless": "^2.60.3",
+        "serverless": "^2.61.0",
         "serverless-plugin-scripts": "^1.0.2",
         "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",
         "serverless-iam-helper": "CMSgov/serverless-iam-helper",
