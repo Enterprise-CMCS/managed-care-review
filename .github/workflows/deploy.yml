@@ -167,8 +167,12 @@ jobs:
       - name: Test - check if env variable is set after fetching secrets
         run: if [ -z ${AURORA_POSTGRES_MTPRISMAINLAYER_ENGINE+x} ]; then echo "secret is unset"; else echo "secret is set to '$AURORA_POSTGRES_MTPRISMAINLAYER_ENGINE'"; fi
 
+      - name: Get url
+        uses: ./.github/aurora_conn_url.js
+        id: dbenv
+
       - name: Set aurora db url
-        run: echo "DATABASE_URL=$(node scripts/aurora_conn_url_from_env.js)" >> $GITHUB_ENV
+        run: echo "DATABASE_URL=${{ steps.dbenv.outputs.database_url }}" >> $GITHUB_ENV
 
       - name: Generate graphql
         run: ./dev generate

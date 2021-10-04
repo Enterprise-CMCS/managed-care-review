@@ -1,7 +1,7 @@
-#!/usr/bin/env node
+const core = require('@actions/core');
 
-// This is a node script for CI that will create a connection URL from the env
-function getAuroraURL() {
+// This is a node script for CI that will assemble a connection URL from the env
+try {
     const usernameVar = `AURORA_POSTGRES_${process.env.stage_name}_USERNAME`;
     const passwordVar = `AURORA_POSTGRES_${process.env.stage_name}_PASSWORD`;
     const hostVar = `AURORA_POSTGRES_${process.env.stage_name}_HOST`;
@@ -10,7 +10,7 @@ function getAuroraURL() {
 
     const auroraURL = `postgresql://${process.env[usernameVar]}:${process.env[passwordVar]}@${process.env[hostVar]}:${process.env[portVar]}/${process.env[dbNameVar]}?schema=public&connection_limit=5`;
 
-    return encodeURIComponent(auroraURL);
+    core.setOutput('database_url', encodeURIComponent(auroraURL));
+} catch (error) {
+    core.setFailed(error.message);
 }
-
-getAuroraURL();
