@@ -92,7 +92,7 @@ jobs:
       - name: Unit Tests
         run: ./dev test --unit --run-db
       - name: publish code coverage
-        uses: paambaati/codeclimate-action@v2.7.5
+        uses: paambaati/codeclimate-action@v3.0.0
         env:
           CC_TEST_REPORTER_ID: 364fbdd9d65e41f3ed5f70b6a295f5f76f7288a3930e738b010cad0c218df37c
         with:
