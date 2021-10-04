@@ -161,7 +161,7 @@ jobs:
           aws-secret-access-key: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_SECRET_ACCESS_KEY] || secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_DEFAULT_REGION] || secrets.AWS_DEFAULT_REGION }}
           secrets: |
-            aurora-postgres-${{env.branch_name}}
+            aurora_postgres_${{env.branch_name}}
           parse-json: true
 
       - name: Test - check if env variable is set after fetching secrets
