@@ -67,5 +67,9 @@ functions:
       STEP_NAME: Check for secrets
       TRIGGER_STRING: SECRETS MISSING
       LOG_ZIP: /tmp/lambda_logs.zip
+      GITHUB_PULL_LABEL: reran
+      GITHUB_ENABLE_COMMENT: true
+      DRY_RUN: false
+
     package:
       artifact: lambda-dependabot.zip
