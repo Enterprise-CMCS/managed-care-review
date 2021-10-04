@@ -44,7 +44,7 @@ jobs:
 
   deploy-app-api:
     name: deploy - app-api
-    needs: [build-prisma-client-lambda-layer, deploy-postgres, deploy-database]
+    needs: [build-prisma-client-lambda-layer, deploy-postgres, deploy-dynamodb]
     runs-on: ubuntu-18.04
     steps:
       - name: Check out repository
