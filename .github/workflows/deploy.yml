@@ -101,8 +101,53 @@ jobs:
         run: |
           pushd services/app-api && npx serverless deploy --stage $STAGE_PREFIX$branch_name
 
+  deploy-postgres:
+    name: deploy - postgres
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: read .nvmrc
+        id: node_version
+        run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
+
+      - uses: actions/setup-node@v2.4.0
+        with:
+          node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
+
+      - name: set branch_name
+        run: |
+          echo "branch_name=$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
+
+      - name: set app version
+        run: echo "APP_VERSION=$(scripts/app_version.sh)" >> $GITHUB_ENV
+
+      - name: set branch specific variable names
+        run: ./.github/build_vars.sh set_names
+
+      - name: set variable values
+        run: ./.github/build_vars.sh set_values
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_ACCESS_KEY_ID] || secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_SECRET_ACCESS_KEY] || secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_DEFAULT_REGION] || secrets.AWS_DEFAULT_REGION }}
+          DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
+          REACT_APP_AUTH_MODE: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_REACT_APP_AUTH_MODE] || secrets.REACT_APP_AUTH_MODE }}
+          IAM_PATH: ${{ secrets.IAM_PATH }}
+          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY] || secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
+
+      - name: Install packages
+        working-directory: services/app-api
+        run: yarn --frozen-lockfile
+
+      - name: deploy postgres
+        id: deploy-postgres
+        run: |
+          pushd services/postgres && npx serverless deploy --stage $STAGE_PREFIX$branch_name
+
   deploy:
-    name: deploy - all
+    name: deploy
     needs: [deploy-app-api]
     runs-on: ubuntu-latest
     steps:
