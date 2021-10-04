@@ -5,6 +5,7 @@ var_list=(
   'AWS_ACCESS_KEY_ID'
   'AWS_SECRET_ACCESS_KEY'
   'AWS_DEFAULT_REGION'
+  'DEPENDABOT_BOT_TOKEN'
   'INFRASTRUCTURE_TYPE'
   'SES_SOURCE_EMAIL_ADDRESS'
   'SES_REVIEW_TEAM_EMAIL_ADDRESS'
@@ -31,7 +32,7 @@ set_value() {
 
 set_name() {
   varname=${1}
-  echo "BRANCH_SPECIFIC_VARNAME_$varname=${branch_name//-/_}_$varname" >> "$GITHUB_ENV"
+  echo "BRANCH_SPECIFIC_VARNAME_$varname=${branch_name:?//-/_}_$varname" >> "$GITHUB_ENV"
 }
 
 case "$1" in
