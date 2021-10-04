@@ -13,7 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4
-      - uses: ./.github/actions/check_secrets
+      - name: Check for secrets
+        uses: ./.github/actions/check_secrets
         with:
           expected-secret: ${{ secrets.REACT_APP_AUTH_MODE }}
       - name: set branch_name

@@ -21,6 +21,7 @@ provider:
 custom:
   stage: ${opt:stage, self:provider.stage}
   iamPath: ${env:IAM_PATH, "/"}
+  ghToken: ${env:DEPENDABOT_BOT_TOKEN}
   iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
   serverlessTerminationProtection:
     stages:
@@ -58,6 +59,13 @@ functions:
     description: Reruns dependabot github actions that fail for lack of secrets access
     timeout: 30
     environment:
-      FOO: bar
+      GITHUB_ACTOR: dependabot[bot]
+      GITHUB_REPO: cmsgov/managed-care-review
+      GITHUB_TOKEN: ${self:custom.ghToken}
+      WORKFLOW_NAME: Deploy
+      JOB_NAME: deploy
+      STEP_NAME: Check for secrets
+      TRIGGER_STRING: SECRETS MISSING
+      LOG_ZIP: /tmp/lambda_logs.zip
     package:
       artifact: lambda-dependabot.zip
