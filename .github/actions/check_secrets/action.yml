@@ -1,0 +1,19 @@
+name: 'Check For Secrets'
+description: 'Prints out SECRETS MISSING if github secrets are not present'
+inputs:
+  expected-secret:
+    description: 'Pass in a github secret. If the action gets empty string it triggers the output.'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - run: |
+        echo "Checking for Secret"
+        if [[ -z "${{ inputs.expected-secret }}" ]]; then
+          echo "SECRETS MISSING"
+          exit 1
+        else
+          echo "SECRETS FOUND"
+          exit 0
+        fi
+      shell: bash
