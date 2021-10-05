@@ -23,22 +23,19 @@ export async function prismaClientAurora(): Promise<
     Result<PrismaClient, Error>
 > {
     try {
-        const secret = await getSecretValue()
+        const postgresURL = await GetConnectionURL()
+        if (postgresURL.isErr()) {
+            return err(postgresURL.error)
+        }
 
-        const postgresURL = `postgresql://${
-            secret.username
-        }:${encodeURIComponent(secret.password)}@${secret.host}:${
-            secret.port
-        }/${secret.dbname}?schema=public&connection_limit=5`
-
-        const prisma = new PrismaClient({
+        const prismaClient = new PrismaClient({
             datasources: {
                 db: {
-                    url: postgresURL,
+                    url: postgresURL.value,
                 },
             },
         })
-        return ok(prisma)
+        return ok(prismaClient)
     } catch (e) {
         return err(new Error('Could not connect to aurora: ' + e))
     }
@@ -62,7 +59,7 @@ interface Secret {
     username: string
 }
 
-async function getSecretValue(): Promise<Secret> {
+async function getSecretValue(): Promise<Result<Secret, Error>> {
     // lookup secrets manager secret from env
     const params = {
         SecretId: process.env.SECRETS_MANAGER_SECRET || 'no secret set',
@@ -81,10 +78,26 @@ async function getSecretValue(): Promise<Secret> {
     const secret = JSON.parse(secretResponse.SecretString ?? '') as Secret
 
     if (!secret.username || !secret.password) {
-        throw Error(
-            'Could not retreive postgres credentials from secrets manager'
+        return err(
+            new Error(
+                'Could not retreive postgres credentials from secrets manager'
+            )
         )
     }
 
-    return secret
+    return ok(secret)
+}
+
+export async function GetConnectionURL(): Promise<Result<string, Error>> {
+    const secret = await getSecretValue()
+    if (secret.isErr()) {
+        return err(secret.error)
+    }
+    const postgresURL = `postgresql://${
+        secret.value.username
+    }:${encodeURIComponent(secret.value.password)}@${secret.value.host}:${
+        secret.value.port
+    }/${secret.value.dbname}?schema=public&connection_limit=5`
+
+    return ok(postgresURL)
 }
