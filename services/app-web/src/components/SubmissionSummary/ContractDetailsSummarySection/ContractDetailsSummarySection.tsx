@@ -59,12 +59,16 @@ export const ContractDetailsSummarySection = ({
             : `${AmendableItemsRecord['CAPITATION_RATES']} (${RateChangeReasonRecord[reason]})`
     }
 
+    // Capture the "other" fields in Items being amended
+    // Including Capitation rates (Other) and Other
+    // to pass through to multi checkbox list
     const itemsAmendedOtherList = []
 
     if (
         submission?.contractAmendmentInfo?.itemsBeingAmended.includes(
             'CAPITATION_RATES'
-        )
+        ) &&
+        capitationRateChangeReason() !== null
     ) {
         itemsAmendedOtherList.push(capitationRateChangeReason())
     }
