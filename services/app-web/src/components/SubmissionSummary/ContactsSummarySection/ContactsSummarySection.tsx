@@ -1,6 +1,6 @@
 import { Grid, GridContainer } from '@trussworks/react-uswds'
 import styles from '../SubmissionSummary.module.scss'
-import { SectionHeader } from '../../SectionHeader/SectionHeader'
+import { SectionHeader } from '../../SectionHeader'
 import {
     ActuaryFirmsRecord,
     ActuaryCommunicationRecord,

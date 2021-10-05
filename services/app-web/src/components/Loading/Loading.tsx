@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Spinner } from '../Spinner/Spinner'
+import { Spinner } from '../Spinner'
 
 import styles from './Loading.module.scss'
 

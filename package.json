@@ -34,12 +34,14 @@
         "@types/dotenv": "^8.2.0",
         "@types/node": "^14.17.20",
         "@types/yargs": "^17.0.3",
-        "chromedriver": "^93.0.1",
+        "chromedriver": "^94.0.0",
         "cypress": "^8.4.1",
         "cypress-pipe": "^2.0.0",
         "dotenv": "^10.0.0",
         "prettier": "^2.4.1",
-        "serverless": "^2.60.0",
+        "serverless": "^2.61.0",
+        "serverless-plugin-scripts": "^1.0.2",
+        "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",
         "serverless-iam-helper": "CMSgov/serverless-iam-helper",
         "serverless-idempotency-helper": "CMSgov/serverless-idempotency-helper",
         "serverless-plugin-scripts": "^1.0.2",
@@ -48,7 +50,7 @@
         "yargs": "^17.2.1"
     },
     "dependencies": {
-        "aws-sdk": "^2.997.0",
+        "aws-sdk": "^2.1000.0",
         "cypress-file-upload": "^5.0.8"
     }
 }

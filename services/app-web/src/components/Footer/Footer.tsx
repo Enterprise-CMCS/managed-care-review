@@ -3,7 +3,7 @@ import React from 'react'
 import medicaidLogo from '../../assets/images/medicaidgovlogo.png'
 import { ReactComponent as HHSIcon } from '../../assets/icons/depthealthhumanservices_usa.svg'
 import styles from './Footer.module.scss'
-import { Logo } from '../Logo/Logo'
+import { Logo } from '../Logo'
 import { GridContainer, Grid } from '@trussworks/react-uswds'
 
 /**

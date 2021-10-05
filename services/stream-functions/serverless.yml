@@ -7,7 +7,6 @@ package:
 
 plugins:
   - serverless-bundle
-  - serverless-dotenv-plugin
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
   - serverless-idempotency-helper
