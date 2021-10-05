@@ -70,10 +70,7 @@ export const ContractDetailsSummarySection = ({
     }
 
     if (submission.contractAmendmentInfo?.otherItemBeingAmended) {
-        const amendedOtherReason =
-            'Other (' +
-            submission.contractAmendmentInfo?.otherItemBeingAmended +
-            ')'
+        const amendedOtherReason = `Other (${submission.contractAmendmentInfo?.otherItemBeingAmended})`
         itemsAmendedOtherList.push(amendedOtherReason)
     }
 
