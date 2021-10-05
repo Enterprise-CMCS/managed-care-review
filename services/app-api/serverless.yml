@@ -155,6 +155,15 @@ functions:
     layers:
       - !Ref PrismaClientLambdaLayer
 
+  migrate:
+    handler: handlers/postgres_migrate.main
+    vpc:
+      securityGroupIds:
+        - ${self:custom.sgId}
+      subnetIds: ${self:custom.privateSubnets}
+    layers:
+      - !Ref PrismaClientLambdaLayer
+
 resources:
   Resources:
     GatewayResponseDefault4XX:
