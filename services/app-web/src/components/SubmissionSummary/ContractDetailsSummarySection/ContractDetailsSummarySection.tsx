@@ -36,10 +36,10 @@ const createCheckboxList = ({
 
     return (
         <ul>
-            {listToDisplay.map((item) => (
-                // TODO: protect from nulls?
-                <li key={item}>{item}</li>
-            ))}
+            {listToDisplay.map((item) =>
+                // make sure to not show nulls
+                item ? <li key={item}>{item}</li> : null
+            )}
         </ul>
     )
 }
