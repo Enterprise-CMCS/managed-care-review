@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { DynamicStepIndicator } from '../../components/DynamicStepIndicator/'
+import { DynamicStepIndicator } from '../../components/DynamicStepIndicator'
 import { STATE_SUBMISSION_FORM_ROUTES } from '../../constants/routes'
 import { StateSubmissionContainer } from './StateSubmissionContainer'
 import { SubmissionType } from './SubmissionType/SubmissionType'

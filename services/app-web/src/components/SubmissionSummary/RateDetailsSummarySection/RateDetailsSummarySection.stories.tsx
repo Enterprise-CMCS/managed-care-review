@@ -8,7 +8,7 @@ export default {
     component: RateDetailsSummarySection,
     parameters: {
         componentSubtitle:
-            'DynamicStepIndicator displays a users progress through a multi-step process. If an invalid route is passed in as the current page, DynamicStepIndicator will render null.',
+            'RateDetailsSummarySection displays the Rate Details data for a Draft or State Submission',
     },
 }
 

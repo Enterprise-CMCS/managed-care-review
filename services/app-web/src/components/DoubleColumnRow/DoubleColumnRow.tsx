@@ -1,7 +1,7 @@
 import { Grid } from '@trussworks/react-uswds'
 import styles from './DoubleColumnRow.module.scss'
 
-export type DoubleColumnRowProps = {
+type DoubleColumnRowProps = {
     left?: React.ReactNode
     right?: React.ReactNode
 }
