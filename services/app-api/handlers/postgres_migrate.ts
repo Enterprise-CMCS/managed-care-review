@@ -37,6 +37,7 @@ export const main: APIGatewayProxyHandler = async () => {
         }
     }
 
+    console.log((await execa.command(`ls -al node_modules`)).stdout)
     const { stdout } = await execa.node(
         `${path.resolve('node_modules/prisma/build/index.js')}`,
         ['migrate', 'deploy', 'dev', '--preview-feature'],
