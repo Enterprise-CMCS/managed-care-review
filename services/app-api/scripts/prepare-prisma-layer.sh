@@ -10,9 +10,9 @@ function preparePrismaLayer() {
     mkdir -p lambda-layers-prisma-client/nodejs/node_modules/prisma
 
     echo "Prepare Prisma Client lambda layer ..."
-    cp -r node_modules/.prisma/client lambda-layers-prisma-client/nodejs/node_modules/.prisma
-    cp -r node_modules/@prisma lambda-layers-prisma-client/nodejs/node_modules
-    cp -r node_modules/prisma lambda-layers-prisma-client-nodejs/node_modules
+    rsync -av node_modules/.prisma/ lambda-layers-prisma-client/nodejs/node_modules/.prisma
+    rsync -av node_modules/@prisma/ lambda-layers-prisma-client/nodejs/node_modules/@prisma
+    rsync -av node_modules/prisma/ lambda-layers-prisma-client-nodejs/node_modules/prisma
 
     echo "Remove Prisma CLI..."
     rm -rf lambda-layers-prisma-client/nodejs/node_modules/@prisma/cli
