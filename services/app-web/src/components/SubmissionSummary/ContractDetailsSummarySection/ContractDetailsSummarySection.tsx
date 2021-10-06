@@ -37,7 +37,6 @@ const createCheckboxList = ({
     return (
         <ul>
             {listToDisplay.map((item) => (
-                // TODO: protect from nulls?
                 <li key={item}>{item}</li>
             ))}
         </ul>
@@ -58,6 +57,25 @@ export const ContractDetailsSummarySection = ({
         return otherReason
             ? `${AmendableItemsRecord['CAPITATION_RATES']} (${otherReason})`
             : `${AmendableItemsRecord['CAPITATION_RATES']} (${RateChangeReasonRecord[reason]})`
+    }
+
+    // Capture the "other" fields in Items being amended
+    // Including Capitation rates (Other) and Other
+    // to pass through to multi checkbox list
+    const itemsAmendedOtherList = []
+
+    if (
+        submission?.contractAmendmentInfo?.itemsBeingAmended.includes(
+            'CAPITATION_RATES'
+        ) &&
+        capitationRateChangeReason() !== null
+    ) {
+        itemsAmendedOtherList.push(capitationRateChangeReason())
+    }
+
+    if (submission.contractAmendmentInfo?.otherItemBeingAmended) {
+        const amendedOtherReason = `Other (${submission.contractAmendmentInfo?.otherItemBeingAmended})`
+        itemsAmendedOtherList.push(amendedOtherReason)
     }
 
     return (
@@ -128,17 +146,7 @@ export const ContractDetailsSummarySection = ({
                                                     item !== 'OTHER'
                                             ),
                                             dict: AmendableItemsRecord,
-                                            otherReasons: [
-                                                submission.contractAmendmentInfo.itemsBeingAmended.includes(
-                                                    'CAPITATION_RATES'
-                                                )
-                                                    ? capitationRateChangeReason()
-                                                    : null,
-                                                submission.contractAmendmentInfo
-                                                    ?.otherItemBeingAmended
-                                                    ? `Other (${submission.contractAmendmentInfo?.otherItemBeingAmended})`
-                                                    : null,
-                                            ],
+                                            otherReasons: itemsAmendedOtherList,
                                         })}
                                     />
                                 }
