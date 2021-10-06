@@ -1,6 +1,7 @@
 import { APIGatewayProxyHandler } from 'aws-lambda'
 import { GetConnectionURL } from '../lib/prisma'
 import execa from 'execa'
+import path from 'path'
 
 const authMode = process.env.REACT_APP_AUTH_MODE
 
@@ -37,7 +38,7 @@ export const main: APIGatewayProxyHandler = async () => {
     }
 
     const { stdout } = await execa.node(
-        'npx prisma',
+        `${path.resolve('node_modules/prisma/build/index.js')}`,
         ['migrate', 'deploy', 'dev', '--preview-feature'],
         {
             env: {
