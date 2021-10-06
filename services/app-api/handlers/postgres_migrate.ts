@@ -1,7 +1,6 @@
 import { APIGatewayProxyHandler } from 'aws-lambda'
 import { GetConnectionURL } from '../lib/prisma'
 import execa from 'execa'
-import path from 'path'
 
 const authMode = process.env.REACT_APP_AUTH_MODE
 
@@ -37,19 +36,13 @@ export const main: APIGatewayProxyHandler = async () => {
         }
     }
 
+    console.log((await execa.command(`pwd`)).stdout)
     console.log((await execa.command(`ls -al node_modules`)).stdout)
-    const { stdout } = await execa.node(
-        `${path.resolve('node_modules/prisma/build/index.js')}`,
-        ['migrate', 'deploy', 'dev', '--preview-feature'],
-        {
-            env: {
-                DATABASE_URL: postgresURL.value,
-            },
-        }
+    const { stdout, stderr } = await execa.command(
+        'node node_modules/prisma/build/index.js generate'
     )
-
-    // testing this out right now:
-    console.log(stdout)
+    console.log('stdout', stdout)
+    console.log('stderr', stderr)
 
     return {
         statusCode: 200,
