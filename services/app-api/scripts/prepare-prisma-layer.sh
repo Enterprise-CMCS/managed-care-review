@@ -13,9 +13,6 @@ function preparePrismaLayer() {
     PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn prisma generate
 
     echo "Prepare Prisma Client lambda layer ..."
-#    rsync -av node_modules/.prisma/ lambda-layers-prisma-client/nodejs/node_modules/.prisma
-#    rsync -av node_modules/@prisma/ lambda-layers-prisma-client/nodejs/node_modules/@prisma
-#    rsync -av node_modules/prisma/ lambda-layers-prisma-client/nodejs/node_modules/prisma
     rsync -av node_modules/@prisma/client/ lambda-layers-prisma-client/nodejs/node_modules/@prisma/client
     rsync -av node_modules/prisma/ lambda-layers-prisma-client/nodejs/node_modules/prisma
     rsync -av node_modules/.prisma/ lambda-layers-prisma-client/nodejs/node_modules/.prisma
@@ -29,6 +26,7 @@ function preparePrismaLayer() {
 
     echo "Remove non-RHEL bins to save space ..."
     rm -rf lambda-layers-prisma-client/nodejs/node_modules/prisma/libquery_engine-debian-openssl-1.1.x.so.node
+    rm -rf lambda-layers-prisma-client/nodejs/node_modules/prisma/libquery_engine-rhel-openssl-1.0.x.so.node
     rm -rf lambda-layers-prisma-client/nodejs/node_modules/@prisma/introspection-engine-debian-openssl-1.1.x 
     rm -rf lambda-layers-prisma-client/nodejs/node_modules/@prisma/libquery_engine-debian-openssl-1.1.x.so.node 
     rm -rf lambda-layers-prisma-client/nodejs/node_modules/@prisma/migration-engine-debian-openssl-1.1.x
