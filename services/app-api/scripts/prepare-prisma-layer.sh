@@ -6,7 +6,7 @@ function preparePrismaLayer() {
 
     echo "Creating layer ..."
     mkdir -p lambda-layers-prisma-client/nodejs/node_modules/.prisma
-    mkdir -p lambda-layers-prisma-client/nodejs/node_modules/@prisma
+    mkdir -p lambda-layers-prisma-client/nodejs/node_modules/@prisma/engines
     mkdir -p lambda-layers-prisma-client/nodejs/node_modules/prisma
 
     echo "Generate RHEL client..."
