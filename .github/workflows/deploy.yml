@@ -101,12 +101,12 @@ jobs:
 
       - name: Install packages
         working-directory: services/app-api
-        run: PRISMA_BINARY_TARGET=rhel-openssl-1.0.x yarn install --frozen-lockfile
+        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn install --frozen-lockfile
 
       # Generate Prisma Client and binary that can run in a lambda environment
       - name: Prepare prisma client
         working-directory: services/app-api
-        run: PRISMA_BINARY_TARGET=rhel-openssl-1.0.x yarn prisma generate
+        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn prisma generate
 
       - name: Prepare "@prisma/client" lambda layer
         working-directory: services/app-api
