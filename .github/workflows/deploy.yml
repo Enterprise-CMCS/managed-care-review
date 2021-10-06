@@ -16,59 +16,13 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v2
 
-      - name: set branch_name
-        run: |
-          echo "branch_name=$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
-
-      - name: set app version
-        run: echo "APP_VERSION=$(scripts/app_version.sh)" >> $GITHUB_ENV
-
-      - name: set branch specific variable names
-        run: ./.github/build_vars.sh set_names
-
-      - name: set variable values
-        run: ./.github/build_vars.sh set_values
-        env:
-          REACT_APP_AUTH_MODE: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_REACT_APP_AUTH_MODE] || secrets.REACT_APP_AUTH_MODE }}
-          AWS_ACCESS_KEY_ID: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_ACCESS_KEY_ID] || secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_SECRET_ACCESS_KEY] || secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_DEFAULT_REGION] || secrets.AWS_DEFAULT_REGION }}
-          INFRASTRUCTURE_TYPE: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_INFRASTRUCTURE_TYPE] || secrets.INFRASTRUCTURE_TYPE || 'development' }}
-          SES_SOURCE_EMAIL_ADDRESS: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_SES_SOURCE_EMAIL_ADDRESS] || secrets.SES_SOURCE_EMAIL_ADDRESS }}
-          SES_REVIEW_TEAM_EMAIL_ADDRESS: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_SES_REVIEW_TEAM_EMAIL_ADDRESS] || secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
-          ROUTE_53_HOSTED_ZONE_ID: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_ROUTE_53_HOSTED_ZONE_ID] }}
-          ROUTE_53_DOMAIN_NAME: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_ROUTE_53_DOMAIN_NAME] }}
-          CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_CLOUDFRONT_CERTIFICATE_ARN] }}
-          CLOUDFRONT_DOMAIN_NAME: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_CLOUDFRONT_DOMAIN_NAME] }}
-          CLOUDFRONT_STORYBOOK_DOMAIN_NAME: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_CLOUDFRONT_STORYBOOK_DOMAIN_NAME] }}
-          OKTA_METADATA_URL: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_OKTA_METADATA_URL] || secrets.OKTA_METADATA_URL }}
-          IAM_PATH: ${{ secrets.IAM_PATH }}
-          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY] || secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-          STAGE_PREFIX: ${{ secrets.STAGE_PREFIX }}
-          DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
-          TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
-
       - name: lock this branch to prevent concurrent builds
         run: ./.github/github-lock.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: read .nvmrc
-        id: node_version
-        run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
-
-      - uses: actions/setup-node@v2.4.0
-        with:
-          node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
-
-      - uses: actions/cache@v2
-        with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-
-      - name: set path
-        run: |
-          echo "PATH=$(pwd)/node_modules/.bin/:$PATH" >> $GITHUB_ENV
+      ## Setup the mc-review env
+      - uses: ./.github/actions/setup_env
 
       - name: Unit Tests
         run: ./dev test --unit --run-db
