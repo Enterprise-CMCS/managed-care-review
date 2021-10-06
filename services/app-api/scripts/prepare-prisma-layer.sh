@@ -12,7 +12,7 @@ function preparePrismaLayer() {
     echo "Prepare Prisma Client lambda layer ..."
     rsync -av node_modules/.prisma/ lambda-layers-prisma-client/nodejs/node_modules/.prisma
     rsync -av node_modules/@prisma/ lambda-layers-prisma-client/nodejs/node_modules/@prisma
-    rsync -av node_modules/prisma/ lambda-layers-prisma-client-nodejs/node_modules/prisma
+    rsync -av node_modules/prisma/ lambda-layers-prisma-client/nodejs/node_modules/prisma
 
     echo "Remove Prisma CLI..."
     rm -rf lambda-layers-prisma-client/nodejs/node_modules/@prisma/cli
