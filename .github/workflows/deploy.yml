@@ -22,7 +22,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       ## Setup the mc-review env
-      - uses: .github/actions/setup_env
+      - uses: ./.github/actions/setup_env
 
       - name: Unit Tests
         run: ./dev test --unit --run-db
