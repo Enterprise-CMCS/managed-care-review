@@ -7,8 +7,7 @@
         "test": "jest --watch",
         "test:once": "jest",
         "lint": "tsc --noEmit && eslint . --ignore-path ../../.gitignore",
-        "clean": "rm -rf node_modules && yarn cache clean",
-        "postinstall": "yarn run prisma generate"
+        "clean": "rm -rf node_modules && yarn cache clean"
     },
     "dependencies": {
         "@aws/dynamodb-data-mapper": "0.7.3",
