@@ -67,6 +67,10 @@ module.exports = {
                         './node_modules/.prisma/client/schema.prisma'
                     ),
                 },
+                {
+                    from: path.resolve(__dirname, 'prisma/migrations'),
+                    to: path.resolve(__dirname, 'prisma/migrations'),
+                },
             ],
         }),
     ],
