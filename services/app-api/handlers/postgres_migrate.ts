@@ -37,7 +37,9 @@ export const main: APIGatewayProxyHandler = async () => {
     }
 
     console.log((await execa.command(`pwd`)).stdout)
-    console.log((await execa.command(`ls -al node_modules`)).stdout)
+    console.log((await execa.command(`ls -al /opt/`)).stdout)
+    console.log((await execa.command(`ls -al /opt/nodejs`)).stdout)
+    console.log((await execa.command(`ls -al /opt/layers`)).stdout)
     const { stdout, stderr } = await execa.command(
         'node /opt/layer/node_modules/prisma/build/index.js generate'
     )
