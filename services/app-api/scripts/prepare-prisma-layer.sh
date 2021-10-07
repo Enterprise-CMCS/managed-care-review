@@ -8,6 +8,7 @@ function preparePrismaLayer() {
     mkdir -p lambda-layers-prisma-client/nodejs/node_modules/.prisma
     mkdir -p lambda-layers-prisma-client/nodejs/node_modules/@prisma/engines
     mkdir -p lambda-layers-prisma-client/nodejs/node_modules/prisma
+    mkdir -p lambda-layers-prisma-client/nodejs/prisma
 
     echo "Generate RHEL client..."
     PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn prisma generate
@@ -22,7 +23,7 @@ function preparePrismaLayer() {
     rsync -av node_modules/@prisma/engines/dist/ lambda-layers-prisma-client/nodejs/node_modules/@prisma/engines/dist
 
     echo "Copy migration files to layer..."
-    rsync -av prisma/migrations/ lambda-layers-prisma-client/nodejs/prisma/migrations
+    rsync -av prisma/ lambda-layers-prisma-client/nodejs/prisma
 
     echo "Remove Prisma CLI ..."
     rm -rf lambda-layers-prisma-client/nodejs/node_modules/@prisma/cli
