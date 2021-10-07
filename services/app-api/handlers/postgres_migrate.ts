@@ -36,11 +36,12 @@ export const main: APIGatewayProxyHandler = async () => {
         }
     }
 
+    // Aurora can have long cold starts, so we extend connection timeout on migrates
     const { stdout, stderr } = await execa.command(
         'node /opt/nodejs/node_modules/prisma/build/index.js migrate deploy --preview-feature',
         {
             env: {
-                DATABASE_URL: postgresURL.value,
+                DATABASE_URL: postgresURL.value + '&connect_timeout=45',
             },
         }
     )
