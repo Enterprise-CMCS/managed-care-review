@@ -21,6 +21,9 @@ function preparePrismaLayer() {
     cp node_modules/@prisma/engines/package.json lambda-layers-prisma-client/nodejs/node_modules/@prisma/engines/package.json
     rsync -av node_modules/@prisma/engines/dist/ lambda-layers-prisma-client/nodejs/node_modules/@prisma/engines/dist
 
+    echo "Copy migration files to layer..."
+    rsync -av prisma/migrations/ lambda-layers-prisma-client/nodejs/prisma/migrations
+
     echo "Remove Prisma CLI ..."
     rm -rf lambda-layers-prisma-client/nodejs/node_modules/@prisma/cli
 
