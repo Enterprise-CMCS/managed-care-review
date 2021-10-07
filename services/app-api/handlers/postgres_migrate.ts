@@ -37,7 +37,12 @@ export const main: APIGatewayProxyHandler = async () => {
     }
 
     const { stdout, stderr } = await execa.command(
-        'node /opt/nodejs/node_modules/prisma/build/index.js migrate deploy --preview-feature'
+        'node /opt/nodejs/node_modules/prisma/build/index.js migrate deploy --preview-feature',
+        {
+            env: {
+                DATABASE_URL: postgresURL.value,
+            },
+        }
     )
     console.log('stdout', stdout)
     console.log('stderr', stderr)
