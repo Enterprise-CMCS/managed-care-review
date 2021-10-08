@@ -21,6 +21,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Check for secrets
+        uses: ./.github/actions/check_secrets
+        with:
+          expected-secret: ${{ secrets.REACT_APP_AUTH_MODE }}
+
       - name: Setup env
         uses: ./.github/actions/setup_env
 
@@ -102,23 +107,8 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v2
 
-      - name: read .nvmrc
-        id: node_version
-        run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
-
-      - uses: actions/setup-node@v2.4.0
-        with:
-          node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
-
-      - name: set branch_name
-        run: |
-          echo "branch_name=$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
-
-      - name: set app version
-        run: echo "APP_VERSION=$(scripts/app_version.sh)" >> $GITHUB_ENV
-
-      - name: set branch specific variable names
-        run: ./.github/build_vars.sh set_names
+      - name: Setup env
+        uses: ./.github/actions/setup_env
 
       - name: set variable values
         run: ./.github/build_vars.sh set_values
@@ -161,23 +151,8 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v2
 
-      - name: read .nvmrc
-        id: node_version
-        run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
-
-      - uses: actions/setup-node@v2.4.0
-        with:
-          node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
-
-      - name: set branch_name
-        run: |
-          echo "branch_name=$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
-
-      - name: set app version
-        run: echo "APP_VERSION=$(scripts/app_version.sh)" >> $GITHUB_ENV
-
-      - name: set branch specific variable names
-        run: ./.github/build_vars.sh set_names
+      - name: Setup env
+        uses: ./.github/actions/setup_env
 
       - name: set variable values
         run: ./.github/build_vars.sh set_values
@@ -207,23 +182,8 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v2
 
-      - name: read .nvmrc
-        id: node_version
-        run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
-
-      - uses: actions/setup-node@v2.4.0
-        with:
-          node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
-
-      - name: set branch_name
-        run: |
-          echo "branch_name=$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
-
-      - name: set app version
-        run: echo "APP_VERSION=$(scripts/app_version.sh)" >> $GITHUB_ENV
-
-      - name: set branch specific variable names
-        run: ./.github/build_vars.sh set_names
+      - name: Setup env
+        uses: ./.github/actions/setup_env
 
       - name: set variable values
         run: ./.github/build_vars.sh set_values
@@ -297,17 +257,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4
-      - name: Check for secrets
-        uses: ./.github/actions/check_secrets
-        with:
-          expected-secret: ${{ secrets.REACT_APP_AUTH_MODE }}
-      - name: set branch_name
-        run: |
-          echo "branch_name=$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
-      - name: set app version
-        run: echo "APP_VERSION=$(scripts/app_version.sh)" >> $GITHUB_ENV
-      - name: set branch specific variable names
-        run: ./.github/build_vars.sh set_names
+
+      - name: Setup env
+        uses: ./.github/actions/setup_en
+
       - name: set variable values
         run: ./.github/build_vars.sh set_values
         env:
@@ -329,24 +282,6 @@ jobs:
           STAGE_PREFIX: ${{ secrets.STAGE_PREFIX }}
           DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
-      - name: lock this branch to prevent concurrent builds
-        run: ./.github/github-lock.sh
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: read .nvmrc
-        id: node_version
-        run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
-      - uses: actions/setup-node@v2.4.1
-        with:
-          node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
-      - uses: actions/cache@v2
-        with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-
-      - name: set path
-        run: |
-          echo "PATH=$(pwd)/node_modules/.bin/:$PATH" >> $GITHUB_ENV
 
       - uses: chrnorm/deployment-action@releases/v1
         name: Create GitHub deployment
