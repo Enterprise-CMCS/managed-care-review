@@ -330,7 +330,7 @@ jobs:
     needs: [deploy]
     runs-on: ubuntu-18.04
     steps:
-      - uses: actions/checkout@v2.3.
+      - uses: actions/checkout@v2
 
       - name: Setup env
         uses: ./.github/actions/setup_env
