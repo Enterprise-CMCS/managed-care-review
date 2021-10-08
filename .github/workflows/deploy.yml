@@ -312,7 +312,7 @@ jobs:
       - name: run migrations
         id: run-migrations
         run: |
-          pushd services/app-api &&  aws lambda invoke --function app-api-$STAGE_PREFIX-migrate --cli-binary-format raw-in-base64-out
+          pushd services/app-api && ./scripts/invoke-migrate-lambda.sh app-api-$STAGE_PREFIX-migrate
 
   deploy:
     name: deploy
