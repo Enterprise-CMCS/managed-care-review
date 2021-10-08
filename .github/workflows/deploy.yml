@@ -270,7 +270,7 @@ jobs:
 
   run-migrations:
     name: prisma-migrate
-    needs: [app-api]
+    needs: [deploy-app-api]
     runs-on: ubuntu-18.04
     steps:
       - name: Check out repository
