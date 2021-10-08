@@ -312,7 +312,7 @@ jobs:
       - name: run migrations
         id: run-migrations
         run: |
-          pushd services/app-api && ./scripts/invoke-migrate-lambda.sh app-api-$STAGE_PREFIX-migrate
+          pushd services/app-api && ./scripts/invoke-migrate-lambda.sh app-api-$branch_name-migrate
 
   deploy:
     name: deploy
