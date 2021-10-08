@@ -361,7 +361,7 @@ jobs:
         run: yarn --frozen-lockfile
 
       - name: Generate graphql
-        run: ./dev generat
+        run: ./dev generate
 
       - name: Create Test Users
         run: |
