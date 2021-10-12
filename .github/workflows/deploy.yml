@@ -358,7 +358,8 @@ jobs:
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
 
       - name: Install packages
-        run: yarn --frozen-lockfile
+        working-directory: services/app-web
+        run: yarn install --frozen-lockfile
 
       - name: Generate graphql
         run: ./dev generate
