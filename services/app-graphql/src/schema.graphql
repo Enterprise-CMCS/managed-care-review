@@ -268,7 +268,7 @@ type StateSubmission {
     actuaryCommunicationPreference: ActuaryCommunicationType
     documents: [Document!]!
     contractAmendmentInfo: ContractAmendmentInfo
-    submittedAt: Date!
+    submittedAt: DateTime!
     contractType: ContractType!
     contractDateStart: Date!
     contractDateEnd: Date!
