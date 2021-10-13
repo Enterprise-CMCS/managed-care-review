@@ -3,7 +3,7 @@ import React from 'react'
 import { NavLink } from 'react-router-dom'
 import styles from './Errors.module.scss'
 
-import PageHeading from '../../components/PageHeading'
+import { PageHeading } from '../../components/PageHeading'
 import { GridContainer } from '@trussworks/react-uswds'
 
 export const ErrorInvalidSubmissionStatus = (): React.ReactElement => {
