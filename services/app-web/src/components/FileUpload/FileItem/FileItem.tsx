@@ -3,7 +3,7 @@ import { Button } from '@trussworks/react-uswds'
 import classnames from 'classnames'
 import { SPACER_GIF } from '../constants'
 
-import styles from './FileUpload.module.scss'
+import styles from '../FileUpload.module.scss'
 
 export type FileStatus =
     | 'DUPLICATE_NAME_ERROR'

@@ -7,6 +7,7 @@ import {
     FileInput,
     FileInputRef,
 } from '@trussworks/react-uswds'
+
 import styles from './FileUpload.module.scss'
 
 import { FileItemT } from './FileItem/FileItem'
