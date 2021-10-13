@@ -44,8 +44,6 @@
         "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",
         "serverless-iam-helper": "CMSgov/serverless-iam-helper",
         "serverless-idempotency-helper": "CMSgov/serverless-idempotency-helper",
-        "serverless-plugin-scripts": "^1.0.2",
-        "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",
         "typescript": "^4.3.5",
         "yargs": "^17.2.1"
     },
