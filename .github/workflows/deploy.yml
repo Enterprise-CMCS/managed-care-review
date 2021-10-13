@@ -67,7 +67,7 @@ jobs:
 
   deploy-migrate-db:
     needs: [unit-tests]
-    uses: ./.github/workflows/deploy-and-migrate-db.yml@main
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-and-migrate-db.yml@main
     name: Deploy and migrate postgres
     with:
       AWS_ACCESS_KEY_ID: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_ACCESS_KEY_ID] || secrets.AWS_ACCESS_KEY_ID }}
