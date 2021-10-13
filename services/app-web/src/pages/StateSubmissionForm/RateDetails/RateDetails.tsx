@@ -30,7 +30,7 @@ import {
     formatUserInputDate,
     validateDateFormat,
 } from '../../../formHelpers'
-import { FieldRadio } from '../../../components/Form/FieldRadio/FieldRadio'
+import { FieldRadio } from '../../../components/Form'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
 import { MCRouterState } from '../../../constants/routerState'
 

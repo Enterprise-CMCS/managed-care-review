@@ -16,9 +16,11 @@ import { Formik, FormikHelpers, FormikErrors } from 'formik'
 
 import styles from '../StateSubmissionForm.module.scss'
 
-import { FieldRadio } from '../../../components/Form/FieldRadio/FieldRadio'
-import { FieldCheckbox } from '../../../components/Form/FieldCheckbox/FieldCheckbox'
-import { FieldTextInput } from '../../../components/Form/FieldTextInput/FieldTextInput'
+import {
+    FieldRadio,
+    FieldCheckbox,
+    FieldTextInput,
+} from '../../../components/Form'
 import {
     formatForApi,
     formatForForm,
