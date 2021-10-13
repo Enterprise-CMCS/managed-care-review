@@ -3,9 +3,9 @@ import { render, screen } from '@testing-library/react'
 import renderer from 'react-test-renderer'
 import userEvent from '@testing-library/user-event'
 
-import { FileItemT } from './FileItem'
+import { FileItemT } from '../FileItem/FileItem'
 import { FileItemsList } from './FileItemsList'
-import { TEST_PDF_FILE } from '../../testHelpers/jestHelpers'
+import { TEST_PDF_FILE } from '../../../testHelpers/jestHelpers'
 
 describe('FileItemList component', () => {
     const pending: FileItemT = {

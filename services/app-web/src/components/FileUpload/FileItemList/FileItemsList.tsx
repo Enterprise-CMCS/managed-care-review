@@ -1,7 +1,7 @@
 import React from 'react'
 import classnames from 'classnames'
 import styles from './FileUpload.module.scss'
-import { FileItem, FileItemT, FileStatus } from './FileItem'
+import { FileItem, FileItemT, FileStatus } from '../FileItem/FileItem'
 
 export const FileItemsList = ({
     fileItems,

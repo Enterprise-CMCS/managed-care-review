@@ -1,7 +1,7 @@
 import React from 'react'
 import { Button } from '@trussworks/react-uswds'
 import classnames from 'classnames'
-import { SPACER_GIF } from './constants'
+import { SPACER_GIF } from '../constants'
 
 import styles from './FileUpload.module.scss'
 
@@ -79,7 +79,7 @@ const DocumentError = ({
     }
 }
 
-export type FileItemProps = {
+type FileItemProps = {
     item: FileItemT
     deleteItem: (item: FileItemT) => void
     retryItem: (item: FileItemT) => void

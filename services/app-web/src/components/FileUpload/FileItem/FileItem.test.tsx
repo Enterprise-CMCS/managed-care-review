@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { FileItem, FileItemT } from './FileItem'
-import { TEST_PDF_FILE } from '../../testHelpers/jestHelpers'
+import { TEST_PDF_FILE } from '../../../testHelpers/jestHelpers'
 
 describe('FileItem component', () => {
     const pending: FileItemT = {
