@@ -20,8 +20,8 @@ import { isS3Error } from '../../../s3'
 import {
     FileUpload,
     S3FileData,
-} from '../../../components/FileUpload/FileUpload'
-import { FileItemT } from '../../../components/FileUpload/FileItem'
+    FileItemT,
+} from '../../../components/FileUpload'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
 import { MCRouterState } from '../../../constants/routerState'
 
