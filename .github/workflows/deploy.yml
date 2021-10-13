@@ -85,8 +85,8 @@ jobs:
 
   deploy-app-api:
     name: deploy - app-api
-    needs: [build-prisma-client-lambda-layer, deploy-postgres, deploy-dynamodb]
-    runs-on: ubuntu-18.04
+    needs: [deploy-migrate-db]
+    runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
