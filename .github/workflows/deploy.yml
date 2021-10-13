@@ -65,20 +65,39 @@ jobs:
             ${{github.workspace}}/services/app-api/coverage/lcov.info:lcov
             ${{github.workspace}}/services/app-web/coverage/lcov.info:lcov
 
-  deploy-migrate-db:
-    name: deploy - postgres
-    runs-on: ubuntu-latest
+  build-prisma-client-lambda-layer:
+    name: build - postgres prisma layer
     needs: [unit-tests]
+    runs-on: ubuntu-18.04
     steps:
-      - uses: ./.github/workflows/deploy-and-migrate-db.yml
-        name: Deploy and migrate postgres
-        secrets:
-          AWS_ACCESS_KEY_ID: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_ACCESS_KEY_ID] || secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_SECRET_ACCESS_KEY] || secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_DEFAULT_REGION] || secrets.AWS_DEFAULT_REGION }}
-          IAM_PATH: ${{ secrets.IAM_PATH }}
-          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY] || secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-          REACT_APP_AUTH_MODE: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_REACT_APP_AUTH_MODE] || secrets.REACT_APP_AUTH_MODE }}
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: read .nvmrc
+        id: node_version
+        run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
+
+      - uses: actions/setup-node@v2.4.0
+        with:
+          node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
+
+      - name: Install packages
+        working-directory: services/app-api
+        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn install --frozen-lockfile
+
+      # Generate Prisma Client and binary that can run in a lambda environment
+      - name: Prepare prisma client
+        working-directory: services/app-api
+        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn prisma generate
+
+      - name: Prepare "@prisma/client" lambda layer
+        working-directory: services/app-api
+        run: ./scripts/prepare-prisma-layer.sh
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: lambda-layers-prisma-client
+          path: ./services/app-api/lambda-layers-prisma-client
 
   deploy-app-api:
     name: deploy - app-api
@@ -124,6 +143,37 @@ jobs:
         run: |
           pushd services/app-api && npx serverless deploy --stage $STAGE_PREFIX$branch_name
 
+  deploy-postgres:
+    name: deploy - postgres
+    needs: [unit-tests]
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: set variable values
+        run: ./.github/build_vars.sh set_values
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_ACCESS_KEY_ID] || secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_SECRET_ACCESS_KEY] || secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_DEFAULT_REGION] || secrets.AWS_DEFAULT_REGION }}
+          DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
+          REACT_APP_AUTH_MODE: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_REACT_APP_AUTH_MODE] || secrets.REACT_APP_AUTH_MODE }}
+          IAM_PATH: ${{ secrets.IAM_PATH }}
+          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY] || secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
+
+      - name: Install packages
+        working-directory: services/postgres
+        run: yarn --frozen-lockfile
+
+      - name: deploy postgres
+        id: deploy-postgres
+        run: |
+          pushd services/postgres && npx serverless deploy --stage $STAGE_PREFIX$branch_name
+
   deploy-dynamodb:
     name: deploy - dynamodb
     needs: [unit-tests]
@@ -154,6 +204,52 @@ jobs:
         id: deploy-dynamodb
         run: |
           pushd services/database && npx serverless deploy --stage $STAGE_PREFIX$branch_name
+
+  run-migrations:
+    name: prisma-migrate
+    needs: [deploy-app-api]
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: read .nvmrc
+        id: node_version
+        run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
+
+      - uses: actions/setup-node@v2.4.0
+        with:
+          node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
+
+      - name: set branch_name
+        run: |
+          echo "branch_name=$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
+
+      - name: set app version
+        run: echo "APP_VERSION=$(scripts/app_version.sh)" >> $GITHUB_ENV
+
+      - name: set branch specific variable names
+        run: ./.github/build_vars.sh set_names
+
+      - name: set variable values
+        run: ./.github/build_vars.sh set_values
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_ACCESS_KEY_ID] || secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_SECRET_ACCESS_KEY] || secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_DEFAULT_REGION] || secrets.AWS_DEFAULT_REGION }}
+          DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
+          REACT_APP_AUTH_MODE: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_REACT_APP_AUTH_MODE] || secrets.REACT_APP_AUTH_MODE }}
+          IAM_PATH: ${{ secrets.IAM_PATH }}
+          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY] || secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
+
+      - name: Install packages
+        working-directory: services/app-api
+        run: yarn --frozen-lockfile
+
+      - name: run migrations
+        id: run-migrations
+        run: |
+          pushd services/app-api && ./scripts/invoke-migrate-lambda.sh app-api-$branch_name-migrate
 
   deploy:
     name: deploy
