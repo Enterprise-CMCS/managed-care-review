@@ -44,12 +44,37 @@ describe('RateDetailsSummarySection', () => {
         expect(screen.queryByText('Edit')).not.toBeInTheDocument()
     })
 
-    it('can render all rate details fields', () => {
+    it('can render all rate details fields for amendment to prior rate certification submission', () => {
         renderWithProviders(
             <RateDetailsSummarySection
                 submission={draftSubmission}
                 navigateTo="rate-details"
             />
+        )
+
+        expect(
+            screen.getByRole('definition', { name: 'Rate certification type' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', {
+                name: 'Rating period of original rate certification',
+            })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', {
+                name: 'Date certified for rate amendment',
+            })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', {
+                name: 'Effective dates of rate amendment',
+            })
+        ).toBeInTheDocument()
+    })
+
+    it('can render all rate details fields for new rate certification submission', () => {
+        renderWithProviders(
+            <RateDetailsSummarySection submission={stateSubmission} />
         )
 
         expect(
