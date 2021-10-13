@@ -3,9 +3,9 @@ import { GridContainer, Grid } from '@trussworks/react-uswds'
 
 import styles from './Header.module.scss'
 
-import PageHeading from '../../components/PageHeading'
-import { StateIcon, StateIconProps } from './StateIcon'
-import { User, StateUser } from '../../gen/gqlClient'
+import PageHeading from '../../PageHeading'
+import { StateIcon, StateIconProps } from '../StateIcon/StateIcon'
+import { User, StateUser } from '../../../gen/gqlClient'
 
 const StateUserRow = ({
     user,
