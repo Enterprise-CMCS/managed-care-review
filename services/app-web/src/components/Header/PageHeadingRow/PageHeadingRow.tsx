@@ -1,7 +1,7 @@
 import React from 'react'
 import { GridContainer, Grid } from '@trussworks/react-uswds'
 
-import styles from './Header.module.scss'
+import styles from '../Header.module.scss'
 
 import PageHeading from '../../PageHeading'
 import { StateIcon, StateIconProps } from '../StateIcon/StateIcon'
