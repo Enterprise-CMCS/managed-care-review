@@ -7,7 +7,7 @@ import { User } from '../../../gen/gqlClient'
 import { idmRedirectURL } from '../../../pages/Auth/cognitoAuth'
 import { AuthModeType } from '../../../common-code/domain-models'
 
-import styles from './Header.module.scss'
+import styles from '../Header.module.scss'
 
 type LogoutHandlerT = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
