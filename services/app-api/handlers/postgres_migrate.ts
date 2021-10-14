@@ -1,6 +1,6 @@
 import { APIGatewayProxyHandler } from 'aws-lambda'
 import { GetConnectionURL } from '../lib/prisma'
-import execa from 'execa'
+import { execSync } from 'child_process'
 
 const authMode = process.env.REACT_APP_AUTH_MODE
 
@@ -38,8 +38,8 @@ export const main: APIGatewayProxyHandler = async () => {
 
     try {
         // Aurora can have long cold starts, so we extend connection timeout on migrates
-        await execa.command(
-            'node /opt/nodejs/node_modules/prisma/build/index.js migrate deploy --schema=/opt/nodejs/prisma/schema.prisma',
+        execSync(
+            `${process.execPath} /opt/nodejs/node_modules/prisma/build/index.js migrate deploy --schema=/opt/nodejs/prisma/schema.prisma`,
             {
                 env: {
                     DATABASE_URL: postgresURL.value + '&connect_timeout=45',
