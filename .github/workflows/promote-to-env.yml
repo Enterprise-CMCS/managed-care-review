@@ -1,0 +1,238 @@
+name: Promote to an environment
+
+on:
+  workflow_call:
+    inputs:
+      stage_name:
+        required: true
+        type: string
+    secrets:
+      aws_access_key_id:
+        required: true
+      aws_secret_access_key:
+        required: true
+      aws_default_region:
+        required: true
+      dynamo_connection:
+        required: true
+      iam_path:
+        required: true
+      full_iam_permissions_boundary_policy:
+        required: true
+      cloudfront_certificate_arn:
+        required: true
+      cloudfront_domain_name:
+        required: true
+      cloudfront_storybook_domain_name:
+        required: true
+      react_app_auth_mode:
+        required: true
+      infrastructure_type:
+        required: true
+      ses_source_email_address:
+        required: true
+      ses_review_team_email_address:
+        required: true
+      route_53_hosted_zone_id:
+        required: true
+      route_53_domain_name:
+        required: true
+      okta_metadata_url:
+        required: true
+      stage_prefix:
+        required: true
+      test_users_pass:
+        required: true
+
+jobs:
+  postgres:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: set variable values
+        run: ./.github/build_vars.sh set_values
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
+          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
+          DYNAMO_CONNECTION: ${{ secrets.dynamo_connection }}
+          REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
+          IAM_PATH: ${{ secrets.iam_path }}
+          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
+
+      - name: Install packages
+        working-directory: services/postgres
+        run: yarn --frozen-lockfile
+
+      - name: deploy postgres
+        id: deploy-postgres
+        run: |
+          pushd services/postgres && npx serverless deploy --stage ${{ inputs.stage_name }}
+
+  run-migrations:
+    needs: [postgres, app-api]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: read .nvmrc
+        id: node_version
+        run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
+
+      - uses: actions/setup-node@v2.4.0
+        with:
+          node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
+
+      - name: set branch_name
+        run: |
+          echo "branch_name=${{ inputs.stage_name }}" >> $GITHUB_ENV
+
+      - name: set app version
+        run: echo "APP_VERSION=$(scripts/app_version.sh)" >> $GITHUB_ENV
+
+      - name: set branch specific variable names
+        run: ./.github/build_vars.sh set_names
+
+      - name: set variable values
+        run: ./.github/build_vars.sh set_values
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
+          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
+          DYNAMO_CONNECTION: ${{ secrets.dynamo_connection }}
+          REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
+          IAM_PATH: ${{ secrets.iam_path }}
+          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
+
+      - name: Install packages
+        working-directory: services/app-api
+        run: yarn --frozen-lockfile
+
+      - name: run migrations
+        id: run-migrations
+        run: |
+          pushd services/app-api && ./scripts/invoke-migrate-lambda.sh app-api-$branch_name-migrate
+
+  app-api:
+    needs: [run-migrations]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: set variable values
+        run: ./.github/build_vars.sh set_values
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
+          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
+          DYNAMO_CONNECTION: ${{ secrets.dynamo_connection }}
+          REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
+          IAM_PATH: ${{ secrets.iam_path }}
+          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
+
+      - name: Generate graphql
+        run: ./dev generate
+
+      - name: Install packages
+        working-directory: services/app-api
+        run: yarn --frozen-lockfile
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: lambda-layers-prisma-client
+          path: ./services/app-api/lambda-layers-prisma-client
+
+      - name: Unzip prisma layer
+        run: |
+          tar -C ./services/app-api/lambda-layers-prisma-client -xf ./services/app-api/lambda-layers-prisma-client/nodejs.tar.gz
+          rm -rf ./services/app-api/lambda-layers-prisma-client/nodejs.tar.gz
+
+      - name: deploy app-api
+        id: deploy-app-api
+        run: |
+          pushd services/app-api && npx serverless deploy --stage ${{ inputs.stage_name }}
+
+  dynamodb:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: set variable values
+        run: ./.github/build_vars.sh set_values
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
+          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
+          DYNAMO_CONNECTION: ${{ secrets.dynamo_connection }}
+          REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
+          IAM_PATH: ${{ secrets.iam_path }}
+          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
+
+      - name: Install packages
+        working-directory: services/database
+        run: yarn --frozen-lockfile
+
+      - name: deploy dynamodb
+        id: deploy-dynamodb
+        run: |
+          pushd services/database && npx serverless deploy --stage ${{ inputs.stage_name }}
+
+  deploy-all:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: set variable values
+        run: ./.github/build_vars.sh set_values
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
+          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
+          DYNAMO_CONNECTION: ${{ secrets.dynamo_connection }}
+          REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
+          IAM_PATH: ${{ secrets.iam_path }}
+          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
+          INFRASTRUCTURE_TYPE: ${{ secrets.infrastructure_type }}
+          SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.ses_source_email_address }}
+          SES_REVIEW_TEAM_EMAIL_ADDRESS: ${{ secrets.ses_review_team_email_address }}
+          ROUTE_53_HOSTED_ZONE_ID: ${{ secrets.route_53_hosted_zone_id }}
+          ROUTE_53_DOMAIN_NAME: ${{ secrets.route_53_domain_name }}
+          CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets.cloudfront_certificate_arn }}
+          CLOUDFRONT_DOMAIN_NAME: ${{ secrets.cloudfront_domain_name }}
+          CLOUDFRONT_STORYBOOK_DOMAIN_NAME: ${{ secrets.cloudfront_storybook_domain_name }}
+          OKTA_METADATA_URL: ${{ secrets.okta_metadata_url }}
+          STAGE_PREFIX: ${{ secrets.stage_prefix }}
+          TEST_USERS_PASS: ${{ secrets.test_users_pass }}
+
+      - name: Generate graphql
+        run: ./dev generate
+
+      - name: deploy
+        id: deploy
+        run: |
+          # When deploying multiple copies of this quickstart to the same AWS Account (not ideal), a prefix helps prevent stepping on each other.
+          # This can optionally be set as an GitHub Actions Secret
+          ./deploy.sh ${{ inputs.stage_name }}
+
+      - name: Set application endpoint
+        run: |
+          cd services
+          endpoint=$(./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name)
+          echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
