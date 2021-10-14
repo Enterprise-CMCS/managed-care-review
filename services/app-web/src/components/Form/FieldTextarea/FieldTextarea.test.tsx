@@ -1,4 +1,3 @@
-import React from 'react'
 import { screen, render } from '@testing-library/react'
 import { FieldTextarea } from './FieldTextarea'
 import { Link } from '@trussworks/react-uswds'

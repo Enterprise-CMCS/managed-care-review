@@ -27,7 +27,7 @@ import {
     UpdateDraftSubmissionInput,
 } from '../../../gen/gqlClient'
 
-import { FieldRadio } from '../../../components/Form/FieldRadio/FieldRadio'
+import { FieldRadio } from '../../../components/Form'
 
 import {
     updatesFromSubmission,
