@@ -1,9 +1,3 @@
-export type { SubmissionTypeSummarySectionProps } from './SubmissionTypeSummarySection/SubmissionTypeSummarySection'
-export type { ContractDetailsSummarySectionProps } from './ContractDetailsSummarySection/ContractDetailsSummarySection'
-export type { RateDetailsSummarySectionProps } from './RateDetailsSummarySection/RateDetailsSummarySection'
-export type { ContactsSummarySectionProps } from './ContactsSummarySection/ContactsSummarySection'
-export type { DocumentsSummarySectionProps } from './DocumentsSummarySection/DocumentsSummarySection'
-
 export { SubmissionTypeSummarySection } from './SubmissionTypeSummarySection/SubmissionTypeSummarySection'
 export { ContractDetailsSummarySection } from './ContractDetailsSummarySection/ContractDetailsSummarySection'
 export { RateDetailsSummarySection } from './RateDetailsSummarySection/RateDetailsSummarySection'

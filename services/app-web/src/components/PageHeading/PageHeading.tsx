@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import classnames from 'classnames'
 
-import './index.scss'
+import './PageHeading.module.scss'
 
 type PageHeadingProps = {
     children: React.ReactNode
@@ -13,7 +13,7 @@ type PageHeadingProps = {
  * This heading is used to direct focus within the app for assistive tech.
  * Drawn from CMSgov/easi-app.
  */
-const PageHeading = ({
+export const PageHeading = ({
     children,
     className,
     headingLevel,
@@ -39,5 +39,3 @@ const PageHeading = ({
         </Component>
     )
 }
-
-export default PageHeading
