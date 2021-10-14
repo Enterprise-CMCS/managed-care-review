@@ -13,6 +13,43 @@ const newSubmission: DraftSubmissionType = {
     submissionType: 'CONTRACT_AND_RATES',
     submissionDescription: 'A real submission',
     documents: [],
+    managedCareEntities: [],
+    federalAuthorities: [],
+    stateContacts: [],
+    actuaryContacts: [],
+}
+
+const basicSubmission: DraftSubmissionType = {
+    createdAt: new Date(2021, 4, 10),
+    updatedAt: new Date(),
+    status: 'DRAFT',
+    stateNumber: 5,
+    id: 'test-abc-123',
+    stateCode: 'MN',
+    programID: 'snbc',
+    submissionType: 'CONTRACT_AND_RATES',
+    submissionDescription: 'A real submission',
+    documents: [],
+    contractType: 'BASE',
+    contractDateStart: new Date(2021, 4, 22),
+    contractDateEnd: new Date(2022, 4, 21),
+    managedCareEntities: [],
+    federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
+    stateContacts: [],
+    actuaryContacts: [],
+}
+
+const contractOnly: DraftSubmissionType = {
+    createdAt: new Date(2021, 4, 10),
+    updatedAt: new Date(),
+    status: 'DRAFT',
+    stateNumber: 5,
+    id: 'test-abc-123',
+    stateCode: 'MN',
+    programID: 'snbc',
+    submissionType: 'CONTRACT_ONLY',
+    submissionDescription: 'A real submission',
+    documents: [],
     contractType: 'BASE',
     contractDateStart: new Date(2021, 4, 22),
     contractDateEnd: new Date(2022, 4, 21),
@@ -343,6 +380,8 @@ const someOthers: DraftSubmissionType = {
 describe('toProtoBuffer', () => {
     test.each([
         [newSubmission, ''],
+        [basicSubmission, ''],
+        [contractOnly, ''],
         [moreFullSubmission, ''],
         [nowWithDocuments, ''],
         [fullRateAmendment, ''],

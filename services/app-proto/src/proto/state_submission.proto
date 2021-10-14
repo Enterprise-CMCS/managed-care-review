@@ -3,18 +3,20 @@ package statesubmission;
 import "google/protobuf/timestamp.proto";
 
 message StateSubmissionInfo {
-  string id = 1;
-  google.protobuf.Timestamp created_at = 2;
-  google.protobuf.Timestamp updated_at = 3;
-  SubmissionStatus submission_status = 4;
-  StateCode state_code = 5;
-  int32 state_number = 6;
-  repeated string program_ids = 7;
-  SubmissionType submission_type = 8;
-  string submission_description = 9;
-  repeated Contact state_contacts = 10;
-  ContractInfo contract_info = 11;
-  repeated Document documents = 12;
+  string proto_name = 1;
+  int32 proto_version = 2;
+  string id = 3;
+  optional Date created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
+  SubmissionStatus submission_status = 6;
+  StateCode state_code = 7;
+  int32 state_number = 8;
+  repeated string program_ids = 9;
+  SubmissionType submission_type = 10;
+  string submission_description = 11;
+  repeated Contact state_contacts = 12;
+  ContractInfo contract_info = 13;
+  repeated Document documents = 14;
 
   repeated RateInfo rate_infos = 50;
 }

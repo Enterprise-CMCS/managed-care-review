@@ -2,9 +2,9 @@ import { statesubmission } from '../../gen/stateSubmissionProto'
 import { draftSubmissionTypeSchema } from '../../gen/draftSubmissionSchema'
 import {
     DraftSubmissionType,
-    StateSubmissionType,
     ActuarialFirmType,
-    CapitationRatesAmendedReason,
+    ContractAmendmentInfo,
+    FederalAuthority,
 } from '../../../app-web/src/common-code/domain-models'
 
 type RecursivelyReplaceNullWithUndefined<T> = T extends null
@@ -93,43 +93,49 @@ const protoDateToDomain = (
 /*
     Convert proto enum (e.g. SUBMISSION_TYPE_CONTRACT_ONLY) to domain enum (e.g. CONTRACT_ONLY)
 */
-function protoEnumToDomain(
-    defaultProtoValue: string,
-    protoEnum: string
-): string {
-    const protoEnumString = removeEnumPrefix(defaultProtoValue, protoEnum)
-    return protoEnumString
-}
 
 type StandardEnum<T> = {
     [id: string]: T | string
     [nu: number]: string
 }
 
-function betterEnumToDomain<T extends StandardEnum<unknown>>(
+function betterEnumToDomain<T extends StandardEnum<unknown>, K extends string>(
     protoEnum: T,
-    key: number
-) {
-    const domainEnum = protoEnumToDomain(protoEnum[0], protoEnum[key])
-    return domainEnum
-}
+    key: number | undefined | null
+): K | undefined {
+    // proto is returning a default value of 0 for undefined enums
+    if (key === undefined || key === null || key == 0) {
+        return undefined
+    }
+    const domainEnum = removeEnumPrefix(protoEnum[0], protoEnum[key])
 
-// protoEnumToDomain(
-//             statesubmission.SubmissionType[0],
-//             statesubmission.SubmissionType[submissionType]
-//         ) as DraftSubmissionType['submissionType']
+    return domainEnum as K
+}
 
 /*
     Convert array of proto enums to domain enums 
+    I couldn't figure out a signature to make it do the casting itself so
+    we still need to cast this result for enums. 
 */
-// function protoEnumArrayToDomain<T extends StandardEnum<unknown>>(
-//     protoEnum: T,
-//     protoEnumArray: number[]
-// ): string[] {
-//     return protoEnumArray.map((enumVal) =>
-//         betterEnumToDomain(protoEnum, enumVal)
-//     )
-// }
+function protoEnumArrayToDomain<T extends StandardEnum<unknown>>(
+    protoEnum: T,
+    protoEnumArray: number[] | undefined | null
+): string[] {
+    if (!protoEnumArray) {
+        return []
+    }
+
+    // since the enum array itself can have null values we compress here
+    const enums = []
+    for (const enumVal of protoEnumArray) {
+        const converted = betterEnumToDomain(protoEnum, enumVal)
+        if (converted) {
+            enums.push(converted)
+        }
+    }
+
+    return enums
+}
 
 /* 
 Remove the proto enum prefix using the default value of that field
@@ -156,6 +162,109 @@ type RecursivePartial<T> = {
     [P in keyof T]?: RecursivePartial<T[P]>
 }
 
+// Parsers for each sub type of DraftSubmissionType
+
+function parseProtoDocuments(
+    docs: statesubmission.IDocument[] | null | undefined
+): RecursivePartial<DraftSubmissionType['documents']> {
+    if (docs === null || docs === undefined) {
+        return []
+    }
+
+    return replaceNullsWithUndefineds(docs).map((doc) => ({
+        s3URL: doc.s3Url,
+        name: doc.name,
+    }))
+}
+
+//
+type CapitationRateI =
+    statesubmission.ContractInfo.IContractAmendmentInfo['capitationRatesAmendedInfo']
+
+function parseCapitationRates(
+    capRates: CapitationRateI | null | undefined
+): ContractAmendmentInfo['capitationRatesAmendedInfo'] | undefined {
+    if (!capRates) {
+        return undefined
+    }
+
+    return {
+        reason: betterEnumToDomain(
+            statesubmission.CapitationRateAmendmentReason,
+            capRates.reason
+        ),
+        otherReason: capRates.otherReason ?? undefined,
+    }
+}
+
+function parseContractAmendment(
+    amendment: statesubmission.IContractInfo['contractAmendmentInfo']
+): RecursivePartial<DraftSubmissionType['contractAmendmentInfo']> {
+    if (!amendment) {
+        return undefined
+    }
+
+    const cleanAmendment = replaceNullsWithUndefineds(amendment)
+
+    return {
+        // items being amended are an enum in proto but not in domain
+        itemsBeingAmended: protoEnumArrayToDomain(
+            statesubmission.AmendedItem,
+            amendment.amendableItems
+        ),
+
+        capitationRatesAmendedInfo: parseCapitationRates(
+            cleanAmendment.capitationRatesAmendedInfo
+        ),
+        otherItemBeingAmended: cleanAmendment.otherAmendableItem,
+        relatedToCovid19: cleanAmendment.relatedToCovid_19,
+        relatedToVaccination: cleanAmendment.relatedToVaccination,
+    }
+}
+
+function parseActuaryContacts(
+    rateInfo: statesubmission.IRateInfo | null | undefined
+): RecursivePartial<DraftSubmissionType['actuaryContacts']> {
+    if (!rateInfo?.actuaryContacts) {
+        return []
+    }
+
+    const actuaryContacts = replaceNullsWithUndefineds(
+        rateInfo.actuaryContacts
+    ).map((aContact) => {
+        const cleanContact = replaceNullsWithUndefineds(aContact)
+
+        return {
+            name: cleanContact?.contact?.name,
+            titleRole: cleanContact?.contact?.titleRole,
+            email: cleanContact?.contact?.email,
+            actuarialFirm: betterEnumToDomain(
+                statesubmission.ActuarialFirmType,
+                aContact.actuarialFirmType
+            ) as ActuarialFirmType,
+            actuarialFirmOther: cleanContact.actuarialFirmOther,
+        }
+    })
+
+    return actuaryContacts
+}
+
+function parseProtoRateAmendment(
+    rateAmendment:
+        | statesubmission.RateInfo['rateAmendmentInfo']
+        | null
+        | undefined
+): RecursivePartial<DraftSubmissionType['rateAmendmentInfo']> {
+    if (!rateAmendment) {
+        return undefined
+    }
+
+    return {
+        effectiveDateEnd: protoDateToDomain(rateAmendment.effectiveDateEnd),
+        effectiveDateStart: protoDateToDomain(rateAmendment.effectiveDateStart),
+    }
+}
+
 // TO CONSIDER: determine what type we have - draft submission or state submission and construct accordingly
 const toDomain = (buff: Uint8Array): DraftSubmissionType | Error => {
     const stateSubmissionMessage = decodeOrError(buff)
@@ -165,10 +274,11 @@ const toDomain = (buff: Uint8Array): DraftSubmissionType | Error => {
     }
 
     const {
+        protoName,
+        protoVersion,
         id,
         createdAt,
         updatedAt,
-        submissionStatus,
         stateCode,
         stateNumber,
         programIds,
@@ -176,9 +286,17 @@ const toDomain = (buff: Uint8Array): DraftSubmissionType | Error => {
         submissionDescription,
         stateContacts,
         contractInfo,
-        documents,
         rateInfos,
     } = stateSubmissionMessage
+
+    // First things first, let's check the protoName and protoVersion
+    if (protoName !== 'STATE_SUBMISSION' && protoVersion !== 1) {
+        console.log(
+            `WARNING: We are unboxing a proto our code doesn't recognize:`,
+            protoName,
+            protoVersion
+        )
+    }
 
     const cleanedStateContacts = replaceNullsWithUndefineds(stateContacts)
 
@@ -187,38 +305,9 @@ const toDomain = (buff: Uint8Array): DraftSubmissionType | Error => {
     // Protos support multiple rate infos for now, but we only support one in our domain models
     // so if there are multiple we'll drop the extras.
     let rateInfo: statesubmission.IRateInfo | undefined = undefined
-    let actuaryContacts: RecursivePartial<
-        DraftSubmissionType['actuaryContacts']
-    > = []
     if (rateInfos.length > 0) {
         rateInfo = rateInfos[0]
-
-        console.log('RATINGE', JSON.stringify(rateInfo))
-
-        // pull out the actuary contacts
-        if (rateInfo.actuaryContacts) {
-            actuaryContacts = rateInfo.actuaryContacts.map((aContact) => {
-                const firm = aContact.actuarialFirmType
-                    ? (betterEnumToDomain(
-                          statesubmission.ActuarialFirmType,
-                          aContact.actuarialFirmType
-                      ) as ActuarialFirmType)
-                    : undefined
-
-                const cleanContact = replaceNullsWithUndefineds(aContact)
-
-                return {
-                    name: cleanContact?.contact?.name,
-                    titleRole: cleanContact?.contact?.titleRole,
-                    email: cleanContact?.contact?.email,
-                    actuarialFirm: firm,
-                    actuarialFirmOther: cleanContact.actuarialFirmOther,
-                }
-            })
-        }
     }
-
-    console.log('writing', actuaryContacts)
 
     // some kind of recursive parser would be really nice here. io-ts might be the easy answer for that
 
@@ -226,15 +315,6 @@ const toDomain = (buff: Uint8Array): DraftSubmissionType | Error => {
     // some kind of wrapper, that returns whatever type you put in it Or and error type with a list of errors?
 
     // the type you put in takes types that take the same
-
-    const errors: Error[] = []
-    let hasErrs = false
-
-    const maybeCreatedAt = protoDateToDomain(createdAt)
-
-    const maybeContractDateStart = protoDateToDomain(
-        stateSubmissionMessage.contractInfo?.contractDateStart
-    )
 
     // contacts we have to map in.
     // For now, if a contact is incomplete, we delete it.
@@ -251,134 +331,64 @@ const toDomain = (buff: Uint8Array): DraftSubmissionType | Error => {
     // it would be nice to type this stronger...
     // could at least say it has keys of domain model?
     // we really want a recursive partial.
+
     const maybeDomainModel: RecursivePartial<DraftSubmissionType> = {
         id: id,
         status: 'DRAFT',
-        createdAt: maybeCreatedAt,
+        createdAt: protoDateToDomain(createdAt),
         updatedAt: protoTimestampToDomain(updatedAt),
         submissionType: betterEnumToDomain(
             statesubmission.SubmissionType,
             submissionType
-        ) as DraftSubmissionType['submissionType'],
+        ),
         stateCode: betterEnumToDomain(statesubmission.StateCode, stateCode),
         submissionDescription: submissionDescription,
         stateNumber: stateNumber,
 
         programID: programIds[0],
 
-        contractType: stateSubmissionMessage?.contractInfo?.contractType
-            ? (betterEnumToDomain(
-                  statesubmission.ContractType,
-                  stateSubmissionMessage.contractInfo.contractType
-              ) as DraftSubmissionType['contractType'])
-            : undefined,
+        contractType: betterEnumToDomain(
+            statesubmission.ContractType,
+            stateSubmissionMessage?.contractInfo?.contractType
+        ),
 
-        contractDateStart: stateSubmissionMessage.contractInfo
-            ?.contractDateStart
-            ? protoDateToDomain(
-                  stateSubmissionMessage.contractInfo.contractDateStart
-              )
-            : undefined,
-        contractDateEnd: stateSubmissionMessage?.contractInfo?.contractDateEnd
-            ? protoDateToDomain(
-                  stateSubmissionMessage.contractInfo.contractDateEnd
-              )
-            : undefined,
-        managedCareEntities: stateSubmissionMessage?.contractInfo
-            ?.managedCareEntities
-            ? stateSubmissionMessage?.contractInfo?.managedCareEntities.map(
-                  (entity) =>
-                      betterEnumToDomain(
-                          statesubmission.ManagedCareEntity,
-                          entity
-                      ) as DraftSubmissionType['managedCareEntities'][number]
-              )
-            : [],
-        federalAuthorities: stateSubmissionMessage?.contractInfo
-            ?.federalAuthorities
-            ? stateSubmissionMessage?.contractInfo?.federalAuthorities.map(
-                  (protoEnum) =>
-                      betterEnumToDomain(
-                          statesubmission.FederalAuthority,
-                          protoEnum
-                      ) as DraftSubmissionType['federalAuthorities'][number]
-              )
-            : [],
+        contractDateStart: protoDateToDomain(
+            stateSubmissionMessage.contractInfo?.contractDateStart
+        ),
+        contractDateEnd: protoDateToDomain(
+            stateSubmissionMessage.contractInfo?.contractDateEnd
+        ),
+        managedCareEntities: protoEnumArrayToDomain(
+            statesubmission.ManagedCareEntity,
+            stateSubmissionMessage?.contractInfo?.managedCareEntities
+        ),
+        federalAuthorities: protoEnumArrayToDomain(
+            statesubmission.FederalAuthority,
+            stateSubmissionMessage?.contractInfo?.federalAuthorities
+        ) as Partial<FederalAuthority[]>,
 
-        contractAmendmentInfo: cleanContractInfo?.contractAmendmentInfo
-            ? {
-                  // items being amended are an enum in proto but not in domain
-                  itemsBeingAmended:
-                      cleanContractInfo.contractAmendmentInfo.amendableItems?.map(
-                          (item) =>
-                              betterEnumToDomain(
-                                  statesubmission.AmendedItem,
-                                  item
-                              )
-                      ) ?? [],
-
-                  capitationRatesAmendedInfo: cleanContractInfo
-                      .contractAmendmentInfo.capitationRatesAmendedInfo
-                      ? {
-                            reason: cleanContractInfo.contractAmendmentInfo
-                                .capitationRatesAmendedInfo.reason
-                                ? (betterEnumToDomain(
-                                      statesubmission.CapitationRateAmendmentReason,
-                                      cleanContractInfo.contractAmendmentInfo
-                                          .capitationRatesAmendedInfo.reason
-                                  ) as CapitationRatesAmendedReason)
-                                : undefined,
-                            otherReason:
-                                cleanContractInfo.contractAmendmentInfo
-                                    .capitationRatesAmendedInfo.otherReason,
-                        }
-                      : undefined,
-                  otherItemBeingAmended:
-                      cleanContractInfo.contractAmendmentInfo
-                          .otherAmendableItem,
-                  relatedToCovid19:
-                      cleanContractInfo.contractAmendmentInfo.relatedToCovid_19,
-                  relatedToVaccination:
-                      cleanContractInfo.contractAmendmentInfo
-                          .relatedToVaccination,
-              }
-            : undefined,
-
-        rateAmendmentInfo: rateInfo?.rateAmendmentInfo
-            ? {
-                  effectiveDateEnd: protoDateToDomain(
-                      rateInfo.rateAmendmentInfo.effectiveDateEnd
-                  ),
-                  effectiveDateStart: protoDateToDomain(
-                      rateInfo.rateAmendmentInfo.effectiveDateStart
-                  ),
-              }
-            : undefined,
-        rateType: rateInfo?.rateType
-            ? (betterEnumToDomain(
-                  statesubmission.RateType,
-                  rateInfo.rateType
-              ) as DraftSubmissionType['rateType'])
-            : undefined,
+        contractAmendmentInfo: parseContractAmendment(
+            contractInfo?.contractAmendmentInfo
+        ),
+        rateAmendmentInfo: parseProtoRateAmendment(rateInfo?.rateAmendmentInfo),
+        rateType: betterEnumToDomain(
+            statesubmission.RateType,
+            rateInfo?.rateType
+        ),
         rateDateStart: protoDateToDomain(rateInfo?.rateDateStart),
         rateDateEnd: protoDateToDomain(rateInfo?.rateDateEnd),
         rateDateCertified: protoDateToDomain(rateInfo?.rateDateCertified),
-        actuaryCommunicationPreference: rateInfo?.actuaryCommunicationPreference
-            ? (betterEnumToDomain(
-                  statesubmission.ActuaryCommunicationType,
-                  rateInfo.actuaryCommunicationPreference
-              ) as DraftSubmissionType['actuaryCommunicationPreference'])
-            : undefined,
+        actuaryCommunicationPreference: betterEnumToDomain(
+            statesubmission.ActuaryCommunicationType,
+            rateInfo?.actuaryCommunicationPreference
+        ),
         stateContacts: cleanedStateContacts,
-        actuaryContacts: actuaryContacts,
-        documents: replaceNullsWithUndefineds(
-            stateSubmissionMessage.documents
-        ).map((doc) => ({
-            s3URL: doc.s3Url,
-            name: doc.name,
-        })),
+        actuaryContacts: parseActuaryContacts(rateInfo),
+        documents: parseProtoDocuments(stateSubmissionMessage.documents),
     }
 
+    // Now that we've gotten things into our domain format. We confirm that all the required
+    // fields are present to turn this into a DraftSubmissionType or a StateSubmissionType
     const parseResult = draftSubmissionTypeSchema.safeParse(maybeDomainModel)
 
     if (parseResult.success == false) {

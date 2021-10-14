@@ -120,4 +120,5 @@ export type {
     ManagedCareEntity,
     DraftSubmissionType,
     AmendableItems,
+    ContractAmendmentInfo,
 }
