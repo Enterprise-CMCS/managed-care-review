@@ -153,11 +153,6 @@ jobs:
           DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
 
-      - name: set branch_name
-        shell: bash
-        run: |
-          echo "branch_name=$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
-
       - name: Install packages
         run: yarn install --frozen-lockfile
 
@@ -168,10 +163,10 @@ jobs:
         run: ./dev generate
 
       - name: Set application endpoint
+        working-directory: services
         run: |
-          cd services
           endpoint=$(./output.sh ui CloudFrontEndpointUrl $branch_name)
-          echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
+          echo "APPLICATION_ENDPOINT=$endpoint" >> $GITHUB_ENV
 
       - name: Create Test Users
         run: |
