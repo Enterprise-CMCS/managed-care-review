@@ -165,8 +165,7 @@ jobs:
       - name: Set application endpoint
         working-directory: services
         run: |
-          endpoint=$(./output.sh ui CloudFrontEndpointUrl $branch_name)
-          echo "APPLICATION_ENDPOINT=$endpoint" >> $GITHUB_ENV
+          echo "APPLICATION_ENDPOINT=$(./output.sh ui CloudFrontEndpointUrl $branch_name)" >> $GITHUB_ENV
 
       - name: Create Test Users
         run: |
