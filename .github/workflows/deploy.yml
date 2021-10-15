@@ -136,7 +136,7 @@ jobs:
 
   cypress:
     name: run-cypress
-    needs: [deploy]
+    needs: [deploy-branch]
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
