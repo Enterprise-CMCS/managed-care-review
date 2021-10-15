@@ -42,8 +42,6 @@ on:
         required: false
       okta_metadata_url:
         required: true
-      stage_prefix:
-        required: true
       test_users_pass:
         required: true
 
@@ -221,7 +219,6 @@ jobs:
           CLOUDFRONT_DOMAIN_NAME: ${{ secrets.cloudfront_domain_name }}
           CLOUDFRONT_STORYBOOK_DOMAIN_NAME: ${{ secrets.cloudfront_storybook_domain_name }}
           OKTA_METADATA_URL: ${{ secrets.okta_metadata_url }}
-          STAGE_PREFIX: ${{ secrets.stage_prefix }}
           TEST_USERS_PASS: ${{ secrets.test_users_pass }}
 
       - name: Generate graphql
