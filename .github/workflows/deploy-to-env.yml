@@ -121,7 +121,7 @@ jobs:
           pushd services/app-api && ./scripts/invoke-migrate-lambda.sh app-api-$branch_name-migrate
 
   app-api:
-    needs: [run-migrations]
+    needs: [postgres]
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
