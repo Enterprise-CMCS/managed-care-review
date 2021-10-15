@@ -48,7 +48,6 @@ jobs:
           OKTA_METADATA_URL: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_OKTA_METADATA_URL] || secrets.OKTA_METADATA_URL }}
           IAM_PATH: ${{ secrets.IAM_PATH }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY] || secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-          STAGE_PREFIX: ${{ secrets.STAGE_PREFIX }}
           DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
 
@@ -99,7 +98,7 @@ jobs:
           name: lambda-layers-prisma-client
           path: ./services/app-api/lambda-layers-prisma-client
 
-  get-branch-name:
+  get-branch-name-vars:
     runs-on: ubuntu-latest
     outputs:
       branch-name: ${{ steps.branch-name.outputs.stage-name-for-branch}}
@@ -114,24 +113,21 @@ jobs:
           echo "::set-output name=stage-name-for-branch::$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})"
 
   deploy-branch:
-    needs: [build-prisma-client-lambda-layer, get-branch-name]
+    needs: [build-prisma-client-lambda-layer, get-branch-name-vars]
     uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@f79262ad9537a861aa7fa5dd73b3c1fa4cdc1873
     with:
-      stage_name: ${{ needs.get-branch-name.outputs.branch-name}}
+      stage_name: ${{ needs.get-branch-name-vars.outputs.branch-name}}
       env_name: dev
     secrets:
-      aws_access_key_id: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_ACCESS_KEY_ID] || secrets.AWS_ACCESS_KEY_ID }}
-      aws_secret_access_key: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_SECRET_ACCESS_KEY] || secrets.AWS_SECRET_ACCESS_KEY }}
-      aws_default_region: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_DEFAULT_REGION] || secrets.AWS_DEFAULT_REGION }}
-      infrastructure_type: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_INFRASTRUCTURE_TYPE] || secrets.INFRASTRUCTURE_TYPE || 'development' }}
-      ses_source_email_address: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_SES_SOURCE_EMAIL_ADDRESS] || secrets.SES_SOURCE_EMAIL_ADDRESS }}
-      ses_review_team_email_address: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_SES_REVIEW_TEAM_EMAIL_ADDRESS] || secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
-      route_53_hosted_zone_id: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_ROUTE_53_HOSTED_ZONE_ID] }}
-      route_53_domain_name: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_ROUTE_53_DOMAIN_NAME] }}
-      okta_metadata_url: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_OKTA_METADATA_URL] || secrets.OKTA_METADATA_URL }}
+      aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
+      infrastructure_type: ${{ secrets.INFRASTRUCTURE_TYPE || 'development' }}
+      ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
+      ses_review_team_email_address: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
+      okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
       iam_path: ${{ secrets.IAM_PATH }}
-      full_iam_permissions_boundary_policy: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY] || secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-      stage_prefix: ${{ secrets.STAGE_PREFIX }}
+      full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
       dynamo_connection: ${{ secrets.DYNAMO_CONNECTION}}
       cloudfront_certificate_arn: ${{ secrets.DEV_CLOUDFRONT_CERTIFICATE_ARN }}
       cloudfront_domain_name: ${{ secrets.DEV_CLOUDFRONT_DOMAIN_NAME }}
@@ -166,7 +162,6 @@ jobs:
           OKTA_METADATA_URL: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_OKTA_METADATA_URL] || secrets.OKTA_METADATA_URL }}
           IAM_PATH: ${{ secrets.IAM_PATH }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY] || secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-          STAGE_PREFIX: ${{ secrets.STAGE_PREFIX }}
           DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
 
@@ -179,7 +174,7 @@ jobs:
       - name: Create Test Users
         run: |
           # this script was compiled along with ./dev above. If that changes, run `tsc` to compile it
-          node ./build_dev/scripts/add_cypress_test_users.js $STAGE_PREFIX$branch_name $TEST_USERS_PASS
+          node ./build_dev/scripts/add_cypress_test_users.js $branch_name $TEST_USERS_PASS
 
       - name: Cypress run
         id: cypress
