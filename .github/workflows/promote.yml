@@ -41,7 +41,7 @@ jobs:
 
   promote-dev:
     needs: [build-prisma-client-lambda-layer]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@${{ GITHUB_SHA }}
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@$f79262ad9537a861aa7fa5dd73b3c1fa4cdc1873
     with:
       stage_name: main
       env_name: dev
@@ -90,7 +90,7 @@ jobs:
 
   promote-val:
     needs: [promote-dev]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@${{ GITHUB_SHA }}
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@f79262ad9537a861aa7fa5dd73b3c1fa4cdc1873
     with:
       stage_name: main
       env_name: val
@@ -133,7 +133,7 @@ jobs:
           path: tests/cypress/videos
 
   promote-prod:
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@${{ GITHUB_SHA }}
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@$f79262ad9537a861aa7fa5dd73b3c1fa4cdc1873
     with:
       stage_name: main
       env_name: prod

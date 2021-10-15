@@ -237,5 +237,5 @@ jobs:
       - name: Set application endpoint
         run: |
           cd services
-          endpoint=$(./output.sh ui CloudFrontEndpointUrl $STAGE_PREFIX$branch_name)
+          endpoint=$(./output.sh ui CloudFrontEndpointUrl ${{ inputs.stage_name }})
           echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
