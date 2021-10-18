@@ -59,6 +59,15 @@ jobs:
             ${{github.workspace}}/services/app-api/coverage/lcov.info:lcov
             ${{github.workspace}}/services/app-web/coverage/lcov.info:lcov
 
+      - uses: chrnorm/deployment-action@releases/v1
+        name: Create GitHub deployment
+        id: ghdeployment
+        with:
+          token: '${{ github.token }}'
+          environment: review-apps
+          description: stack ${{ env.branch_name }}
+          initial_status: in_progress
+
   build-prisma-client-lambda-layer:
     name: build - postgres prisma layer
     needs: [unit-tests]
@@ -125,7 +134,7 @@ jobs:
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
       dynamo_connection: ${{ secrets.DYNAMO_CONNECTION}}
       test_users_pass: ${{ secrets.TEST_USERS_PASS}}
-      react_app_auth_mode: IDM
+      react_app_auth_mode: ${{ secrets.REACT_APP_AUTH_MODE }}
 
   cypress:
     name: run-cypress
@@ -171,6 +180,23 @@ jobs:
           cd services
           endpoint=$(./output.sh ui CloudFrontEndpointUrl $branch_name)
           echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
+
+      - name: Update deployment status (success)
+        if: success()
+        uses: chrnorm/deployment-status@releases/v1
+        with:
+          token: '${{ github.token }}'
+          environment_url: ${{env.APPLICATION_ENDPOINT}}
+          state: 'success'
+          deployment_id: ${{ steps.ghdeployment.outputs.deployment_id }}
+
+      - name: Update deployment status (failure)
+        if: failure() && steps.deploy.outcome == 'failure'
+        uses: chrnorm/deployment-status@releases/v1
+        with:
+          token: '${{ github.token }}'
+          state: 'failure'
+          deployment_id: ${{ steps.ghdeployment.outputs.deployment_id }}
 
       - name: Create Test Users
         run: |
