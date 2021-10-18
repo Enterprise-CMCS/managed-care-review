@@ -4,6 +4,7 @@
     "description": "app-proto Typescript definitions and helpers",
     "scripts": {
         "protogen": "yarn proto:compile && yarn proto:ts",
+        "protogen:watch": "find src | entr yarn protogen",
         "proto:compile": "rm -rf gen && mkdir gen && pbjs -t static-module -w commonjs -o ../app-web/src/gen/stateSubmissionProto.js src/state_submission.proto",
         "proto:ts": "pbts -o ../app-web/src/gen/stateSubmissionProto.d.ts ../app-web/src/gen/stateSubmissionProto.js",
         "test": "jest --watch",

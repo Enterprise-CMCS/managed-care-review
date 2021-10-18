@@ -14,4 +14,5 @@ export {
     compileGraphQLTypesWatchOnce,
     compileGraphQLTypesOnce,
 } from './graphql.js'
+export { compileProto } from './proto.js'
 export { installPrismaDeps, runPostgresLocally } from './postgres.js'

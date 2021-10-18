@@ -6,11 +6,13 @@ import {
     compileGraphQLTypesOnce,
     installWebDepsOnce,
 } from '../local/index.js'
+import { compileProto } from '../local/proto.js'
 
 export async function runWebTestsWatch(jestArgs: string[]) {
     const runner = new LabeledProcessRunner()
 
     compileGraphQLTypesWatchOnce(runner)
+    compileProto(runner)
 
     await installWebDepsOnce(runner)
 
