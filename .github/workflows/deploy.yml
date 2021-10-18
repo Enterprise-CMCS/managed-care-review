@@ -33,7 +33,7 @@ jobs:
         shell: bash
         run: ./.github/build_vars.sh set_values
         env:
-          REACT_APP_AUTH_MODE: ${{ secrets.REACT_APP_AUTH_MODE }}
+          REACT_APP_AUTH_MODE: AWS_COGNITO
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
@@ -134,7 +134,7 @@ jobs:
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
       dynamo_connection: ${{ secrets.DYNAMO_CONNECTION}}
       test_users_pass: ${{ secrets.TEST_USERS_PASS}}
-      react_app_auth_mode: ${{ secrets.REACT_APP_AUTH_MODE }}
+      react_app_auth_mode: AWS_COGNITO
 
   cypress:
     name: run-cypress
@@ -149,7 +149,7 @@ jobs:
       - name: set variable values
         run: ./.github/build_vars.sh set_values
         env:
-          REACT_APP_AUTH_MODE: ${{ secrets.REACT_APP_AUTH_MODE }}
+          REACT_APP_AUTH_MODE: AWS_COGNITO
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
