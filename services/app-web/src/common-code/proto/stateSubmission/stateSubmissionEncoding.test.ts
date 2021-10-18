@@ -1,11 +1,11 @@
-import { toProtoBuffer } from '../src/stateSubmissionEncoding'
-import { statesubmission } from '../gen/stateSubmissionProto'
-import { toDomain } from '../src/stateSubmissionEncoding'
+import { toProtoBuffer } from './toProtoBuffer'
+import { statesubmission } from '../../../gen/stateSubmissionProto'
+import { toDomain } from './toDomain'
 import {
     DraftSubmissionType,
     isStateSubmission,
     StateSubmissionType,
-} from '../../app-web/src/common-code/domain-models'
+} from '../../domain-models'
 import { ZodError } from 'zod'
 
 const newSubmission: DraftSubmissionType = {

@@ -1,9 +1,9 @@
-import { statesubmission, google } from '../../gen/stateSubmissionProto'
+import { statesubmission, google } from '../../../gen/stateSubmissionProto'
 import {
     DraftSubmissionType,
     StateSubmissionType,
     isStateSubmission,
-} from '../../../app-web/src/common-code/domain-models'
+} from '../../domain-models'
 
 /*
     Convert domain date to proto timestamp

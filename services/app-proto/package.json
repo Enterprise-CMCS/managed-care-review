@@ -2,24 +2,16 @@
     "name": "app-proto",
     "version": "1.0.0",
     "description": "app-proto Typescript definitions and helpers",
-    "main": "index.ts",
     "scripts": {
         "protogen": "yarn proto:compile && yarn proto:ts",
-        "proto:compile": "rm -rf gen && mkdir gen && pbjs -t static-module -w commonjs -o gen/stateSubmissionProto.js src/proto/state_submission.proto",
-        "proto:ts": "pbts -o gen/stateSubmissionProto.d.ts gen/stateSubmissionProto.js",
+        "proto:compile": "rm -rf gen && mkdir gen && pbjs -t static-module -w commonjs -o ../app-web/src/gen/stateSubmissionProto.js src/state_submission.proto",
+        "proto:ts": "pbts -o ../app-web/src/gen/stateSubmissionProto.d.ts ../app-web/src/gen/stateSubmissionProto.js",
         "test": "jest --watch",
         "test:once": "jest"
     },
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "jest": "^27.2.1",
-        "protobufjs": "^6.11.2",
-        "ts-jest": "^27.0.5",
-        "ts-node": "^10.2.1"
-    },
-    "devDependencies": {
-        "@types/jest": "^27.0.2",
-        "@types/node": "^16.9.6"
+        "protobufjs": "^6.11.2"
     }
 }

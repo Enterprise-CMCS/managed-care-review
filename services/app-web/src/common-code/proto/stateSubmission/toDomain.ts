@@ -1,5 +1,5 @@
-import { statesubmission } from '../../gen/stateSubmissionProto'
-import { draftSubmissionTypeSchema } from '../../gen/draftSubmissionSchema'
+import { statesubmission } from '../../../gen/stateSubmissionProto'
+import { draftSubmissionTypeSchema } from './draftSubmissionSchema'
 import {
     DraftSubmissionType,
     StateSubmissionType,
@@ -7,7 +7,7 @@ import {
     ContractAmendmentInfo,
     FederalAuthority,
     isStateSubmission,
-} from '../../../app-web/src/common-code/domain-models'
+} from '../../domain-models'
 
 /**
  * Recursively replaces all nulls with undefineds.
