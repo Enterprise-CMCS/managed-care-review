@@ -39,7 +39,7 @@ const domainDateToProtoTimestamp = (
 /*
     Convert domain enum (e.g. CONTRACT_ONLY) to proto enum (e.g. SUBMISSION_TYPE_CONTRACT_ONLY)
 */
-function domainEnumToProto(
+function domainEnumStringToProtoString(
     defaultProtoValue: string,
     domainEnum: string
 ): string {
@@ -54,7 +54,7 @@ type StandardEnum<T> = {
     [nu: number]: string
 }
 
-function betterEnumToProto<T extends StandardEnum<unknown>>(
+function domainEnumToProto<T extends StandardEnum<unknown>>(
     domainEnum: string | undefined,
     protoEnum: T
 ) {
@@ -62,7 +62,7 @@ function betterEnumToProto<T extends StandardEnum<unknown>>(
         return undefined
     }
 
-    const protoKey = domainEnumToProto(protoEnum[0], domainEnum)
+    const protoKey = domainEnumStringToProtoString(protoEnum[0], domainEnum)
 
     return protoEnum[protoKey as keyof T]
 }
@@ -77,7 +77,7 @@ function domainEnumArrayToProto<T extends StandardEnum<unknown>>(
     const enums = []
 
     for (const domainEnum of domainEnumArray) {
-        const penum = betterEnumToProto<T>(domainEnum, protoEnum)
+        const penum = domainEnumToProto<T>(domainEnum, protoEnum)
         if (penum) {
             enums.push(penum)
         }
@@ -122,12 +122,12 @@ const toProtoBuffer = (
 
         createdAt: domainDateToProtoDate(domainData.createdAt),
         updatedAt: domainDateToProtoTimestamp(domainData.updatedAt),
-        submissionType: betterEnumToProto(
+        submissionType: domainEnumToProto(
             domainData.submissionType,
             statesubmission.SubmissionType
         ),
 
-        stateCode: betterEnumToProto(
+        stateCode: domainEnumToProto(
             domainData.stateCode,
             statesubmission.StateCode
         ),
@@ -136,7 +136,7 @@ const toProtoBuffer = (
         // eventually this will need to be an array of ids
         programIds: [domainData.programID],
         contractInfo: {
-            contractType: betterEnumToProto(
+            contractType: domainEnumToProto(
                 domainData.contractType,
                 statesubmission.ContractType
             ),
@@ -165,7 +165,7 @@ const toProtoBuffer = (
                       ),
                       capitationRatesAmendedInfo: {
                           ...contractAmendmentInfo?.capitationRatesAmendedInfo,
-                          reason: betterEnumToProto(
+                          reason: domainEnumToProto(
                               contractAmendmentInfo?.capitationRatesAmendedInfo
                                   ?.reason,
                               statesubmission.CapitationRateAmendmentReason
@@ -177,7 +177,7 @@ const toProtoBuffer = (
         // 9.21 currently only ever one rate on a domain model, eventually this will be a map
         rateInfos: [
             {
-                rateType: betterEnumToProto(
+                rateType: domainEnumToProto(
                     domainData.rateType,
                     statesubmission.RateType
                 ),
@@ -188,7 +188,7 @@ const toProtoBuffer = (
                 ),
                 actuaryContacts: domainData.actuaryContacts.map(
                     (actuaryContact) => {
-                        const firmType = betterEnumToProto(
+                        const firmType = domainEnumToProto(
                             actuaryContact.actuarialFirm,
                             statesubmission.ActuarialFirmType
                         )
@@ -213,7 +213,7 @@ const toProtoBuffer = (
                         rateAmendmentInfo.effectiveDateEnd
                     ),
                 },
-                actuaryCommunicationPreference: betterEnumToProto(
+                actuaryCommunicationPreference: domainEnumToProto(
                     domainData.actuaryCommunicationPreference,
                     statesubmission.ActuaryCommunicationType
                 ),
@@ -225,10 +225,8 @@ const toProtoBuffer = (
         })),
     }
 
+    // turn the above literal into a byte array.
     const protoMessage = new statesubmission.StateSubmissionInfo(literalMessage)
-
-    // const stateSubmissionMessage =
-    // statesubmission.StateSubmissionInfo.fromObject(protoMessage)
 
     return statesubmission.StateSubmissionInfo.encode(protoMessage).finish()
 }

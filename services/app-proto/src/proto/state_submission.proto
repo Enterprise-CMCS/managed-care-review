@@ -6,21 +6,21 @@ import "google/protobuf/timestamp.proto";
 // It has all the fields for both DraftSubmission and StateSubmission, 
 // differentiated by the value of the `status` field.
 message StateSubmissionInfo {
-  string proto_name = 1;
-  int32 proto_version = 2;
-  string id = 3;
-  string status = 4;
-  Date created_at = 5;
-  google.protobuf.Timestamp updated_at = 6;
-  google.protobuf.Timestamp submitted_at = 7;
-  SubmissionStatus submission_status = 8;
-  StateCode state_code = 9;
-  int32 state_number = 10;
+  optional string proto_name = 1;
+  optional int32 proto_version = 2;
+  optional string id = 3;
+  optional string status = 4;
+  optional Date created_at = 5;
+  optional google.protobuf.Timestamp updated_at = 6;
+  optional google.protobuf.Timestamp submitted_at = 7;
+  optional SubmissionStatus submission_status = 8;
+  optional StateCode state_code = 9;
+  optional int32 state_number = 10;
   repeated string program_ids = 11;
-  SubmissionType submission_type = 12;
-  string submission_description = 13;
+  optional SubmissionType submission_type = 12;
+  optional string submission_description = 13;
   repeated Contact state_contacts = 14;
-  ContractInfo contract_info = 15;
+  optional ContractInfo contract_info = 15;
   repeated Document documents = 16;
 
   repeated RateInfo rate_infos = 50;
@@ -36,16 +36,16 @@ enum SubmissionType {
 message Date {
   // Year of the date. Must be from 1 to 9999, or 0 to specify a date without
   // a year.
-  int32 year = 1;
+  optional int32 year = 1;
 
   // Month of a year. Must be from 1 to 12, or 0 to specify a year without a
   // month and day.
-  int32 month = 2;
+  optional int32 month = 2;
 
   // Day of a month. Must be from 1 to 31 and valid for the year and month, or 0
   // to specify a year by itself or a year and month where the day isn't
   // significant.
-  int32 day = 3;
+  optional int32 day = 3;
 }
 
 enum SubmissionStatus{
@@ -56,32 +56,32 @@ enum SubmissionStatus{
 
 
 message Contact {
-  string name = 1;
-  string title_role = 2;
-  string email = 3;
+  optional string name = 1;
+  optional string title_role = 2;
+  optional string email = 3;
 }
 
 /// ContractInfo subtypes
 message ContractInfo {
-  ContractType contract_type = 1;
-  Date contract_date_start = 2;
-  Date contract_date_end = 3;
+  optional ContractType contract_type = 1;
+  optional Date contract_date_start = 2;
+  optional Date contract_date_end = 3;
   repeated ManagedCareEntity managed_care_entities = 4;
   repeated FederalAuthority federal_authorities = 5;
 
-  ContractAmendmentInfo contract_amendment_info  = 50;
+  optional ContractAmendmentInfo contract_amendment_info  = 50;
 
   message ContractAmendmentInfo  {
     message CapitationRatesAmendedInfo {
-      CapitationRateAmendmentReason reason = 1;
-      string other_reason = 2;
+      optional CapitationRateAmendmentReason reason = 1;
+      optional string other_reason = 2;
     }
     
     repeated AmendedItem amendable_items = 1;
-    string other_amendable_item = 2;
-    CapitationRatesAmendedInfo capitation_rates_amended_info = 3;
-    bool related_to_covid_19 = 4;
-    bool related_to_vaccination = 5;
+    optional string other_amendable_item = 2;
+    optional CapitationRatesAmendedInfo capitation_rates_amended_info = 3;
+    optional bool related_to_covid_19 = 4;
+    optional bool related_to_vaccination = 5;
   }
 }
 
@@ -141,25 +141,25 @@ enum ManagedCareEntity {
 
 /// Rate Info subtypes
 message RateInfo {
-  string id = 1;
-  RateType rate_type = 2;
-  Date rate_date_start = 3;
-  Date rate_date_end = 4;
-  Date rate_date_certified = 5;
+  optional string id = 1;
+  optional RateType rate_type = 2;
+  optional Date rate_date_start = 3;
+  optional Date rate_date_end = 4;
+  optional Date rate_date_certified = 5;
   repeated ActuaryContact actuary_contacts = 6;
-  ActuaryCommunicationType actuary_communication_preference = 7;
+  optional ActuaryCommunicationType actuary_communication_preference = 7;
     
-  RateAmendmentInfo rate_amendment_info = 50;
+  optional RateAmendmentInfo rate_amendment_info = 50;
 
   message ActuaryContact {
-    Contact contact = 1;
-    ActuarialFirmType actuarial_firm_type = 2;
-    string actuarial_firm_other= 3;
+    optional Contact contact = 1;
+    optional ActuarialFirmType actuarial_firm_type = 2;
+    optional string actuarial_firm_other= 3;
   }
 
   message RateAmendmentInfo {
-    Date effective_date_start = 1;
-    Date effective_date_end = 2;
+    optional Date effective_date_start = 1;
+    optional Date effective_date_end = 2;
   }
 }
 /// Rate related enums
@@ -189,8 +189,8 @@ enum ActuarialFirmType {
     
 /// Generic sub types
 message Document {
-  string name = 1;
-  string s3_url = 2;
+  optional string name = 1;
+  optional string s3_url = 2;
 }
 
 enum StateCode {

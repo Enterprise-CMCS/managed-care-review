@@ -6,6 +6,7 @@ import {
     isStateSubmission,
     StateSubmissionType,
 } from '../../app-web/src/common-code/domain-models'
+import { ZodError } from 'zod'
 
 const newSubmission: DraftSubmissionType = {
     createdAt: new Date(2021, 4, 10),
@@ -444,13 +445,6 @@ describe('toProtoBuffer', () => {
             expect(toDomain(toProtoBuffer(domainObject))).toEqual(domainObject)
         }
     )
-
-    // test.each([[invalidDomain1]])(
-    //     'given invalid object %o expect error)',
-    //     (invalidDomainObject) => {
-    //         expect(toProtoBuffer(invalidDomainObject)).toThrowError()
-    //     }
-    // )
 })
 
 describe('bad Proto', () => {
@@ -466,139 +460,40 @@ describe('bad Proto', () => {
             'Error: Unknown or missing status on this proto. Cannot decode.'
         )
     })
+
+    it('invalid DraftSubmission', () => {
+        const invalidDraft = Object.assign({}, basicSubmission) as any
+        delete invalidDraft.id
+        delete invalidDraft.stateNumber
+        invalidDraft.submissionType = 'nonsense'
+
+        const encoded = toProtoBuffer(invalidDraft)
+        const decodeErr = toDomain(encoded)
+
+        expect(decodeErr).toBeInstanceOf(Error)
+
+        // the zod error should note these three fields are wrong
+        const zErr = decodeErr as ZodError
+        expect(zErr.issues.flatMap((zodErr) => zodErr.path)).toEqual([
+            'id',
+            'stateNumber',
+            'submissionType',
+        ])
+    })
+
+    it('invalid StateSubmission', () => {
+        const invalidSubmission = Object.assign({}, basicCompleteLiteral) as any
+        delete invalidSubmission.id
+        delete invalidSubmission.stateNumber
+        invalidSubmission.documents = []
+        invalidSubmission.submissionType = 'nonsense'
+
+        const encoded = toProtoBuffer(invalidSubmission)
+        const decodeErr = toDomain(encoded)
+
+        expect(decodeErr).toBeInstanceOf(Error)
+        expect(decodeErr.toString()).toEqual(
+            'Error: ERROR: attempting to parse state submission proto failed'
+        )
+    })
 })
-
-// DRAFT SUBMISSIONS
-
-// const draftSubmission = {
-//     createdAt: new Date(),
-//     updatedAt: new Date(),
-//     id: 'test-abc-123',
-//     stateCode: 'MN',
-//     programID: 'snbc',
-//     program: {
-//         id: 'snbc',
-//         name: 'SNBC',
-//     },
-//     name: 'MN-MSHO-0001',
-//     submissionType: 'CONTRACT_ONLY',
-//     submissionDescription: 'A real submission',
-//     documents: [],
-//     contractType: 'BASE',
-//     contractDateStart: new Date(),
-//     contractDateEnd: new Date(),
-//     contractAmendmentInfo: null,
-//     managedCareEntities: [],
-//     federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
-//     rateType: null,
-//     rateDateStart: null,
-//     rateDateEnd: null,
-//     rateDateCertified: null,
-//     rateAmendmentInfo: null,
-//     stateContacts: [],
-//     actuaryContacts: [],
-//     actuaryCommunicationPreference: null,
-// }
-
-// export function mockContactAndRatesDraft(): DraftSubmission {
-//     return {
-//         __typename: 'DraftSubmission',
-//         createdAt: new Date(),
-//         updatedAt: new Date(),
-//         id: 'test-abc-123',
-//         stateCode: 'MN',
-//         programID: 'snbc',
-//         program: {
-//             id: 'snbc',
-//             name: 'SNBC',
-//         },
-//         name: 'MN-MSHO-0001',
-//         submissionType: 'CONTRACT_AND_RATES',
-//         submissionDescription: 'A real submission',
-//         documents: [],
-//         contractType: 'BASE',
-//         contractDateStart: new Date(),
-//         contractDateEnd: dayjs().add(2, 'days').toDate(),
-//         contractAmendmentInfo: null,
-//         managedCareEntities: [],
-//         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
-//         rateType: null,
-//         rateDateStart: null,
-//         rateDateEnd: null,
-//         rateDateCertified: null,
-//         rateAmendmentInfo: null,
-//         stateContacts: [],
-//         actuaryContacts: [],
-//         actuaryCommunicationPreference: null,
-//     }
-// }
-
-// export function mockCompleteDraft(): DraftSubmission {
-//     return {
-//         createdAt: new Date(),
-//         updatedAt: new Date(),
-//         id: 'test-abc-123',
-//         stateCode: 'MN',
-//         programID: 'snbc',
-//         program: {
-//             id: 'snbc',
-//             name: 'SNBC',
-//         },
-//         name: 'MN-MSHO-0001',
-//         submissionType: 'CONTRACT_ONLY',
-//         submissionDescription: 'A real submission',
-//         documents: [],
-//         contractType: 'BASE',
-//         contractDateStart: new Date(),
-//         contractDateEnd: new Date(),
-//         contractAmendmentInfo: null,
-//         managedCareEntities: [],
-//         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
-//         rateType: 'NEW',
-//         rateDateStart: new Date(),
-//         rateDateEnd: new Date(),
-//         rateDateCertified: new Date(),
-//         rateAmendmentInfo: null,
-//         stateContacts: [
-//             {
-//                 name: 'Test Person',
-//                 titleRole: 'A Role',
-//                 email: 'test@test.com',
-//             },
-//         ],
-//         actuaryContacts: [],
-//         actuaryCommunicationPreference: null,
-//     }
-// }
-
-// function mockNewDraft(): DraftSubmission {
-//     return {
-//         __typename: 'DraftSubmission',
-//         createdAt: new Date(),
-//         updatedAt: new Date(),
-//         id: 'test-abc-124',
-//         stateCode: 'MN',
-//         programID: 'snbc',
-//         program: {
-//             id: 'snbc',
-//             name: 'SNBC',
-//         },
-//         name: 'MN-MSHO-0002',
-//         submissionType: 'CONTRACT_ONLY',
-//         submissionDescription: 'A real submission',
-//         documents: [],
-//         contractType: null,
-//         contractDateStart: null,
-//         contractDateEnd: null,
-//         contractAmendmentInfo: null,
-//         managedCareEntities: [],
-//         federalAuthorities: [],
-//         rateType: null,
-//         rateDateStart: null,
-//         rateDateEnd: null,
-//         rateDateCertified: null,
-//         stateContacts: [],
-//         actuaryContacts: [],
-//         actuaryCommunicationPreference: null,
-//     }
-// }

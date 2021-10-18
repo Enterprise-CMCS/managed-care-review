@@ -9,6 +9,12 @@ import {
     isStateSubmission,
 } from '../../../app-web/src/common-code/domain-models'
 
+/**
+ * Recursively replaces all nulls with undefineds.
+ * Because the generated proto code allows null | undefined for everything, we simplify our lives
+ * by converting all the nulls to undefineds. The type below makes the type checker happy.
+ * Adapted from https://github.com/apollographql/apollo-client/issues/2412
+ */
 type RecursivelyReplaceNullWithUndefined<T> = T extends null
     ? undefined
     : T extends Date
@@ -19,15 +25,6 @@ type RecursivelyReplaceNullWithUndefined<T> = T extends null
               : RecursivelyReplaceNullWithUndefined<T[K]>
       }
 
-/**
- * Recursively replaces all nulls with undefineds.
- * Skips object classes (that have a `.__proto__.constructor`).
- *
- * Unfortunately, until https://github.com/apollographql/apollo-client/issues/2412
- * gets solved at some point,
- * this is the only workaround to prevent `null`s going into the codebase,
- * if it's connected to a Apollo server/client.
- */
 export function replaceNullsWithUndefineds<T>(
     obj: T
 ): RecursivelyReplaceNullWithUndefined<T> {
@@ -48,7 +45,7 @@ export function replaceNullsWithUndefineds<T>(
 }
 
 /*
-    Convert proto timestamp to domain date
+    Convert proto timestamp to domain Date
 */
 const protoTimestampToDomain = (
     protoDateTime: statesubmission.IStateSubmissionInfo['updatedAt']
@@ -76,7 +73,7 @@ const protoTimestampToDomain = (
 }
 
 /*
-    Convert proto date string to domain data string
+    Convert proto CalendarDate (year/month/day) to domain Date
 */
 const protoDateToDomain = (
     protoDate: statesubmission.IDate | null | undefined
@@ -165,7 +162,7 @@ type RecursivePartial<T> = {
     [P in keyof T]?: RecursivePartial<T[P]>
 }
 
-// Parsers for each sub type of DraftSubmissionType
+// Parsers for each field of DraftSubmissionType
 function parseProtoDocuments(
     docs: statesubmission.IDocument[] | null | undefined
 ): RecursivePartial<DraftSubmissionType['documents']> {
@@ -179,7 +176,7 @@ function parseProtoDocuments(
     }))
 }
 
-//
+// Just pulling this type out of the hierarchy
 type CapitationRateI =
     statesubmission.ContractInfo.IContractAmendmentInfo['capitationRatesAmendedInfo']
 
@@ -323,7 +320,7 @@ const toDomain = (
     // and
     const maybeDomainModel: RecursivePartial<DraftSubmissionType> &
         RecursivePartial<StateSubmissionType> = {
-        id: id,
+        id: id ?? undefined,
         createdAt: protoDateToDomain(createdAt),
         updatedAt: protoTimestampToDomain(updatedAt),
         submittedAt: protoTimestampToDomain(submittedAt),
@@ -332,8 +329,8 @@ const toDomain = (
             submissionType
         ),
         stateCode: betterEnumToDomain(statesubmission.StateCode, stateCode),
-        submissionDescription: submissionDescription,
-        stateNumber: stateNumber,
+        submissionDescription: submissionDescription ?? undefined,
+        stateNumber: stateNumber ?? undefined,
 
         programID: programIds[0],
 
