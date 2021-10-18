@@ -7,7 +7,7 @@
         "@testing-library/jest-dom": "^5.11.4",
         "@testing-library/react": "^12.1.0",
         "@testing-library/user-event": "^13.2.1",
-        "@trussworks/react-uswds": "^2.0.0",
+        "@trussworks/react-uswds": "^2.2.0",
         "@types/classnames": "^2.2.11",
         "@types/jest": "^27.0.1",
         "@types/react": "^17.0.5",
