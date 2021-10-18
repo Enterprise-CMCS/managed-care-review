@@ -14,7 +14,7 @@
         "@aws/dynamodb-data-mapper": "0.7.3",
         "@aws/dynamodb-data-mapper-annotations": "^0.7.3",
         "@prisma/client": "3.1.1",
-        "apollo-server-lambda": "^3.3.0",
+        "apollo-server-lambda": "^3.4.0",
         "aws-sdk": "^2.991.0",
         "graphql": "^15.6.0",
         "graphql-scalars": "^1.11.1",
