@@ -153,11 +153,15 @@ jobs:
           DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
 
-      - name: Install packages
+      - name: Install packages in root
         run: yarn install --frozen-lockfile
 
       - name: Install Cypress
         run: yarn cypress install
+
+      - name: Install packages in ui
+        working-directory: services/ui
+        run: yarn install --frozen-lockfile
 
       - name: Generate graphql
         run: ./dev generate
