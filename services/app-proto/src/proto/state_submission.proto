@@ -2,21 +2,26 @@ syntax = "proto3";
 package statesubmission;
 import "google/protobuf/timestamp.proto";
 
+// StateSubmissionInfo represents the form data for MC Review
+// It has all the fields for both DraftSubmission and StateSubmission, 
+// differentiated by the value of the `status` field.
 message StateSubmissionInfo {
   string proto_name = 1;
   int32 proto_version = 2;
   string id = 3;
-  optional Date created_at = 4;
-  google.protobuf.Timestamp updated_at = 5;
-  SubmissionStatus submission_status = 6;
-  StateCode state_code = 7;
-  int32 state_number = 8;
-  repeated string program_ids = 9;
-  SubmissionType submission_type = 10;
-  string submission_description = 11;
-  repeated Contact state_contacts = 12;
-  ContractInfo contract_info = 13;
-  repeated Document documents = 14;
+  string status = 4;
+  Date created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+  google.protobuf.Timestamp submitted_at = 7;
+  SubmissionStatus submission_status = 8;
+  StateCode state_code = 9;
+  int32 state_number = 10;
+  repeated string program_ids = 11;
+  SubmissionType submission_type = 12;
+  string submission_description = 13;
+  repeated Contact state_contacts = 14;
+  ContractInfo contract_info = 15;
+  repeated Document documents = 16;
 
   repeated RateInfo rate_infos = 50;
 }

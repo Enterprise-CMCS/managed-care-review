@@ -1,7 +1,8 @@
 import { statesubmission, google } from '../../gen/stateSubmissionProto'
 import {
     DraftSubmissionType,
-    ActuaryContact,
+    StateSubmissionType,
+    isStateSubmission,
 } from '../../../app-web/src/common-code/domain-models'
 
 /*
@@ -22,8 +23,12 @@ const domainDateToProtoDate = (
 }
 
 const domainDateToProtoTimestamp = (
-    domainDate: Date
+    domainDate: Date | undefined
 ): statesubmission.IStateSubmissionInfo['updatedAt'] => {
+    if (!domainDate) {
+        return undefined
+    }
+
     const seconds = domainDate.getTime() / 1000
     const nanos = (domainDate.getTime() % 1000) * 1e6
     const timestamp = new google.protobuf.Timestamp({ seconds, nanos })
@@ -92,18 +97,29 @@ const getEnumPrefix = (defaultValue: string) => {
 }
 
 // MAIN
-const toProtoBuffer = (domainData: DraftSubmissionType): Uint8Array => {
+const toProtoBuffer = (
+    domainData: DraftSubmissionType | StateSubmissionType
+): Uint8Array => {
     const { contractAmendmentInfo, rateAmendmentInfo } = domainData
 
+    // The difference between DraftSubmission and StateSubmission is currently very small
+    // only status and submittedAt differ from the perspective of the all-optional protobuf
     const literalMessage: statesubmission.IStateSubmissionInfo = {
         // protoName and Version are for internal proto use only
         // We aren't really using them yet but in the future it will be possible
         // to differentiate between different versions of different messages
-        // changes to the proto file at some point will require incremeting "proto version"
+        // changes to the proto file at some point will require incrementing "proto version"
         protoName: 'STATE_SUBMISSION',
         protoVersion: 1,
 
-        ...domainData, // For this conversion, we  can spread unnecessary fields because protobuf discards of them
+        ...domainData, // For this conversion, we  can spread unnecessary fields because protobuf discards them
+
+        // submittedAt is the only field that exists on StateSubmission but not on DraftSubmission.
+        submittedAt:
+            (isStateSubmission(domainData) &&
+                domainDateToProtoTimestamp(domainData.submittedAt)) ||
+            undefined,
+
         createdAt: domainDateToProtoDate(domainData.createdAt),
         updatedAt: domainDateToProtoTimestamp(domainData.updatedAt),
         submissionType: betterEnumToProto(
@@ -143,12 +159,10 @@ const toProtoBuffer = (domainData: DraftSubmissionType): Uint8Array => {
                           contractAmendmentInfo?.relatedToCovid19,
                       otherAmendableItem:
                           contractAmendmentInfo?.otherItemBeingAmended,
-                      amendableItems: contractAmendmentInfo?.itemsBeingAmended
-                          ? domainEnumArrayToProto(
-                                statesubmission.AmendedItem,
-                                contractAmendmentInfo?.itemsBeingAmended
-                            )
-                          : undefined,
+                      amendableItems: domainEnumArrayToProto(
+                          statesubmission.AmendedItem,
+                          contractAmendmentInfo?.itemsBeingAmended
+                      ),
                       capitationRatesAmendedInfo: {
                           ...contractAmendmentInfo?.capitationRatesAmendedInfo,
                           reason: betterEnumToProto(
@@ -213,11 +227,9 @@ const toProtoBuffer = (domainData: DraftSubmissionType): Uint8Array => {
 
     const protoMessage = new statesubmission.StateSubmissionInfo(literalMessage)
 
-    const stateSubmissionMessage =
-        statesubmission.StateSubmissionInfo.fromObject(protoMessage)
+    // const stateSubmissionMessage =
+    // statesubmission.StateSubmissionInfo.fromObject(protoMessage)
 
-    return statesubmission.StateSubmissionInfo.encode(
-        stateSubmissionMessage
-    ).finish()
+    return statesubmission.StateSubmissionInfo.encode(protoMessage).finish()
 }
 export { toProtoBuffer }

@@ -1,6 +1,11 @@
 import { toProtoBuffer } from '../src/stateSubmissionEncoding'
+import { statesubmission } from '../gen/stateSubmissionProto'
 import { toDomain } from '../src/stateSubmissionEncoding'
-import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
+import {
+    DraftSubmissionType,
+    isStateSubmission,
+    StateSubmissionType,
+} from '../../app-web/src/common-code/domain-models'
 
 const newSubmission: DraftSubmissionType = {
     createdAt: new Date(2021, 4, 10),
@@ -377,19 +382,68 @@ const someOthers: DraftSubmissionType = {
     actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
 }
 
+const basicCompleteLiteral: StateSubmissionType = {
+    createdAt: new Date(2021, 4, 10),
+    updatedAt: new Date(),
+    submittedAt: new Date(),
+    status: 'SUBMITTED',
+    stateNumber: 5,
+    id: 'test-abc-123',
+    stateCode: 'MN',
+    programID: 'snbc',
+    submissionType: 'CONTRACT_ONLY',
+    submissionDescription: 'A real submission',
+    documents: [
+        {
+            name: 'dummy doc',
+            s3URL: 'https://s3.com/dummy',
+        },
+    ],
+    contractType: 'BASE',
+    contractDateStart: new Date(2021, 4, 22),
+    contractDateEnd: new Date(2022, 4, 21),
+    managedCareEntities: ['PIHP'],
+    federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
+    stateContacts: [
+        {
+            name: 'Some Body',
+            email: 's@example.com',
+            titleRole: 'Manager',
+        },
+    ],
+    actuaryContacts: [
+        {
+            name: 'Anne Acturay',
+            email: 'aa@example.com',
+            titleRole: 'Deputy',
+            actuarialFirm: 'STATE_IN_HOUSE',
+        },
+    ],
+}
+
 describe('toProtoBuffer', () => {
+    if (!isStateSubmission(basicCompleteLiteral)) {
+        throw new Error(
+            'Bad test, the state submission is not a state submission'
+        )
+    }
+
     test.each([
-        [newSubmission, ''],
-        [basicSubmission, ''],
-        [contractOnly, ''],
-        [moreFullSubmission, ''],
-        [nowWithDocuments, ''],
-        [fullRateAmendment, ''],
-        [fullContractInfo, ''],
-        [someOthers, ''],
-    ])('given valid domain model %j expect %o)', (domainObject) => {
-        expect(toDomain(toProtoBuffer(domainObject))).toEqual(domainObject)
-    })
+        newSubmission,
+        basicSubmission,
+        contractOnly,
+        moreFullSubmission,
+        nowWithDocuments,
+        fullRateAmendment,
+        fullContractInfo,
+        someOthers,
+        basicCompleteLiteral,
+    ])(
+        'given valid domain model %j expect protobufs to be symmetric)',
+        (domainObject: DraftSubmissionType | StateSubmissionType) => {
+            expect(toDomain(toProtoBuffer(domainObject))).toEqual(domainObject)
+        }
+    )
 
     // test.each([[invalidDomain1]])(
     //     'given invalid object %o expect error)',
@@ -397,6 +451,21 @@ describe('toProtoBuffer', () => {
     //         expect(toProtoBuffer(invalidDomainObject)).toThrowError()
     //     }
     // )
+})
+
+describe('bad Proto', () => {
+    it('empty Proto', () => {
+        const protoMessage = new statesubmission.StateSubmissionInfo({})
+        const encodedEmpty =
+            statesubmission.StateSubmissionInfo.encode(protoMessage).finish()
+
+        const maybeError = toDomain(encodedEmpty)
+
+        expect(maybeError).toBeInstanceOf(Error)
+        expect(maybeError.toString()).toEqual(
+            'Error: Unknown or missing status on this proto. Cannot decode.'
+        )
+    })
 })
 
 // DRAFT SUBMISSIONS

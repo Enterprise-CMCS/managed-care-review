@@ -2,9 +2,11 @@ import { statesubmission } from '../../gen/stateSubmissionProto'
 import { draftSubmissionTypeSchema } from '../../gen/draftSubmissionSchema'
 import {
     DraftSubmissionType,
+    StateSubmissionType,
     ActuarialFirmType,
     ContractAmendmentInfo,
     FederalAuthority,
+    isStateSubmission,
 } from '../../../app-web/src/common-code/domain-models'
 
 type RecursivelyReplaceNullWithUndefined<T> = T extends null
@@ -158,12 +160,12 @@ function decodeOrError(
     }
 }
 
+// This type recursively makes a type Partial, so ever field and every field's field will be optional
 type RecursivePartial<T> = {
     [P in keyof T]?: RecursivePartial<T[P]>
 }
 
 // Parsers for each sub type of DraftSubmissionType
-
 function parseProtoDocuments(
     docs: statesubmission.IDocument[] | null | undefined
 ): RecursivePartial<DraftSubmissionType['documents']> {
@@ -265,8 +267,11 @@ function parseProtoRateAmendment(
     }
 }
 
-// TO CONSIDER: determine what type we have - draft submission or state submission and construct accordingly
-const toDomain = (buff: Uint8Array): DraftSubmissionType | Error => {
+// End Parsers
+
+const toDomain = (
+    buff: Uint8Array
+): DraftSubmissionType | StateSubmissionType | Error => {
     const stateSubmissionMessage = decodeOrError(buff)
 
     if (stateSubmissionMessage instanceof Error) {
@@ -277,8 +282,10 @@ const toDomain = (buff: Uint8Array): DraftSubmissionType | Error => {
         protoName,
         protoVersion,
         id,
+        status,
         createdAt,
         updatedAt,
+        submittedAt,
         stateCode,
         stateNumber,
         programIds,
@@ -300,8 +307,6 @@ const toDomain = (buff: Uint8Array): DraftSubmissionType | Error => {
 
     const cleanedStateContacts = replaceNullsWithUndefineds(stateContacts)
 
-    const cleanContractInfo = replaceNullsWithUndefineds(contractInfo)
-
     // Protos support multiple rate infos for now, but we only support one in our domain models
     // so if there are multiple we'll drop the extras.
     let rateInfo: statesubmission.IRateInfo | undefined = undefined
@@ -309,34 +314,19 @@ const toDomain = (buff: Uint8Array): DraftSubmissionType | Error => {
         rateInfo = rateInfos[0]
     }
 
-    // some kind of recursive parser would be really nice here. io-ts might be the easy answer for that
+    // SO, rather than repeat this whole thing for Draft and State submissions, because they are so
+    // similar right now, we're just going to & them together for parsing out all the optional stuff
+    // from the protobuf for now. If Draft and State submission diverged further in the future this
+    // might not be workable anymore and we could break out the parsing into two different branches
 
-    // as is, we have to do our validations here.
-    // some kind of wrapper, that returns whatever type you put in it Or and error type with a list of errors?
-
-    // the type you put in takes types that take the same
-
-    // contacts we have to map in.
-    // For now, if a contact is incomplete, we delete it.
-    // const domainStateContacts: DraftSubmissionType['stateContacts'] = []
-
-    // So the idea here is that we construct a Partial DraftSubmissionType by converting the
-    // pesky proto types over. Enums and Dates, so far.
-    // then we can assert that everything we require to be present is present all at once.
-
-    // It doesn't seem ideal yet, but it's something.
-    // crucially, I'm not sure we'll see errors here when we add a new field.
-    // the runtime typecheck is mostly just checking that things aren't undefined.
-
-    // it would be nice to type this stronger...
-    // could at least say it has keys of domain model?
-    // we really want a recursive partial.
-
-    const maybeDomainModel: RecursivePartial<DraftSubmissionType> = {
+    // Since everything in proto-land is optional, we construct a RecursivePartial version of our domain models
+    // and
+    const maybeDomainModel: RecursivePartial<DraftSubmissionType> &
+        RecursivePartial<StateSubmissionType> = {
         id: id,
-        status: 'DRAFT',
         createdAt: protoDateToDomain(createdAt),
         updatedAt: protoTimestampToDomain(updatedAt),
+        submittedAt: protoTimestampToDomain(submittedAt),
         submissionType: betterEnumToDomain(
             statesubmission.SubmissionType,
             submissionType
@@ -387,15 +377,43 @@ const toDomain = (buff: Uint8Array): DraftSubmissionType | Error => {
         documents: parseProtoDocuments(stateSubmissionMessage.documents),
     }
 
-    // Now that we've gotten things into our domain format. We confirm that all the required
-    // fields are present to turn this into a DraftSubmissionType or a StateSubmissionType
-    const parseResult = draftSubmissionTypeSchema.safeParse(maybeDomainModel)
+    // Now that we've gotten things into our combined draft & state domain format.
+    // we confirm that all the required fields are present to turn this into a DraftSubmissionType or a StateSubmissionType
+    if (status === 'DRAFT') {
+        // cast so we can set status
+        const maybeDraft =
+            maybeDomainModel as RecursivePartial<DraftSubmissionType>
+        maybeDraft.status = 'DRAFT'
 
-    if (parseResult.success == false) {
-        return parseResult.error
+        // This parse returns an actual DraftSubmissionType, so all our partial & casting is put to rest
+        const parseResult = draftSubmissionTypeSchema.safeParse(maybeDraft)
+
+        if (parseResult.success == false) {
+            return parseResult.error
+        }
+
+        return parseResult.data
+    } else if (status === 'SUBMITTED') {
+        const maybeStateSubmission =
+            maybeDomainModel as RecursivePartial<StateSubmissionType>
+        maybeStateSubmission.status = 'SUBMITTED'
+
+        if (isStateSubmission(maybeStateSubmission)) {
+            return maybeStateSubmission
+        } else {
+            console.log(
+                'ERROR: attempting to parse state submission proto failed.',
+                id
+            )
+            return new Error(
+                'ERROR: attempting to parse state submission proto failed'
+            )
+        }
     }
 
-    return parseResult.data
+    // unknown or missing status means we've got a parse error.
+    console.log('ERROR: Unknown or missing status on this proto.', id, status)
+    return new Error('Unknown or missing status on this proto. Cannot decode.')
 }
 
 export { toDomain }
