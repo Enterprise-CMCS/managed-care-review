@@ -140,7 +140,7 @@ jobs:
 
   cypress:
     name: run-cypress
-    needs: [deploy-branch]
+    needs: [deploy-branch, unit-tests]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
