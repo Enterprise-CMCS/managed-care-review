@@ -12,6 +12,8 @@ jobs:
   unit-tests:
     name: test - unit tests
     runs-on: ubuntu-latest
+    outputs:
+      deploy-id: ${{ steps.ghdeployment.outputs.deployment_id }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
@@ -188,7 +190,7 @@ jobs:
           token: '${{ github.token }}'
           environment_url: ${{env.APPLICATION_ENDPOINT}}
           state: 'success'
-          deployment_id: ${{ steps.ghdeployment.outputs.deployment_id }}
+          deployment_id: ${{ needs.unit-tests.outputs.deploy-id }}
 
       - name: Update deployment status (failure)
         if: failure() && steps.deploy.outcome == 'failure'
@@ -196,7 +198,7 @@ jobs:
         with:
           token: '${{ github.token }}'
           state: 'failure'
-          deployment_id: ${{ steps.ghdeployment.outputs.deployment_id }}
+          deployment_id: ${{ needs.unit-tests.outputs.deploy-id }}
 
       - name: Create Test Users
         run: |
