@@ -89,7 +89,7 @@ jobs:
 
       - name: set branch_name
         run: |
-          echo "branch_name=${{ inputs.stage_name || main }}" >> $GITHUB_ENV
+          echo "branch_name=${{ inputs.stage_name }}" >> $GITHUB_ENV
 
       - name: set app version
         run: echo "APP_VERSION=$(scripts/app_version.sh)" >> $GITHUB_ENV
