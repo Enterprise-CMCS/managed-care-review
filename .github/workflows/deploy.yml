@@ -123,7 +123,6 @@ jobs:
     uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@c2e352e291b122921f8b6b0746f4ad8d71f4868e
     with:
       stage_name: ${{ needs.get-branch-name-vars.outputs.branch-name}}
-      env_name: dev
     secrets:
       aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
