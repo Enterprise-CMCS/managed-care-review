@@ -18,7 +18,7 @@ export const SubmissionTypeSummarySection = ({
     navigateTo,
 }: SubmissionTypeSummarySectionProps): React.ReactElement => {
     return (
-        <section id="submissionType" className={styles.reviewSection}>
+        <section id="submissionTypeSection" className={styles.reviewSection}>
             <SectionHeader header={submission.name} navigateTo={navigateTo} />
 
             <dl>

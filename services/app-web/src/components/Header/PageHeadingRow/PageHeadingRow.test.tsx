@@ -1,6 +1,5 @@
-import React from 'react'
 import { screen } from '@testing-library/react'
-import { renderWithProviders } from '../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { PageHeadingRow } from './PageHeadingRow'
 
 describe('Page Heading Row', () => {

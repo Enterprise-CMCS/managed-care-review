@@ -3,7 +3,7 @@ import ProvidersDecorator from '../../../../.storybook/providersDecorator'
 import {
     SubmissionTypeSummarySectionProps,
     SubmissionTypeSummarySection,
-} from '..'
+} from './SubmissionTypeSummarySection'
 import { mockContractAndRatesDraft } from '../../../testHelpers/apolloHelpers'
 
 export default {

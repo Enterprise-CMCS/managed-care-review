@@ -1,9 +1,8 @@
-import React from 'react'
 import { render, waitFor, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { FileUpload, FileUploadProps, S3FileData } from './FileUpload'
-import { FileItemT } from './FileItem'
+import { FileItemT } from './FileItem/FileItem'
 import { SPACER_GIF } from './constants'
 import {
     TEST_DOC_FILE,

@@ -12,7 +12,7 @@ jobs:
     if: github.event.ref_type == 'branch' && !contains(fromJson('["develop", "main", "master", "impl", "val", "prod", "production"]'), github.event.ref)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v2.3.5
       - name: set branch_name
         run: |
           echo "branch_name=$(./scripts/stage_name_for_branch.sh ${{ github.event.ref }})" >> $GITHUB_ENV

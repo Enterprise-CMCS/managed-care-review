@@ -2,12 +2,12 @@ import React from 'react'
 import { Button, Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 
-import { LoginStatusType } from '../../contexts/AuthContext'
-import { User } from '../../gen/gqlClient'
-import { idmRedirectURL } from '../../pages/Auth/cognitoAuth'
-import { AuthModeType } from '../../common-code/domain-models'
+import { LoginStatusType } from '../../../contexts/AuthContext'
+import { User } from '../../../gen/gqlClient'
+import { idmRedirectURL } from '../../../pages/Auth/cognitoAuth'
+import { AuthModeType } from '../../../common-code/domain-models'
 
-import styles from './Header.module.scss'
+import styles from '../Header.module.scss'
 
 type LogoutHandlerT = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>

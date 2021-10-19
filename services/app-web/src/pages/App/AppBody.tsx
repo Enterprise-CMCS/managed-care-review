@@ -4,7 +4,7 @@ import styles from './AppBody.module.scss'
 
 import { AppRoutes } from './AppRoutes'
 import { Footer } from '../../components/Footer'
-import { Header } from '../../components/Header/Header'
+import { Header } from '../../components/Header'
 import { Loading } from '../../components/Loading'
 
 import { AuthModeType } from '../../common-code/domain-models'
