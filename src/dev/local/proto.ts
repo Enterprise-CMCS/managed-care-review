@@ -14,7 +14,7 @@ export async function compileProtoWatch(runner: LabeledProcessRunner) {
         'services/app-proto'
     )
 
-    return runner.runCommandAndOutput(
+    runner.runCommandAndOutput(
         'protogen',
         ['yarn', 'protogen:watch'],
         'services/app-proto'
@@ -30,7 +30,7 @@ export async function compileProto(runner: LabeledProcessRunner) {
 
     return runner.runCommandAndOutput(
         'protogen',
-        ['yarn', 'protogen:watch'],
+        ['yarn', 'protogen'],
         'services/app-proto'
     )
 }

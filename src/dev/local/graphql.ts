@@ -9,7 +9,7 @@ async function compileGraphQLTypesWatch(runner: LabeledProcessRunner) {
         'services/app-graphql'
     )
 
-    return runner.runCommandAndOutput(
+    runner.runCommandAndOutput(
         'gqlgen',
         ['yarn', 'gqlgen', '--watch'],
         'services/app-graphql'

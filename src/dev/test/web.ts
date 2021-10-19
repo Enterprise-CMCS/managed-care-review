@@ -6,13 +6,14 @@ import {
     compileGraphQLTypesOnce,
     installWebDepsOnce,
     compileProto,
+    compileProtoWatch,
 } from '../local/index.js'
 
 export async function runWebTestsWatch(jestArgs: string[]) {
     const runner = new LabeledProcessRunner()
 
     await compileGraphQLTypesWatchOnce(runner)
-    await compileProto(runner)
+    await compileProtoWatch(runner)
 
     await installWebDepsOnce(runner)
 
@@ -33,6 +34,7 @@ export async function runWebTests(
     runner: LabeledProcessRunner
 ): Promise<number> {
     await compileGraphQLTypesOnce(runner)
+    await compileProto(runner)
     await installWebDepsOnce(runner)
 
     return await runner.runCommandAndOutput(

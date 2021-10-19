@@ -18,8 +18,8 @@ export const installWebDepsOnce = once(installWebDeps)
 
 // runWebLocally runs app-web locally
 export async function runWebLocally(runner: LabeledProcessRunner) {
-    compileGraphQLTypesWatchOnce(runner)
-    compileProtoWatch(runner)
+    await compileGraphQLTypesWatchOnce(runner)
+    await compileProtoWatch(runner)
 
     await installWebDepsOnce(runner)
 
