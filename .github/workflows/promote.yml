@@ -43,7 +43,7 @@ jobs:
     needs: [build-prisma-client-lambda-layer]
     uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@aed1e5c636f3ff619e5ed3e2267301a3caf24f16
     with:
-      env_name: main
+      stage_name: main
     secrets:
       aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -114,7 +114,6 @@ jobs:
     uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@aed1e5c636f3ff619e5ed3e2267301a3caf24f16
     with:
       stage_name: val
-      env_name: val
     secrets:
       aws_access_key_id: ${{ secrets.VAL_AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.VAL_AWS_SECRET_ACCESS_KEY }}
@@ -184,7 +183,6 @@ jobs:
     uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@aed1e5c636f3ff619e5ed3e2267301a3caf24f16
     with:
       stage_name: prod
-      env_name: prod
     secrets:
       aws_access_key_id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}

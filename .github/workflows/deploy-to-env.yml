@@ -4,9 +4,6 @@ on:
   workflow_call:
     inputs:
       stage_name:
-        required: false
-        type: string
-      env_name:
         required: true
         type: string
     secrets:
@@ -73,7 +70,7 @@ jobs:
       - name: deploy postgres
         id: deploy-postgres
         run: |
-          pushd services/postgres && npx serverless deploy --stage ${{ inputs.stage_name || inputs.env_name }}
+          pushd services/postgres && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   run-migrations:
     needs: [postgres, app-api]
@@ -161,7 +158,7 @@ jobs:
       - name: deploy app-api
         id: deploy-app-api
         run: |
-          pushd services/app-api && npx serverless deploy --stage ${{ inputs.stage_name || inputs.env_name}}
+          pushd services/app-api && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   dynamodb:
     runs-on: ubuntu-latest
@@ -190,7 +187,7 @@ jobs:
       - name: deploy dynamodb
         id: deploy-dynamodb
         run: |
-          pushd services/database && npx serverless deploy --stage ${{ inputs.stage_name || inputs.env_name }}
+          pushd services/database && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   deploy-all:
     runs-on: ubuntu-latest
@@ -229,10 +226,10 @@ jobs:
         run: |
           # When deploying multiple copies of this quickstart to the same AWS Account (not ideal), a prefix helps prevent stepping on each other.
           # This can optionally be set as an GitHub Actions Secret
-          ./deploy.sh ${{ inputs.stage_name || inputs.env_name }}
+          ./deploy.sh ${{ inputs.stage_name }}
 
       - name: Set application endpoint
         run: |
           cd services
-          endpoint=$(./output.sh ui CloudFrontEndpointUrl ${{ inputs.stage_name || main }})
+          endpoint=$(./output.sh ui CloudFrontEndpointUrl ${{ inputs.stage_name }})
           echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
