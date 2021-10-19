@@ -98,7 +98,7 @@ type StandardEnum<T> = {
     [nu: number]: string
 }
 
-function betterEnumToDomain<T extends StandardEnum<unknown>, K extends string>(
+function enumToDomain<T extends StandardEnum<unknown>, K extends string>(
     protoEnum: T,
     key: number | undefined | null
 ): K | undefined {
@@ -127,7 +127,7 @@ function protoEnumArrayToDomain<T extends StandardEnum<unknown>>(
     // since the enum array itself can have null values we compress here
     const enums = []
     for (const enumVal of protoEnumArray) {
-        const converted = betterEnumToDomain(protoEnum, enumVal)
+        const converted = enumToDomain(protoEnum, enumVal)
         if (converted) {
             enums.push(converted)
         }
@@ -188,7 +188,7 @@ function parseCapitationRates(
     }
 
     return {
-        reason: betterEnumToDomain(
+        reason: enumToDomain(
             statesubmission.CapitationRateAmendmentReason,
             capRates.reason
         ),
@@ -237,7 +237,7 @@ function parseActuaryContacts(
             name: cleanContact?.contact?.name,
             titleRole: cleanContact?.contact?.titleRole,
             email: cleanContact?.contact?.email,
-            actuarialFirm: betterEnumToDomain(
+            actuarialFirm: enumToDomain(
                 statesubmission.ActuarialFirmType,
                 aContact.actuarialFirmType
             ) as ActuarialFirmType,
@@ -324,17 +324,17 @@ const toDomain = (
         createdAt: protoDateToDomain(createdAt),
         updatedAt: protoTimestampToDomain(updatedAt),
         submittedAt: protoTimestampToDomain(submittedAt),
-        submissionType: betterEnumToDomain(
+        submissionType: enumToDomain(
             statesubmission.SubmissionType,
             submissionType
         ),
-        stateCode: betterEnumToDomain(statesubmission.StateCode, stateCode),
+        stateCode: enumToDomain(statesubmission.StateCode, stateCode),
         submissionDescription: submissionDescription ?? undefined,
         stateNumber: stateNumber ?? undefined,
 
         programID: programIds[0],
 
-        contractType: betterEnumToDomain(
+        contractType: enumToDomain(
             statesubmission.ContractType,
             stateSubmissionMessage?.contractInfo?.contractType
         ),
@@ -358,14 +358,11 @@ const toDomain = (
             contractInfo?.contractAmendmentInfo
         ),
         rateAmendmentInfo: parseProtoRateAmendment(rateInfo?.rateAmendmentInfo),
-        rateType: betterEnumToDomain(
-            statesubmission.RateType,
-            rateInfo?.rateType
-        ),
+        rateType: enumToDomain(statesubmission.RateType, rateInfo?.rateType),
         rateDateStart: protoDateToDomain(rateInfo?.rateDateStart),
         rateDateEnd: protoDateToDomain(rateInfo?.rateDateEnd),
         rateDateCertified: protoDateToDomain(rateInfo?.rateDateCertified),
-        actuaryCommunicationPreference: betterEnumToDomain(
+        actuaryCommunicationPreference: enumToDomain(
             statesubmission.ActuaryCommunicationType,
             rateInfo?.actuaryCommunicationPreference
         ),
