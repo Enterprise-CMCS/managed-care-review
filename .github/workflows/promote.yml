@@ -59,6 +59,7 @@ jobs:
       cloudfront_certificate_arn: ${{ secrets.DEV_CLOUDFRONT_CERTIFICATE_ARN }}
       cloudfront_domain_name: ${{ secrets.DEV_CLOUDFRONT_DOMAIN_NAME }}
       cloudfront_storybook_domain_name: ${{ secrets.DEV_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
+      test_users_pass: ${{ secrets.TEST_USERS_PASS}}
       react_app_auth_mode: IDM
 
   dev-cypress:
@@ -130,6 +131,7 @@ jobs:
       iam_path: ${{ secrets.IAM_PATH }}
       stage_prefix: ${{ secrets.STAGE_PREFIX }}
       dynamo_connection: ${{ secrets.DYNAMO_CONNECTION}}
+      test_users_pass: ${{ secrets.TEST_USERS_PASS}}
 
   cypress-val:
     name: val - cypress
@@ -199,6 +201,7 @@ jobs:
       iam_path: ${{ secrets.IAM_PATH }}
       stage_prefix: ${{ secrets.STAGE_PREFIX }}
       dynamo_connection: ${{ secrets.DYNAMO_CONNECTION}}
+      test_users_pass: ${{ secrets.TEST_USERS_PASS}}
 
   cypress-prod:
     name: prod - cypress
