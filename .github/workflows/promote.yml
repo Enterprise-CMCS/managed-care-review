@@ -111,7 +111,7 @@ jobs:
           MSG_MINIMAL: actions url,commit
 
   promote-val:
-    needs: [promote-dev]
+    needs: [dev-cypress]
     uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@main
     with:
       stage_name: val
@@ -182,6 +182,7 @@ jobs:
           MSG_MINIMAL: actions url,commit
 
   promote-prod:
+    needs: [cypress-val]
     uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@main
     with:
       stage_name: prod
