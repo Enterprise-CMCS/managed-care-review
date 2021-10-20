@@ -41,7 +41,7 @@ jobs:
 
   promote-dev:
     needs: [build-prisma-client-lambda-layer]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@c2e352e291b122921f8b6b0746f4ad8d71f4868e
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@main
     with:
       stage_name: main
     secrets:
@@ -111,7 +111,7 @@ jobs:
 
   promote-val:
     needs: [promote-dev]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@c2e352e291b122921f8b6b0746f4ad8d71f4868e
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@main
     with:
       stage_name: val
     secrets:
@@ -180,7 +180,7 @@ jobs:
           MSG_MINIMAL: actions url,commit
 
   promote-prod:
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@c2e352e291b122921f8b6b0746f4ad8d71f4868e
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@main
     with:
       stage_name: prod
     secrets:
