@@ -31,9 +31,7 @@ describe('contract details', () => {
 
             // Navigate to type page to switch to contract and rates submission
             cy.visit(`/submissions/${draftSubmissionId}/type`)
-            cy.findByLabelText(
-                'Contract action and rate certification'
-            ).safeClick()
+            cy.findByText('Contract action and rate certification').click()
             cy.navigateForm('Continue')
 
             // Navigate to contract details page
