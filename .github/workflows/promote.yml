@@ -6,112 +6,83 @@ on:
       - 'main'
 
 jobs:
-  promote:
+  build-prisma-client-lambda-layer:
+    name: build - postgres prisma layer
     runs-on: ubuntu-latest
     steps:
-      - name: set branch_name
-        run: echo "branch_name=main" >> $GITHUB_ENV
-      - name: Check branch name is a legal serverless stage name
-        run: |
-          if [[ ! $branch_name =~ ^[a-zA-Z][a-zA-Z0-9-]*$ ]] || [[ $branch_name -gt 128 ]]; then
-            echo """
-              ------------------------------------------------------------------------------------------------------------------------------
-              ERROR:  Please read below
-              ------------------------------------------------------------------------------------------------------------------------------
-              Bad branch name detected; cannot continue.
+      - name: Check out repository
+        uses: actions/checkout@v2
 
-              The Serverless Application Framework has a concept of stages that facilitate multiple deployments of the same service.
-              In this setup, the git branch name gets passed to Serverless to serve as the stage name.
-              The stage name (branch name in this case) is tacked onto the end of the service name by Serverless.
-              Therefore, the branch name must be a valid service name.
-
-              From Serverless:
-                A service name should only contain alphanumeric (case sensitive) and hyphens. It should start with an alphabetic character and shouldnt exceed 128 characters.
-
-              For Github Actions support, please push your code to a new branch with a name that meets Serverless' service name requirements.
-              So, make a new branch with a name that begins with a letter and is made up of only letters, numbers, and hyphens... then delete this branch.
-              ------------------------------------------------------------------------------------------------------------------------------
-            """
-            exit 1
-          fi
-      - uses: actions/checkout@v2.3.5
-      - name: set app version
-        run: echo "APP_VERSION=$(scripts/app_version.sh)" >> $GITHUB_ENV
-      - name: set branch specific variable names
-        run: ./.github/build_vars.sh set_names
-      - name: set variable values
-        run: ./.github/build_vars.sh set_values
-        env:
-          REACT_APP_AUTH_MODE: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_REACT_APP_AUTH_MODE] || secrets.REACT_APP_AUTH_MODE }}
-          AWS_ACCESS_KEY_ID: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_ACCESS_KEY_ID] || secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_SECRET_ACCESS_KEY] || secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_DEFAULT_REGION] || secrets.AWS_DEFAULT_REGION }}
-          INFRASTRUCTURE_TYPE: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_INFRASTRUCTURE_TYPE] || secrets.INFRASTRUCTURE_TYPE || 'development' }}
-          SES_SOURCE_EMAIL_ADDRESS: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_SES_SOURCE_EMAIL_ADDRESS] || secrets.SES_SOURCE_EMAIL_ADDRESS }}
-          SES_REVIEW_TEAM_EMAIL_ADDRESS: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_SES_REVIEW_TEAM_EMAIL_ADDRESS] || secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
-          ROUTE_53_HOSTED_ZONE_ID: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_ROUTE_53_HOSTED_ZONE_ID] }}
-          ROUTE_53_DOMAIN_NAME: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_ROUTE_53_DOMAIN_NAME] }}
-          CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_CLOUDFRONT_CERTIFICATE_ARN] }}
-          CLOUDFRONT_DOMAIN_NAME: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_CLOUDFRONT_DOMAIN_NAME] }}
-          CLOUDFRONT_STORYBOOK_DOMAIN_NAME: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_CLOUDFRONT_DOMAIN_NAME] }}
-          OKTA_METADATA_URL: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_OKTA_METADATA_URL] || secrets.OKTA_METADATA_URL }}
-          IAM_PATH: ${{ secrets.IAM_PATH }}
-          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY] || secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-          STAGE_PREFIX: ${{ secrets.STAGE_PREFIX }}
-          DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
-      - name: lock this branch to prevent concurrent builds
-        run: ./.github/github-lock.sh
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: read .nvmrc
         id: node_version
         run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
-      - uses: actions/setup-node@v2.4.1
+
+      - uses: actions/setup-node@v2.4.0
         with:
           node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
-      - name: Combine yarn.lock files to single file
-        run: find services -maxdepth 3 -name yarn.lock | xargs cat yarn.lock > combined-yarn-lock.txt
-      - name: cache dependencies
-        uses: actions/cache@v2
+
+      - name: Install packages
+        working-directory: services/app-api
+        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn install --frozen-lockfile
+
+      # Generate Prisma Client and binary that can run in a lambda environment
+      - name: Prepare prisma client
+        working-directory: services/app-api
+        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn prisma generate
+
+      - name: Prepare "@prisma/client" lambda layer
+        working-directory: services/app-api
+        run: ./scripts/prepare-prisma-layer.sh
+
+      - uses: actions/upload-artifact@v2
         with:
-          path: |
-            services/database/node_modules
-            services/uploads/node_modules
-            services/uploads-scan/node_modules
-            services/app-api/node_modules
-            services/stream-functions/node_modules
-            services/ui-auth/node_modules
-            services/ui/node_modules
-            services/app-web/node_modules
-            node_modules
-            tests/nightwatch/node_modules
-          key: ${{ runner.os }}-${{ hashFiles('combined-yarn-lock.txt') }}
-      - name: set path
-        run: |
-          echo "PATH=$(pwd)/node_modules/.bin/:$PATH" >> $GITHUB_ENV
-      - name: Unit Tests
-        run: ./dev test --unit --run-db
-      - name: publish code coverage
-        uses: paambaati/codeclimate-action@v3.0.0
-        env:
-          CC_TEST_REPORTER_ID: 364fbdd9d65e41f3ed5f70b6a295f5f76f7288a3930e738b010cad0c218df37c
-        with:
-          debug: true
-          coverageLocations: |
-            ${{github.workspace}}/services/app-api/coverage/lcov.info:lcov
-            ${{github.workspace}}/services/app-web/coverage/lcov.info:lcov
-      - name: set dev env vars
-        run: ./.github/build_vars.sh set_values
-        env:
-          CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets.DEV_CLOUDFRONT_CERTIFICATE_ARN }}
-          CLOUDFRONT_DOMAIN_NAME: ${{ secrets.DEV_CLOUDFRONT_DOMAIN_NAME }}
-          CLOUDFRONT_STORYBOOK_DOMAIN_NAME: ${{ secrets.DEV_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
-          REACT_APP_AUTH_MODE: IDM
-      - name: deploy to dev
-        run: |
-          # When deploying multiple copies of this quickstart to the same AWS Account (not ideal), a prefix helps prevent stepping on each other.
-          # This can optionally be set as an GitHub Actions Secret
-          ./deploy.sh $STAGE_PREFIX$branch_name
+          name: lambda-layers-prisma-client
+          path: ./services/app-api/lambda-layers-prisma-client
+
+  promote-dev:
+    needs: [build-prisma-client-lambda-layer]
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@c2e352e291b122921f8b6b0746f4ad8d71f4868e
+    with:
+      stage_name: main
+    secrets:
+      aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
+      infrastructure_type: ${{ secrets.INFRASTRUCTURE_TYPE || 'development' }}
+      ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
+      ses_review_team_email_address: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
+      okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
+      iam_path: ${{ secrets.IAM_PATH }}
+      full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
+      stage_prefix: ${{ secrets.STAGE_PREFIX }}
+      dynamo_connection: ${{ secrets.DYNAMO_CONNECTION}}
+      cloudfront_certificate_arn: ${{ secrets.DEV_CLOUDFRONT_CERTIFICATE_ARN }}
+      cloudfront_domain_name: ${{ secrets.DEV_CLOUDFRONT_DOMAIN_NAME }}
+      cloudfront_storybook_domain_name: ${{ secrets.DEV_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
+      react_app_auth_mode: IDM
+
+  dev-cypress:
+    name: dev - cypress
+    needs: [promote-dev]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Install packages in root
+        run: yarn install --frozen-lockfile
+
+      - name: Install Cypress
+        run: yarn cypress install
+
+      - name: Install packages in ui
+        working-directory: services/ui
+        run: yarn install --frozen-lockfile
+
+      - name: Generate graphql
+        run: ./dev generate
 
       - name: Cypress on dev
         id: cypressdev
@@ -119,6 +90,7 @@ jobs:
         with:
           config: baseUrl=https://mc-review-dev.onemac.cms.gov
           spec: tests/cypress/integration/promoteWorkflow/promote.spec.ts
+
       - name: Upload cypress video
         uses: actions/upload-artifact@v2.2.4
         if: failure() && steps.cypressdev.outcome == 'failure'
@@ -126,19 +98,61 @@ jobs:
           name: cypress-videos
           path: tests/cypress/videos
 
-      - name: set val env vars
-        run: ./.github/build_vars.sh set_values
+      - name: Alert Slack On Failure
+        uses: rtCamp/action-slack-notify@v2
+        if: failure()
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.VAL_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.VAL_AWS_SECRET_ACCESS_KEY }}
-          CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets.VAL_CLOUDFRONT_CERTIFICATE_ARN }}
-          CLOUDFRONT_DOMAIN_NAME: ${{ secrets.VAL_CLOUDFRONT_DOMAIN_NAME }}
-          CLOUDFRONT_STORYBOOK_DOMAIN_NAME: ${{ secrets.VAL_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
-          OKTA_METADATA_URL: ${{ secrets.VAL_OKTA_METADATA_URL }}
-          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.VAL_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-          REACT_APP_AUTH_MODE: IDM
-      - name: Deploy to val
-        run: ./deploy.sh val
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: Deploy Alerts
+          SLACK_ICON_EMOJI: ':bell:'
+          SLACK_COLOR: ${{job.status}}
+          SLACK_FOOTER: ''
+          MSG_MINIMAL: actions url,commit
+
+  promote-val:
+    needs: [promote-dev]
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@c2e352e291b122921f8b6b0746f4ad8d71f4868e
+    with:
+      stage_name: val
+    secrets:
+      aws_access_key_id: ${{ secrets.VAL_AWS_ACCESS_KEY_ID }}
+      aws_secret_access_key: ${{ secrets.VAL_AWS_SECRET_ACCESS_KEY }}
+      cloudfront_certificate_arn: ${{ secrets.VAL_CLOUDFRONT_CERTIFICATE_ARN }}
+      cloudfront_domain_name: ${{ secrets.VAL_CLOUDFRONT_DOMAIN_NAME }}
+      cloudfront_storybook_domain_name: ${{ secrets.VAL_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
+      okta_metadata_url: ${{ secrets.VAL_OKTA_METADATA_URL }}
+      full_iam_permissions_boundary_policy: ${{ secrets.VAL_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
+      react_app_auth_mode: IDM
+      aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
+      infrastructure_type: ${{ secrets.INFRASTRUCTURE_TYPE || 'development' }}
+      ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
+      ses_review_team_email_address: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
+      iam_path: ${{ secrets.IAM_PATH }}
+      stage_prefix: ${{ secrets.STAGE_PREFIX }}
+      dynamo_connection: ${{ secrets.DYNAMO_CONNECTION}}
+
+  cypress-val:
+    name: val - cypress
+    needs: [promote-val]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Install packages in root
+        run: yarn install --frozen-lockfile
+
+      - name: Install Cypress
+        run: yarn cypress install
+
+      - name: Install packages in ui
+        working-directory: services/ui
+        run: yarn install --frozen-lockfile
+
+      - name: Generate graphql
+        run: ./dev generate
 
       - name: Cypress on val
         id: cypressval
@@ -146,6 +160,7 @@ jobs:
         with:
           config: baseUrl=https://mc-review-val.onemac.cms.gov
           spec: tests/cypress/integration/promoteWorkflow/promote.spec.ts
+
       - name: Upload cypress video
         uses: actions/upload-artifact@v2.2.4
         if: failure() && steps.cypressval.outcome == 'failure'
@@ -153,19 +168,60 @@ jobs:
           name: cypress-videos
           path: tests/cypress/videos
 
-      - name: set prod env vars
-        run: ./.github/build_vars.sh set_values
+      - name: Alert Slack On Failure
+        uses: rtCamp/action-slack-notify@v2
+        if: failure()
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
-          CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets.PROD_CLOUDFRONT_CERTIFICATE_ARN }}
-          CLOUDFRONT_DOMAIN_NAME: ${{ secrets.PROD_CLOUDFRONT_DOMAIN_NAME }}
-          CLOUDFRONT_STORYBOOK_DOMAIN_NAME: ${{ secrets.PROD_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
-          OKTA_METADATA_URL: ${{ secrets.PROD_OKTA_METADATA_URL }}
-          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.PROD_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-          REACT_APP_AUTH_MODE: IDM
-      - name: Deploy to prod
-        run: ./deploy.sh prod
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: Deploy Alerts
+          SLACK_ICON_EMOJI: ':bell:'
+          SLACK_COLOR: ${{job.status}}
+          SLACK_FOOTER: ''
+          MSG_MINIMAL: actions url,commit
+
+  promote-prod:
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@c2e352e291b122921f8b6b0746f4ad8d71f4868e
+    with:
+      stage_name: prod
+    secrets:
+      aws_access_key_id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
+      aws_secret_access_key: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
+      cloudfront_certificate_arn: ${{ secrets.PROD_CLOUDFRONT_CERTIFICATE_ARN }}
+      cloudfront_domain_name: ${{ secrets.PROD_CLOUDFRONT_DOMAIN_NAME }}
+      cloudfront_storybook_domain_name: ${{ secrets.PROD_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
+      okta_metadata_url: ${{ secrets.PROD_OKTA_METADATA_URL }}
+      full_iam_permissions_boundary_policy: ${{ secrets.PROD_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
+      react_app_auth_mode: IDM
+      aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
+      infrastructure_type: ${{ secrets.INFRASTRUCTURE_TYPE || 'development' }}
+      ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
+      ses_review_team_email_address: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
+      iam_path: ${{ secrets.IAM_PATH }}
+      stage_prefix: ${{ secrets.STAGE_PREFIX }}
+      dynamo_connection: ${{ secrets.DYNAMO_CONNECTION}}
+
+  cypress-prod:
+    name: prod - cypress
+    needs: [promote-prod]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Install packages in root
+        run: yarn install --frozen-lockfile
+
+      - name: Install Cypress
+        run: yarn cypress install
+
+      - name: Install packages in ui
+        working-directory: services/ui
+        run: yarn install --frozen-lockfile
+
+      - name: Generate graphql
+        run: ./dev generate
 
       - name: Cypress on prod
         id: cypressprod
@@ -173,6 +229,7 @@ jobs:
         with:
           config: baseUrl=https://mc-review.onemac.cms.gov
           spec: tests/cypress/integration/promoteWorkflow/promote.spec.ts
+
       - name: Upload cypress video
         uses: actions/upload-artifact@v2.2.4
         if: failure() && steps.cypressprod.outcome == 'failure'
