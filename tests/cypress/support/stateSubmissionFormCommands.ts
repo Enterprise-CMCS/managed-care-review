@@ -9,7 +9,7 @@ Cypress.Commands.add('startNewContractOnlySubmission', () => {
     cy.fillOutContractActionOnly()
 
     cy.navigateForm('Continue')
-    cy.findByRole('heading', { level: 2, name: /Contract details/ })
+    cy.findByRole('heading', { level: 4, name: /Contract details/ })
 })
 
 Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
@@ -23,7 +23,7 @@ Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
     cy.fillOutContractActionAndRateCertification()
 
     cy.navigateForm('Continue')
-    cy.findByRole('heading', { level: 2, name: /Contract details/ })
+    cy.findByRole('heading', { level: 4, name: /Contract details/ })
 })
 
 Cypress.Commands.add('fillOutContractActionOnly', () => {
@@ -144,6 +144,7 @@ Cypress.Commands.add('verifyDocumentsHaveNoErrors', () => {
     cy.findByText('Upload failed').should('not.exist')
     cy.findByText('Duplicate file').should('not.exist')
     cy.findByText('Failed security scan, please remove').should('not.exist')
+    cy.findByText('Remove files with errors').should('not.exist')
 })
 
 Cypress.Commands.add('submitStateSubmissionForm', () => {

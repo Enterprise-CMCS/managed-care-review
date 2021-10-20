@@ -16,6 +16,6 @@ describe('new submission', () => {
 
         // Navigate to contract details page by clicking continue for contract only submission
         cy.navigateForm('Continue')
-        cy.findByRole('heading', { level: 2, name: /Contract details/ })
+        cy.findByRole('heading', { level: 4, name: /Contract details/ })
     })
 })
