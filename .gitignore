@@ -29,3 +29,4 @@ services/app-web/build
 services/uploads/local_buckets
 
 .envrc.local
+lambda_response.json

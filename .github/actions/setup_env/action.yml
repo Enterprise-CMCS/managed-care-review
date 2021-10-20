@@ -1,0 +1,37 @@
+name: 'Setup MC-Review environment'
+description: 'Runs common tasks for setting up the build environment in GHA'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: set branch_name
+      shell: bash
+      run: |
+        echo "branch_name=$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
+
+    - name: set app version
+      shell: bash
+      run: echo "APP_VERSION=$(scripts/app_version.sh)" >> $GITHUB_ENV
+
+    - name: set branch specific variable names
+      shell: bash
+      run: ./.github/build_vars.sh set_names
+
+    - name: read .nvmrc
+      id: node_version
+      shell: bash
+      run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
+
+    - uses: actions/setup-node@v2.4.0
+      with:
+        node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
+
+    - uses: actions/cache@v2
+      with:
+        path: '**/node_modules'
+        key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+
+    - name: set path
+      shell: bash
+      run: |
+        echo "PATH=$(pwd)/node_modules/.bin/:$PATH" >> $GITHUB_ENV

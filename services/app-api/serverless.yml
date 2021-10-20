@@ -23,7 +23,7 @@ custom:
   draftSubmissionsTableStreamArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:database-${self:custom.stage}.DraftSubmissionsTableStreamArn}
   iamPath: ${env:IAM_PATH, "/"}
   iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
-  secretsManagerSecret: aurora-postgres-${self:custom.stage}
+  secretsManagerSecret: aurora_postgres_${self:custom.stage}
   reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
   dynamoConnection: ${env:DYNAMO_CONNECTION}
   webAclName: ${self:service}-${self:custom.stage}-webacl
@@ -35,9 +35,6 @@ custom:
     packager: 'yarn'
     includeModules: true
     excludeRegex: 'darwin|debian'
-    packagerOptions:
-      scripts:
-        - npx prisma generate
   serverlessTerminationProtection:
     stages:
       - dev
@@ -100,6 +97,10 @@ provider:
     REACT_APP_AUTH_MODE: ${self:custom.reactAppAuthMode}
     SECRETS_MANAGER_SECRET: ${self:custom.secretsManagerSecret}
 
+layers:
+  prismaClient:
+    path: lambda-layers-prisma-client
+
 functions:
   health:
     handler: handlers/health_check.main
@@ -151,6 +152,18 @@ functions:
       securityGroupIds:
         - ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
+    layers:
+      - !Ref PrismaClientLambdaLayer
+
+  migrate:
+    handler: handlers/postgres_migrate.main
+    timeout: 60 # aurora cold start can be long
+    vpc:
+      securityGroupIds:
+        - ${self:custom.sgId}
+      subnetIds: ${self:custom.privateSubnets}
+    layers:
+      - !Ref PrismaClientLambdaLayer
 
 resources:
   Resources:
