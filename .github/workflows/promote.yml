@@ -54,7 +54,6 @@ jobs:
       okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
       iam_path: ${{ secrets.IAM_PATH }}
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-      stage_prefix: ${{ secrets.STAGE_PREFIX }}
       dynamo_connection: ${{ secrets.DYNAMO_CONNECTION}}
       cloudfront_certificate_arn: ${{ secrets.DEV_CLOUDFRONT_CERTIFICATE_ARN }}
       cloudfront_domain_name: ${{ secrets.DEV_CLOUDFRONT_DOMAIN_NAME }}
@@ -129,7 +128,6 @@ jobs:
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
       ses_review_team_email_address: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
       iam_path: ${{ secrets.IAM_PATH }}
-      stage_prefix: ${{ secrets.STAGE_PREFIX }}
       dynamo_connection: ${{ secrets.DYNAMO_CONNECTION}}
       test_users_pass: ${{ secrets.TEST_USERS_PASS}}
 
@@ -200,7 +198,6 @@ jobs:
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
       ses_review_team_email_address: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
       iam_path: ${{ secrets.IAM_PATH }}
-      stage_prefix: ${{ secrets.STAGE_PREFIX }}
       dynamo_connection: ${{ secrets.DYNAMO_CONNECTION}}
       test_users_pass: ${{ secrets.TEST_USERS_PASS}}
 
