@@ -157,7 +157,7 @@ functions:
 
   migrate:
     handler: handlers/postgres_migrate.main
-    timeout: 45 # aurora cold start can be long
+    timeout: 60 # aurora cold start can be long
     vpc:
       securityGroupIds:
         - ${self:custom.sgId}

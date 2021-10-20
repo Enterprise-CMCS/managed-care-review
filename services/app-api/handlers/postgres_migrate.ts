@@ -42,7 +42,7 @@ export const main: APIGatewayProxyHandler = async () => {
             `${process.execPath} /opt/nodejs/node_modules/prisma/build/index.js migrate deploy --schema=/opt/nodejs/prisma/schema.prisma`,
             {
                 env: {
-                    DATABASE_URL: postgresURL.value + '&connect_timeout=45',
+                    DATABASE_URL: postgresURL.value + '&connect_timeout=60',
                 },
             }
         )
