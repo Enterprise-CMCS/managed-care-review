@@ -34,9 +34,7 @@ describe('submission type', () => {
             const draftSubmissionId = pathnameArray[2]
             cy.visit(`/submissions/${draftSubmissionId}/type`)
 
-            cy.findByLabelText(
-                'Contract action and rate certification'
-            ).safeClick()
+            cy.findByText('Contract action and rate certification').click()
 
             // Navigate to contract details page by clicking continue for contract and rates submission
             cy.navigateForm('Continue')
