@@ -129,12 +129,12 @@ async function uploadAVDefinitions() {
  * - The file is infected, the clamAV command returns 1 and this function will return "INFECTED"
  * - Any other error and the function will return null; (falsey)
  *
- * @param filePath Path to the file to scan
+ * @param pathToFile Path in the filesystem where the file is stored.
  */
-function scanLocalFile(filePath) {
+function scanLocalFile(pathToFile) {
     try {
         execSync(
-            `${constants.PATH_TO_CLAMAV} -v -a --stdout -d /tmp/ ${filePath}`
+            `${constants.PATH_TO_CLAMAV} -v -a --stdout -d /tmp/ ${pathToFile}`
         );
 
         utils.generateSystemMessage('SUCCESSFUL SCAN, FILE CLEAN');
