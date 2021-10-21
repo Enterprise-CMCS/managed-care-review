@@ -54,8 +54,14 @@ describe('submitDraftSubmission', () => {
         expect(resultDraft.federalAuthorities).toEqual(draft.federalAuthorities)
         // submittedAt should be set to today's date
         const today = new Date()
-        const expectedDate = today.toISOString().split('T')[0]
-        expect(resultDraft.submittedAt).toEqual(expectedDate)
+        const expectedDate = today.toLocaleString('en-US', {
+            timeZone: 'America/Chicago',
+        })
+        expect(
+            resultDraft.submittedAt.toLocaleString('en-US', {
+                timeZone: 'America/Chicago',
+            })
+        ).toEqual(expectedDate)
 
         // UpdatedAt should be after the former updatedAt
         const resultUpdated = new Date(resultDraft.updatedAt)
