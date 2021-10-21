@@ -422,7 +422,7 @@ const basicCompleteLiteral: StateSubmissionType = {
     ],
 }
 
-describe('toProtoBuffer', () => {
+describe('Validate encoding to protobuf and decoding back to domain model', () => {
     if (!isStateSubmission(basicCompleteLiteral)) {
         throw new Error(
             'Bad test, the state submission is not a state submission'
@@ -447,8 +447,8 @@ describe('toProtoBuffer', () => {
     )
 })
 
-describe('bad Proto', () => {
-    it('empty Proto', () => {
+describe('handles invalid data as expected', () => {
+    it('toDomain errors when passed an empty proto message', () => {
         const protoMessage = new statesubmission.StateSubmissionInfo({})
         const encodedEmpty =
             statesubmission.StateSubmissionInfo.encode(protoMessage).finish()
@@ -461,7 +461,7 @@ describe('bad Proto', () => {
         )
     })
 
-    it('invalid DraftSubmission', () => {
+    it('toDomain returns a decode error when passed an invalid DraftSubmission', () => {
         const invalidDraft = Object.assign({}, basicSubmission) as any
         delete invalidDraft.id
         delete invalidDraft.stateNumber
@@ -481,7 +481,7 @@ describe('bad Proto', () => {
         ])
     })
 
-    it('invalid StateSubmission', () => {
+    it('toDomain returns a decode error when passed an invalid StateSubmission', () => {
         const invalidSubmission = Object.assign({}, basicCompleteLiteral) as any
         delete invalidSubmission.id
         delete invalidSubmission.stateNumber
