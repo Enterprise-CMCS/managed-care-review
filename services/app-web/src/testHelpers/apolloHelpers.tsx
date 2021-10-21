@@ -137,6 +137,71 @@ export function mockCompleteDraft(): DraftSubmission {
     }
 }
 
+export function mockContractAndRatesDraft(): DraftSubmission {
+    return {
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        id: 'test-abc-123',
+        stateCode: 'MN',
+        programID: 'pmap',
+        program: {
+            id: 'pmap',
+            name: 'PMAP',
+        },
+        name: 'MN-PMAP-0001',
+        submissionType: 'CONTRACT_AND_RATES',
+        submissionDescription: 'A real submission',
+        documents: [],
+        contractType: 'AMENDMENT',
+        contractDateStart: new Date(),
+        contractDateEnd: new Date(),
+        contractAmendmentInfo: {
+            itemsBeingAmended: [
+                'BENEFITS_PROVIDED',
+                'LENGTH_OF_CONTRACT_PERIOD',
+                'CAPITATION_RATES',
+            ],
+            otherItemBeingAmended: 'Test amendment',
+            capitationRatesAmendedInfo: {
+                reason: 'OTHER',
+                otherReason: 'Test reason',
+            },
+            relatedToCovid19: true,
+        },
+        managedCareEntities: ['MCO'],
+        federalAuthorities: ['STATE_PLAN'],
+        rateType: 'AMENDMENT',
+        rateDateStart: new Date(),
+        rateDateEnd: new Date(),
+        rateDateCertified: new Date(),
+        rateAmendmentInfo: {
+            effectiveDateStart: new Date(),
+            effectiveDateEnd: new Date(),
+        },
+        stateContacts: [
+            {
+                name: 'State Contact 1',
+                titleRole: 'Test State Contact 1',
+                email: 'statecontact1@test.com',
+            },
+            {
+                name: 'State Contact 2',
+                titleRole: 'Test State Contact 2',
+                email: 'statecontact2@test.com',
+            },
+        ],
+        actuaryContacts: [
+            {
+                actuarialFirm: 'DELOITTE',
+                name: 'Actuary Contact 1',
+                titleRole: 'Test Actuary Contact 1',
+                email: 'actuarycontact1@test.com',
+            },
+        ],
+        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+    }
+}
+
 function mockNewDraft(): DraftSubmission {
     return {
         __typename: 'DraftSubmission',

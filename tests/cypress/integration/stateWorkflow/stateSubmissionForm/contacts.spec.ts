@@ -12,13 +12,11 @@ describe('contacts', () => {
 
             // Navigate to contract details page by clicking back for contract only submission
             cy.findByRole('link', { name: /Back/ }).click()
-            cy.findByRole('heading', { level: 2, name: /Contract details/ })
+            cy.findByRole('heading', { level: 4, name: /Contract details/ })
 
             // Navigate to type page to switch to contract and rates submission
             cy.visit(`/submissions/${draftSubmissionId}/type`)
-            cy.findByLabelText(
-                'Contract action and rate certification'
-            ).safeClick()
+            cy.findByText('Contract action and rate certification').click()
             cy.navigateForm('Continue')
 
             // Navigate to contacts page
@@ -26,7 +24,7 @@ describe('contacts', () => {
 
             // Navigate to rate details page by clicking back for contract and rates submission
             cy.findByRole('link', { name: /Back/ }).click()
-            cy.findByRole('heading', { level: 2, name: /Rate details/ })
+            cy.findByRole('heading', { level: 4, name: /Rate details/ })
 
             // Navigate to contacts page
             cy.visit(`/submissions/${draftSubmissionId}/contacts`)

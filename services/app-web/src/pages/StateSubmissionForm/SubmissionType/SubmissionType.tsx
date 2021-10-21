@@ -26,9 +26,11 @@ import {
 import styles from '../StateSubmissionForm.module.scss'
 
 import { useAuth } from '../../../contexts/AuthContext'
-import { FieldTextarea } from '../../../components/Form/FieldTextarea/FieldTextarea'
-import { FieldDropdown } from '../../../components/Form/FieldDropdown/FieldDropdown'
-import { FieldRadio } from '../../../components/Form/FieldRadio/FieldRadio'
+import {
+    FieldTextarea,
+    FieldDropdown,
+    FieldRadio,
+} from '../../../components/Form'
 import { SubmissionTypeRecord } from '../../../constants/submissions'
 import {
     cleanDraftSubmission,

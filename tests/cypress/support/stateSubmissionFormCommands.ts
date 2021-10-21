@@ -9,7 +9,7 @@ Cypress.Commands.add('startNewContractOnlySubmission', () => {
     cy.fillOutContractActionOnly()
 
     cy.navigateForm('Continue')
-    cy.findByRole('heading', { level: 2, name: /Contract details/ })
+    cy.findByRole('heading', { level: 4, name: /Contract details/ })
 })
 
 Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
@@ -23,13 +23,13 @@ Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
     cy.fillOutContractActionAndRateCertification()
 
     cy.navigateForm('Continue')
-    cy.findByRole('heading', { level: 2, name: /Contract details/ })
+    cy.findByRole('heading', { level: 4, name: /Contract details/ })
 })
 
 Cypress.Commands.add('fillOutContractActionOnly', () => {
     // Must be on '/submissions/new'
     cy.findByRole('combobox', { name: 'Program' }).select('pmap')
-    cy.findByLabelText('Contract action only').safeClick()
+    cy.findByText('Contract action only').click()
     cy.findByRole('textbox', { name: 'Submission description' }).type(
         'description of contract only submission'
     )
@@ -38,7 +38,7 @@ Cypress.Commands.add('fillOutContractActionOnly', () => {
 Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
     // Must be on '/submissions/new'
     cy.findByRole('combobox', { name: 'Program' }).select('pmap')
-    cy.findByLabelText('Contract action and rate certification').safeClick()
+    cy.findByText('Contract action and rate certification').click()
     cy.findByRole('textbox', { name: 'Submission description' }).type(
         'description of contract and rates submission'
     )
@@ -46,7 +46,7 @@ Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
 
 Cypress.Commands.add('fillOutBaseContractDetails', () => {
     // Must be on '/submissions/:id/contract-details'
-    cy.findByLabelText('Base contract').safeClick()
+    cy.findByText('Base contract').click()
     cy.wait(2000)
     cy.findByLabelText('Start date').type('04/01/2024')
     cy.findByLabelText('End date').type('03/31/2025').blur()
@@ -57,7 +57,7 @@ Cypress.Commands.add('fillOutBaseContractDetails', () => {
 
 Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
     // Must be on '/submissions/:id/contract-details'
-    cy.findByLabelText('Amendment to base contract').safeClick()
+    cy.findByText('Amendment to base contract').click()
     cy.wait(2000)
     cy.findByLabelText('Start date').type('04/01/2024')
     cy.findByLabelText('End date').type('03/31/2025').blur()
@@ -65,14 +65,14 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
     cy.findByLabelText('1932(a) State Plan Authority').safeClick()
     cy.findByLabelText('Benefits provided').safeClick()
     cy.findByLabelText('Financial incentives').safeClick()
-    cy.findByLabelText('No').safeClick()
+    cy.findByText('No').click()
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
 Cypress.Commands.add('fillOutNewRateCertification', () => {
     // Must be on '/submissions/:id/rate-details'
     // Must be a contract and rates submission
-    cy.findByLabelText('New rate certification').safeClick()
+    cy.findByText('New rate certification').click()
     cy.wait(2000)
     cy.findByLabelText('Start date').type('02/29/2024')
     cy.findByLabelText('End date').type('02/28/2025')
@@ -83,7 +83,7 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
 Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', () => {
     // Must be on '/submissions/:id/rate-details'
     // Must be a contract and rates submission
-    cy.findByLabelText('Amendment to prior rate certification').safeClick()
+    cy.findByText('Amendment to prior rate certification').click()
     cy.wait(2000)
     cy.findAllByLabelText('Start date').eq(0).type('02/29/2024')
     cy.findAllByLabelText('End date').eq(0).type('02/28/2025')
@@ -112,9 +112,9 @@ Cypress.Commands.add('fillOutActuaryContact', () => {
     cy.findAllByLabelText('Mercer').eq(0).safeClick()
 
     // Actuary communication preference
-    cy.findByLabelText(
+    cy.findByText(
         `OACT can communicate directly with the state’s actuary but should copy the state on all written communication and all appointments for verbal discussions.`
-    ).safeClick()
+    ).click()
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
@@ -144,6 +144,7 @@ Cypress.Commands.add('verifyDocumentsHaveNoErrors', () => {
     cy.findByText('Upload failed').should('not.exist')
     cy.findByText('Duplicate file').should('not.exist')
     cy.findByText('Failed security scan, please remove').should('not.exist')
+    cy.findByText('Remove files with errors').should('not.exist')
 })
 
 Cypress.Commands.add('submitStateSubmissionForm', () => {

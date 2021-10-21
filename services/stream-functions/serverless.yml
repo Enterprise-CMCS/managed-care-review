@@ -7,8 +7,9 @@ package:
 
 plugins:
   - serverless-bundle
-  - serverless-dotenv-plugin
   - serverless-stack-termination-protection
+  - serverless-s3-bucket-helper
+  - serverless-idempotency-helper
 
 custom:
   stage: ${opt:stage, self:provider.stage}
@@ -17,7 +18,7 @@ custom:
   emailSource: ${opt:emailSource, env:SES_SOURCE_EMAIL_ADDRESS, "admin@example.com"}
   reviewerEmail: ${opt:reviewTeamEmail, env:SES_REVIEW_TEAM_EMAIL_ADDRESS, "reviewteam@example.com"}
   iamPath: ${env:IAM_PATH, "/"}
-  iamPermissionsBoundaryPolicy: ${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
+  iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
   serverlessTerminationProtection:
     stages:
       - dev
@@ -29,6 +30,23 @@ provider:
   name: aws
   runtime: nodejs14.x
   region: us-east-1
+  iam:
+    role:
+      path: ${self:custom.iamPath}
+      permissionsBoundary: ${self:custom.iamPermissionsBoundaryPolicy}
+      statements:
+        - Effect: 'Allow'
+          Action:
+            - dynamodb:DescribeStream
+            - dynamodb:GetRecords
+            - dynamodb:GetShardIterator
+            - dynamodb:ListStreams
+          Resource: ${self:custom.tableStreamArn}
+        - Effect: 'Allow'
+          Action:
+            - ses:SendEmail
+            - ses:SendRawEmail
+          Resource: '*'
 
 functions:
   emailSubmitter:
@@ -38,7 +56,6 @@ functions:
           arn: ${self:custom.tableStreamArn}
           startingPosition: LATEST
           maximumRetryAttempts: 2
-    role: LambdaEmailerRole
     environment:
       emailSource: ${self:custom.emailSource}
     maximumRetryAttempts: 2
@@ -49,56 +66,7 @@ functions:
           arn: ${self:custom.tableStreamArn}
           startingPosition: LATEST
           maximumRetryAttempts: 2
-    role: LambdaEmailerRole
     environment:
       emailSource: ${self:custom.emailSource}
       reviewerEmail: ${self:custom.reviewerEmail}
     maximumRetryAttempts: 2
-
-resources:
-  Conditions:
-    CreatePermissionsBoundary:
-      Fn::Not:
-        - Fn::Equals:
-            - ''
-            - ${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
-  Resources:
-    LambdaEmailerRole: # Why isn't this with the function as an iamRoleStatements?  https://github.com/serverless/serverless/issues/6485
-      Type: 'AWS::IAM::Role'
-      Properties:
-        AssumeRolePolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-            - Effect: 'Allow'
-              Principal:
-                Service: 'lambda.amazonaws.com'
-              Action: 'sts:AssumeRole'
-        Path: ${self:custom.iamPath}
-        PermissionsBoundary:
-          Fn::If:
-            - CreatePermissionsBoundary
-            - !Sub arn:aws:iam::${AWS::AccountId}:policy${self:custom.iamPermissionsBoundaryPolicy}
-            - !Ref AWS::NoValue
-        Policies:
-          - PolicyName: 'LambdaRolePolicy'
-            PolicyDocument:
-              Version: '2012-10-17'
-              Statement:
-                - Effect: 'Allow'
-                  Action:
-                    - logs:CreateLogGroup
-                    - logs:CreateLogStream
-                    - logs:PutLogEvents
-                  Resource: 'arn:aws:logs:*:*:*'
-                - Effect: 'Allow'
-                  Action:
-                    - dynamodb:DescribeStream
-                    - dynamodb:GetRecords
-                    - dynamodb:GetShardIterator
-                    - dynamodb:ListStreams
-                  Resource: ${self:custom.tableStreamArn}
-                - Effect: 'Allow'
-                  Action:
-                    - ses:SendEmail
-                    - ses:SendRawEmail
-                  Resource: '*'

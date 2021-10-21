@@ -1,0 +1,13 @@
+@import '../SubmissionSummary.module.scss';
+
+.reviewSection {
+    ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+
+        li {
+            padding: units(1) 0;
+        }
+    }
+}

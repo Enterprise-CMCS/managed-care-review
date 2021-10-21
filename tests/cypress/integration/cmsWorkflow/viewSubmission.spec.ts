@@ -6,7 +6,7 @@ describe('CMS User can view submission', () => {
     //         cy.navigateForm('Continue')
     //         cy.findByText(/^MN-PMAP-/).should('exist')
     //         // Fill out contract details
-    //         cy.findByLabelText('Base contract').safeClick()
+    //         cy.findByText('Base contract').click()
     //         cy.findByLabelText('Start date').type('04/01/2024')
     //         cy.findByLabelText('End date').type('03/31/2025').blur()
     //         cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
@@ -14,7 +14,7 @@ describe('CMS User can view submission', () => {
     //         cy.findAllByTestId('errorMessage').should('have.length', 0)
     //         cy.navigateForm('Continue')
     //         //Fill out rate details
-    //         cy.findByLabelText('New rate certification').safeClick()
+    //         cy.findByText('New rate certification').click()
     //         cy.findByLabelText('Start date').type('02/29/2024')
     //         cy.findByLabelText('End date').type('02/28/2025')
     //         cy.findByLabelText('Date certified').type('03/01/2024')
@@ -29,9 +29,9 @@ describe('CMS User can view submission', () => {
     //         cy.findAllByLabelText('Email').eq(1).type('act@test.com')
     //         cy.findByLabelText('Mercer').safeClick()
     //         // actuary communication preference
-    //         cy.findByLabelText(
+    //         cy.findByText(
     //             `OACT can communicate directly with the state’s actuary but should copy the state on all written communication and all appointments for verbal discussions.`
-    //         ).safeClick()
+    //         ).click()
     //         // Continue button navigates to documents page
     //         cy.findByRole('button', {
     //             name: 'Continue',

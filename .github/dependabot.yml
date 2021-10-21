@@ -37,3 +37,9 @@ updates:
     schedule:
       interval: 'weekly'
     open-pull-requests-limit: 2
+
+  - package-ecosystem: 'npm'
+    directory: '/services/stream-functions'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 2

@@ -1,4 +1,3 @@
-import React from 'react'
 import * as Yup from 'yup'
 import { Story } from '@storybook/react'
 import { Formik } from 'formik'

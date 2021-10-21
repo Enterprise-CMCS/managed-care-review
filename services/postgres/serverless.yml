@@ -5,6 +5,8 @@ frameworkVersion: '2'
 
 plugins:
   - serverless-stack-termination-protection
+  - serverless-s3-bucket-helper
+  - serverless-iam-helper
 
 provider:
   name: aws
@@ -13,7 +15,7 @@ provider:
   iam:
     role:
       path: ${self:custom.iamPath}
-      permissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy${self:custom.iamPermissionsBoundaryPolicy}
+      permissionsBoundary: ${self:custom.iamPermissionsBoundaryPolicy}
       statements:
         - Effect: 'Allow'
           Action:
@@ -38,7 +40,7 @@ provider:
 
 custom:
   stage: ${opt:stage, self:provider.stage}
-  iamPermissionsBoundaryPolicy: ${env:IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
+  iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
   iamPath: ${env:IAM_PATH, "/"}
   databaseName: !Sub aurora_${self:service}_${self:custom.stage}_${AWS::AccountId}
   vpcId: ${ssm:/configuration/${self:custom.stage}/vpc/id, ssm:/configuration/default/vpc/id}
@@ -88,7 +90,7 @@ resources:
     PostgresSecret:
       Type: AWS::SecretsManager::Secret
       Properties:
-        Name: 'aurora-${self:service}-${self:custom.stage}'
+        Name: 'aurora_${self:service}_${self:custom.stage}'
         Description: 'Dynamically generated password for aurora serverless postgres'
         GenerateSecretString:
           SecretStringTemplate: '{"username": "mcreviewadmin"}'

@@ -26,7 +26,7 @@ describe('documents', () => {
                 .findAllByRole('listitem')
                 .should('have.length', 3)
             cy.navigateForm('Back')
-            cy.findByRole('heading', { level: 2, name: /Contacts/ })
+            cy.findByRole('heading', { level: 4, name: /Contacts/ })
 
             // reload page, see two documents,  duplicate was discarded on Back
             cy.visit(`/submissions/${draftSubmissionID}/documents`)
@@ -94,7 +94,7 @@ describe('documents', () => {
             cy.verifyDocumentsHaveNoErrors()
 
             cy.navigateForm('Continue')
-            cy.findByRole('heading', { level: 2, name: /Review and submit/ })
+            cy.findByRole('heading', { level: 4, name: /Review and submit/ })
         })
     })
 })

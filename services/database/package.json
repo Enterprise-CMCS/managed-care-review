@@ -10,7 +10,8 @@
     "license": "CC0-1.0",
     "devDependencies": {
         "serverless": "^2.54.0",
-        "serverless-dynamodb-local": "^0.2.39",
+        "serverless-dynamodb-local": "^0.2.40",
+        "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",
         "serverless-stack-termination-protection": "^1.0.4"
     }
 }

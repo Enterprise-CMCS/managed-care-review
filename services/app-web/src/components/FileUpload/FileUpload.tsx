@@ -7,15 +7,17 @@ import {
     FileInput,
     FileInputRef,
 } from '@trussworks/react-uswds'
+
 import styles from './FileUpload.module.scss'
 
-import { FileItemT } from './FileItem'
-import { FileItemsList } from './FileItemsList'
+import { FileItemT } from './FileItem/FileItem'
+import { FileItemsList } from './FileItemList/FileItemsList'
 
 export type S3FileData = {
     key: string
     s3URL: string
 }
+
 export type FileUploadProps = {
     id: string
     name: string
@@ -28,7 +30,7 @@ export type FileUploadProps = {
     onLoadComplete: ({ files }: { files: FileItemT[] }) => void
 } & JSX.IntrinsicElements['input']
 
-/*  FileUpload handles async file upload to S3 and displays inline errors per file. 
+/*  FileUpload handles async file upload to S3 and displays inline errors per file.
     Tracks files as they are uploaded. Once files are no longer processing passes to parent with onLoadComplete.
 
     Note: This component uses a ref to access files in the input. It also clears its own value after each change.

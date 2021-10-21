@@ -7,10 +7,10 @@ import { getRouteName } from '../../constants/routes'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
 import { AuthModeType } from '../../common-code/domain-models'
-import { Logo } from '../Logo/Logo'
+import { Logo } from '../Logo'
 
-import { PageHeadingRow } from './PageHeadingRow'
-import { UserLoginInfo } from './UserLoginInfo'
+import { PageHeadingRow } from './PageHeadingRow/PageHeadingRow'
+import { UserLoginInfo } from './UserLoginInfo/UserLoginInfo'
 
 import styles from './Header.module.scss'
 

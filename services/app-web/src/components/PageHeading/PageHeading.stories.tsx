@@ -1,6 +1,6 @@
 import React from 'react'
 
-import PageHeading from '.'
+import { PageHeading } from './PageHeading'
 
 export default {
     title: 'Components/PageHeading',
