@@ -129,12 +129,15 @@ async function uploadAVDefinitions() {
  * - The file is infected, the clamAV command returns 1 and this function will return "INFECTED"
  * - Any other error and the function will return null; (falsey)
  *
- * @param pathToFile Path in the filesystem where the file is stored.
+ * @param s3ObjectKey Key of the s3 Object
  */
-function scanLocalFile(pathToFile) {
+function scanLocalFile(s3ObjectKey) {
     try {
+        // remove problematic characters from filename
+        let sanitizedFilename = s3ObjectKey.replace(/[^a-zA-Z0-9]/g, '');
+
         execSync(
-            `${constants.PATH_TO_CLAMAV} -v -a --stdout -d /tmp/ '/tmp/download/${pathToFile}'`
+            `${constants.PATH_TO_CLAMAV} -v -a --stdout -d /tmp/ '/tmp/download/${sanitizedFilename}'`
         );
 
         utils.generateSystemMessage('SUCCESSFUL SCAN, FILE CLEAN');
