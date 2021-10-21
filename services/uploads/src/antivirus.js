@@ -32,13 +32,26 @@ async function isS3FileTooBig(s3ObjectKey, s3ObjectBucket) {
     return fileSize > constants.MAX_FILE_SIZE;
 }
 
+/**
+ * Returns the /tmp local path from an s3ObjectKey
+ * @param {string} s3ObjectKey Key of the s3 object
+ * @return {string} Path of the s3 object on the local fs
+ **/
+function pathFromObjectKey(s3ObjectKey) {
+    const downloadDir = `/tmp/download`;
+
+    // remove problematic characters from filename
+    let sanitizedFilename = s3ObjectKey.replace(/[^a-zA-Z0-9]/g, '');
+    return `${downloadDir}/${path.basename(sanitizedFilename)}`;
+}
+
 function downloadFileFromS3(s3ObjectKey, s3ObjectBucket) {
     const downloadDir = `/tmp/download`;
     if (!fs.existsSync(downloadDir)) {
         fs.mkdirSync(downloadDir);
     }
-    let localPath = `${downloadDir}/${path.basename(s3ObjectKey)}`;
 
+    let localPath = pathFromObjectKey(s3ObjectKey);
     let writeStream = fs.createWriteStream(localPath);
 
     utils.generateSystemMessage(
@@ -96,7 +109,9 @@ async function lambdaHandleEvent(event, context) {
         utils.generateSystemMessage('Download File from S3');
         await downloadFileFromS3(s3ObjectKey, s3ObjectBucket);
         utils.generateSystemMessage('Set virusScanStatus');
-        virusScanStatus = clamav.scanLocalFile(path.basename(s3ObjectKey));
+
+        let filePath = pathFromObjectKey(s3ObjectKey);
+        virusScanStatus = clamav.scanLocalFile(filePath);
         utils.generateSystemMessage(`virusScanStatus=${virusScanStatus}`);
     }
 
