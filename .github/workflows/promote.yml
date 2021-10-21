@@ -20,11 +20,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Check for secrets
-        uses: ./.github/actions/check_secrets
-        with:
-          expected-secret: ${{ secrets.REACT_APP_AUTH_MODE }}
-
       - name: Setup env
         uses: ./.github/actions/setup_env
 
