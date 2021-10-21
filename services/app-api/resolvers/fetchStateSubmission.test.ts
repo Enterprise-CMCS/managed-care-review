@@ -39,8 +39,14 @@ describe('fetchStateSubmission', () => {
             },
         ])
         const today = new Date()
-        const expectedDate = today.toISOString().split('T')[0]
-        expect(resultSub.submittedAt).toEqual(expectedDate)
+        const expectedDate = today.toLocaleString('en-US', {
+            timeZone: 'America/Chicago',
+        })
+        expect(
+            resultSub.submittedAt.toLocaleString('en-US', {
+                timeZone: 'America/Chicago',
+            })
+        ).toEqual(expectedDate)
     })
 
     it('returns an error if the submission is a draft', async () => {
