@@ -37,7 +37,10 @@ function downloadFileFromS3(s3ObjectKey, s3ObjectBucket) {
     if (!fs.existsSync(downloadDir)) {
         fs.mkdirSync(downloadDir);
     }
-    let localPath = `${downloadDir}/${path.basename(s3ObjectKey)}`;
+
+    // remove problematic characters from filename
+    let sanitizedFilename = s3ObjectKey.replace(/[^a-zA-Z0-9]/g, '');
+    let localPath = `${downloadDir}/${path.basename(sanitizedFilename)}`;
 
     let writeStream = fs.createWriteStream(localPath);
 
