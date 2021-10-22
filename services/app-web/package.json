@@ -30,7 +30,8 @@
         "uswds": "^2.12.1",
         "uuid": "^8.3.2",
         "web-vitals": "^2.1.0",
-        "yup": "^0.32.9"
+        "yup": "^0.32.9",
+        "zod": "^3.10.1"
     },
     "scripts": {
         "start": "react-scripts start",

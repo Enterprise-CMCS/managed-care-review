@@ -14,6 +14,7 @@ import {
     runWebAgainstAWS,
     compileGraphQLTypesOnce,
     runWebAgainstDocker,
+    compileProto,
 } from './local/index.js'
 
 import {
@@ -65,6 +66,7 @@ async function runAllFormat() {
 async function runAllGenerate() {
     const runner = new LabeledProcessRunner()
     await compileGraphQLTypesOnce(runner)
+    await compileProto(runner)
 }
 
 // runAllLocally runs all of our services locally
@@ -499,7 +501,7 @@ function main() {
         )
         .command(
             'generate',
-            'generate any code required for building. For now thats just GraphQL types.',
+            'generate any code required for building. For now thats GraphQL types and the protobuf coder.',
             {},
             () => {
                 runAllGenerate()

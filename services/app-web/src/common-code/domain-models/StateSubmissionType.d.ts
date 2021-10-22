@@ -1,4 +1,17 @@
 // StateSubmission is a health plan that has been submitted to CMS.
+import type {
+    StateContact,
+    ActuaryContact,
+    FederalAuthority,
+    SubmissionDocument,
+    ContractAmendmentInfo,
+    RateAmendmentInfo,
+    ActuaryCommunicationType,
+    SubmissionType,
+    ContractType,
+    RateType,
+    FederalAuthority,
+} from './DraftSubmissionType'
 
 export type StateSubmissionType = {
     submittedAt: Date

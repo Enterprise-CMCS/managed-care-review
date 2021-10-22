@@ -1,0 +1,250 @@
+syntax = "proto3";
+package statesubmission;
+import "google/protobuf/timestamp.proto";
+
+// StateSubmissionInfo represents the form data for MC Review
+// It has all the fields for both DraftSubmission and StateSubmission, 
+// differentiated by the value of the `status` field.
+message StateSubmissionInfo {
+  optional string proto_name = 1;
+  optional int32 proto_version = 2;
+  optional string id = 3;
+  optional string status = 4;
+  optional Date created_at = 5;
+  optional google.protobuf.Timestamp updated_at = 6;
+  optional google.protobuf.Timestamp submitted_at = 7;
+  optional SubmissionStatus submission_status = 8;
+  optional StateCode state_code = 9;
+  optional int32 state_number = 10;
+  repeated string program_ids = 11;
+  optional SubmissionType submission_type = 12;
+  optional string submission_description = 13;
+  repeated Contact state_contacts = 14;
+  optional ContractInfo contract_info = 15;
+  repeated Document documents = 16;
+
+  repeated RateInfo rate_infos = 50;
+}
+
+/// Submission related enums
+enum SubmissionType {
+  SUBMISSION_TYPE_UNSPECIFIED = 0; 
+  SUBMISSION_TYPE_CONTRACT_ONLY = 1; 
+  SUBMISSION_TYPE_CONTRACT_AND_RATES = 3;
+}
+
+message Date {
+  // Year of the date. Must be from 1 to 9999, or 0 to specify a date without
+  // a year.
+  optional int32 year = 1;
+
+  // Month of a year. Must be from 1 to 12, or 0 to specify a year without a
+  // month and day.
+  optional int32 month = 2;
+
+  // Day of a month. Must be from 1 to 31 and valid for the year and month, or 0
+  // to specify a year by itself or a year and month where the day isn't
+  // significant.
+  optional int32 day = 3;
+}
+
+enum SubmissionStatus{
+  SUBMISSION_STATUS_UNSPECIFIED = 0; 
+  SUBMISSION_STATUS_DRAFT = 1; 
+  SUBMISSION_STATUS_SUBMITTED = 2;
+}
+
+
+message Contact {
+  optional string name = 1;
+  optional string title_role = 2;
+  optional string email = 3;
+}
+
+/// ContractInfo subtypes
+message ContractInfo {
+  optional ContractType contract_type = 1;
+  optional Date contract_date_start = 2;
+  optional Date contract_date_end = 3;
+  repeated ManagedCareEntity managed_care_entities = 4;
+  repeated FederalAuthority federal_authorities = 5;
+
+  optional ContractAmendmentInfo contract_amendment_info  = 50;
+
+  message ContractAmendmentInfo  {
+    message CapitationRatesAmendedInfo {
+      optional CapitationRateAmendmentReason reason = 1;
+      optional string other_reason = 2;
+    }
+    
+    repeated AmendedItem amendable_items = 1;
+    optional string other_amendable_item = 2;
+    optional CapitationRatesAmendedInfo capitation_rates_amended_info = 3;
+    optional bool related_to_covid_19 = 4;
+    optional bool related_to_vaccination = 5;
+  }
+}
+
+/// Contract related enums
+enum AmendedItem {
+  AMENDED_ITEM_UNSPECIFIED = 0;
+  AMENDED_ITEM_BENEFITS_PROVIDED = 1;
+  AMENDED_ITEM_CAPITATION_RATES = 2;
+  AMENDED_ITEM_ENCOUNTER_DATA = 3;
+  AMENDED_ITEM_ENROLLEE_ACCESS = 4;
+  AMENDED_ITEM_ENROLLMENT_PROCESS = 5;
+  AMENDED_ITEM_FINANCIAL_INCENTIVES = 6;
+  AMENDED_ITEM_GEO_AREA_SERVED = 7;
+  AMENDED_ITEM_GRIEVANCES_AND_APPEALS_SYSTEM = 8;
+  AMENDED_ITEM_LENGTH_OF_CONTRACT_PERIOD = 9;
+  AMENDED_ITEM_NON_RISK_PAYMENT = 10;
+  AMENDED_ITEM_PROGRAM_INTEGRITY =11;
+  AMENDED_ITEM_QUALITY_STANDARDS =12;
+  AMENDED_ITEM_RISK_SHARING_MECHANISM =13;
+  AMENDED_ITEM_OTHER=14;
+}
+
+enum CapitationRateAmendmentReason{
+  CAPITATION_RATE_AMENDMENT_REASON_UNSPECIFIED = 0;
+  CAPITATION_RATE_AMENDMENT_REASON_ANNUAL = 1;
+  CAPITATION_RATE_AMENDMENT_REASON_MIDYEAR = 2;
+  CAPITATION_RATE_AMENDMENT_REASON_OTHER = 3;
+}
+
+enum ContractType {
+  CONTRACT_TYPE_UNSPECIFIED = 0;
+  CONTRACT_TYPE_BASE = 1;
+  CONTRACT_TYPE_AMENDMENT = 2;
+} 
+
+
+enum FederalAuthority {
+  FEDERAL_AUTHORITY_UNSPECIFIED = 0;
+  FEDERAL_AUTHORITY_STATE_PLAN = 1;
+  FEDERAL_AUTHORITY_WAIVER_1915B = 2;
+  FEDERAL_AUTHORITY_WAIVER_1115 = 3;
+  FEDERAL_AUTHORITY_VOLUNTARY = 4;
+  FEDERAL_AUTHORITY_BENCHMARK = 5;
+  FEDERAL_AUTHORITY_TITLE_XXI = 6;
+}
+
+enum ManagedCareEntity {
+  MANAGED_CARE_ENTITY_UNSPECIFIED = 0;
+  MANAGED_CARE_ENTITY_MCO = 1;
+  MANAGED_CARE_ENTITY_PIHP = 2;
+  MANAGED_CARE_ENTITY_PAHP= 3; 
+  MANAGED_CARE_ENTITY_PCCM = 4;
+}
+
+
+
+
+/// Rate Info subtypes
+message RateInfo {
+  optional string id = 1;
+  optional RateType rate_type = 2;
+  optional Date rate_date_start = 3;
+  optional Date rate_date_end = 4;
+  optional Date rate_date_certified = 5;
+  repeated ActuaryContact actuary_contacts = 6;
+  optional ActuaryCommunicationType actuary_communication_preference = 7;
+    
+  optional RateAmendmentInfo rate_amendment_info = 50;
+
+  message ActuaryContact {
+    optional Contact contact = 1;
+    optional ActuarialFirmType actuarial_firm_type = 2;
+    optional string actuarial_firm_other= 3;
+  }
+
+  message RateAmendmentInfo {
+    optional Date effective_date_start = 1;
+    optional Date effective_date_end = 2;
+  }
+}
+/// Rate related enums
+enum RateType {
+  RATE_TYPE_UNSPECIFIED = 0;
+  RATE_TYPE_NEW = 1;
+  RATE_TYPE_AMENDMENT = 2;
+}
+
+enum ActuaryCommunicationType {
+  ACTUARY_COMMUNICATION_TYPE_UNSPECIFIED = 0;
+  ACTUARY_COMMUNICATION_TYPE_OACT_TO_ACTUARY = 1;
+  ACTUARY_COMMUNICATION_TYPE_OACT_TO_STATE = 2;
+}
+
+enum ActuarialFirmType {
+  ACTUARIAL_FIRM_TYPE_UNSPECIFIED = 0;
+  ACTUARIAL_FIRM_TYPE_MERCER = 1;
+  ACTUARIAL_FIRM_TYPE_MILLIMAN = 2;
+  ACTUARIAL_FIRM_TYPE_OPTUMAS = 3;
+  ACTUARIAL_FIRM_TYPE_GUIDEHOUSE = 4;
+  ACTUARIAL_FIRM_TYPE_DELOITTE = 5;
+  ACTUARIAL_FIRM_TYPE_STATE_IN_HOUSE = 6;
+  ACTUARIAL_FIRM_TYPE_OTHER = 7;
+}
+
+    
+/// Generic sub types
+message Document {
+  optional string name = 1;
+  optional string s3_url = 2;
+}
+
+enum StateCode {
+  STATE_CODE_UNSPECIFIED = 0;
+  STATE_CODE_AS = 1 ;
+  STATE_CODE_AK = 2;
+  STATE_CODE_AL = 3;
+  STATE_CODE_AR = 4;
+  STATE_CODE_AZ = 5;
+  STATE_CODE_CA = 6;
+  STATE_CODE_CO = 7;
+  STATE_CODE_CT = 8;
+  STATE_CODE_DC = 9;
+  STATE_CODE_DE = 10;
+  STATE_CODE_FL = 11;
+  STATE_CODE_GA = 12;
+  STATE_CODE_HI = 13;
+  STATE_CODE_IA = 14;
+  STATE_CODE_ID = 15;
+  STATE_CODE_IL = 16;
+  STATE_CODE_IN = 17;
+  STATE_CODE_KS = 18;
+  STATE_CODE_LA = 19;
+  STATE_CODE_MA = 20;
+  STATE_CODE_MD = 21;
+  STATE_CODE_ME = 22;
+  STATE_CODE_MI = 23;
+  STATE_CODE_MN = 24;
+  STATE_CODE_MO = 25;
+  STATE_CODE_MS = 26;
+  STATE_CODE_MT = 27;
+  STATE_CODE_NC = 28;
+  STATE_CODE_ND = 29;
+  STATE_CODE_NE = 30;
+  STATE_CODE_NH = 31;
+  STATE_CODE_NJ = 32;
+  STATE_CODE_NM = 33;
+  STATE_CODE_NV = 34;
+  STATE_CODE_NY = 35;
+  STATE_CODE_OH = 36;
+  STATE_CODE_OK = 37;
+  STATE_CODE_OR = 38;
+  STATE_CODE_PA = 39;
+  STATE_CODE_PR = 40;
+  STATE_CODE_RI = 41;
+  STATE_CODE_SC = 42;
+  STATE_CODE_SD = 43;
+  STATE_CODE_TN = 44;
+  STATE_CODE_TX = 45;
+  STATE_CODE_UT = 46;
+  STATE_CODE_VA = 47;
+  STATE_CODE_VT = 48;
+  STATE_CODE_WA = 49;
+  STATE_CODE_WI = 50;
+  STATE_CODE_WV = 51;
+  STATE_CODE_WY= 52;
+}
