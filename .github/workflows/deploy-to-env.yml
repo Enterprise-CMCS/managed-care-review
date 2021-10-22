@@ -191,6 +191,7 @@ jobs:
 
   deploy-all:
     runs-on: ubuntu-latest
+    needs: [app-api]
     steps:
       - uses: actions/checkout@v2.3.4
 
