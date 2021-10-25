@@ -103,7 +103,6 @@ export const RateDetails = ({
     ) => Promise<DraftSubmission | undefined>
 }): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
-    const redirectToDashboard = React.useRef(false)
     const history = useHistory<MCRouterState>()
 
     // Rate documents state management
@@ -263,9 +262,12 @@ export const RateDetails = ({
 
         const updatedDraft = updatesFromSubmission(draftSubmission)
         updatedDraft.rateType = values.rateType
-        updatedDraft.rateDateStart = values.rateDateStart
-        updatedDraft.rateDateEnd = values.rateDateEnd
-        updatedDraft.rateDateCertified = values.rateDateCertified
+        updatedDraft.rateDateStart =
+            values.rateDateStart === '' ? null : values.rateDateStart
+        updatedDraft.rateDateEnd =
+            values.rateDateEnd === '' ? null : values.rateDateEnd
+        updatedDraft.rateDateCertified =
+            values.rateDateCertified === '' ? null : values.rateDateCertified
         updatedDraft.rateDocuments = rateDocuments
 
         if (values.rateType === 'AMENDMENT') {
@@ -289,7 +291,6 @@ export const RateDetails = ({
             }
         } catch (serverError) {
             setSubmitting(false)
-            redirectToDashboard.current = false
         }
     }
 
@@ -616,17 +617,22 @@ export const RateDetails = ({
                                     <Button
                                         type="button"
                                         className="usa-button usa-button--outline"
-                                        onClick={async (e) =>
-                                            handleFormSubmit(
-                                                values,
-                                                setSubmitting,
-                                                {
-                                                    shouldValidate: false,
-                                                    redirectPath:
-                                                        '/contact-details',
-                                                }
-                                            )
-                                        }
+                                        onClick={async () => {
+                                            // do not need to validate or submit if no documents are uploaded
+                                            if (fileItems.length === 0) {
+                                                history.push('contract-details')
+                                            } else {
+                                                await handleFormSubmit(
+                                                    values,
+                                                    setSubmitting,
+                                                    {
+                                                        shouldValidate: false,
+                                                        redirectPath:
+                                                            'contract-details',
+                                                    }
+                                                )
+                                            }
+                                        }}
                                     >
                                         Back
                                     </Button>

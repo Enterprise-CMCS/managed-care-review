@@ -480,8 +480,42 @@ describe('RateDetails', () => {
             })
         })
 
-        it('when zero files present, does not trigger missing documents alert on click', async () => {
+        it('when zero files present, does not trigger missing documents alert on click but still saves the in progress draft', async () => {
             const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={emptyRateDetailsDraft}
+                    updateDraft={mockUpdateDraftFn}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const saveAsDraftButton = screen.getByRole('button', {
+                name: 'Save as draft',
+            })
+            expect(saveAsDraftButton).not.toBeDisabled()
+
+            userEvent.click(saveAsDraftButton)
+            expect(mockUpdateDraftFn).toHaveBeenCalled()
+            expect(
+                screen.queryByText('You must upload at least one document')
+            ).toBeNull()
+        })
+
+        it('when existing file is removed, does not trigger missing documents alert on click but still saves the in progress draft', async () => {
+            const mockUpdateDraftFn = jest.fn()
+            const hasDocsDetailsDraft = {
+                ...mockDraft(),
+                rateDocuments: [{ name: 'aasdf3423af', s3Url: 'asdfads' }],
+                rateType: null,
+                rateDateStart: null,
+                rateDateEnd: null,
+                rateDateCertified: null,
+            }
             renderWithProviders(
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft}
@@ -594,7 +628,7 @@ describe('RateDetails', () => {
             })
         })
 
-        it('when zero files present, does not trigger alert on click', async () => {
+        it('when zero files present, does not trigger missing documents alert on click', async () => {
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <RateDetails
@@ -617,10 +651,10 @@ describe('RateDetails', () => {
             expect(
                 screen.queryByText('You must upload at least one document')
             ).toBeNull()
-            expect(mockUpdateDraftFn).toHaveBeenCalled()
+            expect(mockUpdateDraftFn).not.toHaveBeenCalled()
         })
 
-        it('when duplicate files present, does not trigger alert on click', async () => {
+        it('when duplicate files present, does not trigger duplicate documents alert on click and silently updates submission without the duplicate', async () => {
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <RateDetails
@@ -648,7 +682,22 @@ describe('RateDetails', () => {
             })
             userEvent.click(backButton)
             expect(screen.queryByText('Remove files with errors')).toBeNull()
-            expect(mockUpdateDraftFn).toHaveBeenCalled()
+            expect(mockUpdateDraftFn).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    draftSubmissionUpdates: expect.objectContaining({
+                        rateDocuments: [
+                            {
+                                name: 'testFile.doc',
+                                s3URL: expect.any(String),
+                            },
+                            {
+                                name: 'testFile.pdf',
+                                s3URL: expect.any(String),
+                            },
+                        ],
+                    }),
+                })
+            )
         })
     })
 })
