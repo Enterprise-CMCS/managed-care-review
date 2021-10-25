@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import {
@@ -6,22 +6,29 @@ import {
     fetchCurrentUserMock,
 } from '../../../testHelpers/apolloHelpers'
 
-import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import {
+    renderWithProviders,
+    TEST_DOC_FILE,
+    TEST_PDF_FILE,
+    TEST_XLS_FILE,
+    TEST_PNG_FILE,
+    dragAndDrop,
+} from '../../../testHelpers/jestHelpers'
 import { RateDetails } from './RateDetails'
 
 describe('RateDetails', () => {
+    const emptyRateDetailsDraft = {
+        ...mockDraft(),
+        rateType: null,
+        rateDateStart: null,
+        rateDateEnd: null,
+        rateDateCertified: null,
+    }
+
     afterEach(() => jest.clearAllMocks())
 
     it('renders without errors', async () => {
-        const mock = mockDraft()
         const mockUpdateDraftFn = jest.fn()
-        const emptyRateDetailsDraft = {
-            ...mock,
-            rateType: null,
-            rateDateStart: null,
-            rateDateEnd: null,
-            rateDateCertified: null,
-        }
 
         renderWithProviders(
             <RateDetails
@@ -36,18 +43,16 @@ describe('RateDetails', () => {
         )
 
         expect(screen.getByText('Rate certification type')).toBeInTheDocument()
+        expect(
+            screen.getByText('Upload rate certification')
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('button', { name: 'Continue' })
+        ).not.toBeDisabled()
     })
 
-    it('loads with only rate type form field visible', async () => {
-        const mock = mockDraft()
+    it('loads with empty rate type and document upload fields visible', async () => {
         const mockUpdateDraftFn = jest.fn()
-        const emptyRateDetailsDraft = {
-            ...mock,
-            rateType: null,
-            rateDateStart: null,
-            rateDateEnd: null,
-            rateDateCertified: null,
-        }
 
         renderWithProviders(
             <RateDetails
@@ -61,7 +66,6 @@ describe('RateDetails', () => {
             }
         )
 
-        expect(screen.getByText('Rate certification type')).toBeInTheDocument()
         expect(
             screen.getByRole('radio', { name: 'New rate certification' })
         ).not.toBeChecked()
@@ -70,7 +74,12 @@ describe('RateDetails', () => {
                 name: 'Amendment to prior rate certification',
             })
         ).not.toBeChecked()
-        expect(screen.getAllByRole('radio').length).toBe(2)
+        expect(screen.getByTestId('file-input')).toBeInTheDocument()
+        expect(
+            within(
+                screen.getByTestId('file-input-preview-list')
+            ).queryAllByRole('listitem').length
+        ).toBe(0)
 
         // should not be able to find hidden things
         expect(screen.queryByText('Start date')).toBeNull()
@@ -79,15 +88,7 @@ describe('RateDetails', () => {
     })
 
     it('cannot continue without selecting rate type', async () => {
-        const mock = mockDraft()
         const mockUpdateDraftFn = jest.fn()
-        const emptyRateDetailsDraft = {
-            ...mock,
-            rateType: null,
-            rateDateStart: null,
-            rateDateEnd: null,
-            rateDateCertified: null,
-        }
 
         renderWithProviders(
             <RateDetails
@@ -110,16 +111,8 @@ describe('RateDetails', () => {
         })
     })
 
-    it('cannot continue if rating period is more than or less than 12 months', async () => {
-        const mock = mockDraft()
+    it('cannot continue if no documents are added', async () => {
         const mockUpdateDraftFn = jest.fn()
-        const emptyRateDetailsDraft = {
-            ...mock,
-            rateType: null,
-            rateDateStart: null,
-            rateDateEnd: null,
-            rateDateCertified: null,
-        }
 
         renderWithProviders(
             <RateDetails
@@ -132,36 +125,24 @@ describe('RateDetails', () => {
                 },
             }
         )
-        screen.getByLabelText('New rate certification').click()
         const continueButton = screen.getByRole('button', { name: 'Continue' })
-        const startDateInput = screen.getByLabelText('Start date')
-        const endDateInput = screen.getByLabelText('End date')
 
-        userEvent.type(startDateInput, '04/01/2023')
-        userEvent.type(endDateInput, '04/01/2024')
-        userEvent.type(screen.getByText('Date certified'), '12/01/2021')
+        screen.getByLabelText('New rate certification').click()
 
-        continueButton.click()
-        await waitFor(() =>
-            expect(screen.queryAllByTestId('errorMessage').length).toBe(0)
-        )
+        await continueButton.click()
+        await waitFor(() => {
+            expect(
+                screen.getByText('You must upload at least one document')
+            ).toBeInTheDocument()
+            expect(continueButton).toBeDisabled()
+        })
     })
 
     it('progressively disclose new rate form fields as expected', async () => {
-        const mock = mockDraft()
-        const mockUpdateDraftFn = jest.fn()
-        const emptyRateDetailsDraft = {
-            ...mock,
-            rateType: null,
-            rateDateStart: null,
-            rateDateEnd: null,
-            rateDateCertified: null,
-        }
-
         renderWithProviders(
             <RateDetails
                 draftSubmission={emptyRateDetailsDraft}
-                updateDraft={mockUpdateDraftFn}
+                updateDraft={jest.fn()}
             />,
             {
                 apolloProvider: {
@@ -206,5 +187,468 @@ describe('RateDetails', () => {
         await waitFor(() =>
             expect(screen.queryAllByTestId('errorMessage').length).toBe(0)
         )
+    })
+
+    describe('Rate documents file upload', () => {
+        it('renders without errors', async () => {
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={emptyRateDetailsDraft}
+                    updateDraft={jest.fn()}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(screen.getByTestId('file-input')).toBeInTheDocument()
+                expect(screen.getByTestId('file-input')).toHaveClass(
+                    'usa-file-input'
+                )
+                expect(
+                    screen.getByRole('button', { name: 'Continue' })
+                ).not.toBeDisabled()
+                expect(
+                    within(
+                        screen.getByTestId('file-input-preview-list')
+                    ).queryAllByRole('listitem').length
+                ).toBe(0)
+            })
+        })
+
+        it('accepts a new document', async () => {
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={emptyRateDetailsDraft}
+                    updateDraft={jest.fn()}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const input = screen.getByLabelText('Upload rate certification')
+            expect(input).toBeInTheDocument()
+            userEvent.upload(input, [TEST_DOC_FILE])
+
+            expect(
+                await screen.findByText(TEST_DOC_FILE.name)
+            ).toBeInTheDocument()
+        })
+
+        it('accepts multiple pdf, word, excel documents', async () => {
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={emptyRateDetailsDraft}
+                    updateDraft={jest.fn()}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const input = screen.getByLabelText('Upload rate certification')
+            expect(input).toBeInTheDocument()
+            expect(input).toHaveAttribute(
+                'accept',
+                'application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            )
+            userEvent.upload(input, [
+                TEST_DOC_FILE,
+                TEST_PDF_FILE,
+                TEST_XLS_FILE,
+            ])
+            await waitFor(() => {
+                expect(screen.getByText(TEST_DOC_FILE.name)).toBeInTheDocument()
+                expect(screen.getByText(TEST_PDF_FILE.name)).toBeInTheDocument()
+                expect(screen.getByText(TEST_XLS_FILE.name)).toBeInTheDocument()
+            })
+        })
+    })
+
+    describe('Continue button', () => {
+        it('enabled when valid files are present', async () => {
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={emptyRateDetailsDraft}
+                    updateDraft={jest.fn()}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+            const input = screen.getByLabelText('Upload rate certification')
+
+            userEvent.upload(input, [TEST_DOC_FILE])
+
+            await waitFor(() => {
+                expect(continueButton).not.toBeDisabled()
+            })
+        })
+
+        it('enabled when invalid files have been dropped but valid files are present', async () => {
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={emptyRateDetailsDraft}
+                    updateDraft={jest.fn()}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+            const input = screen.getByLabelText('Upload rate certification')
+            const targetEl = screen.getByTestId('file-input-droptarget')
+
+            userEvent.upload(input, [TEST_DOC_FILE])
+            dragAndDrop(targetEl, [TEST_PNG_FILE])
+
+            await waitFor(() => {
+                expect(
+                    screen.getByText('This is not a valid file type.')
+                ).toBeInTheDocument()
+                expect(continueButton).not.toBeDisabled()
+            })
+        })
+
+        it('disabled with alert after first attempt to continue with zero files', async () => {
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={emptyRateDetailsDraft}
+                    updateDraft={jest.fn()}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+            expect(continueButton).not.toBeDisabled()
+
+            continueButton.click()
+
+            await waitFor(() => {
+                expect(
+                    screen.getByText('You must upload at least one document')
+                ).toBeInTheDocument()
+
+                expect(continueButton).toBeDisabled()
+            })
+        })
+
+        it('disabled with alert after first attempt to continue with invalid duplicate files', async () => {
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={emptyRateDetailsDraft}
+                    updateDraft={jest.fn()}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const input = screen.getByLabelText('Upload rate certification')
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+
+            userEvent.upload(input, [TEST_DOC_FILE, TEST_DOC_FILE])
+            expect(continueButton).not.toBeDisabled()
+
+            continueButton.click()
+            await waitFor(() => {
+                expect(
+                    screen.getByText(
+                        'You must remove all documents with error messages before continuing'
+                    )
+                ).toBeInTheDocument()
+
+                expect(continueButton).toBeDisabled()
+            })
+        })
+
+        it('disabled with alert after first attempt to continue with invalid files', async () => {
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={emptyRateDetailsDraft}
+                    updateDraft={jest.fn()}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+
+            const targetEl = screen.getByTestId('file-input-droptarget')
+            dragAndDrop(targetEl, [TEST_PNG_FILE])
+
+            expect(
+                await screen.findByText('This is not a valid file type.')
+            ).toBeInTheDocument()
+
+            expect(continueButton).not.toBeDisabled()
+            continueButton.click()
+
+            expect(
+                await screen.findByText('You must upload at least one document')
+            ).toBeInTheDocument()
+
+            expect(continueButton).toBeDisabled()
+        })
+    })
+
+    describe('Save as draft button', () => {
+        it('enabled when valid files are present', async () => {
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={emptyRateDetailsDraft}
+                    updateDraft={mockUpdateDraftFn}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const saveAsDraftButton = screen.getByRole('button', {
+                name: 'Save as draft',
+            })
+            const input = screen.getByLabelText('Upload rate certification')
+
+            userEvent.upload(input, [TEST_DOC_FILE])
+
+            await waitFor(() => {
+                expect(saveAsDraftButton).not.toBeDisabled()
+            })
+        })
+
+        it('enabled when invalid files have been dropped but valid files are present', async () => {
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={emptyRateDetailsDraft}
+                    updateDraft={mockUpdateDraftFn}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const saveAsDraftButton = screen.getByRole('button', {
+                name: 'Save as draft',
+            })
+            const input = screen.getByLabelText('Upload rate certification')
+            const targetEl = screen.getByTestId('file-input-droptarget')
+
+            userEvent.upload(input, [TEST_DOC_FILE])
+            dragAndDrop(targetEl, [TEST_PNG_FILE])
+
+            await waitFor(() => {
+                expect(saveAsDraftButton).not.toBeDisabled()
+            })
+        })
+
+        it('when zero files present, does not trigger missing documents alert on click', async () => {
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={emptyRateDetailsDraft}
+                    updateDraft={mockUpdateDraftFn}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const saveAsDraftButton = screen.getByRole('button', {
+                name: 'Save as draft',
+            })
+            expect(saveAsDraftButton).not.toBeDisabled()
+
+            userEvent.click(saveAsDraftButton)
+            expect(mockUpdateDraftFn).toHaveBeenCalled()
+            expect(
+                screen.queryByText('You must upload at least one document')
+            ).toBeNull()
+        })
+
+        it('when duplicate files present, triggers error alert on click', async () => {
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={emptyRateDetailsDraft}
+                    updateDraft={mockUpdateDraftFn}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+            const input = screen.getByLabelText('Upload rate certification')
+            const saveAsDraftButton = screen.getByRole('button', {
+                name: 'Save as draft',
+            })
+
+            userEvent.upload(input, [TEST_DOC_FILE])
+            userEvent.upload(input, [TEST_PDF_FILE])
+            userEvent.upload(input, [TEST_DOC_FILE])
+
+            await waitFor(() => {
+                expect(screen.queryAllByText('Duplicate file').length).toBe(1)
+            })
+            userEvent.click(saveAsDraftButton)
+            await waitFor(() => {
+                expect(mockUpdateDraftFn).not.toHaveBeenCalled()
+                expect(
+                    screen.queryByText('Remove files with errors')
+                ).toBeInTheDocument()
+            })
+        })
+    })
+
+    describe('Back button', () => {
+        it('enabled when valid files are present', async () => {
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={emptyRateDetailsDraft}
+                    updateDraft={jest.fn()}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const backButton = screen.getByRole('button', {
+                name: 'Back',
+            })
+            const input = screen.getByLabelText('Upload rate certification')
+
+            userEvent.upload(input, [TEST_DOC_FILE])
+
+            await waitFor(() => {
+                expect(backButton).not.toBeDisabled()
+            })
+        })
+
+        it('enabled when invalid files have been dropped but valid files are present', async () => {
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={emptyRateDetailsDraft}
+                    updateDraft={jest.fn()}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const backButton = screen.getByRole('button', {
+                name: 'Back',
+            })
+            const input = screen.getByLabelText('Upload rate certification')
+            const targetEl = screen.getByTestId('file-input-droptarget')
+
+            userEvent.upload(input, [TEST_DOC_FILE])
+            dragAndDrop(targetEl, [TEST_PNG_FILE])
+
+            await waitFor(() => {
+                expect(backButton).not.toBeDisabled()
+            })
+        })
+
+        it('when zero files present, does not trigger alert on click', async () => {
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={emptyRateDetailsDraft}
+                    updateDraft={mockUpdateDraftFn}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const backButton = screen.getByRole('button', {
+                name: 'Back',
+            })
+            expect(backButton).not.toBeDisabled()
+
+            userEvent.click(backButton)
+            expect(
+                screen.queryByText('You must upload at least one document')
+            ).toBeNull()
+            expect(mockUpdateDraftFn).toHaveBeenCalled()
+        })
+
+        it('when duplicate files present, does not trigger alert on click', async () => {
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={emptyRateDetailsDraft}
+                    updateDraft={mockUpdateDraftFn}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const input = screen.getByLabelText('Upload rate certification')
+            const backButton = screen.getByRole('button', {
+                name: 'Back',
+            })
+
+            userEvent.upload(input, [TEST_DOC_FILE])
+            userEvent.upload(input, [TEST_PDF_FILE])
+            userEvent.upload(input, [TEST_DOC_FILE])
+            await waitFor(() => {
+                expect(backButton).not.toBeDisabled()
+                expect(screen.queryAllByText('Duplicate file').length).toBe(1)
+            })
+            userEvent.click(backButton)
+            expect(screen.queryByText('Remove files with errors')).toBeNull()
+            expect(mockUpdateDraftFn).toHaveBeenCalled()
+        })
     })
 })
