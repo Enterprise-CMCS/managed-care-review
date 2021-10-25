@@ -17,7 +17,7 @@
         "graphql": "^15.6.0",
         "graphql-scalars": "^1.11.1",
         "neverthrow": "^4.2.2",
-        "prisma": "3.2.1",
+        "prisma": "3.3.0",
         "request": "^2.88.2",
         "uuid": "^8.3.2"
     },
