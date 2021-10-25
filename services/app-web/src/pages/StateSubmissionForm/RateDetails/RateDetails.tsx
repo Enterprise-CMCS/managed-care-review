@@ -14,6 +14,7 @@ import {
 } from '@trussworks/react-uswds'
 import { Formik, FormikErrors } from 'formik'
 import { useHistory } from 'react-router-dom'
+import { v4 as uuidv4 } from 'uuid'
 
 import styles from '../StateSubmissionForm.module.scss'
 
@@ -22,23 +23,23 @@ import {
     RateType,
     UpdateDraftSubmissionInput,
 } from '../../../gen/gqlClient'
-import {
-    formatForForm,
-    isDateRangeEmpty,
-    formatUserInputDate,
-} from '../../../formHelpers'
+
+import { FieldRadio } from '../../../components/Form'
 import {
     FileUpload,
     S3FileData,
     FileItemT,
 } from '../../../components/FileUpload'
-import { useS3 } from '../../../contexts/S3Context'
+import {
+    formatForForm,
+    isDateRangeEmpty,
+    formatUserInputDate,
+} from '../../../formHelpers'
 import { isS3Error } from '../../../s3'
-import { FieldRadio } from '../../../components/Form'
-import { updatesFromSubmission } from '../updateSubmissionTransform'
 import { MCRouterState } from '../../../constants/routerState'
 import { RateDetailsFormSchema } from './schema'
-
+import { updatesFromSubmission } from '../updateSubmissionTransform'
+import { useS3 } from '../../../contexts/S3Context'
 type FormError =
     FormikErrors<RateDetailsFormValues>[keyof FormikErrors<RateDetailsFormValues>]
 
@@ -106,11 +107,32 @@ export const RateDetails = ({
     const history = useHistory<MCRouterState>()
 
     // Rate documents state management
-    const { deleteFile, uploadFile, scanFile, getS3URL } = useS3()
+    const { deleteFile, getKey, getS3URL, scanFile, uploadFile } = useS3()
     const [hasValidFiles, setHasValidFiles] = React.useState(false)
     const [hasPendingFiles, setHasPendingFiles] = React.useState(false)
     const [fileItems, setFileItems] = React.useState<FileItemT[]>([])
-    const fileItemsFromDraftSubmission: FileItemT[] | undefined = []
+    const fileItemsFromDraftSubmission: FileItemT[] | undefined =
+        (draftSubmission?.rateDocuments &&
+            draftSubmission?.rateDocuments.map((doc) => {
+                const key = getKey(doc.s3URL)
+                if (!key) {
+                    return {
+                        id: uuidv4(),
+                        name: doc.name,
+                        key: 'INVALID_KEY',
+                        s3URL: undefined,
+                        status: 'UPLOAD_ERROR',
+                    }
+                }
+                return {
+                    id: uuidv4(),
+                    name: doc.name,
+                    key: key,
+                    s3URL: doc.s3URL,
+                    status: 'UPLOAD_COMPLETE',
+                }
+            })) ||
+        undefined
 
     React.useEffect(() => {
         const somePending: boolean = fileItems.some(
@@ -210,7 +232,6 @@ export const RateDetails = ({
             if (!hasValidFiles) return
         }
 
-        console.log(options)
         const rateDocuments = fileItems.reduce(
             (formDataDocuments, fileItem) => {
                 if (fileItem.status === 'UPLOAD_ERROR') {
@@ -240,13 +261,12 @@ export const RateDetails = ({
             [] as { name: string; s3URL: string }[]
         )
 
-        console.log('rateDocuments', rateDocuments)
-
         const updatedDraft = updatesFromSubmission(draftSubmission)
         updatedDraft.rateType = values.rateType
         updatedDraft.rateDateStart = values.rateDateStart
         updatedDraft.rateDateEnd = values.rateDateEnd
         updatedDraft.rateDateCertified = values.rateDateCertified
+        updatedDraft.rateDocuments = rateDocuments
 
         if (values.rateType === 'AMENDMENT') {
             updatedDraft.rateAmendmentInfo = {
@@ -278,10 +298,9 @@ export const RateDetails = ({
             <Formik
                 initialValues={rateDetailsInitialValues}
                 onSubmit={(values, { setSubmitting }) => {
-                    console.log('AH', values)
                     return handleFormSubmit(values, setSubmitting, {
                         shouldValidate: true,
-                        redirectPath: 'documents',
+                        redirectPath: 'contacts',
                     })
                 }}
                 validationSchema={RateDetailsFormSchema}
