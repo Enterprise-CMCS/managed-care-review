@@ -34,9 +34,7 @@ type ActuarialFirmType =
     | 'STATE_IN_HOUSE'
     | 'OTHER'
 
-type ActuaryCommunicationType =
-    | 'OACT_TO_ACTUARY'
-    | 'OACT_TO_STATE'
+type ActuaryCommunicationType = 'OACT_TO_ACTUARY' | 'OACT_TO_STATE'
 
 type FederalAuthority =
     | 'STATE_PLAN'
@@ -105,6 +103,7 @@ type DraftSubmissionType = {
     federalAuthorities: FederalAuthority[]
     contractAmendmentInfo?: ContractAmendmentInfo
     rateType?: RateType
+    rateDocuments?: SubmissionDocument[]
     rateDateStart?: Date
     rateDateEnd?: Date
     rateDateCertified?: Date

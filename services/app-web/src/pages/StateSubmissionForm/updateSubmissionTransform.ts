@@ -47,6 +47,7 @@ function updatesFromSubmission(draft: DraftSubmission): DraftSubmissionUpdates {
         managedCareEntities: draft.managedCareEntities,
         contractAmendmentInfo: stripTypename(draft.contractAmendmentInfo),
         rateType: draft.rateType,
+        rateDocuments: stripTypename(draft.documents),
         rateDateStart: draft.rateDateStart,
         rateDateEnd: draft.rateDateEnd,
         rateDateCertified: draft.rateDateCertified,
