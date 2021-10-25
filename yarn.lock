@@ -247,18 +247,18 @@
     ramda "^0.26.1"
     semver "^6.1.1"
 
-"@serverless/dashboard-plugin@^5.4.5":
-  version "5.4.5"
-  resolved "https://registry.yarnpkg.com/@serverless/dashboard-plugin/-/dashboard-plugin-5.4.5.tgz#9377d03003c330e51db2b5fa53dfea514646889d"
-  integrity sha512-/GC25lNFBcUQ/jK4ArDkx7yJk8a+QVXPHa7jakb8zXYDUy1s9XbXW5R8Lj0X1s1e8NG52+rCh6y1gy53hGqvbQ==
+"@serverless/dashboard-plugin@^5.5.0":
+  version "5.5.0"
+  resolved "https://registry.yarnpkg.com/@serverless/dashboard-plugin/-/dashboard-plugin-5.5.0.tgz#d8b0407e277f22111a88cf0d6062d0e17de5b9ca"
+  integrity sha512-a3vWcAacJrUeUFcGXhm/tDxvZjqQI1KjRjFGrqbxoN0N5fCdkLtOn6578Iq4hdP8BF2XanS1xGGdhPjcYBdsUA==
   dependencies:
     "@serverless/event-mocks" "^1.1.1"
     "@serverless/platform-client" "^4.3.0"
-    "@serverless/utils" "^5.17.0"
+    "@serverless/utils" "^5.18.0"
     chalk "^4.1.2"
     child-process-ext "^2.1.1"
     chokidar "^3.5.2"
-    cli-color "^2.0.0"
+    cli-color "^2.0.1"
     flat "^5.0.2"
     fs-extra "^9.1.0"
     js-yaml "^4.1.0"
@@ -381,10 +381,10 @@
     uuid "^8.3.2"
     write-file-atomic "^3.0.3"
 
-"@serverless/utils@^5.17.0":
-  version "5.17.0"
-  resolved "https://registry.yarnpkg.com/@serverless/utils/-/utils-5.17.0.tgz#b53261aa6c6d4ecee6e99b49c68a1988851a2386"
-  integrity sha512-Xnkg1xPjXFCiXXvsIi+inl9lgWSyEyG6tUpGzaKbpPcPo16xruBUX+aRKtMd53QXe3WJVe7+1+MOzjiXbRzE1A==
+"@serverless/utils@^5.18.0", "@serverless/utils@^5.19.0":
+  version "5.19.0"
+  resolved "https://registry.yarnpkg.com/@serverless/utils/-/utils-5.19.0.tgz#3cbf280e299dd4747bbdd24b5afc3c79d3c3867f"
+  integrity sha512-bgQawVfBgxcZoS1wxukJfRYKkMOZncZfOSTCRUnYzwH78fAAE79vfu49LGx2EGEJa8BThmtzjinZ9SK9yS0kIw==
   dependencies:
     archive-type "^4.0.0"
     chalk "^4.1.2"
@@ -404,7 +404,7 @@
     js-yaml "^4.1.0"
     jwt-decode "^3.1.2"
     lodash "^4.17.21"
-    log "^6.2.0"
+    log "^6.3.1"
     log-node "^8.0.1"
     make-dir "^3.1.0"
     memoizee "^0.4.15"
@@ -412,6 +412,7 @@
     p-event "^4.2.0"
     supports-color "^8.1.1"
     type "^2.5.0"
+    uni-global "^1.0.0"
     uuid "^8.3.2"
     write-file-atomic "^3.0.3"
 
@@ -863,10 +864,10 @@ at-least-node@^1.0.0:
   resolved "https://registry.yarnpkg.com/at-least-node/-/at-least-node-1.0.0.tgz#602cd4b46e844ad4effc92a8011a3c46e0238dc2"
   integrity sha512-+q/t7Ekv1EDY2l6Gda6LLiX14rU9TV20Wa3ofeQmwPFZbOMo9DXrLbOjFaaclkXKWidIaopwAObQDqwWtGUjqg==
 
-aws-sdk@^2.1001.0, aws-sdk@^2.999.0:
-  version "2.1001.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1001.0.tgz#c4da256aa0058438ba611ae06fa850f4f7d63abc"
-  integrity sha512-DpmslPU8myCaaRUwMzB/SqAMtD2zQckxYwq3CguIv8BI+JHxDLeTdPCLfA5jffQ8k6dcvISOuiqdpwCZucU0BA==
+aws-sdk@^2.1001.0, aws-sdk@^2.1011.0:
+  version "2.1013.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1013.0.tgz#85babc473b0bc90cc1160eb48baf616ddb86e346"
+  integrity sha512-TXxkp/meAdofpC15goFpNuur7fvh/mcMRfHJoP1jYzTtD0wcoB4FK16GLcny0uDYgkQgZuiO9QYv3Rq5bhGCqQ==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -1203,10 +1204,10 @@ chownr@^2.0.0:
   resolved "https://registry.yarnpkg.com/chownr/-/chownr-2.0.0.tgz#15bfbe53d2eab4cf70f18a8cd68ebe5b3cb1dece"
   integrity sha512-bIomtDF5KGpdogkLd9VspvFzk9KfpyyGlS8YFVZl7TGPBHL5snIOnxeshwVgPteQ9b4Eydl+pVbIyE1DcvCWgQ==
 
-chromedriver@^94.0.0:
-  version "94.0.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-94.0.0.tgz#f6a3533976ba72413a01672954040c3544ea9d30"
-  integrity sha512-x4hK7R7iOyAhdLHJEcOyGBW/oa2kno6AqpHVLd+n3G7c2Vk9XcAXMz84XhNItqykJvTc6E3z/JRIT1eHYH//Eg==
+chromedriver@^95.0.0:
+  version "95.0.0"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-95.0.0.tgz#ecf854cac6df5137a651dcc132edf55612d3db7f"
+  integrity sha512-HwSg7S0ZZYsHTjULwxFHrrUqEpz1+ljDudJM3eOquvqD5QKnR5pSe/GlBTY9UU2tVFRYz8bEHYC4Y8qxciQiLQ==
   dependencies:
     "@testim/chrome-version" "^1.0.7"
     axios "^0.21.2"
@@ -1253,6 +1254,17 @@ cli-color@^2.0.0:
     es5-ext "^0.10.51"
     es6-iterator "^2.0.3"
     memoizee "^0.4.14"
+    timers-ext "^0.1.7"
+
+cli-color@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/cli-color/-/cli-color-2.0.1.tgz#93e3491308691f1e46beb78b63d0fb2585e42ba6"
+  integrity sha512-eBbxZF6fqPUNnf7CLAFOersUnyYzv83tHFLSlts+OAHsNendaqv2tHCq+/MO+b3Y+9JeoUlIvobyxG/Z8GNeOg==
+  dependencies:
+    d "^1.0.1"
+    es5-ext "^0.10.53"
+    es6-iterator "^2.0.3"
+    memoizee "^0.4.15"
     timers-ext "^0.1.7"
 
 cli-cursor@^2.1.0:
@@ -3161,10 +3173,10 @@ log@^6.0.0:
     sprintf-kit "^2.0.0"
     type "^1.0.1"
 
-log@^6.2.0:
-  version "6.2.0"
-  resolved "https://registry.yarnpkg.com/log/-/log-6.2.0.tgz#7a7766c00a93e7a2c28ac8d44afd0bf6383b4ead"
-  integrity sha512-W1sDY5FqR6wlpygW8ZFSxCfBhKx/RzCHK5S+Br8zA14bAnwSgCm5hToIWzi0Yhy6x9Ppw7pyIV06r8F5cSRHUw==
+log@^6.3.1:
+  version "6.3.1"
+  resolved "https://registry.yarnpkg.com/log/-/log-6.3.1.tgz#fcf9bd71fe2274a51ad608dc95c549dd7512146b"
+  integrity sha512-McG47rJEWOkXTDioZzQNydAVvZNeEkSyLJ1VWkFwfW+o1knW+QSi8D1KjPn/TnctV+q99lkvJNe1f0E1IjfY2A==
   dependencies:
     d "^1.0.1"
     duration "^0.2.2"
@@ -3172,6 +3184,7 @@ log@^6.2.0:
     event-emitter "^0.3.5"
     sprintf-kit "^2.0.1"
     type "^2.5.0"
+    uni-global "^1.0.0"
 
 logform@^2.1.1:
   version "2.2.0"
@@ -4205,20 +4218,20 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   version "1.0.0"
   resolved "https://codeload.github.com/CMSgov/serverless-s3-bucket-helper/tar.gz/6316e139c4c4742c44911aaaf71585ea69f92c17"
 
-serverless@^2.61.0:
-  version "2.61.0"
-  resolved "https://registry.yarnpkg.com/serverless/-/serverless-2.61.0.tgz#ad64207aa6090dc3e8caed69277b696c26baecd3"
-  integrity sha512-a0Kha0IJ7dekoXgecoo1jsoH7c1d5tOdYaalZt0ZjrFBJq/hURpqJurPzuDlx4MwecbrGTe2aMjGUYFBFcDlRw==
+serverless@^2.64.1:
+  version "2.64.1"
+  resolved "https://registry.yarnpkg.com/serverless/-/serverless-2.64.1.tgz#708f7000577437f5fec27efd996967d67dc66fb3"
+  integrity sha512-9DErsV4ACg/2UkRoX2EYRkcDyRi3NBld/gexCeVnkmUunadSwnmtSBeVU8spvg+zc61b1vbusTHE4woqcd2gvw==
   dependencies:
     "@serverless/cli" "^1.5.2"
     "@serverless/components" "^3.17.1"
-    "@serverless/dashboard-plugin" "^5.4.5"
+    "@serverless/dashboard-plugin" "^5.5.0"
     "@serverless/platform-client" "^4.3.0"
-    "@serverless/utils" "^5.17.0"
+    "@serverless/utils" "^5.19.0"
     ajv "^6.12.6"
     ajv-keywords "^3.5.2"
     archiver "^5.3.0"
-    aws-sdk "^2.999.0"
+    aws-sdk "^2.1011.0"
     bluebird "^3.7.2"
     boxen "^5.1.2"
     cachedir "^2.3.0"
@@ -4872,6 +4885,13 @@ unbzip2-stream@^1.0.9:
   dependencies:
     buffer "^5.2.1"
     through "^2.3.8"
+
+uni-global@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/uni-global/-/uni-global-1.0.0.tgz#3583c449e87a2d9dc270ea221410a649bcdad040"
+  integrity sha512-WWM3HP+siTxzIWPNUg7hZ4XO8clKi6NoCAJJWnuRL+BAqyFXF8gC03WNyTefGoUXYc47uYgXxpKLIEvo65PEHw==
+  dependencies:
+    type "^2.5.0"
 
 universalify@^0.1.0:
   version "0.1.2"
