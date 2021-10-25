@@ -46,6 +46,10 @@ query fetchDraftSubmission($input: FetchDraftSubmissionInput!) {
                 relatedToVaccination
             }
             rateType
+            rateDocuments {
+                name
+                s3URL
+            }
             rateDateStart
             rateDateEnd
             rateDateCertified
