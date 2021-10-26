@@ -110,11 +110,14 @@ export const RateDetails = ({
     const [hasValidFiles, setHasValidFiles] = React.useState(false)
     const [hasPendingFiles, setHasPendingFiles] = React.useState(false)
     const [fileItems, setFileItems] = React.useState<FileItemT[]>([])
+
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         (draftSubmission?.rateDocuments &&
             draftSubmission?.rateDocuments.map((doc) => {
                 const key = getKey(doc.s3URL)
                 if (!key) {
+                    // If there is no key, this means the file saved on a submission cannot be parsed or does not exist on s3.
+                    // We still include the file in the list displayed to the user, but with an error. .
                     return {
                         id: uuidv4(),
                         name: doc.name,
@@ -224,8 +227,9 @@ export const RateDetails = ({
             redirectPath: string
         }
     ) => {
-        // if there are any errors present in the documents and we are in a validation state (relevant for Save as Draft and Continue buttons), stop here.
-        // Force user to clear validations to continue
+        // This is where documents validation happens (outside of the yup schema, which only handles the formik form data)
+        // if there are any errors present in the documents and we are in a validation state (relevant for Save as Draft and Continue buttons) we will never submit
+        // instead, force user to clear validations to continue
         if (options.shouldValidate) {
             setShouldValidate(true)
             if (!hasValidFiles) return
