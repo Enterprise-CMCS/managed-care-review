@@ -23,6 +23,7 @@ function cleanDraftSubmission(
         delete draftUpdate.rateDateEnd
         delete draftUpdate.rateDateCertified
         delete draftUpdate.rateAmendmentInfo
+        draftUpdate.rateDocuments = []
         draftUpdate.actuaryContacts = []
         delete draftUpdate.actuaryCommunicationPreference
     }
