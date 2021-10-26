@@ -87,6 +87,7 @@ export function applyUpdates(
     draft.contractAmendmentInfo = amendmentInfoUpdates
 
     draft.rateType = updates.rateType ?? undefined
+    draft.rateDocuments = updates.rateDocuments ?? []
     draft.rateDateStart = updates.rateDateStart ?? undefined
     draft.rateDateEnd = updates.rateDateEnd ?? undefined
     draft.rateDateCertified = updates.rateDateCertified ?? undefined

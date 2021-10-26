@@ -174,6 +174,9 @@ export class SubmissionStoreType {
     @attribute()
     rateType?: RateType
 
+    @attribute({ memberType: embed(DocumentStoreT) })
+    rateDocuments: Array<DocumentStoreT>
+
     @attribute()
     rateDateStart?: Date
 
@@ -241,6 +244,7 @@ export class SubmissionStoreType {
         this.managedCareEntities = []
         this.federalAuthorities = []
         this.rateType = undefined
+        this.rateDocuments = []
         this.rateDateStart = undefined
         this.rateDateEnd = undefined
         this.rateDateCertified = undefined

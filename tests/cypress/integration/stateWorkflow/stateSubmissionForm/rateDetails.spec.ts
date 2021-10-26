@@ -11,7 +11,7 @@ describe('rate details', () => {
             cy.visit(`/submissions/${draftSubmissionId}/rate-details`)
 
             // Navigate to contract details page by clicking back
-            cy.findByRole('link', { name: /Back/ }).click()
+            cy.findByRole('button', { name: /Back/ }).click()
             cy.findByRole('heading', { level: 4, name: /Contract details/ })
 
             // Navigate to rate details page

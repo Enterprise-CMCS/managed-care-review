@@ -23,6 +23,7 @@ function cleanDraftSubmission(
         delete draftUpdate.rateDateEnd
         delete draftUpdate.rateDateCertified
         delete draftUpdate.rateAmendmentInfo
+        draftUpdate.rateDocuments = []
         draftUpdate.actuaryContacts = []
         delete draftUpdate.actuaryCommunicationPreference
     }
@@ -47,6 +48,7 @@ function updatesFromSubmission(draft: DraftSubmission): DraftSubmissionUpdates {
         managedCareEntities: draft.managedCareEntities,
         contractAmendmentInfo: stripTypename(draft.contractAmendmentInfo),
         rateType: draft.rateType,
+        rateDocuments: stripTypename(draft.documents),
         rateDateStart: draft.rateDateStart,
         rateDateEnd: draft.rateDateEnd,
         rateDateCertified: draft.rateDateCertified,
