@@ -5,6 +5,12 @@ repos:
       hooks:
           - id: shell-lint
 
+    - repo: https://github.com/yoheimuta/protolint
+      rev: v0.35.1
+      hooks:
+          - id: protolint
+            exclude: node_modules
+
     - repo: git://github.com/pre-commit/pre-commit-hooks
       rev: v4.0.1
       hooks:

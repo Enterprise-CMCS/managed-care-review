@@ -17,8 +17,6 @@ const hasValidContract = (sub: StateSubmissionType): boolean =>
     sub.contractType !== undefined &&
     sub.contractDateStart !== undefined &&
     sub.contractDateEnd !== undefined &&
-    sub.contractDateStart !== undefined &&
-    sub.contractDateEnd !== undefined &&
     sub.managedCareEntities.length !== 0 &&
     sub.federalAuthorities.length !== 0
 

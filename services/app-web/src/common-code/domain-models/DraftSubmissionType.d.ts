@@ -2,6 +2,7 @@
 
 // GQL SCHEMA MATCHED TYPES
 type SubmissionType = 'CONTRACT_ONLY' | 'CONTRACT_AND_RATES'
+export type CapitationRatesAmendedReason = 'ANNUAL' | 'MIDYEAR' | 'OTHER'
 type SubmissionDocument = {
     name: string
     s3URL: string
@@ -11,7 +12,7 @@ type ContractAmendmentInfo = {
     itemsBeingAmended: string[]
     otherItemBeingAmended?: string
     capitationRatesAmendedInfo?: {
-        reason?: 'ANNUAL' | 'MIDYEAR' | 'OTHER'
+        reason?: CapitationRatesAmendedReason
         otherReason?: string
     }
     relatedToCovid19?: boolean
@@ -34,9 +35,7 @@ type ActuarialFirmType =
     | 'STATE_IN_HOUSE'
     | 'OTHER'
 
-type ActuaryCommunicationType =
-    | 'OACT_TO_ACTUARY'
-    | 'OACT_TO_STATE'
+type ActuaryCommunicationType = 'OACT_TO_ACTUARY' | 'OACT_TO_STATE'
 
 type FederalAuthority =
     | 'STATE_PLAN'
@@ -62,38 +61,34 @@ type ActuaryContact = {
 
 type RateType = 'NEW' | 'AMENDMENT'
 
-// CLIENT_SIDE ONLY TYPES
-const ENTITIES = ['MCO', 'PIHP', 'PAHP', 'PCCM'] as const
-type ManagedCareEntity = typeof ENTITIES[number]
+type ManagedCareEntity = 'MCO' | 'PIHP' | 'PAHP' | 'PCCM'
 
-const AMENDABLE_ITEMS = [
-    'BENEFITS_PROVIDED',
-    'CAPITATION_RATES',
-    'ENCOUNTER_DATA',
-    'ENROLLE_ACCESS',
-    'ENROLLMENT_PROCESS',
-    'FINANCIAL_INCENTIVES',
-    'GEO_AREA_SERVED',
-    'GRIEVANCES_AND_APPEALS_SYSTEM',
-    'LENGTH_OF_CONTRACT_PERIOD',
-    'NON_RISK_PAYMENT',
-    'PROGRAM_INTEGRITY',
-    'QUALITY_STANDARDS',
-    'RISK_SHARING_MECHANISM',
-] as const
-export type AmendableItems = typeof AMENDABLE_ITEMS[number]
+type AmendableItems =
+    | 'BENEFITS_PROVIDED'
+    | 'CAPITATION_RATES'
+    | 'ENCOUNTER_DATA'
+    | 'ENROLLE_ACCESS'
+    | 'ENROLLMENT_PROCESS'
+    | 'FINANCIAL_INCENTIVES'
+    | 'GEO_AREA_SERVED'
+    | 'GRIEVANCES_AND_APPEALS_SYSTEM'
+    | 'LENGTH_OF_CONTRACT_PERIOD'
+    | 'NON_RISK_PAYMENT'
+    | 'PROGRAM_INTEGRITY'
+    | 'QUALITY_STANDARDS'
+    | 'RISK_SHARING_MECHANISM'
 
 // MAIN
-type DraftSubmissionType = {
+export type DraftSubmissionType = {
     id: string
+    createdAt: Date
+    updatedAt: Date
     status: 'DRAFT'
     stateCode: string
     stateNumber: number
     programID: string
-    submissionDescription: string
     submissionType: SubmissionType
-    createdAt: Date
-    updatedAt: DateTime
+    submissionDescription: string
     stateContacts: StateContact[]
     actuaryContacts: ActuaryContact[]
     actuaryCommunicationPreference?: ActuaryCommunicationType
@@ -125,4 +120,5 @@ export type {
     ManagedCareEntity,
     DraftSubmissionType,
     AmendableItems,
+    ContractAmendmentInfo,
 }
