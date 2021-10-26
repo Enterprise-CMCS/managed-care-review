@@ -1,5 +1,5 @@
 import { S3 } from 'aws-sdk'
-import { APIGatewayProxyResult, APIGatewayProxyEvent } from 'aws-lambda'
+import { APIGatewayProxyHandler } from 'aws-lambda'
 import Archiver from 'archiver'
 import { Readable, Stream } from 'stream'
 
@@ -10,10 +10,7 @@ type S3BulkDownloadRequest = {
     keys: string[]
 }
 
-export const main = async (
-    event: APIGatewayProxyEvent
-): Promise<APIGatewayProxyResult> => {
-    console.log('Begin zip lambda...', event)
+export const main: APIGatewayProxyHandler = async (event) => {
     const bulkDlRequest = JSON.parse(event.body ?? '') as S3BulkDownloadRequest
 
     type S3DownloadStreamDetails = { stream: Readable; filename: string }
