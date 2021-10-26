@@ -26,6 +26,7 @@ export type StateSubmissionType = {
     updatedAt: DateTime
     documents: SubmissionDocument[]
     contractType: ContractType
+    contractDocuments: SubmissionDocument[]
     contractDateStart: Date
     contractDateEnd: Date
     managedCareEntities: string[]

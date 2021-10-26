@@ -94,6 +94,7 @@ export type DraftSubmissionType = {
     actuaryCommunicationPreference?: ActuaryCommunicationType
     documents: SubmissionDocument[]
     contractType?: ContractType
+    contractDocuments: SubmissionDocument[]
     contractDateStart?: Date
     contractDateEnd?: Date
     managedCareEntities: string[]

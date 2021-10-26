@@ -218,6 +218,9 @@ export class SubmissionStoreType {
     @attribute({ memberType: embed(DocumentStoreT) })
     documents: Array<DocumentStoreT>
 
+    @attribute({ memberType: embed(DocumentStoreT) })
+    contractDocuments: Array<DocumentStoreT>
+
     @attribute()
     contractAmendmentInfo?: ContractAmendmentInfoT
 
@@ -239,6 +242,7 @@ export class SubmissionStoreType {
         this.actuaryCommunicationPreference = undefined
         this.documents = []
         this.contractType = undefined
+        this.contractDocuments = []
         this.contractDateStart = undefined
         this.contractDateEnd = undefined
         this.managedCareEntities = []
