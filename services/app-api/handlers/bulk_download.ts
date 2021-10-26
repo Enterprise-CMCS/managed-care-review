@@ -13,6 +13,7 @@ type S3BulkDownloadRequest = {
 export const main = async (
     event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
+    console.log('Begin zip lambda...', event)
     const bulkDlRequest = JSON.parse(event.body ?? '') as S3BulkDownloadRequest
 
     type S3DownloadStreamDetails = { stream: Readable; filename: string }
