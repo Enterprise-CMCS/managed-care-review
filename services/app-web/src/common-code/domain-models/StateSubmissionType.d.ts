@@ -10,7 +10,6 @@ import type {
     SubmissionType,
     ContractType,
     RateType,
-    FederalAuthority,
 } from './DraftSubmissionType'
 
 export type StateSubmissionType = {
