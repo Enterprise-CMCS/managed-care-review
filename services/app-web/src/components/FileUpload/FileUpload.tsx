@@ -24,6 +24,7 @@ export type FileUploadProps = {
     label: string
     hint?: React.ReactNode
     initialItems?: FileItemT[]
+    isLabelVisible?: boolean
     uploadFile: (file: File) => Promise<S3FileData>
     scanFile?: (key: string) => Promise<void | Error> // optional function to be called after uploading (used for scanning)
     deleteFile: (key: string) => Promise<void>
@@ -44,6 +45,7 @@ export const FileUpload = ({
     label,
     hint,
     initialItems,
+    isLabelVisible = true,
     uploadFile,
     scanFile,
     deleteFile,
@@ -293,9 +295,10 @@ export const FileUpload = ({
 
     return (
         <FormGroup className="margin-top-0">
-            <Label className="srOnly" htmlFor={id}>
+            <Label className={isLabelVisible ? '' : 'srOnly'} htmlFor={id}>
                 {label}
             </Label>
+
             {formError && (
                 <ErrorMessage id={`${id}-error`}>{formError}</ErrorMessage>
             )}

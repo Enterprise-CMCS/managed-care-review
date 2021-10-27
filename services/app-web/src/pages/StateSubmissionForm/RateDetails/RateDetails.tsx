@@ -337,30 +337,34 @@ export const RateDetails = ({
                                 )}
                                 {formAlert && formAlert}
                                 <span>All fields are required</span>
-                                <FileUpload
-                                    id="rateDocuments"
-                                    name="rateDocuments"
-                                    label="Upload rate certification"
-                                    hint={
-                                        <Link
-                                            aria-label="Document definitions and requirements (opens in new window)"
-                                            href={
-                                                'https://www.medicaid.gov/federal-policy-guidance/downloads/cib110819.pdf'
-                                            }
-                                            variant="external"
-                                            target="_blank"
-                                        >
-                                            Document definitions and
-                                            requirements
-                                        </Link>
-                                    }
-                                    accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                                    initialItems={fileItemsFromDraftSubmission}
-                                    uploadFile={handleUploadFile}
-                                    scanFile={handleScanFile}
-                                    deleteFile={handleDeleteFile}
-                                    onLoadComplete={onLoadComplete}
-                                />
+                                <FormGroup>
+                                    <FileUpload
+                                        id="rateDocuments"
+                                        name="rateDocuments"
+                                        label="Upload rate certification"
+                                        hint={
+                                            <Link
+                                                aria-label="Document definitions and requirements (opens in new window)"
+                                                href={
+                                                    'https://www.medicaid.gov/federal-policy-guidance/downloads/cib110819.pdf'
+                                                }
+                                                variant="external"
+                                                target="_blank"
+                                            >
+                                                Document definitions and
+                                                requirements
+                                            </Link>
+                                        }
+                                        accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                        initialItems={
+                                            fileItemsFromDraftSubmission
+                                        }
+                                        uploadFile={handleUploadFile}
+                                        scanFile={handleScanFile}
+                                        deleteFile={handleDeleteFile}
+                                        onLoadComplete={onLoadComplete}
+                                    />
+                                </FormGroup>
                                 <FormGroup
                                     error={showFieldErrors(errors.rateType)}
                                 >
