@@ -465,38 +465,34 @@ export const ContractDetails = ({
                             )}
                             {formAlert && formAlert}
                             <span>All fields are required</span>
-                            <FileUpload
-                                id="documents"
-                                name="documents"
-                                label="Upload documents"
-                                hint={
-                                    <>
-                                        <p
-                                            data-testid="documents-hint"
-                                            className="text-base-darker"
-                                        >
-                                            <strong>Upload contract</strong>
-                                        </p>
-                                        <Link
-                                            aria-label="Document definitions and requirements (opens in new window)"
-                                            href={
-                                                '/help#document-definitions-requirements'
-                                            }
-                                            variant="external"
-                                            target="_blank"
-                                        >
-                                            Document definitions and
-                                            requirements
-                                        </Link>
-                                    </>
-                                }
-                                accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                                initialItems={fileItemsFromDraftSubmission}
-                                uploadFile={handleUploadFile}
-                                scanFile={handleScanFile}
-                                deleteFile={handleDeleteFile}
-                                onLoadComplete={onLoadComplete}
-                            />
+                            <FormGroup>
+                                <FileUpload
+                                    id="documents"
+                                    name="documents"
+                                    label="Upload contract"
+                                    hint={
+                                        <>
+                                            <Link
+                                                aria-label="Document definitions and requirements (opens in new window)"
+                                                href={
+                                                    '/help#document-definitions-requirements'
+                                                }
+                                                variant="external"
+                                                target="_blank"
+                                            >
+                                                Document definitions and
+                                                requirements
+                                            </Link>
+                                        </>
+                                    }
+                                    accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                    initialItems={fileItemsFromDraftSubmission}
+                                    uploadFile={handleUploadFile}
+                                    scanFile={handleScanFile}
+                                    deleteFile={handleDeleteFile}
+                                    onLoadComplete={onLoadComplete}
+                                />
+                            </FormGroup>
                             <FormGroup
                                 error={showFieldErrors(errors.contractType)}
                             >
