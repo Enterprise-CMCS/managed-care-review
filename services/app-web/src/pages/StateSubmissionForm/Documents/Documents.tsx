@@ -263,6 +263,7 @@ export const Documents = ({
                         id="documents"
                         name="documents"
                         label="Upload documents"
+                        isLabelVisible={false}
                         hint={
                             <>
                                 <Link
