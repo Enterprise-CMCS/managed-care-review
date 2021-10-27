@@ -1,8 +1,6 @@
 import React from 'react'
-import * as Yup from 'yup'
-import dayjs from 'dayjs'
-import isLeapYear from 'dayjs/plugin/isLeapYear'
 import {
+    Alert,
     ErrorMessage,
     Form as UswdsForm,
     FormGroup,
@@ -14,8 +12,9 @@ import {
     ButtonGroup,
     Label,
 } from '@trussworks/react-uswds'
-import { Formik, FormikErrors, FormikHelpers } from 'formik'
-import { NavLink, useHistory } from 'react-router-dom'
+import { Formik, FormikErrors } from 'formik'
+import { useHistory } from 'react-router-dom'
+import { v4 as uuidv4 } from 'uuid'
 
 import styles from '../StateSubmissionForm.module.scss'
 
@@ -24,71 +23,23 @@ import {
     RateType,
     UpdateDraftSubmissionInput,
 } from '../../../gen/gqlClient'
+
+import { FieldRadio } from '../../../components/Form'
+import {
+    FileUpload,
+    S3FileData,
+    FileItemT,
+} from '../../../components/FileUpload'
 import {
     formatForForm,
     isDateRangeEmpty,
     formatUserInputDate,
-    validateDateFormat,
 } from '../../../formHelpers'
-import { FieldRadio } from '../../../components/Form'
-import { updatesFromSubmission } from '../updateSubmissionTransform'
+import { isS3Error } from '../../../s3'
 import { MCRouterState } from '../../../constants/routerState'
-
-// Dependency setup
-Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
-dayjs.extend(isLeapYear)
-
-// Formik setup
-const RateDetailsFormSchema = Yup.object().shape({
-    rateType: Yup.string().defined('You must choose a rate certification type'),
-    rateDateStart: Yup.date()
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore-next-line
-        .validateDateFormat('YYYY-MM-DD', true)
-        .defined('You must enter a start date')
-        .typeError('The start date must be in MM/DD/YYYY format'),
-    rateDateEnd: Yup.date()
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore-next-line
-        .validateDateFormat('YYYY-MM-DD', true)
-        .defined('You must enter an end date')
-        .typeError('The end date must be in MM/DD/YYYY format')
-        .min(
-            Yup.ref('rateDateStart'),
-            'The end date must come after the start date'
-        ),
-    rateDateCertified: Yup.date()
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore-next-line
-        .validateDateFormat('YYYY-MM-DD', true)
-        .defined('You must enter the date the document was certified')
-        .typeError('The certified date must be in MM/DD/YYYY format'),
-    effectiveDateStart: Yup.date().when('rateType', {
-        is: 'AMENDMENT',
-        then: Yup.date()
-            .nullable()
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore-next-line
-            .validateDateFormat('YYYY-MM-DD', true)
-            .defined('You must enter a start date')
-            .typeError('The start date must be in MM/DD/YYYY format'),
-    }),
-    effectiveDateEnd: Yup.date().when('rateType', {
-        is: 'AMENDMENT',
-        then: Yup.date()
-            .nullable()
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore-next-line
-            .validateDateFormat('YYYY-MM-DD', true)
-            .defined('You must enter an end date')
-            .typeError('The end date must be in MM/DD/YYYY format')
-            .min(
-                Yup.ref('effectiveDateStart'),
-                'The end date must come after the start date'
-            ),
-    }),
-})
-
+import { RateDetailsFormSchema } from './schema'
+import { updatesFromSubmission } from '../updateSubmissionTransform'
+import { useS3 } from '../../../contexts/S3Context'
 type FormError =
     FormikErrors<RateDetailsFormValues>[keyof FormikErrors<RateDetailsFormValues>]
 
@@ -108,6 +59,28 @@ const RateDatesErrorMessage = ({
     </ErrorMessage>
 )
 
+const PageLevelErrorAlert = ({
+    hasNoDocuments,
+}: {
+    hasNoDocuments: boolean
+}): JSX.Element =>
+    hasNoDocuments ? (
+        <Alert
+            type="error"
+            heading="Missing documents"
+            className="margin-bottom-2"
+        >
+            You must upload at least one document
+        </Alert>
+    ) : (
+        <Alert
+            type="error"
+            heading="Remove files with errors"
+            className="margin-bottom-2"
+        >
+            You must remove all documents with error messages before continuing
+        </Alert>
+    )
 export interface RateDetailsFormValues {
     rateType: RateType | undefined
     rateDateStart: string
@@ -130,9 +103,87 @@ export const RateDetails = ({
     ) => Promise<DraftSubmission | undefined>
 }): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
-    const redirectToDashboard = React.useRef(false)
     const history = useHistory<MCRouterState>()
 
+    // Rate documents state management
+    const { deleteFile, getKey, getS3URL, scanFile, uploadFile } = useS3()
+    const [hasValidFiles, setHasValidFiles] = React.useState(false)
+    const [hasPendingFiles, setHasPendingFiles] = React.useState(false)
+    const [fileItems, setFileItems] = React.useState<FileItemT[]>([])
+
+    const fileItemsFromDraftSubmission: FileItemT[] | undefined =
+        (draftSubmission?.rateDocuments &&
+            draftSubmission?.rateDocuments.map((doc) => {
+                const key = getKey(doc.s3URL)
+                if (!key) {
+                    // If there is no key, this means the file saved on a submission cannot be parsed or does not exist on s3.
+                    // We still include the file in the list displayed to the user, but with an error. .
+                    return {
+                        id: uuidv4(),
+                        name: doc.name,
+                        key: 'INVALID_KEY',
+                        s3URL: undefined,
+                        status: 'UPLOAD_ERROR',
+                    }
+                }
+                return {
+                    id: uuidv4(),
+                    name: doc.name,
+                    key: key,
+                    s3URL: doc.s3URL,
+                    status: 'UPLOAD_COMPLETE',
+                }
+            })) ||
+        undefined
+
+    React.useEffect(() => {
+        const somePending: boolean = fileItems.some(
+            (item) => item.status === 'PENDING'
+        )
+        setHasPendingFiles(somePending)
+
+        const hasValidDocumentsForSubmission: boolean =
+            fileItems.length > 0 &&
+            !somePending &&
+            fileItems.every((item) => item.status === 'UPLOAD_COMPLETE')
+        setHasValidFiles(hasValidDocumentsForSubmission)
+    }, [fileItems])
+
+    const onLoadComplete = async ({ files }: { files: FileItemT[] }) => {
+        setFileItems(files)
+    }
+    const handleDeleteFile = async (key: string) => {
+        const result = await deleteFile(key)
+        if (isS3Error(result)) {
+            throw new Error(`Error in S3 key: ${key}`)
+        }
+
+        return
+    }
+
+    const handleUploadFile = async (file: File): Promise<S3FileData> => {
+        const s3Key = await uploadFile(file)
+
+        if (isS3Error(s3Key)) {
+            throw new Error(`Error in S3: ${file.name}`)
+        }
+
+        const s3URL = await getS3URL(s3Key, file.name)
+        return { key: s3Key, s3URL: s3URL }
+    }
+
+    const handleScanFile = async (key: string): Promise<void | Error> => {
+        try {
+            await scanFile(key)
+        } catch (e) {
+            if (isS3Error(e)) {
+                throw new Error(`Error in S3: ${key}`)
+            }
+            throw new Error('Scanning error: Scanning retry timed out')
+        }
+    }
+
+    // Rate details form setup
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
@@ -170,13 +221,58 @@ export const RateDetails = ({
 
     const handleFormSubmit = async (
         values: RateDetailsFormValues,
-        formikHelpers: FormikHelpers<RateDetailsFormValues>
+        setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
+        options: {
+            shouldValidate: boolean
+            redirectPath: string
+        }
     ) => {
+        // This is where documents validation happens (outside of the yup schema, which only handles the formik form data)
+        // if there are any errors present in the documents and we are in a validation state (relevant for Save as Draft and Continue buttons) we will never submit
+        // instead, force user to clear validations to continue
+        if (options.shouldValidate) {
+            setShouldValidate(true)
+            if (!hasValidFiles) return
+        }
+
+        const rateDocuments = fileItems.reduce(
+            (formDataDocuments, fileItem) => {
+                if (fileItem.status === 'UPLOAD_ERROR') {
+                    console.log(
+                        'Attempting to save files that failed upload, discarding invalid files'
+                    )
+                } else if (fileItem.status === 'SCANNING_ERROR') {
+                    console.log(
+                        'Attempting to save files that failed scanning, discarding invalid files'
+                    )
+                } else if (fileItem.status === 'DUPLICATE_NAME_ERROR') {
+                    console.log(
+                        'Attempting to save files that are duplicate names, discarding duplicate'
+                    )
+                } else if (!fileItem.s3URL)
+                    console.log(
+                        'Attempting to save a seemingly valid file item is not yet uploaded to S3, this should not happen on form submit. Discarding file.'
+                    )
+                else {
+                    formDataDocuments.push({
+                        name: fileItem.name,
+                        s3URL: fileItem.s3URL,
+                    })
+                }
+                return formDataDocuments
+            },
+            [] as { name: string; s3URL: string }[]
+        )
+
         const updatedDraft = updatesFromSubmission(draftSubmission)
         updatedDraft.rateType = values.rateType
-        updatedDraft.rateDateStart = values.rateDateStart
-        updatedDraft.rateDateEnd = values.rateDateEnd
-        updatedDraft.rateDateCertified = values.rateDateCertified
+        updatedDraft.rateDateStart =
+            values.rateDateStart === '' ? null : values.rateDateStart
+        updatedDraft.rateDateEnd =
+            values.rateDateEnd === '' ? null : values.rateDateEnd
+        updatedDraft.rateDateCertified =
+            values.rateDateCertified === '' ? null : values.rateDateCertified
+        updatedDraft.rateDocuments = rateDocuments
 
         if (values.rateType === 'AMENDMENT') {
             updatedDraft.rateAmendmentInfo = {
@@ -193,17 +289,12 @@ export const RateDetails = ({
                 draftSubmissionUpdates: updatedDraft,
             })
             if (updatedSubmission) {
-                if (redirectToDashboard.current) {
-                    history.push(`/dashboard`, {
-                        defaultProgramID: draftSubmission.programID,
-                    })
-                } else {
-                    history.push(`/submissions/${draftSubmission.id}/contacts`)
-                }
+                history.push(options.redirectPath, {
+                    defaultProgramID: draftSubmission.programID,
+                })
             }
         } catch (serverError) {
-            formikHelpers.setSubmitting(false)
-            redirectToDashboard.current = false
+            setSubmitting(false)
         }
     }
 
@@ -211,16 +302,20 @@ export const RateDetails = ({
         <>
             <Formik
                 initialValues={rateDetailsInitialValues}
-                onSubmit={handleFormSubmit}
+                onSubmit={(values, { setSubmitting }) => {
+                    return handleFormSubmit(values, setSubmitting, {
+                        shouldValidate: true,
+                        redirectPath: 'contacts',
+                    })
+                }}
                 validationSchema={RateDetailsFormSchema}
             >
                 {({
                     values,
                     errors,
-                    dirty,
                     handleSubmit,
                     isSubmitting,
-
+                    setSubmitting,
                     setFieldValue,
                 }) => (
                     <>
@@ -228,12 +323,44 @@ export const RateDetails = ({
                             className={styles.formContainer}
                             id="RateDetailsForm"
                             aria-label="Rate Details Form"
-                            onSubmit={handleSubmit}
+                            onSubmit={(e) => {
+                                setShouldValidate(true)
+                                handleSubmit(e)
+                            }}
                         >
                             <fieldset className="usa-fieldset">
                                 <legend className="srOnly">Rate Details</legend>
+                                {shouldValidate && !hasValidFiles && (
+                                    <PageLevelErrorAlert
+                                        hasNoDocuments={fileItems.length === 0}
+                                    />
+                                )}
                                 {formAlert && formAlert}
                                 <span>All fields are required</span>
+                                <FileUpload
+                                    id="rateDocuments"
+                                    name="rateDocuments"
+                                    label="Upload rate certification"
+                                    hint={
+                                        <Link
+                                            aria-label="Document definitions and requirements (opens in new window)"
+                                            href={
+                                                'https://www.medicaid.gov/federal-policy-guidance/downloads/cib110819.pdf'
+                                            }
+                                            variant="external"
+                                            target="_blank"
+                                        >
+                                            Document definitions and
+                                            requirements
+                                        </Link>
+                                    }
+                                    accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                    initialItems={fileItemsFromDraftSubmission}
+                                    uploadFile={handleUploadFile}
+                                    scanFile={handleScanFile}
+                                    deleteFile={handleDeleteFile}
+                                    onLoadComplete={onLoadComplete}
+                                />
                                 <FormGroup
                                     error={showFieldErrors(errors.rateType)}
                                 >
@@ -462,16 +589,26 @@ export const RateDetails = ({
                                 <Button
                                     type="button"
                                     unstyled
-                                    onClick={() => {
-                                        if (!dirty) {
-                                            history.push(`/dashboard`, {
-                                                defaultProgramID:
-                                                    draftSubmission.programID,
-                                            })
+                                    onClick={async () => {
+                                        // do not need to trigger validations if file list is empty
+                                        if (fileItems.length === 0) {
+                                            await handleFormSubmit(
+                                                values,
+                                                setSubmitting,
+                                                {
+                                                    shouldValidate: false,
+                                                    redirectPath: '/dashboard',
+                                                }
+                                            )
                                         } else {
-                                            setShouldValidate(true)
-                                            redirectToDashboard.current = true
-                                            handleSubmit()
+                                            await handleFormSubmit(
+                                                values,
+                                                setSubmitting,
+                                                {
+                                                    shouldValidate: true,
+                                                    redirectPath: '/dashboard',
+                                                }
+                                            )
                                         }
                                     }}
                                 >
@@ -481,21 +618,35 @@ export const RateDetails = ({
                                     type="default"
                                     className={styles.buttonGroup}
                                 >
-                                    <Link
-                                        asCustom={NavLink}
+                                    <Button
+                                        type="button"
                                         className="usa-button usa-button--outline"
-                                        variant="unstyled"
-                                        to={`contract-details`}
+                                        onClick={async () => {
+                                            // do not need to validate or submit if no documents are uploaded
+                                            if (fileItems.length === 0) {
+                                                history.push('contract-details')
+                                            } else {
+                                                await handleFormSubmit(
+                                                    values,
+                                                    setSubmitting,
+                                                    {
+                                                        shouldValidate: false,
+                                                        redirectPath:
+                                                            'contract-details',
+                                                    }
+                                                )
+                                            }
+                                        }}
                                     >
                                         Back
-                                    </Link>
+                                    </Button>
                                     <Button
                                         type="submit"
-                                        disabled={isSubmitting}
-                                        onClick={() => {
-                                            redirectToDashboard.current = false
-                                            setShouldValidate(true)
-                                        }}
+                                        disabled={
+                                            isSubmitting ||
+                                            hasPendingFiles ||
+                                            (shouldValidate && !hasValidFiles)
+                                        }
                                     >
                                         Continue
                                     </Button>

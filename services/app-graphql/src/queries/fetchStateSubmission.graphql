@@ -47,6 +47,10 @@ query fetchStateSubmission($input: FetchStateSubmissionInput!) {
                 relatedToVaccination
             }
             rateType
+            rateDocuments {
+                name
+                s3URL
+            }
             rateDateStart
             rateDateEnd
             rateDateCertified

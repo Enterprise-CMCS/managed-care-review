@@ -100,6 +100,7 @@ export type DraftSubmissionType = {
     federalAuthorities: FederalAuthority[]
     contractAmendmentInfo?: ContractAmendmentInfo
     rateType?: RateType
+    rateDocuments?: SubmissionDocument[]
     rateDateStart?: Date
     rateDateEnd?: Date
     rateDateCertified?: Date

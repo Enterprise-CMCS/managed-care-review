@@ -14,7 +14,7 @@ describe('dynamo Types', () => {
         storeSub.submissionDescription = 'a store draft submission'
         storeSub.status = 'DRAFT'
         storeSub.submittedAt = undefined
-
+        storeSub.rateDocuments = [{ s3URL: 'foo.com', name: 'foo' }]
         const domainSubResult = convertToDomainSubmission(storeSub)
 
         expect(isDraftSubmission(domainSubResult)).toBeTruthy()
@@ -29,6 +29,7 @@ describe('dynamo Types', () => {
         storeSub.contractDateStart = new Date()
         storeSub.contractDateEnd = new Date()
         storeSub.documents = [{ s3URL: 'foo.com', name: 'foo' }]
+        storeSub.rateDocuments = [{ s3URL: 'bar.com', name: 'bar' }]
         storeSub.federalAuthorities = ['WAIVER_1915B']
         storeSub.managedCareEntities = ['bar']
 
