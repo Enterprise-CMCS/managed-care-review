@@ -15,6 +15,18 @@ export const main: APIGatewayProxyHandler = async (event) => {
     const bulkDlRequest = JSON.parse(
         event.body ?? '{}'
     ) as S3BulkDownloadRequest
+    console.log('type: ', bulkDlRequest)
+
+    if (!bulkDlRequest.keys || !bulkDlRequest.bucket) {
+        return {
+            statusCode: 400,
+            body: JSON.stringify('could not retreive bucket or keys'),
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': true,
+            },
+        }
+    }
 
     type S3DownloadStreamDetails = { stream: Readable; filename: string }
 
