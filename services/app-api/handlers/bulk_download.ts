@@ -10,9 +10,12 @@ interface S3BulkDownloadRequest {
     keys: string[]
 }
 
-export const main: APIGatewayProxyHandler = async (event: APIGatewayEvent) => {
+export const main: APIGatewayProxyHandler = async (
+    event: S3BulkDownloadRequest
+) => {
+    console.time('zipProcess')
     console.log('Starting zip lambda...', event)
-    if (!event.body) {
+    if (!event.bucket || !event.keys) {
         return {
             statusCode: 400,
             body: 'No body found in request',
@@ -23,7 +26,7 @@ export const main: APIGatewayProxyHandler = async (event: APIGatewayEvent) => {
         }
     }
 
-    const bulkDlRequest: S3BulkDownloadRequest = JSON.parse(event.body)
+    const bulkDlRequest: S3BulkDownloadRequest = event
     console.log('Bulk download request:', bulkDlRequest)
 
     type S3DownloadStreamDetails = { stream: Readable; filename: string }
