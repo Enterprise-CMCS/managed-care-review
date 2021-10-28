@@ -103,7 +103,7 @@ function enumToDomain<T extends StandardEnum<unknown>, K extends string>(
     key: number | undefined | null
 ): K | undefined {
     // proto is returning a default value of 0 for undefined enums
-    if (key === undefined || key === null || key == 0) {
+    if (key === undefined || key === null || key === 0) {
         return undefined
     }
     const domainEnum = removeEnumPrefix(protoEnum[0], protoEnum[key])
@@ -112,9 +112,9 @@ function enumToDomain<T extends StandardEnum<unknown>, K extends string>(
 }
 
 /*
-    Convert array of proto enums to domain enums 
+    Convert array of proto enums to domain enums
     I couldn't figure out a signature to make it do the casting itself so
-    we still need to cast this result for enums. 
+    we still need to cast this result for enums.
 */
 function protoEnumArrayToDomain<T extends StandardEnum<unknown>>(
     protoEnum: T,
@@ -136,7 +136,7 @@ function protoEnumArrayToDomain<T extends StandardEnum<unknown>>(
     return enums
 }
 
-/* 
+/*
 Remove the proto enum prefix using the default value of that field
     - (e.g. return SUBMISSION_TYPE from the default value SUBMISSION_TYPE_UNSPECIFIED)
 */
@@ -153,7 +153,7 @@ function decodeOrError(
         const message = statesubmission.StateSubmissionInfo.decode(buff)
         return message
     } catch (e) {
-        return e
+        return new Error(`${e}`)
     }
 }
 
@@ -345,6 +345,9 @@ const toDomain = (
         contractDateEnd: protoDateToDomain(
             stateSubmissionMessage.contractInfo?.contractDateEnd
         ),
+        contractDocuments: parseProtoDocuments(
+            stateSubmissionMessage.contractInfo?.contractDocuments
+        ),
         managedCareEntities: protoEnumArrayToDomain(
             statesubmission.ManagedCareEntity,
             stateSubmissionMessage?.contractInfo?.managedCareEntities
@@ -359,6 +362,10 @@ const toDomain = (
         ),
         rateAmendmentInfo: parseProtoRateAmendment(rateInfo?.rateAmendmentInfo),
         rateType: enumToDomain(statesubmission.RateType, rateInfo?.rateType),
+        rateDocuments:
+            (rateInfo?.rateDocuments?.length &&
+                parseProtoDocuments(rateInfo?.rateDocuments)) ||
+            undefined,
         rateDateStart: protoDateToDomain(rateInfo?.rateDateStart),
         rateDateEnd: protoDateToDomain(rateInfo?.rateDateEnd),
         rateDateCertified: protoDateToDomain(rateInfo?.rateDateCertified),
@@ -382,7 +389,7 @@ const toDomain = (
         // This parse returns an actual DraftSubmissionType, so all our partial & casting is put to rest
         const parseResult = draftSubmissionTypeSchema.safeParse(maybeDraft)
 
-        if (parseResult.success == false) {
+        if (parseResult.success === false) {
             return parseResult.error
         }
 

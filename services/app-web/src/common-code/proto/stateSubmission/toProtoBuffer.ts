@@ -152,6 +152,10 @@ const toProtoBuffer = (
                 statesubmission.FederalAuthority,
                 domainData.federalAuthorities
             ),
+            contractDocuments: domainData.contractDocuments.map((doc) => ({
+                s3Url: doc.s3URL,
+                name: doc.name,
+            })),
             contractAmendmentInfo: contractAmendmentInfo
                 ? {
                       ...contractAmendmentInfo,
@@ -186,6 +190,13 @@ const toProtoBuffer = (
                 rateDateCertified: domainDateToProtoDate(
                     domainData.rateDateCertified
                 ),
+                rateDocuments:
+                    (domainData?.rateDocuments?.length &&
+                        domainData.rateDocuments.map((doc) => ({
+                            s3Url: doc.s3URL,
+                            name: doc.name,
+                        }))) ||
+                    undefined,
                 actuaryContacts: domainData.actuaryContacts.map(
                     (actuaryContact) => {
                         const firmType = domainEnumToProto(

@@ -86,6 +86,13 @@ export async function updateDraftSubmission(
         storeDraft.documents.push(storeDocument)
     })
 
+    draftSubmission.contractDocuments.forEach((doc) => {
+        const storeDocument = new DocumentStoreT()
+        storeDocument.name = doc.name
+        storeDocument.s3URL = doc.s3URL
+        storeDraft.contractDocuments.push(storeDocument)
+    })
+
     if (draftSubmission.rateDocuments) {
         draftSubmission.rateDocuments.forEach((doc) => {
             const storeDocument = new DocumentStoreT()

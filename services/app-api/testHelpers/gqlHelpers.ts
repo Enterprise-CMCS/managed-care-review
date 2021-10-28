@@ -116,6 +116,12 @@ const createAndUpdateTestDraftSubmission = async (
                 s3URL: 'fakeS3URL',
             },
         ],
+        contractDocuments: [
+            {
+                name: 'contractDocument.pdf',
+                s3URL: 'fakeS3URL002',
+            },
+        ],
         stateContacts: [
             {
                 name: 'test name',

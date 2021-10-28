@@ -32,6 +32,10 @@ mutation submitDraftSubmission($input: SubmitDraftSubmissionInput!) {
                 s3URL
             }
             contractType
+            contractDocuments {
+                name
+                s3URL
+            }
             contractDateStart
             contractDateEnd
             managedCareEntities

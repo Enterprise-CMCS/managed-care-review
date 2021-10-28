@@ -1,6 +1,5 @@
 import React from 'react'
 import {
-    Alert,
     ErrorMessage,
     Form as UswdsForm,
     FormGroup,
@@ -29,6 +28,7 @@ import {
     FileUpload,
     S3FileData,
     FileItemT,
+    UploadErrorAlert,
 } from '../../../components/FileUpload'
 import {
     formatForForm,
@@ -58,29 +58,6 @@ const RateDatesErrorMessage = ({
             : validationErrorMessage}
     </ErrorMessage>
 )
-
-const PageLevelErrorAlert = ({
-    hasNoDocuments,
-}: {
-    hasNoDocuments: boolean
-}): JSX.Element =>
-    hasNoDocuments ? (
-        <Alert
-            type="error"
-            heading="Missing documents"
-            className="margin-bottom-2"
-        >
-            You must upload at least one document
-        </Alert>
-    ) : (
-        <Alert
-            type="error"
-            heading="Remove files with errors"
-            className="margin-bottom-2"
-        >
-            You must remove all documents with error messages before continuing
-        </Alert>
-    )
 export interface RateDetailsFormValues {
     rateType: RateType | undefined
     rateDateStart: string
@@ -266,12 +243,9 @@ export const RateDetails = ({
 
         const updatedDraft = updatesFromSubmission(draftSubmission)
         updatedDraft.rateType = values.rateType
-        updatedDraft.rateDateStart =
-            values.rateDateStart === '' ? null : values.rateDateStart
-        updatedDraft.rateDateEnd =
-            values.rateDateEnd === '' ? null : values.rateDateEnd
-        updatedDraft.rateDateCertified =
-            values.rateDateCertified === '' ? null : values.rateDateCertified
+        updatedDraft.rateDateStart = values.rateDateStart || null
+        updatedDraft.rateDateEnd = values.rateDateEnd || null
+        updatedDraft.rateDateCertified = values.rateDateCertified || null
         updatedDraft.rateDocuments = rateDocuments
 
         if (values.rateType === 'AMENDMENT') {
@@ -331,36 +305,40 @@ export const RateDetails = ({
                             <fieldset className="usa-fieldset">
                                 <legend className="srOnly">Rate Details</legend>
                                 {shouldValidate && !hasValidFiles && (
-                                    <PageLevelErrorAlert
+                                    <UploadErrorAlert
                                         hasNoDocuments={fileItems.length === 0}
                                     />
                                 )}
                                 {formAlert && formAlert}
                                 <span>All fields are required</span>
-                                <FileUpload
-                                    id="rateDocuments"
-                                    name="rateDocuments"
-                                    label="Upload rate certification"
-                                    hint={
-                                        <Link
-                                            aria-label="Document definitions and requirements (opens in new window)"
-                                            href={
-                                                'https://www.medicaid.gov/federal-policy-guidance/downloads/cib110819.pdf'
-                                            }
-                                            variant="external"
-                                            target="_blank"
-                                        >
-                                            Document definitions and
-                                            requirements
-                                        </Link>
-                                    }
-                                    accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                                    initialItems={fileItemsFromDraftSubmission}
-                                    uploadFile={handleUploadFile}
-                                    scanFile={handleScanFile}
-                                    deleteFile={handleDeleteFile}
-                                    onLoadComplete={onLoadComplete}
-                                />
+                                <FormGroup>
+                                    <FileUpload
+                                        id="rateDocuments"
+                                        name="rateDocuments"
+                                        label="Upload rate certification"
+                                        hint={
+                                            <Link
+                                                aria-label="Document definitions and requirements (opens in new window)"
+                                                href={
+                                                    'https://www.medicaid.gov/federal-policy-guidance/downloads/cib110819.pdf'
+                                                }
+                                                variant="external"
+                                                target="_blank"
+                                            >
+                                                Document definitions and
+                                                requirements
+                                            </Link>
+                                        }
+                                        accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                        initialItems={
+                                            fileItemsFromDraftSubmission
+                                        }
+                                        uploadFile={handleUploadFile}
+                                        scanFile={handleScanFile}
+                                        deleteFile={handleDeleteFile}
+                                        onLoadComplete={onLoadComplete}
+                                    />
+                                </FormGroup>
                                 <FormGroup
                                     error={showFieldErrors(errors.rateType)}
                                 >

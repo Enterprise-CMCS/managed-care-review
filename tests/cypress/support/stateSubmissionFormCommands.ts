@@ -52,6 +52,12 @@ Cypress.Commands.add('fillOutBaseContractDetails', () => {
     cy.findByLabelText('End date').type('03/31/2025').blur()
     cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
     cy.findByLabelText('1932(a) State Plan Authority').safeClick()
+    cy.findByTestId('file-input-input').attachFile(
+        'documents/trussel-guide.pdf'
+    )
+
+    cy.verifyDocumentsHaveNoErrors()
+    cy.waitForDocumentsToLoad()
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
@@ -66,6 +72,12 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
     cy.findByLabelText('Benefits provided').safeClick()
     cy.findByLabelText('Financial incentives').safeClick()
     cy.findByText('No').click()
+    cy.findByTestId('file-input-input').attachFile(
+        'documents/trussel-guide.pdf'
+    )
+
+    cy.verifyDocumentsHaveNoErrors()
+    cy.waitForDocumentsToLoad()
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 

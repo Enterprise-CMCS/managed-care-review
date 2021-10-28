@@ -241,6 +241,7 @@ type DraftSubmission {
     actuaryCommunicationPreference: ActuaryCommunicationType
     documents: [Document!]!
     contractType: ContractType
+    contractDocuments: [Document!]!
     contractDateStart: Date
     contractDateEnd: Date
     managedCareEntities: [String!]!
@@ -271,6 +272,7 @@ type StateSubmission {
     contractAmendmentInfo: ContractAmendmentInfo
     submittedAt: Date!
     contractType: ContractType!
+    contractDocuments: [Document!]!
     contractDateStart: Date!
     contractDateEnd: Date!
     managedCareEntities: [String!]!
@@ -294,6 +296,7 @@ input DraftSubmissionUpdates {
     actuaryCommunicationPreference: ActuaryCommunicationType
     documents: [DocumentInput!]!
     contractType: ContractType
+    contractDocuments: [DocumentInput!]!
     contractDateStart: Date
     contractDateEnd: Date
     managedCareEntities: [String!]!

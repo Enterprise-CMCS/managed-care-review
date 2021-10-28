@@ -10,7 +10,6 @@ import type {
     SubmissionType,
     ContractType,
     RateType,
-    FederalAuthority,
 } from './DraftSubmissionType'
 
 export type StateSubmissionType = {
@@ -26,13 +25,14 @@ export type StateSubmissionType = {
     updatedAt: DateTime
     documents: SubmissionDocument[]
     contractType: ContractType
+    contractDocuments: SubmissionDocument[]
     contractDateStart: Date
     contractDateEnd: Date
     managedCareEntities: string[]
     federalAuthorities: FederalAuthority[]
     contractAmendmentInfo?: ContractAmendmentInfo
     rateType?: RateType
-    rateDocuments: SubmissionDocument[]
+    rateDocuments?: SubmissionDocument[]
     rateDateStart?: Date
     rateDateEnd?: Date
     rateDateCertified?: Date
