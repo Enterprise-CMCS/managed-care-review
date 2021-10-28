@@ -1,4 +1,3 @@
-import { domain } from 'process'
 import { statesubmission, google } from '../../../gen/stateSubmissionProto'
 import {
     DraftSubmissionType,
