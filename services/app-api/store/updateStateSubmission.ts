@@ -46,12 +46,14 @@ export async function updateStateSubmission(
         storeSubmission.contractDocuments.push(storeDocument)
     })
 
-    stateSubmission.rateDocuments.forEach((doc) => {
-        const storeDocument = new DocumentStoreT()
-        storeDocument.name = doc.name
-        storeDocument.s3URL = doc.s3URL
-        storeSubmission.rateDocuments.push(storeDocument)
-    })
+    if (stateSubmission.rateDocuments) {
+        stateSubmission.rateDocuments.forEach((doc) => {
+            const storeDocument = new DocumentStoreT()
+            storeDocument.name = doc.name
+            storeDocument.s3URL = doc.s3URL
+            storeSubmission.rateDocuments.push(storeDocument)
+        })
+    }
 
     storeSubmission.stateContacts = stateSubmission.stateContacts
     storeSubmission.actuaryContacts = stateSubmission.actuaryContacts
