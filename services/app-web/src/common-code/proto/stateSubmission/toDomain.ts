@@ -153,7 +153,7 @@ function decodeOrError(
         const message = statesubmission.StateSubmissionInfo.decode(buff)
         return message
     } catch (e) {
-        return e
+        return new Error(`${e}`)
     }
 }
 
@@ -345,6 +345,9 @@ const toDomain = (
         contractDateEnd: protoDateToDomain(
             stateSubmissionMessage.contractInfo?.contractDateEnd
         ),
+        contractDocuments: parseProtoDocuments(
+            stateSubmissionMessage.contractInfo?.contractDocuments
+        ),
         managedCareEntities: protoEnumArrayToDomain(
             statesubmission.ManagedCareEntity,
             stateSubmissionMessage?.contractInfo?.managedCareEntities
@@ -359,6 +362,10 @@ const toDomain = (
         ),
         rateAmendmentInfo: parseProtoRateAmendment(rateInfo?.rateAmendmentInfo),
         rateType: enumToDomain(statesubmission.RateType, rateInfo?.rateType),
+        rateDocuments:
+            (rateInfo?.rateDocuments?.length &&
+                parseProtoDocuments(rateInfo?.rateDocuments)) ||
+            undefined,
         rateDateStart: protoDateToDomain(rateInfo?.rateDateStart),
         rateDateEnd: protoDateToDomain(rateInfo?.rateDateEnd),
         rateDateCertified: protoDateToDomain(rateInfo?.rateDateCertified),

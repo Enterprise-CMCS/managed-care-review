@@ -19,6 +19,7 @@ const newSubmission: DraftSubmissionType = {
     submissionType: 'CONTRACT_AND_RATES',
     submissionDescription: 'A real submission',
     documents: [],
+    contractDocuments: [],
     managedCareEntities: [],
     federalAuthorities: [],
     stateContacts: [],
@@ -39,6 +40,7 @@ const basicSubmission: DraftSubmissionType = {
     contractType: 'BASE',
     contractDateStart: new Date(2021, 4, 22),
     contractDateEnd: new Date(2022, 4, 21),
+    contractDocuments: [],
     managedCareEntities: [],
     federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
     stateContacts: [],
@@ -56,6 +58,7 @@ const contractOnly: DraftSubmissionType = {
     submissionType: 'CONTRACT_ONLY',
     submissionDescription: 'A real submission',
     documents: [],
+    contractDocuments: [],
     contractType: 'BASE',
     contractDateStart: new Date(2021, 4, 22),
     contractDateEnd: new Date(2022, 4, 21),
@@ -79,6 +82,7 @@ const moreFullSubmission: DraftSubmissionType = {
     contractType: 'BASE',
     contractDateStart: new Date(2021, 4, 22),
     contractDateEnd: new Date(2022, 4, 21),
+    contractDocuments: [],
     managedCareEntities: [],
     federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
     stateContacts: [
@@ -133,6 +137,7 @@ const nowWithDocuments: DraftSubmissionType = {
     contractType: 'BASE',
     contractDateStart: new Date(2021, 4, 22),
     contractDateEnd: new Date(2022, 4, 21),
+    contractDocuments: [],
     managedCareEntities: [],
     federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
     stateContacts: [
@@ -187,6 +192,7 @@ const fullRateAmendment: DraftSubmissionType = {
     contractType: 'BASE',
     contractDateStart: new Date(2021, 4, 22),
     contractDateEnd: new Date(2022, 4, 21),
+    contractDocuments: [],
     managedCareEntities: ['PIHP'],
     federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
     rateType: 'AMENDMENT',
@@ -250,6 +256,7 @@ const fullContractInfo: DraftSubmissionType = {
     contractType: 'AMENDMENT',
     contractDateStart: new Date(2021, 4, 22),
     contractDateEnd: new Date(2022, 4, 21),
+    contractDocuments: [],
     contractAmendmentInfo: {
         itemsBeingAmended: [
             'ENROLLEE_ACCESS',
@@ -328,6 +335,7 @@ const someOthers: DraftSubmissionType = {
     contractType: 'AMENDMENT',
     contractDateStart: new Date(2021, 4, 22),
     contractDateEnd: new Date(2022, 4, 21),
+    contractDocuments: [],
     contractAmendmentInfo: {
         itemsBeingAmended: [
             'ENROLLEE_ACCESS',
@@ -403,6 +411,7 @@ const basicCompleteLiteral: StateSubmissionType = {
     contractType: 'BASE',
     contractDateStart: new Date(2021, 4, 22),
     contractDateEnd: new Date(2022, 4, 21),
+    contractDocuments: [],
     managedCareEntities: ['PIHP'],
     federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
     stateContacts: [
@@ -420,6 +429,7 @@ const basicCompleteLiteral: StateSubmissionType = {
             actuarialFirm: 'STATE_IN_HOUSE',
         },
     ],
+    rateDocuments: undefined,
 }
 
 describe('Validate encoding to protobuf and decoding back to domain model', () => {

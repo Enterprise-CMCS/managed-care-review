@@ -79,29 +79,6 @@ describe('StateSubmissionForm', () => {
             expect(program).toHaveDisplayValue('SNBC')
         })
 
-        it('loads contract details fields for /submissions/:id/contract-details', async () => {
-            renderWithProviders(
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={StateSubmissionForm}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchDraftSubmissionMock({
-                                id: '12',
-                                statusCode: 200,
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/12/contract-details',
-                    },
-                }
-            )
-        })
-
         it('loads contract details fields for /submissions/:id/contract-details with amendments', async () => {
             const mockAmendment = mockDraft()
 
@@ -203,6 +180,11 @@ describe('StateSubmissionForm', () => {
                     },
                 }
             )
+
+            await waitFor(() => {
+                expect(screen.getByText('Upload documents')).toBeInTheDocument()
+                expect(screen.getByTestId('file-input')).toBeInTheDocument()
+            })
         })
     })
 
