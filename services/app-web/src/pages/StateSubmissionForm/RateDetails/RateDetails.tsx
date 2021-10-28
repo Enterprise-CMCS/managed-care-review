@@ -1,6 +1,5 @@
 import React from 'react'
 import {
-    Alert,
     ErrorMessage,
     Form as UswdsForm,
     FormGroup,
@@ -29,6 +28,7 @@ import {
     FileUpload,
     S3FileData,
     FileItemT,
+    UploadErrorAlert,
 } from '../../../components/FileUpload'
 import {
     formatForForm,
@@ -58,29 +58,6 @@ const RateDatesErrorMessage = ({
             : validationErrorMessage}
     </ErrorMessage>
 )
-
-const PageLevelErrorAlert = ({
-    hasNoDocuments,
-}: {
-    hasNoDocuments: boolean
-}): JSX.Element =>
-    hasNoDocuments ? (
-        <Alert
-            type="error"
-            heading="Missing documents"
-            className="margin-bottom-2"
-        >
-            You must upload at least one document
-        </Alert>
-    ) : (
-        <Alert
-            type="error"
-            heading="Remove files with errors"
-            className="margin-bottom-2"
-        >
-            You must remove all documents with error messages before continuing
-        </Alert>
-    )
 export interface RateDetailsFormValues {
     rateType: RateType | undefined
     rateDateStart: string
@@ -331,7 +308,7 @@ export const RateDetails = ({
                             <fieldset className="usa-fieldset">
                                 <legend className="srOnly">Rate Details</legend>
                                 {shouldValidate && !hasValidFiles && (
-                                    <PageLevelErrorAlert
+                                    <UploadErrorAlert
                                         hasNoDocuments={fileItems.length === 0}
                                     />
                                 )}

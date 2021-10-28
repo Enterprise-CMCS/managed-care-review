@@ -27,6 +27,7 @@ import {
     FileUpload,
     S3FileData,
     FileItemT,
+    UploadErrorAlert,
 } from '../../../components/FileUpload'
 import {
     formatForApi,
@@ -303,30 +304,6 @@ export const ContractDetails = ({
         values: ContractDetailsFormValues
     ): boolean => values.contractType === 'AMENDMENT'
 
-    const PageLevelErrorAlert = ({
-        hasNoDocuments,
-    }: {
-        hasNoDocuments: boolean
-    }): JSX.Element =>
-        hasNoDocuments ? (
-            <Alert
-                type="error"
-                heading="Missing documents"
-                className="margin-bottom-2"
-            >
-                You must upload at least one document
-            </Alert>
-        ) : (
-            <Alert
-                type="error"
-                heading="Remove files with errors"
-                className="margin-bottom-2"
-            >
-                You must remove all documents with error messages before
-                continuing
-            </Alert>
-        )
-
     const handleFormSubmit = async (
         values: ContractDetailsFormValues,
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
@@ -459,7 +436,7 @@ export const ContractDetails = ({
                         <fieldset className="usa-fieldset">
                             <legend className="srOnly">Contract Details</legend>
                             {shouldValidate && !hasValidFiles && (
-                                <PageLevelErrorAlert
+                                <UploadErrorAlert
                                     hasNoDocuments={fileItems.length === 0}
                                 />
                             )}
