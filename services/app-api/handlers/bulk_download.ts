@@ -14,7 +14,6 @@ export const main: APIGatewayProxyHandler = async (
     event: APIGatewayProxyEvent
 ) => {
     console.time('zipProcess')
-    console.log('Event body: ', event.body)
     console.log('Starting zip lambda...', event)
     if (!event.body) {
         return {
