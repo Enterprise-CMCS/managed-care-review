@@ -12,6 +12,7 @@ interface S3BulkDownloadRequest {
 
 export const main: APIGatewayProxyHandler = async (event: APIGatewayEvent) => {
     console.log('Starting zip lambda...', event)
+    console.log('type of event', typeof event.body)
     const bulkDlRequest = JSON.parse(
         event.body ?? '{}'
     ) as S3BulkDownloadRequest
