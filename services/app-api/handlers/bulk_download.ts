@@ -12,22 +12,19 @@ interface S3BulkDownloadRequest {
 
 export const main: APIGatewayProxyHandler = async (event: APIGatewayEvent) => {
     console.log('Starting zip lambda...', event)
-    console.log('type of event', typeof event.body)
-    const bulkDlRequest: S3BulkDownloadRequest = event.body
-        ? JSON.parse(event.body)
-        : ({} as S3BulkDownloadRequest)
-    console.log('type: ', bulkDlRequest)
-
-    if (!bulkDlRequest.keys || !bulkDlRequest.bucket) {
+    if (!event.body) {
         return {
             statusCode: 400,
-            body: JSON.stringify('could not retreive bucket or keys'),
+            body: 'No body found in request',
             headers: {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Credentials': true,
             },
         }
     }
+
+    const bulkDlRequest: S3BulkDownloadRequest = JSON.parse(event.body)
+    console.log('Bulk download request:', bulkDlRequest)
 
     type S3DownloadStreamDetails = { stream: Readable; filename: string }
 
