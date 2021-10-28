@@ -14,7 +14,7 @@ export const main: APIGatewayProxyHandler = async (
     event: APIGatewayProxyEvent
 ) => {
     console.time('zipProcess')
-    console.log(event)
+    console.log('Event body: ', event.body)
     console.log('Starting zip lambda...', event)
     if (!event.body) {
         return {
@@ -27,7 +27,9 @@ export const main: APIGatewayProxyHandler = async (
         }
     }
 
-    const bulkDlRequest: S3BulkDownloadRequest = JSON.parse(event.body)
+    const bulkDlRequest: S3BulkDownloadRequest = JSON.parse(
+        JSON.stringify(event.body)
+    )
     console.log('Bulk download request:', bulkDlRequest)
 
     type S3DownloadStreamDetails = { stream: Readable; filename: string }
