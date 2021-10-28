@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import * as Yup from 'yup'
 import dayjs from 'dayjs'
 import {
-    Alert,
     Form as UswdsForm,
     FormGroup,
     Fieldset,
@@ -351,8 +350,8 @@ export const ContractDetails = ({
 
         const updatedDraft = updatesFromSubmission(draftSubmission)
         updatedDraft.contractType = values.contractType
-        updatedDraft.contractDateStart = values.contractDateStart
-        updatedDraft.contractDateEnd = values.contractDateEnd
+        updatedDraft.contractDateStart = values.contractDateStart || null
+        updatedDraft.contractDateEnd = values.contractDateEnd || null
         updatedDraft.managedCareEntities = values.managedCareEntities
         updatedDraft.federalAuthorities = values.federalAuthorities
         updatedDraft.contractDocuments = contractDocuments
@@ -417,7 +416,6 @@ export const ContractDetails = ({
             {({
                 values,
                 errors,
-                dirty,
                 handleSubmit,
                 setSubmitting,
                 isSubmitting,
@@ -1169,7 +1167,7 @@ export const ContractDetails = ({
                                     type="button"
                                     className="usa-button usa-button--outline"
                                     onClick={async () => {
-                                        // do not need to validate or submit if no documents are uploaded
+                                        // do not need to validate or resubmit if no documents are uploaded
                                         if (fileItems.length === 0) {
                                             history.push('type')
                                         } else {

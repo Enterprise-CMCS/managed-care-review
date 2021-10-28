@@ -243,12 +243,9 @@ export const RateDetails = ({
 
         const updatedDraft = updatesFromSubmission(draftSubmission)
         updatedDraft.rateType = values.rateType
-        updatedDraft.rateDateStart =
-            values.rateDateStart === '' ? null : values.rateDateStart
-        updatedDraft.rateDateEnd =
-            values.rateDateEnd === '' ? null : values.rateDateEnd
-        updatedDraft.rateDateCertified =
-            values.rateDateCertified === '' ? null : values.rateDateCertified
+        updatedDraft.rateDateStart = values.rateDateStart || null
+        updatedDraft.rateDateEnd = values.rateDateEnd || null
+        updatedDraft.rateDateCertified = values.rateDateCertified || null
         updatedDraft.rateDocuments = rateDocuments
 
         if (values.rateType === 'AMENDMENT') {
