@@ -1,5 +1,5 @@
 import { S3 } from 'aws-sdk'
-import { APIGatewayEvent, APIGatewayProxyHandler } from 'aws-lambda'
+import { APIGatewayProxyEvent, APIGatewayProxyHandler } from 'aws-lambda'
 import Archiver from 'archiver'
 import { Readable, Stream } from 'stream'
 
@@ -11,11 +11,12 @@ interface S3BulkDownloadRequest {
 }
 
 export const main: APIGatewayProxyHandler = async (
-    event: S3BulkDownloadRequest
+    event: APIGatewayProxyEvent
 ) => {
     console.time('zipProcess')
+    console.log(event)
     console.log('Starting zip lambda...', event)
-    if (!event.bucket || !event.keys) {
+    if (!event.body) {
         return {
             statusCode: 400,
             body: 'No body found in request',
@@ -26,7 +27,7 @@ export const main: APIGatewayProxyHandler = async (
         }
     }
 
-    const bulkDlRequest: S3BulkDownloadRequest = event
+    const bulkDlRequest: S3BulkDownloadRequest = JSON.parse(event.body)
     console.log('Bulk download request:', bulkDlRequest)
 
     type S3DownloadStreamDetails = { stream: Readable; filename: string }
@@ -91,6 +92,7 @@ export const main: APIGatewayProxyHandler = async (
 
     await s3Upload.promise()
 
+    console.timeEnd('zipProcess')
     return {
         statusCode: 200,
         body: JSON.stringify('success'),
