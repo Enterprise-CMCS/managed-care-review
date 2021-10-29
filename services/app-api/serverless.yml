@@ -89,22 +89,6 @@ provider:
             - rds-db:connect
           Resource:
             - ${self:custom.auroraArn}
-        - Effect: 'Allow'
-          Action:
-            - s3:GetObject
-            - s3:GetObjectTagging
-            - s3:PutObject
-            - s3:PutObjectAcl
-            - s3:PutObjectTagging
-            - s3:PutObjectVersionTagging
-            - s3:ListBucket
-          Resource:
-            - !Sub arn:aws:s3:::uploads-${self:custom.stage}-uploads-${AWS::AccountId}/*
-        - Effect: 'Allow'
-          Action:
-            - s3:ListBucket
-          Resource:
-            - !Sub arn:aws:s3:::uploads-${self:custom.stage}-uploads-${AWS::AccountId}
 
   environment:
     stage: ${self:custom.stage}
