@@ -67,7 +67,7 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 # double check your work.
 nvm    # should return a list of nvm commands
 node -v     # should return v12.20.0
-node which    # should return something like /Users/YOURUSER/.nvm/versions/node/v12.20.0/bin/node
+which node    # should return something like /Users/YOURUSER/.nvm/versions/node/v12.20.0/bin/node
 
 # if things aren't working you may need to manually adjust your ~/.bash_profile or ~/.zshrc. See [nvm docs](https://github.com/nvm-sh/nvm#troubleshooting-on-macos) for more.
 
