@@ -65,15 +65,21 @@ export const main: APIGatewayProxyHandler = async (
         }
     })
 
-    const zip = Archiver('zip')
-    zip.on('error', (error: Archiver.ArchiverError) => {
-        console.log('Error in zip.on: ', error.message)
-        throw new Error(
-            `${error.name} ${error.code} ${error.message} ${error.path} ${error.stack}`
-        )
-    })
-
     await new Promise((resolve, reject) => {
+        console.log('Starting zip process...')
+        const zip = Archiver('zip')
+        zip.on('error', (error: Archiver.ArchiverError) => {
+            console.log('Error in zip.on: ', error.message, error.stack)
+            return {
+                statusCode: 500,
+                body: JSON.stringify(error.message),
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': true,
+                },
+            }
+        })
+
         console.log('Starting upload...')
 
         streamPassThrough.on('close', resolve)
