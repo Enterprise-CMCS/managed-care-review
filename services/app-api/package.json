@@ -7,8 +7,12 @@
         "test": "jest --watch",
         "test:once": "jest",
         "lint": "tsc --noEmit && eslint . --ignore-path ../../.gitignore",
+        "lint:staged": "tsc --noEmit && eslint $(git diff --name-only HEAD | grep -E '/.src/(ts)$' | xargs)",
         "clean": "rm -rf node_modules && yarn cache clean"
     },
+    "precommit": [
+        "lint:staged"
+    ],
     "dependencies": {
         "@aws/dynamodb-data-mapper": "0.7.3",
         "@aws/dynamodb-data-mapper-annotations": "^0.7.3",

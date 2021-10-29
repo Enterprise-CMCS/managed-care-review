@@ -150,7 +150,7 @@ const ContractDatesErrorMessage = ({
 }): React.ReactElement => (
     <ErrorMessage>
         {isDateRangeEmpty(values.contractDateStart, values.contractDateEnd)
-            ? 'You must provide a start and an end date'
+            ? 'You must provide a start asdfsaand an end date'
             : validationErrorMessage}
     </ErrorMessage>
 )

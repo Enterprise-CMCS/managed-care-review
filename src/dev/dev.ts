@@ -40,18 +40,49 @@ async function runAllClean() {
     )
 }
 
-async function runAllLint() {
+async function runAllLint({
+    runStaged = false,
+    web = true,
+    api = true,
+}: {
+    runStaged?: boolean
+    web?: boolean
+    api?: boolean
+}) {
     const runner = new LabeledProcessRunner()
-    await runner.runCommandAndOutput(
-        'web lint',
-        ['yarn', 'lint'],
-        'services/app-web'
-    )
-    await runner.runCommandAndOutput(
-        'api lint',
-        ['yarn', 'lint'],
-        'services/app-api'
-    )
+    if (runStaged) {
+        // run staged files only
+        if (web) {
+            await runner.runCommandAndOutput(
+                'web lint',
+                ['yarn', 'lint:staged'],
+                'services/app-web'
+            )
+        }
+        if (api) {
+            await runner.runCommandAndOutput(
+                'api lint',
+                ['yarn', 'lint:staged'],
+                'services/app-api'
+            )
+        }
+    } else {
+        // run generic eslint across all files
+        if (web) {
+            await runner.runCommandAndOutput(
+                'web lint',
+                ['yarn', 'lint'],
+                'services/app-web'
+            )
+        }
+        if (api) {
+            await runner.runCommandAndOutput(
+                'api lint',
+                ['yarn', 'lint'],
+                'services/app-api'
+            )
+        }
+    }
 }
 
 async function runAllFormat() {
@@ -493,10 +524,44 @@ function main() {
         )
         .command(
             'lint',
-            'run all linters. This will be replaced by pre-commit.',
-            {},
-            () => {
-                runAllLint()
+            'run all linters',
+            (yargs) => {
+                return yargs.command(
+                    'staged',
+                    'run lint with autofix and on staged files only for precommit',
+                    (yargs) => {
+                        return yargs
+                            .command(
+                                'web',
+                                'run lint staged on app-web',
+                                (yargs) => {
+                                    runAllLint({ runStaged: true, api: false })
+                                }
+                            )
+                            .command(
+                                'api',
+                                'run lint staged on app-api',
+                                (yargs) => {
+                                    runAllLint({ runStaged: true, web: false })
+                                }
+                            )
+                            .command(
+                                '*',
+                                ' lint app-web and app-api',
+                                (yargs) => {
+                                    runAllLint({
+                                        runStaged: true,
+                                        api: true,
+                                        web: true,
+                                    })
+                                }
+                            )
+                    }
+                )
+            },
+            (args) => {
+                // default ./dev lint just runs eslint across all files in web and api
+                runAllLint({ runStaged: false, api: true, web: true })
             }
         )
         .command(
