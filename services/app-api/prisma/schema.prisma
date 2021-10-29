@@ -17,3 +17,9 @@ model TestUser {
     email     String   @unique
     name      String?
 }
+
+model StateSubmission {
+    id  String @id
+    stateCode String
+    submissionFormProto Bytes
+}
