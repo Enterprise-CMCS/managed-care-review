@@ -17,6 +17,7 @@ export const main: APIGatewayProxyHandler = async (
     console.time('zipProcess')
     console.log('Starting zip lambda...')
     if (!event.body) {
+        console.timeEnd('zipProcess')
         return {
             statusCode: 400,
             body: 'No body found in request',
@@ -37,6 +38,7 @@ export const main: APIGatewayProxyHandler = async (
         !bulkDlRequest.keys ||
         !bulkDlRequest.zipFileName
     ) {
+        console.timeEnd('zipProcess')
         return {
             statusCode: 400,
             body: 'Missing bucket, keys or zipFileName in request',
@@ -84,6 +86,7 @@ export const main: APIGatewayProxyHandler = async (
         const zip = Archiver('zip')
         zip.on('error', (error: Archiver.ArchiverError) => {
             console.log('Error in zip.on: ', error.message, error.stack)
+            console.timeEnd('zipProcess')
             return {
                 statusCode: 500,
                 body: JSON.stringify(error.message),
