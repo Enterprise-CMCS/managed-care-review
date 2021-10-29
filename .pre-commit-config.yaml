@@ -24,7 +24,6 @@ repos:
             entry: './dev lint staged web'
             language: script
             pass_filenames: false
-            verbose: true
 
           - id: lint-app-api
             name: Lint staged app-api
@@ -32,7 +31,6 @@ repos:
             entry: './dev lint staged api'
             language: script
             pass_filenames: false
-            verbose: true
 
     - repo: https://github.com/pre-commit/mirrors-prettier
       rev: 'v2.3.2' # Use the sha / tag you want to point at
