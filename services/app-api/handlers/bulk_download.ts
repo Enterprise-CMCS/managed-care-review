@@ -14,7 +14,7 @@ export const main: APIGatewayProxyHandler = async (
     event: APIGatewayProxyEvent
 ) => {
     console.time('zipProcess')
-    console.log('Starting zip lambda...', event)
+    console.log('Starting zip lambda...')
     if (!event.body) {
         return {
             statusCode: 400,
@@ -44,6 +44,8 @@ export const main: APIGatewayProxyHandler = async (
         }
     )
 
+    console.log('S3 download streams:', s3DownloadStreams)
+
     const streamPassThrough = new Stream.PassThrough()
     const params: S3.PutObjectRequest = {
         ACL: 'private',
@@ -65,13 +67,14 @@ export const main: APIGatewayProxyHandler = async (
 
     const zip = Archiver('zip')
     zip.on('error', (error: Archiver.ArchiverError) => {
+        console.log('Error in zip.on: ', error.message)
         throw new Error(
             `${error.name} ${error.code} ${error.message} ${error.path} ${error.stack}`
         )
     })
 
     await new Promise((resolve, reject) => {
-        console.log('Starting upload')
+        console.log('Starting upload...')
 
         streamPassThrough.on('close', resolve)
         streamPassThrough.on('end', resolve)
@@ -85,9 +88,11 @@ export const main: APIGatewayProxyHandler = async (
         )
 
         zip.finalize().catch((error) => {
+            console.log('Error in zip finalize: ', error.message)
             throw new Error(`Archiver could not finalize: ${error}`)
         })
     }).catch((error: { code: string; message: string; data: string }) => {
+        console.log('Caught error: ', error.message)
         throw new Error(`${error.code} ${error.message} ${error.data}`)
     })
 
