@@ -512,7 +512,12 @@ describe('RateDetails', () => {
             const mockUpdateDraftFn = jest.fn()
             const hasDocsDetailsDraft = {
                 ...mockDraft(),
-                rateDocuments: [{ name: 'aasdf3423af', s3Url: 'asdfads' }],
+                rateDocuments: [
+                    {
+                        name: 'aasdf3423af',
+                        s3URL: 's3://bucketname/key/fileName',
+                    },
+                ],
                 rateType: null,
                 rateDateStart: null,
                 rateDateEnd: null,
@@ -520,7 +525,7 @@ describe('RateDetails', () => {
             }
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={hasDocsDetailsDraft}
                     updateDraft={mockUpdateDraftFn}
                 />,
                 {
