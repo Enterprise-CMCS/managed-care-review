@@ -153,6 +153,7 @@ resources:
                 - !Sub ${DocumentUploadsBucket.Arn}/*.txt
                 - !Sub ${DocumentUploadsBucket.Arn}/*.xls
                 - !Sub ${DocumentUploadsBucket.Arn}/*.xlsx
+                - !Sub ${DocumentUploadsBucket.Arn}/*.zip
     LambdaInvokePermission:
       Type: AWS::Lambda::Permission
       Properties:
