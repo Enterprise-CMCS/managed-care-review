@@ -153,6 +153,8 @@ describe('RateDetails', () => {
 
         expect(screen.getByText('Rate certification type')).toBeInTheDocument()
         screen.getByLabelText('New rate certification').click()
+        const input = screen.getByLabelText('Upload rate certification')
+        userEvent.upload(input, [TEST_DOC_FILE])
 
         // check that now we can see hidden things
         await waitFor(() => {
@@ -569,7 +571,9 @@ describe('RateDetails', () => {
             await waitFor(() => {
                 expect(mockUpdateDraftFn).not.toHaveBeenCalled()
                 expect(
-                    screen.queryByText('Remove files with errors')
+                    screen.queryByText(
+                        'You must remove all documents with error messages before continuing'
+                    )
                 ).toBeInTheDocument()
             })
         })

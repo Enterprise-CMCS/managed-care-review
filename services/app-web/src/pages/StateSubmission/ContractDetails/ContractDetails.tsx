@@ -25,7 +25,6 @@ import {
     FileUpload,
     S3FileData,
     FileItemT,
-    UploadErrorAlert,
 } from '../../../components/FileUpload'
 import {
     formatForApi,
@@ -120,6 +119,7 @@ export const ContractDetails = ({
     const [hasPendingFiles, setHasPendingFiles] = React.useState(false)
     const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
+    const showDocumentErrors = shouldValidate && !hasValidFiles
 
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         draftSubmission &&
@@ -361,18 +361,22 @@ export const ContractDetails = ({
                     >
                         <fieldset className="usa-fieldset">
                             <legend className="srOnly">Contract Details</legend>
-                            {shouldValidate && !hasValidFiles && (
-                                <UploadErrorAlert
-                                    hasNoDocuments={fileItems.length === 0}
-                                />
-                            )}
                             {formAlert && formAlert}
                             <span>All fields are required</span>
-                            <FormGroup>
+                            <FormGroup error={showDocumentErrors}>
                                 <FileUpload
                                     id="documents"
                                     name="documents"
                                     label="Upload contract"
+                                    error={
+                                        showDocumentErrors &&
+                                        fileItems.length === 0
+                                            ? ' You must upload at least one document'
+                                            : showDocumentErrors &&
+                                              !hasValidFiles
+                                            ? ' You must remove all documents with error messages before continuing'
+                                            : undefined
+                                    }
                                     hint={
                                         <>
                                             <Link

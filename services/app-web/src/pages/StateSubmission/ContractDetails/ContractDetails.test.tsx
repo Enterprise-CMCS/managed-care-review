@@ -8,7 +8,14 @@ import {
     fetchCurrentUserMock,
 } from '../../../testHelpers/apolloHelpers'
 
-import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import {
+    renderWithProviders,
+    TEST_DOC_FILE,
+    TEST_PDF_FILE,
+    TEST_XLS_FILE,
+    TEST_PNG_FILE,
+    dragAndDrop,
+} from '../../../testHelpers/jestHelpers'
 
 import { ContractDetails } from './'
 
@@ -47,11 +54,13 @@ describe('ContractDetails', () => {
             )
         ).toBeNull()
 
-        // click amendment
+        // click amendment and upload docs
         const amendmentRadio = screen.getByLabelText(
             'Amendment to base contract'
         )
         amendmentRadio.click()
+        const input = screen.getByLabelText('Upload contract')
+        userEvent.upload(input, [TEST_DOC_FILE])
 
         // check that now we can see hidden things
         expect(screen.queryByText('Items being amended')).toBeInTheDocument()
