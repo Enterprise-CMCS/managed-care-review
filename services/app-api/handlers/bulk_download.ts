@@ -8,6 +8,7 @@ const s3 = new S3({ region: 'us-east-1' })
 interface S3BulkDownloadRequest {
     bucket: string
     keys: string[]
+    zipFileName: string
 }
 
 export const main: APIGatewayProxyHandler = async (
@@ -31,6 +32,21 @@ export const main: APIGatewayProxyHandler = async (
     )
     console.log('Bulk download request:', bulkDlRequest)
 
+    if (
+        !bulkDlRequest.bucket ||
+        !bulkDlRequest.keys ||
+        !bulkDlRequest.zipFileName
+    ) {
+        return {
+            statusCode: 400,
+            body: 'Missing bucket, keys or zipFileName in request',
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': true,
+            },
+        }
+    }
+
     type S3DownloadStreamDetails = { stream: Readable; filename: string }
 
     const s3DownloadStreams: S3DownloadStreamDetails[] = bulkDlRequest.keys.map(
@@ -44,16 +60,14 @@ export const main: APIGatewayProxyHandler = async (
         }
     )
 
-    console.log('S3 download streams:', s3DownloadStreams)
-
     const streamPassThrough = new Stream.PassThrough()
     const params: S3.PutObjectRequest = {
         ACL: 'private',
         Body: streamPassThrough,
         Bucket: bulkDlRequest.bucket,
         ContentType: 'application/zip',
-        Key: 'file.zip',
-        StorageClass: 'STANDARD_IA',
+        Key: bulkDlRequest.zipFileName,
+        StorageClass: 'STANDARD',
     }
 
     const s3Upload = s3.upload(params, (error: Error): void => {
