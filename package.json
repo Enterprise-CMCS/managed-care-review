@@ -13,10 +13,16 @@
     },
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
+        "precommit": "lint-staged",
         "lint": "lerna run lint --parallel",
         "cypress:open": "cypress open --env AUTH_MODE=LOCAL",
         "cypress:run": "cypress run --env AUTH_MODE=LOCAL",
         "prepare": "husky install"
+    },
+    "lint-staged": {
+        "*.sh": [
+            "shellcheck"
+        ]
     },
     "repository": {
         "type": "git",
@@ -46,6 +52,7 @@
         "dotenv": "^10.0.0",
         "husky": "^7.0.4",
         "lerna": "^4.0.0",
+        "lint-staged": "^11.2.6",
         "prettier": "^2.4.1",
         "serverless": "^2.64.1",
         "serverless-iam-helper": "CMSgov/serverless-iam-helper",
