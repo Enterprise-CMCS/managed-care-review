@@ -153,6 +153,8 @@ describe('RateDetails', () => {
 
         expect(screen.getByText('Rate certification type')).toBeInTheDocument()
         screen.getByLabelText('New rate certification').click()
+        const input = screen.getByLabelText('Upload rate certification')
+        userEvent.upload(input, [TEST_DOC_FILE])
 
         // check that now we can see hidden things
         await waitFor(() => {
@@ -510,7 +512,12 @@ describe('RateDetails', () => {
             const mockUpdateDraftFn = jest.fn()
             const hasDocsDetailsDraft = {
                 ...mockDraft(),
-                rateDocuments: [{ name: 'aasdf3423af', s3Url: 'asdfads' }],
+                rateDocuments: [
+                    {
+                        name: 'aasdf3423af',
+                        s3URL: 's3://bucketname/key/fileName',
+                    },
+                ],
                 rateType: null,
                 rateDateStart: null,
                 rateDateEnd: null,
@@ -518,7 +525,7 @@ describe('RateDetails', () => {
             }
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={hasDocsDetailsDraft}
                     updateDraft={mockUpdateDraftFn}
                 />,
                 {
@@ -569,7 +576,9 @@ describe('RateDetails', () => {
             await waitFor(() => {
                 expect(mockUpdateDraftFn).not.toHaveBeenCalled()
                 expect(
-                    screen.queryByText('Remove files with errors')
+                    screen.queryByText(
+                        'You must remove all documents with error messages before continuing'
+                    )
                 ).toBeInTheDocument()
             })
         })

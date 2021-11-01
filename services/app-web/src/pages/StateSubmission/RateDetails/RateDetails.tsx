@@ -28,7 +28,6 @@ import {
     FileUpload,
     S3FileData,
     FileItemT,
-    UploadErrorAlert,
 } from '../../../components/FileUpload'
 import {
     formatForForm,
@@ -87,6 +86,7 @@ export const RateDetails = ({
     const [hasValidFiles, setHasValidFiles] = React.useState(false)
     const [hasPendingFiles, setHasPendingFiles] = React.useState(false)
     const [fileItems, setFileItems] = React.useState<FileItemT[]>([])
+    const showDocumentErrors = shouldValidate && !hasValidFiles
 
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         (draftSubmission?.rateDocuments &&
@@ -304,11 +304,6 @@ export const RateDetails = ({
                         >
                             <fieldset className="usa-fieldset">
                                 <legend className="srOnly">Rate Details</legend>
-                                {shouldValidate && !hasValidFiles && (
-                                    <UploadErrorAlert
-                                        hasNoDocuments={fileItems.length === 0}
-                                    />
-                                )}
                                 {formAlert && formAlert}
                                 <span>All fields are required</span>
                                 <FormGroup>
@@ -316,6 +311,15 @@ export const RateDetails = ({
                                         id="rateDocuments"
                                         name="rateDocuments"
                                         label="Upload rate certification"
+                                        error={
+                                            showDocumentErrors &&
+                                            fileItems.length === 0
+                                                ? ' You must upload at least one document'
+                                                : showDocumentErrors &&
+                                                  !hasValidFiles
+                                                ? 'You must remove all documents with error messages before continuing'
+                                                : undefined
+                                        }
                                         hint={
                                             <Link
                                                 aria-label="Document definitions and requirements (opens in new window)"
