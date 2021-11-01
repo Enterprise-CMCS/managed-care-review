@@ -48,6 +48,12 @@
         "storybook": "start-storybook -p 6006 -s public --quiet",
         "build-storybook": "build-storybook -s public --quiet"
     },
+    "lint-staged": {
+        "src/**/*.{js,jsx,ts,tsx}": [
+            "eslint --fix",
+            "prettier --write src/**/*.ts{,x}"
+        ]
+    },
     "resolutions": {
         "@storybook/react/babel-loader": "8.1.0"
     },

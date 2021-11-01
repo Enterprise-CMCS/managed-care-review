@@ -6,8 +6,8 @@ import "google/protobuf/timestamp.proto";
 // It has all the fields for both DraftSubmission and StateSubmission, 
 // differentiated by the value of the `status` field.
 message StateSubmissionInfo {
-  {}  optional string proto_name = 1;
-  {} optional int32 proto_version = 2;
+  optional string proto_name = 1;
+  optional int32 proto_version = 2;
   optional string id = 3;
   optional string status = 4;
   optional Date created_at = 5;

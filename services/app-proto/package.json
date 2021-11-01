@@ -12,6 +12,11 @@
         "precommit": "lint-staged",
         "lint": "protolint lint ."
     },
+    "lint-staged": {
+        "*.proto": [
+            "protolint lint ."
+        ]
+    },
     "author": "",
     "license": "ISC",
     "dependencies": {

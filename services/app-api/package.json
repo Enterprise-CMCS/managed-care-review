@@ -10,6 +10,12 @@
         "lint": "tsc --noEmit && eslint . --ignore-path ../../.gitignore",
         "clean": "rm -rf node_modules && yarn cache clean"
     },
+    "lint-staged": {
+        "*.{js,ts}": [
+            "eslint --fix",
+            "prettier --write"
+        ]
+    },
     "dependencies": {
         "@aws/dynamodb-data-mapper": "0.7.3",
         "@aws/dynamodb-data-mapper-annotations": "^0.7.3",
