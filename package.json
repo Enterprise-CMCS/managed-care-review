@@ -33,7 +33,7 @@
         "@testing-library/cypress": "^8.0.1",
         "@types/dotenv": "^8.2.0",
         "@types/node": "^14.17.32",
-        "@types/yargs": "^17.0.4",
+        "@types/yargs": "^17.0.5",
         "chromedriver": "^95.0.0",
         "cypress": "^8.7.0",
         "cypress-pipe": "^2.0.0",
@@ -48,7 +48,7 @@
         "yargs": "^17.2.1"
     },
     "dependencies": {
-        "aws-sdk": "^2.1016.0",
+        "aws-sdk": "^2.1018.0",
         "cypress-file-upload": "^5.0.8"
     }
 }
