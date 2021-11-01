@@ -7,7 +7,7 @@
     "private": true,
     "workspaces": [
         "services/*",
-        "scripts/*"
+        "scripts"
     ],
     "directories": {
         "test": "tests"
