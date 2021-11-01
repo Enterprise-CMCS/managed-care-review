@@ -4,7 +4,7 @@
     "main": "handler.js",
     "license": "MIT",
     "scripts": {
-        "precommit": "tsc --noEmit && lint-staged",
+        "precommit": "lint-staged",
         "test": "jest --watch",
         "test:once": "jest",
         "lint": "tsc --noEmit && eslint . --ignore-path ../../.gitignore",
