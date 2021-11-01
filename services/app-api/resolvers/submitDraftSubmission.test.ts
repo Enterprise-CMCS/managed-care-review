@@ -1,13 +1,13 @@
 import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitDraftSubmission.graphql'
 import {
-    constructTestServer,
+    constructTestPostgresServer,
     createAndUpdateTestDraftSubmission,
     fetchTestStateSubmissionById,
 } from '../testHelpers/gqlHelpers'
 
 describe('submitDraftSubmission', () => {
     it('returns a StateSubmission if complete', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         // setup
         const draft = await createAndUpdateTestDraftSubmission(server)
@@ -66,7 +66,7 @@ describe('submitDraftSubmission', () => {
     })
 
     it('returns an error if there are no documents attached', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const draft = await createAndUpdateTestDraftSubmission(server, {
             documents: [],
@@ -93,7 +93,7 @@ describe('submitDraftSubmission', () => {
     })
 
     it('returns an error if there are no contract details fields', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const draft = await createAndUpdateTestDraftSubmission(server, {
             contractType: undefined,
@@ -122,7 +122,7 @@ describe('submitDraftSubmission', () => {
     })
 
     it('returns an error if there are missing rate details fields for submission type', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const draft = await createAndUpdateTestDraftSubmission(server, {
             submissionType: 'CONTRACT_AND_RATES',
@@ -153,7 +153,7 @@ describe('submitDraftSubmission', () => {
     })
 
     it('returns an error if there are invalid rate details fields for submission type', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const draft = await createAndUpdateTestDraftSubmission(server, {
             submissionType: 'CONTRACT_ONLY',

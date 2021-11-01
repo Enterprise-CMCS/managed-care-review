@@ -5,7 +5,9 @@ import { findProgram } from '../store/findProgram'
 import { findAllSubmissions } from './findAllSubmissions'
 import { insertDraftSubmission } from './insertDraftSubmission'
 import { updateDraftSubmission } from './updateDraftSubmission'
+import { updateStateSubmission } from './updateStateSubmission'
 import { findDraftSubmission } from './findDraftSubmission'
+import { findStateSubmission } from './findStateSubmission'
 
 export function NewPostgresStore(client: PrismaClient): Store {
     return {
@@ -19,12 +21,10 @@ export function NewPostgresStore(client: PrismaClient): Store {
         },
         updateDraftSubmission: (draftSubmission) =>
             updateDraftSubmission(client, draftSubmission),
-        updateStateSubmission: (submissionID) => {
-            throw new Error('UNIMPLEMENTED')
-        },
-        findStateSubmission: (submissionID) => {
-            throw new Error('UNIMPLEMENTED')
-        },
+        updateStateSubmission: (submission) =>
+            updateStateSubmission(client, submission),
+        findStateSubmission: (submissionID) =>
+            findStateSubmission(client, submissionID),
         findProgram: findProgram,
     }
 }

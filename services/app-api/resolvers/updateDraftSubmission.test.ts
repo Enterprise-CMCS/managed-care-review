@@ -209,7 +209,7 @@ describe('updateDraftSubmissionPostgres', () => {
         })
     })
 
-    it.only('updates a submission if the state matches', async () => {
+    it('updates a submission if the state matches', async () => {
         const server = await constructTestPostgresServer()
 
         const createdDraft = await createTestDraftSubmission(server)
@@ -432,7 +432,7 @@ describe('updateDraftSubmissionPostgres', () => {
                     titleRole: 'A Role',
                     email: 'test@test.com',
                     actuarialFirm: 'MERCER' as const,
-                    actuarialFirmOther: '',
+                    actuarialFirmOther: null,
                 },
             ],
             actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
@@ -904,7 +904,7 @@ describe('updateDraftSubmissionPostgres', () => {
         const createdID = createdDraft.id
 
         // setup a server with a different user
-        const otherUserServer = constructTestServer({
+        const otherUserServer = await constructTestPostgresServer({
             context: {
                 user: {
                     name: 'Aang',

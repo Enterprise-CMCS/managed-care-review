@@ -18,7 +18,7 @@ describe('indexDraftSubmissionUseingPostgres', () => {
 
         // First, create a new submission
         const draftSub = await createTestDraftSubmission(server)
-        const stateSub = await createTestDraftSubmission(server) // TODO Make this state again
+        const stateSub = await createTestStateSubmission(server) // TODO Make this state again
 
         // then see if we can get that same submission back from the index
         const result = await server.executeOperation({
