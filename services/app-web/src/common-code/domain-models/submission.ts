@@ -43,7 +43,7 @@ const hasValidRates = (sub: StateSubmissionType): boolean => {
 }
 
 const hasValidDocuments = (sub: StateSubmissionType): boolean =>
-    sub.documents.length !== 0
+    sub.contractDocuments.length !== 0
 
 const isStateSubmission = (sub: unknown): sub is StateSubmissionType => {
     if (sub && typeof sub === 'object' && 'status' in sub) {

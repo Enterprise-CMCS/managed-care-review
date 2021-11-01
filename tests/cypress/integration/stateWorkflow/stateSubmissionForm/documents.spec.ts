@@ -67,12 +67,6 @@ describe('documents', () => {
                 'This is not a valid file type.'
             )
 
-            // Continue button shows error, no documents
-            cy.navigateForm('Continue')
-            cy.findByText('You must upload at least one document').should(
-                'exist'
-            )
-
             // Drop multiple valid files
             cy.findByTestId('file-input-droptarget')
                 .should('exist')

@@ -402,16 +402,16 @@ const basicCompleteLiteral: StateSubmissionType = {
     programID: 'snbc',
     submissionType: 'CONTRACT_ONLY',
     submissionDescription: 'A real submission',
-    documents: [
-        {
-            name: 'dummy doc',
-            s3URL: 'https://s3.com/dummy',
-        },
-    ],
+    documents: [],
     contractType: 'BASE',
     contractDateStart: new Date(2021, 4, 22),
     contractDateEnd: new Date(2022, 4, 21),
-    contractDocuments: [],
+    contractDocuments: [
+        {
+            name: 'test doc',
+            s3URL: 'https://s3.com/test',
+        },
+    ],
     managedCareEntities: ['PIHP'],
     federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
     stateContacts: [

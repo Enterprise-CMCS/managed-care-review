@@ -351,7 +351,7 @@ describe('Documents', () => {
             })
         })
 
-        it('enabled when invalid files have been dropped but valid files are present', async () => {
+        it('enabled when invalid file types have been dropped', async () => {
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <Documents
@@ -385,40 +385,7 @@ describe('Documents', () => {
             })
         })
 
-        it('disabled with alert after first attempt to continue with zero files', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <Documents
-                    draftSubmission={{
-                        ...mockDraft(),
-                        submissionType: 'CONTRACT_AND_RATES',
-                    }}
-                    updateDraft={mockUpdateDraftFn}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
-
-            const continueButton = screen.getByRole('button', {
-                name: 'Continue',
-            })
-            expect(continueButton).not.toBeDisabled()
-
-            continueButton.click()
-
-            await waitFor(() => {
-                expect(
-                    screen.getByText('You must upload at least one document')
-                ).toBeInTheDocument()
-
-                expect(continueButton).toBeDisabled()
-            })
-        })
-
-        it('disabled with alert after first attempt to continue with invalid duplicate files', async () => {
+        it('when duplicate files present, triggers error alert on continue click', async () => {
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <Documents
@@ -435,26 +402,27 @@ describe('Documents', () => {
                 }
             )
             const input = screen.getByLabelText('Upload documents')
-            const continueButton = screen.getByRole('button', {
-                name: 'Continue',
+            const saveAsDraftButton = screen.getByRole('button', {
+                name: 'Save as draft',
             })
 
-            userEvent.upload(input, [TEST_DOC_FILE, TEST_DOC_FILE])
-            expect(continueButton).not.toBeDisabled()
+            userEvent.upload(input, [TEST_DOC_FILE])
+            userEvent.upload(input, [TEST_PDF_FILE])
+            userEvent.upload(input, [TEST_DOC_FILE])
 
-            continueButton.click()
             await waitFor(() => {
+                expect(screen.queryAllByText('Duplicate file').length).toBe(1)
+            })
+            userEvent.click(saveAsDraftButton)
+            await waitFor(() => {
+                expect(mockUpdateDraftFn).not.toHaveBeenCalled()
                 expect(
-                    screen.getByText(
-                        'You must remove all documents with error messages before continuing'
-                    )
+                    screen.queryByText('Remove files with errors')
                 ).toBeInTheDocument()
-
-                expect(continueButton).toBeDisabled()
             })
         })
 
-        it('disabled with alert after first attempt to continue with invalid files', async () => {
+        it('when zero files present, does not trigger alert on click to continue', async () => {
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <Documents
@@ -470,25 +438,59 @@ describe('Documents', () => {
                     },
                 }
             )
+
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+            expect(continueButton).not.toBeDisabled()
+
+            userEvent.click(continueButton)
+            expect(
+                screen.queryByText('You must upload at least one document')
+            ).toBeNull()
+            expect(mockUpdateDraftFn).toHaveBeenCalled()
+        })
+
+        it('when invalid file type files present, does not trigger alert on click to continue', async () => {
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <Documents
+                    draftSubmission={{
+                        ...mockDraft(),
+                        submissionType: 'CONTRACT_AND_RATES',
+                    }}
+                    updateDraft={mockUpdateDraftFn}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
 
+            const input = screen.getByLabelText('Upload documents')
             const targetEl = screen.getByTestId('file-input-droptarget')
+
+            userEvent.upload(input, [TEST_DOC_FILE])
             dragAndDrop(targetEl, [TEST_PNG_FILE])
 
+            await waitFor(() => {
+                expect(
+                    screen.getByText('This is not a valid file type.')
+                ).toBeInTheDocument()
+            })
+
+            userEvent.click(continueButton)
             expect(
-                await screen.findByText('This is not a valid file type.')
-            ).toBeInTheDocument()
-
-            expect(continueButton).not.toBeDisabled()
-            continueButton.click()
-
-            expect(
-                await screen.findByText('You must upload at least one document')
-            ).toBeInTheDocument()
-
-            expect(continueButton).toBeDisabled()
+                screen.queryByText(
+                    'You must remove all documents with error messages before continuing'
+                )
+            ).toBeNull()
+            expect(mockUpdateDraftFn).toHaveBeenCalled()
         })
     })
 

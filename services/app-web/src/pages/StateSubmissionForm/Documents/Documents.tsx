@@ -55,9 +55,9 @@ const DocumentRequirementsHint = ({
     )
 
 const PageLevelErrorAlert = ({
-    hasNoDocuments,
+    hasNoDocuments = false,
 }: {
-    hasNoDocuments: boolean
+    hasNoDocuments?: boolean
 }): JSX.Element =>
     hasNoDocuments ? (
         <Alert
@@ -111,16 +111,18 @@ export const Documents = ({
             }
         })
 
+    // useEffect use case
+    // fileItems are dynamically changing constantly and we need our side effects to display in a reliable way
+    // this includes wether buttons are disabled or error alerts are displayed
     useEffect(() => {
         const hasPendingFiles: boolean = fileItems.some(
             (item) => item.status === 'PENDING'
         )
         setHasPendingFiles(hasPendingFiles)
 
-        const hasValidDocumentsForSubmission: boolean =
-            fileItems.length > 0 &&
-            !hasPendingFiles &&
-            fileItems.every((item) => item.status === 'UPLOAD_COMPLETE')
+        const hasValidDocumentsForSubmission: boolean = fileItems.every(
+            (item) => item.status === 'UPLOAD_COMPLETE'
+        )
         setHasValidFiles(hasValidDocumentsForSubmission)
     }, [fileItems])
 
@@ -254,9 +256,7 @@ export const Documents = ({
                 <fieldset className="usa-fieldset">
                     <legend className="srOnly">Documents</legend>
                     {shouldValidate && !hasValidFiles && (
-                        <PageLevelErrorAlert
-                            hasNoDocuments={fileItems.length === 0}
-                        />
+                        <PageLevelErrorAlert />
                     )}
                     {formAlert && formAlert}
                     <FileUpload
@@ -305,18 +305,10 @@ export const Documents = ({
                         type="button"
                         unstyled
                         onClick={async (e) => {
-                            // do not need to validate empty file list or force user to add at least one file for Save as Draft
-                            if (fileItems.length === 0) {
-                                await handleFormSubmit({
-                                    shouldValidate: false,
-                                    redirectPath: '/dashboard',
-                                })(e)
-                            } else {
-                                await handleFormSubmit({
-                                    shouldValidate: true,
-                                    redirectPath: '/dashboard',
-                                })(e)
-                            }
+                            await handleFormSubmit({
+                                shouldValidate: true,
+                                redirectPath: '/dashboard',
+                            })(e)
                         }}
                     >
                         Save as draft
@@ -338,7 +330,9 @@ export const Documents = ({
                             type="submit"
                             disabled={
                                 hasPendingFiles ||
-                                (shouldValidate && !hasValidFiles)
+                                (shouldValidate &&
+                                    fileItems.length > 0 &&
+                                    !hasValidFiles)
                             }
                         >
                             Continue

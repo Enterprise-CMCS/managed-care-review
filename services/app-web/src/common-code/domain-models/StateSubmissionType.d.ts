@@ -23,7 +23,7 @@ export type StateSubmissionType = {
     submissionType: SubmissionType
     createdAt: Date
     updatedAt: DateTime
-    documents: SubmissionDocument[]
+    documents?: SubmissionDocument[]
     contractType: ContractType
     contractDocuments: SubmissionDocument[]
     contractDateStart: Date
