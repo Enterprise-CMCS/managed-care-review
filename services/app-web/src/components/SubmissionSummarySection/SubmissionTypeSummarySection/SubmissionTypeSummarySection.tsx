@@ -1,6 +1,6 @@
 import { Grid } from '@trussworks/react-uswds'
 import dayjs from 'dayjs'
-import styles from '../SubmissionSummary.module.scss'
+import styles from '../SubmissionSummarySection.module.scss'
 import { SubmissionTypeRecord } from '../../../constants/submissions'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { DataDetail } from '../../../components/DataDetail'
@@ -18,7 +18,7 @@ export const SubmissionTypeSummarySection = ({
     navigateTo,
 }: SubmissionTypeSummarySectionProps): React.ReactElement => {
     return (
-        <section id="submissionTypeSection" className={styles.reviewSection}>
+        <section id="submissionTypeSection" className={styles.summarySection}>
             <SectionHeader header={submission.name} navigateTo={navigateTo} />
 
             <dl>

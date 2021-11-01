@@ -1,6 +1,6 @@
 import { screen } from '@testing-library/react'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
-import { ContactsSummarySection } from './'
+import { ContactsSummarySection } from '.'
 import {
     mockContractAndRatesDraft,
     mockStateSubmission,

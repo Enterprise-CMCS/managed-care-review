@@ -16,7 +16,7 @@ import {
     RateDetailsSummarySection,
     ContactsSummarySection,
     DocumentsSummarySection,
-} from '../../SubmissionSummary'
+} from '../../../components/SubmissionSummarySection'
 import {
     DraftSubmission,
     useSubmitDraftSubmissionMutation,

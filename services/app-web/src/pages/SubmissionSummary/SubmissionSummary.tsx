@@ -11,7 +11,7 @@ import {
     RateDetailsSummarySection,
     ContactsSummarySection,
     DocumentsSummarySection,
-} from './'
+} from '../../components/SubmissionSummarySection'
 import { GenericError } from '../Errors/GenericError'
 import { usePage } from '../../contexts/PageContext'
 import { useAuth } from '../../contexts/AuthContext'

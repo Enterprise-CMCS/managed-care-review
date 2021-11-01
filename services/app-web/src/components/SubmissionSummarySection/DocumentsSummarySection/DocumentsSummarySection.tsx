@@ -58,7 +58,7 @@ export const DocumentsSummarySection = ({
     }`
 
     return (
-        <section id="documents" className={styles.reviewSection}>
+        <section id="documents" className={styles.summarySection}>
             <SectionHeader header="Documents" navigateTo={navigateTo} />
             <span className="text-bold">{documentsSummary}</span>
             <ul>

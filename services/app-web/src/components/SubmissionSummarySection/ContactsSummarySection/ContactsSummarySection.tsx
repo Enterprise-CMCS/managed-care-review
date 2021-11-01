@@ -1,6 +1,6 @@
 import { Grid, GridContainer } from '@trussworks/react-uswds'
-import styles from '../SubmissionSummary.module.scss'
-import { SectionHeader } from '../../../components/SectionHeader'
+import styles from '../SubmissionSummarySection.module.scss'
+import { SectionHeader } from '../../SectionHeader'
 import {
     ActuaryFirmsRecord,
     ActuaryCommunicationRecord,
@@ -17,7 +17,7 @@ export const ContactsSummarySection = ({
     navigateTo,
 }: ContactsSummarySectionProps): React.ReactElement => {
     return (
-        <section id="stateContacts" className={styles.reviewSection}>
+        <section id="stateContacts" className={styles.summarySection}>
             <dl>
                 <SectionHeader
                     header="State contacts"
@@ -51,7 +51,7 @@ export const ContactsSummarySection = ({
             {submission.submissionType === 'CONTRACT_AND_RATES' && (
                 <>
                     <dl>
-                        <div className={styles.reviewSectionSubHeader}>
+                        <div className={styles.summarySectionSubHeader}>
                             <h2>Actuary contacts</h2>
                         </div>
                         <GridContainer>

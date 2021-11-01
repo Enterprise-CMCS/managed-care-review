@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import styles from '../SubmissionSummary.module.scss'
+import styles from '../SubmissionSummarySection.module.scss'
 import {
     AmendableItemsRecord,
     ContractTypeRecord,
@@ -79,7 +79,7 @@ export const ContractDetailsSummarySection = ({
     }
 
     return (
-        <section id="contractDetailsSection" className={styles.reviewSection}>
+        <section id="contractDetailsSection" className={styles.summarySection}>
             <SectionHeader header="Contract details" navigateTo={navigateTo} />
             <dl>
                 <DoubleColumnRow

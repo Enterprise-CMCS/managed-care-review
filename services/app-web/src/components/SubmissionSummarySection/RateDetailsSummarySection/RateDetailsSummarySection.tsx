@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import styles from '../SubmissionSummary.module.scss'
+import styles from '../SubmissionSummarySection.module.scss'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { DataDetail } from '../../../components/DataDetail'
 import { DoubleColumnRow } from '../../../components/DoubleColumnRow'
@@ -15,7 +15,7 @@ export const RateDetailsSummarySection = ({
     navigateTo,
 }: RateDetailsSummarySectionProps): React.ReactElement => {
     return (
-        <section id="rateDetails" className={styles.reviewSection}>
+        <section id="rateDetails" className={styles.summarySection}>
             <dl>
                 <SectionHeader header="Rate details" navigateTo={navigateTo} />
                 <DoubleColumnRow
