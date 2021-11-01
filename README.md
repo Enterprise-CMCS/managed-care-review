@@ -23,7 +23,8 @@ Additional sources for documentation:
 ### Local Tooling
 
 ```bash
-brew install direnv pre-commit shellcheck
+brew tap yoheimuta/protolint
+brew install direnv pre-commit shellcheck protolint
 pre-commit install --install-hooks
 ```
 
