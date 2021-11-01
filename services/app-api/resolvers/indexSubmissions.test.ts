@@ -17,7 +17,7 @@ describe('indexDraftSubmission', () => {
 
         // First, create a new submission
         const draftSub = await createTestDraftSubmission(server)
-        const stateSub = await createTestStateSubmission(server) // TODO Make this state again
+        const stateSub = await createTestStateSubmission(server)
 
         // then see if we can get that same submission back from the index
         const result = await server.executeOperation({
@@ -60,5 +60,43 @@ describe('indexDraftSubmission', () => {
 
         expect(draftResult.__typename).toBe('DraftSubmission')
         expect(stateResult.__typename).toBe('StateSubmission')
+    })
+
+    it('returns no submissions for a different states user', async () => {
+        const server = await constructTestPostgresServer()
+
+        // First, create a new submission
+        const draftSub = await createTestDraftSubmission(server)
+        const stateSub = await createTestStateSubmission(server)
+
+        const otherUserServer = await constructTestPostgresServer({
+            context: {
+                user: {
+                    name: 'Aang',
+                    state_code: 'VA',
+                    role: 'STATE_USER',
+                    email: 'aang@mn.gov',
+                },
+            },
+        })
+
+        // then see if we can get that same submission back from the index
+        const result = await otherUserServer.executeOperation({
+            query: INDEX_SUBMISSIONS,
+        })
+
+        expect(result.errors).toBeUndefined()
+
+        const submissionsIndex = result.data?.indexSubmissions
+
+        // Since we don't wipe the DB between tests, here we filter out all
+        // the extraneous submissions and grab the two we started with.
+
+        const theseSubmissions: Submission[] = submissionsIndex.edges
+            .map((edge: SubmissionEdge) => edge.node)
+            .filter((sub: Submission) =>
+                [draftSub.id, stateSub.id].includes(sub.id)
+            )
+        expect(theseSubmissions.length).toBe(0)
     })
 })

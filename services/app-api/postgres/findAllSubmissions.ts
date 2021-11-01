@@ -12,9 +12,14 @@ export async function findAllSubmissions(
     client: PrismaClient,
     stateCode: string
 ): Promise<(DraftSubmissionType | StateSubmissionType)[] | StoreError> {
-    const result = await client.stateSubmission.findMany()
+    const result = await client.stateSubmission.findMany({
+        where: {
+            stateCode: {
+                equals: stateCode,
+            },
+        },
+    })
 
-    // TODO: test and scope by state.
     const drafts: (DraftSubmissionType | StateSubmissionType)[] = []
     const errors: Error[] = []
     result.forEach((dbDraft) => {

@@ -51,11 +51,10 @@ export async function insertDraftSubmission(
     const buffer = Buffer.from(protobuf)
 
     try {
-        const result = await client.stateSubmission.create({
+        await client.stateSubmission.create({
             data: {
                 id: draft.id,
                 stateCode: draft.stateCode,
-                // createAt: draft.createdAt,
                 submissionFormProto: buffer,
             },
         })
