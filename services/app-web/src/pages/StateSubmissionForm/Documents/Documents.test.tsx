@@ -62,7 +62,7 @@ describe('Documents', () => {
             }
         )
 
-        const input = screen.getByLabelText('Upload documents')
+        const input = screen.getByLabelText('Upload supporting documents')
         expect(input).toBeInTheDocument()
         userEvent.upload(input, [TEST_DOC_FILE])
 
@@ -83,7 +83,7 @@ describe('Documents', () => {
             }
         )
 
-        const input = screen.getByLabelText('Upload documents')
+        const input = screen.getByLabelText('Upload supporting documents')
         expect(input).toBeInTheDocument()
         expect(input).toHaveAttribute(
             'accept',
@@ -134,7 +134,7 @@ describe('Documents', () => {
         })
     })
 
-    it('show correct hint text for contract only submission', () => {
+    it('show correct hint text', () => {
         const mockUpdateDraftFn = jest.fn()
         renderWithProviders(
             <Documents
@@ -151,28 +151,7 @@ describe('Documents', () => {
             }
         )
         expect(screen.queryByTestId('documents-hint')).toHaveTextContent(
-            'Must include: An executed contract'
-        )
-    })
-
-    it('show correct hint text for contract and rates submission', () => {
-        const mockUpdateDraftFn = jest.fn()
-        renderWithProviders(
-            <Documents
-                draftSubmission={{
-                    ...mockDraft(),
-                    submissionType: 'CONTRACT_AND_RATES',
-                }}
-                updateDraft={mockUpdateDraftFn}
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
-        expect(screen.queryByTestId('documents-hint')).toHaveTextContent(
-            'Must include: An executed contract and a signed rate certification'
+            'Upload and categorize any additional supporting documents'
         )
     })
 
@@ -224,7 +203,7 @@ describe('Documents', () => {
                 },
             }
         )
-        const input = screen.getByLabelText('Upload documents')
+        const input = screen.getByLabelText('Upload supporting documents')
         userEvent.upload(input, [TEST_DOC_FILE])
         userEvent.upload(input, [TEST_PDF_FILE])
         userEvent.upload(input, [TEST_DOC_FILE])
@@ -251,7 +230,7 @@ describe('Documents', () => {
                 },
             }
         )
-        const input = screen.getByLabelText('Upload documents')
+        const input = screen.getByLabelText('Upload supporting documents')
 
         userEvent.upload(input, [TEST_XLS_FILE])
 
@@ -304,7 +283,7 @@ describe('Documents', () => {
                 },
             }
         )
-        const input = screen.getByLabelText('Upload documents')
+        const input = screen.getByLabelText('Upload supporting documents')
         userEvent.upload(input, [TEST_DOC_FILE])
         userEvent.upload(input, [TEST_PDF_FILE])
         userEvent.upload(input, [TEST_DOC_FILE])
@@ -342,7 +321,7 @@ describe('Documents', () => {
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
-            const input = screen.getByLabelText('Upload documents')
+            const input = screen.getByLabelText('Upload supporting documents')
 
             userEvent.upload(input, [TEST_DOC_FILE])
 
@@ -371,7 +350,7 @@ describe('Documents', () => {
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
-            const input = screen.getByLabelText('Upload documents')
+            const input = screen.getByLabelText('Upload supporting documents')
             const targetEl = screen.getByTestId('file-input-droptarget')
 
             userEvent.upload(input, [TEST_DOC_FILE])
@@ -401,7 +380,7 @@ describe('Documents', () => {
                     },
                 }
             )
-            const input = screen.getByLabelText('Upload documents')
+            const input = screen.getByLabelText('Upload supporting documents')
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
             })
@@ -472,7 +451,7 @@ describe('Documents', () => {
                 name: 'Continue',
             })
 
-            const input = screen.getByLabelText('Upload documents')
+            const input = screen.getByLabelText('Upload supporting documents')
             const targetEl = screen.getByTestId('file-input-droptarget')
 
             userEvent.upload(input, [TEST_DOC_FILE])
@@ -515,7 +494,7 @@ describe('Documents', () => {
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
             })
-            const input = screen.getByLabelText('Upload documents')
+            const input = screen.getByLabelText('Upload supporting documents')
 
             userEvent.upload(input, [TEST_DOC_FILE])
 
@@ -544,7 +523,7 @@ describe('Documents', () => {
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
             })
-            const input = screen.getByLabelText('Upload documents')
+            const input = screen.getByLabelText('Upload supporting documents')
             const targetEl = screen.getByTestId('file-input-droptarget')
 
             userEvent.upload(input, [TEST_DOC_FILE])
@@ -599,7 +578,7 @@ describe('Documents', () => {
                     },
                 }
             )
-            const input = screen.getByLabelText('Upload documents')
+            const input = screen.getByLabelText('Upload supporting documents')
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
             })
@@ -643,7 +622,7 @@ describe('Back button', () => {
         const backButton = screen.getByRole('button', {
             name: 'Back',
         })
-        const input = screen.getByLabelText('Upload documents')
+        const input = screen.getByLabelText('Upload supporting documents')
 
         userEvent.upload(input, [TEST_DOC_FILE])
 
@@ -672,7 +651,7 @@ describe('Back button', () => {
         const backButton = screen.getByRole('button', {
             name: 'Back',
         })
-        const input = screen.getByLabelText('Upload documents')
+        const input = screen.getByLabelText('Upload supporting documents')
         const targetEl = screen.getByTestId('file-input-droptarget')
 
         userEvent.upload(input, [TEST_DOC_FILE])
@@ -728,7 +707,7 @@ describe('Back button', () => {
                 },
             }
         )
-        const input = screen.getByLabelText('Upload documents')
+        const input = screen.getByLabelText('Upload supporting documents')
         const backButton = screen.getByRole('button', {
             name: 'Back',
         })

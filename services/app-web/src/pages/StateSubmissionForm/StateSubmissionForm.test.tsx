@@ -182,7 +182,9 @@ describe('StateSubmissionForm', () => {
             )
 
             await waitFor(() => {
-                expect(screen.getByText('Upload documents')).toBeInTheDocument()
+                expect(
+                    screen.getByText('Upload supporting documents')
+                ).toBeInTheDocument()
                 expect(screen.getByTestId('file-input')).toBeInTheDocument()
             })
         })
