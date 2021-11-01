@@ -1,6 +1,5 @@
 {
     "hooks": {
-        "pre-commit": "lerna run precommit --concurrency 2 --stream",
-        "pre-push": "lerna run lint"
+        "pre-commit": "lerna run precommit --concurrency 3 --stream"
     }
 }
