@@ -41,7 +41,7 @@
         "clean": "rm -rf node_modules && yarn cache clean",
         "format": "prettier --write src/**/*.ts{,x}",
         "lint": "tsc --noEmit && eslint src/",
-        "precommit": "lint-staged",
+        "precommit": "tsc --noEmit && lint-staged",
         "test:a11y": "pa11y-ci",
         "test:once": "react-scripts test --watchAll=false",
         "test:update": "react-scripts test -u",
