@@ -22,10 +22,12 @@ Additional sources for documentation:
 
 ### Local Tooling
 
+We use a collection of tools to manage this monorepo. We use [Husky](https://github.com/typicode/husky) to run our pre-commit scripts. We use [Lerna](https://github.com/lerna/lerna) to manage commands across the entire monorepo; for example, `husky` uses the command `lerna run precommit` to run the `precommit` script indicated in each `package.json`. To get the tools needed for local development, you can run:
+
 ```bash
 brew tap yoheimuta/protolint
-brew install direnv pre-commit shellcheck protolint
-pre-commit install --install-hooks
+brew install direnv shellcheck protolint
+yarn husky install
 ```
 
 We use [direnv](https://direnv.net/) to automatically set required environment variables when you enter this directory or its children. This will be used when running the application locally, or when using tools like the `aws` or `serverless` CLIs locally.
