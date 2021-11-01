@@ -110,16 +110,11 @@ const createAndUpdateTestDraftSubmission = async (
         programID: 'cnet',
         submissionType: 'CONTRACT_AND_RATES' as const,
         submissionDescription: 'An updated submission',
-        documents: [
-            {
-                name: 'myfile.pdf',
-                s3URL: 'fakeS3URL',
-            },
-        ],
+        documents: [],
         contractDocuments: [
             {
                 name: 'contractDocument.pdf',
-                s3URL: 'fakeS3URL002',
+                s3URL: 'fakeS3URL',
             },
         ],
         stateContacts: [

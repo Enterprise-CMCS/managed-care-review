@@ -73,7 +73,7 @@ function submit(
     ) {
         return {
             code: 'INCOMPLETE',
-            message: 'submissions must have documents',
+            message: 'submissions must have valid documents',
         }
     } else
         return {
