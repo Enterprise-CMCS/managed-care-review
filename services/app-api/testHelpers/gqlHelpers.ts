@@ -1,6 +1,5 @@
 import { ApolloServer } from 'apollo-server-lambda'
 
-import { getTestStore } from '../testHelpers/storeHelpers'
 import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
 import FETCH_DRAFT_SUBMISSION from '../../app-graphql/src/queries/fetchDraftSubmission.graphql'
 import UPDATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/updateDraftSubmission.graphql'
@@ -18,11 +17,6 @@ import {
 } from '../gen/gqlServer'
 import { NewPrismaClient } from '../lib/prisma'
 import { NewPostgresStore } from '../postgres/postgresStore'
-import { Result, ok, err } from 'neverthrow'
-
-const store = getTestStore()
-
-const testResolvers = configureResolvers(store)
 
 const defaultContext = (): Context => {
     return {
@@ -53,15 +47,6 @@ const constructTestPostgresServer = async (
         context,
     })
 }
-
-const constructTestServer = (
-    { context } = { context: defaultContext() }
-): ApolloServer =>
-    new ApolloServer({
-        typeDefs,
-        resolvers: testResolvers,
-        context,
-    })
 
 const createTestDraftSubmission = async (
     server: ApolloServer
@@ -258,7 +243,6 @@ const fetchTestStateSubmissionById = async (
 }
 
 export {
-    constructTestServer,
     constructTestPostgresServer,
     createTestDraftSubmission,
     createTestStateSubmission,

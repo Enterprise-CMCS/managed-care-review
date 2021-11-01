@@ -27,8 +27,6 @@ export async function insertDraftSubmission(
     // TODO, calculate this.
     const stateNumber = 4
 
-    console.log('INSERTING', args.submissionType)
-
     // construct a new Draft Submission
     const draft: DraftSubmissionType = {
         id: uuidv4(),

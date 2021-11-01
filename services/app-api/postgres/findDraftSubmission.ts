@@ -18,9 +18,7 @@ export async function findDraftSubmission(
         },
     })
 
-    console.log('FIND RESULT!', findResult)
     if (!findResult) {
-        console.log('NO RESULT BACK')
         return undefined
     }
 

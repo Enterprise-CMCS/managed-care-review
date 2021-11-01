@@ -14,9 +14,7 @@ export async function findAllSubmissions(
 ): Promise<(DraftSubmissionType | StateSubmissionType)[] | StoreError> {
     const result = await client.stateSubmission.findMany()
 
-    console.log('findMANY result', result)
     // TODO: test and scope by state.
-
     const drafts: (DraftSubmissionType | StateSubmissionType)[] = []
     const errors: Error[] = []
     result.forEach((dbDraft) => {

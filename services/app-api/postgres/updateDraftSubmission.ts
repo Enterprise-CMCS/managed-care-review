@@ -20,8 +20,6 @@ export async function updateDraftSubmission(
     const proto = toProtoBuffer(draftSubmission)
     const buffer = Buffer.from(proto)
 
-    console.log('UPDATING', draftSubmission.submissionType)
-
     let updateResult = undefined
     try {
         updateResult = await client.stateSubmission.update({
@@ -60,7 +58,6 @@ export async function updateDraftSubmission(
             message: 'The updated submission is not a DraftSubmission',
         }
     }
-    console.log('UPDATEd', decodeUpdated)
 
     return decodeUpdated
 }
