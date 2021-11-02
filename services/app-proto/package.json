@@ -1,5 +1,6 @@
 {
     "name": "app-proto",
+    "private": "true",
     "version": "1.0.0",
     "description": "app-proto Typescript definitions and helpers",
     "scripts": {
