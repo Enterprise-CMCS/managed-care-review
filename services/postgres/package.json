@@ -1,5 +1,6 @@
 {
     "name": "postgres",
+    "private": "true",
     "description": "",
     "version": "1.0.0",
     "main": "index.js",

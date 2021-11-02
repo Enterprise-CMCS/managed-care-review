@@ -1,5 +1,6 @@
 {
     "name": "stream-functions",
+    "private": "true",
     "description": "",
     "version": "1.0.0",
     "dependencies": {},

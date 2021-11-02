@@ -1,5 +1,6 @@
 {
     "name": "app-graphql",
+    "private": "true",
     "version": "1.0.0",
     "description": "app graphql definitions",
     "license": "MIT",
