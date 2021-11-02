@@ -13,7 +13,7 @@
         "test": "tests"
     },
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "format": "learn run format",
         "lint": "lerna run lint --parallel",
         "cypress:open": "cypress open --env AUTH_MODE=LOCAL",
         "cypress:run": "cypress run --env AUTH_MODE=LOCAL",
