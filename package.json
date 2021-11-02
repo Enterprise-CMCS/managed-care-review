@@ -1,5 +1,5 @@
 {
-    "name": "guide-wire",
+    "name": "managed-care-review",
     "type": "module",
     "version": "1.0.0",
     "description": "",
@@ -26,14 +26,14 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/CMSgov/guide-wire.git"
+        "url": "git+https://github.com/CMSgov/managed-care-review.git"
     },
     "author": "",
     "license": "CC0-1.0",
     "bugs": {
-        "url": "https://github.com/CMSgov/guide-wire/issues"
+        "url": "https://github.com/CMSgov/managed-care-review/issues"
     },
-    "homepage": "https://github.com/CMSgov/guide-wire#readme",
+    "homepage": "https://github.com/CMSgov/managed-care-review#readme",
     "jest": {
         "testPathIgnorePatterns": [
             "src/pages/Auth/Signup",
