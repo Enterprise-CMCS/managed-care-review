@@ -19,15 +19,9 @@ export const DocumentsSummarySection = ({
 }: DocumentsSummarySectionProps): React.ReactElement => {
     const { getURL, getKey } = useS3()
     useEffect(() => {
-        const mergedDocuments = submission.rateDocuments
-            ? submission.documents.concat(
-                  submission.contractDocuments,
-                  submission.rateDocuments
-              )
-            : submission.documents.concat(submission.contractDocuments)
         const refreshDocuments = async () => {
-            const newDocs = await Promise.all(
-                mergedDocuments.map(async (doc) => {
+            const newDocuments = await Promise.all(
+                submission.documents.map(async (doc) => {
                     const key = getKey(doc.s3URL)
                     if (!key)
                         return {
@@ -45,7 +39,7 @@ export const DocumentsSummarySection = ({
                 console.log(err)
                 return []
             })
-            setRefreshedDocs(newDocs)
+            setRefreshedDocs(newDocuments)
         }
 
         void refreshDocuments()
