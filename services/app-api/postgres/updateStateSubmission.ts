@@ -10,6 +10,7 @@ import {
     toDomain,
     toProtoBuffer,
 } from '../../app-web/src/common-code/proto/stateSubmission'
+import { updateSubmissionWrapper } from './updateDraftSubmission'
 
 export async function updateStateSubmission(
     client: PrismaClient,
@@ -20,25 +21,17 @@ export async function updateStateSubmission(
     const proto = toProtoBuffer(stateSubmission)
     const buffer = Buffer.from(proto)
 
-    let updateResult = undefined
-    try {
-        updateResult = await client.stateSubmission.update({
-            where: {
-                id: stateSubmission.id,
-            },
-            data: {
-                submissionFormProto: buffer,
-            },
-        })
-    } catch (e) {
-        return {
-            code: 'UNEXPECTED_EXCEPTION',
-            message:
-                "still haven't figured out what kinds of errors we can get here",
-        }
+    const updateResult = await updateSubmissionWrapper(
+        client,
+        stateSubmission.id,
+        buffer
+    )
+
+    if (isStoreError(updateResult)) {
+        return updateResult
     }
 
-    const decodeUpdated = toDomain(updateResult.submissionFormProto)
+    const decodeUpdated = toDomain(updateResult)
 
     if (decodeUpdated instanceof Error) {
         console.log(

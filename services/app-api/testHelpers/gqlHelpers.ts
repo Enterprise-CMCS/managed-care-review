@@ -17,6 +17,7 @@ import {
 } from '../gen/gqlServer'
 import { NewPrismaClient } from '../lib/prisma'
 import { NewPostgresStore } from '../postgres/postgresStore'
+import { PrismaClient } from '@prisma/client'
 
 const defaultContext = (): Context => {
     return {
@@ -29,15 +30,22 @@ const defaultContext = (): Context => {
     }
 }
 
+async function newTestPrismaClient(): Promise<PrismaClient> {
+    const maybeClient = await NewPrismaClient()
+    if (maybeClient.isErr()) {
+        console.log('Error: ', maybeClient.error)
+        throw new Error('failed to configure postgres client for testing')
+    }
+
+    return maybeClient.value
+}
+
 const constructTestPostgresServer = async (
     { context } = { context: defaultContext() }
 ): Promise<ApolloServer> => {
-    const prismaClient = await NewPrismaClient()
-    if (prismaClient.isErr()) {
-        console.log('Error: ', prismaClient)
-        throw new Error('failed to configure postgres client for testing')
-    }
-    const postgresStore = NewPostgresStore(prismaClient.value)
+    const prismaClient = await newTestPrismaClient()
+
+    const postgresStore = NewPostgresStore(prismaClient)
 
     const postgresResolvers = configureResolvers(postgresStore)
 
@@ -243,6 +251,7 @@ const fetchTestStateSubmissionById = async (
 }
 
 export {
+    newTestPrismaClient,
     constructTestPostgresServer,
     createTestDraftSubmission,
     createTestStateSubmission,

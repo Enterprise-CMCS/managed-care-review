@@ -18,8 +18,17 @@ model TestUser {
     name      String?
 }
 
+// The StateSubmission Form Data
 model StateSubmission {
     id  String @id
+    state  State  @relation(fields: [stateCode], references: [stateCode])
     stateCode String
     submissionFormProto Bytes
+}
+
+model State {
+    stateCode String @id
+    name String
+    latestStateSubmissionNumber Int @default(0)
+    stateSubmissions StateSubmission[]
 }

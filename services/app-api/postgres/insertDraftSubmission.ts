@@ -5,13 +5,12 @@ import { Buffer } from 'buffer'
 import {
     DraftSubmissionType,
     SubmissionType,
-    isDraftSubmission,
 } from '../../app-web/src/common-code/domain-models'
 
 import { toProtoBuffer } from '../../app-web/src/common-code/proto/stateSubmission'
 
 import { StoreError, isStoreError } from '../store/storeError'
-import { PrismaClientInitializationError } from '@prisma/client/runtime'
+import { convertPrismaErrorToStoreError } from './storeError'
 
 export type InsertDraftSubmissionArgsType = {
     stateCode: string
@@ -20,12 +19,45 @@ export type InsertDraftSubmissionArgsType = {
     submissionDescription: string
 }
 
+// By using Prisma's "increment" syntax here, we ensure that we are atomically increasing
+// the state number every time we call this function.
+async function incrementAndGetStateNumber(
+    client: PrismaClient,
+    stateCode: string
+): Promise<number | StoreError> {
+    try {
+        const stateNumberResult = await client.state.update({
+            data: {
+                latestStateSubmissionNumber: {
+                    increment: 1,
+                },
+            },
+            where: {
+                stateCode: stateCode,
+            },
+        })
+
+        return stateNumberResult.latestStateSubmissionNumber
+    } catch (e) {
+        return convertPrismaErrorToStoreError(e)
+    }
+}
+
 export async function insertDraftSubmission(
     client: PrismaClient,
     args: InsertDraftSubmissionArgsType
 ): Promise<DraftSubmissionType | StoreError> {
-    // TODO, calculate this.
-    const stateNumber = 4
+    const stateNumberResult = await incrementAndGetStateNumber(
+        client,
+        args.stateCode
+    )
+
+    if (isStoreError(stateNumberResult)) {
+        console.log('Error: Getting New State Number', stateNumberResult)
+        return stateNumberResult
+    }
+
+    const stateNumber: number = stateNumberResult
 
     // construct a new Draft Submission
     const draft: DraftSubmissionType = {
@@ -58,21 +90,10 @@ export async function insertDraftSubmission(
                 submissionFormProto: buffer,
             },
         })
-    } catch (e) {
-        console.log('ERROR: talking to the database: ', e.name, e)
+    } catch (e: unknown) {
+        console.log('ERROR: inserting into to the database: ', e)
 
-        if (e instanceof PrismaClientInitializationError) {
-            console.log('CONNECTION ERROR', e.message, e.errorCode)
-            return {
-                code: 'CONNECTION_ERROR',
-                message: e.message,
-            }
-        }
-
-        return {
-            code: 'UNEXPECTED_EXCEPTION',
-            message: 'unknown error',
-        }
+        return convertPrismaErrorToStoreError(e)
     }
 
     return draft

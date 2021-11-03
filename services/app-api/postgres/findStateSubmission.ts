@@ -7,19 +7,20 @@ import {
     isStateSubmission,
 } from '../../app-web/src/common-code/domain-models'
 import { toDomain } from '../../app-web/src/common-code/proto/stateSubmission'
+import { findUniqueSubmissionWrapper } from './findDraftSubmission'
 
 export async function findStateSubmission(
     client: PrismaClient,
     id: string
 ): Promise<StateSubmissionType | undefined | StoreError> {
-    const findResult = await client.stateSubmission.findUnique({
-        where: {
-            id: id,
-        },
-    })
+    const findResult = await findUniqueSubmissionWrapper(client, id)
 
-    if (!findResult) {
-        return undefined
+    if (isStoreError(findResult)) {
+        return findResult
+    }
+
+    if (findResult === undefined) {
+        return findResult
     }
 
     const decodeResult = toDomain(findResult.submissionFormProto)

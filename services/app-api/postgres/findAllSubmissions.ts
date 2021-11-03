@@ -1,24 +1,42 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, StateSubmission } from '@prisma/client'
 
-import { StoreError } from '../store/storeError'
+import { isStoreError, StoreError } from '../store/storeError'
 
 import {
     DraftSubmissionType,
     StateSubmissionType,
 } from '../../app-web/src/common-code/domain-models'
 import { toDomain } from '../../app-web/src/common-code/proto/stateSubmission'
+import { convertPrismaErrorToStoreError } from './storeError'
+
+async function findAllSubmissionWrapper(
+    client: PrismaClient,
+    stateCode: string
+): Promise<StateSubmission[] | StoreError> {
+    try {
+        const result = await client.stateSubmission.findMany({
+            where: {
+                stateCode: {
+                    equals: stateCode,
+                },
+            },
+        })
+
+        return result
+    } catch (e: unknown) {
+        return convertPrismaErrorToStoreError(e)
+    }
+}
 
 export async function findAllSubmissions(
     client: PrismaClient,
     stateCode: string
 ): Promise<(DraftSubmissionType | StateSubmissionType)[] | StoreError> {
-    const result = await client.stateSubmission.findMany({
-        where: {
-            stateCode: {
-                equals: stateCode,
-            },
-        },
-    })
+    const result = await findAllSubmissionWrapper(client, stateCode)
+
+    if (isStoreError(result)) {
+        return result
+    }
 
     const drafts: (DraftSubmissionType | StateSubmissionType)[] = []
     const errors: Error[] = []
