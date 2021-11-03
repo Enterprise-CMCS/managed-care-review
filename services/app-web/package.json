@@ -54,9 +54,6 @@
             "prettier --write src/**/*.ts{,x}"
         ]
     },
-    "resolutions": {
-        "@storybook/react/babel-loader": "8.1.0"
-    },
     "jest": {
         "coveragePathIgnorePatterns": [
             "src/pages/Auth/Signup",
