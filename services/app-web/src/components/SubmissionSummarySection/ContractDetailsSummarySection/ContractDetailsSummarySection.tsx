@@ -56,7 +56,7 @@ export const ContractDetailsSummarySection = ({
     const { getURL, getKey } = useS3()
     useEffect(() => {
         const refreshDocuments = async () => {
-            const newContractDocs = await Promise.all(
+            const newDocuments = await Promise.all(
                 submission.contractDocuments.map(async (doc) => {
                     const key = getKey(doc.s3URL)
                     if (!key)
@@ -75,7 +75,7 @@ export const ContractDetailsSummarySection = ({
                 console.log(err)
                 return []
             })
-            setRefreshedDocs(newContractDocs)
+            setRefreshedDocs(newDocuments)
         }
 
         void refreshDocuments()
