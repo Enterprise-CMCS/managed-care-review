@@ -80,7 +80,7 @@ async function getSecretValue(): Promise<Result<Secret, Error>> {
     if (!secret.username || !secret.password) {
         return err(
             new Error(
-                'Could not retreive postgres credentials from secrets manager'
+                'Could not retrieve postgres credentials from secrets manager'
             )
         )
     }
