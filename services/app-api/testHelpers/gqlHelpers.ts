@@ -30,7 +30,7 @@ const defaultContext = (): Context => {
     }
 }
 
-async function newTestPrismaClient(): Promise<PrismaClient> {
+async function configurePrismaClient(): Promise<PrismaClient> {
     const maybeClient = await NewPrismaClient()
     if (maybeClient.isErr()) {
         console.log('Error: ', maybeClient.error)
@@ -40,10 +40,16 @@ async function newTestPrismaClient(): Promise<PrismaClient> {
     return maybeClient.value
 }
 
+const sharedClientPromise = configurePrismaClient()
+
+async function sharedTestPrismaClient(): Promise<PrismaClient> {
+    return await sharedClientPromise
+}
+
 const constructTestPostgresServer = async (
     { context } = { context: defaultContext() }
 ): Promise<ApolloServer> => {
-    const prismaClient = await newTestPrismaClient()
+    const prismaClient = await sharedTestPrismaClient()
 
     const postgresStore = NewPostgresStore(prismaClient)
 
@@ -251,7 +257,7 @@ const fetchTestStateSubmissionById = async (
 }
 
 export {
-    newTestPrismaClient,
+    sharedTestPrismaClient,
     constructTestPostgresServer,
     createTestDraftSubmission,
     createTestStateSubmission,

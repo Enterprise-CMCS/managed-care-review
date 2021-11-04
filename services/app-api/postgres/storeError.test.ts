@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client'
 import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
 import { toProtoBuffer } from '../../app-web/src/common-code/proto/stateSubmission'
 
-import { newTestPrismaClient } from '../testHelpers/gqlHelpers'
+import { sharedTestPrismaClient } from '../testHelpers/gqlHelpers'
 import { convertPrismaErrorToStoreError } from './storeError'
 
 describe('storeError', () => {
@@ -49,7 +49,7 @@ describe('storeError', () => {
     })
 
     it('errors on double insert', async () => {
-        const client = await newTestPrismaClient()
+        const client = await sharedTestPrismaClient()
 
         const doubledID = uuidv4()
 

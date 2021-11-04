@@ -1,4 +1,4 @@
-import { newTestPrismaClient } from '../testHelpers/gqlHelpers'
+import { sharedTestPrismaClient } from '../testHelpers/gqlHelpers'
 import { insertDraftSubmission } from './insertDraftSubmission'
 import { isStoreError } from '../store'
 
@@ -9,7 +9,7 @@ describe('insertDraftSubmissionPostgres', () => {
         // this test attempts to create a number of drafts concurrently.
         // if any of the state numbers in the resultant drafts are duplicates, we have a bug.
 
-        const client = await newTestPrismaClient()
+        const client = await sharedTestPrismaClient()
 
         const args = {
             stateCode: 'FL',

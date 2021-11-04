@@ -67,7 +67,7 @@ jobs:
       - name: Unit Tests
         env:
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5
-        run: ./dev test --unit
+        run: ./dev test --unit --run-db
 
       - name: publish code coverage
         uses: paambaati/codeclimate-action@v3.0.0
