@@ -111,12 +111,7 @@ const createAndUpdateTestDraftSubmission = async (
         submissionType: 'CONTRACT_AND_RATES' as const,
         submissionDescription: 'An updated submission',
         documents: [],
-        contractDocuments: [
-            {
-                name: 'contractDocument.pdf',
-                s3URL: 'fakeS3URL',
-            },
-        ],
+
         stateContacts: [
             {
                 name: 'test name',
@@ -137,12 +132,24 @@ const createAndUpdateTestDraftSubmission = async (
         contractType: 'BASE' as const,
         contractDateStart: startDate,
         contractDateEnd: endDate,
+        contractDocuments: [
+            {
+                name: 'contractDocument.pdf',
+                s3URL: 'fakeS3URL',
+            },
+        ],
         managedCareEntities: ['MCO'],
         federalAuthorities: ['STATE_PLAN' as const],
         rateType: 'NEW' as const,
         rateDateStart: startDate,
         rateDateEnd: endDate,
         rateDateCertified: dateCertified,
+        rateDocuments: [
+            {
+                name: 'rateDocument.pdf',
+                s3URL: 'fakeS3URL',
+            },
+        ],
         ...partialDraftSubmissionUpdates,
     }
 

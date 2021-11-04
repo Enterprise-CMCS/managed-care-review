@@ -230,12 +230,10 @@ const toProtoBuffer = (
                 ),
             },
         ],
-        documents:
-            domainData.documents &&
-            domainData.documents.map((doc) => ({
-                s3Url: doc.s3URL,
-                name: doc.name,
-            })),
+        documents: domainData.documents.map((doc) => ({
+            s3Url: doc.s3URL,
+            name: doc.name,
+        })),
     }
 
     // turn the above literal into a byte array.

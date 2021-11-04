@@ -10,11 +10,7 @@ describe('submitDraftSubmission', () => {
         const server = constructTestServer()
 
         // setup
-        const draft = await createAndUpdateTestDraftSubmission(server, {
-            // optional fields
-            documents: [],
-            rateDocuments: [],
-        })
+        const draft = await createAndUpdateTestDraftSubmission(server, {})
         const draftID = draft.id
 
         // submit
@@ -28,6 +24,7 @@ describe('submitDraftSubmission', () => {
             },
         })
 
+        console.log(submitResult.errors)
         expect(submitResult.errors).toBeUndefined()
         const createdID =
             submitResult?.data?.submitDraftSubmission.submission.id
@@ -76,6 +73,7 @@ describe('submitDraftSubmission', () => {
         const server = constructTestServer()
 
         const draft = await createAndUpdateTestDraftSubmission(server, {
+            documents: [],
             contractDocuments: [],
         })
         const draftID = draft.id
