@@ -12,7 +12,7 @@ export const SectionHeader = ({
     navigateTo,
 }: SectionHeaderProps): React.ReactElement => {
     return (
-        <div className={styles.reviewSectionHeader}>
+        <div className={styles.summarySectionHeader}>
             <h2>{header}</h2>
             {navigateTo && (
                 <div>

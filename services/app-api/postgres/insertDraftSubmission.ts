@@ -72,6 +72,7 @@ export async function insertDraftSubmission(
         stateCode: args.stateCode,
 
         documents: [],
+        contractDocuments: [],
         stateContacts: [],
         actuaryContacts: [],
         managedCareEntities: [],

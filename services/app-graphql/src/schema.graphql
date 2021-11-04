@@ -241,12 +241,14 @@ type DraftSubmission {
     actuaryCommunicationPreference: ActuaryCommunicationType
     documents: [Document!]!
     contractType: ContractType
+    contractDocuments: [Document!]!
     contractDateStart: Date
     contractDateEnd: Date
     managedCareEntities: [String!]!
     federalAuthorities: [FederalAuthority!]!
     contractAmendmentInfo: ContractAmendmentInfo
     rateType: RateType
+    rateDocuments: [Document!]
     rateDateStart: Date
     rateDateEnd: Date
     rateDateCertified: Date
@@ -270,11 +272,13 @@ type StateSubmission {
     contractAmendmentInfo: ContractAmendmentInfo
     submittedAt: Date!
     contractType: ContractType!
+    contractDocuments: [Document!]!
     contractDateStart: Date!
     contractDateEnd: Date!
     managedCareEntities: [String!]!
     federalAuthorities: [FederalAuthority!]!
     rateType: RateType
+    rateDocuments: [Document!]
     rateDateStart: Date
     rateDateEnd: Date
     rateDateCertified: Date
@@ -292,12 +296,14 @@ input DraftSubmissionUpdates {
     actuaryCommunicationPreference: ActuaryCommunicationType
     documents: [DocumentInput!]!
     contractType: ContractType
+    contractDocuments: [DocumentInput!]!
     contractDateStart: Date
     contractDateEnd: Date
     managedCareEntities: [String!]!
     federalAuthorities: [FederalAuthority!]!
     contractAmendmentInfo: ContractAmendmentInfoInput
     rateType: RateType
+    rateDocuments: [DocumentInput!]
     rateDateStart: Date
     rateDateEnd: Date
     rateDateCertified: Date

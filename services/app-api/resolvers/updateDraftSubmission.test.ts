@@ -29,6 +29,7 @@ describe('updateDraftSubmission', () => {
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 documents: [],
+                contractDocuments: [],
                 managedCareEntities: [],
                 federalAuthorities: [],
                 rateType: 'AMENDMENT',
@@ -49,6 +50,7 @@ describe('updateDraftSubmission', () => {
                 submissionType: 'CONTRACT_ONLY',
                 submissionDescription: 'an updated draft',
                 documents: [],
+                contractDocuments: [],
                 contractType: null,
                 contractDateStart: null,
                 contractDateEnd: null,
@@ -92,6 +94,7 @@ describe('updateDraftSubmission', () => {
                 submissionDescription: 'an old submission',
                 createdAt: new Date(),
                 updatedAt: new Date(),
+                contractDocuments: [],
                 documents: [],
                 managedCareEntities: [],
                 federalAuthorities: [],
@@ -105,6 +108,7 @@ describe('updateDraftSubmission', () => {
                 submissionType: 'CONTRACT_ONLY',
                 submissionDescription: 'an updated draft',
                 documents: [],
+                contractDocuments: [],
                 contractType: null,
                 contractDateStart: null,
                 contractDateEnd: null,
@@ -160,6 +164,7 @@ describe('updateDraftSubmission', () => {
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 documents: [],
+                contractDocuments: [],
                 managedCareEntities: [],
                 federalAuthorities: [],
                 stateContacts: [],
@@ -172,6 +177,7 @@ describe('updateDraftSubmission', () => {
                 submissionType: 'CONTRACT_ONLY',
                 submissionDescription: 'an updated draft',
                 documents: [],
+                contractDocuments: [],
                 contractType: null,
                 contractDateStart: null,
                 contractDateEnd: null,
@@ -225,6 +231,7 @@ describe('updateDraftSubmission', () => {
             submissionDescription: 'An updated submission',
             documents: [],
             contractType: 'BASE',
+            contractDocuments: [],
             contractDateStart: startDate,
             contractDateEnd: endDate,
             managedCareEntities: ['MCO'],
@@ -303,6 +310,12 @@ describe('updateDraftSubmission', () => {
                     s3URL: 'fakeS3URL',
                 },
             ],
+            contractDocuments: [
+                {
+                    name: 'contractDocument.pdf',
+                    s3URL: 'fakeS3URL001',
+                },
+            ],
             contractType: 'BASE',
             contractDateStart: startDate,
             contractDateEnd: endDate,
@@ -349,6 +362,13 @@ describe('updateDraftSubmission', () => {
             },
         ])
 
+        expect(resultDraft1.contractDocuments).toEqual([
+            {
+                name: 'contractDocument.pdf',
+                s3URL: 'fakeS3URL001',
+            },
+        ])
+
         // Update with two more documents
         const updatedDraft2 = {
             programID: 'cnet',
@@ -365,6 +385,16 @@ describe('updateDraftSubmission', () => {
                 },
             ],
             contractType: 'BASE',
+            contractDocuments: [
+                {
+                    name: 'contractDocument2.pdf',
+                    s3URL: 'fakeS3URL002',
+                },
+                {
+                    name: 'contractDocument3.pdf',
+                    s3URL: 'fakeS3URL003',
+                },
+            ],
             contractDateStart: resultDraft1.contractDateStart,
             contractDateEnd: resultDraft1.contractDateEnd,
             managedCareEntities: [],
@@ -404,6 +434,8 @@ describe('updateDraftSubmission', () => {
         })
         const resultDraft2 =
             updateResult2.data?.updateDraftSubmission.draftSubmission
+
+        expect(updateResult2.errors).toBeUndefined()
         expect(resultDraft2.documents.length).toEqual(2)
         expect(resultDraft2.documents[0].name).toEqual('myfile2.pdf')
     })
@@ -437,6 +469,7 @@ describe('updateDraftSubmission', () => {
             actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
             documents: [],
             contractType: 'BASE',
+            contractDocuments: [],
             contractDateStart: null,
             contractDateEnd: null,
             managedCareEntities: [],
@@ -504,6 +537,7 @@ describe('updateDraftSubmission', () => {
             submissionDescription: 'An updated submission',
             documents: [],
             contractType: 'AMENDMENT',
+            contractDocuments: [],
             contractDateStart: startDate,
             managedCareEntities: [],
             federalAuthorities: [],
@@ -561,6 +595,7 @@ describe('updateDraftSubmission', () => {
             submissionDescription: 'An updated submission',
             documents: [],
             contractType: 'AMENDMENT',
+            contractDocuments: [],
             contractDateStart: startDate,
             managedCareEntities: [],
             federalAuthorities: [],
@@ -643,6 +678,7 @@ describe('updateDraftSubmission', () => {
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [],
+            contractDocuments: [],
             managedCareEntities: [],
             federalAuthorities: [],
             stateContacts: [],
@@ -698,6 +734,7 @@ describe('updateDraftSubmission', () => {
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [],
+            contractDocuments: [],
             managedCareEntities: [],
             federalAuthorities: [],
             stateContacts: [],
@@ -753,6 +790,12 @@ describe('updateDraftSubmission', () => {
                     s3URL: 'fakeS3URL',
                 },
             ],
+            contractDocuments: [
+                {
+                    name: 'myContractDocument.pdf',
+                    s3URL: 'fakeS3URL001',
+                },
+            ],
             stateContacts: [
                 {
                     name: 'Test Person',
@@ -804,6 +847,7 @@ describe('updateDraftSubmission', () => {
             managedCareEntities: [],
             federalAuthorities: [],
             documents: [],
+            contractDocuments: [],
             stateContacts: [
                 {
                     name: 'Test Person',
@@ -849,6 +893,7 @@ describe('updateDraftSubmission', () => {
             submissionDescription: 'An updated submission',
             documents: [],
             contractType: 'BASE',
+            contractDocuments: [],
             contractDateStart: startDate,
             contractDateEnd: endDate,
             managedCareEntities: [],
@@ -922,6 +967,7 @@ describe('updateDraftSubmission', () => {
             submissionDescription: 'An updated submission',
             documents: [],
             contractType: 'BASE',
+            contractDocuments: [],
             contractDateStart: startDate,
             contractDateEnd: endDate,
             managedCareEntities: [],
@@ -963,6 +1009,7 @@ describe('updateDraftSubmission', () => {
             submissionDescription: 'An updated submission',
             documents: [],
             contractType: 'BASE',
+            contractDocuments: [],
             contractDateStart: startDate,
             contractDateEnd: endDate,
             managedCareEntities: [],

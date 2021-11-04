@@ -65,6 +65,7 @@ describe('storeError', () => {
             stateCode: 'FL',
 
             documents: [],
+            contractDocuments: [],
             stateContacts: [],
             actuaryContacts: [],
             managedCareEntities: [],

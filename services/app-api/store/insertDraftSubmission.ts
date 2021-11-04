@@ -99,6 +99,8 @@ export async function insertDraftSubmission(
     draft.submissionDescription = args.submissionDescription
     draft.stateCode = args.stateCode
     draft.documents = []
+    draft.contractDocuments = []
+    draft.rateDocuments = []
 
     try {
         const stateNumberResult = await getNextStateNumber(

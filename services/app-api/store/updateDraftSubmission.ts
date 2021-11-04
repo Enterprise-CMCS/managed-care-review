@@ -45,7 +45,8 @@ export async function updateDraftSubmission(
     storeDraft.rateDateCertified = draftSubmission.rateDateCertified
     storeDraft.stateContacts = draftSubmission.stateContacts
     storeDraft.actuaryContacts = draftSubmission.actuaryContacts
-    storeDraft.actuaryCommunicationPreference = draftSubmission.actuaryCommunicationPreference
+    storeDraft.actuaryCommunicationPreference =
+        draftSubmission.actuaryCommunicationPreference
 
     if (draftSubmission.contractAmendmentInfo) {
         const draftInfo = draftSubmission.contractAmendmentInfo
@@ -84,6 +85,22 @@ export async function updateDraftSubmission(
         storeDocument.s3URL = doc.s3URL
         storeDraft.documents.push(storeDocument)
     })
+
+    draftSubmission.contractDocuments.forEach((doc) => {
+        const storeDocument = new DocumentStoreT()
+        storeDocument.name = doc.name
+        storeDocument.s3URL = doc.s3URL
+        storeDraft.contractDocuments.push(storeDocument)
+    })
+
+    if (draftSubmission.rateDocuments) {
+        draftSubmission.rateDocuments.forEach((doc) => {
+            const storeDocument = new DocumentStoreT()
+            storeDocument.name = doc.name
+            storeDocument.s3URL = doc.s3URL
+            storeDraft.rateDocuments.push(storeDocument)
+        })
+    }
 
     try {
         const putResult = await mapper.put(storeDraft)

@@ -174,6 +174,9 @@ export class SubmissionStoreType {
     @attribute()
     rateType?: RateType
 
+    @attribute({ memberType: embed(DocumentStoreT) })
+    rateDocuments: Array<DocumentStoreT>
+
     @attribute()
     rateDateStart?: Date
 
@@ -215,6 +218,9 @@ export class SubmissionStoreType {
     @attribute({ memberType: embed(DocumentStoreT) })
     documents: Array<DocumentStoreT>
 
+    @attribute({ memberType: embed(DocumentStoreT) })
+    contractDocuments: Array<DocumentStoreT>
+
     @attribute()
     contractAmendmentInfo?: ContractAmendmentInfoT
 
@@ -236,11 +242,13 @@ export class SubmissionStoreType {
         this.actuaryCommunicationPreference = undefined
         this.documents = []
         this.contractType = undefined
+        this.contractDocuments = []
         this.contractDateStart = undefined
         this.contractDateEnd = undefined
         this.managedCareEntities = []
         this.federalAuthorities = []
         this.rateType = undefined
+        this.rateDocuments = []
         this.rateDateStart = undefined
         this.rateDateEnd = undefined
         this.rateDateCertified = undefined

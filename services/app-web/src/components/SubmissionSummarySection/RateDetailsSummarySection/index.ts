@@ -1,0 +1,1 @@
+export { RateDetailsSummarySection } from './RateDetailsSummarySection'
