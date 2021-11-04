@@ -42,8 +42,14 @@ const hasValidRates = (sub: StateSubmissionType): boolean => {
     }
 }
 
-const hasValidDocuments = (sub: StateSubmissionType): boolean =>
-    sub.contractDocuments.length !== 0
+const hasValidDocuments = (sub: StateSubmissionType): boolean => {
+    const validRateDocuments =
+        sub.submissionType === 'CONTRACT_AND_RATES'
+            ? Boolean(sub.rateDocuments && sub.rateDocuments.length !== 0)
+            : true
+    const validContractDocuments = sub.contractDocuments.length !== 0
+    return validRateDocuments && validContractDocuments
+}
 
 const isStateSubmission = (sub: unknown): sub is StateSubmissionType => {
     if (sub && typeof sub === 'object' && 'status' in sub) {
