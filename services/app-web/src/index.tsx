@@ -8,7 +8,7 @@ import './index.scss'
 
 import App from './pages/App/App'
 import reportWebVitals from './reportWebVitals'
-import { localGQLFetch, fakeAmplifyFetch } from './api'
+import { localGQLFetch, fakeAmplifyFetch } from './local'
 import { assertIsAuthMode } from './common-code/domain-models'
 import { S3ClientT, newAmplifyS3Client, newLocalS3Client } from './s3'
 

@@ -1,5 +1,5 @@
-import { loginLocalUser, getLoggedInUser, logoutLocalUser } from './localAuth'
-import { CognitoUserType } from '../../common-code/domain-models/cognitoUserType'
+import { loginLocalUser, getLoggedInUser, logoutLocalUser } from './'
+import { CognitoUserType } from '../common-code/domain-models/cognitoUserType'
 
 describe('localLogin', () => {
     it('returns empty on empty', async () => {
