@@ -44,10 +44,14 @@ export default class LabeledProcessRunner {
         return `\x1b[38;5;${color}m ${prefix.padStart(maxLength)}|\x1b[0m`
     }
 
+    // awaitFor is a string that will resolve this promise when it is printed by the running command.
+    // the command will keep running, but this promise will be resolved.
+    // it must be a string on a single line.
     async runCommandAndOutput(
         prefix: string,
         cmd: string[],
-        cwd: string | null
+        cwd: string | undefined,
+        { awaitFor }: { awaitFor: undefined | string } = { awaitFor: undefined }
     ): Promise<number> {
         const proc_opts: Record<string, any> = {}
 
@@ -62,23 +66,45 @@ export default class LabeledProcessRunner {
         const startingPrefix = this.formattedPrefix(prefix)
         process.stdout.write(`${startingPrefix} Running: ${cmd.join(' ')}\n`)
 
-        proc.stdout.on('data', (data) => {
-            const paddedPrefix = this.formattedPrefix(prefix)
-
-            for (let line of data.toString().split('\n')) {
-                process.stdout.write(`${paddedPrefix} ${line}\n`)
-            }
-        })
-
-        proc.stderr.on('data', (data) => {
-            const paddedPrefix = this.formattedPrefix(prefix)
-
-            for (let line of data.toString().split('\n')) {
-                process.stdout.write(`${paddedPrefix} ${line}\n`)
-            }
-        })
-
         return new Promise<number>((resolve, reject) => {
+            proc.stdout.on('data', (data) => {
+                const paddedPrefix = this.formattedPrefix(prefix)
+
+                const lines = data.toString().split('\n')
+                if (lines[lines.length - 1] === '') {
+                    lines.pop()
+                }
+                for (let line of lines) {
+                    // if we get a line that has awaitFor in it, we resolve the promise.
+                    if (awaitFor) {
+                        if (line.includes(awaitFor)) {
+                            resolve(0)
+                        }
+                    }
+
+                    process.stdout.write(`${paddedPrefix} ${line}\n`)
+                }
+            })
+
+            proc.stderr.on('data', (data) => {
+                const paddedPrefix = this.formattedPrefix(prefix)
+
+                const lines = data.toString().split('\n')
+                if (lines[lines.length - 1] === '') {
+                    lines.pop()
+                }
+                for (let line of lines) {
+                    // if we get a line that has awaitFor in it, we resolve the promise.
+                    if (awaitFor) {
+                        if (line.includes(awaitFor)) {
+                            resolve(0)
+                        }
+                    }
+
+                    process.stdout.write(`${paddedPrefix} ${line}\n`)
+                }
+            })
+
             proc.on('error', (error) => {
                 const paddedPrefix = this.formattedPrefix(prefix)
                 process.stdout.write(
