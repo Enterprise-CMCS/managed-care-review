@@ -12,7 +12,6 @@ import { v4 as uuidv4 } from 'uuid'
 import styles from '../StateSubmissionForm.module.scss'
 import {
     DraftSubmission,
-    SubmissionType,
     UpdateDraftSubmissionInput,
 } from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
@@ -26,7 +25,7 @@ import { updatesFromSubmission } from '../updateSubmissionTransform'
 import { MCRouterState } from '../../../constants/routerState'
 
 /*
- * Documents is responsible for setting up api requests, redirects, and handling page level alert for overall errors related to invalid documents for a submission
+ * The page level component is responsible for setting up api requests, redirects, and handling page level alert for overall errors related to invalid documents for a submission
  * Inline error that are specific to the individual files as they upload are handled in FileUpload and FileItem.
  */
 
@@ -38,26 +37,10 @@ type DocumentProps = {
     ) => Promise<DraftSubmission | undefined>
 }
 
-const DocumentRequirementsHint = ({
-    submissionType,
-}: {
-    submissionType: SubmissionType
-}): JSX.Element =>
-    submissionType === 'CONTRACT_AND_RATES' ? (
-        <>
-            <strong>Must include:</strong> An executed contract and a signed
-            rate certification
-        </>
-    ) : (
-        <>
-            <strong>Must include:</strong> An executed contract
-        </>
-    )
-
 const PageLevelErrorAlert = ({
-    hasNoDocuments,
+    hasNoDocuments = false,
 }: {
-    hasNoDocuments: boolean
+    hasNoDocuments?: boolean
 }): JSX.Element =>
     hasNoDocuments ? (
         <Alert
@@ -111,17 +94,19 @@ export const Documents = ({
             }
         })
 
+    // useEffect use case
+    // fileItems are dynamically changing constantly and we need our side effects to display in a reliable way
+    // this includes wether buttons are disabled or error alerts are displayed
     useEffect(() => {
         const hasPendingFiles: boolean = fileItems.some(
             (item) => item.status === 'PENDING'
         )
         setHasPendingFiles(hasPendingFiles)
 
-        const hasValidDocumentsForSubmission: boolean =
-            fileItems.length > 0 &&
-            !hasPendingFiles &&
-            fileItems.every((item) => item.status === 'UPLOAD_COMPLETE')
-        setHasValidFiles(hasValidDocumentsForSubmission)
+        const hasValidSupportingDocuments: boolean = fileItems.every(
+            (item) => item.status === 'UPLOAD_COMPLETE'
+        )
+        setHasValidFiles(hasValidSupportingDocuments)
     }, [fileItems])
 
     // If there is a submission error, ensure form is in validation state
@@ -183,7 +168,7 @@ export const Documents = ({
         async (e: React.FormEvent | React.MouseEvent) => {
             e.preventDefault()
 
-            // if there are any errors present in the documents and we are in a validation state (relevant for Save as Draft and Continue buttons), stop here.
+            // if there are any errors present in supporting documents and we are in a validation state (relevant for Save as Draft and Continue buttons), stop here.
             // Force user to clear validations to continue
             if (shouldValidate) {
                 setShouldValidate(true)
@@ -252,42 +237,37 @@ export const Documents = ({
                 }}
             >
                 <fieldset className="usa-fieldset">
-                    <legend className="srOnly">Documents</legend>
+                    <legend className="srOnly">Supporting Documents</legend>
                     {shouldValidate && !hasValidFiles && (
-                        <PageLevelErrorAlert
-                            hasNoDocuments={fileItems.length === 0}
-                        />
+                        <PageLevelErrorAlert />
                     )}
                     {formAlert && formAlert}
                     <FileUpload
                         id="documents"
                         name="documents"
-                        label="Upload documents"
+                        label="Upload supporting documents"
                         isLabelVisible={false}
                         hint={
                             <>
                                 <Link
-                                    aria-label="Tip sheet for complete contract action
-                                submissions (opens in new window)"
+                                    aria-label="Document definitions and requirements (opens in new window)"
                                     href={
                                         'https://www.medicaid.gov/federal-policy-guidance/downloads/cib110819.pdf'
                                     }
                                     variant="external"
                                     target="_blank"
                                 >
-                                    Tip sheet for complete contract action
-                                    submissions
+                                    Document definitions and requirements
                                 </Link>
 
                                 <p
                                     data-testid="documents-hint"
                                     className="text-base-darker"
                                 >
-                                    <DocumentRequirementsHint
-                                        submissionType={
-                                            draftSubmission.submissionType
-                                        }
-                                    />
+                                    <strong>
+                                        Upload and categorize any additional
+                                        supporting documents
+                                    </strong>
                                 </p>
                             </>
                         }
@@ -305,18 +285,10 @@ export const Documents = ({
                         type="button"
                         unstyled
                         onClick={async (e) => {
-                            // do not need to validate empty file list or force user to add at least one file for Save as Draft
-                            if (fileItems.length === 0) {
-                                await handleFormSubmit({
-                                    shouldValidate: false,
-                                    redirectPath: '/dashboard',
-                                })(e)
-                            } else {
-                                await handleFormSubmit({
-                                    shouldValidate: true,
-                                    redirectPath: '/dashboard',
-                                })(e)
-                            }
+                            await handleFormSubmit({
+                                shouldValidate: true,
+                                redirectPath: '/dashboard',
+                            })(e)
                         }}
                     >
                         Save as draft
@@ -338,7 +310,9 @@ export const Documents = ({
                             type="submit"
                             disabled={
                                 hasPendingFiles ||
-                                (shouldValidate && !hasValidFiles)
+                                (shouldValidate &&
+                                    fileItems.length > 0 &&
+                                    !hasValidFiles)
                             }
                         >
                             Continue

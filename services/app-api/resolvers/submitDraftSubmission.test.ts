@@ -10,7 +10,7 @@ describe('submitDraftSubmission', () => {
         const server = constructTestServer()
 
         // setup
-        const draft = await createAndUpdateTestDraftSubmission(server)
+        const draft = await createAndUpdateTestDraftSubmission(server, {})
         const draftID = draft.id
 
         // submit
@@ -24,6 +24,7 @@ describe('submitDraftSubmission', () => {
             },
         })
 
+        console.log(submitResult.errors)
         expect(submitResult.errors).toBeUndefined()
         const createdID =
             submitResult?.data?.submitDraftSubmission.submission.id
@@ -43,6 +44,7 @@ describe('submitDraftSubmission', () => {
         expect(resultDraft.submissionDescription).toEqual(
             'An updated submission'
         )
+        expect(resultDraft.documents).toEqual(draft.documents)
 
         // Contract details fields should still be set
         expect(resultDraft.contractType).toEqual(draft.contractType)
@@ -51,6 +53,8 @@ describe('submitDraftSubmission', () => {
         expect(resultDraft.managedCareEntities).toEqual(
             draft.managedCareEntities
         )
+        expect(resultDraft.contractDocuments).toEqual(draft.contractDocuments)
+
         expect(resultDraft.federalAuthorities).toEqual(draft.federalAuthorities)
         // submittedAt should be set to today's date
         const today = new Date()
@@ -65,11 +69,12 @@ describe('submitDraftSubmission', () => {
         ).toBeGreaterThan(0)
     })
 
-    it('returns an error if there are no documents attached', async () => {
+    it('returns an error if there are no contract documents attached', async () => {
         const server = constructTestServer()
 
         const draft = await createAndUpdateTestDraftSubmission(server, {
             documents: [],
+            contractDocuments: [],
         })
         const draftID = draft.id
 
@@ -88,7 +93,7 @@ describe('submitDraftSubmission', () => {
             'BAD_USER_INPUT'
         )
         expect(submitResult.errors?.[0].extensions?.message).toEqual(
-            'submissions must have documents'
+            'submissions must have valid documents'
         )
     })
 
