@@ -1,34 +1,34 @@
 // datasource requires a url. we override this with connection
 // details from secrets manager in the application
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 generator client {
-    provider      = "prisma-client-js"
-    binaryTargets = ["native", "rhel-openssl-1.0.x"]
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
 }
 
 // A model is required for prisma. Dummy model for our testing.
 model TestUser {
-    id        Int      @id @default(autoincrement())
-    createdAt DateTime @default(now())
-    email     String   @unique
-    name      String?
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  email     String   @unique
+  name      String?
 }
 
 // The StateSubmission Form Data
 model StateSubmission {
-    id  String @id
-    state  State  @relation(fields: [stateCode], references: [stateCode])
-    stateCode String
-    submissionFormProto Bytes
+  id                  String @id
+  state               State  @relation(fields: [stateCode], references: [stateCode])
+  stateCode           String
+  submissionFormProto Bytes
 }
 
 model State {
-    stateCode String @id
-    name String
-    latestStateSubmissionNumber Int @default(0)
-    stateSubmissions StateSubmission[]
+  stateCode                   String            @id
+  name                        String
+  latestStateSubmissionNumber Int               @default(0)
+  stateSubmissions            StateSubmission[]
 }
