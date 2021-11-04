@@ -63,6 +63,8 @@ jobs:
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
 
       - name: Unit Tests
+        env:
+          DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5
         run: ./dev test --unit
 
       - name: publish code coverage
