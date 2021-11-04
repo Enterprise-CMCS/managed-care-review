@@ -20,18 +20,17 @@
     "dependencies": {
         "@aws/dynamodb-data-mapper": "0.7.3",
         "@aws/dynamodb-data-mapper-annotations": "^0.7.3",
-        "@prisma/client": "3.1.1",
+        "@prisma/client": "3.4.0",
         "apollo-server-lambda": "^3.4.0",
         "graphql": "^15.6.1",
         "graphql-scalars": "^1.11.1",
         "neverthrow": "^4.2.2",
-        "prisma": "3.3.0",
+        "prisma": "3.4.0",
         "request": "^2.88.2",
         "uuid": "^8.3.2"
     },
     "devDependencies": {
         "@types/aws-lambda": "^8.10.83",
-        "@types/copy-webpack-plugin": "^8.0.1",
         "@types/glob": "^7.1.4",
         "@types/jest": "^27.0.1",
         "@types/request": "^2.48.7",
@@ -39,7 +38,6 @@
         "@typescript-eslint/eslint-plugin": "^4.31.1",
         "@typescript-eslint/parser": "^4.33.0",
         "aws-sdk": "^2.991.0",
-        "copy-webpack-plugin": "^9.0.1",
         "eslint": "^7.19.0",
         "eslint-config-prettier": "^8.3.0",
         "eslint-plugin-jest": "^24.4.0",
@@ -49,19 +47,16 @@
         "jest-raw-loader": "^1.0.1",
         "lint-staged": "^11.2.6",
         "prettier": "^2.4.1",
-        "serverless": "^2.60.0",
+        "serverless": "^2.65.0",
         "serverless-associate-waf": "^1.2.1",
+        "serverless-bundle": "^5.0.2",
         "serverless-dotenv-plugin": "^3.9.0",
         "serverless-iam-helper": "CMSgov/serverless-iam-helper",
         "serverless-idempotency-helper": "CMSgov/serverless-idempotency-helper",
         "serverless-offline": "^8.0.0",
         "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",
         "serverless-stack-termination-protection": "^1.0.4",
-        "serverless-webpack": "^5.5.4",
         "ts-jest": "^26.4.4",
-        "ts-loader": "^9.2.6",
-        "tsconfig-paths-webpack-plugin": "^3.5.1",
-        "typescript": "4.3.5",
-        "webpack-node-externals": "^3.0.0"
+        "typescript": "4.3.5"
     }
 }
