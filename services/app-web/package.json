@@ -93,8 +93,20 @@
     },
     "jest": {
         "coveragePathIgnorePatterns": [
+            "/*.stories.tsx",
+            "src/s3",
+            "src/api",
+            "src/testHelpers",
+            "src/local",
+            "src/gen",
+            "src/Aut/CheckAuth.tsx",
+            "src/Aut/CognitoLogin.tsx",
             "src/pages/Auth/Signup",
-            "src/pages/Auth/ConfirmSignUp"
+            "src/pages/Auth/ConfirmSignUp",
+            "App.tsx",
+            "index.ts",
+            "log_event.ts",
+            "reportWebVitals.ts"
         ],
         "coverageReporters": [
             [

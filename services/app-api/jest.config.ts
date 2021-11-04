@@ -6,4 +6,5 @@ module.exports = {
     },
     coverageReporters: [['lcov', { projectRoot: '../../' }], 'text'],
     moduleFileExtensions: ['js', 'json', 'jsx', 'd.ts', 'ts', 'tsx', 'node'],
+    coveragePathIgnorePatterns: ['src/testHelpers'],
 }
