@@ -12,6 +12,20 @@ jobs:
   unit-tests:
     name: test - unit tests
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:13.3
+        env:
+          REACT_APP_AUTH_MODE: LOCAL
+          POSTGRES_PASSWORD: shhhsecret
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     outputs:
       deploy-id: ${{ steps.ghdeployment.outputs.deployment_id }}
     steps:
@@ -35,7 +49,7 @@ jobs:
         shell: bash
         run: ./.github/build_vars.sh set_values
         env:
-          REACT_APP_AUTH_MODE: AWS_COGNITO
+          REACT_APP_AUTH_MODE: LOCAL
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
@@ -49,7 +63,7 @@ jobs:
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
 
       - name: Unit Tests
-        run: ./dev test --unit --run-db
+        run: ./dev test --unit
 
       - name: publish code coverage
         uses: paambaati/codeclimate-action@v3.0.0
