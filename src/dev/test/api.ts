@@ -32,11 +32,19 @@ export async function runAPITestsWatch(jestArgs: string[], runDB: boolean) {
     })
 }
 
+// Runs the API jest tests for CI. Save coverage information, resets the database.
 export async function runAPITests(
     runner: LabeledProcessRunner
 ): Promise<number> {
     await compileGraphQLTypesOnce(runner)
     await installAPIDeps(runner)
+
+    // reset the db, wiping it and running all the migrations files that exist
+    await runner.runCommandAndOutput(
+        'prisma reset',
+        ['npx', 'prisma', 'migrate', 'reset', '--force'],
+        'services/app-api'
+    )
 
     return await runner.runCommandAndOutput(
         'api - unit',
