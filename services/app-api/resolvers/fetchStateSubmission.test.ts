@@ -32,9 +32,10 @@ describe('fetchStateSubmission', () => {
         expect(resultSub.program.name).toBe('CNET')
         expect(resultSub.name).toContain('FL-CNET')
         expect(resultSub.submissionDescription).toEqual('An updated submission')
-        expect(resultSub.documents).toEqual([
+        expect(resultSub.documents).toEqual([])
+        expect(resultSub.contractDocuments).toEqual([
             {
-                name: 'myfile.pdf',
+                name: 'contractDocument.pdf',
                 s3URL: 'fakeS3URL',
             },
         ])
