@@ -97,7 +97,9 @@ export async function GetConnectionURL(): Promise<Result<string, Error>> {
         secret.value.username
     }:${encodeURIComponent(secret.value.password)}@${secret.value.host}:${
         secret.value.port
-    }/${secret.value.dbname}?schema=public&connection_limit=5`
+    }/${
+        secret.value.dbname
+    }?schema=public&connection_limit=5&connect_timeout=60`
 
     return ok(postgresURL)
 }

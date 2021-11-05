@@ -38,6 +38,7 @@ export const main: APIGatewayProxyHandler = async () => {
 
     try {
         // Aurora can have long cold starts, so we extend connection timeout on migrates
+        console.log('migrating')
         execSync(
             `${process.execPath} /opt/nodejs/node_modules/prisma/build/index.js migrate deploy --schema=/opt/nodejs/prisma/schema.prisma`,
             {
