@@ -82,11 +82,11 @@
         ]
     },
     "devDependencies": {
-        "@storybook/addon-a11y": "^6.2.9",
-        "@storybook/addon-essentials": "^6.2.9",
-        "@storybook/addon-links": "^6.3.7",
+        "@storybook/addon-a11y": "^6.3.12",
+        "@storybook/addon-essentials": "^6.3.12",
+        "@storybook/addon-links": "^6.3.12",
         "@storybook/preset-create-react-app": "^3.2.0",
-        "@storybook/react": "^6.2.9",
+        "@storybook/react": "^6.3.12",
         "@types/react-router-dom": "^5.1.7",
         "@types/react-test-renderer": "^17.0.1",
         "@types/url-parse": "^1.4.3",
@@ -110,5 +110,8 @@
         "serverless-plugin-scripts": "^1.0.2",
         "serverless-s3-sync": "^1.14.4",
         "serverless-stack-termination-protection": "^1.0.4"
+    },
+    "resolutions": {
+        "webpack": "4.44.2"
     }
 }
