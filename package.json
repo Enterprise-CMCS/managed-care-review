@@ -5,10 +5,15 @@
     "description": "",
     "main": "index.js",
     "private": true,
-    "workspaces": [
-        "services/*",
-        "."
-    ],
+    "workspaces": {
+        "packages": [
+            "services/*",
+            "."
+        ],
+        "nohoist": [
+            "services/app-api"
+        ]
+    },
     "directories": {
         "test": "tests"
     },
