@@ -176,5 +176,5 @@ Cypress.Commands.add('submitStateSubmissionForm', () => {
     cy.navigateForm('Submit')
     // HM-TODO: Move this check to dashboard page
     cy.findAllByTestId('modalWindow').should('exist')
-    cy.navigateForm('Submit')
+    cy.navigateForm('Confirm submit')
 })
