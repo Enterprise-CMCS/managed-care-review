@@ -11,7 +11,8 @@
             "."
         ],
         "nohoist": [
-            "services/app-api"
+            "**/app-api/**",
+            "**/app-web/**"
         ]
     },
     "directories": {
