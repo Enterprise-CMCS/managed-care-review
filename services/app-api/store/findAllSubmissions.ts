@@ -20,6 +20,7 @@ export async function findAllSubmissions(
     try {
         const submissions: (DraftSubmissionType | StateSubmissionType)[] = []
 
+        console.log('QUERINY In Dynamo')
         for await (const storeSubmission of mapper.query(
             SubmissionStoreType,
             {
