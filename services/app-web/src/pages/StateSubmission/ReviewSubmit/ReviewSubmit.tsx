@@ -1,15 +1,20 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import {
     Button,
     ButtonGroup,
     GridContainer,
     Link,
     Alert,
+    Modal,
+    ModalToggleButton,
+    ModalHeading,
+    ModalFooter,
+    ModalRef,
 } from '@trussworks/react-uswds'
 import { NavLink, useHistory } from 'react-router-dom'
 import styles from './ReviewSubmit.module.scss'
 import stylesForm from '../StateSubmissionForm.module.scss'
-import { Dialog } from '../../../components/Dialog'
+// import { Dialog } from '../../../components/Dialog'
 import {
     SubmissionTypeSummarySection,
     ContractDetailsSummarySection,
@@ -28,9 +33,6 @@ export const ReviewSubmit = ({
 }: {
     draftSubmission: DraftSubmission
 }): React.ReactElement => {
-    const [displayConfirmation, setDisplayConfirmation] =
-        useState<boolean>(false)
-
     const [userVisibleError, setUserVisibleError] = useState<
         string | undefined
     >(undefined)
@@ -55,16 +57,6 @@ export const ReviewSubmit = ({
         setUserVisibleError(error)
     }
 
-    const handleSubmitConfirmation = () => {
-        console.log('Confirmation Button Presssed')
-        setDisplayConfirmation(true)
-    }
-
-    const handleCancelSubmitConfirmation = () => {
-        console.log('cancel sub comf')
-        setDisplayConfirmation(false)
-    }
-
     const handleFormSubmit = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault()
 
@@ -82,7 +74,6 @@ export const ReviewSubmit = ({
             if (data.errors) {
                 console.log(data.errors)
                 showError('Error attempting to submit. Please try again.')
-                setDisplayConfirmation(false)
             }
 
             if (data.data?.submitDraftSubmission) {
@@ -91,12 +82,13 @@ export const ReviewSubmit = ({
         } catch (error) {
             console.log(error)
             showError('Error attempting to submit. Please try again.')
-            setDisplayConfirmation(false)
         }
     }
 
     const isContractActionAndRateCertification =
         draftSubmission.submissionType === 'CONTRACT_AND_RATES'
+
+    const modalRef = useRef<ModalRef>(null)
 
     return (
         <GridContainer className={styles.reviewSectionWrapper}>
@@ -154,28 +146,37 @@ export const ReviewSubmit = ({
                     >
                         Back
                     </Link>
-                    <Button
-                        type="button"
+                    <ModalToggleButton
+                        modalRef={modalRef}
                         className={styles.submitButton}
-                        data-testid="pageSubmitButton"
-                        onClick={handleSubmitConfirmation}
+                        opener
                     >
                         Submit
-                    </Button>
+                    </ModalToggleButton>
                 </ButtonGroup>
 
-                {displayConfirmation && (
-                    <Dialog
-                        heading="Ready to submit?"
-                        actions={[
-                            <Button
-                                type="button"
-                                key="cancelButton"
+                <Modal
+                    ref={modalRef}
+                    aria-labelledby="review-and-submit-modal-heading"
+                    aria-describedby="review-and-submit-modal-description"
+                    id="review-and-submit-modal"
+                >
+                    <ModalHeading id="review-and-submit-modal-heading">
+                        Ready to submit?
+                    </ModalHeading>
+                    <p id="review-and-submit-description">
+                        Submitting this package will send it to CMS to begin
+                        their review.
+                    </p>
+                    <ModalFooter>
+                        <ButtonGroup className="float-right">
+                            <ModalToggleButton
+                                modalRef={modalRef}
+                                closer
                                 outline
-                                onClick={handleCancelSubmitConfirmation}
                             >
                                 Cancel
-                            </Button>,
+                            </ModalToggleButton>
                             <Button
                                 type="button"
                                 key="submitButton"
@@ -184,15 +185,10 @@ export const ReviewSubmit = ({
                                 onClick={handleFormSubmit}
                             >
                                 Submit
-                            </Button>,
-                        ]}
-                    >
-                        <p>
-                            Submitting this package will send it to CMS to begin
-                            their review.
-                        </p>
-                    </Dialog>
-                )}
+                            </Button>
+                        </ButtonGroup>
+                    </ModalFooter>
+                </Modal>
             </div>
         </GridContainer>
     )
