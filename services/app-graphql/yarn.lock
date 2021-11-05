@@ -648,25 +648,25 @@
     change-case-all "1.0.14"
     tslib "~2.3.0"
 
-"@graphql-codegen/typescript-resolvers@^2.3.2":
-  version "2.3.2"
-  resolved "https://registry.yarnpkg.com/@graphql-codegen/typescript-resolvers/-/typescript-resolvers-2.3.2.tgz#dad462e505387497c654cf0627a2e57a27af5a61"
-  integrity sha512-WnZbFMKhfxc1Nzjlcuz998fSlMpQ0/NJVLX99Re8qLCeQy2hxF0vLl4if9pUSJYUZgUiMeCNEJLKfB/aduHCcw==
+"@graphql-codegen/typescript-resolvers@^2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@graphql-codegen/typescript-resolvers/-/typescript-resolvers-2.4.0.tgz#94a818f7e903ab50c67461ab73aea7b74dfefbde"
+  integrity sha512-yz1hG9NK3MRePPixWnEU70WvtjxJxqXrNOV/t4/VK2Z38lmDH98TpCQvYq/kAoGb3Y7RqU5K+Ms7DJD6VQB+sg==
   dependencies:
-    "@graphql-codegen/plugin-helpers" "^2.2.0"
-    "@graphql-codegen/typescript" "^2.2.4"
-    "@graphql-codegen/visitor-plugin-common" "2.4.0"
+    "@graphql-codegen/plugin-helpers" "^2.3.0"
+    "@graphql-codegen/typescript" "^2.3.0"
+    "@graphql-codegen/visitor-plugin-common" "2.5.0"
     "@graphql-tools/utils" "^8.1.1"
     auto-bind "~4.0.0"
     tslib "~2.3.0"
 
-"@graphql-codegen/typescript@^2.2.4":
-  version "2.2.4"
-  resolved "https://registry.yarnpkg.com/@graphql-codegen/typescript/-/typescript-2.2.4.tgz#e7fef7e83f04e69e297ae7e4ed101803623db8ee"
-  integrity sha512-NTST7i1+Rot/t5hUJtnvIh1iqBlB9tyN2oD5XC1c2cMwz0cr7JaAgVYGfLO7XOQ5eG2IAw/D3umQ5JROa3cumw==
+"@graphql-codegen/typescript@^2.2.4", "@graphql-codegen/typescript@^2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@graphql-codegen/typescript/-/typescript-2.3.0.tgz#af7614558f911996ced63dbe8a22ee20974e429c"
+  integrity sha512-bsq+y0cyrltVfpK5/JVz90lMBFby/Q+4oxiFGpjVdAjv/dbS9Bu476tQlN0Es76fc88Ce25wD40JXKfgWQDqKw==
   dependencies:
-    "@graphql-codegen/plugin-helpers" "^2.2.0"
-    "@graphql-codegen/visitor-plugin-common" "2.4.0"
+    "@graphql-codegen/plugin-helpers" "^2.3.0"
+    "@graphql-codegen/visitor-plugin-common" "2.5.0"
     auto-bind "~4.0.0"
     tslib "~2.3.0"
 
