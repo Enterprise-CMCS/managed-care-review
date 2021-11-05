@@ -2,6 +2,15 @@
 
 These are all pieces of technology we rely on with resources to help learn them.
 
+## Prisma
+
+An ORM for Typescript + Postgres. We define the tables and relationships we want in our database in our /services/app-api/prisma/schema.prisma file. Prisma generates a typescript client for making queries as well as migrations for changing our database to match the desired state.
+
+-   https://www.prisma.io
+-   https://www.prisma.io/docs/concepts/components/prisma-schema
+-   https://www.prisma.io/docs/guides/database/developing-with-prisma-migrate
+-   https://www.prisma.io/docs/concepts/components/prisma-client
+
 ## DynamoDB
 
 An AWS native datastore.
