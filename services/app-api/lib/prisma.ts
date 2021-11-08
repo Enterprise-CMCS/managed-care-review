@@ -99,7 +99,7 @@ export async function GetConnectionURL(): Promise<Result<string, Error>> {
         secret.value.port
     }/${
         secret.value.dbname
-    }?schema=public&connection_limit=5&connect_timeout=60`
+    }?schema=public&connection_limit=5&connect_timeout=60&pool_timeout=70`
 
     return ok(postgresURL)
 }
