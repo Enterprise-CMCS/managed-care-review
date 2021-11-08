@@ -8,7 +8,7 @@
     "workspaces": {
         "packages": [
             "services/*",
-            "."
+            "dev/*"
         ],
         "nohoist": [
             "**/app-api/**",
@@ -43,18 +43,11 @@
         "url": "https://github.com/CMSgov/managed-care-review/issues"
     },
     "homepage": "https://github.com/CMSgov/managed-care-review#readme",
-    "jest": {
-        "testPathIgnorePatterns": [
-            "src/pages/Auth/Signup",
-            "src/pages/Auth/ConfirmSignUp",
-            "**/*.stories.tsx"
-        ]
-    },
     "devDependencies": {
         "@testing-library/cypress": "^8.0.1",
         "@types/dotenv": "^8.2.0",
         "@types/node": "^14.17.32",
-        "@types/yargs": "^17.0.4",
+        "@types/yargs": "^17.0.5",
         "chromedriver": "^95.0.0",
         "cypress": "^8.7.0",
         "cypress-pipe": "^2.0.0",
@@ -68,11 +61,10 @@
         "serverless-idempotency-helper": "CMSgov/serverless-idempotency-helper",
         "serverless-plugin-scripts": "^1.0.2",
         "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",
-        "typescript": "^4.4.4",
         "yargs": "^17.2.1"
     },
     "dependencies": {
-        "aws-sdk": "^2.1016.0",
+        "aws-sdk": "^2.1018.0",
         "cypress-file-upload": "^5.0.8"
     },
     "resolutions": {

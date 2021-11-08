@@ -12,7 +12,7 @@ describe('review and submit', () => {
 
             // Navigate to documents page by clicking back
             cy.findByRole('link', { name: /Back/ }).click()
-            cy.findByRole('heading', { level: 4, name: /Documents/ })
+            cy.findByRole('heading', { level: 4, name: /Supporting documents/ })
 
             // Navigate to review and submit page
             cy.visit(`/submissions/${draftSubmissionId}/review-and-submit`)

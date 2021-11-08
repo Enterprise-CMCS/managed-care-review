@@ -22,6 +22,7 @@ export type FileUploadProps = {
     id: string
     name: string
     label: string
+    error?: string
     hint?: React.ReactNode
     initialItems?: FileItemT[]
     isLabelVisible?: boolean
@@ -44,6 +45,7 @@ export const FileUpload = ({
     name,
     label,
     hint,
+    error,
     initialItems,
     isLabelVisible = true,
     uploadFile,
@@ -52,7 +54,6 @@ export const FileUpload = ({
     onLoadComplete,
     ...inputProps
 }: FileUploadProps): React.ReactElement => {
-    const [formError, setFormError] = useState<string | null>(null)
     const [loadingStatus, setLoadingStatus] = useState<
         null | 'UPLOADING' | 'COMPLETE'
     >(null)
@@ -277,8 +278,8 @@ export const FileUpload = ({
 
         // reset input immediately to prepare for next interaction
         fileInputRef.current?.clearFiles()
-        setFormError(null)
     }
+
     const handleOnDrop = (e: React.DragEvent): void => {
         e.preventDefault()
         e.stopPropagation()
@@ -299,9 +300,7 @@ export const FileUpload = ({
                 {label}
             </Label>
 
-            {formError && (
-                <ErrorMessage id={`${id}-error`}>{formError}</ErrorMessage>
-            )}
+            {error && <ErrorMessage id={`${id}-error`}>{error}</ErrorMessage>}
             {hint && (
                 <span
                     id={`${id}-hint`}

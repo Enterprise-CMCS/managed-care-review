@@ -67,7 +67,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     SUBMISSIONS_CONTRACT_DETAILS: 'Contract details',
     SUBMISSIONS_RATE_DETAILS: 'Rate details',
     SUBMISSIONS_CONTACTS: 'Contacts',
-    SUBMISSIONS_DOCUMENTS: 'Documents',
+    SUBMISSIONS_DOCUMENTS: 'Supporting documents',
     SUBMISSIONS_REVIEW_SUBMIT: 'Review and submit',
     UNKNOWN_ROUTE: 'Not found',
 }
