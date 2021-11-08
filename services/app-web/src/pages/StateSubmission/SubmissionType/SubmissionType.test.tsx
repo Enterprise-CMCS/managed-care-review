@@ -18,16 +18,6 @@ describe('SubmissionType', () => {
         submissionType: '',
     }
 
-    it('renders without errors', async () => {
-        renderWithProviders(<SubmissionType />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-        })
-
-        // Now that SumbissionType heading is no longer in the DOM, how can we test that SumbissionType renders without errors?
-    })
-
     it('displays submission type form when expected', async () => {
         renderWithProviders(<SubmissionType />, {
             apolloProvider: {

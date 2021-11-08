@@ -1,13 +1,17 @@
-import { mockStateSubmission } from '../../testHelpers/apolloHelpers'
+import {
+    mockDraft,
+    mockStateSubmission,
+    mockContractAndRatesDraft,
+} from '../../testHelpers/apolloHelpers'
 import { StateSubmissionType } from '.'
 import {
     hasValidContract,
-    // hasValidDocuments,
-    // hasValidRates,
-    // isContractOnly,
-    // isContractAndRates,
-    // isStateSubmission,
-    // isDraftSubmission,
+    hasValidDocuments,
+    hasValidRates,
+    isContractOnly,
+    isContractAndRates,
+    isStateSubmission,
+    isDraftSubmission,
 } from './'
 
 describe('submission type assertions', () => {
@@ -27,12 +31,174 @@ describe('submission type assertions', () => {
             ).toEqual(expectedResponse)
         }
     )
-})
 
-// it('hasValidContract evaluates as expected', () => {})
-// it('hasValidDocuments evaluates as expected', () => {})
-// it('hasValidRates evaluates as expected', () => {})
-// it('isContractOnly evaluates as expected', () => {})
-// it('isContractAndRates evaluates as expected', () => {})
-// it('isDraftSubmission evaluates as expected', () => {})
-// it('isStateSubmission evaluates as expected', () => {})
+    test.each([
+        [mockStateSubmission(), true],
+        [{ ...mockStateSubmission(), documents: [] }, true],
+        [
+            {
+                ...mockStateSubmission(),
+                submissionType: 'CONTRACT_ONLY',
+                rateDocuments: [],
+            },
+            true,
+        ],
+        [{ ...mockStateSubmission(), contractDocuments: [] }, false],
+        [
+            {
+                ...mockStateSubmission(),
+                submissionType: 'CONTRACT_AND_RATES',
+                rateDocuments: [],
+            },
+            false,
+        ],
+    ])(
+        'hasValidDocuments evaluates as expected',
+        (submission, expectedResponse) => {
+            // type coercion to allow us to test
+            expect(
+                hasValidDocuments(submission as unknown as StateSubmissionType)
+            ).toEqual(expectedResponse)
+        }
+    )
+
+    test.each([
+        [mockStateSubmission(), true],
+        [mockContractAndRatesDraft(), true],
+        [
+            {
+                ...mockStateSubmission(),
+                rateType: undefined,
+            },
+            false,
+        ],
+        [
+            {
+                ...mockStateSubmission(),
+                rateDateStart: undefined,
+            },
+            false,
+        ],
+        [
+            {
+                ...mockStateSubmission(),
+                rateDateEnd: undefined,
+            },
+            false,
+        ],
+        [
+            {
+                ...mockStateSubmission(),
+                rateDateCertified: undefined,
+            },
+            false,
+        ],
+        [
+            {
+                ...mockStateSubmission(),
+                submissionType: 'CONTRACT_ONLY',
+                rateDocuments: [],
+            },
+            false,
+        ],
+        [
+            {
+                ...mockStateSubmission(),
+                rateType: 'AMENDMENT',
+                rateAmendmentInfo: undefined,
+            },
+            false,
+        ],
+    ])(
+        'hasValidRates evaluates as expected',
+        (submission, expectedResponse) => {
+            // type coercion to allow us to test
+            expect(
+                hasValidRates(submission as unknown as StateSubmissionType)
+            ).toEqual(expectedResponse)
+        }
+    )
+
+    test.each([
+        [{ ...mockStateSubmission(), submissionType: 'CONTRACT_ONLY' }, true],
+        [
+            {
+                ...mockStateSubmission(),
+                submissionType: 'CONTRACT_AND_RATES',
+            },
+            false,
+        ],
+    ])(
+        'isContractOnly evaluates as expected',
+        (submission, expectedResponse) => {
+            // type coercion to allow us to test
+            expect(
+                isContractOnly(submission as unknown as StateSubmissionType)
+            ).toEqual(expectedResponse)
+        }
+    )
+
+    test.each([
+        [
+            { ...mockStateSubmission(), submissionType: 'CONTRACT_AND_RATES' },
+            true,
+        ],
+        [
+            {
+                ...mockStateSubmission(),
+                submissionType: 'CONTRACT_ONLY',
+            },
+            false,
+        ],
+    ])(
+        'isContractAndRates evaluates as expected',
+        (submission, expectedResponse) => {
+            // type coercion to allow us to test
+            expect(
+                isContractAndRates(submission as unknown as StateSubmissionType)
+            ).toEqual(expectedResponse)
+        }
+    )
+
+    test.each([
+        [{ ...mockDraft(), status: 'DRAFT' }, true],
+        [{ ...mockContractAndRatesDraft(), status: 'DRAFT' }, true],
+        [mockStateSubmission(), false],
+    ])(
+        'isDraftSubmission evaluates as expected',
+        (submission, expectedResponse) => {
+            // type coercion to allow us to test
+            expect(isDraftSubmission(submission)).toEqual(expectedResponse)
+        }
+    )
+
+    test.each([
+        [{ ...mockStateSubmission(), status: 'SUBMITTED' }, true],
+        [
+            {
+                ...mockStateSubmission(),
+                status: 'SUBMITTED',
+                contractDocuments: [],
+            },
+            false,
+        ],
+        [
+            {
+                ...mockStateSubmission(),
+                status: 'SUBMITTED',
+                submissionType: 'CONTRACT_ONLY',
+                rateDocuments: [],
+            },
+            false,
+        ],
+        [{ ...mockStateSubmission(), contractType: undefined }, false],
+        [mockDraft(), false],
+        [mockContractAndRatesDraft(), false],
+    ])(
+        'isStateSubmission evaluates as expected',
+        (submission, expectedResponse) => {
+            // type coercion to allow us to test
+            expect(isStateSubmission(submission)).toEqual(expectedResponse)
+        }
+    )
+})
