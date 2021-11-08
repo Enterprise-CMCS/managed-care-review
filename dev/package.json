@@ -1,0 +1,24 @@
+{
+    "name": "dev",
+    "version": "1.0.0",
+    "description": "local dev tooling",
+    "main": "index.js",
+    "private": true,
+    "license": "MIT",
+    "scripts": {
+        "precommit": "lint-staged",
+        "lint": "tsc --noEmit && eslint src/",
+        "clean": "rm -rf node_modules && yarn cache clean",
+        "format": "prettier --write src/**/*.ts{,x}",
+        "build": "tsc"
+    },
+    "lint-staged": {
+        "dev/src/**/*.{js,ts}": [
+            "eslint --fix",
+            "prettier --write src/**/*.ts{,x}"
+        ]
+    },
+    "devDependencies": {
+        "typescript": "^4.4.4"
+    }
+}

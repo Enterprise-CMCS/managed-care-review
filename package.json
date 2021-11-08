@@ -8,7 +8,7 @@
     "workspaces": {
         "packages": [
             "services/*",
-            "."
+            "dev/*"
         ],
         "nohoist": [
             "**/app-api/**",
@@ -19,7 +19,7 @@
         "test": "tests"
     },
     "scripts": {
-        "format": "learn run format",
+        "format": "learna run format",
         "lint": "lerna run lint --parallel",
         "cypress:open": "cypress open --env AUTH_MODE=LOCAL",
         "cypress:run": "cypress run --env AUTH_MODE=LOCAL",
@@ -65,7 +65,6 @@
         "serverless-idempotency-helper": "CMSgov/serverless-idempotency-helper",
         "serverless-plugin-scripts": "^1.0.2",
         "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",
-        "typescript": "^4.4.4",
         "yargs": "^17.2.1"
     },
     "dependencies": {

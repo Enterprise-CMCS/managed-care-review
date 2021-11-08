@@ -49,7 +49,7 @@
         "build-storybook": "build-storybook -s public --quiet"
     },
     "lint-staged": {
-        "src/**/*.{js,jsx,ts,tsx}": [
+        "app-web/src/**/*.{js,jsx,ts,tsx}": [
             "eslint --fix",
             "prettier --write src/**/*.ts{,x}"
         ]
