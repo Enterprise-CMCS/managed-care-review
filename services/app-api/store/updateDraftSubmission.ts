@@ -78,13 +78,14 @@ export async function updateDraftSubmission(
         info.effectiveDateEnd = draftInfo.effectiveDateEnd
         storeDraft.rateAmendmentInfo = info
     }
-
-    draftSubmission.documents.forEach((doc) => {
-        const storeDocument = new DocumentStoreT()
-        storeDocument.name = doc.name
-        storeDocument.s3URL = doc.s3URL
-        storeDraft.documents.push(storeDocument)
-    })
+    if (draftSubmission.documents) {
+        draftSubmission.documents.forEach((doc) => {
+            const storeDocument = new DocumentStoreT()
+            storeDocument.name = doc.name
+            storeDocument.s3URL = doc.s3URL
+            storeDraft.documents.push(storeDocument)
+        })
+    }
 
     draftSubmission.contractDocuments.forEach((doc) => {
         const storeDocument = new DocumentStoreT()

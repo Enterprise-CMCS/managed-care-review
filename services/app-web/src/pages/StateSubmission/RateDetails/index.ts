@@ -1,0 +1,1 @@
+export { RateDetails } from './RateDetails'

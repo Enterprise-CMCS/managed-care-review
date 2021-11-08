@@ -1,0 +1,12 @@
+@import '../../styles/uswdsImports.scss';
+@import '../../styles/custom.scss';
+
+.background {
+    background-color: $cms-color-white;
+    width: 100%;
+}
+
+.container {
+    max-width: 50rem; // should match ReviewSubmit max-width
+    padding: 2rem 0;
+}
