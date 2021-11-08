@@ -22,7 +22,7 @@ async function findAllSubmissionWrapper(
                 },
             },
         })
-        console.log('connected: result')
+        console.log('connected:', result)
 
         return result
     } catch (e: unknown) {

@@ -11,16 +11,13 @@ export function indexSubmissionsResolver(
     store: Store
 ): QueryResolvers['indexSubmissions'] {
     return async (_parent, _args, context) => {
-        console.log('INDEX SUBMISSIONS')
         // This resolver is only callable by state users
         if (!isStateUser(context.user)) {
             throw new ForbiddenError('user not authorized to fetch state data')
         }
 
         // fetch from the store
-        console.log('Find ALl')
         const result = await store.findAllSubmissions(context.user.state_code)
-        console.log('Find Result', result)
 
         if (isStoreError(result)) {
             if (result.code === 'WRONG_STATUS') {
