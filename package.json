@@ -60,8 +60,7 @@
         "serverless-iam-helper": "CMSgov/serverless-iam-helper",
         "serverless-idempotency-helper": "CMSgov/serverless-idempotency-helper",
         "serverless-plugin-scripts": "^1.0.2",
-        "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",
-        "yargs": "^17.2.1"
+        "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper"
     },
     "dependencies": {
         "aws-sdk": "^2.1018.0",

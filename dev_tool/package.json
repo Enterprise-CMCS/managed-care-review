@@ -1,5 +1,6 @@
 {
     "name": "dev_tool",
+    "type": "module",
     "version": "1.0.0",
     "description": "local dev tooling",
     "main": "index.js",
@@ -17,6 +18,9 @@
             "eslint --fix",
             "prettier --write src/**/*.ts{,x}"
         ]
+    },
+    "dependencies": {
+        "yargs": "^17.2.1"
     },
     "devDependencies": {
         "typescript": "^4.4.4"
