@@ -60,4 +60,4 @@ function updatesFromSubmission(draft: DraftSubmission): DraftSubmissionUpdates {
     }
 }
 
-export { cleanDraftSubmission, updatesFromSubmission }
+export { cleanDraftSubmission, omitTypename, updatesFromSubmission }

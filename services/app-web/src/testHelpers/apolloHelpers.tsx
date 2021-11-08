@@ -266,7 +266,7 @@ export function mockStateSubmission(): StateSubmission {
         contractDateStart: new Date(),
         contractDateEnd: new Date(),
         contractAmendmentInfo: null,
-        managedCareEntities: [],
+        managedCareEntities: ['ENROLLMENT_PROCESS'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateType: 'NEW',
         rateDocuments: [],
