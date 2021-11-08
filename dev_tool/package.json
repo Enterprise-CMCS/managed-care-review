@@ -14,7 +14,7 @@
         "build": "tsc"
     },
     "lint-staged": {
-        "dev/src/**/*.{js,ts}": [
+        "dev_tool/src/**/*.{js,ts}": [
             "eslint --fix",
             "prettier --write src/**/*.ts{,x}"
         ]
