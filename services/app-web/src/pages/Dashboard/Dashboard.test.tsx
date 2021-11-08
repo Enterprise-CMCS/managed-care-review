@@ -103,11 +103,7 @@ describe('Dashboard', () => {
             email: 'bob@dmas.mn.gov',
         }
 
-        const submissions = [
-            mockDraft(),
-            mockStateSubmission(),
-            mockDraft(),
-        ]
+        const submissions = [mockDraft(), mockStateSubmission(), mockDraft()]
         submissions[2].id = 'test-abc-122'
         submissions[2].name = 'MN-MSHO-0002' // the names collide otherwise
 
@@ -129,12 +125,7 @@ describe('Dashboard', () => {
 
         const names = links.map((link) => link.textContent)
 
-        expect(names).toEqual([
-            'MN-MSHO-0001',
-            'MN-MSHO-0002',
-            'MN-MSHO-0003',
-        ])
-
+        expect(names).toEqual(['MN-MSHO-0001', 'MN-MSHO-0002', 'MN-MSHO-0003'])
     })
 
     it('loads first tab active', async () => {

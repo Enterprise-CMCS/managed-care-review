@@ -19,8 +19,11 @@
         "test": "tests"
     },
     "scripts": {
-        "format": "learna run format",
+        "clean": "lerna clean",
+        "test": "lerna run test",
         "lint": "lerna run lint --parallel",
+        "format": "yarn prettier --write",
+        "prettier": "prettier --ignore-path .gitignore \"**/*.+(ts|tsx|json)\"",
         "cypress:open": "cypress open --env AUTH_MODE=LOCAL",
         "cypress:run": "cypress run --env AUTH_MODE=LOCAL",
         "precommit": "lint-staged"
