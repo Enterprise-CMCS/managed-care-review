@@ -157,8 +157,6 @@ jobs:
 
       - name: deploy app-api
         id: deploy-app-api
-        env:
-          SLS_DEBUG: '*'
         run: |
           pushd services/app-api && npx serverless deploy --stage ${{ inputs.stage_name }}
 
