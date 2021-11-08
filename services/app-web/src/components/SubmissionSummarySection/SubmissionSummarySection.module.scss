@@ -81,6 +81,21 @@
     }
 }
 
+.documentsList {
+    border: 1px solid $theme-color-base-lighter;
+    border-top: 10px solid;
+    border-image-slice: 1;
+    border-image-source: linear-gradient(
+        to right,
+        $theme-color-primary-dark,
+        $theme-color-primary
+    );
+
+    li:nth-child(odd) {
+        background: $theme-color-base-lightest;
+    }
+}
+
 @media print {
     header,
     footer,
