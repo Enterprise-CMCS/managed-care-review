@@ -19,7 +19,7 @@
         "test": "tests"
     },
     "scripts": {
-        "format": "learn run format",
+        "test": "lerna run test",
         "lint": "lerna run lint --parallel",
         "cypress:open": "cypress open --env AUTH_MODE=LOCAL",
         "cypress:run": "cypress run --env AUTH_MODE=LOCAL",
