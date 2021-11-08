@@ -40,13 +40,6 @@
         "url": "https://github.com/CMSgov/managed-care-review/issues"
     },
     "homepage": "https://github.com/CMSgov/managed-care-review#readme",
-    "jest": {
-        "testPathIgnorePatterns": [
-            "src/pages/Auth/Signup",
-            "src/pages/Auth/ConfirmSignUp",
-            "**/*.stories.tsx"
-        ]
-    },
     "devDependencies": {
         "@testing-library/cypress": "^8.0.1",
         "@types/dotenv": "^8.2.0",
