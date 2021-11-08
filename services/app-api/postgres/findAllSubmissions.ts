@@ -14,6 +14,7 @@ async function findAllSubmissionWrapper(
     stateCode: string
 ): Promise<StateSubmission[] | StoreError> {
     try {
+        console.log('making connection')
         const result = await client.stateSubmission.findMany({
             where: {
                 stateCode: {
@@ -21,9 +22,11 @@ async function findAllSubmissionWrapper(
                 },
             },
         })
+        console.log('connected: result')
 
         return result
     } catch (e: unknown) {
+        console.log('failed to findAll', e)
         return convertPrismaErrorToStoreError(e)
     }
 }

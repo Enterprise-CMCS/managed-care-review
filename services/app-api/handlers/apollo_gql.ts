@@ -107,6 +107,7 @@ async function initializeGQLHandler(): Promise<Handler> {
     }
 
     const getPostgresStore = async () => {
+        console.log('Getting Postgres Connection')
         const prismaResult = await NewPrismaClient()
 
         if (prismaResult.isErr()) {
@@ -159,6 +160,7 @@ const handlerPromise = initializeGQLHandler()
 const gqlHandler: Handler = async (event, context, completion) => {
     // Once initialized, future awaits will return immediately
     const initializedHandler = await handlerPromise
+    console.log('initalizedHandler has awaited')
 
     return await initializedHandler(event, context, completion)
 }
