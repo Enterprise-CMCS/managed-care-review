@@ -1,5 +1,5 @@
 {
-    "name": "dev",
+    "name": "dev_tool",
     "version": "1.0.0",
     "description": "local dev tooling",
     "main": "index.js",
