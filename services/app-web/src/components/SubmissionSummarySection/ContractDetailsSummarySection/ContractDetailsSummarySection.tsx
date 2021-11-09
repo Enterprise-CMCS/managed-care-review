@@ -10,7 +10,7 @@ import {
     ManagedCareEntityRecord,
 } from '../../../constants/submissions'
 import { SectionHeader } from '../../../components/SectionHeader'
-import { Link, Grid } from '@trussworks/react-uswds'
+import { Link } from '@trussworks/react-uswds'
 import { DataDetail } from '../../../components/DataDetail'
 import { DoubleColumnRow } from '../../../components/DoubleColumnRow'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
@@ -220,25 +220,20 @@ export const ContractDetailsSummarySection = ({
                     )}
             </dl>
 
-            <span className="text-bold">Contract</span>
-            <ul className={styles.documentsList}>
-                <Grid row gap className={styles.row}>
-                    <Grid tablet={{ col: 7 }} className="text-bold">
-                        Document name
-                    </Grid>
-                    <Grid tablet={{ col: 3 }} className="text-bold">
-                        Date uploaded
-                    </Grid>
-                    <Grid tablet={{ col: 2 }} className="text-bold">
-                        Document category
-                    </Grid>
-                </Grid>
-
-                {refreshedDocs.map((doc) => (
-                    <li key={doc.name}>
-                        {doc.url ? (
-                            <Grid row gap className={styles.row}>
-                                <Grid tablet={{ col: 7 }}>
+            <table className={styles.documentsList}>
+                <caption className="text-bold">Contract</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Document name</th>
+                        <th scope="col">Date uploaded</th>
+                        <th scope="col">Document category</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {refreshedDocs.map((doc) => (
+                        <tr key={doc.name}>
+                            {doc.url ? (
+                                <td>
                                     <Link
                                         aria-label={`${doc.name} (opens in new window)`}
                                         href={doc.url}
@@ -247,16 +242,16 @@ export const ContractDetailsSummarySection = ({
                                     >
                                         {doc.name}
                                     </Link>
-                                </Grid>
-                                <Grid tablet={{ col: 3 }}>Not available</Grid>
-                                <Grid tablet={{ col: 2 }}>Contract</Grid>
-                            </Grid>
-                        ) : (
-                            <span>{doc.name}</span>
-                        )}
-                    </li>
-                ))}
-            </ul>
+                                </td>
+                            ) : (
+                                <td>{doc.name}</td>
+                            )}
+                            <td></td>
+                            <td>Contract</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </section>
     )
 }

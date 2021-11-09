@@ -116,24 +116,20 @@ export const RateDetailsSummarySection = ({
                 />
             </dl>
 
-            <span className="text-bold">Rate certification</span>
-            <ul className={styles.documentsList}>
-                <Grid row gap className={styles.row}>
-                    <Grid tablet={{ col: 7 }} className="text-bold">
-                        Document name
-                    </Grid>
-                    <Grid tablet={{ col: 3 }} className="text-bold">
-                        Date uploaded
-                    </Grid>
-                    <Grid tablet={{ col: 2 }} className="text-bold">
-                        Document category
-                    </Grid>
-                </Grid>
-                {refreshedDocs.map((doc) => (
-                    <li key={doc.name}>
-                        {doc.url ? (
-                            <Grid row gap className={styles.row}>
-                                <Grid tablet={{ col: 7 }}>
+            <table className={styles.documentsList}>
+                <caption className="text-bold">Rate certification</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Document name</th>
+                        <th scope="col">Date uploaded</th>
+                        <th scope="col">Document category</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {refreshedDocs.map((doc) => (
+                        <tr key={doc.name}>
+                            {doc.url ? (
+                                <td>
                                     <Link
                                         aria-label={`${doc.name} (opens in new window)`}
                                         href={doc.url}
@@ -142,18 +138,16 @@ export const RateDetailsSummarySection = ({
                                     >
                                         {doc.name}
                                     </Link>
-                                </Grid>
-                                <Grid tablet={{ col: 3 }}>Not available</Grid>
-                                <Grid tablet={{ col: 2 }}>
-                                    Rate certification
-                                </Grid>
-                            </Grid>
-                        ) : (
-                            <span>{doc.name}</span>
-                        )}
-                    </li>
-                ))}
-            </ul>
+                                </td>
+                            ) : (
+                                <td>{doc.name}</td>
+                            )}
+                            <td></td>
+                            <td>Rate certification</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </section>
     )
 }

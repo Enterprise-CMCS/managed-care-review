@@ -88,11 +88,28 @@
     border-image-source: linear-gradient(
         to right,
         $theme-color-primary-dark,
-        $theme-color-primary
+        #02bfe7
     );
 
-    li:nth-child(odd) {
-        background: $theme-color-base-lightest;
+    caption {
+        text-align: left;
+        margin-bottom: units(2);
+    }
+
+    th {
+        font-size: size('body', '2xs');
+    }
+
+    th,
+    td {
+        text-align: left;
+        padding: units(1);
+    }
+
+    tbody {
+        tr:nth-child(even) {
+            background: $theme-color-base-lightest;
+        }
     }
 }
 
