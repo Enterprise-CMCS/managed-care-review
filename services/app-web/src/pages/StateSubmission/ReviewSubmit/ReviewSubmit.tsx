@@ -37,6 +37,9 @@ export const ReviewSubmit = ({
         string | undefined
     >(undefined)
     const history = useHistory<MCRouterState>()
+    const modalRef = useRef<ModalRef>(null)
+
+
     const [submitDraftSubmission] = useSubmitDraftSubmissionMutation({
         // An alternative to messing with the cache like we do with create, just zero it out.
         update(cache, { data }) {
@@ -69,26 +72,25 @@ export const ReviewSubmit = ({
                 },
             })
 
-            console.log('Got data: ', data)
 
             if (data.errors) {
-                console.log(data.errors)
                 showError('Error attempting to submit. Please try again.')
+                modalRef.current?.toggleModal(undefined, false)
             }
 
             if (data.data?.submitDraftSubmission) {
                 history.push(`/dashboard?justSubmitted=${draftSubmission.name}`)
             }
         } catch (error) {
-            console.log(error)
             showError('Error attempting to submit. Please try again.')
+            modalRef.current?.toggleModal(undefined, false)
         }
+        
     }
 
     const isContractActionAndRateCertification =
         draftSubmission.submissionType === 'CONTRACT_AND_RATES'
 
-    const modalRef = useRef<ModalRef>(null)
 
     return (
         <GridContainer className={styles.reviewSectionWrapper}>
@@ -184,7 +186,7 @@ export const ReviewSubmit = ({
                                 className={styles.submitButton}
                                 onClick={handleFormSubmit}
                             >
-                                Submit
+                                Confirm submit
                             </Button>
                         </ButtonGroup>
                     </ModalFooter>
