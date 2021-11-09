@@ -81,38 +81,6 @@
     }
 }
 
-.documentsList {
-    border: 1px solid $theme-color-base-lighter;
-    border-top: 10px solid;
-    border-image-slice: 1;
-    border-image-source: linear-gradient(
-        to right,
-        $theme-color-primary-dark,
-        #02bfe7
-    );
-
-    caption {
-        text-align: left;
-        margin-bottom: units(2);
-    }
-
-    th {
-        font-size: size('body', '2xs');
-    }
-
-    th,
-    td {
-        text-align: left;
-        padding: units(1);
-    }
-
-    tbody {
-        tr:nth-child(even) {
-            background: $theme-color-base-lightest;
-        }
-    }
-}
-
 @media print {
     header,
     footer,
