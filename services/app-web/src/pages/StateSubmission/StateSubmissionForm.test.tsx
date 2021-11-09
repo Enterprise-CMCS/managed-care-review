@@ -230,8 +230,8 @@ describe('StateSubmissionForm', () => {
                 expect(
                     screen.getByRole(
                         'heading',
-                        { level: 4 },
-                        { name: 'Submission type' }
+                        { level: 4, name: 'Submission type' }
+                        
                     )
                 ).toBeInTheDocument()
             )
@@ -295,8 +295,7 @@ describe('StateSubmissionForm', () => {
                 expect(
                     screen.getByRole(
                         'heading',
-                        { level: 4 },
-                        { name: 'Submission type' }
+                        { level: 4, name: 'Submission type' }
                     )
                 ).toBeInTheDocument()
             )

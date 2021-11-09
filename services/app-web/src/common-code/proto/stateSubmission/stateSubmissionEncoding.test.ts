@@ -472,6 +472,7 @@ describe('handles invalid data as expected', () => {
     })
 
     it('toDomain returns a decode error when passed an invalid DraftSubmission', () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const invalidDraft = Object.assign({}, basicSubmission) as any
         delete invalidDraft.id
         delete invalidDraft.stateNumber
@@ -492,6 +493,7 @@ describe('handles invalid data as expected', () => {
     })
 
     it('toDomain returns a decode error when passed an invalid StateSubmission', () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const invalidSubmission = Object.assign({}, basicCompleteLiteral) as any
         delete invalidSubmission.id
         delete invalidSubmission.stateNumber

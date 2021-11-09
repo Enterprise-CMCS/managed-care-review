@@ -21,8 +21,7 @@ describe('NewStateSubmissionForm', () => {
             expect(
                 screen.getByRole(
                     'heading',
-                    { level: 4 },
-                    { name: 'Submission type' }
+                    { level: 4, name: 'Submission type' }
                 )
             ).toBeInTheDocument()
         )

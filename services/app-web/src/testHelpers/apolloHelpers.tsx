@@ -498,6 +498,7 @@ const submitDraftSubmissionMockError = ({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const indexSubmissionsMockSuccess = (
     submissions: Submission[] = [mockDraft(), mockStateSubmission()]
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): MockedResponse<Record<string, any>> => {
     const submissionEdges = submissions.map((sub) => {
         return {
