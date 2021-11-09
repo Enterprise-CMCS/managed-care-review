@@ -8,7 +8,7 @@
     "license": "MIT",
     "scripts": {
         "precommit": "lint-staged",
-        "lint": "tsc --noEmit && eslint src/",
+        "lint": "tsc --noEmit && eslint",
         "clean": "rm -rf node_modules && yarn cache clean",
         "format": "prettier --write src/**/*.ts{,x}",
         "build": "tsc"
