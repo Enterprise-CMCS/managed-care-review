@@ -1,6 +1,6 @@
 /*
 Order matters in this file. Read more about USWDS settings
-https://designsystem.digital.gov/documentation/settings/ 
+https://designsystem.digital.gov/documentation/settings/
 */
 
 /* GENERAL */
@@ -25,3 +25,6 @@ $theme-footer-max-width: 'desktop-lg';
 
 /* COMPONENTS */
 $theme-footer-logos-background: #f0fafd;
+
+/* MODAL */
+$theme-modal-border-radius: 0;

@@ -40,6 +40,7 @@ describe('review and submit', () => {
             cy.visit(`/submissions/${draftSubmissionId}/review-and-submit`)
 
             cy.submitStateSubmissionForm()
+            cy.findAllByTestId('modalWindow').should('be.hidden')
             cy.findByRole('heading', { level: 4, name: /Submission Error/ })
         })
     })
