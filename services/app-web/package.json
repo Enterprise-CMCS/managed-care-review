@@ -97,7 +97,7 @@
             "src/s3",
             "src/api",
             "src/testHelpers",
-            "src/local",
+            "src/localAuth",
             "src/gen",
             "src/Aut/CheckAuth.tsx",
             "src/Aut/CognitoLogin.tsx",

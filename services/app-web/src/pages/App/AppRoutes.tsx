@@ -3,7 +3,7 @@ import { Switch, Route } from 'react-router-dom'
 import { useLocation, useHistory } from 'react-router'
 
 import { CognitoLogin } from '../Auth/CognitoLogin'
-import { LocalLogin } from '../../local'
+import { LocalLogin } from '../../localAuth'
 import { Error404 } from '../Errors/Error404'
 import { useAuth } from '../../contexts/AuthContext'
 import { Dashboard } from '../Dashboard/Dashboard'

@@ -12,7 +12,7 @@ import {
 } from '@trussworks/react-uswds'
 import { useHistory } from 'react-router-dom'
 
-import { loginLocalUser } from './'
+import { loginLocalUser } from '.'
 
 import aangAvatar from '../assets/images/aang.png'
 import tophAvatar from '../assets/images/toph.png'
