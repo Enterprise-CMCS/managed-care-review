@@ -31,3 +31,5 @@ services/uploads/local_buckets
 
 .envrc.local
 lambda_response.json
+scripts/add_cypress_test_users.js
+scripts/add_cypress_test_users.js.map

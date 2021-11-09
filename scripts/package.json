@@ -1,0 +1,19 @@
+{
+    "name": "scripts",
+    "version": "1.0.0",
+    "description": "local scripts",
+    "main": "index.js",
+    "license": "MIT",
+    "private": true,
+    "scripts": {
+        "precommit": "lint-staged",
+        "clean": "rm -rf node_modules && yarn cache clean",
+        "lint": "tsc --noEmit && eslint",
+        "build": "tsc"
+    },
+    "lint-staged": {
+        "scripts/*.sh": [
+            "shellcheck"
+        ]
+    }
+}

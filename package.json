@@ -8,7 +8,8 @@
     "workspaces": {
         "packages": [
             "services/*",
-            "dev_tool"
+            "dev_tool",
+            "scripts"
         ],
         "nohoist": [
             "**/app-api/**",
@@ -27,11 +28,6 @@
         "cypress:open": "cypress open --env AUTH_MODE=LOCAL",
         "cypress:run": "cypress run --env AUTH_MODE=LOCAL",
         "precommit": "lint-staged"
-    },
-    "lint-staged": {
-        "scripts/*.sh": [
-            "shellcheck"
-        ]
     },
     "repository": {
         "type": "git",

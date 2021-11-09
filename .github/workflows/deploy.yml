@@ -202,7 +202,7 @@ jobs:
       - name: Create Test Users
         run: |
           # this script was compiled along with ./dev above. If that changes, run `tsc` to compile it
-          node ./build_dev/scripts/add_cypress_test_users.js $branch_name $TEST_USERS_PASS
+          node ./scripts/add_cypress_test_users.js $branch_name $TEST_USERS_PASS
 
       - name: Cypress run
         id: cypress
