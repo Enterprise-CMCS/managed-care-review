@@ -2,6 +2,20 @@
     "name": "app-web",
     "version": "0.1.0",
     "private": true,
+    "scripts": {
+        "start": "react-scripts start",
+        "build": "react-scripts build",
+        "test": "react-scripts test",
+        "eject": "react-scripts eject",
+        "clean": "rm -rf node_modules && yarn cache clean",
+        "format": "prettier --write src/**/*.ts{,x}",
+        "lint": "tsc --noEmit && eslint src/",
+        "test:a11y": "pa11y-ci",
+        "test:once": "react-scripts test  --watchAll=false",
+        "test:update": "react-scripts test -u",
+        "storybook": "start-storybook -p 6006 -s public --quiet",
+        "build-storybook": "build-storybook -s public --quiet"
+    },
     "dependencies": {
         "@apollo/client": "^3.4.15",
         "@testing-library/jest-dom": "^5.11.4",
@@ -33,49 +47,8 @@
         "yup": "^0.32.9",
         "zod": "^3.10.1"
     },
-    "scripts": {
-        "start": "react-scripts start",
-        "build": "react-scripts build",
-        "test": "react-scripts test",
-        "eject": "react-scripts eject",
-        "clean": "rm -rf node_modules && yarn cache clean",
-        "format": "prettier --write src/**/*.ts{,x}",
-        "lint": "tsc --noEmit && eslint src/",
-        "test:a11y": "pa11y-ci",
-        "test:once": "react-scripts test --watchAll=false",
-        "test:update": "react-scripts test -u",
-        "storybook": "start-storybook -p 6006 -s public --quiet",
-        "build-storybook": "build-storybook -s public --quiet"
-    },
     "resolutions": {
         "@storybook/react/babel-loader": "8.1.0"
-    },
-    "jest": {
-        "coveragePathIgnorePatterns": [
-            "src/pages/Auth/Signup",
-            "src/pages/Auth/ConfirmSignUp"
-        ],
-        "coverageReporters": [
-            [
-                "lcov",
-                {
-                    "projectRoot": "../../"
-                }
-            ],
-            "text"
-        ]
-    },
-    "browserslist": {
-        "production": [
-            ">0.2%",
-            "not dead",
-            "not op_mini all"
-        ],
-        "development": [
-            "last 1 chrome version",
-            "last 1 firefox version",
-            "last 1 safari version"
-        ]
     },
     "devDependencies": {
         "@storybook/addon-a11y": "^6.2.9",
@@ -105,5 +78,44 @@
         "serverless-plugin-scripts": "^1.0.2",
         "serverless-s3-sync": "^1.14.4",
         "serverless-stack-termination-protection": "^1.0.4"
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    },
+    "jest": {
+        "coveragePathIgnorePatterns": [
+            "/*.stories.tsx",
+            "src/s3",
+            "src/api",
+            "src/testHelpers",
+            "src/localAuth",
+            "src/gen",
+            "src/Aut/CheckAuth.tsx",
+            "src/Aut/CognitoLogin.tsx",
+            "src/pages/Auth/Signup",
+            "src/pages/Auth/ConfirmSignUp",
+            "App.tsx",
+            "index.ts",
+            "log_event.ts",
+            "reportWebVitals.ts"
+        ],
+        "coverageReporters": [
+            [
+                "lcov",
+                {
+                    "projectRoot": "../../"
+                }
+            ],
+            "text"
+        ]
     }
 }

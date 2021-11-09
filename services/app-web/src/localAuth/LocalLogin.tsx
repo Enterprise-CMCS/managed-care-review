@@ -12,14 +12,14 @@ import {
 } from '@trussworks/react-uswds'
 import { useHistory } from 'react-router-dom'
 
-import { loginLocalUser } from './localAuth'
+import { loginLocalUser } from '.'
 
-import aangAvatar from '../../assets/images/aang.png'
-import tophAvatar from '../../assets/images/toph.png'
-import zukoAvatar from '../../assets/images/zuko.png'
+import aangAvatar from '../assets/images/aang.png'
+import tophAvatar from '../assets/images/toph.png'
+import zukoAvatar from '../assets/images/zuko.png'
 
-import { useAuth } from '../../contexts/AuthContext'
-import { CognitoUserType } from '../../common-code/domain-models'
+import { useAuth } from '../contexts/AuthContext'
+import { CognitoUserType } from '../common-code/domain-models'
 
 const localUsers: CognitoUserType[] = [
     {

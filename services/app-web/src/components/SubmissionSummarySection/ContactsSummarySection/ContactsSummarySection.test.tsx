@@ -99,7 +99,12 @@ describe('ContactsSummarySection', () => {
 
     it('can render only state contacts for contract only submission', () => {
         renderWithProviders(
-            <ContactsSummarySection submission={stateSubmission} />
+            <ContactsSummarySection
+                submission={{
+                    ...stateSubmission,
+                    submissionType: 'CONTRACT_ONLY',
+                }}
+            />
         )
 
         expect(

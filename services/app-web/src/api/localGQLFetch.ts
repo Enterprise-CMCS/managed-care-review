@@ -1,4 +1,4 @@
-import { getLoggedInUser } from '../pages/Auth/localAuth'
+import { getLoggedInUser } from '../localAuth'
 
 import { fakeAmplifyFetch } from './fakeAmplifyFetch'
 
