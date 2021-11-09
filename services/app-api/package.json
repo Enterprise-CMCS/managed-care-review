@@ -8,7 +8,7 @@
         "precommit": "lint-staged",
         "test": "jest --watch",
         "test:once": "jest --runInBand --ci",
-        "lint": "tsc --noEmit && eslint . --ignore-path ../../.gitignore",
+        "lint": "tsc --noEmit && eslint .",
         "clean": "rm -rf node_modules && yarn cache clean"
     },
     "lint-staged": {
