@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from 'react'
 import dayjs from 'dayjs'
 import styles from '../SubmissionSummarySection.module.scss'
-import { Document } from '../../../gen/gqlClient'
 import {
     AmendableItemsRecord,
     ContractTypeRecord,
@@ -10,13 +8,9 @@ import {
     ManagedCareEntityRecord,
 } from '../../../constants/submissions'
 import { SectionHeader } from '../../../components/SectionHeader'
-import { Link } from '@trussworks/react-uswds'
 import { DataDetail } from '../../../components/DataDetail'
 import { DoubleColumnRow } from '../../../components/DoubleColumnRow'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
-import { useS3 } from '../../../contexts/S3Context'
-
-type DocumentWithLink = { url: string | null } & Document
 
 export type ContractDetailsSummarySectionProps = {
     submission: DraftSubmission | StateSubmission
@@ -53,36 +47,6 @@ export const ContractDetailsSummarySection = ({
     submission,
     navigateTo,
 }: ContractDetailsSummarySectionProps): React.ReactElement => {
-    const { getURL, getKey } = useS3()
-    useEffect(() => {
-        const refreshDocuments = async () => {
-            const newDocuments = await Promise.all(
-                submission.contractDocuments.map(async (doc) => {
-                    const key = getKey(doc.s3URL)
-                    if (!key)
-                        return {
-                            ...doc,
-                            url: null,
-                        }
-
-                    const documentLink = await getURL(key)
-                    return {
-                        ...doc,
-                        url: documentLink,
-                    }
-                })
-            ).catch((err) => {
-                console.log(err)
-                return []
-            })
-            setRefreshedDocs(newDocuments)
-        }
-
-        void refreshDocuments()
-    }, [submission, getKey, getURL])
-
-    const [refreshedDocs, setRefreshedDocs] = useState<DocumentWithLink[]>([])
-
     // Array of values from a checkbox field is displayed in an unordered list
 
     const capitationRateChangeReason = (): string | null => {
@@ -219,39 +183,6 @@ export const ContractDetailsSummarySection = ({
                         </>
                     )}
             </dl>
-
-            <table className={styles.documentsList}>
-                <caption className="text-bold">Contract</caption>
-                <thead>
-                    <tr>
-                        <th scope="col">Document name</th>
-                        <th scope="col">Date uploaded</th>
-                        <th scope="col">Document category</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {refreshedDocs.map((doc) => (
-                        <tr key={doc.name}>
-                            {doc.url ? (
-                                <td>
-                                    <Link
-                                        aria-label={`${doc.name} (opens in new window)`}
-                                        href={doc.url}
-                                        variant="external"
-                                        target="_blank"
-                                    >
-                                        {doc.name}
-                                    </Link>
-                                </td>
-                            ) : (
-                                <td>{doc.name}</td>
-                            )}
-                            <td></td>
-                            <td>Contract</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
         </section>
     )
 }
