@@ -2,6 +2,15 @@
 
 These are all pieces of technology we rely on with resources to help learn them.
 
+## Prisma
+
+An ORM for Typescript + Postgres. We define the tables and relationships we want in our database in our /services/app-api/prisma/schema.prisma file. Prisma generates a typescript client for making queries as well as migrations for changing our database to match the desired state.
+
+-   https://www.prisma.io
+-   https://www.prisma.io/docs/concepts/components/prisma-schema
+-   https://www.prisma.io/docs/guides/database/developing-with-prisma-migrate
+-   https://www.prisma.io/docs/concepts/components/prisma-client
+
 ## DynamoDB
 
 An AWS native datastore.
@@ -19,6 +28,10 @@ Testing library is a javascript test framework for DOM based tests. It lets us w
 https://testing-library.com/docs/
 
 the expect matchers are from jest-dom: https://github.com/testing-library/jest-dom#custom-matchers
+
+## Protobuf
+
+Protobuf is a tool for serializing key-value data. Designed for API requests, the serialized format is space efficient and typed. We're using it to encode form data and save it in our database in a single column. Our protobuf schema is located in /services/app-proto/src/state_submission.proto. We serialize our domain models DraftSubmissionType and StateSubmissionType into byte arrays which we write and read from postgres.
 
 ## Apollo Client
 

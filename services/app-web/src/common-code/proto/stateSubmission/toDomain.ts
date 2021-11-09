@@ -82,12 +82,17 @@ const protoDateToDomain = (
         return undefined
     }
 
-    if (!(protoDate.year && protoDate.month && protoDate.day)) {
+    // intentionally using `== null` here to check for null and undefined but _not_ 0
+    if (
+        protoDate.year == null ||
+        protoDate.month == null ||
+        protoDate.day == null
+    ) {
         console.log('LOG: Incomplete Proto Date', protoDate)
         return undefined
     }
 
-    return new Date(protoDate.year, protoDate.month, protoDate.day)
+    return new Date(Date.UTC(protoDate.year, protoDate.month, protoDate.day))
 }
 /*
     Convert proto enum (e.g. SUBMISSION_TYPE_CONTRACT_ONLY) to domain enum (e.g. CONTRACT_ONLY)

@@ -23,7 +23,7 @@ Store Methods:
 
 VariableNames:
 
--   always caiptalize ID, so programID not programId
+-   always capitalize ID, so programID not programId
 
 ## Dependency Injection
 

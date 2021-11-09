@@ -80,7 +80,7 @@ async function getSecretValue(): Promise<Result<Secret, Error>> {
     if (!secret.username || !secret.password) {
         return err(
             new Error(
-                'Could not retreive postgres credentials from secrets manager'
+                'Could not retrieve postgres credentials from secrets manager'
             )
         )
     }
@@ -97,7 +97,9 @@ export async function GetConnectionURL(): Promise<Result<string, Error>> {
         secret.value.username
     }:${encodeURIComponent(secret.value.password)}@${secret.value.host}:${
         secret.value.port
-    }/${secret.value.dbname}?schema=public&connection_limit=5`
+    }/${
+        secret.value.dbname
+    }?schema=public&connection_limit=5&connect_timeout=60&pool_timeout=70`
 
     return ok(postgresURL)
 }

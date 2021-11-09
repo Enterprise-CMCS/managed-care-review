@@ -6,7 +6,7 @@ import {
 import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
 import UPDATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/updateDraftSubmission.graphql'
 import {
-    constructTestServer,
+    constructTestPostgresServer,
     createTestDraftSubmission,
     fetchTestDraftSubmissionById,
 } from '../testHelpers/gqlHelpers'
@@ -215,7 +215,7 @@ describe('updateDraftSubmission', () => {
     })
 
     it('updates a submission if the state matches', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const createdDraft = await createTestDraftSubmission(server)
         const createdID = createdDraft.id
@@ -293,7 +293,7 @@ describe('updateDraftSubmission', () => {
     })
 
     it('updates a submission to have documents', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const createdDraft = await createTestDraftSubmission(server)
         const createdID = createdDraft.id
@@ -441,7 +441,7 @@ describe('updateDraftSubmission', () => {
     })
 
     it('updates a submission to have state contacts', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const createdDraft = await createTestDraftSubmission(server)
         const createdID = createdDraft.id
@@ -463,7 +463,7 @@ describe('updateDraftSubmission', () => {
                     titleRole: 'A Role',
                     email: 'test@test.com',
                     actuarialFirm: 'MERCER' as const,
-                    actuarialFirmOther: '',
+                    actuarialFirmOther: null,
                 },
             ],
             actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
@@ -525,7 +525,7 @@ describe('updateDraftSubmission', () => {
     })
 
     it('updates a submission to have contract amendment details', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const createdDraft = await createTestDraftSubmission(server)
         const createdID = createdDraft.id
@@ -583,7 +583,7 @@ describe('updateDraftSubmission', () => {
     })
 
     it('updates a submission with conditionals in contract amendment details', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const createdDraft = await createTestDraftSubmission(server)
         const createdID = createdDraft.id
@@ -660,7 +660,7 @@ describe('updateDraftSubmission', () => {
     })
 
     it('updates a submission to have a new rate', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const createdDraft = await createTestDraftSubmission(server)
         const createdID = createdDraft.id
@@ -712,7 +712,7 @@ describe('updateDraftSubmission', () => {
     })
 
     it('updates a submission to have a rate amendment', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const createdDraft = await createTestDraftSubmission(server)
         const createdID = createdDraft.id
@@ -773,7 +773,7 @@ describe('updateDraftSubmission', () => {
     })
 
     it('updates a submission to remove existing documents', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const createdDraft = await createTestDraftSubmission(server)
         const createdID = createdDraft.id
@@ -882,7 +882,7 @@ describe('updateDraftSubmission', () => {
     })
 
     it('errors if the ID does not exist', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const startDate = '2021-07-06'
         const endDate = '2021-07-12'
@@ -926,7 +926,7 @@ describe('updateDraftSubmission', () => {
     })
 
     it('returns an error if you are requesting for a different state (403)', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         // SETUP: First, create a new submission
         const createInput: CreateDraftSubmissionInput = {
@@ -948,7 +948,7 @@ describe('updateDraftSubmission', () => {
         const createdID = createdDraft.id
 
         // setup a server with a different user
-        const otherUserServer = constructTestServer({
+        const otherUserServer = await constructTestPostgresServer({
             context: {
                 user: {
                     name: 'Aang',
@@ -996,7 +996,7 @@ describe('updateDraftSubmission', () => {
     })
 
     it('returns an error if you try and set a programID thats not valid', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const createdDraft = await createTestDraftSubmission(server)
         const createdID = createdDraft.id

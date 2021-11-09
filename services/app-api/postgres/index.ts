@@ -1,0 +1,1 @@
+export { NewPostgresStore } from './postgresStore'
