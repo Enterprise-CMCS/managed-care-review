@@ -32,7 +32,7 @@ export type StateSubmissionType = {
     federalAuthorities: FederalAuthority[]
     contractAmendmentInfo?: ContractAmendmentInfo
     rateType?: RateType
-    rateDocuments?: SubmissionDocument[]
+    rateDocuments: SubmissionDocument[]
     rateDateStart?: Date
     rateDateEnd?: Date
     rateDateCertified?: Date
