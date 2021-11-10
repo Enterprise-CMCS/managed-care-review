@@ -77,13 +77,13 @@ export const RateDetailsSummarySection = ({
                         ) : null
                     }
                 />
+                <UploadedDocumentsTable
+                    documents={submission.rateDocuments}
+                    caption="Rate certification"
+                    documentCategory="Rate certification"
+                />
             </dl>
 
-            <UploadedDocumentsTable
-                documents={submission.rateDocuments}
-                caption="Rate certification"
-                documentCategory="Rate certification"
-            />
         </section>
     )
 }
