@@ -10,6 +10,7 @@
     "dependencies": {},
     "devDependencies": {
         "serverless": "^2.54.0",
+        "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",
         "serverless-stack-termination-protection": "^1.0.4"
     }
 }

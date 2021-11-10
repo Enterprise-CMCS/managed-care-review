@@ -7,10 +7,10 @@
     "scripts": {},
     "author": "",
     "license": "CC0-1.0",
-    "dependencies": {
-        "prettier": "^2.2.1"
-    },
     "devDependencies": {
-        "serverless-stack-termination-protection": "^1.0.4"
+        "prettier": "^2.2.1",
+        "serverless-iam-helper": "CMSgov/serverless-iam-helper",
+        "serverless-stack-termination-protection": "^1.0.4",
+        "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper"
     }
 }
