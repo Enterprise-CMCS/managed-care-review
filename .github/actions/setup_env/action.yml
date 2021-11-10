@@ -43,7 +43,7 @@ runs:
     - name: Install yarn package
       shell: bash
       id: yarn-install
-      run: yarn install --prefer-offline --frozen-lockfile --cache-folder ${{ steps.yarn-cache.outputs.dir }}
+      run: yarn install --prefer-offline --frozen-lockfile
 
     - name: set path
       shell: bash
