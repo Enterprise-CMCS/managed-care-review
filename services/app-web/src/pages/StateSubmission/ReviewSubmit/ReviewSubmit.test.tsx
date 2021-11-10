@@ -1,4 +1,3 @@
-import React from 'react'
 import { screen, waitFor } from '@testing-library/react'
 import { createMemoryHistory } from 'history'
 
@@ -51,7 +50,7 @@ describe('ReviewSubmit', () => {
             ).toBeInTheDocument()
 
             expect(
-                screen.getByRole('heading', { name: 'Documents' })
+                screen.getByRole('heading', { name: 'Supporting documents' })
             ).toBeInTheDocument()
 
             const sectionHeadings = screen.queryAllByRole('heading', {

@@ -1,22 +1,22 @@
 import React, { useEffect, useState } from 'react'
 import styles from '../SubmissionSummarySection.module.scss'
 import { Document } from '../../../gen/gqlClient'
-import { SectionHeader } from '../../../components/SectionHeader'
+import { SectionHeader } from '../../SectionHeader'
 import { Link } from '@trussworks/react-uswds'
 import { useS3 } from '../../../contexts/S3Context'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 
 type DocumentWithLink = { url: string | null } & Document
 
-export type DocumentsSummarySectionProps = {
+export type SupportingDocumentsSummarySectionProps = {
     submission: DraftSubmission | StateSubmission
     navigateTo?: string
 }
 
-export const DocumentsSummarySection = ({
+export const SupportingDocumentsSummarySection = ({
     submission,
     navigateTo,
-}: DocumentsSummarySectionProps): React.ReactElement => {
+}: SupportingDocumentsSummarySectionProps): React.ReactElement => {
     const { getURL, getKey } = useS3()
     useEffect(() => {
         const refreshDocuments = async () => {
@@ -53,7 +53,10 @@ export const DocumentsSummarySection = ({
 
     return (
         <section id="documents" className={styles.summarySection}>
-            <SectionHeader header="Documents" navigateTo={navigateTo} />
+            <SectionHeader
+                header="Supporting documents"
+                navigateTo={navigateTo}
+            />
             <span className="text-bold">{documentsSummary}</span>
             <ul>
                 {refreshedDocs.map((doc) => (
