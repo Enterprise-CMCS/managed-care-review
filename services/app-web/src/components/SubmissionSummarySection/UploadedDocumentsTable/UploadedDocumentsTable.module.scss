@@ -2,8 +2,9 @@
 @import '../../../styles/custom.scss';
 
 .uploadedDocumentsTable {
+    width: 100%;
+
     caption {
-        text-align: left;
         margin-bottom: units(2);
     }
 
