@@ -22,7 +22,7 @@
         $theme-color-primary-dark,
         #02bfe7
     );
-    box-shadow: inset 0 0 1px #363636, 0px 0px 24px rgb(0 0 0 / 5%);
+    box-shadow: inset 0 0 1px $theme-color-base-dark, 0px 0px 24px rgb(0 0 0 / 5%);
 }
 
 h3 {
