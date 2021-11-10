@@ -16,9 +16,9 @@ const domainDateToProtoDate = (
     }
 
     return {
-        day: domainDate.getDate(),
-        month: domainDate.getMonth(),
-        year: domainDate.getFullYear(),
+        day: domainDate.getUTCDate(),
+        month: domainDate.getUTCMonth(),
+        year: domainDate.getUTCFullYear(),
     }
 }
 

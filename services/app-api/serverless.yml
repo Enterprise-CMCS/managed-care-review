@@ -131,6 +131,13 @@ functions:
           method: get
           cors: true
           authorizer: aws_iam
+    timeout: 60 # aurora cold start can be long
+    vpc:
+      securityGroupIds:
+        - ${self:custom.sgId}
+      subnetIds: ${self:custom.privateSubnets}
+    layers:
+      - !Ref PrismaClientLambdaLayer
 
   hello:
     handler: handlers/hello.main

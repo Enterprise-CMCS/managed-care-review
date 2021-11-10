@@ -1,10 +1,10 @@
 import { CreateDraftSubmissionInput } from '../gen/gqlServer'
 import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
-import { constructTestServer } from '../testHelpers/gqlHelpers'
+import { constructTestPostgresServer } from '../testHelpers/gqlHelpers'
 
 describe('createDraftSubmission', () => {
     it('returns draft submission payload with a draft submission', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const input: CreateDraftSubmissionInput = {
             programID: 'managed-medical-assistance',
@@ -33,7 +33,7 @@ describe('createDraftSubmission', () => {
     })
 
     it('returns an error if the program id is not in valid', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
         const input: CreateDraftSubmissionInput = {
             programID: 'xyz123',
             submissionType: 'CONTRACT_ONLY',

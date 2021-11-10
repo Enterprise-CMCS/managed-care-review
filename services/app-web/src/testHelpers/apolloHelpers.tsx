@@ -257,7 +257,7 @@ export function mockStateSubmission(): StateSubmission {
             name: 'SNBC',
         },
         name: 'MN-MSHO-0003',
-        submissionType: 'CONTRACT_ONLY',
+        submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A submitted submission',
         submittedAt: new Date(),
         documents: [{ s3URL: 'bar', name: 'foo' }],
@@ -266,10 +266,10 @@ export function mockStateSubmission(): StateSubmission {
         contractDateStart: new Date(),
         contractDateEnd: new Date(),
         contractAmendmentInfo: null,
-        managedCareEntities: [],
+        managedCareEntities: ['ENROLLMENT_PROCESS'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateType: 'NEW',
-        rateDocuments: [],
+        rateDocuments: [{ s3URL: 'bar', name: 'foo' }],
         rateDateStart: new Date(),
         rateDateEnd: new Date(),
         rateDateCertified: new Date(),
@@ -498,7 +498,7 @@ const submitDraftSubmissionMockError = ({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const indexSubmissionsMockSuccess = (
     submissions: Submission[] = [mockDraft(), mockStateSubmission()]
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): MockedResponse<Record<string, any>> => {
     const submissionEdges = submissions.map((sub) => {
         return {

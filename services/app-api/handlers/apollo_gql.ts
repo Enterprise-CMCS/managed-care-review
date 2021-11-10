@@ -1,8 +1,8 @@
 import { ApolloServer } from 'apollo-server-lambda'
 import {
+    Handler,
     APIGatewayProxyHandler,
     APIGatewayProxyEvent,
-    Context as LambdaContext,
 } from 'aws-lambda'
 
 import typeDefs from '../../app-graphql/src/schema.graphql'
@@ -16,77 +16,48 @@ import { configureResolvers } from '../resolvers'
 import {
     userFromLocalAuthProvider,
     userFromCognitoAuthProvider,
+    userFromAuthProvider,
 } from '../authn'
+import { NewPrismaClient } from '../lib/prisma'
+import { NewPostgresStore } from '../postgres/postgresStore'
 
-// Configuration:
-const authMode = process.env.REACT_APP_AUTH_MODE
-assertIsAuthMode(authMode)
-
-const getDynamoStore = () => {
-    const dynamoConnection = process.env.DYNAMO_CONNECTION
-    const stageName = process.env.stage
-    const dbPrefix = stageName + '-'
-
-    if (dynamoConnection === 'USE_AWS') {
-        return newDeployedStore(
-            process.env.AWS_DEFAULT_REGION || 'no region',
-            dbPrefix
-        )
-    } else {
-        return newLocalStore(process.env.DYNAMO_CONNECTION || 'no db url')
-    }
-}
-
-const store = getDynamoStore()
-
-const userFetcher =
-    authMode === 'LOCAL'
-        ? userFromLocalAuthProvider
-        : userFromCognitoAuthProvider
-// End Configuration
-
-// Resolvers are defined and tested in the resolvers package
-const resolvers = configureResolvers(store)
-
+// The Context type passed to all of our GraphQL resolvers
 export interface Context {
     user: CognitoUserType
 }
-const context = async ({
-    event,
-}: {
-    event: APIGatewayProxyEvent
-    context: LambdaContext
-}): Promise<Context> => {
-    const authProvider =
-        event.requestContext.identity.cognitoAuthenticationProvider
-    if (authProvider) {
-        try {
-            const userResult = await userFetcher(authProvider)
 
-            if (!userResult.isErr()) {
-                return {
-                    user: userResult.value,
+// This function pulls auth info out of the cognitoAuthenticationProvider in the lambda event
+// and turns that into our GQL resolver context object
+function contextForRequestForFetcher(
+    userFetcher: userFromAuthProvider
+): ({ event }: { event: APIGatewayProxyEvent }) => Promise<Context> {
+    return async ({ event }) => {
+        const authProvider =
+            event.requestContext.identity.cognitoAuthenticationProvider
+        if (authProvider) {
+            try {
+                const userResult = await userFetcher(authProvider)
+
+                if (!userResult.isErr()) {
+                    return {
+                        user: userResult.value,
+                    }
+                } else {
+                    throw new Error(
+                        `Log: failed to fetch user: ${userResult.error}`
+                    )
                 }
-            } else {
-                throw new Error(
-                    `Log: failed to fetch user: ${userResult.error}`
-                )
+            } catch (err) {
+                console.log('Error attempting to fetch user: ', err)
+                throw new Error('Log: placing user in gql context failed')
             }
-        } catch (err) {
-            console.log('Error attempting to fetch user: ', err)
-            throw new Error('Log: placing user in gql context failed')
+        } else {
+            throw new Error('Log: no AuthProvider')
         }
-    } else {
-        throw new Error('Log: no AuthProvider')
     }
 }
 
-const server = new ApolloServer({
-    typeDefs,
-    resolvers,
-    context,
-})
-
+// This middleware returns an error if the local request is missing authentication info
 function localAuthMiddleware(
     wrapped: APIGatewayProxyHandler
 ): APIGatewayProxyHandler {
@@ -110,15 +81,88 @@ function localAuthMiddleware(
     }
 }
 
-const gqlHandler = server.createHandler({
-    expressGetMiddlewareOptions: {
-        cors: {
-            origin: true,
-            credentials: true,
+// This asynchronous function is started on the cold-load of this script
+// and is awaited by our handler function
+// Pattern is explained here https://serverlessfirst.com/function-initialisation/
+async function initializeGQLHandler(): Promise<Handler> {
+    // Initializing our handler should be the only place we read environment variables. Everything
+    // should be configured by parameters, per /docs/designPatterns.md#Dependency_Injection
+
+    const authMode = process.env.REACT_APP_AUTH_MODE
+    assertIsAuthMode(authMode)
+
+    const useDynamo = process.env.USE_DYNAMO
+    const dynamoConnection = process.env.DYNAMO_CONNECTION
+    const defaultRegion = process.env.AWS_DEFAULT_REGION
+    const stageName = process.env.stage
+
+    const getDynamoStore = () => {
+        const dbPrefix = stageName + '-'
+
+        if (dynamoConnection === 'USE_AWS') {
+            return newDeployedStore(defaultRegion || 'no region', dbPrefix)
+        } else {
+            return newLocalStore(dynamoConnection || 'no db url')
+        }
+    }
+
+    const getPostgresStore = async () => {
+        console.log('Getting Postgres Connection')
+        const prismaResult = await NewPrismaClient()
+
+        if (prismaResult.isErr()) {
+            console.log(
+                'Error: attempting to create prisma client: ',
+                prismaResult.error
+            )
+            throw new Error('Failed to create Prisma Client')
+        }
+
+        return NewPostgresStore(prismaResult.value)
+    }
+
+    const store =
+        useDynamo === 'YES' ? getDynamoStore() : await getPostgresStore()
+
+    // Resolvers are defined and tested in the resolvers package
+    const resolvers = configureResolvers(store)
+
+    const userFetcher =
+        authMode === 'LOCAL'
+            ? userFromLocalAuthProvider
+            : userFromCognitoAuthProvider
+
+    // Our user-context function is parametrized with a local or
+    const contextForRequest = contextForRequestForFetcher(userFetcher)
+
+    const server = new ApolloServer({
+        typeDefs,
+        resolvers,
+        context: contextForRequest,
+    })
+
+    const handler = server.createHandler({
+        expressGetMiddlewareOptions: {
+            cors: {
+                origin: true,
+                credentials: true,
+            },
         },
-    },
-})
+    })
 
-const isLocal = authMode === 'LOCAL'
+    // Locally, we wrap our handler in a middleware that returns 403 for unauthenticated requests
+    const isLocal = authMode === 'LOCAL'
+    return isLocal ? localAuthMiddleware(handler) : handler
+}
 
-exports.graphqlHandler = isLocal ? localAuthMiddleware(gqlHandler) : gqlHandler
+const handlerPromise = initializeGQLHandler()
+
+const gqlHandler: Handler = async (event, context, completion) => {
+    // Once initialized, future awaits will return immediately
+    const initializedHandler = await handlerPromise
+    console.log('initalizedHandler has awaited')
+
+    return await initializedHandler(event, context, completion)
+}
+
+exports.graphqlHandler = gqlHandler

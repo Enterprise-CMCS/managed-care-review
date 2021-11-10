@@ -9,6 +9,22 @@ jobs:
   unit-tests:
     name: test - unit tests
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:13.3
+        env:
+          REACT_APP_AUTH_MODE: LOCAL
+          POSTGRES_PASSWORD: shhhsecret
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
@@ -25,7 +41,7 @@ jobs:
         shell: bash
         run: ./.github/build_vars.sh set_values
         env:
-          REACT_APP_AUTH_MODE: IDM
+          REACT_APP_AUTH_MODE: LOCAL
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
@@ -39,6 +55,8 @@ jobs:
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
 
       - name: Unit Tests
+        env:
+          DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5
         run: ./dev test --unit --run-db
 
       - name: publish code coverage

@@ -12,7 +12,7 @@
         "clean": "rm -rf node_modules && yarn cache clean"
     },
     "lint-staged": {
-        "*.{js,ts}": [
+        "app-api/*.{js,ts}": [
             "eslint --fix",
             "prettier --write"
         ]
@@ -26,8 +26,10 @@
         "graphql-scalars": "^1.11.1",
         "neverthrow": "^4.2.2",
         "prisma": "3.4.0",
+        "protobufjs": "^6.11.2",
         "request": "^2.88.2",
-        "uuid": "^8.3.2"
+        "uuid": "^8.3.2",
+        "zod": "^3.11.6"
     },
     "devDependencies": {
         "@types/aws-lambda": "^8.10.83",

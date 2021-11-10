@@ -156,7 +156,7 @@ message RateInfo {
   message ActuaryContact {
     optional Contact contact = 1;
     optional ActuarialFirmType actuarial_firm_type = 2;
-    optional string actuarial_firm_other= 3;
+    optional string actuarial_firm_other = 3;
   }
 
   message RateAmendmentInfo {
