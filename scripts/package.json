@@ -5,6 +5,7 @@
     "main": "index.js",
     "license": "MIT",
     "private": true,
+    "type": "module",
     "scripts": {
         "precommit": "lint-staged",
         "clean": "rm -rf node_modules && yarn cache clean",
@@ -15,5 +16,8 @@
         "scripts/*.sh": [
             "shellcheck"
         ]
+    },
+    "dependencies": {
+        "aws-sdk": "^2.1018.0"
     }
 }
