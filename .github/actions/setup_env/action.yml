@@ -40,6 +40,11 @@ runs:
         node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
         cache: 'yarn'
 
+    - name: Install yarn package
+      shell: bash
+      id: yarn-install
+      run: yarn install --prefer-offline --frozen-lockfile --cache-folder ${{ steps.yarn-cache.outputs.dir }}
+
     - name: set path
       shell: bash
       run: |

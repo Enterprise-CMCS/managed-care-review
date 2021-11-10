@@ -103,10 +103,11 @@ jobs:
       - uses: actions/setup-node@v2.4.1
         with:
           node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
+          cache: yarn
 
       - name: Install packages
         working-directory: services/app-api
-        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn install --frozen-lockfile
+        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn install --prefer-offline --frozen-lockfile
 
       # Generate Prisma Client and binary that can run in a lambda environment
       - name: Prepare prisma client
@@ -181,15 +182,8 @@ jobs:
           DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
 
-      - name: Install packages in root
-        run: yarn install --frozen-lockfile
-
       - name: Install Cypress
         run: yarn cypress install
-
-      - name: Install packages in ui
-        working-directory: services/ui
-        run: yarn install --frozen-lockfile
 
       - name: Generate graphql
         run: ./dev generate
