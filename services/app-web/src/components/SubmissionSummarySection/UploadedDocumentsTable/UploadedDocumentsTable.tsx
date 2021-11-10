@@ -2,14 +2,10 @@ import { useEffect, useState } from 'react'
 import styles from './UploadedDocumentsTable.module.scss'
 import { Link } from '@trussworks/react-uswds'
 import { useS3 } from '../../../contexts/S3Context'
-import {
-    Document,
-    DraftSubmission,
-    StateSubmission,
-} from '../../../gen/gqlClient'
+import { Document } from '../../../gen/gqlClient'
 
 export type UploadedDocumentsTableProps = {
-    submission: DraftSubmission | StateSubmission
+    documents: Document[]
     caption: string | null
     documentCategory: string
 }
@@ -17,7 +13,7 @@ export type UploadedDocumentsTableProps = {
 type DocumentWithLink = { url: string | null } & Document
 
 export const UploadedDocumentsTable = ({
-    submission,
+    documents,
     caption,
     documentCategory,
 }: UploadedDocumentsTableProps): React.ReactElement => {
@@ -26,7 +22,7 @@ export const UploadedDocumentsTable = ({
     useEffect(() => {
         const refreshDocuments = async () => {
             const newDocuments = await Promise.all(
-                submission.rateDocuments.map(async (doc) => {
+                documents.map(async (doc) => {
                     const key = getKey(doc.s3URL)
                     if (!key)
                         return {
@@ -48,7 +44,7 @@ export const UploadedDocumentsTable = ({
         }
 
         void refreshDocuments()
-    }, [submission, getKey, getURL])
+    }, [documents, getKey, getURL])
     return (
         <table
             className={`borderTopLinearGradient ${styles.uploadedDocumentsTable}`}
@@ -57,7 +53,7 @@ export const UploadedDocumentsTable = ({
             <thead>
                 <tr>
                     <th scope="col">Document name</th>
-                    <th scope="col">Date uploaded</th>
+                    <th scope="col"></th>
                     <th scope="col">Document category</th>
                 </tr>
             </thead>

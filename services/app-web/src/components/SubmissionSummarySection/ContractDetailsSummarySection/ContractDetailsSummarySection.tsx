@@ -185,7 +185,7 @@ export const ContractDetailsSummarySection = ({
                     )}
 
                 <UploadedDocumentsTable
-                    submission={submission}
+                    documents={submission.contractDocuments}
                     caption="Contract"
                     documentCategory="Contract"
                 />

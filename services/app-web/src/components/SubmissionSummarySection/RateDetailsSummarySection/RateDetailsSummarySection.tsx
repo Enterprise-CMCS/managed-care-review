@@ -80,7 +80,7 @@ export const RateDetailsSummarySection = ({
             </dl>
 
             <UploadedDocumentsTable
-                submission={submission}
+                documents={submission.rateDocuments}
                 caption="Rate certification"
                 documentCategory="Rate certification"
             />
