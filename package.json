@@ -40,23 +40,13 @@
     },
     "homepage": "https://github.com/CMSgov/managed-care-review#readme",
     "devDependencies": {
-        "@testing-library/cypress": "^8.0.1",
-        "@types/dotenv": "^8.2.0",
-        "@types/node": "^14.17.32",
-        "@types/yargs": "^17.0.5",
         "chromedriver": "^95.0.0",
         "cypress": "^8.7.0",
         "cypress-pipe": "^2.0.0",
-        "dotenv": "^10.0.0",
         "husky": "^7.0.4",
         "lerna": "^4.0.0",
         "lint-staged": "^11.2.6",
-        "prettier": "^2.4.1",
-        "serverless": "^2.65.0",
-        "serverless-iam-helper": "CMSgov/serverless-iam-helper",
-        "serverless-idempotency-helper": "CMSgov/serverless-idempotency-helper",
-        "serverless-plugin-scripts": "^1.0.2",
-        "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper"
+        "prettier": "^2.4.1"
     },
     "dependencies": {
         "aws-sdk": "^2.1018.0",
