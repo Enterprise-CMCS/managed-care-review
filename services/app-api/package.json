@@ -60,9 +60,10 @@
         "serverless-stack-termination-protection": "^1.0.4",
         "serverless-webpack": "^5.5.4",
         "ts-jest": "^26.4.4",
-        "ts-loader": "^9.2.6",
+        "ts-loader": "~8.2.0",
         "tsconfig-paths-webpack-plugin": "^3.5.1",
         "typescript": "4.4.4",
-        "webpack-node-externals": "^3.0.0"
+        "webpack-node-externals": "^3.0.0",
+        "webpack": "4.44.2"
     }
 }
