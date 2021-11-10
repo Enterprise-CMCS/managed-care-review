@@ -64,7 +64,7 @@ module.exports = {
                 {
                     from: path.resolve(
                         __dirname,
-                        './node_modules/.prisma/client/schema.prisma'
+                        '../../node_modules/.prisma/client/schema.prisma'
                     ),
                 },
             ],
