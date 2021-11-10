@@ -10,10 +10,6 @@
             "services/*",
             "dev_tool",
             "scripts"
-        ],
-        "nohoist": [
-            "**/app-api/**",
-            "**/app-web/**"
         ]
     },
     "directories": {
