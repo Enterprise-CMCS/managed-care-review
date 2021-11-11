@@ -9,7 +9,7 @@ import { updateStateSubmission } from './updateStateSubmission'
 import { findDraftSubmission } from './findDraftSubmission'
 import { findStateSubmission } from './findStateSubmission'
 
-export function NewPostgresStore(client: PrismaClient): Store {
+function NewPostgresStore(client: PrismaClient): Store {
     return {
         findAllSubmissions: (stateCode) =>
             findAllSubmissions(client, stateCode),
@@ -28,3 +28,5 @@ export function NewPostgresStore(client: PrismaClient): Store {
         findProgram: findProgram,
     }
 }
+
+export { NewPostgresStore }

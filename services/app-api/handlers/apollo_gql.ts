@@ -18,8 +18,8 @@ import {
     userFromCognitoAuthProvider,
     userFromAuthProvider,
 } from '../authn'
-import { NewPrismaClient } from '../lib/prisma'
-import { NewPostgresStore } from '../postgres/postgresStore'
+import { NewPostgresStore, NewPrismaClient } from '../postgres/'
+import { FetchSecrets } from '../secrets'
 
 // The Context type passed to all of our GraphQL resolvers
 export interface Context {
@@ -95,6 +95,12 @@ async function initializeGQLHandler(): Promise<Handler> {
     const dynamoConnection = process.env.DYNAMO_CONNECTION
     const defaultRegion = process.env.AWS_DEFAULT_REGION
     const stageName = process.env.stage
+    const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET
+    const dbURL = process.env.DATABASE_URL
+
+    if (!dbURL) {
+        throw new Error('Init Error: DATABASE_URL is required to run app-api')
+    }
 
     const getDynamoStore = () => {
         const dbPrefix = stageName + '-'
@@ -108,17 +114,43 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     const getPostgresStore = async () => {
         console.log('Getting Postgres Connection')
-        const prismaResult = await NewPrismaClient()
 
-        if (prismaResult.isErr()) {
+        let dbConnectionURL = dbURL
+        if (dbURL === 'AWS_SM') {
+            if (!secretsManagerSecret) {
+                console.log(
+                    'Init Error: The env var SECRETS_MANAGER_SECRET must be set if DATABASE_URL=AWS_SM'
+                )
+                throw new Error(
+                    'Init Error: The env var SECRETS_MANAGER_SECRET must be set if DATABASE_URL=AWS_SM'
+                )
+            }
+
+            // We need to pull the db url out of AWS Secrets Manager
+            // if we put more secrets in here, we'll probably need to instantiate it somewhere else
+            const secretsResult = await FetchSecrets(secretsManagerSecret)
+            if (secretsResult instanceof Error) {
+                console.log(
+                    'Init Error: Failed to fetch secrets from Secrets Manager',
+                    secretsResult
+                )
+                throw secretsResult
+            }
+
+            dbConnectionURL = secretsResult.pgConnectionURL
+        }
+
+        const prismaResult = await NewPrismaClient(dbConnectionURL)
+
+        if (prismaResult instanceof Error) {
             console.log(
                 'Error: attempting to create prisma client: ',
-                prismaResult.error
+                prismaResult
             )
             throw new Error('Failed to create Prisma Client')
         }
 
-        return NewPostgresStore(prismaResult.value)
+        return NewPostgresStore(prismaResult)
     }
 
     const store =
