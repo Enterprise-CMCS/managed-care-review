@@ -134,6 +134,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
           DYNAMO_CONNECTION: ${{ secrets.dynamo_connection }}
+          DATABASE_URL: AWS_SM
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
           IAM_PATH: ${{ secrets.iam_path }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}

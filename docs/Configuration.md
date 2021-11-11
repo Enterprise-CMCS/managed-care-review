@@ -73,7 +73,7 @@ Valid values are any url (most likely `http://localhost:8000`), for a local run,
 
 ### `SECRETS_MANAGER_SECRET`
 
-Read by `app-api` to securely pull secrets out of AWS Secrets Manager. Only set in AWS deployed environments, not used locally.
+Read by `app-api` to securely pull secrets out of AWS Secrets Manager. Only set in AWS deployed environments, not used locally. This is the name of the secret to pull out of SM, which is scoped by review-app.
 
 ### `DATABASE_URL`
 
