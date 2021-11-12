@@ -19,8 +19,8 @@
     border-image-slice: 1;
     border-image-source: linear-gradient(
         to right,
-        $theme-color-primary-dark,
-        #02bfe7
+        $theme-color-gradient-dark,
+        $theme-color-gradient-light
     );
     box-shadow: inset 0 0 1px $theme-color-base-dark,
         0px 0px 24px rgb(0 0 0 / 5%);
