@@ -7,6 +7,8 @@ export const main: APIGatewayProxyHandler = async () => {
     const dbURL = process.env.DATABASE_URL
     const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET
 
+    console.log('WHATS COMING THROUGH: ', process.env)
+
     if (!dbURL) {
         throw new Error('Init Error: DATABASE_URL is required to run app-api')
     }
