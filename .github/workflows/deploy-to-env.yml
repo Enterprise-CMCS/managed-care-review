@@ -137,7 +137,6 @@ jobs:
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
           IAM_PATH: ${{ secrets.iam_path }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
-          NODE_OPTIONS: '--max_old_space_size=4096'
 
       - name: Generate graphql
         run: ./dev generate
@@ -154,6 +153,8 @@ jobs:
 
       - name: deploy app-api
         id: deploy-app-api
+        env:
+          NODE_OPTIONS: --max_old_space_size=4096
         run: |
           pushd services/app-api && npx serverless deploy --stage ${{ inputs.stage_name }}
 
