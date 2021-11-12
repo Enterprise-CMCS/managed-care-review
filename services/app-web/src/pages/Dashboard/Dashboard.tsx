@@ -1,6 +1,6 @@
 import React from 'react'
 import dayjs from 'dayjs'
-import { GridContainer, Link, Alert } from '@trussworks/react-uswds'
+import { GridContainer, Link, Alert, Table } from '@trussworks/react-uswds'
 import { NavLink, useLocation } from 'react-router-dom'
 
 import styles from './Dashboard.module.scss'
@@ -15,14 +15,19 @@ import {
 } from '../../components/SubmissionCard'
 import { useAuth } from '../../contexts/AuthContext'
 import { MCRouterState } from '../../constants/routerState'
-import { Program, useIndexSubmissionsQuery } from '../../gen/gqlClient'
+import {
+    IndexSubmissionsQuery,
+    Program,
+    useIndexSubmissionsQuery,
+    SubmissionType as GQLSubmissionType,
+} from '../../gen/gqlClient'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
-import { SubmissionType as DomainSubmissionType } from '../../../../app-web/src/common-code/domain-models'
+// import { SubmissionType as DomainSubmissionType } from '../../../../app-web/src/common-code/domain-models'
 
 // The SubmissionCard uses some enums, which I think might be a storybook thing but I haven't looked too deeply in it
 // so we map our types to the enums.
 const domainSubmissionTypeMap: {
-    [Property in DomainSubmissionType]: SubmissionType
+    [Property in GQLSubmissionType]: SubmissionType
 } = {
     CONTRACT_ONLY: SubmissionType.ContractOnly,
     CONTRACT_AND_RATES: SubmissionType.ContractAndRates,
@@ -86,9 +91,18 @@ type SubmissionCardInfo = {
     id: string
     name: string
     programID: string
-    submissionType: DomainSubmissionType
+    submissionType: GQLSubmissionType
     submissionDescription: string
     submittedAt?: Date
+}
+
+type TableRow = {
+    __typename: string
+    id: string
+    program: Program
+    createdAt: string
+    updatedAt: string
+    submissionType: GQLSubmissionType
 }
 
 export const Dashboard = (): React.ReactElement => {
@@ -147,6 +161,18 @@ export const Dashboard = (): React.ReactElement => {
         programSubmissions[program.id] = submissions
     }
 
+    // function tableRows(): TableRow[] {
+    //     return submissionList.map((submission) => {
+    //         return {
+    //             id: submission.id,
+    //             programs: "placeholder",
+    //             submittedAt: dayjs(submission.submittedAt).format('MM/DD/YYYY'),
+    //             updatedAt: dayjs(submission.updatedAt).format('MM/DD/YYYY'),
+    //             status: submissionStatusMap[submission.__typename],
+    //         }
+    //     })
+    // }
+
     return (
         <>
             <div className={styles.container} data-testid="dashboard-page">
@@ -195,48 +221,105 @@ export const Dashboard = (): React.ReactElement => {
                                         </div>
                                         {programSubmissions[program.id].length >
                                         0 ? (
-                                            <ul
-                                                id="submissions-list"
-                                                data-testid="submissions-list"
-                                                className="SubmissionCard_submissionList__1okWK"
-                                            >
-                                                {programSubmissions[
-                                                    program.id
-                                                ].map((submission) => (
-                                                    <SubmissionCard
-                                                        key={submission.name}
-                                                        href={editUrlForSubmission(
-                                                            submission
-                                                        )}
-                                                        description={
-                                                            submission.submissionDescription
+                                            <Table>
+                                                <thead>
+                                                    <tr>
+                                                        <th>ID</th>
+                                                        <th>Programs</th>
+                                                        <th>Submitted</th>
+                                                        <th>Last updated</th>
+                                                        <th>Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {submissionList.map(
+                                                        (submission: TableRow) => {
+                                                            return (
+                                                                <tr
+                                                                    key={
+                                                                        submission.id
+                                                                    }
+                                                                >
+                                                                    <td>
+                                                                        {
+                                                                            submission.id
+                                                                        }
+                                                                    </td>
+                                                                    <td>
+                                                                        {
+                                                                            submission
+                                                                                .program
+                                                                                .name
+                                                                        }
+                                                                    </td>
+                                                                    <td>
+                                                                        {dayjs(
+                                                                            submission.createdAt
+                                                                        ).format(
+                                                                            'MM/DD/YYYY'
+                                                                        )}
+                                                                    </td>
+                                                                    <td>
+                                                                        {dayjs(
+                                                                            submission.updatedAt
+                                                                        ).format(
+                                                                            'MM/DD/YYYY'
+                                                                        )}
+                                                                    </td>
+                                                                    <td>
+                                                                        {submission.__typename ===
+                                                                        'StateSubmission'
+                                                                            ? 'Submitted'
+                                                                            : 'Draft'}
+                                                                    </td>
+                                                                </tr>
+                                                            )
                                                         }
-                                                        name={submission.name}
-                                                        date={
-                                                            submission.__typename ===
-                                                                'StateSubmission' &&
-                                                            submission.submittedAt
-                                                                ? dayjs(
-                                                                      submission.submittedAt
-                                                                  )
-                                                                : undefined
-                                                        }
-                                                        status={
-                                                            submissionStatusMap[
-                                                                submission
-                                                                    .__typename
-                                                            ]
-                                                        }
-                                                        submissionType={
-                                                            domainSubmissionTypeMap[
-                                                                submission
-                                                                    .submissionType
-                                                            ]
-                                                        }
-                                                    />
-                                                ))}
-                                            </ul>
+                                                    )}
+                                                </tbody>
+                                            </Table>
                                         ) : (
+                                            // <ul
+                                            //     id="submissions-list"
+                                            //     data-testid="submissions-list"
+                                            //     className="SubmissionCard_submissionList__1okWK"
+                                            // >
+                                            //     {programSubmissions[
+                                            //         program.id
+                                            //     ].map((submission) => (
+                                            //         <SubmissionCard
+                                            //             key={submission.name}
+                                            //             href={editUrlForSubmission(
+                                            //                 submission
+                                            //             )}
+                                            //             description={
+                                            //                 submission.submissionDescription
+                                            //             }
+                                            //             name={submission.name}
+                                            //             date={
+                                            //                 submission.__typename ===
+                                            //                     'StateSubmission' &&
+                                            //                 submission.submittedAt
+                                            //                     ? dayjs(
+                                            //                           submission.submittedAt
+                                            //                       )
+                                            //                     : undefined
+                                            //             }
+                                            //             status={
+                                            //                 submissionStatusMap[
+                                            //                     submission
+                                            //                         .__typename
+                                            //                 ]
+                                            //             }
+                                            //             submissionType={
+                                            //                 domainSubmissionTypeMap[
+                                            //                     submission
+                                            //                         .submissionType
+                                            //                 ]
+                                            //             }
+                                            //         />
+                                            //     ))}
+                                            // </ul>
                                             <div className={styles.panelEmpty}>
                                                 <h3>
                                                     You have no submissions for{' '}
