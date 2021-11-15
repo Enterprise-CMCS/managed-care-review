@@ -1,7 +1,7 @@
 import { SES, AWSError, Request } from 'aws-sdk';
 const ses = new SES({ region: "us-east-1" });
 
-type emailData = {
+type EmailData = {
   bodyData: string,
   sourceEmail: string ,
   subjectData: string ,
@@ -14,7 +14,7 @@ type emailData = {
 
 
 }
-function getSESEmailParams(email: emailData): SES.SendEmailRequest {
+function getSESEmailParams(email: EmailData): SES.SendEmailRequest {
 
  const {bccAddresses, ccAddresses, toAddresses,  bodyData, bodyCharset, subjectData, subjectCharset, sourceEmail, replyToAddresses} = email;
 
@@ -57,3 +57,4 @@ function sendEmail(params:  SES.SendEmailRequest): Request<SES.SendEmailResponse
 
 
 export {getSESEmailParams, sendEmail}
+export type {EmailData}

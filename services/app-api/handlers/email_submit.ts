@@ -1,10 +1,11 @@
 import { Handler } from 'aws-lambda';
 import {SendEmailRequest} from 'aws-sdk/clients/ses'
-import {getSESEmailParams, sendEmail} from "../emailer";
+import {getSESEmailParams, sendEmail, submissionReceivedCMSEmail} from "../emailer";
 
 export const main: Handler = async (event, context, callback) => {
   console.log("EVENT: \n" + JSON.stringify(event, null, 2))
   console.log("Received event:", JSON.stringify(event));
+  //  add event payload
   const stageName =  process.env.stage
   const emailSource =  process.env.emailSource || 'UNKNOWN_SOURCE';
 
