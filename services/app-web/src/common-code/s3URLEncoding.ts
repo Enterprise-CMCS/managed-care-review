@@ -1,7 +1,11 @@
 import Url from 'url-parse'
 
 // tslint:disable-next-line
-const isValidS3URLFormat = (url: Url): boolean => {
+const isValidS3URLFormat = (url: {
+    protocol: string
+    slashes: boolean
+    pathname: string
+}): boolean => {
     return (
         url.protocol === 's3:' &&
         url.slashes === true &&
