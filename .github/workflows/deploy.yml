@@ -222,7 +222,6 @@ jobs:
           config: baseUrl=${{env.APPLICATION_ENDPOINT}}
           record: true
         env:
-          DEBUG: 'cypress:*'
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
