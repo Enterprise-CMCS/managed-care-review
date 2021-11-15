@@ -178,11 +178,11 @@ export const ReviewSubmit = ({
                             <Button
                                 type="button"
                                 key="submitButton"
-                                aria-label="Confirm submit"
+                                aria-label="Submit"
                                 className={styles.submitButton}
                                 onClick={handleFormSubmit}
                             >
-                                Confirm submit
+                                Submit
                             </Button>
                         </ButtonGroup>
                     </ModalFooter>
