@@ -1,25 +1,23 @@
 import { ApolloServer } from 'apollo-server-lambda'
 import {
-    Handler,
-    APIGatewayProxyHandler,
     APIGatewayProxyEvent,
+    APIGatewayProxyHandler,
+    Handler,
 } from 'aws-lambda'
-
 import typeDefs from '../../app-graphql/src/schema.graphql'
 import {
     assertIsAuthMode,
     CognitoUserType,
 } from '../../app-web/src/common-code/domain-models'
-
-import { newDeployedStore, newLocalStore } from '../store'
-import { configureResolvers } from '../resolvers'
 import {
-    userFromLocalAuthProvider,
-    userFromCognitoAuthProvider,
     userFromAuthProvider,
+    userFromCognitoAuthProvider,
+    userFromLocalAuthProvider,
 } from '../authn'
-import { NewPostgresStore, NewPrismaClient } from '../postgres/'
-import { FetchSecrets } from '../secrets'
+import { NewPostgresStore } from '../postgres/postgresStore'
+import { configureResolvers } from '../resolvers'
+import { newDeployedStore, newLocalStore } from '../store'
+import { configurePostgres } from './configuration'
 
 // The Context type passed to all of our GraphQL resolvers
 export interface Context {
@@ -115,42 +113,13 @@ async function initializeGQLHandler(): Promise<Handler> {
     const getPostgresStore = async () => {
         console.log('Getting Postgres Connection')
 
-        let dbConnectionURL = dbURL
-        if (dbURL === 'AWS_SM') {
-            if (!secretsManagerSecret) {
-                console.log(
-                    'Init Error: The env var SECRETS_MANAGER_SECRET must be set if DATABASE_URL=AWS_SM'
-                )
-                throw new Error(
-                    'Init Error: The env var SECRETS_MANAGER_SECRET must be set if DATABASE_URL=AWS_SM'
-                )
-            }
-
-            // We need to pull the db url out of AWS Secrets Manager
-            // if we put more secrets in here, we'll probably need to instantiate it somewhere else
-            const secretsResult = await FetchSecrets(secretsManagerSecret)
-            if (secretsResult instanceof Error) {
-                console.log(
-                    'Init Error: Failed to fetch secrets from Secrets Manager',
-                    secretsResult
-                )
-                throw secretsResult
-            }
-
-            dbConnectionURL = secretsResult.pgConnectionURL
+        const pgResult = await configurePostgres(dbURL, secretsManagerSecret)
+        if (pgResult instanceof Error) {
+            console.log("Init Error: Postgres couldn't be configured")
+            throw pgResult
         }
 
-        const prismaResult = await NewPrismaClient(dbConnectionURL)
-
-        if (prismaResult instanceof Error) {
-            console.log(
-                'Error: attempting to create prisma client: ',
-                prismaResult
-            )
-            throw new Error('Failed to create Prisma Client')
-        }
-
-        return NewPostgresStore(prismaResult)
+        return NewPostgresStore(pgResult)
     }
 
     const store =

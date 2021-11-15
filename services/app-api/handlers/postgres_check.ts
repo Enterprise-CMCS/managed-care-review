@@ -1,6 +1,6 @@
 import { APIGatewayProxyHandler } from 'aws-lambda'
-import { NewPrismaClient } from '../postgres'
-import { FetchSecrets } from '../secrets'
+import { configurePostgres } from './configuration'
+
 export const main: APIGatewayProxyHandler = async () => {
     const dbURL = process.env.DATABASE_URL
     const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET
@@ -9,34 +9,10 @@ export const main: APIGatewayProxyHandler = async () => {
         throw new Error('Init Error: DATABASE_URL is required to run app-api')
     }
 
-    let dbConnectionURL = dbURL
-    if (dbURL === 'AWS_SM') {
-        if (!secretsManagerSecret) {
-            console.log(
-                'Init Error: The env var SECRETS_MANAGER_SECRET must be set if DATABASE_URL=AWS_SM'
-            )
-            throw new Error(
-                'Init Error: The env var SECRETS_MANAGER_SECRET must be set if DATABASE_URL=AWS_SM'
-            )
-        }
-
-        // We need to pull the db url out of AWS Secrets Manager
-        // if we put more secrets in here, we'll probably need to instantiate it somewhere else
-        const secretsResult = await FetchSecrets(secretsManagerSecret)
-        if (secretsResult instanceof Error) {
-            console.log(
-                'Init Error: Failed to fetch secrets from Secrets Manager',
-                secretsResult
-            )
-            throw secretsResult
-        }
-
-        dbConnectionURL = secretsResult.pgConnectionURL
-    }
-
-    const prismaResult = await NewPrismaClient(dbConnectionURL)
+    const prismaResult = await configurePostgres(dbURL, secretsManagerSecret)
 
     if (prismaResult instanceof Error) {
+        console.error('Init Error: ', prismaResult)
         return {
             statusCode: 400,
             body: JSON.stringify({
