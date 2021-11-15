@@ -66,6 +66,7 @@ describe('storeError', () => {
 
             documents: [],
             contractDocuments: [],
+            rateDocuments: [],
             stateContacts: [],
             actuaryContacts: [],
             managedCareEntities: [],

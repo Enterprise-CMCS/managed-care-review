@@ -2,6 +2,30 @@
 @import 'theme/_cms';
 @import 'theme/_color';
 
+// Custom app wide styles
+.srOnly {
+    position: absolute;
+    left: -1000px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+// Top border linear gradient
+.borderTopLinearGradient {
+    border: 0 solid;
+    border-top: 10px solid;
+    border-image-slice: 1;
+    border-image-source: linear-gradient(
+        to right,
+        $theme-color-gradient-dark,
+        $theme-color-gradient-light
+    );
+    box-shadow: inset 0 0 1px $theme-color-base-dark,
+        0px 0px 24px rgb(0 0 0 / 5%);
+}
+
 h3 {
     margin-top: 0;
     font-weight: normal;
@@ -11,15 +35,6 @@ h3 {
 .usa-label,
 .usa-legend {
     font-weight: bold;
-}
-
-.srOnly {
-    position: absolute;
-    left: -1000px;
-    top: auto;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
 }
 
 .address {
