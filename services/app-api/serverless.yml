@@ -8,6 +8,7 @@ package:
 plugins:
   - serverless-webpack
   - serverless-offline
+  - serverless-online
   - serverless-associate-waf
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
@@ -18,6 +19,7 @@ custom:
   stage: ${opt:stage, self:provider.stage}
   region: ${opt:region, self:provider.region}
   appVersion: ${env:APP_VERSION}
+  emailSource: ${opt:emailSource, env:SES_SOURCE_EMAIL_ADDRESS, "admin@example.com"}
   auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:postgres-${self:custom.stage}.PostgresAuroraArn }
   draftSubmissionsTableArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:database-${self:custom.stage}.DraftSubmissionsTableArn}
   draftSubmissionsTableStreamArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:database-${self:custom.stage}.DraftSubmissionsTableStreamArn}
@@ -102,6 +104,16 @@ layers:
     path: lambda-layers-prisma-client
 
 functions:
+  email_submit:
+    handler: handlers/email_submitter.main
+    events:
+      - http:
+          path: email_submit
+          method: post
+          cors: true
+    environment:
+      emailSource: macrael@truss.works
+
   health:
     handler: handlers/health_check.main
     events:
