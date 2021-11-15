@@ -29,7 +29,7 @@ export async function compileProtoWatch(runner: LabeledProcessRunner) {
 export async function compileProto(runner: LabeledProcessRunner) {
     await runner.runCommandAndOutput(
         'proto deps',
-        ['yarn', 'install'],
+        ['yarn', 'install', '--prefer-offline'],
         'services/app-proto'
     )
 
