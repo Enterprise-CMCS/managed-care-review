@@ -1,6 +1,6 @@
 import Url from 'url-parse'
 
-const isValidS3URLFormat = (url: Url): boolean => {
+const isValidS3URLFormat = (url: Url<string>): boolean => {
     return (
         url.protocol === 's3:' &&
         url.slashes === true &&
