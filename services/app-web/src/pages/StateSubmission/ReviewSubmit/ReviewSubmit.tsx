@@ -147,6 +147,7 @@ export const ReviewSubmit = ({
                     <ModalToggleButton
                         modalRef={modalRef}
                         className={styles.submitButton}
+                        data-testid="form-submit"
                         opener
                     >
                         Submit
@@ -179,6 +180,7 @@ export const ReviewSubmit = ({
                                 type="button"
                                 key="submitButton"
                                 aria-label="Submit"
+                                data-testid="modal-submit"
                                 className={styles.submitButton}
                                 onClick={handleFormSubmit}
                             >
