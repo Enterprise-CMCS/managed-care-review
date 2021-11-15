@@ -1,7 +1,5 @@
-import { GetSecretValueResponse } from 'aws-sdk/clients/secretsmanager'
 import { SecretsManager } from 'aws-sdk'
-
-import { Result, ok, err } from 'neverthrow'
+import { GetSecretValueResponse } from 'aws-sdk/clients/secretsmanager'
 
 interface APISecrets {
     pgConnectionURL: string
@@ -11,12 +9,12 @@ async function FetchSecrets(
     secretManagerSecret: string
 ): Promise<APISecrets | Error> {
     const secretsResult = await getSecretValue(secretManagerSecret)
-    if (secretsResult.isErr()) {
+    if (secretsResult instanceof Error) {
         console.log('Error: Failed to get secrets', secretsResult)
         return new Error('Failed to talk to AWS SecretsManager')
     }
 
-    const pgConnectionURL = getConnectionURL(secretsResult.value)
+    const pgConnectionURL = getConnectionURL(secretsResult)
 
     return {
         pgConnectionURL,
@@ -35,7 +33,7 @@ interface Secret {
 
 async function getSecretValue(
     secretManagerSecret: string
-): Promise<Result<Secret, Error>> {
+): Promise<Secret | Error> {
     // lookup secrets manager secret from env
     const params = {
         SecretId: secretManagerSecret,
@@ -55,14 +53,12 @@ async function getSecretValue(
 
     if (!secret.username || !secret.password) {
         console.log('Error: failed to get secrets', secret)
-        return err(
-            new Error(
-                'Could not retrieve postgres credentials from secrets manager'
-            )
+        return new Error(
+            'Could not retrieve postgres credentials from secrets manager'
         )
     }
 
-    return ok(secret)
+    return secret
 }
 
 export function getConnectionURL(secrets: Secret): string {
