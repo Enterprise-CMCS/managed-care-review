@@ -127,6 +127,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       branch-name: ${{ steps.branch-name.outputs.stage-name-for-branch}}
+      node-version: ${{ steps.node_version.outputs.node_version }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
@@ -136,6 +137,11 @@ jobs:
         shell: bash
         run: |
           echo "::set-output name=stage-name-for-branch::$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})"
+
+      - name: read .nvmrc
+        id: node_version
+        shell: bash
+        run: echo ::set-output name=node_version::$(cat .nvmrc)
 
   deploy-branch:
     needs: [build-prisma-client-lambda-layer, get-branch-name-vars]
@@ -160,6 +166,12 @@ jobs:
     name: run-cypress
     needs: [deploy-branch, unit-tests]
     runs-on: ubuntu-latest
+    container: cypress/browsers:node${{ needs.get-branch-name-vars.outputs.node-version }}-chrome91-ff89
+    strategy:
+      fail-fast: false
+      matrix:
+        # run copies of the current job in parallel
+        containers: [1, 2, 3, 4, 5]
     steps:
       - uses: actions/checkout@v2
 
@@ -215,14 +227,16 @@ jobs:
         run: |
           lerna run build --scope=scripts && node ./scripts/add_cypress_test_users.js $branch_name $TEST_USERS_PASS
 
-      - name: Cypress run
+      - name: Cypress -- Chrome
         id: cypress
         uses: cypress-io/github-action@v2
         with:
           config: baseUrl=${{env.APPLICATION_ENDPOINT}}
           record: true
+          parallel: true
+          browser: chrome
+          group: 'Chrome'
         env:
-          DEBUG: 'cypress:*'
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
