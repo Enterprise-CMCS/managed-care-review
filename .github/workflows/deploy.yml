@@ -79,13 +79,6 @@ jobs:
             ${{github.workspace}}/services/app-api/coverage/lcov.info:lcov
             ${{github.workspace}}/services/app-web/coverage/lcov.info:lcov
 
-      - name: Save node_modules
-        uses: actions/upload-artifact@v2
-        with:
-          name: node_modules
-          if-no-files-found: error
-          path: node_modules
-
       - uses: chrnorm/deployment-action@releases/v1
         name: Create GitHub deployment
         id: ghdeployment
@@ -182,12 +175,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Download node_modules
-        uses: actions/download-artifact@v2
-        with:
-          name: node_modules
-          path: node_modules
-
       - name: set branch_name
         shell: bash
         run: |
@@ -209,11 +196,8 @@ jobs:
           DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
 
-      - name: Generate graphql
-        run: lerna run gqlgen
-
-      - name: Generate protobufs
-        run: lerna run protogen
+      - name: Add lerna to environment
+        run: yarn global add lerna
 
       - name: Create Test Users
         run: |
