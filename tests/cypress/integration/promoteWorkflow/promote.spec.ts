@@ -6,7 +6,7 @@ describe('promote', () => {
         cy.findByRole('heading', { level: 2, name: /How it works/ })
         cy.findByRole('heading', {
             level: 2,
-            name: /You can submit capitation rates and contracts/,
+            name: /You can use MC-Review to submit:/,
         })
     })
 })
