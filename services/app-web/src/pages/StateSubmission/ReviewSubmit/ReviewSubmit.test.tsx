@@ -99,11 +99,7 @@ describe('ReviewSubmit', () => {
         )
 
         await waitFor(() =>
-            expect(
-                screen.getByRole('button', {
-                    name: 'Submit',
-                })
-            ).toBeDefined()
+            expect(screen.getByTestId('form-submit')).toBeDefined()
         )
     })
 
@@ -116,18 +112,14 @@ describe('ReviewSubmit', () => {
                 },
             }
         )
-        const submitButton = screen.getByRole('button', {
-            name: 'Submit',
-        })
+        const submitButton = screen.getByTestId('form-submit')
 
         expect(submitButton).toBeInTheDocument()
 
         submitButton.click()
 
         await waitFor(() => {
-            const confirmSubmit = screen.getByRole('button', {
-                name: 'Confirm submit',
-            })
+            const confirmSubmit = screen.getByTestId('modal-submit')
             expect(confirmSubmit).toBeInTheDocument()
             expect(screen.getByText('Ready to submit?')).toBeInTheDocument()
             expect(
@@ -163,15 +155,11 @@ describe('ReviewSubmit', () => {
             }
         )
 
-        const submit = screen.getByRole('button', {
-            name: 'Submit',
-        })
+        const submit = screen.getByTestId('modal-submit')
         submit.click()
 
         await waitFor(() => {
-            const confirmSubmit = screen.getByRole('button', {
-                name: 'Confirm submit',
-            })
+            const confirmSubmit = screen.getByTestId('modal-submit')
             expect(confirmSubmit).toBeInTheDocument()
             confirmSubmit.click()
         })
@@ -199,15 +187,11 @@ describe('ReviewSubmit', () => {
             }
         )
 
-        const submitButton = await screen.findByRole('button', {
-            name: 'Submit',
-        })
+        const submitButton = screen.getByTestId('form-submit')
 
         submitButton.click()
 
-        const confirmSubmit = await screen.findByRole('button', {
-            name: 'Confirm submit',
-        })
+        const confirmSubmit = screen.getByTestId('modal-submit')
         expect(confirmSubmit).toBeInTheDocument()
         confirmSubmit.click()
 

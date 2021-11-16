@@ -175,10 +175,9 @@ Cypress.Commands.add('submitStateSubmissionForm', () => {
     // Must be on '/submissions/:id/review-and-submit'
     cy.navigateForm('Submit')
     // HM-TODO: Move this check to dashboard page
-    cy.findAllByTestId('modalWindow').should('exist').within(($modal) => {
-        cy.findByRole('button', {
-            name: 'Confirm submit', hidden: true
-        }).click()
-    })
-   
+    cy.findAllByTestId('modalWindow')
+        .should('exist')
+        .within(($modal) => {
+            cy.findByTestId('modal-submit').click()
+        })
 })
