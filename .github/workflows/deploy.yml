@@ -79,6 +79,13 @@ jobs:
             ${{github.workspace}}/services/app-api/coverage/lcov.info:lcov
             ${{github.workspace}}/services/app-web/coverage/lcov.info:lcov
 
+      - name: Save node_modules
+        uses: actions/upload-artifact@v2
+        with:
+          name: node_modules
+          if-no-files-found: error
+          path: node_modules
+
       - uses: chrnorm/deployment-action@releases/v1
         name: Create GitHub deployment
         id: ghdeployment
@@ -163,8 +170,8 @@ jobs:
       react_app_auth_mode: AWS_COGNITO
 
   cypress:
-    name: run-cypress
-    needs: [deploy-branch, unit-tests]
+    name: cypress-run
+    needs: [deploy-branch]
     runs-on: ubuntu-latest
     container: cypress/browsers:node14.17.0-chrome91-ff89
     strategy:
@@ -175,8 +182,16 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup env
-        uses: ./.github/actions/setup_env
+      - name: Download node_modules
+        uses: actions/download-artifact@v2
+        with:
+          name: node_modules
+          path: node_modules
+
+      - name: set branch_name
+        shell: bash
+        run: |
+          echo "branch_name=$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
 
       - name: set variable values
         run: ./.github/build_vars.sh set_values
@@ -194,11 +209,15 @@ jobs:
           DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
 
-      - name: Install Cypress
-        run: yarn cypress install
-
       - name: Generate graphql
-        run: ./dev generate
+        run: lerna run gqlgen
+
+      - name: Generate protobufs
+        run: lerna run protogen
+
+      - name: Create Test Users
+        run: |
+          lerna run build --scope=scripts && node ./scripts/add_cypress_test_users.js $branch_name $TEST_USERS_PASS
 
       - name: Set application endpoint
         run: |
@@ -223,14 +242,11 @@ jobs:
           state: 'failure'
           deployment_id: ${{ needs.unit-tests.outputs.deploy-id }}
 
-      - name: Create Test Users
-        run: |
-          lerna run build --scope=scripts && node ./scripts/add_cypress_test_users.js $branch_name $TEST_USERS_PASS
-
       - name: Cypress -- Chrome
         id: cypress
         uses: cypress-io/github-action@v2
         with:
+          install: false
           config: baseUrl=${{env.APPLICATION_ENDPOINT}}
           record: true
           parallel: true
