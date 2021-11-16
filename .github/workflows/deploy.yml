@@ -175,10 +175,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: set branch_name
-        shell: bash
-        run: |
-          echo "branch_name=$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
+      - name: Setup env
+        uses: ./.github/actions/setup_env
 
       - name: set variable values
         run: ./.github/build_vars.sh set_values
@@ -201,7 +199,7 @@ jobs:
 
       - name: Create Test Users
         run: |
-          lerna run build --scope=scripts && node ./scripts/add_cypress_test_users.js $branch_name $TEST_USERS_PASS
+          node ./scripts/add_cypress_test_users.js $branch_name $TEST_USERS_PASS
 
       - name: Set application endpoint
         run: |
