@@ -70,7 +70,7 @@ export const Landing = (): React.ReactElement => {
                             <h2>Before you begin:</h2>
                             <ul className={styles.detailsList}>
                                 <li>
-                                    Each MC-Review submission can contain only{' '}
+                                    Each MC-Review submission can contain only
                                     <strong>one</strong> contract action
                                 </li>
                                 <li>
