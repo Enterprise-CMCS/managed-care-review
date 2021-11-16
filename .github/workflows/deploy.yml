@@ -166,7 +166,7 @@ jobs:
     name: run-cypress
     needs: [deploy-branch, unit-tests]
     runs-on: ubuntu-latest
-    container: cypress/browsers:node${{ needs.get-branch-name-vars.outputs.node-version }}-chrome91-ff89
+    container: cypress/browsers:node14.17.0-chrome91-ff89
     strategy:
       fail-fast: false
       matrix:
