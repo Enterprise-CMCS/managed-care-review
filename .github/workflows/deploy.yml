@@ -194,9 +194,6 @@ jobs:
           DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
 
-      - name: Add lerna to environment
-        run: yarn global add lerna
-
       - name: Create Test Users
         run: |
           node ./scripts/add_cypress_test_users.js $branch_name $TEST_USERS_PASS
