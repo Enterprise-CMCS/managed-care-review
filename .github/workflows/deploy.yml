@@ -164,7 +164,7 @@ jobs:
 
   cypress:
     name: cypress-run
-    needs: [deploy-branch]
+    needs: [deploy-branch, unit-tests]
     runs-on: ubuntu-latest
     container: cypress/browsers:node14.17.0-chrome91-ff89
     strategy:
