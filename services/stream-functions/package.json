@@ -6,7 +6,7 @@
     "dependencies": {},
     "devDependencies": {
         "serverless": "^2.65.0",
-        "serverless-bundle": "4.4.0",
+        "serverless-bundle": "5.1.0",
         "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",
         "serverless-idempotency-helper": "CMSgov/serverless-idempotency-helper",
         "serverless-stack-termination-protection": "^1.0.4",
