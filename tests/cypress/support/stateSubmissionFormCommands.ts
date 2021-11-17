@@ -52,6 +52,12 @@ Cypress.Commands.add('fillOutBaseContractDetails', () => {
     cy.findByLabelText('End date').type('03/31/2025').blur()
     cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
     cy.findByLabelText('1932(a) State Plan Authority').safeClick()
+    cy.findByTestId('file-input-input').attachFile(
+        'documents/trussel-guide.pdf'
+    )
+
+    cy.verifyDocumentsHaveNoErrors()
+    cy.waitForDocumentsToLoad()
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
@@ -66,6 +72,12 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
     cy.findByLabelText('Benefits provided').safeClick()
     cy.findByLabelText('Financial incentives').safeClick()
     cy.findByText('No').click()
+    cy.findByTestId('file-input-input').attachFile(
+        'documents/trussel-guide.pdf'
+    )
+
+    cy.verifyDocumentsHaveNoErrors()
+    cy.waitForDocumentsToLoad()
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
@@ -77,6 +89,12 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
     cy.findByLabelText('Start date').type('02/29/2024')
     cy.findByLabelText('End date').type('02/28/2025')
     cy.findByLabelText('Date certified').type('03/01/2024')
+    cy.findByTestId('file-input-input').attachFile(
+        'documents/trussel-guide.pdf'
+    )
+
+    cy.verifyDocumentsHaveNoErrors()
+    cy.waitForDocumentsToLoad()
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
@@ -90,6 +108,12 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', () => {
     cy.findAllByLabelText('Start date').eq(1).type('03/01/2024')
     cy.findAllByLabelText('End date').eq(1).type('03/01/2025')
     cy.findByLabelText('Date certified for rate amendment').type('03/01/2024')
+    cy.findByTestId('file-input-input').attachFile(
+        'documents/trussel-guide.pdf'
+    )
+
+    cy.verifyDocumentsHaveNoErrors()
+    cy.waitForDocumentsToLoad()
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
@@ -151,6 +175,9 @@ Cypress.Commands.add('submitStateSubmissionForm', () => {
     // Must be on '/submissions/:id/review-and-submit'
     cy.navigateForm('Submit')
     // HM-TODO: Move this check to dashboard page
-    cy.findByRole('dialog').should('exist')
-    cy.navigateForm('Confirm submit')
+    cy.findAllByTestId('modalWindow')
+        .should('exist')
+        .within(($modal) => {
+            cy.findByTestId('modal-submit').click()
+        })
 })

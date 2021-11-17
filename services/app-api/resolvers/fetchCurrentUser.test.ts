@@ -1,11 +1,11 @@
 import { Context } from '../handlers/apollo_gql'
 
-import { constructTestServer } from '../testHelpers/gqlHelpers'
+import { constructTestPostgresServer } from '../testHelpers/gqlHelpers'
 import FETCH_CURRENT_USER from '../../app-graphql/src/queries/fetchCurrentUser.graphql'
 
 describe('currentUser', () => {
     it('returns the currentUser', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         // make a mock request
         const res = await server.executeOperation({ query: FETCH_CURRENT_USER })
@@ -28,7 +28,9 @@ describe('currentUser', () => {
             },
         }
 
-        const server = constructTestServer({ context: customContext })
+        const server = await constructTestPostgresServer({
+            context: customContext,
+        })
 
         // make a mock request
         const res = await server.executeOperation({ query: FETCH_CURRENT_USER })

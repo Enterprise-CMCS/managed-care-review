@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "forceConsistentCasingInFileNames": true,
+        "moduleResolution": "node",
+        "noFallthroughCasesInSwitch": true,
+        "strict": true,
+        "useUnknownInCatchVariables": false
+    }
+}

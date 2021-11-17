@@ -1,6 +1,6 @@
 # Managed Care Review ![Build & Deploy](https://github.com/CMSgov/managed-care-review/actions/workflows/promote.yml/badge.svg?branch=main)
 
-<a href="https://codeclimate.com/repos/6041539f31779a5f8d00e7e6/maintainability"><img src="https://api.codeclimate.com/v1/badges/397709446d5aca86032d/maintainability" /></a> <a href="https://codeclimate.com/repos/6041539f31779a5f8d00e7e6/test_coverage"><img src="https://api.codeclimate.com/v1/badges/397709446d5aca86032d/test_coverage" /></a>
+<a href="https://codeclimate.com/repos/616dbb175e8227015001784f/maintainability"><img src="https://api.codeclimate.com/v1/badges/42503a338d09d6a358a5/maintainability" /></a> <a href="https://codeclimate.com/repos/616dbb175e8227015001784f/test_coverage"><img src="https://api.codeclimate.com/v1/badges/42503a338d09d6a358a5/test_coverage" /></a>
 
 Managed Care Review is an application that accepts Managed Care contract and rate submissions from states and packages them for review by CMS. It uses a Serverless architecture (services deployed as AWS Lambdas) with React and Node as client/server and GraphQL as the api protocol. The codebase is a Typescript monorepo.
 
@@ -22,9 +22,16 @@ Additional sources for documentation:
 
 ### Local Tooling
 
+We use a collection of tools to manage this monorepo. 
+
+We use [Lerna](https://github.com/lerna/lerna) to manage commands across the entire monorepo. This tool is good for managing multi-package repositories like ours, where there are several nested `package.json`, typescript, eslint, and prettier configs, potentially with their own rules. We  also use [Husky](https://github.com/typicode/husky) to run and organize our pre-commit scripts - e.g. `husky` uses the command `lerna run precommit` to run the specific `precommit` script indicated in each `package.json`.
+
+  To get the tools needed for local development, you can run:
+
 ```bash
-brew install direnv pre-commit shellcheck
-pre-commit install --install-hooks
+brew tap yoheimuta/protolint
+brew install direnv shellcheck protolint
+yarn husky install
 ```
 
 We use [direnv](https://direnv.net/) to automatically set required environment variables when you enter this directory or its children. This will be used when running the application locally, or when using tools like the `aws` or `serverless` CLIs locally.
@@ -67,7 +74,7 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 # double check your work.
 nvm    # should return a list of nvm commands
 node -v     # should return v12.20.0
-node which    # should return something like /Users/YOURUSER/.nvm/versions/node/v12.20.0/bin/node
+which node    # should return something like /Users/YOURUSER/.nvm/versions/node/v12.20.0/bin/node
 
 # if things aren't working you may need to manually adjust your ~/.bash_profile or ~/.zshrc. See [nvm docs](https://github.com/nvm-sh/nvm#troubleshooting-on-macos) for more.
 
@@ -101,7 +108,7 @@ When run locally (with LOCAL_LOGIN=true), auth bypasses Cognito and uses [`serve
 Run whole app locally
 
 -   `./dev local` to run the entire app and storybook
--   Available flags: `--storybook`, `--web`, `--api`, `--s3`, '--db' for running services individually
+-   Available flags: `--storybook`, `--web`, `--api`, `--s3`, '--postgres' for running services individually
 -   (you can also exclude services by using the yargs 'no' standard: `./dev local --no-storybook`)
 
 Run individual services locally
@@ -132,15 +139,27 @@ Run web app locally, but configured to run against a deployed backend
 
 #### Run cypress tests in a linux docker container
 
-We've had a number of issues only reproduce in cypress being run in Github Actions. We've added tooling to dev to run our cypress tests locally in a linux docker container which has been able to reproduce those issues. To do so, you'll need to have docker installed and running and run the app locally with `./dev local` like normal to provide the api & db & s3 (you could just run those three services if you like). Unfortunately, docker networking is a little weird, so we have to run a separate `web` in order for the cypress tests to be able to reach our app correctly. That's started with `./dev local web --for-docker`. Finally you can run the tests themselves with `./dev test browser --in-docker`. So minimally:
+We've had a number of issues only reproduce in cypress being run in Github Actions. We've added tooling to dev to run our cypress tests locally in a linux docker container which has been able to reproduce those issues. To do so, you'll need to have docker installed and running and run the app locally with `./dev local` like normal to provide the api & postgres & s3 (you could just run those three services if you like). Unfortunately, docker networking is a little weird, so we have to run a separate `web` in order for the cypress tests to be able to reach our app correctly. That's started with `./dev local web --for-docker`. Finally you can run the tests themselves with `./dev test browser --in-docker`. So minimally:
 
 ```bash
-./dev local --api --db --s3
+./dev local --api --postgres --s3
 ./dev local web --for-docker
 ./dev test browser --in-docker
 ```
 
 And since this has to run headless b/c it's in docker, you can see how the test actually worked by opening the video that Cypress records in ./tests/cypress/videos
+
+## Updating the Database
+
+We are using Postgres as our primary data store and [Prisma](https://prisma.io) as our interface to it. If you want to modify our database's schema, you must use the [`prisma migrate`](https://www.prisma.io/docs/concepts/components/prisma-migrate) command in app-api. `./dev prisma` forwards all arguments to prisma in app-api.
+
+We describe our database tables and relationships between them in our Prisma schema at /services/app-api/prisma/schema.prisma. If you want to change our database, start by changing [that schema file](https://www.prisma.io/docs/concepts/components/prisma-schema) how you like.
+
+If you want to test that schema before you generate the migration that will be checked in an run by other dev and in dev/val/prod, you can use the [`./dev prisma -- db push`](https://www.prisma.io/docs/guides/database/prototyping-schema-db-push) to make the changes to your current database and generate the matching PrismaClient.
+
+When you're happy with your schema.prisma, use [`./dev prisma -- migrate dev`](https://www.prisma.io/docs/concepts/components/prisma-migrate) to generate a new migration file. (if you have run `prisma db push` you will have to wipe your local db to do so). That file gets checked in and used to make the changes in all other environments.
+
+Whenever you run `./dev postgres` we start a new postgres docker container and run `prisma migrate reset --force` to clean it out and run all of our checked in migrations there. After that you should be ready to develop.
 
 ## Build & Deploy
 

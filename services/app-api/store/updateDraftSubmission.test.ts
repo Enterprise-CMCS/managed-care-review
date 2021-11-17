@@ -50,6 +50,12 @@ describe('updateDraftSubmission', () => {
                 managedCareEntities: ['MCO'],
                 federalAuthorities: ['VOLUNTARY'],
                 rateType: 'NEW',
+                rateDocuments: [
+                    {
+                        name: 'testratedoc.pdf',
+                        s3URL: 'fakeS3URL',
+                    },
+                ],
                 rateDateStart: startDate,
                 rateDateEnd: endDate,
                 rateDateCertified: dateCertified,
@@ -78,6 +84,12 @@ describe('updateDraftSubmission', () => {
                 )
                 expect(getResult.contractDateStart).toEqual(startDate)
                 expect(getResult.contractDateEnd).toEqual(endDate)
+                expect(getResult.rateDocuments[0]).toEqual(
+                    expect.objectContaining({
+                        name: 'testratedoc.pdf',
+                        s3URL: 'fakeS3URL',
+                    })
+                )
                 expect(getResult.rateDateStart).toEqual(startDate)
                 expect(getResult.rateDateEnd).toEqual(endDate)
                 expect(getResult.rateDateCertified).toEqual(dateCertified)

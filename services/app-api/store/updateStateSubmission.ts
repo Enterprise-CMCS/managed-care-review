@@ -32,16 +32,35 @@ export async function updateStateSubmission(
     storeSubmission.submissionDescription =
         stateSubmission.submissionDescription
 
-    stateSubmission.documents.forEach((doc) => {
+    if (stateSubmission.documents) {
+        stateSubmission.documents.forEach((doc) => {
+            const storeDocument = new DocumentStoreT()
+            storeDocument.name = doc.name
+            storeDocument.s3URL = doc.s3URL
+            storeSubmission.documents.push(storeDocument)
+        })
+    }
+
+    stateSubmission.contractDocuments.forEach((doc) => {
         const storeDocument = new DocumentStoreT()
         storeDocument.name = doc.name
         storeDocument.s3URL = doc.s3URL
-        storeSubmission.documents.push(storeDocument)
+        storeSubmission.contractDocuments.push(storeDocument)
     })
+
+    if (stateSubmission.rateDocuments) {
+        stateSubmission.rateDocuments.forEach((doc) => {
+            const storeDocument = new DocumentStoreT()
+            storeDocument.name = doc.name
+            storeDocument.s3URL = doc.s3URL
+            storeSubmission.rateDocuments.push(storeDocument)
+        })
+    }
 
     storeSubmission.stateContacts = stateSubmission.stateContacts
     storeSubmission.actuaryContacts = stateSubmission.actuaryContacts
-    storeSubmission.actuaryCommunicationPreference = stateSubmission.actuaryCommunicationPreference
+    storeSubmission.actuaryCommunicationPreference =
+        stateSubmission.actuaryCommunicationPreference
 
     storeSubmission.contractType = stateSubmission.contractType
     storeSubmission.contractDateStart = stateSubmission.contractDateStart

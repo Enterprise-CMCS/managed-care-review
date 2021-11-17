@@ -82,28 +82,29 @@ const actuaryContactSchema = z.object({
 
 const rateTypeSchema = z.union([z.literal('NEW'), z.literal('AMENDMENT')])
 
-const managedCareEntitySchema = z.union([
-    z.literal('MCO'),
-    z.literal('PIHP'),
-    z.literal('PAHP'),
-    z.literal('PCCM'),
-])
+// Commenting out because this wasn't being used but was raising lint warning -hw
+// const managedCareEntitySchema = z.union([
+//     z.literal('MCO'),
+//     z.literal('PIHP'),
+//     z.literal('PAHP'),
+//     z.literal('PCCM'),
+// ])
 
-const amendableItemsSchema = z.union([
-    z.literal('BENEFITS_PROVIDED'),
-    z.literal('CAPITATION_RATES'),
-    z.literal('ENCOUNTER_DATA'),
-    z.literal('ENROLLE_ACCESS'),
-    z.literal('ENROLLMENT_PROCESS'),
-    z.literal('FINANCIAL_INCENTIVES'),
-    z.literal('GEO_AREA_SERVED'),
-    z.literal('GRIEVANCES_AND_APPEALS_SYSTEM'),
-    z.literal('LENGTH_OF_CONTRACT_PERIOD'),
-    z.literal('NON_RISK_PAYMENT'),
-    z.literal('PROGRAM_INTEGRITY'),
-    z.literal('QUALITY_STANDARDS'),
-    z.literal('RISK_SHARING_MECHANISM'),
-])
+// const amendableItemsSchema = z.union([
+//     z.literal('BENEFITS_PROVIDED'),
+//     z.literal('CAPITATION_RATES'),
+//     z.literal('ENCOUNTER_DATA'),
+//     z.literal('ENROLLE_ACCESS'),
+//     z.literal('ENROLLMENT_PROCESS'),
+//     z.literal('FINANCIAL_INCENTIVES'),
+//     z.literal('GEO_AREA_SERVED'),
+//     z.literal('GRIEVANCES_AND_APPEALS_SYSTEM'),
+//     z.literal('LENGTH_OF_CONTRACT_PERIOD'),
+//     z.literal('NON_RISK_PAYMENT'),
+//     z.literal('PROGRAM_INTEGRITY'),
+//     z.literal('QUALITY_STANDARDS'),
+//     z.literal('RISK_SHARING_MECHANISM'),
+// ])
 
 export const draftSubmissionTypeSchema = z.object({
     id: z.string(),
@@ -120,12 +121,14 @@ export const draftSubmissionTypeSchema = z.object({
     actuaryCommunicationPreference: actuaryCommunicationTypeSchema.optional(),
     documents: z.array(submissionDocumentSchema),
     contractType: contractTypeSchema.optional(),
+    contractDocuments: z.array(submissionDocumentSchema),
     contractDateStart: z.date().optional(),
     contractDateEnd: z.date().optional(),
     managedCareEntities: z.array(z.string()),
     federalAuthorities: z.array(federalAuthoritySchema),
     contractAmendmentInfo: contractAmendmentInfoSchema.optional(),
     rateType: rateTypeSchema.optional(),
+    rateDocuments: z.array(submissionDocumentSchema).optional(),
     rateDateStart: z.date().optional(),
     rateDateEnd: z.date().optional(),
     rateDateCertified: z.date().optional(),

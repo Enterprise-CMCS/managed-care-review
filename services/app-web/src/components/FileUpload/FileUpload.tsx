@@ -22,8 +22,10 @@ export type FileUploadProps = {
     id: string
     name: string
     label: string
+    error?: string
     hint?: React.ReactNode
     initialItems?: FileItemT[]
+    isLabelVisible?: boolean
     uploadFile: (file: File) => Promise<S3FileData>
     scanFile?: (key: string) => Promise<void | Error> // optional function to be called after uploading (used for scanning)
     deleteFile: (key: string) => Promise<void>
@@ -43,14 +45,15 @@ export const FileUpload = ({
     name,
     label,
     hint,
+    error,
     initialItems,
+    isLabelVisible = true,
     uploadFile,
     scanFile,
     deleteFile,
     onLoadComplete,
     ...inputProps
 }: FileUploadProps): React.ReactElement => {
-    const [formError, setFormError] = useState<string | null>(null)
     const [loadingStatus, setLoadingStatus] = useState<
         null | 'UPLOADING' | 'COMPLETE'
     >(null)
@@ -275,8 +278,8 @@ export const FileUpload = ({
 
         // reset input immediately to prepare for next interaction
         fileInputRef.current?.clearFiles()
-        setFormError(null)
     }
+
     const handleOnDrop = (e: React.DragEvent): void => {
         e.preventDefault()
         e.stopPropagation()
@@ -293,12 +296,11 @@ export const FileUpload = ({
 
     return (
         <FormGroup className="margin-top-0">
-            <Label className="srOnly" htmlFor={id}>
+            <Label className={isLabelVisible ? '' : 'srOnly'} htmlFor={id}>
                 {label}
             </Label>
-            {formError && (
-                <ErrorMessage id={`${id}-error`}>{formError}</ErrorMessage>
-            )}
+
+            {error && <ErrorMessage id={`${id}-error`}>{error}</ErrorMessage>}
             {hint && (
                 <span
                     id={`${id}-hint`}

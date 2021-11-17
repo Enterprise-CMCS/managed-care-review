@@ -33,7 +33,8 @@ custom:
   webpack:
     webpackConfig: 'webpack.config.js'
     packager: 'yarn'
-    includeModules: true
+    includeModules:
+      nodeModulesRelativeDir: '../../'
     excludeRegex: 'darwin|debian'
   serverlessTerminationProtection:
     stages:
@@ -131,6 +132,13 @@ functions:
           method: get
           cors: true
           authorizer: aws_iam
+    timeout: 60 # aurora cold start can be long
+    vpc:
+      securityGroupIds:
+        - ${self:custom.sgId}
+      subnetIds: ${self:custom.privateSubnets}
+    layers:
+      - !Ref PrismaClientLambdaLayer
 
   hello:
     handler: handlers/hello.main

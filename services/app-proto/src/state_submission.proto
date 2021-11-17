@@ -68,6 +68,7 @@ message ContractInfo {
   optional Date contract_date_end = 3;
   repeated ManagedCareEntity managed_care_entities = 4;
   repeated FederalAuthority federal_authorities = 5;
+  repeated Document contract_documents = 6;
 
   optional ContractAmendmentInfo contract_amendment_info  = 50;
 
@@ -148,13 +149,14 @@ message RateInfo {
   optional Date rate_date_certified = 5;
   repeated ActuaryContact actuary_contacts = 6;
   optional ActuaryCommunicationType actuary_communication_preference = 7;
-    
+  repeated Document rate_documents = 8;
+  
   optional RateAmendmentInfo rate_amendment_info = 50;
 
   message ActuaryContact {
     optional Contact contact = 1;
     optional ActuarialFirmType actuarial_firm_type = 2;
-    optional string actuarial_firm_other= 3;
+    optional string actuarial_firm_other = 3;
   }
 
   message RateAmendmentInfo {

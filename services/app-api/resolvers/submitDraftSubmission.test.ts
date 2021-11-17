@@ -1,16 +1,16 @@
 import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitDraftSubmission.graphql'
 import {
-    constructTestServer,
+    constructTestPostgresServer,
     createAndUpdateTestDraftSubmission,
     fetchTestStateSubmissionById,
 } from '../testHelpers/gqlHelpers'
 
 describe('submitDraftSubmission', () => {
     it('returns a StateSubmission if complete', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         // setup
-        const draft = await createAndUpdateTestDraftSubmission(server)
+        const draft = await createAndUpdateTestDraftSubmission(server, {})
         const draftID = draft.id
 
         // submit
@@ -24,6 +24,7 @@ describe('submitDraftSubmission', () => {
             },
         })
 
+        console.log(submitResult.errors)
         expect(submitResult.errors).toBeUndefined()
         const createdID =
             submitResult?.data?.submitDraftSubmission.submission.id
@@ -43,6 +44,7 @@ describe('submitDraftSubmission', () => {
         expect(resultDraft.submissionDescription).toEqual(
             'An updated submission'
         )
+        expect(resultDraft.documents).toEqual(draft.documents)
 
         // Contract details fields should still be set
         expect(resultDraft.contractType).toEqual(draft.contractType)
@@ -51,6 +53,8 @@ describe('submitDraftSubmission', () => {
         expect(resultDraft.managedCareEntities).toEqual(
             draft.managedCareEntities
         )
+        expect(resultDraft.contractDocuments).toEqual(draft.contractDocuments)
+
         expect(resultDraft.federalAuthorities).toEqual(draft.federalAuthorities)
         // submittedAt should be set to today's date
         const today = new Date()
@@ -65,11 +69,12 @@ describe('submitDraftSubmission', () => {
         ).toBeGreaterThan(0)
     })
 
-    it('returns an error if there are no documents attached', async () => {
-        const server = constructTestServer()
+    it('returns an error if there are no contract documents attached', async () => {
+        const server = await constructTestPostgresServer()
 
         const draft = await createAndUpdateTestDraftSubmission(server, {
             documents: [],
+            contractDocuments: [],
         })
         const draftID = draft.id
 
@@ -88,12 +93,12 @@ describe('submitDraftSubmission', () => {
             'BAD_USER_INPUT'
         )
         expect(submitResult.errors?.[0].extensions?.message).toEqual(
-            'submissions must have documents'
+            'submissions must have valid documents'
         )
     })
 
     it('returns an error if there are no contract details fields', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const draft = await createAndUpdateTestDraftSubmission(server, {
             contractType: undefined,
@@ -122,7 +127,7 @@ describe('submitDraftSubmission', () => {
     })
 
     it('returns an error if there are missing rate details fields for submission type', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const draft = await createAndUpdateTestDraftSubmission(server, {
             submissionType: 'CONTRACT_AND_RATES',
@@ -153,7 +158,7 @@ describe('submitDraftSubmission', () => {
     })
 
     it('returns an error if there are invalid rate details fields for submission type', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const draft = await createAndUpdateTestDraftSubmission(server, {
             submissionType: 'CONTRACT_ONLY',

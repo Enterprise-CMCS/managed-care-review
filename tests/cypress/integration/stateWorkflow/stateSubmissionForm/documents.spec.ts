@@ -12,7 +12,7 @@ describe('documents', () => {
             // Add two valid documents and one duplicate, then navigate back
             cy.visit(`/submissions/${draftSubmissionID}/documents`)
             // HM-TODO: Why doesn't level attribute work here?
-            cy.findByRole('heading', { name: /Documents/ })
+            cy.findByRole('heading', { name: /Supporting documents/ })
             cy.findByTestId('file-input-input').attachFile([
                 'documents/trussel-guide.pdf',
                 'documents/how-to-open-source.pdf',
@@ -65,12 +65,6 @@ describe('documents', () => {
             cy.findByTestId('file-input-error').should(
                 'have.text',
                 'This is not a valid file type.'
-            )
-
-            // Continue button shows error, no documents
-            cy.navigateForm('Continue')
-            cy.findByText('You must upload at least one document').should(
-                'exist'
             )
 
             // Drop multiple valid files

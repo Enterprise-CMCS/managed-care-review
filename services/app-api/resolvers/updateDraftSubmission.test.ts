@@ -6,7 +6,7 @@ import {
 import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
 import UPDATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/updateDraftSubmission.graphql'
 import {
-    constructTestServer,
+    constructTestPostgresServer,
     createTestDraftSubmission,
     fetchTestDraftSubmissionById,
 } from '../testHelpers/gqlHelpers'
@@ -29,9 +29,11 @@ describe('updateDraftSubmission', () => {
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 documents: [],
+                contractDocuments: [],
                 managedCareEntities: [],
                 federalAuthorities: [],
                 rateType: 'AMENDMENT',
+                rateDocuments: [],
                 rateDateStart: new Date(),
                 rateDateEnd: new Date(),
                 rateDateCertified: new Date(),
@@ -49,6 +51,7 @@ describe('updateDraftSubmission', () => {
                 submissionType: 'CONTRACT_ONLY',
                 submissionDescription: 'an updated draft',
                 documents: [],
+                contractDocuments: [],
                 contractType: null,
                 contractDateStart: null,
                 contractDateEnd: null,
@@ -56,6 +59,7 @@ describe('updateDraftSubmission', () => {
                 federalAuthorities: [],
                 contractAmendmentInfo: null,
                 rateType: null,
+                rateDocuments: [],
                 rateDateStart: null,
                 rateDateEnd: null,
                 rateDateCertified: null,
@@ -92,6 +96,8 @@ describe('updateDraftSubmission', () => {
                 submissionDescription: 'an old submission',
                 createdAt: new Date(),
                 updatedAt: new Date(),
+                contractDocuments: [],
+                rateDocuments: [],
                 documents: [],
                 managedCareEntities: [],
                 federalAuthorities: [],
@@ -105,6 +111,7 @@ describe('updateDraftSubmission', () => {
                 submissionType: 'CONTRACT_ONLY',
                 submissionDescription: 'an updated draft',
                 documents: [],
+                contractDocuments: [],
                 contractType: null,
                 contractDateStart: null,
                 contractDateEnd: null,
@@ -118,6 +125,7 @@ describe('updateDraftSubmission', () => {
                     relatedToVaccination: null,
                 },
                 rateType: null,
+                rateDocuments: [],
                 rateDateStart: null,
                 rateDateEnd: null,
                 rateDateCertified: null,
@@ -160,6 +168,8 @@ describe('updateDraftSubmission', () => {
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 documents: [],
+                contractDocuments: [],
+                rateDocuments: [],
                 managedCareEntities: [],
                 federalAuthorities: [],
                 stateContacts: [],
@@ -172,6 +182,7 @@ describe('updateDraftSubmission', () => {
                 submissionType: 'CONTRACT_ONLY',
                 submissionDescription: 'an updated draft',
                 documents: [],
+                contractDocuments: [],
                 contractType: null,
                 contractDateStart: null,
                 contractDateEnd: null,
@@ -188,6 +199,7 @@ describe('updateDraftSubmission', () => {
                     relatedToVaccination: null,
                 },
                 rateType: null,
+                rateDocuments: [],
                 rateDateStart: null,
                 rateDateEnd: null,
                 rateDateCertified: null,
@@ -209,7 +221,7 @@ describe('updateDraftSubmission', () => {
     })
 
     it('updates a submission if the state matches', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const createdDraft = await createTestDraftSubmission(server)
         const createdID = createdDraft.id
@@ -225,10 +237,12 @@ describe('updateDraftSubmission', () => {
             submissionDescription: 'An updated submission',
             documents: [],
             contractType: 'BASE',
+            contractDocuments: [],
             contractDateStart: startDate,
             contractDateEnd: endDate,
             managedCareEntities: ['MCO'],
             federalAuthorities: ['VOLUNTARY'],
+            rateDocuments: [],
             rateDateStart: startDate,
             rateDateEnd: endDate,
             rateDateCertified: certifiedDate,
@@ -286,7 +300,7 @@ describe('updateDraftSubmission', () => {
     })
 
     it('updates a submission to have documents', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const createdDraft = await createTestDraftSubmission(server)
         const createdID = createdDraft.id
@@ -303,6 +317,13 @@ describe('updateDraftSubmission', () => {
                     s3URL: 'fakeS3URL',
                 },
             ],
+            contractDocuments: [
+                {
+                    name: 'contractDocument.pdf',
+                    s3URL: 'fakeS3URL001',
+                },
+            ],
+            rateDocuments: [],
             contractType: 'BASE',
             contractDateStart: startDate,
             contractDateEnd: endDate,
@@ -349,6 +370,13 @@ describe('updateDraftSubmission', () => {
             },
         ])
 
+        expect(resultDraft1.contractDocuments).toEqual([
+            {
+                name: 'contractDocument.pdf',
+                s3URL: 'fakeS3URL001',
+            },
+        ])
+
         // Update with two more documents
         const updatedDraft2 = {
             programID: 'cnet',
@@ -365,8 +393,19 @@ describe('updateDraftSubmission', () => {
                 },
             ],
             contractType: 'BASE',
+            contractDocuments: [
+                {
+                    name: 'contractDocument2.pdf',
+                    s3URL: 'fakeS3URL002',
+                },
+                {
+                    name: 'contractDocument3.pdf',
+                    s3URL: 'fakeS3URL003',
+                },
+            ],
             contractDateStart: resultDraft1.contractDateStart,
             contractDateEnd: resultDraft1.contractDateEnd,
+            rateDocuments: [],
             managedCareEntities: [],
             federalAuthorities: [],
             stateContacts: [
@@ -404,12 +443,14 @@ describe('updateDraftSubmission', () => {
         })
         const resultDraft2 =
             updateResult2.data?.updateDraftSubmission.draftSubmission
+
+        expect(updateResult2.errors).toBeUndefined()
         expect(resultDraft2.documents.length).toEqual(2)
         expect(resultDraft2.documents[0].name).toEqual('myfile2.pdf')
     })
 
     it('updates a submission to have state contacts', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const createdDraft = await createTestDraftSubmission(server)
         const createdID = createdDraft.id
@@ -431,16 +472,18 @@ describe('updateDraftSubmission', () => {
                     titleRole: 'A Role',
                     email: 'test@test.com',
                     actuarialFirm: 'MERCER' as const,
-                    actuarialFirmOther: '',
+                    actuarialFirmOther: null,
                 },
             ],
             actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
             documents: [],
             contractType: 'BASE',
+            contractDocuments: [],
             contractDateStart: null,
             contractDateEnd: null,
             managedCareEntities: [],
             federalAuthorities: [],
+            rateDocuments: [],
         }
 
         const updateResult = await server.executeOperation({
@@ -492,7 +535,7 @@ describe('updateDraftSubmission', () => {
     })
 
     it('updates a submission to have contract amendment details', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const createdDraft = await createTestDraftSubmission(server)
         const createdID = createdDraft.id
@@ -504,11 +547,13 @@ describe('updateDraftSubmission', () => {
             submissionDescription: 'An updated submission',
             documents: [],
             contractType: 'AMENDMENT',
+            contractDocuments: [],
             contractDateStart: startDate,
             managedCareEntities: [],
             federalAuthorities: [],
             stateContacts: [],
             actuaryContacts: [],
+            rateDocuments: [],
 
             // rate detail info
             contractAmendmentInfo: {
@@ -549,7 +594,7 @@ describe('updateDraftSubmission', () => {
     })
 
     it('updates a submission with conditionals in contract amendment details', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const createdDraft = await createTestDraftSubmission(server)
         const createdID = createdDraft.id
@@ -561,9 +606,11 @@ describe('updateDraftSubmission', () => {
             submissionDescription: 'An updated submission',
             documents: [],
             contractType: 'AMENDMENT',
+            contractDocuments: [],
             contractDateStart: startDate,
             managedCareEntities: [],
             federalAuthorities: [],
+            rateDocuments: [],
             contractAmendmentInfo: {
                 itemsBeingAmended: [
                     'BENEFITS_PROVIDED',
@@ -625,7 +672,7 @@ describe('updateDraftSubmission', () => {
     })
 
     it('updates a submission to have a new rate', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const createdDraft = await createTestDraftSubmission(server)
         const createdID = createdDraft.id
@@ -633,6 +680,7 @@ describe('updateDraftSubmission', () => {
         const endDate = '2022-06-30'
         const rateDetails = {
             rateType: 'NEW' as const,
+            rateDocuments: [],
             rateDateStart: startDate,
             rateDateEnd: endDate,
             rateDateCertified: '2021-06-13',
@@ -643,6 +691,7 @@ describe('updateDraftSubmission', () => {
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [],
+            contractDocuments: [],
             managedCareEntities: [],
             federalAuthorities: [],
             stateContacts: [],
@@ -676,7 +725,7 @@ describe('updateDraftSubmission', () => {
     })
 
     it('updates a submission to have a rate amendment', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const createdDraft = await createTestDraftSubmission(server)
         const createdID = createdDraft.id
@@ -684,6 +733,7 @@ describe('updateDraftSubmission', () => {
         const endDate = '2022-06-30'
         const rateAmendment = {
             rateType: 'AMENDMENT' as const,
+            rateDocuments: [],
             rateDateStart: startDate,
             rateDateEnd: endDate,
             rateDateCertified: '2021-06-13',
@@ -698,6 +748,7 @@ describe('updateDraftSubmission', () => {
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [],
+            contractDocuments: [],
             managedCareEntities: [],
             federalAuthorities: [],
             stateContacts: [],
@@ -736,7 +787,7 @@ describe('updateDraftSubmission', () => {
     })
 
     it('updates a submission to remove existing documents', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const createdDraft = await createTestDraftSubmission(server)
         const createdID = createdDraft.id
@@ -747,10 +798,17 @@ describe('updateDraftSubmission', () => {
             submissionDescription: 'An updated submission',
             managedCareEntities: [],
             federalAuthorities: [],
+            rateDocuments: [],
             documents: [
                 {
                     name: 'myfile.pdf',
                     s3URL: 'fakeS3URL',
+                },
+            ],
+            contractDocuments: [
+                {
+                    name: 'myContractDocument.pdf',
+                    s3URL: 'fakeS3URL001',
                 },
             ],
             stateContacts: [
@@ -804,6 +862,8 @@ describe('updateDraftSubmission', () => {
             managedCareEntities: [],
             federalAuthorities: [],
             documents: [],
+            contractDocuments: [],
+            rateDocuments: [],
             stateContacts: [
                 {
                     name: 'Test Person',
@@ -838,7 +898,7 @@ describe('updateDraftSubmission', () => {
     })
 
     it('errors if the ID does not exist', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const startDate = '2021-07-06'
         const endDate = '2021-07-12'
@@ -849,6 +909,8 @@ describe('updateDraftSubmission', () => {
             submissionDescription: 'An updated submission',
             documents: [],
             contractType: 'BASE',
+            contractDocuments: [],
+            rateDocuments: [],
             contractDateStart: startDate,
             contractDateEnd: endDate,
             managedCareEntities: [],
@@ -881,7 +943,7 @@ describe('updateDraftSubmission', () => {
     })
 
     it('returns an error if you are requesting for a different state (403)', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         // SETUP: First, create a new submission
         const createInput: CreateDraftSubmissionInput = {
@@ -903,7 +965,7 @@ describe('updateDraftSubmission', () => {
         const createdID = createdDraft.id
 
         // setup a server with a different user
-        const otherUserServer = constructTestServer({
+        const otherUserServer = await constructTestPostgresServer({
             context: {
                 user: {
                     name: 'Aang',
@@ -922,6 +984,8 @@ describe('updateDraftSubmission', () => {
             submissionDescription: 'An updated submission',
             documents: [],
             contractType: 'BASE',
+            contractDocuments: [],
+            rateDocuments: [],
             contractDateStart: startDate,
             contractDateEnd: endDate,
             managedCareEntities: [],
@@ -950,7 +1014,7 @@ describe('updateDraftSubmission', () => {
     })
 
     it('returns an error if you try and set a programID thats not valid', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         const createdDraft = await createTestDraftSubmission(server)
         const createdID = createdDraft.id
@@ -963,6 +1027,8 @@ describe('updateDraftSubmission', () => {
             submissionDescription: 'An updated submission',
             documents: [],
             contractType: 'BASE',
+            contractDocuments: [],
+            rateDocuments: [],
             contractDateStart: startDate,
             contractDateEnd: endDate,
             managedCareEntities: [],

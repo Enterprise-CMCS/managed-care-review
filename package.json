@@ -1,54 +1,55 @@
 {
-    "name": "guide-wire",
+    "name": "managed-care-review",
     "type": "module",
     "version": "1.0.0",
     "description": "",
     "main": "index.js",
+    "private": true,
+    "workspaces": {
+        "packages": [
+            "services/*",
+            "dev_tool",
+            "scripts"
+        ]
+    },
     "directories": {
         "test": "tests"
     },
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "clean": "lerna clean",
+        "test": "lerna run test",
+        "lint": "lerna run lint --parallel",
+        "format": "yarn prettier --write",
+        "prettier": "prettier --ignore-path .gitignore \"**/*.+(ts|tsx|json)\"",
         "cypress:open": "cypress open --env AUTH_MODE=LOCAL",
-        "cypress:run": "cypress run --env AUTH_MODE=LOCAL"
+        "cypress:run": "cypress run --env AUTH_MODE=LOCAL",
+        "precommit": "lint-staged"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/CMSgov/guide-wire.git"
+        "url": "git+https://github.com/CMSgov/managed-care-review.git"
     },
     "author": "",
     "license": "CC0-1.0",
     "bugs": {
-        "url": "https://github.com/CMSgov/guide-wire/issues"
+        "url": "https://github.com/CMSgov/managed-care-review/issues"
     },
-    "homepage": "https://github.com/CMSgov/guide-wire#readme",
-    "jest": {
-        "testPathIgnorePatterns": [
-            "src/pages/Auth/Signup",
-            "src/pages/Auth/ConfirmSignUp",
-            "**/*.stories.tsx"
-        ]
-    },
+    "homepage": "https://github.com/CMSgov/managed-care-review#readme",
     "devDependencies": {
-        "@testing-library/cypress": "^8.0.1",
-        "@types/dotenv": "^8.2.0",
-        "@types/node": "^14.17.31",
-        "@types/yargs": "^17.0.4",
         "chromedriver": "^95.0.0",
-        "cypress": "^8.6.0",
+        "cypress": "^8.7.0",
         "cypress-pipe": "^2.0.0",
-        "dotenv": "^10.0.0",
-        "prettier": "^2.4.1",
-        "serverless": "^2.64.1",
-        "serverless-plugin-scripts": "^1.0.2",
-        "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",
-        "serverless-iam-helper": "CMSgov/serverless-iam-helper",
-        "serverless-idempotency-helper": "CMSgov/serverless-idempotency-helper",
-        "typescript": "^4.3.5",
-        "yargs": "^17.2.1"
+        "husky": "^7.0.4",
+        "lerna": "^4.0.0",
+        "lint-staged": "^11.2.6",
+        "prettier": "^2.4.1"
     },
     "dependencies": {
-        "aws-sdk": "^2.1001.0",
+        "aws-sdk": "^2.1018.0",
         "cypress-file-upload": "^5.0.8"
+    },
+    "resolutions": {
+        "babel-loader": "8.1.0",
+        "jest": "26.6.0"
     }
 }

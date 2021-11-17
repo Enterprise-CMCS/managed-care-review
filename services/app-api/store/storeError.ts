@@ -1,6 +1,7 @@
 export const StoreErrorCodes = [
     'CONFIGURATION_ERROR',
     'CONNECTION_ERROR',
+    'PROTOBUF_ERROR',
     'INSERT_ERROR',
     'UNEXPECTED_EXCEPTION',
     'WRONG_STATUS',

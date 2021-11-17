@@ -80,6 +80,7 @@ export function applyUpdates(
         updates.actuaryCommunicationPreference ?? undefined
 
     draft.contractType = updates.contractType ?? undefined
+    draft.contractDocuments = updates.contractDocuments ?? []
     draft.contractDateStart = updates.contractDateStart ?? undefined
     draft.contractDateEnd = updates.contractDateEnd ?? undefined
     draft.managedCareEntities = updates.managedCareEntities
@@ -87,6 +88,7 @@ export function applyUpdates(
     draft.contractAmendmentInfo = amendmentInfoUpdates
 
     draft.rateType = updates.rateType ?? undefined
+    draft.rateDocuments = updates.rateDocuments ?? []
     draft.rateDateStart = updates.rateDateStart ?? undefined
     draft.rateDateEnd = updates.rateDateEnd ?? undefined
     draft.rateDateCertified = updates.rateDateCertified ?? undefined
@@ -105,7 +107,6 @@ export function updateDraftSubmissionResolver(
         // fetch the current submission, put the updated stuff on it?
         const result = await store.findDraftSubmission(input.submissionID)
         if (isStoreError(result)) {
-            console.log('Error finding a submission for update', result)
             throw new Error(
                 `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
             )
@@ -156,7 +157,6 @@ export function updateDraftSubmissionResolver(
                 `Issue updating a draft submission of type ${updateResult.code}. Message: ${updateResult.message}`
             )
         }
-
         const updatedDraft: DraftSubmissionType = updateResult
 
         return {

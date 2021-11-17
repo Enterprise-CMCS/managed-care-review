@@ -1,13 +1,13 @@
 import FETCH_STATE_SUBMISSION from '../../app-graphql/src/queries/fetchStateSubmission.graphql'
 import {
-    constructTestServer,
+    constructTestPostgresServer,
     createTestStateSubmission,
     createAndUpdateTestDraftSubmission,
 } from '../testHelpers/gqlHelpers'
 
 describe('fetchStateSubmission', () => {
     it('returns draft submission payload with a draft submission', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         // First, create a new submission
         const stateSubmission = await createTestStateSubmission(server)
@@ -32,9 +32,10 @@ describe('fetchStateSubmission', () => {
         expect(resultSub.program.name).toBe('CNET')
         expect(resultSub.name).toContain('FL-CNET')
         expect(resultSub.submissionDescription).toEqual('An updated submission')
-        expect(resultSub.documents).toEqual([
+        expect(resultSub.documents).toEqual([])
+        expect(resultSub.contractDocuments).toEqual([
             {
-                name: 'myfile.pdf',
+                name: 'contractDocument.pdf',
                 s3URL: 'fakeS3URL',
             },
         ])
@@ -44,7 +45,7 @@ describe('fetchStateSubmission', () => {
     })
 
     it('returns an error if the submission is a draft', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         // First, create a new submission
         const draft = await createAndUpdateTestDraftSubmission(server)
@@ -73,7 +74,7 @@ describe('fetchStateSubmission', () => {
     })
 
     it('returns null if the ID does not exist', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         // then see if we can fetch that same submission
         const input = {
@@ -90,7 +91,7 @@ describe('fetchStateSubmission', () => {
     })
 
     it('a different user from the same state can fetch the draft', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         // First, create a new submission
         const stateSubmission = await createTestStateSubmission(server)
@@ -103,7 +104,7 @@ describe('fetchStateSubmission', () => {
         }
 
         // setup a server with a different user
-        const otherUserServer = constructTestServer({
+        const otherUserServer = await constructTestPostgresServer({
             context: {
                 user: {
                     name: 'Aang',
@@ -121,11 +122,12 @@ describe('fetchStateSubmission', () => {
 
         expect(result.errors).toBeUndefined()
 
-        expect(result.data).toBeDefined()
+        expect(result.data?.fetchStateSubmission.submission).toBeDefined()
+        expect(result.data?.fetchStateSubmission.submission).not.toBeNull()
     })
 
     it('returns an error if you are requesting for a different state (403)', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         // First, create a new submission
         const stateSubmission = await createTestStateSubmission(server)
@@ -138,7 +140,7 @@ describe('fetchStateSubmission', () => {
         }
 
         // setup a server with a different user
-        const otherUserServer = constructTestServer({
+        const otherUserServer = await constructTestPostgresServer({
             context: {
                 user: {
                     name: 'Aang',

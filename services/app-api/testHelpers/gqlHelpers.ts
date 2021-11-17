@@ -1,6 +1,5 @@
 import { ApolloServer } from 'apollo-server-lambda'
 
-import { getTestStore } from '../testHelpers/storeHelpers'
 import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
 import FETCH_DRAFT_SUBMISSION from '../../app-graphql/src/queries/fetchDraftSubmission.graphql'
 import UPDATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/updateDraftSubmission.graphql'
@@ -16,10 +15,9 @@ import {
     DraftSubmissionUpdates,
     StateSubmission,
 } from '../gen/gqlServer'
-
-const store = getTestStore()
-
-const testResolvers = configureResolvers(store)
+import { NewPrismaClient } from '../lib/prisma'
+import { NewPostgresStore } from '../postgres/postgresStore'
+import { PrismaClient } from '@prisma/client'
 
 const defaultContext = (): Context => {
     return {
@@ -32,14 +30,37 @@ const defaultContext = (): Context => {
     }
 }
 
-const constructTestServer = (
+async function configurePrismaClient(): Promise<PrismaClient> {
+    const maybeClient = await NewPrismaClient()
+    if (maybeClient.isErr()) {
+        console.log('Error: ', maybeClient.error)
+        throw new Error('failed to configure postgres client for testing')
+    }
+
+    return maybeClient.value
+}
+
+const sharedClientPromise = configurePrismaClient()
+
+async function sharedTestPrismaClient(): Promise<PrismaClient> {
+    return await sharedClientPromise
+}
+
+const constructTestPostgresServer = async (
     { context } = { context: defaultContext() }
-): ApolloServer =>
-    new ApolloServer({
+): Promise<ApolloServer> => {
+    const prismaClient = await sharedTestPrismaClient()
+
+    const postgresStore = NewPostgresStore(prismaClient)
+
+    const postgresResolvers = configureResolvers(postgresStore)
+
+    return new ApolloServer({
         typeDefs,
-        resolvers: testResolvers,
+        resolvers: postgresResolvers,
         context,
     })
+}
 
 const createTestDraftSubmission = async (
     server: ApolloServer
@@ -110,12 +131,8 @@ const createAndUpdateTestDraftSubmission = async (
         programID: 'cnet',
         submissionType: 'CONTRACT_AND_RATES' as const,
         submissionDescription: 'An updated submission',
-        documents: [
-            {
-                name: 'myfile.pdf',
-                s3URL: 'fakeS3URL',
-            },
-        ],
+        documents: [],
+
         stateContacts: [
             {
                 name: 'test name',
@@ -136,12 +153,24 @@ const createAndUpdateTestDraftSubmission = async (
         contractType: 'BASE' as const,
         contractDateStart: startDate,
         contractDateEnd: endDate,
+        contractDocuments: [
+            {
+                name: 'contractDocument.pdf',
+                s3URL: 'fakeS3URL',
+            },
+        ],
         managedCareEntities: ['MCO'],
         federalAuthorities: ['STATE_PLAN' as const],
         rateType: 'NEW' as const,
         rateDateStart: startDate,
         rateDateEnd: endDate,
         rateDateCertified: dateCertified,
+        rateDocuments: [
+            {
+                name: 'rateDocument.pdf',
+                s3URL: 'fakeS3URL',
+            },
+        ],
         ...partialDraftSubmissionUpdates,
     }
 
@@ -236,7 +265,8 @@ const fetchTestStateSubmissionById = async (
 }
 
 export {
-    constructTestServer,
+    sharedTestPrismaClient,
+    constructTestPostgresServer,
     createTestDraftSubmission,
     createTestStateSubmission,
     updateTestDraftSubmission,

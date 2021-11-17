@@ -82,12 +82,17 @@ const protoDateToDomain = (
         return undefined
     }
 
-    if (!(protoDate.year && protoDate.month && protoDate.day)) {
+    // intentionally using `== null` here to check for null and undefined but _not_ 0
+    if (
+        protoDate.year == null ||
+        protoDate.month == null ||
+        protoDate.day == null
+    ) {
         console.log('LOG: Incomplete Proto Date', protoDate)
         return undefined
     }
 
-    return new Date(protoDate.year, protoDate.month, protoDate.day)
+    return new Date(Date.UTC(protoDate.year, protoDate.month, protoDate.day))
 }
 /*
     Convert proto enum (e.g. SUBMISSION_TYPE_CONTRACT_ONLY) to domain enum (e.g. CONTRACT_ONLY)
@@ -103,7 +108,7 @@ function enumToDomain<T extends StandardEnum<unknown>, K extends string>(
     key: number | undefined | null
 ): K | undefined {
     // proto is returning a default value of 0 for undefined enums
-    if (key === undefined || key === null || key == 0) {
+    if (key === undefined || key === null || key === 0) {
         return undefined
     }
     const domainEnum = removeEnumPrefix(protoEnum[0], protoEnum[key])
@@ -112,9 +117,9 @@ function enumToDomain<T extends StandardEnum<unknown>, K extends string>(
 }
 
 /*
-    Convert array of proto enums to domain enums 
+    Convert array of proto enums to domain enums
     I couldn't figure out a signature to make it do the casting itself so
-    we still need to cast this result for enums. 
+    we still need to cast this result for enums.
 */
 function protoEnumArrayToDomain<T extends StandardEnum<unknown>>(
     protoEnum: T,
@@ -136,7 +141,7 @@ function protoEnumArrayToDomain<T extends StandardEnum<unknown>>(
     return enums
 }
 
-/* 
+/*
 Remove the proto enum prefix using the default value of that field
     - (e.g. return SUBMISSION_TYPE from the default value SUBMISSION_TYPE_UNSPECIFIED)
 */
@@ -153,7 +158,7 @@ function decodeOrError(
         const message = statesubmission.StateSubmissionInfo.decode(buff)
         return message
     } catch (e) {
-        return e
+        return new Error(`${e}`)
     }
 }
 
@@ -345,6 +350,9 @@ const toDomain = (
         contractDateEnd: protoDateToDomain(
             stateSubmissionMessage.contractInfo?.contractDateEnd
         ),
+        contractDocuments: parseProtoDocuments(
+            stateSubmissionMessage.contractInfo?.contractDocuments
+        ),
         managedCareEntities: protoEnumArrayToDomain(
             statesubmission.ManagedCareEntity,
             stateSubmissionMessage?.contractInfo?.managedCareEntities
@@ -359,6 +367,7 @@ const toDomain = (
         ),
         rateAmendmentInfo: parseProtoRateAmendment(rateInfo?.rateAmendmentInfo),
         rateType: enumToDomain(statesubmission.RateType, rateInfo?.rateType),
+        rateDocuments: parseProtoDocuments(rateInfo?.rateDocuments),
         rateDateStart: protoDateToDomain(rateInfo?.rateDateStart),
         rateDateEnd: protoDateToDomain(rateInfo?.rateDateEnd),
         rateDateCertified: protoDateToDomain(rateInfo?.rateDateCertified),
@@ -382,11 +391,11 @@ const toDomain = (
         // This parse returns an actual DraftSubmissionType, so all our partial & casting is put to rest
         const parseResult = draftSubmissionTypeSchema.safeParse(maybeDraft)
 
-        if (parseResult.success == false) {
+        if (parseResult.success === false) {
             return parseResult.error
         }
 
-        return parseResult.data
+        return parseResult.data as DraftSubmissionType
     } else if (status === 'SUBMITTED') {
         const maybeStateSubmission =
             maybeDomainModel as RecursivePartial<StateSubmissionType>

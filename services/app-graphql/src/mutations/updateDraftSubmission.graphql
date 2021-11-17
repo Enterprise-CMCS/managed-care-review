@@ -31,6 +31,10 @@ mutation updateDraftSubmission($input: UpdateDraftSubmissionInput!) {
                 s3URL
             }
             contractType
+            contractDocuments {
+                name
+                s3URL
+            }
             contractDateStart
             contractDateEnd
             managedCareEntities
@@ -46,6 +50,10 @@ mutation updateDraftSubmission($input: UpdateDraftSubmissionInput!) {
                 relatedToVaccination
             }
             rateType
+            rateDocuments {
+                name
+                s3URL
+            }
             rateDateStart
             rateDateEnd
             rateDateCertified

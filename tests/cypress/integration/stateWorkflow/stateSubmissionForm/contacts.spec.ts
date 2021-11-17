@@ -42,7 +42,7 @@ describe('contacts', () => {
             // Navigate to documents page by clicking continue
             cy.navigateForm('Continue')
             // HM-TODO: Why doesn't level attribute work here?
-            cy.findByRole('heading', { name: /Documents/ })
+            cy.findByRole('heading', { name: /Supporting documents/ })
         })
     })
 
@@ -84,7 +84,7 @@ describe('contacts', () => {
             // Navigate to documents page by clicking continue
             cy.navigateForm('Continue')
             // HM-TODO: Why doesn't level attribute work here?
-            cy.findByRole('heading', { name: /Documents/ })
+            cy.findByRole('heading', { name: /Supporting documents/ })
 
             // Navigate to contacts page
             cy.visit(`/submissions/${draftSubmissionId}/contacts`)
