@@ -3,6 +3,7 @@ import styles from '../SubmissionSummarySection.module.scss'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { DataDetail } from '../../../components/DataDetail'
 import { DoubleColumnRow } from '../../../components/DoubleColumnRow'
+import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 
 export type RateDetailsSummarySectionProps = {
@@ -75,6 +76,12 @@ export const RateDetailsSummarySection = ({
                             />
                         ) : null
                     }
+                />
+
+                <UploadedDocumentsTable
+                    documents={submission.rateDocuments}
+                    caption="Rate certification"
+                    documentCategory="Rate certification"
                 />
             </dl>
         </section>

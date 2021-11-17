@@ -367,10 +367,7 @@ const toDomain = (
         ),
         rateAmendmentInfo: parseProtoRateAmendment(rateInfo?.rateAmendmentInfo),
         rateType: enumToDomain(statesubmission.RateType, rateInfo?.rateType),
-        rateDocuments:
-            (rateInfo?.rateDocuments?.length &&
-                parseProtoDocuments(rateInfo?.rateDocuments)) ||
-            undefined,
+        rateDocuments: parseProtoDocuments(rateInfo?.rateDocuments),
         rateDateStart: protoDateToDomain(rateInfo?.rateDateStart),
         rateDateEnd: protoDateToDomain(rateInfo?.rateDateEnd),
         rateDateCertified: protoDateToDomain(rateInfo?.rateDateCertified),
@@ -398,7 +395,7 @@ const toDomain = (
             return parseResult.error
         }
 
-        return parseResult.data
+        return parseResult.data as DraftSubmissionType
     } else if (status === 'SUBMITTED') {
         const maybeStateSubmission =
             maybeDomainModel as RecursivePartial<StateSubmissionType>

@@ -20,7 +20,7 @@ import {
     ContractDetailsSummarySection,
     RateDetailsSummarySection,
     ContactsSummarySection,
-    DocumentsSummarySection,
+    SupportingDocumentsSummarySection,
 } from '../../../components/SubmissionSummarySection'
 import {
     DraftSubmission,
@@ -38,7 +38,6 @@ export const ReviewSubmit = ({
     >(undefined)
     const history = useHistory<MCRouterState>()
     const modalRef = useRef<ModalRef>(null)
-
 
     const [submitDraftSubmission] = useSubmitDraftSubmissionMutation({
         // An alternative to messing with the cache like we do with create, just zero it out.
@@ -72,7 +71,6 @@ export const ReviewSubmit = ({
                 },
             })
 
-
             if (data.errors) {
                 showError('Error attempting to submit. Please try again.')
                 modalRef.current?.toggleModal(undefined, false)
@@ -85,12 +83,10 @@ export const ReviewSubmit = ({
             showError('Error attempting to submit. Please try again.')
             modalRef.current?.toggleModal(undefined, false)
         }
-        
     }
 
     const isContractActionAndRateCertification =
         draftSubmission.submissionType === 'CONTRACT_AND_RATES'
-
 
     return (
         <GridContainer className={styles.reviewSectionWrapper}>
@@ -122,7 +118,7 @@ export const ReviewSubmit = ({
                 navigateTo="contacts"
             />
 
-            <DocumentsSummarySection
+            <SupportingDocumentsSummarySection
                 submission={draftSubmission}
                 navigateTo="documents"
             />
@@ -151,6 +147,7 @@ export const ReviewSubmit = ({
                     <ModalToggleButton
                         modalRef={modalRef}
                         className={styles.submitButton}
+                        data-testid="form-submit"
                         opener
                     >
                         Submit
@@ -182,11 +179,12 @@ export const ReviewSubmit = ({
                             <Button
                                 type="button"
                                 key="submitButton"
-                                aria-label="Confirm submit"
+                                aria-label="Submit"
+                                data-testid="modal-submit"
                                 className={styles.submitButton}
                                 onClick={handleFormSubmit}
                             >
-                                Confirm submit
+                                Submit
                             </Button>
                         </ButtonGroup>
                     </ModalFooter>

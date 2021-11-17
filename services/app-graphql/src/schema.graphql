@@ -248,7 +248,7 @@ type DraftSubmission {
     federalAuthorities: [FederalAuthority!]!
     contractAmendmentInfo: ContractAmendmentInfo
     rateType: RateType
-    rateDocuments: [Document!]
+    rateDocuments: [Document!]!
     rateDateStart: Date
     rateDateEnd: Date
     rateDateCertified: Date
@@ -278,7 +278,7 @@ type StateSubmission {
     managedCareEntities: [String!]!
     federalAuthorities: [FederalAuthority!]!
     rateType: RateType
-    rateDocuments: [Document!]
+    rateDocuments: [Document!]!
     rateDateStart: Date
     rateDateEnd: Date
     rateDateCertified: Date
@@ -303,7 +303,7 @@ input DraftSubmissionUpdates {
     federalAuthorities: [FederalAuthority!]!
     contractAmendmentInfo: ContractAmendmentInfoInput
     rateType: RateType
-    rateDocuments: [DocumentInput!]
+    rateDocuments: [DocumentInput!]!
     rateDateStart: Date
     rateDateEnd: Date
     rateDateCertified: Date
