@@ -22,6 +22,11 @@ runs:
       shell: bash
       run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
 
+    - name: Get yarn cache directory path
+      shell: bash
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+
     - uses: actions/setup-node@v2.4.0
       with:
         node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
