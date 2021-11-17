@@ -1,6 +1,6 @@
 import React from 'react'
 import dayjs from 'dayjs'
-import { GridContainer, Link, Alert, Table } from '@trussworks/react-uswds'
+import { Alert, GridContainer, Link, Table, Tag } from '@trussworks/react-uswds'
 import { NavLink, useLocation } from 'react-router-dom'
 
 import styles from './Dashboard.module.scss'
@@ -47,6 +47,9 @@ const submissionStatusMap: {
 */
 const programIDFromSubmissionName = (name: string) =>
     name.split('-').slice(1, -1).join('-').toLowerCase()
+
+const isSubmitted = (typename: string) =>
+    typename === 'StateSubmission' ? true : false
 
 // we want all the DraftSubmissions to rise above the StateSubmissions
 // but otherwise remain in numeric order  so we can compare their
@@ -99,6 +102,7 @@ type SubmissionCardInfo = {
 type TableRow = {
     __typename: string
     id: string
+    name: string
     program: Program
     createdAt: string
     updatedAt: string
@@ -136,19 +140,19 @@ export const Dashboard = (): React.ReactElement => {
         location.search
     ).get('justSubmitted')
 
-    let defaultTab: string | undefined = undefined
-    if (justSubmittedSubmissionName) {
-        for (const submission of submissionList) {
-            if (submission.name === justSubmittedSubmissionName) {
-                defaultTab = submission.program.name
-            }
-        }
-    } else if (location.state && location.state.defaultProgramID) {
-        const defaultProgram = loggedInUser.state.programs.find(
-            (program) => program.id === location.state?.defaultProgramID
-        )
-        defaultTab = defaultProgram?.name
-    }
+    // let defaultTab: string | undefined = undefined
+    // if (justSubmittedSubmissionName) {
+    //     for (const submission of submissionList) {
+    //         if (submission.name === justSubmittedSubmissionName) {
+    //             defaultTab = submission.program.name
+    //         }
+    //     }
+    // } else if (location.state && location.state.defaultProgramID) {
+    //     const defaultProgram = loggedInUser.state.programs.find(
+    //         (program) => program.id === location.state?.defaultProgramID
+    //     )
+    //     defaultTab = defaultProgram?.name
+    // }
 
     // Go through the list of programs and create a list of submissions in the right order
     const programSubmissions: { [progID: string]: SubmissionCardInfo[] } = {}
@@ -161,178 +165,176 @@ export const Dashboard = (): React.ReactElement => {
         programSubmissions[program.id] = submissions
     }
 
-    // function tableRows(): TableRow[] {
-    //     return submissionList.map((submission) => {
-    //         return {
-    //             id: submission.id,
-    //             programs: "placeholder",
-    //             submittedAt: dayjs(submission.submittedAt).format('MM/DD/YYYY'),
-    //             updatedAt: dayjs(submission.updatedAt).format('MM/DD/YYYY'),
-    //             status: submissionStatusMap[submission.__typename],
-    //         }
-    //     })
-    // }
+    const hasSubmissions = Object.values(programSubmissions).some(
+        (value) => Array.isArray(value) && value.length > 0
+    )
+
+    const getFirstProgramName = Object.keys(programSubmissions)[0]
 
     return (
         <>
             <div className={styles.container} data-testid="dashboard-page">
                 {programs.length ? (
-                    <Tabs className={styles.tabs} defaultActiveTab={defaultTab}>
-                        {programs.map((program: Program) => (
-                            <TabPanel
-                                key={program.name}
-                                id={program.name}
-                                tabName={program.name}
-                            >
-                                <GridContainer>
-                                    <section
-                                        key={program.name}
-                                        className={styles.panel}
+                    // <div>
+                    //     {programs.map((program: Program) => (
+                    // <TabPanel
+                    //     key={program.name}
+                    //     id={program.name}
+                    //     tabName={program.name}
+                    // >
+                    <GridContainer>
+                        {/* {programs.map((program: Program) => ( */}
+                        <section
+                            // key={program.name}
+                            className={styles.panel}
+                        >
+                            {justSubmittedSubmissionName && (
+                                <SubmissionSuccessMessage
+                                    submissionName={justSubmittedSubmissionName}
+                                />
+                            )}
+                            <div className={styles.panelHeader}>
+                                <h2>Submissions</h2>
+                                <div>
+                                    <Link
+                                        asCustom={NavLink}
+                                        className="usa-button"
+                                        variant="unstyled"
+                                        to={{
+                                            pathname: '/submissions/new',
+                                            state: {
+                                                defaultProgramID:
+                                                    getFirstProgramName,
+                                            },
+                                        }}
                                     >
-                                        {justSubmittedSubmissionName &&
-                                            programIDFromSubmissionName(
-                                                justSubmittedSubmissionName
-                                            ) === program.id && (
-                                                <SubmissionSuccessMessage
-                                                    submissionName={
-                                                        justSubmittedSubmissionName
-                                                    }
-                                                />
-                                            )}
-                                        <div className={styles.panelHeader}>
-                                            <h2>Submissions</h2>
-                                            <div>
-                                                <Link
-                                                    asCustom={NavLink}
-                                                    className="usa-button"
-                                                    variant="unstyled"
-                                                    to={{
-                                                        pathname:
-                                                            '/submissions/new',
-                                                        state: {
-                                                            defaultProgramID:
-                                                                program.id,
-                                                        },
-                                                    }}
-                                                >
-                                                    Start new submission
-                                                </Link>
-                                            </div>
-                                        </div>
-                                        {programSubmissions[program.id].length >
-                                        0 ? (
-                                            <Table>
-                                                <thead>
-                                                    <tr>
-                                                        <th>ID</th>
-                                                        <th>Programs</th>
-                                                        <th>Submitted</th>
-                                                        <th>Last updated</th>
-                                                        <th>Status</th>
+                                        Start new submission
+                                    </Link>
+                                </div>
+                            </div>
+                            {hasSubmissions ? (
+                                <Table>
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Programs</th>
+                                            <th>Submitted</th>
+                                            <th>Last updated</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {submissionList.map(
+                                            (submission: TableRow) => {
+                                                return (
+                                                    <tr key={submission.id}>
+                                                        <td>
+                                                            {submission.name}
+                                                        </td>
+                                                        <td>
+                                                            <Tag
+                                                                className={`radius-pill ${styles.programTag}`}
+                                                            >
+                                                                {
+                                                                    submission
+                                                                        .program
+                                                                        .name
+                                                                }
+                                                            </Tag>
+                                                        </td>
+                                                        <td>
+                                                            {dayjs(
+                                                                submission.createdAt
+                                                            ).format(
+                                                                'MM/DD/YYYY'
+                                                            )}
+                                                        </td>
+                                                        <td>
+                                                            {dayjs(
+                                                                submission.updatedAt
+                                                            ).format(
+                                                                'MM/DD/YYYY'
+                                                            )}
+                                                        </td>
+                                                        <td>
+                                                            <Tag
+                                                                className={
+                                                                    isSubmitted(
+                                                                        submission.__typename
+                                                                    )
+                                                                        ? styles.submittedTag
+                                                                        : styles.draftTag
+                                                                }
+                                                            >
+                                                                {isSubmitted(
+                                                                    submission.__typename
+                                                                )
+                                                                    ? 'Submitted'
+                                                                    : 'Draft'}
+                                                            </Tag>
+                                                        </td>
                                                     </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {submissionList.map(
-                                                        (submission: TableRow) => {
-                                                            return (
-                                                                <tr
-                                                                    key={
-                                                                        submission.id
-                                                                    }
-                                                                >
-                                                                    <td>
-                                                                        {
-                                                                            submission.id
-                                                                        }
-                                                                    </td>
-                                                                    <td>
-                                                                        {
-                                                                            submission
-                                                                                .program
-                                                                                .name
-                                                                        }
-                                                                    </td>
-                                                                    <td>
-                                                                        {dayjs(
-                                                                            submission.createdAt
-                                                                        ).format(
-                                                                            'MM/DD/YYYY'
-                                                                        )}
-                                                                    </td>
-                                                                    <td>
-                                                                        {dayjs(
-                                                                            submission.updatedAt
-                                                                        ).format(
-                                                                            'MM/DD/YYYY'
-                                                                        )}
-                                                                    </td>
-                                                                    <td>
-                                                                        {submission.__typename ===
-                                                                        'StateSubmission'
-                                                                            ? 'Submitted'
-                                                                            : 'Draft'}
-                                                                    </td>
-                                                                </tr>
-                                                            )
-                                                        }
-                                                    )}
-                                                </tbody>
-                                            </Table>
-                                        ) : (
-                                            // <ul
-                                            //     id="submissions-list"
-                                            //     data-testid="submissions-list"
-                                            //     className="SubmissionCard_submissionList__1okWK"
-                                            // >
-                                            //     {programSubmissions[
-                                            //         program.id
-                                            //     ].map((submission) => (
-                                            //         <SubmissionCard
-                                            //             key={submission.name}
-                                            //             href={editUrlForSubmission(
-                                            //                 submission
-                                            //             )}
-                                            //             description={
-                                            //                 submission.submissionDescription
-                                            //             }
-                                            //             name={submission.name}
-                                            //             date={
-                                            //                 submission.__typename ===
-                                            //                     'StateSubmission' &&
-                                            //                 submission.submittedAt
-                                            //                     ? dayjs(
-                                            //                           submission.submittedAt
-                                            //                       )
-                                            //                     : undefined
-                                            //             }
-                                            //             status={
-                                            //                 submissionStatusMap[
-                                            //                     submission
-                                            //                         .__typename
-                                            //                 ]
-                                            //             }
-                                            //             submissionType={
-                                            //                 domainSubmissionTypeMap[
-                                            //                     submission
-                                            //                         .submissionType
-                                            //                 ]
-                                            //             }
-                                            //         />
-                                            //     ))}
-                                            // </ul>
-                                            <div className={styles.panelEmpty}>
-                                                <h3>
-                                                    You have no submissions for{' '}
-                                                    {program.name} yet.
-                                                </h3>
-                                            </div>
+                                                )
+                                            }
                                         )}
-                                    </section>
-                                </GridContainer>
-                            </TabPanel>
-                        ))}
-                    </Tabs>
+                                    </tbody>
+                                </Table>
+                            ) : (
+                                // <ul
+                                //     id="submissions-list"
+                                //     data-testid="submissions-list"
+                                //     className="SubmissionCard_submissionList__1okWK"
+                                // >
+                                //     {programSubmissions[
+                                //         program.id
+                                //     ].map((submission) => (
+                                //         <SubmissionCard
+                                //             key={submission.name}
+                                //             href={editUrlForSubmission(
+                                //                 submission
+                                //             )}
+                                //             description={
+                                //                 submission.submissionDescription
+                                //             }
+                                //             name={submission.name}
+                                //             date={
+                                //                 submission.__typename ===
+                                //                     'StateSubmission' &&
+                                //                 submission.submittedAt
+                                //                     ? dayjs(
+                                //                           submission.submittedAt
+                                //                       )
+                                //                     : undefined
+                                //             }
+                                //             status={
+                                //                 submissionStatusMap[
+                                //                     submission
+                                //                         .__typename
+                                //                 ]
+                                //             }
+                                //             submissionType={
+                                //                 domainSubmissionTypeMap[
+                                //                     submission
+                                //                         .submissionType
+                                //                 ]
+                                //             }
+                                //         />
+                                //     ))}
+                                // </ul>
+                                <div className={styles.panelEmpty}>
+                                    <h3>
+                                        You have no submissions for{' '}
+                                        {getFirstProgramName} yet.
+                                    </h3>
+                                </div>
+                            )}
+                        </section>
+                        {/* ))} */}
+                    </GridContainer>
                 ) : (
+                    // </TabPanel>
+                    //     ))}
+                    // </div>
                     <p>No programs exist</p>
                 )}
             </div>

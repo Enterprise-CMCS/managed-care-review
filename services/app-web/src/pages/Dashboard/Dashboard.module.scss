@@ -30,6 +30,18 @@
     width: 100%;
 }
 
+.programTag {
+    background: $cms-color-primary;
+}
+
+.submittedTag {
+    background: $theme-color-success;
+}
+
+.draftTag {
+    background: $theme-color-warning-dark;
+}
+
 .panel {
     padding: units(2);
 
