@@ -58,7 +58,7 @@ const ActuaryFirmsRecord: Record<ActuarialFirmType, string> = {
     DELOITTE: 'Deloitte',
     STATE_IN_HOUSE: 'State in-house',
     OTHER: 'Other',
-  }
+}
 
 const ActuaryCommunicationRecord: Record<ActuaryCommunicationType, string> = {
     OACT_TO_ACTUARY: `The CMS Office of the Actuary can communicate directly with the state’s actuary

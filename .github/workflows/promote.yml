@@ -129,6 +129,12 @@ jobs:
     name: dev - cypress
     needs: [promote-dev]
     runs-on: ubuntu-latest
+    container: cypress/browsers:node14.17.0-chrome91-ff89
+    strategy:
+      fail-fast: false
+      matrix:
+        # run copies of the current job in parallel
+        containers: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v2
 
@@ -154,25 +160,20 @@ jobs:
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS}}
           REACT_APP_AUTH_MODE: IDM
 
-      - name: Install packages in root
-        run: yarn install --frozen-lockfile
-
-      - name: Install Cypress
-        run: yarn cypress install
-
-      - name: Install packages in ui
-        working-directory: services/ui
-        run: yarn install --frozen-lockfile
-
-      - name: Generate graphql
-        run: ./dev generate
-
-      - name: Cypress on dev
+      - name: Cypress on Dev -- Chrome
         id: cypressdev
         uses: cypress-io/github-action@v2
         with:
+          install: false
           config: baseUrl=https://mc-review-dev.onemac.cms.gov
           spec: tests/cypress/integration/promoteWorkflow/promote.spec.ts
+          record: true
+          parallel: true
+          browser: chrome
+          group: 'Chrome'
+        env:
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload cypress video
         uses: actions/upload-artifact@v2.2.4
@@ -218,6 +219,12 @@ jobs:
     name: val - cypress
     needs: [promote-val]
     runs-on: ubuntu-latest
+    container: cypress/browsers:node14.17.0-chrome91-ff89
+    strategy:
+      fail-fast: false
+      matrix:
+        # run copies of the current job in parallel
+        containers: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v2
 
@@ -243,25 +250,20 @@ jobs:
           DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS}}
 
-      - name: Install packages in root
-        run: yarn install --frozen-lockfile
-
-      - name: Install Cypress
-        run: yarn cypress install
-
-      - name: Install packages in ui
-        working-directory: services/ui
-        run: yarn install --frozen-lockfile
-
-      - name: Generate graphql
-        run: ./dev generate
-
-      - name: Cypress on val
+      - name: Cypress on Val -- Chrome
         id: cypressval
         uses: cypress-io/github-action@v2
         with:
+          install: false
           config: baseUrl=https://mc-review-val.onemac.cms.gov
           spec: tests/cypress/integration/promoteWorkflow/promote.spec.ts
+          record: true
+          parallel: true
+          browser: chrome
+          group: 'Chrome'
+        env:
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload cypress video
         uses: actions/upload-artifact@v2.2.4
@@ -307,6 +309,12 @@ jobs:
     name: prod - cypress
     needs: [promote-prod]
     runs-on: ubuntu-latest
+    container: cypress/browsers:node14.17.0-chrome91-ff89
+    strategy:
+      fail-fast: false
+      matrix:
+        # run copies of the current job in parallel
+        containers: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v2
 
@@ -332,25 +340,20 @@ jobs:
           DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS}}
 
-      - name: Install packages in root
-        run: yarn install --frozen-lockfile
-
-      - name: Install Cypress
-        run: yarn cypress install
-
-      - name: Install packages in ui
-        working-directory: services/ui
-        run: yarn install --frozen-lockfile
-
-      - name: Generate graphql
-        run: ./dev generate
-
-      - name: Cypress on prod
-        id: cypressprod
+      - name: Cypress on Prod -- Chrome
+        id: cypress
         uses: cypress-io/github-action@v2
         with:
+          install: false
           config: baseUrl=https://mc-review.onemac.cms.gov
           spec: tests/cypress/integration/promoteWorkflow/promote.spec.ts
+          record: true
+          parallel: true
+          browser: chrome
+          group: 'Chrome'
+        env:
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload cypress video
         uses: actions/upload-artifact@v2.2.4

@@ -1,12 +1,12 @@
 import React from 'react'
-import { screen, waitFor } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 
 import { fetchCurrentUserMock } from '../../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { NewStateSubmissionForm } from './NewStateSubmissionForm'
 
 describe('NewStateSubmissionForm', () => {
-    it('loads Submission type step for /submissions/new', async () => {
+    it('loads the correct form in /submissions/new', async () => {
         renderWithProviders(<NewStateSubmissionForm />, {
             apolloProvider: {
                 mocks: [
@@ -16,15 +16,10 @@ describe('NewStateSubmissionForm', () => {
             },
             routerProvider: { route: '/submissions/new' },
         })
+  
+        expect(
+            screen.getByRole('form', { name: 'New Submission Form' })
+        ).toBeInTheDocument()
 
-        await waitFor(() =>
-            expect(
-                screen.getByRole(
-                    'heading',
-                    { level: 4 },
-                    { name: 'Submission type' }
-                )
-            ).toBeInTheDocument()
-        )
     })
 })

@@ -21,7 +21,7 @@ export const compileGraphQLTypesWatchOnce = once(compileGraphQLTypesWatch)
 async function compileGraphQLTypes(runner: LabeledProcessRunner) {
     await runner.runCommandAndOutput(
         'gql deps',
-        ['yarn', 'install'],
+        ['yarn', 'install', '--prefer-offline'],
         'services/app-graphql'
     )
 

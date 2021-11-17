@@ -1,4 +1,12 @@
+import { aliasQuery } from '../utils/graphql-test-utils'
+
 Cypress.Commands.add('logInAsStateUser', () => {
+    // Set up gql intercept for requests on app load
+    cy.intercept('POST', '*/graphql', (req) => {
+        aliasQuery(req, 'fetchCurrentUser')
+        aliasQuery(req, 'indexSubmissions')
+    })
+
     cy.visit('/')
     cy.findByRole('link', { name: 'Sign In' }).click()
     const authMode = Cypress.env('AUTH_MODE')
@@ -18,7 +26,8 @@ Cypress.Commands.add('logInAsStateUser', () => {
     } else {
         throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
     }
-    cy.waitForApiToLoad()
+    cy.wait('@fetchCurrentUserQuery')
+    cy.wait('@indexSubmissionsQuery') // this is the first request that engages the db
 })
 
 Cypress.Commands.add(

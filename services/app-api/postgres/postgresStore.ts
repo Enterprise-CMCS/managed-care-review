@@ -16,7 +16,8 @@ export function NewPostgresStore(client: PrismaClient): Store {
         insertDraftSubmission: (args) => insertDraftSubmission(client, args),
         findDraftSubmission: (draftUUID) =>
             findDraftSubmission(client, draftUUID),
-        findDraftSubmissionByStateNumber: (stateCode, stateNumber) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        findDraftSubmissionByStateNumber: (_stateCode, _stateNumber) => {
             throw new Error('UNIMPLEMENTED')
         },
         updateDraftSubmission: (draftSubmission) =>

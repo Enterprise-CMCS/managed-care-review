@@ -10,7 +10,7 @@ type PageContextType = {
     updateHeading: (pathname: string, headingText?: string) => void
 }
 
-const PageContext = React.createContext((null as unknown) as PageContextType)
+const PageContext = React.createContext(null as unknown as PageContextType)
 
 export type PageProviderProps = {
     children: React.ReactNode
@@ -50,5 +50,5 @@ const PageProvider: React.FC = ({ children }) => {
 }
 
 const usePage = (): PageContextType =>
-    (React.useContext(PageContext) as unknown) as PageContextType
+    React.useContext(PageContext) as unknown as PageContextType
 export { PageProvider, usePage }
