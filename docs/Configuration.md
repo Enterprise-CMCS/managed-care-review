@@ -86,3 +86,9 @@ The region in AWS where the bucket is located. Cannot be set if REACT_APP_S3_LOC
 -   REACT_APP_S3_LOCAL_URL
 
 The local URL where an s3 server is being run. Cannot be set if REACT_APP_S3_REGION is set.
+
+### `EMAILER_MODE`
+
+Read by `app-api`
+
+Determines which emailer to use, local or AWS SES emailer. Valid values are `LOCAL` or `SES`
