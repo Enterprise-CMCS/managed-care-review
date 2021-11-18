@@ -18,6 +18,7 @@ var_list=(
   'FULL_IAM_PERMISSIONS_BOUNDARY_POLICY'
   'STAGE_PREFIX'
   'DYNAMO_CONNECTION'
+  'DATABASE_URL'
   'TEST_USERS_PASS'
 )
 
@@ -31,7 +32,9 @@ set_value() {
 
 set_name() {
   varname=${1}
-  echo "BRANCH_SPECIFIC_VARNAME_$varname=${branch_name//-/_}_$varname" >> "$GITHUB_ENV"
+  branch=${branch_name:?}
+
+  echo "BRANCH_SPECIFIC_VARNAME_$varname=${branch//-/_}_$varname" >> "$GITHUB_ENV"
 }
 
 case "$1" in

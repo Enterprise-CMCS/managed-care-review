@@ -17,7 +17,7 @@ jobs:
       postgres:
         image: postgres:13.3
         env:
-          REACT_APP_AUTH_MODE: LOCAL
+          REACT_APP_AUTH_MODE: AWS_COGNITO
           POSTGRES_PASSWORD: shhhsecret
         # Set health checks to wait until postgres has started
         options: >-
@@ -51,7 +51,7 @@ jobs:
         shell: bash
         run: ./.github/build_vars.sh set_values
         env:
-          REACT_APP_AUTH_MODE: LOCAL
+          REACT_APP_AUTH_MODE: AWS_COGNITO
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
@@ -145,7 +145,7 @@ jobs:
 
   deploy-branch:
     needs: [build-prisma-client-lambda-layer, get-branch-name-vars]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@main
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@a8ba2f5fddd271d31327113c313a3275c5559720
     with:
       stage_name: ${{ needs.get-branch-name-vars.outputs.branch-name}}
     secrets:

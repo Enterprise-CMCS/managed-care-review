@@ -1,6 +1,6 @@
 import {
-    PrismaClientKnownRequestError,
     PrismaClientInitializationError,
+    PrismaClientKnownRequestError,
 } from '@prisma/client/runtime'
 import type { StoreError } from '../store'
 
@@ -20,7 +20,14 @@ export const convertPrismaErrorToStoreError = (
             }
         }
 
-        console.log(
+        if (prismaErr.code === 'P2025') {
+            return {
+                code: 'INSERT_ERROR',
+                message: 'insert failed because required record not found',
+            }
+        }
+
+        console.error(
             'ERROR: Unhandled KnownRequestError from prisma: ',
             prismaErr
         )
@@ -38,7 +45,7 @@ export const convertPrismaErrorToStoreError = (
         }
     }
 
-    console.log(
+    console.error(
         "CODING ERROR: we weren't able to decode the error thrown by prisma correctly",
         prismaErr
     )
