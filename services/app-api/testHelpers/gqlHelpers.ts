@@ -1,22 +1,21 @@
 import { ApolloServer } from 'apollo-server-lambda'
-
 import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
-import FETCH_DRAFT_SUBMISSION from '../../app-graphql/src/queries/fetchDraftSubmission.graphql'
-import UPDATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/updateDraftSubmission.graphql'
-import FETCH_STATE_SUBMISSION from '../../app-graphql/src/queries/fetchStateSubmission.graphql'
 import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitDraftSubmission.graphql'
+import UPDATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/updateDraftSubmission.graphql'
+import FETCH_DRAFT_SUBMISSION from '../../app-graphql/src/queries/fetchDraftSubmission.graphql'
+import FETCH_STATE_SUBMISSION from '../../app-graphql/src/queries/fetchStateSubmission.graphql'
 import typeDefs from '../../app-graphql/src/schema.graphql'
-import { configureResolvers } from '../resolvers'
-import { Context } from '../handlers/apollo_gql'
 import {
-    UpdateDraftSubmissionInput,
     CreateDraftSubmissionInput,
     DraftSubmission,
     DraftSubmissionUpdates,
     StateSubmission,
+    UpdateDraftSubmissionInput,
 } from '../gen/gqlServer'
-import { NewPostgresStore, NewPrismaClient } from '../postgres'
-import { PrismaClient } from '@prisma/client'
+import { Context } from '../handlers/apollo_gql'
+import { NewPostgresStore } from '../postgres'
+import { configureResolvers } from '../resolvers'
+import { sharedTestPrismaClient } from './storeHelpers'
 
 const defaultContext = (): Context => {
     return {
@@ -27,36 +26,6 @@ const defaultContext = (): Context => {
             email: 'james@example.com',
         },
     }
-}
-
-async function configurePrismaClient(): Promise<PrismaClient> {
-    const dbURL = process.env.DATABASE_URL
-
-    if (!dbURL) {
-        throw new Error(
-            'Test Init Error: DATABASE_URL must be set to run tests'
-        )
-    }
-
-    if (dbURL === 'AWS_SM') {
-        throw new Error(
-            'Secret Manager not supported for testing against postgres'
-        )
-    }
-
-    const clientResult = await NewPrismaClient(dbURL)
-    if (clientResult instanceof Error) {
-        console.log('Error: ', clientResult)
-        throw new Error('failed to configure postgres client for testing')
-    }
-
-    return clientResult
-}
-
-const sharedClientPromise = configurePrismaClient()
-
-async function sharedTestPrismaClient(): Promise<PrismaClient> {
-    return await sharedClientPromise
 }
 
 const constructTestPostgresServer = async (
@@ -278,7 +247,6 @@ const fetchTestStateSubmissionById = async (
 }
 
 export {
-    sharedTestPrismaClient,
     constructTestPostgresServer,
     createTestDraftSubmission,
     createTestStateSubmission,
