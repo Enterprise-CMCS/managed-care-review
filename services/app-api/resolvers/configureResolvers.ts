@@ -1,5 +1,6 @@
 import { GraphQLDate, GraphQLDateTime } from 'graphql-scalars'
 
+import type { Emailer } from '../emailer'
 import type { Store } from '../store'
 import { Resolvers } from '../gen/gqlServer'
 
@@ -14,7 +15,7 @@ import { stateSubmissionResolver } from './stateSubmissionResolver'
 import { fetchStateSubmissionResolver } from './fetchStateSubmission'
 import { indexSubmissionsResolver } from './indexSubmissions'
 
-export function configureResolvers(store: Store): Resolvers {
+export function configureResolvers(store: Store, emailer: Emailer): Resolvers {
     const resolvers: Resolvers = {
         Date: GraphQLDate,
         DateTime: GraphQLDateTime,
@@ -27,7 +28,10 @@ export function configureResolvers(store: Store): Resolvers {
         Mutation: {
             createDraftSubmission: createDraftSubmissionResolver(store),
             updateDraftSubmission: updateDraftSubmissionResolver(store),
-            submitDraftSubmission: submitDraftSubmissionResolver(store),
+            submitDraftSubmission: submitDraftSubmissionResolver(
+                store,
+                emailer
+            ),
         },
         Submission: {
             // resolveType is required to differentiate Unions

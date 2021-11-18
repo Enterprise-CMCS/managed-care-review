@@ -12,6 +12,7 @@ import {
 } from '../../app-web/src/common-code/domain-models'
 
 import { newDeployedStore, newLocalStore } from '../store'
+import { newLocalEmailer, newSESEmailer } from '../emailer'
 import { configureResolvers } from '../resolvers'
 import {
     userFromLocalAuthProvider,
@@ -95,6 +96,29 @@ async function initializeGQLHandler(): Promise<Handler> {
     const dynamoConnection = process.env.DYNAMO_CONNECTION
     const defaultRegion = process.env.AWS_DEFAULT_REGION
     const stageName = process.env.stage
+    const applicationEndpoint = process.env.APPLICATION_ENDPOINT
+    const emailSource = process.env.emailSource || 'macrael@truss.works'
+    const emailerMode = process.env.EMAILER_MODE
+
+    // START Assert configuration is valid
+    if (emailerMode !== 'LOCAL' && emailerMode !== 'SES')
+        throw new Error(
+            'Configuration Error: EMAILER_MODE is not valid. Current value: ' +
+                emailerMode
+        )
+
+    if (applicationEndpoint === undefined)
+        throw new Error(
+            'Configuration Error: APPLICATION_ENDPOINT is not valid. Current value: ' +
+                applicationEndpoint
+        )
+
+    if (stageName === undefined)
+        throw new Error(
+            'Configuration Error: stage is not valid. Current value: ' +
+                stageName
+        )
+    // END
 
     const getDynamoStore = () => {
         const dbPrefix = stageName + '-'
@@ -124,8 +148,21 @@ async function initializeGQLHandler(): Promise<Handler> {
     const store =
         useDynamo === 'YES' ? getDynamoStore() : await getPostgresStore()
 
+    const emailer =
+        emailerMode == 'LOCAL'
+            ? newLocalEmailer({
+                  emailSource: 'local@example.com',
+                  stage: 'local',
+                  baseUrl: applicationEndpoint,
+              })
+            : newSESEmailer({
+                  emailSource: emailSource,
+                  stage: stageName,
+                  baseUrl: applicationEndpoint,
+              })
+
     // Resolvers are defined and tested in the resolvers package
-    const resolvers = configureResolvers(store)
+    const resolvers = configureResolvers(store, emailer)
 
     const userFetcher =
         authMode === 'LOCAL'

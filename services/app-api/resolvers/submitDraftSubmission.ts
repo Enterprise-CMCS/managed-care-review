@@ -1,5 +1,5 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
-import { submissionReceivedCMSEmail, getEmailer } from '../emailer'
+import { Emailer } from '../emailer'
 import { isStoreError, Store } from '../store/index'
 import { MutationResolvers, State } from '../gen/gqlServer'
 import {
@@ -86,7 +86,8 @@ function submit(
 // submitDraftSubmissionResolver is a state machine transition for Submission,
 // transforming it from a DraftSubmission to a StateSubmission
 export function submitDraftSubmissionResolver(
-    store: Store
+    store: Store,
+    emailer: Emailer
 ): MutationResolvers['submitDraftSubmission'] {
     return async (_parent, { input }, context) => {
         // This resolver is only callable by state users
@@ -149,8 +150,8 @@ export function submitDraftSubmissionResolver(
 
         const updatedSubmission: StateSubmissionType = updateResult
 
-        const emailData = submissionReceivedCMSEmail(stateSubmission)
-        const emailer = getEmailer()
+        // Send the email!
+        const emailData = emailer.generateCMSEmail(stateSubmission)
         try {
             await emailer.sendEmail(emailData)
         } catch (err) {

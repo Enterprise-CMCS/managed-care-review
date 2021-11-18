@@ -1,5 +1,12 @@
 import { Lambda } from 'aws-sdk'
-import { getSESEmailParams } from './'
+import { getSESEmailParams, submissionReceivedCMSEmail } from './'
+import { StateSubmissionType } from '../../app-web/src/common-code/domain-models'
+
+type EmailConfiguration = {
+    stage: string
+    emailSource: string
+    baseUrl: string
+}
 
 type EmailData = {
     bodyText: string
@@ -22,16 +29,18 @@ function isEmailData(data: EmailData): data is EmailData {
 
 type Emailer = {
     sendEmail: (emailData: EmailData) => Promise<void | Error>
+    generateCMSEmail: (submission: StateSubmissionType) => EmailData
 }
 
-function newSESEmailer(): Emailer {
+function newSESEmailer(config: EmailConfiguration): Emailer {
+    console.log('using SES emailer')
     const lambda = new Lambda()
 
     return {
         sendEmail: async (emailData: EmailData): Promise<void | Error> => {
             const emailRequestParams = getSESEmailParams(emailData)
             const lambdaParams = {
-                FunctionName: `app-api-${process.env.stage}-email_submit`,
+                FunctionName: `app-api-${config.stage}-email_submit`,
                 Payload: JSON.stringify({ body: emailRequestParams }),
             }
 
@@ -43,25 +52,24 @@ function newSESEmailer(): Emailer {
                 return new Error('Email send failed. ' + err)
             }
         },
-    }
-}
-
-function newLocalEmailer(): Emailer {
-    return {
-        sendEmail: async (emailData: EmailData): Promise<void | Error> => {
-            console.log('Mock email locally')
-            console.log('Email content' + emailData)
+        generateCMSEmail: (submission: StateSubmissionType): EmailData => {
+            return submissionReceivedCMSEmail(submission, config)
         },
     }
 }
 
-const getEmailer = (): Emailer => {
-    if (process.env.stage == 'LOCAL') {
-        return newLocalEmailer()
-    } else {
-        return newSESEmailer()
+function newLocalEmailer(config: EmailConfiguration): Emailer {
+    return {
+        sendEmail: async (emailData: EmailData): Promise<void | Error> => {
+            console.log('Mock email locally')
+            // TODO: add a visual frame to the email data
+            console.log('Email content' + emailData)
+        },
+        generateCMSEmail: (submission: StateSubmissionType): EmailData => {
+            return submissionReceivedCMSEmail(submission, config)
+        },
     }
 }
 
-export { getEmailer, isEmailData }
-export type { Emailer, EmailData }
+export { newLocalEmailer, newSESEmailer, isEmailData }
+export type { Emailer, EmailConfiguration, EmailData }
