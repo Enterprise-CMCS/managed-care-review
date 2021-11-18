@@ -1,4 +1,5 @@
-export {getSESEmailParams, sendEmail} from './awsSES'
-export {submissionReceivedStateEmail, submissionReceivedCMSEmail}  from './templates'
+export { getSESEmailParams, sendEmail } from './awsSES'
+export { submissionReceivedCMSEmail } from './templates'
 
-export type {EmailData}  from './awsSES'
+export { getEmailer, isEmailData } from './emailer'
+export type { Emailer, EmailData } from './emailer'

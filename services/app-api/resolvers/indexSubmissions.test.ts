@@ -1,6 +1,6 @@
 import INDEX_SUBMISSIONS from '../../app-graphql/src/queries/indexSubmissions.graphql'
 import {
-    constructTestServer,
+    constructTestPostgresServer,
     createTestDraftSubmission,
     createTestStateSubmission,
 } from '../testHelpers/gqlHelpers'
@@ -13,7 +13,7 @@ import {
 
 describe('indexDraftSubmission', () => {
     it('returns some submissions', async () => {
-        const server = constructTestServer()
+        const server = await constructTestPostgresServer()
 
         // First, create a new submission
         const draftSub = await createTestDraftSubmission(server)
@@ -62,14 +62,14 @@ describe('indexDraftSubmission', () => {
         expect(stateResult.__typename).toBe('StateSubmission')
     })
 
-    it('returns no submissions for a different user', async () => {
-        const server = constructTestServer()
+    it('returns no submissions for a different states user', async () => {
+        const server = await constructTestPostgresServer()
 
         // First, create a new submission
         const draftSub = await createTestDraftSubmission(server)
         const stateSub = await createTestStateSubmission(server)
 
-        const otherUserServer = constructTestServer({
+        const otherUserServer = await constructTestPostgresServer({
             context: {
                 user: {
                     name: 'Aang',

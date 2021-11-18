@@ -1,5 +1,6 @@
 export { SubmissionTypeSummarySection } from './SubmissionTypeSummarySection'
 export { ContractDetailsSummarySection } from './ContractDetailsSummarySection'
 export { RateDetailsSummarySection } from './RateDetailsSummarySection'
-export { ContactsSummarySection } from '../../components/SubmissionSummarySection/ContactsSummarySection'
-export { DocumentsSummarySection } from './DocumentsSummarySection'
+export { ContactsSummarySection } from './ContactsSummarySection'
+export { SupportingDocumentsSummarySection } from './SupportingDocumentsSummarySection'
+export { UploadedDocumentsTable } from './UploadedDocumentsTable'

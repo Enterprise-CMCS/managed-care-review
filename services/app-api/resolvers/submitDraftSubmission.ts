@@ -1,4 +1,5 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import { submissionReceivedCMSEmail, getEmailer } from '../emailer'
 import { isStoreError, Store } from '../store/index'
 import { MutationResolvers, State } from '../gen/gqlServer'
 import {
@@ -147,6 +148,14 @@ export function submitDraftSubmissionResolver(
         }
 
         const updatedSubmission: StateSubmissionType = updateResult
+
+        const emailData = submissionReceivedCMSEmail(stateSubmission)
+        const emailer = getEmailer()
+        try {
+            await emailer.sendEmail(emailData)
+        } catch (err) {
+            console.error(Error)
+        }
 
         return { submission: updatedSubmission }
     }

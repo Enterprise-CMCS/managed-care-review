@@ -30,6 +30,7 @@ export async function runAPILocally(runner: LabeledProcessRunner) {
             'offline',
             '--httpPort',
             '3030',
+            '--useChildProcesses',
             'start',
         ],
         'services/app-api'

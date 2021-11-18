@@ -19,7 +19,8 @@ custom:
   stage: ${opt:stage, self:provider.stage}
   region: ${opt:region, self:provider.region}
   appVersion: ${env:APP_VERSION}
-  emailSource: ${opt:emailSource, env:SES_SOURCE_EMAIL_ADDRESS, "admin@example.com"}
+  emailSource: ${opt:emailSource, env:SES_SOURCE_EMAIL_ADDRESS, "mc-review@cms.hhs.gov"}
+  sesSourceEmailAddress: ${ssm:/configuration/${self:custom.stage}/sesSourceEmailAddress~true, ssm:/configuration/default/sesSourceEmailAddress~true, "mc-review@cms.hhs.gov"}
   auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:postgres-${self:custom.stage}.PostgresAuroraArn }
   draftSubmissionsTableArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:database-${self:custom.stage}.DraftSubmissionsTableArn}
   draftSubmissionsTableStreamArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:database-${self:custom.stage}.DraftSubmissionsTableStreamArn}
@@ -91,6 +92,11 @@ provider:
             - rds-db:connect
           Resource:
             - ${self:custom.auroraArn}
+        - Effect: 'Allow'
+          Action:
+            - ses:SendEmail
+            - ses:SendRawEmail
+          Resource: '*'
 
   environment:
     stage: ${self:custom.stage}
@@ -112,7 +118,7 @@ functions:
           method: post
           cors: true
     environment:
-      emailSource: macrael@truss.works
+      emailSource: ${self:custom.sesSourceEmailAddress}
 
   health:
     handler: handlers/health_check.main
@@ -143,6 +149,13 @@ functions:
           method: get
           cors: true
           authorizer: aws_iam
+    timeout: 60 # aurora cold start can be long
+    vpc:
+      securityGroupIds:
+        - ${self:custom.sgId}
+      subnetIds: ${self:custom.privateSubnets}
+    layers:
+      - !Ref PrismaClientLambdaLayer
 
   hello:
     handler: handlers/hello.main

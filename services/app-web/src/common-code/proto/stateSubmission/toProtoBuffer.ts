@@ -16,9 +16,9 @@ const domainDateToProtoDate = (
     }
 
     return {
-        day: domainDate.getDate(),
-        month: domainDate.getMonth(),
-        year: domainDate.getFullYear(),
+        day: domainDate.getUTCDate(),
+        month: domainDate.getUTCMonth(),
+        year: domainDate.getUTCFullYear(),
     }
 }
 
@@ -68,7 +68,7 @@ function domainEnumToProto<T extends StandardEnum<unknown>>(
 }
 
 /*
-    Convert array of domain enums to proto enums 
+    Convert array of domain enums to proto enums
 */
 function domainEnumArrayToProto<T extends StandardEnum<unknown>>(
     protoEnum: T,
@@ -86,7 +86,7 @@ function domainEnumArrayToProto<T extends StandardEnum<unknown>>(
     return enums
 }
 
-/* 
+/*
 Return the prefix for proto enum based on the default value of that field
     - (e.g. return SUBMISSION_TYPE from the default value SUBMISSION_TYPE_UNSPECIFIED)
     - the prefix is a substring of the default value without _UNSPECIFIED
@@ -190,13 +190,10 @@ const toProtoBuffer = (
                 rateDateCertified: domainDateToProtoDate(
                     domainData.rateDateCertified
                 ),
-                rateDocuments:
-                    (domainData?.rateDocuments?.length &&
-                        domainData.rateDocuments.map((doc) => ({
-                            s3Url: doc.s3URL,
-                            name: doc.name,
-                        }))) ||
-                    undefined,
+                rateDocuments: domainData.rateDocuments.map((doc) => ({
+                    s3Url: doc.s3URL,
+                    name: doc.name,
+                })),
                 actuaryContacts: domainData.actuaryContacts.map(
                     (actuaryContact) => {
                         const firmType = domainEnumToProto(

@@ -9,7 +9,7 @@ import {
 import { ZodError } from 'zod'
 
 const newSubmission: DraftSubmissionType = {
-    createdAt: new Date(2021, 4, 10),
+    createdAt: new Date(Date.UTC(2021, 4, 10)),
     updatedAt: new Date(),
     status: 'DRAFT',
     stateNumber: 5,
@@ -20,6 +20,7 @@ const newSubmission: DraftSubmissionType = {
     submissionDescription: 'A real submission',
     documents: [],
     contractDocuments: [],
+    rateDocuments: [],
     managedCareEntities: [],
     federalAuthorities: [],
     stateContacts: [],
@@ -27,7 +28,7 @@ const newSubmission: DraftSubmissionType = {
 }
 
 const basicSubmission: DraftSubmissionType = {
-    createdAt: new Date(2021, 4, 10),
+    createdAt: new Date(Date.UTC(2021, 4, 10)),
     updatedAt: new Date(),
     status: 'DRAFT',
     stateNumber: 5,
@@ -38,9 +39,10 @@ const basicSubmission: DraftSubmissionType = {
     submissionDescription: 'A real submission',
     documents: [],
     contractType: 'BASE',
-    contractDateStart: new Date(2021, 4, 22),
-    contractDateEnd: new Date(2022, 4, 21),
+    contractDateStart: new Date(Date.UTC(2021, 4, 22)),
+    contractDateEnd: new Date(Date.UTC(2022, 4, 21)),
     contractDocuments: [],
+    rateDocuments: [],
     managedCareEntities: [],
     federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
     stateContacts: [],
@@ -48,7 +50,7 @@ const basicSubmission: DraftSubmissionType = {
 }
 
 const contractOnly: DraftSubmissionType = {
-    createdAt: new Date(2021, 4, 10),
+    createdAt: new Date(Date.UTC(2021, 4, 10)),
     updatedAt: new Date(),
     status: 'DRAFT',
     stateNumber: 5,
@@ -59,9 +61,10 @@ const contractOnly: DraftSubmissionType = {
     submissionDescription: 'A real submission',
     documents: [],
     contractDocuments: [],
+    rateDocuments: [],
     contractType: 'BASE',
-    contractDateStart: new Date(2021, 4, 22),
-    contractDateEnd: new Date(2022, 4, 21),
+    contractDateStart: new Date(Date.UTC(2021, 4, 22)),
+    contractDateEnd: new Date(Date.UTC(2022, 4, 21)),
     managedCareEntities: [],
     federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
     stateContacts: [],
@@ -69,7 +72,7 @@ const contractOnly: DraftSubmissionType = {
 }
 
 const moreFullSubmission: DraftSubmissionType = {
-    createdAt: new Date(2021, 4, 10),
+    createdAt: new Date(Date.UTC(2021, 4, 10)),
     updatedAt: new Date(),
     status: 'DRAFT',
     stateNumber: 5,
@@ -80,9 +83,10 @@ const moreFullSubmission: DraftSubmissionType = {
     submissionDescription: 'A real submission',
     documents: [],
     contractType: 'BASE',
-    contractDateStart: new Date(2021, 4, 22),
-    contractDateEnd: new Date(2022, 4, 21),
+    contractDateStart: new Date(Date.UTC(2021, 4, 22)),
+    contractDateEnd: new Date(Date.UTC(2022, 4, 21)),
     contractDocuments: [],
+    rateDocuments: [],
     managedCareEntities: [],
     federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
     stateContacts: [
@@ -115,7 +119,7 @@ const moreFullSubmission: DraftSubmissionType = {
 }
 
 const nowWithDocuments: DraftSubmissionType = {
-    createdAt: new Date(2021, 4, 10),
+    createdAt: new Date(Date.UTC(2021, 4, 10)),
     updatedAt: new Date(),
     status: 'DRAFT',
     stateNumber: 5,
@@ -135,9 +139,10 @@ const nowWithDocuments: DraftSubmissionType = {
         },
     ],
     contractType: 'BASE',
-    contractDateStart: new Date(2021, 4, 22),
-    contractDateEnd: new Date(2022, 4, 21),
+    contractDateStart: new Date(Date.UTC(2021, 4, 22)),
+    contractDateEnd: new Date(Date.UTC(2022, 4, 21)),
     contractDocuments: [],
+    rateDocuments: [],
     managedCareEntities: [],
     federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
     stateContacts: [
@@ -170,7 +175,7 @@ const nowWithDocuments: DraftSubmissionType = {
 }
 
 const fullRateAmendment: DraftSubmissionType = {
-    createdAt: new Date(2021, 4, 10),
+    createdAt: new Date(Date.UTC(2021, 4, 10)),
     updatedAt: new Date(),
     status: 'DRAFT',
     stateNumber: 5,
@@ -190,18 +195,19 @@ const fullRateAmendment: DraftSubmissionType = {
         },
     ],
     contractType: 'BASE',
-    contractDateStart: new Date(2021, 4, 22),
-    contractDateEnd: new Date(2022, 4, 21),
+    contractDateStart: new Date(Date.UTC(2021, 4, 22)),
+    contractDateEnd: new Date(Date.UTC(2022, 4, 21)),
     contractDocuments: [],
+    rateDocuments: [],
     managedCareEntities: ['PIHP'],
     federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
     rateType: 'AMENDMENT',
-    rateDateStart: new Date(2021, 4, 22),
-    rateDateEnd: new Date(2022, 3, 29),
-    rateDateCertified: new Date(2021, 4, 23),
+    rateDateStart: new Date(Date.UTC(2021, 4, 22)),
+    rateDateEnd: new Date(Date.UTC(2022, 3, 29)),
+    rateDateCertified: new Date(Date.UTC(2021, 4, 23)),
     rateAmendmentInfo: {
-        effectiveDateStart: new Date(2022, 5, 21),
-        effectiveDateEnd: new Date(2022, 9, 21),
+        effectiveDateStart: new Date(Date.UTC(2022, 5, 21)),
+        effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
     },
     stateContacts: [
         {
@@ -234,7 +240,7 @@ const fullRateAmendment: DraftSubmissionType = {
 }
 
 const fullContractInfo: DraftSubmissionType = {
-    createdAt: new Date(2021, 4, 10),
+    createdAt: new Date(Date.UTC(2021, 4, 10)),
     updatedAt: new Date(),
     status: 'DRAFT',
     stateNumber: 5,
@@ -254,9 +260,10 @@ const fullContractInfo: DraftSubmissionType = {
         },
     ],
     contractType: 'AMENDMENT',
-    contractDateStart: new Date(2021, 4, 22),
-    contractDateEnd: new Date(2022, 4, 21),
+    contractDateStart: new Date(Date.UTC(2021, 4, 22)),
+    contractDateEnd: new Date(Date.UTC(2022, 4, 21)),
     contractDocuments: [],
+    rateDocuments: [],
     contractAmendmentInfo: {
         itemsBeingAmended: [
             'ENROLLEE_ACCESS',
@@ -275,12 +282,12 @@ const fullContractInfo: DraftSubmissionType = {
     managedCareEntities: ['PIHP'],
     federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
     rateType: 'AMENDMENT',
-    rateDateStart: new Date(2021, 4, 22),
-    rateDateEnd: new Date(2022, 3, 29),
-    rateDateCertified: new Date(2021, 4, 23),
+    rateDateStart: new Date(Date.UTC(2021, 4, 22)),
+    rateDateEnd: new Date(Date.UTC(2022, 3, 29)),
+    rateDateCertified: new Date(Date.UTC(2021, 4, 23)),
     rateAmendmentInfo: {
-        effectiveDateStart: new Date(2022, 5, 21),
-        effectiveDateEnd: new Date(2022, 9, 21),
+        effectiveDateStart: new Date(Date.UTC(2022, 5, 21)),
+        effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
     },
     stateContacts: [
         {
@@ -314,7 +321,7 @@ const fullContractInfo: DraftSubmissionType = {
 
 const someOthers: DraftSubmissionType = {
     id: 'test-abc-123',
-    createdAt: new Date(2021, 4, 10),
+    createdAt: new Date(Date.UTC(2021, 4, 10)),
     updatedAt: new Date(),
     status: 'DRAFT',
     stateCode: 'MN',
@@ -333,8 +340,8 @@ const someOthers: DraftSubmissionType = {
         },
     ],
     contractType: 'AMENDMENT',
-    contractDateStart: new Date(2021, 4, 22),
-    contractDateEnd: new Date(2022, 4, 21),
+    contractDateStart: new Date(Date.UTC(2021, 4, 22)),
+    contractDateEnd: new Date(Date.UTC(2022, 4, 21)),
     contractDocuments: [],
     contractAmendmentInfo: {
         itemsBeingAmended: [
@@ -354,12 +361,22 @@ const someOthers: DraftSubmissionType = {
     managedCareEntities: ['PIHP', 'PCCM'],
     federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
     rateType: 'AMENDMENT',
-    rateDateStart: new Date(2021, 4, 22),
-    rateDateEnd: new Date(2022, 3, 29),
-    rateDateCertified: new Date(2021, 4, 23),
+    rateDocuments: [
+        {
+            s3URL: 'www.example.com/test.png',
+            name: 'dummy rate doc',
+        },
+        {
+            s3URL: 'www.example.com/test2.png',
+            name: 'dummy rate doc2',
+        },
+    ],
+    rateDateStart: new Date(Date.UTC(2021, 4, 22)),
+    rateDateEnd: new Date(Date.UTC(2022, 3, 29)),
+    rateDateCertified: new Date(Date.UTC(2021, 4, 23)),
     rateAmendmentInfo: {
-        effectiveDateStart: new Date(2022, 5, 21),
-        effectiveDateEnd: new Date(2022, 9, 21),
+        effectiveDateStart: new Date(Date.UTC(2022, 5, 21)),
+        effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
     },
     stateContacts: [
         {
@@ -392,7 +409,7 @@ const someOthers: DraftSubmissionType = {
 }
 
 const basicCompleteLiteral: StateSubmissionType = {
-    createdAt: new Date(2021, 4, 10),
+    createdAt: new Date(Date.UTC(2021, 4, 10)),
     updatedAt: new Date(),
     submittedAt: new Date(),
     status: 'SUBMITTED',
@@ -404,8 +421,8 @@ const basicCompleteLiteral: StateSubmissionType = {
     submissionDescription: 'A real submission',
     documents: [],
     contractType: 'BASE',
-    contractDateStart: new Date(2021, 4, 22),
-    contractDateEnd: new Date(2022, 4, 21),
+    contractDateStart: new Date(Date.UTC(2021, 4, 22)),
+    contractDateEnd: new Date(Date.UTC(2022, 4, 21)),
     contractDocuments: [
         {
             name: 'test doc',
@@ -429,7 +446,7 @@ const basicCompleteLiteral: StateSubmissionType = {
             actuarialFirm: 'STATE_IN_HOUSE',
         },
     ],
-    rateDocuments: undefined,
+    rateDocuments: [],
 }
 
 describe('Validate encoding to protobuf and decoding back to domain model', () => {
@@ -472,6 +489,7 @@ describe('handles invalid data as expected', () => {
     })
 
     it('toDomain returns a decode error when passed an invalid DraftSubmission', () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const invalidDraft = Object.assign({}, basicSubmission) as any
         delete invalidDraft.id
         delete invalidDraft.stateNumber
@@ -492,6 +510,7 @@ describe('handles invalid data as expected', () => {
     })
 
     it('toDomain returns a decode error when passed an invalid StateSubmission', () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const invalidSubmission = Object.assign({}, basicCompleteLiteral) as any
         delete invalidSubmission.id
         delete invalidSubmission.stateNumber

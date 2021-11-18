@@ -2,7 +2,7 @@ import * as React from 'react'
 
 import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
 import { useFetchCurrentUserQuery, User as UserType } from '../gen/gqlClient'
-import { logoutLocalUser } from '../pages/Auth/localAuth'
+import { logoutLocalUser } from '../localAuth'
 import { AuthModeType } from '../common-code/domain-models'
 
 type LogoutFn = () => Promise<null>

@@ -10,7 +10,7 @@ import {
     ContractDetailsSummarySection,
     RateDetailsSummarySection,
     ContactsSummarySection,
-    DocumentsSummarySection,
+    SupportingDocumentsSummarySection,
 } from '../../components/SubmissionSummarySection'
 import { GenericError } from '../Errors/GenericError'
 import { usePage } from '../../contexts/PageContext'
@@ -88,7 +88,7 @@ export const SubmissionSummary = (): React.ReactElement => {
 
                 <ContactsSummarySection submission={submission} />
 
-                <DocumentsSummarySection submission={submission} />
+                <SupportingDocumentsSummarySection submission={submission} />
             </GridContainer>
         </div>
     )

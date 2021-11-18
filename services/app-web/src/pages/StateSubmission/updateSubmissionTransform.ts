@@ -5,10 +5,11 @@ import { DraftSubmission, DraftSubmissionUpdates } from '../../gen/gqlClient'
     If you pass gql __typename within a mutation input things break; however,  __typename comes down on cached queries by default
     This function is needed to remove _typename  for optional objects such as contractAmendmentInfo and rateAmendmentInfo
 */
-const omitTypename = (key: unknown, value: unknown) =>
-    key === '__typename' ? undefined : value
+function omitTypename<T>(key: unknown, value: T): T | undefined {
+    return key === '__typename' ? undefined : value
+}
 
-export function stripTypename<T>(input: T): T {
+function stripTypename<T>(input: T): T {
     return JSON.parse(JSON.stringify(input), omitTypename)
 }
 
@@ -60,4 +61,9 @@ function updatesFromSubmission(draft: DraftSubmission): DraftSubmissionUpdates {
     }
 }
 
-export { cleanDraftSubmission, updatesFromSubmission }
+export {
+    cleanDraftSubmission,
+    stripTypename,
+    omitTypename,
+    updatesFromSubmission,
+}

@@ -1,3 +1,4 @@
+import { spawn } from 'child_process'
 import yargs from 'yargs'
 import { commandMustSucceedSync } from './localProcess.js'
 import LabeledProcessRunner from './runner.js'
@@ -147,6 +148,17 @@ async function runUnitTests(runner: LabeledProcessRunner) {
 async function runOnlineTests() {
     // passing run changes the command from cypress open to cypress run.
     await runBrowserTests(['run'])
+}
+
+function runPrisma(args: string[]) {
+    const proc = spawn('prisma', args, {
+        cwd: 'services/app-api',
+        stdio: 'inherit',
+    })
+
+    proc.on('close', (code) => {
+        process.exit(code ? code : 0)
+    })
 }
 
 function main() {
@@ -478,6 +490,33 @@ function main() {
                 console.log(
                     "with a default subcommand, I don't think this code can be reached"
                 )
+            }
+        )
+        .command(
+            'prisma',
+            'run the prisma command in app-api. all arguments after -- will be passed directly into the prisma command.',
+            (yargs) => {
+                return yargs.example([
+                    [
+                        '$0 prisma -- db push',
+                        'push the current config in schema.prisma into the db and generate a new client',
+                    ],
+                    [
+                        '$0 prisma -- migrate dev',
+                        'generate a new migration that will bring other databases into sync with schema.prisma and apply it to your local db',
+                    ],
+                    [
+                        '$0 prisma -- migrate dev --only-create',
+                        'generates a new migration based on schema.prisma but does not apply it. This lets you modify the SQL if it doesnt capture your intent correctly',
+                    ],
+                ])
+            },
+            (args) => {
+                const prismaArgs = args._.slice(1).map((intOrString) => {
+                    return intOrString.toString()
+                })
+
+                runPrisma(prismaArgs)
             }
         )
         .command('clean', 'clean node dependencies', {}, () => {

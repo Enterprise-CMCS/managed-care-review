@@ -110,7 +110,6 @@ export const draftSubmissionTypeSchema = z.object({
     id: z.string(),
     createdAt: z.date(),
     updatedAt: z.date(),
-    submittedAt: z.date().optional(),
     status: z.literal('DRAFT'),
     stateCode: z.string(),
     stateNumber: z.number(),
