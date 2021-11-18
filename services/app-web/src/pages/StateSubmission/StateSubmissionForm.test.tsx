@@ -2,7 +2,6 @@ import { screen, waitFor } from '@testing-library/react'
 import { within } from '@testing-library/react'
 import { Route } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
-
 import { Document } from '../../gen/gqlClient'
 import { RoutesRecord } from '../../constants/routes'
 import {
@@ -227,15 +226,10 @@ describe('StateSubmissionForm', () => {
             )
 
             await waitFor(() =>
-                expect(
-                    screen.getByRole(
-                        'heading',
-                        { level: 4 },
-                        { name: 'Submission type' }
-                    )
-                ).toBeInTheDocument()
-            )
-
+            expect(
+                screen.getByRole('form', { name: 'Submission Type Form' })
+            ).toBeInTheDocument()
+        )
             const textarea = await screen.findByRole('textbox', {
                 name: 'Submission description',
             })
@@ -290,16 +284,11 @@ describe('StateSubmissionForm', () => {
                     routerProvider: { route: '/submissions/15/type' },
                 }
             )
-
             await waitFor(() =>
-                expect(
-                    screen.getByRole(
-                        'heading',
-                        { level: 4 },
-                        { name: 'Submission type' }
-                    )
-                ).toBeInTheDocument()
-            )
+            expect(
+                screen.getByRole('form', { name: 'Submission Type Form' })
+            ).toBeInTheDocument()
+        )
 
             const textarea = await screen.findByRole('textbox', {
                 name: 'Submission description',

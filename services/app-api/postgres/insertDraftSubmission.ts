@@ -73,6 +73,7 @@ export async function insertDraftSubmission(
 
         documents: [],
         contractDocuments: [],
+        rateDocuments: [],
         stateContacts: [],
         actuaryContacts: [],
         managedCareEntities: [],

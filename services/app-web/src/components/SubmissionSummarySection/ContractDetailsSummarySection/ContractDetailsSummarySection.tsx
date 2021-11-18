@@ -8,6 +8,7 @@ import {
     ManagedCareEntityRecord,
 } from '../../../constants/submissions'
 import { SectionHeader } from '../../../components/SectionHeader'
+import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import { DataDetail } from '../../../components/DataDetail'
 import { DoubleColumnRow } from '../../../components/DoubleColumnRow'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
@@ -182,6 +183,12 @@ export const ContractDetailsSummarySection = ({
                             )}
                         </>
                     )}
+
+                <UploadedDocumentsTable
+                    documents={submission.contractDocuments}
+                    caption="Contract"
+                    documentCategory="Contract"
+                />
             </dl>
         </section>
     )

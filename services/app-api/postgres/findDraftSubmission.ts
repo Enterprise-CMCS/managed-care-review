@@ -34,7 +34,7 @@ export async function findDraftSubmission(
     client: PrismaClient,
     draftUUID: string
 ): Promise<DraftSubmissionType | undefined | StoreError> {
-    let findResult = await findUniqueSubmissionWrapper(client, draftUUID)
+    const findResult = await findUniqueSubmissionWrapper(client, draftUUID)
 
     if (isStoreError(findResult)) {
         return findResult

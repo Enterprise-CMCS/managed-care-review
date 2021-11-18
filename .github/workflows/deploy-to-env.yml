@@ -143,10 +143,6 @@ jobs:
       - name: Generate graphql
         run: ./dev generate
 
-      - name: Install packages
-        working-directory: services/app-api
-        run: yarn --frozen-lockfile
-
       - uses: actions/download-artifact@v2
         with:
           name: lambda-layers-prisma-client
@@ -159,6 +155,8 @@ jobs:
 
       - name: deploy app-api
         id: deploy-app-api
+        env:
+          NODE_OPTIONS: --max_old_space_size=4096
         run: |
           pushd services/app-api && npx serverless deploy --stage ${{ inputs.stage_name }}
 

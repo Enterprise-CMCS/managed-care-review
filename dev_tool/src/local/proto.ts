@@ -8,6 +8,11 @@ export async function compileProtoWatch(runner: LabeledProcessRunner) {
         "`entr` is required to compile our protobufs and watch. You should be able to get it with `brew install entr`. It's great."
     )
 
+    requireBinary(
+        ['which', 'protolint'],
+        '`protolint` is used on pre-commit to check your .proto files. Please refer to the README for installation instructions.'
+    )
+
     await runner.runCommandAndOutput(
         'proto deps',
         ['yarn', 'install'],
@@ -24,7 +29,7 @@ export async function compileProtoWatch(runner: LabeledProcessRunner) {
 export async function compileProto(runner: LabeledProcessRunner) {
     await runner.runCommandAndOutput(
         'proto deps',
-        ['yarn', 'install'],
+        ['yarn', 'install', '--prefer-offline'],
         'services/app-proto'
     )
 

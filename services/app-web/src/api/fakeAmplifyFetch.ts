@@ -10,10 +10,6 @@ function fetchResponseFromAxios(axiosResponse: AxiosResponse): Response {
         redirected: false,
         type: 'basic',
         url: axiosResponse.request.url,
-        // This is actually called by apollo-client
-        trailer: new Promise<Headers>((resolve) => {
-            resolve(axiosResponse.headers)
-        }),
 
         body: axiosResponse.data,
 

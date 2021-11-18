@@ -103,10 +103,11 @@ jobs:
       - uses: actions/setup-node@v2.4.1
         with:
           node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
+          cache: yarn
 
       - name: Install packages
         working-directory: services/app-api
-        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn install --frozen-lockfile
+        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn install --prefer-offline --frozen-lockfile
 
       # Generate Prisma Client and binary that can run in a lambda environment
       - name: Prepare prisma client
@@ -126,6 +127,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       branch-name: ${{ steps.branch-name.outputs.stage-name-for-branch}}
+      node-version: ${{ steps.node_version.outputs.node_version }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
@@ -135,6 +137,11 @@ jobs:
         shell: bash
         run: |
           echo "::set-output name=stage-name-for-branch::$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})"
+
+      - name: read .nvmrc
+        id: node_version
+        shell: bash
+        run: echo ::set-output name=node_version::$(cat .nvmrc)
 
   deploy-branch:
     needs: [build-prisma-client-lambda-layer, get-branch-name-vars]
@@ -156,9 +163,15 @@ jobs:
       react_app_auth_mode: AWS_COGNITO
 
   cypress:
-    name: run-cypress
+    name: cypress-run
     needs: [deploy-branch, unit-tests]
     runs-on: ubuntu-latest
+    container: cypress/browsers:node14.17.0-chrome91-ff89
+    strategy:
+      fail-fast: false
+      matrix:
+        # run copies of the current job in parallel
+        containers: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v2
 
@@ -181,18 +194,13 @@ jobs:
           DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
 
-      - name: Install packages in root
-        run: yarn install --frozen-lockfile
+      - name: Create Test Users
+        run: |
+          node ./scripts/add_cypress_test_users.js $branch_name $TEST_USERS_PASS
 
-      - name: Install Cypress
-        run: yarn cypress install
-
-      - name: Install packages in ui
-        working-directory: services/ui
-        run: yarn install --frozen-lockfile
-
-      - name: Generate graphql
-        run: ./dev generate
+      - name: Add serverless to Cypress
+        shell: bash
+        run: yarn global add serverless
 
       - name: Set application endpoint
         run: |
@@ -217,19 +225,17 @@ jobs:
           state: 'failure'
           deployment_id: ${{ needs.unit-tests.outputs.deploy-id }}
 
-      - name: Create Test Users
-        run: |
-          # this script was compiled along with ./dev above. If that changes, run `tsc` to compile it
-          node ./build_dev/scripts/add_cypress_test_users.js $branch_name $TEST_USERS_PASS
-
-      - name: Cypress run
+      - name: Cypress -- Chrome
         id: cypress
         uses: cypress-io/github-action@v2
         with:
+          install: false
           config: baseUrl=${{env.APPLICATION_ENDPOINT}}
           record: true
+          parallel: true
+          browser: chrome
+          group: 'Chrome'
         env:
-          DEBUG: 'cypress:*'
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

@@ -22,7 +22,7 @@ export const Landing = (): React.ReactElement => {
                                     <li className={styles.login}>
                                         <span>Sign in with IDM</span>
                                         <span>
-                                            Sign in using your IDM credentials
+                                            Sign in using your IDM credentials.
                                         </span>
                                     </li>
                                     <li className={styles.upload}>
@@ -48,15 +48,35 @@ export const Landing = (): React.ReactElement => {
                             </div>
                         </Grid>
                         <Grid tablet={{ col: 6 }}>
-                            <h2>
-                                You can submit capitation rates and contracts
-                                with managed care plans, including:
-                            </h2>
+                            <h2>You can use MC-Review to submit:</h2>
                             <ul className={styles.detailsList}>
                                 <li>Base contracts</li>
-                                <li>Contract amendments</li>
+                                <li>Amendments to base contracts</li>
                                 <li>Rate certifications</li>
                                 <li>Amendments to rate certifications</li>
+                            </ul>
+
+                            <h3>Not accepted by MC-Review at this time:</h3>
+                            <ul className={styles.detailsList}>
+                                <li>
+                                    Non health plan submissions (EBRK, EQRO,
+                                    dual demonstration contracts)
+                                </li>
+                                <li>State directed preprints</li>
+                                <li>Unexecuted/draft documents</li>
+                                <li>Rate-only submissions</li>
+                            </ul>
+
+                            <h2>Before you begin:</h2>
+                            <ul className={styles.detailsList}>
+                                <li>
+                                    Each MC-Review submission can contain only
+                                    <strong>one</strong> contract action
+                                </li>
+                                <li>
+                                    Each contract action can tie to one or more
+                                    managed care programs
+                                </li>
                             </ul>
                         </Grid>
                     </Grid>

@@ -4,6 +4,7 @@ import { sharedTestPrismaClient } from '../testHelpers/storeHelpers'
 import { insertDraftSubmission } from './insertDraftSubmission'
 
 describe('insertDraftSubmissionPostgres', () => {
+    // eslint-disable-next-line jest/expect-expect
     it('increases state number with every insertion', async () => {
         // this test attempts to create a number of drafts concurrently.
         // if any of the state numbers in the resultant drafts are duplicates, we have a bug.

@@ -33,6 +33,7 @@ describe('updateDraftSubmission', () => {
                 managedCareEntities: [],
                 federalAuthorities: [],
                 rateType: 'AMENDMENT',
+                rateDocuments: [],
                 rateDateStart: new Date(),
                 rateDateEnd: new Date(),
                 rateDateCertified: new Date(),
@@ -58,6 +59,7 @@ describe('updateDraftSubmission', () => {
                 federalAuthorities: [],
                 contractAmendmentInfo: null,
                 rateType: null,
+                rateDocuments: [],
                 rateDateStart: null,
                 rateDateEnd: null,
                 rateDateCertified: null,
@@ -95,6 +97,7 @@ describe('updateDraftSubmission', () => {
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 contractDocuments: [],
+                rateDocuments: [],
                 documents: [],
                 managedCareEntities: [],
                 federalAuthorities: [],
@@ -122,6 +125,7 @@ describe('updateDraftSubmission', () => {
                     relatedToVaccination: null,
                 },
                 rateType: null,
+                rateDocuments: [],
                 rateDateStart: null,
                 rateDateEnd: null,
                 rateDateCertified: null,
@@ -165,6 +169,7 @@ describe('updateDraftSubmission', () => {
                 updatedAt: new Date(),
                 documents: [],
                 contractDocuments: [],
+                rateDocuments: [],
                 managedCareEntities: [],
                 federalAuthorities: [],
                 stateContacts: [],
@@ -194,6 +199,7 @@ describe('updateDraftSubmission', () => {
                     relatedToVaccination: null,
                 },
                 rateType: null,
+                rateDocuments: [],
                 rateDateStart: null,
                 rateDateEnd: null,
                 rateDateCertified: null,
@@ -236,6 +242,7 @@ describe('updateDraftSubmission', () => {
             contractDateEnd: endDate,
             managedCareEntities: ['MCO'],
             federalAuthorities: ['VOLUNTARY'],
+            rateDocuments: [],
             rateDateStart: startDate,
             rateDateEnd: endDate,
             rateDateCertified: certifiedDate,
@@ -316,6 +323,7 @@ describe('updateDraftSubmission', () => {
                     s3URL: 'fakeS3URL001',
                 },
             ],
+            rateDocuments: [],
             contractType: 'BASE',
             contractDateStart: startDate,
             contractDateEnd: endDate,
@@ -397,6 +405,7 @@ describe('updateDraftSubmission', () => {
             ],
             contractDateStart: resultDraft1.contractDateStart,
             contractDateEnd: resultDraft1.contractDateEnd,
+            rateDocuments: [],
             managedCareEntities: [],
             federalAuthorities: [],
             stateContacts: [
@@ -474,6 +483,7 @@ describe('updateDraftSubmission', () => {
             contractDateEnd: null,
             managedCareEntities: [],
             federalAuthorities: [],
+            rateDocuments: [],
         }
 
         const updateResult = await server.executeOperation({
@@ -543,6 +553,7 @@ describe('updateDraftSubmission', () => {
             federalAuthorities: [],
             stateContacts: [],
             actuaryContacts: [],
+            rateDocuments: [],
 
             // rate detail info
             contractAmendmentInfo: {
@@ -599,6 +610,7 @@ describe('updateDraftSubmission', () => {
             contractDateStart: startDate,
             managedCareEntities: [],
             federalAuthorities: [],
+            rateDocuments: [],
             contractAmendmentInfo: {
                 itemsBeingAmended: [
                     'BENEFITS_PROVIDED',
@@ -668,6 +680,7 @@ describe('updateDraftSubmission', () => {
         const endDate = '2022-06-30'
         const rateDetails = {
             rateType: 'NEW' as const,
+            rateDocuments: [],
             rateDateStart: startDate,
             rateDateEnd: endDate,
             rateDateCertified: '2021-06-13',
@@ -720,6 +733,7 @@ describe('updateDraftSubmission', () => {
         const endDate = '2022-06-30'
         const rateAmendment = {
             rateType: 'AMENDMENT' as const,
+            rateDocuments: [],
             rateDateStart: startDate,
             rateDateEnd: endDate,
             rateDateCertified: '2021-06-13',
@@ -784,6 +798,7 @@ describe('updateDraftSubmission', () => {
             submissionDescription: 'An updated submission',
             managedCareEntities: [],
             federalAuthorities: [],
+            rateDocuments: [],
             documents: [
                 {
                     name: 'myfile.pdf',
@@ -848,6 +863,7 @@ describe('updateDraftSubmission', () => {
             federalAuthorities: [],
             documents: [],
             contractDocuments: [],
+            rateDocuments: [],
             stateContacts: [
                 {
                     name: 'Test Person',
@@ -894,6 +910,7 @@ describe('updateDraftSubmission', () => {
             documents: [],
             contractType: 'BASE',
             contractDocuments: [],
+            rateDocuments: [],
             contractDateStart: startDate,
             contractDateEnd: endDate,
             managedCareEntities: [],
@@ -968,6 +985,7 @@ describe('updateDraftSubmission', () => {
             documents: [],
             contractType: 'BASE',
             contractDocuments: [],
+            rateDocuments: [],
             contractDateStart: startDate,
             contractDateEnd: endDate,
             managedCareEntities: [],
@@ -1010,6 +1028,7 @@ describe('updateDraftSubmission', () => {
             documents: [],
             contractType: 'BASE',
             contractDocuments: [],
+            rateDocuments: [],
             contractDateStart: startDate,
             contractDateEnd: endDate,
             managedCareEntities: [],
