@@ -61,9 +61,8 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
 function newLocalEmailer(config: EmailConfiguration): Emailer {
     return {
         sendEmail: async (emailData: EmailData): Promise<void | Error> => {
-            console.log('Mock email locally')
             // TODO: add a visual frame to the email data
-            console.log('Email content' + emailData)
+            console.log('Email sent!' + emailData)
         },
         generateCMSEmail: (submission: StateSubmissionType): EmailData => {
             return submissionReceivedCMSEmail(submission, config)

@@ -6,6 +6,7 @@ import UPDATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/updateDraft
 import FETCH_STATE_SUBMISSION from '../../app-graphql/src/queries/fetchStateSubmission.graphql'
 import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitDraftSubmission.graphql'
 import typeDefs from '../../app-graphql/src/schema.graphql'
+import { Emailer, EmailData, submissionReceivedCMSEmail } from '../emailer'
 import { configureResolvers } from '../resolvers'
 import { Context } from '../handlers/apollo_gql'
 import {
@@ -18,6 +19,7 @@ import {
 import { NewPrismaClient } from '../lib/prisma'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import { PrismaClient } from '@prisma/client'
+import { StateSubmissionType } from '../../app-web/src/common-code/domain-models'
 
 const defaultContext = (): Context => {
     return {
@@ -52,14 +54,32 @@ const constructTestPostgresServer = async (
     const prismaClient = await sharedTestPrismaClient()
 
     const postgresStore = NewPostgresStore(prismaClient)
-
-    const postgresResolvers = configureResolvers(postgresStore)
+    const emailer = constructTestEmailer()
+    const postgresResolvers = configureResolvers(postgresStore, emailer)
 
     return new ApolloServer({
         typeDefs,
         resolvers: postgresResolvers,
         context,
     })
+}
+
+const constructTestEmailer = (): Emailer => {
+    const config = {
+        emailSource: 'local@example.com',
+        stage: 'local',
+        baseUrl: 'http://localhost',
+    }
+    return {
+        sendEmail: async (emailData: EmailData): Promise<void | Error> => {
+            console.log('Mock email locally')
+            // TODO: add a visual frame to the email data
+            console.log('Email content' + emailData)
+        },
+        generateCMSEmail: (submission: StateSubmissionType): EmailData => {
+            return submissionReceivedCMSEmail(submission, config)
+        },
+    }
 }
 
 const createTestDraftSubmission = async (

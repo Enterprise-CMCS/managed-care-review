@@ -24,7 +24,6 @@ describe('submitDraftSubmission', () => {
             },
         })
 
-        console.log(submitResult.errors)
         expect(submitResult.errors).toBeUndefined()
         const createdID =
             submitResult?.data?.submitDraftSubmission.submission.id
@@ -185,5 +184,47 @@ describe('submitDraftSubmission', () => {
         expect(submitResult.errors?.[0].extensions?.message).toEqual(
             'submission includes invalid rate fields'
         )
+    })
+
+    it('send email to CMS if submission is valid', async () => {
+        const server = await constructTestPostgresServer()
+        const draft = await createAndUpdateTestDraftSubmission(server, {})
+        const draftID = draft.id
+
+        await new Promise((resolve) => setTimeout(resolve, 2000)) // TODO: why is this here in other tests??
+        const submitResult = await server.executeOperation({
+            query: SUBMIT_DRAFT_SUBMISSION,
+            variables: {
+                input: {
+                    submissionID: draftID,
+                },
+            },
+        })
+
+        expect(submitResult.errors).toBeUndefined()
+        // TODO: add assertion that emailer was called
+    })
+
+    it('does not send email to CMS if submission fails', async () => {
+        const server = await constructTestPostgresServer()
+        const draft = await createAndUpdateTestDraftSubmission(server, {
+            submissionType: 'CONTRACT_ONLY',
+            rateDateStart: '2025-05-01',
+            rateDateEnd: '2026-04-30',
+            rateDateCertified: '2025-03-15',
+        })
+        const draftID = draft.id
+
+        const submitResult = await server.executeOperation({
+            query: SUBMIT_DRAFT_SUBMISSION,
+            variables: {
+                input: {
+                    submissionID: draftID,
+                },
+            },
+        })
+
+        expect(submitResult.errors).toBeDefined()
+        // TODO: add assertion that emailer was called
     })
 })
