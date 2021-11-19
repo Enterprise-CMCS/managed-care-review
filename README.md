@@ -22,11 +22,11 @@ Additional sources for documentation:
 
 ### Local Tooling
 
-We use a collection of tools to manage this monorepo. 
+We use a collection of tools to manage this monorepo.
 
-We use [Lerna](https://github.com/lerna/lerna) to manage commands across the entire monorepo. This tool is good for managing multi-package repositories like ours, where there are several nested `package.json`, typescript, eslint, and prettier configs, potentially with their own rules. We  also use [Husky](https://github.com/typicode/husky) to run and organize our pre-commit scripts - e.g. `husky` uses the command `lerna run precommit` to run the specific `precommit` script indicated in each `package.json`.
+We use [Lerna](https://github.com/lerna/lerna) to manage commands across the entire monorepo. This tool is good for managing multi-package repositories like ours, where there are several nested `package.json`, typescript, eslint, and prettier configs, potentially with their own rules. We also use [Husky](https://github.com/typicode/husky) to run and organize our pre-commit scripts - e.g. `husky` uses the command `lerna run precommit` to run the specific `precommit` script indicated in each `package.json`.
 
-  To get the tools needed for local development, you can run:
+To get the tools needed for local development, you can run:
 
 ```bash
 brew tap yoheimuta/protolint
@@ -121,10 +121,10 @@ Some of those services have their own options as well, namely app-web, see below
 
 Run tests locally
 
--   `./dev test web` to run the web tests, watching the results
--   `./dev test api` to run the api tests, watching the results
+-   `./dev test web` to run the web tests, watching the results, requires the database to be running.
+-   `./dev test api` to run the api tests, watching the results, requires the database to be running.
 -   `./dev test browser` to run the cypress browser based tests, this opens the cypress runner and requires an endpoint to test against. By default, runs on localhost (so you should be running the app locally if this is what you intend). To see options for flags cypress accepts see [docs](https://docs.cypress.io/guides/guides/command-line#Commands).
--   `./dev test` (or `dev test check`) to run all the tests that CI runs, once. This will run the web, api, and browser tests
+-   `./dev test` (or `dev test check`) to run all the tests that CI runs, once. This will run the web, api, and browser tests, requires the database to be running.
 -   Run with flags `./dev test --unit`, `.dev test --online`, to filter down, but still run once.
 
 Clear dependencies
