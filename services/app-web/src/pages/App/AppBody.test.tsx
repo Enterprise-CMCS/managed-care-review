@@ -57,7 +57,7 @@ describe('App Body and routes', () => {
             })
             expect(
                 screen.getByRole('heading', {
-                    name: /You can submit capitation rates and contracts/i,
+                    name: /You can use MC-Review to submit:/i,
                     level: 2,
                 })
             ).toBeInTheDocument()

@@ -1,5 +1,6 @@
 {
     "name": "app-proto",
+    "private": "true",
     "version": "1.0.0",
     "description": "app-proto Typescript definitions and helpers",
     "scripts": {
@@ -7,12 +8,20 @@
         "protogen:watch": "find src | entr yarn protogen",
         "proto:compile": "rm -rf gen && mkdir gen && pbjs -t static-module -w commonjs -o ../app-web/src/gen/stateSubmissionProto.js src/state_submission.proto",
         "proto:ts": "pbts -o ../app-web/src/gen/stateSubmissionProto.d.ts ../app-web/src/gen/stateSubmissionProto.js",
-        "test": "jest --watch",
-        "test:once": "jest"
+        "precommit": "lint-staged",
+        "lint": "protolint lint ."
+    },
+    "lint-staged": {
+        "*.proto": [
+            "protolint lint ."
+        ]
     },
     "author": "",
     "license": "ISC",
     "dependencies": {
         "protobufjs": "^6.11.2"
+    },
+    "devDependencies": {
+        "lint-staged": "^11.2.6"
     }
 }

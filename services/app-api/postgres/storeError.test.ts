@@ -1,3 +1,5 @@
+/* eslint-disable jest/no-conditional-expect */
+/* eslint-disable jest/no-try-expect */
 import { v4 as uuidv4 } from 'uuid'
 import { PrismaClient } from '@prisma/client'
 

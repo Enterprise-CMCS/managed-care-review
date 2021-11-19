@@ -6,7 +6,6 @@ plugins:
   - serverless-plugin-scripts
   - serverless-s3-local
   - serverless-stack-termination-protection
-  - serverless-s3-bucket-helper
   - serverless-idempotency-helper
   - serverless-iam-helper
 

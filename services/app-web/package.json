@@ -10,18 +10,49 @@
         "clean": "rm -rf node_modules && yarn cache clean",
         "format": "prettier --write src/**/*.ts{,x}",
         "lint": "tsc --noEmit && eslint src/",
+        "precommit": "lint-staged",
         "test:a11y": "pa11y-ci",
-        "test:once": "react-scripts test  --watchAll=false",
+        "test:once": "react-scripts test --watchAll=false --runInBand --ci",
         "test:update": "react-scripts test -u",
         "storybook": "start-storybook -p 6006 -s public --quiet",
         "build-storybook": "build-storybook -s public --quiet"
     },
+    "lint-staged": {
+        "app-web/src/**/*.{js,jsx,ts,tsx}": [
+            "eslint --fix",
+            "prettier --write src/**/*.ts{,x}"
+        ]
+    },
+    "jest": {
+        "coveragePathIgnorePatterns": [
+            "src/pages/Auth/Signup",
+            "src/pages/Auth/ConfirmSignUp"
+        ],
+        "coverageReporters": [
+            [
+                "lcov",
+                {
+                    "projectRoot": "../../"
+                }
+            ],
+            "text"
+        ]
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    },
     "dependencies": {
         "@apollo/client": "^3.4.15",
-        "@testing-library/jest-dom": "^5.11.4",
-        "@testing-library/react": "^12.1.0",
-        "@testing-library/user-event": "^13.5.0",
-        "@trussworks/react-uswds": "^2.4.1",
+        "@trussworks/react-uswds": "^2.2.0",
         "@types/classnames": "^2.2.11",
         "@types/jest": "^27.0.1",
         "@types/react": "^17.0.5",
@@ -39,7 +70,7 @@
         "react-router-dom": "^5.3.0",
         "react-scripts": "4.0.3",
         "sass": "^1.43.3",
-        "typescript": "^4.0.3",
+        "typescript": "^4.4.4",
         "url-parse": "^1.5.2",
         "uswds": "^2.12.1",
         "uuid": "^8.3.2",
@@ -47,15 +78,16 @@
         "yup": "^0.32.9",
         "zod": "^3.10.1"
     },
-    "resolutions": {
-        "@storybook/react/babel-loader": "8.1.0"
-    },
     "devDependencies": {
-        "@storybook/addon-a11y": "^6.2.9",
-        "@storybook/addon-essentials": "^6.2.9",
-        "@storybook/addon-links": "^6.3.7",
+        "@storybook/addon-a11y": "^6.3.12",
+        "@storybook/addon-essentials": "^6.3.12",
+        "@storybook/addon-links": "^6.3.12",
         "@storybook/preset-create-react-app": "^3.2.0",
-        "@storybook/react": "^6.2.9",
+        "@storybook/react": "^6.3.12",
+        "@testing-library/jest-dom": "^5.11.4",
+        "@testing-library/react": "^12.1.2",
+        "@testing-library/user-event": "^13.5.0",
+        "@testing-library/cypress": "^8.0.1",
         "@types/react-router-dom": "^5.1.7",
         "@types/react-test-renderer": "^17.0.1",
         "@types/url-parse": "^1.4.3",
@@ -70,6 +102,7 @@
         "eslint-plugin-react": "^7.22.0",
         "eslint-plugin-react-hooks": "^4.2.0",
         "graphql.macro": "^1.4.2",
+        "lint-staged": "^11.2.6",
         "pa11y-ci": "^2.4.2",
         "prettier": "^2.3.2",
         "react-test-renderer": "^17.0.2",
@@ -77,45 +110,10 @@
         "serverless-cloudfront-invalidate": "^1.11.0",
         "serverless-plugin-scripts": "^1.0.2",
         "serverless-s3-sync": "^1.14.4",
-        "serverless-stack-termination-protection": "^1.0.4"
+        "serverless-stack-termination-protection": "^1.0.4",
+        "webpack": "4.44.2"
     },
-    "browserslist": {
-        "production": [
-            ">0.2%",
-            "not dead",
-            "not op_mini all"
-        ],
-        "development": [
-            "last 1 chrome version",
-            "last 1 firefox version",
-            "last 1 safari version"
-        ]
-    },
-    "jest": {
-        "coveragePathIgnorePatterns": [
-            "/*.stories.tsx",
-            "src/s3",
-            "src/api",
-            "src/testHelpers",
-            "src/localAuth",
-            "src/gen",
-            "src/Aut/CheckAuth.tsx",
-            "src/Aut/CognitoLogin.tsx",
-            "src/pages/Auth/Signup",
-            "src/pages/Auth/ConfirmSignUp",
-            "App.tsx",
-            "index.ts",
-            "log_event.ts",
-            "reportWebVitals.ts"
-        ],
-        "coverageReporters": [
-            [
-                "lcov",
-                {
-                    "projectRoot": "../../"
-                }
-            ],
-            "text"
-        ]
+    "resolutions": {
+        "@storybook/react/babel-loader": "8.1.0"
     }
 }

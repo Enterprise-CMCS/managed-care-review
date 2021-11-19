@@ -306,7 +306,7 @@ export const RateDetails = ({
                                 <legend className="srOnly">Rate Details</legend>
                                 {formAlert && formAlert}
                                 <span>All fields are required</span>
-                                <FormGroup>
+                                <FormGroup error={showDocumentErrors}>
                                     <FileUpload
                                         id="rateDocuments"
                                         name="rateDocuments"

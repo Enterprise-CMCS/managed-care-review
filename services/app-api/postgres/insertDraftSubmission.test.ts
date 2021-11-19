@@ -5,6 +5,8 @@ import { isStoreError } from '../store'
 import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
 
 describe('insertDraftSubmissionPostgres', () => {
+    // TODO this test needs to be improved its not testing anything
+    // eslint-disable-next-line jest/expect-expect
     it('increases state number with every insertion', async () => {
         // this test attempts to create a number of drafts concurrently.
         // if any of the state numbers in the resultant drafts are duplicates, we have a bug.

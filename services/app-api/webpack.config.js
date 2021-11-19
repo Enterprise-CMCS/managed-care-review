@@ -7,7 +7,16 @@ const slsw = require('serverless-webpack');
 const isLocal = slsw.lib.webpack.isLocal;
 
 const tsConfigPath = 'tsconfig.json';
-const extensions = ['.js', '.jsx', '.json', '.ts', '.tsx', '.graphql', '.gql'];
+const extensions = [
+    '.mjs',
+    '.js',
+    '.jsx',
+    '.json',
+    '.ts',
+    '.tsx',
+    '.graphql',
+    '.gql',
+];
 const servicePath = '';
 
 module.exports = {
@@ -18,7 +27,13 @@ module.exports = {
     performance: {
         hints: false,
     },
-    externals: [nodeExternals(), 'aws-sdk'],
+    externals: [
+        nodeExternals(),
+        nodeExternals({
+            modulesDir: path.resolve(__dirname, '../../node_modules'),
+        }),
+        'aws-sdk',
+    ],
     devtool: 'source-map',
     resolve: {
         symlinks: false,
@@ -33,6 +48,11 @@ module.exports = {
     },
     module: {
         rules: [
+            {
+                test: /\.mjs$/,
+                include: /node_modules/,
+                type: 'javascript/auto',
+            },
             {
                 test: /\.(ts|tsx)$/,
                 use: [
@@ -64,7 +84,7 @@ module.exports = {
                 {
                     from: path.resolve(
                         __dirname,
-                        './node_modules/.prisma/client/schema.prisma'
+                        '../../node_modules/.prisma/client/schema.prisma'
                     ),
                 },
             ],

@@ -19,7 +19,9 @@ import {
 import { NewPrismaClient } from '../lib/prisma'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import { PrismaClient } from '@prisma/client'
-import { StateSubmissionType } from '../../app-web/src/common-code/domain-models'
+import {
+    StateSubmissionType,
+} from '../../app-web/src/common-code/domain-models'
 
 const defaultContext = (): Context => {
     return {

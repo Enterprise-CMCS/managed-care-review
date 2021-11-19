@@ -1,16 +1,16 @@
 {
     "name": "ui",
+    "private": "true",
     "description": "",
     "version": "1.0.0",
     "main": "index.js",
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
+    "scripts": {},
     "author": "",
     "license": "CC0-1.0",
     "dependencies": {},
     "devDependencies": {
         "serverless": "^2.54.0",
+        "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",
         "serverless-stack-termination-protection": "^1.0.4"
     }
 }

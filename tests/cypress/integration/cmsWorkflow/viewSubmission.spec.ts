@@ -55,7 +55,7 @@ describe('CMS User can view submission', () => {
     //         // Submit, sent to dashboard
     //         cy.navigateForm('Submit')
     //         cy.findByRole('dialog').should('exist')
-    //         cy.navigateForm('Confirm submit')
+    //         cy.navigateForm('Submit')
     //         cy.waitForApiToLoad()
     //         cy.findByText('Dashboard').should('exist')
     //         cy.findByText('PMAP').should('exist')
