@@ -51,7 +51,6 @@ jobs:
           OKTA_METADATA_URL: ${{ secrets.OKTA_METADATA_URL }}
           IAM_PATH: ${{ secrets.IAM_PATH }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-          DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
 
       - name: Unit Tests
@@ -118,7 +117,6 @@ jobs:
       okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
       iam_path: ${{ secrets.IAM_PATH }}
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-      dynamo_connection: ${{ secrets.DYNAMO_CONNECTION}}
       cloudfront_certificate_arn: ${{ secrets.DEV_CLOUDFRONT_CERTIFICATE_ARN }}
       cloudfront_domain_name: ${{ secrets.DEV_CLOUDFRONT_DOMAIN_NAME }}
       cloudfront_storybook_domain_name: ${{ secrets.DEV_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
@@ -153,7 +151,6 @@ jobs:
           OKTA_METADATA_URL: ${{ secrets.OKTA_METADATA_URL }}
           IAM_PATH: ${{ secrets.IAM_PATH }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-          DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
           CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets.DEV_CLOUDFRONT_CERTIFICATE_ARN }}
           CLOUDFRONT_DOMAIN_NAME: ${{ secrets.DEV_CLOUDFRONT_DOMAIN_NAME }}
           CLOUDFRONT_STORYBOOK_DOMAIN_NAME: ${{ secrets.DEV_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
@@ -212,7 +209,6 @@ jobs:
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
       ses_review_team_email_address: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
       iam_path: ${{ secrets.IAM_PATH }}
-      dynamo_connection: ${{ secrets.DYNAMO_CONNECTION}}
       test_users_pass: ${{ secrets.TEST_USERS_PASS}}
 
   cypress-val:
@@ -247,7 +243,6 @@ jobs:
           SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
           SES_REVIEW_TEAM_EMAIL_ADDRESS: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
           IAM_PATH: ${{ secrets.IAM_PATH }}
-          DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS}}
 
       - name: Cypress on Val -- Chrome
@@ -302,7 +297,6 @@ jobs:
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
       ses_review_team_email_address: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
       iam_path: ${{ secrets.IAM_PATH }}
-      dynamo_connection: ${{ secrets.DYNAMO_CONNECTION}}
       test_users_pass: ${{ secrets.TEST_USERS_PASS}}
 
   cypress-prod:
@@ -337,7 +331,6 @@ jobs:
           SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
           SES_REVIEW_TEAM_EMAIL_ADDRESS: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
           IAM_PATH: ${{ secrets.IAM_PATH }}
-          DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS}}
 
       - name: Cypress on Prod -- Chrome
