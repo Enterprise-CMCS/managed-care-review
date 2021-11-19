@@ -1,5 +1,5 @@
 import { Lambda } from 'aws-sdk'
-import { getSESEmailParams, submissionReceivedCMSEmail } from './'
+import { getSESEmailParams, newSubmissionCMSEmailTemplate } from './'
 import { StateSubmissionType } from '../../app-web/src/common-code/domain-models'
 
 type EmailConfiguration = {
@@ -46,14 +46,14 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
 
             try {
                 await lambda.invoke(lambdaParams).promise()
-                console.log('Email send succeeded')
+                console.log('SES email send succeeded!')
                 return
             } catch (err) {
-                return new Error('Email send failed. ' + err)
+                return new Error('SES email send failed. ' + err)
             }
         },
         generateCMSEmail: (submission: StateSubmissionType): EmailData => {
-            return submissionReceivedCMSEmail(submission, config)
+            return newSubmissionCMSEmailTemplate(submission, config)
         },
     }
 }
@@ -61,15 +61,16 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
 function newLocalEmailer(config: EmailConfiguration): Emailer {
     return {
         sendEmail: async (emailData: EmailData): Promise<void | Error> => {
-        console.log(`
+            const emailRequestParams = getSESEmailParams(emailData)
+            console.log(`
             EMAIL SENT
             ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
-            ${JSON.stringify(emailData)}
+            ${JSON.stringify(emailRequestParams)}
             ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
         `)
         },
         generateCMSEmail: (submission: StateSubmissionType): EmailData => {
-            return submissionReceivedCMSEmail(submission, config)
+            return newSubmissionCMSEmailTemplate(submission, config)
         },
     }
 }

@@ -1,8 +1,7 @@
 import { Handler } from 'aws-lambda';
-import { sendEmail } from '../emailer'
+import { sendSESEmail } from '../emailer'
 
 export const main: Handler = async (event) => {
-    console.log('EVENT', event.body)
     if (!event.body)
         return {
             statusCode: 400,
@@ -16,9 +15,7 @@ export const main: Handler = async (event) => {
             },
         }
     try {
-        const data = await sendEmail(event.body).promise()
-        console.log('Send success!', data)
-        return data
+        return await sendSESEmail(event.body).promise()
     } catch (err) {
         return {
             StatusCode: 400,
@@ -33,4 +30,26 @@ export const main: Handler = async (event) => {
         }
     }
 }
-   
+
+
+/* Sample event for use testing in lambda console
+  {"body": 
+    {"Destination":{
+      "BccAddresses":[],"CcAddresses":[],"ToAddresses":["hana@truss.works"]
+    },
+    "Message":{
+        "Body":{
+            "Text":{
+                "Data":"test",
+                "Charset":"UTF-8"
+            },
+            "Html":{
+                "Data":"test"}},
+                "Subject":{
+                    "Data":"This is a test",
+                    "Charset":"UTF-8"}
+                },
+            "Source":"macrael@truss.works"
+        }
+    }
+*/

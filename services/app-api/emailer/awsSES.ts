@@ -45,18 +45,16 @@ function getSESEmailParams(email: EmailData): SES.SendEmailRequest {
     return emailParams
 }
 
-function sendEmail(
+function sendSESEmail(
     params: SES.SendEmailRequest
 ): Request<SES.SendEmailResponse, AWSError> {
     return ses.sendEmail(params, function (err, data) {
         if (err) {
-            console.error('Error sending email', err)
-            return err
+            return new Error('SES error: ' + err)
         } else {
-            console.log(data)
             return data
         }
     })
 }
 
-export { getSESEmailParams, sendEmail }
+export { getSESEmailParams, sendSESEmail }

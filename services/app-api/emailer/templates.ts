@@ -13,7 +13,7 @@ const generateSubmissionName = (sub: StateSubmissionType): string => {
     return `${sub.stateCode.toUpperCase()}-${sub.programID.toUpperCase()}-${padNumber}`
 }
 
-const submissionReceivedCMSEmail = (
+const newSubmissionCMSEmailTemplate = (
     submission: StateSubmissionType,
     config: EmailConfiguration
 ): EmailData => {
@@ -52,7 +52,4 @@ const submissionReceivedCMSEmail = (
     }
 }
 
-
-
-
-export {submissionReceivedCMSEmail}
+export { newSubmissionCMSEmailTemplate }

@@ -6,7 +6,7 @@ import UPDATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/updateDraft
 import FETCH_STATE_SUBMISSION from '../../app-graphql/src/queries/fetchStateSubmission.graphql'
 import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitDraftSubmission.graphql'
 import typeDefs from '../../app-graphql/src/schema.graphql'
-import { Emailer, EmailData, submissionReceivedCMSEmail } from '../emailer'
+import { Emailer, EmailData, newSubmissionCMSEmailTemplate } from '../emailer'
 import { configureResolvers } from '../resolvers'
 import { Context } from '../handlers/apollo_gql'
 import {
@@ -19,9 +19,7 @@ import {
 import { NewPrismaClient } from '../lib/prisma'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import { PrismaClient } from '@prisma/client'
-import {
-    StateSubmissionType,
-} from '../../app-web/src/common-code/domain-models'
+import { StateSubmissionType } from '../../app-web/src/common-code/domain-models'
 
 const defaultContext = (): Context => {
     return {
@@ -79,7 +77,7 @@ const constructTestEmailer = (): Emailer => {
             console.log('Email content' + emailData)
         },
         generateCMSEmail: (submission: StateSubmissionType): EmailData => {
-            return submissionReceivedCMSEmail(submission, config)
+            return newSubmissionCMSEmailTemplate(submission, config)
         },
     }
 }
