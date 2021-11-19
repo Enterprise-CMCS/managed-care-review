@@ -61,8 +61,12 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
 function newLocalEmailer(config: EmailConfiguration): Emailer {
     return {
         sendEmail: async (emailData: EmailData): Promise<void | Error> => {
-            // TODO: add a visual frame to the email data
-            console.log('Email sent!' + emailData)
+        console.log(`
+            EMAIL SENT
+            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
+            ${JSON.stringify(emailData)}
+            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
+        `)
         },
         generateCMSEmail: (submission: StateSubmissionType): EmailData => {
             return submissionReceivedCMSEmail(submission, config)
