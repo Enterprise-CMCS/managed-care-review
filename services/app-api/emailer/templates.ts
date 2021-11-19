@@ -18,7 +18,7 @@ const newSubmissionCMSEmailTemplate = (
     config: EmailConfiguration
 ): EmailData => {
     return {
-        toAddresses: ['hana@truss.works'],
+        toAddresses: ['mc-review-qa@truss.works'],
         sourceEmail: config.emailSource,
         subject: `${
             config.stage !== 'prod' ? `[${config.stage}] ` : ''

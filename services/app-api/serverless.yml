@@ -19,7 +19,7 @@ custom:
   stage: ${opt:stage, self:provider.stage}
   region: ${opt:region, self:provider.region}
   appVersion: ${env:APP_VERSION}
-  emailSource: ${opt:emailSource, env:SES_SOURCE_EMAIL_ADDRESS, "mc-review@cms.hhs.gov"}
+  emailSource: ${opt:emailSource, env:SES_SOURCE_EMAIL_ADDRESS, "macrael@truss.works"}
   auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:postgres-${self:custom.stage}.PostgresAuroraArn }
   draftSubmissionsTableArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:database-${self:custom.stage}.DraftSubmissionsTableArn}
   draftSubmissionsTableStreamArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:database-${self:custom.stage}.DraftSubmissionsTableStreamArn}
