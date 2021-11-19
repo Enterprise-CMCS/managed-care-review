@@ -45,8 +45,6 @@
         "prettier": "^2.4.1"
     },
     "dependencies": {
-        "aws-sdk": "^2.1001.0",
-        "cypress-file-upload": "^5.0.8",
         "aws-sdk": "^2.1018.0",
         "cypress-file-upload": "^5.0.8"
     },
