@@ -104,7 +104,7 @@ jobs:
 
   promote-dev:
     needs: [build-prisma-client-lambda-layer]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@1438d9c799c63448f447fcf2f52b6afc3cdf4deb
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@main
     with:
       stage_name: main
     secrets:
@@ -122,7 +122,6 @@ jobs:
       cloudfront_storybook_domain_name: ${{ secrets.DEV_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
       test_users_pass: ${{ secrets.TEST_USERS_PASS}}
       react_app_auth_mode: IDM
-      dynamo_connection: nonsense
 
   dev-cypress:
     name: dev - cypress
