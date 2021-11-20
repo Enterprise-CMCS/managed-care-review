@@ -122,6 +122,7 @@ jobs:
       cloudfront_storybook_domain_name: ${{ secrets.DEV_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
       test_users_pass: ${{ secrets.TEST_USERS_PASS}}
       react_app_auth_mode: IDM
+      dynamo_connection: nonsense
 
   dev-cypress:
     name: dev - cypress
