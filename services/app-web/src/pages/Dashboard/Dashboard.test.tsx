@@ -1,9 +1,7 @@
 import React from 'react'
-import userEvent from '@testing-library/user-event'
-import { createMemoryHistory } from 'history'
 import { screen, waitFor, within } from '@testing-library/react'
 
-import { Dashboard, sortDraftsToTop } from './Dashboard'
+import { Dashboard } from './Dashboard'
 import {
     fetchCurrentUserMock,
     indexSubmissionsMockSuccess,
@@ -52,7 +50,7 @@ describe('Dashboard', () => {
         })
     })
 
-    it('displays tabs for available programs based on loggedInUser state', async () => {
+    it('displays submissions table', async () => {
         const mockUser = {
             __typename: 'StateUser' as const,
             state: {
@@ -69,47 +67,11 @@ describe('Dashboard', () => {
             email: 'bob@dmas.mn.gov',
         }
 
-        renderWithProviders(<Dashboard />, {
-            apolloProvider: {
-                mocks: [
-                    fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
-                    indexSubmissionsMockSuccess(),
-                ],
-            },
-        })
-
-        await waitFor(() => {
-            const tabs = screen.getAllByRole('tab')
-            expect(tabs.length).toBe(3)
-            expect(tabs[0].textContent).toBe('MSHO')
-            expect(tabs[1].textContent).toBe('PMAP')
-        })
-    })
-
-    it('displays submission cards', async () => {
-        const mockUser = {
-            __typename: 'StateUser' as const,
-            state: {
-                name: 'Minnesota',
-                code: 'MN',
-                programs: [
-                    { id: 'msho', name: 'MSHO' },
-                    { id: 'pmap', name: 'PMAP' },
-                    { id: 'snbc', name: 'SNBC' },
-                ],
-            },
-            role: 'State User',
-            name: 'Bob it user',
-            email: 'bob@dmas.mn.gov',
-        }
-
-        const submissions = [
-            mockDraft(),
-            mockStateSubmission(),
-            mockDraft(),
-        ]
+        const submissions = [mockDraft(), mockStateSubmission(), mockDraft()]
         submissions[2].id = 'test-abc-122'
         submissions[2].name = 'MN-MSHO-0002' // the names collide otherwise
+        // set middle row to latest updatedAt to test sorting (it should be sorted to top)
+        submissions[1].updatedAt = '2100-01-01T00:00:00.000Z'
 
         renderWithProviders(<Dashboard />, {
             apolloProvider: {
@@ -120,164 +82,16 @@ describe('Dashboard', () => {
             },
         })
 
-        // we want to check that there are three submissions and in the right order.
-        const cardsList = await screen.findByTestId('submissions-list')
-        expect(cardsList.children.length).toEqual(3)
-
-        const links = within(cardsList).getAllByRole('link')
-        expect(links.length).toEqual(3)
-
-        const names = links.map((link) => link.textContent)
-
-        expect(names).toEqual([
-            'MN-MSHO-0001',
-            'MN-MSHO-0002',
-            'MN-MSHO-0003',
-        ])
-
-    })
-
-    it('loads first tab active', async () => {
-        renderWithProviders(<Dashboard />, {
-            apolloProvider: {
-                mocks: [
-                    fetchCurrentUserMock({ statusCode: 200 }),
-                    indexSubmissionsMockSuccess(),
-                ],
-            },
-        })
-
-        await waitFor(() => {
-            const tabs = screen.getAllByRole('tab')
-            expect(tabs.length).toBe(3)
-            expect(tabs[0]).toHaveClass('easi-tabs__tab--selected')
-            expect(tabs[1]).not.toHaveClass('easi-tabs__tab--selected')
-            expect(tabs[2]).not.toHaveClass('easi-tabs__tab--selected')
-        })
-    })
-
-    it('on new submission click, redirect to /submissions/new', async () => {
-        const history = createMemoryHistory()
-
-        renderWithProviders(<Dashboard />, {
-            apolloProvider: {
-                mocks: [
-                    fetchCurrentUserMock({ statusCode: 200 }),
-                    indexSubmissionsMockSuccess(),
-                ],
-            },
-            routerProvider: {
-                routerProps: { history: history },
-            },
-        })
-
-        await waitFor(() => {
-            const links = screen.getAllByRole('link', {
-                name: 'Start new submission',
-            })
-            expect(links).toBeDefined()
-            userEvent.click(links[0])
-        })
-
-        await waitFor(() => {
-            expect(history.location.pathname).toBe('/submissions/new')
-        })
-    })
-    // Currently first tab and program is selected by default, adjust test when this is dynamic
-    it('shows the success message if set', async () => {
-        renderWithProviders(<Dashboard />, {
-            apolloProvider: {
-                mocks: [
-                    fetchCurrentUserMock({ statusCode: 200 }),
-                    indexSubmissionsMockSuccess(),
-                ],
-            },
-            routerProvider: {
-                route: `dashboard?justSubmitted=MN-MSHO-0001`,
-            },
-        })
-
-        await waitFor(() => {
-            const title = screen.getByText('MN-MSHO-0001 was sent to CMS')
-            expect(title).toBeInTheDocument()
-        })
-    })
-
-    it('has a stable Draft sort', async () => {
-        type TestCase = [
-            { __typename: string; id: string; name: string }[],
-            string | undefined,
-            string[]
-        ]
-        const tests: TestCase[] = [
-            [
-                [
-                    {
-                        __typename: 'DraftSubmission',
-                        id: '4',
-                        name: 'MSHO-0005',
-                    },
-                    {
-                        __typename: 'StateSubmission',
-                        id: '3',
-                        name: 'MSHO-0004',
-                    },
-                    {
-                        __typename: 'DraftSubmission',
-                        id: '2',
-                        name: 'MSHO-0003',
-                    },
-                    {
-                        __typename: 'StateSubmission',
-                        id: '1',
-                        name: 'MSHO-0002',
-                    },
-                    {
-                        __typename: 'DraftSubmission',
-                        id: '0',
-                        name: 'MSHO-0001',
-                    },
-                ],
-                undefined,
-                ['4', '2', '0', '3', '1'],
-            ],
-
-            [
-                [
-                    {
-                        __typename: 'DraftSubmission',
-                        id: '4',
-                        name: 'MSHO-0005',
-                    },
-                    {
-                        __typename: 'StateSubmission',
-                        id: '3',
-                        name: 'MSHO-0004',
-                    },
-                    {
-                        __typename: 'DraftSubmission',
-                        id: '2',
-                        name: 'MSHO-0003',
-                    },
-                    {
-                        __typename: 'StateSubmission',
-                        id: '1',
-                        name: 'MSHO-0002',
-                    },
-                    {
-                        __typename: 'DraftSubmission',
-                        id: '0',
-                        name: 'MSHO-0001',
-                    },
-                ],
-                'MSHO-0002',
-                ['1', '4', '2', '0', '3'],
-            ],
-        ]
-
-        for (const test of tests) {
-            sortDraftsToTop(test[0], test[1])
-            expect(test[0].map((i) => i.id)).toStrictEqual(test[2])
-        }
+        // we want to check that there's a table with three submissions, sorted by `updatedAt`.
+        const rows = await screen.findAllByRole('row')
+        expect(rows[1]).toHaveTextContent('MSHO-0001')
+        const link1 = within(rows[1]).getByRole('link')
+        expect(link1).toHaveAttribute('href', '/submissions/test-abc-123/type')
+        expect(rows[2]).toHaveTextContent('MSHO-0003')
+        const link2 = within(rows[2]).getByRole('link')
+        expect(link2).toHaveAttribute('href', '/submissions/test-abc-125')
+        expect(rows[3]).toHaveTextContent('MSHO-0002')
+        const link3 = within(rows[3]).getByRole('link')
+        expect(link3).toHaveAttribute('href', '/submissions/test-abc-122/type')
     })
 })

@@ -14,6 +14,27 @@
     max-width: 75rem;
 }
 
+.panel {
+    padding: units(2);
+    width: 100%;
+
+    & .panelHeader {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    & .panelEmpty {
+        margin-top: units(8);
+
+        h3 {
+            font-weight: font-weight('normal');
+            color: color('base-light');
+            text-align: center;
+        }
+    }
+}
+
 .alert {
     div {
         margin-top: units(1);
@@ -40,24 +61,4 @@
 
 .draftTag {
     background: $theme-color-warning-dark;
-}
-
-.panel {
-    padding: units(2);
-
-    & .panelHeader {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    & .panelEmpty {
-        margin-top: units(8);
-
-        h3 {
-            font-weight: font-weight('normal');
-            color: color('base-light');
-            text-align: center;
-        }
-    }
 }
