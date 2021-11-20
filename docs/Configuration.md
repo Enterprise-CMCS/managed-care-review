@@ -66,11 +66,6 @@ This is the metatdata URL configured for reaching out to Otka auth. Reqired for 
 
 ### `IAM_PATH`
 
-### `DYNAMO_CONNECTION`
-
-Read by `app-api` in configuring graphql to work with a DynamoDB store.
-Valid values are any url (most likely `http://localhost:8000`), for a local run, and `USE_AWS` for use in deployed environments.
-
 ### `SECRETS_MANAGER_SECRET`
 
 Read by `app-api` to securely pull secrets out of AWS Secrets Manager. Only set in AWS deployed environments, not used locally. This is the name of the secret to pull out of SM, which is scoped by review-app.

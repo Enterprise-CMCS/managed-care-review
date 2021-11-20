@@ -1,8 +1,5 @@
-import { DataMapper } from '@aws/dynamodb-data-mapper'
 import { PrismaClient } from '@prisma/client'
-import DynamoDB from 'aws-sdk/clients/dynamodb'
 import { NewPrismaClient } from '../postgres'
-import { Store, storeWithDynamoConfig } from '../store/store'
 
 async function configurePrismaClient(): Promise<PrismaClient> {
     const dbURL = process.env.DATABASE_URL
@@ -34,38 +31,4 @@ async function sharedTestPrismaClient(): Promise<PrismaClient> {
     return await sharedClientPromise
 }
 
-export function getTestStore(): Store {
-    // we hard code this for now b/c we don't have .env loaded for these tests.
-    const testURL = 'http://localhost:8000'
-
-    const config = {
-        region: 'localhost',
-        endpoint: testURL,
-        accessKeyId: 'LOCAL_FAKE_KEY',
-        secretAccessKey: 'LOCAL_FAKE_SECRET',
-
-        maxRetries: 1,
-    }
-
-    return storeWithDynamoConfig(config, 'local-')
-}
-
-function getTestDynamoMapper(): DataMapper {
-    const testURL = 'http://localhost:8000'
-
-    const config = {
-        region: 'localhost',
-        endpoint: testURL,
-        accessKeyId: 'LOCAL_FAKE_KEY',
-        secretAccessKey: 'LOCAL_FAKE_SECRET',
-
-        maxRetries: 1,
-    }
-
-    const conn = new DynamoDB(config)
-    const mapper = new DataMapper({ client: conn, tableNamePrefix: 'local-' })
-
-    return mapper
-}
-
-export { sharedTestPrismaClient, getTestDynamoMapper }
+export { sharedTestPrismaClient }

@@ -1,5 +1,5 @@
 import { Resolvers } from '../gen/gqlServer'
-import { Store } from '../store'
+import { Store } from '../postgres'
 
 export function draftSubmissionResolver(
     store: Store

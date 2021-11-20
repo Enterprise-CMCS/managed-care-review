@@ -1,8 +1,7 @@
 import { ProgramT } from '../../app-web/src/common-code/domain-models'
-
 import statePrograms from '../data/statePrograms.json'
 
-export function findProgram(
+function findProgram(
     stateCode: string,
     programID: string
 ): ProgramT | undefined {
@@ -12,3 +11,5 @@ export function findProgram(
 
     return program
 }
+
+export { findProgram }

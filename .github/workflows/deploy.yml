@@ -61,7 +61,6 @@ jobs:
           OKTA_METADATA_URL: ${{ secrets.OKTA_METADATA_URL }}
           IAM_PATH: ${{ secrets.IAM_PATH }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-          DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
 
       - name: Unit Tests
@@ -158,7 +157,6 @@ jobs:
       okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
       iam_path: ${{ secrets.IAM_PATH }}
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-      dynamo_connection: ${{ secrets.DYNAMO_CONNECTION}}
       test_users_pass: ${{ secrets.TEST_USERS_PASS}}
       react_app_auth_mode: AWS_COGNITO
 
@@ -191,7 +189,6 @@ jobs:
           OKTA_METADATA_URL: ${{ secrets.OKTA_METADATA_URL }}
           IAM_PATH: ${{ secrets.IAM_PATH }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-          DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
 
       - name: Create Test Users

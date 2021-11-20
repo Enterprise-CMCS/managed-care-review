@@ -1,16 +1,16 @@
 import { PrismaClient } from '@prisma/client'
-import { v4 as uuidv4 } from 'uuid'
 import { Buffer } from 'buffer'
-
+import { v4 as uuidv4 } from 'uuid'
 import {
     DraftSubmissionType,
     SubmissionType,
 } from '../../app-web/src/common-code/domain-models'
-
 import { toProtoBuffer } from '../../app-web/src/common-code/proto/stateSubmission'
-
-import { StoreError, isStoreError } from '../store/storeError'
-import { convertPrismaErrorToStoreError } from './storeError'
+import {
+    convertPrismaErrorToStoreError,
+    isStoreError,
+    StoreError,
+} from './storeError'
 
 export type InsertDraftSubmissionArgsType = {
     stateCode: string

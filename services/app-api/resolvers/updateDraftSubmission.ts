@@ -1,17 +1,14 @@
-import { UserInputError, ForbiddenError } from 'apollo-server-lambda'
-
-import { isStoreError, Store } from '../store/index'
-
-import {
-    MutationResolvers,
-    State,
-    DraftSubmissionUpdates,
-} from '../gen/gqlServer'
-
+import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import {
     DraftSubmissionType,
     isStateUser,
 } from '../../app-web/src/common-code/domain-models'
+import {
+    DraftSubmissionUpdates,
+    MutationResolvers,
+    State,
+} from '../gen/gqlServer'
+import { isStoreError, Store } from '../postgres'
 
 // This MUTATES the passed in draft, overwriting all the current fields with the updated fields
 export function applyUpdates(
