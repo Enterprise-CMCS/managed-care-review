@@ -104,7 +104,7 @@ jobs:
 
   promote-dev:
     needs: [build-prisma-client-lambda-layer]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@main
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@1438d9c799c63448f447fcf2f52b6afc3cdf4deb
     with:
       stage_name: main
     secrets:
