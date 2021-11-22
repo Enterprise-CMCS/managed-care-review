@@ -1,26 +1,24 @@
 import { ApolloServer } from 'apollo-server-lambda'
 import {
-    Handler,
-    APIGatewayProxyHandler,
     APIGatewayProxyEvent,
+    APIGatewayProxyHandler,
+    Handler,
 } from 'aws-lambda'
-
 import typeDefs from '../../app-graphql/src/schema.graphql'
 import {
     assertIsAuthMode,
     CognitoUserType,
 } from '../../app-web/src/common-code/domain-models'
-
-import { newDeployedStore, newLocalStore } from '../store'
-import { newLocalEmailer, newSESEmailer } from '../emailer'
-import { configureResolvers } from '../resolvers'
 import {
-    userFromLocalAuthProvider,
-    userFromCognitoAuthProvider,
     userFromAuthProvider,
+    userFromCognitoAuthProvider,
+    userFromLocalAuthProvider,
 } from '../authn'
+import { newLocalEmailer, newSESEmailer } from '../emailer'
 import { NewPrismaClient } from '../lib/prisma'
 import { NewPostgresStore } from '../postgres/postgresStore'
+import { configureResolvers } from '../resolvers'
+import { newDeployedStore, newLocalStore } from '../store'
 
 // The Context type passed to all of our GraphQL resolvers
 export interface Context {
@@ -97,7 +95,8 @@ async function initializeGQLHandler(): Promise<Handler> {
     const defaultRegion = process.env.AWS_DEFAULT_REGION
     const stageName = process.env.stage
     const applicationEndpoint = process.env.APPLICATION_ENDPOINT
-    const emailSource = process.env.emailSource || 'macrael@truss.works'
+    const emailSource =
+        process.env.SES_SOURCE_EMAIL_ADDRESS || 'macrael@truss.works'
     const emailerMode = process.env.EMAILER_MODE
 
     // START Assert configuration is valid

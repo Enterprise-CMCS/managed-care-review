@@ -20,6 +20,7 @@ custom:
   region: ${opt:region, self:provider.region}
   appVersion: ${env:APP_VERSION}
   emailSource: ${opt:emailSource, env:SES_SOURCE_EMAIL_ADDRESS, "macrael@truss.works"}
+  emailerMode: ${opt:emailSource, env:EMAILER_MODE}
   auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:postgres-${self:custom.stage}.PostgresAuroraArn }
   draftSubmissionsTableArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:database-${self:custom.stage}.DraftSubmissionsTableArn}
   draftSubmissionsTableStreamArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:database-${self:custom.stage}.DraftSubmissionsTableStreamArn}
@@ -104,6 +105,7 @@ provider:
     DYNAMO_CONNECTION: ${self:custom.dynamoConnection}
     REACT_APP_AUTH_MODE: ${self:custom.reactAppAuthMode}
     SECRETS_MANAGER_SECRET: ${self:custom.secretsManagerSecret}
+    EMAILER_MODE: ${self:custom.emailerMode}
 
 layers:
   prismaClient:
@@ -118,7 +120,7 @@ functions:
           method: post
           cors: true
     environment:
-      emailSource: ${self:custom.sesSourceEmailAddress}
+      SES_SOURCE_EMAIL_ADDRESS: ${self:custom.emailSource}
 
   health:
     handler: handlers/health_check.main

@@ -137,6 +137,8 @@ jobs:
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
           IAM_PATH: ${{ secrets.iam_path }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
+          EMAILER_MODE: SES
+          SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.ses_source_email_address }}
 
       - name: Generate graphql
         run: ./dev generate
