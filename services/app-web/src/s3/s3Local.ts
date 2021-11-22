@@ -81,5 +81,11 @@ export function newLocalS3Client(
             const params = { Key: s3key }
             return s3Client.getSignedUrl('getObject', params)
         },
+        getBulkDlURL: async (
+            keys: string[],
+            filename: string
+        ): Promise<string | Error> => {
+            return 'not implemented'
+        },
     }
 }
