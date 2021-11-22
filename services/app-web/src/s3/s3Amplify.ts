@@ -1,6 +1,7 @@
 import { parseKey } from '../common-code/s3URLEncoding'
 import { Storage } from 'aws-amplify'
 import { v4 as uuidv4 } from 'uuid'
+import AWS from 'aws-sdk'
 
 import type { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
@@ -121,6 +122,32 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
                 throw new Error(
                     `Didn't get a string back from s3.get. We should have to use a different config for that.`
                 )
+            }
+        },
+        getBulkDlURL: async (
+            keys: string[],
+            filename: string
+        ): Promise<string | Error> => {
+            // setup the lambda invocation
+            const stageName = process.env.stage
+            const bulkDLFunc = new AWS.Lambda()
+            const zipRequestParams = {
+                keys: keys,
+                bucket: bucketName,
+                zipFilename: filename,
+            }
+
+            const lambdaParams = {
+                FunctionName: `app-api-${stageName}-zip_keys`,
+                Payload: JSON.stringify({ body: zipRequestParams }),
+            }
+
+            try {
+                const dlURL = await bulkDLFunc.invoke(lambdaParams).promise()
+                console.log('success: zip of files on s3 completed.')
+                return dlURL.Payload as string
+            } catch (err) {
+                return new Error('Could not get a bulk DL URL' + err)
             }
         },
     }
