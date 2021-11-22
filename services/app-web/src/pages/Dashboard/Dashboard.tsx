@@ -140,7 +140,7 @@ export const Dashboard = (): React.ReactElement => {
                                         (submission: TableRow) => {
                                             return (
                                                 <tr key={submission.id}>
-                                                    <td>
+                                                    <td data-testid="submission-id">
                                                         <NavLink
                                                             to={editUrlForSubmission(
                                                                 submission

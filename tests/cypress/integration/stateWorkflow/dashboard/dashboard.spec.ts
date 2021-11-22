@@ -65,16 +65,22 @@ describe('dashboard', () => {
             // Link back to dashboard, submission visible in default program
             cy.findByText('Back to state dashboard').should('exist').click()
             cy.findByText('Dashboard').should('exist')
-            // check the table of submissions
+            // check the table of submissions--find a draft row, then the link in the ID column
             cy.get('table')
-                .contains('td', 'MN-PMAP-0001')
-                .children()
+                .contains('span', 'Draft')
+                .eq(0)
+                .parents('tr')
+                .findByTestId('submission-id')
+                .find('a')
                 .should('have.attr', 'href')
                 // draft submission URL is /submissions/${submission.id}/type
                 .and('include', 'type')
             cy.get('table')
-                .contains('td', 'MN-PMAP-0002')
-                .children()
+                .contains('span', 'Submitted')
+                .eq(0)
+                .parents('tr')
+                .findByTestId('submission-id')
+                .find('a')
                 .should('have.attr', 'href')
                 .and('include', 'submissions')
                 // submitted submission URL is /submissions/${submission.id}
