@@ -14,7 +14,6 @@ import {
     SubmissionType as GQLSubmissionType,
 } from '../../gen/gqlClient'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
-// import { SubmissionType as DomainSubmissionType } from '../../../../app-web/src/common-code/domain-models'
 
 const isSubmitted = (typename: string) =>
     typename === 'StateSubmission' ? true : false
@@ -76,21 +75,9 @@ export const Dashboard = (): React.ReactElement => {
         location.search
     ).get('justSubmitted')
 
-    // Go through the list of programs and create a list of submissions in the right order
-    const programSubmissions: { [progID: string]: TableRow[] } = {}
-    for (const program of programs) {
-        const submissions = submissionList.filter(
-            (sub) => sub.programID === program.id
-        )
+    const hasSubmissions = submissionList.length > 0
 
-        programSubmissions[program.id] = submissions
-    }
-
-    const hasSubmissions = Object.values(programSubmissions).some(
-        (value) => Array.isArray(value) && value.length > 0
-    )
-
-    const getFirstProgramName = Object.keys(programSubmissions)[0]
+    const getFirstProgramName = submissionList[0].programID
 
     return (
         <>
