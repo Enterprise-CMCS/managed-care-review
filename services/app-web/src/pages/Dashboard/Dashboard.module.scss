@@ -14,24 +14,9 @@
     max-width: 75rem;
 }
 
-.alert {
-    div {
-        margin-top: units(1);
-    }
-    ol {
-        margin-top: 0;
-    }
-    li {
-        padding: units(1) 0;
-    }
-}
-
-.tabs {
-    width: 100%;
-}
-
 .panel {
     padding: units(2);
+    width: 100%;
 
     & .panelHeader {
         display: flex;
@@ -48,4 +33,32 @@
             text-align: center;
         }
     }
+}
+
+.alert {
+    div {
+        margin-top: units(1);
+    }
+    ol {
+        margin-top: 0;
+    }
+    li {
+        padding: units(1) 0;
+    }
+}
+
+.tabs {
+    width: 100%;
+}
+
+.programTag {
+    background: $cms-color-primary;
+}
+
+.submittedTag {
+    background: $theme-color-success;
+}
+
+.draftTag {
+    background: $theme-color-warning-dark;
 }
