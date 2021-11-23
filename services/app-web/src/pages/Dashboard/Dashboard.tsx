@@ -99,7 +99,9 @@ export const Dashboard = (): React.ReactElement => {
 
     const hasSubmissions = submissionRows.length > 0
 
-    const getFirstProgramName = submissionRows[0].program.id
+    const getFirstProgramName = hasSubmissions
+        ? submissionRows[0].program.id
+        : ''
 
     return (
         <>
