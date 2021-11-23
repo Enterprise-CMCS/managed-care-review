@@ -67,7 +67,7 @@ export const Dashboard = (): React.ReactElement => {
 
     const programs = loggedInUser.state.programs
 
-    const submissionList = data.indexSubmissions.edges
+    const submissionRows = data.indexSubmissions.edges
         .map((edge) => edge.node)
         .map((row) => {
             if (row.__typename === 'DraftSubmission') {
@@ -97,9 +97,9 @@ export const Dashboard = (): React.ReactElement => {
         location.search
     ).get('justSubmitted')
 
-    const hasSubmissions = submissionList.length > 0
+    const hasSubmissions = submissionRows.length > 0
 
-    const getFirstProgramName = submissionList[0].program.id
+    const getFirstProgramName = submissionRows[0].program.id
 
     return (
         <>
@@ -145,7 +145,7 @@ export const Dashboard = (): React.ReactElement => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {submissionList.map(
+                                    {submissionRows.map(
                                         (submission: TableRow) => {
                                             return (
                                                 <tr key={submission.id}>
