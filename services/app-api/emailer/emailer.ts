@@ -1,6 +1,6 @@
 import { Lambda } from 'aws-sdk'
-import { getSESEmailParams, newSubmissionCMSEmailTemplate } from './'
 import { StateSubmissionType } from '../../app-web/src/common-code/domain-models'
+import { getSESEmailParams, newSubmissionCMSEmailTemplate } from './'
 
 type EmailConfiguration = {
     stage: string
@@ -19,12 +19,6 @@ type EmailData = {
     subjectCharset?: string
     bodyCharset?: string
     bodyHTML?: string
-}
-
-function isEmailData(data: EmailData): data is EmailData {
-    return Boolean(
-        data.bodyText && data.sourceEmail && data.subject && data.toAddresses
-    )
 }
 
 type Emailer = {
@@ -75,5 +69,5 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
     }
 }
 
-export { newLocalEmailer, newSESEmailer, isEmailData }
+export { newLocalEmailer, newSESEmailer }
 export type { Emailer, EmailConfiguration, EmailData }

@@ -1,4 +1,6 @@
 import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitDraftSubmission.graphql'
+import { StateSubmissionType } from '../../app-web/src/common-code/domain-models'
+import { EmailData, Emailer, newSubmissionCMSEmailTemplate } from '../emailer'
 import {
     constructTestPostgresServer,
     createAndUpdateTestDraftSubmission,
@@ -186,8 +188,36 @@ describe('submitDraftSubmission', () => {
         )
     })
 
+    const testEmailerWithCallback = (
+        sendCallback: (data: EmailData) => void
+    ): Emailer => {
+        const config = {
+            emailSource: 'local@example.com',
+            stage: 'local',
+            baseUrl: 'http://localhost',
+        }
+        return {
+            sendEmail: async (emailData: EmailData): Promise<void | Error> => {
+                console.log('Mocsk email locally')
+                console.log('Email content' + emailData)
+                sendCallback(emailData)
+            },
+            generateCMSEmail: (submission: StateSubmissionType): EmailData => {
+                return newSubmissionCMSEmailTemplate(submission, config)
+            },
+        }
+    }
+
     it('send email to CMS if submission is valid', async () => {
-        const server = await constructTestPostgresServer()
+        let sentEmailData: EmailData | undefined = undefined
+        const mockEmailer = testEmailerWithCallback((emailData) => {
+            console.log('IN CALLBACK')
+            sentEmailData = emailData
+        })
+
+        const server = await constructTestPostgresServer({
+            emailer: mockEmailer,
+        })
         const draft = await createAndUpdateTestDraftSubmission(server, {})
         const draftID = draft.id
 
@@ -202,7 +232,20 @@ describe('submitDraftSubmission', () => {
         })
 
         expect(submitResult.errors).toBeUndefined()
-        // TODO: add assertion that emailer was called
+        expect(sentEmailData).toBeDefined()
+        console.log('SUBRESU', submitResult)
+        // this is dumb but works. Typescript seems to not realize that the callback could modify this variable.
+        sentEmailData = sentEmailData as unknown as EmailData
+        expect(sentEmailData.bodyText).toEqual(
+            `
+            FL-CNET-0060 was received from FL.//TODO this should be something on the domain model.
+
+            Submission type: Contract action and rate certification
+            Submission description: An updated submission
+
+            View the full submission: http://localhost/submissions/${submitResult?.data?.submitDraftSubmission?.submission?.id}
+        `
+        )
     })
 
     it('does not send email to CMS if submission fails', async () => {

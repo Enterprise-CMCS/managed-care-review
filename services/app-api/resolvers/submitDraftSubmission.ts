@@ -1,17 +1,12 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
-import { Emailer } from '../emailer'
-import { isStoreError, Store } from '../store/index'
-import { MutationResolvers, State } from '../gen/gqlServer'
 import {
-    DraftSubmissionType,
-    StateSubmissionType,
-    hasValidContract,
+    DraftSubmissionType, hasValidContract,
     hasValidDocuments,
-    hasValidRates,
-    isStateSubmission,
-    isContractAndRates,
-    isStateUser,
+    hasValidRates, isContractAndRates, isStateSubmission, isStateUser, StateSubmissionType
 } from '../../app-web/src/common-code/domain-models'
+import { Emailer } from '../emailer'
+import { MutationResolvers, State } from '../gen/gqlServer'
+import { isStoreError, Store } from '../store/index'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = typeof SubmissionErrorCodes[number] // iterable union type
@@ -152,10 +147,11 @@ export function submitDraftSubmissionResolver(
 
         // Send the email!
         const emailData = emailer.generateCMSEmail(stateSubmission)
-        try {
-            await emailer.sendEmail(emailData)
-        } catch (err) {
-            console.error(Error)
+        const emailResult = await emailer.sendEmail(emailData)
+
+        if (emailResult instanceof Error) {
+            console.log("ERROR: Failed to send email to CMS:", emailResult)
+            throw emailResult
         }
 
         return { submission: updatedSubmission }

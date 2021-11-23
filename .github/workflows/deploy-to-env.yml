@@ -219,7 +219,7 @@ jobs:
           OKTA_METADATA_URL: ${{ secrets.okta_metadata_url }}
           TEST_USERS_PASS: ${{ secrets.test_users_pass }}
 
-      - name: Generate graphql
+      - name: Generate graphql and proto
         run: ./dev generate
 
       - name: deploy

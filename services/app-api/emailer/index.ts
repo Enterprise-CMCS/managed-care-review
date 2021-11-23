@@ -1,5 +1,4 @@
 export { getSESEmailParams, sendSESEmail } from './awsSES'
+export { newLocalEmailer, newSESEmailer } from './emailer'
+export type { EmailConfiguration, EmailData, Emailer } from './emailer'
 export { newSubmissionCMSEmailTemplate } from './templates'
-
-export { newLocalEmailer, newSESEmailer, isEmailData } from './emailer'
-export type { Emailer, EmailConfiguration, EmailData } from './emailer'

@@ -106,6 +106,7 @@ provider:
     REACT_APP_AUTH_MODE: ${self:custom.reactAppAuthMode}
     SECRETS_MANAGER_SECRET: ${self:custom.secretsManagerSecret}
     EMAILER_MODE: ${self:custom.emailerMode}
+    SES_SOURCE_EMAIL_ADDRESS: ${self:custom.emailSource}
 
 layers:
   prismaClient:
@@ -119,8 +120,6 @@ functions:
           path: email_submit
           method: post
           cors: true
-    environment:
-      SES_SOURCE_EMAIL_ADDRESS: ${self:custom.emailSource}
 
   health:
     handler: handlers/health_check.main

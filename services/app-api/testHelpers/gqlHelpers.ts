@@ -1,25 +1,24 @@
+import { PrismaClient } from '@prisma/client'
 import { ApolloServer } from 'apollo-server-lambda'
-
 import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
-import FETCH_DRAFT_SUBMISSION from '../../app-graphql/src/queries/fetchDraftSubmission.graphql'
-import UPDATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/updateDraftSubmission.graphql'
-import FETCH_STATE_SUBMISSION from '../../app-graphql/src/queries/fetchStateSubmission.graphql'
 import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitDraftSubmission.graphql'
+import UPDATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/updateDraftSubmission.graphql'
+import FETCH_DRAFT_SUBMISSION from '../../app-graphql/src/queries/fetchDraftSubmission.graphql'
+import FETCH_STATE_SUBMISSION from '../../app-graphql/src/queries/fetchStateSubmission.graphql'
 import typeDefs from '../../app-graphql/src/schema.graphql'
-import { Emailer, EmailData, newSubmissionCMSEmailTemplate } from '../emailer'
-import { configureResolvers } from '../resolvers'
-import { Context } from '../handlers/apollo_gql'
+import { StateSubmissionType } from '../../app-web/src/common-code/domain-models'
+import { EmailData, Emailer, newSubmissionCMSEmailTemplate } from '../emailer'
 import {
-    UpdateDraftSubmissionInput,
     CreateDraftSubmissionInput,
     DraftSubmission,
     DraftSubmissionUpdates,
-    StateSubmission,
+    StateSubmission, UpdateDraftSubmissionInput
 } from '../gen/gqlServer'
+import { Context } from '../handlers/apollo_gql'
 import { NewPrismaClient } from '../lib/prisma'
 import { NewPostgresStore } from '../postgres/postgresStore'
-import { PrismaClient } from '@prisma/client'
-import { StateSubmissionType } from '../../app-web/src/common-code/domain-models'
+import { configureResolvers } from '../resolvers'
+
 
 const defaultContext = (): Context => {
     return {
@@ -49,12 +48,15 @@ async function sharedTestPrismaClient(): Promise<PrismaClient> {
 }
 
 const constructTestPostgresServer = async (
-    { context } = { context: defaultContext() }
+    opts?: { context?: Context, emailer?: Emailer }
 ): Promise<ApolloServer> => {
-    const prismaClient = await sharedTestPrismaClient()
 
+    // set defaults
+    const context = opts?.context || defaultContext()
+    const emailer = opts?.emailer || constructTestEmailer()
+
+    const prismaClient = await sharedTestPrismaClient()
     const postgresStore = NewPostgresStore(prismaClient)
-    const emailer = constructTestEmailer()
     const postgresResolvers = configureResolvers(postgresStore, emailer)
 
     return new ApolloServer({
