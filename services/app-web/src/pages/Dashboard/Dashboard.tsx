@@ -168,7 +168,7 @@ export const Dashboard = (): React.ReactElement => {
                                                             }
                                                         </Tag>
                                                     </td>
-                                                    <td>
+                                                    <td data-testid="submission-date">
                                                         {submission.submittedAt
                                                             ? dayjs(
                                                                   submission.submittedAt
