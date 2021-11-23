@@ -34,19 +34,18 @@ type TableRow = {
     id: string
     name: string
     program: Program
-    createdAt: string
+    submittedAt?: string
     updatedAt: string
     submissionType: GQLSubmissionType
 }
 
 export const Dashboard = (): React.ReactElement => {
+    const { loading, data, error } = useIndexSubmissionsQuery()
     // add a setSortColumn function once we implement sorting--and then delete this comment :-)
     // <Partial<keyof TableRow>> tells the compiler "any of the keys of TableRow is acceptable"
     const [sortColumn] = useState<Partial<keyof TableRow>>('updatedAt')
     const { loginStatus, loggedInUser } = useAuth()
     const location = useLocation<MCRouterState>()
-
-    const { loading, data, error } = useIndexSubmissionsQuery()
 
     if (error) {
         console.log('error loading submissions', error)
@@ -69,6 +68,28 @@ export const Dashboard = (): React.ReactElement => {
 
     const submissionList = data.indexSubmissions.edges
         .map((edge) => edge.node)
+        .map((row) => {
+            if (row.__typename === 'DraftSubmission') {
+                return {
+                    __typename: row.__typename,
+                    id: row.id,
+                    name: row.name,
+                    program: row.program,
+                    updatedAt: row.updatedAt,
+                    submissionType: row.submissionType,
+                }
+            } else {
+                return {
+                    __typename: row.__typename,
+                    id: row.id,
+                    name: row.name,
+                    program: row.program,
+                    submittedAt: row.submittedAt,
+                    updatedAt: row.updatedAt,
+                    submissionType: row.submissionType,
+                }
+            }
+        })
         .sort((a, b) => (a[sortColumn] > b[sortColumn] ? -1 : 1))
 
     const justSubmittedSubmissionName = new URLSearchParams(
@@ -77,7 +98,7 @@ export const Dashboard = (): React.ReactElement => {
 
     const hasSubmissions = submissionList.length > 0
 
-    const getFirstProgramName = submissionList[0].programID
+    const getFirstProgramName = submissionList[0].program.id
 
     return (
         <>
@@ -148,9 +169,13 @@ export const Dashboard = (): React.ReactElement => {
                                                         </Tag>
                                                     </td>
                                                     <td>
-                                                        {dayjs(
-                                                            submission.createdAt
-                                                        ).format('MM/DD/YYYY')}
+                                                        {submission.submittedAt
+                                                            ? dayjs(
+                                                                  submission.submittedAt
+                                                              ).format(
+                                                                  'MM/DD/YYYY'
+                                                              )
+                                                            : ''}
                                                     </td>
                                                     <td>
                                                         {dayjs(
