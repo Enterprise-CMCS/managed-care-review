@@ -17,7 +17,7 @@ export const SupportingDocumentsSummarySection = ({
     submission,
     navigateTo,
 }: SupportingDocumentsSummarySectionProps): React.ReactElement => {
-    const { getURL, getKey } = useS3()
+    const { getURL, getKey, getBulkDlURL } = useS3()
     useEffect(() => {
         const refreshDocuments = async () => {
             const newDocuments = await Promise.all(
@@ -51,12 +51,45 @@ export const SupportingDocumentsSummarySection = ({
         refreshedDocs.length === 1 ? 'file' : 'files'
     }`
 
+    useEffect(() => {
+        // get all the keys for the documents we want to zip
+        async function fetchZipUrl() {
+            const keysFromDocs = submission.documents
+                .map((doc) => {
+                    const key = getKey(doc.s3URL)
+                    if (!key) return ''
+                    return key
+                })
+                .filter((key) => key !== '')
+
+            // call the lambda to zip the files and get the url
+            const zippedURL = await getBulkDlURL(
+                keysFromDocs,
+                'some-filename.zip'
+            )
+            setZippedFilesURL(zippedURL)
+        }
+
+        void fetchZipUrl()
+    }, [getKey, getBulkDlURL, submission.documents])
+
+    const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
+
     return (
         <section id="documents" className={styles.summarySection}>
             <SectionHeader
                 header="Supporting documents"
                 navigateTo={navigateTo}
             />
+            <div>
+                <Link
+                    className="usa-button"
+                    variant="unstyled"
+                    href={zippedFilesURL}
+                >
+                    Download all documents
+                </Link>
+            </div>
             <span className="text-bold">{documentsSummary}</span>
             <ul>
                 {refreshedDocs.map((doc) => (

@@ -127,7 +127,7 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
         getBulkDlURL: async (
             keys: string[],
             filename: string
-        ): Promise<string | Error> => {
+        ): Promise<string> => {
             // setup the lambda invocation
             const stageName = process.env.stage
             const bulkDLFunc = new AWS.Lambda()
@@ -147,7 +147,7 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
                 console.log('success: zip of files on s3 completed.')
                 return dlURL.Payload as string
             } catch (err) {
-                return new Error('Could not get a bulk DL URL' + err)
+                throw new Error('Could not get a bulk DL URL' + err)
             }
         },
     }
