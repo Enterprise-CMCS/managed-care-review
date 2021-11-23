@@ -40,12 +40,13 @@ type TableRow = {
 }
 
 export const Dashboard = (): React.ReactElement => {
-    const { loading, data, error } = useIndexSubmissionsQuery()
     // add a setSortColumn function once we implement sorting--and then delete this comment :-)
     // <Partial<keyof TableRow>> tells the compiler "any of the keys of TableRow is acceptable"
     const [sortColumn] = useState<Partial<keyof TableRow>>('updatedAt')
     const { loginStatus, loggedInUser } = useAuth()
     const location = useLocation<MCRouterState>()
+
+    const { loading, data, error } = useIndexSubmissionsQuery()
 
     if (error) {
         console.log('error loading submissions', error)
