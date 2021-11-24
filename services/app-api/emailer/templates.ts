@@ -1,16 +1,14 @@
-import { SubmissionType, StateSubmissionType } from "../../app-web/src/common-code/domain-models"
+import {
+    SubmissionType,
+    StateSubmissionType,
+    submissionName,
+} from '../../app-web/src/common-code/domain-models'
 import { EmailData, EmailConfiguration } from './'
 
 // TODO: move to common-code - lang records for relevant enums - this should match code in app-web constants/submission.ts (should this be moved to common-code?)
 const SubmissionTypeRecord: Record<SubmissionType, string> = {
     CONTRACT_ONLY: 'Contract action only',
     CONTRACT_AND_RATES: 'Contract action and rate certification',
-}
-
-// TODO: move to common-code - get submission name - this should match code in app-web stateSubmissionResolver (should this be moved to common-code?)
-const generateSubmissionName = (sub: StateSubmissionType): string => {
-    const padNumber = sub.stateNumber.toString().padStart(4, '0')
-    return `${sub.stateCode.toUpperCase()}-${sub.programID.toUpperCase()}-${padNumber}`
 }
 
 const newSubmissionCMSEmailTemplate = (
@@ -22,9 +20,9 @@ const newSubmissionCMSEmailTemplate = (
         sourceEmail: config.emailSource,
         subject: `${
             config.stage !== 'prod' ? `[${config.stage}] ` : ''
-        }New Managed Care Submission: ${generateSubmissionName(submission)}`,
+        }New Managed Care Submission: ${submissionName(submission)}`,
         bodyText: `
-            ${generateSubmissionName(submission)} was received from ${
+            ${submissionName(submission)} was received from ${
             submission.stateCode
         }.
 
@@ -36,7 +34,7 @@ const newSubmissionCMSEmailTemplate = (
         }
         `,
         bodyHTML: `
-            ${generateSubmissionName(submission)} was received from ${
+            ${submissionName(submission)} was received from ${
             submission.stateCode
         }.<br /><br />
             Submission type: ${

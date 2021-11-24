@@ -1,5 +1,6 @@
 import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitDraftSubmission.graphql'
 import { StateSubmissionType } from '../../app-web/src/common-code/domain-models'
+import { StateSubmission } from '../gen/gqlServer'
 import { EmailData, Emailer, newSubmissionCMSEmailTemplate } from '../emailer'
 import {
     constructTestPostgresServer,
@@ -233,17 +234,19 @@ describe('submitDraftSubmission', () => {
 
         expect(submitResult.errors).toBeUndefined()
         expect(sentEmailData).toBeDefined()
-        console.log('SUBRESU', submitResult)
+        const sub = submitResult?.data?.submitDraftSubmission
+            ?.submission as StateSubmission
+
         // this is dumb but works. Typescript seems to not realize that the callback could modify this variable.
         sentEmailData = sentEmailData as unknown as EmailData
         expect(sentEmailData.bodyText).toEqual(
             `
-            FL-CNET-0060 was received from FL.//TODO this should be something on the domain model.
+            ${sub.name} was received from FL.
 
             Submission type: Contract action and rate certification
             Submission description: An updated submission
 
-            View the full submission: http://localhost/submissions/${submitResult?.data?.submitDraftSubmission?.submission?.id}
+            View the full submission: http://localhost/submissions/${sub.id}
         `
         )
     })

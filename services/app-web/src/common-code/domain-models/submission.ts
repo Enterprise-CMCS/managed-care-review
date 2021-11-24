@@ -1,5 +1,6 @@
 import { DraftSubmissionType } from './DraftSubmissionType'
 import { StateSubmissionType } from './StateSubmissionType'
+import { SubmissionUnionType } from './SubmissionUnionType'
 
 const isContractOnly = (
     sub: DraftSubmissionType | StateSubmissionType
@@ -47,7 +48,7 @@ const hasValidDocuments = (sub: StateSubmissionType): boolean => {
         sub.submissionType === 'CONTRACT_AND_RATES'
             ? sub.rateDocuments?.length !== 0
             : true
-   
+
     const validContractDocuments = sub.contractDocuments.length !== 0
     return validRateDocuments && validContractDocuments
 }
@@ -79,6 +80,11 @@ const isDraftSubmission = (sub: unknown): sub is DraftSubmissionType => {
     return false
 }
 
+function submissionName(submission: SubmissionUnionType): string {
+    const padNumber = submission.stateNumber.toString().padStart(4, '0')
+    return `${submission.stateCode.toUpperCase()}-${submission.programID.toUpperCase()}-${padNumber}`
+}
+
 export {
     hasValidContract,
     hasValidDocuments,
@@ -87,4 +93,5 @@ export {
     isContractAndRates,
     isStateSubmission,
     isDraftSubmission,
+    submissionName,
 }
