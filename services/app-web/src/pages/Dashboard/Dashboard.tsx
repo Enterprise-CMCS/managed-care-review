@@ -34,7 +34,7 @@ type TableRow = {
     id: string
     name: string
     program: Program
-    createdAt: string
+    submittedAt?: string
     updatedAt: string
     submissionType: GQLSubmissionType
 }
@@ -67,17 +67,41 @@ export const Dashboard = (): React.ReactElement => {
 
     const programs = loggedInUser.state.programs
 
-    const submissionList = data.indexSubmissions.edges
+    const submissionRows = data.indexSubmissions.edges
         .map((edge) => edge.node)
+        .map((row) => {
+            if (row.__typename === 'DraftSubmission') {
+                return {
+                    __typename: row.__typename,
+                    id: row.id,
+                    name: row.name,
+                    program: row.program,
+                    updatedAt: row.updatedAt,
+                    submissionType: row.submissionType,
+                }
+            } else {
+                return {
+                    __typename: row.__typename,
+                    id: row.id,
+                    name: row.name,
+                    program: row.program,
+                    submittedAt: row.submittedAt,
+                    updatedAt: row.updatedAt,
+                    submissionType: row.submissionType,
+                }
+            }
+        })
         .sort((a, b) => (a[sortColumn] > b[sortColumn] ? -1 : 1))
 
     const justSubmittedSubmissionName = new URLSearchParams(
         location.search
     ).get('justSubmitted')
 
-    const hasSubmissions = submissionList.length > 0
+    const hasSubmissions = submissionRows.length > 0
 
-    const getFirstProgramName = submissionList[0].programID
+    const getFirstProgramName = hasSubmissions
+        ? submissionRows[0].program.id
+        : ''
 
     return (
         <>
@@ -123,7 +147,7 @@ export const Dashboard = (): React.ReactElement => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {submissionList.map(
+                                    {submissionRows.map(
                                         (submission: TableRow) => {
                                             return (
                                                 <tr key={submission.id}>
@@ -147,10 +171,14 @@ export const Dashboard = (): React.ReactElement => {
                                                             }
                                                         </Tag>
                                                     </td>
-                                                    <td>
-                                                        {dayjs(
-                                                            submission.createdAt
-                                                        ).format('MM/DD/YYYY')}
+                                                    <td data-testid="submission-date">
+                                                        {submission.submittedAt
+                                                            ? dayjs(
+                                                                  submission.submittedAt
+                                                              ).format(
+                                                                  'MM/DD/YYYY'
+                                                              )
+                                                            : ''}
                                                     </td>
                                                     <td>
                                                         {dayjs(
