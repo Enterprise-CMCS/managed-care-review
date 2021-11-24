@@ -144,7 +144,7 @@ jobs:
 
   deploy-branch:
     needs: [build-prisma-client-lambda-layer, get-branch-name-vars]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@41d52bfb2cc7b95849e19cd8d8c15ac7ecc6e2e8
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@d1bf4dad0f3ff962d72ac4a2d5ea7b138768b394
     with:
       stage_name: ${{ needs.get-branch-name-vars.outputs.branch-name}}
     secrets:
