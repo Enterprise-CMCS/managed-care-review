@@ -97,6 +97,8 @@ async function initializeGQLHandler(): Promise<Handler> {
         process.env.SES_SOURCE_EMAIL_ADDRESS || 'macrael@truss.works'
     const emailerMode = process.env.EMAILER_MODE
 
+    console.log('SES SOURCE:', emailSource)
+
     // START Assert configuration is valid
     if (emailerMode !== 'LOCAL' && emailerMode !== 'SES')
         throw new Error(
