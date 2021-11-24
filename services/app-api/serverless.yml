@@ -19,6 +19,7 @@ custom:
   stage: ${opt:stage, self:provider.stage}
   region: ${opt:region, self:provider.region}
   appVersion: ${env:APP_VERSION}
+  applicationEndpoint: ${env:APPLICATION_ENDPOINT}
   emailSource: ${env:SES_SOURCE_EMAIL_ADDRESS, "macrael@truss.works"}
   emailerMode: ${env:EMAILER_MODE}
   auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:postgres-${self:custom.stage}.PostgresAuroraArn }
@@ -95,6 +96,7 @@ provider:
     SECRETS_MANAGER_SECRET: ${self:custom.secretsManagerSecret}
     EMAILER_MODE: ${self:custom.emailerMode}
     SES_SOURCE_EMAIL_ADDRESS: ${self:custom.emailSource}
+    APPLICATION_ENDPOINT: ${self:custom.applicationEndpoint}
 
 layers:
   prismaClient:
