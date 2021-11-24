@@ -87,6 +87,10 @@ provider:
             - ses:SendEmail
             - ses:SendRawEmail
           Resource: '*'
+        - Effect: 'Allow'
+          Action:
+            - lambda:InvokeFunction
+          Resource: '*'
 
   environment:
     stage: ${self:custom.stage}
