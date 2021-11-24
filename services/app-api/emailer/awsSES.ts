@@ -48,7 +48,7 @@ function getSESEmailParams(email: EmailData): SES.SendEmailRequest {
 function sendSESEmail(
     params: SES.SendEmailRequest
 ): Request<SES.SendEmailResponse, AWSError> {
-    console.log('SENDING SES EMAIL')
+    console.log('SENDING SES EMAIL', params)
     return ses.sendEmail(params, function (err, data) {
         if (err) {
             return new Error('SES error: ' + err)
