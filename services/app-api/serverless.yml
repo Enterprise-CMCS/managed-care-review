@@ -25,7 +25,7 @@ custom:
   iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
   secretsManagerSecret: aurora_postgres_${self:custom.stage}
   reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
-  dynamoConnection: ${env:DYNAMO_CONNECTION}
+  dbURL: ${env:DATABASE_URL}
   webAclName: ${self:service}-${self:custom.stage}-webacl
   associateWaf:
     name: ${self:custom.webAclName}
@@ -64,18 +64,6 @@ provider:
       path: ${self:custom.iamPath}
       permissionsBoundary: ${self:custom.iamPermissionsBoundaryPolicy}
       statements:
-        - Effect: 'Allow'
-          Action:
-            - dynamodb:DescribeTable
-            - dynamodb:Query
-            - dynamodb:Scan
-            - dynamodb:GetItem
-            - dynamodb:PutItem
-            - dynamodb:UpdateItem
-            - dynamodb:DeleteItem
-          Resource:
-            - ${self:custom.draftSubmissionsTableArn}
-            - ${self:custom.draftSubmissionsTableArn}/index/*
         - Effect: 'Allow' # cognito user lookup
           Action:
             - cognito-idp:ListUsers
@@ -94,7 +82,7 @@ provider:
   environment:
     stage: ${self:custom.stage}
     appVersion: ${self:custom.appVersion}
-    DYNAMO_CONNECTION: ${self:custom.dynamoConnection}
+    DATABASE_URL: ${self:custom.dbURL}
     REACT_APP_AUTH_MODE: ${self:custom.reactAppAuthMode}
     SECRETS_MANAGER_SECRET: ${self:custom.secretsManagerSecret}
 

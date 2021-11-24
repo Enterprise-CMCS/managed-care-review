@@ -1,8 +1,7 @@
-import { sharedTestPrismaClient } from '../testHelpers/gqlHelpers'
-import { insertDraftSubmission } from './insertDraftSubmission'
-import { isStoreError } from '../store'
-
 import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
+import { sharedTestPrismaClient } from '../testHelpers/storeHelpers'
+import { insertDraftSubmission } from './insertDraftSubmission'
+import { isStoreError } from './storeError'
 
 describe('insertDraftSubmissionPostgres', () => {
     // eslint-disable-next-line jest/expect-expect

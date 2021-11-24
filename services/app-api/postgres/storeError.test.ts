@@ -2,11 +2,9 @@
 /* eslint-disable jest/no-try-expect */
 import { v4 as uuidv4 } from 'uuid'
 import { PrismaClient } from '@prisma/client'
-
 import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
 import { toProtoBuffer } from '../../app-web/src/common-code/proto/stateSubmission'
-
-import { sharedTestPrismaClient } from '../testHelpers/gqlHelpers'
+import { sharedTestPrismaClient } from '../testHelpers/storeHelpers'
 import { convertPrismaErrorToStoreError } from './storeError'
 
 describe('storeError', () => {

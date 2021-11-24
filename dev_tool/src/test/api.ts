@@ -1,21 +1,15 @@
-import LabeledProcessRunner from '../runner.js'
 import { spawn } from 'child_process'
-
 import {
-    compileGraphQLTypesWatchOnce,
     compileGraphQLTypesOnce,
-    runDBLocally,
+    compileGraphQLTypesWatchOnce,
     installAPIDeps,
 } from '../local/index.js'
+import LabeledProcessRunner from '../runner.js'
 
-export async function runAPITestsWatch(jestArgs: string[], runDB: boolean) {
+export async function runAPITestsWatch(jestArgs: string[]) {
     const runner = new LabeledProcessRunner()
 
     compileGraphQLTypesWatchOnce(runner)
-
-    if (runDB) {
-        runDBLocally(runner)
-    }
 
     await installAPIDeps(runner)
 

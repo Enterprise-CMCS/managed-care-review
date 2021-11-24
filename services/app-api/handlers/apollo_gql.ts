@@ -1,25 +1,22 @@
 import { ApolloServer } from 'apollo-server-lambda'
 import {
-    Handler,
-    APIGatewayProxyHandler,
     APIGatewayProxyEvent,
+    APIGatewayProxyHandler,
+    Handler,
 } from 'aws-lambda'
-
 import typeDefs from '../../app-graphql/src/schema.graphql'
 import {
     assertIsAuthMode,
     CognitoUserType,
 } from '../../app-web/src/common-code/domain-models'
-
-import { newDeployedStore, newLocalStore } from '../store'
-import { configureResolvers } from '../resolvers'
 import {
-    userFromLocalAuthProvider,
-    userFromCognitoAuthProvider,
     userFromAuthProvider,
+    userFromCognitoAuthProvider,
+    userFromLocalAuthProvider,
 } from '../authn'
-import { NewPrismaClient } from '../lib/prisma'
 import { NewPostgresStore } from '../postgres/postgresStore'
+import { configureResolvers } from '../resolvers'
+import { configurePostgres } from './configuration'
 
 // The Context type passed to all of our GraphQL resolvers
 export interface Context {
@@ -91,38 +88,20 @@ async function initializeGQLHandler(): Promise<Handler> {
     const authMode = process.env.REACT_APP_AUTH_MODE
     assertIsAuthMode(authMode)
 
-    const useDynamo = process.env.USE_DYNAMO
-    const dynamoConnection = process.env.DYNAMO_CONNECTION
-    const defaultRegion = process.env.AWS_DEFAULT_REGION
-    const stageName = process.env.stage
+    const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET
+    const dbURL = process.env.DATABASE_URL
 
-    const getDynamoStore = () => {
-        const dbPrefix = stageName + '-'
-
-        if (dynamoConnection === 'USE_AWS') {
-            return newDeployedStore(defaultRegion || 'no region', dbPrefix)
-        } else {
-            return newLocalStore(dynamoConnection || 'no db url')
-        }
+    if (!dbURL) {
+        throw new Error('Init Error: DATABASE_URL is required to run app-api')
     }
 
-    const getPostgresStore = async () => {
-        console.log('Getting Postgres Connection')
-        const prismaResult = await NewPrismaClient()
-
-        if (prismaResult.isErr()) {
-            console.log(
-                'Error: attempting to create prisma client: ',
-                prismaResult.error
-            )
-            throw new Error('Failed to create Prisma Client')
-        }
-
-        return NewPostgresStore(prismaResult.value)
+    const pgResult = await configurePostgres(dbURL, secretsManagerSecret)
+    if (pgResult instanceof Error) {
+        console.log("Init Error: Postgres couldn't be configured")
+        throw pgResult
     }
 
-    const store =
-        useDynamo === 'YES' ? getDynamoStore() : await getPostgresStore()
+    const store = await NewPostgresStore(pgResult)
 
     // Resolvers are defined and tested in the resolvers package
     const resolvers = configureResolvers(store)

@@ -15,18 +15,17 @@ Additional sources for documentation:
 -   [ ] Serverless - Get help installing it here: [Serverless Getting Started page](https://www.serverless.com/framework/docs/providers/aws/guide/installation/). Learn more about serverless from the [Serverless Stack tutorial](https://serverless-stack.com/).
 -   [ ] Yarn - In order to install dependencies, you need to [install yarn](https://classic.yarnpkg.com/en/docs/install/).
 -   [ ] AWS Account - You'll need an AWS account with appropriate IAM permissions (admin recommended) to deploy this app in Amazon.
--   [ ] Java - Our local database runner (which is a serverless plugin called `serverless-dynamodb-local`) requires java to run. You can install it here: https://www.oracle.com/java/technologies/javase-downloads.html
 -   [ ] NVM - If you are on a Mac using nvm, you should be able to install all the dependencies as [described below](#Installing-Node-and-Dependencies).
 -   [ ] envrc - Used to set environment variables locally
 -   [ ] docker - Used to run postgres locally
 
 ### Local Tooling
 
-We use a collection of tools to manage this monorepo. 
+We use a collection of tools to manage this monorepo.
 
-We use [Lerna](https://github.com/lerna/lerna) to manage commands across the entire monorepo. This tool is good for managing multi-package repositories like ours, where there are several nested `package.json`, typescript, eslint, and prettier configs, potentially with their own rules. We  also use [Husky](https://github.com/typicode/husky) to run and organize our pre-commit scripts - e.g. `husky` uses the command `lerna run precommit` to run the specific `precommit` script indicated in each `package.json`.
+We use [Lerna](https://github.com/lerna/lerna) to manage commands across the entire monorepo. This tool is good for managing multi-package repositories like ours, where there are several nested `package.json`, typescript, eslint, and prettier configs, potentially with their own rules. We also use [Husky](https://github.com/typicode/husky) to run and organize our pre-commit scripts - e.g. `husky` uses the command `lerna run precommit` to run the specific `precommit` script indicated in each `package.json`.
 
-  To get the tools needed for local development, you can run:
+To get the tools needed for local development, you can run:
 
 ```bash
 brew tap yoheimuta/protolint
@@ -97,7 +96,7 @@ See the above Requirements section if the command asks for any prerequisites you
 
 The ./dev script is written in typescript in `./src`. The entry-point is `./src/dev.ts`, it manages running the moving pieces locally: the API, the database, the file store, and the frontend.
 
-Local dev is built around the Serverless plugin [`serverless-offline`](https://github.com/dherault/serverless-offline). `serverless-offline` runs an API gateway locally configured by `./services/app-api/serverless.yml` and hot reloads your lambdas on every save. The plugins [`serverless-dynamodb-local`](https://github.com/99x/serverless-dynamodb-local) and [`serverless-s3-local`](https://github.com/ar90n/serverless-s3-local) stand up the local db and local s3 in a similar fashion.
+Local dev is built around the Serverless plugin [`serverless-offline`](https://github.com/dherault/serverless-offline). `serverless-offline` runs an API gateway locally configured by `./services/app-api/serverless.yml` and hot reloads your lambdas on every save. The plugin [`serverless-s3-local`](https://github.com/ar90n/serverless-s3-local) stands up the local s3 in a similar fashion.
 
 When run locally (with LOCAL_LOGIN=true), auth bypasses Cognito and uses [`serverless-offline`](https://github.com/dherault/serverless-offline). The frontend mimics login in local storage with mock users and sends an id in the `cognito-identity-id` header on every request. This is set as the cognito Id in the `event.requestContext.identity` for lambdas, just like Cognito would in AWS.
 
@@ -121,10 +120,10 @@ Some of those services have their own options as well, namely app-web, see below
 
 Run tests locally
 
--   `./dev test web` to run the web tests, watching the results
--   `./dev test api` to run the api tests, watching the results
+-   `./dev test web` to run the web tests, watching the results, requires the database to be running.
+-   `./dev test api` to run the api tests, watching the results, requires the database to be running.
 -   `./dev test browser` to run the cypress browser based tests, this opens the cypress runner and requires an endpoint to test against. By default, runs on localhost (so you should be running the app locally if this is what you intend). To see options for flags cypress accepts see [docs](https://docs.cypress.io/guides/guides/command-line#Commands).
--   `./dev test` (or `dev test check`) to run all the tests that CI runs, once. This will run the web, api, and browser tests
+-   `./dev test` (or `dev test check`) to run all the tests that CI runs, once. This will run the web, api, and browser tests, requires the database to be running.
 -   Run with flags `./dev test --unit`, `.dev test --online`, to filter down, but still run once.
 
 Clear dependencies

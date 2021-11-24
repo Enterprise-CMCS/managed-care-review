@@ -1,15 +1,54 @@
 import { PrismaClient } from '@prisma/client'
-import { Store } from '../store/store'
-import { findProgram } from '../store/findProgram'
-
+import {
+    DraftSubmissionType,
+    ProgramT,
+    StateSubmissionType,
+} from '../../app-web/src/common-code/domain-models'
+import { findProgram } from '../postgres'
 import { findAllSubmissions } from './findAllSubmissions'
-import { insertDraftSubmission } from './insertDraftSubmission'
-import { updateDraftSubmission } from './updateDraftSubmission'
-import { updateStateSubmission } from './updateStateSubmission'
 import { findDraftSubmission } from './findDraftSubmission'
 import { findStateSubmission } from './findStateSubmission'
+import {
+    insertDraftSubmission,
+    InsertDraftSubmissionArgsType,
+} from './insertDraftSubmission'
+import { StoreError } from './storeError'
+import { updateDraftSubmission } from './updateDraftSubmission'
+import { updateStateSubmission } from './updateStateSubmission'
 
-export function NewPostgresStore(client: PrismaClient): Store {
+type Store = {
+    insertDraftSubmission: (
+        args: InsertDraftSubmissionArgsType
+    ) => Promise<DraftSubmissionType | StoreError>
+
+    findAllSubmissions: (
+        stateCode: string
+    ) => Promise<(DraftSubmissionType | StateSubmissionType)[] | StoreError>
+
+    findDraftSubmission: (
+        draftUUID: string
+    ) => Promise<DraftSubmissionType | undefined | StoreError>
+    findDraftSubmissionByStateNumber: (
+        stateCoder: string,
+        stateNumber: number
+    ) => Promise<DraftSubmissionType | undefined | StoreError>
+
+    updateDraftSubmission: (
+        draftSubmission: DraftSubmissionType
+    ) => Promise<DraftSubmissionType | StoreError>
+
+    findStateSubmission: (
+        draftUUID: string
+    ) => Promise<StateSubmissionType | undefined | StoreError>
+
+    updateStateSubmission: (
+        stateSubmission: StateSubmissionType
+    ) => Promise<StateSubmissionType | StoreError>
+
+    findProgram: (stateCode: string, programID: string) => ProgramT | undefined
+}
+
+function NewPostgresStore(client: PrismaClient): Store {
     return {
         findAllSubmissions: (stateCode) =>
             findAllSubmissions(client, stateCode),
@@ -29,3 +68,5 @@ export function NewPostgresStore(client: PrismaClient): Store {
         findProgram: findProgram,
     }
 }
+
+export { NewPostgresStore, Store }

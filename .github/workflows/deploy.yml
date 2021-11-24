@@ -17,7 +17,7 @@ jobs:
       postgres:
         image: postgres:13.3
         env:
-          REACT_APP_AUTH_MODE: LOCAL
+          REACT_APP_AUTH_MODE: AWS_COGNITO
           POSTGRES_PASSWORD: shhhsecret
         # Set health checks to wait until postgres has started
         options: >-
@@ -51,7 +51,7 @@ jobs:
         shell: bash
         run: ./.github/build_vars.sh set_values
         env:
-          REACT_APP_AUTH_MODE: LOCAL
+          REACT_APP_AUTH_MODE: AWS_COGNITO
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
@@ -61,13 +61,12 @@ jobs:
           OKTA_METADATA_URL: ${{ secrets.OKTA_METADATA_URL }}
           IAM_PATH: ${{ secrets.IAM_PATH }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-          DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
 
       - name: Unit Tests
         env:
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5
-        run: ./dev test --unit --run-db
+        run: ./dev test --unit
 
       - name: publish code coverage
         uses: paambaati/codeclimate-action@v3.0.0
@@ -158,7 +157,6 @@ jobs:
       okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
       iam_path: ${{ secrets.IAM_PATH }}
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-      dynamo_connection: ${{ secrets.DYNAMO_CONNECTION}}
       test_users_pass: ${{ secrets.TEST_USERS_PASS}}
       react_app_auth_mode: AWS_COGNITO
 
@@ -191,7 +189,6 @@ jobs:
           OKTA_METADATA_URL: ${{ secrets.OKTA_METADATA_URL }}
           IAM_PATH: ${{ secrets.IAM_PATH }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-          DYNAMO_CONNECTION: ${{ secrets.DYNAMO_CONNECTION}}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
 
       - name: Create Test Users
