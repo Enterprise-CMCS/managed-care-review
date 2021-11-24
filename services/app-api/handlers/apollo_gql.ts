@@ -91,9 +91,6 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET
     const dbURL = process.env.DATABASE_URL
-    const useDynamo = process.env.USE_DYNAMO
-    const dynamoConnection = process.env.DYNAMO_CONNECTION
-    const defaultRegion = process.env.AWS_DEFAULT_REGION
     const stageName = process.env.stage
     const applicationEndpoint = process.env.APPLICATION_ENDPOINT
     const emailSource =
