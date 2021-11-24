@@ -89,7 +89,7 @@ jobs:
       - name: run migrations
         id: run-migrations
         run: |
-          pushd services/app-api && ./scripts/invoke-migrate-lambda.sh app-api-$branch_name-migrate
+          pushd services/app-api && ./scripts/invoke-migrate-lambda.sh app-api-${{ inputs.stage_name }}-migrate
 
   app-api:
     needs: [postgres]
