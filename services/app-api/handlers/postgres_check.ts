@@ -1,8 +1,18 @@
 import { APIGatewayProxyHandler } from 'aws-lambda'
-import { NewPrismaClient } from '../lib/prisma'
+import { configurePostgres } from './configuration'
+
 export const main: APIGatewayProxyHandler = async () => {
-    const prismaResult = await NewPrismaClient()
-    if (prismaResult.isErr()) {
+    const dbURL = process.env.DATABASE_URL
+    const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET
+
+    if (!dbURL) {
+        throw new Error('Init Error: DATABASE_URL is required to run app-api')
+    }
+
+    const prismaResult = await configurePostgres(dbURL, secretsManagerSecret)
+
+    if (prismaResult instanceof Error) {
+        console.error('Init Error: ', prismaResult)
         return {
             statusCode: 400,
             body: JSON.stringify({
@@ -15,7 +25,7 @@ export const main: APIGatewayProxyHandler = async () => {
             },
         }
     }
-    const prisma = prismaResult.value
+    const prisma = prismaResult
 
     // just do a rando query for now to test this connection out
     // since we don't have a store for this yet

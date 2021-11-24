@@ -1,11 +1,11 @@
-import { ForbiddenError, ApolloError } from 'apollo-server-lambda'
-import { isStoreError, Store } from '../store/index'
-import { QueryResolvers, State } from '../gen/gqlServer'
+import { ApolloError, ForbiddenError } from 'apollo-server-lambda'
 import {
-    StateSubmissionType,
-    isStateUser,
     isCMSUser,
+    isStateUser,
+    StateSubmissionType,
 } from '../../app-web/src/common-code/domain-models'
+import { QueryResolvers, State } from '../gen/gqlServer'
+import { isStoreError, Store } from '../postgres'
 
 export function fetchStateSubmissionResolver(
     store: Store

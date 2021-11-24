@@ -1,14 +1,44 @@
 import {
-    PrismaClientKnownRequestError,
     PrismaClientInitializationError,
+    PrismaClientKnownRequestError,
 } from '@prisma/client/runtime'
-import type { StoreError } from '../store'
+
+const StoreErrorCodes = [
+    'CONFIGURATION_ERROR',
+    'CONNECTION_ERROR',
+    'PROTOBUF_ERROR',
+    'INSERT_ERROR',
+    'UNEXPECTED_EXCEPTION',
+    'WRONG_STATUS',
+] as const
+type StoreErrorCode = typeof StoreErrorCodes[number] // iterable union type
+
+type StoreError = {
+    code: StoreErrorCode
+    message: string
+}
+
+// Wow this seems complicated. If there are cleaner ways to do this I'd like to know it.
+function isStoreError(err: unknown): err is StoreError {
+    if (err && typeof err == 'object') {
+        if ('code' in err && 'message' in err) {
+            // This seems ugly but necessary in a type guard.
+            const hasCode = err as { code: unknown }
+            if (typeof hasCode.code === 'string') {
+                if (
+                    StoreErrorCodes.some((errCode) => hasCode.code === errCode)
+                ) {
+                    return true
+                }
+            }
+        }
+    }
+    return false
+}
 
 // This function is meant to be called from a catch statement after trying
 // a prisma command, so it takes unknown as the input
-export const convertPrismaErrorToStoreError = (
-    prismaErr: unknown
-): StoreError => {
+const convertPrismaErrorToStoreError = (prismaErr: unknown): StoreError => {
     // PrismaClientKnownRequestError is for errors that are expected to occur based on
     // making invalid requests of some kind.
     if (prismaErr instanceof PrismaClientKnownRequestError) {
@@ -20,7 +50,14 @@ export const convertPrismaErrorToStoreError = (
             }
         }
 
-        console.log(
+        if (prismaErr.code === 'P2025') {
+            return {
+                code: 'INSERT_ERROR',
+                message: 'insert failed because required record not found',
+            }
+        }
+
+        console.error(
             'ERROR: Unhandled KnownRequestError from prisma: ',
             prismaErr
         )
@@ -38,7 +75,7 @@ export const convertPrismaErrorToStoreError = (
         }
     }
 
-    console.log(
+    console.error(
         "CODING ERROR: we weren't able to decode the error thrown by prisma correctly",
         prismaErr
     )
@@ -47,3 +84,5 @@ export const convertPrismaErrorToStoreError = (
         message: 'A completely unexpected prisma exception has occurred',
     }
 }
+
+export { StoreError, isStoreError, convertPrismaErrorToStoreError }

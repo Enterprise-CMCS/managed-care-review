@@ -1,19 +1,17 @@
 import { GraphQLDate, GraphQLDateTime } from 'graphql-scalars'
-
-import type { Emailer } from '../emailer'
-import type { Store } from '../store'
 import { Resolvers } from '../gen/gqlServer'
-
-import { fetchCurrentUserResolver } from './fetchCurrentUser'
-import { stateUserResolver } from './userResolver'
-import { fetchDraftSubmissionResolver } from './fetchDraftSubmission'
+import type { Store } from '../postgres'
+import type { Emailer } from '../emailer'
 import { createDraftSubmissionResolver } from './createDraftSubmission'
-import { updateDraftSubmissionResolver } from './updateDraftSubmission'
-import { submitDraftSubmissionResolver } from './submitDraftSubmission'
 import { draftSubmissionResolver } from './draftSubmissionResolver'
-import { stateSubmissionResolver } from './stateSubmissionResolver'
+import { fetchCurrentUserResolver } from './fetchCurrentUser'
+import { fetchDraftSubmissionResolver } from './fetchDraftSubmission'
 import { fetchStateSubmissionResolver } from './fetchStateSubmission'
 import { indexSubmissionsResolver } from './indexSubmissions'
+import { stateSubmissionResolver } from './stateSubmissionResolver'
+import { submitDraftSubmissionResolver } from './submitDraftSubmission'
+import { updateDraftSubmissionResolver } from './updateDraftSubmission'
+import { stateUserResolver } from './userResolver'
 
 export function configureResolvers(store: Store, emailer: Emailer): Resolvers {
     const resolvers: Resolvers = {

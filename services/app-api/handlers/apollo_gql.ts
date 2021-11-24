@@ -15,10 +15,9 @@ import {
     userFromLocalAuthProvider,
 } from '../authn'
 import { newLocalEmailer, newSESEmailer } from '../emailer'
-import { NewPrismaClient } from '../lib/prisma'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import { configureResolvers } from '../resolvers'
-import { newDeployedStore, newLocalStore } from '../store'
+import { configurePostgres } from './configuration'
 
 // The Context type passed to all of our GraphQL resolvers
 export interface Context {
@@ -90,6 +89,8 @@ async function initializeGQLHandler(): Promise<Handler> {
     const authMode = process.env.REACT_APP_AUTH_MODE
     assertIsAuthMode(authMode)
 
+    const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET
+    const dbURL = process.env.DATABASE_URL
     const useDynamo = process.env.USE_DYNAMO
     const dynamoConnection = process.env.DYNAMO_CONNECTION
     const defaultRegion = process.env.AWS_DEFAULT_REGION
@@ -119,33 +120,17 @@ async function initializeGQLHandler(): Promise<Handler> {
         )
     // END
 
-    const getDynamoStore = () => {
-        const dbPrefix = stageName + '-'
-
-        if (dynamoConnection === 'USE_AWS') {
-            return newDeployedStore(defaultRegion || 'no region', dbPrefix)
-        } else {
-            return newLocalStore(dynamoConnection || 'no db url')
-        }
+    if (!dbURL) {
+        throw new Error('Init Error: DATABASE_URL is required to run app-api')
     }
 
-    const getPostgresStore = async () => {
-        console.log('Getting Postgres Connection')
-        const prismaResult = await NewPrismaClient()
-
-        if (prismaResult.isErr()) {
-            console.log(
-                'Error: attempting to create prisma client: ',
-                prismaResult.error
-            )
-            throw new Error('Failed to create Prisma Client')
-        }
-
-        return NewPostgresStore(prismaResult.value)
+    const pgResult = await configurePostgres(dbURL, secretsManagerSecret)
+    if (pgResult instanceof Error) {
+        console.log("Init Error: Postgres couldn't be configured")
+        throw pgResult
     }
 
-    const store =
-        useDynamo === 'YES' ? getDynamoStore() : await getPostgresStore()
+    const store = await NewPostgresStore(pgResult)
 
     const emailer =
         emailerMode == 'LOCAL'

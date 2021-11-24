@@ -13,8 +13,6 @@ on:
         required: true
       aws_default_region:
         required: true
-      dynamo_connection:
-        required: true
       iam_path:
         required: true
       full_iam_permissions_boundary_policy:
@@ -58,7 +56,6 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
-          DYNAMO_CONNECTION: ${{ secrets.dynamo_connection }}
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
           IAM_PATH: ${{ secrets.iam_path }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
@@ -103,8 +100,8 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
-          DYNAMO_CONNECTION: ${{ secrets.dynamo_connection }}
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
+          DATABASE_URL: AWS_SM
           IAM_PATH: ${{ secrets.iam_path }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
 
@@ -133,7 +130,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
-          DYNAMO_CONNECTION: ${{ secrets.dynamo_connection }}
+          DATABASE_URL: AWS_SM
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
           IAM_PATH: ${{ secrets.iam_path }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
@@ -160,35 +157,6 @@ jobs:
         run: |
           pushd services/app-api && npx serverless deploy --stage ${{ inputs.stage_name }}
 
-  dynamodb:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v2
-
-      - name: Setup env
-        uses: ./.github/actions/setup_env
-
-      - name: set variable values
-        run: ./.github/build_vars.sh set_values
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
-          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
-          DYNAMO_CONNECTION: ${{ secrets.dynamo_connection }}
-          REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
-          IAM_PATH: ${{ secrets.iam_path }}
-          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
-
-      - name: Install packages
-        working-directory: services/database
-        run: yarn --frozen-lockfile
-
-      - name: deploy dynamodb
-        id: deploy-dynamodb
-        run: |
-          pushd services/database && npx serverless deploy --stage ${{ inputs.stage_name }}
-
   deploy-all:
     runs-on: ubuntu-latest
     needs: [app-api]
@@ -204,7 +172,6 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
-          DYNAMO_CONNECTION: ${{ secrets.dynamo_connection }}
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
           IAM_PATH: ${{ secrets.iam_path }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}

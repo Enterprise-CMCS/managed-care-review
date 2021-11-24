@@ -1,8 +1,7 @@
-import { sharedTestPrismaClient } from '../testHelpers/gqlHelpers'
-import { insertDraftSubmission } from './insertDraftSubmission'
-import { isStoreError } from '../store'
-
 import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
+import { sharedTestPrismaClient } from '../testHelpers/storeHelpers'
+import { insertDraftSubmission } from './insertDraftSubmission'
+import { isStoreError } from './storeError'
 
 describe('insertDraftSubmissionPostgres', () => {
     // TODO this test needs to be improved its not testing anything

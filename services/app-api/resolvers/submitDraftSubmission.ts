@@ -6,7 +6,7 @@ import {
 } from '../../app-web/src/common-code/domain-models'
 import { Emailer } from '../emailer'
 import { MutationResolvers, State } from '../gen/gqlServer'
-import { isStoreError, Store } from '../store/index'
+import { isStoreError, Store } from '../postgres'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = typeof SubmissionErrorCodes[number] // iterable union type
