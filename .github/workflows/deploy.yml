@@ -89,7 +89,6 @@ jobs:
 
   build-prisma-client-lambda-layer:
     name: build - postgres prisma layer
-    needs: [unit-tests]
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -104,9 +103,14 @@ jobs:
           node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
           cache: yarn
 
+      - name: Get yarn cache directory path
+        shell: bash
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
       - name: Install packages
         working-directory: services/app-api
-        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn install --prefer-offline --frozen-lockfile
+        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn install --prefer-offline --frozen-lockfile --cache-folder ${{ steps.yarn-cache-dir-path.outputs.dir }}
 
       # Generate Prisma Client and binary that can run in a lambda environment
       - name: Prepare prisma client
@@ -143,8 +147,8 @@ jobs:
         run: echo ::set-output name=node_version::$(cat .nvmrc)
 
   deploy-branch:
-    needs: [build-prisma-client-lambda-layer, get-branch-name-vars]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@main
+    needs: [build-prisma-client-lambda-layer, get-branch-name-vars, unit-tests]
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@01ce5d1c70f5a154d50ec3f5685c28fd75185dad
     with:
       stage_name: ${{ needs.get-branch-name-vars.outputs.branch-name}}
     secrets:

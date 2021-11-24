@@ -37,6 +37,18 @@ runs:
       id: yarn-install
       run: yarn install --prefer-offline --frozen-lockfile --cache-folder ${{ steps.yarn-cache-dir-path.outputs.dir }}
 
+    - name: Install lerna
+      shell: bash
+      run: yarn global add lerna
+
+    - name: Generate graphql
+      shell: bash
+      run: lerna run gqlgen
+
+    - name: Generate protobuf
+      shell: bash
+      run: lerna run protogen
+
     - name: set path
       shell: bash
       run: |
