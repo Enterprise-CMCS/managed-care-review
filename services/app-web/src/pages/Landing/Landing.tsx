@@ -71,7 +71,7 @@ export const Landing = (): React.ReactElement => {
                             <ul className={styles.detailsList}>
                                 <li>
                                     Each MC-Review submission can contain only
-                                    <strong>one</strong> contract action
+                                    <strong> one</strong> contract action
                                 </li>
                                 <li>
                                     Each contract action can tie to one or more
