@@ -75,6 +75,11 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      # set the branch name to the stage name for the migration
+      - name: set branch_name
+        run: |
+          echo "branch_name=${{ inputs.stage_name }}" >> $GITHUB_ENV
+
       - name: set variable values
         run: ./.github/build_vars.sh set_values
         env:
