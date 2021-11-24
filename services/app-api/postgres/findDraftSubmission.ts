@@ -1,13 +1,14 @@
 import { PrismaClient, StateSubmission } from '@prisma/client'
-
-import { StoreError, isStoreError } from '../store/storeError'
-
 import {
     DraftSubmissionType,
     isDraftSubmission,
 } from '../../app-web/src/common-code/domain-models'
 import { toDomain } from '../../app-web/src/common-code/proto/stateSubmission'
-import { convertPrismaErrorToStoreError } from './storeError'
+import {
+    convertPrismaErrorToStoreError,
+    isStoreError,
+    StoreError,
+} from './storeError'
 
 export async function findUniqueSubmissionWrapper(
     client: PrismaClient,

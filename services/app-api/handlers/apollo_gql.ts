@@ -16,7 +16,6 @@ import {
 } from '../authn'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import { configureResolvers } from '../resolvers'
-import { newDeployedStore, newLocalStore } from '../store'
 import { configurePostgres } from './configuration'
 
 // The Context type passed to all of our GraphQL resolvers
@@ -89,10 +88,6 @@ async function initializeGQLHandler(): Promise<Handler> {
     const authMode = process.env.REACT_APP_AUTH_MODE
     assertIsAuthMode(authMode)
 
-    const useDynamo = process.env.USE_DYNAMO
-    const dynamoConnection = process.env.DYNAMO_CONNECTION
-    const defaultRegion = process.env.AWS_DEFAULT_REGION
-    const stageName = process.env.stage
     const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET
     const dbURL = process.env.DATABASE_URL
 
@@ -100,30 +95,13 @@ async function initializeGQLHandler(): Promise<Handler> {
         throw new Error('Init Error: DATABASE_URL is required to run app-api')
     }
 
-    const getDynamoStore = () => {
-        const dbPrefix = stageName + '-'
-
-        if (dynamoConnection === 'USE_AWS') {
-            return newDeployedStore(defaultRegion || 'no region', dbPrefix)
-        } else {
-            return newLocalStore(dynamoConnection || 'no db url')
-        }
+    const pgResult = await configurePostgres(dbURL, secretsManagerSecret)
+    if (pgResult instanceof Error) {
+        console.log("Init Error: Postgres couldn't be configured")
+        throw pgResult
     }
 
-    const getPostgresStore = async () => {
-        console.log('Getting Postgres Connection')
-
-        const pgResult = await configurePostgres(dbURL, secretsManagerSecret)
-        if (pgResult instanceof Error) {
-            console.log("Init Error: Postgres couldn't be configured")
-            throw pgResult
-        }
-
-        return NewPostgresStore(pgResult)
-    }
-
-    const store =
-        useDynamo === 'YES' ? getDynamoStore() : await getPostgresStore()
+    const store = await NewPostgresStore(pgResult)
 
     // Resolvers are defined and tested in the resolvers package
     const resolvers = configureResolvers(store)

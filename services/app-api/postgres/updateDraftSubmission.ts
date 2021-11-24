@@ -1,7 +1,4 @@
 import { PrismaClient } from '@prisma/client'
-
-import { StoreError, isStoreError } from '../store/storeError'
-
 import {
     DraftSubmissionType,
     isDraftSubmission,
@@ -10,7 +7,11 @@ import {
     toDomain,
     toProtoBuffer,
 } from '../../app-web/src/common-code/proto/stateSubmission'
-import { convertPrismaErrorToStoreError } from './storeError'
+import {
+    convertPrismaErrorToStoreError,
+    isStoreError,
+    StoreError,
+} from './storeError'
 
 export async function updateSubmissionWrapper(
     client: PrismaClient,

@@ -1,15 +1,13 @@
 import { PrismaClient } from '@prisma/client'
-
-import { StoreError, isStoreError } from '../store/storeError'
-
 import {
-    StateSubmissionType,
     isStateSubmission,
+    StateSubmissionType,
 } from '../../app-web/src/common-code/domain-models'
 import {
     toDomain,
     toProtoBuffer,
 } from '../../app-web/src/common-code/proto/stateSubmission'
+import { StoreError, isStoreError } from './storeError'
 import { updateSubmissionWrapper } from './updateDraftSubmission'
 
 export async function updateStateSubmission(

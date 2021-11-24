@@ -1,7 +1,7 @@
-import LabeledProcessRunner from '../runner.js'
 import { requireBinary } from '../deps.js'
+import LabeledProcessRunner from '../runner.js'
 
-// run the graphql compiler with --watch
+// run the proto compiler with --watch
 export async function compileProtoWatch(runner: LabeledProcessRunner) {
     requireBinary(
         ['which', 'entr'],

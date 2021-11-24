@@ -1,14 +1,7 @@
-import { UserInputError, ForbiddenError } from 'apollo-server-lambda'
-
-import {
-    InsertDraftSubmissionArgsType,
-    isStoreError,
-    Store,
-} from '../store/index'
-
+import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { isStateUser } from '../../app-web/src/common-code/domain-models'
-
 import { MutationResolvers, State } from '../gen/gqlServer'
+import { InsertDraftSubmissionArgsType, isStoreError, Store } from '../postgres'
 
 export function createDraftSubmissionResolver(
     store: Store

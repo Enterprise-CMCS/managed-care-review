@@ -6,7 +6,6 @@ stage=${1:-dev}
 
 services=(
   'uploads'
-  'stream-functions'
   'ui'
   'ui-auth'
   'storybook'
