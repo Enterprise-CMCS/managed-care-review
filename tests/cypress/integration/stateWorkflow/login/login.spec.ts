@@ -16,8 +16,5 @@ describe('login', () => {
         cy.findByRole('heading', { name: 'Minnesota Dashboard' }).should(
             'exist'
         )
-        cy.findAllByRole('tab', { name: 'MSHO' }).should('exist')
-        cy.findAllByRole('tab', { name: 'PMAP' }).should('exist')
-        cy.findAllByRole('tab', { name: 'SNBC' }).should('exist')
     })
 })

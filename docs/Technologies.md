@@ -11,16 +11,6 @@ An ORM for Typescript + Postgres. We define the tables and relationships we want
 -   https://www.prisma.io/docs/guides/database/developing-with-prisma-migrate
 -   https://www.prisma.io/docs/concepts/components/prisma-client
 
-## DynamoDB
-
-An AWS native datastore.
-
-A great conceptual intro into how tables/indicies work:
-
--   https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.CoreComponents.html
--   https://www.dynamodbguide.com/what-is-dynamo-db
--   https://www.youtube.com/watch?v=HaEPXoXVf2k&t=57s
-
 ## React Testing Library
 
 Testing library is a javascript test framework for DOM based tests. It lets us write tests where we render into the DOM, then find and interact with elements there like a user would. The library isn't huge so the docs are very accessible.

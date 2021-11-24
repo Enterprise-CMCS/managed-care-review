@@ -1,30 +1,26 @@
 import { spawn } from 'child_process'
 import yargs from 'yargs'
+import { parseRunFlags } from './flags.js'
+import {
+    compileGraphQLTypesOnce,
+    compileProto,
+    runAPILocally,
+    runPostgresLocally,
+    runS3Locally,
+    runStorybookLocally,
+    runWebAgainstAWS,
+    runWebAgainstDocker,
+    runWebLocally,
+} from './local/index.js'
 import { commandMustSucceedSync } from './localProcess.js'
 import LabeledProcessRunner from './runner.js'
-
-import { parseRunFlags } from './flags.js'
-
-import {
-    runDBLocally,
-    runPostgresLocally,
-    runAPILocally,
-    runWebLocally,
-    runStorybookLocally,
-    runS3Locally,
-    runWebAgainstAWS,
-    compileGraphQLTypesOnce,
-    runWebAgainstDocker,
-    compileProto,
-} from './local/index.js'
-
 import {
     runAPITests,
     runAPITestsWatch,
-    runWebTests,
-    runWebTestsWatch,
     runBrowserTests,
     runBrowserTestsInDocker,
+    runWebTests,
+    runWebTestsWatch,
 } from './test/index.js'
 
 async function runAllClean() {
@@ -75,7 +71,6 @@ type runLocalFlags = {
     runAPI: boolean
     runWeb: boolean
     runPostgres: boolean
-    runDB: boolean
     runS3: boolean
     runStoryBook: boolean
 }
@@ -83,13 +78,11 @@ async function runAllLocally({
     runAPI,
     runWeb,
     runPostgres,
-    runDB,
     runS3,
     runStoryBook,
 }: runLocalFlags) {
     const runner = new LabeledProcessRunner()
 
-    runDB && runDBLocally(runner)
     runPostgres && runPostgresLocally(runner)
     runS3 && runS3Locally(runner)
     runAPI && runAPILocally(runner)
@@ -100,17 +93,11 @@ async function runAllLocally({
 async function runAllTests({
     runUnit,
     runOnline,
-    runDBInBackground,
 }: {
     runUnit: boolean
     runOnline: boolean
-    runDBInBackground: boolean
 }) {
     const runner = new LabeledProcessRunner()
-
-    if (runDBInBackground) {
-        runDBLocally(runner)
-    }
 
     try {
         if (runUnit) {
@@ -124,9 +111,6 @@ async function runAllTests({
         console.log('Testing Error', e)
         process.exit(1)
     }
-    // if the db is running in the background it prevents the process from exiting
-    // one day we could have a cancellation to call, but this works just as well
-    process.exit(0)
 }
 
 // runUnitTests runs the api and web tests once, including coverage.
@@ -208,10 +192,6 @@ function main() {
                                     type: 'boolean',
                                     describe: 'run s3 locally',
                                 })
-                                .option('db', {
-                                    type: 'boolean',
-                                    describe: 'run database locally',
-                                })
                                 .option('postgres', {
                                     type: 'boolean',
                                     describe: 'run postgres locally',
@@ -223,7 +203,7 @@ function main() {
                                         'run all services except storybook',
                                     ],
                                     [
-                                        '$0 local --api --db',
+                                        '$0 local --api --postgres',
                                         'run app-api and the databse',
                                     ],
                                 ])
@@ -233,7 +213,6 @@ function main() {
                                 runAPI: args.api,
                                 runWeb: args.web,
                                 runPostgres: args.postgres,
-                                runDB: args.db,
                                 runS3: args.s3,
                                 runStoryBook: args.storybook,
                             }
@@ -313,11 +292,6 @@ function main() {
 
                         runS3Locally(runner)
                     })
-                    .command('db', 'run the databse locally.', () => {
-                        const runner = new LabeledProcessRunner()
-
-                        runDBLocally(runner)
-                    })
                     .command('postgres', 'run postgres locally.', () => {
                         const runner = new LabeledProcessRunner()
 
@@ -335,12 +309,6 @@ function main() {
             'run tests. If no flags are passed runs both --unit and --online',
             (yargs) => {
                 return yargs
-                    .option('run-db', {
-                        type: 'boolean',
-                        default: false,
-                        describe:
-                            'runs the ./dev local --db command before starting testing',
-                    })
                     .command(
                         ['check', '*'], // adding '*' here makes this subcommand the default command
                         'run all tests once, exiting non-zero on failure and generating coverage data. These are all the tests run by CI',
@@ -374,7 +342,6 @@ function main() {
 
                             const testingFlags = {
                                 ...runFlags,
-                                runDBInBackground: args['run-db'],
                             }
 
                             runAllTests(testingFlags)
@@ -407,7 +374,7 @@ function main() {
                                     return intOrString.toString()
                                 }
                             )
-                            runAPITestsWatch(unparsedJestArgs, args['run-db'])
+                            runAPITestsWatch(unparsedJestArgs)
                         }
                     )
                     .command(

@@ -1,16 +1,16 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
-import { isStoreError, Store } from '../store/index'
-import { MutationResolvers, State } from '../gen/gqlServer'
 import {
     DraftSubmissionType,
-    StateSubmissionType,
     hasValidContract,
     hasValidDocuments,
     hasValidRates,
-    isStateSubmission,
     isContractAndRates,
+    isStateSubmission,
     isStateUser,
+    StateSubmissionType,
 } from '../../app-web/src/common-code/domain-models'
+import { MutationResolvers, State } from '../gen/gqlServer'
+import { isStoreError, Store } from '../postgres'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = typeof SubmissionErrorCodes[number] // iterable union type
