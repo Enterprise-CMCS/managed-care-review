@@ -115,11 +115,11 @@ async function initializeGQLHandler(): Promise<Handler> {
             'Configuration Error: stage is not valid. Current value: ' +
                 stageName
         )
-    // END
 
     if (!dbURL) {
         throw new Error('Init Error: DATABASE_URL is required to run app-api')
     }
+    // END
 
     const pgResult = await configurePostgres(dbURL, secretsManagerSecret)
     if (pgResult instanceof Error) {
@@ -127,7 +127,7 @@ async function initializeGQLHandler(): Promise<Handler> {
         throw pgResult
     }
 
-    const store = await NewPostgresStore(pgResult)
+    const store = NewPostgresStore(pgResult)
 
     const emailer =
         emailerMode == 'LOCAL'
