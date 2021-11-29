@@ -17,6 +17,12 @@ export function createDraftSubmissionResolver(
         const program = store.findProgram(stateFromCurrentUser, input.programID)
 
         if (program === undefined) {
+            console.error({
+                message: 'createDraftSubmission failed',
+                operation: 'createDraftSubmission',
+                status: 'ERROR',
+                error: `The program id ${input.programID} does not exist in state ${stateFromCurrentUser}`,
+            })
             throw new UserInputError(
                 `The program id ${input.programID} does not exist in state ${stateFromCurrentUser}`,
                 {
@@ -33,22 +39,29 @@ export function createDraftSubmissionResolver(
                 input.submissionType as InsertDraftSubmissionArgsType['submissionType'],
         }
 
-        try {
-            const draftSubResult = await store.insertDraftSubmission(
-                dbDraftSubmission
+        const draftSubResult = await store.insertDraftSubmission(
+            dbDraftSubmission
+        )
+        if (isStoreError(draftSubResult)) {
+            console.error({
+                message: 'createDraftSubmission failed',
+                operation: 'createDraftSubmission',
+                status: 'ERROR',
+                error: draftSubResult,
+            })
+            throw new Error(
+                `Issue creating a draft submission of type ${draftSubResult.code}. Message: ${draftSubResult.message}`
             )
-            if (isStoreError(draftSubResult)) {
-                throw new Error(
-                    `Issue creating a draft submission of type ${draftSubResult.code}. Message: ${draftSubResult.message}`
-                )
-            }
+        }
 
-            return {
-                draftSubmission: draftSubResult,
-            }
-        } catch (createErr) {
-            console.log('Error creating a draft submission:', createErr)
-            throw new Error(createErr)
+        console.info({
+            message: 'createDraftSubmission succeeded',
+            operation: 'createDraftSubmission',
+            status: 'SUCCESS',
+        })
+
+        return {
+            draftSubmission: draftSubResult,
         }
     }
 }

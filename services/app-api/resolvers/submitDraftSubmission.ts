@@ -1,8 +1,13 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import {
-    DraftSubmissionType, hasValidContract,
+    DraftSubmissionType,
+    hasValidContract,
     hasValidDocuments,
-    hasValidRates, isContractAndRates, isStateSubmission, isStateUser, StateSubmissionType
+    hasValidRates,
+    isContractAndRates,
+    isStateSubmission,
+    isStateUser,
+    StateSubmissionType,
 } from '../../app-web/src/common-code/domain-models'
 import { Emailer } from '../emailer'
 import { MutationResolvers, State } from '../gen/gqlServer'
@@ -87,6 +92,12 @@ export function submitDraftSubmissionResolver(
     return async (_parent, { input }, context) => {
         // This resolver is only callable by state users
         if (!isStateUser(context.user)) {
+            console.error({
+                message: 'submitDraftSubmission failed',
+                operation: 'submitDraftSubmission',
+                status: 'FAILURE',
+                error: 'user not authorized to fetch state data',
+            })
             throw new ForbiddenError('user not authorized to fetch state data')
         }
 
@@ -94,12 +105,24 @@ export function submitDraftSubmissionResolver(
         const result = await store.findDraftSubmission(input.submissionID)
 
         if (isStoreError(result)) {
+            console.error({
+                message: 'submitDraftSubmission failed',
+                operation: 'submitDraftSubmission',
+                status: 'FAILURE',
+                error: result,
+            })
             throw new Error(
                 `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
             )
         }
 
         if (result === undefined) {
+            console.error({
+                message: 'submitDraftSubmission failed',
+                operation: 'submitDraftSubmission',
+                status: 'FAILURE',
+                error: `A draft must exist to be submitted: ${input.submissionID}`,
+            })
             throw new UserInputError(
                 `A draft must exist to be submitted: ${input.submissionID}`,
                 {
@@ -113,6 +136,12 @@ export function submitDraftSubmissionResolver(
         // Authorization
         const stateFromCurrentUser: State['code'] = context.user.state_code
         if (draft.stateCode !== stateFromCurrentUser) {
+            console.error({
+                message: 'submitDraftSubmission failed',
+                operation: 'submitDraftSubmission',
+                status: 'FAILURE',
+                error: 'user not authorized to fetch data from a different state',
+            })
             throw new ForbiddenError(
                 'user not authorized to fetch data from a different state'
             )
@@ -122,6 +151,12 @@ export function submitDraftSubmissionResolver(
         const submissionResult = submit(draft)
 
         if (isSubmissionError(submissionResult)) {
+            console.error({
+                message: 'submitDraftSubmission failed',
+                operation: 'submitDraftSubmission',
+                status: 'FAILURE',
+                error: submissionResult,
+            })
             throw new UserInputError(
                 'Incomplete submission cannot be submitted',
                 {
@@ -138,6 +173,12 @@ export function submitDraftSubmissionResolver(
             console.log(
                 `Issue updating a state submission of type ${updateResult.code}. Message: ${updateResult.message}`
             )
+            console.error({
+                message: 'submitDraftSubmission failed',
+                operation: 'submitDraftSubmission',
+                status: 'FAILURE',
+                error: updateResult,
+            })
             throw new Error(
                 `Issue updating a state submission of type ${updateResult.code}. Message: ${updateResult.message}`
             )
@@ -150,9 +191,21 @@ export function submitDraftSubmissionResolver(
         const emailResult = await emailer.sendEmail(emailData)
 
         if (emailResult instanceof Error) {
-            console.log("ERROR: Failed to send email to CMS:", emailResult)
+            console.log('ERROR: Failed to send email to CMS:', emailResult)
+            console.error({
+                message: 'submitDraftSubmission failed',
+                operation: 'submitDraftSubmission',
+                status: 'FAILURE',
+                error: emailResult,
+            })
             throw emailResult
         }
+
+        console.info({
+            message: 'submitDraftSubmission succeeded',
+            operation: 'submitDraftSubmission',
+            status: 'SUCCESS',
+        })
 
         return { submission: updatedSubmission }
     }

@@ -1,4 +1,4 @@
-import { Handler } from 'aws-lambda';
+import { Handler } from 'aws-lambda'
 import { sendSESEmail } from '../emailer'
 
 export const main: Handler = async (event) => {
@@ -15,8 +15,17 @@ export const main: Handler = async (event) => {
             },
         }
     try {
-        return await sendSESEmail(event.body).promise()
+        console.log('INFO: Sending SES Email: ', event.body)
+        const sesResult = await sendSESEmail(event.body).promise()
+        console.log('Sent email: ', sesResult)
+        console.info({
+            message: 'email_submit succeeded',
+            operation: 'email_submit',
+            status: 'SUCCESS',
+        })
+        return sesResult
     } catch (err) {
+        console.log('ERROR: Email send failed: ', err)
         return {
             StatusCode: 400,
             body: JSON.stringify({
@@ -30,7 +39,6 @@ export const main: Handler = async (event) => {
         }
     }
 }
-
 
 /* Sample event for use testing in lambda console
   {"body": 

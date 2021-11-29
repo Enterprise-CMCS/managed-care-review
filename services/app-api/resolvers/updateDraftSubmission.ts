@@ -98,18 +98,36 @@ export function updateDraftSubmissionResolver(
     return async (_parent, { input }, context) => {
         // This resolver is only callable by state users
         if (!isStateUser(context.user)) {
+            console.error({
+                message: 'updateDraftSubmission failed',
+                operation: 'updateDraftSubmission',
+                status: 'FAILURE',
+                error: 'user not authorized to fetch state data',
+            })
             throw new ForbiddenError('user not authorized to modify state data')
         }
 
         // fetch the current submission, put the updated stuff on it?
         const result = await store.findDraftSubmission(input.submissionID)
         if (isStoreError(result)) {
+            console.error({
+                message: 'updateDraftSubmission failed',
+                operation: 'updateDraftSubmission',
+                status: 'FAILURE',
+                error: result,
+            })
             throw new Error(
                 `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
             )
         }
 
         if (result === undefined) {
+            console.error({
+                message: 'updateDraftSubmission failed',
+                operation: 'updateDraftSubmission',
+                status: 'FAILURE',
+                error: `No submission found to update with that ID: ${input.submissionID}`,
+            })
             throw new UserInputError(
                 `No submission found to update with that ID: ${input.submissionID}`,
                 {
@@ -122,6 +140,12 @@ export function updateDraftSubmissionResolver(
         // Authorize the update
         const stateFromCurrentUser: State['code'] = context.user.state_code
         if (draft.stateCode !== stateFromCurrentUser) {
+            console.error({
+                message: 'updateDraftSubmission failed',
+                operation: 'updateDraftSubmission',
+                status: 'FAILURE',
+                error: 'user not authorized to fetch data from a different state',
+            })
             throw new ForbiddenError(
                 'user not authorized to fetch data from a different state'
             )
@@ -134,6 +158,12 @@ export function updateDraftSubmissionResolver(
         )
 
         if (program === undefined) {
+            console.error({
+                message: 'updateDraftSubmission failed',
+                operation: 'updateDraftSubmission',
+                status: 'FAILURE',
+                error: `The program id ${input.draftSubmissionUpdates.programID} does not exist in state ${stateFromCurrentUser}`,
+            })
             throw new UserInputError(
                 `The program id ${input.draftSubmissionUpdates.programID} does not exist in state ${stateFromCurrentUser}`,
                 {
@@ -147,15 +177,23 @@ export function updateDraftSubmissionResolver(
 
         const updateResult = await store.updateDraftSubmission(draft)
         if (isStoreError(updateResult)) {
-            console.log(
-                `Issue updating a draft submission of type ${updateResult.code}. Message: ${updateResult.message}`
-            )
+            console.error({
+                message: 'updateDraftSubmission failed',
+                operation: 'updateDraftSubmission',
+                status: 'FAILURE',
+                error: `Issue updating a draft submission of type ${updateResult.code}. Message: ${updateResult.message}`,
+            })
             throw new Error(
                 `Issue updating a draft submission of type ${updateResult.code}. Message: ${updateResult.message}`
             )
         }
         const updatedDraft: DraftSubmissionType = updateResult
 
+        console.info({
+            message: 'updateDraftSubmission failed',
+            operation: 'updateDraftSubmission',
+            status: 'SUCCESS',
+        })
         return {
             draftSubmission: updatedDraft,
         }

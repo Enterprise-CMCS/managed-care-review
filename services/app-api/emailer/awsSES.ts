@@ -25,12 +25,13 @@ function getSESEmailParams(email: EmailData): SES.SendEmailRequest {
         },
         Message: {
             Body: {
-                Text: {
-                    Data: bodyText,
-                    Charset: bodyCharset || 'UTF-8',
-                },
+                // Text: {
+                //     Data: bodyText,
+                //     Charset: bodyCharset || 'UTF-8',
+                // },
                 Html: {
                     Data: bodyHTML || bodyText,
+                    Charset: 'UTF-8',
                 },
             },
             Subject: {
