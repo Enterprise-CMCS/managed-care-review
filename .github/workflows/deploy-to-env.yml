@@ -60,10 +60,6 @@ jobs:
           IAM_PATH: ${{ secrets.iam_path }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
 
-      - name: Install packages
-        working-directory: services/postgres
-        run: yarn --frozen-lockfile
-
       - name: deploy postgres
         id: deploy-postgres
         run: |
@@ -76,23 +72,13 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v2
 
-      - name: read .nvmrc
-        id: node_version
-        run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
+      - name: Setup env
+        uses: ./.github/actions/setup_env
 
-      - uses: actions/setup-node@v2.4.1
-        with:
-          node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
-
+      # set the branch name to the stage name for the migration
       - name: set branch_name
         run: |
           echo "branch_name=${{ inputs.stage_name }}" >> $GITHUB_ENV
-
-      - name: set app version
-        run: echo "APP_VERSION=$(scripts/app_version.sh)" >> $GITHUB_ENV
-
-      - name: set branch specific variable names
-        run: ./.github/build_vars.sh set_names
 
       - name: set variable values
         run: ./.github/build_vars.sh set_values
@@ -104,10 +90,6 @@ jobs:
           DATABASE_URL: AWS_SM
           IAM_PATH: ${{ secrets.iam_path }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
-
-      - name: Install packages
-        working-directory: services/app-api
-        run: yarn --frozen-lockfile
 
       - name: run migrations
         id: run-migrations
@@ -134,9 +116,6 @@ jobs:
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
           IAM_PATH: ${{ secrets.iam_path }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
-
-      - name: Generate graphql
-        run: ./dev generate
 
       - uses: actions/download-artifact@v2
         with:
@@ -183,9 +162,6 @@ jobs:
           CLOUDFRONT_STORYBOOK_DOMAIN_NAME: ${{ secrets.cloudfront_storybook_domain_name }}
           OKTA_METADATA_URL: ${{ secrets.okta_metadata_url }}
           TEST_USERS_PASS: ${{ secrets.test_users_pass }}
-
-      - name: Generate graphql
-        run: ./dev generate
 
       - name: deploy
         id: deploy
