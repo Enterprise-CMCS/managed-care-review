@@ -8488,9 +8488,9 @@ aws-amplify@^4.3.4:
     "@aws-amplify/xr" "3.0.24"
 
 aws-sdk@^2.1018.0, aws-sdk@^2.1030.0, aws-sdk@^2.224.1, aws-sdk@^2.346.0, aws-sdk@^2.834.0, aws-sdk@^2.916.0, aws-sdk@^2.991.0:
-  version "2.1033.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1033.0.tgz#8bd0084142b15cc2ca427483c36c86b27abc046b"
-  integrity sha512-cgcjiuR82bhfBWTffqt6e9+Cn/UgeC6QPQTrlJy3GxwPxChthyrt/h5pekj2l4PLFvETsG10Y6CqQysJEMsncw==
+  version "2.1037.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1037.0.tgz#f397aea0aa2b7a862be89240e68c8138c959fb3c"
+  integrity sha512-z1IfFFvKg1ZKikyExhLeiax0jIe/YwFrBjIUhcPjBfh+c4otvuqp9RBp2iyXt3GamhEkKoPyvd6a5K7IGsTBMw==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -8528,6 +8528,13 @@ axios@0.21.4, axios@^0.21.1, axios@^0.21.2:
   integrity sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==
   dependencies:
     follow-redirects "^1.14.0"
+
+axios@^0.24.0:
+  version "0.24.0"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-0.24.0.tgz#804e6fa1e4b9c5288501dd9dff56a7a0940d20d6"
+  integrity sha512-Q6cWsys88HoPgAaFAVUb0WpPk0O8iTeisR9IMqy9G8AbO4NlpVknrnQS03zzF9PGAWgO3cgletO3VjV/P7VztA==
+  dependencies:
+    follow-redirects "^1.14.4"
 
 axobject-query@^2.2.0:
   version "2.2.0"
@@ -13274,7 +13281,7 @@ focus-trap@^6.7.1:
   dependencies:
     tabbable "^5.2.1"
 
-follow-redirects@^1.0.0, follow-redirects@^1.14.0:
+follow-redirects@^1.0.0, follow-redirects@^1.14.0, follow-redirects@^1.14.4:
   version "1.14.5"
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.14.5.tgz#f09a5848981d3c772b5392309778523f8d85c381"
   integrity sha512-wtphSXy7d4/OR+MvIFbCVBDzZ5520qV8XfPklSN5QtxuMUJZ+b0Wnst1e1lCDocfzuCkHqj8k0FpZqO+UIaKNA==
