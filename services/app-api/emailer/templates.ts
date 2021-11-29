@@ -5,7 +5,6 @@ import {
 } from '../../app-web/src/common-code/domain-models'
 import { EmailData, EmailConfiguration } from './'
 
-// TODO: move to common-code - lang records for relevant enums - this should match code in app-web constants/submission.ts (should this be moved to common-code?)
 const SubmissionTypeRecord: Record<SubmissionType, string> = {
     CONTRACT_ONLY: 'Contract action only',
     CONTRACT_AND_RATES: 'Contract action and rate certification',

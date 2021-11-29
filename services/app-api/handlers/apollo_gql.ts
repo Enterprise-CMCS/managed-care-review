@@ -94,8 +94,7 @@ async function initializeGQLHandler(): Promise<Handler> {
     const dbURL = process.env.DATABASE_URL
     const stageName = process.env.stage
     const applicationEndpoint = process.env.APPLICATION_ENDPOINT
-    const emailSource =
-        process.env.SES_SOURCE_EMAIL_ADDRESS || 'macrael@truss.works'
+    const emailSource = process.env.SES_SOURCE_EMAIL_ADDRESS
     const emailerMode = process.env.EMAILER_MODE
 
     // Print out all the variables we've been configured with. Leave sensitive ones out, please.
@@ -115,17 +114,16 @@ async function initializeGQLHandler(): Promise<Handler> {
                 emailerMode
         )
 
-    if (applicationEndpoint === undefined)
+    if (emailSource === undefined)
         throw new Error(
-            'Configuration Error: APPLICATION_ENDPOINT is not valid. Current value: ' +
-                applicationEndpoint
+            'Configuration Error: SES_SOURCE_EMAILADDRESS is required'
         )
 
+    if (applicationEndpoint === undefined)
+        throw new Error('Configuration Error: APPLICATION_ENDPOINT is required')
+
     if (stageName === undefined)
-        throw new Error(
-            'Configuration Error: stage is not valid. Current value: ' +
-                stageName
-        )
+        throw new Error('Configuration Error: stage is required')
 
     if (!dbURL) {
         throw new Error('Init Error: DATABASE_URL is required to run app-api')

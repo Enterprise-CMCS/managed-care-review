@@ -1,10 +1,6 @@
 import { Lambda } from 'aws-sdk'
 import { StateSubmissionType } from '../../app-web/src/common-code/domain-models'
-import {
-    getSESEmailParams,
-    newSubmissionCMSEmailTemplate,
-    sendSESEmail,
-} from './'
+import { getSESEmailParams, newSubmissionCMSEmailTemplate } from './'
 
 type EmailConfiguration = {
     stage: string
@@ -43,11 +39,8 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
             }
 
             try {
-                // await lambda.invoke(lambdaParams).promise()
-                const sesResult = await sendSESEmail(
-                    emailRequestParams
-                ).promise()
-                console.log('SES email send faked!', sesResult)
+                const sesResult = await lambda.invoke(lambdaParams).promise()
+                console.log('SES email invoked!', sesResult)
                 return
             } catch (err) {
                 return new Error('SES email send failed. ' + err)

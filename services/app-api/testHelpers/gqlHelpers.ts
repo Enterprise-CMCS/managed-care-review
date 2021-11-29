@@ -7,12 +7,18 @@ import FETCH_DRAFT_SUBMISSION from '../../app-graphql/src/queries/fetchDraftSubm
 import FETCH_STATE_SUBMISSION from '../../app-graphql/src/queries/fetchStateSubmission.graphql'
 import typeDefs from '../../app-graphql/src/schema.graphql'
 import { StateSubmissionType } from '../../app-web/src/common-code/domain-models'
-import { EmailData, Emailer, newSubmissionCMSEmailTemplate } from '../emailer'
+import {
+    EmailData,
+    Emailer,
+    newLocalEmailer,
+    newSubmissionCMSEmailTemplate,
+} from '../emailer'
 import {
     CreateDraftSubmissionInput,
     DraftSubmission,
     DraftSubmissionUpdates,
-    StateSubmission, UpdateDraftSubmissionInput
+    StateSubmission,
+    UpdateDraftSubmissionInput,
 } from '../gen/gqlServer'
 import { Context } from '../handlers/apollo_gql'
 import { NewPostgresStore } from '../postgres'
@@ -30,10 +36,10 @@ const defaultContext = (): Context => {
     }
 }
 
-const constructTestPostgresServer = async (
-    opts?: { context?: Context, emailer?: Emailer }
-): Promise<ApolloServer> => {
-
+const constructTestPostgresServer = async (opts?: {
+    context?: Context
+    emailer?: Emailer
+}): Promise<ApolloServer> => {
     // set defaults
     const context = opts?.context || defaultContext()
     const emailer = opts?.emailer || constructTestEmailer()
@@ -52,19 +58,10 @@ const constructTestPostgresServer = async (
 const constructTestEmailer = (): Emailer => {
     const config = {
         emailSource: 'local@example.com',
-        stage: 'local',
-        baseUrl: 'http://localhost',
+        stage: 'localtest',
+        baseUrl: 'http://localtest',
     }
-    return {
-        sendEmail: async (emailData: EmailData): Promise<void | Error> => {
-            console.log('Mock email locally')
-            // TODO: add a visual frame to the email data
-            console.log('Email content' + emailData)
-        },
-        generateCMSEmail: (submission: StateSubmissionType): EmailData => {
-            return newSubmissionCMSEmailTemplate(submission, config)
-        },
-    }
+    return newLocalEmailer(config)
 }
 
 const createTestDraftSubmission = async (
