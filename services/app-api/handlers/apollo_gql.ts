@@ -15,7 +15,6 @@ import {
     userFromLocalAuthProvider,
 } from '../authn'
 import { newLocalEmailer, newSESEmailer } from '../emailer'
-import { logError } from '../logger'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import { configureResolvers } from '../resolvers'
 import { configurePostgres } from './configuration'

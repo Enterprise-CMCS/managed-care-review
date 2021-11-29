@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client'
 import { ApolloServer } from 'apollo-server-lambda'
 import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
 import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitDraftSubmission.graphql'
@@ -6,13 +5,7 @@ import UPDATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/updateDraft
 import FETCH_DRAFT_SUBMISSION from '../../app-graphql/src/queries/fetchDraftSubmission.graphql'
 import FETCH_STATE_SUBMISSION from '../../app-graphql/src/queries/fetchStateSubmission.graphql'
 import typeDefs from '../../app-graphql/src/schema.graphql'
-import { StateSubmissionType } from '../../app-web/src/common-code/domain-models'
-import {
-    EmailData,
-    Emailer,
-    newLocalEmailer,
-    newSubmissionCMSEmailTemplate,
-} from '../emailer'
+import { Emailer, newLocalEmailer } from '../emailer'
 import {
     CreateDraftSubmissionInput,
     DraftSubmission,
