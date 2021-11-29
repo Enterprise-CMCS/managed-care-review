@@ -15,6 +15,7 @@ import {
     userFromLocalAuthProvider,
 } from '../authn'
 import { newLocalEmailer, newSESEmailer } from '../emailer'
+import { logError } from '../logger'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import { configureResolvers } from '../resolvers'
 import { configurePostgres } from './configuration'
@@ -46,7 +47,7 @@ function contextForRequestForFetcher(
                     )
                 }
             } catch (err) {
-                console.log('Error attempting to fetch user: ', err)
+                console.error('Error attempting to fetch user: ', err)
                 throw new Error('Log: placing user in gql context failed')
             }
         } else {
@@ -64,7 +65,7 @@ function localAuthMiddleware(
             event.requestContext.identity.cognitoAuthenticationProvider
 
         if (userHeader === 'NO_USER') {
-            console.log('NO_USER info set, returning 403')
+            console.info('NO_USER info set, returning 403')
             return Promise.resolve({
                 statusCode: 403,
                 body: '{ "error": "No User Sent in cognitoAuthenticationProvider header"}\n',
@@ -93,11 +94,12 @@ async function initializeGQLHandler(): Promise<Handler> {
     const dbURL = process.env.DATABASE_URL
     const stageName = process.env.stage
     const applicationEndpoint = process.env.APPLICATION_ENDPOINT
-    const emailSource = 'macrael@truss.works'
+    const emailSource =
+        process.env.SES_SOURCE_EMAIL_ADDRESS || 'macrael@truss.works'
     const emailerMode = process.env.EMAILER_MODE
 
     // Print out all the variables we've been configured with. Leave sensitive ones out, please.
-    console.log('Running With Config: ', {
+    console.info('Running With Config: ', {
         authMode,
         stageName,
         dbURL,
@@ -132,7 +134,7 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     const pgResult = await configurePostgres(dbURL, secretsManagerSecret)
     if (pgResult instanceof Error) {
-        console.log("Init Error: Postgres couldn't be configured")
+        console.error("Init Error: Postgres couldn't be configured")
         throw pgResult
     }
 
@@ -187,7 +189,6 @@ const handlerPromise = initializeGQLHandler()
 const gqlHandler: Handler = async (event, context, completion) => {
     // Once initialized, future awaits will return immediately
     const initializedHandler = await handlerPromise
-    console.log('initalizedHandler has awaited')
 
     return await initializedHandler(event, context, completion)
 }

@@ -1,11 +1,8 @@
 import { QueryResolvers } from '../gen/gqlServer'
+import { logSuccess } from '../logger'
 
 export function fetchCurrentUserResolver(): QueryResolvers['fetchCurrentUser'] {
-    console.info({
-        message: 'fetchCurrentUser succeeded',
-        operation: 'fetchCurrentUser',
-        status: 'SUCCESS',
-    })
+    logSuccess('fetchCurrentUser')
     return async (_parent, _args, context) => {
         return context.user
     }

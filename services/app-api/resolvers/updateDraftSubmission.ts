@@ -8,6 +8,7 @@ import {
     MutationResolvers,
     State,
 } from '../gen/gqlServer'
+import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
 
 // This MUTATES the passed in draft, overwriting all the current fields with the updated fields
@@ -98,54 +99,37 @@ export function updateDraftSubmissionResolver(
     return async (_parent, { input }, context) => {
         // This resolver is only callable by state users
         if (!isStateUser(context.user)) {
-            console.error({
-                message: 'updateDraftSubmission failed',
-                operation: 'updateDraftSubmission',
-                status: 'FAILURE',
-                error: 'user not authorized to fetch state data',
-            })
+            logError(
+                'updateDraftSubmission',
+                'user not authorized to modify state data'
+            )
             throw new ForbiddenError('user not authorized to modify state data')
         }
 
         // fetch the current submission, put the updated stuff on it?
         const result = await store.findDraftSubmission(input.submissionID)
         if (isStoreError(result)) {
-            console.error({
-                message: 'updateDraftSubmission failed',
-                operation: 'updateDraftSubmission',
-                status: 'FAILURE',
-                error: result,
-            })
-            throw new Error(
-                `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
-            )
+            const errMessage = `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
+            logError('updateDraftSubmission', errMessage)
+            throw new Error(errMessage)
         }
 
         if (result === undefined) {
-            console.error({
-                message: 'updateDraftSubmission failed',
-                operation: 'updateDraftSubmission',
-                status: 'FAILURE',
-                error: `No submission found to update with that ID: ${input.submissionID}`,
+            const errMessage = `No submission found to update with that ID: ${input.submissionID}`
+            logError('updateDraftSubmission', errMessage)
+            throw new UserInputError(errMessage, {
+                argumentName: 'submissionID',
             })
-            throw new UserInputError(
-                `No submission found to update with that ID: ${input.submissionID}`,
-                {
-                    argumentName: 'submissionID',
-                }
-            )
         }
         const draft: DraftSubmissionType = result
 
         // Authorize the update
         const stateFromCurrentUser: State['code'] = context.user.state_code
         if (draft.stateCode !== stateFromCurrentUser) {
-            console.error({
-                message: 'updateDraftSubmission failed',
-                operation: 'updateDraftSubmission',
-                status: 'FAILURE',
-                error: 'user not authorized to fetch data from a different state',
-            })
+            logError(
+                'updateDraftSubmission',
+                'user not authorized to fetch data from a different state'
+            )
             throw new ForbiddenError(
                 'user not authorized to fetch data from a different state'
             )
@@ -158,18 +142,11 @@ export function updateDraftSubmissionResolver(
         )
 
         if (program === undefined) {
-            console.error({
-                message: 'updateDraftSubmission failed',
-                operation: 'updateDraftSubmission',
-                status: 'FAILURE',
-                error: `The program id ${input.draftSubmissionUpdates.programID} does not exist in state ${stateFromCurrentUser}`,
+            const errMessage = `The program id ${input.draftSubmissionUpdates.programID} does not exist in state ${stateFromCurrentUser}`
+            logError('updateDraftSubmission', errMessage)
+            throw new UserInputError(errMessage, {
+                argumentName: 'programID',
             })
-            throw new UserInputError(
-                `The program id ${input.draftSubmissionUpdates.programID} does not exist in state ${stateFromCurrentUser}`,
-                {
-                    argumentName: 'programID',
-                }
-            )
         }
 
         // apply the updates to the draft
@@ -177,23 +154,13 @@ export function updateDraftSubmissionResolver(
 
         const updateResult = await store.updateDraftSubmission(draft)
         if (isStoreError(updateResult)) {
-            console.error({
-                message: 'updateDraftSubmission failed',
-                operation: 'updateDraftSubmission',
-                status: 'FAILURE',
-                error: `Issue updating a draft submission of type ${updateResult.code}. Message: ${updateResult.message}`,
-            })
-            throw new Error(
-                `Issue updating a draft submission of type ${updateResult.code}. Message: ${updateResult.message}`
-            )
+            const errMessage = `Issue updating a draft submission of type ${updateResult.code}. Message: ${updateResult.message}`
+            logError('updateDraftSubmission', errMessage)
+            throw new Error(errMessage)
         }
         const updatedDraft: DraftSubmissionType = updateResult
 
-        console.info({
-            message: 'updateDraftSubmission failed',
-            operation: 'updateDraftSubmission',
-            status: 'SUCCESS',
-        })
+        logSuccess('updateDraftSubmission')
         return {
             draftSubmission: updatedDraft,
         }
