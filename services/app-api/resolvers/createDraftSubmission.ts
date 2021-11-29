@@ -1,6 +1,7 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { isStateUser } from '../../app-web/src/common-code/domain-models'
 import { MutationResolvers, State } from '../gen/gqlServer'
+import { logError, logSuccess } from '../logger'
 import { InsertDraftSubmissionArgsType, isStoreError, Store } from '../postgres'
 
 export function createDraftSubmissionResolver(
@@ -9,6 +10,10 @@ export function createDraftSubmissionResolver(
     return async (_parent, { input }, context) => {
         // This resolver is only callable by state users
         if (!isStateUser(context.user)) {
+            logError(
+                'createDraftSubmission',
+                'user not authorized to create state data'
+            )
             throw new ForbiddenError('user not authorized to create state data')
         }
 
@@ -17,18 +22,11 @@ export function createDraftSubmissionResolver(
         const program = store.findProgram(stateFromCurrentUser, input.programID)
 
         if (program === undefined) {
-            console.error({
-                message: 'createDraftSubmission failed',
-                operation: 'createDraftSubmission',
-                status: 'ERROR',
-                error: `The program id ${input.programID} does not exist in state ${stateFromCurrentUser}`,
+            const errMessage = `The program id ${input.programID} does not exist in state ${stateFromCurrentUser}`
+            logError('createDraftSubmission', errMessage)
+            throw new UserInputError(errMessage, {
+                argumentName: 'programID',
             })
-            throw new UserInputError(
-                `The program id ${input.programID} does not exist in state ${stateFromCurrentUser}`,
-                {
-                    argumentName: 'programID',
-                }
-            )
         }
 
         const dbDraftSubmission: InsertDraftSubmissionArgsType = {
@@ -43,22 +41,12 @@ export function createDraftSubmissionResolver(
             dbDraftSubmission
         )
         if (isStoreError(draftSubResult)) {
-            console.error({
-                message: 'createDraftSubmission failed',
-                operation: 'createDraftSubmission',
-                status: 'ERROR',
-                error: draftSubResult,
-            })
-            throw new Error(
-                `Issue creating a draft submission of type ${draftSubResult.code}. Message: ${draftSubResult.message}`
-            )
+            const errMessage = `Issue creating a draft submission of type ${draftSubResult.code}. Message: ${draftSubResult.message}`
+            logError('createDraftSubmission', errMessage)
+            throw new Error(errMessage)
         }
 
-        console.info({
-            message: 'createDraftSubmission succeeded',
-            operation: 'createDraftSubmission',
-            status: 'SUCCESS',
-        })
+        logSuccess('createDraftSubmission')
 
         return {
             draftSubmission: draftSubResult,

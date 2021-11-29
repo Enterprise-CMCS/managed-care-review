@@ -93,8 +93,7 @@ async function initializeGQLHandler(): Promise<Handler> {
     const dbURL = process.env.DATABASE_URL
     const stageName = process.env.stage
     const applicationEndpoint = process.env.APPLICATION_ENDPOINT
-    const emailSource =
-        process.env.SES_SOURCE_EMAIL_ADDRESS || 'macrael@truss.works'
+    const emailSource = 'macrael@truss.works'
     const emailerMode = process.env.EMAILER_MODE
 
     // Print out all the variables we've been configured with. Leave sensitive ones out, please.
