@@ -26,7 +26,6 @@ import {
     DraftSubmission,
     useSubmitDraftSubmissionMutation,
 } from '../../../gen/gqlClient'
-import { MCRouterState } from '../../../constants/routerState'
 
 export const ReviewSubmit = ({
     draftSubmission,
@@ -36,7 +35,7 @@ export const ReviewSubmit = ({
     const [userVisibleError, setUserVisibleError] = useState<
         string | undefined
     >(undefined)
-    const history = useHistory<MCRouterState>()
+    const history = useHistory()
     const modalRef = useRef<ModalRef>(null)
 
     const [submitDraftSubmission] = useSubmitDraftSubmissionMutation({
@@ -130,7 +129,6 @@ export const ReviewSubmit = ({
                     variant="unstyled"
                     to={{
                         pathname: '/dashboard',
-                        state: { defaultProgramID: draftSubmission.programID },
                     }}
                 >
                     Save as draft
