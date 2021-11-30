@@ -1,3 +1,4 @@
+import { submissionName } from '../../app-web/src/common-code/domain-models'
 import { Resolvers } from '../gen/gqlServer'
 import { Store } from '../postgres'
 
@@ -32,8 +33,7 @@ export function stateSubmissionResolver(
                 )
             }
 
-            const padNumber = parent.stateNumber.toString().padStart(4, '0')
-            return `${parent.stateCode.toUpperCase()}-${parent.programID.toUpperCase()}-${padNumber}`
+            return submissionName(parent)
         },
     }
 }

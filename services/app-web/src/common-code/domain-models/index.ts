@@ -43,4 +43,5 @@ export {
     isContractAndRates,
     isStateSubmission,
     isDraftSubmission,
+    submissionName,
 } from './submission'
