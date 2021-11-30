@@ -52,7 +52,6 @@ import {
     ManagedCareEntityRecord,
     FederalAuthorityRecord,
 } from '../../../constants/submissions'
-import { MCRouterState } from '../../../constants/routerState'
 
 function formattedDatePlusOneDay(initialValue: string): string {
     const dayjsValue = dayjs(initialValue)
@@ -112,7 +111,7 @@ export const ContractDetails = ({
     formAlert?: React.ReactElement
 }): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
-    const history = useHistory<MCRouterState>()
+    const history = useHistory()
 
     // Contract documents state management
     const [hasValidFiles, setHasValidFiles] = React.useState(false)
@@ -318,9 +317,7 @@ export const ContractDetails = ({
                 draftSubmissionUpdates: updatedDraft,
             })
             if (updatedSubmission) {
-                history.push(options.redirectPath, {
-                    defaultProgramID: draftSubmission.programID,
-                })
+                history.push(options.redirectPath)
             }
         } catch (serverError) {
             setSubmitting(false)
