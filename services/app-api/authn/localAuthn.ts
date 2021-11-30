@@ -8,6 +8,7 @@ export async function userFromLocalAuthProvider(
         const localUser = JSON.parse(authProvider)
         return ok(localUser)
     } catch (e) {
+        console.error('ERROR: failed to parse local user from authProvider')
         return err(e)
     }
 }
