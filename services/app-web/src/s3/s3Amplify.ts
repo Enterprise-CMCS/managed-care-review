@@ -130,11 +130,21 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
         ): Promise<string> => {
             // setup the lambda invocation
             const stageName = process.env.stage
-            const bulkDLFunc = new Lambda({ region: 'us-east-1' })
+            if (stageName === undefined || stageName === '') {
+                throw new Error(
+                    'You must set the stage name in your environment variables'
+                )
+            }
+
+            const prependedKeys = keys.map((key) => `allusers/${key}`)
+            const prependedFilename = `allusers/${filename}`
+            const bulkDLFunc = new Lambda({
+                region: 'us-east-1',
+            })
             const zipRequestParams = {
-                keys: keys,
+                keys: prependedKeys,
                 bucket: bucketName,
-                zipFilename: filename,
+                zipFileName: prependedFilename,
             }
 
             const lambdaParams = {
@@ -144,7 +154,6 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
 
             try {
                 const dlURL = await bulkDLFunc.invoke(lambdaParams).promise()
-                console.log('success: zip of files on s3 completed.')
                 return dlURL.Payload as string
             } catch (err) {
                 throw new Error('Could not get a bulk DL URL: ' + err)
