@@ -1,3 +1,5 @@
+import { URL } from 'url'
+
 import {
     SubmissionType,
     StateSubmissionType,
@@ -14,6 +16,10 @@ const newSubmissionCMSEmailTemplate = (
     submission: StateSubmissionType,
     config: EmailConfiguration
 ): EmailData => {
+    const submissionURL = new URL(
+        `submissions/${submission.id}`,
+        config.baseUrl
+    ).href
     return {
         toAddresses: ['mc-review-qa@truss.works'],
         sourceEmail: config.emailSource,
@@ -28,10 +34,7 @@ const newSubmissionCMSEmailTemplate = (
             Submission type: ${SubmissionTypeRecord[submission.submissionType]}
             Submission description: ${submission.submissionDescription}
 
-            View the full submission: ${config.baseUrl}/submissions/${
-            submission.id
-        }
-        `,
+            View the full submission: ${submissionURL}`,
         bodyHTML: `
             ${submissionName(submission)} was received from ${
             submission.stateCode
@@ -42,9 +45,7 @@ const newSubmissionCMSEmailTemplate = (
             Submission description: ${
                 submission.submissionDescription
             }<br /><br />
-            <a href="${config.baseUrl}/submissions/${
-            submission.id
-        }">View the full submission</a>
+            <a href="${submissionURL}">View the full submission</a>
         `,
     }
 }
