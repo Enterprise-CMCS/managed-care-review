@@ -7,7 +7,6 @@ import styles from './Dashboard.module.scss'
 
 import { Loading } from '../../components/Loading'
 import { useAuth } from '../../contexts/AuthContext'
-import { MCRouterState } from '../../constants/routerState'
 import {
     Program,
     useIndexSubmissionsQuery,
@@ -44,7 +43,7 @@ export const Dashboard = (): React.ReactElement => {
     // <Partial<keyof TableRow>> tells the compiler "any of the keys of TableRow is acceptable"
     const [sortColumn] = useState<Partial<keyof TableRow>>('updatedAt')
     const { loginStatus, loggedInUser } = useAuth()
-    const location = useLocation<MCRouterState>()
+    const location = useLocation()
 
     const { loading, data, error } = useIndexSubmissionsQuery()
 
@@ -99,10 +98,6 @@ export const Dashboard = (): React.ReactElement => {
 
     const hasSubmissions = submissionRows.length > 0
 
-    const getFirstProgramName = hasSubmissions
-        ? submissionRows[0].program.id
-        : ''
-
     return (
         <>
             <GridContainer
@@ -125,10 +120,6 @@ export const Dashboard = (): React.ReactElement => {
                                     variant="unstyled"
                                     to={{
                                         pathname: '/submissions/new',
-                                        state: {
-                                            defaultProgramID:
-                                                getFirstProgramName,
-                                        },
                                     }}
                                 >
                                     Start new submission

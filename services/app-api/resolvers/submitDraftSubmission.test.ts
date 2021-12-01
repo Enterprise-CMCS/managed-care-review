@@ -1,4 +1,7 @@
 import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitDraftSubmission.graphql'
+import { StateSubmissionType } from '../../app-web/src/common-code/domain-models'
+import { StateSubmission } from '../gen/gqlServer'
+import { EmailData, Emailer, newSubmissionCMSEmailTemplate } from '../emailer'
 import {
     constructTestPostgresServer,
     createAndUpdateTestDraftSubmission,
@@ -24,7 +27,6 @@ describe('submitDraftSubmission', () => {
             },
         })
 
-        console.log(submitResult.errors)
         expect(submitResult.errors).toBeUndefined()
         const createdID =
             submitResult?.data?.submitDraftSubmission.submission.id
@@ -185,5 +187,89 @@ describe('submitDraftSubmission', () => {
         expect(submitResult.errors?.[0].extensions?.message).toEqual(
             'submission includes invalid rate fields'
         )
+    })
+
+    const testEmailerWithCallback = (
+        sendCallback: (data: EmailData) => void
+    ): Emailer => {
+        const config = {
+            emailSource: 'local@example.com',
+            stage: 'local',
+            baseUrl: 'http://localhost',
+        }
+        return {
+            sendEmail: async (emailData: EmailData): Promise<void | Error> => {
+                console.log('Mocsk email locally')
+                console.log('Email content' + emailData)
+                sendCallback(emailData)
+            },
+            generateCMSEmail: (submission: StateSubmissionType): EmailData => {
+                return newSubmissionCMSEmailTemplate(submission, config)
+            },
+        }
+    }
+
+    it('send email to CMS if submission is valid', async () => {
+        let sentEmailData: EmailData | undefined = undefined
+        const mockEmailer = testEmailerWithCallback((emailData) => {
+            console.log('IN CALLBACK')
+            sentEmailData = emailData
+        })
+
+        const server = await constructTestPostgresServer({
+            emailer: mockEmailer,
+        })
+        const draft = await createAndUpdateTestDraftSubmission(server, {})
+        const draftID = draft.id
+
+        await new Promise((resolve) => setTimeout(resolve, 2000)) // TODO: why is this here in other tests??
+        const submitResult = await server.executeOperation({
+            query: SUBMIT_DRAFT_SUBMISSION,
+            variables: {
+                input: {
+                    submissionID: draftID,
+                },
+            },
+        })
+
+        expect(submitResult.errors).toBeUndefined()
+        expect(sentEmailData).toBeDefined()
+        const sub = submitResult?.data?.submitDraftSubmission
+            ?.submission as StateSubmission
+
+        // this is dumb but works. Typescript seems to not realize that the callback could modify this variable.
+        sentEmailData = sentEmailData as unknown as EmailData
+        expect(sentEmailData.bodyText).toEqual(
+            `
+            ${sub.name} was received from FL.
+
+            Submission type: Contract action and rate certification
+            Submission description: An updated submission
+
+            View the full submission: http://localhost/submissions/${sub.id}`
+        )
+    })
+
+    it('does not send email to CMS if submission fails', async () => {
+        const server = await constructTestPostgresServer()
+        const draft = await createAndUpdateTestDraftSubmission(server, {
+            submissionType: 'CONTRACT_ONLY',
+            rateDateStart: '2025-05-01',
+            rateDateEnd: '2026-04-30',
+            rateDateCertified: '2025-03-15',
+        })
+        const draftID = draft.id
+
+        const submitResult = await server.executeOperation({
+            query: SUBMIT_DRAFT_SUBMISSION,
+            variables: {
+                input: {
+                    submissionID: draftID,
+                },
+            },
+        })
+
+        expect(submitResult.errors).toBeDefined()
+        // TODO: add assertion that emailer was called
     })
 })

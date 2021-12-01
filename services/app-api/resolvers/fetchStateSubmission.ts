@@ -5,6 +5,7 @@ import {
     StateSubmissionType,
 } from '../../app-web/src/common-code/domain-models'
 import { QueryResolvers, State } from '../gen/gqlServer'
+import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
 
 export function fetchStateSubmissionResolver(
@@ -17,6 +18,10 @@ export function fetchStateSubmissionResolver(
         if (isStoreError(result)) {
             console.log('Error finding a submission', result)
             if (result.code === 'WRONG_STATUS') {
+                logError(
+                    'fetchStateSubmission',
+                    'Submission is not a StateSubmission'
+                )
                 throw new ApolloError(
                     `Submission is not a StateSubmission`,
                     'WRONG_STATUS',
@@ -26,9 +31,9 @@ export function fetchStateSubmissionResolver(
                 )
             }
 
-            throw new Error(
-                `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
-            )
+            const errMessage = `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
+            logError('fetchStateSubmission', errMessage)
+            throw new Error(errMessage)
         }
 
         if (result === undefined) {
@@ -43,6 +48,10 @@ export function fetchStateSubmissionResolver(
         if (isStateUser(context.user)) {
             const stateFromCurrentUser: State['code'] = context.user.state_code
             if (draft.stateCode !== stateFromCurrentUser) {
+                logError(
+                    'fetchStateSubmission',
+                    'user not authorized to fetch data from a different state'
+                )
                 throw new ForbiddenError(
                     'user not authorized to fetch data from a different state'
                 )
@@ -50,10 +59,11 @@ export function fetchStateSubmissionResolver(
         } else if (isCMSUser(context.user)) {
             true // CMS users have access, no error to throw here, but I want to have it in the if tree so we don't forget something.
         } else {
-            console.log('Error: Unknown User Type: ', context.user)
+            logError('fetchStateSubmission', 'unknown user type')
             throw new ForbiddenError(`unknown user type`)
         }
 
+        logSuccess('fetchStateSubmission')
         return { submission: draft }
     }
 }

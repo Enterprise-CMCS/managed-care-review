@@ -61,9 +61,6 @@ export const SubmissionSummary = (): React.ReactElement => {
                         variant="unstyled"
                         to={{
                             pathname: '/dashboard',
-                            state: {
-                                defaultProgramID: submission.programID,
-                            },
                         }}
                     >
                         <svg

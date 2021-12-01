@@ -34,7 +34,6 @@ import {
     stripTypename,
 } from '../updateSubmissionTransform'
 
-import { MCRouterState } from '../../../constants/routerState'
 import { useFocus } from '../../../hooks/useFocus'
 
 export interface ContactsFormValues {
@@ -156,7 +155,7 @@ export const Contacts = ({
     const [newActuaryContactButtonRef, setNewActuaryContactButtonFocus] =
         useFocus()
 
-    const history = useHistory<MCRouterState>()
+    const history = useHistory()
 
     /*
      Set focus to contact name field when adding new contacts.
@@ -249,9 +248,7 @@ export const Contacts = ({
             })
             if (updatedSubmission) {
                 if (redirectToDashboard.current) {
-                    history.push(`/dashboard`, {
-                        defaultProgramID: draftSubmission.programID,
-                    })
+                    history.push(`/dashboard`)
                 } else {
                     history.push(`/submissions/${draftSubmission.id}/documents`)
                 }
@@ -879,10 +876,7 @@ export const Contacts = ({
                                     unstyled
                                     onClick={() => {
                                         if (!dirty) {
-                                            history.push(`/dashboard`, {
-                                                defaultProgramID:
-                                                    draftSubmission.programID,
-                                            })
+                                            history.push(`/dashboard`)
                                         } else {
                                             setShouldValidate(true)
 

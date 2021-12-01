@@ -14,6 +14,7 @@ import {
     userFromCognitoAuthProvider,
     userFromLocalAuthProvider,
 } from '../authn'
+import { newLocalEmailer, newSESEmailer } from '../emailer'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import { configureResolvers } from '../resolvers'
 import { configurePostgres } from './configuration'
@@ -45,7 +46,7 @@ function contextForRequestForFetcher(
                     )
                 }
             } catch (err) {
-                console.log('Error attempting to fetch user: ', err)
+                console.error('Error attempting to fetch user: ', err)
                 throw new Error('Log: placing user in gql context failed')
             }
         } else {
@@ -63,7 +64,7 @@ function localAuthMiddleware(
             event.requestContext.identity.cognitoAuthenticationProvider
 
         if (userHeader === 'NO_USER') {
-            console.log('NO_USER info set, returning 403')
+            console.info('NO_USER info set, returning 403')
             return Promise.resolve({
                 statusCode: 403,
                 body: '{ "error": "No User Sent in cognitoAuthenticationProvider header"}\n',
@@ -90,21 +91,67 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET
     const dbURL = process.env.DATABASE_URL
+    const stageName = process.env.stage
+    const applicationEndpoint = process.env.APPLICATION_ENDPOINT
+    const emailSource = process.env.SES_SOURCE_EMAIL_ADDRESS
+    const emailerMode = process.env.EMAILER_MODE
+
+    // Print out all the variables we've been configured with. Leave sensitive ones out, please.
+    console.info('Running With Config: ', {
+        authMode,
+        stageName,
+        dbURL,
+        applicationEndpoint,
+        emailSource,
+        emailerMode,
+    })
+
+    // START Assert configuration is valid
+    if (emailerMode !== 'LOCAL' && emailerMode !== 'SES')
+        throw new Error(
+            'Configuration Error: EMAILER_MODE is not valid. Current value: ' +
+                emailerMode
+        )
+
+    if (emailSource === undefined)
+        throw new Error(
+            'Configuration Error: SES_SOURCE_EMAILADDRESS is required'
+        )
+
+    if (applicationEndpoint === undefined)
+        throw new Error('Configuration Error: APPLICATION_ENDPOINT is required')
+
+    if (stageName === undefined)
+        throw new Error('Configuration Error: stage is required')
 
     if (!dbURL) {
         throw new Error('Init Error: DATABASE_URL is required to run app-api')
     }
+    // END
 
     const pgResult = await configurePostgres(dbURL, secretsManagerSecret)
     if (pgResult instanceof Error) {
-        console.log("Init Error: Postgres couldn't be configured")
+        console.error("Init Error: Postgres couldn't be configured")
         throw pgResult
     }
 
-    const store = await NewPostgresStore(pgResult)
+    const store = NewPostgresStore(pgResult)
+
+    const emailer =
+        emailerMode == 'LOCAL'
+            ? newLocalEmailer({
+                  emailSource: 'local@example.com',
+                  stage: 'local',
+                  baseUrl: applicationEndpoint,
+              })
+            : newSESEmailer({
+                  emailSource: emailSource,
+                  stage: stageName,
+                  baseUrl: applicationEndpoint,
+              })
 
     // Resolvers are defined and tested in the resolvers package
-    const resolvers = configureResolvers(store)
+    const resolvers = configureResolvers(store, emailer)
 
     const userFetcher =
         authMode === 'LOCAL'
@@ -139,7 +186,6 @@ const handlerPromise = initializeGQLHandler()
 const gqlHandler: Handler = async (event, context, completion) => {
     // Once initialized, future awaits will return immediately
     const initializedHandler = await handlerPromise
-    console.log('initalizedHandler has awaited')
 
     return await initializedHandler(event, context, completion)
 }
