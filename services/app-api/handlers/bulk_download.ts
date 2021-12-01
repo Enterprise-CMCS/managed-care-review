@@ -1,9 +1,13 @@
 import { S3 } from 'aws-sdk'
-import { Handler } from 'aws-lambda'
+import { APIGatewayProxyHandler } from 'aws-lambda'
 import Archiver from 'archiver'
 import { Readable, Stream } from 'stream'
 
+import { assertIsAuthMode } from '../../app-web/src/common-code/domain-models'
+
 const s3 = new S3({ region: 'us-east-1' })
+const authMode = process.env.REACT_APP_AUTH_MODE
+assertIsAuthMode(authMode)
 
 interface S3BulkDownloadRequest {
     bucket: string
@@ -11,7 +15,25 @@ interface S3BulkDownloadRequest {
     zipFileName: string
 }
 
-export const main: Handler = async (event) => {
+export const main: APIGatewayProxyHandler = async (event) => {
+    const authProvider =
+        event.requestContext.identity.cognitoAuthenticationProvider
+    if (authProvider == undefined) {
+        return {
+            statusCode: 400,
+            body:
+                JSON.stringify({
+                    code: 'NO_AUTH_PROVIDER',
+                    message:
+                        'auth provider missing. This should always be taken care of by the API Gateway',
+                }) + '\n',
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': true,
+            },
+        }
+    }
+
     console.time('zipProcess')
     console.log('Starting zip lambda...')
     if (!event.body) {
