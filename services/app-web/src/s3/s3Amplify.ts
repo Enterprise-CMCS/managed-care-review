@@ -1,7 +1,7 @@
 import { parseKey } from '../common-code/s3URLEncoding'
 import { Storage } from 'aws-amplify'
 import { v4 as uuidv4 } from 'uuid'
-import AWS from 'aws-sdk'
+import { Lambda } from 'aws-sdk'
 
 import type { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
@@ -130,7 +130,7 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
         ): Promise<string> => {
             // setup the lambda invocation
             const stageName = process.env.stage
-            const bulkDLFunc = new AWS.Lambda({ region: 'us-east-1' })
+            const bulkDLFunc = new Lambda({ region: 'us-east-1' })
             const zipRequestParams = {
                 keys: keys,
                 bucket: bucketName,
