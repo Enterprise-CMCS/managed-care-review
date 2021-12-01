@@ -88,14 +88,9 @@ export const main: Handler = async (event) => {
         zip.on('error', (error: Archiver.ArchiverError) => {
             console.log('Error in zip.on: ', error.message, error.stack)
             console.timeEnd('zipProcess')
-            return {
-                statusCode: 500,
-                body: JSON.stringify(error.message),
-                headers: {
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Credentials': true,
-                },
-            }
+            throw new Error(
+                `${error.name} ${error.code} ${error.message} ${error.path} ${error.stack}`
+            )
         })
 
         console.log('Starting upload...')
