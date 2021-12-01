@@ -112,7 +112,14 @@ export const main: Handler = async (event) => {
         })
     }).catch((error: { code: string; message: string; data: string }) => {
         console.log('Caught error: ', error.message)
-        throw new Error(`${error.code} ${error.message} ${error.data}`)
+        return {
+            statusCode: 500,
+            body: JSON.stringify(error.message),
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': true,
+            },
+        }
     })
 
     await s3Upload.promise()
