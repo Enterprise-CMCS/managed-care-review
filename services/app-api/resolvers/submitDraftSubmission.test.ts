@@ -246,8 +246,7 @@ describe('submitDraftSubmission', () => {
             Submission type: Contract action and rate certification
             Submission description: An updated submission
 
-            View the full submission: http://localhost/submissions/${sub.id}
-        `
+            View the full submission: http://localhost/submissions/${sub.id}`
         )
     })
 
