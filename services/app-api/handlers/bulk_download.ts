@@ -1,5 +1,5 @@
 import { S3 } from 'aws-sdk'
-import { APIGatewayProxyEvent, APIGatewayProxyHandler } from 'aws-lambda'
+import { Handler } from 'aws-lambda'
 import Archiver from 'archiver'
 import { Readable, Stream } from 'stream'
 
@@ -11,9 +11,7 @@ interface S3BulkDownloadRequest {
     zipFileName: string
 }
 
-export const main: APIGatewayProxyHandler = async (
-    event: APIGatewayProxyEvent
-) => {
+export const main: Handler = async (event) => {
     console.time('zipProcess')
     console.log('Starting zip lambda...')
     if (!event.body) {
