@@ -39,7 +39,10 @@ export const main: Handler = async (event) => {
         console.timeEnd('zipProcess')
         return {
             statusCode: 400,
-            body: 'Missing bucket, keys or zipFileName in request',
+            body: JSON.stringify({
+                code: 'BAD_REQUEST',
+                message: 'Missing bucket, keys or zipFileName in request',
+            }),
             headers: {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Credentials': true,
@@ -122,7 +125,7 @@ export const main: Handler = async (event) => {
     console.timeEnd('zipProcess')
     return {
         statusCode: 200,
-        body: JSON.stringify('success'),
+        body: JSON.stringify({ code: 'SUCCESS', message: 'success' }),
         headers: {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Credentials': true,
