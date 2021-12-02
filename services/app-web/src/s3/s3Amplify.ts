@@ -2,6 +2,7 @@ import { parseKey } from '../common-code/s3URLEncoding'
 import { Storage } from 'aws-amplify'
 import { v4 as uuidv4 } from 'uuid'
 import { Lambda } from 'aws-sdk'
+import { axios } from 'axios'
 
 import type { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
@@ -138,23 +139,20 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
 
             const prependedKeys = keys.map((key) => `allusers/${key}`)
             const prependedFilename = `allusers/${filename}`
-            const bulkDLFunc = new Lambda({
-                region: 'us-east-1',
-            })
+
             const zipRequestParams = {
                 keys: prependedKeys,
                 bucket: bucketName,
                 zipFileName: prependedFilename,
             }
 
-            const lambdaParams = {
-                FunctionName: `app-api-${stageName}-zip_keys`,
-                Payload: JSON.stringify({ body: zipRequestParams }),
-            }
-
             try {
-                const dlURL = await bulkDLFunc.invoke(lambdaParams).promise()
-                return dlURL.Payload as string
+                const resp = await axios.post(
+                    '/zip',
+                    JSON.stringify({ body: zipRequestParams })
+                )
+                console.log(resp.data)
+                return prependedFilename // this needs to be fixed to the actual url
             } catch (err) {
                 throw new Error('Could not get a bulk DL URL: ' + err)
             }
