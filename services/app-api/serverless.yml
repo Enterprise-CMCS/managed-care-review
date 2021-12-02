@@ -189,10 +189,10 @@ functions:
     handler: handlers/bulk_download.main
     events:
       - http:
-        path: zip
-        method: post
-        cors: true
-        authorizer: aws_iam
+          path: zip
+          method: post
+          cors: true
+          authorizer: aws_iam
 
 resources:
   Resources:
