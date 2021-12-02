@@ -6,6 +6,7 @@ type EmailConfiguration = {
     stage: string
     emailSource: string
     baseUrl: string
+    cmsReviewersSharedEmail: string //comma separated list of emails
 }
 
 type EmailData = {

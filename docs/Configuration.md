@@ -102,3 +102,9 @@ Determines which emailer to use, local or AWS SES emailer. Valid values are `LOC
 Read by `app-api`
 
 Sets the "from" address for all emails sent by the system. This address must have been added to SES and validated there, in order to work.
+
+### `CMS_REVIEWERS_SHARED_EMAIL`
+
+Read by `app-api`
+
+Sets the "to" addresses for generic emails sent to the shared CMS inbox (there may be multiple). Value is comma separated string.
