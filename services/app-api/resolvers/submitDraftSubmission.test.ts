@@ -196,6 +196,7 @@ describe('submitDraftSubmission', () => {
             emailSource: 'local@example.com',
             stage: 'local',
             baseUrl: 'http://localhost',
+            cmsReviewersSharedEmail: 'test@example.com',
         }
         return {
             sendEmail: async (emailData: EmailData): Promise<void | Error> => {
@@ -251,7 +252,15 @@ describe('submitDraftSubmission', () => {
     })
 
     it('does not send email to CMS if submission fails', async () => {
-        const server = await constructTestPostgresServer()
+        let sentEmailData: EmailData | undefined = undefined
+        const mockEmailer = testEmailerWithCallback((emailData) => {
+            console.log('IN CALLBACK')
+            sentEmailData = emailData
+        })
+
+        const server = await constructTestPostgresServer({
+            emailer: mockEmailer,
+        })
         const draft = await createAndUpdateTestDraftSubmission(server, {
             submissionType: 'CONTRACT_ONLY',
             rateDateStart: '2025-05-01',
@@ -270,6 +279,6 @@ describe('submitDraftSubmission', () => {
         })
 
         expect(submitResult.errors).toBeDefined()
-        // TODO: add assertion that emailer was called
+        expect(sentEmailData).not.toBeDefined()
     })
 })
