@@ -29,7 +29,7 @@ To get the tools needed for local development, you can run:
 
 ```bash
 brew tap yoheimuta/protolint
-brew install yarn lerna direnv shellcheck protolint git-secrets
+brew install yarn lerna direnv shellcheck protolint detect-secrets
 yarn husky install
 ```
 
