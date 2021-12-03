@@ -31,6 +31,8 @@ on:
         required: true
       ses_review_team_email_address:
         required: false
+      cms_reviewers_shared_email:
+        required: true
       route_53_hosted_zone_id:
         required: false
       route_53_domain_name:
@@ -127,6 +129,7 @@ jobs:
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
           EMAILER_MODE: SES
           SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.ses_source_email_address }}
+          CMS_REVIEWERS_SHARED_EMAIL: ${{ secrets.cms_reviewers_shared_email }}
 
         run: |
           pushd services/app-api && npx serverless deploy --stage ${{ inputs.stage_name }}
