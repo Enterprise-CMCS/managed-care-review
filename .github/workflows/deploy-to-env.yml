@@ -98,19 +98,6 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: set variable values
-        run: ./.github/build_vars.sh set_values
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
-          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
-          DATABASE_URL: AWS_SM
-          REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
-          IAM_PATH: ${{ secrets.iam_path }}
-          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
-          EMAILER_MODE: SES
-          SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.ses_source_email_address }}
-
       - name: Set application endpoint
         run: |
           cd services
@@ -131,6 +118,16 @@ jobs:
         id: deploy-app-api
         env:
           NODE_OPTIONS: --max_old_space_size=4096
+          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
+          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
+          DATABASE_URL: AWS_SM
+          REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
+          IAM_PATH: ${{ secrets.iam_path }}
+          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
+          EMAILER_MODE: SES
+          SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.ses_source_email_address }}
+
         run: |
           pushd services/app-api && npx serverless deploy --stage ${{ inputs.stage_name }}
 
