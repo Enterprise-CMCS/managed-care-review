@@ -22,9 +22,7 @@ const newSubmissionCMSEmailTemplate = (
     ).href
     const isTestEnvironment = config.stage !== 'prod'
 
-    const reviewerEmails = isTestEnvironment
-        ? ['mc-review-qa@truss.works']
-        : config.cmsReviewersSharedEmail.split(',')
+    const reviewerEmails = config.cmsReviewersSharedEmail.split(',')
 
     return {
         toAddresses: reviewerEmails,
