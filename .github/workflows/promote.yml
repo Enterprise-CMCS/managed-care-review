@@ -45,10 +45,9 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-          CMS_REVIEWERS_SHARED_EMAIL: ${{ secrets.CMS_REVIEWERS_SHARED_EMAIL }}
           INFRASTRUCTURE_TYPE: ${{ secrets.INFRASTRUCTURE_TYPE || 'development' }}
           SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
-          SES_REVIEW_TEAM_EMAIL_ADDRESS: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
+          SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
           OKTA_METADATA_URL: ${{ secrets.OKTA_METADATA_URL }}
           IAM_PATH: ${{ secrets.IAM_PATH }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
@@ -116,10 +115,9 @@ jobs:
       aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
-      cms_reviewers_shared_email: ${{ secrets.CMS_REVIEWERS_SHARED_EMAIL }}
       infrastructure_type: ${{ secrets.INFRASTRUCTURE_TYPE || 'development' }}
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
-      ses_review_team_email_address: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
+      ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
       okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
       iam_path: ${{ secrets.IAM_PATH }}
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
@@ -151,10 +149,9 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-          CMS_REVIEWERS_SHARED_EMAIL: ${{ secrets.CMS_REVIEWERS_SHARED_EMAIL }}
           INFRASTRUCTURE_TYPE: ${{ secrets.INFRASTRUCTURE_TYPE || 'development' }}
           SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
-          SES_REVIEW_TEAM_EMAIL_ADDRESS: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
+          SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
           OKTA_METADATA_URL: ${{ secrets.OKTA_METADATA_URL }}
           IAM_PATH: ${{ secrets.IAM_PATH }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
@@ -208,14 +205,13 @@ jobs:
       cloudfront_certificate_arn: ${{ secrets.VAL_CLOUDFRONT_CERTIFICATE_ARN }}
       cloudfront_domain_name: ${{ secrets.VAL_CLOUDFRONT_DOMAIN_NAME }}
       cloudfront_storybook_domain_name: ${{ secrets.VAL_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
-      cms_reviewers_shared_email: ${{ secrets.VAL_CMS_REVIEWERS_SHARED_EMAIL }}
       okta_metadata_url: ${{ secrets.VAL_OKTA_METADATA_URL }}
       full_iam_permissions_boundary_policy: ${{ secrets.VAL_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
       react_app_auth_mode: IDM
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       infrastructure_type: ${{ secrets.INFRASTRUCTURE_TYPE || 'development' }}
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
-      ses_review_team_email_address: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
+      ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
       iam_path: ${{ secrets.IAM_PATH }}
       test_users_pass: ${{ secrets.TEST_USERS_PASS}}
 
@@ -243,14 +239,13 @@ jobs:
           CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets.VAL_CLOUDFRONT_CERTIFICATE_ARN }}
           CLOUDFRONT_DOMAIN_NAME: ${{ secrets.VAL_CLOUDFRONT_DOMAIN_NAME }}
           CLOUDFRONT_STORYBOOK_DOMAIN_NAME: ${{ secrets.VAL_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
-          CMS_REVIEWERS_SHARED_EMAIL: ${{ secrets.VAL_CMS_REVIEWERS_SHARED_EMAIL }}
           OKTA_METADATA_URL: ${{ secrets.VAL_OKTA_METADATA_URL }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.VAL_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
           REACT_APP_AUTH_MODE: IDM
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
           INFRASTRUCTURE_TYPE: ${{ secrets.INFRASTRUCTURE_TYPE || 'development' }}
           SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
-          SES_REVIEW_TEAM_EMAIL_ADDRESS: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
+          SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
           IAM_PATH: ${{ secrets.IAM_PATH }}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS}}
 
@@ -298,14 +293,13 @@ jobs:
       cloudfront_certificate_arn: ${{ secrets.PROD_CLOUDFRONT_CERTIFICATE_ARN }}
       cloudfront_domain_name: ${{ secrets.PROD_CLOUDFRONT_DOMAIN_NAME }}
       cloudfront_storybook_domain_name: ${{ secrets.PROD_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
-      cms_reviewers_shared_email: ${{ secrets.PROD_CMS_REVIEWERS_SHARED_EMAIL }}
       okta_metadata_url: ${{ secrets.PROD_OKTA_METADATA_URL }}
       full_iam_permissions_boundary_policy: ${{ secrets.PROD_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
       react_app_auth_mode: IDM
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       infrastructure_type: ${{ secrets.INFRASTRUCTURE_TYPE || 'development' }}
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
-      ses_review_team_email_address: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
+      ses_review_team_email_addresses: ${{ secrets.PROD_SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
       iam_path: ${{ secrets.IAM_PATH }}
       test_users_pass: ${{ secrets.TEST_USERS_PASS}}
 
@@ -333,14 +327,13 @@ jobs:
           CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets.PROD_CLOUDFRONT_CERTIFICATE_ARN }}
           CLOUDFRONT_DOMAIN_NAME: ${{ secrets.PROD_CLOUDFRONT_DOMAIN_NAME }}
           CLOUDFRONT_STORYBOOK_DOMAIN_NAME: ${{ secrets.PROD_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
-          CMS_REVIEWERS_SHARED_EMAIL: ${{ secrets.PROD_CMS_REVIEWERS_SHARED_EMAIL }}
           OKTA_METADATA_URL: ${{ secrets.PROD_OKTA_METADATA_URL }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.PROD_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
           REACT_APP_AUTH_MODE: IDM
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
           INFRASTRUCTURE_TYPE: ${{ secrets.INFRASTRUCTURE_TYPE || 'development' }}
           SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
-          SES_REVIEW_TEAM_EMAIL_ADDRESS: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
+          SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.PROD_SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
           IAM_PATH: ${{ secrets.IAM_PATH }}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS}}
 

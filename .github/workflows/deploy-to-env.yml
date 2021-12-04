@@ -29,9 +29,7 @@ on:
         required: true
       ses_source_email_address:
         required: true
-      ses_review_team_email_address:
-        required: false
-      cms_reviewers_shared_email:
+      SES_REVIEW_TEAM_EMAIL_ADDRESSES:
         required: true
       route_53_hosted_zone_id:
         required: false
@@ -128,8 +126,7 @@ jobs:
           IAM_PATH: ${{ secrets.iam_path }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
           EMAILER_MODE: SES
-          SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.ses_source_email_address }}
-          CMS_REVIEWERS_SHARED_EMAIL: ${{ secrets.cms_reviewers_shared_email }}
+          SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.ses_review_team_email_addresses }}
 
         run: |
           pushd services/app-api && npx serverless deploy --stage ${{ inputs.stage_name }}
@@ -184,7 +181,7 @@ jobs:
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
           INFRASTRUCTURE_TYPE: ${{ secrets.infrastructure_type }}
           SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.ses_source_email_address }}
-          SES_REVIEW_TEAM_EMAIL_ADDRESS: ${{ secrets.ses_review_team_email_address }}
+          SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.ses_review_team_email_addresses }}
           ROUTE_53_HOSTED_ZONE_ID: ${{ secrets.route_53_hosted_zone_id }}
           ROUTE_53_DOMAIN_NAME: ${{ secrets.route_53_domain_name }}
           CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets.cloudfront_certificate_arn }}

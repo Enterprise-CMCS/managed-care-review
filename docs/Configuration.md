@@ -103,7 +103,7 @@ Read by `app-api`
 
 Sets the "from" address for all emails sent by the system. This address must have been added to SES and validated there, in order to work.
 
-### `CMS_REVIEWERS_SHARED_EMAIL`
+### `SES_REVIEW_TEAM_EMAIL_ADDRESSES`
 
 Read by `app-api`
 

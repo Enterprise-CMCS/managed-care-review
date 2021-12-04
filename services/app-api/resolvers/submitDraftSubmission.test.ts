@@ -196,7 +196,7 @@ describe('submitDraftSubmission', () => {
             emailSource: 'local@example.com',
             stage: 'local',
             baseUrl: 'http://localhost',
-            cmsReviewersSharedEmail: 'test@example.com',
+            cmsReviewSharedEmails: 'test@example.com',
         }
         return {
             sendEmail: async (emailData: EmailData): Promise<void | Error> => {
