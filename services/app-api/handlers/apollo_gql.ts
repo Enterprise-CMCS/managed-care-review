@@ -116,7 +116,7 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     if (emailSource === undefined)
         throw new Error(
-            'Configuration Error: SES_SOURCE_EMAILADDRESS is required'
+            'Configuration Error: SES_SOURCE_EMAIL_ADDRESS is required'
         )
 
     if (cmsReviewSharedEmails === undefined)
@@ -155,7 +155,7 @@ async function initializeGQLHandler(): Promise<Handler> {
                   emailSource: emailSource,
                   stage: stageName,
                   baseUrl: applicationEndpoint,
-                  cmsReviewSharedEmails: cmsReviewSharedEmails.split(''),
+                  cmsReviewSharedEmails: cmsReviewSharedEmails.split('')a,
               })
 
     // Resolvers are defined and tested in the resolvers package
