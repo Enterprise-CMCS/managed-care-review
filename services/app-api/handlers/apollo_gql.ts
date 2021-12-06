@@ -155,7 +155,7 @@ async function initializeGQLHandler(): Promise<Handler> {
                   emailSource: emailSource,
                   stage: stageName,
                   baseUrl: applicationEndpoint,
-                  cmsReviewSharedEmails: cmsReviewSharedEmails.split('')a,
+                  cmsReviewSharedEmails: cmsReviewSharedEmails.split(''),
               })
 
     // Resolvers are defined and tested in the resolvers package
