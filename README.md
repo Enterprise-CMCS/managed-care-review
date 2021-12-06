@@ -29,7 +29,7 @@ To get the tools needed for local development, you can run:
 
 ```bash
 brew tap yoheimuta/protolint
-brew install direnv shellcheck protolint
+brew install yarn lerna direnv shellcheck protolint detect-secrets
 yarn husky install
 ```
 
@@ -188,8 +188,7 @@ Before beginning, it is assumed you have:
 The following should install everything you need on macOS:
 
 ```bash
-brew install awscli direnv pre-commit shellcheck
-pre-commit install --install-hooks
+brew install awscli shellcheck
 ```
 
 ### AWS Access
@@ -244,6 +243,10 @@ Cloudtamer credentials are updated.
 Currently, `ctkey-wrapper` requires the user to be running the openconnect-tinyproxy
 container [here](https://github.com/trussworks/openconnect-tinyproxy) to connect
 to Cloudtamer.
+
+## Contributing
+
+We welcome contributions to this project. MC Review is an internal CMS tool for facilitating the review of state Medicaid contracts. It is developed by a federal contracting team under contract with CMS and is deployed internally for that purpose. MC Review is built using agile development processes and accepts both issues and feature requests via GitHub issues on this repository. If you’d like to contribute back any changes to this code base, please create a Pull Request and a team member will review your work. While this repository is dedicated primarily to delivering MC Review to the government, if you find any parts of it useful or find any errors in the code we would love your contributions and feedback. All contributors are required to follow our [Code of Conduct](./CODE_OF_CONDUCT.md)
 
 ## License
 
