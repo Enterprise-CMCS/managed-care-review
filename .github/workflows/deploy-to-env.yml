@@ -29,7 +29,7 @@ on:
         required: true
       ses_source_email_address:
         required: true
-      SES_REVIEW_TEAM_EMAIL_ADDRESSES:
+      ses_review_team_email_addresses:
         required: true
       route_53_hosted_zone_id:
         required: false
