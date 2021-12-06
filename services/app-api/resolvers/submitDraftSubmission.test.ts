@@ -196,11 +196,11 @@ describe('submitDraftSubmission', () => {
             emailSource: 'local@example.com',
             stage: 'local',
             baseUrl: 'http://localhost',
-            cmsReviewSharedEmails: 'test@example.com',
+            cmsReviewSharedEmails: ['test@example.com'],
         }
         return {
             sendEmail: async (emailData: EmailData): Promise<void | Error> => {
-                console.log('Mocsk email locally')
+                console.log('Mock email locally')
                 console.log('Email content' + emailData)
                 sendCallback(emailData)
             },
