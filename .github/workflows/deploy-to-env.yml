@@ -127,6 +127,7 @@ jobs:
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
           EMAILER_MODE: SES
           SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.ses_review_team_email_addresses }}
+          SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.ses_source_email_address }}
 
         run: |
           pushd services/app-api && npx serverless deploy --stage ${{ inputs.stage_name }}
