@@ -1,13 +1,17 @@
 import { Lambda } from 'aws-sdk'
 import { StateSubmissionType } from '../../app-web/src/common-code/domain-models'
-import { getSESEmailParams, newSubmissionCMSEmailTemplate } from './'
+import {
+    getSESEmailParams,
+    newSubmissionCMSEmailTemplate,
+    newEmailTemplate,
+} from './'
+import type { EmailTemplate } from './'
 
 type EmailConfiguration = {
     stage: string
     emailSource: string
     baseUrl: string
 }
-
 type EmailData = {
     bodyText: string
     sourceEmail: string
@@ -24,6 +28,15 @@ type EmailData = {
 type Emailer = {
     sendEmail: (emailData: EmailData) => Promise<void | Error>
     generateCMSEmail: (submission: StateSubmissionType) => EmailData
+    generateEmailTemplate: ({
+        template,
+        submission,
+        config,
+    }: {
+        template: EmailTemplate
+        submission: StateSubmissionType
+        config: EmailConfiguration
+    }) => EmailData
 }
 
 function newSESEmailer(config: EmailConfiguration): Emailer {
@@ -49,6 +62,15 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
         generateCMSEmail: (submission: StateSubmissionType): EmailData => {
             return newSubmissionCMSEmailTemplate(submission, config)
         },
+        generateEmailTemplate: (options: {
+            template: EmailTemplate
+            submission: StateSubmissionType
+            config: EmailConfiguration
+        }): EmailData => {
+            const template = newEmailTemplate(options)
+            if (template instanceof Error) throw Error('Invalid Email Template')
+            return template
+        },
     }
 }
 
@@ -65,6 +87,15 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
         },
         generateCMSEmail: (submission: StateSubmissionType): EmailData => {
             return newSubmissionCMSEmailTemplate(submission, config)
+        },
+        generateEmailTemplate: (options: {
+            template: EmailTemplate
+            submission: StateSubmissionType
+            config: EmailConfiguration
+        }): EmailData => {
+            const template = newEmailTemplate(options)
+            if (template instanceof Error) throw Error('Invalid Email template')
+            return template
         },
     }
 }
