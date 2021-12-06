@@ -90,11 +90,11 @@
         "zod": "^3.10.1"
     },
     "devDependencies": {
-        "@storybook/addon-a11y": "^6.3.12",
-        "@storybook/addon-essentials": "^6.3.12",
-        "@storybook/addon-links": "^6.3.12",
+        "@storybook/addon-a11y": "^6.4.8",
+        "@storybook/addon-essentials": "^6.4.8",
+        "@storybook/addon-links": "^6.4.8",
         "@storybook/preset-create-react-app": "^3.2.0",
-        "@storybook/react": "^6.3.12",
+        "@storybook/react": "^6.4.8",
         "@testing-library/jest-dom": "^5.11.4",
         "@testing-library/react": "^12.1.2",
         "@testing-library/user-event": "^13.5.0",
