@@ -11,6 +11,7 @@ import {
     TEST_TEXT_FILE,
     TEST_VIDEO_FILE,
     dragAndDrop,
+    userClickByRole,
 } from '../../testHelpers/jestHelpers'
 
 const fakeApiRequest = (success: boolean): Promise<S3FileData> => {
@@ -238,6 +239,31 @@ describe('FileUpload component', () => {
             expect(props.deleteFile).toHaveBeenCalled()
             expect(props.onLoadComplete).toHaveBeenCalled()
         })
+    })
+
+    it('calls uploadFile again when failed scan is retried', async () => {
+        const props: FileUploadProps = {
+            id: 'Default',
+            name: 'Default Input',
+            label: 'File input label',
+            uploadFile: jest
+                .fn()
+                .mockResolvedValue({ key: '12313', s3Url: 's3:/12313' }),
+            deleteFile: jest.fn().mockResolvedValue(undefined),
+            scanFile: jest.fn().mockRejectedValue(new Error('failed')),
+            onLoadComplete: jest.fn().mockResolvedValue(undefined),
+            accept: '.pdf,.txt',
+        }
+
+        render(<FileUpload {...props} />)
+
+        const input = screen.getByTestId('file-input-input')
+        userEvent.upload(input, [TEST_PDF_FILE])
+        await waitFor(() => expect(props.onLoadComplete).toHaveBeenCalled())
+
+        userClickByRole(screen, 'button', { name: 'Retry' })
+        await waitFor(() => expect(props.uploadFile).toHaveBeenCalled())
+        expect(props.uploadFile).toHaveBeenCalledTimes(2)
     })
 
     describe('drag and drop behavior', () => {
