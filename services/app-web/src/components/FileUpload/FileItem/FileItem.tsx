@@ -164,7 +164,7 @@ export const FileItem = ({
                 >
                     Remove
                 </Button>
-                {hasUploadError && !hasUnexpectedError && (
+                {(hasUploadError || hasScanningError) && !hasUnexpectedError && (
                     <Button
                         type="button"
                         size="small"
