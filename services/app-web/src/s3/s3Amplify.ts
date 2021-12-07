@@ -1,8 +1,6 @@
 import { parseKey } from '../common-code/s3URLEncoding'
-import { Storage } from 'aws-amplify'
+import { Storage, API } from 'aws-amplify'
 import { v4 as uuidv4 } from 'uuid'
-import { Lambda } from 'aws-sdk'
-import { axios } from 'axios'
 
 import type { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
@@ -128,15 +126,8 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
         getBulkDlURL: async (
             keys: string[],
             filename: string
-        ): Promise<string> => {
+        ): Promise<string | Error> => {
             // setup the lambda invocation
-            const stageName = process.env.stage
-            if (stageName === undefined || stageName === '') {
-                throw new Error(
-                    'You must set the stage name in your environment variables'
-                )
-            }
-
             const prependedKeys = keys.map((key) => `allusers/${key}`)
             const prependedFilename = `allusers/${filename}`
 
@@ -149,14 +140,14 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
             // the below is just a sketch, the URL needs to be fixed and the return value
             // should be the actual URL
             try {
-                const resp = await axios.post(
-                    '/zip',
-                    JSON.stringify({ body: zipRequestParams })
-                )
+                const resp = await API.post('api', '/zip', {
+                    response: true,
+                    body: zipRequestParams,
+                })
                 console.log(resp.data)
                 return prependedFilename // this needs to be fixed to the actual url
             } catch (err) {
-                throw new Error('Could not get a bulk DL URL: ' + err)
+                return new Error('Could not get a bulk DL URL: ' + err)
             }
         },
     }

@@ -67,6 +67,11 @@ export const SupportingDocumentsSummarySection = ({
                 keysFromDocs,
                 'some-filename.zip'
             )
+            if (zippedURL instanceof Error) {
+                console.log('ERROR: TODO: DISPLAY AN ERROR MESSAGE')
+                return
+            }
+
             setZippedFilesURL(zippedURL)
         }
 

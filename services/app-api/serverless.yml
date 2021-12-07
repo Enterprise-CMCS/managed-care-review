@@ -27,6 +27,7 @@ custom:
   draftSubmissionsTableStreamArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:database-${self:custom.stage}.DraftSubmissionsTableStreamArn}
   iamPath: ${env:IAM_PATH, "/"}
   iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
+  document_uploads_bucket_arn: ${cf:uploads-${self:custom.stage}.DocumentUploadsBucketArn}
   secretsManagerSecret: aurora_postgres_${self:custom.stage}
   reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
   dbURL: ${env:DATABASE_URL}
@@ -91,6 +92,12 @@ provider:
           Action:
             - lambda:InvokeFunction
           Resource: '*'
+        - Effect: 'Allow'
+          Action:
+            - 's3:*'
+          Resource:
+            # this is the "public" folder for all regular uploads from Amplify
+            - ${self:custom.document_uploads_bucket_arn}/allusers/*
 
   environment:
     stage: ${self:custom.stage}

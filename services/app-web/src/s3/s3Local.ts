@@ -84,7 +84,7 @@ export function newLocalS3Client(
         getBulkDlURL: async (
             keys: string[],
             filename: string
-        ): Promise<string> => {
+        ): Promise<string | Error> => {
             return 'dashboard'
         },
     }
