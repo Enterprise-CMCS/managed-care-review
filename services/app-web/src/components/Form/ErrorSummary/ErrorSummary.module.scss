@@ -1,0 +1,20 @@
+@import '../../../styles/uswdsImports.scss';
+
+.message {
+    border: 0;
+    background: transparent;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: normal;
+    color: color($theme-link-color);
+    text-align: left;
+}
+
+.summary {
+    h3 {
+        font-weight: bold;
+    }
+    ol {
+        padding-left: 1rem;
+    }
+}
