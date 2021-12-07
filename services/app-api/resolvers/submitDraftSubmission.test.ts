@@ -202,8 +202,17 @@ describe('submitDraftSubmission', () => {
                 console.log('Email content' + emailData)
                 sendCallback(emailData)
             },
-            generateEmailTemplate: ({ template }): EmailData => {
-                const result = newEmailTemplate({ template, config })
+            generateEmailTemplate: ({
+                template,
+                submission,
+                user,
+            }): EmailData => {
+                const result = newEmailTemplate({
+                    template,
+                    submission,
+                    user,
+                    config,
+                })
                 if (result instanceof Error) {
                     throw result
                 }
