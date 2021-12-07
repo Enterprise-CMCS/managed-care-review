@@ -242,8 +242,7 @@ describe('submitDraftSubmission', () => {
         expect(mockEmailer.generateEmailTemplate).toHaveNthReturnedWith(
             1,
             expect.objectContaining({
-                bodyText: `
-            ${sub.name} was received from FL.
+                bodyText: `${sub.name} was received from FL.
 
             Submission type: Contract action and rate certification
             Submission description: An updated submission
@@ -279,10 +278,17 @@ describe('submitDraftSubmission', () => {
         expect(mockEmailer.generateEmailTemplate).toHaveNthReturnedWith(
             2,
             expect.objectContaining({
-                bodyText: `
-            ${sub.name} was successfully submitted.
+                bodyText: `${sub.name} was successfully submitted.
 
-            View the full submission: http://localhost/submissions/${sub.id}`,
+            View the full submission: http://localhost/submissions/${sub.id}
+            
+            If you need to make any changes, please contact CMS.
+        
+            What comes next:
+            1. Check for completeness: CMS will review all documentation submitted to ensure all required materials were received.
+            2. CMS review: Your submission will be reviewed by CMS for adherence to federal regulations. If a rate certification is included, it will be reviewed for policy adherence and actuarial soundness.
+            3. Questions: You may receive questions via email form CMS as they conduct their reviews.
+            4. Decision: Once all questions have been addressed, CMS will contact you with their final recommendation.`,
             })
         )
     })
