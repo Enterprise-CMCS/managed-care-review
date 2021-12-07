@@ -1,7 +1,6 @@
 import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitDraftSubmission.graphql'
-import { StateSubmissionType } from '../../app-web/src/common-code/domain-models'
 import { StateSubmission } from '../gen/gqlServer'
-import { EmailData, Emailer, newSubmissionCMSEmailTemplate } from '../emailer'
+import { EmailData, Emailer, newEmailTemplate } from '../emailer'
 import {
     constructTestPostgresServer,
     createAndUpdateTestDraftSubmission,
@@ -199,12 +198,16 @@ describe('submitDraftSubmission', () => {
         }
         return {
             sendEmail: async (emailData: EmailData): Promise<void | Error> => {
-                console.log('Mocsk email locally')
+                console.log('Mock email locally')
                 console.log('Email content' + emailData)
                 sendCallback(emailData)
             },
-            generateCMSEmail: (submission: StateSubmissionType): EmailData => {
-                return newSubmissionCMSEmailTemplate(submission, config)
+            generateEmailTemplate: ({ template }): EmailData => {
+                const result = newEmailTemplate({ template, config })
+                if (result instanceof Error) {
+                    throw result
+                }
+                return result
             },
         }
     }

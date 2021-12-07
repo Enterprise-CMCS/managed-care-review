@@ -91,8 +91,9 @@ export function submitDraftSubmissionResolver(
     emailer: Emailer
 ): MutationResolvers['submitDraftSubmission'] {
     return async (_parent, { input }, context) => {
+        const { user } = context
         // This resolver is only callable by state users
-        if (!isStateUser(context.user)) {
+        if (!isStateUser(user)) {
             logError(
                 'submitDraftSubmission',
                 'user not authorized to fetch state data'
@@ -120,7 +121,7 @@ export function submitDraftSubmissionResolver(
         const draft: DraftSubmissionType = result
 
         // Authorization
-        const stateFromCurrentUser: State['code'] = context.user.state_code
+        const stateFromCurrentUser: State['code'] = user.state_code
         if (draft.stateCode !== stateFromCurrentUser) {
             logError(
                 'submitDraftSubmission',
@@ -159,12 +160,27 @@ export function submitDraftSubmissionResolver(
 
         const updatedSubmission: StateSubmissionType = updateResult
 
-        // Send the email!
-        const emailData = emailer.generateCMSEmail(stateSubmission)
+        // Send CMS and state emails for submission!
+        const emailData = emailer.generateEmailTemplate({
+            template: 'CMS_NEW_PACKAGE',
+            submission: stateSubmission,
+        })
         const emailResult = await emailer.sendEmail(emailData)
 
+        const emailData2 = emailer.generateEmailTemplate({
+            template: 'STATE_NEW_PACKAGE',
+            submission: stateSubmission,
+            user,
+        })
+        const emailResult2 = await emailer.sendEmail(emailData2)
+
         if (emailResult instanceof Error) {
-            logError('submitDraftSubmission', emailResult)
+            logError('submitDraftSubmission - CMS email', emailResult)
+            throw emailResult
+        }
+
+        if (emailResult2 instanceof Error) {
+            logError('submitDraftSubmission - state email', emailResult2)
             throw emailResult
         }
 

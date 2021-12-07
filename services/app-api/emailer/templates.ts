@@ -4,14 +4,19 @@ import {
     SubmissionType,
     StateSubmissionType,
     submissionName,
+    CognitoUserType,
 } from '../../app-web/src/common-code/domain-models'
 import { EmailData, EmailConfiguration } from './'
 
-enum EmailTemplate {
-    CMS_NEW_PACKAGE,
-    STATE_NEW_PACKAGE,
-}
+const TEMPLATE_NAME = ['CMS_NEW_PACKAGE', 'STATE_NEW_PACKAGE'] as const // iterable union type
+type EmailTemplateName = typeof TEMPLATE_NAME[number]
 
+type EmailTemplateParams = {
+    template: EmailTemplateName
+    submission?: StateSubmissionType
+    user?: CognitoUserType
+    config: EmailConfiguration
+}
 const SubmissionTypeRecord: Record<SubmissionType, string> = {
     CONTRACT_ONLY: 'Contract action only',
     CONTRACT_AND_RATES: 'Contract action and rate certification',
@@ -20,19 +25,33 @@ const SubmissionTypeRecord: Record<SubmissionType, string> = {
 const newEmailTemplate = ({
     template,
     submission,
+    user,
     config,
-}: {
-    template: EmailTemplate
-    submission: StateSubmissionType
-    config: EmailConfiguration
-}): EmailData | Error => {
+}: EmailTemplateParams): EmailData | Error => {
     switch (template) {
-        case EmailTemplate['CMS_NEW_PACKAGE']:
+        case 'CMS_NEW_PACKAGE':
+            if (!submission) {
+                return new Error(
+                    'Missing required param {submission} for CMS_NEW_PACKAGE email'
+                )
+            }
             return newSubmissionCMSEmailTemplate(submission, config)
-        case EmailTemplate['STATE_NEW_PACKAGE']:
-            return newSubmissionStateEmailTemplate(submission, config)
+        case 'STATE_NEW_PACKAGE': {
+            if (!user) {
+                return new Error(
+                    'Missing required param {user} for STATE_NEW_PACKAGE email'
+                )
+            }
+            if (!submission) {
+                return new Error(
+                    'Missing required param {submission} for STATE_NEW_PACKAGE email'
+                )
+            }
+
+            return newSubmissionStateEmailTemplate(submission, user, config)
+        }
         default:
-            return new Error('Invalid Email Template Type')
+            return new Error(`Invalid template name: ${template}`)
     }
 }
 
@@ -76,13 +95,14 @@ const newSubmissionCMSEmailTemplate = (
 
 const newSubmissionStateEmailTemplate = (
     submission: StateSubmissionType,
+    user: CognitoUserType,
     config: EmailConfiguration
 ): EmailData => {
     const submissionURL = new URL(
         `submissions/${submission.id}`,
         config.baseUrl
     ).href
-    const currentUserEmail = 'mc-review-qa@truss.works'
+    const currentUserEmail = user.email
     const receiverEmails: string[] = [currentUserEmail].concat(
         submission.stateContacts.map((contact) => contact.email)
     )
@@ -110,4 +130,4 @@ export {
     newEmailTemplate,
 }
 
-export type { EmailTemplate }
+export type { EmailTemplateName, EmailTemplateParams }

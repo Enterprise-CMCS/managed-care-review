@@ -1,11 +1,6 @@
 import { Lambda } from 'aws-sdk'
-import { StateSubmissionType } from '../../app-web/src/common-code/domain-models'
-import {
-    getSESEmailParams,
-    newSubmissionCMSEmailTemplate,
-    newEmailTemplate,
-} from './'
-import type { EmailTemplate } from './'
+import { getSESEmailParams, newEmailTemplate } from './'
+import type { EmailTemplateParams } from './'
 
 type EmailConfiguration = {
     stage: string
@@ -27,16 +22,9 @@ type EmailData = {
 
 type Emailer = {
     sendEmail: (emailData: EmailData) => Promise<void | Error>
-    generateCMSEmail: (submission: StateSubmissionType) => EmailData
-    generateEmailTemplate: ({
-        template,
-        submission,
-        config,
-    }: {
-        template: EmailTemplate
-        submission: StateSubmissionType
-        config: EmailConfiguration
-    }) => EmailData
+    generateEmailTemplate: (
+        params: Omit<EmailTemplateParams, 'config'> // omit config because that data is passed to Emailer on initialization
+    ) => EmailData
 }
 
 function newSESEmailer(config: EmailConfiguration): Emailer {
@@ -59,16 +47,12 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
                 return new Error('SES email send failed. ' + err)
             }
         },
-        generateCMSEmail: (submission: StateSubmissionType): EmailData => {
-            return newSubmissionCMSEmailTemplate(submission, config)
-        },
-        generateEmailTemplate: (options: {
-            template: EmailTemplate
-            submission: StateSubmissionType
-            config: EmailConfiguration
-        }): EmailData => {
-            const template = newEmailTemplate(options)
-            if (template instanceof Error) throw Error('Invalid Email Template')
+        generateEmailTemplate: (
+            params: Omit<EmailTemplateParams, 'config'>
+        ): EmailData => {
+            const template = newEmailTemplate({ ...params, config })
+            if (template instanceof Error)
+                throw Error(`generateEmailTemplate failed: ${template}`)
             return template
         },
     }
@@ -85,15 +69,10 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
             ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
         `)
         },
-        generateCMSEmail: (submission: StateSubmissionType): EmailData => {
-            return newSubmissionCMSEmailTemplate(submission, config)
-        },
-        generateEmailTemplate: (options: {
-            template: EmailTemplate
-            submission: StateSubmissionType
-            config: EmailConfiguration
-        }): EmailData => {
-            const template = newEmailTemplate(options)
+        generateEmailTemplate: (
+            params: Omit<EmailTemplateParams, 'config'>
+        ): EmailData => {
+            const template = newEmailTemplate({ ...params, config })
             if (template instanceof Error) throw Error('Invalid Email template')
             return template
         },
