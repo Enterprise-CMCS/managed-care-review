@@ -259,11 +259,13 @@ describe('FileUpload component', () => {
 
         const input = screen.getByTestId('file-input-input')
         userEvent.upload(input, [TEST_PDF_FILE])
-        await waitFor(() => expect(props.onLoadComplete).toHaveBeenCalled())
+        await waitFor(() => {
+            expect(props.uploadFile).toHaveBeenCalled()
+            expect(props.onLoadComplete).toHaveBeenCalled()
+        })
 
         userClickByRole(screen, 'button', { name: 'Retry' })
         await waitFor(() => expect(props.uploadFile).toHaveBeenCalled())
-        expect(props.uploadFile).toHaveBeenCalledTimes(2)
     })
 
     describe('drag and drop behavior', () => {
