@@ -17,19 +17,14 @@ runs:
       shell: bash
       run: ./.github/build_vars.sh set_names
 
-    - name: read .nvmrc
-      id: node_version
-      shell: bash
-      run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
-
     - name: Get yarn cache directory path
       shell: bash
       id: yarn-cache-dir-path
       run: echo "::set-output name=dir::$(yarn cache dir)"
 
-    - uses: actions/setup-node@v2.4.0
+    - uses: actions/setup-node@v2.5.0
       with:
-        node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
+        node-version-file: '.nvmrc'
         cache: 'yarn'
 
     - name: Install yarn package
