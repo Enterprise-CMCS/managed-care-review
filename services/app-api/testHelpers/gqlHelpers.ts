@@ -61,7 +61,7 @@ const createTestDraftSubmission = async (
     server: ApolloServer
 ): Promise<DraftSubmission> => {
     const input: CreateDraftSubmissionInput = {
-        programID: 'smmc',
+        programIDs: ['smmc'],
         submissionType: 'CONTRACT_ONLY' as const,
         submissionDescription: 'A created submission',
     }
@@ -123,7 +123,7 @@ const createAndUpdateTestDraftSubmission = async (
     const dateCertified = '2025-03-15'
 
     const updates = {
-        programID: 'cnet',
+        programIDs: ['cnet'],
         submissionType: 'CONTRACT_AND_RATES' as const,
         submissionDescription: 'An updated submission',
         documents: [],

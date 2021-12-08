@@ -38,7 +38,7 @@ function cleanDraftSubmission(
 // but for now the compiler complains if you forget anything so ¯\_(ツ)_/¯
 function updatesFromSubmission(draft: DraftSubmission): DraftSubmissionUpdates {
     return {
-        programID: draft.programID,
+        programIDs: draft.programIDs,
         submissionType: draft.submissionType,
         submissionDescription: draft.submissionDescription,
         documents: stripTypename(draft.documents),

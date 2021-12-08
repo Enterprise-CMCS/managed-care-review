@@ -19,7 +19,7 @@ export function createDraftSubmissionResolver(
 
         const stateFromCurrentUser: State['code'] = context.user.state_code
 
-        const program = store.findProgram(stateFromCurrentUser, input.programID)
+        const program = store.findProgram(stateFromCurrentUser, input.programIDs)
 
         if (program === undefined) {
             const errMessage = `The program id ${input.programID} does not exist in state ${stateFromCurrentUser}`
@@ -31,7 +31,7 @@ export function createDraftSubmissionResolver(
 
         const dbDraftSubmission: InsertDraftSubmissionArgsType = {
             stateCode: stateFromCurrentUser,
-            programID: input.programID,
+            programIDs: input.programIDs,
             submissionDescription: input.submissionDescription,
             submissionType:
                 input.submissionType as InsertDraftSubmissionArgsType['submissionType'],

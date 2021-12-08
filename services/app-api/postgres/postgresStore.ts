@@ -45,7 +45,7 @@ type Store = {
         stateSubmission: StateSubmissionType
     ) => Promise<StateSubmissionType | StoreError>
 
-    findProgram: (stateCode: string, programID: string) => ProgramT | undefined
+    findProgram: (stateCode: string, programIDs: Array<string>) => ProgramT | undefined
 }
 
 function NewPostgresStore(client: PrismaClient): Store {

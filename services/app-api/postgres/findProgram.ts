@@ -3,11 +3,11 @@ import statePrograms from '../data/statePrograms.json'
 
 function findProgram(
     stateCode: string,
-    programID: string
+    programIDs: Array<string>
 ): ProgramT | undefined {
     const program = statePrograms.states
         .find((state) => state.code === stateCode)
-        ?.programs.find((program) => program.id == programID)
+        ?.programs.find((program) => programIDs.some((id) => id === program.id))
 
     return program
 }

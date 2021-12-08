@@ -67,7 +67,7 @@ export function applyUpdates(
         }
     )
 
-    draft.programID = updates.programID
+    draft.programIDs = updates.programIDs
     draft.submissionType = updates.submissionType
     draft.submissionDescription = updates.submissionDescription
     draft.documents = updates.documents

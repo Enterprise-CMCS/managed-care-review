@@ -14,7 +14,7 @@ import {
 
 export type InsertDraftSubmissionArgsType = {
     stateCode: string
-    programID: string
+    programIDs: Array<string>
     submissionType: SubmissionType
     submissionDescription: string
 }
@@ -67,7 +67,7 @@ export async function insertDraftSubmission(
         stateNumber,
         status: 'DRAFT',
         submissionType: args.submissionType,
-        programID: args.programID,
+        programIDs: args.programIDs,
         submissionDescription: args.submissionDescription,
         stateCode: args.stateCode,
 

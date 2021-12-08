@@ -86,7 +86,7 @@ export type DraftSubmissionType = {
     status: 'DRAFT'
     stateCode: string
     stateNumber: number
-    programID: string
+    programIDs: string[]
     submissionType: SubmissionType
     submissionDescription: string
     stateContacts: StateContact[]

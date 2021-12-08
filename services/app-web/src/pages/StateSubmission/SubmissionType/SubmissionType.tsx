@@ -12,6 +12,7 @@ import {
 } from '@trussworks/react-uswds'
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
 import { NavLink, useHistory, Link as ReactRouterLink } from 'react-router-dom'
+import Select from 'react-select'
 
 import {
     CreateDraftSubmissionInput,
@@ -39,14 +40,14 @@ import {
 // Formik setup
 // Should be listed in order of appearance on field to allow errors to focus as expected
 const SubmissionTypeFormSchema = Yup.object().shape({
-    program: Yup.string(),
+    program: Yup.array(Yup.string()),
     submissionType: Yup.string().required('You must choose a submission type'),
     submissionDescription: Yup.string().required(
         'You must provide a description of any major changes or updates'
     ),
 })
 export interface SubmissionTypeFormValues {
-    programID: string
+    programIDs: string[]
     submissionDescription: string
     submissionType: string
 }
@@ -79,11 +80,10 @@ export const SubmissionType = ({
     const history = useHistory()
     const location = history.location
     const isNewSubmission = location.pathname === '/submissions/new'
-    const programOptions: Array<{ id: string; label: string }> = programs.map(
-        (program) => {
-            return { id: program.id, label: program.name }
-        }
-    )
+    const programOptions: Array<{ value: string; label: string }> =
+        programs.map((program) => {
+            return { value: program.id, label: program.name }
+        })
 
     const [createDraftSubmission, { error }] = useCreateDraftSubmissionMutation(
         {
@@ -130,7 +130,7 @@ export const SubmissionType = ({
         shouldValidate && Boolean(error)
 
     const submissionTypeInitialValues: SubmissionTypeFormValues = {
-        programID: draftSubmission?.program.id ?? programs[0]?.id,
+        programIDs: draftSubmission?.programIDs ?? [programs[0]?.id],
         submissionDescription: draftSubmission?.submissionDescription ?? '',
         submissionType: draftSubmission?.submissionType ?? '',
     }
@@ -155,7 +155,7 @@ export const SubmissionType = ({
                 }
 
                 const input: CreateDraftSubmissionInput = {
-                    programID: values.programID,
+                    programIDs: values.programIDs,
                     submissionType: values.submissionType,
                     submissionDescription: values.submissionDescription,
                 }
@@ -190,7 +190,7 @@ export const SubmissionType = ({
             }
             const updatedDraft = updatesFromSubmission(draftSubmission)
 
-            updatedDraft.programID = values.programID
+            updatedDraft.programIDs = values.programIDs
             updatedDraft.submissionType =
                 values.submissionType as SubmissionTypeT
             updatedDraft.submissionDescription = values.submissionDescription
@@ -239,13 +239,19 @@ export const SubmissionType = ({
                                     </Alert>
                                 ))}
                             <span>All fields are required</span>
-                            <FieldDropdown
+                            <Select
+                                id="programID"
+                                name="programID"
+                                options={programOptions}
+                                isMulti
+                            />
+                            {/* <FieldDropdown
                                 id="programID"
                                 name="programID"
                                 label="Program"
                                 showError={showFieldErrors(errors.programID)}
                                 options={programOptions}
-                            />
+                            /> */}
                             <FormGroup
                                 error={showFieldErrors(errors.submissionType)}
                             >

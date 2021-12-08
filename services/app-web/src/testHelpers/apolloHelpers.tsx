@@ -40,7 +40,7 @@ export function mockDraft(): DraftSubmission {
         updatedAt: new Date(),
         id: 'test-abc-123',
         stateCode: 'MN',
-        programID: 'snbc',
+        programIDs: ['snbc'],
         program: {
             id: 'snbc',
             name: 'SNBC',
@@ -75,7 +75,7 @@ export function mockContactAndRatesDraft(): DraftSubmission {
         updatedAt: new Date(),
         id: 'test-abc-123',
         stateCode: 'MN',
-        programID: 'snbc',
+        programIDs: ['snbc'],
         program: {
             id: 'snbc',
             name: 'SNBC',
@@ -109,7 +109,7 @@ export function mockCompleteDraft(): DraftSubmission {
         updatedAt: new Date(),
         id: 'test-abc-123',
         stateCode: 'MN',
-        programID: 'snbc',
+        programIDs: ['snbc'],
         program: {
             id: 'snbc',
             name: 'SNBC',
@@ -149,7 +149,7 @@ export function mockContractAndRatesDraft(): DraftSubmission {
         updatedAt: new Date(),
         id: 'test-abc-123',
         stateCode: 'MN',
-        programID: 'pmap',
+        programIDs: ['pmap'],
         program: {
             id: 'pmap',
             name: 'PMAP',
@@ -217,7 +217,7 @@ function mockNewDraft(): DraftSubmission {
         updatedAt: new Date(),
         id: 'test-abc-124',
         stateCode: 'MN',
-        programID: 'snbc',
+        programIDs: ['snbc'],
         program: {
             id: 'snbc',
             name: 'SNBC',
@@ -251,7 +251,7 @@ export function mockStateSubmission(): StateSubmission {
         updatedAt: new Date(),
         id: 'test-abc-125',
         stateCode: 'MN',
-        programID: 'snbc',
+        programIDs: ['snbc'],
         program: {
             id: 'snbc',
             name: 'SNBC',
@@ -320,7 +320,7 @@ fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
 
 type createDraftSubmissionMockProps = {
     input: {
-        programID: string
+        programIDs: Array<string>
         submissionType: string
         submissionDescription: string
     }
