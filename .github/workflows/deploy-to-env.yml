@@ -98,12 +98,6 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: Set application endpoint
-        run: |
-          cd services
-          endpoint=$(./output.sh ui CloudFrontEndpointUrl ${{ inputs.stage_name }})
-          echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
-
       - uses: actions/download-artifact@v2
         with:
           name: lambda-layers-prisma-client

@@ -124,7 +124,7 @@ async function initializeGQLHandler(): Promise<Handler> {
             'Configuration Error: SES_REVIEW_TEAM_EMAIL_ADDRESSES is required'
         )
 
-    if (applicationEndpoint === undefined)
+    if (applicationEndpoint === undefined || applicationEndpoint === '')
         throw new Error('Configuration Error: APPLICATION_ENDPOINT is required')
 
     if (stageName === undefined)

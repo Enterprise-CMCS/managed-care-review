@@ -19,7 +19,7 @@ custom:
   stage: ${opt:stage, self:provider.stage}
   region: ${opt:region, self:provider.region}
   appVersion: ${env:APP_VERSION}
-  applicationEndpoint: ${env:APPLICATION_ENDPOINT}
+  applicationEndpoint: ${cf:ui-${self:custom.stage}.CloudFrontEndpointUrl, env:APPLICATION_ENDPOINT}
   emailSource: ${env:SES_SOURCE_EMAIL_ADDRESS}
   emailerMode: ${env:EMAILER_MODE}
   emailReviewTeamAddresses: ${env:SES_REVIEW_TEAM_EMAIL_ADDRESSES}
