@@ -83,7 +83,7 @@ export const ErrorSummary = ({
             <div className="usa-alert__body">
                 <h3 className="usa-alert__heading" tabIndex={-1} ref={headingRef}>{summaryHeading(numberOfErrors)}</h3>
                 <ol>
-                    {Object.keys(errors).map((key) => <li><ErrorSummaryMessage key={key} errorKey={key} message={flattenMessage(errors[key])} /></li>)}
+                    {Object.keys(errors).map((key) => <li key={key}><ErrorSummaryMessage errorKey={key} message={flattenMessage(errors[key])} /></li>)}
                 </ol>
             </div>
         </div>
