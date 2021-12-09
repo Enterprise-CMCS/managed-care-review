@@ -65,7 +65,7 @@ export const SupportingDocumentsSummarySection = ({
             // call the lambda to zip the files and get the url
             const zippedURL = await getBulkDlURL(
                 keysFromDocs,
-                'some-filename.zip'
+                submission.name + '-supporting-documents.zip'
             )
             if (zippedURL instanceof Error) {
                 console.log('ERROR: TODO: DISPLAY AN ERROR MESSAGE')
@@ -76,7 +76,7 @@ export const SupportingDocumentsSummarySection = ({
         }
 
         void fetchZipUrl()
-    }, [getKey, getBulkDlURL, submission.documents])
+    }, [getKey, getBulkDlURL, submission])
 
     const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
 
@@ -87,13 +87,17 @@ export const SupportingDocumentsSummarySection = ({
                 navigateTo={navigateTo}
             />
             <div>
-                <Link
-                    className="usa-button"
-                    variant="unstyled"
-                    href={zippedFilesURL}
-                >
-                    Download all documents
-                </Link>
+                {zippedFilesURL ? (
+                    <Link
+                        variant="external"
+                        href={zippedFilesURL}
+                        target="_blank"
+                    >
+                        {'Download all supporting documents'}
+                    </Link>
+                ) : (
+                    <span>{}</span>
+                )}
             </div>
             <span className="text-bold">{documentsSummary}</span>
             <ul>
