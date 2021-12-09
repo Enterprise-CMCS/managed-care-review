@@ -20,6 +20,7 @@ import {
     FieldRadio,
     FieldCheckbox,
     FieldTextInput,
+    ErrorSummary,
 } from '../../../components/Form'
 import {
     FileUpload,
@@ -324,6 +325,14 @@ export const ContractDetails = ({
         }
     }
 
+    const documentsError = showDocumentErrors &&
+        fileItems.length === 0
+            ? ' You must upload at least one document'
+            : showDocumentErrors &&
+            !hasValidFiles
+            ? ' You must remove all documents with error messages before continuing'
+            : undefined;
+
     return (
         <Formik
             initialValues={contractDetailsInitialValues}
@@ -360,20 +369,15 @@ export const ContractDetails = ({
                             <legend className="srOnly">Contract Details</legend>
                             {formAlert && formAlert}
                             <span>All fields are required</span>
+
+                            <ErrorSummary errors={documentsError ? {documents: documentsError, ...errors} : errors} />
+
                             <FormGroup error={showDocumentErrors}>
                                 <FileUpload
                                     id="documents"
                                     name="documents"
                                     label="Upload contract"
-                                    error={
-                                        showDocumentErrors &&
-                                        fileItems.length === 0
-                                            ? ' You must upload at least one document'
-                                            : showDocumentErrors &&
-                                              !hasValidFiles
-                                            ? ' You must remove all documents with error messages before continuing'
-                                            : undefined
-                                    }
+                                    error={documentsError}
                                     hint={
                                         <>
                                             <Link

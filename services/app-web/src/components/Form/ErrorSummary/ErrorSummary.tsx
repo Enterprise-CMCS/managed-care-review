@@ -37,8 +37,16 @@ function summaryHeading(numberOfErrors: number) {
     }
 }
 
+function flattenMessage(message: string | string[]) {
+    if (typeof message === "string") {
+        return message;
+    }
+
+    return message.join(" and ");
+}
+
 export type ErrorSummaryProps = {
-    errors: { [field: string]: string }
+    errors: { [field: string]: string | string[] }
 }
 
 /**
@@ -75,7 +83,7 @@ export const ErrorSummary = ({
             <div className="usa-alert__body">
                 <h3 className="usa-alert__heading" tabIndex={-1} ref={headingRef}>{summaryHeading(numberOfErrors)}</h3>
                 <ol>
-                    {Object.keys(errors).map((key) => <li><ErrorSummaryMessage key={key} errorKey={key} message={errors[key]} /></li>)}
+                    {Object.keys(errors).map((key) => <li><ErrorSummaryMessage key={key} errorKey={key} message={flattenMessage(errors[key])} /></li>)}
                 </ol>
             </div>
         </div>
