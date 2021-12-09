@@ -4,8 +4,9 @@ import { getSESEmailParams, newSubmissionCMSEmailTemplate } from './'
 
 type EmailConfiguration = {
     stage: string
-    emailSource: string
     baseUrl: string
+    emailSource: string // an email address for the generic application-wide sender
+    cmsReviewSharedEmails: string[] // list of shared emails that all new managed care packages must be sent to
 }
 
 type EmailData = {

@@ -20,11 +20,15 @@ const newSubmissionCMSEmailTemplate = (
         `submissions/${submission.id}`,
         config.baseUrl
     ).href
+    const isTestEnvironment = config.stage !== 'prod'
+
+    const reviewerEmails = config.cmsReviewSharedEmails
+
     return {
-        toAddresses: ['mc-review-qa@truss.works'],
+        toAddresses: reviewerEmails,
         sourceEmail: config.emailSource,
         subject: `${
-            config.stage !== 'prod' ? `[${config.stage}] ` : ''
+            isTestEnvironment ? `[${config.stage}] ` : ''
         }New Managed Care Submission: ${submissionName(submission)}`,
         bodyText: `
             ${submissionName(submission)} was received from ${
