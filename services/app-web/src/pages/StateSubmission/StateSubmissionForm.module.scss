@@ -109,3 +109,19 @@
         margin-top: units(4);
     }
 }
+
+.multiSelect {
+    [class*='program-select__multi-value'] {
+        border-radius: 99rem 99rem 99rem 99rem;
+    }
+    [class*='program-select__multi-value__label'] {
+        background: $cms-color-primary;
+        color: white;
+        border-radius: 99rem 0rem 0rem 99rem;
+    }
+    [class*='program-select__multi-value__remove'] {
+        background: $cms-color-primary;
+        color: white;
+        border-radius: 0rem 99rem 99rem 0rem;
+    }
+}

@@ -253,6 +253,8 @@ export const SubmissionType = ({
                                 {/* @ts-ignore */}
                                 {({ field, form }) => (
                                     <Select
+                                        className={styles.multiSelect}
+                                        classNamePrefix="program-select"
                                         id="programIDs"
                                         name="programIDs"
                                         options={programOptions}
