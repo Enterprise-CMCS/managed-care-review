@@ -9,12 +9,12 @@ export function stateSubmissionResolver(
         program(parent) {
             const program = store.findProgram(
                 parent.stateCode,
-                parent.programID
+                parent.programIDs
             )
 
             if (program === undefined) {
                 throw new Error(
-                    `The program id ${parent.programID} does not exist in state ${parent.stateCode}`
+                    `The program id ${parent.programIDs} does not exist in state ${parent.stateCode}`
                 )
             }
 
@@ -24,12 +24,12 @@ export function stateSubmissionResolver(
         name(parent) {
             const program = store.findProgram(
                 parent.stateCode,
-                parent.programID
+                parent.programIDs
             )
 
             if (program === undefined) {
                 throw new Error(
-                    `The program id ${parent.programID} does not exist in state ${parent.stateCode}`
+                    `The program id ${parent.programIDs} does not exist in state ${parent.stateCode}`
                 )
             }
 

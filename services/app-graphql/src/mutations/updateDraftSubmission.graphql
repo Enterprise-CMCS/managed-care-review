@@ -5,7 +5,7 @@ mutation updateDraftSubmission($input: UpdateDraftSubmissionInput!) {
             name
             createdAt
             updatedAt
-            programID
+            programIDs
             program {
                 name
                 id

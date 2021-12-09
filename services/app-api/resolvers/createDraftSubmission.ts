@@ -22,10 +22,10 @@ export function createDraftSubmissionResolver(
         const program = store.findProgram(stateFromCurrentUser, input.programIDs)
 
         if (program === undefined) {
-            const errMessage = `The program id ${input.programID} does not exist in state ${stateFromCurrentUser}`
+            const errMessage = `The program id ${input.programIDs} does not exist in state ${stateFromCurrentUser}`
             logError('createDraftSubmission', errMessage)
             throw new UserInputError(errMessage, {
-                argumentName: 'programID',
+                argumentName: 'programIDs',
             })
         }
 

@@ -10,7 +10,7 @@ import {
     FormGroup,
     Link,
 } from '@trussworks/react-uswds'
-import { Formik, FormikHelpers, FormikErrors } from 'formik'
+import { Formik, FormikHelpers, FormikErrors, Field } from 'formik'
 import { NavLink, useHistory, Link as ReactRouterLink } from 'react-router-dom'
 import Select from 'react-select'
 
@@ -130,7 +130,7 @@ export const SubmissionType = ({
         shouldValidate && Boolean(error)
 
     const submissionTypeInitialValues: SubmissionTypeFormValues = {
-        programIDs: draftSubmission?.programIDs ?? [programs[0]?.id],
+        programIDs: draftSubmission?.programIDs ?? [],
         submissionDescription: draftSubmission?.submissionDescription ?? '',
         submissionType: draftSubmission?.submissionType ?? '',
     }
@@ -211,6 +211,15 @@ export const SubmissionType = ({
             }
         }
     }
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const getValue = (...args) => {
+        console.log('input: ', args)
+        return []
+        // if (programOptions) {
+        //     programOptions.filter(option => inputtarget..indexOf(option.value) >= 0)
+        // }
+    }
 
     return (
         <Formik
@@ -239,12 +248,32 @@ export const SubmissionType = ({
                                     </Alert>
                                 ))}
                             <span>All fields are required</span>
-                            <Select
-                                id="programID"
-                                name="programID"
+                            <Field name="programIDs">
+                                {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                                {/* @ts-ignore */}
+                                {({ field, form }) => (
+                                    <Select
+                                        id="programIDs"
+                                        name="programIDs"
+                                        options={programOptions}
+                                        isMulti
+                                        onChange={(selectedOption) =>
+                                            form.setFieldValue(
+                                                'programIDs',
+                                                selectedOption.map(
+                                                    (item) => item.value
+                                                )
+                                            )
+                                        }
+                                    />
+                                )}
+                            </Field>
+                            {/* <Select
+                                id="programIDs"
+                                name="programIDs"
                                 options={programOptions}
                                 isMulti
-                            />
+                            /> */}
                             {/* <FieldDropdown
                                 id="programID"
                                 name="programID"

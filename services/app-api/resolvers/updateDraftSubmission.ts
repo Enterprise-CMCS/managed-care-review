@@ -135,17 +135,17 @@ export function updateDraftSubmissionResolver(
             )
         }
 
-        // Validate the programID
+        // Validate the programIDs
         const program = store.findProgram(
             stateFromCurrentUser,
-            input.draftSubmissionUpdates.programID
+            input.draftSubmissionUpdates.programIDs
         )
 
         if (program === undefined) {
-            const errMessage = `The program id ${input.draftSubmissionUpdates.programID} does not exist in state ${stateFromCurrentUser}`
+            const errMessage = `The program id ${input.draftSubmissionUpdates.programIDs} does not exist in state ${stateFromCurrentUser}`
             logError('updateDraftSubmission', errMessage)
             throw new UserInputError(errMessage, {
-                argumentName: 'programID',
+                argumentName: 'programIDs',
             })
         }
 
