@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import dayjs from 'dayjs'
 import styles from '../SubmissionSummarySection.module.scss'
 import {
@@ -12,6 +13,8 @@ import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySec
 import { DataDetail } from '../../../components/DataDetail'
 import { DoubleColumnRow } from '../../../components/DoubleColumnRow'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
+import { useS3 } from '../../../contexts/S3Context'
+import { Link } from '@trussworks/react-uswds'
 
 export type ContractDetailsSummarySectionProps = {
     submission: DraftSubmission | StateSubmission
@@ -79,9 +82,52 @@ export const ContractDetailsSummarySection = ({
         itemsAmendedOtherList.push(amendedOtherReason)
     }
 
+    // Get the zip file for the contract
+    const { getKey, getBulkDlURL } = useS3()
+    useEffect(() => {
+        // get all the keys for the documents we want to zip
+        async function fetchZipUrl() {
+            const keysFromDocs = submission.contractDocuments
+                .map((doc) => {
+                    const key = getKey(doc.s3URL)
+                    if (!key) return ''
+                    return key
+                })
+                .filter((key) => key !== '')
+
+            // call the lambda to zip the files and get the url
+            const zippedURL = await getBulkDlURL(
+                keysFromDocs,
+                submission.name + '-contract-details.zip'
+            )
+            if (zippedURL instanceof Error) {
+                console.log('ERROR: TODO: DISPLAY AN ERROR MESSAGE')
+                return
+            }
+
+            setZippedFilesURL(zippedURL)
+        }
+
+        void fetchZipUrl()
+    }, [getKey, getBulkDlURL, submission])
+    const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
+
     return (
         <section id="contractDetailsSection" className={styles.summarySection}>
             <SectionHeader header="Contract details" navigateTo={navigateTo} />
+            <div>
+                {zippedFilesURL ? (
+                    <Link
+                        variant="external"
+                        href={zippedFilesURL}
+                        target="_blank"
+                    >
+                        {'Download all contract documents'}
+                    </Link>
+                ) : (
+                    <span>{}</span>
+                )}
+            </div>
             <dl>
                 <DoubleColumnRow
                     left={

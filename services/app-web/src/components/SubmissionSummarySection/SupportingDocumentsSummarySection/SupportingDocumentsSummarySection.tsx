@@ -54,6 +54,7 @@ export const SupportingDocumentsSummarySection = ({
     useEffect(() => {
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
+            console.log(submission)
             const keysFromDocs = submission.documents
                 .map((doc) => {
                     const key = getKey(doc.s3URL)

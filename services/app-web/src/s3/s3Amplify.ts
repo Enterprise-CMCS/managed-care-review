@@ -127,15 +127,7 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
             keys: string[],
             filename: string
         ): Promise<string | Error> => {
-            // if the zip file already exists, just return it
-            try {
-                const zipFile = await Storage.get(filename)
-                if (typeof zipFile === 'string') {
-                    return zipFile
-                }
-            } catch (err) {
-                return new Error('Could not get a bulk DL URL: ' + err)
-            }
+            // TODO: if the zip file already exists, just return it
 
             // zip doesn't exist yet, setup the lambda invocation to make it
             const prependedKeys = keys.map((key) => `allusers/${key}`)
