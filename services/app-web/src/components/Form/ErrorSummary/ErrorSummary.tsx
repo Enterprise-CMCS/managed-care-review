@@ -14,6 +14,7 @@ const ErrorSummaryMessage = ({
         <button
             type="button"
             className={classnames("usa-error-message", "usa-alert__text", styles.message)}
+            data-testid="error-summary-message"
             onClick={() => {
                 const fieldElement: HTMLElement | null = document.querySelector(
                     `[name="${errorKey}"]`
@@ -66,7 +67,7 @@ export const ErrorSummary = ({
     const headingRef = useRef<HTMLHeadingElement>(null);
 
     useEffect(() => {
-        if (numberOfErrors === 0) {
+        if (numberOfErrors > 0) {
             const { current } = headingRef;
             if (current) {
                 current.focus();
@@ -79,7 +80,7 @@ export const ErrorSummary = ({
     }
 
     return (
-        <div className={classNames("usa-alert", "usa-alert--error", styles.summary)} role="alert">
+        <div className={classNames("usa-alert", "usa-alert--error", styles.summary)} role="alert" data-testid="error-summary">
             <div className="usa-alert__body">
                 <h3 className="usa-alert__heading" tabIndex={-1} ref={headingRef}>{summaryHeading(numberOfErrors)}</h3>
                 <ol>
