@@ -14,6 +14,7 @@ import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
 import { StateSubmissionForm } from './StateSubmissionForm'
 import { updatesFromSubmission } from './updateSubmissionTransform'
+import selectEvent from 'react-select-event'
 
 describe('StateSubmissionForm', () => {
     describe('loads draft submission', () => {
@@ -74,8 +75,10 @@ describe('StateSubmissionForm', () => {
                 await screen.findByLabelText('Contract action only')
             ).toBeChecked()
 
-            const programs = await screen.findByLabelText('programs')
-            expect(programs).toHaveDisplayValue('SNBC')
+            // in react-select, only items that are selected have a "remove item" label
+            await waitFor(() => {
+                expect(screen.getByLabelText('Remove SNBC')).toBeInTheDocument()
+            })
         })
 
         it('loads contract details fields for /submissions/:id/contract-details with amendments', async () => {

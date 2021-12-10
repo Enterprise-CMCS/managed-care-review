@@ -255,6 +255,14 @@ export const SubmissionType = ({
                                 {/* @ts-ignore */}
                                 {({ field, form }) => (
                                     <Select
+                                        defaultValue={values.programIDs.map(
+                                            (item) => {
+                                                return {
+                                                    value: item,
+                                                    label: item.toUpperCase(),
+                                                }
+                                            }
+                                        )}
                                         className={styles.multiSelect}
                                         classNamePrefix="program-select"
                                         id="programIDs"

@@ -167,6 +167,7 @@ describe('SubmissionType', () => {
             await selectEvent.select(combobox, 'Program 1')
         })
 
+        // in react-select, only items that are selected have a "remove item" label
         await waitFor(() => {
             expect(
                 screen.getByLabelText('Remove Program 1')
