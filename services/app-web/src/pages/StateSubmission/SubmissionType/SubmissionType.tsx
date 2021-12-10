@@ -12,7 +12,7 @@ import {
 } from '@trussworks/react-uswds'
 import { Formik, FormikHelpers, FormikErrors, Field } from 'formik'
 import { NavLink, useHistory, Link as ReactRouterLink } from 'react-router-dom'
-import Select from 'react-select'
+import Select, { AriaOnFocus } from 'react-select'
 
 import {
     CreateDraftSubmissionInput,
@@ -26,11 +26,7 @@ import {
 import styles from '../StateSubmissionForm.module.scss'
 
 import { useAuth } from '../../../contexts/AuthContext'
-import {
-    FieldTextarea,
-    FieldDropdown,
-    FieldRadio,
-} from '../../../components/Form'
+import { FieldTextarea, FieldRadio } from '../../../components/Form'
 import { SubmissionTypeRecord } from '../../../constants/submissions'
 import {
     cleanDraftSubmission,
@@ -60,6 +56,13 @@ type SubmissionTypeProps = {
     formAlert?: React.ReactElement
 }
 
+interface ProgramOption {
+    readonly value: string
+    readonly label: string
+    readonly isFixed?: boolean
+    readonly isDisabled?: boolean
+}
+
 type FormError =
     FormikErrors<SubmissionTypeFormValues>[keyof FormikErrors<SubmissionTypeFormValues>]
 export const SubmissionType = ({
@@ -80,10 +83,18 @@ export const SubmissionType = ({
     const history = useHistory()
     const location = history.location
     const isNewSubmission = location.pathname === '/submissions/new'
+
     const programOptions: Array<{ value: string; label: string }> =
         programs.map((program) => {
             return { value: program.id, label: program.name }
         })
+
+    const onFocus: AriaOnFocus<ProgramOption> = ({ focused, isDisabled }) => {
+        const msg = `You are currently focused on option ${focused.label}${
+            isDisabled ? ', disabled' : ''
+        }`
+        return msg
+    }
 
     const [createDraftSubmission, { error }] = useCreateDraftSubmissionMutation(
         {
@@ -211,15 +222,6 @@ export const SubmissionType = ({
             }
         }
     }
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const getValue = (...args) => {
-        console.log('input: ', args)
-        return []
-        // if (programOptions) {
-        //     programOptions.filter(option => inputtarget..indexOf(option.value) >= 0)
-        // }
-    }
 
     return (
         <Formik
@@ -257,8 +259,12 @@ export const SubmissionType = ({
                                         classNamePrefix="program-select"
                                         id="programIDs"
                                         name="programIDs"
+                                        aria-label="programs"
                                         options={programOptions}
                                         isMulti
+                                        ariaLiveMessages={{
+                                            onFocus,
+                                        }}
                                         onChange={(selectedOption) =>
                                             form.setFieldValue(
                                                 'programIDs',
@@ -270,19 +276,6 @@ export const SubmissionType = ({
                                     />
                                 )}
                             </Field>
-                            {/* <Select
-                                id="programIDs"
-                                name="programIDs"
-                                options={programOptions}
-                                isMulti
-                            /> */}
-                            {/* <FieldDropdown
-                                id="programID"
-                                name="programID"
-                                label="Program"
-                                showError={showFieldErrors(errors.programID)}
-                                options={programOptions}
-                            /> */}
                             <FormGroup
                                 error={showFieldErrors(errors.submissionType)}
                             >

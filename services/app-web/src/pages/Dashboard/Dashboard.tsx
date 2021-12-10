@@ -8,7 +8,6 @@ import styles from './Dashboard.module.scss'
 import { Loading } from '../../components/Loading'
 import { useAuth } from '../../contexts/AuthContext'
 import {
-    Program,
     useIndexSubmissionsQuery,
     SubmissionType as GQLSubmissionType,
 } from '../../gen/gqlClient'
@@ -156,6 +155,7 @@ export const Dashboard = (): React.ReactElement => {
                                                             (id) => {
                                                                 return (
                                                                     <Tag
+                                                                        key={id}
                                                                         className={`radius-pill ${styles.programTag}`}
                                                                     >
                                                                         {id}

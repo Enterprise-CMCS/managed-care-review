@@ -74,8 +74,8 @@ describe('StateSubmissionForm', () => {
                 await screen.findByLabelText('Contract action only')
             ).toBeChecked()
 
-            const program = await screen.findByLabelText('Program')
-            expect(program).toHaveDisplayValue('SNBC')
+            const programs = await screen.findByLabelText('programs')
+            expect(programs).toHaveDisplayValue('SNBC')
         })
 
         it('loads contract details fields for /submissions/:id/contract-details with amendments', async () => {
@@ -226,10 +226,10 @@ describe('StateSubmissionForm', () => {
             )
 
             await waitFor(() =>
-            expect(
-                screen.getByRole('form', { name: 'Submission Type Form' })
-            ).toBeInTheDocument()
-        )
+                expect(
+                    screen.getByRole('form', { name: 'Submission Type Form' })
+                ).toBeInTheDocument()
+            )
             const textarea = await screen.findByRole('textbox', {
                 name: 'Submission description',
             })
@@ -285,10 +285,10 @@ describe('StateSubmissionForm', () => {
                 }
             )
             await waitFor(() =>
-            expect(
-                screen.getByRole('form', { name: 'Submission Type Form' })
-            ).toBeInTheDocument()
-        )
+                expect(
+                    screen.getByRole('form', { name: 'Submission Type Form' })
+                ).toBeInTheDocument()
+            )
 
             const textarea = await screen.findByRole('textbox', {
                 name: 'Submission description',
