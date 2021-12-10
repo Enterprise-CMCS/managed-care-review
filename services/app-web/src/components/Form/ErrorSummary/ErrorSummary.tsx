@@ -11,9 +11,9 @@ const ErrorSummaryMessage = ({
     errorKey, message
 }: ErrorSummaryMessageProps): React.ReactElement => {
     return (
-        <button
-            type="button"
-            className={classnames("usa-error-message", "usa-alert__text", styles.message)}
+        <a
+            href={"#" + errorKey}
+            className={classnames(styles.message)}
             data-testid="error-summary-message"
             onClick={() => {
                 const fieldElement: HTMLElement | null = document.querySelector(
@@ -26,7 +26,7 @@ const ErrorSummaryMessage = ({
             }}
         >
         {message}
-      </button> 
+      </a> 
     ) 
 }
 
