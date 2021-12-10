@@ -263,7 +263,7 @@ describe('submitDraftSubmission', () => {
             Submission type: Contract action and rate certification
             Submission description: An updated submission
 
-            View the full submission: http://localhost/submissions/${sub.id}`,
+            View submission: http://localhost/submissions/${sub.id}`,
             })
         )
     })
@@ -295,14 +295,14 @@ describe('submitDraftSubmission', () => {
             expect.objectContaining({
                 bodyText: `${sub.name} was successfully submitted.
 
-            View the full submission: http://localhost/submissions/${sub.id}
+            View submission: http://localhost/submissions/${sub.id}
             
             If you need to make any changes, please contact CMS.
         
             What comes next:
             1. Check for completeness: CMS will review all documentation submitted to ensure all required materials were received.
             2. CMS review: Your submission will be reviewed by CMS for adherence to federal regulations. If a rate certification is included, it will be reviewed for policy adherence and actuarial soundness.
-            3. Questions: You may receive questions via email form CMS as they conduct their reviews.
+            3. Questions: You may receive questions via email from CMS as they conduct their review.
             4. Decision: Once all questions have been addressed, CMS will contact you with their final recommendation.`,
             })
         )

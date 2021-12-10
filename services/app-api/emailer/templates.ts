@@ -38,7 +38,7 @@ const newPackageCMSEmailTemplate = (
             Submission type: ${SubmissionTypeRecord[submission.submissionType]}
             Submission description: ${submission.submissionDescription}
 
-            View the full submission: ${submissionURL}`,
+            View submission: ${submissionURL}`,
         bodyHTML: `
             ${submissionName(submission)} was received from ${
             submission.stateCode
@@ -49,7 +49,7 @@ const newPackageCMSEmailTemplate = (
             Submission description: ${
                 submission.submissionDescription
             }<br /><br />
-            <a href="${submissionURL}">View the full submission</a>
+            <a href="${submissionURL}">View submission</a>
         `,
     }
 }
@@ -75,19 +75,19 @@ const newPackageStateEmailTemplate = (
         }${submissionName(submission)} was sent to CMS`,
         bodyText: `${submissionName(submission)} was successfully submitted.
 
-            View the full submission: ${submissionURL}
+            View submission: ${submissionURL}
             
             If you need to make any changes, please contact CMS.
         
             What comes next:
             1. Check for completeness: CMS will review all documentation submitted to ensure all required materials were received.
             2. CMS review: Your submission will be reviewed by CMS for adherence to federal regulations. If a rate certification is included, it will be reviewed for policy adherence and actuarial soundness.
-            3. Questions: You may receive questions via email form CMS as they conduct their reviews.
+            3. Questions: You may receive questions via email from CMS as they conduct their review.
             4. Decision: Once all questions have been addressed, CMS will contact you with their final recommendation.`,
         bodyHTML: `
             ${submissionName(submission)} was successfully submitted.
             <br /><br />
-            <a href="${submissionURL}">View the full submission</a>
+            <a href="${submissionURL}">View submission</a>
             <br /><br />
             If you need to make any changes, please contact CMS.
             <br /><br />
@@ -100,7 +100,7 @@ const newPackageStateEmailTemplate = (
                     <strong>CMS review:</strong> Your submission will be reviewed by CMS for adherence to federal regulations. If a rate certification is included, it will be reviewed for policy adherence and actuarial soundness.
                 </li>
                 <li>
-                    <strong>Questions:</strong> You may receive questions via email form CMS as they conduct their reviews.
+                    <strong>Questions:</strong> You may receive questions via email from CMS as they conduct their review.
                 </li>
                 <li>
                     <strong>Decision:</strong> Once all questions have been addressed, CMS will contact you with their final recommendation.
