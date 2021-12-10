@@ -77,7 +77,14 @@ export const main: APIGatewayProxyHandler = async (event) => {
         (key: string) => {
             return {
                 stream: s3
-                    .getObject({ Bucket: bulkDlRequest.bucket, Key: key })
+                    .getObject(
+                        { Bucket: bulkDlRequest.bucket, Key: key },
+                        function (err, data) {
+                            // an error occurred
+                            if (err) console.log(err, err.stack)
+                            else console.log(data) // successful response
+                        }
+                    )
                     .createReadStream(),
                 filename: key,
             }
