@@ -1,6 +1,5 @@
 import { Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
-import { ProgressPlugin } from 'webpack'
 import styles from './SectionHeader.module.scss'
 
 export type SectionHeaderProps = {
