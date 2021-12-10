@@ -47,7 +47,8 @@ function flattenMessage(message: string | string[]) {
 }
 
 export type ErrorSummaryProps = {
-    errors: { [field: string]: string | string[] }
+    errors: { [field: string]: string | string[] },
+    autofocus?: boolean,
 }
 
 /**
@@ -60,20 +61,23 @@ export type ErrorSummaryProps = {
  * rendered inside of a Formik form context.
  */
 export const ErrorSummary = ({
-    errors
+    errors,
+    autofocus = true
 }: ErrorSummaryProps): React.ReactElement | null => {
     const numberOfErrors = Object.keys(errors).length;
 
     const headingRef = useRef<HTMLHeadingElement>(null);
 
+    const focusHeading = numberOfErrors > 0 && autofocus;
+
     useEffect(() => {
-        if (numberOfErrors > 0) {
+        if (focusHeading) {
             const { current } = headingRef;
             if (current) {
                 current.focus();
             }
         }
-      }, [numberOfErrors]);
+      }, [focusHeading]);
       
     if (numberOfErrors === 0) {
         return null;
