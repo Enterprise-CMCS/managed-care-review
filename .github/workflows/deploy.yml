@@ -57,7 +57,7 @@ jobs:
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
           INFRASTRUCTURE_TYPE: ${{ secrets.INFRASTRUCTURE_TYPE || 'development' }}
           SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
-          SES_REVIEW_TEAM_EMAIL_ADDRESS: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
+          SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
           OKTA_METADATA_URL: ${{ secrets.OKTA_METADATA_URL }}
           IAM_PATH: ${{ secrets.IAM_PATH }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
@@ -147,7 +147,7 @@ jobs:
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       infrastructure_type: ${{ secrets.INFRASTRUCTURE_TYPE || 'development' }}
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
-      ses_review_team_email_address: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
+      ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
       okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
       iam_path: ${{ secrets.IAM_PATH }}
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
@@ -179,7 +179,7 @@ jobs:
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
           INFRASTRUCTURE_TYPE: ${{ secrets.INFRASTRUCTURE_TYPE || 'development' }}
           SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
-          SES_REVIEW_TEAM_EMAIL_ADDRESS: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
+          SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
           OKTA_METADATA_URL: ${{ secrets.OKTA_METADATA_URL }}
           IAM_PATH: ${{ secrets.IAM_PATH }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
