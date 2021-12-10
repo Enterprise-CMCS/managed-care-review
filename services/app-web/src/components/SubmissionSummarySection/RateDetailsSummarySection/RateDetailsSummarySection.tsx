@@ -51,20 +51,21 @@ export const RateDetailsSummarySection = ({
     return (
         <section id="rateDetails" className={styles.summarySection}>
             <dl>
-                <SectionHeader header="Rate details" navigateTo={navigateTo} />
-                <div>
-                    {zippedFilesURL ? (
-                        <Link
-                            variant="external"
-                            href={zippedFilesURL}
-                            target="_blank"
-                        >
-                            {'Download all rate documents'}
-                        </Link>
-                    ) : (
-                        <span>{}</span>
-                    )}
-                </div>
+                <SectionHeader header="Rate details" navigateTo={navigateTo}>
+                    <div>
+                        {zippedFilesURL ? (
+                            <Link
+                                variant="external"
+                                href={zippedFilesURL}
+                                target="_blank"
+                            >
+                                {'Download all rate documents'}
+                            </Link>
+                        ) : (
+                            <span>{}</span>
+                        )}
+                    </div>
+                </SectionHeader>
 
                 <DoubleColumnRow
                     left={

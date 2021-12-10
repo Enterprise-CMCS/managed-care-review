@@ -114,20 +114,21 @@ export const ContractDetailsSummarySection = ({
 
     return (
         <section id="contractDetailsSection" className={styles.summarySection}>
-            <SectionHeader header="Contract details" navigateTo={navigateTo} />
-            <div>
-                {zippedFilesURL ? (
-                    <Link
-                        variant="external"
-                        href={zippedFilesURL}
-                        target="_blank"
-                    >
-                        {'Download all contract documents'}
-                    </Link>
-                ) : (
-                    <span>{}</span>
-                )}
-            </div>
+            <SectionHeader header="Contract details" navigateTo={navigateTo}>
+                <div>
+                    {zippedFilesURL ? (
+                        <Link
+                            variant="external"
+                            href={zippedFilesURL}
+                            target="_blank"
+                        >
+                            {'Download all contract documents'}
+                        </Link>
+                    ) : (
+                        <span>{}</span>
+                    )}
+                </div>
+            </SectionHeader>
             <dl>
                 <DoubleColumnRow
                     left={

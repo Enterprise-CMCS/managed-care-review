@@ -1,15 +1,18 @@
 import { Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
+import { ProgressPlugin } from 'webpack'
 import styles from './SectionHeader.module.scss'
 
 export type SectionHeaderProps = {
     header: string
     navigateTo?: string
+    children?: React.ReactNode
 }
 
 export const SectionHeader = ({
     header,
     navigateTo,
+    children,
 }: SectionHeaderProps): React.ReactElement => {
     return (
         <div className={styles.summarySectionHeader}>
@@ -26,6 +29,7 @@ export const SectionHeader = ({
                     </Link>
                 </div>
             )}
+            {children}
         </div>
     )
 }

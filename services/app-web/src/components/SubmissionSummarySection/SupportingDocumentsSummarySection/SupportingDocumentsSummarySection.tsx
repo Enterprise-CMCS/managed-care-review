@@ -86,20 +86,21 @@ export const SupportingDocumentsSummarySection = ({
             <SectionHeader
                 header="Supporting documents"
                 navigateTo={navigateTo}
-            />
-            <div>
-                {zippedFilesURL ? (
-                    <Link
-                        variant="external"
-                        href={zippedFilesURL}
-                        target="_blank"
-                    >
-                        {'Download all supporting documents'}
-                    </Link>
-                ) : (
-                    <span>{}</span>
-                )}
-            </div>
+            >
+                <div>
+                    {zippedFilesURL ? (
+                        <Link
+                            variant="external"
+                            href={zippedFilesURL}
+                            target="_blank"
+                        >
+                            {'Download all supporting documents'}
+                        </Link>
+                    ) : (
+                        <span>{}</span>
+                    )}
+                </div>
+            </SectionHeader>
             <span className="text-bold">{documentsSummary}</span>
             <ul>
                 {refreshedDocs.map((doc) => (
