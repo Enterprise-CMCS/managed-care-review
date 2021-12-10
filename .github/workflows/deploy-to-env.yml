@@ -29,8 +29,8 @@ on:
         required: true
       ses_source_email_address:
         required: true
-      ses_review_team_email_address:
-        required: false
+      ses_review_team_email_addresses:
+        required: true
       route_53_hosted_zone_id:
         required: false
       route_53_domain_name:
@@ -98,25 +98,6 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: set variable values
-        run: ./.github/build_vars.sh set_values
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
-          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
-          DATABASE_URL: AWS_SM
-          REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
-          IAM_PATH: ${{ secrets.iam_path }}
-          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
-          EMAILER_MODE: SES
-          SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.ses_source_email_address }}
-
-      - name: Set application endpoint
-        run: |
-          cd services
-          endpoint=$(./output.sh ui CloudFrontEndpointUrl ${{ inputs.stage_name }})
-          echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
-
       - uses: actions/download-artifact@v2
         with:
           name: lambda-layers-prisma-client
@@ -131,6 +112,17 @@ jobs:
         id: deploy-app-api
         env:
           NODE_OPTIONS: --max_old_space_size=4096
+          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
+          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
+          DATABASE_URL: AWS_SM
+          REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
+          IAM_PATH: ${{ secrets.iam_path }}
+          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
+          EMAILER_MODE: SES
+          SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.ses_review_team_email_addresses }}
+          SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.ses_source_email_address }}
+
         run: |
           pushd services/app-api && npx serverless deploy --stage ${{ inputs.stage_name }}
 
@@ -184,7 +176,7 @@ jobs:
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
           INFRASTRUCTURE_TYPE: ${{ secrets.infrastructure_type }}
           SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.ses_source_email_address }}
-          SES_REVIEW_TEAM_EMAIL_ADDRESS: ${{ secrets.ses_review_team_email_address }}
+          SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.ses_review_team_email_addresses }}
           ROUTE_53_HOSTED_ZONE_ID: ${{ secrets.route_53_hosted_zone_id }}
           ROUTE_53_DOMAIN_NAME: ${{ secrets.route_53_domain_name }}
           CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets.cloudfront_certificate_arn }}

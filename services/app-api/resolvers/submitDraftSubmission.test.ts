@@ -203,6 +203,7 @@ describe('submitDraftSubmission', () => {
             emailSource: 'local@example.com',
             stage: 'local',
             baseUrl: 'http://localhost',
+            cmsReviewSharedEmails: ['test@example.com'],
         }
         return {
             sendEmail: jest.fn(

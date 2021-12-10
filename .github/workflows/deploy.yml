@@ -18,7 +18,7 @@ jobs:
         image: postgres:13.3
         env:
           REACT_APP_AUTH_MODE: AWS_COGNITO
-          POSTGRES_PASSWORD: shhhsecret
+          POSTGRES_PASSWORD: shhhsecret #pragma: allowlist secret
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
@@ -57,7 +57,7 @@ jobs:
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
           INFRASTRUCTURE_TYPE: ${{ secrets.INFRASTRUCTURE_TYPE || 'development' }}
           SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
-          SES_REVIEW_TEAM_EMAIL_ADDRESS: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
+          SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
           OKTA_METADATA_URL: ${{ secrets.OKTA_METADATA_URL }}
           IAM_PATH: ${{ secrets.IAM_PATH }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
@@ -65,7 +65,7 @@ jobs:
 
       - name: Unit Tests
         env:
-          DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5
+          DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         run: ./dev test --unit
 
       - name: publish code coverage
@@ -94,13 +94,9 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v2
 
-      - name: read .nvmrc
-        id: node_version
-        run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
-
-      - uses: actions/setup-node@v2.4.1
+      - uses: actions/setup-node@v2.5.0
         with:
-          node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
+          node-version-file: '.nvmrc'
           cache: yarn
 
       - name: Get yarn cache directory path
@@ -130,7 +126,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       branch-name: ${{ steps.branch-name.outputs.stage-name-for-branch}}
-      node-version: ${{ steps.node_version.outputs.node_version }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
@@ -140,11 +135,6 @@ jobs:
         shell: bash
         run: |
           echo "::set-output name=stage-name-for-branch::$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})"
-
-      - name: read .nvmrc
-        id: node_version
-        shell: bash
-        run: echo ::set-output name=node_version::$(cat .nvmrc)
 
   deploy-branch:
     needs: [build-prisma-client-lambda-layer, get-branch-name-vars, unit-tests]
@@ -157,7 +147,7 @@ jobs:
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       infrastructure_type: ${{ secrets.INFRASTRUCTURE_TYPE || 'development' }}
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
-      ses_review_team_email_address: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
+      ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
       okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
       iam_path: ${{ secrets.IAM_PATH }}
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
@@ -189,7 +179,7 @@ jobs:
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
           INFRASTRUCTURE_TYPE: ${{ secrets.INFRASTRUCTURE_TYPE || 'development' }}
           SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
-          SES_REVIEW_TEAM_EMAIL_ADDRESS: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
+          SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
           OKTA_METADATA_URL: ${{ secrets.OKTA_METADATA_URL }}
           IAM_PATH: ${{ secrets.IAM_PATH }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
