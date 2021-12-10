@@ -4,6 +4,7 @@ import {
     SubmissionUnionType,
 } from '../../app-web/src/common-code/domain-models'
 import { QueryResolvers } from '../gen/gqlServer'
+import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
 
 export function indexSubmissionsResolver(
@@ -12,6 +13,10 @@ export function indexSubmissionsResolver(
     return async (_parent, _args, context) => {
         // This resolver is only callable by state users
         if (!isStateUser(context.user)) {
+            logError(
+                'indexSubmissions',
+                'user not authorized to fetch state data'
+            )
             throw new ForbiddenError('user not authorized to fetch state data')
         }
 
@@ -20,6 +25,10 @@ export function indexSubmissionsResolver(
 
         if (isStoreError(result)) {
             if (result.code === 'WRONG_STATUS') {
+                logError(
+                    'indexSubmissions',
+                    'Submission is not a DraftSubmission'
+                )
                 throw new ApolloError(
                     `Submission is not a DraftSubmission`,
                     'WRONG_STATUS',
@@ -28,9 +37,10 @@ export function indexSubmissionsResolver(
                     }
                 )
             }
-            throw new Error(
-                `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
-            )
+
+            const errMessage = `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
+            logError('indexSubmissions', errMessage)
+            throw new Error(errMessage)
         }
 
         const submissions: SubmissionUnionType[] = result
@@ -41,6 +51,7 @@ export function indexSubmissionsResolver(
             }
         })
 
+        logSuccess('indexSubmissions')
         return { totalCount: edges.length, edges }
     }
 }

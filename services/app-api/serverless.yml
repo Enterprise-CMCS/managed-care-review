@@ -8,6 +8,7 @@ package:
 plugins:
   - serverless-webpack
   - serverless-offline
+  - serverless-online
   - serverless-associate-waf
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
@@ -18,6 +19,10 @@ custom:
   stage: ${opt:stage, self:provider.stage}
   region: ${opt:region, self:provider.region}
   appVersion: ${env:APP_VERSION}
+  applicationEndpoint: ${cf:ui-${self:custom.stage}.CloudFrontEndpointUrl, env:APPLICATION_ENDPOINT}
+  emailSource: ${env:SES_SOURCE_EMAIL_ADDRESS}
+  emailerMode: ${env:EMAILER_MODE}
+  emailReviewTeamAddresses: ${env:SES_REVIEW_TEAM_EMAIL_ADDRESSES}
   auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:postgres-${self:custom.stage}.PostgresAuroraArn }
   draftSubmissionsTableArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:database-${self:custom.stage}.DraftSubmissionsTableArn}
   draftSubmissionsTableStreamArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:database-${self:custom.stage}.DraftSubmissionsTableStreamArn}
@@ -78,6 +83,15 @@ provider:
             - rds-db:connect
           Resource:
             - ${self:custom.auroraArn}
+        - Effect: 'Allow'
+          Action:
+            - ses:SendEmail
+            - ses:SendRawEmail
+          Resource: '*'
+        - Effect: 'Allow'
+          Action:
+            - lambda:InvokeFunction
+          Resource: '*'
 
   environment:
     stage: ${self:custom.stage}
@@ -85,12 +99,24 @@ provider:
     DATABASE_URL: ${self:custom.dbURL}
     REACT_APP_AUTH_MODE: ${self:custom.reactAppAuthMode}
     SECRETS_MANAGER_SECRET: ${self:custom.secretsManagerSecret}
+    EMAILER_MODE: ${self:custom.emailerMode}
+    SES_SOURCE_EMAIL_ADDRESS: ${self:custom.emailSource}
+    SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${self:custom.emailReviewTeamAddresses}
+    APPLICATION_ENDPOINT: ${self:custom.applicationEndpoint}
 
 layers:
   prismaClient:
     path: lambda-layers-prisma-client
 
 functions:
+  email_submit:
+    handler: handlers/email_submit.main
+    events:
+      - http:
+          path: email_submit
+          method: post
+          cors: true
+
   health:
     handler: handlers/health_check.main
     events:

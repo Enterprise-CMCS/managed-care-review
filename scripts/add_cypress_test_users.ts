@@ -99,8 +99,9 @@ async function createUser({
         await cognito.adminCreateUser(userProps).promise()
     } catch (e) {
         // swallow username exists errors. this script is meant to be run repeatedly.
-        if (e.code !== 'UsernameExistsException') {
-            throw e
+        // @ts-ignore-next-line err is unknown - we need a type assertion for AWSError type
+        if (e.code && e.code !== 'UsernameExistsException') {
+            throw new Error('AWS Error: ' + e)
         }
     }
 

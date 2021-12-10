@@ -4,6 +4,7 @@ import { insertDraftSubmission } from './insertDraftSubmission'
 import { isStoreError } from './storeError'
 
 describe('insertDraftSubmissionPostgres', () => {
+    // TODO this test needs to be improved its not testing anything
     // eslint-disable-next-line jest/expect-expect
     it('increases state number with every insertion', async () => {
         // this test attempts to create a number of drafts concurrently.

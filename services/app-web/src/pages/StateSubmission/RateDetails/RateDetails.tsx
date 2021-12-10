@@ -35,7 +35,6 @@ import {
     formatUserInputDate,
 } from '../../../formHelpers'
 import { isS3Error } from '../../../s3'
-import { MCRouterState } from '../../../constants/routerState'
 import { RateDetailsFormSchema } from './RateDetailsSchema'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
 import { useS3 } from '../../../contexts/S3Context'
@@ -79,7 +78,7 @@ export const RateDetails = ({
     ) => Promise<DraftSubmission | undefined>
 }): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
-    const history = useHistory<MCRouterState>()
+    const history = useHistory()
 
     // Rate documents state management
     const { deleteFile, getKey, getS3URL, scanFile, uploadFile } = useS3()
@@ -263,9 +262,7 @@ export const RateDetails = ({
                 draftSubmissionUpdates: updatedDraft,
             })
             if (updatedSubmission) {
-                history.push(options.redirectPath, {
-                    defaultProgramID: draftSubmission.programID,
-                })
+                history.push(options.redirectPath)
             }
         } catch (serverError) {
             setSubmitting(false)

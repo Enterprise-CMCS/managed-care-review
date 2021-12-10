@@ -22,7 +22,6 @@ import {
     FileItemT,
 } from '../../../components/FileUpload'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
-import { MCRouterState } from '../../../constants/routerState'
 
 /*
  * The page level component is responsible for setting up api requests, redirects, and handling page level alert for overall errors related to invalid documents for a submission
@@ -70,7 +69,7 @@ export const Documents = ({
     const [hasValidFiles, setHasValidFiles] = useState(false)
     const [hasPendingFiles, setHasPendingFiles] = useState(false)
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
-    const history = useHistory<MCRouterState>()
+    const history = useHistory()
 
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         draftSubmission &&
@@ -214,9 +213,7 @@ export const Documents = ({
                     draftSubmissionUpdates: updatedDraft,
                 })
                 if (updatedSubmission) {
-                    history.push(redirectPath, {
-                        defaultProgramID: draftSubmission.programID,
-                    })
+                    history.push(redirectPath)
                 }
             } catch (error) {
                 onUpdateDraftSubmissionError()
