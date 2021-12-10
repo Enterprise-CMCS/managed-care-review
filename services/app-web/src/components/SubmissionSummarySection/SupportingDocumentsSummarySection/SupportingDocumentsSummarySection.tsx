@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import styles from '../SubmissionSummarySection.module.scss'
 import { Document } from '../../../gen/gqlClient'
 import { SectionHeader } from '../../SectionHeader'
+import { DownloadButton } from '../../DownloadButton'
 import { Link } from '@trussworks/react-uswds'
 import { useS3 } from '../../../contexts/S3Context'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
@@ -87,19 +88,10 @@ export const SupportingDocumentsSummarySection = ({
                 header="Supporting documents"
                 navigateTo={navigateTo}
             >
-                <div>
-                    {zippedFilesURL ? (
-                        <Link
-                            variant="external"
-                            href={zippedFilesURL}
-                            target="_blank"
-                        >
-                            {'Download all supporting documents'}
-                        </Link>
-                    ) : (
-                        <span>{}</span>
-                    )}
-                </div>
+                <DownloadButton
+                    text="Download all supporting documents"
+                    zippedFilesURL={zippedFilesURL}
+                />
             </SectionHeader>
             <span className="text-bold">{documentsSummary}</span>
             <ul>

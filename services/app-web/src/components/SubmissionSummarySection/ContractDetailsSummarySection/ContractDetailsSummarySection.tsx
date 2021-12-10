@@ -12,9 +12,9 @@ import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import { DataDetail } from '../../../components/DataDetail'
 import { DoubleColumnRow } from '../../../components/DoubleColumnRow'
+import { DownloadButton } from '../../DownloadButton'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
-import { Link } from '@trussworks/react-uswds'
 
 export type ContractDetailsSummarySectionProps = {
     submission: DraftSubmission | StateSubmission
@@ -115,19 +115,10 @@ export const ContractDetailsSummarySection = ({
     return (
         <section id="contractDetailsSection" className={styles.summarySection}>
             <SectionHeader header="Contract details" navigateTo={navigateTo}>
-                <div>
-                    {zippedFilesURL ? (
-                        <Link
-                            variant="external"
-                            href={zippedFilesURL}
-                            target="_blank"
-                        >
-                            {'Download all contract documents'}
-                        </Link>
-                    ) : (
-                        <span>{}</span>
-                    )}
-                </div>
+                <DownloadButton
+                    text="Download all contract documents"
+                    zippedFilesURL={zippedFilesURL}
+                />
             </SectionHeader>
             <dl>
                 <DoubleColumnRow

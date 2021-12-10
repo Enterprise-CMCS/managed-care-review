@@ -4,10 +4,10 @@ import styles from '../SubmissionSummarySection.module.scss'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { DataDetail } from '../../../components/DataDetail'
 import { DoubleColumnRow } from '../../../components/DoubleColumnRow'
+import { DownloadButton } from '../../DownloadButton'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
-import { Link } from '@trussworks/react-uswds'
 
 export type RateDetailsSummarySectionProps = {
     submission: DraftSubmission | StateSubmission
@@ -52,19 +52,10 @@ export const RateDetailsSummarySection = ({
         <section id="rateDetails" className={styles.summarySection}>
             <dl>
                 <SectionHeader header="Rate details" navigateTo={navigateTo}>
-                    <div>
-                        {zippedFilesURL ? (
-                            <Link
-                                variant="external"
-                                href={zippedFilesURL}
-                                target="_blank"
-                            >
-                                {'Download all rate documents'}
-                            </Link>
-                        ) : (
-                            <span>{}</span>
-                        )}
-                    </div>
+                    <DownloadButton
+                        text="Download all rate documents"
+                        zippedFilesURL={zippedFilesURL}
+                    />
                 </SectionHeader>
 
                 <DoubleColumnRow
