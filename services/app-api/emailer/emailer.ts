@@ -1,6 +1,13 @@
 import { Lambda } from 'aws-sdk'
-import { getSESEmailParams, newEmailTemplate } from './'
-import type { EmailTemplateParams } from './'
+import {
+    getSESEmailParams,
+    newPackageCMSEmailTemplate,
+    newPackageStateEmailTemplate,
+} from './'
+import {
+    StateSubmissionType,
+    CognitoUserType,
+} from '../../app-web/src/common-code/domain-models'
 
 type EmailConfiguration = {
     stage: string
@@ -22,15 +29,18 @@ type EmailData = {
 
 type Emailer = {
     sendEmail: (emailData: EmailData) => Promise<void | Error>
-    generateEmailTemplate: (
-        params: Omit<EmailTemplateParams, 'config'> // omit config because that data is passed to Emailer on initialization
-    ) => EmailData
+    sendCMSNewPackage: (
+        submission: StateSubmissionType
+    ) => Promise<void | Error>
+    sendStateNewPackage: (
+        submission: StateSubmissionType,
+        user: CognitoUserType
+    ) => Promise<void | Error>
 }
 
 function newSESEmailer(config: EmailConfiguration): Emailer {
     console.log('using SES emailer')
     const lambda = new Lambda()
-
     return {
         sendEmail: async (emailData: EmailData): Promise<void | Error> => {
             const emailRequestParams = getSESEmailParams(emailData)
@@ -47,13 +57,20 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
                 return new Error('SES email send failed. ' + err)
             }
         },
-        generateEmailTemplate: (
-            params: Omit<EmailTemplateParams, 'config'>
-        ): EmailData => {
-            const template = newEmailTemplate({ ...params, config })
-            if (template instanceof Error)
-                throw Error(`generateEmailTemplate failed: ${template}`)
-            return template
+        sendCMSNewPackage: async function (submission: StateSubmissionType) {
+            const emailData = newPackageCMSEmailTemplate(submission, config)
+            return await this.sendEmail(emailData)
+        },
+        sendStateNewPackage: async function (
+            submission: StateSubmissionType,
+            user: CognitoUserType
+        ) {
+            const emailData = newPackageStateEmailTemplate(
+                submission,
+                user,
+                config
+            )
+            return await this.sendEmail(emailData)
         },
     }
 }
@@ -69,12 +86,32 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
             ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
         `)
         },
-        generateEmailTemplate: (
-            params: Omit<EmailTemplateParams, 'config'>
-        ): EmailData => {
-            const template = newEmailTemplate({ ...params, config })
-            if (template instanceof Error) throw Error('Invalid Email template')
-            return template
+        sendCMSNewPackage: async (submission: StateSubmissionType) => {
+            const emailData = newPackageCMSEmailTemplate(submission, config)
+            const emailRequestParams = getSESEmailParams(emailData)
+            console.log(`
+            EMAIL SENT
+            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
+            ${JSON.stringify(emailRequestParams)}
+            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
+        `)
+        },
+        sendStateNewPackage: async (
+            submission: StateSubmissionType,
+            user: CognitoUserType
+        ) => {
+            const emailData = newPackageStateEmailTemplate(
+                submission,
+                user,
+                config
+            )
+            const emailRequestParams = getSESEmailParams(emailData)
+            console.log(`
+            EMAIL SENT
+            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
+            ${JSON.stringify(emailRequestParams)}
+            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
+        `)
         },
     }
 }

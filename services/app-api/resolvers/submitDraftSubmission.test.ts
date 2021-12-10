@@ -1,6 +1,15 @@
 import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitDraftSubmission.graphql'
+import {
+    StateSubmissionType,
+    CognitoUserType,
+} from '../../app-web/src/common-code/domain-models'
 import { StateSubmission } from '../gen/gqlServer'
-import { EmailData, Emailer, newEmailTemplate } from '../emailer'
+import {
+    EmailData,
+    Emailer,
+    newPackageCMSEmailTemplate,
+    newPackageStateEmailTemplate,
+} from '../emailer'
 import {
     constructTestPostgresServer,
     createAndUpdateTestDraftSubmission,
@@ -188,6 +197,7 @@ describe('submitDraftSubmission', () => {
         )
     })
 
+    // move to test helpers
     const testEmailer = (): Emailer => {
         const config = {
             emailSource: 'local@example.com',
@@ -195,29 +205,35 @@ describe('submitDraftSubmission', () => {
             baseUrl: 'http://localhost',
         }
         return {
-            sendEmail: async (emailData: EmailData): Promise<void | Error> => {
-                console.log('Mock email locally for tests')
-                console.log('Email content' + emailData)
-            },
-            generateEmailTemplate: jest.fn(
-                ({ template, submission, user }): EmailData => {
-                    const result = newEmailTemplate({
-                        template,
-                        submission,
-                        user,
-                        config,
-                    })
-                    if (result instanceof Error) {
-                        throw result
-                    }
-                    return result
+            sendEmail: jest.fn(
+                async (emailData: EmailData): Promise<void | Error> => {
+                    console.log('Email content' + emailData)
                 }
             ),
+            sendCMSNewPackage: function async(
+                submission: StateSubmissionType
+            ): Promise<void | Error> {
+                const emailData = newPackageCMSEmailTemplate(submission, config)
+                return this.sendEmail(emailData)
+            },
+            sendStateNewPackage: function async(
+                submission: StateSubmissionType,
+                user: CognitoUserType
+            ): Promise<void | Error> {
+                const emailData = newPackageStateEmailTemplate(
+                    submission,
+                    user,
+                    config
+                )
+                return this.sendEmail(emailData)
+            },
         }
     }
 
     it('send email to CMS if submission is valid', async () => {
         const mockEmailer = testEmailer()
+
+        //mock invoke email submit lambda
         const server = await constructTestPostgresServer({
             emailer: mockEmailer,
         })
@@ -239,8 +255,7 @@ describe('submitDraftSubmission', () => {
         const sub = submitResult?.data?.submitDraftSubmission
             ?.submission as StateSubmission
 
-        expect(mockEmailer.generateEmailTemplate).toHaveNthReturnedWith(
-            1,
+        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
             expect.objectContaining({
                 bodyText: `${sub.name} was received from FL.
 
@@ -275,8 +290,7 @@ describe('submitDraftSubmission', () => {
         const sub = submitResult?.data?.submitDraftSubmission
             ?.submission as StateSubmission
 
-        expect(mockEmailer.generateEmailTemplate).toHaveNthReturnedWith(
-            2,
+        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
             expect.objectContaining({
                 bodyText: `${sub.name} was successfully submitted.
 
@@ -316,6 +330,6 @@ describe('submitDraftSubmission', () => {
         })
 
         expect(submitResult.errors).toBeDefined()
-        expect(mockEmailer.generateEmailTemplate).not.toHaveBeenCalled()
+        expect(mockEmailer.sendEmail).not.toHaveBeenCalled()
     })
 })

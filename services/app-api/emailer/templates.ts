@@ -8,54 +8,12 @@ import {
 } from '../../app-web/src/common-code/domain-models'
 import { EmailData, EmailConfiguration } from './'
 
-const TEMPLATE_NAME = ['CMS_NEW_PACKAGE', 'STATE_NEW_PACKAGE'] as const // iterable union type
-type EmailTemplateName = typeof TEMPLATE_NAME[number]
-
-type EmailTemplateParams = {
-    template: EmailTemplateName
-    submission?: StateSubmissionType
-    user?: CognitoUserType
-    config: EmailConfiguration
-}
 const SubmissionTypeRecord: Record<SubmissionType, string> = {
     CONTRACT_ONLY: 'Contract action only',
     CONTRACT_AND_RATES: 'Contract action and rate certification',
 }
 
-const newEmailTemplate = ({
-    template,
-    submission,
-    user,
-    config,
-}: EmailTemplateParams): EmailData | Error => {
-    switch (template) {
-        case 'CMS_NEW_PACKAGE':
-            if (!submission) {
-                return new Error(
-                    'Missing required param {submission} for CMS_NEW_PACKAGE email'
-                )
-            }
-            return newSubmissionCMSEmailTemplate(submission, config)
-        case 'STATE_NEW_PACKAGE': {
-            if (!user) {
-                return new Error(
-                    'Missing required param {user} for STATE_NEW_PACKAGE email'
-                )
-            }
-            if (!submission) {
-                return new Error(
-                    'Missing required param {submission} for STATE_NEW_PACKAGE email'
-                )
-            }
-
-            return newSubmissionStateEmailTemplate(submission, user, config)
-        }
-        default:
-            return new Error(`Invalid template name: ${template}`)
-    }
-}
-
-const newSubmissionCMSEmailTemplate = (
+const newPackageCMSEmailTemplate = (
     submission: StateSubmissionType,
     config: EmailConfiguration
 ): EmailData => {
@@ -92,7 +50,7 @@ const newSubmissionCMSEmailTemplate = (
     }
 }
 
-const newSubmissionStateEmailTemplate = (
+const newPackageStateEmailTemplate = (
     submission: StateSubmissionType,
     user: CognitoUserType,
     config: EmailConfiguration
@@ -149,10 +107,5 @@ const newSubmissionStateEmailTemplate = (
     }
 }
 
-export {
-    newSubmissionCMSEmailTemplate,
-    newSubmissionStateEmailTemplate,
-    newEmailTemplate,
-}
+export { newPackageCMSEmailTemplate, newPackageStateEmailTemplate }
 
-export type { EmailTemplateName, EmailTemplateParams }

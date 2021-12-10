@@ -160,28 +160,29 @@ export function submitDraftSubmissionResolver(
 
         const updatedSubmission: StateSubmissionType = updateResult
 
-        // Send CMS and state emails for submission!
-        const emailData = emailer.generateEmailTemplate({
-            template: 'CMS_NEW_PACKAGE',
-            submission: stateSubmission,
-        })
-        const emailResult = await emailer.sendEmail(emailData)
+        // Send emails!
+        const cmsNewPackageEmailResult = await
+        emailer.sendCMSNewPackage(stateSubmission)
 
-        const emailData2 = emailer.generateEmailTemplate({
-            template: 'STATE_NEW_PACKAGE',
-            submission: stateSubmission,
-            user,
-        })
-        const emailResult2 = await emailer.sendEmail(emailData2)
+        const stateNewPackageEmailResult = await emailer.sendStateNewPackage(
+            stateSubmission,
+            user
+        )
 
-        if (emailResult instanceof Error) {
-            logError('submitDraftSubmission - CMS email', emailResult)
-            throw emailResult
+        if (cmsNewPackageEmailResult instanceof Error) {
+            logError(
+                'submitDraftSubmission - CMS email failed',
+                cmsNewPackageEmailResult
+            )
+            throw cmsNewPackageEmailResult
         }
 
-        if (emailResult2 instanceof Error) {
-            logError('submitDraftSubmission - state email', emailResult2)
-            throw emailResult
+        if (stateNewPackageEmailResult instanceof Error) {
+            logError(
+                'submitDraftSubmission - state email failed',
+                stateNewPackageEmailResult
+            )
+            throw stateNewPackageEmailResult
         }
 
         logSuccess('submitDraftSubmission')
