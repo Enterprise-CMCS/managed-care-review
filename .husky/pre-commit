@@ -1,4 +1,18 @@
-#!/bin/sh
+#!/bin/bash
 . "$(dirname "$0")/_/husky.sh"
 
+# In a continuing effort to print errors when they are needed, we check for 
+# all pre-commit dependency requirements here. 
+requirements=("protolint" "shellcheck" "detect-secrets")
+
+for req in "${requirements[@]}"; do
+    if ! command -v "$req" &> /dev/null; then
+        echo "$req is required to run pre-commit. Check the README for installation instructions"
+    fi
+done
+
+# detect secrets in commit
+git diff --staged --name-only -z | xargs -0 detect-secrets-hook
+
+# Run "precommit" in all yarn repos
 lerna run precommit --concurrency 3 --stream
