@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from '@trussworks/react-uswds'
+import { Button, Link } from '@trussworks/react-uswds'
 
 type DownloadButtonProps = {
     text: string
@@ -12,8 +12,10 @@ export const DownloadButton = ({
 }: DownloadButtonProps): React.ReactElement => {
     return (
         <div>
-            <Link variant="external" href={zippedFilesURL} target="_blank">
-                {text}
+            <Link href={zippedFilesURL} target="_blank">
+                <Button type="button" size="small">
+                    {text}
+                </Button>
             </Link>
         </div>
     )
