@@ -154,6 +154,14 @@ exports[`FileItemList component renders correctly 1`] = `
       >
         Remove
       </button>
+      <button
+        className="usa-button usa-button--small usa-button--unstyled"
+        data-testid="button"
+        onClick={[Function]}
+        type="button"
+      >
+        Retry
+      </button>
     </div>
   </li>
   <li
