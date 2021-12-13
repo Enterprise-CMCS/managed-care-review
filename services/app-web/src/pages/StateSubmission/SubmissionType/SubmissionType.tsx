@@ -9,6 +9,7 @@ import {
     Fieldset,
     FormGroup,
     Link,
+    Label,
 } from '@trussworks/react-uswds'
 import { Formik, FormikHelpers, FormikErrors, Field } from 'formik'
 import { NavLink, useHistory, Link as ReactRouterLink } from 'react-router-dom'
@@ -36,7 +37,7 @@ import {
 // Formik setup
 // Should be listed in order of appearance on field to allow errors to focus as expected
 const SubmissionTypeFormSchema = Yup.object().shape({
-    program: Yup.array(Yup.string()),
+    programIDs: Yup.array().min(1, 'You must select at least one program'),
     submissionType: Yup.string().required('You must choose a submission type'),
     submissionDescription: Yup.string().required(
         'You must provide a description of any major changes or updates'
@@ -250,40 +251,50 @@ export const SubmissionType = ({
                                     </Alert>
                                 ))}
                             <span>All fields are required</span>
-                            <Field name="programIDs">
-                                {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-                                {/* @ts-ignore */}
-                                {({ field, form }) => (
-                                    <Select
-                                        defaultValue={values.programIDs.map(
-                                            (item) => {
-                                                return {
-                                                    value: item,
-                                                    label: item.toUpperCase(),
-                                                }
-                                            }
-                                        )}
-                                        className={styles.multiSelect}
-                                        classNamePrefix="program-select"
-                                        id="programIDs"
-                                        name="programIDs"
-                                        aria-label="programs"
-                                        options={programOptions}
-                                        isMulti
-                                        ariaLiveMessages={{
-                                            onFocus,
-                                        }}
-                                        onChange={(selectedOption) =>
-                                            form.setFieldValue(
-                                                'programIDs',
-                                                selectedOption.map(
-                                                    (item) => item.value
-                                                )
-                                            )
-                                        }
-                                    />
+                            <FormGroup
+                                error={showFieldErrors(errors.programIDs)}
+                            >
+                                <Label htmlFor="programIDs">Program(s)</Label>
+                                {showFieldErrors(errors.programIDs) && (
+                                    <ErrorMessage>
+                                        {errors.programIDs}
+                                    </ErrorMessage>
                                 )}
-                            </Field>
+                                <Field name="programIDs">
+                                    {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                                    {/* @ts-ignore */}
+                                    {({ field, form }) => (
+                                        <Select
+                                            defaultValue={values.programIDs.map(
+                                                (item) => {
+                                                    return {
+                                                        value: item,
+                                                        label: item.toUpperCase(),
+                                                    }
+                                                }
+                                            )}
+                                            className={styles.multiSelect}
+                                            classNamePrefix="program-select"
+                                            id="programIDs"
+                                            name="programIDs"
+                                            aria-label="programs"
+                                            options={programOptions}
+                                            isMulti
+                                            ariaLiveMessages={{
+                                                onFocus,
+                                            }}
+                                            onChange={(selectedOption) =>
+                                                form.setFieldValue(
+                                                    'programIDs',
+                                                    selectedOption.map(
+                                                        (item) => item.value
+                                                    )
+                                                )
+                                            }
+                                        />
+                                    )}
+                                </Field>
+                            </FormGroup>
                             <FormGroup
                                 error={showFieldErrors(errors.submissionType)}
                             >

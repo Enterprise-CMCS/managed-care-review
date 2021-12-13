@@ -322,6 +322,9 @@ describe('SubmissionType', () => {
                         'You must provide a description of any major changes or updates'
                     )
                 ).toBeInTheDocument()
+                expect(
+                    screen.queryByText('You must select at least one program')
+                ).toBeInTheDocument()
             })
         })
     })

@@ -56,8 +56,8 @@ export const SubmissionTypeSummarySection = ({
                     left={
                         <DataDetail
                             id="program"
-                            label="Program"
-                            data={submission.program.name}
+                            label="Program(s)"
+                            data={submission.programIDs}
                         />
                     }
                     right={

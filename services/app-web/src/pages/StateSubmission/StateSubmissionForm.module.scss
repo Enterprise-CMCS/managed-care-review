@@ -34,6 +34,7 @@
         margin-top: 0;
     }
 }
+
 .pageActions {
     display: flex;
     justify-content: space-between;
@@ -111,6 +112,7 @@
 }
 
 .multiSelect {
+    padding-top: 12px;
     [class*='program-select__multi-value'] {
         border-radius: 99rem 99rem 99rem 99rem;
     }
