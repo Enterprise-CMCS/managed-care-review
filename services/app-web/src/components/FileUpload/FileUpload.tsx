@@ -118,15 +118,18 @@ export const FileUpload = ({
                 currentItem.status === 'DUPLICATE_NAME_ERROR' &&
                 !isDuplicateItem(newList, currentItem)
             ) {
-                if (currentItem.key !== undefined) {
-                    // we know S3 succeeded
+                if (
+                    currentItem.key !== undefined &&
+                    currentItem.file === undefined
+                ) {
+                    // we know S3 upload and scanning has succeeded successfully
                     newList.push({
                         ...currentItem,
                         status: 'UPLOAD_COMPLETE',
                     })
                 } else {
                     newList.push({
-                        // user should retry S3 upload
+                        // user did not complete S3 upload and scan, lets display the upload error which forces user  to retry or remove
                         ...currentItem,
                         status: 'UPLOAD_ERROR',
                     })
@@ -160,11 +163,10 @@ export const FileUpload = ({
                             if (item.file && item.file === file) {
                                 return {
                                     ...item,
-                                    file: undefined,
                                     key: data.key,
                                     s3URL: data.s3URL,
-                                    // In general we update the UI status for file items as uploads to S3 complete
-                                    // However, files with duplicate name errors are an exception. They are uploaded to s3 silently and instead display their error.
+                                    // In general, we update the UI status for file items as uploads and scans to S3 complete
+                                    // Files with duplicate name errors are exceptional. This error takes priority. Duplicate files are still uploaded to s3 silently and scanned but will only display their duplicate name error.
                                     status:
                                         item.status === 'DUPLICATE_NAME_ERROR'
                                             ? item.status
@@ -187,6 +189,7 @@ export const FileUpload = ({
                                     if (item.key === data.key) {
                                         return {
                                             ...item,
+                                            file: undefined,
                                             status:
                                                 item.status ===
                                                 'DUPLICATE_NAME_ERROR'
@@ -251,7 +254,10 @@ export const FileUpload = ({
     }
 
     const retryFile = (item: FileItemT) => {
-        if (!item.file) return
+        if (!item.file) {
+            console.log('cannot retry, no file available')
+            return
+        }
 
         setFileItems((prevItems) => {
             const newItems = [...prevItems]
