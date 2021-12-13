@@ -18,9 +18,9 @@ export const main: Handler = async (event) => {
     console.log('INFO: Sending SES Email: ', event.body)
     const sesResult = await sendSESEmail(event.body)
 
-    if (!('MessageId' in sesResult)) {
-        // we got an error back. This type narrows on the
-        console.log('ERROR: Email send failed: ', sesResult)
+    if (sesResult instanceof Error) {
+        // we got an error back
+        console.log('ERROR: Email send failed: ', sesResult.awsErr)
         return {
             StatusCode: 500,
             body: JSON.stringify({

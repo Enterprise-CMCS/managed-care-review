@@ -46,16 +46,29 @@ function getSESEmailParams(email: EmailData): SES.SendEmailRequest {
     return emailParams
 }
 
+class AWSResponseError extends Error {
+    awsErr: AWSError
+
+    constructor(awsErr: AWSError) {
+        super(awsErr.message)
+        this.awsErr = awsErr
+
+        // Set the prototype explicitly.
+        // this makes `instanceof` work correctly
+        Object.setPrototypeOf(this, AWSResponseError.prototype)
+    }
+}
+
 async function sendSESEmail(
     params: SES.SendEmailRequest
-): Promise<SES.SendEmailResponse | AWSError> {
+): Promise<SES.SendEmailResponse | AWSResponseError> {
     console.log('SENDING SES EMAIL', params)
     try {
         const response = await ses.sendEmail(params).promise()
         return response
     } catch (err) {
-        return err
+        return new AWSResponseError(err)
     }
 }
 
-export { getSESEmailParams, sendSESEmail }
+export { getSESEmailParams, sendSESEmail, AWSResponseError }
