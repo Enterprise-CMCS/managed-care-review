@@ -1,4 +1,4 @@
-import { SES, AWSError, Request } from 'aws-sdk'
+import { SES, AWSError } from 'aws-sdk'
 import { EmailData } from './'
 
 const ses = new SES({ region: 'us-east-1' })
@@ -46,17 +46,16 @@ function getSESEmailParams(email: EmailData): SES.SendEmailRequest {
     return emailParams
 }
 
-function sendSESEmail(
+async function sendSESEmail(
     params: SES.SendEmailRequest
-): Request<SES.SendEmailResponse, AWSError> {
+): Promise<SES.SendEmailResponse | AWSError> {
     console.log('SENDING SES EMAIL', params)
-    return ses.sendEmail(params, function (err, data) {
-        if (err) {
-            return new Error('SES error: ' + err)
-        } else {
-            return data
-        }
-    })
+    try {
+        const response = await ses.sendEmail(params).promise()
+        return response
+    } catch (err) {
+        return err
+    }
 }
 
 export { getSESEmailParams, sendSESEmail }

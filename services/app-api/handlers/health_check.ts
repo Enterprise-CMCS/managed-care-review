@@ -8,11 +8,11 @@ export const main: APIGatewayProxyHandler = async () => {
         version: process.env.appVersion,
     }
 
-    console.log('TRYING TO SEND A BARE EMAIL')
+    console.log('TRYING TO SEND A BARE EMAIL A Thrid TIME')
 
     const ses = new SES({ region: 'us-east-1' })
 
-    var params = {
+    var params: SES.SendEmailRequest = {
         Destination: {
             BccAddresses: [],
             CcAddresses: [],
@@ -31,18 +31,20 @@ export const main: APIGatewayProxyHandler = async () => {
             },
             Subject: {
                 Charset: 'UTF-8',
-                Data: 'Test email ONE',
+                Data: 'Test email TWO',
             },
         },
-        ReplyToAddresses: [],
-        ReturnPath: '',
-        ReturnPathArn: '',
         Source: 'macrael@truss.works',
-        SourceArn: '',
+        // ReplyToAddresses: [],
     }
 
     try {
-        const result = await ses.sendEmail(params).promise()
+        const result = await ses
+            .sendEmail(params, (info, err) => {
+                console.log('THIS IS A CALL BACK', info, err)
+                return 'foo'
+            })
+            .promise()
         console.log('SEND RESULT', result)
     } catch (err) {
         console.log('FAILED TO SEND EMAIL', err)
