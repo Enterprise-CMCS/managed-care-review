@@ -187,7 +187,9 @@ jobs:
 
       - name: Create Test Users
         run: |
-          node ./scripts/add_cypress_test_users.js $branch_name $TEST_USERS_PASS
+          cd scripts
+          yarn tsc
+          node ./add_cypress_test_users.js $branch_name $TEST_USERS_PASS
 
       - name: Add serverless to Cypress
         shell: bash
