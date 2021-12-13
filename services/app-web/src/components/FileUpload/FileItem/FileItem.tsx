@@ -16,7 +16,7 @@ export type FileStatus =
 export type FileItemT = {
     id: string
     name: string
-    file?: File // only items that are not uploaded to s3 have this
+    file?: File // this becomes undefined after both uploading and scanning has completed with success
     key?: string // only items uploaded to s3 have this
     s3URL?: string // only items uploaded to s3 have this
     status: FileStatus
@@ -164,7 +164,7 @@ export const FileItem = ({
                 >
                     Remove
                 </Button>
-                {hasUploadError && !hasUnexpectedError && (
+                {(hasUploadError || hasScanningError) && !hasUnexpectedError && (
                     <Button
                         type="button"
                         size="small"
