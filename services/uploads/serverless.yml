@@ -182,14 +182,14 @@ resources:
         Bucket: !Ref DocumentZipsBucket
         PolicyDocument:
           Statement:
-            - Action: 's3:PutObject'
+            - Action:
+                - 's3:PutObject'
               Effect: Deny
               Principal: '*'
               NotResource:
                 - !Sub ${DocumentZipsBucket.Arn}/*.zip
             - Action:
                 - 's3:GetObject'
-                - 's3:ListBucket'
               Effect: 'Deny'
               Resource: !Sub ${DocumentZipsBucket.Arn}/*
               Principal: '*'
@@ -219,5 +219,7 @@ resources:
       Value: !Ref DocumentUploadsBucket
     DocumentUploadsBucketArn:
       Value: !GetAtt DocumentUploadsBucket.Arn
+    DocumentZipsBucketName:
+      Value: !Ref DocumentZipsBucket
     Region:
       Value: !Sub ${AWS::Region}
