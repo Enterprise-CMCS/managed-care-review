@@ -62,6 +62,7 @@ export async function signUp(
                 given_name: user.given_name,
                 family_name: user.family_name,
                 'custom:state_code': user.state_code,
+                'custom:role': 'macmcrrs-state-user',
             },
         })
         return result.user

@@ -65,7 +65,6 @@ async function createUser({
         UserPoolId: userPoolID,
         Username: email,
         MessageAction: 'SUPPRESS',
-        //TemporaryPassword: 'Password!1',
         DesiredDeliveryMediums: ['EMAIL'],
         UserAttributes: [
             {
@@ -140,19 +139,19 @@ async function main() {
     const testUsers = [
         {
             name: 'Aang',
-            email: 'aang@dhs.state.mn.us',
+            email: 'aang@example.com',
             role: 'STATE_USER' as const,
             state: 'MN',
         },
         {
             name: 'Toph',
-            email: 'toph@dmas.virginia.gov',
+            email: 'toph@example.com',
             role: 'STATE_USER' as const,
             state: 'VA',
         },
         {
             name: 'Zuko',
-            email: 'zuko@cms.hhs.gov',
+            email: 'zuko@example.com',
             role: 'CMS_USER' as const,
             state: undefined,
         },
