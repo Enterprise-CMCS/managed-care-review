@@ -383,11 +383,11 @@ describe('RateDetails', () => {
 
             continueButton.click()
             await waitFor(() => {
-                // expect(
-                //     screen.getByText(
-                //         'You must remove all documents with error messages before continuing'
-                //     )
-                // ).toBeInTheDocument()
+                expect(
+                    screen.getByText(
+                        'You must remove all documents with error messages before continuing'
+                    )
+                ).toBeInTheDocument()
 
                 expect(continueButton).toBeDisabled()
             })
