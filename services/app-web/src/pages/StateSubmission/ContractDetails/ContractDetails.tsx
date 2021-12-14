@@ -1119,7 +1119,6 @@ export const ContractDetails = ({
                                         if (fileItems.length === 0) {
                                             history.push('type')
                                         } else {
-                                            setFocusErrorSummaryHeading(true)
                                             await handleFormSubmit(
                                                 values,
                                                 setSubmitting,
