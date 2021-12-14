@@ -38,7 +38,8 @@
             "App.tsx",
             "index.ts",
             "log_event.ts",
-            "reportWebVitals.ts"
+            "reportWebVitals.ts",
+            "src/components/Combobox.tsx"
         ],
         "coverageReporters": [
             [
