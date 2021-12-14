@@ -10,22 +10,24 @@ const ErrorSummaryMessage = ({
     errorKey, message
 }: ErrorSummaryMessageProps): React.ReactElement => {
     return (
-        <a
-            href={"#" + errorKey}
-            className={classnames(styles.message)}
-            data-testid="error-summary-message"
-            onClick={() => {
-                const fieldElement: HTMLElement | null = document.querySelector(
-                    `[name="${errorKey}"]`
-                );
-            
-                if (fieldElement) {
-                    fieldElement.focus();
-                }
-            }}
-        >
-        {message}
-      </a> 
+        <span
+            className={classnames(styles.message)}>
+            <a
+                href={"#" + errorKey}
+                data-testid="error-summary-message"
+                onClick={() => {
+                    const fieldElement: HTMLElement | null = document.querySelector(
+                        `[name="${errorKey}"]`
+                    );
+                
+                    if (fieldElement) {
+                        fieldElement.focus();
+                    }
+                }}
+                >
+                {message}
+            </a> 
+        </span>
     ) 
 }
 
