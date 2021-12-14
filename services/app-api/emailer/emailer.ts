@@ -28,7 +28,6 @@ type Emailer = {
 }
 
 function newSESEmailer(config: EmailConfiguration): Emailer {
-    console.log('using SES emailer')
     const lambda = new Lambda()
 
     return {
@@ -41,7 +40,6 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
 
             try {
                 const sesResult = await lambda.invoke(lambdaParams).promise()
-                console.log('SES email invoked!', sesResult)
                 return
             } catch (err) {
                 return new Error('SES email send failed. ' + err)

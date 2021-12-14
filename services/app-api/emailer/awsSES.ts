@@ -62,7 +62,6 @@ class AWSResponseError extends Error {
 async function sendSESEmail(
     params: SES.SendEmailRequest
 ): Promise<SES.SendEmailResponse | AWSResponseError> {
-    console.log('SENDING SES EMAIL', params)
     try {
         const response = await ses.sendEmail(params).promise()
         return response
@@ -72,3 +71,33 @@ async function sendSESEmail(
 }
 
 export { getSESEmailParams, sendSESEmail, AWSResponseError }
+
+/*
+// This is an example SES SendEmail params for a call to ses.sendEmail that works with our config.
+var params: SES.SendEmailRequest = {
+        Destination: {
+            BccAddresses: [],
+            CcAddresses: [],
+            ToAddresses: ['macrae@truss.works'],
+        },
+        Message: {
+            Body: {
+                Html: {
+                    Charset: 'UTF-8',
+                    Data: 'HELLO This message body contains HTML formatting. It can, for example, contain links like this one: <a class="ulink" href="http://docs.aws.amazon.com/ses/latest/DeveloperGuide" target="_blank">Amazon SES Developer Guide</a>.',
+                },
+                Text: {
+                    Charset: 'UTF-8',
+                    Data: 'HELLO This is the message body in text format.',
+                },
+            },
+            Subject: {
+                Charset: 'UTF-8',
+                Data: 'Test email TWO',
+            },
+        },
+        Source: 'macrael@truss.works',
+        // ReplyToAddresses: [],
+    }
+
+ */
