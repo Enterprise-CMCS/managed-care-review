@@ -1,5 +1,6 @@
 import classNames from 'classnames'
 import classnames from 'classnames'
+import React, { useEffect, useRef } from 'react'
 import styles from './ErrorSummary.module.scss'
 
 type ErrorSummaryMessageProps = {
@@ -10,24 +11,22 @@ const ErrorSummaryMessage = ({
     errorKey, message
 }: ErrorSummaryMessageProps): React.ReactElement => {
     return (
-        <span
-            className={classnames(styles.message)}>
-            <a
-                href={"#" + errorKey}
-                data-testid="error-summary-message"
-                onClick={() => {
-                    const fieldElement: HTMLElement | null = document.querySelector(
-                        `[name="${errorKey}"]`
-                    );
-                
-                    if (fieldElement) {
-                        fieldElement.focus();
-                    }
-                }}
-                >
-                {message}
-            </a> 
-        </span>
+        <a
+            href={"#" + errorKey}
+            className={classnames(styles.message)}
+            data-testid="error-summary-message"
+            onClick={() => {
+                const fieldElement: HTMLElement | null = document.querySelector(
+                    `[name="${errorKey}"]`
+                );
+            
+                if (fieldElement) {
+                    fieldElement.focus();
+                }
+            }}
+        >
+        {message}
+      </a> 
     ) 
 }
 
@@ -62,11 +61,10 @@ export type ErrorSummaryProps = {
  * rendered inside of a Formik form context.
  */
 export const ErrorSummary = ({
-    errors,
-    headingRef
+    errors, headingRef
 }: ErrorSummaryProps): React.ReactElement | null => {
     const numberOfErrors = Object.keys(errors).length;
-      
+
     if (numberOfErrors === 0) {
         return null;
     }

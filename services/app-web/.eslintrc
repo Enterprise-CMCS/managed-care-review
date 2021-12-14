@@ -4,7 +4,7 @@
         "project": ["./tsconfig.json"],
         "sourceType": "module"
     },
-    "plugins": ["@typescript-eslint", "jsx-a11y", "testing-library"],
+    "plugins": ["@typescript-eslint", "jsx-a11y", "testing-library", "jest"],
     "extends": [
         "eslint:recommended",
         "plugin:jest/recommended",
@@ -16,6 +16,9 @@
         "react-app",
         "react-app/jest"
     ],
+    "env": {
+    "jest/globals": true
+  },
     "ignorePatterns": ["src/gen/*"],
     "rules": {
         "prefer-promise-reject-errors": "error",
