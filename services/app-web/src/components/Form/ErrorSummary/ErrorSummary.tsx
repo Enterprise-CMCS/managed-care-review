@@ -1,6 +1,5 @@
 import classNames from 'classnames'
 import classnames from 'classnames'
-import React, { useEffect, useRef } from 'react'
 import styles from './ErrorSummary.module.scss'
 
 type ErrorSummaryMessageProps = {
@@ -48,7 +47,7 @@ function flattenMessage(message: string | string[]) {
 
 export type ErrorSummaryProps = {
     errors: { [field: string]: string | string[] },
-    autofocus?: boolean,
+    headingRef?: React.Ref<HTMLHeadingElement>
 }
 
 /**
@@ -62,22 +61,9 @@ export type ErrorSummaryProps = {
  */
 export const ErrorSummary = ({
     errors,
-    autofocus = true
+    headingRef
 }: ErrorSummaryProps): React.ReactElement | null => {
     const numberOfErrors = Object.keys(errors).length;
-
-    const headingRef = useRef<HTMLHeadingElement>(null);
-
-    const focusHeading = numberOfErrors > 0 && autofocus;
-
-    useEffect(() => {
-        if (focusHeading) {
-            const { current } = headingRef;
-            if (current) {
-                current.focus();
-            }
-        }
-      }, [focusHeading]);
       
     if (numberOfErrors === 0) {
         return null;
