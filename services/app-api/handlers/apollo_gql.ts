@@ -95,6 +95,7 @@ async function initializeGQLHandler(): Promise<Handler> {
     const applicationEndpoint = process.env.APPLICATION_ENDPOINT
     const emailSource = process.env.SES_SOURCE_EMAIL_ADDRESS
     const emailerMode = process.env.EMAILER_MODE
+    const cmsReviewSharedEmails = process.env.SES_REVIEW_TEAM_EMAIL_ADDRESSES
 
     // Print out all the variables we've been configured with. Leave sensitive ones out, please.
     console.info('Running With Config: ', {
@@ -115,10 +116,15 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     if (emailSource === undefined)
         throw new Error(
-            'Configuration Error: SES_SOURCE_EMAILADDRESS is required'
+            'Configuration Error: SES_SOURCE_EMAIL_ADDRESS is required'
         )
 
-    if (applicationEndpoint === undefined)
+    if (cmsReviewSharedEmails === undefined)
+        throw new Error(
+            'Configuration Error: SES_REVIEW_TEAM_EMAIL_ADDRESSES is required'
+        )
+
+    if (applicationEndpoint === undefined || applicationEndpoint === '')
         throw new Error('Configuration Error: APPLICATION_ENDPOINT is required')
 
     if (stageName === undefined)
@@ -143,11 +149,13 @@ async function initializeGQLHandler(): Promise<Handler> {
                   emailSource: 'local@example.com',
                   stage: 'local',
                   baseUrl: applicationEndpoint,
+                  cmsReviewSharedEmails: cmsReviewSharedEmails.split(','),
               })
             : newSESEmailer({
                   emailSource: emailSource,
                   stage: stageName,
                   baseUrl: applicationEndpoint,
+                  cmsReviewSharedEmails: cmsReviewSharedEmails.split(','),
               })
 
     // Resolvers are defined and tested in the resolvers package

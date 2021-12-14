@@ -91,8 +91,9 @@ export function submitDraftSubmissionResolver(
     emailer: Emailer
 ): MutationResolvers['submitDraftSubmission'] {
     return async (_parent, { input }, context) => {
+        const { user } = context
         // This resolver is only callable by state users
-        if (!isStateUser(context.user)) {
+        if (!isStateUser(user)) {
             logError(
                 'submitDraftSubmission',
                 'user not authorized to fetch state data'
@@ -120,7 +121,7 @@ export function submitDraftSubmissionResolver(
         const draft: DraftSubmissionType = result
 
         // Authorization
-        const stateFromCurrentUser: State['code'] = context.user.state_code
+        const stateFromCurrentUser: State['code'] = user.state_code
         if (draft.stateCode !== stateFromCurrentUser) {
             logError(
                 'submitDraftSubmission',
@@ -159,13 +160,29 @@ export function submitDraftSubmissionResolver(
 
         const updatedSubmission: StateSubmissionType = updateResult
 
-        // Send the email!
-        const emailData = emailer.generateCMSEmail(stateSubmission)
-        const emailResult = await emailer.sendEmail(emailData)
+        // Send emails!
+        const cmsNewPackageEmailResult = await
+        emailer.sendCMSNewPackage(stateSubmission)
 
-        if (emailResult instanceof Error) {
-            logError('submitDraftSubmission', emailResult)
-            throw emailResult
+        const stateNewPackageEmailResult = await emailer.sendStateNewPackage(
+            stateSubmission,
+            user
+        )
+
+        if (cmsNewPackageEmailResult instanceof Error) {
+            logError(
+                'submitDraftSubmission - CMS email failed',
+                cmsNewPackageEmailResult
+            )
+            throw cmsNewPackageEmailResult
+        }
+
+        if (stateNewPackageEmailResult instanceof Error) {
+            logError(
+                'submitDraftSubmission - state email failed',
+                stateNewPackageEmailResult
+            )
+            throw stateNewPackageEmailResult
         }
 
         logSuccess('submitDraftSubmission')

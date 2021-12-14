@@ -1,7 +1,15 @@
 import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitDraftSubmission.graphql'
-import { StateSubmissionType } from '../../app-web/src/common-code/domain-models'
+import {
+    StateSubmissionType,
+    CognitoUserType,
+} from '../../app-web/src/common-code/domain-models'
 import { StateSubmission } from '../gen/gqlServer'
-import { EmailData, Emailer, newSubmissionCMSEmailTemplate } from '../emailer'
+import {
+    EmailData,
+    Emailer,
+    newPackageCMSEmailTemplate,
+    newPackageStateEmailTemplate,
+} from '../emailer'
 import {
     constructTestPostgresServer,
     createAndUpdateTestDraftSubmission,
@@ -189,33 +197,44 @@ describe('submitDraftSubmission', () => {
         )
     })
 
-    const testEmailerWithCallback = (
-        sendCallback: (data: EmailData) => void
-    ): Emailer => {
+    // move to test helpers
+    const testEmailer = (): Emailer => {
         const config = {
             emailSource: 'local@example.com',
             stage: 'local',
             baseUrl: 'http://localhost',
+            cmsReviewSharedEmails: ['test@example.com'],
         }
         return {
-            sendEmail: async (emailData: EmailData): Promise<void | Error> => {
-                console.log('Mocsk email locally')
-                console.log('Email content' + emailData)
-                sendCallback(emailData)
+            sendEmail: jest.fn(
+                async (emailData: EmailData): Promise<void | Error> => {
+                    console.log('Email content' + emailData)
+                }
+            ),
+            sendCMSNewPackage: function async(
+                submission: StateSubmissionType
+            ): Promise<void | Error> {
+                const emailData = newPackageCMSEmailTemplate(submission, config)
+                return this.sendEmail(emailData)
             },
-            generateCMSEmail: (submission: StateSubmissionType): EmailData => {
-                return newSubmissionCMSEmailTemplate(submission, config)
+            sendStateNewPackage: function async(
+                submission: StateSubmissionType,
+                user: CognitoUserType
+            ): Promise<void | Error> {
+                const emailData = newPackageStateEmailTemplate(
+                    submission,
+                    user,
+                    config
+                )
+                return this.sendEmail(emailData)
             },
         }
     }
 
     it('send email to CMS if submission is valid', async () => {
-        let sentEmailData: EmailData | undefined = undefined
-        const mockEmailer = testEmailerWithCallback((emailData) => {
-            console.log('IN CALLBACK')
-            sentEmailData = emailData
-        })
+        const mockEmailer = testEmailer()
 
+        //mock invoke email submit lambda
         const server = await constructTestPostgresServer({
             emailer: mockEmailer,
         })
@@ -233,25 +252,67 @@ describe('submitDraftSubmission', () => {
         })
 
         expect(submitResult.errors).toBeUndefined()
-        expect(sentEmailData).toBeDefined()
+
         const sub = submitResult?.data?.submitDraftSubmission
             ?.submission as StateSubmission
 
-        // this is dumb but works. Typescript seems to not realize that the callback could modify this variable.
-        sentEmailData = sentEmailData as unknown as EmailData
-        expect(sentEmailData.bodyText).toEqual(
-            `
-            ${sub.name} was received from FL.
+        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+            expect.objectContaining({
+                bodyText: `${sub.name} was received from FL.
 
             Submission type: Contract action and rate certification
             Submission description: An updated submission
 
-            View the full submission: http://localhost/submissions/${sub.id}`
+            View submission: http://localhost/submissions/${sub.id}`,
+            })
         )
     })
 
-    it('does not send email to CMS if submission fails', async () => {
-        const server = await constructTestPostgresServer()
+    it('send email to user and state contacts if submission is valid', async () => {
+        const mockEmailer = testEmailer()
+        const server = await constructTestPostgresServer({
+            emailer: mockEmailer,
+        })
+        const draft = await createAndUpdateTestDraftSubmission(server, {})
+        const draftID = draft.id
+
+        await new Promise((resolve) => setTimeout(resolve, 2000)) // TODO: why is this here in other tests??
+        const submitResult = await server.executeOperation({
+            query: SUBMIT_DRAFT_SUBMISSION,
+            variables: {
+                input: {
+                    submissionID: draftID,
+                },
+            },
+        })
+
+        expect(submitResult.errors).toBeUndefined()
+
+        const sub = submitResult?.data?.submitDraftSubmission
+            ?.submission as StateSubmission
+
+        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+            expect.objectContaining({
+                bodyText: `${sub.name} was successfully submitted.
+
+            View submission: http://localhost/submissions/${sub.id}
+            
+            If you need to make any changes, please contact CMS.
+        
+            What comes next:
+            1. Check for completeness: CMS will review all documentation submitted to ensure all required materials were received.
+            2. CMS review: Your submission will be reviewed by CMS for adherence to federal regulations. If a rate certification is included, it will be reviewed for policy adherence and actuarial soundness.
+            3. Questions: You may receive questions via email from CMS as they conduct their review.
+            4. Decision: Once all questions have been addressed, CMS will contact you with their final recommendation.`,
+            })
+        )
+    })
+
+    it('does not send any emails if submission fails', async () => {
+        const mockEmailer = testEmailer()
+        const server = await constructTestPostgresServer({
+            emailer: mockEmailer,
+        })
         const draft = await createAndUpdateTestDraftSubmission(server, {
             submissionType: 'CONTRACT_ONLY',
             rateDateStart: '2025-05-01',
@@ -270,6 +331,6 @@ describe('submitDraftSubmission', () => {
         })
 
         expect(submitResult.errors).toBeDefined()
-        // TODO: add assertion that emailer was called
+        expect(mockEmailer.sendEmail).not.toHaveBeenCalled()
     })
 })

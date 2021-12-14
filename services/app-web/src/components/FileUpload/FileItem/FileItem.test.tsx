@@ -131,7 +131,7 @@ describe('FileItem component', () => {
         expect(buttonActionProps.deleteItem).toHaveBeenCalled()
     })
 
-    it('displays security scan failed message and remove button when status is SCANNING_ERROR', () => {
+    it('displays security scan failed message and  both retry and remove buttons when status is SCANNING_ERROR', () => {
         render(<FileItem item={scanningError} {...buttonActionProps} />)
 
         const imageEl = screen.getByTestId('file-input-preview-image')
@@ -142,7 +142,9 @@ describe('FileItem component', () => {
         expect(
             screen.getByRole('button', { name: 'Remove' })
         ).toBeInTheDocument()
-        expect(screen.queryByRole('button', { name: 'Retry' })).toBeNull()
+        expect(
+            screen.queryByRole('button', { name: 'Retry' })
+        ).toBeInTheDocument()
     })
 
     it('displays duplicate name error message and remove button when status is DUPLICATE_NAME_ERROR', () => {
