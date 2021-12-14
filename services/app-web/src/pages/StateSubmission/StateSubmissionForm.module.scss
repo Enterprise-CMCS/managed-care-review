@@ -111,6 +111,7 @@
     }
 }
 
+// react-select draws the chips in two parts, so we round the outer and square in the inner corners
 .multiSelect {
     padding-top: 12px;
     [class*='program-select__multi-value'] {

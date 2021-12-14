@@ -10,6 +10,7 @@ import {
 } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
+import { pluralize } from './pluralizer'
 
 // This MUTATES the passed in draft, overwriting all the current fields with the updated fields
 export function applyUpdates(
@@ -142,7 +143,8 @@ export function updateDraftSubmissionResolver(
         )
 
         if (program === undefined) {
-            const errMessage = `The program id ${input.draftSubmissionUpdates.programIDs} does not exist in state ${stateFromCurrentUser}`
+            const count = input.draftSubmissionUpdates.programIDs.length
+            const errMessage = `The program ${(pluralize('id', count))} ${input.draftSubmissionUpdates.programIDs.join(', ')} ${(pluralize('does', count))} not exist in state ${stateFromCurrentUser}`
             logError('updateDraftSubmission', errMessage)
             throw new UserInputError(errMessage, {
                 argumentName: 'programIDs',

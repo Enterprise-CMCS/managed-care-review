@@ -14,7 +14,6 @@ import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
 import { StateSubmissionForm } from './StateSubmissionForm'
 import { updatesFromSubmission } from './updateSubmissionTransform'
-import selectEvent from 'react-select-event'
 
 describe('StateSubmissionForm', () => {
     describe('loads draft submission', () => {

@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import classnames from 'classnames'
 
 import styles from './Tabs.module.scss'
-import { CustomAriaLive } from '../Combobox/Combobox'
 
 type TabsProps = {
     defaultActiveTab?: string
@@ -21,28 +20,16 @@ export const Tabs = ({
     const [activeTab, setActiveTab] = useState(defaultActiveTab || tabs[0].name)
 
     return (
-        <>
-            <CustomAriaLive />
-            <div
-                className={styles['easi-tabs']}
-                data-testid="tabs"
-                {...tabProps}
-            >
+        <div className={styles['easi-tabs']} data-testid="tabs" {...tabProps}>
                 <div className={styles['easi-tabs__navigation']}>
-                    <ul
-                        className={styles['easi-tabs__tab-list']}
-                        role="tablist"
-                    >
+                <ul className={styles['easi-tabs__tab-list']} role="tablist">
                         {tabs.map((tab) => (
                             <li
                                 key={tab.id}
-                                className={classnames(
-                                    styles['easi-tabs__tab'],
-                                    {
+                            className={classnames(styles['easi-tabs__tab'], {
                                         [styles['easi-tabs__tab--selected']]:
                                             activeTab === tab.name,
-                                    }
-                                )}
+                            })}
                                 role="tab"
                             >
                                 <button
@@ -52,11 +39,7 @@ export const Tabs = ({
                                     aria-controls={tab.id}
                                     onClick={() => setActiveTab(tab.name)}
                                 >
-                                    <span
-                                        className={
-                                            styles['easi-tabs__tab-text']
-                                        }
-                                    >
+                                <span className={styles['easi-tabs__tab-text']}>
                                         {tab.name}
                                     </span>
                                 </button>
@@ -77,7 +60,6 @@ export const Tabs = ({
                     return child
                 })}
             </div>
-        </>
     )
 }
 
