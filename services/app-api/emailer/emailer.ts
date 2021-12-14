@@ -1,6 +1,13 @@
 import { Lambda } from 'aws-sdk'
-import { StateSubmissionType } from '../../app-web/src/common-code/domain-models'
-import { getSESEmailParams, newSubmissionCMSEmailTemplate } from './'
+import {
+    getSESEmailParams,
+    newPackageCMSEmailTemplate,
+    newPackageStateEmailTemplate,
+} from './'
+import {
+    StateSubmissionType,
+    CognitoUserType,
+} from '../../app-web/src/common-code/domain-models'
 
 type EmailConfiguration = {
     stage: string
@@ -8,7 +15,6 @@ type EmailConfiguration = {
     emailSource: string // an email address for the generic application-wide sender
     cmsReviewSharedEmails: string[] // list of shared emails that all new managed care packages must be sent to
 }
-
 type EmailData = {
     bodyText: string
     sourceEmail: string
@@ -24,12 +30,17 @@ type EmailData = {
 
 type Emailer = {
     sendEmail: (emailData: EmailData) => Promise<void | Error>
-    generateCMSEmail: (submission: StateSubmissionType) => EmailData
+    sendCMSNewPackage: (
+        submission: StateSubmissionType
+    ) => Promise<void | Error>
+    sendStateNewPackage: (
+        submission: StateSubmissionType,
+        user: CognitoUserType
+    ) => Promise<void | Error>
 }
 
 function newSESEmailer(config: EmailConfiguration): Emailer {
     const lambda = new Lambda()
-
     return {
         sendEmail: async (emailData: EmailData): Promise<void | Error> => {
             const emailRequestParams = getSESEmailParams(emailData)
@@ -45,8 +56,20 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
                 return new Error('SES email send failed. ' + err)
             }
         },
-        generateCMSEmail: (submission: StateSubmissionType): EmailData => {
-            return newSubmissionCMSEmailTemplate(submission, config)
+        sendCMSNewPackage: async function (submission: StateSubmissionType) {
+            const emailData = newPackageCMSEmailTemplate(submission, config)
+            return await this.sendEmail(emailData)
+        },
+        sendStateNewPackage: async function (
+            submission: StateSubmissionType,
+            user: CognitoUserType
+        ) {
+            const emailData = newPackageStateEmailTemplate(
+                submission,
+                user,
+                config
+            )
+            return await this.sendEmail(emailData)
         },
     }
 }
@@ -62,8 +85,32 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
             ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
         `)
         },
-        generateCMSEmail: (submission: StateSubmissionType): EmailData => {
-            return newSubmissionCMSEmailTemplate(submission, config)
+        sendCMSNewPackage: async (submission: StateSubmissionType) => {
+            const emailData = newPackageCMSEmailTemplate(submission, config)
+            const emailRequestParams = getSESEmailParams(emailData)
+            console.log(`
+            EMAIL SENT
+            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
+            ${JSON.stringify(emailRequestParams)}
+            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
+        `)
+        },
+        sendStateNewPackage: async (
+            submission: StateSubmissionType,
+            user: CognitoUserType
+        ) => {
+            const emailData = newPackageStateEmailTemplate(
+                submission,
+                user,
+                config
+            )
+            const emailRequestParams = getSESEmailParams(emailData)
+            console.log(`
+            EMAIL SENT
+            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
+            ${JSON.stringify(emailRequestParams)}
+            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
+        `)
         },
     }
 }
