@@ -115,7 +115,6 @@ export const ContractDetails = ({
 
     // Contract documents state management
     const [hasValidFiles, setHasValidFiles] = React.useState(false)
-    const [hasPendingFiles, setHasPendingFiles] = React.useState(false)
     const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
     const showDocumentErrors = shouldValidate && !hasValidFiles
@@ -143,20 +142,19 @@ export const ContractDetails = ({
         })
 
     React.useEffect(() => {
-        const somePending: boolean = fileItems.some(
-            (item) => item.status === 'PENDING'
-        )
-        setHasPendingFiles(somePending)
-
         const hasValidDocumentsForSubmission: boolean =
             fileItems.length > 0 &&
-            !somePending &&
             fileItems.every((item) => item.status === 'UPLOAD_COMPLETE')
+            
         setHasValidFiles(hasValidDocumentsForSubmission)
     }, [fileItems])
 
-    const onLoadComplete = async ({ files }: { files: FileItemT[] }) => {
-        setFileItems(files)
+    const onFileItemsUpdate = async ({
+        fileItems,
+    }: {
+        fileItems: FileItemT[]
+    }) => {
+        setFileItems(fileItems)
     }
     const handleDeleteFile = async (key: string) => {
         const result = await deleteFile(key)
@@ -394,7 +392,7 @@ export const ContractDetails = ({
                                     uploadFile={handleUploadFile}
                                     scanFile={handleScanFile}
                                     deleteFile={handleDeleteFile}
-                                    onLoadComplete={onLoadComplete}
+                                    onFileItemsUpdate={onFileItemsUpdate}
                                 />
                             </FormGroup>
                             <FormGroup
@@ -1094,7 +1092,7 @@ export const ContractDetails = ({
                             >
                                 <Button
                                     type="button"
-                                    className="usa-button usa-button--outline"
+                                    outline
                                     onClick={async () => {
                                         // do not need to validate or resubmit if no documents are uploaded
                                         if (fileItems.length === 0) {
@@ -1117,7 +1115,6 @@ export const ContractDetails = ({
                                     type="submit"
                                     disabled={
                                         isSubmitting ||
-                                        hasPendingFiles ||
                                         (shouldValidate && !hasValidFiles)
                                     }
                                 >

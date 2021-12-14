@@ -113,8 +113,12 @@ export const Documents = ({
         if (!shouldValidate) setShouldValidate(true)
     }
 
-    const onLoadComplete = async ({ files }: { files: FileItemT[] }) => {
-        setFileItems(files)
+    const onFileItemsUpdate = async ({
+        fileItems,
+    }: {
+        fileItems: FileItemT[]
+    }) => {
+        setFileItems(fileItems)
     }
     const handleDeleteFile = async (key: string) => {
         const result = await deleteFile(key)
@@ -170,6 +174,7 @@ export const Documents = ({
             // if there are any errors present in supporting documents and we are in a validation state (relevant for Save as Draft and Continue buttons), stop here.
             // Force user to clear validations to continue
             if (shouldValidate) {
+                console.log('should validate', fileItems.length)
                 setShouldValidate(true)
                 if (!hasValidFiles) return
             }
@@ -273,7 +278,7 @@ export const Documents = ({
                         uploadFile={handleUploadFile}
                         scanFile={handleScanFile}
                         deleteFile={handleDeleteFile}
-                        onLoadComplete={onLoadComplete}
+                        onFileItemsUpdate={onFileItemsUpdate}
                     />
                 </fieldset>
 
@@ -293,7 +298,7 @@ export const Documents = ({
                     <ButtonGroup type="default" className={styles.buttonGroup}>
                         <Button
                             type="button"
-                            className="usa-button usa-button--outline"
+                            outline
                             onClick={async (e) => {
                                 await handleFormSubmit({
                                     shouldValidate: false,
