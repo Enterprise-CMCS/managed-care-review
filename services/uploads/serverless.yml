@@ -31,12 +31,14 @@ provider:
           Resource:
             - !Sub arn:aws:s3:::${self:service.name}-${self:custom.stage}-uploads-${AWS::AccountId}/*
             - !Sub arn:aws:s3:::${self:service.name}-${self:custom.stage}-avscan-${AWS::AccountId}/*
+            - !Sub arn:aws:s3:::${self:service.name}-${self:custom.stage}-zips-${AWS::AccountId}/*
         - Effect: 'Allow'
           Action:
             - s3:ListBucket
           Resource:
             - !Sub arn:aws:s3:::${self:service.name}-${self:custom.stage}-uploads-${AWS::AccountId}
-            - !Sub arn:aws:s3:::${self:service.name}-${self:custom.stage}-avscan-${AWS::AccountId}/*
+            - !Sub arn:aws:s3:::${self:service.name}-${self:custom.stage}-avscan-${AWS::AccountId}
+            - !Sub arn:aws:s3:::${self:service.name}-${self:custom.stage}-zips-${AWS::AccountId}
 
 custom:
   stage: ${opt:stage, self:provider.stage}
@@ -153,6 +155,38 @@ resources:
                 - !Sub ${DocumentUploadsBucket.Arn}/*.xls
                 - !Sub ${DocumentUploadsBucket.Arn}/*.xlsx
                 - !Sub ${DocumentUploadsBucket.Arn}/*.zip
+    DocumentZipsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: !Sub ${self:service.name}-${self:custom.stage}-zips-${AWS::AccountId}
+        BucketEncryption:
+          ServerSideEncryptionConfiguration:
+            - ServerSideEncryptionByDefault:
+                SSEAlgorithm: AES256
+        CorsConfiguration: # Set the CORS policy
+          CorsRules:
+            - AllowedOrigins:
+                - '*'
+              AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - GET
+                - PUT
+                - POST
+                - DELETE
+                - HEAD
+              MaxAge: 3000
+    DocumentZipsBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref DocumentZipsBucket
+        PolicyDocument:
+          Statement:
+            - Action: 's3:PutObject'
+              Effect: Deny
+              Principal: '*'
+              NotResource:
+                - !Sub ${DocumentZipsBucket.Arn}/*.zip
     LambdaInvokePermission:
       Type: AWS::Lambda::Permission
       Properties:
