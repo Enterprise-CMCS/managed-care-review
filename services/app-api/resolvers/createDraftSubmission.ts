@@ -20,7 +20,7 @@ export function createDraftSubmissionResolver(
 
         const stateFromCurrentUser: State['code'] = context.user.state_code
 
-        const program = store.findProgram(stateFromCurrentUser, input.programIDs)
+        const program = store.findPrograms(stateFromCurrentUser, input.programIDs)
 
         if (program === undefined) {
             const count = input.programIDs.length

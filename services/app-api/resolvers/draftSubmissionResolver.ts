@@ -9,7 +9,7 @@ export function draftSubmissionResolver(
     return {
         program(parent) {
             const count = parent.programIDs.length
-            const program = store.findProgram(
+            const program = store.findPrograms(
                 parent.stateCode,
                 parent.programIDs
             )
@@ -25,7 +25,7 @@ export function draftSubmissionResolver(
 
         name(parent) {
             const count = parent.programIDs.length
-            const program = store.findProgram(
+            const program = store.findPrograms(
                 parent.stateCode,
                 parent.programIDs
             )

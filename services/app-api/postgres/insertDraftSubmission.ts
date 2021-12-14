@@ -14,7 +14,7 @@ import {
 
 export type InsertDraftSubmissionArgsType = {
     stateCode: string
-    programIDs: Array<string>
+    programIDs: string[]
     submissionType: SubmissionType
     submissionDescription: string
 }

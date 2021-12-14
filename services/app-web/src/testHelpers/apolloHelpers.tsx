@@ -320,7 +320,7 @@ fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
 
 type createDraftSubmissionMockProps = {
     input: {
-        programIDs: Array<string>
+        programIDs: string[]
         submissionType: string
         submissionDescription: string
     }

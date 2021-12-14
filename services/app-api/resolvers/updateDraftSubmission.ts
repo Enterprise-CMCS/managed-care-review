@@ -137,7 +137,7 @@ export function updateDraftSubmissionResolver(
         }
 
         // Validate the programIDs
-        const program = store.findProgram(
+        const program = store.findPrograms(
             stateFromCurrentUser,
             input.draftSubmissionUpdates.programIDs
         )

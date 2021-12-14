@@ -8,7 +8,7 @@ export function stateSubmissionResolver(
 ): Resolvers['StateSubmission'] {
     return {
         program(parent) {
-            const program = store.findProgram(
+            const program = store.findPrograms(
                 parent.stateCode,
                 parent.programIDs
             )
@@ -24,7 +24,7 @@ export function stateSubmissionResolver(
         },
 
         name(parent) {
-            const program = store.findProgram(
+            const program = store.findPrograms(
                 parent.stateCode,
                 parent.programIDs
             )
