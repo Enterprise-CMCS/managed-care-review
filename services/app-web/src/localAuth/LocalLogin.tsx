@@ -23,28 +23,28 @@ import { CognitoUserType } from '../common-code/domain-models'
 
 const localUsers: CognitoUserType[] = [
     {
-        email: 'aang@dhs.state.mn.us',
+        email: 'aang@example.com',
         name: 'Aang',
         role: 'STATE_USER',
         state_code: 'MN',
     },
     {
-        email: 'toph@dmas.virginia.gov',
+        email: 'toph@example.com',
         name: 'Toph',
         role: 'STATE_USER',
         state_code: 'VA',
     },
     {
-        email: 'zuko@cms.hhs.gov',
+        email: 'zuko@example.com',
         name: 'Zuko',
         role: 'CMS_USER',
     },
 ]
 
 const userAvatars: { [key: string]: string } = {
-    'aang@dhs.state.mn.us': aangAvatar,
-    'toph@dmas.virginia.gov': tophAvatar,
-    'zuko@cms.hhs.gov': zukoAvatar,
+    'aang@example.com': aangAvatar,
+    'toph@example.com': tophAvatar,
+    'zuko@example.com': zukoAvatar,
 }
 
 export function LocalLogin(): React.ReactElement {
