@@ -28,7 +28,9 @@ Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
 
 Cypress.Commands.add('fillOutContractActionOnly', () => {
     // Must be on '/submissions/new'
-    cy.findByRole('combobox', { name: 'programs' }).click()
+    cy.findByRole('combobox', { name: 'programs' }).click({
+        force: true,
+    })
     cy.findByText('PMAP').click()
     cy.findByText('Contract action only').click()
     cy.findByRole('textbox', { name: 'Submission description' }).type(
@@ -38,7 +40,9 @@ Cypress.Commands.add('fillOutContractActionOnly', () => {
 
 Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
     // Must be on '/submissions/new'
-    cy.findByRole('combobox', { name: 'programs' }).click()
+    cy.findByRole('combobox', { name: 'programs' }).click({
+        force: true,
+    })
     cy.findByText('PMAP').click()
     cy.findByText('Contract action and rate certification').click()
     cy.findByRole('textbox', { name: 'Submission description' }).type(
