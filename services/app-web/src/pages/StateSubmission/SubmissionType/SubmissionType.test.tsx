@@ -327,8 +327,10 @@ describe('SubmissionType', () => {
                     )
                 ).toHaveLength(2)
                 expect(
-                    screen.queryByText('You must select at least one program')
-                ).toBeInTheDocument()
+                    screen.queryAllByText(
+                        'You must select at least one program'
+                    )
+                ).toHaveLength(2)
             })
         })
     })
