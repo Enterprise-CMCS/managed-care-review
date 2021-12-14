@@ -187,6 +187,15 @@ resources:
               Principal: '*'
               NotResource:
                 - !Sub ${DocumentZipsBucket.Arn}/*.zip
+            - Action:
+                - 's3:GetObject'
+                - 's3:ListBucket'
+              Effect: 'Deny'
+              Resource: !Sub ${DocumentZipsBucket.Arn}/*
+              Principal: '*'
+              Condition:
+                StringNotEquals:
+                  aws:PrincipalArn: !GetAtt IamRoleLambdaExecution.Arn
     LambdaInvokePermission:
       Type: AWS::Lambda::Permission
       Properties:
