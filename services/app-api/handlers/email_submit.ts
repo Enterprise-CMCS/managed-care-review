@@ -2,7 +2,7 @@ import { Handler } from 'aws-lambda'
 import { sendSESEmail } from '../emailer'
 
 export const main: Handler = async (event) => {
-    if (!event.body)
+    if (!event.body) {
         return {
             statusCode: 400,
             body: JSON.stringify({
@@ -14,23 +14,18 @@ export const main: Handler = async (event) => {
                 'Access-Control-Allow-Credentials': true,
             },
         }
-    try {
-        console.log('INFO: Sending SES Email: ', event.body)
-        const sesResult = await sendSESEmail(event.body).promise()
-        console.log('Sent email: ', sesResult)
-        console.info({
-            message: 'email_submit succeeded',
-            operation: 'email_submit',
-            status: 'SUCCESS',
-        })
-        return sesResult
-    } catch (err) {
-        console.log('ERROR: Email send failed: ', err)
+    }
+    console.log('INFO: Sending SES Email: ', event.body)
+    const sesResult = await sendSESEmail(event.body)
+
+    if (sesResult instanceof Error) {
+        // we got an error back
+        console.log('ERROR: Email send failed: ', sesResult.awsErr)
         return {
-            StatusCode: 400,
+            StatusCode: 500,
             body: JSON.stringify({
                 code: 'EMAIL_FAILED',
-                message: 'Could not send email. ' + err,
+                message: 'Could not send email. ' + sesResult,
             }),
             headers: {
                 'Access-Control-Allow-Origin': '*',
@@ -38,26 +33,12 @@ export const main: Handler = async (event) => {
             },
         }
     }
-}
 
-/* Sample event for use testing in lambda console
-  {"body": 
-    {"Destination":{
-      "BccAddresses":[],"CcAddresses":[],"ToAddresses":["hana@truss.works"]
-    },
-    "Message":{
-        "Body":{
-            "Text":{
-                "Data":"test",
-                "Charset":"UTF-8"
-            },
-            "Html":{
-                "Data":"test"}},
-                "Subject":{
-                    "Data":"This is a test",
-                    "Charset":"UTF-8"}
-                },
-            "Source":"macrael@truss.works"
-        }
-    }
-*/
+    console.log('Sent email: ', sesResult)
+    console.info({
+        message: 'email_submit succeeded',
+        operation: 'email_submit',
+        status: 'SUCCESS',
+    })
+    return sesResult
+}
