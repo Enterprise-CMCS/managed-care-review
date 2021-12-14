@@ -275,8 +275,8 @@ describe('SubmissionType', () => {
             await waitFor(() => {
                 expect(textarea).toHaveClass('usa-input--error')
                 expect(
-                    screen.getByText('You must choose a submission type')
-                ).toBeVisible()
+                    screen.getAllByText('You must choose a submission type')
+                ).toHaveLength(2)
             })
         })
 
@@ -319,13 +319,13 @@ describe('SubmissionType', () => {
             )
             await waitFor(() => {
                 expect(
-                    screen.queryByText('You must choose a submission type')
-                ).toBeInTheDocument()
+                    screen.queryAllByText('You must choose a submission type')
+                ).toHaveLength(2)
                 expect(
-                    screen.queryByText(
+                    screen.queryAllByText(
                         'You must provide a description of any major changes or updates'
                     )
-                ).toBeInTheDocument()
+                ).toHaveLength(2)
                 expect(
                     screen.queryByText('You must select at least one program')
                 ).toBeInTheDocument()

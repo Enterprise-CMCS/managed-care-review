@@ -33,6 +33,7 @@ import {
     cleanDraftSubmission,
     updatesFromSubmission,
 } from '../updateSubmissionTransform'
+import { ErrorSummary } from '../../../components/Form/ErrorSummary/ErrorSummary'
 
 // Formik setup
 // Should be listed in order of appearance on field to allow errors to focus as expected
@@ -251,6 +252,9 @@ export const SubmissionType = ({
                                     </Alert>
                                 ))}
                             <span>All fields are required</span>
+
+                            <ErrorSummary errors={errors} />
+
                             <FormGroup
                                 error={showFieldErrors(errors.programIDs)}
                             >
