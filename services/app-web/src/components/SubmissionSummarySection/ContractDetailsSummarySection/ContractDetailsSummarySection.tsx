@@ -51,37 +51,6 @@ export const ContractDetailsSummarySection = ({
     submission,
     navigateTo,
 }: ContractDetailsSummarySectionProps): React.ReactElement => {
-    // Array of values from a checkbox field is displayed in an unordered list
-
-    const capitationRateChangeReason = (): string | null => {
-        const { reason, otherReason } =
-            submission?.contractAmendmentInfo?.capitationRatesAmendedInfo || {}
-        if (!reason) return null
-
-        return otherReason
-            ? `${AmendableItemsRecord['CAPITATION_RATES']} (${otherReason})`
-            : `${AmendableItemsRecord['CAPITATION_RATES']} (${RateChangeReasonRecord[reason]})`
-    }
-
-    // Capture the "other" fields in Items being amended
-    // Including Capitation rates (Other) and Other
-    // to pass through to multi checkbox list
-    const itemsAmendedOtherList = []
-
-    if (
-        submission?.contractAmendmentInfo?.itemsBeingAmended.includes(
-            'CAPITATION_RATES'
-        ) &&
-        capitationRateChangeReason() !== null
-    ) {
-        itemsAmendedOtherList.push(capitationRateChangeReason())
-    }
-
-    if (submission.contractAmendmentInfo?.otherItemBeingAmended) {
-        const amendedOtherReason = `Other (${submission.contractAmendmentInfo?.otherItemBeingAmended})`
-        itemsAmendedOtherList.push(amendedOtherReason)
-    }
-
     // Get the zip file for the contract
     const { getKey, getBulkDlURL } = useS3()
     useEffect(() => {
@@ -111,6 +80,36 @@ export const ContractDetailsSummarySection = ({
         void fetchZipUrl()
     }, [getKey, getBulkDlURL, submission])
     const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
+
+    // Array of values from a checkbox field is displayed in an unordered list
+    const capitationRateChangeReason = (): string | null => {
+        const { reason, otherReason } =
+            submission?.contractAmendmentInfo?.capitationRatesAmendedInfo || {}
+        if (!reason) return null
+
+        return otherReason
+            ? `${AmendableItemsRecord['CAPITATION_RATES']} (${otherReason})`
+            : `${AmendableItemsRecord['CAPITATION_RATES']} (${RateChangeReasonRecord[reason]})`
+    }
+
+    // Capture the "other" fields in Items being amended
+    // Including Capitation rates (Other) and Other
+    // to pass through to multi checkbox list
+    const itemsAmendedOtherList = []
+
+    if (
+        submission?.contractAmendmentInfo?.itemsBeingAmended.includes(
+            'CAPITATION_RATES'
+        ) &&
+        capitationRateChangeReason() !== null
+    ) {
+        itemsAmendedOtherList.push(capitationRateChangeReason())
+    }
+
+    if (submission.contractAmendmentInfo?.otherItemBeingAmended) {
+        const amendedOtherReason = `Other (${submission.contractAmendmentInfo?.otherItemBeingAmended})`
+        itemsAmendedOtherList.push(amendedOtherReason)
+    }
 
     return (
         <section id="contractDetailsSection" className={styles.summarySection}>

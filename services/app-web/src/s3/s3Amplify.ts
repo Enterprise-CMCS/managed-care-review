@@ -139,8 +139,6 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
                 zipFileName: prependedFilename,
             }
 
-            // the below is just a sketch, the URL needs to be fixed and the return value
-            // should be the actual URL
             try {
                 const resp = await API.post('api', '/zip', {
                     response: true,
