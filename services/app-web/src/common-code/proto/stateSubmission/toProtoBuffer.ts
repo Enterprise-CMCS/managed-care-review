@@ -134,7 +134,7 @@ const toProtoBuffer = (
 
         stateNumber: domainData.stateNumber,
         // eventually this will need to be an array of ids
-        programIds: [domainData.programID],
+        programIds: domainData.programIDs,
         contractInfo: {
             contractType: domainEnumToProto(
                 domainData.contractType,

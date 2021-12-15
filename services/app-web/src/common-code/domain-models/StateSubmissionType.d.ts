@@ -18,7 +18,7 @@ export type StateSubmissionType = {
     status: 'SUBMITTED'
     stateCode: string
     stateNumber: number
-    programID: string
+    programIDs: string[]
     submissionDescription: string
     submissionType: SubmissionType
     createdAt: Date

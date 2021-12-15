@@ -8,7 +8,6 @@ import styles from './Dashboard.module.scss'
 import { Loading } from '../../components/Loading'
 import { useAuth } from '../../contexts/AuthContext'
 import {
-    Program,
     useIndexSubmissionsQuery,
     SubmissionType as GQLSubmissionType,
 } from '../../gen/gqlClient'
@@ -32,7 +31,7 @@ type TableRow = {
     __typename: string
     id: string
     name: string
-    program: Program
+    programIDs: Array<string>
     submittedAt?: string
     updatedAt: string
     submissionType: GQLSubmissionType
@@ -74,7 +73,7 @@ export const Dashboard = (): React.ReactElement => {
                     __typename: row.__typename,
                     id: row.id,
                     name: row.name,
-                    program: row.program,
+                    programIDs: row.programIDs,
                     updatedAt: row.updatedAt,
                     submissionType: row.submissionType,
                 }
@@ -83,7 +82,7 @@ export const Dashboard = (): React.ReactElement => {
                     __typename: row.__typename,
                     id: row.id,
                     name: row.name,
-                    program: row.program,
+                    programIDs: row.programIDs,
                     submittedAt: row.submittedAt,
                     updatedAt: row.updatedAt,
                     submissionType: row.submissionType,
@@ -152,15 +151,18 @@ export const Dashboard = (): React.ReactElement => {
                                                         </NavLink>
                                                     </td>
                                                     <td>
-                                                        <Tag
-                                                            className={`radius-pill ${styles.programTag}`}
-                                                        >
-                                                            {
-                                                                submission
-                                                                    .program
-                                                                    .name
+                                                        {submission.programIDs.map(
+                                                            (id) => {
+                                                                return (
+                                                                    <Tag
+                                                                        key={id}
+                                                                        className={`radius-pill ${styles.programTag}`}
+                                                                    >
+                                                                        {id}
+                                                                    </Tag>
+                                                                )
                                                             }
-                                                        </Tag>
+                                                        )}
                                                     </td>
                                                     <td data-testid="submission-date">
                                                         {submission.submittedAt

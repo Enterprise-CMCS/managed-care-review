@@ -113,7 +113,7 @@ export const draftSubmissionTypeSchema = z.object({
     status: z.literal('DRAFT'),
     stateCode: z.string(),
     stateNumber: z.number(),
-    programID: z.string(),
+    programIDs: z.array(z.string()),
     submissionType: submissionTypeSchema,
     submissionDescription: z.string(),
     stateContacts: z.array(stateContactSchema),
