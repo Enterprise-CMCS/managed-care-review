@@ -96,6 +96,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
     // construct the zip bucket
     const accountId = event.requestContext.accountId
     const zipsBucket = 'uploads-' + stageName + '-zips-' + accountId
+    console.log(zipsBucket)
 
     const params: S3.PutObjectRequest = {
         ACL: 'private',
