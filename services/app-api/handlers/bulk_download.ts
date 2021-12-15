@@ -7,6 +7,7 @@ import { assertIsAuthMode } from '../../app-web/src/common-code/domain-models'
 
 const s3 = new S3({ region: 'us-east-1' })
 const authMode = process.env.REACT_APP_AUTH_MODE
+const stageName = process.env.stage
 assertIsAuthMode(authMode)
 
 interface S3BulkDownloadRequest {
@@ -50,7 +51,6 @@ export const main: APIGatewayProxyHandler = async (event) => {
 
     const bulkDlRequest: S3BulkDownloadRequest = JSON.parse(event.body)
     console.log('Bulk download request:', bulkDlRequest)
-    console.log('wat', bulkDlRequest.keys)
 
     if (
         !bulkDlRequest.bucket ||
@@ -92,10 +92,15 @@ export const main: APIGatewayProxyHandler = async (event) => {
     )
 
     const streamPassThrough = new Stream.PassThrough()
+
+    // construct the zip bucket
+    const accountId = event.requestContext.accountId
+    const zipsBucket = 'uploads-' + stageName + '-zips-' + accountId
+
     const params: S3.PutObjectRequest = {
         ACL: 'private',
         Body: streamPassThrough,
-        Bucket: bulkDlRequest.bucket,
+        Bucket: zipsBucket,
         ContentType: 'application/zip',
         Key: bulkDlRequest.zipFileName,
         StorageClass: 'STANDARD',
