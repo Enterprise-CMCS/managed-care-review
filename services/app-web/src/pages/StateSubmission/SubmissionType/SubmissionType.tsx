@@ -9,9 +9,11 @@ import {
     Fieldset,
     FormGroup,
     Link,
+    Label,
 } from '@trussworks/react-uswds'
-import { Formik, FormikHelpers, FormikErrors } from 'formik'
+import { Formik, FormikHelpers, FormikErrors, Field } from 'formik'
 import { NavLink, useHistory, Link as ReactRouterLink } from 'react-router-dom'
+import Select, { AriaOnFocus } from 'react-select'
 
 import {
     CreateDraftSubmissionInput,
@@ -25,28 +27,25 @@ import {
 import styles from '../StateSubmissionForm.module.scss'
 
 import { useAuth } from '../../../contexts/AuthContext'
-import {
-    FieldTextarea,
-    FieldDropdown,
-    FieldRadio,
-} from '../../../components/Form'
+import { FieldTextarea, FieldRadio } from '../../../components/Form'
 import { SubmissionTypeRecord } from '../../../constants/submissions'
 import {
     cleanDraftSubmission,
     updatesFromSubmission,
 } from '../updateSubmissionTransform'
+import { ErrorSummary } from '../../../components/Form/ErrorSummary/ErrorSummary'
 
 // Formik setup
 // Should be listed in order of appearance on field to allow errors to focus as expected
 const SubmissionTypeFormSchema = Yup.object().shape({
-    program: Yup.string(),
+    programIDs: Yup.array().min(1, 'You must select at least one program'),
     submissionType: Yup.string().required('You must choose a submission type'),
     submissionDescription: Yup.string().required(
         'You must provide a description of any major changes or updates'
     ),
 })
 export interface SubmissionTypeFormValues {
-    programID: string
+    programIDs: string[]
     submissionDescription: string
     submissionType: string
 }
@@ -57,6 +56,13 @@ type SubmissionTypeProps = {
         input: UpdateDraftSubmissionInput
     ) => Promise<DraftSubmission | undefined>
     formAlert?: React.ReactElement
+}
+
+interface ProgramOption {
+    readonly value: string
+    readonly label: string
+    readonly isFixed?: boolean
+    readonly isDisabled?: boolean
 }
 
 type FormError =
@@ -79,11 +85,18 @@ export const SubmissionType = ({
     const history = useHistory()
     const location = history.location
     const isNewSubmission = location.pathname === '/submissions/new'
-    const programOptions: Array<{ id: string; label: string }> = programs.map(
-        (program) => {
-            return { id: program.id, label: program.name }
-        }
-    )
+
+    const programOptions: Array<{ value: string; label: string }> =
+        programs.map((program) => {
+            return { value: program.id, label: program.name }
+        })
+
+    const onFocus: AriaOnFocus<ProgramOption> = ({ focused, isDisabled }) => {
+        const msg = `You are currently focused on option ${focused.label}${
+            isDisabled ? ', disabled' : ''
+        }`
+        return msg
+    }
 
     const [createDraftSubmission, { error }] = useCreateDraftSubmissionMutation(
         {
@@ -130,7 +143,7 @@ export const SubmissionType = ({
         shouldValidate && Boolean(error)
 
     const submissionTypeInitialValues: SubmissionTypeFormValues = {
-        programID: draftSubmission?.program.id ?? programs[0]?.id,
+        programIDs: draftSubmission?.programIDs ?? [],
         submissionDescription: draftSubmission?.submissionDescription ?? '',
         submissionType: draftSubmission?.submissionType ?? '',
     }
@@ -155,7 +168,7 @@ export const SubmissionType = ({
                 }
 
                 const input: CreateDraftSubmissionInput = {
-                    programID: values.programID,
+                    programIDs: values.programIDs,
                     submissionType: values.submissionType,
                     submissionDescription: values.submissionDescription,
                 }
@@ -190,7 +203,7 @@ export const SubmissionType = ({
             }
             const updatedDraft = updatesFromSubmission(draftSubmission)
 
-            updatedDraft.programID = values.programID
+            updatedDraft.programIDs = values.programIDs
             updatedDraft.submissionType =
                 values.submissionType as SubmissionTypeT
             updatedDraft.submissionDescription = values.submissionDescription
@@ -239,13 +252,53 @@ export const SubmissionType = ({
                                     </Alert>
                                 ))}
                             <span>All fields are required</span>
-                            <FieldDropdown
-                                id="programID"
-                                name="programID"
-                                label="Program"
-                                showError={showFieldErrors(errors.programID)}
-                                options={programOptions}
-                            />
+
+                            <ErrorSummary errors={errors} />
+
+                            <FormGroup
+                                error={showFieldErrors(errors.programIDs)}
+                            >
+                                <Label htmlFor="programIDs">Program(s)</Label>
+                                {showFieldErrors(errors.programIDs) && (
+                                    <ErrorMessage>
+                                        {errors.programIDs}
+                                    </ErrorMessage>
+                                )}
+                                <Field name="programIDs">
+                                    {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                                    {/* @ts-ignore */}
+                                    {({ field, form }) => (
+                                        <Select
+                                            defaultValue={values.programIDs.map(
+                                                (item) => {
+                                                    return {
+                                                        value: item,
+                                                        label: item.toUpperCase(),
+                                                    }
+                                                }
+                                            )}
+                                            className={styles.multiSelect}
+                                            classNamePrefix="program-select"
+                                            id="programIDs"
+                                            name="programIDs"
+                                            aria-label="programs"
+                                            options={programOptions}
+                                            isMulti
+                                            ariaLiveMessages={{
+                                                onFocus,
+                                            }}
+                                            onChange={(selectedOption) =>
+                                                form.setFieldValue(
+                                                    'programIDs',
+                                                    selectedOption.map(
+                                                        (item) => item.value
+                                                    )
+                                                )
+                                            }
+                                        />
+                                    )}
+                                </Field>
+                            </FormGroup>
                             <FormGroup
                                 error={showFieldErrors(errors.submissionType)}
                             >

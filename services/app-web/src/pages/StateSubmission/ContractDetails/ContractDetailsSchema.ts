@@ -10,38 +10,50 @@ export const ContractDetailsFormSchema = Yup.object().shape({
         'You must choose a contract action type'
     ),
     contractDateStart: Yup.date()
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore-next-line
-        .validateDateFormat('YYYY-MM-DD', true)
-        .defined('You must enter a start date')
-        .typeError('The start date must be in MM/DD/YYYY format'),
-    contractDateEnd: Yup.date()
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore-next-line
-        .validateDateFormat('YYYY-MM-DD', true)
-        .defined('You must enter an end date')
-        .typeError('The end date must be in MM/DD/YYYY format')
-        .when(
-            // ContractDateEnd must be at minimum the day after Start
-            'contractDateStart',
-            (contractDateStart: Date, schema: Yup.DateSchema) => {
-                const startDate = dayjs(contractDateStart)
-                if (startDate.isValid()) {
-                    return schema.min(
-                        startDate.add(1, 'day'),
-                        'The end date must come after the start date'
-                    )
-                }
+        .when("contractType", (contractType) => {
+            if (contractType) {
+                return Yup.date()
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore-next-line
+                .validateDateFormat('YYYY-MM-DD', true)
+                .defined('You must enter a start date')
+                .typeError('The start date must be in MM/DD/YYYY format');
             }
-        ),
-    managedCareEntities: Yup.array().min(
-        1,
-        'You must select at least one entity'
-    ),
-    federalAuthorities: Yup.array().min(
-        1,
-        'You must select at least one authority'
-    ),
+        }),
+    contractDateEnd: Yup.date()
+        .when("contractType", (contractType) => {
+            if (contractType) {
+                return Yup.date()
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore-next-line
+                    .validateDateFormat('YYYY-MM-DD', true)
+                    .defined('You must enter an end date')
+                    .typeError('The end date must be in MM/DD/YYYY format')
+                    .when(
+                        // ContractDateEnd must be at minimum the day after Start
+                        'contractDateStart',
+                        (contractDateStart: Date, schema: Yup.DateSchema) => {
+                            const startDate = dayjs(contractDateStart)
+                            if (startDate.isValid()) {
+                                return schema.min(
+                                    startDate.add(1, 'day'),
+                                    'The end date must come after the start date'
+                                )
+                            }
+                        }
+                    )
+            }
+        }),
+    managedCareEntities: Yup.array()
+        .when("contractType", {
+            is: (contractType:string|undefined) => contractType,
+            then: Yup.array().min(1, 'You must select at least one entity')
+        }),
+    federalAuthorities: Yup.array()
+        .when("contractType", {
+            is: (contractType:string|undefined) => contractType,
+            then: Yup.array().min(1, 'You must select at least one authority')
+        }),
     itemsAmended: Yup.array().when('contractType', {
         is: 'AMENDMENT',
         then: Yup.array().min(1, 'You must select at least one item'),

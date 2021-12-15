@@ -9,7 +9,7 @@ describe('fetchDraftSubmission', () => {
 
         // First, create a new submission
         const createInput: CreateDraftSubmissionInput = {
-            programID: 'managed-medical-assistance',
+            programIDs: ['managed-medical-assistance'],
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
         }
@@ -64,7 +64,7 @@ describe('fetchDraftSubmission', () => {
 
         // First, create a new submission
         const createInput: CreateDraftSubmissionInput = {
-            programID: 'smmc',
+            programIDs: ['smmc'],
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
         }
@@ -111,7 +111,7 @@ describe('fetchDraftSubmission', () => {
 
         // First, create a new submission
         const createInput: CreateDraftSubmissionInput = {
-            programID: 'smmc',
+            programIDs: ['smmc'],
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
         }

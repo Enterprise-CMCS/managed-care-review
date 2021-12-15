@@ -34,6 +34,7 @@
         margin-top: 0;
     }
 }
+
 .pageActions {
     display: flex;
     justify-content: space-between;
@@ -107,5 +108,23 @@
 
     .removeContactBtn {
         margin-top: units(4);
+    }
+}
+
+// react-select draws the chips in two parts, so we round the outer and square in the inner corners
+.multiSelect {
+    padding-top: 12px;
+    [class*='program-select__multi-value'] {
+        border-radius: 99rem 99rem 99rem 99rem;
+    }
+    [class*='program-select__multi-value__label'] {
+        background: $cms-color-primary;
+        color: white;
+        border-radius: 99rem 0rem 0rem 99rem;
+    }
+    [class*='program-select__multi-value__remove'] {
+        background: $cms-color-primary;
+        color: white;
+        border-radius: 0rem 99rem 99rem 0rem;
     }
 }

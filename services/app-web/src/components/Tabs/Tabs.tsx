@@ -49,10 +49,10 @@ export const Tabs = ({
             </div>
             {React.Children.map(children, (child) => {
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore 
-                if ( child && child?.props.tabName === activeTab) {
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore 
+                // @ts-ignore
+                if (child && child?.props.tabName === activeTab) {
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
                     return React.cloneElement(child, {
                         isActive: true,
                     })

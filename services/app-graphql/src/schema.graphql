@@ -28,7 +28,7 @@ type Mutation {
 }
 
 input CreateDraftSubmissionInput {
-    programID: ID!
+    programIDs: [ID!]!
     submissionType: SubmissionType!
     submissionDescription: String!
 }
@@ -228,7 +228,7 @@ enum FederalAuthority {
 
 type DraftSubmission {
     id: ID!
-    programID: String!
+    programIDs: [ID!]!
     program: Program!
     submissionType: SubmissionType!
     submissionDescription: String!
@@ -257,7 +257,7 @@ type DraftSubmission {
 
 type StateSubmission {
     id: ID!
-    programID: String!
+    programIDs: [ID!]!
     program: Program!
     submissionType: SubmissionType!
     submissionDescription: String!
@@ -288,7 +288,7 @@ type StateSubmission {
 union Submission = DraftSubmission | StateSubmission
 
 input DraftSubmissionUpdates {
-    programID: String!
+    programIDs: [ID!]!
     submissionType: SubmissionType!
     submissionDescription: String!
     stateContacts: [StateContactInput!]!

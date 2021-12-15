@@ -23,7 +23,7 @@ describe('updateDraftSubmission', () => {
                 status: 'DRAFT',
                 stateCode: 'FL',
                 stateNumber: 3,
-                programID: 'smmc',
+                programIDs: ['smmc'],
                 submissionType: 'CONTRACT_ONLY' as const,
                 submissionDescription: 'an old submission',
                 createdAt: new Date(),
@@ -47,7 +47,7 @@ describe('updateDraftSubmission', () => {
             }
 
             const updates: DraftSubmissionUpdates = {
-                programID: 'smmc',
+                programIDs: ['smmc'],
                 submissionType: 'CONTRACT_ONLY',
                 submissionDescription: 'an updated draft',
                 documents: [],
@@ -91,7 +91,7 @@ describe('updateDraftSubmission', () => {
                 status: 'DRAFT',
                 stateCode: 'FL',
                 stateNumber: 3,
-                programID: 'smmc',
+                programIDs: ['smmc'],
                 submissionType: 'CONTRACT_ONLY' as const,
                 submissionDescription: 'an old submission',
                 createdAt: new Date(),
@@ -107,7 +107,7 @@ describe('updateDraftSubmission', () => {
             }
 
             const updates: DraftSubmissionUpdates = {
-                programID: 'smmc',
+                programIDs: ['smmc'],
                 submissionType: 'CONTRACT_ONLY',
                 submissionDescription: 'an updated draft',
                 documents: [],
@@ -162,7 +162,7 @@ describe('updateDraftSubmission', () => {
                 status: 'DRAFT',
                 stateCode: 'FL',
                 stateNumber: 3,
-                programID: 'smmc',
+                programIDs: ['smmc'],
                 submissionType: 'CONTRACT_ONLY' as const,
                 submissionDescription: 'an old submission',
                 createdAt: new Date(),
@@ -178,7 +178,7 @@ describe('updateDraftSubmission', () => {
             }
 
             const updates: DraftSubmissionUpdates = {
-                programID: 'smmc',
+                programIDs: ['smmc'],
                 submissionType: 'CONTRACT_ONLY',
                 submissionDescription: 'an updated draft',
                 documents: [],
@@ -232,7 +232,7 @@ describe('updateDraftSubmission', () => {
         await new Promise((resolve) => setTimeout(resolve, 2000))
 
         const updatedDraft = {
-            programID: 'cnet',
+            programIDs: ['cnet'],
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [],
@@ -308,7 +308,7 @@ describe('updateDraftSubmission', () => {
         const endDate = '2021-07-12'
 
         const updatedDraft = {
-            programID: 'cnet',
+            programIDs: ['cnet'],
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [
@@ -379,7 +379,7 @@ describe('updateDraftSubmission', () => {
 
         // Update with two more documents
         const updatedDraft2 = {
-            programID: 'cnet',
+            programIDs: ['cnet'],
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [
@@ -456,7 +456,7 @@ describe('updateDraftSubmission', () => {
         const createdID = createdDraft.id
 
         const updatedDraft = {
-            programID: 'cnet',
+            programIDs: ['cnet'],
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             stateContacts: [
@@ -542,7 +542,7 @@ describe('updateDraftSubmission', () => {
         const startDate = '2021-07-06'
 
         const updatedDraft = {
-            programID: 'cnet',
+            programIDs: ['cnet'],
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [],
@@ -601,7 +601,7 @@ describe('updateDraftSubmission', () => {
         const startDate = '2021-07-06'
 
         const updatedDraft = {
-            programID: 'cnet',
+            programIDs: ['cnet'],
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [],
@@ -687,7 +687,7 @@ describe('updateDraftSubmission', () => {
         }
 
         const updatedDraft = {
-            programID: 'cnet',
+            programIDs: ['cnet'],
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [],
@@ -744,7 +744,7 @@ describe('updateDraftSubmission', () => {
         }
 
         const updatedDraft = {
-            programID: 'cnet',
+            programIDs: ['cnet'],
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [],
@@ -793,7 +793,7 @@ describe('updateDraftSubmission', () => {
         const createdID = createdDraft.id
 
         const updatedDraftWithDocs = {
-            programID: 'cnet',
+            programIDs: ['cnet'],
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             managedCareEntities: [],
@@ -856,7 +856,7 @@ describe('updateDraftSubmission', () => {
 
         // Remove documents
         const updatedDraftWithoutDocs = {
-            programID: resultDraft.programID,
+            programIDs: resultDraft.programIDs,
             submissionType: resultDraft.submissionType,
             submissionDescription: resultDraft.submissionDescription,
             managedCareEntities: [],
@@ -904,7 +904,7 @@ describe('updateDraftSubmission', () => {
         const endDate = '2021-07-12'
 
         const updatedDraft = {
-            programID: 'cnet',
+            programIDs: ['cnet'],
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [],
@@ -947,7 +947,7 @@ describe('updateDraftSubmission', () => {
 
         // SETUP: First, create a new submission
         const createInput: CreateDraftSubmissionInput = {
-            programID: 'smmc',
+            programIDs: ['smmc'],
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A created submission',
         }
@@ -979,7 +979,7 @@ describe('updateDraftSubmission', () => {
         const startDate = '2021-07-06'
         const endDate = '2021-07-12'
         const updatedDraft = {
-            programID: 'cnet',
+            programIDs: ['cnet'],
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [],
@@ -1022,7 +1022,7 @@ describe('updateDraftSubmission', () => {
         const endDate = '2021-07-12'
         // ACT: next, update that submission but from a user from a different state
         const updatedDraft = {
-            programID: 'wefwefwefew',
+            programIDs: ['wefwefwefew'],
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [],

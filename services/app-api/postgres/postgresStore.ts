@@ -4,7 +4,7 @@ import {
     ProgramT,
     StateSubmissionType,
 } from '../../app-web/src/common-code/domain-models'
-import { findProgram } from '../postgres'
+import { findPrograms } from '../postgres'
 import { findAllSubmissions } from './findAllSubmissions'
 import { findDraftSubmission } from './findDraftSubmission'
 import { findStateSubmission } from './findStateSubmission'
@@ -45,7 +45,7 @@ type Store = {
         stateSubmission: StateSubmissionType
     ) => Promise<StateSubmissionType | StoreError>
 
-    findProgram: (stateCode: string, programID: string) => ProgramT | undefined
+    findPrograms: (stateCode: string, programIDs: Array<string>) => ProgramT | undefined
 }
 
 function NewPostgresStore(client: PrismaClient): Store {
@@ -65,7 +65,7 @@ function NewPostgresStore(client: PrismaClient): Store {
             updateStateSubmission(client, submission),
         findStateSubmission: (submissionID) =>
             findStateSubmission(client, submissionID),
-        findProgram: findProgram,
+        findPrograms: findPrograms,
     }
 }
 

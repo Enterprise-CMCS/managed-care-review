@@ -88,8 +88,8 @@ describe('ContractDetails', () => {
 
         // check that there are the errors we expect
         expect(
-            screen.queryByText('You must select at least one item')
-        ).toBeInTheDocument()
+            screen.queryAllByText('You must select at least one item')
+        ).toHaveLength(2)
 
         // click capRates
         await act(async () => {
@@ -101,10 +101,10 @@ describe('ContractDetails', () => {
 
         // check error for not selected
         expect(
-            screen.getByText(
+            screen.getAllByText(
                 'You must select a reason for capitation rate change'
             )
-        ).toBeInTheDocument()
+        ).toHaveLength(2)
 
         // click annual rate
         await act(async () => {
@@ -133,8 +133,8 @@ describe('ContractDetails', () => {
         // other is displayed, error is back
         await waitFor(() =>
             expect(
-                screen.getByText('You must enter a description')
-            ).toBeInTheDocument()
+                screen.getAllByText('You must enter a description')
+            ).toHaveLength(2)
         )
         // click "NO" for the Covid question so we can submit
         const otherBox = screen.getByLabelText(
@@ -195,8 +195,8 @@ describe('ContractDetails', () => {
 
         // check error for not selected
         expect(
-            screen.getByText('You must enter a description')
-        ).toBeInTheDocument()
+            screen.getAllByText('You must enter a description')
+        ).toHaveLength(2)
 
         // click annual rate
         await act(async () => {
@@ -254,10 +254,10 @@ describe('ContractDetails', () => {
 
         // check on the covid error
         expect(
-            screen.queryByText(
+            screen.queryAllByText(
                 'You must indicate whether or not this contract action is related to COVID-19'
             )
-        ).toBeInTheDocument()
+        ).toHaveLength(2);
 
         // click other
         await act(async () => {
@@ -271,10 +271,10 @@ describe('ContractDetails', () => {
             )
         ).toBeInTheDocument()
         expect(
-            screen.queryByText(
+            screen.queryAllByText(
                 'You must indicate whether or not this is related to vaccine administration'
             )
-        ).toBeInTheDocument()
+        ).toHaveLength(2)
 
         // click annual rate
         await act(async () => {
@@ -452,8 +452,8 @@ describe('ContractDetails', () => {
 
             await waitFor(() => {
                 expect(
-                    screen.getByText('You must upload at least one document')
-                ).toBeInTheDocument()
+                    screen.getAllByText('You must upload at least one document')
+                ).toHaveLength(2);
 
                 expect(continueButton).toBeDisabled()
             })
@@ -483,10 +483,10 @@ describe('ContractDetails', () => {
             continueButton.click()
             await waitFor(() => {
                 expect(
-                    screen.getByText(
+                    screen.getAllByText(
                         'You must remove all documents with error messages before continuing'
                     )
-                ).toBeInTheDocument()
+                ).toHaveLength(2)
 
                 expect(continueButton).toBeDisabled()
             })
@@ -519,8 +519,8 @@ describe('ContractDetails', () => {
             continueButton.click()
 
             expect(
-                await screen.findByText('You must upload at least one document')
-            ).toBeInTheDocument()
+                await screen.findAllByText('You must upload at least one document')
+            ).toHaveLength(2);
 
             expect(continueButton).toBeDisabled()
         })
@@ -671,10 +671,10 @@ describe('ContractDetails', () => {
             await waitFor(() => {
                 expect(mockUpdateDraftFn).not.toHaveBeenCalled()
                 expect(
-                    screen.queryByText(
+                    screen.queryAllByText(
                         'You must remove all documents with error messages before continuing'
                     )
-                ).toBeInTheDocument()
+                ).toHaveLength(2)
             })
         })
     })
