@@ -221,5 +221,7 @@ resources:
       Value: !GetAtt DocumentUploadsBucket.Arn
     DocumentZipsBucketName:
       Value: !Ref DocumentZipsBucket
+    DocumentZipsBucketArn:
+      Value: !Ref DocumentZipsBucket.Arn
     Region:
       Value: !Sub ${AWS::Region}
