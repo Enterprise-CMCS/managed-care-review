@@ -14,7 +14,7 @@ describe('insertDraftSubmissionPostgres', () => {
 
         const args = {
             stateCode: 'FL',
-            programID: 'smmc',
+            programIDs: ['smmc'],
             submissionType: 'CONTRACT_ONLY' as const,
             submissionDescription: 'concurrency state code test',
         }

@@ -1,4 +1,4 @@
-export { findProgram } from './findProgram'
+export { findPrograms } from './findPrograms'
 export { InsertDraftSubmissionArgsType } from './insertDraftSubmission'
 export { NewPostgresStore, Store } from './postgresStore'
 export { NewPrismaClient } from './prismaClient'

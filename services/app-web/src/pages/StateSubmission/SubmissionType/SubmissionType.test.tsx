@@ -2,7 +2,7 @@ import React from 'react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryHistory } from 'history'
 import { screen, waitFor } from '@testing-library/react'
-
+import selectEvent from 'react-select-event'
 import {
     fetchCurrentUserMock,
     mockDraft,
@@ -13,7 +13,7 @@ import { Formik } from 'formik'
 
 describe('SubmissionType', () => {
     const SubmissionTypeInitialValues: SubmissionTypeFormValues = {
-        programID: 'ccc-plus',
+        programIDs: ['ccc-plus'],
         submissionDescription: '',
         submissionType: '',
     }
@@ -114,7 +114,7 @@ describe('SubmissionType', () => {
 
         await waitFor(() =>
             expect(
-                screen.getByRole('combobox', { name: 'Program' })
+                screen.getByRole('combobox', { name: 'programs' })
             ).toBeInTheDocument()
         )
     })
@@ -153,15 +153,29 @@ describe('SubmissionType', () => {
                 },
             }
         )
+        const combobox = await screen.findByRole('combobox')
+
+        await waitFor(async () => {
+            await selectEvent.openMenu(combobox)
+        })
 
         await waitFor(() => {
-            const programOptions = screen.getAllByRole('option')
-            expect(programOptions.length).toBe(3)
+            expect(screen.getByText('Program 3')).toBeInTheDocument()
+        })
+
+        await waitFor(async () => {
+            await selectEvent.select(combobox, 'Program 1')
+            await selectEvent.select(combobox, 'Program 3')
+        })
+
+        // in react-select, only items that are selected have a "remove item" label
+        await waitFor(() => {
             expect(
-                programOptions.find(
-                    (option) => option.textContent === 'Program Test'
-                )
-            ).toBeDefined()
+                screen.getByLabelText('Remove Program 1')
+            ).toBeInTheDocument()
+            expect(
+                screen.getByLabelText('Remove Program 3')
+            ).toBeInTheDocument()
         })
     })
 
@@ -181,8 +195,6 @@ describe('SubmissionType', () => {
         )
 
         await waitFor(() => {
-            const programOptions = screen.getAllByRole('option')
-            expect(programOptions.length).toBe(3)
             expect(
                 screen.getByRole('radio', { name: 'Contract action only' })
             ).toBeInTheDocument()
@@ -312,6 +324,11 @@ describe('SubmissionType', () => {
                 expect(
                     screen.queryAllByText(
                         'You must provide a description of any major changes or updates'
+                    )
+                ).toHaveLength(2)
+                expect(
+                    screen.queryAllByText(
+                        'You must select at least one program'
                     )
                 ).toHaveLength(2)
             })

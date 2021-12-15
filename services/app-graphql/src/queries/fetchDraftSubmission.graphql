@@ -5,7 +5,7 @@ query fetchDraftSubmission($input: FetchDraftSubmissionInput!) {
             name
             createdAt
             updatedAt
-            programID
+            programIDs
             program {
                 name
                 id

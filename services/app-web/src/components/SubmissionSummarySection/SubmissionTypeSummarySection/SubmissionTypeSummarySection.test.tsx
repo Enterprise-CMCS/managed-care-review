@@ -52,7 +52,7 @@ describe('SubmissionTypeSummarySection', () => {
         )
 
         expect(
-            screen.getByRole('definition', { name: 'Program' })
+            screen.getByRole('definition', { name: 'Program(s)' })
         ).toBeInTheDocument()
         expect(
             screen.getByRole('definition', { name: 'Submission type' })

@@ -8,7 +8,7 @@ describe('submission transform functions', () => {
     describe('cleanDraftSubmission', () => {
         it('empties rate related fields if submission is contract only', () => {
             const submissionWithRates: DraftSubmissionUpdates = {
-                programID: 'snbc',
+                programIDs: ['snbc'],
                 submissionType: 'CONTRACT_ONLY',
                 submissionDescription: 'A real submission',
                 documents: [],
@@ -38,7 +38,7 @@ describe('submission transform functions', () => {
                 actuaryCommunicationPreference: 'OACT_TO_STATE',
             }
             const submissionWithoutRates = {
-                programID: 'snbc',
+                programIDs: ['snbc'],
                 submissionType: 'CONTRACT_ONLY',
                 submissionDescription: 'A real submission',
                 documents: [],
@@ -62,7 +62,7 @@ describe('submission transform functions', () => {
 
         it('does not empty rate fields if submission is CONTRACT_AND_RATES', () => {
             const submissionWithRates: DraftSubmissionUpdates = {
-                programID: 'snbc',
+                programIDs: ['snbc'],
                 submissionType: 'CONTRACT_ONLY',
                 submissionDescription: 'A real submission',
                 documents: [],
