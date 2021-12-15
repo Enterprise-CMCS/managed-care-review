@@ -155,6 +155,7 @@ export const Dashboard = (): React.ReactElement => {
                                                             (id) => {
                                                                 return (
                                                                     <Tag
+                                                                        data-testid="program-tag"
                                                                         key={id}
                                                                         className={`radius-pill ${styles.programTag}`}
                                                                     >

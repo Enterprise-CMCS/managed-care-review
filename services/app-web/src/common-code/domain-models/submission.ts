@@ -82,7 +82,7 @@ const isDraftSubmission = (sub: unknown): sub is DraftSubmissionType => {
 
 function submissionName(submission: SubmissionUnionType): string {
     const padNumber = submission.stateNumber.toString().padStart(4, '0')
-    return `${submission.stateCode.toUpperCase()}-${submission.programIDs[0].toUpperCase()}-${padNumber}`
+    return `MCR-${submission.stateCode.toUpperCase()}-${submission.programIDs.join('-').toUpperCase()}-${padNumber}`
 }
 
 export {
