@@ -100,7 +100,7 @@ provider:
           Resource:
             # this is the "public" folder for all regular uploads from Amplify
             - ${self:custom.document_uploads_bucket_arn}/allusers/*
-            - ${self:custom.document_zips_bucket_arn}/*
+            - ${self:custom.document_zips_bucket_arn}/allusers/*
 
   environment:
     stage: ${self:custom.stage}
