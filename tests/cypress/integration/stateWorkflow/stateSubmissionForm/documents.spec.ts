@@ -9,6 +9,17 @@ describe('documents', () => {
             const draftSubmissionID = pathname.split('/')[2]
             cy.visit(`/submissions/${draftSubmissionID}/documents`)
 
+            // Add two of the same document
+            cy.visit(`/submissions/${draftSubmissionID}/documents`)
+            cy.findByTestId('file-input-input').attachFile([
+                'documents/trussel-guide.pdf'
+            ])
+            cy.findByTestId('file-input-input').attachFile(
+                'documents/trussel-guide.pdf'
+            )
+            cy.waitForDocumentsToLoad()
+            cy.findByText('Duplicate file').should('exist')
+
             // Add two valid documents and one duplicate, then navigate back
             cy.visit(`/submissions/${draftSubmissionID}/documents`)
             // HM-TODO: Why doesn't level attribute work here?
