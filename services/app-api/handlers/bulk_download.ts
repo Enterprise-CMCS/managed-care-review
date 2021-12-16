@@ -88,7 +88,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
                 stream: s3.getObject(params).createReadStream(),
                 key: key,
                 filename: parseContentDisposition(
-                    metadata.ContentDisposition ?? ''
+                    metadata.ContentDisposition ?? key
                 ),
             }
         })
