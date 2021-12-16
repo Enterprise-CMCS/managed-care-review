@@ -1,6 +1,6 @@
 import classNames from 'classnames'
 import classnames from 'classnames'
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
 import styles from './ErrorSummary.module.scss'
 
 type ErrorSummaryMessageProps = {
