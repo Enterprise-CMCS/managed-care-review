@@ -378,16 +378,19 @@ describe('RateDetails', () => {
                 name: 'Continue',
             })
 
-            userEvent.upload(input, [TEST_DOC_FILE, TEST_DOC_FILE])
+            userEvent.upload(input, TEST_DOC_FILE)
+            userEvent.upload(input, [])
+            userEvent.upload(input, TEST_DOC_FILE)
             expect(continueButton).not.toBeDisabled()
 
             continueButton.click()
+
             await waitFor(() => {
                 expect(
-                    screen.getByText(
+                    screen.getAllByText(
                         'You must remove all documents with error messages before continuing'
                     )
-                ).toBeInTheDocument()
+                ).toHaveLength(2)
 
                 expect(continueButton).toBeDisabled()
             })
