@@ -3,6 +3,7 @@ import { isStateUser } from '../../app-web/src/common-code/domain-models'
 import { MutationResolvers, State } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { InsertDraftSubmissionArgsType, isStoreError, Store } from '../postgres'
+import { pluralize } from './pluralizer'
 
 export function createDraftSubmissionResolver(
     store: Store
@@ -19,19 +20,20 @@ export function createDraftSubmissionResolver(
 
         const stateFromCurrentUser: State['code'] = context.user.state_code
 
-        const program = store.findProgram(stateFromCurrentUser, input.programID)
+        const program = store.findPrograms(stateFromCurrentUser, input.programIDs)
 
         if (program === undefined) {
-            const errMessage = `The program id ${input.programID} does not exist in state ${stateFromCurrentUser}`
+            const count = input.programIDs.length
+            const errMessage = `The program ${pluralize('id', count)} ${input.programIDs.join(', ')} ${pluralize('does', count)} not exist in state ${stateFromCurrentUser}`
             logError('createDraftSubmission', errMessage)
             throw new UserInputError(errMessage, {
-                argumentName: 'programID',
+                argumentName: 'programIDs',
             })
         }
 
         const dbDraftSubmission: InsertDraftSubmissionArgsType = {
             stateCode: stateFromCurrentUser,
-            programID: input.programID,
+            programIDs: input.programIDs,
             submissionDescription: input.submissionDescription,
             submissionType:
                 input.submissionType as InsertDraftSubmissionArgsType['submissionType'],

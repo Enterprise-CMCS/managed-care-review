@@ -18,6 +18,7 @@ import {
     FieldRadio,
     FieldCheckbox,
     FieldTextInput,
+    ErrorSummary,
 } from '../../../components/Form'
 import {
     FileUpload,
@@ -316,6 +317,14 @@ export const ContractDetails = ({
         }
     }
 
+    const documentsErrorMessage = showFileUploadError &&
+        fileItems.length === 0
+            ? ' You must upload at least one document'
+            : showFileUploadError &&
+            !hasValidFiles
+            ? ' You must remove all documents with error messages before continuing'
+            : undefined;
+
     return (
         <Formik
             initialValues={contractDetailsInitialValues}
@@ -351,20 +360,15 @@ export const ContractDetails = ({
                             <legend className="srOnly">Contract Details</legend>
                             {formAlert && formAlert}
                             <span>All fields are required</span>
+
+                            <ErrorSummary errors={documentsErrorMessage ? {documents: documentsErrorMessage, ...errors} : errors} />
+
                             <FormGroup error={showFileUploadError}>
                                 <FileUpload
                                     id="documents"
                                     name="documents"
                                     label="Upload contract"
-                                    error={
-                                        showFileUploadError &&
-                                        fileItems.length === 0
-                                            ? ' You must upload at least one document'
-                                            : showFileUploadError &&
-                                              !hasValidFiles
-                                            ? ' You must remove all documents with error messages before continuing'
-                                            : undefined
-                                    }
+                                    error={documentsErrorMessage}
                                     hint={
                                         <>
                                             <Link

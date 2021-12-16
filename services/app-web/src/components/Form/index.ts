@@ -1,3 +1,4 @@
+export { ErrorSummary } from './ErrorSummary/ErrorSummary'
 export { FieldCheckbox } from './FieldCheckbox/FieldCheckbox'
 export { FieldDropdown } from './FieldDropdown/FieldDropdown'
 export { FieldRadio } from './FieldRadio/FieldRadio'

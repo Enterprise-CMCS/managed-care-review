@@ -60,7 +60,7 @@ describe('storeError', () => {
             stateNumber: 4,
             status: 'DRAFT',
             submissionType: 'CONTRACT_ONLY',
-            programID: 'smmc',
+            programIDs: ['smmc'],
             submissionDescription: 'description',
             stateCode: 'FL',
 

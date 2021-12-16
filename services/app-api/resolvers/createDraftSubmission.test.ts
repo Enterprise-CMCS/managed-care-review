@@ -7,7 +7,7 @@ describe('createDraftSubmission', () => {
         const server = await constructTestPostgresServer()
 
         const input: CreateDraftSubmissionInput = {
-            programID: 'managed-medical-assistance',
+            programIDs: ['managed-medical-assistance'],
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
         }
@@ -35,7 +35,7 @@ describe('createDraftSubmission', () => {
     it('returns an error if the program id is not in valid', async () => {
         const server = await constructTestPostgresServer()
         const input: CreateDraftSubmissionInput = {
-            programID: 'xyz123',
+            programIDs: ['xyz123'],
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
         }

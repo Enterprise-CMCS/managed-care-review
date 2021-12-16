@@ -337,7 +337,7 @@ const toDomain = (
         submissionDescription: submissionDescription ?? undefined,
         stateNumber: stateNumber ?? undefined,
 
-        programID: programIds[0],
+        programIDs: programIds,
 
         contractType: enumToDomain(
             statesubmission.ContractType,

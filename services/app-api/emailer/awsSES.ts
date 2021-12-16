@@ -1,4 +1,4 @@
-import { SES, AWSError, Request } from 'aws-sdk'
+import { SES, AWSError } from 'aws-sdk'
 import { EmailData } from './'
 
 const ses = new SES({ region: 'us-east-1' })
@@ -46,17 +46,58 @@ function getSESEmailParams(email: EmailData): SES.SendEmailRequest {
     return emailParams
 }
 
-function sendSESEmail(
-    params: SES.SendEmailRequest
-): Request<SES.SendEmailResponse, AWSError> {
-    console.log('SENDING SES EMAIL', params)
-    return ses.sendEmail(params, function (err, data) {
-        if (err) {
-            return new Error('SES error: ' + err)
-        } else {
-            return data
-        }
-    })
+class AWSResponseError extends Error {
+    awsErr: AWSError
+
+    constructor(awsErr: AWSError) {
+        super(awsErr.message)
+        this.awsErr = awsErr
+
+        // Set the prototype explicitly.
+        // this makes `instanceof` work correctly
+        Object.setPrototypeOf(this, AWSResponseError.prototype)
+    }
 }
 
-export { getSESEmailParams, sendSESEmail }
+async function sendSESEmail(
+    params: SES.SendEmailRequest
+): Promise<SES.SendEmailResponse | AWSResponseError> {
+    try {
+        const response = await ses.sendEmail(params).promise()
+        return response
+    } catch (err) {
+        return new AWSResponseError(err)
+    }
+}
+
+export { getSESEmailParams, sendSESEmail, AWSResponseError }
+
+/*
+// This is an example SES SendEmail params for a call to ses.sendEmail that works with our config.
+var params: SES.SendEmailRequest = {
+        Destination: {
+            BccAddresses: [],
+            CcAddresses: [],
+            ToAddresses: ['macrae@truss.works'],
+        },
+        Message: {
+            Body: {
+                Html: {
+                    Charset: 'UTF-8',
+                    Data: 'HELLO This message body contains HTML formatting. It can, for example, contain links like this one: <a class="ulink" href="http://docs.aws.amazon.com/ses/latest/DeveloperGuide" target="_blank">Amazon SES Developer Guide</a>.',
+                },
+                Text: {
+                    Charset: 'UTF-8',
+                    Data: 'HELLO This is the message body in text format.',
+                },
+            },
+            Subject: {
+                Charset: 'UTF-8',
+                Data: 'Test email TWO',
+            },
+        },
+        Source: 'macrael@truss.works',
+        // ReplyToAddresses: [],
+    }
+
+ */

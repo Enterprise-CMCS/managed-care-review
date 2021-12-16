@@ -9,7 +9,7 @@ query indexSubmissions {
                     name
                     createdAt
                     updatedAt
-                    programID
+                    programIDs
                     program {
                         name
                         id
@@ -24,7 +24,7 @@ query indexSubmissions {
                     createdAt
                     updatedAt
                     submittedAt
-                    programID
+                    programIDs
                     program {
                         name
                         id

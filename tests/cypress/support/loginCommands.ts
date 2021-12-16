@@ -20,7 +20,7 @@ Cypress.Commands.add('logInAsStateUser', () => {
             throw Error('Cannot login test user without a password')
         console.log(testUsersPassword)
         cy.findByText('Show Login Form').click()
-        cy.findByTestId('loginEmail').type('aang@dhs.state.mn.us')
+        cy.findByTestId('loginEmail').type('aang@example.com')
         cy.findByTestId('loginPassword').type(testUsersPassword)
         cy.findByRole('button', { name: 'Login' }).click()
     } else {
@@ -46,7 +46,7 @@ Cypress.Commands.add(
                 throw Error('Cannot login test user without a password')
             console.log(testUsersPassword)
             cy.findByText('Show Login Form').click()
-            cy.findByTestId('loginEmail').type('zuko@cms.hhs.gov')
+            cy.findByTestId('loginEmail').type('zuko@example.com')
             cy.findByTestId('loginPassword').type(testUsersPassword)
             cy.findByRole('button', { name: 'Login' }).click()
         } else {

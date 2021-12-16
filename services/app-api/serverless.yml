@@ -28,7 +28,7 @@ custom:
   draftSubmissionsTableStreamArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:database-${self:custom.stage}.DraftSubmissionsTableStreamArn}
   iamPath: ${env:IAM_PATH, "/"}
   iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
-  secretsManagerSecret: aurora_postgres_${self:custom.stage}
+  secretsManagerSecret: aurora_postgres_${self:custom.stage} #pragma: allowlist secret
   reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
   dbURL: ${env:DATABASE_URL}
   webAclName: ${self:service}-${self:custom.stage}-webacl
@@ -75,8 +75,8 @@ provider:
           Resource: '*'
         - Effect: 'Allow'
           Action:
-            - secretsmanager:GetSecretValue
-            - secretsmanager:DescribeSecret
+            - secretsmanager:GetSecretValue #pragma: allowlist secret
+            - secretsmanager:DescribeSecret #pragma: allowlist secret
           Resource: '*'
         - Effect: 'Allow'
           Action:

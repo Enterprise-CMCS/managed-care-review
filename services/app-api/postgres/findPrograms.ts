@@ -1,15 +1,15 @@
 import { ProgramT } from '../../app-web/src/common-code/domain-models'
 import statePrograms from '../data/statePrograms.json'
 
-function findProgram(
+function findPrograms(
     stateCode: string,
-    programID: string
+    programIDs: string[]
 ): ProgramT | undefined {
     const program = statePrograms.states
         .find((state) => state.code === stateCode)
-        ?.programs.find((program) => program.id == programID)
+        ?.programs.find((program) => programIDs.includes(program.id))
 
     return program
 }
 
-export { findProgram }
+export { findPrograms }
