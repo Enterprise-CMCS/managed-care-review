@@ -80,9 +80,13 @@ const isDraftSubmission = (sub: unknown): sub is DraftSubmissionType => {
     return false
 }
 
+const naturalSort = (a: string, b: string): number => {
+    return a.localeCompare(b, "en", { numeric: true })
+}
+
 function submissionName(submission: SubmissionUnionType): string {
     const padNumber = submission.stateNumber.toString().padStart(4, '0')
-    return `MCR-${submission.stateCode.toUpperCase()}-${submission.programIDs.join('-').toUpperCase()}-${padNumber}`
+    return `MCR-${submission.stateCode.toUpperCase()}-${submission.programIDs.sort(naturalSort).join('-').toUpperCase()}-${padNumber}`
 }
 
 export {
