@@ -35,28 +35,6 @@
     }
 }
 
-.pageActions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: units(4);
-    [class^='usa-label'] {
-        font-weight: normal;
-    }
-    button[class^='usa-button usa-button--unstyled'] {
-        margin-top: 0 !important;
-    }
-    a[class^='usa-button usa-button--unstyled'] {
-        margin-bottom: 1.5rem;
-    }
-    li[class^='usa-button-group__item'] {
-        a[class^='usa-button'],
-        button[class^='usa-button'] {
-            margin-top: 0;
-        }
-    }
-}
-
 .buttonGroup {
     justify-content: flex-end;
     margin-right: 0;

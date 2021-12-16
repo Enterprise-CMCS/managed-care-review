@@ -1,7 +1,6 @@
 import React from 'react'
 import { Button, ButtonGroup } from '@trussworks/react-uswds'
 import { PageActionsContainer } from './PageActionsContainer'
-import styles from '../StateSubmissionForm.module.scss'
 
 /*  
    This is the main call to action element displayed at the bottom of form pages.
@@ -34,7 +33,7 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
 
     return (
         <PageActionsContainer left={leftElement}>
-            <ButtonGroup type="default" className={styles.buttonGroup}>
+            <ButtonGroup type="default">
                 <Button type="button" outline onClick={backOnClick}>
                     {!isFirstPage ? 'Back' : 'Cancel'}
                 </Button>

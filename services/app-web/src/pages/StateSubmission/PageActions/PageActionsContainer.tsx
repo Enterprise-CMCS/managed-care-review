@@ -1,6 +1,7 @@
 import React from 'react'
 import { ButtonGroup } from '@trussworks/react-uswds'
-import styles from '../StateSubmissionForm.module.scss'
+import classnames from 'classnames'
+import styles from './PageActions.module.scss'
 
 /* Wrapper for <PageActions />
     In most cases this UI will be used through the main PageActions component. However, surfacing the wrapper so its possible to pass in custom elements and combinations.
@@ -24,8 +25,14 @@ export const PageActionsContainer = (
     ) : (
         children
     )
+
+    const containerClasses = classnames(
+        styles.pageActions,
+        left ? styles.pageActionsContainer : styles.pageActionsContainerNoLeft
+    )
+
     return (
-        <div className={styles.pageActions}>
+        <div className={containerClasses}>
             {left && left}
             {mainChildren}
         </div>
