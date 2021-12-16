@@ -82,9 +82,11 @@ export const RateDetails = ({
 
     // Rate documents state management
     const { deleteFile, getKey, getS3URL, scanFile, uploadFile } = useS3()
-    const [hasValidFiles, setHasValidFiles] = React.useState(false)
     const [fileItems, setFileItems] = React.useState<FileItemT[]>([])
-    const showDocumentErrors = shouldValidate && !hasValidFiles
+    const hasValidFiles =
+        fileItems.length > 0 &&
+        fileItems.every((item) => item.status === 'UPLOAD_COMPLETE')
+    const showFileUploadError = shouldValidate && !hasValidFiles
 
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         (draftSubmission?.rateDocuments &&
@@ -110,13 +112,6 @@ export const RateDetails = ({
                 }
             })) ||
         undefined
-
-    React.useEffect(() => {
-        const hasValidDocumentsForSubmission: boolean =
-            fileItems.length > 0 &&
-            fileItems.every((item) => item.status === 'UPLOAD_COMPLETE')
-        setHasValidFiles(hasValidDocumentsForSubmission)
-    }, [fileItems])
 
     const onFileItemsUpdate = async ({
         fileItems,
@@ -300,16 +295,16 @@ export const RateDetails = ({
                                 <legend className="srOnly">Rate Details</legend>
                                 {formAlert && formAlert}
                                 <span>All fields are required</span>
-                                <FormGroup error={showDocumentErrors}>
+                                <FormGroup error={showFileUploadError}>
                                     <FileUpload
                                         id="rateDocuments"
                                         name="rateDocuments"
                                         label="Upload rate certification"
                                         error={
-                                            showDocumentErrors &&
+                                            showFileUploadError &&
                                             fileItems.length === 0
                                                 ? ' You must upload at least one document'
-                                                : showDocumentErrors &&
+                                                : showFileUploadError &&
                                                   !hasValidFiles
                                                 ? 'You must remove all documents with error messages before continuing'
                                                 : undefined
@@ -619,9 +614,7 @@ export const RateDetails = ({
                                     <Button
                                         type="submit"
                                         disabled={Boolean(
-                                            isSubmitting ||
-                                                (shouldValidate &&
-                                                    !hasValidFiles)
+                                            isSubmitting || showFileUploadError
                                         )}
                                     >
                                         Continue

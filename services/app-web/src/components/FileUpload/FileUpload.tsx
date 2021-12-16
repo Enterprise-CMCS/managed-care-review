@@ -54,9 +54,6 @@ export const FileUpload = ({
     onFileItemsUpdate,
     ...inputProps
 }: FileUploadProps): React.ReactElement => {
-    const [loadingStatus, setLoadingStatus] = useState<
-        null | 'UPLOADING' | 'COMPLETE'
-    >(null)
     const [fileItems, setFileItems] = useState<FileItemT[]>(initialItems || [])
     const fileInputRef = useRef<FileInputRef>(null) // reference to the HTML input which has files
 
@@ -152,7 +149,6 @@ export const FileUpload = ({
     // Upload to S3 and update file items in component state with the async loading status
     // This includes moving from pending/loading UI to display success or errors
     const asyncS3Upload = (files: File[] | File) => {
-        setLoadingStatus('UPLOADING')
         const upload = (file: File) => {
             uploadFile(file)
                 .then((data) => {
@@ -237,9 +233,6 @@ export const FileUpload = ({
                             }
                         })
                     })
-                })
-                .finally(() => {
-                    setLoadingStatus('COMPLETE')
                 })
         }
 

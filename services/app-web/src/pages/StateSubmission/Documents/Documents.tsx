@@ -43,10 +43,12 @@ export const Documents = ({
 }: DocumentProps): React.ReactElement => {
     const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
     const [shouldValidate, setShouldValidate] = useState(false)
-    const [hasValidFiles, setHasValidFiles] = useState(false)
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
     const history = useHistory()
-
+    const hasValidFiles = fileItems.every(
+        (item) => item.status === 'UPLOAD_COMPLETE'
+    )
+    const showFileUploadError = shouldValidate && !hasValidFiles
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         draftSubmission &&
         draftSubmission.documents.map((doc) => {
@@ -68,16 +70,6 @@ export const Documents = ({
                 status: 'UPLOAD_COMPLETE',
             }
         })
-
-    // useEffect use case
-    // fileItems are dynamically changing constantly and we need our side effects to display in a reliable way
-    // this includes wether buttons are disabled or error alerts are displayed
-    useEffect(() => {
-        const hasValidSupportingDocuments: boolean = fileItems.every(
-            (item) => item.status === 'UPLOAD_COMPLETE'
-        )
-        setHasValidFiles(hasValidSupportingDocuments)
-    }, [fileItems])
 
     // If there is a submission error, ensure form is in validation state
     const onUpdateDraftSubmissionError = () => {
@@ -211,7 +203,7 @@ export const Documents = ({
                 <fieldset className="usa-fieldset">
                     <legend className="srOnly">Supporting Documents</legend>
 
-                    {shouldValidate && !hasValidFiles && (
+                    {showFileUploadError && (
                         <Alert
                             type="error"
                             heading="Remove files with errors"
@@ -252,7 +244,7 @@ export const Documents = ({
                             </>
                         }
                         error={
-                            shouldValidate && !hasValidFiles
+                            showFileUploadError
                                 ? ' You must remove all documents with error messages before continuing'
                                 : undefined
                         }
@@ -294,9 +286,7 @@ export const Documents = ({
                         <Button
                             type="submit"
                             disabled={
-                                shouldValidate &&
-                                fileItems.length > 0 &&
-                                !hasValidFiles
+                                showFileUploadError && fileItems.length > 0
                             }
                         >
                             Continue

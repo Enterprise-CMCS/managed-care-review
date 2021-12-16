@@ -67,7 +67,11 @@ export function newLocalS3Client(
             }
         },
         scanFile: async (s3Key: string): Promise<void | S3Error> => {
-            return
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve()
+                }, 1000)
+            })
         },
         getKey: (s3URL: string) => {
             const key = parseKey(s3URL)
