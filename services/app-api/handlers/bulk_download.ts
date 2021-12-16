@@ -93,6 +93,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
             }
         })
     )
+    console.log('debug - s3DownloadStreams: ' + s3DownloadStreams)
 
     const streamPassThrough = new Stream.PassThrough()
 
@@ -175,5 +176,6 @@ export const main: APIGatewayProxyHandler = async (event) => {
 function parseContentDisposition(cd: string): string {
     console.log('original content-disposition: ' + cd)
     const [, filename] = cd.split('filename=')
+    console.log('original name: ' + filename)
     return filename
 }
