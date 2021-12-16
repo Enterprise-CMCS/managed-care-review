@@ -123,7 +123,7 @@ jobs:
 
   deploy-branch:
     needs: [build-prisma-client-lambda-layer, get-branch-name-vars, unit-tests]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@main
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@wml-test-email-from
     with:
       stage_name: ${{ needs.get-branch-name-vars.outputs.branch-name}}
     secrets:
@@ -155,16 +155,12 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: set variable values
-        run: ./.github/build_vars.sh set_values
+      - name: Create Test Users
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-          REACT_APP_AUTH_MODE: AWS_COGNITO
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
-
-      - name: Create Test Users
         run: |
           cd scripts
           yarn tsc
@@ -208,6 +204,7 @@ jobs:
           browser: chrome
           group: 'Chrome'
         env:
+          REACT_APP_AUTH_MODE: AWS_COGNITO
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
