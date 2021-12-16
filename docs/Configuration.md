@@ -4,7 +4,7 @@ managed-care-review is [configured using env vars](https://12factor.net/config).
 
 Different env vars can be set in different environments [local dev, review apps, dev, staging, prod] to configure things differently. Environment variables are individually mapped in the `deploy` and `promote` Github workflows for use in deployments. If a new environment variable is added, it should be mapped there as well.
 
-For local dev, we use `.envrc` and `.envrc.local` to set the appropriate environment variables. Any local changes should be made to `.envrc.local`.
+For local dev, we use `.envrc` and `.envrc.local` to set the appropriate environment variables. `.envrc` is loaded first, then `.envrc.local`, so if you need to set anything differently for your local environment you can set it in there. For more details, see the [`direnv` docs](https://direnv.net).
 
 Also, CreateReactApp only loads env vars that start with `REACT_APP_`, so any configuration that needs to be read by app-web must start that way.
 
