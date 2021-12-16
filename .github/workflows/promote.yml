@@ -97,7 +97,6 @@ jobs:
       aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
-      infrastructure_type: unused
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
       ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
       okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
@@ -106,7 +105,6 @@ jobs:
       cloudfront_certificate_arn: ${{ secrets.DEV_CLOUDFRONT_CERTIFICATE_ARN }}
       cloudfront_domain_name: ${{ secrets.DEV_CLOUDFRONT_DOMAIN_NAME }}
       cloudfront_storybook_domain_name: ${{ secrets.DEV_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
-      test_users_pass: unused
       react_app_auth_mode: IDM
 
   dev-cypress:
@@ -174,11 +172,9 @@ jobs:
       full_iam_permissions_boundary_policy: ${{ secrets.VAL_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
       react_app_auth_mode: IDM
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
-      infrastructure_type: unused
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
       ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
       iam_path: ${{ secrets.IAM_PATH }}
-      test_users_pass: unused
 
   cypress-val:
     name: val - cypress
@@ -245,11 +241,9 @@ jobs:
       full_iam_permissions_boundary_policy: ${{ secrets.PROD_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
       react_app_auth_mode: IDM
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
-      infrastructure_type: unused
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
       ses_review_team_email_addresses: ${{ secrets.PROD_SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
       iam_path: ${{ secrets.IAM_PATH }}
-      test_users_pass: unused
 
   cypress-prod:
     name: prod - cypress

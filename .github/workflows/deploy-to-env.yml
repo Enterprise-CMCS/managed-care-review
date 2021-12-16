@@ -25,8 +25,6 @@ on:
         required: false
       react_app_auth_mode:
         required: true
-      infrastructure_type:
-        required: true
       ses_source_email_address:
         required: true
       ses_review_team_email_addresses:
@@ -36,8 +34,6 @@ on:
       route_53_domain_name:
         required: false
       okta_metadata_url:
-        required: true
-      test_users_pass:
         required: true
 
 jobs:
