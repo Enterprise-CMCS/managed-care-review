@@ -15,7 +15,7 @@ import {
     mockDraft,
 } from '../../../testHelpers/apolloHelpers'
 import { Documents } from './Documents'
-import HeaderStories from '../../../components/Header/Header.stories'
+
 
 describe('Documents', () => {
     it('renders without errors', async () => {

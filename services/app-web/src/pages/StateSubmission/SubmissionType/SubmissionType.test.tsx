@@ -74,7 +74,7 @@ describe('SubmissionType', () => {
 
         await waitFor(() =>
             expect(
-                screen.getByRole('link', {
+                screen.getByRole('button', {
                     name: 'Cancel',
                 })
             ).toBeDefined()

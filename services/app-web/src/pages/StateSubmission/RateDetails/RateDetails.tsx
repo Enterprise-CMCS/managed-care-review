@@ -4,11 +4,9 @@ import {
     Form as UswdsForm,
     FormGroup,
     Fieldset,
-    Button,
     Link,
     DateRangePicker,
     DatePicker,
-    ButtonGroup,
     Label,
 } from '@trussworks/react-uswds'
 import { Formik, FormikErrors } from 'formik'
@@ -38,6 +36,7 @@ import { isS3Error } from '../../../s3'
 import { RateDetailsFormSchema } from './RateDetailsSchema'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
 import { useS3 } from '../../../contexts/S3Context'
+import { PageActions } from '../PageActions'
 type FormError =
     FormikErrors<RateDetailsFormValues>[keyof FormikErrors<RateDetailsFormValues>]
 
@@ -286,9 +285,8 @@ export const RateDetails = ({
                             className={styles.formContainer}
                             id="RateDetailsForm"
                             aria-label="Rate Details Form"
-                            onSubmit={(e) => {
-                                setShouldValidate(true)
-                                handleSubmit(e)
+                            onSubmit={() => {
+                                return
                             }}
                         >
                             <fieldset className="usa-fieldset">
@@ -556,71 +554,53 @@ export const RateDetails = ({
                                     </>
                                 )}
                             </fieldset>
-                            <div className={styles.pageActions}>
-                                <Button
-                                    type="button"
-                                    unstyled
-                                    onClick={async () => {
-                                        // do not need to trigger validations if file list is empty
-                                        if (fileItems.length === 0) {
-                                            await handleFormSubmit(
-                                                values,
-                                                setSubmitting,
-                                                {
-                                                    shouldValidate: false,
-                                                    redirectPath: '/dashboard',
-                                                }
-                                            )
-                                        } else {
-                                            await handleFormSubmit(
-                                                values,
-                                                setSubmitting,
-                                                {
-                                                    shouldValidate: true,
-                                                    redirectPath: '/dashboard',
-                                                }
-                                            )
-                                        }
-                                    }}
-                                >
-                                    Save as draft
-                                </Button>
-                                <ButtonGroup
-                                    type="default"
-                                    className={styles.buttonGroup}
-                                >
-                                    <Button
-                                        type="button"
-                                        outline
-                                        onClick={async () => {
-                                            // do not need to validate or submit if no documents are uploaded
-                                            if (fileItems.length === 0) {
-                                                history.push('contract-details')
-                                            } else {
-                                                await handleFormSubmit(
-                                                    values,
-                                                    setSubmitting,
-                                                    {
-                                                        shouldValidate: false,
-                                                        redirectPath:
-                                                            'contract-details',
-                                                    }
-                                                )
+                            <PageActions
+                                backOnClick={async () => {
+                                    // do not need to validate or submit if no documents are uploaded
+                                    if (fileItems.length === 0) {
+                                        history.push('contract-details')
+                                    } else {
+                                        await handleFormSubmit(
+                                            values,
+                                            setSubmitting,
+                                            {
+                                                shouldValidate: false,
+                                                redirectPath:
+                                                    'contract-details',
                                             }
-                                        }}
-                                    >
-                                        Back
-                                    </Button>
-                                    <Button
-                                        type="submit"
-                                        disabled={Boolean(
-                                            isSubmitting || showFileUploadError
-                                        )}
-                                    >
-                                        Continue
-                                    </Button>
-                                </ButtonGroup>
-                            </div>
+                                        )
+                                    }
+                                }}
+                                continueOnClick={() => {
+                                    setShouldValidate(true)
+                                    handleSubmit()
+                                }}
+                                saveAsDraftOnClick={async () => {
+                                    // do not need to trigger validations if file list is empty
+                                    if (fileItems.length === 0) {
+                                        await handleFormSubmit(
+                                            values,
+                                            setSubmitting,
+                                            {
+                                                shouldValidate: false,
+                                                redirectPath: '/dashboard',
+                                            }
+                                        )
+                                    } else {
+                                        await handleFormSubmit(
+                                            values,
+                                            setSubmitting,
+                                            {
+                                                shouldValidate: true,
+                                                redirectPath: '/dashboard',
+                                            }
+                                        )
+                                    }
+                                }}
+                                continueDisabled={Boolean(
+                                    isSubmitting || showFileUploadError
+                                )}
+                            />
                         </UswdsForm>
                     </>
                 )}

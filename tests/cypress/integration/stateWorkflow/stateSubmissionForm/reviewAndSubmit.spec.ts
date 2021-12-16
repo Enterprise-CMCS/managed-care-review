@@ -11,7 +11,7 @@ describe('review and submit', () => {
             cy.visit(`/submissions/${draftSubmissionId}/review-and-submit`)
 
             // Navigate to documents page by clicking back
-            cy.findByRole('link', { name: /Back/ }).click()
+            cy.findByRole('button', { name: /Back/ }).click()
             cy.findByRole('heading', { level: 4, name: /Supporting documents/ })
 
             // Navigate to review and submit page
@@ -23,7 +23,7 @@ describe('review and submit', () => {
             cy.findByText('Last updated').should('not.exist')
 
             // Navigate to dashboard page by clicking save as draft
-            cy.findByRole('link', { name: /Save as draft/ }).click()
+            cy.findByRole('button', { name: /Save as draft/ }).click()
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
         })
     })

@@ -2,8 +2,6 @@ import React from 'react'
 import * as Yup from 'yup'
 import {
     Alert,
-    Button,
-    ButtonGroup,
     ErrorMessage,
     Form as UswdsForm,
     Fieldset,
@@ -11,7 +9,7 @@ import {
     Link,
 } from '@trussworks/react-uswds'
 import { Formik, FormikHelpers, FormikErrors } from 'formik'
-import { NavLink, useHistory, Link as ReactRouterLink } from 'react-router-dom'
+import { useHistory, Link as ReactRouterLink } from 'react-router-dom'
 
 import {
     CreateDraftSubmissionInput,
@@ -35,6 +33,7 @@ import {
     cleanDraftSubmission,
     updatesFromSubmission,
 } from '../updateSubmissionTransform'
+import { PageActions } from '../PageActions'
 
 // Formik setup
 // Should be listed in order of appearance on field to allow errors to focus as expected
@@ -319,30 +318,13 @@ export const SubmissionType = ({
                                 }
                             />
                         </fieldset>
-                        <ButtonGroup
-                            type="default"
-                            className={styles.buttonGroup}
-                        >
-                            <Link
-                                asCustom={NavLink}
-                                variant="unstyled"
-                                className="usa-button usa-button--outline"
-                                to={{
-                                    pathname: '/dashboard',
-                                }}
-                            >
-                                Cancel
-                            </Link>
-                            <Button
-                                type="submit"
-                                disabled={isSubmitting}
-                                onClick={() => {
-                                    setShouldValidate(true)
-                                }}
-                            >
-                                Continue
-                            </Button>
-                        </ButtonGroup>
+                        <PageActions
+                            pageVariant="FIRST"
+                            backOnClick={() => history.push('/dashboard')}
+                            continueOnClick={() => setShouldValidate(true)}
+                            saveAsDraftOnClick={() => setShouldValidate(true)}
+                            continueDisabled={isSubmitting}
+                        />
                     </UswdsForm>
                 </>
             )}

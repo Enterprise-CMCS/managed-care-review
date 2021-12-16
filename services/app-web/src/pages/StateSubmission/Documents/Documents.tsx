@@ -1,11 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import {
-    Alert,
-    Form as UswdsForm,
-    Button,
-    ButtonGroup,
-    Link,
-} from '@trussworks/react-uswds'
+import React, { useState } from 'react'
+import { Alert, Form as UswdsForm, Link } from '@trussworks/react-uswds'
 import { useHistory } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -22,6 +16,7 @@ import {
     FileItemT,
 } from '../../../components/FileUpload'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
+import { PageActions } from '../PageActions'
 
 /*
  * The page level component is responsible for setting up api requests, redirects, and handling page level alert for overall errors related to invalid documents for a submission
@@ -193,11 +188,8 @@ export const Documents = ({
                 className={styles.formContainer}
                 id="DocumentsForm"
                 aria-label="Documents Form"
-                onSubmit={async (e) => {
-                    await handleFormSubmit({
-                        shouldValidate: true,
-                        redirectPath: `review-and-submit`,
-                    })(e)
+                onSubmit={() => {
+                    return
                 }}
             >
                 <fieldset className="usa-fieldset">
@@ -256,43 +248,29 @@ export const Documents = ({
                         onFileItemsUpdate={onFileItemsUpdate}
                     />
                 </fieldset>
-
-                <div className={styles.pageActions}>
-                    <Button
-                        type="button"
-                        unstyled
-                        onClick={async (e) => {
-                            await handleFormSubmit({
-                                shouldValidate: true,
-                                redirectPath: '/dashboard',
-                            })(e)
-                        }}
-                    >
-                        Save as draft
-                    </Button>
-                    <ButtonGroup type="default" className={styles.buttonGroup}>
-                        <Button
-                            type="button"
-                            outline
-                            onClick={async (e) => {
-                                await handleFormSubmit({
-                                    shouldValidate: false,
-                                    redirectPath: 'contacts',
-                                })(e)
-                            }}
-                        >
-                            Back
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={
-                                showFileUploadError && fileItems.length > 0
-                            }
-                        >
-                            Continue
-                        </Button>
-                    </ButtonGroup>
-                </div>
+                <PageActions
+                    saveAsDraftOnClick={async (e) => {
+                        await handleFormSubmit({
+                            shouldValidate: true,
+                            redirectPath: '/dashboard',
+                        })(e)
+                    }}
+                    backOnClick={async (e) => {
+                        await handleFormSubmit({
+                            shouldValidate: false,
+                            redirectPath: 'contacts',
+                        })(e)
+                    }}
+                    continueDisabled={
+                        showFileUploadError && fileItems.length > 0
+                    }
+                    continueOnClick={async (e) => {
+                        await handleFormSubmit({
+                            shouldValidate: true,
+                            redirectPath: `review-and-submit`,
+                        })(e)
+                    }}
+                />
             </UswdsForm>
         </>
     )
