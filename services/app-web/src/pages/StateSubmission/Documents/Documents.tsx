@@ -36,29 +36,6 @@ type DocumentProps = {
     ) => Promise<DraftSubmission | undefined>
 }
 
-const PageLevelErrorAlert = ({
-    hasNoDocuments = false,
-}: {
-    hasNoDocuments?: boolean
-}): JSX.Element =>
-    hasNoDocuments ? (
-        <Alert
-            type="error"
-            heading="Missing documents"
-            className="margin-bottom-2"
-        >
-            You must upload at least one document
-        </Alert>
-    ) : (
-        <Alert
-            type="error"
-            heading="Remove files with errors"
-            className="margin-bottom-2"
-        >
-            You must remove all documents with error messages before continuing
-        </Alert>
-    )
-
 export const Documents = ({
     draftSubmission,
     updateDraft,
@@ -67,7 +44,6 @@ export const Documents = ({
     const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
     const [shouldValidate, setShouldValidate] = useState(false)
     const [hasValidFiles, setHasValidFiles] = useState(false)
-    const [hasPendingFiles, setHasPendingFiles] = useState(false)
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
     const history = useHistory()
 
@@ -97,11 +73,6 @@ export const Documents = ({
     // fileItems are dynamically changing constantly and we need our side effects to display in a reliable way
     // this includes wether buttons are disabled or error alerts are displayed
     useEffect(() => {
-        const hasPendingFiles: boolean = fileItems.some(
-            (item) => item.status === 'PENDING'
-        )
-        setHasPendingFiles(hasPendingFiles)
-
         const hasValidSupportingDocuments: boolean = fileItems.every(
             (item) => item.status === 'UPLOAD_COMPLETE'
         )
@@ -174,7 +145,6 @@ export const Documents = ({
             // if there are any errors present in supporting documents and we are in a validation state (relevant for Save as Draft and Continue buttons), stop here.
             // Force user to clear validations to continue
             if (shouldValidate) {
-                console.log('should validate', fileItems.length)
                 setShouldValidate(true)
                 if (!hasValidFiles) return
             }
@@ -240,8 +210,16 @@ export const Documents = ({
             >
                 <fieldset className="usa-fieldset">
                     <legend className="srOnly">Supporting Documents</legend>
+
                     {shouldValidate && !hasValidFiles && (
-                        <PageLevelErrorAlert />
+                        <Alert
+                            type="error"
+                            heading="Remove files with errors"
+                            className="margin-bottom-2"
+                        >
+                            You must remove all documents with error messages
+                            before continuing
+                        </Alert>
                     )}
                     {formAlert && formAlert}
                     <FileUpload
@@ -272,6 +250,11 @@ export const Documents = ({
                                     </strong>
                                 </p>
                             </>
+                        }
+                        error={
+                            shouldValidate && !hasValidFiles
+                                ? ' You must remove all documents with error messages before continuing'
+                                : undefined
                         }
                         accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                         initialItems={fileItemsFromDraftSubmission}
@@ -311,10 +294,9 @@ export const Documents = ({
                         <Button
                             type="submit"
                             disabled={
-                                hasPendingFiles ||
-                                (shouldValidate &&
-                                    fileItems.length > 0 &&
-                                    !hasValidFiles)
+                                shouldValidate &&
+                                fileItems.length > 0 &&
+                                !hasValidFiles
                             }
                         >
                             Continue
