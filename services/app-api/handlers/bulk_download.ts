@@ -71,24 +71,27 @@ export const main: APIGatewayProxyHandler = async (event) => {
         }
     }
 
-    type S3DownloadStreamDetails = { stream: Readable; filename: string }
+    type S3DownloadStreamDetails = {
+        stream: Readable
+        key: string
+        filename: string
+    }
 
-    const s3DownloadStreams: S3DownloadStreamDetails[] = bulkDlRequest.keys.map(
-        (key: string) => {
+    // here we go through all the keys and open a stream to the object.
+    // also, the filename in s3 is a uuid, and we store the original
+    // filename in the content-disposition header. set original filename too.
+    const s3DownloadStreams: S3DownloadStreamDetails[] = await Promise.all(
+        bulkDlRequest.keys.map(async (key: string) => {
+            const params = { Bucket: bulkDlRequest.bucket, Key: key }
+            const metadata = await s3.headObject(params).promise()
             return {
-                stream: s3
-                    .getObject(
-                        { Bucket: bulkDlRequest.bucket, Key: key },
-                        function (err, data) {
-                            // an error occurred
-                            if (err) console.log(err, err.stack)
-                            else console.log(data) // successful response
-                        }
-                    )
-                    .createReadStream(),
-                filename: key,
+                stream: s3.getObject(params).createReadStream(),
+                key: key,
+                filename: parseContentDisposition(
+                    metadata.ContentDisposition ?? ''
+                ),
             }
-        }
+        })
     )
 
     const streamPassThrough = new Stream.PassThrough()
@@ -96,7 +99,6 @@ export const main: APIGatewayProxyHandler = async (event) => {
     // construct the zip bucket
     const accountId = event.requestContext.accountId
     const zipsBucket = 'uploads-' + stageName + '-zips-' + accountId
-    console.log(zipsBucket)
 
     const params: S3.PutObjectRequest = {
         ACL: 'private',
@@ -167,4 +169,11 @@ export const main: APIGatewayProxyHandler = async (event) => {
             'Access-Control-Allow-Credentials': true,
         },
     }
+}
+
+// parses a content-disposition header for the filename
+function parseContentDisposition(cd: string): string {
+    console.log('original content-disposition: ' + cd)
+    const [, filename] = cd.split('filename=')
+    return filename
 }
