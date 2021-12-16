@@ -127,9 +127,6 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
             keys: string[],
             filename: string
         ): Promise<string | Error> => {
-            // TODO: if the zip file already exists, just return it
-
-            // zip doesn't exist yet, setup the lambda invocation to make it
             const prependedKeys = keys.map((key) => `allusers/${key}`)
             const prependedFilename = `allusers/${filename}`
 
@@ -140,15 +137,17 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
             }
 
             try {
-                const resp = await API.post('api', '/zip', {
+                await API.post('api', '/zip', {
                     response: true,
                     body: zipRequestParams,
                 })
-                console.log('zip response: ' + resp.data)
-                return await Storage.get(filename)
             } catch (err) {
                 return new Error('Could not get a bulk DL URL: ' + err)
             }
+
+            return await Storage.get(filename, {
+                bucket: process.env.REACT_APP_S3_ZIPS_BUCKET,
+            })
         },
     }
 }

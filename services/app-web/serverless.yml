@@ -26,6 +26,7 @@ custom:
   cognito_user_pool_client_domain: ${cf:ui-auth-${self:custom.stage}.UserPoolClientDomain}
   s3_documents_bucket_region: ${cf:uploads-${self:custom.stage}.Region}
   s3_documents_bucket_name: ${cf:uploads-${self:custom.stage}.DocumentUploadsBucketName}
+  s3_zips_bucket_name: ${cf:uploads-${self:custom.stage}.DocumentZipsBucketName}
   ui_s3_bucket_name: ${cf:ui-${self:custom.stage}.S3BucketName}
   ui_cloudfront_distribution_id: ${cf:ui-${self:custom.stage}.CloudFrontDistributionId}
   storybook_s3_bucket_name: ${cf:storybook-${self:custom.stage}.S3BucketName}
@@ -69,5 +70,6 @@ custom:
         export REACT_APP_COGNITO_USER_POOL_CLIENT_DOMAIN=${self:custom.cognito_user_pool_client_domain}
         export REACT_APP_S3_REGION=${self:custom.s3_documents_bucket_region}
         export REACT_APP_S3_DOCUMENTS_BUCKET=${self:custom.s3_documents_bucket_name}
+        export REACT_APP_S3_ZIPS_BUCKET=${self:custom.s3_zips_bucket_name}
         yarn run build
         yarn build-storybook
