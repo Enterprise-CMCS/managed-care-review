@@ -211,6 +211,7 @@ jobs:
           REACT_APP_AUTH_MODE: AWS_COGNITO
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
 
       - name: Upload cypress screenshots
         uses: actions/upload-artifact@v2.2.4

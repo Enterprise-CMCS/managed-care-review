@@ -12,7 +12,7 @@ Also, CreateReactApp only loads env vars that start with `REACT_APP_`, so any co
 
 ### `REACT_APP_AUTH_MODE`
 
-Read by `app-api` and `app-web` and `cypress`.
+Read by `app-api` and `app-web` and Cypress.
 
 valid values: `LOCAL`, `AWS_COGNITO`, `IDM`
 
@@ -117,6 +117,6 @@ Configures the secrets necessary to interact with AWS services. Can be generated
 
 ### `TEST_USERS_PASS`
 
-Read by the Create Test Users action
+Read by the Create Test Users action and Cypress in AWS_COGNITO mode
 
 This is how we set the test users password configured for all review apps
