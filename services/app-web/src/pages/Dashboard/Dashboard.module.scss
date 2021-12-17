@@ -1,12 +1,20 @@
 @import '../../styles/uswdsImports.scss';
 @import '../../styles/custom';
 
-.container {
+.wrapper {
     display: flex;
     flex: 1 0 auto;
     padding-top: units(4);
     width: 100%;
+    max-width: 100%;
     background-color: $cms-color-white;
+}
+
+.container {
+    width: 100%;
+    max-width: 75rem;
+    padding: 0rem 2rem 0rem 2rem;
+    margin: auto;
 }
 
 .alertContainer {

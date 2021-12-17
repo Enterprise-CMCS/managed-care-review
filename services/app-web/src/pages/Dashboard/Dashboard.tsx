@@ -99,119 +99,127 @@ export const Dashboard = (): React.ReactElement => {
 
     return (
         <>
-            <GridContainer
-                className={styles.container}
-                data-testid="dashboard-page"
-            >
-                {programs.length ? (
-                    <section className={styles.panel}>
-                        {justSubmittedSubmissionName && (
-                            <SubmissionSuccessMessage
-                                submissionName={justSubmittedSubmissionName}
-                            />
-                        )}
-                        <div className={styles.panelHeader}>
-                            <h2>Submissions</h2>
-                            <div>
-                                <Link
-                                    asCustom={NavLink}
-                                    className="usa-button"
-                                    variant="unstyled"
-                                    to={{
-                                        pathname: '/submissions/new',
-                                    }}
-                                >
-                                    Start new submission
-                                </Link>
+            <div className={styles.wrapper}>
+                <GridContainer
+                    className={styles.container}
+                    data-testid="dashboard-page"
+                >
+                    {programs.length ? (
+                        <section className={styles.panel}>
+                            {justSubmittedSubmissionName && (
+                                <SubmissionSuccessMessage
+                                    submissionName={justSubmittedSubmissionName}
+                                />
+                            )}
+                            <div className={styles.panelHeader}>
+                                <h2>Submissions</h2>
+                                <div>
+                                    <Link
+                                        asCustom={NavLink}
+                                        className="usa-button"
+                                        variant="unstyled"
+                                        to={{
+                                            pathname: '/submissions/new',
+                                        }}
+                                    >
+                                        Start new submission
+                                    </Link>
+                                </div>
                             </div>
-                        </div>
-                        {hasSubmissions ? (
-                            <Table fullWidth>
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Programs</th>
-                                        <th>Submitted</th>
-                                        <th>Last updated</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {submissionRows.map(
-                                        (submission: TableRow) => {
-                                            return (
-                                                <tr key={submission.id}>
-                                                    <td data-testid="submission-id">
-                                                        <NavLink
-                                                            to={editUrlForSubmission(
-                                                                submission
+                            {hasSubmissions ? (
+                                <Table fullWidth>
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Programs</th>
+                                            <th>Submitted</th>
+                                            <th>Last updated</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {submissionRows.map(
+                                            (submission: TableRow) => {
+                                                return (
+                                                    <tr key={submission.id}>
+                                                        <td data-testid="submission-id">
+                                                            <NavLink
+                                                                to={editUrlForSubmission(
+                                                                    submission
+                                                                )}
+                                                            >
+                                                                {
+                                                                    submission.name
+                                                                }
+                                                            </NavLink>
+                                                        </td>
+                                                        <td>
+                                                            {submission.programIDs.map(
+                                                                (id) => {
+                                                                    return (
+                                                                        <Tag
+                                                                            data-testid="program-tag"
+                                                                            key={
+                                                                                id
+                                                                            }
+                                                                            className={`radius-pill ${styles.programTag}`}
+                                                                        >
+                                                                            {id}
+                                                                        </Tag>
+                                                                    )
+                                                                }
                                                             )}
-                                                        >
-                                                            {submission.name}
-                                                        </NavLink>
-                                                    </td>
-                                                    <td>
-                                                        {submission.programIDs.map(
-                                                            (id) => {
-                                                                return (
-                                                                    <Tag
-                                                                        data-testid="program-tag"
-                                                                        key={id}
-                                                                        className={`radius-pill ${styles.programTag}`}
-                                                                    >
-                                                                        {id}
-                                                                    </Tag>
-                                                                )
-                                                            }
-                                                        )}
-                                                    </td>
-                                                    <td data-testid="submission-date">
-                                                        {submission.submittedAt
-                                                            ? dayjs(
-                                                                  submission.submittedAt
-                                                              ).format(
-                                                                  'MM/DD/YYYY'
-                                                              )
-                                                            : ''}
-                                                    </td>
-                                                    <td>
-                                                        {dayjs(
-                                                            submission.updatedAt
-                                                        ).format('MM/DD/YYYY')}
-                                                    </td>
-                                                    <td>
-                                                        <Tag
-                                                            className={
-                                                                isSubmitted(
+                                                        </td>
+                                                        <td data-testid="submission-date">
+                                                            {submission.submittedAt
+                                                                ? dayjs(
+                                                                      submission.submittedAt
+                                                                  ).format(
+                                                                      'MM/DD/YYYY'
+                                                                  )
+                                                                : ''}
+                                                        </td>
+                                                        <td>
+                                                            {dayjs(
+                                                                submission.updatedAt
+                                                            ).format(
+                                                                'MM/DD/YYYY'
+                                                            )}
+                                                        </td>
+                                                        <td>
+                                                            <Tag
+                                                                className={
+                                                                    isSubmitted(
+                                                                        submission.__typename
+                                                                    )
+                                                                        ? styles.submittedTag
+                                                                        : styles.draftTag
+                                                                }
+                                                            >
+                                                                {isSubmitted(
                                                                     submission.__typename
                                                                 )
-                                                                    ? styles.submittedTag
-                                                                    : styles.draftTag
-                                                            }
-                                                        >
-                                                            {isSubmitted(
-                                                                submission.__typename
-                                                            )
-                                                                ? 'Submitted'
-                                                                : 'Draft'}
-                                                        </Tag>
-                                                    </td>
-                                                </tr>
-                                            )
-                                        }
-                                    )}
-                                </tbody>
-                            </Table>
-                        ) : (
-                            <div className={styles.panelEmpty}>
-                                <h3>You have no submissions yet</h3>
-                            </div>
-                        )}
-                    </section>
-                ) : (
-                    <p>No programs exist</p>
-                )}
-            </GridContainer>
+                                                                    ? 'Submitted'
+                                                                    : 'Draft'}
+                                                            </Tag>
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            }
+                                        )}
+                                    </tbody>
+                                </Table>
+                            ) : (
+                                <div className={styles.panelEmpty}>
+                                    <h3>You have no submissions yet</h3>
+                                </div>
+                            )}
+                        </section>
+                    ) : (
+                        <p>No programs exist</p>
+                    )}
+                </GridContainer>
+            </div>
         </>
     )
 }
