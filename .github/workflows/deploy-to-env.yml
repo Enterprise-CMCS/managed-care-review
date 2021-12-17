@@ -25,8 +25,6 @@ on:
         required: false
       react_app_auth_mode:
         required: true
-      infrastructure_type:
-        required: true
       ses_source_email_address:
         required: true
       ses_review_team_email_addresses:
@@ -36,8 +34,6 @@ on:
       route_53_domain_name:
         required: false
       okta_metadata_url:
-        required: true
-      test_users_pass:
         required: true
 
 jobs:
@@ -50,18 +46,14 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: set variable values
-        run: ./.github/build_vars.sh set_values
+      - name: deploy postgres
+        id: deploy-postgres
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
-          REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
           IAM_PATH: ${{ secrets.iam_path }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
-
-      - name: deploy postgres
-        id: deploy-postgres
         run: |
           pushd services/postgres && npx serverless deploy --stage ${{ inputs.stage_name }}
 
@@ -140,8 +132,8 @@ jobs:
         run: |
           echo "branch_name=${{ inputs.stage_name }}" >> $GITHUB_ENV
 
-      - name: set variable values
-        run: ./.github/build_vars.sh set_values
+      - name: run migrations
+        id: run-migrations
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
@@ -150,9 +142,6 @@ jobs:
           DATABASE_URL: AWS_SM
           IAM_PATH: ${{ secrets.iam_path }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
-
-      - name: run migrations
-        id: run-migrations
         run: |
           pushd services/app-api && ./scripts/invoke-migrate-lambda.sh app-api-$branch_name-migrate
 
@@ -165,8 +154,8 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: set variable values
-        run: ./.github/build_vars.sh set_values
+      - name: deploy
+        id: deploy
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
@@ -174,7 +163,6 @@ jobs:
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
           IAM_PATH: ${{ secrets.iam_path }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
-          INFRASTRUCTURE_TYPE: ${{ secrets.infrastructure_type }}
           SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.ses_source_email_address }}
           SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.ses_review_team_email_addresses }}
           ROUTE_53_HOSTED_ZONE_ID: ${{ secrets.route_53_hosted_zone_id }}
@@ -183,10 +171,6 @@ jobs:
           CLOUDFRONT_DOMAIN_NAME: ${{ secrets.cloudfront_domain_name }}
           CLOUDFRONT_STORYBOOK_DOMAIN_NAME: ${{ secrets.cloudfront_storybook_domain_name }}
           OKTA_METADATA_URL: ${{ secrets.okta_metadata_url }}
-          TEST_USERS_PASS: ${{ secrets.test_users_pass }}
-
-      - name: deploy
-        id: deploy
         run: |
           # When deploying multiple copies of this quickstart to the same AWS Account (not ideal), a prefix helps prevent stepping on each other.
           # This can optionally be set as an GitHub Actions Secret
