@@ -210,19 +210,18 @@ export const RateDetails = ({
         values: RateDetailsFormValues,
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
         options: {
-            shouldValidate: boolean
+            shouldValidateDocuments: boolean
             redirectPath: string
         }
     ) => {
-        // This is where documents validation happens (outside of the yup schema, which only handles the formik form data)
-        // if there are any errors present in the documents and we are in a validation state (relevant for Save as Draft and Continue buttons) we will never submit
-        // instead, force user to clear validations to continue
-        if (options.shouldValidate) {
-            setShouldValidate(true)
-            if (!hasValidFiles){
+        // Currently documents validation happens (outside of the yup schema, which only handles the formik form data)
+        // if there are any errors present in the documents list and we are in a validation state (relevant for Save as Draft) force user to clear validations to continue
+        if (options.shouldValidateDocuments) {
+            if (!hasValidFiles) {
+                setShouldValidate(true)
                 setFocusErrorSummaryHeading(true)
                 return
-            } 
+            }
         }
 
         const rateDocuments = fileItems.reduce(
@@ -289,7 +288,7 @@ export const RateDetails = ({
                 initialValues={rateDetailsInitialValues}
                 onSubmit={(values, { setSubmitting }) => {
                     return handleFormSubmit(values, setSubmitting, {
-                        shouldValidate: true,
+                        shouldValidateDocuments: true,
                         redirectPath: 'contacts',
                     })
                 }}
@@ -308,8 +307,10 @@ export const RateDetails = ({
                             className={styles.formContainer}
                             id="RateDetailsForm"
                             aria-label="Rate Details Form"
-                            onSubmit={() => {
-                                return
+                            onSubmit={(e) => {
+                                setShouldValidate(true)
+                                setFocusErrorSummaryHeading(true)
+                                handleSubmit(e)
                             }}
                         >
                             <fieldset className="usa-fieldset">
@@ -318,10 +319,20 @@ export const RateDetails = ({
                                 <span>All fields are required</span>
 
                                 <FormGroup error={showFileUploadError}>
-                                       { shouldValidate && <ErrorSummary
-                                            errors={documentsError ? {documents: documentsError, ...errors} : errors}
+                                    {shouldValidate && (
+                                        <ErrorSummary
+                                            errors={
+                                                documentsError
+                                                    ? {
+                                                          documents:
+                                                              documentsError,
+                                                          ...errors,
+                                                      }
+                                                    : errors
+                                            }
                                             headingRef={errorSummaryHeadingRef}
-                                        /> }
+                                        />
+                                    )}
                                     <FileUpload
                                         id="rateDocuments"
                                         name="rateDocuments"
@@ -584,17 +595,12 @@ export const RateDetails = ({
                                             values,
                                             setSubmitting,
                                             {
-                                                shouldValidate: false,
+                                                shouldValidateDocuments: false,
                                                 redirectPath:
                                                     'contract-details',
                                             }
                                         )
                                     }
-                                }}
-                                continueOnClick={() => {
-                                    setShouldValidate(true)
-                                    setFocusErrorSummaryHeading(true)
-                                    handleSubmit()
                                 }}
                                 saveAsDraftOnClick={async () => {
                                     // do not need to trigger validations if file list is empty
@@ -603,16 +609,17 @@ export const RateDetails = ({
                                             values,
                                             setSubmitting,
                                             {
-                                                shouldValidate: false,
+                                                shouldValidateDocuments: false,
                                                 redirectPath: '/dashboard',
                                             }
                                         )
                                     } else {
+                                        setFocusErrorSummaryHeading(true)
                                         await handleFormSubmit(
                                             values,
                                             setSubmitting,
                                             {
-                                                shouldValidate: true,
+                                                shouldValidateDocuments: true,
                                                 redirectPath: '/dashboard',
                                             }
                                         )

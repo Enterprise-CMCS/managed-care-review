@@ -36,14 +36,31 @@ export const Documents = ({
     updateDraft,
     formAlert = undefined,
 }: DocumentProps): React.ReactElement => {
-    const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
     const [shouldValidate, setShouldValidate] = useState(false)
-    const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
     const history = useHistory()
+
+    // Documents state management
+    const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
+    const [fileItems, setFileItems] = useState<FileItemT[]>([])
     const hasValidFiles = fileItems.every(
         (item) => item.status === 'UPLOAD_COMPLETE'
     )
     const showFileUploadError = shouldValidate && !hasValidFiles
+
+    // Error summary state management
+    const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
+    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
+        React.useState(false)
+
+    React.useEffect(() => {
+        // Focus the error summary heading only if we are displaying
+        // validation errors and the heading element exists
+        if (focusErrorSummaryHeading && errorSummaryHeadingRef.current) {
+            errorSummaryHeadingRef.current.focus()
+        }
+        setFocusErrorSummaryHeading(false)
+    }, [focusErrorSummaryHeading])
+
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         draftSubmission &&
         draftSubmission.documents.map((doc) => {
@@ -111,7 +128,7 @@ export const Documents = ({
 
     /*
      * handleFormSubmit is used by all page actions
-     * @param shouldValidate - if true prevent submission while validation errors are present; if false silently discard errors but allow submission
+     * @param shouldValidateDocuments - if true prevent submission while validation errors are present; if false silently discard errors but allow submission
      * @param redirectPath - relative path within '/submissions/:id/' where application will redirect if submission succeeds
      *
      * Documents form changes are always persisted; all page action buttons trigger updateDraftSubmission
@@ -120,20 +137,23 @@ export const Documents = ({
      */
     const handleFormSubmit =
         ({
-            shouldValidate,
+            shouldValidateDocuments,
             redirectPath,
         }: {
-            shouldValidate: boolean
+            shouldValidateDocuments: boolean
             redirectPath: string
         }) =>
         async (e: React.FormEvent | React.MouseEvent) => {
             e.preventDefault()
 
-            // if there are any errors present in supporting documents and we are in a validation state (relevant for Save as Draft and Continue buttons), stop here.
-            // Force user to clear validations to continue
-            if (shouldValidate) {
-                setShouldValidate(true)
-                if (!hasValidFiles) return
+            // Currently documents validation happens (outside of the yup schema, which only handles the formik form data)
+            // if there are any errors present in the documents list and we are in a validation state (relevant for Save as Draft) force user to clear validations to continue
+            if (shouldValidateDocuments) {
+                if (!hasValidFiles) {
+                    setShouldValidate(true)
+                    setFocusErrorSummaryHeading(true)
+                    return
+                }
             }
 
             const documents = fileItems.reduce(
@@ -251,13 +271,13 @@ export const Documents = ({
                 <PageActions
                     saveAsDraftOnClick={async (e) => {
                         await handleFormSubmit({
-                            shouldValidate: true,
+                            shouldValidateDocuments: true,
                             redirectPath: '/dashboard',
                         })(e)
                     }}
                     backOnClick={async (e) => {
                         await handleFormSubmit({
-                            shouldValidate: false,
+                            shouldValidateDocuments: false,
                             redirectPath: 'contacts',
                         })(e)
                     }}
@@ -266,7 +286,7 @@ export const Documents = ({
                     }
                     continueOnClick={async (e) => {
                         await handleFormSubmit({
-                            shouldValidate: true,
+                            shouldValidateDocuments: true,
                             redirectPath: `review-and-submit`,
                         })(e)
                     }}

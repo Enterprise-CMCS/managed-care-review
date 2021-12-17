@@ -8,8 +8,8 @@ import { PageActionsContainer } from './PageActionsContainer'
 */
 type PageActionProps = {
     backOnClick: React.MouseEventHandler<HTMLButtonElement>
-    continueOnClick: React.MouseEventHandler<HTMLButtonElement>
-    saveAsDraftOnClick: React.MouseEventHandler<HTMLButtonElement>
+    saveAsDraftOnClick?: React.MouseEventHandler<HTMLButtonElement>
+    continueOnClick?: React.MouseEventHandler<HTMLButtonElement> // the reason this isn't required is the continue button is a type="submit" so is can use the form onsubmit as its event handler.
     continueDisabled?: boolean
     pageVariant?: 'FIRST' | 'LAST' // other options could be added here as union type
 }
@@ -25,11 +25,12 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
 
     const isFirstPage = pageVariant === 'FIRST'
     const isLastPage = pageVariant === 'LAST'
-    const leftElement = isFirstPage ? undefined : (
-        <Button type="button" unstyled onClick={saveAsDraftOnClick}>
-            Save as draft
-        </Button>
-    )
+    const leftElement =
+        isFirstPage || !saveAsDraftOnClick ? undefined : (
+            <Button type="button" unstyled onClick={saveAsDraftOnClick}>
+                Save as draft
+            </Button>
+        )
 
     return (
         <PageActionsContainer left={leftElement}>
