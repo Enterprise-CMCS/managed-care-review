@@ -124,14 +124,6 @@ export async function runWebAgainstAWS(
         }
     )
 
-    const s3ZipsBucket = commandMustSucceedSync(
-        './output.sh',
-        ['uploads', 'DocumentZipsBucketName', stageName],
-        {
-            cwd: './services',
-        }
-    )
-
     // set them
     process.env.PORT = '3003' // run hybrid on a different port
     process.env.REACT_APP_AUTH_MODE = apiAuthMode // override local_login in .env
@@ -144,7 +136,6 @@ export async function runWebAgainstAWS(
     process.env.REACT_APP_S3_REGION = s3Region
     delete process.env.REACT_APP_S3_LOCAL_URL
     process.env.REACT_APP_S3_DOCUMENTS_BUCKET = s3DocsBucket
-    process.env.REACT_APP_S3_ZIPS_BUCKET = s3ZipsBucket
     process.env.REACT_APP_APPLICATION_ENDPOINT = 'http://localhost:3003/'
 
     // run it

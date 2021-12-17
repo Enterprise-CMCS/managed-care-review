@@ -7,7 +7,6 @@ import { assertIsAuthMode } from '../../app-web/src/common-code/domain-models'
 
 const s3 = new S3({ region: 'us-east-1' })
 const authMode = process.env.REACT_APP_AUTH_MODE
-const stageName = process.env.stage
 assertIsAuthMode(authMode)
 
 interface S3BulkDownloadRequest {
@@ -97,14 +96,10 @@ export const main: APIGatewayProxyHandler = async (event) => {
 
     const streamPassThrough = new Stream.PassThrough()
 
-    // construct the zip bucket
-    const accountId = event.requestContext.accountId
-    const zipsBucket = 'uploads-' + stageName + '-zips-' + accountId
-
     const params: S3.PutObjectRequest = {
         ACL: 'private',
         Body: streamPassThrough,
-        Bucket: zipsBucket,
+        Bucket: bulkDlRequest.bucket,
         ContentType: 'application/zip',
         Key: bulkDlRequest.zipFileName,
         StorageClass: 'STANDARD',
@@ -160,6 +155,26 @@ export const main: APIGatewayProxyHandler = async (event) => {
     })
 
     await s3Upload.promise()
+
+    // tag the file as having previously been scanned
+    const taggingParams = {
+        Bucket: bulkDlRequest.bucket,
+        Key: bulkDlRequest.zipFileName,
+        Tagging: {
+            TagSet: [
+                {
+                    Key: 'contentsPreviouslyScanned',
+                    Value: 'TRUE',
+                },
+            ],
+        },
+    }
+
+    try {
+        await s3.putObjectTagging(taggingParams).promise()
+    } catch (err) {
+        console.log('Could not tag zip file: ' + err)
+    }
 
     console.timeEnd('zipProcess')
     return {

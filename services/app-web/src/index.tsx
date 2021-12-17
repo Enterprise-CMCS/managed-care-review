@@ -70,16 +70,11 @@ const apolloClient = new ApolloClient({
 const s3Region = process.env.REACT_APP_S3_REGION
 const s3LocalURL = process.env.REACT_APP_S3_LOCAL_URL
 const s3DocumentsBucket = process.env.REACT_APP_S3_DOCUMENTS_BUCKET
-const s3ZipsBucket = process.env.REACT_APP_S3_ZIPS_BUCKET
 
 if (s3DocumentsBucket === undefined) {
     throw new Error(
         'To configure s3, you  must set REACT_APP_S3_DOCUMENTS_BUCKET'
     )
-}
-
-if (s3ZipsBucket === undefined) {
-    throw new Error('To configure s3, you  must set REACT_APP_S3_ZIPS_BUCKET')
 }
 
 if (s3Region !== undefined && s3LocalURL !== undefined) {
