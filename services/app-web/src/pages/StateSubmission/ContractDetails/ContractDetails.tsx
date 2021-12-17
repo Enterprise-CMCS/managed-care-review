@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import dayjs from 'dayjs'
 import {
     Form as UswdsForm,
@@ -116,10 +116,24 @@ export const ContractDetails = ({
     // Contract documents state management
     const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
+
     const hasValidFiles =
         fileItems.length > 0 &&
         fileItems.every((item) => item.status === 'UPLOAD_COMPLETE')
     const showFileUploadError = shouldValidate && !hasValidFiles
+    const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
+    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] = React.useState(false)
+
+
+    useEffect(() => {
+        // Focus the error summary heading only if we are displaying
+        // validation errors and the heading element exists
+        if (focusErrorSummaryHeading && errorSummaryHeadingRef.current) {
+            errorSummaryHeadingRef.current.focus()
+        }
+        setFocusErrorSummaryHeading(false);
+    }, [focusErrorSummaryHeading])
+
 
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         draftSubmission &&
@@ -236,7 +250,10 @@ export const ContractDetails = ({
         // instead, force user to clear validations to continue
         if (options.shouldValidate) {
             setShouldValidate(true)
-            if (!hasValidFiles) return
+            if (!hasValidFiles) {
+                   setFocusErrorSummaryHeading(true)
+                   return
+                }
         }
 
         const contractDocuments = fileItems.reduce(
@@ -362,6 +379,10 @@ export const ContractDetails = ({
                             <span>All fields are required</span>
 
                             <ErrorSummary errors={documentsErrorMessage ? {documents: documentsErrorMessage, ...errors} : errors} />
+                            { shouldValidate && <ErrorSummary
+                                errors={documentsErrorMessage ? {documents: documentsErrorMessage, ...errors} : errors}
+                                headingRef={errorSummaryHeadingRef}
+                            /> }
 
                             <FormGroup error={showFileUploadError}>
                                 <FileUpload

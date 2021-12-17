@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import * as Yup from 'yup'
 import {
     Alert,
@@ -75,6 +75,8 @@ export const SubmissionType = ({
     const [showFormAlert, setShowFormAlert] = React.useState(false)
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const { loggedInUser } = useAuth()
+    const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
+    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] = React.useState(false)
 
     let programs: Program[] = []
     if (loggedInUser && loggedInUser.__typename === 'StateUser') {
@@ -133,6 +135,15 @@ export const SubmissionType = ({
             },
         }
     )
+
+    useEffect(() => {
+        // Focus the error summary heading only if we are displaying
+        // validation errors and the heading element exists
+        if (focusErrorSummaryHeading && errorSummaryHeadingRef.current) {
+            errorSummaryHeadingRef.current.focus()
+        }
+        setFocusErrorSummaryHeading(false);
+    }, [focusErrorSummaryHeading])
 
     if ((error || formAlert) && !showFormAlert) {
         setShowFormAlert(true)
@@ -252,7 +263,7 @@ export const SubmissionType = ({
                                 ))}
                             <span>All fields are required</span>
 
-                            <ErrorSummary errors={errors} />
+                            { shouldValidate && <ErrorSummary errors={errors} headingRef={errorSummaryHeadingRef} /> }
 
                             <FormGroup
                                 error={showFieldErrors(errors.programIDs)}
@@ -374,7 +385,9 @@ export const SubmissionType = ({
                         <PageActions
                             pageVariant="FIRST"
                             backOnClick={() => history.push('/dashboard')}
-                            continueOnClick={() => setShouldValidate(true)}
+                            continueOnClick={() =>{ 
+                                setShouldValidate(true)   
+                                setFocusErrorSummaryHeading(true)}}
                             saveAsDraftOnClick={() => setShouldValidate(true)}
                             continueDisabled={isSubmitting}
                         />

@@ -42,23 +42,4 @@ describe('ErrorSummary component', () => {
             screen.getByText("You must provide a description")
         ).toBeInTheDocument()
     })
-
-    it('autofocuses the heading by default', () => {
-        render(
-            <ErrorSummary
-              errors={{title: "You must provide a title"}} />
-        )
-
-        expect(screen.getByText("There is 1 error on this page")).toHaveFocus()
-    })
-
-    it('does not autofocus when autofocus is false', () => {
-        render(
-            <ErrorSummary
-              errors={{title: "You must provide a title"}}
-              autofocus={false} />
-        )
-
-        expect(screen.getByText("There is 1 error on this page")).not.toHaveFocus()
-    })
 })

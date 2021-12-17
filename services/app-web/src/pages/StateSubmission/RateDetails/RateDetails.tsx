@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
     ErrorMessage,
     Form as UswdsForm,
@@ -21,7 +21,7 @@ import {
     UpdateDraftSubmissionInput,
 } from '../../../gen/gqlClient'
 
-import { FieldRadio } from '../../../components/Form'
+import { ErrorSummary, FieldRadio } from '../../../components/Form'
 import {
     FileUpload,
     S3FileData,
@@ -82,10 +82,21 @@ export const RateDetails = ({
     // Rate documents state management
     const { deleteFile, getKey, getS3URL, scanFile, uploadFile } = useS3()
     const [fileItems, setFileItems] = React.useState<FileItemT[]>([])
+    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] = React.useState(false)
+    const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
+
     const hasValidFiles =
         fileItems.length > 0 &&
         fileItems.every((item) => item.status === 'UPLOAD_COMPLETE')
+        
     const showFileUploadError = shouldValidate && !hasValidFiles
+    const documentsError = showFileUploadError &&
+    fileItems.length === 0
+        ? ' You must upload at least one document'
+        : showFileUploadError &&
+        !hasValidFiles
+        ? ' You must remove all documents with error messages before continuing'
+        : undefined;
 
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         (draftSubmission?.rateDocuments &&
@@ -150,6 +161,15 @@ export const RateDetails = ({
         }
     }
 
+    useEffect(() => {
+        // Focus the error summary heading only if we are displaying
+        // validation errors and the heading element exists
+        if (focusErrorSummaryHeading && errorSummaryHeadingRef.current) {
+            errorSummaryHeadingRef.current.focus()
+        }
+        setFocusErrorSummaryHeading(false);
+    }, [focusErrorSummaryHeading])
+
     // Rate details form setup
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
@@ -199,7 +219,10 @@ export const RateDetails = ({
         // instead, force user to clear validations to continue
         if (options.shouldValidate) {
             setShouldValidate(true)
-            if (!hasValidFiles) return
+            if (!hasValidFiles){
+                setFocusErrorSummaryHeading(true)
+                return
+            } 
         }
 
         const rateDocuments = fileItems.reduce(
@@ -293,20 +316,17 @@ export const RateDetails = ({
                                 <legend className="srOnly">Rate Details</legend>
                                 {formAlert && formAlert}
                                 <span>All fields are required</span>
+
                                 <FormGroup error={showFileUploadError}>
+                                       { shouldValidate && <ErrorSummary
+                                            errors={documentsError ? {documents: documentsError, ...errors} : errors}
+                                            headingRef={errorSummaryHeadingRef}
+                                        /> }
                                     <FileUpload
                                         id="rateDocuments"
                                         name="rateDocuments"
                                         label="Upload rate certification"
-                                        error={
-                                            showFileUploadError &&
-                                            fileItems.length === 0
-                                                ? ' You must upload at least one document'
-                                                : showFileUploadError &&
-                                                  !hasValidFiles
-                                                ? 'You must remove all documents with error messages before continuing'
-                                                : undefined
-                                        }
+                                        error={documentsError}
                                         hint={
                                             <Link
                                                 aria-label="Document definitions and requirements (opens in new window)"
@@ -573,6 +593,7 @@ export const RateDetails = ({
                                 }}
                                 continueOnClick={() => {
                                     setShouldValidate(true)
+                                    setFocusErrorSummaryHeading(true)
                                     handleSubmit()
                                 }}
                                 saveAsDraftOnClick={async () => {
