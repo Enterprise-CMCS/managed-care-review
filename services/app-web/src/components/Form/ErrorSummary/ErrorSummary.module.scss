@@ -1,13 +1,17 @@
 @import '../../../styles/uswdsImports.scss';
 
 .message {
-    border: 0;
-    background: transparent;
-    text-decoration: underline;
-    cursor: pointer;
-    font-weight: normal;
-    color: color($theme-link-color);
-    text-align: left;
+    a {
+        border: 0;
+        background: transparent;
+        text-decoration: underline;
+        cursor: pointer;
+        font-weight: normal;
+        text-align: left;
+        &, &:visited {
+            color: color($theme-link-color);
+        }
+    }
 }
 
 .summary {
@@ -17,4 +21,5 @@
     ol {
         padding-left: 1rem;
     }
+    margin-bottom: 1rem;
 }

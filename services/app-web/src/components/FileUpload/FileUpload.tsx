@@ -284,6 +284,12 @@ export const FileUpload = ({
 
         // reset input immediately to prepare for next interaction
         fileInputRef.current?.clearFiles()
+
+        // Clear the input's value to ensure that onChange is always triggered.
+        // Otherwise Chrome doesn't fire an onChange event if the same file is selected twice in a row.
+        if (fileInputRef.current?.input) {
+            fileInputRef.current.input.value = ''
+        }
     }
 
     const handleOnDrop = (e: React.DragEvent): void => {

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import * as Yup from 'yup'
 import {
     Form as UswdsForm,
@@ -27,7 +27,7 @@ import {
     UpdateDraftSubmissionInput,
 } from '../../../gen/gqlClient'
 
-import { FieldRadio } from '../../../components/Form'
+import { ErrorSummary, FieldRadio } from '../../../components/Form'
 
 import {
     updatesFromSubmission,
@@ -129,6 +129,38 @@ const actuaryContactErrorHandling = (
     return error
 }
 
+// Convert the formik errors into a shape that can be passed to ErrorSummary
+const flattenErrors = (
+    errors: FormikErrors<ContactsFormValues>
+): { [field: string]: string } => {
+
+    const flattened: {[field: string]: string} = {}
+
+    if (errors.stateContacts && Array.isArray(errors.stateContacts)) {
+        errors.stateContacts.forEach((contact, index) => {
+            if (!contact) return;
+
+            Object.entries(contact).forEach(([field, value]) => {
+                const errorKey = `stateContacts.${index}.${field}`
+                flattened[errorKey] = value
+            })
+        })
+    }
+
+    if (errors.actuaryContacts && Array.isArray(errors.actuaryContacts)) {
+        errors.actuaryContacts.forEach((contact, index) => {
+            if (!contact) return;
+
+            Object.entries(contact).forEach(([field, value]) => {
+                const errorKey = `actuaryContacts.${index}.${field}`
+                flattened[errorKey] = value
+            })
+        })
+    }
+
+    return flattened
+}
+
 export const Contacts = ({
     draftSubmission,
     showValidations = false,
@@ -157,6 +189,9 @@ export const Contacts = ({
 
     const history = useHistory()
 
+    const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
+    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] = React.useState(false)
+
     /*
      Set focus to contact name field when adding new contacts.
      Clears ref and focusNewContact component state immediately after. The reset allows additional contacts to be added and preserves expected focus behavior.
@@ -175,6 +210,15 @@ export const Contacts = ({
             newActuaryContactNameRef.current = null
         }
     }, [focusNewContact, focusNewActuaryContact])
+
+    useEffect(() => {
+        // Focus the error summary heading only if we are displaying
+        // validation errors and the heading element exists
+        if (focusErrorSummaryHeading && errorSummaryHeadingRef.current) {
+            errorSummaryHeadingRef.current.focus()
+        }
+        setFocusErrorSummaryHeading(false);
+    }, [focusErrorSummaryHeading])
 
     // TODO: refactor this into reusable component that is more understandable
     const showFieldErrors = (error?: FormError): boolean | undefined =>
@@ -287,7 +331,8 @@ export const Contacts = ({
                                 <legend className="srOnly">
                                     State contacts
                                 </legend>
-                                {formAlert && formAlert}
+
+                                { shouldValidate && <ErrorSummary errors={flattenErrors(errors)} headingRef={errorSummaryHeadingRef} /> }
 
                                 <FieldArray name="stateContacts">
                                     {({ remove, push }) => (
@@ -879,6 +924,7 @@ export const Contacts = ({
                                             history.push(`/dashboard`)
                                         } else {
                                             setShouldValidate(true)
+                                            setFocusErrorSummaryHeading(true)
 
                                             redirectToDashboard.current = true
                                             handleSubmit()
@@ -910,6 +956,7 @@ export const Contacts = ({
                                         onClick={() => {
                                             redirectToDashboard.current = false
                                             setShouldValidate(true)
+                                            setFocusErrorSummaryHeading(true)
                                         }}
                                     >
                                         Continue

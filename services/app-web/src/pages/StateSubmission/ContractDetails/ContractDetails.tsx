@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import dayjs from 'dayjs'
 import {
     Form as UswdsForm,
@@ -120,6 +120,8 @@ export const ContractDetails = ({
     const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
     const showDocumentErrors = shouldValidate && !hasValidFiles
+    const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
+    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] = React.useState(false)
 
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         draftSubmission &&
@@ -325,6 +327,15 @@ export const ContractDetails = ({
         }
     }
 
+    useEffect(() => {
+        // Focus the error summary heading only if we are displaying
+        // validation errors and the heading element exists
+        if (focusErrorSummaryHeading && errorSummaryHeadingRef.current) {
+            errorSummaryHeadingRef.current.focus()
+        }
+        setFocusErrorSummaryHeading(false);
+    }, [focusErrorSummaryHeading])
+
     const documentsError = showDocumentErrors &&
         fileItems.length === 0
             ? ' You must upload at least one document'
@@ -362,6 +373,7 @@ export const ContractDetails = ({
                         aria-label="Contract Details Form"
                         onSubmit={(e) => {
                             setShouldValidate(true)
+                            setFocusErrorSummaryHeading(true)
                             handleSubmit(e)
                         }}
                     >
@@ -370,7 +382,10 @@ export const ContractDetails = ({
                             {formAlert && formAlert}
                             <span>All fields are required</span>
 
-                            <ErrorSummary errors={documentsError ? {documents: documentsError, ...errors} : errors} />
+                            { shouldValidate && <ErrorSummary
+                                errors={documentsError ? {documents: documentsError, ...errors} : errors}
+                                headingRef={errorSummaryHeadingRef}
+                            /> }
 
                             <FormGroup error={showDocumentErrors}>
                                 <FileUpload
