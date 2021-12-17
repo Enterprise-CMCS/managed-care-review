@@ -145,9 +145,7 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
                 return new Error('Could not get a bulk DL URL: ' + err)
             }
 
-            return await Storage.get(filename, {
-                bucket: process.env.REACT_APP_S3_ZIPS_BUCKET,
-            })
+            return await Storage.get(filename)
         },
     }
 }
