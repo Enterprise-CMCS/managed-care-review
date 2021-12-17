@@ -271,8 +271,8 @@ describe('updateDraftSubmission', () => {
         expect(resultDraft.submissionType).toEqual('CONTRACT_AND_RATES')
         expect(resultDraft.program.id).toEqual('cnet')
         // check that the stateNumber is being returned the same
-        expect(resultDraft.name.split('-')[2]).toEqual(
-            createdDraft.name.split('-')[2]
+        expect(resultDraft.name.split('-')[3]).toEqual(
+            createdDraft.name.split('-')[3]
         )
         expect(resultDraft.submissionDescription).toEqual(
             'An updated submission'

@@ -7,7 +7,7 @@ describe('createDraftSubmission', () => {
         const server = await constructTestPostgresServer()
 
         const input: CreateDraftSubmissionInput = {
-            programIDs: ['managed-medical-assistance'],
+            programIDs: ['test-name', 'managed-medical-assistance'],
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
         }
@@ -19,7 +19,6 @@ describe('createDraftSubmission', () => {
         expect(res.errors).toBeUndefined()
 
         const draft = res.data?.createDraftSubmission.draftSubmission
-
         expect(draft.submissionDescription).toBe('A real submission')
         expect(draft.submissionType).toBe('CONTRACT_ONLY')
         expect(draft.program.id).toBe('managed-medical-assistance')
@@ -30,6 +29,11 @@ describe('createDraftSubmission', () => {
         expect(draft.federalAuthorities.length).toBe(0)
         expect(draft.contractDateStart).toBe(null)
         expect(draft.contractDateEnd).toBe(null)
+        // test the proper construction of the submission name (sorted, includes all program ids)
+        expect(draft.name).toContain('managed-medical-assistance'.toUpperCase())
+        expect(draft.name).toContain('test-name'.toUpperCase())
+        expect(draft.name.indexOf('managed-medical-assistance'.toUpperCase()))
+            .toBeLessThan(draft.name.indexOf('test-name'.toUpperCase()))
     })
 
     it('returns an error if the program id is not in valid', async () => {
