@@ -29,7 +29,6 @@ custom:
   iamPath: ${env:IAM_PATH, "/"}
   iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
   document_uploads_bucket_arn: ${cf:uploads-${self:custom.stage}.DocumentUploadsBucketArn}
-  document_zips_bucket_arn: ${cf:uploads-${self:custom.stage}.DocumentZipsBucketArn}
   secretsManagerSecret: aurora_postgres_${self:custom.stage} #pragma: allowlist secret
   reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
   dbURL: ${env:DATABASE_URL}
@@ -100,7 +99,6 @@ provider:
           Resource:
             # this is the "public" folder for all regular uploads from Amplify
             - ${self:custom.document_uploads_bucket_arn}/allusers/*
-            - ${self:custom.document_zips_bucket_arn}/allusers/*
 
   environment:
     stage: ${self:custom.stage}
