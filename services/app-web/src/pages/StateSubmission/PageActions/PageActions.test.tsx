@@ -8,7 +8,6 @@ describe('PageActions', () => {
         it('displays Save as Draft, Back and Continue buttons', () => {
             render(
                 <PageActions
-                    continueOnClick={jest.fn()}
                     saveAsDraftOnClick={jest.fn()}
                     backOnClick={jest.fn()}
                 />

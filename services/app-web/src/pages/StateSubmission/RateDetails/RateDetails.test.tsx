@@ -466,10 +466,10 @@ describe('RateDetails', () => {
              expect(continueButton).toBeDisabled()
 
              expect(
-                 screen.getByText(
+                 screen.getAllByText(
                      'You must remove all documents with error messages before continuing'
-                 )
-             ).toBeInTheDocument()
+                 ).length
+             ).toBe(2)
          })
     })
 
