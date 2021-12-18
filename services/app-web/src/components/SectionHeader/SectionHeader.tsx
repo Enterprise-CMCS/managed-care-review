@@ -16,8 +16,8 @@ export const SectionHeader = ({
     return (
         <div className={styles.summarySectionHeader}>
             <h2>{header}</h2>
-            {navigateTo && (
-                <div>
+            <div>
+                {navigateTo && (
                     <Link
                         variant="unstyled"
                         asCustom={NavLink}
@@ -26,9 +26,9 @@ export const SectionHeader = ({
                     >
                         Edit <span className="srOnly">{header}</span>
                     </Link>
-                </div>
-            )}
-            {children}
+                )}
+                {children}
+            </div>
         </div>
     )
 }

@@ -81,6 +81,7 @@ export const ContractDetailsSummarySection = ({
     }, [getKey, getBulkDlURL, submission])
     const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
 
+    const isSubmitted = submission.__typename === 'StateSubmission'
     // Array of values from a checkbox field is displayed in an unordered list
     const capitationRateChangeReason = (): string | null => {
         const { reason, otherReason } =
@@ -114,10 +115,12 @@ export const ContractDetailsSummarySection = ({
     return (
         <section id="contractDetailsSection" className={styles.summarySection}>
             <SectionHeader header="Contract details" navigateTo={navigateTo}>
-                <DownloadButton
-                    text="Download all contract documents"
-                    zippedFilesURL={zippedFilesURL}
-                />
+                {isSubmitted && (
+                    <DownloadButton
+                        text="Download all contract documents"
+                        zippedFilesURL={zippedFilesURL}
+                    />
+                )}
             </SectionHeader>
             <dl>
                 <DoubleColumnRow

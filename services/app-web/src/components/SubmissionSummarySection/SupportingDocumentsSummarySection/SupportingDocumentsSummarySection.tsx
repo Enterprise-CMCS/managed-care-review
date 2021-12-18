@@ -81,6 +81,7 @@ export const SupportingDocumentsSummarySection = ({
     }, [getKey, getBulkDlURL, submission])
 
     const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
+    const isSubmitted = submission.__typename === 'StateSubmission'
 
     return (
         <section id="documents" className={styles.summarySection}>
@@ -88,10 +89,12 @@ export const SupportingDocumentsSummarySection = ({
                 header="Supporting documents"
                 navigateTo={navigateTo}
             >
-                <DownloadButton
-                    text="Download all supporting documents"
-                    zippedFilesURL={zippedFilesURL}
-                />
+                {isSubmitted && (
+                    <DownloadButton
+                        text="Download all supporting documents"
+                        zippedFilesURL={zippedFilesURL}
+                    />
+                )}
             </SectionHeader>
             <span className="text-bold">{documentsSummary}</span>
             <ul>
