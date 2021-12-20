@@ -37,24 +37,9 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: set variable values
-        shell: bash
-        run: ./.github/build_vars.sh set_values
-        env:
-          REACT_APP_AUTH_MODE: IDM
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-          INFRASTRUCTURE_TYPE: ${{ secrets.INFRASTRUCTURE_TYPE || 'development' }}
-          SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
-          SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
-          OKTA_METADATA_URL: ${{ secrets.OKTA_METADATA_URL }}
-          IAM_PATH: ${{ secrets.IAM_PATH }}
-          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-          TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
-
       - name: Unit Tests
         env:
+          REACT_APP_AUTH_MODE: IDM
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         run: ./dev test --unit
 
@@ -112,7 +97,6 @@ jobs:
       aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
-      infrastructure_type: ${{ secrets.INFRASTRUCTURE_TYPE || 'development' }}
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
       ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
       okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
@@ -121,7 +105,6 @@ jobs:
       cloudfront_certificate_arn: ${{ secrets.DEV_CLOUDFRONT_CERTIFICATE_ARN }}
       cloudfront_domain_name: ${{ secrets.DEV_CLOUDFRONT_DOMAIN_NAME }}
       cloudfront_storybook_domain_name: ${{ secrets.DEV_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
-      test_users_pass: ${{ secrets.TEST_USERS_PASS}}
       react_app_auth_mode: IDM
 
   dev-cypress:
@@ -140,24 +123,6 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: set variable values
-        run: ./.github/build_vars.sh set_values
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-          INFRASTRUCTURE_TYPE: ${{ secrets.INFRASTRUCTURE_TYPE || 'development' }}
-          SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
-          SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
-          OKTA_METADATA_URL: ${{ secrets.OKTA_METADATA_URL }}
-          IAM_PATH: ${{ secrets.IAM_PATH }}
-          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-          CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets.DEV_CLOUDFRONT_CERTIFICATE_ARN }}
-          CLOUDFRONT_DOMAIN_NAME: ${{ secrets.DEV_CLOUDFRONT_DOMAIN_NAME }}
-          CLOUDFRONT_STORYBOOK_DOMAIN_NAME: ${{ secrets.DEV_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
-          TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS}}
-          REACT_APP_AUTH_MODE: IDM
-
       - name: Cypress on Dev -- Chrome
         id: cypressdev
         uses: cypress-io/github-action@v2
@@ -170,6 +135,7 @@ jobs:
           browser: chrome
           group: 'Chrome'
         env:
+          REACT_APP_AUTH_MODE: IDM
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -206,11 +172,9 @@ jobs:
       full_iam_permissions_boundary_policy: ${{ secrets.VAL_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
       react_app_auth_mode: IDM
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
-      infrastructure_type: ${{ secrets.INFRASTRUCTURE_TYPE || 'development' }}
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
       ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
       iam_path: ${{ secrets.IAM_PATH }}
-      test_users_pass: ${{ secrets.TEST_USERS_PASS}}
 
   cypress-val:
     name: val - cypress
@@ -228,24 +192,6 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: set variable values
-        run: ./.github/build_vars.sh set_values
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.VAL_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.VAL_AWS_SECRET_ACCESS_KEY }}
-          CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets.VAL_CLOUDFRONT_CERTIFICATE_ARN }}
-          CLOUDFRONT_DOMAIN_NAME: ${{ secrets.VAL_CLOUDFRONT_DOMAIN_NAME }}
-          CLOUDFRONT_STORYBOOK_DOMAIN_NAME: ${{ secrets.VAL_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
-          OKTA_METADATA_URL: ${{ secrets.VAL_OKTA_METADATA_URL }}
-          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.VAL_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-          REACT_APP_AUTH_MODE: IDM
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-          INFRASTRUCTURE_TYPE: ${{ secrets.INFRASTRUCTURE_TYPE || 'development' }}
-          SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
-          SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
-          IAM_PATH: ${{ secrets.IAM_PATH }}
-          TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS}}
-
       - name: Cypress on Val -- Chrome
         id: cypressval
         uses: cypress-io/github-action@v2
@@ -258,6 +204,7 @@ jobs:
           browser: chrome
           group: 'Chrome'
         env:
+          REACT_APP_AUTH_MODE: IDM
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -294,11 +241,9 @@ jobs:
       full_iam_permissions_boundary_policy: ${{ secrets.PROD_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
       react_app_auth_mode: IDM
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
-      infrastructure_type: ${{ secrets.INFRASTRUCTURE_TYPE || 'development' }}
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
       ses_review_team_email_addresses: ${{ secrets.PROD_SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
       iam_path: ${{ secrets.IAM_PATH }}
-      test_users_pass: ${{ secrets.TEST_USERS_PASS}}
 
   cypress-prod:
     name: prod - cypress
@@ -316,24 +261,6 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: set variable values
-        run: ./.github/build_vars.sh set_values
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
-          CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets.PROD_CLOUDFRONT_CERTIFICATE_ARN }}
-          CLOUDFRONT_DOMAIN_NAME: ${{ secrets.PROD_CLOUDFRONT_DOMAIN_NAME }}
-          CLOUDFRONT_STORYBOOK_DOMAIN_NAME: ${{ secrets.PROD_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
-          OKTA_METADATA_URL: ${{ secrets.PROD_OKTA_METADATA_URL }}
-          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.PROD_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-          REACT_APP_AUTH_MODE: IDM
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-          INFRASTRUCTURE_TYPE: ${{ secrets.INFRASTRUCTURE_TYPE || 'development' }}
-          SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
-          SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.PROD_SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
-          IAM_PATH: ${{ secrets.IAM_PATH }}
-          TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS}}
-
       - name: Cypress on Prod -- Chrome
         id: cypress
         uses: cypress-io/github-action@v2
@@ -346,6 +273,7 @@ jobs:
           browser: chrome
           group: 'Chrome'
         env:
+          REACT_APP_AUTH_MODE: IDM
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

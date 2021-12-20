@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
     ErrorMessage,
     Form as UswdsForm,
@@ -23,7 +23,7 @@ import {
     UpdateDraftSubmissionInput,
 } from '../../../gen/gqlClient'
 
-import { FieldRadio } from '../../../components/Form'
+import { ErrorSummary, FieldRadio } from '../../../components/Form'
 import {
     FileUpload,
     S3FileData,
@@ -86,6 +86,8 @@ export const RateDetails = ({
     const [hasPendingFiles, setHasPendingFiles] = React.useState(false)
     const [fileItems, setFileItems] = React.useState<FileItemT[]>([])
     const showDocumentErrors = shouldValidate && !hasValidFiles
+    const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
+    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] = React.useState(false)
 
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         (draftSubmission?.rateDocuments &&
@@ -158,6 +160,15 @@ export const RateDetails = ({
             throw new Error('Scanning error: Scanning retry timed out')
         }
     }
+
+    useEffect(() => {
+        // Focus the error summary heading only if we are displaying
+        // validation errors and the heading element exists
+        if (focusErrorSummaryHeading && errorSummaryHeadingRef.current) {
+            errorSummaryHeadingRef.current.focus()
+        }
+        setFocusErrorSummaryHeading(false);
+    }, [focusErrorSummaryHeading])
 
     // Rate details form setup
     const showFieldErrors = (error?: FormError) =>
@@ -269,6 +280,14 @@ export const RateDetails = ({
         }
     }
 
+    const documentsError = showDocumentErrors &&
+    fileItems.length === 0
+        ? ' You must upload at least one document'
+        : showDocumentErrors &&
+        !hasValidFiles
+        ? ' You must remove all documents with error messages before continuing'
+        : undefined;
+
     return (
         <>
             <Formik
@@ -296,6 +315,7 @@ export const RateDetails = ({
                             aria-label="Rate Details Form"
                             onSubmit={(e) => {
                                 setShouldValidate(true)
+                                setFocusErrorSummaryHeading(true)
                                 handleSubmit(e)
                             }}
                         >
@@ -303,20 +323,18 @@ export const RateDetails = ({
                                 <legend className="srOnly">Rate Details</legend>
                                 {formAlert && formAlert}
                                 <span>All fields are required</span>
+
+                                { shouldValidate && <ErrorSummary
+                                errors={documentsError ? {documents: documentsError, ...errors} : errors}
+                                headingRef={errorSummaryHeadingRef}
+                            /> }
+
                                 <FormGroup error={showDocumentErrors}>
                                     <FileUpload
                                         id="rateDocuments"
                                         name="rateDocuments"
                                         label="Upload rate certification"
-                                        error={
-                                            showDocumentErrors &&
-                                            fileItems.length === 0
-                                                ? ' You must upload at least one document'
-                                                : showDocumentErrors &&
-                                                  !hasValidFiles
-                                                ? 'You must remove all documents with error messages before continuing'
-                                                : undefined
-                                        }
+                                        error={documentsError}
                                         hint={
                                             <Link
                                                 aria-label="Document definitions and requirements (opens in new window)"
