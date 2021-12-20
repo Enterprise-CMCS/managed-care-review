@@ -18,6 +18,7 @@ export const RateDetailsSummarySection = ({
     submission,
     navigateTo,
 }: RateDetailsSummarySectionProps): React.ReactElement => {
+    const isSubmitted = submission.__typename === 'StateSubmission'
     // Get the zip file for the rate details
     const { getKey, getBulkDlURL } = useS3()
     useEffect(() => {
@@ -52,10 +53,12 @@ export const RateDetailsSummarySection = ({
         <section id="rateDetails" className={styles.summarySection}>
             <dl>
                 <SectionHeader header="Rate details" navigateTo={navigateTo}>
-                    <DownloadButton
-                        text="Download all rate documents"
-                        zippedFilesURL={zippedFilesURL}
-                    />
+                    {isSubmitted && (
+                        <DownloadButton
+                            text="Download all rate documents"
+                            zippedFilesURL={zippedFilesURL}
+                        />
+                    )}
                 </SectionHeader>
 
                 <DoubleColumnRow
