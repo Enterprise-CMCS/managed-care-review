@@ -28,7 +28,7 @@ custom:
   draftSubmissionsTableStreamArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:database-${self:custom.stage}.DraftSubmissionsTableStreamArn}
   iamPath: ${env:IAM_PATH, "/"}
   iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
-  document_uploads_bucket_arn: ${cf:uploads-${self:custom.stage}.DocumentUploadsBucketArn}
+  document_uploads_bucket_arn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${self:custom.stage}.DocumentUploadsBucketArn}
   secretsManagerSecret: aurora_postgres_${self:custom.stage} #pragma: allowlist secret
   reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
   dbURL: ${env:DATABASE_URL}
