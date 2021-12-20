@@ -47,24 +47,9 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: set variable values
-        shell: bash
-        run: ./.github/build_vars.sh set_values
-        env:
-          REACT_APP_AUTH_MODE: AWS_COGNITO
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-          INFRASTRUCTURE_TYPE: ${{ secrets.INFRASTRUCTURE_TYPE || 'development' }}
-          SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
-          SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
-          OKTA_METADATA_URL: ${{ secrets.OKTA_METADATA_URL }}
-          IAM_PATH: ${{ secrets.IAM_PATH }}
-          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-          TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
-
       - name: Unit Tests
         env:
+          REACT_APP_AUTH_MODE: AWS_COGNITO
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         run: ./dev test --unit
 
@@ -145,13 +130,11 @@ jobs:
       aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
-      infrastructure_type: ${{ secrets.INFRASTRUCTURE_TYPE || 'development' }}
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
       ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
       okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
       iam_path: ${{ secrets.IAM_PATH }}
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-      test_users_pass: ${{ secrets.TEST_USERS_PASS}}
       react_app_auth_mode: AWS_COGNITO
 
   cypress:
@@ -170,22 +153,12 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: set variable values
-        run: ./.github/build_vars.sh set_values
+      - name: Create Test Users
         env:
-          REACT_APP_AUTH_MODE: AWS_COGNITO
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-          INFRASTRUCTURE_TYPE: ${{ secrets.INFRASTRUCTURE_TYPE || 'development' }}
-          SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
-          SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
-          OKTA_METADATA_URL: ${{ secrets.OKTA_METADATA_URL }}
-          IAM_PATH: ${{ secrets.IAM_PATH }}
-          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
-
-      - name: Create Test Users
         run: |
           cd scripts
           yarn tsc
@@ -196,6 +169,10 @@ jobs:
         run: yarn global add serverless
 
       - name: Set application endpoint
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
         run: |
           cd services
           endpoint=$(./output.sh ui CloudFrontEndpointUrl $branch_name)
@@ -229,8 +206,10 @@ jobs:
           browser: chrome
           group: 'Chrome'
         env:
+          REACT_APP_AUTH_MODE: AWS_COGNITO
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
 
       - name: Upload cypress screenshots
         uses: actions/upload-artifact@v2.2.4
