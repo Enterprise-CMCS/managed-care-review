@@ -18,11 +18,6 @@ import {
 import { updatesFromSubmission } from '../updateSubmissionTransform'
 import { PageActions } from '../PageActions'
 
-/*
- * The page level component is responsible for setting up api requests, redirects, and handling page level alert for overall errors related to invalid documents for a submission
- * Inline error that are specific to the individual files as they upload are handled in FileUpload and FileItem.
- */
-
 type DocumentProps = {
     draftSubmission: DraftSubmission
     formAlert?: React.ReactElement
@@ -45,7 +40,18 @@ export const Documents = ({
     const hasValidFiles = fileItems.every(
         (item) => item.status === 'UPLOAD_COMPLETE'
     )
+    const hasLoadingFiles =
+        fileItems.some((item) => item.status === 'PENDING') ||
+        fileItems.some((item) => item.status === 'SCANNING')
     const showFileUploadError = shouldValidate && !hasValidFiles
+
+    // for supporting documents page, empty documents list is allowed
+    const documentsErrorMessage =
+        showFileUploadError && hasLoadingFiles
+            ? 'You must wait for all documents to finish uploading before continuing'
+            : showFileUploadError && !hasValidFiles
+            ? ' You must remove all documents with error messages before continuing'
+            : undefined
 
     // Error summary state management
     const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
@@ -215,14 +221,13 @@ export const Documents = ({
                 <fieldset className="usa-fieldset">
                     <legend className="srOnly">Supporting Documents</legend>
 
-                    {showFileUploadError && (
+                    {documentsErrorMessage && (
                         <Alert
                             type="error"
                             heading="Remove files with errors"
                             className="margin-bottom-2"
                         >
-                            You must remove all documents with error messages
-                            before continuing
+                            {documentsErrorMessage}
                         </Alert>
                     )}
                     {formAlert && formAlert}
@@ -255,11 +260,7 @@ export const Documents = ({
                                 </p>
                             </>
                         }
-                        error={
-                            showFileUploadError
-                                ? ' You must remove all documents with error messages before continuing'
-                                : undefined
-                        }
+                        error={documentsErrorMessage}
                         accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                         initialItems={fileItemsFromDraftSubmission}
                         uploadFile={handleUploadFile}

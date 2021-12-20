@@ -88,15 +88,19 @@ export const RateDetails = ({
     const hasValidFiles =
         fileItems.length > 0 &&
         fileItems.every((item) => item.status === 'UPLOAD_COMPLETE')
-        
+    const hasLoadingFiles =
+        fileItems.some((item) => item.status === 'PENDING') ||
+        fileItems.some((item) => item.status === 'SCANNING')
     const showFileUploadError = shouldValidate && !hasValidFiles
-    const documentsError = showFileUploadError &&
-    fileItems.length === 0
-        ? ' You must upload at least one document'
-        : showFileUploadError &&
-        !hasValidFiles
-        ? ' You must remove all documents with error messages before continuing'
-        : undefined;
+
+    const documentsErrorMessage =
+        showFileUploadError && hasLoadingFiles
+            ? 'You must wait for all documents to finish uploading before continuing'
+            : showFileUploadError && fileItems.length === 0
+            ? ' You must upload at least one document'
+            : showFileUploadError && !hasValidFiles
+            ? ' You must remove all documents with error messages before continuing'
+            : undefined
 
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         (draftSubmission?.rateDocuments &&
@@ -167,7 +171,7 @@ export const RateDetails = ({
         if (focusErrorSummaryHeading && errorSummaryHeadingRef.current) {
             errorSummaryHeadingRef.current.focus()
         }
-        setFocusErrorSummaryHeading(false);
+        setFocusErrorSummaryHeading(false)
     }, [focusErrorSummaryHeading])
 
     // Rate details form setup
@@ -322,10 +326,10 @@ export const RateDetails = ({
                                     {shouldValidate && (
                                         <ErrorSummary
                                             errors={
-                                                documentsError
+                                                documentsErrorMessage
                                                     ? {
                                                           documents:
-                                                              documentsError,
+                                                              documentsErrorMessage,
                                                           ...errors,
                                                       }
                                                     : errors
@@ -337,7 +341,7 @@ export const RateDetails = ({
                                         id="rateDocuments"
                                         name="rateDocuments"
                                         label="Upload rate certification"
-                                        error={documentsError}
+                                        error={documentsErrorMessage}
                                         hint={
                                             <Link
                                                 aria-label="Document definitions and requirements (opens in new window)"

@@ -467,7 +467,7 @@ describe('RateDetails', () => {
 
              expect(
                  screen.getAllByText(
-                     'You must remove all documents with error messages before continuing'
+                     'You must wait for all documents to finish uploading before continuing'
                  ).length
              ).toBe(2)
          })

@@ -119,8 +119,18 @@ export const ContractDetails = ({
     const hasValidFiles =
         fileItems.length > 0 &&
         fileItems.every((item) => item.status === 'UPLOAD_COMPLETE')
+    const hasLoadingFiles =
+        fileItems.some((item) => item.status === 'PENDING') ||
+        fileItems.some((item) => item.status === 'SCANNING')
     const showFileUploadError = shouldValidate && !hasValidFiles
-
+    const documentsErrorMessage =
+        showFileUploadError && hasLoadingFiles
+            ? 'You must wait for all documents to finish uploading before continuing'
+            : showFileUploadError && fileItems.length === 0
+            ? ' You must upload at least one document'
+            : showFileUploadError && !hasValidFiles
+            ? ' You must remove all documents with error messages before continuing'
+            : undefined
     // Error summary state management
     const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
     const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
@@ -331,13 +341,6 @@ export const ContractDetails = ({
             setSubmitting(false)
         }
     }
-
-    const documentsErrorMessage =
-        showFileUploadError && fileItems.length === 0
-            ? ' You must upload at least one document'
-            : showFileUploadError && !hasValidFiles
-            ? ' You must remove all documents with error messages before continuing'
-            : undefined
 
     return (
         <Formik
