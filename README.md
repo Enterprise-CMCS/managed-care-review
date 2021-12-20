@@ -218,6 +218,16 @@ To verify things are working, run:
 ctkey --version
 ```
 
+To verify serverless (and AWS access) is set up properly with ctkey, run:
+
+ ```shell
+which serverless # should return something like /managed-care-review/scripts/serverless`
+which sls # should return something like /managed-care-review/scripts/sls`
+```
+
+These should both point to paths inside the codebase (not to paths in usr/local/bin).
+You can also verify things are working by running any serverless command , e.g. `cd services/app-api && serverless info --stage main`.
+
 Mac users: If you get an OS X error about the file not being trusted, go to
 System Preferences > Security > General and click to allow ctkey.
 
