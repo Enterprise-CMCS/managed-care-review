@@ -22,6 +22,7 @@ export async function runAPILocally(runner: LabeledProcessRunner) {
     runner.runCommandAndOutput(
         'api',
         [
+            'npx',
             'serverless',
             '--stage',
             'local',
