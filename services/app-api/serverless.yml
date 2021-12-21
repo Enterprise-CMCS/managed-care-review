@@ -28,6 +28,7 @@ custom:
   draftSubmissionsTableStreamArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:database-${self:custom.stage}.DraftSubmissionsTableStreamArn}
   iamPath: ${env:IAM_PATH, "/"}
   iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
+  document_uploads_bucket_arn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${self:custom.stage}.DocumentUploadsBucketArn}
   secretsManagerSecret: aurora_postgres_${self:custom.stage} #pragma: allowlist secret
   reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
   dbURL: ${env:DATABASE_URL}
@@ -92,6 +93,12 @@ provider:
           Action:
             - lambda:InvokeFunction
           Resource: '*'
+        - Effect: 'Allow'
+          Action:
+            - 's3:*'
+          Resource:
+            # this is the "public" folder for all regular uploads from Amplify
+            - ${self:custom.document_uploads_bucket_arn}/allusers/*
 
   environment:
     stage: ${self:custom.stage}
@@ -186,6 +193,15 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     layers:
       - !Ref PrismaClientLambdaLayer
+
+  zip_keys:
+    handler: handlers/bulk_download.main
+    events:
+      - http:
+          path: zip
+          method: post
+          cors: true
+          authorizer: aws_iam
 
 resources:
   Resources:

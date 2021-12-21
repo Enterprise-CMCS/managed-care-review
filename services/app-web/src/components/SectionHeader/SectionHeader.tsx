@@ -5,17 +5,19 @@ import styles from './SectionHeader.module.scss'
 export type SectionHeaderProps = {
     header: string
     navigateTo?: string
+    children?: React.ReactNode
 }
 
 export const SectionHeader = ({
     header,
     navigateTo,
+    children,
 }: SectionHeaderProps): React.ReactElement => {
     return (
         <div className={styles.summarySectionHeader}>
             <h2>{header}</h2>
-            {navigateTo && (
-                <div>
+            <div>
+                {navigateTo && (
                     <Link
                         variant="unstyled"
                         asCustom={NavLink}
@@ -24,8 +26,9 @@ export const SectionHeader = ({
                     >
                         Edit <span className="srOnly">{header}</span>
                     </Link>
-                </div>
-            )}
+                )}
+                {children}
+            </div>
         </div>
     )
 }

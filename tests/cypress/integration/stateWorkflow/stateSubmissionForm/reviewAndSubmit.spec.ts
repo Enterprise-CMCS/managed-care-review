@@ -21,6 +21,7 @@ describe('review and submit', () => {
             // (should only appear on Submission Summary)
             cy.findByText('Submitted').should('not.exist')
             cy.findByText('Last updated').should('not.exist')
+            cy.findByText('Download all contract documents').should('not.exist')
 
             // Navigate to dashboard page by clicking save as draft
             cy.findByRole('link', { name: /Save as draft/ }).click()

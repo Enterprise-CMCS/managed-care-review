@@ -62,6 +62,7 @@ describe('dashboard', () => {
             cy.findByText('Rate details').should('exist')
             cy.findByText('New rate certification').should('exist')
             cy.findByText('02/29/2024 - 02/28/2025').should('exist')
+            cy.findByText('Download all contract documents').should('exist')
             // Link back to dashboard, submission visible in default program
             cy.findByText('Back to state dashboard').should('exist').click()
             cy.findByText('Dashboard').should('exist')
@@ -91,13 +92,13 @@ describe('dashboard', () => {
                 .parents('tr')
                 .findByTestId('submission-date')
                 .should('be.empty')
-                cy.get('table')
+            cy.get('table')
                 .contains('span', 'Submitted')
                 .eq(0)
                 .parents('tr')
                 .findByTestId('submission-date')
                 .should('not.be.empty')
-                /* the submission ID should contain 'MCR-', which is the prefix for all submissions
+            /* the submission ID should contain 'MCR-', which is the prefix for all submissions
                 as well as the names of the programs (we only check for one program name here) */
             cy.get('table')
                 .contains('span', 'Draft')
@@ -116,7 +117,8 @@ describe('dashboard', () => {
                         .then((submissionId) => {
                             expect(submissionId).to.contain(text.toUpperCase())
                             expect(submissionId).to.contain('MCR-')
+                        })
+                })
         })
     })
 })
-})})

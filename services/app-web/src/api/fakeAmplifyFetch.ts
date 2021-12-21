@@ -3,7 +3,7 @@ import { AxiosResponse } from 'axios'
 
 function fetchResponseFromAxios(axiosResponse: AxiosResponse): Response {
     const fakeFetchResponse: Response = {
-        headers: axiosResponse.headers,
+        headers: new Headers(axiosResponse.headers),
         status: axiosResponse.status,
         ok: axiosResponse.status >= 200 && axiosResponse.status < 300,
         statusText: axiosResponse.statusText,
