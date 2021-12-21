@@ -314,17 +314,27 @@ export const FileUpload = ({
                     {hint}
                 </span>
             )}
+            {fileItems.length > 0 && (
+                <div role="alert" aria-live="assertive" className="sr-only">
+                    {`There are ${fileItems.length} selected.`}
+                </div>
+            )}
             <FileInput
                 id={id}
                 name={name}
                 className={styles.fileInput}
-                aria-describedby={`${id}-error ${id}-hint`}
+                aria-describedby={`${id}-error ${id}-hint ${id}-selected-announcement`}
                 multiple
                 onChange={handleOnChange}
                 onDrop={handleOnDrop}
                 accept={inputProps.accept}
                 ref={fileInputRef}
             />
+            <span id={`${id}-selected-announcement`} className="sr-only">
+                {fileItems
+                    ? `${fileItems.length} files selected`
+                    : 'Select a file'}
+            </span>
             <FileItemsList
                 retryItem={retryFile}
                 deleteItem={deleteItem}
