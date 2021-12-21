@@ -138,10 +138,10 @@ const flattenErrors = (
 
     if (errors.stateContacts && Array.isArray(errors.stateContacts)) {
         errors.stateContacts.forEach((contact, index) => {
-            if (!contact) return;
+            if (!contact) return
 
             Object.entries(contact).forEach(([field, value]) => {
-                const errorKey = `stateContacts.${index}.${field}`
+                const errorKey = `${contact}.${field}`
                 flattened[errorKey] = value
             })
         })
@@ -149,10 +149,10 @@ const flattenErrors = (
 
     if (errors.actuaryContacts && Array.isArray(errors.actuaryContacts)) {
         errors.actuaryContacts.forEach((contact, index) => {
-            if (!contact) return;
+            if (!contact) return
 
             Object.entries(contact).forEach(([field, value]) => {
-                const errorKey = `actuaryContacts.${index}.${field}`
+                const errorKey = `${contact}.${field}`
                 flattened[errorKey] = value
             })
         })
@@ -372,7 +372,7 @@ return (
                                                                 )}
                                                             >
                                                                 <label
-                                                                    htmlFor={`stateContacts.${index}.name`}
+                                                                    htmlFor={`{${stateContact}}.name`}
                                                                 >
                                                                     Name
                                                                 </label>
@@ -380,14 +380,14 @@ return (
                                                                     `True`
                                                                 ) && (
                                                                     <ErrorMessage
-                                                                        name={`stateContacts.${index}.name`}
+                                                                        name={`{${stateContact}}.name`}
                                                                         component="div"
                                                                         className="usa-error-message"
                                                                     />
                                                                 )}
                                                                 <Field
-                                                                    name={`stateContacts.${index}.name`}
-                                                                    id={`stateContacts.${index}.name`}
+                                                                    name={`{${stateContact}}.name`}
+                                                                    id={`{${stateContact}}.name`}
                                                                     aria-required={
                                                                         index ===
                                                                         0
@@ -414,7 +414,7 @@ return (
                                                                 )}
                                                             >
                                                                 <label
-                                                                    htmlFor={`stateContacts.${index}.titleRole`}
+                                                                    htmlFor={`{${stateContact}}.titleRole`}
                                                                 >
                                                                     Title/Role
                                                                 </label>
@@ -422,14 +422,14 @@ return (
                                                                     `True`
                                                                 ) && (
                                                                     <ErrorMessage
-                                                                        name={`stateContacts.${index}.titleRole`}
+                                                                        name={`{${stateContact}}.titleRole`}
                                                                         component="div"
                                                                         className="usa-error-message"
                                                                     />
                                                                 )}
                                                                 <Field
-                                                                    name={`stateContacts.${index}.titleRole`}
-                                                                    id={`stateContacts.${index}.titleRole`}
+                                                                    name={`{${stateContact}}.titleRole`}
+                                                                    id={`{${stateContact}}.titleRole`}
                                                                     aria-required={
                                                                         index ===
                                                                         0
@@ -450,7 +450,7 @@ return (
                                                                 )}
                                                             >
                                                                 <label
-                                                                    htmlFor={`stateContacts.${index}.email`}
+                                                                    htmlFor={`{${stateContact}}.email`}
                                                                 >
                                                                     Email
                                                                 </label>
@@ -458,14 +458,14 @@ return (
                                                                     `True`
                                                                 ) && (
                                                                     <ErrorMessage
-                                                                        name={`stateContacts.${index}.email`}
+                                                                        name={`{${stateContact}}.email`}
                                                                         component="div"
                                                                         className="usa-error-message"
                                                                     />
                                                                 )}
                                                                 <Field
-                                                                    name={`stateContacts.${index}.email`}
-                                                                    id={`stateContacts.${index}.email`}
+                                                                    name={`{${stateContact}}.email`}
+                                                                    id={`{${stateContact}}.email`}
                                                                     aria-required={
                                                                         index ===
                                                                         0
@@ -561,7 +561,7 @@ return (
                                                                     )}
                                                                 >
                                                                     <label
-                                                                        htmlFor={`actuaryContacts.${index}.name`}
+                                                                        htmlFor={`${actuaryContact}.name`}
                                                                     >
                                                                         Name
                                                                     </label>
@@ -569,14 +569,14 @@ return (
                                                                         `True`
                                                                     ) && (
                                                                         <ErrorMessage
-                                                                            name={`actuaryContacts.${index}.name`}
+                                                                            name={`${actuaryContact}.name`}
                                                                             component="div"
                                                                             className="usa-error-message"
                                                                         />
                                                                     )}
                                                                     <Field
-                                                                        name={`actuaryContacts.${index}.name`}
-                                                                        id={`actuaryContacts.${index}.name`}
+                                                                        name={`${actuaryContact}.name`}
+                                                                        id={`${actuaryContact}.name`}
                                                                         aria-required={
                                                                             index ===
                                                                             0
@@ -604,7 +604,7 @@ return (
                                                                     )}
                                                                 >
                                                                     <label
-                                                                        htmlFor={`actuaryContacts.${index}.titleRole`}
+                                                                        htmlFor={`${actuaryContact}.titleRole`}
                                                                     >
                                                                         Title/Role
                                                                     </label>
@@ -612,14 +612,14 @@ return (
                                                                         `True`
                                                                     ) && (
                                                                         <ErrorMessage
-                                                                            name={`actuaryContacts.${index}.titleRole`}
+                                                                            name={`${actuaryContact}.titleRole`}
                                                                             component="div"
                                                                             className="usa-error-message"
                                                                         />
                                                                     )}
                                                                     <Field
-                                                                        name={`actuaryContacts.${index}.titleRole`}
-                                                                        id={`actuaryContacts.${index}.titleRole`}
+                                                                        name={`${actuaryContact}.titleRole`}
+                                                                        id={`${actuaryContact}.titleRole`}
                                                                         aria-required={
                                                                             index ===
                                                                             0
@@ -640,7 +640,7 @@ return (
                                                                     )}
                                                                 >
                                                                     <label
-                                                                        htmlFor={`actuaryContacts.${index}.email`}
+                                                                        htmlFor={`${actuaryContact}.email`}
                                                                     >
                                                                         Email
                                                                     </label>
@@ -648,14 +648,14 @@ return (
                                                                         `True`
                                                                     ) && (
                                                                         <ErrorMessage
-                                                                            name={`actuaryContacts.${index}.email`}
+                                                                            name={`${actuaryContact}.email`}
                                                                             component="div"
                                                                             className="usa-error-message"
                                                                         />
                                                                     )}
                                                                     <Field
-                                                                        name={`actuaryContacts.${index}.email`}
-                                                                        id={`actuaryContacts.${index}.email`}
+                                                                        name={`${actuaryContact}.email`}
+                                                                        id={`${actuaryContact}.email`}
                                                                         aria-required={
                                                                             index ===
                                                                             0
@@ -677,7 +677,7 @@ return (
                                                                     )}
                                                                 >
                                                                     <label
-                                                                        htmlFor={`actuaryContacts.${index}.actuarialFirm`}
+                                                                        htmlFor={`${actuaryContact}.actuarialFirm`}
                                                                     >
                                                                         Actuarial
                                                                         firm
@@ -686,14 +686,14 @@ return (
                                                                         `True`
                                                                     ) && (
                                                                         <ErrorMessage
-                                                                            name={`actuaryContacts.${index}.actuarialFirm`}
+                                                                            name={`${actuaryContact}.actuarialFirm`}
                                                                             component="div"
                                                                             className="usa-error-message"
                                                                         />
                                                                     )}
                                                                     <FieldRadio
                                                                         id={`mercer-${index}`}
-                                                                        name={`actuaryContacts.${index}.actuarialFirm`}
+                                                                        name={`${actuaryContact}.actuarialFirm`}
                                                                         label="Mercer"
                                                                         value={
                                                                             'MERCER'
@@ -710,7 +710,7 @@ return (
                                                                     />
                                                                     <FieldRadio
                                                                         id={`milliman-${index}`}
-                                                                        name={`actuaryContacts.${index}.actuarialFirm`}
+                                                                        name={`${actuaryContact}.actuarialFirm`}
                                                                         label="Milliman"
                                                                         value={
                                                                             'MILLIMAN'
@@ -727,7 +727,7 @@ return (
                                                                     />
                                                                     <FieldRadio
                                                                         id={`optumas-${index}`}
-                                                                        name={`actuaryContacts.${index}.actuarialFirm`}
+                                                                        name={`${actuaryContact}.actuarialFirm`}
                                                                         label="Optumas"
                                                                         value={
                                                                             'OPTUMAS'
@@ -744,7 +744,7 @@ return (
                                                                     />
                                                                     <FieldRadio
                                                                         id={`guidehouse-${index}`}
-                                                                        name={`actuaryContacts.${index}.actuarialFirm`}
+                                                                        name={`${actuaryContact}.actuarialFirm`}
                                                                         label="Guidehouse"
                                                                         value={
                                                                             'GUIDEHOUSE'
@@ -753,7 +753,7 @@ return (
                                                                     />
                                                                     <FieldRadio
                                                                         id={`deloitte-${index}`}
-                                                                        name={`actuaryContacts.${index}.actuarialFirm`}
+                                                                        name={`${actuaryContact}.actuarialFirm`}
                                                                         label="Deloitte"
                                                                         value={
                                                                             'DELOITTE'
@@ -770,7 +770,7 @@ return (
                                                                     />
                                                                     <FieldRadio
                                                                         id={`stateInHouse-${index}`}
-                                                                        name={`actuaryContacts.${index}.actuarialFirm`}
+                                                                        name={`${actuaryContact}.actuarialFirm`}
                                                                         label="State in-house"
                                                                         value={
                                                                             'STATE_IN_HOUSE'
@@ -787,7 +787,7 @@ return (
                                                                     />
                                                                     <FieldRadio
                                                                         id={`other-${index}`}
-                                                                        name={`actuaryContacts.${index}.actuarialFirm`}
+                                                                        name={`${actuaryContact}.actuarialFirm`}
                                                                         label="Other"
                                                                         value={
                                                                             'OTHER'
@@ -821,7 +821,7 @@ return (
                                                                             )}
                                                                         >
                                                                             <label
-                                                                                htmlFor={`actuaryContacts.${index}.actuarialFirmOther`}
+                                                                                htmlFor={`${actuaryContact}.actuarialFirmOther`}
                                                                             >
                                                                                 Other
                                                                                 actuarial
@@ -831,14 +831,14 @@ return (
                                                                                 `True`
                                                                             ) && (
                                                                                 <ErrorMessage
-                                                                                    name={`actuaryContacts.${index}.actuarialFirmOther`}
+                                                                                    name={`${actuaryContact}.actuarialFirmOther`}
                                                                                     component="div"
                                                                                     className="usa-error-message"
                                                                                 />
                                                                             )}
                                                                             <Field
-                                                                                name={`actuaryContacts.${index}.actuarialFirmOther`}
-                                                                                id={`actuaryContacts.${index}.actuarialFirmOther`}
+                                                                                name={`${actuaryContact}.actuarialFirmOther`}
+                                                                                id={`${actuaryContact}.actuarialFirmOther`}
                                                                                 type="text"
                                                                                 className="usa-input"
                                                                             />
