@@ -25,6 +25,23 @@ describe('ContractDetails', () => {
     }
     afterEach(() => jest.clearAllMocks())
 
+
+    it('displays correct form guidance', async () => {
+        renderWithProviders(
+            <ContractDetails
+                draftSubmission={mockDraft()}
+                updateDraft={jest.fn()}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        expect(screen.getByText(/All fields are required/)).toBeInTheDocument()
+    })
+
     it('progressively discloses options for capitation rates', async () => {
         // mount an empty form
 
@@ -35,7 +52,7 @@ describe('ContractDetails', () => {
         renderWithProviders(
             <ContractDetails
                 draftSubmission={emptyDraft}
-                updateDraft={async (_) => undefined}
+                updateDraft={jest.fn()}
             />,
             {
                 apolloProvider: {
