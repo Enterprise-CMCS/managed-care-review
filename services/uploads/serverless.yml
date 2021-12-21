@@ -124,6 +124,8 @@ resources:
                 - ETag
         NotificationConfiguration:
           LambdaConfigurations:
+            - Event: s3:CompleteMultipartUpload
+              Function: !GetAtt AvScanLambdaFunction.Arn
             - Event: s3:ObjectCreated:Put
               Function: !GetAtt AvScanLambdaFunction.Arn
       DependsOn: LambdaInvokePermission
