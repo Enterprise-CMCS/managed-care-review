@@ -253,7 +253,7 @@ which serverless # should return something like /managed-care-review/scripts/ser
 which sls # should return something like /managed-care-review/scripts/sls`
 ```
 
-These should both point to paths inside the codebase (not to paths in usr/local/bin).
+These should both point to paths inside the codebase (not to paths in /usr/local/bin).
 
 
 Then verify things are working by running any serverless command , e.g. `cd services/app-api && serverless info --stage main`. This command should print information and not return any Serverless Error around "AWS Credentials".
