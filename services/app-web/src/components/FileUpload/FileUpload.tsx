@@ -29,11 +29,11 @@ export type FileUploadProps = {
     uploadFile: (file: File) => Promise<S3FileData>
     scanFile?: (key: string) => Promise<void | Error> // optional function to be called after uploading (used for scanning)
     deleteFile: (key: string) => Promise<void>
-    onLoadComplete: ({ files }: { files: FileItemT[] }) => void
+    onFileItemsUpdate: ({ fileItems }: { fileItems: FileItemT[] }) => void
 } & JSX.IntrinsicElements['input']
 
 /*  FileUpload handles async file upload to S3 and displays inline errors per file.
-    Tracks files as they are uploaded. Once files are no longer processing passes to parent with onLoadComplete.
+    Tracks files as they are uploaded. Once files are no longer processing passes to parent with onFileItemsUpdate.
 
     Note: This component uses a ref to access files in the input. It also clears its own value after each change.
     This is not standard behavior for an HTML input. However, rendering quickly allows us to take over handling of files
@@ -51,20 +51,16 @@ export const FileUpload = ({
     uploadFile,
     scanFile,
     deleteFile,
-    onLoadComplete,
+    onFileItemsUpdate,
     ...inputProps
 }: FileUploadProps): React.ReactElement => {
-    const [loadingStatus, setLoadingStatus] = useState<
-        null | 'UPLOADING' | 'COMPLETE'
-    >(null)
     const [fileItems, setFileItems] = useState<FileItemT[]>(initialItems || [])
     const fileInputRef = useRef<FileInputRef>(null) // reference to the HTML input which has files
 
+    // update fileItems in parent
     React.useEffect(() => {
-        if (loadingStatus !== 'UPLOADING') {
-            onLoadComplete({ files: fileItems })
-        }
-    }, [fileItems, loadingStatus, onLoadComplete])
+        onFileItemsUpdate({ fileItems })
+    }, [fileItems, onFileItemsUpdate])
 
     const isDuplicateItem = (
         existingList: FileItemT[],
@@ -153,7 +149,6 @@ export const FileUpload = ({
     // Upload to S3 and update file items in component state with the async loading status
     // This includes moving from pending/loading UI to display success or errors
     const asyncS3Upload = (files: File[] | File) => {
-        setLoadingStatus('UPLOADING')
         const upload = (file: File) => {
             uploadFile(file)
                 .then((data) => {
@@ -238,9 +233,6 @@ export const FileUpload = ({
                             }
                         })
                     })
-                })
-                .finally(() => {
-                    setLoadingStatus('COMPLETE')
                 })
         }
 

@@ -104,7 +104,7 @@ describe('ReviewSubmit', () => {
         })
     })
 
-    it('displays back link', async () => {
+    it('displays back and save as draft buttons', async () => {
         renderWithProviders(
             <ReviewSubmit draftSubmission={mockCompleteDraft()} />,
             {
@@ -116,8 +116,15 @@ describe('ReviewSubmit', () => {
 
         await waitFor(() =>
             expect(
-                screen.getByRole('link', {
+                screen.getByRole('button', {
                     name: 'Back',
+                })
+            ).toBeDefined()
+        )
+        await waitFor(() =>
+            expect(
+                screen.getByRole('button', {
+                    name: 'Save as draft',
                 })
             ).toBeDefined()
         )
