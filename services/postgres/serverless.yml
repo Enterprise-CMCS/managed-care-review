@@ -58,7 +58,6 @@ custom:
       - main
   pauseAurora:
     other: true
-    dev: true
     val: false
     prod: false
 
