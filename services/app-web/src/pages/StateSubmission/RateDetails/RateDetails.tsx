@@ -324,10 +324,19 @@ export const RateDetails = ({
                                 {formAlert && formAlert}
                                 <span>All fields are required</span>
 
-                                { shouldValidate && <ErrorSummary
-                                errors={documentsError ? {documents: documentsError, ...errors} : errors}
-                                headingRef={errorSummaryHeadingRef}
-                            /> }
+                                {shouldValidate && (
+                                    <ErrorSummary
+                                        errors={
+                                            documentsError
+                                                ? {
+                                                      documents: documentsError,
+                                                      ...errors,
+                                                  }
+                                                : errors
+                                        }
+                                        headingRef={errorSummaryHeadingRef}
+                                    />
+                                )}
 
                                 <FormGroup error={showDocumentErrors}>
                                     <FileUpload
@@ -336,17 +345,24 @@ export const RateDetails = ({
                                         label="Upload rate certification"
                                         error={documentsError}
                                         hint={
-                                            <Link
-                                                aria-label="Document definitions and requirements (opens in new window)"
-                                                href={
-                                                    'https://www.medicaid.gov/federal-policy-guidance/downloads/cib110819.pdf'
-                                                }
-                                                variant="external"
-                                                target="_blank"
-                                            >
-                                                Document definitions and
-                                                requirements
-                                            </Link>
+                                            <>
+                                                <Link
+                                                    aria-label="Document definitions and requirements (opens in new window)"
+                                                    href={
+                                                        'https://www.medicaid.gov/federal-policy-guidance/downloads/cib110819.pdf'
+                                                    }
+                                                    variant="external"
+                                                    target="_blank"
+                                                >
+                                                    Document definitions and
+                                                    requirements
+                                                </Link>
+                                                <span className="srOnly">
+                                                    This input only accepts PDF,
+                                                    CSV, DOC, DOCX, XLS, XLSX
+                                                    files.
+                                                </span>
+                                            </>
                                         }
                                         accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                                         initialItems={

@@ -266,6 +266,10 @@ export const Documents = ({
                                         supporting documents
                                     </strong>
                                 </p>
+                                <span className="srOnly">
+                                    This input only accepts PDF, CSV, DOC, DOCX,
+                                    XLS, XLSX files.
+                                </span>
                             </>
                         }
                         accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
