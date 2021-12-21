@@ -313,6 +313,7 @@ export const RateDetails = ({
                             className={styles.formContainer}
                             id="RateDetailsForm"
                             aria-label="Rate Details Form"
+                            aria-describedby="form-guidance"
                             onSubmit={(e) => {
                                 setShouldValidate(true)
                                 setFocusErrorSummaryHeading(true)
@@ -322,7 +323,9 @@ export const RateDetails = ({
                             <fieldset className="usa-fieldset">
                                 <legend className="srOnly">Rate Details</legend>
                                 {formAlert && formAlert}
-                                <span>All fields are required</span>
+                                <span id="form-guidance">
+                                    All fields are required
+                                </span>
 
                                 {shouldValidate && (
                                     <ErrorSummary
@@ -343,6 +346,7 @@ export const RateDetails = ({
                                         id="rateDocuments"
                                         name="rateDocuments"
                                         label="Upload rate certification"
+                                        aria-required
                                         error={documentsError}
                                         hint={
                                             <>
@@ -380,6 +384,7 @@ export const RateDetails = ({
                                     <Fieldset
                                         className={styles.radioGroup}
                                         legend="Rate certification type"
+                                        aria-required
                                     >
                                         {showFieldErrors(errors.rateType) && (
                                             <ErrorMessage>
@@ -392,7 +397,6 @@ export const RateDetails = ({
                                             label="New rate certification"
                                             value={'NEW'}
                                             checked={values.rateType === 'NEW'}
-                                            aria-required
                                         />
                                         <FieldRadio
                                             id="amendmentRate"
@@ -402,7 +406,6 @@ export const RateDetails = ({
                                             checked={
                                                 values.rateType === 'AMENDMENT'
                                             }
-                                            aria-required
                                         />
                                     </Fieldset>
                                 </FormGroup>
@@ -420,6 +423,7 @@ export const RateDetails = ({
                                             }
                                         >
                                             <Fieldset
+                                                aria-required
                                                 legend={
                                                     isRateTypeAmendment(values)
                                                         ? 'Rating period of original rate certification'
@@ -488,7 +492,10 @@ export const RateDetails = ({
                                         {isRateTypeAmendment(values) && (
                                             <>
                                                 <FormGroup>
-                                                    <Fieldset legend="Effective dates of rate amendment">
+                                                    <Fieldset
+                                                        aria-required
+                                                        legend="Effective dates of rate amendment"
+                                                    >
                                                         {showFieldErrors(
                                                             errors.effectiveDateStart ||
                                                                 errors.effectiveDateEnd
