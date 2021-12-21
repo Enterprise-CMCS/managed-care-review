@@ -39,11 +39,29 @@ export const RateDetailsSummarySection = ({
                                     ? 'Rating period of original rate certification'
                                     : 'Rating period'
                             }
-                            data={`${dayjs(submission.rateDateStart).format(
-                                'MM/DD/YYYY'
-                            )} to ${dayjs(submission.rateDateEnd).format(
-                                'MM/DD/YYYY'
-                            )}`}
+                            data={
+                                <>
+                                    <time
+                                        dateTime={dayjs(
+                                            submission.rateDateStart
+                                        ).format('YYYY-MM-DD')}
+                                    >
+                                        {dayjs(submission.rateDateStart).format(
+                                            'MM/DD/YYYY'
+                                        )}
+                                    </time>{' '}
+                                    to{' '}
+                                    <time
+                                        dateTime={dayjs(
+                                            submission.rateDateEnd
+                                        ).format('YYYY-MM-DD')}
+                                    >
+                                        {dayjs(submission.rateDateEnd).format(
+                                            'MM/DD/YYYY'
+                                        )}
+                                    </time>
+                                </>
+                            }
                         />
                     }
                 />
