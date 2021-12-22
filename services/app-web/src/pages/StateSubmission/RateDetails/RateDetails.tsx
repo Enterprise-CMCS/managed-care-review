@@ -457,6 +457,7 @@ export const RateDetails = ({
                                                         disabled: false,
                                                         id: 'rateDateStart',
                                                         name: 'rateDateStart',
+                                                        'aria-required': true,
                                                         defaultValue:
                                                             values.rateDateStart,
                                                         onChange: (val) =>
@@ -473,6 +474,7 @@ export const RateDetails = ({
                                                         disabled: false,
                                                         id: 'rateDateEnd',
                                                         name: 'rateDateEnd',
+                                                        'aria-required': true,
                                                         defaultValue:
                                                             values.rateDateEnd,
                                                         onChange: (val) =>
@@ -523,6 +525,8 @@ export const RateDetails = ({
                                                                 disabled: false,
                                                                 id: 'effectiveDateStart',
                                                                 name: 'effectiveDateStart',
+                                                                'aria-required':
+                                                                    true,
                                                                 defaultValue:
                                                                     values.effectiveDateStart,
                                                                 onChange: (
@@ -541,6 +545,8 @@ export const RateDetails = ({
                                                                 disabled: false,
                                                                 id: 'effectiveDateEnd',
                                                                 name: 'effectiveDateEnd',
+                                                                'aria-required':
+                                                                    true,
                                                                 defaultValue:
                                                                     values.effectiveDateEnd,
                                                                 onChange: (
