@@ -332,7 +332,7 @@ export const FileUpload = ({
                 accept={inputProps.accept}
                 ref={fileInputRef}
             />
-            <span id={`${id}-selected-announcement`} className="sr-only">
+            <span id={`${id}-selected-announcement`} className="srOnly">
                 {fileItems
                     ? `${fileItems.length} files selected`
                     : 'Select a file'}
