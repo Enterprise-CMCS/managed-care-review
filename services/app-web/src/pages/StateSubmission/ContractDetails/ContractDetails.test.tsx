@@ -494,7 +494,9 @@ describe('ContractDetails', () => {
                 name: 'Continue',
             })
 
-            userEvent.upload(input, [TEST_DOC_FILE, TEST_DOC_FILE])
+            userEvent.upload(input, [TEST_DOC_FILE])
+            userEvent.upload(input, []) // clear input and ensure we add same file twice
+            userEvent.upload(input, [TEST_DOC_FILE])
             expect(continueButton).not.toBeDisabled()
 
             continueButton.click()
@@ -536,10 +538,55 @@ describe('ContractDetails', () => {
             continueButton.click()
 
             expect(
-                await screen.findAllByText('You must upload at least one document')
-            ).toHaveLength(2);
+                await screen.findAllByText(
+                    'You must upload at least one document'
+                )
+            ).toHaveLength(2)
 
             expect(continueButton).toBeDisabled()
+        })
+        it('disabled with alert when trying to continue while a file is still uploading', async () => {
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={emptyContractDetailsDraft}
+                    updateDraft={jest.fn()}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+            const targetEl = screen.getByTestId('file-input-droptarget')
+
+            // upload one file
+            dragAndDrop(targetEl, [TEST_PDF_FILE])
+            const imageElFile1 = screen.getByTestId('file-input-preview-image')
+            expect(imageElFile1).toHaveClass('is-loading')
+            await waitFor(() =>
+                expect(imageElFile1).not.toHaveClass('is-loading')
+            )
+
+            // upload second file
+            dragAndDrop(targetEl, [TEST_DOC_FILE])
+
+            const imageElFile2 = screen.getAllByTestId(
+                'file-input-preview-image'
+            )[1]
+            expect(imageElFile2).toHaveClass('is-loading')
+
+            // click continue while file 2 still loading
+            continueButton.click()
+            expect(continueButton).toBeDisabled()
+
+            expect(
+                screen.getAllByText(
+                    'You must wait for all documents to finish uploading before continuing'
+                ).length
+            ).toBe(2)
         })
     })
 

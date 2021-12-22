@@ -1,5 +1,5 @@
 import { parseKey } from '../common-code/s3URLEncoding'
-import { Storage } from 'aws-amplify'
+import { Storage, API } from 'aws-amplify'
 import { v4 as uuidv4 } from 'uuid'
 
 import type { S3ClientT } from './s3Client'
@@ -122,6 +122,30 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
                     `Didn't get a string back from s3.get. We should have to use a different config for that.`
                 )
             }
+        },
+        getBulkDlURL: async (
+            keys: string[],
+            filename: string
+        ): Promise<string | Error> => {
+            const prependedKeys = keys.map((key) => `allusers/${key}`)
+            const prependedFilename = `allusers/${filename}`
+
+            const zipRequestParams = {
+                keys: prependedKeys,
+                bucket: bucketName,
+                zipFileName: prependedFilename,
+            }
+
+            try {
+                await API.post('api', '/zip', {
+                    response: true,
+                    body: zipRequestParams,
+                })
+            } catch (err) {
+                return new Error('Could not get a bulk DL URL: ' + err)
+            }
+
+            return await Storage.get(filename)
         },
     }
 }

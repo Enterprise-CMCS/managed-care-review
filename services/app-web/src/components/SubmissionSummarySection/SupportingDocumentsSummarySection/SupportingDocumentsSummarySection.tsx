@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import styles from '../SubmissionSummarySection.module.scss'
 import { Document } from '../../../gen/gqlClient'
 import { SectionHeader } from '../../SectionHeader'
+import { DownloadButton } from '../../DownloadButton'
 import { Link } from '@trussworks/react-uswds'
 import { useS3 } from '../../../contexts/S3Context'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
@@ -17,7 +18,7 @@ export const SupportingDocumentsSummarySection = ({
     submission,
     navigateTo,
 }: SupportingDocumentsSummarySectionProps): React.ReactElement => {
-    const { getURL, getKey } = useS3()
+    const { getURL, getKey, getBulkDlURL } = useS3()
     useEffect(() => {
         const refreshDocuments = async () => {
             const newDocuments = await Promise.all(
@@ -51,12 +52,50 @@ export const SupportingDocumentsSummarySection = ({
         refreshedDocs.length === 1 ? 'file' : 'files'
     }`
 
+    useEffect(() => {
+        // get all the keys for the documents we want to zip
+        async function fetchZipUrl() {
+            console.log(submission)
+            const keysFromDocs = submission.documents
+                .map((doc) => {
+                    const key = getKey(doc.s3URL)
+                    if (!key) return ''
+                    return key
+                })
+                .filter((key) => key !== '')
+
+            // call the lambda to zip the files and get the url
+            const zippedURL = await getBulkDlURL(
+                keysFromDocs,
+                submission.name + '-supporting-documents.zip'
+            )
+            if (zippedURL instanceof Error) {
+                console.log('ERROR: TODO: DISPLAY AN ERROR MESSAGE')
+                return
+            }
+
+            setZippedFilesURL(zippedURL)
+        }
+
+        void fetchZipUrl()
+    }, [getKey, getBulkDlURL, submission])
+
+    const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
+    const isSubmitted = submission.__typename === 'StateSubmission'
+
     return (
         <section id="documents" className={styles.summarySection}>
             <SectionHeader
                 header="Supporting documents"
                 navigateTo={navigateTo}
-            />
+            >
+                {isSubmitted && (
+                    <DownloadButton
+                        text="Download all supporting documents"
+                        zippedFilesURL={zippedFilesURL}
+                    />
+                )}
+            </SectionHeader>
             <span className="text-bold">{documentsSummary}</span>
             <ul>
                 {refreshedDocs.map((doc) => (

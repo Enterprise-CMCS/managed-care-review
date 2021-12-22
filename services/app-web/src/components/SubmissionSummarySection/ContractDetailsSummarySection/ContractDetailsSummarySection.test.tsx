@@ -10,7 +10,7 @@ describe('ContractDetailsSummarySection', () => {
     const draftSubmission = mockContractAndRatesDraft()
     const stateSubmission = mockStateSubmission()
 
-    it('can render draft submission without errors', () => {
+    it('can render draft submission without errors (review and submit behavior)', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
                 submission={draftSubmission}
@@ -27,9 +27,14 @@ describe('ContractDetailsSummarySection', () => {
         expect(
             screen.getByRole('link', { name: 'Edit Contract details' })
         ).toHaveAttribute('href', '/contract-details')
+        expect(
+            screen.queryByRole('button', {
+                name: 'Download all contract documents',
+            })
+        ).toBeNull()
     })
 
-    it('can render state submission without errors', () => {
+    it('can render state submission on summary page without errors (submission summary behavior)', () => {
         renderWithProviders(
             <ContractDetailsSummarySection submission={stateSubmission} />
         )
@@ -40,8 +45,12 @@ describe('ContractDetailsSummarySection', () => {
                 name: 'Contract details',
             })
         ).toBeInTheDocument()
-        // Is this the best way to check that the link is not present?
         expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+        expect(
+            screen.getByRole('button', {
+                name: 'Download all contract documents',
+            })
+        ).toBeInTheDocument()
     })
 
     it('can render all contract details fields', () => {

@@ -5,8 +5,6 @@ import {
     FormGroup,
     Fieldset,
     Button,
-    Link,
-    ButtonGroup,
 } from '@trussworks/react-uswds'
 import {
     Formik,
@@ -16,7 +14,7 @@ import {
     FieldArray,
     ErrorMessage,
 } from 'formik'
-import { NavLink, useHistory } from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 
 import styles from '../StateSubmissionForm.module.scss'
 
@@ -35,7 +33,7 @@ import {
 } from '../updateSubmissionTransform'
 
 import { useFocus } from '../../../hooks/useFocus'
-
+import { PageActions } from '../PageActions'
 export interface ContactsFormValues {
     stateContacts: stateContactValue[]
     actuaryContacts: actuaryContactValue[]
@@ -931,58 +929,36 @@ return (
                                 </FormGroup>
                             </fieldset>
                         )}
-                        <div className={styles.pageActions}>
-                            <Button
-                                type="button"
-                                unstyled
-                                onClick={() => {
+                        
+                            <PageActions
+                                saveAsDraftOnClick={() => {
                                     if (!dirty) {
                                         history.push(`/dashboard`)
                                     } else {
                                         setShouldValidate(true)
-                                        setFocusErrorSummaryHeading(true)
-
+                                           setFocusErrorSummaryHeading(true)
                                         redirectToDashboard.current = true
                                         handleSubmit()
                                     }
                                 }}
-                            >
-                                Save as draft
-                            </Button>
-                            <ButtonGroup
-                                type="default"
-                                className={styles.buttonGroup}
-                            >
-                                <Link
-                                    asCustom={NavLink}
-                                    className="usa-button usa-button--outline"
-                                    variant="unstyled"
-                                    to={
+                                backOnClick={() =>
+                                    history.push(
                                         draftSubmission.submissionType ===
-                                        'CONTRACT_ONLY'
+                                            'CONTRACT_ONLY'
                                             ? 'contract-details'
                                             : 'rate-details'
-                                    }
-                                >
-                                    Back
-                                </Link>
-                                <Button
-                                    type="submit"
-                                    disabled={isSubmitting}
-                                    onClick={() => {
-                                        redirectToDashboard.current = false
-                                        setShouldValidate(true)
-                                        setFocusErrorSummaryHeading(true)
-                                    }}
-                                >
-                                    Continue
-                                </Button>
-                            </ButtonGroup>
-                        </div>
-                    </UswdsForm>
-                </>
-            )}
-        </Formik>
-    </>
-)
+                                    )
+                                }
+                                continueOnClick={() => {
+                                    redirectToDashboard.current = false
+                                    setShouldValidate(true)
+                                    setFocusErrorSummaryHeading(true)
+                                }}
+                            />
+                        </UswdsForm>
+                    </>
+                )}
+            </Formik>
+        </>
+    )
 }

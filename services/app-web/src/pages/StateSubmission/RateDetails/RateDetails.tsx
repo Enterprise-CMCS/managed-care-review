@@ -4,11 +4,9 @@ import {
     Form as UswdsForm,
     FormGroup,
     Fieldset,
-    Button,
     Link,
     DateRangePicker,
     DatePicker,
-    ButtonGroup,
     Label,
 } from '@trussworks/react-uswds'
 import { Formik, FormikErrors } from 'formik'
@@ -38,6 +36,7 @@ import { isS3Error } from '../../../s3'
 import { RateDetailsFormSchema } from './RateDetailsSchema'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
 import { useS3 } from '../../../contexts/S3Context'
+import { PageActions } from '../PageActions'
 type FormError =
     FormikErrors<RateDetailsFormValues>[keyof FormikErrors<RateDetailsFormValues>]
 
@@ -82,12 +81,26 @@ export const RateDetails = ({
 
     // Rate documents state management
     const { deleteFile, getKey, getS3URL, scanFile, uploadFile } = useS3()
-    const [hasValidFiles, setHasValidFiles] = React.useState(false)
-    const [hasPendingFiles, setHasPendingFiles] = React.useState(false)
     const [fileItems, setFileItems] = React.useState<FileItemT[]>([])
-    const showDocumentErrors = shouldValidate && !hasValidFiles
-    const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
     const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] = React.useState(false)
+    const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
+
+    const hasValidFiles =
+        fileItems.length > 0 &&
+        fileItems.every((item) => item.status === 'UPLOAD_COMPLETE')
+    const hasLoadingFiles =
+        fileItems.some((item) => item.status === 'PENDING') ||
+        fileItems.some((item) => item.status === 'SCANNING')
+    const showFileUploadError = shouldValidate && !hasValidFiles
+
+    const documentsErrorMessage =
+        showFileUploadError && hasLoadingFiles
+            ? 'You must wait for all documents to finish uploading before continuing'
+            : showFileUploadError && fileItems.length === 0
+            ? ' You must upload at least one document'
+            : showFileUploadError && !hasValidFiles
+            ? ' You must remove all documents with error messages before continuing'
+            : undefined
 
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         (draftSubmission?.rateDocuments &&
@@ -114,21 +127,12 @@ export const RateDetails = ({
             })) ||
         undefined
 
-    React.useEffect(() => {
-        const somePending: boolean = fileItems.some(
-            (item) => item.status === 'PENDING'
-        )
-        setHasPendingFiles(somePending)
-
-        const hasValidDocumentsForSubmission: boolean =
-            fileItems.length > 0 &&
-            !somePending &&
-            fileItems.every((item) => item.status === 'UPLOAD_COMPLETE')
-        setHasValidFiles(hasValidDocumentsForSubmission)
-    }, [fileItems])
-
-    const onLoadComplete = async ({ files }: { files: FileItemT[] }) => {
-        setFileItems(files)
+    const onFileItemsUpdate = async ({
+        fileItems,
+    }: {
+        fileItems: FileItemT[]
+    }) => {
+        setFileItems(fileItems)
     }
     const handleDeleteFile = async (key: string) => {
         const result = await deleteFile(key)
@@ -167,7 +171,7 @@ export const RateDetails = ({
         if (focusErrorSummaryHeading && errorSummaryHeadingRef.current) {
             errorSummaryHeadingRef.current.focus()
         }
-        setFocusErrorSummaryHeading(false);
+        setFocusErrorSummaryHeading(false)
     }, [focusErrorSummaryHeading])
 
     // Rate details form setup
@@ -210,16 +214,18 @@ export const RateDetails = ({
         values: RateDetailsFormValues,
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
         options: {
-            shouldValidate: boolean
+            shouldValidateDocuments: boolean
             redirectPath: string
         }
     ) => {
-        // This is where documents validation happens (outside of the yup schema, which only handles the formik form data)
-        // if there are any errors present in the documents and we are in a validation state (relevant for Save as Draft and Continue buttons) we will never submit
-        // instead, force user to clear validations to continue
-        if (options.shouldValidate) {
-            setShouldValidate(true)
-            if (!hasValidFiles) return
+        // Currently documents validation happens (outside of the yup schema, which only handles the formik form data)
+        // if there are any errors present in the documents list and we are in a validation state (relevant for Save as Draft) force user to clear validations to continue
+        if (options.shouldValidateDocuments) {
+            if (!hasValidFiles) {
+                setShouldValidate(true)
+                setFocusErrorSummaryHeading(true)
+                return
+            }
         }
 
         const rateDocuments = fileItems.reduce(
@@ -280,21 +286,13 @@ export const RateDetails = ({
         }
     }
 
-    const documentsError = showDocumentErrors &&
-    fileItems.length === 0
-        ? ' You must upload at least one document'
-        : showDocumentErrors &&
-        !hasValidFiles
-        ? ' You must remove all documents with error messages before continuing'
-        : undefined;
-
     return (
         <>
             <Formik
                 initialValues={rateDetailsInitialValues}
                 onSubmit={(values, { setSubmitting }) => {
                     return handleFormSubmit(values, setSubmitting, {
-                        shouldValidate: true,
+                        shouldValidateDocuments: true,
                         redirectPath: 'contacts',
                     })
                 }}
@@ -327,27 +325,27 @@ export const RateDetails = ({
                                     All fields are required
                                 </span>
 
-                                {shouldValidate && (
-                                    <ErrorSummary
-                                        errors={
-                                            documentsError
-                                                ? {
-                                                      documents: documentsError,
-                                                      ...errors,
-                                                  }
-                                                : errors
-                                        }
-                                        headingRef={errorSummaryHeadingRef}
-                                    />
-                                )}
-
-                                <FormGroup error={showDocumentErrors}>
+                                <FormGroup error={showFileUploadError}>
+                                    {shouldValidate && (
+                                        <ErrorSummary
+                                            errors={
+                                                documentsErrorMessage
+                                                    ? {
+                                                          documents:
+                                                              documentsErrorMessage,
+                                                          ...errors,
+                                                      }
+                                                    : errors
+                                            }
+                                            headingRef={errorSummaryHeadingRef}
+                                        />
+                                    )}
                                     <FileUpload
                                         id="rateDocuments"
                                         name="rateDocuments"
                                         label="Upload rate certification"
                                         aria-required
-                                        error={documentsError}
+                                        error={documentsErrorMessage}
                                         hint={
                                             <>
                                                 <Link
@@ -375,7 +373,7 @@ export const RateDetails = ({
                                         uploadFile={handleUploadFile}
                                         scanFile={handleScanFile}
                                         deleteFile={handleDeleteFile}
-                                        onLoadComplete={onLoadComplete}
+                                        onFileItemsUpdate={onFileItemsUpdate}
                                     />
                                 </FormGroup>
                                 <FormGroup
@@ -605,73 +603,50 @@ export const RateDetails = ({
                                     </>
                                 )}
                             </fieldset>
-                            <div className={styles.pageActions}>
-                                <Button
-                                    type="button"
-                                    unstyled
-                                    onClick={async () => {
-                                        // do not need to trigger validations if file list is empty
-                                        if (fileItems.length === 0) {
-                                            await handleFormSubmit(
-                                                values,
-                                                setSubmitting,
-                                                {
-                                                    shouldValidate: false,
-                                                    redirectPath: '/dashboard',
-                                                }
-                                            )
-                                        } else {
-                                            await handleFormSubmit(
-                                                values,
-                                                setSubmitting,
-                                                {
-                                                    shouldValidate: true,
-                                                    redirectPath: '/dashboard',
-                                                }
-                                            )
-                                        }
-                                    }}
-                                >
-                                    Save as draft
-                                </Button>
-                                <ButtonGroup
-                                    type="default"
-                                    className={styles.buttonGroup}
-                                >
-                                    <Button
-                                        type="button"
-                                        className="usa-button usa-button--outline"
-                                        onClick={async () => {
-                                            // do not need to validate or submit if no documents are uploaded
-                                            if (fileItems.length === 0) {
-                                                history.push('contract-details')
-                                            } else {
-                                                await handleFormSubmit(
-                                                    values,
-                                                    setSubmitting,
-                                                    {
-                                                        shouldValidate: false,
-                                                        redirectPath:
-                                                            'contract-details',
-                                                    }
-                                                )
+                            <PageActions
+                                backOnClick={async () => {
+                                    // do not need to validate or submit if no documents are uploaded
+                                    if (fileItems.length === 0) {
+                                        history.push('contract-details')
+                                    } else {
+                                        await handleFormSubmit(
+                                            values,
+                                            setSubmitting,
+                                            {
+                                                shouldValidateDocuments: false,
+                                                redirectPath:
+                                                    'contract-details',
                                             }
-                                        }}
-                                    >
-                                        Back
-                                    </Button>
-                                    <Button
-                                        type="submit"
-                                        disabled={
-                                            isSubmitting ||
-                                            hasPendingFiles ||
-                                            (shouldValidate && !hasValidFiles)
-                                        }
-                                    >
-                                        Continue
-                                    </Button>
-                                </ButtonGroup>
-                            </div>
+                                        )
+                                    }
+                                }}
+                                saveAsDraftOnClick={async () => {
+                                    // do not need to trigger validations if file list is empty
+                                    if (fileItems.length === 0) {
+                                        await handleFormSubmit(
+                                            values,
+                                            setSubmitting,
+                                            {
+                                                shouldValidateDocuments: false,
+                                                redirectPath: '/dashboard',
+                                            }
+                                        )
+                                    } else {
+                                        setFocusErrorSummaryHeading(true)
+                                        await handleFormSubmit(
+                                            values,
+                                            setSubmitting,
+                                            {
+                                                shouldValidateDocuments: true,
+                                                redirectPath: '/dashboard',
+                                            }
+                                        )
+                                    }
+                                }}
+                                continueDisabled={Boolean(
+                                    isSubmitting || showFileUploadError
+                                )}
+                            />
                         </UswdsForm>
                     </>
                 )}

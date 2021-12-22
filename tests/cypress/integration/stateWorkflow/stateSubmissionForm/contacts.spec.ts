@@ -11,7 +11,7 @@ describe('contacts', () => {
             cy.visit(`/submissions/${draftSubmissionId}/contacts`)
 
             // Navigate to contract details page by clicking back for contract only submission
-            cy.findByRole('link', { name: /Back/ }).click()
+            cy.findByRole('button', { name: /Back/ }).click()
             cy.findByRole('heading', { level: 4, name: /Contract details/ })
 
             // Navigate to type page to switch to contract and rates submission
@@ -23,7 +23,7 @@ describe('contacts', () => {
             cy.visit(`/submissions/${draftSubmissionId}/contacts`)
 
             // Navigate to rate details page by clicking back for contract and rates submission
-            cy.findByRole('link', { name: /Back/ }).click()
+            cy.findByRole('button', { name: /Back/ }).click()
             cy.findByRole('heading', { level: 4, name: /Rate details/ })
 
             // Navigate to contacts page

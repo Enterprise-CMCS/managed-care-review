@@ -1,10 +1,13 @@
+import { useState, useEffect } from 'react'
 import dayjs from 'dayjs'
 import styles from '../SubmissionSummarySection.module.scss'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { DataDetail } from '../../../components/DataDetail'
 import { DoubleColumnRow } from '../../../components/DoubleColumnRow'
+import { DownloadButton } from '../../DownloadButton'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
+import { useS3 } from '../../../contexts/S3Context'
 
 export type RateDetailsSummarySectionProps = {
     submission: DraftSubmission | StateSubmission
@@ -15,10 +18,49 @@ export const RateDetailsSummarySection = ({
     submission,
     navigateTo,
 }: RateDetailsSummarySectionProps): React.ReactElement => {
+    const isSubmitted = submission.__typename === 'StateSubmission'
+    // Get the zip file for the rate details
+    const { getKey, getBulkDlURL } = useS3()
+    useEffect(() => {
+        // get all the keys for the documents we want to zip
+        async function fetchZipUrl() {
+            const keysFromDocs = submission.rateDocuments
+                .map((doc) => {
+                    const key = getKey(doc.s3URL)
+                    if (!key) return ''
+                    return key
+                })
+                .filter((key) => key !== '')
+
+            // call the lambda to zip the files and get the url
+            const zippedURL = await getBulkDlURL(
+                keysFromDocs,
+                submission.name + '-rate-details.zip'
+            )
+            if (zippedURL instanceof Error) {
+                console.log('ERROR: TODO: DISPLAY AN ERROR MESSAGE')
+                return
+            }
+
+            setZippedFilesURL(zippedURL)
+        }
+
+        void fetchZipUrl()
+    }, [getKey, getBulkDlURL, submission])
+    const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
+
     return (
         <section id="rateDetails" className={styles.summarySection}>
             <dl>
-                <SectionHeader header="Rate details" navigateTo={navigateTo} />
+                <SectionHeader header="Rate details" navigateTo={navigateTo}>
+                    {isSubmitted && (
+                        <DownloadButton
+                            text="Download all rate documents"
+                            zippedFilesURL={zippedFilesURL}
+                        />
+                    )}
+                </SectionHeader>
+
                 <DoubleColumnRow
                     left={
                         <DataDetail

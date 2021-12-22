@@ -11,7 +11,7 @@ describe('submission type', () => {
             cy.visit(`/submissions/${draftSubmissionId}/type`)
 
             // Navigate to dashboard page by clicking cancel
-            cy.findByRole('link', { name: /Cancel/ }).click()
+            cy.findByRole('button', { name: /Cancel/ }).click()
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // Navigate to type page

@@ -7,4 +7,5 @@ export type S3ClientT = {
     getKey: (S3URL: string) => string | null
     getURL: (key: string) => Promise<string>
     getS3URL: (key: string, filename: string) => Promise<string>
+    getBulkDlURL: (keys: string[], filename: string) => Promise<string | Error>
 }

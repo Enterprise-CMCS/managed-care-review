@@ -41,7 +41,7 @@ describe('FileUpload component', () => {
             await fakeApiRequest(true)
             return
         },
-        onLoadComplete: () => {
+        onFileItemsUpdate: () => {
             return
         },
     }
@@ -189,7 +189,7 @@ describe('FileUpload component', () => {
         })
     })
 
-    it('calls uploadFile, scanFile and onLoadComplete when file is successfully added', async () => {
+    it('calls uploadFile, scanFile and onFileItemsUpdate when file is successfully added', async () => {
         const props: FileUploadProps = {
             id: 'Default',
             name: 'Default Input',
@@ -199,7 +199,7 @@ describe('FileUpload component', () => {
                 .mockResolvedValue({ key: '12313', s3Url: 's3:/12313' }),
             deleteFile: jest.fn().mockResolvedValue(undefined),
             scanFile: jest.fn().mockResolvedValue(undefined),
-            onLoadComplete: jest.fn().mockResolvedValue(undefined),
+            onFileItemsUpdate: jest.fn().mockResolvedValue(undefined),
             accept: '.pdf,.txt',
         }
 
@@ -210,7 +210,7 @@ describe('FileUpload component', () => {
         await waitFor(() => {
             expect(props.uploadFile).toHaveBeenCalled()
             expect(props.scanFile).toHaveBeenCalled()
-            expect(props.onLoadComplete).toHaveBeenCalled()
+            expect(props.onFileItemsUpdate).toHaveBeenCalled()
             expect(props.deleteFile).not.toHaveBeenCalled()
         })
     })
@@ -225,7 +225,7 @@ describe('FileUpload component', () => {
                 .mockResolvedValue({ key: '12313', s3Url: 's3:/12313' }),
             deleteFile: jest.fn().mockResolvedValue(undefined),
             scanFile: jest.fn().mockRejectedValue(new Error('failed')),
-            onLoadComplete: jest.fn().mockResolvedValue(undefined),
+            onFileItemsUpdate: jest.fn().mockResolvedValue(undefined),
             accept: '.pdf,.txt',
         }
 
@@ -237,7 +237,7 @@ describe('FileUpload component', () => {
             expect(props.uploadFile).toHaveBeenCalled()
             expect(props.scanFile).toHaveBeenCalled()
             expect(props.deleteFile).toHaveBeenCalled()
-            expect(props.onLoadComplete).toHaveBeenCalled()
+            expect(props.onFileItemsUpdate).toHaveBeenCalled()
         })
     })
 
@@ -251,7 +251,7 @@ describe('FileUpload component', () => {
                 .mockResolvedValue({ key: '12313', s3Url: 's3:/12313' }),
             deleteFile: jest.fn().mockResolvedValue(undefined),
             scanFile: jest.fn().mockRejectedValue(new Error('failed')),
-            onLoadComplete: jest.fn().mockResolvedValue(undefined),
+            onFileItemsUpdate: jest.fn().mockResolvedValue(undefined),
             accept: '.pdf,.txt',
         }
 
@@ -261,7 +261,7 @@ describe('FileUpload component', () => {
         userEvent.upload(input, [TEST_PDF_FILE])
         await waitFor(() => {
             expect(props.uploadFile).toHaveBeenCalled()
-            expect(props.onLoadComplete).toHaveBeenCalled()
+            expect(props.onFileItemsUpdate).toHaveBeenCalled()
         })
 
         userClickByRole(screen, 'button', { name: 'Retry' })

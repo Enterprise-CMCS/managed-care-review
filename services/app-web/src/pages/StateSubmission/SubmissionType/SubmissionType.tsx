@@ -2,8 +2,6 @@ import React, { useEffect } from 'react'
 import * as Yup from 'yup'
 import {
     Alert,
-    Button,
-    ButtonGroup,
     ErrorMessage,
     Form as UswdsForm,
     Fieldset,
@@ -12,7 +10,7 @@ import {
     Label,
 } from '@trussworks/react-uswds'
 import { Formik, FormikHelpers, FormikErrors, Field } from 'formik'
-import { NavLink, useHistory, Link as ReactRouterLink } from 'react-router-dom'
+import { useHistory, Link as ReactRouterLink } from 'react-router-dom'
 import Select, { AriaOnFocus } from 'react-select'
 
 import {
@@ -33,6 +31,7 @@ import {
     cleanDraftSubmission,
     updatesFromSubmission,
 } from '../updateSubmissionTransform'
+import { PageActions } from '../PageActions'
 import { ErrorSummary } from '../../../components/Form/ErrorSummary/ErrorSummary'
 
 // Formik setup
@@ -383,31 +382,15 @@ export const SubmissionType = ({
                                 }
                             />
                         </fieldset>
-                        <ButtonGroup
-                            type="default"
-                            className={styles.buttonGroup}
-                        >
-                            <Link
-                                asCustom={NavLink}
-                                variant="unstyled"
-                                className="usa-button usa-button--outline"
-                                to={{
-                                    pathname: '/dashboard',
-                                }}
-                            >
-                                Cancel
-                            </Link>
-                            <Button
-                                type="submit"
-                                disabled={isSubmitting}
-                                onClick={() => {
-                                    setShouldValidate(true)
-                                    setFocusErrorSummaryHeading(true)
-                                }}
-                            >
-                                Continue
-                            </Button>
-                        </ButtonGroup>
+                        <PageActions
+                            pageVariant="FIRST"
+                            backOnClick={() => history.push('/dashboard')}
+                            continueOnClick={() =>{ 
+                                setShouldValidate(true)   
+                                setFocusErrorSummaryHeading(true)}}
+                            saveAsDraftOnClick={() => setShouldValidate(true)}
+                            continueDisabled={isSubmitting}
+                        />
                     </UswdsForm>
                 </>
             )}

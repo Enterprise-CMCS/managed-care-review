@@ -12,7 +12,7 @@ export function newLocalS3Client(
         s3ForcePathStyle: true,
         apiVersion: '2006-03-01',
         accessKeyId: 'S3RVER', // This specific key is required when working offline
-        secretAccessKey: 'S3RVER', // That's pre-set by serverless-s3-offline
+        secretAccessKey: 'S3RVER', // pragma: allowlist secret; pre-set by serverless-s3-offline
         params: { Bucket: bucketName },
         endpoint: new AWS.Endpoint(endpoint),
     })
@@ -67,7 +67,11 @@ export function newLocalS3Client(
             }
         },
         scanFile: async (s3Key: string): Promise<void | S3Error> => {
-            return
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve()
+                }, 1000)
+            })
         },
         getKey: (s3URL: string) => {
             const key = parseKey(s3URL)
@@ -80,6 +84,12 @@ export function newLocalS3Client(
         getURL: async (s3key: string): Promise<string> => {
             const params = { Key: s3key }
             return s3Client.getSignedUrl('getObject', params)
+        },
+        getBulkDlURL: async (
+            keys: string[],
+            filename: string
+        ): Promise<string | Error> => {
+            return s3Client.getSignedUrl('getObject', { Key: filename })
         },
     }
 }
