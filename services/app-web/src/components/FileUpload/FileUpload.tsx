@@ -315,8 +315,10 @@ export const FileUpload = ({
                 </span>
             )}
             {fileItems.length > 0 && (
-                <div role="alert" aria-live="assertive" className="sr-only">
-                    {`There are ${fileItems.length} selected.`}
+                <div role="alert" aria-live="assertive" className="srOnly">
+                    {`${fileItems.length} ${
+                        fileItems.length === 1 ? 'file' : 'files'
+                    } selected.`}
                 </div>
             )}
             <FileInput
