@@ -369,6 +369,7 @@ export const ContractDetails = ({
                         className={styles.formContainer}
                         id="ContractDetailsForm"
                         aria-label="Contract Details Form"
+                        aria-describedby='form-guidance'
                         onSubmit={(e) => {
                             setShouldValidate(true)
                             setFocusErrorSummaryHeading(true)
@@ -378,7 +379,7 @@ export const ContractDetails = ({
                         <fieldset className="usa-fieldset">
                             <legend className="srOnly">Contract Details</legend>
                             {formAlert && formAlert}
-                            <span>All fields are required</span>
+                            <span id="form-guidance">All fields are required</span>
 
                             {shouldValidate && (
                                 <ErrorSummary
@@ -400,6 +401,7 @@ export const ContractDetails = ({
                                     id="documents"
                                     name="documents"
                                     label="Upload contract"
+                                    aria-required
                                     error={documentsErrorMessage}
                                     hint={
                                         <>
@@ -414,6 +416,10 @@ export const ContractDetails = ({
                                                 Document definitions and
                                                 requirements
                                             </Link>
+                                            <span className="srOnly">
+                                                This input only accepts PDF,
+                                                CSV, DOC, DOCX, XLS, XLSX files.
+                                            </span>
                                         </>
                                     }
                                     accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -428,6 +434,7 @@ export const ContractDetails = ({
                                 error={showFieldErrors(errors.contractType)}
                             >
                                 <Fieldset
+                                    aria-required
                                     className={styles.radioGroup}
                                     legend="Contract action type"
                                 >
@@ -440,19 +447,19 @@ export const ContractDetails = ({
                                         id="baseContract"
                                         name="contractType"
                                         label="Base contract"
+                                        aria-required
                                         value={'BASE'}
                                         checked={values.contractType === 'BASE'}
-                                        aria-required
                                     />
                                     <FieldRadio
                                         id="amendmentContract"
                                         name="contractType"
                                         label="Amendment to base contract"
+                                        aria-required
                                         value={'AMENDMENT'}
                                         checked={
                                             values.contractType === 'AMENDMENT'
                                         }
-                                        aria-required
                                     />
                                 </Fieldset>
                             </FormGroup>
@@ -470,6 +477,7 @@ export const ContractDetails = ({
                                         }
                                     >
                                         <Fieldset
+                                            aria-required
                                             legend={
                                                 isContractAmendmentSelected(
                                                     values
@@ -498,9 +506,10 @@ export const ContractDetails = ({
                                                 startDateHint="mm/dd/yyyy"
                                                 startDateLabel="Start date"
                                                 startDatePickerProps={{
-                                                    disabled: false,
                                                     id: 'contractDateStart',
                                                     name: 'contractDateStart',
+                                                    'aria-required': true,
+                                                    disabled: false,
                                                     defaultValue:
                                                         values.contractDateStart,
                                                     maxDate:
@@ -521,6 +530,7 @@ export const ContractDetails = ({
                                                     disabled: false,
                                                     id: 'contractDateEnd',
                                                     name: 'contractDateEnd',
+                                                    'aria-required': true,
                                                     defaultValue:
                                                         values.contractDateEnd,
                                                     minDate:
@@ -543,7 +553,10 @@ export const ContractDetails = ({
                                             errors.managedCareEntities
                                         )}
                                     >
-                                        <Fieldset legend="Managed Care entities">
+                                        <Fieldset
+                                            aria-required
+                                            legend="Managed Care entities"
+                                        >
                                             <Link
                                                 variant="external"
                                                 href={
@@ -617,7 +630,10 @@ export const ContractDetails = ({
                                             errors.federalAuthorities
                                         )}
                                     >
-                                        <Fieldset legend="Federal authority your program operates under">
+                                        <Fieldset
+                                            aria-required
+                                            legend="Federal authority your program operates under"
+                                        >
                                             <Link
                                                 variant="external"
                                                 href={
@@ -715,7 +731,10 @@ export const ContractDetails = ({
                                                     errors.itemsAmended
                                                 )}
                                             >
-                                                <Fieldset legend="Items being amended">
+                                                <Fieldset
+                                                    aria-required
+                                                    legend="Items being amended"
+                                                >
                                                     <Link
                                                         variant="external"
                                                         asCustom={
@@ -779,7 +798,10 @@ export const ContractDetails = ({
                                                                         : styles.nestedOptions
                                                                 }
                                                             >
-                                                                <Fieldset legend="Select reason for capitation rate change">
+                                                                <Fieldset
+                                                                    aria-required
+                                                                    legend="Select reason for capitation rate change"
+                                                                >
                                                                     {showFieldErrors(
                                                                         errors.capitationRates
                                                                     ) && (
@@ -987,11 +1009,12 @@ export const ContractDetails = ({
                                                         >
                                                             <FieldTextInput
                                                                 id="other-items-amended"
+                                                                name="otherItemAmended"
                                                                 label="Other item description"
+                                                                aria-required
                                                                 showError={showFieldErrors(
                                                                     errors.otherItemAmended
                                                                 )}
-                                                                name="otherItemAmended"
                                                                 type="text"
                                                             />
                                                         </div>
@@ -1006,7 +1029,10 @@ export const ContractDetails = ({
                                                             errors.relatedToCovid19
                                                         )}
                                                     >
-                                                        <Fieldset legend="Is this contract action related to the COVID-19 public health emergency?">
+                                                        <Fieldset
+                                                            aria-required
+                                                            legend="Is this contract action related to the COVID-19 public health emergency?"
+                                                        >
                                                             {showFieldErrors(
                                                                 errors.relatedToCovid19
                                                             ) && (
@@ -1045,7 +1071,10 @@ export const ContractDetails = ({
                                                                 errors.relatedToVaccination
                                                             )}
                                                         >
-                                                            <Fieldset legend="Is this related to coverage and reimbursement for vaccine administration?">
+                                                            <Fieldset
+                                                                aria-required
+                                                                legend="Is this related to coverage and reimbursement for vaccine administration?"
+                                                            >
                                                                 {showFieldErrors(
                                                                     errors.relatedToVaccination
                                                                 ) && (

@@ -51,6 +51,22 @@ describe('RateDetails', () => {
         ).not.toBeDisabled()
     })
 
+
+    it('displays correct form guidance', async () => {
+        renderWithProviders(
+            <RateDetails
+                draftSubmission={emptyRateDetailsDraft}
+                updateDraft={jest.fn()}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+        expect(screen.getByText(/All fields are required/)).toBeInTheDocument()
+    })
+
     it('loads with empty rate type and document upload fields visible', async () => {
         const mockUpdateDraftFn = jest.fn()
 

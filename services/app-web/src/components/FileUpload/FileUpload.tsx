@@ -56,7 +56,7 @@ export const FileUpload = ({
 }: FileUploadProps): React.ReactElement => {
     const [fileItems, setFileItems] = useState<FileItemT[]>(initialItems || [])
     const fileInputRef = useRef<FileInputRef>(null) // reference to the HTML input which has files
-
+    const inputRequired = inputProps['aria-required'] || inputProps.required
     // update fileItems in parent
     React.useEffect(() => {
         onFileItemsUpdate({ fileItems })
@@ -316,7 +316,7 @@ export const FileUpload = ({
             )}
             <FileInput
                 id={id}
-                name={name}
+                name={`${name}${inputRequired ? ' (required)' : ''}`}
                 className={styles.fileInput}
                 aria-describedby={`${id}-error ${id}-hint`}
                 multiple
@@ -324,6 +324,7 @@ export const FileUpload = ({
                 onDrop={handleOnDrop}
                 accept={inputProps.accept}
                 ref={fileInputRef}
+                aria-required={inputRequired}
             />
             <FileItemsList
                 retryItem={retryFile}

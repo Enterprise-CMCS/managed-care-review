@@ -258,6 +258,10 @@ export const Documents = ({
                                         supporting documents
                                     </strong>
                                 </p>
+                                <span className="srOnly">
+                                    This input only accepts PDF, CSV, DOC, DOCX,
+                                    XLS, XLSX files.
+                                </span>
                             </>
                         }
                         error={documentsErrorMessage}

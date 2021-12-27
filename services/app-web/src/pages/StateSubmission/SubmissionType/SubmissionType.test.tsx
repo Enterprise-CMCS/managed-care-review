@@ -18,6 +18,16 @@ describe('SubmissionType', () => {
         submissionType: '',
     }
 
+    it('displays correct form guidance', async () => {
+        renderWithProviders(<SubmissionType />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
+
+        expect(screen.getByText(/All fields are required/)).toBeInTheDocument()
+    })
+
     it('displays submission type form when expected', async () => {
         renderWithProviders(<SubmissionType />, {
             apolloProvider: {
@@ -114,7 +124,7 @@ describe('SubmissionType', () => {
 
         await waitFor(() =>
             expect(
-                screen.getByRole('combobox', { name: 'programs' })
+                screen.getByRole('combobox', { name: 'programs (required)' })
             ).toBeInTheDocument()
         )
     })
