@@ -42,6 +42,7 @@ on:
 jobs:
   postgres:
     runs-on: ubuntu-latest
+    if: ${{ contains(inputs.changed_services, 'postgres') }}
     steps:
       - name: Check which services changed
         shell: bash
