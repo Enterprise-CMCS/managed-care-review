@@ -137,7 +137,7 @@ jobs:
           echo "::set-output name=stage-name-for-branch::$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})"
 
   deploy-branch:
-    needs: [build-prisma-client-lambda-layer, get-branch-name-vars, unit-tests]
+    needs: [get-branch-name-vars]
     uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@mt-skip-sls-deploy
     with:
       stage_name: ${{ needs.get-branch-name-vars.outputs.branch-name}}
