@@ -116,6 +116,12 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v2
 
+      - name: last commit
+        id: last-commit
+        shell: bash
+        run: |
+          echo "::set-output name=last-commit::$(git rev-parse --verify --short ${{ github.sha }}^)"
+
       - name: get changed services
         id: changed-services-array
         shell: bash
