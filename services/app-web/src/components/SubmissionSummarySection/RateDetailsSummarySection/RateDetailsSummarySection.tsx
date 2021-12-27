@@ -83,7 +83,7 @@ export const RateDetailsSummarySection = ({
                             }
                             data={`${dayjs(submission.rateDateStart).format(
                                 'MM/DD/YYYY'
-                            )} - ${dayjs(submission.rateDateEnd).format(
+                            )} to ${dayjs(submission.rateDateEnd).format(
                                 'MM/DD/YYYY'
                             )}`}
                         />
@@ -111,7 +111,7 @@ export const RateDetailsSummarySection = ({
                                 data={`${dayjs(
                                     submission.rateAmendmentInfo
                                         .effectiveDateStart
-                                ).format('MM/DD/YYYY')} - ${dayjs(
+                                ).format('MM/DD/YYYY')} to ${dayjs(
                                     submission.rateAmendmentInfo
                                         .effectiveDateEnd
                                 ).format('MM/DD/YYYY')}`}

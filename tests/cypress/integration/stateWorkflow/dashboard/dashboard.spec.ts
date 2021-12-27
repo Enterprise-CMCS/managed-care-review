@@ -50,6 +50,9 @@ describe('dashboard', () => {
         cy.location().then((loc) => {
             expect(loc.search).to.match(/.*justSubmitted=*/)
             const submissionName = loc.search.split('=').pop()
+            if (submissionName === undefined) {
+                throw new Error('No submission name found' + loc.search)
+            }
             cy.findByText(`${submissionName} was sent to CMS`).should('exist')
             cy.findByText(submissionName).should('exist').click()
             cy.url({ timeout: 10_000 }).should('contain', submissionId)
@@ -61,7 +64,7 @@ describe('dashboard', () => {
             cy.findByText('Last updated').should('exist')
             cy.findByText('Rate details').should('exist')
             cy.findByText('New rate certification').should('exist')
-            cy.findByText('02/29/2024 - 02/28/2025').should('exist')
+            cy.findByText('02/29/2024 to 02/28/2025').should('exist')
             cy.findByText('Download all contract documents').should('exist')
             // Link back to dashboard, submission visible in default program
             cy.findByText('Back to state dashboard').should('exist').click()

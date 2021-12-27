@@ -143,7 +143,7 @@ export const ContractDetailsSummarySection = ({
                             label="Contract effective dates"
                             data={`${dayjs(submission.contractDateStart).format(
                                 'MM/DD/YYYY'
-                            )} - ${dayjs(submission.contractDateEnd).format(
+                            )} to ${dayjs(submission.contractDateEnd).format(
                                 'MM/DD/YYYY'
                             )}`}
                         />
