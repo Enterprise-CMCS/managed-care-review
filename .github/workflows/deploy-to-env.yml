@@ -37,6 +37,17 @@ on:
         required: true
 
 jobs:
+  get-changed-services:
+    runs-on: ubuntu-latest
+    outputs:
+      changed-services: ${{ steps.changed-services-array.outputs.changed-services }}
+    steps:
+      - name: get changed services
+        id: changed-services-array
+        shell: bash
+        run: |
+          echo "::set-output name=changed-services::$(lerna ls --since "$GITHUB_SHA" -all --json | jq '[.[] | .name]')""
+
   postgres:
     runs-on: ubuntu-latest
     steps:
