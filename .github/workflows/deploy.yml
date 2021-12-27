@@ -124,6 +124,12 @@ jobs:
         run: |
           echo "::set-output name=changed-services::$(./scripts/changed_services.sh ${{ github.sha }})"
 
+      - name: test we have changed services output
+        id: test
+        shell: bash
+        run: |
+          echo "${{steps.changed-services-array.outputs.changed-services"
+
       - name: set branch_name
         id: branch-name
         shell: bash
