@@ -6,6 +6,9 @@ on:
       stage_name:
         required: true
         type: string
+      changed_services:
+        required: true
+        type: string
     secrets:
       aws_access_key_id:
         required: true
@@ -37,20 +40,12 @@ on:
         required: true
 
 jobs:
-  get-changed-services:
-    runs-on: ubuntu-latest
-    outputs:
-      changed-services: ${{ steps.changed-services-array.outputs.changed-services }}
-    steps:
-      - name: get changed services
-        id: changed-services-array
-        shell: bash
-        run: |
-          echo "::set-output name=changed-services::$(lerna ls --since "$GITHUB_SHA^1" -all --json | jq '[.[] | .name]')""
-
   postgres:
     runs-on: ubuntu-latest
     steps:
+      - name: Check which services changed
+        run: echo ${{fromJSON(inputs.changed_services)}}
+
       - name: Check out repository
         uses: actions/checkout@v2
 
