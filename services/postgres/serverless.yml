@@ -1,8 +1,6 @@
 service: postgres
 variablesResolutionMode: 20210326
 
-# always changing
-
 frameworkVersion: '2'
 
 plugins:
