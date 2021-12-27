@@ -30,14 +30,7 @@ jobs:
 
     outputs:
       deploy-id: ${{ steps.ghdeployment.outputs.deployment_id }}
-      changed-services: ${{ steps.changed-services-array.outputs.changed-services }}
     steps:
-      - name: get changed services
-        id: changed-services-array
-        shell: bash
-        run: |
-          echo "::set-output name=changed-services::$(lerna ls --since "$GITHUB_SHA^1" -all --json | jq '[.[] | .name]')"
-
       - name: Check out repository
         uses: actions/checkout@v2
 
@@ -118,9 +111,16 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       branch-name: ${{ steps.branch-name.outputs.stage-name-for-branch}}
+      changed-services: ${{ steps.changed-services-array.outputs.changed-services }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
+
+      - name: get changed services
+        id: changed-services-array
+        shell: bash
+        run: |
+          echo "::set-output name=changed-services::$(lerna ls --since "$GITHUB_SHA^1" -all --json | jq '[.[] | .name]')"
 
       - name: set branch_name
         id: branch-name
