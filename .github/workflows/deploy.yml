@@ -120,7 +120,7 @@ jobs:
         id: changed-services-array
         shell: bash
         run: |
-          echo "::set-output name=changed-services::$(./scripts/changed_services.sh ${GITHUB_SHA})"
+          echo "::set-output name=changed-services::$(./scripts/changed_services.sh $GITHUB_SHA)"
 
       - name: set branch_name
         id: branch-name
