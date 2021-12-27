@@ -5,6 +5,8 @@ frameworkVersion: '2'
 package:
   individually: true
 
+# testing diffs
+
 plugins:
   - serverless-webpack
   - serverless-offline
