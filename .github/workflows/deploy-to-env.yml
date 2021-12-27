@@ -46,7 +46,7 @@ jobs:
       - name: Check which services changed
         shell: bash
         run: |
-          echo ${{contains(fromJSON(inputs.changed_services), 'postgres')}}
+          echo ${{contains(inputs.changed_services, 'postgres')}}
 
       - name: Check out repository
         uses: actions/checkout@v2
