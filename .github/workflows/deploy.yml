@@ -120,7 +120,7 @@ jobs:
         id: last-commit
         shell: bash
         run: |
-          echo "::set-output name=last-commit::$(git rev-parse --verify --short ${{ github.sha }}^)"
+          echo "::set-output name=last-commit::$(git rev-parse --verify --short ${{ github.sha }})"
 
       - name: get changed services
         id: changed-services-array
