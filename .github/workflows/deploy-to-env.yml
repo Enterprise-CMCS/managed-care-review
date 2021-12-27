@@ -46,7 +46,7 @@ jobs:
         id: changed-services-array
         shell: bash
         run: |
-          echo "::set-output name=changed-services::$(lerna ls --since "$GITHUB_SHA" -all --json | jq '[.[] | .name]')""
+          echo "::set-output name=changed-services::$(lerna ls --since "$GITHUB_SHA^1" -all --json | jq '[.[] | .name]')""
 
   postgres:
     runs-on: ubuntu-latest
