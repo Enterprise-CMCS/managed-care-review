@@ -128,7 +128,7 @@ jobs:
         id: test
         shell: bash
         run: |
-          echo "${{steps.changed-services-array.outputs.changed-services"
+          echo "${{steps.changed-services-array.outputs.changed-services}}"
 
       - name: set branch_name
         id: branch-name
