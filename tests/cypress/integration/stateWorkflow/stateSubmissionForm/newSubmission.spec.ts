@@ -6,7 +6,7 @@ describe('new submission', () => {
         cy.visit(`/submissions/new`)
 
         // Navigate to dashboard page by clicking cancel
-        cy.findByRole('link', { name: /Cancel/ }).click()
+        cy.findByRole('button', { name: /Cancel/ }).click()
         cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
         // Navigate to new page

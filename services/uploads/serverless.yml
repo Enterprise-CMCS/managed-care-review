@@ -36,7 +36,7 @@ provider:
             - s3:ListBucket
           Resource:
             - !Sub arn:aws:s3:::${self:service.name}-${self:custom.stage}-uploads-${AWS::AccountId}
-            - !Sub arn:aws:s3:::${self:service.name}-${self:custom.stage}-avscan-${AWS::AccountId}/*
+            - !Sub arn:aws:s3:::${self:service.name}-${self:custom.stage}-avscan-${AWS::AccountId}
 
 custom:
   stage: ${opt:stage, self:provider.stage}
@@ -140,6 +140,8 @@ resources:
                 StringNotEquals:
                   s3:ExistingObjectTag/virusScanStatus:
                     - 'CLEAN'
+                  s3:ExistingObjectTag/contentsPreviouslyScanned:
+                    - 'TRUE'
                   aws:PrincipalArn: !GetAtt IamRoleLambdaExecution.Arn
             - Action: 's3:PutObject'
               Effect: Deny
@@ -152,6 +154,7 @@ resources:
                 - !Sub ${DocumentUploadsBucket.Arn}/*.txt
                 - !Sub ${DocumentUploadsBucket.Arn}/*.xls
                 - !Sub ${DocumentUploadsBucket.Arn}/*.xlsx
+                - !Sub ${DocumentUploadsBucket.Arn}/*.zip
     LambdaInvokePermission:
       Type: AWS::Lambda::Permission
       Properties:

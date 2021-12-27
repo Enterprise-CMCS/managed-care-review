@@ -20,6 +20,20 @@ describe('ReviewSubmit', () => {
                 },
             }
         )
+        expect(
+            screen.getByRole('heading', { name: 'Contract details' })
+        ).toBeInTheDocument()
+    })
+
+    it('displays edit buttons for every section', async () => {
+        renderWithProviders(
+            <ReviewSubmit draftSubmission={mockCompleteDraft()} />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
 
         await waitFor(() => {
             const sectionHeadings = screen.queryAllByRole('heading', {
@@ -31,6 +45,24 @@ describe('ReviewSubmit', () => {
             expect(sectionHeadings.length).toBeGreaterThanOrEqual(
                 editButtons.length
             )
+        })
+    })
+
+    it('does not display zip download buttons', async () => {
+        renderWithProviders(
+            <ReviewSubmit draftSubmission={mockCompleteDraft()} />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        await waitFor(() => {
+            const bulkDownloadButtons = screen.queryAllByRole('button', {
+                name: /documents/,
+            })
+            expect(bulkDownloadButtons.length).toBe(0)
         })
     })
 
@@ -49,6 +81,9 @@ describe('ReviewSubmit', () => {
                 screen.getByRole('heading', { name: 'Contract details' })
             ).toBeInTheDocument()
 
+            expect(
+                screen.getByRole('heading', { name: 'State contacts' })
+            ).toBeInTheDocument()
             expect(
                 screen.getByRole('heading', { name: 'Supporting documents' })
             ).toBeInTheDocument()
@@ -69,7 +104,7 @@ describe('ReviewSubmit', () => {
         })
     })
 
-    it('displays back link', async () => {
+    it('displays back and save as draft buttons', async () => {
         renderWithProviders(
             <ReviewSubmit draftSubmission={mockCompleteDraft()} />,
             {
@@ -81,8 +116,15 @@ describe('ReviewSubmit', () => {
 
         await waitFor(() =>
             expect(
-                screen.getByRole('link', {
+                screen.getByRole('button', {
                     name: 'Back',
+                })
+            ).toBeDefined()
+        )
+        await waitFor(() =>
+            expect(
+                screen.getByRole('button', {
+                    name: 'Save as draft',
                 })
             ).toBeDefined()
         )

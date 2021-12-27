@@ -4,10 +4,8 @@ import {
     Form as UswdsForm,
     FormGroup,
     Fieldset,
-    Button,
     Link,
     DateRangePicker,
-    ButtonGroup,
     ErrorMessage,
 } from '@trussworks/react-uswds'
 import { v4 as uuidv4 } from 'uuid'
@@ -53,6 +51,7 @@ import {
     ManagedCareEntityRecord,
     FederalAuthorityRecord,
 } from '../../../constants/submissions'
+import { PageActions } from '../PageActions'
 
 function formattedDatePlusOneDay(initialValue: string): string {
     const dayjsValue = dayjs(initialValue)
@@ -115,13 +114,36 @@ export const ContractDetails = ({
     const history = useHistory()
 
     // Contract documents state management
-    const [hasValidFiles, setHasValidFiles] = React.useState(false)
-    const [hasPendingFiles, setHasPendingFiles] = React.useState(false)
     const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
-    const showDocumentErrors = shouldValidate && !hasValidFiles
+    const hasValidFiles =
+        fileItems.length > 0 &&
+        fileItems.every((item) => item.status === 'UPLOAD_COMPLETE')
+    const hasLoadingFiles =
+        fileItems.some((item) => item.status === 'PENDING') ||
+        fileItems.some((item) => item.status === 'SCANNING')
+    const showFileUploadError = shouldValidate && !hasValidFiles
+    const documentsErrorMessage =
+        showFileUploadError && hasLoadingFiles
+            ? 'You must wait for all documents to finish uploading before continuing'
+            : showFileUploadError && fileItems.length === 0
+            ? ' You must upload at least one document'
+            : showFileUploadError && !hasValidFiles
+            ? ' You must remove all documents with error messages before continuing'
+            : undefined
+    // Error summary state management
     const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
-    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] = React.useState(false)
+    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
+        React.useState(false)
+
+    useEffect(() => {
+        // Focus the error summary heading only if we are displaying
+        // validation errors and the heading element exists
+        if (focusErrorSummaryHeading && errorSummaryHeadingRef.current) {
+            errorSummaryHeadingRef.current.focus()
+        }
+        setFocusErrorSummaryHeading(false)
+    }, [focusErrorSummaryHeading])
 
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         draftSubmission &&
@@ -145,21 +167,12 @@ export const ContractDetails = ({
             }
         })
 
-    React.useEffect(() => {
-        const somePending: boolean = fileItems.some(
-            (item) => item.status === 'PENDING'
-        )
-        setHasPendingFiles(somePending)
-
-        const hasValidDocumentsForSubmission: boolean =
-            fileItems.length > 0 &&
-            !somePending &&
-            fileItems.every((item) => item.status === 'UPLOAD_COMPLETE')
-        setHasValidFiles(hasValidDocumentsForSubmission)
-    }, [fileItems])
-
-    const onLoadComplete = async ({ files }: { files: FileItemT[] }) => {
-        setFileItems(files)
+    const onFileItemsUpdate = async ({
+        fileItems,
+    }: {
+        fileItems: FileItemT[]
+    }) => {
+        setFileItems(fileItems)
     }
     const handleDeleteFile = async (key: string) => {
         const result = await deleteFile(key)
@@ -237,16 +250,18 @@ export const ContractDetails = ({
         values: ContractDetailsFormValues,
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
         options: {
-            shouldValidate: boolean
+            shouldValidateDocuments: boolean
             redirectPath: string
         }
     ) => {
-        // This is where documents validation happens (outside of the yup schema, which only handles the formik form data)
-        // if there are any errors present in the documents and we are in a validation state (relevant for Save as Draft and Continue buttons) we will never submit
-        // instead, force user to clear validations to continue
-        if (options.shouldValidate) {
-            setShouldValidate(true)
-            if (!hasValidFiles) return
+        // Currently documents validation happens (outside of the yup schema, which only handles the formik form data)
+        // if there are any errors present in the documents list and we are in a validation state (relevant for Save as Draft) force user to clear validations to continue
+        if (options.shouldValidateDocuments) {
+            if (!hasValidFiles) {
+                setShouldValidate(true)
+                setFocusErrorSummaryHeading(true)
+                return
+            }
         }
 
         const contractDocuments = fileItems.reduce(
@@ -327,29 +342,12 @@ export const ContractDetails = ({
         }
     }
 
-    useEffect(() => {
-        // Focus the error summary heading only if we are displaying
-        // validation errors and the heading element exists
-        if (focusErrorSummaryHeading && errorSummaryHeadingRef.current) {
-            errorSummaryHeadingRef.current.focus()
-        }
-        setFocusErrorSummaryHeading(false);
-    }, [focusErrorSummaryHeading])
-
-    const documentsError = showDocumentErrors &&
-        fileItems.length === 0
-            ? ' You must upload at least one document'
-            : showDocumentErrors &&
-            !hasValidFiles
-            ? ' You must remove all documents with error messages before continuing'
-            : undefined;
-
     return (
         <Formik
             initialValues={contractDetailsInitialValues}
             onSubmit={(values, { setSubmitting }) => {
                 return handleFormSubmit(values, setSubmitting, {
-                    shouldValidate: true,
+                    shouldValidateDocuments: true,
                     redirectPath:
                         draftSubmission.submissionType === 'CONTRACT_ONLY'
                             ? 'contacts'
@@ -371,6 +369,7 @@ export const ContractDetails = ({
                         className={styles.formContainer}
                         id="ContractDetailsForm"
                         aria-label="Contract Details Form"
+                        aria-describedby='form-guidance'
                         onSubmit={(e) => {
                             setShouldValidate(true)
                             setFocusErrorSummaryHeading(true)
@@ -380,19 +379,30 @@ export const ContractDetails = ({
                         <fieldset className="usa-fieldset">
                             <legend className="srOnly">Contract Details</legend>
                             {formAlert && formAlert}
-                            <span>All fields are required</span>
+                            <span id="form-guidance">All fields are required</span>
 
-                            { shouldValidate && <ErrorSummary
-                                errors={documentsError ? {documents: documentsError, ...errors} : errors}
-                                headingRef={errorSummaryHeadingRef}
-                            /> }
+                            {shouldValidate && (
+                                <ErrorSummary
+                                    errors={
+                                        documentsErrorMessage
+                                            ? {
+                                                  documents:
+                                                      documentsErrorMessage,
+                                                  ...errors,
+                                              }
+                                            : errors
+                                    }
+                                    headingRef={errorSummaryHeadingRef}
+                                />
+                            )}
 
-                            <FormGroup error={showDocumentErrors}>
+                            <FormGroup error={showFileUploadError}>
                                 <FileUpload
                                     id="documents"
                                     name="documents"
                                     label="Upload contract"
-                                    error={documentsError}
+                                    aria-required
+                                    error={documentsErrorMessage}
                                     hint={
                                         <>
                                             <Link
@@ -406,6 +416,10 @@ export const ContractDetails = ({
                                                 Document definitions and
                                                 requirements
                                             </Link>
+                                            <span className="srOnly">
+                                                This input only accepts PDF,
+                                                CSV, DOC, DOCX, XLS, XLSX files.
+                                            </span>
                                         </>
                                     }
                                     accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -413,13 +427,14 @@ export const ContractDetails = ({
                                     uploadFile={handleUploadFile}
                                     scanFile={handleScanFile}
                                     deleteFile={handleDeleteFile}
-                                    onLoadComplete={onLoadComplete}
+                                    onFileItemsUpdate={onFileItemsUpdate}
                                 />
                             </FormGroup>
                             <FormGroup
                                 error={showFieldErrors(errors.contractType)}
                             >
                                 <Fieldset
+                                    aria-required
                                     className={styles.radioGroup}
                                     legend="Contract action type"
                                 >
@@ -432,19 +447,19 @@ export const ContractDetails = ({
                                         id="baseContract"
                                         name="contractType"
                                         label="Base contract"
+                                        aria-required
                                         value={'BASE'}
                                         checked={values.contractType === 'BASE'}
-                                        aria-required
                                     />
                                     <FieldRadio
                                         id="amendmentContract"
                                         name="contractType"
                                         label="Amendment to base contract"
+                                        aria-required
                                         value={'AMENDMENT'}
                                         checked={
                                             values.contractType === 'AMENDMENT'
                                         }
-                                        aria-required
                                     />
                                 </Fieldset>
                             </FormGroup>
@@ -462,6 +477,7 @@ export const ContractDetails = ({
                                         }
                                     >
                                         <Fieldset
+                                            aria-required
                                             legend={
                                                 isContractAmendmentSelected(
                                                     values
@@ -490,9 +506,10 @@ export const ContractDetails = ({
                                                 startDateHint="mm/dd/yyyy"
                                                 startDateLabel="Start date"
                                                 startDatePickerProps={{
-                                                    disabled: false,
                                                     id: 'contractDateStart',
                                                     name: 'contractDateStart',
+                                                    'aria-required': true,
+                                                    disabled: false,
                                                     defaultValue:
                                                         values.contractDateStart,
                                                     maxDate:
@@ -513,6 +530,7 @@ export const ContractDetails = ({
                                                     disabled: false,
                                                     id: 'contractDateEnd',
                                                     name: 'contractDateEnd',
+                                                    'aria-required': true,
                                                     defaultValue:
                                                         values.contractDateEnd,
                                                     minDate:
@@ -535,7 +553,10 @@ export const ContractDetails = ({
                                             errors.managedCareEntities
                                         )}
                                     >
-                                        <Fieldset legend="Managed Care entities">
+                                        <Fieldset
+                                            aria-required
+                                            legend="Managed Care entities"
+                                        >
                                             <Link
                                                 variant="external"
                                                 href={
@@ -609,7 +630,10 @@ export const ContractDetails = ({
                                             errors.federalAuthorities
                                         )}
                                     >
-                                        <Fieldset legend="Federal authority your program operates under">
+                                        <Fieldset
+                                            aria-required
+                                            legend="Federal authority your program operates under"
+                                        >
                                             <Link
                                                 variant="external"
                                                 href={
@@ -707,7 +731,10 @@ export const ContractDetails = ({
                                                     errors.itemsAmended
                                                 )}
                                             >
-                                                <Fieldset legend="Items being amended">
+                                                <Fieldset
+                                                    aria-required
+                                                    legend="Items being amended"
+                                                >
                                                     <Link
                                                         variant="external"
                                                         asCustom={
@@ -771,7 +798,10 @@ export const ContractDetails = ({
                                                                         : styles.nestedOptions
                                                                 }
                                                             >
-                                                                <Fieldset legend="Select reason for capitation rate change">
+                                                                <Fieldset
+                                                                    aria-required
+                                                                    legend="Select reason for capitation rate change"
+                                                                >
                                                                     {showFieldErrors(
                                                                         errors.capitationRates
                                                                     ) && (
@@ -979,11 +1009,12 @@ export const ContractDetails = ({
                                                         >
                                                             <FieldTextInput
                                                                 id="other-items-amended"
+                                                                name="otherItemAmended"
                                                                 label="Other item description"
+                                                                aria-required
                                                                 showError={showFieldErrors(
                                                                     errors.otherItemAmended
                                                                 )}
-                                                                name="otherItemAmended"
                                                                 type="text"
                                                             />
                                                         </div>
@@ -998,7 +1029,10 @@ export const ContractDetails = ({
                                                             errors.relatedToCovid19
                                                         )}
                                                     >
-                                                        <Fieldset legend="Is this contract action related to the COVID-19 public health emergency?">
+                                                        <Fieldset
+                                                            aria-required
+                                                            legend="Is this contract action related to the COVID-19 public health emergency?"
+                                                        >
                                                             {showFieldErrors(
                                                                 errors.relatedToCovid19
                                                             ) && (
@@ -1037,7 +1071,10 @@ export const ContractDetails = ({
                                                                 errors.relatedToVaccination
                                                             )}
                                                         >
-                                                            <Fieldset legend="Is this related to coverage and reimbursement for vaccine administration?">
+                                                            <Fieldset
+                                                                aria-required
+                                                                legend="Is this related to coverage and reimbursement for vaccine administration?"
+                                                            >
                                                                 {showFieldErrors(
                                                                     errors.relatedToVaccination
                                                                 ) && (
@@ -1078,72 +1115,48 @@ export const ContractDetails = ({
                             )}
                         </fieldset>
 
-                        <div className={styles.pageActions}>
-                            <Button
-                                type="button"
-                                unstyled
-                                onClick={async () => {
-                                    // do not need to trigger validations if file list is empty
-                                    if (fileItems.length === 0) {
-                                        await handleFormSubmit(
-                                            values,
-                                            setSubmitting,
-                                            {
-                                                shouldValidate: false,
-                                                redirectPath: '/dashboard',
-                                            }
-                                        )
-                                    } else {
-                                        await handleFormSubmit(
-                                            values,
-                                            setSubmitting,
-                                            {
-                                                shouldValidate: true,
-                                                redirectPath: '/dashboard',
-                                            }
-                                        )
-                                    }
-                                }}
-                            >
-                                Save as draft
-                            </Button>
-                            <ButtonGroup
-                                type="default"
-                                className={styles.buttonGroup}
-                            >
-                                <Button
-                                    type="button"
-                                    className="usa-button usa-button--outline"
-                                    onClick={async () => {
-                                        // do not need to validate or resubmit if no documents are uploaded
-                                        if (fileItems.length === 0) {
-                                            history.push('type')
-                                        } else {
-                                            await handleFormSubmit(
-                                                values,
-                                                setSubmitting,
-                                                {
-                                                    shouldValidate: false,
-                                                    redirectPath: 'type',
-                                                }
-                                            )
+                        <PageActions
+                            saveAsDraftOnClick={async () => {
+                                // do not need to trigger validations if file list is empty
+                                if (fileItems.length === 0) {
+                                    await handleFormSubmit(
+                                        values,
+                                        setSubmitting,
+                                        {
+                                            shouldValidateDocuments: false,
+                                            redirectPath: '/dashboard',
                                         }
-                                    }}
-                                >
-                                    Back
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    disabled={
-                                        isSubmitting ||
-                                        hasPendingFiles ||
-                                        (shouldValidate && !hasValidFiles)
-                                    }
-                                >
-                                    Continue
-                                </Button>
-                            </ButtonGroup>
-                        </div>
+                                    )
+                                } else {
+                                    await handleFormSubmit(
+                                        values,
+                                        setSubmitting,
+                                        {
+                                            shouldValidateDocuments: true,
+                                            redirectPath: '/dashboard',
+                                        }
+                                    )
+                                }
+                            }}
+                            backOnClick={async () => {
+                                // do not need to validate or resubmit if no documents are uploaded
+                                if (fileItems.length === 0) {
+                                    history.push('type')
+                                } else {
+                                    await handleFormSubmit(
+                                        values,
+                                        setSubmitting,
+                                        {
+                                            shouldValidateDocuments: false,
+                                            redirectPath: 'type',
+                                        }
+                                    )
+                                }
+                            }}
+                            continueDisabled={
+                                isSubmitting || showFileUploadError
+                            }
+                        />
                     </UswdsForm>
                 </>
             )}

@@ -244,6 +244,20 @@ Currently, `ctkey-wrapper` requires the user to be running the openconnect-tinyp
 container [here](https://github.com/trussworks/openconnect-tinyproxy) to connect
 to Cloudtamer.
 
+### Verify serverless setup
+
+To verify serverless (and AWS access) is set up properly with ctkey, run:
+
+ ```shell
+which serverless # should return something like /managed-care-review/scripts/serverless`
+which sls # should return something like /managed-care-review/scripts/sls`
+```
+
+These should both point to paths inside the codebase (not to paths in /usr/local/bin).
+
+
+Then verify things are working by running any serverless command , e.g. `cd services/app-api && serverless info --stage main`. This command should print information and not return any Serverless Error around "AWS Credentials".
+
 ## Contributing
 
 We welcome contributions to this project. MC Review is an internal CMS tool for facilitating the review of state Medicaid contracts. It is developed by a federal contracting team under contract with CMS and is deployed internally for that purpose. MC Review is built using agile development processes and accepts both issues and feature requests via GitHub issues on this repository. If you’d like to contribute back any changes to this code base, please create a Pull Request and a team member will review your work. While this repository is dedicated primarily to delivering MC Review to the government, if you find any parts of it useful or find any errors in the code we would love your contributions and feedback. All contributors are required to follow our [Code of Conduct](./CODE_OF_CONDUCT.md)

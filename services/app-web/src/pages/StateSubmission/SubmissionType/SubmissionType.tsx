@@ -2,8 +2,6 @@ import React, { useEffect } from 'react'
 import * as Yup from 'yup'
 import {
     Alert,
-    Button,
-    ButtonGroup,
     ErrorMessage,
     Form as UswdsForm,
     Fieldset,
@@ -12,7 +10,7 @@ import {
     Label,
 } from '@trussworks/react-uswds'
 import { Formik, FormikHelpers, FormikErrors, Field } from 'formik'
-import { NavLink, useHistory, Link as ReactRouterLink } from 'react-router-dom'
+import { useHistory, Link as ReactRouterLink } from 'react-router-dom'
 import Select, { AriaOnFocus } from 'react-select'
 
 import {
@@ -33,6 +31,7 @@ import {
     cleanDraftSubmission,
     updatesFromSubmission,
 } from '../updateSubmissionTransform'
+import { PageActions } from '../PageActions'
 import { ErrorSummary } from '../../../components/Form/ErrorSummary/ErrorSummary'
 
 // Formik setup
@@ -252,6 +251,7 @@ export const SubmissionType = ({
                                 ? 'New Submission Form'
                                 : 'Submission Type Form'
                         }
+                        aria-describedby="form-guidance"
                         onSubmit={handleSubmit}
                     >
                         <fieldset className="usa-fieldset">
@@ -262,9 +262,16 @@ export const SubmissionType = ({
                                         Something went wrong
                                     </Alert>
                                 ))}
-                            <span>All fields are required</span>
+                            <span id="form-guidance">
+                                All fields are required
+                            </span>
 
-                            { shouldValidate && <ErrorSummary errors={errors} headingRef={errorSummaryHeadingRef} /> }
+                            {shouldValidate && (
+                                <ErrorSummary
+                                    errors={errors}
+                                    headingRef={errorSummaryHeadingRef}
+                                />
+                            )}
 
                             <FormGroup
                                 error={showFieldErrors(errors.programIDs)}
@@ -292,7 +299,7 @@ export const SubmissionType = ({
                                             classNamePrefix="program-select"
                                             id="programIDs"
                                             name="programIDs"
-                                            aria-label="programs"
+                                            aria-label="programs (required)"
                                             options={programOptions}
                                             isMulti
                                             ariaLiveMessages={{
@@ -315,6 +322,7 @@ export const SubmissionType = ({
                             >
                                 <Fieldset
                                     className={styles.radioGroup}
+                                    aria-required
                                     legend="Choose submission type"
                                 >
                                     {showFieldErrors(errors.submissionType) && (
@@ -323,7 +331,6 @@ export const SubmissionType = ({
                                         </ErrorMessage>
                                     )}
                                     <FieldRadio
-                                        aria-required
                                         checked={
                                             values.submissionType ===
                                             'CONTRACT_ONLY'
@@ -338,7 +345,6 @@ export const SubmissionType = ({
                                         value={'CONTRACT_ONLY'}
                                     />
                                     <FieldRadio
-                                        aria-required
                                         checked={
                                             values.submissionType ===
                                             'CONTRACT_AND_RATES'
@@ -358,6 +364,7 @@ export const SubmissionType = ({
                                 label="Submission description"
                                 id="submissionDescription"
                                 name="submissionDescription"
+                                aria-required
                                 showError={showFieldErrors(
                                     errors.submissionDescription
                                 )}
@@ -383,31 +390,16 @@ export const SubmissionType = ({
                                 }
                             />
                         </fieldset>
-                        <ButtonGroup
-                            type="default"
-                            className={styles.buttonGroup}
-                        >
-                            <Link
-                                asCustom={NavLink}
-                                variant="unstyled"
-                                className="usa-button usa-button--outline"
-                                to={{
-                                    pathname: '/dashboard',
-                                }}
-                            >
-                                Cancel
-                            </Link>
-                            <Button
-                                type="submit"
-                                disabled={isSubmitting}
-                                onClick={() => {
-                                    setShouldValidate(true)
-                                    setFocusErrorSummaryHeading(true)
-                                }}
-                            >
-                                Continue
-                            </Button>
-                        </ButtonGroup>
+                        <PageActions
+                            pageVariant="FIRST"
+                            backOnClick={() => history.push('/dashboard')}
+                            continueOnClick={() => {
+                                setShouldValidate(true)
+                                setFocusErrorSummaryHeading(true)
+                            }}
+                            saveAsDraftOnClick={() => setShouldValidate(true)}
+                            continueDisabled={isSubmitting}
+                        />
                     </UswdsForm>
                 </>
             )}

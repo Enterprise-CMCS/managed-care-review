@@ -19,17 +19,17 @@ provider:
       statements:
         - Effect: 'Allow'
           Action:
-            - secretsmanager:DescribeSecret
-            - secretsmanager:GetSecretValue
-            - secretsmanager:PutSecretValue
-            - secretsmanager:UpdateSecretVersionStage
+            - secretsmanager:DescribeSecret # pragma: allowlist secret
+            - secretsmanager:GetSecretValue # pragma: allowlist secret
+            - secretsmanager:PutSecretValue # pragma: allowlist secret
+            - secretsmanager:UpdateSecretVersionStage # pragma: allowlist secret
           Resource: '*'
           Condition:
             StringEquals:
-              'secretsmanager:resource/AllowRotationLambdaArn': '${self:custom.rotatorArn}'
+              'secretsmanager:resource/AllowRotationLambdaArn': '${self:custom.rotatorArn}' # pragma: allowlist secret
         - Effect: Allow
           Action:
-            - secretsmanager:GetRandomPassword
+            - secretsmanager:GetRandomPassword # pragma: allowlist secret
           Resource: '*'
         - Effect: Allow
           Action:
@@ -56,6 +56,10 @@ custom:
       - val
       - prod
       - main
+  pauseAurora:
+    other: true
+    val: false
+    prod: false
 
 package:
   individually: true
@@ -108,6 +112,8 @@ resources:
         MasterUserPassword: !Sub '{{resolve:secretsmanager:${PostgresSecret}::password}}'
         DBSubnetGroupName: !Ref PostgresSubnetGroup
         VpcSecurityGroupIds: ['${self:custom.sgId}']
+        ScalingConfiguration:
+          AutoPause: ${self:custom.pauseAurora.${opt:stage}, self:custom.pauseAurora.other}
 
     PostgresSubnetGroup:
       Type: AWS::RDS::DBSubnetGroup

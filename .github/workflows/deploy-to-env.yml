@@ -80,8 +80,28 @@ jobs:
         run: |
           pushd services/ui && npx serverless deploy --stage ${{ inputs.stage_name }}
 
+  uploads:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: deploy uploads
+        id: deploy-uploads
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
+          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
+          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
+          IAM_PATH: ${{ secrets.iam_path }}
+        run: |
+          pushd services/uploads && npx serverless deploy --stage ${{ inputs.stage_name }}
+
   app-api:
-    needs: [postgres, ui]
+    needs: [postgres, ui, uploads]
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository

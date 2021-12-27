@@ -1,11 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import {
-    Alert,
-    Form as UswdsForm,
-    Button,
-    ButtonGroup,
-    Link,
-} from '@trussworks/react-uswds'
+import React, { useState } from 'react'
+import { Alert, Form as UswdsForm, Link } from '@trussworks/react-uswds'
 import { useHistory } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -22,11 +16,7 @@ import {
     FileItemT,
 } from '../../../components/FileUpload'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
-
-/*
- * The page level component is responsible for setting up api requests, redirects, and handling page level alert for overall errors related to invalid documents for a submission
- * Inline error that are specific to the individual files as they upload are handled in FileUpload and FileItem.
- */
+import { PageActions } from '../PageActions'
 
 type DocumentProps = {
     draftSubmission: DraftSubmission
@@ -36,40 +26,46 @@ type DocumentProps = {
     ) => Promise<DraftSubmission | undefined>
 }
 
-const PageLevelErrorAlert = ({
-    hasNoDocuments = false,
-}: {
-    hasNoDocuments?: boolean
-}): JSX.Element =>
-    hasNoDocuments ? (
-        <Alert
-            type="error"
-            heading="Missing documents"
-            className="margin-bottom-2"
-        >
-            You must upload at least one document
-        </Alert>
-    ) : (
-        <Alert
-            type="error"
-            heading="Remove files with errors"
-            className="margin-bottom-2"
-        >
-            You must remove all documents with error messages before continuing
-        </Alert>
-    )
-
 export const Documents = ({
     draftSubmission,
     updateDraft,
     formAlert = undefined,
 }: DocumentProps): React.ReactElement => {
-    const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
     const [shouldValidate, setShouldValidate] = useState(false)
-    const [hasValidFiles, setHasValidFiles] = useState(false)
-    const [hasPendingFiles, setHasPendingFiles] = useState(false)
-    const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
     const history = useHistory()
+
+    // Documents state management
+    const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
+    const [fileItems, setFileItems] = useState<FileItemT[]>([])
+    const hasValidFiles = fileItems.every(
+        (item) => item.status === 'UPLOAD_COMPLETE'
+    )
+    const hasLoadingFiles =
+        fileItems.some((item) => item.status === 'PENDING') ||
+        fileItems.some((item) => item.status === 'SCANNING')
+    const showFileUploadError = shouldValidate && !hasValidFiles
+
+    // for supporting documents page, empty documents list is allowed
+    const documentsErrorMessage =
+        showFileUploadError && hasLoadingFiles
+            ? 'You must wait for all documents to finish uploading before continuing'
+            : showFileUploadError && !hasValidFiles
+            ? ' You must remove all documents with error messages before continuing'
+            : undefined
+
+    // Error summary state management
+    const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
+    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
+        React.useState(false)
+
+    React.useEffect(() => {
+        // Focus the error summary heading only if we are displaying
+        // validation errors and the heading element exists
+        if (focusErrorSummaryHeading && errorSummaryHeadingRef.current) {
+            errorSummaryHeadingRef.current.focus()
+        }
+        setFocusErrorSummaryHeading(false)
+    }, [focusErrorSummaryHeading])
 
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         draftSubmission &&
@@ -93,28 +89,17 @@ export const Documents = ({
             }
         })
 
-    // useEffect use case
-    // fileItems are dynamically changing constantly and we need our side effects to display in a reliable way
-    // this includes wether buttons are disabled or error alerts are displayed
-    useEffect(() => {
-        const hasPendingFiles: boolean = fileItems.some(
-            (item) => item.status === 'PENDING'
-        )
-        setHasPendingFiles(hasPendingFiles)
-
-        const hasValidSupportingDocuments: boolean = fileItems.every(
-            (item) => item.status === 'UPLOAD_COMPLETE'
-        )
-        setHasValidFiles(hasValidSupportingDocuments)
-    }, [fileItems])
-
     // If there is a submission error, ensure form is in validation state
     const onUpdateDraftSubmissionError = () => {
         if (!shouldValidate) setShouldValidate(true)
     }
 
-    const onLoadComplete = async ({ files }: { files: FileItemT[] }) => {
-        setFileItems(files)
+    const onFileItemsUpdate = async ({
+        fileItems,
+    }: {
+        fileItems: FileItemT[]
+    }) => {
+        setFileItems(fileItems)
     }
     const handleDeleteFile = async (key: string) => {
         const result = await deleteFile(key)
@@ -149,7 +134,7 @@ export const Documents = ({
 
     /*
      * handleFormSubmit is used by all page actions
-     * @param shouldValidate - if true prevent submission while validation errors are present; if false silently discard errors but allow submission
+     * @param shouldValidateDocuments - if true prevent submission while validation errors are present; if false silently discard errors but allow submission
      * @param redirectPath - relative path within '/submissions/:id/' where application will redirect if submission succeeds
      *
      * Documents form changes are always persisted; all page action buttons trigger updateDraftSubmission
@@ -158,20 +143,23 @@ export const Documents = ({
      */
     const handleFormSubmit =
         ({
-            shouldValidate,
+            shouldValidateDocuments,
             redirectPath,
         }: {
-            shouldValidate: boolean
+            shouldValidateDocuments: boolean
             redirectPath: string
         }) =>
         async (e: React.FormEvent | React.MouseEvent) => {
             e.preventDefault()
 
-            // if there are any errors present in supporting documents and we are in a validation state (relevant for Save as Draft and Continue buttons), stop here.
-            // Force user to clear validations to continue
-            if (shouldValidate) {
-                setShouldValidate(true)
-                if (!hasValidFiles) return
+            // Currently documents validation happens (outside of the yup schema, which only handles the formik form data)
+            // if there are any errors present in the documents list and we are in a validation state (relevant for Save as Draft) force user to clear validations to continue
+            if (shouldValidateDocuments) {
+                if (!hasValidFiles) {
+                    setShouldValidate(true)
+                    setFocusErrorSummaryHeading(true)
+                    return
+                }
             }
 
             const documents = fileItems.reduce(
@@ -226,17 +214,21 @@ export const Documents = ({
                 className={styles.formContainer}
                 id="DocumentsForm"
                 aria-label="Documents Form"
-                onSubmit={async (e) => {
-                    await handleFormSubmit({
-                        shouldValidate: true,
-                        redirectPath: `review-and-submit`,
-                    })(e)
+                onSubmit={() => {
+                    return
                 }}
             >
                 <fieldset className="usa-fieldset">
                     <legend className="srOnly">Supporting Documents</legend>
-                    {shouldValidate && !hasValidFiles && (
-                        <PageLevelErrorAlert />
+
+                    {documentsErrorMessage && (
+                        <Alert
+                            type="error"
+                            heading="Remove files with errors"
+                            className="margin-bottom-2"
+                        >
+                            {documentsErrorMessage}
+                        </Alert>
                     )}
                     {formAlert && formAlert}
                     <FileUpload
@@ -266,56 +258,44 @@ export const Documents = ({
                                         supporting documents
                                     </strong>
                                 </p>
+                                <span className="srOnly">
+                                    This input only accepts PDF, CSV, DOC, DOCX,
+                                    XLS, XLSX files.
+                                </span>
                             </>
                         }
+                        error={documentsErrorMessage}
                         accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                         initialItems={fileItemsFromDraftSubmission}
                         uploadFile={handleUploadFile}
                         scanFile={handleScanFile}
                         deleteFile={handleDeleteFile}
-                        onLoadComplete={onLoadComplete}
+                        onFileItemsUpdate={onFileItemsUpdate}
                     />
                 </fieldset>
-
-                <div className={styles.pageActions}>
-                    <Button
-                        type="button"
-                        unstyled
-                        onClick={async (e) => {
-                            await handleFormSubmit({
-                                shouldValidate: true,
-                                redirectPath: '/dashboard',
-                            })(e)
-                        }}
-                    >
-                        Save as draft
-                    </Button>
-                    <ButtonGroup type="default" className={styles.buttonGroup}>
-                        <Button
-                            type="button"
-                            className="usa-button usa-button--outline"
-                            onClick={async (e) => {
-                                await handleFormSubmit({
-                                    shouldValidate: false,
-                                    redirectPath: 'contacts',
-                                })(e)
-                            }}
-                        >
-                            Back
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={
-                                hasPendingFiles ||
-                                (shouldValidate &&
-                                    fileItems.length > 0 &&
-                                    !hasValidFiles)
-                            }
-                        >
-                            Continue
-                        </Button>
-                    </ButtonGroup>
-                </div>
+                <PageActions
+                    saveAsDraftOnClick={async (e) => {
+                        await handleFormSubmit({
+                            shouldValidateDocuments: true,
+                            redirectPath: '/dashboard',
+                        })(e)
+                    }}
+                    backOnClick={async (e) => {
+                        await handleFormSubmit({
+                            shouldValidateDocuments: false,
+                            redirectPath: 'contacts',
+                        })(e)
+                    }}
+                    continueDisabled={
+                        showFileUploadError && fileItems.length > 0
+                    }
+                    continueOnClick={async (e) => {
+                        await handleFormSubmit({
+                            shouldValidateDocuments: true,
+                            redirectPath: `review-and-submit`,
+                        })(e)
+                    }}
+                />
             </UswdsForm>
         </>
     )

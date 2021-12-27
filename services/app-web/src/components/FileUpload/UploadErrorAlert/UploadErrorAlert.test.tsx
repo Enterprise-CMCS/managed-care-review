@@ -3,12 +3,12 @@ import { UploadErrorAlert } from './UploadErrorAlert'
 
 describe('UploadErrorAlert component', () => {
     it('renders without errors', async () => {
-        render(<UploadErrorAlert hasNoDocuments />)
+        render(<UploadErrorAlert hasNoDocuments={true} />)
         expect(await screen.findByRole('heading')).toBeInTheDocument()
     })
 
     it('displays expected alerts for missing documents', () => {
-        render(<UploadErrorAlert hasNoDocuments />)
+        render(<UploadErrorAlert hasNoDocuments={true} />)
 
         expect(
             screen.getByRole('heading', { name: 'Missing documents' })
@@ -19,7 +19,7 @@ describe('UploadErrorAlert component', () => {
     })
 
     it('displays expected alert for other generic errors', () => {
-        render(<UploadErrorAlert />)
+        render(<UploadErrorAlert hasNoDocuments={false} />)
         expect(screen.getByText('Remove files with errors')).toBeInTheDocument()
     })
 })

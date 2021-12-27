@@ -36,6 +36,40 @@ describe('Contacts', () => {
         })
     })
 
+    it('displays correct form guidance for contract only submission', async () => {
+        renderWithProviders(
+            <Contacts draftSubmission={mockDraft()} updateDraft={jest.fn()} />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        expect(
+            screen.getByText(/A state contact is required/)
+        ).toBeInTheDocument()
+    })
+
+    it('displays correct form guidance for contract and rates submission', async () => {
+        renderWithProviders(
+            <Contacts
+                draftSubmission={mockContactAndRatesDraft()}
+                updateDraft={jest.fn()}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        expect(
+            screen.getByText(/A state and an actuary contact are required/)
+        ).toBeInTheDocument()
+    })
+
+
     it('checks saved mocked state contacts correctly', async () => {
         const mockUpdateDraftFn = jest.fn()
 

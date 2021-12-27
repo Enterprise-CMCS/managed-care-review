@@ -16,6 +16,7 @@ import {
 } from '../../../testHelpers/apolloHelpers'
 import { Documents } from './Documents'
 
+
 describe('Documents', () => {
     it('renders without errors', async () => {
         const mockUpdateDraftFn = jest.fn()
@@ -470,6 +471,52 @@ describe('Documents', () => {
                 )
             ).toBeNull()
             expect(mockUpdateDraftFn).toHaveBeenCalled()
+        })
+
+        it('disabled with alert when trying to continue while a file is still uploading', async () => {
+            renderWithProviders(
+                <Documents
+                    draftSubmission={{
+                        ...mockDraft(),
+                    }}
+                    updateDraft={jest.fn()}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+            const targetEl = screen.getByTestId('file-input-droptarget')
+
+            // upload one file
+            dragAndDrop(targetEl, [TEST_PDF_FILE])
+            const imageElFile1 = screen.getByTestId('file-input-preview-image')
+            expect(imageElFile1).toHaveClass('is-loading')
+            await waitFor(() =>
+                expect(imageElFile1).not.toHaveClass('is-loading')
+            )
+
+            // upload second file
+            dragAndDrop(targetEl, [TEST_DOC_FILE])
+
+            const imageElFile2 = screen.getAllByTestId(
+                'file-input-preview-image'
+            )[1]
+            expect(imageElFile2).toHaveClass('is-loading')
+
+            // click continue while file 2 still loading
+            continueButton.click()
+            expect(continueButton).toBeDisabled()
+
+            expect(
+                screen.getAllByText(
+                    'You must wait for all documents to finish uploading before continuing'
+                )
+            ).not.toBeNull()
         })
     })
 
