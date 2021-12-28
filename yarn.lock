@@ -7006,9 +7006,9 @@
   integrity sha512-HnYpAE1Y6kRyKM/XkEuiRQhTHvkzMBurTHnpFLYLBGPIylZNPs9jJcuOOYWxPLJCSEtmZT0Y8rHDokKN7rRTig==
 
 "@types/aws-lambda@^8.10.76", "@types/aws-lambda@^8.10.83":
-  version "8.10.88"
-  resolved "https://registry.yarnpkg.com/@types/aws-lambda/-/aws-lambda-8.10.88.tgz#1f18ac2e15be30376e86a688a943390e7d6683e5"
-  integrity sha512-Gbdr5tmGMGV1bgWDEfgNnfqtS9YVKDCkyAgYPmYIeEQFTSjU+VzVoE0Gc1MyrzREdk3Iu5daUCRU9eQL5s+iYQ==
+  version "8.10.89"
+  resolved "https://registry.yarnpkg.com/@types/aws-lambda/-/aws-lambda-8.10.89.tgz#22617ecc1eef9571abebb50c947553362da6051b"
+  integrity sha512-jwtSuEZj4rY4R2pAEOXi+RutS8RWbwMzoGlRVukdyOpnfqA/XPkAf8QoGWmg4o/UaNpQ8Mj0Xhkp5SZ1t/Zq4Q==
 
 "@types/babel__core@^7.0.0", "@types/babel__core@^7.1.7":
   version "7.1.17"
@@ -24999,9 +24999,9 @@ use@^3.1.0:
   integrity sha512-cwESVXlO3url9YWlFW/TA9cshCEhtu7IKJ/p5soJ/gGpj7vbvFrAY/eIioQ6Dw23KjZhYgiIo8HOs1nQ2vr/oQ==
 
 uswds@^2.12.1:
-  version "2.12.2"
-  resolved "https://registry.yarnpkg.com/uswds/-/uswds-2.12.2.tgz#810555721b4ee0cd28d08ceed003e33006e5a17e"
-  integrity sha512-Y9YeILoe4xiH26JpyznSbIsC8osHY88QjTFM3K5r7GcSuryauu7CpPnQdBUCw5R7myc24N5X8S/nxnXvOEtudg==
+  version "2.13.0"
+  resolved "https://registry.yarnpkg.com/uswds/-/uswds-2.13.0.tgz#7ad910d43f1ab4595664619dfb6f701f64de7193"
+  integrity sha512-DybO7wnczHtP5UXjRLHzVB3R4Dbl5hCIaONA4ctPoiof7FkEhST6zIveC2tUQNjmDiacbpvAtp9aNzEfxLCpcw==
   dependencies:
     classlist-polyfill "^1.0.3"
     domready "^1.0.8"
