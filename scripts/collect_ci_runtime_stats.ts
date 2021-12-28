@@ -114,13 +114,8 @@ function massageRuns(timedRuns: TimedRuns): TimedRuns {
 }
 
 // fetch the run and compute all the times we care about
-function fetchStepTimes(run: WorkflowRun): StepTimes {
+function computeStepTimes(run: WorkflowRun): StepTimes {
     const times: StepTimes = {}
-
-    // console.log(
-    //     'Jorbs',
-    //     jobs.map((j) => j.name)
-    // )
 
     //job
     for (const job of run.jobs) {
@@ -180,6 +175,8 @@ interface WorkflowRun {
     }[]
 }
 
+// grab workflow runs we're interested in, then grab their jobs
+// and return them with their jobs included.
 async function fetchDeployRuns(): Promise<WorkflowRun[]> {
     const token = readToken()
     const octokit = new Octokit({ auth: token })
@@ -237,15 +234,62 @@ async function fetchDeployRuns(): Promise<WorkflowRun[]> {
     return runsWithJobs
 }
 
-function processDeployRuns(runs: WorkflowRun[]): TimedRuns {
-    const timedRuns: TimedRuns = {}
-    for (const run of runs) {
-        const stepTimes = fetchStepTimes(run)
+function processDeployRuns(runs: WorkflowRun[]): [TimedRuns, TimedRuns] {
+    // separate out first runs from last runs.
+    const firstRunSet: { [names: string]: WorkflowRun } = {}
+    const laterRuns: WorkflowRun[] = []
 
-        timedRuns[run.id] = stepTimes
+    // runs come to us in reverse chronological order
+    // reversing them lets us scan through them pulling out
+    // the first time we see any branch
+    runs.reverse()
+    for (const run of runs) {
+        if (run.head_branch === undefined || run.head_branch === null)
+            throw new Error('we shouldnt have a branchless run')
+
+        if (!(run.head_branch in firstRunSet)) {
+            firstRunSet[run.head_branch] = run
+        } else {
+            laterRuns.push(run)
+        }
     }
 
-    return timedRuns
+    const timedFirstRuns: TimedRuns = {}
+    for (const run of Object.values(firstRunSet)) {
+        const stepTimes = computeStepTimes(run)
+
+        timedFirstRuns[run.id] = stepTimes
+    }
+
+    const timedLaterRuns: TimedRuns = {}
+    for (const run of laterRuns) {
+        const stepTimes = computeStepTimes(run)
+
+        timedLaterRuns[run.id] = stepTimes
+    }
+
+    return [timedFirstRuns, timedLaterRuns]
+}
+
+function printStats(stats: StepStats) {
+    // print them out in order of weight
+    const outputs: [string, number, number][] = Object.keys(stats).map((k) => {
+        return [k, stats[k].mean, stats[k].stdev]
+    })
+
+    const sortedOutputs = outputs.sort((a, b) => b[1] - a[1])
+
+    const formatter = new Intl.NumberFormat('en-US', {
+        maximumFractionDigits: 2,
+    })
+
+    for (const line of sortedOutputs) {
+        console.log(
+            `${line[0]}: ${formatter.format(line[1])} (${formatter.format(
+                line[2]
+            )})`
+        )
+    }
 }
 
 async function main() {
@@ -257,40 +301,33 @@ async function main() {
     // console.log('runs', runs)
     // fs.writeFileSync('./all_gh_runs.json', JSON.stringify(runs))
     // console.log('written')
+
     // read from the cache.
     const cachedRuns = fs.readFileSync('./all_gh_runs.json').toString()
-
     const runs: WorkflowRun[] = JSON.parse(cachedRuns)
 
-    const timedRuns = processDeployRuns(runs)
+    const [timedFirstRuns, timedLaterRuns] = processDeployRuns(runs)
 
     // const cache = fs.readFileSync('./all_step_times.json').toString()
     // const timedRuns: TimedRuns = JSON.parse(cache)
 
     // console.log('GOT', timedRuns)
 
-    const massagedRuns = massageRuns(timedRuns)
+    const firstStats = calculateStats(massageRuns(timedFirstRuns))
+    const laterStats = calculateStats(massageRuns(timedLaterRuns))
 
-    const stats = calculateStats(massagedRuns)
-
-    // print them out in order of weight
-    const averages: [string, number, number][] = Object.keys(stats).map((k) => {
-        return [k, stats[k].mean, stats[k].stdev]
-    })
-
-    const sortedAverages = averages.sort((a, b) => b[1] - a[1])
-
-    const formatter = new Intl.NumberFormat('en-US', {
-        maximumFractionDigits: 2,
-    })
-
-    for (const pair of sortedAverages) {
-        console.log(
-            `${pair[0]}: ${formatter.format(pair[1])} (${formatter.format(
-                pair[2]
-            )})`
-        )
+    // zip together our stats to display them together.
+    const allStats: StepStats = {}
+    for (const firstKey of Object.keys(firstStats)) {
+        const newKey = 'initial | ' + firstKey
+        allStats[newKey] = firstStats[firstKey]
     }
+    for (const laterKey of Object.keys(laterStats)) {
+        const newKey = 'subsequ | ' + laterKey
+        allStats[newKey] = laterStats[laterKey]
+    }
+
+    printStats(allStats)
 }
 
 main()
