@@ -136,12 +136,6 @@ jobs:
         run: |
           echo "::set-output name=stage-name-for-branch::$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})"
 
-      - name: build ci scripts
-        id: build-ci-scripts
-        run: |
-          pushd scripts && yarn install --focus
-          lerna run build:ci-scripts
-
       - name: run get_changed_services
         uses: ./scripts/get_changed_services.js
         with:

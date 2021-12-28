@@ -26,8 +26,8 @@ notes/
 
 /scripts/add_cypress_test_users.js
 /scripts/add_cypress_test_users.js.map
-/scripts/get_changed_services.js
-/scripts/get_changed_services.js.map
+#/scripts/get_changed_services.js
+#/scripts/get_changed_services.js.map
 
 services/app-web/public/env-config.js
 services/app-web/storybook-static
