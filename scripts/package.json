@@ -10,7 +10,8 @@
         "precommit": "lint-staged",
         "clean": "rm -rf node_modules && yarn cache clean",
         "lint": "tsc --noEmit && eslint",
-        "build": "tsc"
+        "build": "tsc",
+        "build:ci-scripts": "tsc"
     },
     "lint-staged": {
         "scripts/*.sh": [

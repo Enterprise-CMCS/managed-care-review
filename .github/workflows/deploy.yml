@@ -136,6 +136,16 @@ jobs:
         run: |
           echo "::set-output name=stage-name-for-branch::$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})"
 
+      - name: build ci scripts
+        id: build-ci-scripts
+        run: |
+          lerna run build:ci-scripts
+
+      - name: run get_changed_services
+        uses: ./scripts/get_changed_services.js
+        with:
+          branchName: ${GITHUB_REF#refs/heads/}
+
   deploy-branch:
     needs: [get-branch-name-vars]
     uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@mt-skip-sls-deploy
