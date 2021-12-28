@@ -26,6 +26,7 @@ notes/
 
 /scripts/add_cypress_test_users.js
 /scripts/add_cypress_test_users.js.map
+/scripts/collect_ci_runtime_stats.js*
 
 services/app-web/public/env-config.js
 services/app-web/storybook-static

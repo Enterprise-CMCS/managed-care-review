@@ -1,6 +1,13 @@
 import { Octokit } from 'octokit'
 import fs from 'fs'
 
+// This script collects stats on the 100 most recent successful github
+// action CI runs and prints out how long individual jobs and steps are
+// taking.
+
+// For development, I ran it with entr in this directory
+//        `find . | entr -cs "yarn tsc && node ./collect_ci_runtime_stats.js"`
+
 type StepTimes = { [names: string]: number }
 type TimedRuns = { [id: string]: StepTimes }
 type StepStats = { [names: string]: { mean: number; stdev: number } }
