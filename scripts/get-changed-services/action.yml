@@ -8,5 +8,5 @@ outputs:
   changed-services:
     description: 'An array of services that need to be deployed'
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'index.js'
