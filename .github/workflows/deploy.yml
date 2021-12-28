@@ -148,6 +148,8 @@ jobs:
         uses: ./scripts/get-changed-services/
         with:
           branchName: ${GITHUB_REF#refs/heads/}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   deploy-branch:
     needs: [get-branch-name-vars]
