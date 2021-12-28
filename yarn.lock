@@ -24396,10 +24396,10 @@ ts-jest@^26.4.4:
     semver "7.x"
     yargs-parser "20.x"
 
-ts-loader@~8.2.0:
-  version "8.2.0"
-  resolved "https://registry.yarnpkg.com/ts-loader/-/ts-loader-8.2.0.tgz#6a3aeaa378aecda543e2ed2c332d3123841d52e0"
-  integrity sha512-ebXBFrNyMSmbWgjnb3WBloUBK+VSx1xckaXsMXxlZRDqce/OPdYBVN5efB0W3V0defq0Gcy4YuzvPGqRgjj85A==
+ts-loader@~8.3.0:
+  version "8.3.0"
+  resolved "https://registry.yarnpkg.com/ts-loader/-/ts-loader-8.3.0.tgz#83360496d6f8004fab35825279132c93412edf33"
+  integrity sha512-MgGly4I6cStsJy27ViE32UoqxPTN9Xly4anxxVyaIWR+9BGxboV4EyJBGfR3RePV7Ksjj3rHmPZJeIt+7o4Vag==
   dependencies:
     chalk "^4.1.0"
     enhanced-resolve "^4.0.0"
@@ -24999,9 +24999,9 @@ use@^3.1.0:
   integrity sha512-cwESVXlO3url9YWlFW/TA9cshCEhtu7IKJ/p5soJ/gGpj7vbvFrAY/eIioQ6Dw23KjZhYgiIo8HOs1nQ2vr/oQ==
 
 uswds@^2.12.1:
-  version "2.12.2"
-  resolved "https://registry.yarnpkg.com/uswds/-/uswds-2.12.2.tgz#810555721b4ee0cd28d08ceed003e33006e5a17e"
-  integrity sha512-Y9YeILoe4xiH26JpyznSbIsC8osHY88QjTFM3K5r7GcSuryauu7CpPnQdBUCw5R7myc24N5X8S/nxnXvOEtudg==
+  version "2.13.0"
+  resolved "https://registry.yarnpkg.com/uswds/-/uswds-2.13.0.tgz#7ad910d43f1ab4595664619dfb6f701f64de7193"
+  integrity sha512-DybO7wnczHtP5UXjRLHzVB3R4Dbl5hCIaONA4ctPoiof7FkEhST6zIveC2tUQNjmDiacbpvAtp9aNzEfxLCpcw==
   dependencies:
     classlist-polyfill "^1.0.3"
     domready "^1.0.8"
