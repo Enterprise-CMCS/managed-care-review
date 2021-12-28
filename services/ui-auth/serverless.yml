@@ -11,7 +11,7 @@ custom:
   stage: ${opt:stage, self:provider.stage}
   region: ${opt:region, self:provider.region}
   document_uploads_bucket_arn: ${cf:uploads-${self:custom.stage}.DocumentUploadsBucketArn}
-  api_gateway_rest_api_name: ${cf:app-api-${self:custom.stage}.ApiGatewayRestApiName}
+  api_gateway_rest_api_name: ${cf:infra-api-${self:custom.stage}.ApiGatewayRestApiId}
   application_endpoint_url: ${cf:ui-${self:custom.stage}.CloudFrontEndpointUrl}
   okta_metadata_url: ${env:OKTA_METADATA_URL}
   iamPath: ${env:IAM_PATH, "/"}
@@ -99,7 +99,7 @@ resources:
         DefaultRedirectURI: ${self:custom.application_endpoint_url}
         ExplicitAuthFlows:
           - ADMIN_NO_SRP_AUTH
-        GenerateSecret: false
+        GenerateSecret: false # pragma: allowlist secret
         LogoutURLs:
           - ${self:custom.application_endpoint_url}
           - http://localhost:3000/

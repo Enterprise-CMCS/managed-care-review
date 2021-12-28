@@ -1,0 +1,16 @@
+{
+    "name": "infra-api",
+    "private": "true",
+    "description": "",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {},
+    "author": "",
+    "license": "CC0-1.0",
+    "devDependencies": {
+        "serverless": "^2.52.1",
+        "serverless-iam-helper": "CMSgov/serverless-iam-helper",
+        "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",
+        "serverless-stack-termination-protection": "^1.0.4"
+    }
+}
