@@ -137,7 +137,7 @@ jobs:
           echo "::set-output name=stage-name-for-branch::$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})"
 
       - name: run get_changed_services
-        uses: ./scripts/get_changed_services.js
+        uses: ./scripts/get_changed_services/
         with:
           branchName: ${GITHUB_REF#refs/heads/}
 
