@@ -88,9 +88,28 @@ jobs:
           name: lambda-layers-prisma-client
           path: ./services/app-api/lambda-layers-prisma-client
 
-  promote-dev:
+  promote-infra-dev:
     needs: [build-prisma-client-lambda-layer, unit-tests]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@main
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
+    with:
+      stage_name: main
+    secrets:
+      aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
+      ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
+      ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
+      okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
+      iam_path: ${{ secrets.IAM_PATH }}
+      full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
+      cloudfront_certificate_arn: ${{ secrets.DEV_CLOUDFRONT_CERTIFICATE_ARN }}
+      cloudfront_domain_name: ${{ secrets.DEV_CLOUDFRONT_DOMAIN_NAME }}
+      cloudfront_storybook_domain_name: ${{ secrets.DEV_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
+      react_app_auth_mode: IDM
+
+  promote-app-dev:
+    needs: [promote-infra-dev, build-prisma-client-lambda-layer, unit-tests]
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
     with:
       stage_name: main
     secrets:
@@ -109,7 +128,7 @@ jobs:
 
   dev-cypress:
     name: dev - cypress
-    needs: [promote-dev]
+    needs: [promote-app-dev]
     runs-on: ubuntu-latest
     container: cypress/browsers:node14.17.0-chrome91-ff89
     strategy:
@@ -157,9 +176,28 @@ jobs:
           SLACK_FOOTER: ''
           MSG_MINIMAL: actions url,commit
 
-  promote-val:
+  promote-infra-val:
     needs: [dev-cypress]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@main
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
+    with:
+      stage_name: val
+    secrets:
+      aws_access_key_id: ${{ secrets.VAL_AWS_ACCESS_KEY_ID }}
+      aws_secret_access_key: ${{ secrets.VAL_AWS_SECRET_ACCESS_KEY }}
+      cloudfront_certificate_arn: ${{ secrets.VAL_CLOUDFRONT_CERTIFICATE_ARN }}
+      cloudfront_domain_name: ${{ secrets.VAL_CLOUDFRONT_DOMAIN_NAME }}
+      cloudfront_storybook_domain_name: ${{ secrets.VAL_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
+      okta_metadata_url: ${{ secrets.VAL_OKTA_METADATA_URL }}
+      full_iam_permissions_boundary_policy: ${{ secrets.VAL_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
+      react_app_auth_mode: IDM
+      aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
+      ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
+      ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
+      iam_path: ${{ secrets.IAM_PATH }}
+
+  promote-app-val:
+    needs: [dev-cypress, promote-infra-val]
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
     with:
       stage_name: val
     secrets:
@@ -178,7 +216,7 @@ jobs:
 
   cypress-val:
     name: val - cypress
-    needs: [promote-val]
+    needs: [promote-app-val]
     runs-on: ubuntu-latest
     container: cypress/browsers:node14.17.0-chrome91-ff89
     strategy:
@@ -226,9 +264,28 @@ jobs:
           SLACK_FOOTER: ''
           MSG_MINIMAL: actions url,commit
 
-  promote-prod:
+  promote-infra-prod:
     needs: [cypress-val]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@main
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
+    with:
+      stage_name: prod
+    secrets:
+      aws_access_key_id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
+      aws_secret_access_key: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
+      cloudfront_certificate_arn: ${{ secrets.PROD_CLOUDFRONT_CERTIFICATE_ARN }}
+      cloudfront_domain_name: ${{ secrets.PROD_CLOUDFRONT_DOMAIN_NAME }}
+      cloudfront_storybook_domain_name: ${{ secrets.PROD_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
+      okta_metadata_url: ${{ secrets.PROD_OKTA_METADATA_URL }}
+      full_iam_permissions_boundary_policy: ${{ secrets.PROD_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
+      react_app_auth_mode: IDM
+      aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
+      ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
+      ses_review_team_email_addresses: ${{ secrets.PROD_SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
+      iam_path: ${{ secrets.IAM_PATH }}
+
+  promote-app-prod:
+    needs: [cypress-val, promote-infra-prod]
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
     with:
       stage_name: prod
     secrets:
@@ -247,7 +304,7 @@ jobs:
 
   cypress-prod:
     name: prod - cypress
-    needs: [promote-prod]
+    needs: [promote-app-prod]
     runs-on: ubuntu-latest
     container: cypress/browsers:node14.17.0-chrome91-ff89
     strategy:

@@ -121,9 +121,31 @@ jobs:
         run: |
           echo "::set-output name=stage-name-for-branch::$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})"
 
-  deploy-branch:
-    needs: [build-prisma-client-lambda-layer, get-branch-name-vars, unit-tests]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@main
+  deploy-infra:
+    needs: [get-branch-name-vars]
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@wml-reorder-infra-deps
+    with:
+      stage_name: ${{ needs.get-branch-name-vars.outputs.branch-name}}
+    secrets:
+      aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
+      ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
+      ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
+      okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
+      iam_path: ${{ secrets.IAM_PATH }}
+      full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
+      react_app_auth_mode: AWS_COGNITO
+
+  deploy-app:
+    needs:
+      [
+        build-prisma-client-lambda-layer,
+        get-branch-name-vars,
+        unit-tests,
+        deploy-infra,
+      ]
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@wml-reorder-infra-deps
     with:
       stage_name: ${{ needs.get-branch-name-vars.outputs.branch-name}}
     secrets:
@@ -139,7 +161,7 @@ jobs:
 
   cypress:
     name: cypress-run
-    needs: [deploy-branch, unit-tests]
+    needs: [deploy-app, unit-tests]
     runs-on: ubuntu-latest
     container: cypress/browsers:node14.17.0-chrome91-ff89
     strategy:
@@ -188,7 +210,7 @@ jobs:
           deployment_id: ${{ needs.unit-tests.outputs.deploy-id }}
 
       - name: Update deployment status (failure)
-        if: failure() && needs.deploy-branch.outcome == 'failure'
+        if: failure() && needs.deploy-app.outcome == 'failure'
         uses: chrnorm/deployment-status@releases/v1
         with:
           token: '${{ github.token }}'
