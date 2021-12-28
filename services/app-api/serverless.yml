@@ -19,8 +19,8 @@ custom:
   region: ${opt:region, self:provider.region}
   appVersion: ${env:APP_VERSION}
   applicationEndpoint: ${cf:ui-${self:custom.stage}.CloudFrontEndpointUrl, env:APPLICATION_ENDPOINT}
-  appApiGatewayId: ${cf:infra-api-${self:custom.stage}.ApiGatewayRestApiId, env:CF_CONFIG_IGNORED_LOCALLY}
-  appApiGatewayRootResourceId: ${cf:infra-api-${self:custom.stage}.AppApiGatewayRootResourceId, env:CF_CONFIG_IGNORED_LOCALLY}
+  appApiGatewayId: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:infra-api-${self:custom.stage}.ApiGatewayRestApiId}
+  appApiGatewayRootResourceId: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:infra-api-${self:custom.stage}.AppApiGatewayRootResourceId}
   emailSource: ${env:SES_SOURCE_EMAIL_ADDRESS}
   emailerMode: ${env:EMAILER_MODE}
   emailReviewTeamAddresses: ${env:SES_REVIEW_TEAM_EMAIL_ADDRESSES}
@@ -114,7 +114,6 @@ layers:
 functions:
   email_submit:
     handler: handlers/email_submit.main
-    events:
 
   health:
     handler: handlers/health_check.main
@@ -195,6 +194,7 @@ functions:
           cors: true
           authorizer: aws_iam
 
+resources:
   Outputs:
     ApiAuthMode:
       Value: ${self:custom.reactAppAuthMode}
