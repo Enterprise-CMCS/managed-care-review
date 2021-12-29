@@ -41,8 +41,8 @@ on:
 
 jobs:
   postgres:
-    runs-on: ubuntu-latest
     if: ${{ contains(inputs.changed_services, 'postgres') }}
+    runs-on: ubuntu-latest
     steps:
       - name: Check which services changed
         shell: bash
@@ -67,8 +67,8 @@ jobs:
           pushd services/postgres && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   ui:
-    runs-on: ubuntu-latest
     if: ${{ contains(inputs.changed_services, 'ui') }}
+    runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
@@ -91,6 +91,7 @@ jobs:
           pushd services/ui && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   storybook:
+    if: ${{ contains(inputs.changed_services, 'storybook') }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -115,8 +116,8 @@ jobs:
           pushd services/storybook && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   uploads:
-    runs-on: ubuntu-latest
     if: ${{ contains(inputs.changed_services, 'uploads') }}
+    runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
@@ -137,8 +138,8 @@ jobs:
 
   app-api:
     needs: [postgres, ui, uploads]
-    runs-on: ubuntu-latest
     if: ${{ contains(inputs.changed_services, 'app-api') }}
+    runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
@@ -176,6 +177,7 @@ jobs:
 
   ui-auth:
     needs: [uploads, app-api, ui]
+    if: ${{ contains(inputs.changed_services, 'ui-auth') }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -227,6 +229,7 @@ jobs:
 
   app-web:
     needs: [ui-auth, app-api, ui, uploads, storybook]
+    if: ${{ contains(inputs.changed_services, 'ui-auth') }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
