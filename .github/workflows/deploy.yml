@@ -37,7 +37,7 @@ jobs:
         with:
           token: '${{ github.token }}'
           environment: review-apps
-          description: stack ${{ env.branch_name }}
+          description: stack ${{ steps.branch-name.outputs.stage-name-for-branch}}
           initial_status: in_progress
 
   unit-tests:
