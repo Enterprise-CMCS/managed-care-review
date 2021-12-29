@@ -118,18 +118,6 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: get changed services
-        id: changed-services-array
-        shell: bash
-        run: |
-          echo "::set-output name=changed-services::$(./scripts/changed_services.sh ${{ github.sha }})"
-
-      - name: test we have changed services output
-        id: test
-        shell: bash
-        run: |
-          echo "${{steps.changed-services-array.outputs.changed-services}}"
-
       - name: set branch_name
         id: branch-name
         shell: bash
@@ -151,6 +139,12 @@ jobs:
           branchName: ${GITHUB_REF#refs/heads/}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: test we have changed services output
+        id: test
+        shell: bash
+        run: |
+          echo "${{steps.changed-services-action.outputs.changed-services}}"
 
   deploy-branch:
     needs: [get-branch-name-vars]
