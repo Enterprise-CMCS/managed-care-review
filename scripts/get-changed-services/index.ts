@@ -39,7 +39,7 @@ const workflowrun = await octokit.actions.listWorkflowRuns({
 // if we haven't had a successful run on this branch, we need to deploy everything
 if (workflowrun.data.total_count === 0) {
     const services = await getAllServices()
-    core.setOutput('changed_services', services)
+    core.setOutput('changed-services', services)
 }
 
 console.log(workflowrun)
