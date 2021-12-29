@@ -9,6 +9,37 @@ on:
       - '!main'
 
 jobs:
+  begin-deployment:
+    name: Begin Deployment
+    runs-on: ubuntu-latest
+    outputs:
+      deploy-id: ${{ steps.ghdeployment.outputs.deployment_id }}
+      branch-name: ${{ steps.branch-name.outputs.stage-name-for-branch}}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: lock this branch to prevent concurrent deploys
+        run: ./.github/github-lock.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: set branch_name
+        id: branch-name
+        shell: bash
+        run: |
+          echo "::set-output name=stage-name-for-branch::$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})"
+
+      - uses: chrnorm/deployment-action@releases/v1
+        name: Create GitHub deployment
+        id: ghdeployment
+        with:
+          token: '${{ github.token }}'
+          environment: review-apps
+          description: stack ${{ steps.branch-name.outputs.stage-name-for-branch}}
+          initial_status: in_progress
+
   unit-tests:
     name: test - unit tests
     runs-on: ubuntu-latest
@@ -28,16 +59,9 @@ jobs:
         ports:
           - 5432:5432
 
-    outputs:
-      deploy-id: ${{ steps.ghdeployment.outputs.deployment_id }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
-
-      - name: lock this branch to prevent concurrent builds
-        run: ./.github/github-lock.sh
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check for secrets
         uses: ./.github/actions/check_secrets
@@ -62,15 +86,6 @@ jobs:
           coverageLocations: |
             ${{github.workspace}}/services/app-api/coverage/lcov.info:lcov
             ${{github.workspace}}/services/app-web/coverage/lcov.info:lcov
-
-      - uses: chrnorm/deployment-action@releases/v1
-        name: Create GitHub deployment
-        id: ghdeployment
-        with:
-          token: '${{ github.token }}'
-          environment: review-apps
-          description: stack ${{ env.branch_name }}
-          initial_status: in_progress
 
   build-prisma-client-lambda-layer:
     name: build - postgres prisma layer
@@ -107,25 +122,11 @@ jobs:
           name: lambda-layers-prisma-client
           path: ./services/app-api/lambda-layers-prisma-client
 
-  get-branch-name-vars:
-    runs-on: ubuntu-latest
-    outputs:
-      branch-name: ${{ steps.branch-name.outputs.stage-name-for-branch}}
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v2
-
-      - name: set branch_name
-        id: branch-name
-        shell: bash
-        run: |
-          echo "::set-output name=stage-name-for-branch::$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})"
-
-  deploy-branch:
-    needs: [build-prisma-client-lambda-layer, get-branch-name-vars, unit-tests]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-to-env.yml@main
+  deploy-infra:
+    needs: [begin-deployment]
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@wml-reorder-infra-deps
     with:
-      stage_name: ${{ needs.get-branch-name-vars.outputs.branch-name}}
+      stage_name: ${{ needs.begin-deployment.outputs.branch-name}}
     secrets:
       aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -137,16 +138,82 @@ jobs:
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
       react_app_auth_mode: AWS_COGNITO
 
+  deploy-app:
+    needs:
+      [
+        begin-deployment,
+        build-prisma-client-lambda-layer,
+        unit-tests,
+        deploy-infra,
+      ]
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@wml-reorder-infra-deps
+    with:
+      stage_name: ${{ needs.begin-deployment.outputs.branch-name}}
+    secrets:
+      aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
+      ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
+      ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
+      okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
+      iam_path: ${{ secrets.IAM_PATH }}
+      full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
+      react_app_auth_mode: AWS_COGNITO
+
+  end-deployment:
+    needs: [begin-deployment, deploy-app]
+    if: always() && needs.begin-deployment.result == 'success'
+    name: End Deployment
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Update deployment status (failure)
+        if: failure() && needs.begin-deployment.result == 'success'
+        uses: chrnorm/deployment-status@releases/v1
+        with:
+          token: '${{ github.token }}'
+          state: 'failure'
+          deployment_id: ${{ needs.begin-deployment.outputs.deploy-id }}
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Add serverless to End
+        shell: bash
+        run: yarn global add serverless
+
+      - name: Set application endpoint
+        if: needs.deploy-app.result == 'success'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+        run: |
+          cd services
+          endpoint=$(./output.sh ui CloudFrontEndpointUrl $branch_name)
+          echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
+
+      - name: Update deployment status (success)
+        if: needs.deploy-app.result == 'success'
+        uses: chrnorm/deployment-status@releases/v1
+        with:
+          token: '${{ github.token }}'
+          environment_url: ${{env.APPLICATION_ENDPOINT}}
+          state: 'success'
+          deployment_id: ${{ needs.begin-deployment.outputs.deploy-id }}
+
   cypress:
     name: cypress-run
-    needs: [deploy-branch, unit-tests]
+    needs: [deploy-app]
     runs-on: ubuntu-latest
     container: cypress/browsers:node14.17.0-chrome91-ff89
     strategy:
       fail-fast: false
       matrix:
         # run copies of the current job in parallel
-        containers: [1, 2, 3, 4]
+        containers: [1, 2, 3, 4, 5, 6]
     steps:
       - uses: actions/checkout@v2
 
@@ -177,23 +244,6 @@ jobs:
           cd services
           endpoint=$(./output.sh ui CloudFrontEndpointUrl $branch_name)
           echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
-
-      - name: Update deployment status (success)
-        if: success()
-        uses: chrnorm/deployment-status@releases/v1
-        with:
-          token: '${{ github.token }}'
-          environment_url: ${{env.APPLICATION_ENDPOINT}}
-          state: 'success'
-          deployment_id: ${{ needs.unit-tests.outputs.deploy-id }}
-
-      - name: Update deployment status (failure)
-        if: failure() && needs.deploy-branch.outcome == 'failure'
-        uses: chrnorm/deployment-status@releases/v1
-        with:
-          token: '${{ github.token }}'
-          state: 'failure'
-          deployment_id: ${{ needs.unit-tests.outputs.deploy-id }}
 
       - name: Cypress -- Chrome
         id: cypress
