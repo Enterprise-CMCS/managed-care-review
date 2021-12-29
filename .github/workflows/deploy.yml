@@ -111,7 +111,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       branch-name: ${{ steps.branch-name.outputs.stage-name-for-branch}}
-      changed-services: ${{ steps.changed-services-array.outputs.changed-services }}
+      changed-services: ${{ steps.changed-services-action.outputs.changed-services }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
@@ -145,6 +145,7 @@ jobs:
           lerna run build:ci-scripts
 
       - name: run get_changed_services
+        id: changed-services-action
         uses: ./scripts/get-changed-services/
         with:
           branchName: ${GITHUB_REF#refs/heads/}
