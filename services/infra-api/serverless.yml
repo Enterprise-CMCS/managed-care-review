@@ -80,7 +80,7 @@ resources:
     ApiGwWebAclAssociation:
       Type: AWS::WAFv2::WebACLAssociation
       Properties:
-        ResourceArn: !GetAtt AppApiGateway.Arn
+        ResourceArn: !Sub arn:aws:apigateway:${self:provider.region}::/restapis/${AppApiGateway}
         WebACLArn: !GetAtt AppApiGatewayAcl.Arn
 
   Outputs:
