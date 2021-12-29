@@ -80,8 +80,8 @@ resources:
     ApiGwWebAclAssociation:
       Type: AWS::WAFv2::WebACLAssociation
       Properties:
-        ResourceArn: !Ref AppApiGateway
-        WebACLArn: !Ref AppApiGatewayAcl
+        ResourceArn: !GetAtt AppApiGateway.Arn
+        WebACLArn: !GetAtt AppApiGatewayAcl.Arn
 
   Outputs:
     ApiGatewayRestApiId:
