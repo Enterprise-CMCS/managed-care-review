@@ -104,26 +104,6 @@ jobs:
         run: |
           pushd services/storybook && npx serverless deploy --stage ${{ inputs.stage_name }}
 
-  infra-api:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v2
-
-      - name: Setup env
-        uses: ./.github/actions/setup_env
-
-      - name: deploy infra-api
-        id: deploy-uploads
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
-          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
-          # FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
-          # IAM_PATH: ${{ secrets.iam_path }}
-        run: |
-          pushd services/infra-api && npx serverless deploy --stage ${{ inputs.stage_name }}
-
   uploads:
     runs-on: ubuntu-latest
     steps:
@@ -143,3 +123,48 @@ jobs:
           IAM_PATH: ${{ secrets.iam_path }}
         run: |
           pushd services/uploads && npx serverless deploy --stage ${{ inputs.stage_name }}
+
+  infra-api:
+    needs: [ui, postgres, uploads]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: deploy infra-api
+        id: deploy-uploads
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
+          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
+          # FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
+          # IAM_PATH: ${{ secrets.iam_path }}
+        run: |
+          pushd services/infra-api && npx serverless deploy --stage ${{ inputs.stage_name }}
+
+  ui-auth:
+    needs: [infra-api, ui, uploads]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: deploy ui-auth
+        id: deploy-ui-auth
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
+          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
+          IAM_PATH: ${{ secrets.iam_path }}
+          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
+          SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.ses_source_email_address }}
+          OKTA_METADATA_URL: ${{ secrets.okta_metadata_url }}
+
+        run: |
+          pushd services/ui-auth && npx serverless deploy --stage ${{ inputs.stage_name }}
