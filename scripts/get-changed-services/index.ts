@@ -4,8 +4,8 @@ import * as core from '@actions/core'
 import { exec } from 'child_process'
 import util from 'util'
 
+/*
 import fs from 'fs'
-
 // just for testing locally now
 function readToken(path = '../../../../../access_token.txt') {
     return fs.readFileSync(path).toString().trim()
@@ -13,6 +13,7 @@ function readToken(path = '../../../../../access_token.txt') {
 
 process.env.GITHUB_ACTION = 'true'
 process.env.GITHUB_TOKEN = readToken()
+*/
 
 // Use lerna to get a list of all of the packages that are in the current repo
 interface LernaListItem {
