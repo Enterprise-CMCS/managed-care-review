@@ -170,7 +170,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Set application endpoint
-        if: needs.deploy-app.outcome == 'success'
+        if: needs.deploy-app.result == 'success'
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -181,7 +181,7 @@ jobs:
           echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
 
       - name: Update deployment status (success)
-        if: needs.deploy-app.outcome == 'success'
+        if: needs.deploy-app.result == 'success'
         uses: chrnorm/deployment-status@releases/v1
         with:
           token: '${{ github.token }}'
@@ -190,7 +190,7 @@ jobs:
           deployment_id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
       - name: Update deployment status (failure)
-        if: failure()
+        if: failure() && needs.begin-deployment.result == 'success'
         uses: chrnorm/deployment-status@releases/v1
         with:
           token: '${{ github.token }}'
