@@ -160,6 +160,43 @@ jobs:
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
       react_app_auth_mode: AWS_COGNITO
 
+  end-deployment:
+    needs: [deploy-app]
+    if: always()
+    name: End Deployment
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set application endpoint
+        if: needs.deploy-app.outcome == 'success'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+        run: |
+          cd services
+          endpoint=$(./output.sh ui CloudFrontEndpointUrl $branch_name)
+          echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
+
+      - name: Update deployment status (success)
+        if: needs.deploy-app.outcome == 'success'
+        uses: chrnorm/deployment-status@releases/v1
+        with:
+          token: '${{ github.token }}'
+          environment_url: ${{env.APPLICATION_ENDPOINT}}
+          state: 'success'
+          deployment_id: ${{ needs.begin-deployment.outputs.deploy-id }}
+
+      - name: Update deployment status (failure)
+        if: failure()
+        uses: chrnorm/deployment-status@releases/v1
+        with:
+          token: '${{ github.token }}'
+          state: 'failure'
+          deployment_id: ${{ needs.begin-deployment.outputs.deploy-id }}
+
   cypress:
     name: cypress-run
     needs: [deploy-app]
@@ -200,23 +237,6 @@ jobs:
           cd services
           endpoint=$(./output.sh ui CloudFrontEndpointUrl $branch_name)
           echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
-
-      - name: Update deployment status (success)
-        if: success()
-        uses: chrnorm/deployment-status@releases/v1
-        with:
-          token: '${{ github.token }}'
-          environment_url: ${{env.APPLICATION_ENDPOINT}}
-          state: 'success'
-          deployment_id: ${{ needs.begin-deployment.outputs.deploy-id }}
-
-      - name: Update deployment status (failure)
-        if: failure() && needs.deploy-app.outcome == 'failure'
-        uses: chrnorm/deployment-status@releases/v1
-        with:
-          token: '${{ github.token }}'
-          state: 'failure'
-          deployment_id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
       - name: Cypress -- Chrome
         id: cypress
