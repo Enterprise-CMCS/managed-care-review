@@ -3,15 +3,6 @@ import * as core from '@actions/core'
 
 import { exec } from 'child_process'
 import util from 'util'
-import fs from 'fs'
-
-// just for testing locally now
-function readToken(path = '../../../../../access_token.txt') {
-    return fs.readFileSync(path).toString().trim()
-}
-
-process.env.GITHUB_ACTION = 'true'
-process.env.GITHUB_TOKEN = readToken()
 
 // Use lerna to get a list of all of the packages that are in the current repo
 interface LernaListItem {
@@ -41,8 +32,8 @@ const workflowrun = await octokit.actions.listWorkflowRuns({
     repo: 'managed-care-review',
     workflow_id: 'deploy.yml',
     status: 'success',
-    branch: 'mt-skip-sls-deploy',
-    //branch: core.getInput('branchName', { required: true }),
+    //branch: 'mt-skip-sls-deploy',
+    branch: core.getInput('branchName', { required: true }),
 })
 
 // if we haven't had a successful run on this branch, we need to deploy everything
