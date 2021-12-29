@@ -1,10 +1,14 @@
 import { Octokit } from '@octokit/action';
-import fs from 'fs';
+import * as core from '@actions/core';
 import { exec } from 'child_process';
 import util from 'util';
+import fs from 'fs';
+// just for testing locally now
 function readToken(path = '../../../../../access_token.txt') {
     return fs.readFileSync(path).toString().trim();
 }
+process.env.GITHUB_ACTION = 'true';
+process.env.GITHUB_TOKEN = readToken();
 // a list of all of our deployable service names from lerna
 async function getAllServices() {
     const execPromise = util.promisify(exec);
@@ -15,23 +19,44 @@ async function getAllServices() {
     }
     return lernaList.map((i) => i.name);
 }
-const services = await getAllServices();
-console.log('our service array: ' + services);
-console.log(readToken());
-process.env.GITHUB_ACTION = 'true';
-process.env.GITHUB_TOKEN = readToken();
-// we pass in branchName and stageName as inputs from the action
+// get the workflow runs for this branch
+// we pass in branchName as input from the action
 const octokit = new Octokit();
-const workflowrun = await octokit.actions.listWorkflowRuns({
+const allWorkflowRuns = await octokit.actions.listWorkflowRuns({
     owner: 'CMSgov',
     repo: 'managed-care-review',
     workflow_id: 'deploy.yml',
-    status: 'success',
+    //status: 'success',
     branch: 'mt-skip-sls-deploy',
     //branch: core.getInput('branchName', { required: true }),
 });
-// if we haven't had a successful run before, we need to deploy everything
-if (workflowrun.data.total_count === 0) {
+const services = await getAllServices();
+// if we haven't had a run on this branch, we need to deploy everything
+if (allWorkflowRuns.data.total_count === 0) {
+    core.setOutput('changed-services', services);
 }
-console.log(workflowrun);
+const workflow_runs = allWorkflowRuns.data.workflow_runs;
+const single_run = await octokit.actions.listJobsForWorkflowRunAttempt({
+    owner: 'CMSgov',
+    repo: 'managed-care-review',
+    run_id: workflow_runs[0].id,
+    attempt_number: workflow_runs[0].run_attempt ?? 1,
+});
+//console.log(single_run.data.jobs)
+const successfulJobs = single_run.data.jobs
+    .map((job) => {
+    if (job.conclusion === 'success') {
+        return job.name.split(' / ')[1]; // spaces are significant here
+    }
+})
+    .filter((name) => {
+    if (typeof name === 'undefined') {
+        return false;
+    }
+    return true;
+});
+const jobsToRun = services.filter((x) => !successfulJobs.includes(x));
+console.log('All services: ' + services);
+console.log('Successful jobs: ' + successfulJobs);
+console.log('Jobs to rerun: ' + jobsToRun);
 //# sourceMappingURL=index.js.map
