@@ -44,11 +44,6 @@ jobs:
     if: ${{ contains(inputs.changed_services, 'postgres') }}
     runs-on: ubuntu-latest
     steps:
-      - name: Check which services changed
-        shell: bash
-        run: |
-          echo ${{contains(inputs.changed_services, 'postgres')}}
-
       - name: Check out repository
         uses: actions/checkout@v2
 
@@ -229,7 +224,7 @@ jobs:
 
   app-web:
     needs: [ui-auth, app-api, ui, uploads, storybook]
-    if: ${{ contains(inputs.changed_services, 'ui-auth') }}
+    if: ${{ contains(inputs.changed_services, 'app-web') }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
