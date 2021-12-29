@@ -79,9 +79,9 @@ resources:
 
     ApiGwWebAclAssociation:
       Type: AWS::WAFv2::WebACLAssociation
-        Properties: 
-          ResourceArn: !Ref AppApiGateway
-          WebACLArn: !Ref AppApiGatewayAcl
+      Properties:
+        ResourceArn: !Ref AppApiGateway
+        WebACLArn: !Ref AppApiGatewayAcl
 
   Outputs:
     ApiGatewayRestApiId:
