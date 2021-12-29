@@ -18,12 +18,12 @@ custom:
       - val
       - prod
       - main
-  
+
 provider:
   name: aws
   runtime: nodejs14.x
   region: us-east-1
-  
+
 resources:
   Resources:
     AppApiGateway:
@@ -32,21 +32,21 @@ resources:
         Name: ${self:service}-${self:custom.stage}-app-api-gateway
 
     GatewayResponseDefault4XX:
-        Type: 'AWS::ApiGateway::GatewayResponse'
-        Properties:
-          ResponseParameters:
-            gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-            gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
-          ResponseType: DEFAULT_4XX
-          RestApiId: !Ref AppApiGateway
-      GatewayResponseDefault5XX:
-        Type: 'AWS::ApiGateway::GatewayResponse'
-        Properties:
-          ResponseParameters:
-            gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-            gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
-          ResponseType: DEFAULT_5XX
-          RestApiId: !Ref AppApiGateway
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_4XX
+        RestApiId: !Ref AppApiGateway
+    GatewayResponseDefault5XX:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_5XX
+        RestApiId: !Ref AppApiGateway
 
       # ApiGwWebAcl:
       #   Type: AWS::WAFv2::WebACL
@@ -78,7 +78,7 @@ resources:
       #       SampledRequestsEnabled: true
       #       MetricName: ${self:custom.webAclName}
 
-  Outputs:    
+  Outputs:
     ApiGatewayRestApiId:
       Value:
         Ref: AppApiGateway
