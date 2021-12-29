@@ -161,13 +161,28 @@ jobs:
       react_app_auth_mode: AWS_COGNITO
 
   end-deployment:
-    needs: [deploy-app]
-    if: always()
+    needs: [begin-deployment, deploy-app]
+    if: always() && needs.begin-deployment.result == 'success'
     name: End Deployment
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
+
+      - name: Update deployment status (failure)
+        if: failure() && needs.begin-deployment.result == 'success'
+        uses: chrnorm/deployment-status@releases/v1
+        with:
+          token: '${{ github.token }}'
+          state: 'failure'
+          deployment_id: ${{ needs.begin-deployment.outputs.deploy-id }}
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Add serverless to End
+        shell: bash
+        run: yarn global add serverless
 
       - name: Set application endpoint
         if: needs.deploy-app.result == 'success'
@@ -187,14 +202,6 @@ jobs:
           token: '${{ github.token }}'
           environment_url: ${{env.APPLICATION_ENDPOINT}}
           state: 'success'
-          deployment_id: ${{ needs.begin-deployment.outputs.deploy-id }}
-
-      - name: Update deployment status (failure)
-        if: failure() && needs.begin-deployment.result == 'success'
-        uses: chrnorm/deployment-status@releases/v1
-        with:
-          token: '${{ github.token }}'
-          state: 'failure'
           deployment_id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
   cypress:
