@@ -77,7 +77,7 @@ resources:
           SampledRequestsEnabled: true
           MetricName: ${self:custom.stage}-webacl
 
-     ApiGwWebAclAssociation:
+    ApiGwWebAclAssociation:
       Type: AWS::WAFv2::WebACLAssociation
         Properties: 
           ResourceArn: !Ref AppApiGateway

@@ -125,7 +125,6 @@ jobs:
           pushd services/uploads && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   infra-api:
-    needs: [ui, postgres, uploads]
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
