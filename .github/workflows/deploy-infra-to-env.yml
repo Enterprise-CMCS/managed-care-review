@@ -90,7 +90,8 @@ jobs:
       - name: get application endpoint
         id: save-app-endpoint
         run: |
-          endpoint=$(services/output.sh ui CloudFrontEndpointUrl ${{ inputs.stage_name }})
+          cd services
+          endpoint=$(./output.sh ui CloudFrontEndpointUrl ${{ inputs.stage_name }})
           run: echo "::set-output name=app-endpoint::$endpoint"
 
   storybook:
