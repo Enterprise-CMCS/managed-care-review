@@ -101,9 +101,6 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
-          REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
-          DATABASE_URL: AWS_SM
-          IAM_PATH: ${{ secrets.iam_path }}
-          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
+          STAGE_NAME: ${{ inputs.stage_name }}
         run: |
-          pushd services/app-api && ./scripts/invoke-migrate-lambda.sh app-api-$branch_name-migrate
+          pushd services/app-api && ./scripts/invoke-migrate-lambda.sh app-api-$STAGE_NAME-migrate
