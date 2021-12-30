@@ -47,8 +47,9 @@ jobs:
         shell: bash
         run: echo "::set-output name=branch-name::$(echo ${GITHUB_REF#refs/heads/})"
 
-      - name: Setup env
-        uses: ./.github/actions/setup_env
+      - name: install tsc
+        shell: bash
+        run: yarn global add typescript
 
       - name: build scripts
         shell: bash
