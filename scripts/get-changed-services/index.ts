@@ -76,7 +76,8 @@ async function main() {
 
     const successfulJobs = jobsFromLastSuccess.data.jobs
         .map((job) => {
-            if (job.conclusion === 'success') {
+            // a skipped job means it ran successfully previously
+            if (job.conclusion === 'success' || job.conclusion === 'skipped') {
                 return job.name.split(' / ')[1] // spaces are significant here
             }
         })
