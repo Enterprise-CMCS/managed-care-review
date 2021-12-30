@@ -110,7 +110,7 @@ jobs:
   get-branch-name-vars:
     runs-on: ubuntu-latest
     outputs:
-      branch-name: ${{ steps.branch-name.outputs.stage-name-for-branch}}
+      stage-name: ${{ steps.stage-name.outputs.stage-name-for-branch}}
       changed-services: ${{ steps.changed-services-action.outputs.changed-services }}
     steps:
       - name: Check out repository
@@ -118,11 +118,16 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: set branch_name
-        id: branch-name
+      - name: set stage name
+        id: stage-name
         shell: bash
         run: |
           echo "::set-output name=stage-name-for-branch::$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})"
+
+      - name: set branch name
+        id: branch-name
+        shell: bash
+        run: echo "::set-output name=branch-name::$(echo ${GITHUB_REF#refs/heads/})"
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -136,7 +141,7 @@ jobs:
         id: changed-services-action
         uses: ./scripts/get-changed-services/
         with:
-          branchName: ${GITHUB_REF#refs/heads/}
+          branchName: ${{ steps.branch-name.outputs.branch-name}}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

@@ -46,6 +46,7 @@ async function main() {
     // if we haven't had a run on this branch, we need to deploy everything
     if (allWorkflowRuns.data.total_count === 0) {
         core.setOutput('changed-services', deployAllServices)
+        return
     }
 
     // if a run was cancelled by a user then we need to go back further and

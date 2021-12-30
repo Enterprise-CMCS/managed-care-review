@@ -3,6 +3,7 @@ import * as core from '@actions/core';
 import { exec } from 'child_process';
 import util from 'util';
 /*
+import fs from 'fs'
 // just for testing locally now
 function readToken(path = '../../../../../access_token.txt') {
     return fs.readFileSync(path).toString().trim()
@@ -32,8 +33,8 @@ async function main() {
         repo: 'managed-care-review',
         workflow_id: 'deploy.yml',
         //status: 'success',
-        branch: 'mt-skip-sls-deploy',
-        //branch: core.getInput('branchName', { required: true }),
+        //branch: 'mt-skip-sls-deploy',
+        branch: core.getInput('branchName', { required: true }),
     });
     const deployAllServices = listOfServiceJobs;
     // if we haven't had a run on this branch, we need to deploy everything
