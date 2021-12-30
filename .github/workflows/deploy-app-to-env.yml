@@ -51,7 +51,9 @@ jobs:
 
       - name: Generate Code
         shell: bash
-        run: cd services/app-graphql && yarn gqlgen
+        run: |
+          cd services/app-graphql && yarn gqlgen
+          cd ../app-proto && yarn protogen
 
       - name: deploy app-web
         id: deploy-app-web
