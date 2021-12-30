@@ -259,7 +259,6 @@ jobs:
         id: cypress
         uses: cypress-io/github-action@v2
         with:
-          install: false
           config: baseUrl=${{ needs.deploy-infra.outputs.application-endpoint }}
           record: true
           parallel: true
