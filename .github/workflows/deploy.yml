@@ -194,7 +194,7 @@ jobs:
       react_app_auth_mode: AWS_COGNITO
 
   end-deployment:
-    needs: [begin-deployment, deploy-app]
+    needs: [begin-deployment, deploy-infra, deploy-app]
     if: always() && needs.begin-deployment.result == 'success'
     name: End Deployment
     runs-on: ubuntu-latest
@@ -244,7 +244,7 @@ jobs:
 
   cypress:
     name: cypress-run
-    needs: [deploy-app, create-test-users]
+    needs: [deploy-app, deploy-infra, create-test-users]
     runs-on: ubuntu-latest
     container: cypress/browsers:node14.17.0-chrome91-ff89
     strategy:
