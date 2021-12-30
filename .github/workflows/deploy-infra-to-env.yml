@@ -80,6 +80,30 @@ jobs:
         run: |
           pushd services/ui && npx serverless deploy --stage ${{ inputs.stage_name }}
 
+  storybook:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: deploy storybook
+        id: deploy-storybook
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
+          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
+          IAM_PATH: ${{ secrets.iam_path }}
+          ROUTE_53_HOSTED_ZONE_ID: ${{ secrets.route_53_hosted_zone_id }}
+          ROUTE_53_DOMAIN_NAME: ${{ secrets.route_53_domain_name }}
+          CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets.cloudfront_certificate_arn }}
+          CLOUDFRONT_STORYBOOK_DOMAIN_NAME: ${{ secrets.cloudfront_storybook_domain_name }}
+
+        run: |
+          pushd services/storybook && npx serverless deploy --stage ${{ inputs.stage_name }}
+
   uploads:
     runs-on: ubuntu-latest
     steps:
@@ -100,8 +124,7 @@ jobs:
         run: |
           pushd services/uploads && npx serverless deploy --stage ${{ inputs.stage_name }}
 
-  app-api:
-    needs: [postgres, ui, uploads]
+  infra-api:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -110,36 +133,19 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - uses: actions/download-artifact@v2
-        with:
-          name: lambda-layers-prisma-client
-          path: ./services/app-api/lambda-layers-prisma-client
-
-      - name: Unzip prisma layer
-        run: |
-          tar -C ./services/app-api/lambda-layers-prisma-client -xf ./services/app-api/lambda-layers-prisma-client/nodejs.tar.gz
-          rm -rf ./services/app-api/lambda-layers-prisma-client/nodejs.tar.gz
-
-      - name: deploy app-api
-        id: deploy-app-api
+      - name: deploy infra-api
+        id: deploy-uploads
         env:
-          NODE_OPTIONS: --max_old_space_size=4096
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
-          DATABASE_URL: AWS_SM
-          REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
-          IAM_PATH: ${{ secrets.iam_path }}
-          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
-          EMAILER_MODE: SES
-          SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.ses_review_team_email_addresses }}
-          SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.ses_source_email_address }}
-
+          # FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
+          # IAM_PATH: ${{ secrets.iam_path }}
         run: |
-          pushd services/app-api && npx serverless deploy --stage ${{ inputs.stage_name }}
+          pushd services/infra-api && npx serverless deploy --stage ${{ inputs.stage_name }}
 
-  run-migrations:
-    needs: [postgres, app-api]
+  ui-auth:
+    needs: [infra-api, ui, uploads]
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -148,50 +154,16 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: set branch_name
-        run: |
-          echo "branch_name=${{ inputs.stage_name }}" >> $GITHUB_ENV
-
-      - name: run migrations
-        id: run-migrations
+      - name: deploy ui-auth
+        id: deploy-ui-auth
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
-          REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
-          DATABASE_URL: AWS_SM
-          IAM_PATH: ${{ secrets.iam_path }}
-          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
-        run: |
-          pushd services/app-api && ./scripts/invoke-migrate-lambda.sh app-api-$branch_name-migrate
-
-  deploy-all:
-    runs-on: ubuntu-latest
-    needs: [app-api]
-    steps:
-      - uses: actions/checkout@v2.3.4
-
-      - name: Setup env
-        uses: ./.github/actions/setup_env
-
-      - name: deploy
-        id: deploy
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
-          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
-          REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
           IAM_PATH: ${{ secrets.iam_path }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
           SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.ses_source_email_address }}
-          SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.ses_review_team_email_addresses }}
-          ROUTE_53_HOSTED_ZONE_ID: ${{ secrets.route_53_hosted_zone_id }}
-          ROUTE_53_DOMAIN_NAME: ${{ secrets.route_53_domain_name }}
-          CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets.cloudfront_certificate_arn }}
-          CLOUDFRONT_DOMAIN_NAME: ${{ secrets.cloudfront_domain_name }}
-          CLOUDFRONT_STORYBOOK_DOMAIN_NAME: ${{ secrets.cloudfront_storybook_domain_name }}
           OKTA_METADATA_URL: ${{ secrets.okta_metadata_url }}
+
         run: |
-          # When deploying multiple copies of this quickstart to the same AWS Account (not ideal), a prefix helps prevent stepping on each other.
-          # This can optionally be set as an GitHub Actions Secret
-          ./deploy.sh ${{ inputs.stage_name }}
+          pushd services/ui-auth && npx serverless deploy --stage ${{ inputs.stage_name }}

@@ -1,0 +1,101 @@
+service: infra-api
+variablesResolutionMode: 20210326
+
+frameworkVersion: '2'
+
+plugins:
+  - serverless-stack-termination-protection
+  - serverless-s3-bucket-helper
+  - serverless-iam-helper
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  # iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
+  # iamPath: ${env:IAM_PATH, "/"}
+  serverlessTerminationProtection:
+    stages:
+      - dev
+      - val
+      - prod
+      - main
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: us-east-1
+
+resources:
+  Resources:
+    AppApiGateway:
+      Type: AWS::ApiGateway::RestApi
+      Properties:
+        Name: ${self:service}-${self:custom.stage}-app-api-gateway
+
+    GatewayResponseDefault4XX:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_4XX
+        RestApiId: !Ref AppApiGateway
+    GatewayResponseDefault5XX:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_5XX
+        RestApiId: !Ref AppApiGateway
+
+    # AppApiGatewayAcl:
+    #   Type: AWS::WAFv2::WebACL
+    #   Properties:
+    #     DefaultAction:
+    #       Block: {}
+    #     Rules:
+    #       - Action:
+    #           Allow: {}
+    #         Name: ${self:custom.stage}-allow-usa-plus-territories
+    #         Priority: 0
+    #         Statement:
+    #           GeoMatchStatement:
+    #             CountryCodes:
+    #               - GU # Guam
+    #               - PR # Puerto Rico
+    #               - US # USA
+    #               - UM # US Minor Outlying Islands
+    #               - VI # US Virgin Islands
+    #               - MP # Northern Mariana Islands
+    #         VisibilityConfig:
+    #           SampledRequestsEnabled: true
+    #           CloudWatchMetricsEnabled: true
+    #           MetricName: WafWebAcl
+    #     Scope: REGIONAL
+    #     VisibilityConfig:
+    #       CloudWatchMetricsEnabled: true
+    #       SampledRequestsEnabled: true
+    #       MetricName: ${self:custom.stage}-webacl
+
+    # ApiGwWebAclAssociation:
+    #   Type: AWS::WAFv2::WebACLAssociation
+    #   DependsOn:
+    #     - AppApiGateway
+    #     - AppApiGatewayAcl
+    #   Properties:
+    #     ResourceArn: !Sub
+    #       - arn:aws:apigateway:${self:provider.region}::/restapis/${GatewayRef}/stages/${self:custom.stage}
+    #       - { GatewayRef: !Ref AppApiGateway }
+    #     WebACLArn: !GetAtt AppApiGatewayAcl.Arn
+
+  Outputs:
+    ApiGatewayRestApiId:
+      Value:
+        Ref: AppApiGateway
+    ApiGatewayRestApiUrl:
+      Value: !Sub https://${AppApiGateway}.execute-api.${self:provider.region}.amazonaws.com/${self:custom.stage}
+    AppApiGatewayRootResourceId:
+      Value:
+        Fn::GetAtt:
+          - AppApiGateway
+          - RootResourceId
