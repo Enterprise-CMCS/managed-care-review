@@ -16,20 +16,18 @@ jobs:
       - name: set branch_name
         run: |
           echo "branch_name=$(./scripts/stage_name_for_branch.sh ${{ github.event.ref }})" >> $GITHUB_ENV
-      - name: set branch specific variable names
-        run: ./.github/build_vars.sh set_names
-      - name: set variable values
-        run: ./.github/build_vars.sh set_values
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_ACCESS_KEY_ID] || secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_SECRET_ACCESS_KEY] || secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets[env.BRANCH_SPECIFIC_VARNAME_AWS_DEFAULT_REGION] || secrets.AWS_DEFAULT_REGION }}
-          STAGE_PREFIX: ${{ secrets.STAGE_PREFIX }}
-      - name: lock this branch to prevent concurrent builds
+
+      - name: lock this branch to prevent concurrent destroys
         run: ./.github/github-lock.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: ./destroy.sh $STAGE_PREFIX$branch_name
+      - name: destroy all
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+          STAGE_PREFIX: ${{ secrets.STAGE_PREFIX }}
+        run: ./destroy.sh $STAGE_PREFIX$branch_name
       - name: Alert Slack On Destroy Failure
         uses: rtCamp/action-slack-notify@v2
         if: failure()

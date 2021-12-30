@@ -15,10 +15,16 @@ jobs:
     outputs:
       deploy-id: ${{ steps.ghdeployment.outputs.deployment_id }}
       branch-name: ${{ steps.branch-name.outputs.stage-name-for-branch}}
+      app-version: ${{ steps.branch-name.outputs.app-version}}
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
+
+      - name: Check for secrets
+        uses: ./.github/actions/check_secrets
+        with:
+          expected-secret: ${{ secrets.REACT_APP_AUTH_MODE }}
 
       - name: lock this branch to prevent concurrent deploys
         run: ./.github/github-lock.sh
@@ -31,6 +37,11 @@ jobs:
         run: |
           echo "::set-output name=stage-name-for-branch::$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})"
 
+      - name: set app version
+        id: app-version
+        shell: bash
+        run: echo "::set-output name=app-version::$(scripts/app_version.sh)"
+
       - uses: chrnorm/deployment-action@releases/v1
         name: Create GitHub deployment
         id: ghdeployment
@@ -40,8 +51,34 @@ jobs:
           description: stack ${{ steps.branch-name.outputs.stage-name-for-branch}}
           initial_status: in_progress
 
-  unit-tests:
-    name: test - unit tests
+  web-unit-tests:
+    name: test - web unit tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Web Unit Tests
+        env:
+          REACT_APP_AUTH_MODE: AWS_COGNITO
+          DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
+        run: ./dev test web --unit
+
+      - name: publish code coverage
+        uses: paambaati/codeclimate-action@v3.0.0
+        env:
+          CC_TEST_REPORTER_ID: cace182021fe88d327fa8d95355ac6081f420e094a214fe77feb5df2f0259e9d
+        with:
+          debug: true
+          coverageLocations: |
+            ${{github.workspace}}/services/app-web/coverage/lcov.info:lcov
+
+  api-unit-tests:
+    name: test - api unit tests
     runs-on: ubuntu-latest
 
     services:
@@ -63,19 +100,14 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v2
 
-      - name: Check for secrets
-        uses: ./.github/actions/check_secrets
-        with:
-          expected-secret: ${{ secrets.REACT_APP_AUTH_MODE }}
-
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: Unit Tests
+      - name: API Unit Tests
         env:
           REACT_APP_AUTH_MODE: AWS_COGNITO
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
-        run: ./dev test --unit
+        run: ./dev test api --unit
 
       - name: publish code coverage
         uses: paambaati/codeclimate-action@v3.0.0
@@ -85,7 +117,6 @@ jobs:
           debug: true
           coverageLocations: |
             ${{github.workspace}}/services/app-api/coverage/lcov.info:lcov
-            ${{github.workspace}}/services/app-web/coverage/lcov.info:lcov
 
   build-prisma-client-lambda-layer:
     name: build - postgres prisma layer
@@ -124,7 +155,7 @@ jobs:
 
   deploy-infra:
     needs: [begin-deployment]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@wml-thin-setup
     with:
       stage_name: ${{ needs.begin-deployment.outputs.branch-name}}
     secrets:
@@ -132,36 +163,73 @@ jobs:
       aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
-      ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
       okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
       iam_path: ${{ secrets.IAM_PATH }}
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-      react_app_auth_mode: AWS_COGNITO
 
   deploy-app:
     needs:
       [
         begin-deployment,
         build-prisma-client-lambda-layer,
-        unit-tests,
+        web-unit-tests,
+        api-unit-tests,
         deploy-infra,
       ]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@wml-thin-setup
     with:
-      stage_name: ${{ needs.begin-deployment.outputs.branch-name}}
+      stage_name: ${{ needs.begin-deployment.outputs.branch-name }}
+      app_version: ${{ needs.begin-deployment.outputs.app-version }}
     secrets:
       aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
       ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
-      okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
       iam_path: ${{ secrets.IAM_PATH }}
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
       react_app_auth_mode: AWS_COGNITO
 
+  finishing-prep:
+    name: Finishing Prep
+    needs: [deploy-infra, begin-deployment]
+    runs-on: ubuntu-latest
+    outputs:
+      application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Create Test Users
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+          BRANCH_NAME: ${{ needs.begin-deployment.outputs.branch-name }}
+          TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
+        run: |
+          cd scripts
+          yarn tsc
+          node ./add_cypress_test_users.js $BRANCH_NAME $TEST_USERS_PASS
+
+      - name: get application endpoint
+        id: save-app-endpoint
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+          BRANCH_NAME: ${{ needs.begin-deployment.outputs.branch-name }}
+        run: |
+          cd services
+          endpoint=$(./output.sh ui CloudFrontEndpointUrl $BRANCH_NAME)
+          echo $endpoint
+          echo "::set-output name=app-endpoint::$endpoint"
+
   end-deployment:
-    needs: [begin-deployment, deploy-app]
+    needs: [begin-deployment, deploy-app, finishing-prep]
     if: always() && needs.begin-deployment.result == 'success'
     name: End Deployment
     runs-on: ubuntu-latest
@@ -177,36 +245,18 @@ jobs:
           state: 'failure'
           deployment_id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
-      - name: Setup env
-        uses: ./.github/actions/setup_env
-
-      - name: Add serverless to End
-        shell: bash
-        run: yarn global add serverless
-
-      - name: Set application endpoint
-        if: needs.deploy-app.result == 'success'
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-        run: |
-          cd services
-          endpoint=$(./output.sh ui CloudFrontEndpointUrl $branch_name)
-          echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
-
       - name: Update deployment status (success)
         if: needs.deploy-app.result == 'success'
         uses: chrnorm/deployment-status@releases/v1
         with:
           token: '${{ github.token }}'
-          environment_url: ${{env.APPLICATION_ENDPOINT}}
+          environment_url: ${{ needs.finishing-prep.outputs.application-endpoint }}
           state: 'success'
           deployment_id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
   cypress:
     name: cypress-run
-    needs: [deploy-app]
+    needs: [deploy-app, finishing-prep]
     runs-on: ubuntu-latest
     container: cypress/browsers:node14.17.0-chrome91-ff89
     strategy:
@@ -217,40 +267,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup env
-        uses: ./.github/actions/setup_env
-
-      - name: Create Test Users
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-          TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
-        run: |
-          cd scripts
-          yarn tsc
-          node ./add_cypress_test_users.js $branch_name $TEST_USERS_PASS
-
-      - name: Add serverless to Cypress
-        shell: bash
-        run: yarn global add serverless
-
-      - name: Set application endpoint
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-        run: |
-          cd services
-          endpoint=$(./output.sh ui CloudFrontEndpointUrl $branch_name)
-          echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
-
       - name: Cypress -- Chrome
         id: cypress
         uses: cypress-io/github-action@v2
         with:
-          install: false
-          config: baseUrl=${{env.APPLICATION_ENDPOINT}}
+          config: baseUrl=${{ needs.finishing-prep.outputs.application-endpoint }}
           record: true
           parallel: true
           browser: chrome
