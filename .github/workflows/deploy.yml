@@ -15,6 +15,7 @@ jobs:
     outputs:
       deploy-id: ${{ steps.ghdeployment.outputs.deployment_id }}
       branch-name: ${{ steps.branch-name.outputs.stage-name-for-branch}}
+      app-version: ${{ steps.branch-name.outputs.app-version}}
 
     steps:
       - name: Check out repository
@@ -30,6 +31,11 @@ jobs:
         shell: bash
         run: |
           echo "::set-output name=stage-name-for-branch::$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})"
+
+      - name: set app version
+        id: app-version
+        shell: bash
+        run: echo "::set-output name=app-version::$(scripts/app_version.sh)"
 
       - uses: chrnorm/deployment-action@releases/v1
         name: Create GitHub deployment
@@ -148,7 +154,8 @@ jobs:
       ]
     uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@wml-reorder-infra-deps
     with:
-      stage_name: ${{ needs.begin-deployment.outputs.branch-name}}
+      stage_name: ${{ needs.begin-deployment.outputs.branch-name }}
+      app_version: ${{ needs.begin-deployment.outputs.app-version }}
     secrets:
       aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

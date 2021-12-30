@@ -9,6 +9,8 @@ jobs:
   unit-tests:
     name: test - unit tests
     runs-on: ubuntu-latest
+    outputs:
+      app-version: ${{ steps.branch-name.outputs.app-version}}
 
     services:
       postgres:
@@ -33,6 +35,11 @@ jobs:
         run: ./.github/github-lock.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: set app version
+        id: app-version
+        shell: bash
+        run: echo "::set-output name=app-version::$(scripts/app_version.sh)"
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -112,6 +119,7 @@ jobs:
     uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
     with:
       stage_name: main
+      app_version: ${{ needs.unit-tests.outputs.app-version }}
     secrets:
       aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -200,6 +208,7 @@ jobs:
     uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
     with:
       stage_name: val
+      app_version: ${{ needs.unit-tests.outputs.app-version }}
     secrets:
       aws_access_key_id: ${{ secrets.VAL_AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.VAL_AWS_SECRET_ACCESS_KEY }}
@@ -288,6 +297,7 @@ jobs:
     uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
     with:
       stage_name: prod
+      app_version: ${{ needs.unit-tests.outputs.app-version }}
     secrets:
       aws_access_key_id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}

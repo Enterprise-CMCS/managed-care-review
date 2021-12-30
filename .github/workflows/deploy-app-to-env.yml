@@ -6,6 +6,9 @@ on:
       stage_name:
         required: true
         type: string
+      app_version:
+        required: true
+        type: string
     secrets:
       aws_access_key_id:
         required: true
@@ -46,6 +49,10 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Generate Code
+        shell: bash
+        run: cd serviecs/app-graphql && yarn gqlgen
+
       - name: deploy app-web
         id: deploy-app-web
         env:
@@ -67,6 +74,12 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Generate Code
+        shell: bash
+        run: |
+          cd serviecs/app-graphql && yarn gqlgen
+          cd ../app-proto && yarn protogen
+
       - uses: actions/download-artifact@v2
         with:
           name: lambda-layers-prisma-client
@@ -84,6 +97,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
+          APP_VERSION: ${{ inputs.app_version }}
           DATABASE_URL: AWS_SM
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
           IAM_PATH: ${{ secrets.iam_path }}
