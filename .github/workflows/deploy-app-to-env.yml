@@ -38,10 +38,7 @@ jobs:
         uses: ./.github/actions/setup_env
 
       - name: Generate Code
-        shell: bash
-        run: |
-          cd services/app-graphql && yarn gqlgen
-          cd ../app-proto && yarn protogen
+        run: lerna run generate-code
 
       - name: deploy app-web
         id: deploy-app-web
@@ -65,10 +62,7 @@ jobs:
         uses: ./.github/actions/setup_env
 
       - name: Generate Code
-        shell: bash
-        run: |
-          cd services/app-graphql && yarn gqlgen
-          cd ../app-proto && yarn protogen
+        run: lerna run generate-code
 
       - uses: actions/download-artifact@v2
         with:
