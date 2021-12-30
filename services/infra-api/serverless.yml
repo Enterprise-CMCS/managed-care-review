@@ -83,7 +83,7 @@ resources:
         - AppApiGateway
         - AppApiGatewayAcl
       Properties:
-        ResourceArn: ResourceArn: !Sub
+        ResourceArn: !Sub
           - arn:aws:apigateway:${self:provider.region}::/restapis/${GatewayRef}/stages/${self:custom.stage}
           - { GatewayRef: !Ref AppApiGateway }
         WebACLArn: !GetAtt AppApiGatewayAcl.Arn
