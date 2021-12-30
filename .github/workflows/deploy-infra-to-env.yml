@@ -92,7 +92,7 @@ jobs:
         run: |
           cd services
           endpoint=$(./output.sh ui CloudFrontEndpointUrl ${{ inputs.stage_name }})
-          run: echo "::set-output name=app-endpoint::$endpoint"
+          echo "::set-output name=app-endpoint::$endpoint"
 
   storybook:
     runs-on: ubuntu-latest
