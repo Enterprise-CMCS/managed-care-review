@@ -163,11 +163,9 @@ jobs:
       aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
-      ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
       okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
       iam_path: ${{ secrets.IAM_PATH }}
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-      react_app_auth_mode: AWS_COGNITO
 
   deploy-app:
     needs:
@@ -188,7 +186,6 @@ jobs:
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
       ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
-      okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
       iam_path: ${{ secrets.IAM_PATH }}
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
       react_app_auth_mode: AWS_COGNITO

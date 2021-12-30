@@ -23,16 +23,8 @@ on:
         required: false
       cloudfront_storybook_domain_name:
         required: false
-      react_app_auth_mode:
-        required: true
       ses_source_email_address:
         required: true
-      ses_review_team_email_addresses:
-        required: true
-      route_53_hosted_zone_id:
-        required: false
-      route_53_domain_name:
-        required: false
       okta_metadata_url:
         required: true
 
@@ -74,8 +66,6 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
           IAM_PATH: ${{ secrets.iam_path }}
-          ROUTE_53_HOSTED_ZONE_ID: ${{ secrets.route_53_hosted_zone_id }}
-          ROUTE_53_DOMAIN_NAME: ${{ secrets.route_53_domain_name }}
           CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets.cloudfront_certificate_arn }}
           CLOUDFRONT_DOMAIN_NAME: ${{ secrets.cloudfront_domain_name }}
         run: |
@@ -97,8 +87,6 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
           IAM_PATH: ${{ secrets.iam_path }}
-          ROUTE_53_HOSTED_ZONE_ID: ${{ secrets.route_53_hosted_zone_id }}
-          ROUTE_53_DOMAIN_NAME: ${{ secrets.route_53_domain_name }}
           CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets.cloudfront_certificate_arn }}
           CLOUDFRONT_STORYBOOK_DOMAIN_NAME: ${{ secrets.cloudfront_storybook_domain_name }}
 
@@ -140,8 +128,6 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
-          # FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
-          # IAM_PATH: ${{ secrets.iam_path }}
         run: |
           pushd services/infra-api && npx serverless deploy --stage ${{ inputs.stage_name }}
 

@@ -105,14 +105,12 @@ jobs:
       aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
-      ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
       okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
       iam_path: ${{ secrets.IAM_PATH }}
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
       cloudfront_certificate_arn: ${{ secrets.DEV_CLOUDFRONT_CERTIFICATE_ARN }}
       cloudfront_domain_name: ${{ secrets.DEV_CLOUDFRONT_DOMAIN_NAME }}
       cloudfront_storybook_domain_name: ${{ secrets.DEV_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
-      react_app_auth_mode: IDM
 
   promote-app-dev:
     needs: [promote-infra-dev, build-prisma-client-lambda-layer, unit-tests]
@@ -124,14 +122,10 @@ jobs:
       aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
-      ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
-      ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
-      okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
       iam_path: ${{ secrets.IAM_PATH }}
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-      cloudfront_certificate_arn: ${{ secrets.DEV_CLOUDFRONT_CERTIFICATE_ARN }}
-      cloudfront_domain_name: ${{ secrets.DEV_CLOUDFRONT_DOMAIN_NAME }}
-      cloudfront_storybook_domain_name: ${{ secrets.DEV_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
+      ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
+      ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
       react_app_auth_mode: IDM
 
   dev-cypress:
@@ -197,10 +191,8 @@ jobs:
       cloudfront_storybook_domain_name: ${{ secrets.VAL_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
       okta_metadata_url: ${{ secrets.VAL_OKTA_METADATA_URL }}
       full_iam_permissions_boundary_policy: ${{ secrets.VAL_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-      react_app_auth_mode: IDM
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
-      ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
       iam_path: ${{ secrets.IAM_PATH }}
 
   promote-app-val:
@@ -212,16 +204,12 @@ jobs:
     secrets:
       aws_access_key_id: ${{ secrets.VAL_AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.VAL_AWS_SECRET_ACCESS_KEY }}
-      cloudfront_certificate_arn: ${{ secrets.VAL_CLOUDFRONT_CERTIFICATE_ARN }}
-      cloudfront_domain_name: ${{ secrets.VAL_CLOUDFRONT_DOMAIN_NAME }}
-      cloudfront_storybook_domain_name: ${{ secrets.VAL_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
-      okta_metadata_url: ${{ secrets.VAL_OKTA_METADATA_URL }}
+      aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
+      iam_path: ${{ secrets.IAM_PATH }}
       full_iam_permissions_boundary_policy: ${{ secrets.VAL_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
       react_app_auth_mode: IDM
-      aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
       ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
-      iam_path: ${{ secrets.IAM_PATH }}
 
   cypress-val:
     name: val - cypress
@@ -286,10 +274,8 @@ jobs:
       cloudfront_storybook_domain_name: ${{ secrets.PROD_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
       okta_metadata_url: ${{ secrets.PROD_OKTA_METADATA_URL }}
       full_iam_permissions_boundary_policy: ${{ secrets.PROD_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-      react_app_auth_mode: IDM
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
-      ses_review_team_email_addresses: ${{ secrets.PROD_SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
       iam_path: ${{ secrets.IAM_PATH }}
 
   promote-app-prod:
@@ -301,16 +287,12 @@ jobs:
     secrets:
       aws_access_key_id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
-      cloudfront_certificate_arn: ${{ secrets.PROD_CLOUDFRONT_CERTIFICATE_ARN }}
-      cloudfront_domain_name: ${{ secrets.PROD_CLOUDFRONT_DOMAIN_NAME }}
-      cloudfront_storybook_domain_name: ${{ secrets.PROD_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
-      okta_metadata_url: ${{ secrets.PROD_OKTA_METADATA_URL }}
+      aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
+      iam_path: ${{ secrets.IAM_PATH }}
       full_iam_permissions_boundary_policy: ${{ secrets.PROD_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
       react_app_auth_mode: IDM
-      aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
       ses_review_team_email_addresses: ${{ secrets.PROD_SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
-      iam_path: ${{ secrets.IAM_PATH }}
 
   cypress-prod:
     name: prod - cypress

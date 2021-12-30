@@ -20,23 +20,11 @@ on:
         required: true
       full_iam_permissions_boundary_policy:
         required: true
-      cloudfront_certificate_arn:
-        required: false
-      cloudfront_domain_name:
-        required: false
-      cloudfront_storybook_domain_name:
-        required: false
       react_app_auth_mode:
         required: true
       ses_source_email_address:
         required: true
       ses_review_team_email_addresses:
-        required: true
-      route_53_hosted_zone_id:
-        required: false
-      route_53_domain_name:
-        required: false
-      okta_metadata_url:
         required: true
 
 jobs:
