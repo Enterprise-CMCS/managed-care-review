@@ -47,14 +47,13 @@ jobs:
         shell: bash
         run: echo "::set-output name=branch-name::$(echo ${GITHUB_REF#refs/heads/})"
 
-      - name: install tsc
-        shell: bash
-        run: yarn global add typescript
+      - name: Setup env
+        uses: ./.github/actions/setup_env
 
       - name: build scripts
         shell: bash
         run: |
-          cd scripts && yarn build
+          lerna run build:ci-scripts
 
       - name: run get_changed_services
         id: changed-services-action
