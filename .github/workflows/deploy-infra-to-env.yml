@@ -33,7 +33,7 @@ on:
 
 jobs:
   postgres:
-    if: ${{ contains(inputs.changed_services, 'postgres') }}
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
