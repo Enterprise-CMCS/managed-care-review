@@ -193,8 +193,41 @@ jobs:
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
       react_app_auth_mode: AWS_COGNITO
 
+  finishing-prep:
+    name: Finishing Prep
+    needs: [deploy-infra, begin-deployment]
+    runs-on: ubuntu-latest
+    outputs:
+      application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Create Test Users
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+          BRANCH_NAME: ${{ needs.begin-deployment.outputs.branch-name }}
+          TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
+        run: |
+          cd scripts
+          yarn tsc
+          node ./add_cypress_test_users.js $BRANCH_NAME $TEST_USERS_PASS
+
+      - name: get application endpoint
+        id: save-app-endpoint
+        run: |
+          cd services
+          endpoint=$(./output.sh ui CloudFrontEndpointUrl ${{ inputs.stage_name }})
+          echo $endpoint
+          echo "::set-output name=app-endpoint::$endpoint"
+
   end-deployment:
-    needs: [begin-deployment, deploy-infra, deploy-app]
+    needs: [begin-deployment, deploy-app, finishing-prep]
     if: always() && needs.begin-deployment.result == 'success'
     name: End Deployment
     runs-on: ubuntu-latest
@@ -215,36 +248,13 @@ jobs:
         uses: chrnorm/deployment-status@releases/v1
         with:
           token: '${{ github.token }}'
-          environment_url: ${{ needs.deploy-infra.outputs.application-endpoint }}
+          environment_url: ${{ needs.finishing-prep.outputs.application-endpoint }}
           state: 'success'
           deployment_id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
-  create-test-users:
-    name: Create Test Users
-    needs: [deploy-infra, begin-deployment]
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Setup env
-        uses: ./.github/actions/setup_env
-
-      - name: Create Test Users
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-          BRANCH_NAME: ${{ needs.begin-deployment.outputs.branch-name }}
-          TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
-        run: |
-          cd scripts
-          yarn tsc
-          node ./add_cypress_test_users.js $BRANCH_NAME $TEST_USERS_PASS
-
   cypress:
     name: cypress-run
-    needs: [deploy-app, deploy-infra, create-test-users]
+    needs: [deploy-app, finishing-prep]
     runs-on: ubuntu-latest
     container: cypress/browsers:node14.17.0-chrome91-ff89
     strategy:
@@ -259,7 +269,7 @@ jobs:
         id: cypress
         uses: cypress-io/github-action@v2
         with:
-          config: baseUrl=${{ needs.deploy-infra.outputs.application-endpoint }}
+          config: baseUrl=${{ needs.finishing-prep.outputs.application-endpoint }}
           record: true
           parallel: true
           browser: chrome
