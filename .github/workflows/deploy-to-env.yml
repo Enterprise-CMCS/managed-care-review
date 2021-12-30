@@ -196,6 +196,7 @@ jobs:
           pushd services/ui-auth && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   run-migrations:
+    if: ${{ contains(inputs.changed_services, 'run-migrations') }}
     needs: [postgres, app-api]
     runs-on: ubuntu-latest
     steps:
