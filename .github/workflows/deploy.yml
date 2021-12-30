@@ -54,7 +54,7 @@ jobs:
       - name: build scripts
         shell: bash
         run: |
-          lerna run build:ci-scripts
+          cd scripts && yarn build
 
       - name: run get_changed_services
         id: changed-services-action

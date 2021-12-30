@@ -22,7 +22,7 @@ const listOfServiceJobs = [
     'ui',
     'uploads',
     'run-migrations',
-    'build-prisma',
+    'prisma-layer',
 ];
 const octokit = new Octokit();
 async function main() {
@@ -40,6 +40,7 @@ async function main() {
     // if we haven't had a run on this branch, we need to deploy everything
     if (allWorkflowRuns.data.total_count === 0) {
         core.setOutput('changed-services', deployAllServices);
+        return;
     }
     // if a run was cancelled by a user then we need to go back further and
     // find an attempt that actually ran and had an actionable outcome for us
@@ -62,7 +63,8 @@ async function main() {
     });
     const successfulJobs = jobsFromLastSuccess.data.jobs
         .map((job) => {
-        if (job.conclusion === 'success') {
+        // a skipped job means it ran successfully previously
+        if (job.conclusion === 'success' || job.conclusion === 'skipped') {
             return job.name.split(' / ')[1]; // spaces are significant here
         }
     })
