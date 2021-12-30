@@ -25,7 +25,7 @@ const listOfServiceJobs = [
     'ui',
     'uploads',
     'run-migrations',
-    'build-prisma',
+    'prisma-layer',
 ]
 
 const octokit = new Octokit()
