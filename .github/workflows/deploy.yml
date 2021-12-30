@@ -221,7 +221,7 @@ jobs:
 
   create-test-users:
     name: Create Test Users
-    needs: deploy-infra
+    needs: [deploy-infra, begin-deployment]
     runs-on: ubuntu-latest
 
     steps:
