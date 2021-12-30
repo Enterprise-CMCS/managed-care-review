@@ -21,6 +21,11 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v2
 
+      - name: Check for secrets
+        uses: ./.github/actions/check_secrets
+        with:
+          expected-secret: ${{ secrets.REACT_APP_AUTH_MODE }}
+
       - name: lock this branch to prevent concurrent deploys
         run: ./.github/github-lock.sh
         env:
@@ -46,8 +51,34 @@ jobs:
           description: stack ${{ steps.branch-name.outputs.stage-name-for-branch}}
           initial_status: in_progress
 
-  unit-tests:
-    name: test - unit tests
+  web-unit-tests:
+    name: test - web unit tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Web Unit Tests
+        env:
+          REACT_APP_AUTH_MODE: AWS_COGNITO
+          DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
+        run: ./dev test web --unit
+
+      - name: publish code coverage
+        uses: paambaati/codeclimate-action@v3.0.0
+        env:
+          CC_TEST_REPORTER_ID: cace182021fe88d327fa8d95355ac6081f420e094a214fe77feb5df2f0259e9d
+        with:
+          debug: true
+          coverageLocations: |
+            ${{github.workspace}}/services/app-web/coverage/lcov.info:lcov
+
+  api-unit-tests:
+    name: test - api unit tests
     runs-on: ubuntu-latest
 
     services:
@@ -69,19 +100,14 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v2
 
-      - name: Check for secrets
-        uses: ./.github/actions/check_secrets
-        with:
-          expected-secret: ${{ secrets.REACT_APP_AUTH_MODE }}
-
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: Unit Tests
+      - name: API Unit Tests
         env:
           REACT_APP_AUTH_MODE: AWS_COGNITO
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
-        run: ./dev test --unit
+        run: ./dev test api --unit
 
       - name: publish code coverage
         uses: paambaati/codeclimate-action@v3.0.0
@@ -91,7 +117,6 @@ jobs:
           debug: true
           coverageLocations: |
             ${{github.workspace}}/services/app-api/coverage/lcov.info:lcov
-            ${{github.workspace}}/services/app-web/coverage/lcov.info:lcov
 
   build-prisma-client-lambda-layer:
     name: build - postgres prisma layer
@@ -149,7 +174,8 @@ jobs:
       [
         begin-deployment,
         build-prisma-client-lambda-layer,
-        unit-tests,
+        web-unit-tests,
+        api-unit-tests,
         deploy-infra,
       ]
     uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@wml-thin-setup
@@ -209,11 +235,12 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+          BRANCH_NAME: ${{ needs.begin-deployment.outputs.branch-name }}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
         run: |
           cd scripts
           yarn tsc
-          node ./add_cypress_test_users.js $branch_name $TEST_USERS_PASS
+          node ./add_cypress_test_users.js $BRANCH_NAME $TEST_USERS_PASS
 
   cypress:
     name: cypress-run
