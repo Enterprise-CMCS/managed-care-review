@@ -184,7 +184,7 @@ jobs:
     needs: [begin-deployment]
     uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@mt-skip-sls-deploy
     with:
-      stage_name: ${{ needs.begin-deployment.outputs.branch-name}}
+      stage_name: ${{ needs.begin-deployment.outputs.stage-name}}
       changed_services: ${{ needs.begin-deployment.outputs.changed-services }}
     secrets:
       aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -286,7 +286,7 @@ jobs:
   cypress:
     name: cypress-run
     needs: [deploy-app, finishing-prep]
-    if: always() && needs.deploy-app.result == 'success'
+    if: always() && needs.deploy-app.result == 'success' && needs.finishing-prep.result == 'success'
     runs-on: ubuntu-latest
     container: cypress/browsers:node14.17.0-chrome91-ff89
     strategy:
