@@ -184,43 +184,20 @@ jobs:
           state: 'failure'
           deployment_id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
-      - name: Setup env
-        uses: ./.github/actions/setup_env
-
-      - name: Add serverless to End
-        shell: bash
-        run: yarn global add serverless
-
-      - name: Set application endpoint
-        if: needs.deploy-app.result == 'success'
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-        run: |
-          cd services
-          endpoint=$(./output.sh ui CloudFrontEndpointUrl $branch_name)
-          echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
-
       - name: Update deployment status (success)
         if: needs.deploy-app.result == 'success'
         uses: chrnorm/deployment-status@releases/v1
         with:
           token: '${{ github.token }}'
-          environment_url: ${{env.APPLICATION_ENDPOINT}}
+          environment_url: ${{ needs.deploy-infra.outputs.application-endpoint }}
           state: 'success'
           deployment_id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
-  cypress:
-    name: cypress-run
-    needs: [deploy-app]
+  create-test-users:
+    name: Create Test Users
+    needs: deploy-infra
     runs-on: ubuntu-latest
-    container: cypress/browsers:node14.17.0-chrome91-ff89
-    strategy:
-      fail-fast: false
-      matrix:
-        # run copies of the current job in parallel
-        containers: [1, 2, 3, 4, 5, 6]
+
     steps:
       - uses: actions/checkout@v2
 
@@ -238,26 +215,25 @@ jobs:
           yarn tsc
           node ./add_cypress_test_users.js $branch_name $TEST_USERS_PASS
 
-      - name: Add serverless to Cypress
-        shell: bash
-        run: yarn global add serverless
-
-      - name: Set application endpoint
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-        run: |
-          cd services
-          endpoint=$(./output.sh ui CloudFrontEndpointUrl $branch_name)
-          echo "APPLICATION_ENDPOINT=$endpoint" >> "$GITHUB_ENV"
+  cypress:
+    name: cypress-run
+    needs: [deploy-app, create-test-users]
+    runs-on: ubuntu-latest
+    container: cypress/browsers:node14.17.0-chrome91-ff89
+    strategy:
+      fail-fast: false
+      matrix:
+        # run copies of the current job in parallel
+        containers: [1, 2, 3, 4, 5, 6]
+    steps:
+      - uses: actions/checkout@v2
 
       - name: Cypress -- Chrome
         id: cypress
         uses: cypress-io/github-action@v2
         with:
           install: false
-          config: baseUrl=${{env.APPLICATION_ENDPOINT}}
+          config: baseUrl=${{ needs.deploy-infra.outputs.application-endpoint }}
           record: true
           parallel: true
           browser: chrome

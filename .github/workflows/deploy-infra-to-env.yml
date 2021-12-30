@@ -35,6 +35,10 @@ on:
         required: false
       okta_metadata_url:
         required: true
+    outputs:
+      application-endpoint:
+        description: 'The endpoint for app-web'
+        value: ${{ jobs.ui.outputs.application-endpoint }}
 
 jobs:
   postgres:
@@ -59,6 +63,9 @@ jobs:
 
   ui:
     runs-on: ubuntu-latest
+    outputs:
+      application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
@@ -79,6 +86,12 @@ jobs:
           CLOUDFRONT_DOMAIN_NAME: ${{ secrets.cloudfront_domain_name }}
         run: |
           pushd services/ui && npx serverless deploy --stage ${{ inputs.stage_name }}
+
+      - name: get application endpoint
+        id: save-app-endpoint
+        run: |
+          endpoint=$(./output.sh ui CloudFrontEndpointUrl ${{ inputs.stage_name }})
+          run: echo "::set-output name=app-endpoint::$endpoint"
 
   storybook:
     runs-on: ubuntu-latest
