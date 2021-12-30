@@ -94,7 +94,7 @@ export async function runWebAgainstAWS(
 
     const apiBase = commandMustSucceedSync(
         './output.sh',
-        ['app-api', 'ApiGatewayRestApiUrl', stageName],
+        ['infra-api', 'ApiGatewayRestApiUrl', stageName],
         {
             cwd: './services',
         }

@@ -5,6 +5,7 @@
     "description": "app graphql definitions",
     "license": "MIT",
     "scripts": {
+        "generate-code": "yarn gqlgen",
         "gqlgen": "graphql-codegen",
         "gqlgen-watch": "graphql-codegen --watch"
     },

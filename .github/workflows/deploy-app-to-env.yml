@@ -1,0 +1,109 @@
+name: Promote to an environment
+
+on:
+  workflow_call:
+    inputs:
+      stage_name:
+        required: true
+        type: string
+      app_version:
+        required: true
+        type: string
+      changed_services:
+        required: true
+        type: string
+    secrets:
+      aws_access_key_id:
+        required: true
+      aws_secret_access_key:
+        required: true
+      aws_default_region:
+        required: true
+      iam_path:
+        required: true
+      full_iam_permissions_boundary_policy:
+        required: true
+      react_app_auth_mode:
+        required: true
+      ses_source_email_address:
+        required: true
+      ses_review_team_email_addresses:
+        required: true
+
+jobs:
+  app-web:
+    if: ${{ contains(inputs.changed_services, 'app-web') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate Code
+        run: lerna run generate-code
+
+      - name: deploy app-web
+        id: deploy-app-web
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
+          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
+          IAM_PATH: ${{ secrets.iam_path }}
+          REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
+
+        run: |
+          pushd services/app-web && npx serverless deploy --stage ${{ inputs.stage_name }}
+
+  app-api:
+    if: ${{ contains(inputs.changed_services, 'app-api') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate Code
+        run: lerna run generate-code
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: lambda-layers-prisma-client
+          path: ./services/app-api/lambda-layers-prisma-client
+
+      - name: Unzip prisma layer
+        run: |
+          tar -C ./services/app-api/lambda-layers-prisma-client -xf ./services/app-api/lambda-layers-prisma-client/nodejs.tar.gz
+          rm -rf ./services/app-api/lambda-layers-prisma-client/nodejs.tar.gz
+
+      - name: deploy app-api
+        id: deploy-app-api
+        env:
+          NODE_OPTIONS: --max_old_space_size=4096
+          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
+          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
+          APP_VERSION: ${{ inputs.app_version }}
+          DATABASE_URL: AWS_SM
+          REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
+          IAM_PATH: ${{ secrets.iam_path }}
+          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
+          EMAILER_MODE: SES
+          SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.ses_review_team_email_addresses }}
+          SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.ses_source_email_address }}
+
+        run: |
+          pushd services/app-api && npx serverless deploy --stage ${{ inputs.stage_name }}
+
+      - name: run migrations
+        id: run-migrations
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
+          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
+          STAGE_NAME: ${{ inputs.stage_name }}
+        run: |
+          pushd services/app-api && ./scripts/invoke-migrate-lambda.sh app-api-$STAGE_NAME-migrate
