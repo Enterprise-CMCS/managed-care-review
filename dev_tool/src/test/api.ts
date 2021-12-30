@@ -4,12 +4,14 @@ import {
     compileGraphQLTypesWatchOnce,
     installAPIDeps,
 } from '../local/index.js'
+import { compileProto } from '../local/proto.js'
 import LabeledProcessRunner from '../runner.js'
 
 export async function runAPITestsWatch(jestArgs: string[]) {
     const runner = new LabeledProcessRunner()
 
     compileGraphQLTypesWatchOnce(runner)
+    await compileProto(runner)
 
     await installAPIDeps(runner)
 
@@ -31,6 +33,7 @@ export async function runAPITests(
     runner: LabeledProcessRunner
 ): Promise<number> {
     await compileGraphQLTypesOnce(runner)
+    await compileProto(runner)
     await installAPIDeps(runner)
 
     // reset the db, wiping it and running all the migrations files that exist
