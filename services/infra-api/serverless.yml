@@ -48,40 +48,45 @@ resources:
         ResponseType: DEFAULT_5XX
         RestApiId: !Ref AppApiGateway
 
-    AppApiGatewayAcl:
-      Type: AWS::WAFv2::WebACL
-      Properties:
-        DefaultAction:
-          Block: {}
-        Rules:
-          - Action:
-              Allow: {}
-            Name: ${self:custom.stage}-allow-usa-plus-territories
-            Priority: 0
-            Statement:
-              GeoMatchStatement:
-                CountryCodes:
-                  - GU # Guam
-                  - PR # Puerto Rico
-                  - US # USA
-                  - UM # US Minor Outlying Islands
-                  - VI # US Virgin Islands
-                  - MP # Northern Mariana Islands
-            VisibilityConfig:
-              SampledRequestsEnabled: true
-              CloudWatchMetricsEnabled: true
-              MetricName: WafWebAcl
-        Scope: REGIONAL
-        VisibilityConfig:
-          CloudWatchMetricsEnabled: true
-          SampledRequestsEnabled: true
-          MetricName: ${self:custom.stage}-webacl
+    # AppApiGatewayAcl:
+    #   Type: AWS::WAFv2::WebACL
+    #   Properties:
+    #     DefaultAction:
+    #       Block: {}
+    #     Rules:
+    #       - Action:
+    #           Allow: {}
+    #         Name: ${self:custom.stage}-allow-usa-plus-territories
+    #         Priority: 0
+    #         Statement:
+    #           GeoMatchStatement:
+    #             CountryCodes:
+    #               - GU # Guam
+    #               - PR # Puerto Rico
+    #               - US # USA
+    #               - UM # US Minor Outlying Islands
+    #               - VI # US Virgin Islands
+    #               - MP # Northern Mariana Islands
+    #         VisibilityConfig:
+    #           SampledRequestsEnabled: true
+    #           CloudWatchMetricsEnabled: true
+    #           MetricName: WafWebAcl
+    #     Scope: REGIONAL
+    #     VisibilityConfig:
+    #       CloudWatchMetricsEnabled: true
+    #       SampledRequestsEnabled: true
+    #       MetricName: ${self:custom.stage}-webacl
 
-    ApiGwWebAclAssociation:
-      Type: AWS::WAFv2::WebACLAssociation
-      Properties:
-        ResourceArn: !Sub arn:aws:apigateway:${self:provider.region}::/restapis/${AppApiGateway}/stages/${self:custom.stage}
-        WebACLArn: !GetAtt AppApiGatewayAcl.Arn
+    # ApiGwWebAclAssociation:
+    #   Type: AWS::WAFv2::WebACLAssociation
+    #   DependsOn:
+    #     - AppApiGateway
+    #     - AppApiGatewayAcl
+    #   Properties:
+    #     ResourceArn: !Sub
+    #       - arn:aws:apigateway:${self:provider.region}::/restapis/${GatewayRef}/stages/${self:custom.stage}
+    #       - { GatewayRef: !Ref AppApiGateway }
+    #     WebACLArn: !GetAtt AppApiGatewayAcl.Arn
 
   Outputs:
     ApiGatewayRestApiId:

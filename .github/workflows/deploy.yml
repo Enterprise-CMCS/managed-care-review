@@ -130,7 +130,7 @@ jobs:
 
   deploy-infra:
     needs: [begin-deployment]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@wml-reorder-infra-deps
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@wml-fix-acl-dep
     with:
       stage_name: ${{ needs.begin-deployment.outputs.branch-name}}
     secrets:
@@ -152,7 +152,7 @@ jobs:
         unit-tests,
         deploy-infra,
       ]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@wml-reorder-infra-deps
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
     with:
       stage_name: ${{ needs.begin-deployment.outputs.branch-name }}
       app_version: ${{ needs.begin-deployment.outputs.app-version }}
