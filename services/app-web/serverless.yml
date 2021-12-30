@@ -69,5 +69,13 @@ custom:
         export REACT_APP_COGNITO_USER_POOL_CLIENT_DOMAIN=${self:custom.cognito_user_pool_client_domain}
         export REACT_APP_S3_REGION=${self:custom.s3_documents_bucket_region}
         export REACT_APP_S3_DOCUMENTS_BUCKET=${self:custom.s3_documents_bucket_name}
-        yarn run build
-        yarn build-storybook
+
+        # run the app-api build and the storybook build in parallel. 
+        # this isn't elegant but saves us CI time, it's probably more correct to break
+        # these out into separate processes. N.B. the output of these two commands
+        # will be interleaved.
+        yarn run build &
+        P1=$!
+        yarn build-storybook &
+        P2=$!
+        wait $P1 && wait $P2
