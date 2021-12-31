@@ -4,19 +4,6 @@ description: 'Runs common tasks for setting up the build environment in GHA'
 runs:
   using: 'composite'
   steps:
-    - name: set branch_name
-      shell: bash
-      run: |
-        echo "branch_name=$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
-
-    - name: set app version
-      shell: bash
-      run: echo "APP_VERSION=$(scripts/app_version.sh)" >> $GITHUB_ENV
-
-    - name: set branch specific variable names
-      shell: bash
-      run: ./.github/build_vars.sh set_names
-
     - name: Get yarn cache directory path
       shell: bash
       id: yarn-cache-dir-path
@@ -31,18 +18,6 @@ runs:
       shell: bash
       id: yarn-install
       run: yarn install --prefer-offline --frozen-lockfile --cache-folder ${{ steps.yarn-cache-dir-path.outputs.dir }}
-
-    - name: Install lerna
-      shell: bash
-      run: yarn global add lerna
-
-    - name: Generate graphql
-      shell: bash
-      run: lerna run gqlgen
-
-    - name: Generate protobuf
-      shell: bash
-      run: lerna run protogen
 
     - name: set path
       shell: bash

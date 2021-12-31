@@ -351,22 +351,27 @@ function main() {
                         'api',
                         'run & watch api jest tests. Any args passed after a -- will be passed directly to jest',
                         (yargs) => {
-                            return yargs.example([
-                                [
-                                    '$0 test api',
-                                    'run the api jest tests, rerunning on save',
-                                ],
-                                [
-                                    '$0 test api -- -t submit',
-                                    'run tests that match the pattern /submit/',
-                                ],
-                                [
-                                    '$0 test api -- --watchAll=false',
-                                    'run the tests once and exit',
-                                ],
-                            ])
+                            return yargs
+                                .option('unit', {
+                                    type: 'boolean',
+                                    describe: 'run tests with coverage data',
+                                })
+                                .example([
+                                    [
+                                        '$0 test api',
+                                        'run the api jest tests, rerunning on save',
+                                    ],
+                                    [
+                                        '$0 test api -- -t submit',
+                                        'run tests that match the pattern /submit/',
+                                    ],
+                                    [
+                                        '$0 test api -- --watchAll=false',
+                                        'run the tests once and exit',
+                                    ],
+                                ])
                         },
-                        (args) => {
+                        async (args) => {
                             // all args that come after a `--` hang out in args._, along with the command name(s)
                             // they can be strings or numbers so we map them before passing them on
                             const unparsedJestArgs = args._.slice(2).map(
@@ -374,6 +379,11 @@ function main() {
                                     return intOrString.toString()
                                 }
                             )
+                            if (args.unit) {
+                                const runner = new LabeledProcessRunner()
+                                process.exit(await runAPITests(runner))
+                            }
+
                             runAPITestsWatch(unparsedJestArgs)
                         }
                     )
@@ -381,22 +391,27 @@ function main() {
                         'web',
                         'run & watch web jest tests. Any args passed after a -- will be passed directly to jest',
                         (yargs) => {
-                            return yargs.example([
-                                [
-                                    '$0 test web',
-                                    'run the web jest tests, rerunning on save',
-                                ],
-                                [
-                                    '$0 test web -- -t submit',
-                                    'run tests that match the pattern /submit/',
-                                ],
-                                [
-                                    '$0 test web -- --watchAll=false',
-                                    'run the tests once and exit',
-                                ],
-                            ])
+                            return yargs
+                                .option('unit', {
+                                    type: 'boolean',
+                                    describe: 'run tests with coverage data',
+                                })
+                                .example([
+                                    [
+                                        '$0 test web',
+                                        'run the web jest tests, rerunning on save',
+                                    ],
+                                    [
+                                        '$0 test web -- -t submit',
+                                        'run tests that match the pattern /submit/',
+                                    ],
+                                    [
+                                        '$0 test web -- --watchAll=false',
+                                        'run the tests once and exit',
+                                    ],
+                                ])
                         },
-                        (args) => {
+                        async (args) => {
                             // all args that come after a `--` hang out in args._, along with the command name(s)
                             // they can be strings or numbers so we map them before passing them on
                             const unparsedJestArgs = args._.slice(2).map(
@@ -404,6 +419,10 @@ function main() {
                                     return intOrString.toString()
                                 }
                             )
+                            if (args.unit) {
+                                const runner = new LabeledProcessRunner()
+                                process.exit(await runWebTests(runner))
+                            }
                             runWebTestsWatch(unparsedJestArgs)
                         }
                     )

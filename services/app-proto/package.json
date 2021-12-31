@@ -4,6 +4,7 @@
     "version": "1.0.0",
     "description": "app-proto Typescript definitions and helpers",
     "scripts": {
+        "generate-code": "yarn protogen",
         "protogen": "yarn proto:compile && yarn proto:ts",
         "protogen:watch": "find src | entr yarn protogen",
         "proto:compile": "rm -rf gen && mkdir gen && pbjs -t static-module -w commonjs -o ../app-web/src/gen/stateSubmissionProto.js src/state_submission.proto",
