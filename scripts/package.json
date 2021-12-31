@@ -19,6 +19,7 @@
     },
     "dependencies": {
         "aws-sdk": "^2.1018.0",
-        "octokit": "^1.7.1"
+        "octokit": "^1.7.1",
+        "typescript": "^4.5.4"
     }
 }

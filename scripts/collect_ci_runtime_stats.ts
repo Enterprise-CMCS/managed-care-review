@@ -30,19 +30,23 @@ function readToken(path = GH_TOKEN_PATH) {
 interface WorkflowRun {
     id: number
     head_branch: string | null
-    jobs: {
-        completed_at: string | undefined | null
-        started_at: string
-        name: string
-        steps?:
-            | {
-                  completed_at?: string | undefined | null
-                  started_at?: string | undefined | null
-                  name: string
-              }[]
-            | undefined
-        id: number
-    }[]
+    run_number: number
+    jobs: WorkflowJob[]
+}
+
+interface WorkflowJob {
+    completed_at: string | undefined | null
+    started_at: string
+    name: string
+    conclusion: string | undefined | null
+    steps?:
+        | {
+              completed_at?: string | undefined | null
+              started_at?: string | undefined | null
+              name: string
+          }[]
+        | undefined
+    id: number
 }
 
 // grab workflow runs we're interested in, then grab their jobs
@@ -101,6 +105,16 @@ async function fetchDeployRuns(): Promise<WorkflowRun[]> {
 }
 
 function processDeployRuns(runs: WorkflowRun[]): [TimedRuns, TimedRuns] {
+    // filter out all the jobs that never block
+    for (const run of runs) {
+        run.jobs = blockingJobs(run)
+        console.log(
+            'BLOCKING JOBS',
+            run.run_number,
+            run.jobs.map((j) => j.name)
+        )
+    }
+
     // separate out initial runs from subsequent runs.
     const firstRunSet: { [names: string]: WorkflowRun } = {}
     const laterRuns: WorkflowRun[] = []
@@ -305,26 +319,76 @@ function printStats(stats: StepStats) {
     }
 }
 
+// loads the deploy runs either by hitting the API or by reading from the cache.
+async function loadDeployRuns(useCache: boolean): Promise<WorkflowRun[]> {
+    if (useCache && fs.existsSync(CACHE_FILE)) {
+        // read from the cache
+        const cachedRuns = fs.readFileSync(CACHE_FILE).toString()
+        const runs = JSON.parse(cachedRuns)
+        return runs
+    } else {
+        // talk to github
+        const runs = await fetchDeployRuns()
+        if (useCache) {
+            fs.writeFileSync(CACHE_FILE, JSON.stringify(runs))
+            console.log('cache written')
+        }
+        return runs
+    }
+}
+
+function blockingJobs(run: WorkflowRun): WorkflowJob[] {
+    // idea is to trace back from the last job. Steps are all sequential more or less.
+
+    // get a sortable map of all task end times to task
+    const endTimes = new Map<Date, WorkflowJob>()
+    for (const job of run.jobs) {
+        if (!job.completed_at) throw new Error('all are finished')
+        const finishedAt: Date = new Date(Date.parse(job.completed_at))
+        endTimes.set(finishedAt, job)
+    }
+
+    const lastIsFirst = Array.from(endTimes.keys()).sort(
+        (a, b) => b.getTime() - a.getTime()
+    )
+
+    // the next poll task is the one that finished just before this one started
+    // technically we should know that that task is a needs of the current one.
+    // that's not in the API though.
+    let pollStartTime: Date = new Date(864000000000000)
+    const longPolls: WorkflowJob[] = []
+    let lastTimeSeen: Date | undefined
+    while (
+        (lastTimeSeen = lastIsFirst.find((d) => {
+            return d.getTime() < pollStartTime.getTime()
+        }))
+    ) {
+        const pollTask = endTimes.get(lastTimeSeen)
+        if (pollTask === undefined) throw new Error('we put it in there.')
+
+        if (pollTask.conclusion !== 'skipped') {
+            longPolls.push(pollTask)
+        }
+
+        pollStartTime = new Date(Date.parse(pollTask.started_at))
+    }
+
+    return longPolls
+}
+
 async function main() {
     console.log('starting')
     testStandardDev()
 
-    let runs: WorkflowRun[] = []
-    if (process.argv.includes('--use-cache') && fs.existsSync(CACHE_FILE)) {
-        // read from the cache
-        const cachedRuns = fs.readFileSync(CACHE_FILE).toString()
-        runs = JSON.parse(cachedRuns)
-    } else {
-        // talk to github
-        runs = await fetchDeployRuns()
-        console.log('runs', runs)
-        if (process.argv.includes('--use-cache')) {
-            fs.writeFileSync(CACHE_FILE, JSON.stringify(runs))
-            console.log('cache written')
-        }
-    }
+    // parse args
+    const useCache = process.argv.includes('--use-cache')
 
-    const [timedFirstRuns, timedLaterRuns] = processDeployRuns(runs)
+    const runs = await loadDeployRuns(useCache)
+
+    // Filter out all runs from before the big reordering
+    const recentRuns = runs.filter((r) => r.run_number > 3005)
+
+    const [timedFirstRuns, timedLaterRuns] = processDeployRuns(recentRuns)
 
     const firstStats = calculateStats(massageRuns(timedFirstRuns))
     const laterStats = calculateStats(massageRuns(timedLaterRuns))
