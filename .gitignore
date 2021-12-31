@@ -24,8 +24,9 @@ notes/
 /tests/cypress/screenshots
 /tests/cypress/videos
 
-/scripts/add_cypress_test_users.js
-/scripts/add_cypress_test_users.js.map
+/scripts/add_cypress_test_users.js*
+/scripts/collect_ci_runtime_stats.js*
+/scripts/recent_actions_cache.json
 
 services/app-web/public/env-config.js
 services/app-web/storybook-static
