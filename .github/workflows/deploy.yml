@@ -182,7 +182,7 @@ jobs:
 
   deploy-infra:
     needs: [begin-deployment]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@mt-skip-sls-deploy
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@mt-skip-deploys
     with:
       stage_name: ${{ needs.begin-deployment.outputs.stage-name}}
       changed_services: ${{ needs.begin-deployment.outputs.changed-services }}
@@ -204,7 +204,7 @@ jobs:
         api-unit-tests,
         deploy-infra,
       ]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@mt-skip-sls-deploy
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@mt-skip-deploys
     with:
       stage_name: ${{ needs.begin-deployment.outputs.stage-name }}
       app_version: ${{ needs.begin-deployment.outputs.app-version }}
