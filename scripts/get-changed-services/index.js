@@ -2,16 +2,13 @@ import { Octokit } from '@octokit/action';
 import * as core from '@actions/core';
 import { exec } from 'child_process';
 import util from 'util';
-/*
-import fs from 'fs'
+import fs from 'fs';
 // just for testing locally now
 function readToken(path = '../../../../../access_token.txt') {
-    return fs.readFileSync(path).toString().trim()
+    return fs.readFileSync(path).toString().trim();
 }
-
-process.env.GITHUB_ACTION = 'true'
-process.env.GITHUB_TOKEN = readToken()
-*/
+process.env.GITHUB_ACTION = 'true';
+process.env.GITHUB_TOKEN = readToken();
 // for now keep this list hardcoded
 const listOfServiceJobs = [
     'app-api',
@@ -23,6 +20,7 @@ const listOfServiceJobs = [
     'uploads',
     'run-migrations',
     'prisma-layer',
+    'infra-api',
 ];
 const octokit = new Octokit();
 async function main() {
@@ -33,8 +31,8 @@ async function main() {
         repo: 'managed-care-review',
         workflow_id: 'deploy.yml',
         //status: 'success',
-        //branch: 'mt-skip-sls-deploy',
-        branch: core.getInput('branchName', { required: true }),
+        branch: 'mt-skip-deploys',
+        //branch: core.getInput('branchName', { required: true }),
     });
     const deployAllServices = listOfServiceJobs;
     // if we haven't had a run on this branch, we need to deploy everything
@@ -53,15 +51,17 @@ async function main() {
         core.setOutput('changed-services', deployAllServices);
         return;
     }
-    // has anything changed since that run? were there services that completed
-    // in that last run that we don't need to redeploy?
-    const jobsFromLastSuccess = await octokit.actions.listJobsForWorkflowRunAttempt({
+    // have lerna tell us which services have changed in code since the
+    // last completed workflow run
+    const lernaChangedServices = await getChangedServicesSinceSha(lastCompletedRun.head_sha);
+    // look for jobs in the last non-skipped GHA run that we might be able to skip
+    const jobsFromLastRun = await octokit.actions.listJobsForWorkflowRunAttempt({
         owner: 'CMSgov',
         repo: 'managed-care-review',
         run_id: lastCompletedRun.id,
         attempt_number: lastCompletedRun.run_attempt ?? 1,
     });
-    const successfulJobs = jobsFromLastSuccess.data.jobs
+    const jobsToSkip = jobsFromLastRun.data.jobs
         .map((job) => {
         // a skipped job means it ran successfully previously
         if (job.conclusion === 'success' || job.conclusion === 'skipped') {
@@ -74,9 +74,11 @@ async function main() {
         }
         return true;
     });
-    const jobsToRun = listOfServiceJobs.filter((x) => !successfulJobs.includes(x));
+    const ghaJobsToRun = listOfServiceJobs.filter((x) => !jobsToSkip.includes(x));
+    const jobsToRun = [...new Set([...ghaJobsToRun, ...lernaChangedServices])];
     console.log('All services: ' + listOfServiceJobs);
-    console.log('Successful jobs: ' + successfulJobs);
+    console.log('Jobs we can skip from GHA: ' + jobsToSkip);
+    console.log('Changed services from lerna: ' + lernaChangedServices);
     console.log('Jobs to rerun: ' + jobsToRun);
     core.setOutput('changed-services', jobsToRun);
 }
@@ -84,6 +86,16 @@ async function main() {
 async function getAllServicesFromLerna() {
     const execPromise = util.promisify(exec);
     const { stdout, stderr } = await execPromise('lerna ls -a --json');
+    const lernaList = JSON.parse(stdout);
+    if (stderr) {
+        console.log(stderr);
+    }
+    return lernaList.map((i) => i.name);
+}
+// uses lerna to find services that have changed since the passed sha
+async function getChangedServicesSinceSha(sha) {
+    const execPromise = util.promisify(exec);
+    const { stdout, stderr } = await execPromise(`lerna ls --since ${sha} -all --json`);
     const lernaList = JSON.parse(stdout);
     if (stderr) {
         console.log(stderr);
