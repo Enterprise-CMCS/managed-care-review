@@ -224,6 +224,7 @@ jobs:
   finishing-prep:
     name: Finishing Prep
     needs: [deploy-infra, begin-deployment]
+    if: always()
     runs-on: ubuntu-latest
     outputs:
       application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
