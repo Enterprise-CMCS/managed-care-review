@@ -11,7 +11,18 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       app-version: ${{ steps.branch-name.outputs.app-version}}
-
+      changed-services: "[
+        'app-api',
+        'app-web',
+        'postgres',
+        'storybook',
+        'ui-auth',
+        'ui',
+        'uploads',
+        'run-migrations',
+        'prisma-layer',
+        'infra-api'
+        ]"
     services:
       postgres:
         image: postgres:13.3
@@ -100,6 +111,7 @@ jobs:
     uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
     with:
       stage_name: main
+      changed_services: ${{ needs.unit-tests.outputs.changed-services}}
     secrets:
       aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -118,6 +130,7 @@ jobs:
     with:
       stage_name: main
       app_version: ${{ needs.unit-tests.outputs.app-version }}
+      changed_services: ${{ needs.unit-tests.outputs.changed-services}}
     secrets:
       aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -183,6 +196,7 @@ jobs:
     uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
     with:
       stage_name: val
+      changed_services: ${{ needs.unit-tests.outputs.changed-services}}
     secrets:
       aws_access_key_id: ${{ secrets.VAL_AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.VAL_AWS_SECRET_ACCESS_KEY }}
@@ -201,6 +215,7 @@ jobs:
     with:
       stage_name: val
       app_version: ${{ needs.unit-tests.outputs.app-version }}
+      changed_services: ${{ needs.unit-tests.outputs.changed-services}}
     secrets:
       aws_access_key_id: ${{ secrets.VAL_AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.VAL_AWS_SECRET_ACCESS_KEY }}
@@ -266,6 +281,7 @@ jobs:
     uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
     with:
       stage_name: prod
+      changed_services: ${{ needs.unit-tests.outputs.changed-services}}
     secrets:
       aws_access_key_id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
@@ -284,6 +300,7 @@ jobs:
     with:
       stage_name: prod
       app_version: ${{ needs.unit-tests.outputs.app-version }}
+      changed_services: ${{ needs.unit-tests.outputs.changed-services}}
     secrets:
       aws_access_key_id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
