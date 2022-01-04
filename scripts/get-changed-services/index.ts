@@ -51,11 +51,11 @@ async function main() {
 
     // if a run was cancelled by a user then we need to go back further and
     // find an attempt that actually ran and had an actionable outcome for us
-    // this is either a run that succeeded or one that failed at some point.
-    // failures can still mean that some services have deployed ok, so
-    // we can consider skipping those.
+    // Right now we only look at success, but failures can still mean that
+    // some services have deployed ok. In the future we may want to look deeper
+    // into run failures so we can consider skipping those.
     const lastCompletedRun = allWorkflowRuns.data.workflow_runs.find(
-        (run) => run.conclusion === 'success' || run.conclusion === 'failure'
+        (run) => run.conclusion === 'success'
     )
 
     // if we don't even have a run that hasn't been user cancelled, run everything
