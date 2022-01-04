@@ -168,7 +168,7 @@ const waitFor = (delay = 1000) =>
 const retryWithBackoff = async (
     fn: () => Promise<void | S3Error>,
     retryCount = 0,
-    maxRetries = 3,
+    maxRetries = 6,
     err: null | S3Error = null
 ): Promise<void | S3Error> => {
     if (retryCount > maxRetries) {
