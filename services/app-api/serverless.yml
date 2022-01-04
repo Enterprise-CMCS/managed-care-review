@@ -5,7 +5,7 @@ frameworkVersion: '2'
 package:
   individually: true
 
-# testing diffs
+# check if skipping works in CI here
 
 plugins:
   - serverless-webpack
