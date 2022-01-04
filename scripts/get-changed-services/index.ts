@@ -130,6 +130,7 @@ async function getAllServicesFromLerna(): Promise<string[]> {
 
 // uses lerna to find services that have changed since the passed sha
 async function getChangedServicesSinceSha(sha: string): Promise<string[]> {
+    console.log(sha)
     const execPromise = util.promisify(exec)
     const { stdout, stderr } = await execPromise(
         `lerna ls --since ${sha} -all --json`
