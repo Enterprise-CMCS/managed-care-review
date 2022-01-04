@@ -206,6 +206,10 @@ jobs:
         api-unit-tests,
         deploy-infra,
       ]
+    if: |
+      always() &&
+      (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped')
+
     uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@mt-skip-deploys
     with:
       stage_name: ${{ needs.begin-deployment.outputs.stage-name }}
