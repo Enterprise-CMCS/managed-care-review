@@ -2,8 +2,6 @@ service: ui
 
 frameworkVersion: '2'
 
-# one more test
-
 provider:
   name: aws
   runtime: nodejs14.x
