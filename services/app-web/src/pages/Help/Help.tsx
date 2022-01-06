@@ -189,10 +189,10 @@ export const Help = (): React.ReactElement => {
                 </Table>
             </section>
             <section className={styles.helpSection}>
-                <h3 id="documents-definitions-and-requirements">
+                <h3 id="document-definitions-requirements">
                     Documents definitions and requirements
                 </h3>
-                <h4 id="key-docyments">Key documents</h4>
+                <h4 id="key-documents">Key documents</h4>
                 <Table bordered fixed fullWidth>
                     <thead>
                         <tr>
