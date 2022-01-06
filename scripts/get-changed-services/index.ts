@@ -4,23 +4,12 @@ import * as core from '@actions/core'
 import { exec } from 'child_process'
 import util from 'util'
 
-// for now keep this list hardcoded
-const listOfServiceJobs = [
-    'app-api',
-    'app-web',
-    'postgres',
-    'storybook',
-    'ui-auth',
-    'ui',
-    'uploads',
-    'run-migrations',
-    'prisma-layer',
-    'infra-api',
-]
-
 const octokit = new Octokit()
 
 async function main() {
+    // get our service names from lerna
+    const listOfServices = await getAllServicesFromLerna()
+
     // get the workflow runs for this branch
     // we pass in branchName as input from the action
     const allWorkflowRuns = await octokit.actions.listWorkflowRuns({
@@ -30,7 +19,7 @@ async function main() {
         branch: core.getInput('branchName', { required: true }),
     })
 
-    const deployAllServices = listOfServiceJobs
+    const deployAllServices = listOfServices
     // if we haven't had a run on this branch, we need to deploy everything
     if (allWorkflowRuns.data.total_count === 0) {
         core.setOutput('changed-services', deployAllServices)
@@ -82,14 +71,12 @@ async function main() {
             return true
         })
 
-    const ghaJobsToRun = listOfServiceJobs.filter(
-        (x) => !jobsToSkip.includes(x)
-    )
+    const ghaJobsToRun = listOfServices.filter((x) => !jobsToSkip.includes(x))
 
     // concat our two arrays of what to change together into one deduped set
     const jobsToRun = [...new Set([...ghaJobsToRun, ...lernaChangedServices])]
 
-    console.log('All services: ' + listOfServiceJobs)
+    console.log('All services: ' + listOfServices)
     console.log('Jobs we can skip from GHA: ' + jobsToSkip)
     console.log('Changed services from lerna: ' + lernaChangedServices)
     console.log('Jobs to rerun: ' + jobsToRun)

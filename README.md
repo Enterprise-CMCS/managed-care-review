@@ -259,7 +259,7 @@ Then verify things are working by running any serverless command , e.g. `cd serv
 
 ## Adding a Service
 
-The Serverless framework calls encpsulated units of lambdas + AWS infrastructure a "service", so we've inherited this terminology from that project. All of our services live under the `./services/` directory. If you need to add a new service to the project a few things need to happen:
+The Serverless framework calls encapsulated units of lambdas + AWS infrastructure a "service", so we've inherited this terminology from that project. All of our services live under the `./services/` directory. If you need to add a new service to the project a few things need to happen:
 
 -   `lerna create ${service-name}`. Follow Lerna's prompts and you'll end up with a directory under `./services/` with a generated `package.json` and `README.md` file.
 -   Add a `serverless.yml` file to the root directory of this new service. You can copy off of an existing config or run the `serverless` command in `./services/${service-name}` to use one of their starter templates.
