@@ -3,16 +3,6 @@ import * as core from '@actions/core'
 
 import { exec } from 'child_process'
 import util from 'util'
-/*
-import fs from 'fs'
-// just for testing locally now
-function readToken(path = '../../../../../access_token.txt') {
-    return fs.readFileSync(path).toString().trim()
-}
-
-process.env.GITHUB_ACTION = 'true'
-process.env.GITHUB_TOKEN = readToken()
-*/
 
 // for now keep this list hardcoded
 const listOfServiceJobs = [
@@ -37,8 +27,6 @@ async function main() {
         owner: 'CMSgov',
         repo: 'managed-care-review',
         workflow_id: 'deploy.yml',
-        //status: 'success',
-        //branch: 'mt-skip-deploys',
         branch: core.getInput('branchName', { required: true }),
     })
 

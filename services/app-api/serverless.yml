@@ -5,8 +5,6 @@ frameworkVersion: '2'
 package:
   individually: true
 
-# check if skipping works in CI here
-
 plugins:
   - serverless-webpack
   - serverless-offline

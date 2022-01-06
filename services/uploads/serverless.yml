@@ -9,8 +9,6 @@ plugins:
   - serverless-idempotency-helper
   - serverless-iam-helper
 
-# test a change will cause a deploy
-
 # The `provider` block defines where your service will be deployed
 provider:
   name: aws
