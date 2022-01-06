@@ -188,6 +188,55 @@ export const Help = (): React.ReactElement => {
                     </tbody>
                 </Table>
             </section>
+            <section className={styles.helpSection}>
+                <h3 id="documents-definitions-and-requirements">
+                    Documents definitions and requirements
+                </h3>
+                <h4 id="key-docyments">Key documents</h4>
+                <Table bordered fixed fullWidth>
+                    <thead>
+                        <tr>
+                            <th>Document type</th>
+                            <th>Definition</th>
+                            <th>Required</th>
+                            <th>Regulatory reference</th>
+                            <th>MC-Review category</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Base contract</td>
+                            <td>The final language agreed to by all parties.</td>
+                            <td>For all "base contract" "contract action" submissions</td>
+                            <td>Medicaid: § 438.3(a)<br/><br/>CHIP: § 457.1201</td>
+                            <td>Contract</td>
+                        </tr>
+                        <tr>
+                            <td>Contract amendment</td>
+                            <td>The final language agreed to by all parties for a change to the base contract</td>
+                            <td>For all "amendment to base contract" submissions</td>
+                            <td>Medicaid: § 438.3(a)<br/><br/>CHIP: § 457.1201</td>
+                            <td>Contract</td>
+                        </tr>
+                        <tr>
+                            <td>Contract appendix</td>
+                            <td>All appendices and attachments to the contract document. <br/><br/>Please note: Adding a new appendix during the course of a contract period requires an executed "amendment to base contract" submission</td>
+                            <td>For all "base contract" and "amendment to base contract" submissions</td>
+                            <td>
+                                <a href="https://www.medicaid.gov/federal-policy-guidance/downloads/cib110819.pdf" target="_blank">11.8.2019 CMCS Informational Bulletin</a>
+                            </td>
+                            <td>Contract</td>
+                        </tr>
+                        <tr>
+                            <td>Rate certification</td>
+                            <td>The actuary’s certification of the rates or rate ranges, along with the report from the actuary describing the development of the rates or rate ranges</td>
+                            <td>For all "contract action and rate certification" submissions</td>
+                            <td>Medicaid: § 438.7</td>
+                            <td>Rate certification</td>
+                        </tr>
+                    </tbody>
+                </Table>
+            </section>
         </GridContainer>
     )
 }
