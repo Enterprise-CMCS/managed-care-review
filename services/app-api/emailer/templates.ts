@@ -30,7 +30,7 @@ const newPackageCMSEmailTemplate = (
         sourceEmail: config.emailSource,
         subject: `${
             isTestEnvironment ? `[${config.stage}] ` : ''
-        }New Managed Care Submission: ${submissionName(submission)}`,
+        }TEST New Managed Care Submission: ${submissionName(submission)}`,
         bodyText: `Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.
         ${submissionName(submission)} was received from ${submission.stateCode}.
 
@@ -73,7 +73,7 @@ const newPackageStateEmailTemplate = (
         sourceEmail: config.emailSource,
         subject: `${
             config.stage !== 'prod' ? `[${config.stage}] ` : ''
-        }${submissionName(submission)} was sent to CMS`,
+        }TEST ${submissionName(submission)} was sent to CMS`,
         bodyText: `Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.
 
             ${submissionName(submission)} was successfully submitted.
