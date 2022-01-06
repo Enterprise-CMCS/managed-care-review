@@ -46,33 +46,10 @@ async function main() {
     const lernaChangedServices = await getChangedServicesSinceSha(
         lastCompletedRun.head_sha
     )
-
-    // look for jobs in the last non-skipped GHA run that we might be able to skip
-    const jobsFromLastRun = await octokit.actions.listJobsForWorkflowRunAttempt(
-        {
-            owner: 'CMSgov',
-            repo: 'managed-care-review',
-            run_id: lastCompletedRun.id,
-            attempt_number: lastCompletedRun.run_attempt ?? 1,
-        }
+    const jobsToSkip = await getJobsToSkip(
+        lastCompletedRun.id,
+        lastCompletedRun.run_attempt ?? 1
     )
-
-    const jobsToSkip = jobsFromLastRun.data.jobs
-        .map((job) => {
-            // A skipped job means it previously ran successfully if the workflow
-            // run was a success. If we ever look at workflow failures in the future
-            // this assumption no longer holds, as skipped could be because of the
-            // failure.
-            if (job.conclusion === 'success' || job.conclusion === 'skipped') {
-                return job.name.split(' / ')[1] // spaces are significant here
-            }
-        })
-        .filter((name) => {
-            if (typeof name === 'undefined') {
-                return false
-            }
-            return true
-        })
 
     const ghaJobsToRun = listOfServices.filter((x) => !jobsToSkip.includes(x))
 
@@ -85,6 +62,40 @@ async function main() {
     console.log('Jobs to rerun: ' + jobsToRun)
 
     core.setOutput('changed-services', jobsToRun)
+}
+
+async function getJobsToSkip(
+    lastCompletedRunId: number,
+    runAttempt: number
+): Promise<string[]> {
+    // look for jobs in the last non-skipped GHA run that we might be able to skip
+    const jobsFromLastRun = await octokit.actions.listJobsForWorkflowRunAttempt(
+        {
+            owner: 'CMSgov',
+            repo: 'managed-care-review',
+            run_id: lastCompletedRunId,
+            attempt_number: runAttempt,
+        }
+    )
+
+    // helper to make sure we get names back TypeScript understands using a type guard
+    const isName = (name: string | undefined): name is string => {
+        return !!name
+    }
+
+    const jobsToSkip = jobsFromLastRun.data.jobs
+        .map((job) => {
+            // A skipped job means it previously ran successfully if the workflow
+            // run was a success. If we ever look at workflow failures in the future
+            // this assumption no longer holds, as skipped could be because of the
+            // failure.
+            if (job.conclusion === 'success' || job.conclusion === 'skipped') {
+                return job.name.split(' / ')[1] // spaces are significant here
+            }
+        })
+        .filter(isName)
+
+    return jobsToSkip
 }
 
 interface LernaListItem {
