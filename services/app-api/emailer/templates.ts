@@ -30,16 +30,17 @@ const newPackageCMSEmailTemplate = (
         sourceEmail: config.emailSource,
         subject: `${
             isTestEnvironment ? `[${config.stage}] ` : ''
-        }New Managed Care Submission: ${submissionName(submission)}`,
-        bodyText: `${submissionName(submission)} was received from ${
-            submission.stateCode
-        }.
+        }TEST New Managed Care Submission: ${submissionName(submission)}`,
+        bodyText: `Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.
+        ${submissionName(submission)} was received from ${submission.stateCode}.
 
             Submission type: ${SubmissionTypeRecord[submission.submissionType]}
             Submission description: ${submission.submissionDescription}
 
             View submission: ${submissionURL}`,
         bodyHTML: `
+            <span style="color:#FF0000">Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.</span>
+            <br /><br />
             ${submissionName(submission)} was received from ${
             submission.stateCode
         }.<br /><br />
@@ -72,9 +73,11 @@ const newPackageStateEmailTemplate = (
         sourceEmail: config.emailSource,
         subject: `${
             config.stage !== 'prod' ? `[${config.stage}] ` : ''
-        }${submissionName(submission)} was sent to CMS`,
-        bodyText: `${submissionName(submission)} was successfully submitted.
+        }TEST ${submissionName(submission)} was sent to CMS`,
+        bodyText: `Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.
 
+            ${submissionName(submission)} was successfully submitted.
+        
             View submission: ${submissionURL}
             
             If you need to make any changes, please contact CMS.
@@ -85,7 +88,9 @@ const newPackageStateEmailTemplate = (
             3. Questions: You may receive questions via email from CMS as they conduct their review.
             4. Decision: Once all questions have been addressed, CMS will contact you with their final recommendation.`,
         bodyHTML: `
-            ${submissionName(submission)} was successfully submitted.
+            <span style="color:#FF0000">Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.</span>
+            <br /><br />
+             ${submissionName(submission)} was successfully submitted.
             <br /><br />
             <a href="${submissionURL}">View submission</a>
             <br /><br />
