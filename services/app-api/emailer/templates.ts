@@ -39,11 +39,7 @@ const newPackageCMSEmailTemplate = (
 
             View submission: ${submissionURL}`,
         bodyHTML: `
-<<<<<<< HEAD
             <span style="color:#FF0000",font-weight:"bold">Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.</span>
-=======
-            <span style="color:#FF0000">Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.</span>
->>>>>>> origin/main
             <br /><br />
             ${submissionName(submission)} was received from ${
             submission.stateCode
@@ -92,11 +88,7 @@ const newPackageStateEmailTemplate = (
             3. Questions: You may receive questions via email from CMS as they conduct their review.
             4. Decision: Once all questions have been addressed, CMS will contact you with their final recommendation.`,
         bodyHTML: `
-<<<<<<< HEAD
             <span style="color:#FF0000",font-weight:"bold">Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.</span>
-=======
-            <span style="color:#FF0000">Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.</span>
->>>>>>> origin/main
             <br /><br />
              ${submissionName(submission)} was successfully submitted.
             <br /><br />
