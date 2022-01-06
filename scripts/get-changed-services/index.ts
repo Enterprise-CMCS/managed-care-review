@@ -59,7 +59,10 @@ async function main() {
 
     const jobsToSkip = jobsFromLastRun.data.jobs
         .map((job) => {
-            // a skipped job means it ran successfully previously
+            // A skipped job means it previously ran successfully if the workflow
+            // run was a success. If we ever look at workflow failures in the future
+            // this assumption no longer holds, as skipped could be because of the
+            // failure.
             if (job.conclusion === 'success' || job.conclusion === 'skipped') {
                 return job.name.split(' / ')[1] // spaces are significant here
             }
