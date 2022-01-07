@@ -234,8 +234,7 @@ export const Documents = ({
                     <FileUpload
                         id="documents"
                         name="documents"
-                        label="Upload any additional
-                        supporting documents"
+                        label="Upload any additional supporting documents"
                         hint={
                             <>
                                 <Link
