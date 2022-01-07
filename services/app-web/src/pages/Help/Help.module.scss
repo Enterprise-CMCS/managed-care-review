@@ -3,4 +3,10 @@
 
 .helpSection {
     margin: units(4) 0;
+
+    table {
+        th, td {
+            vertical-align: top;
+        }
+    }
 }
