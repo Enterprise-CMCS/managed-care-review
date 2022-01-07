@@ -223,7 +223,7 @@ export const Help = (): React.ReactElement => {
                             <td>All appendices and attachments to the contract document. <br/><br/>Please note: Adding a new appendix during the course of a contract period requires an executed "amendment to base contract" submission.</td>
                             <td>For all "base contract" and "amendment to base contract" submissions.</td>
                             <td>
-                                <a href="https://www.medicaid.gov/federal-policy-guidance/downloads/cib110819.pdf" target="_blank">11.8.2019 CMCS Informational Bulletin</a>
+                                <a href="https://www.medicaid.gov/federal-policy-guidance/downloads/cib110819.pdf" target="_blank" rel="noreferrer">11.8.2019 CMCS Informational Bulletin</a>
                             </td>
                             <td>Contract</td>
                         </tr>
@@ -259,7 +259,7 @@ export const Help = (): React.ReactElement => {
                             <td>Redlined contract changes/Contract change document</td>
                             <td>States who have significant changes between one contract verison and the next will sometimes submit redlined or contract change documents to CMS in order to clearly outline the changes between each version.</td>
                             <td>Optional</td>
-                            <td><a href="https://www.medicaid.gov/federal-policy-guidance/downloads/cib110819.pdf" target="_blank">11.8.2019 CMCS Informational Bulletin</a></td>
+                            <td><a href="https://www.medicaid.gov/federal-policy-guidance/downloads/cib110819.pdf" target="_blank" rel="noreferrer">11.8.2019 CMCS Informational Bulletin</a></td>
                             <td>Contract - supporting</td>
                         </tr>
                         <tr>
@@ -279,15 +279,15 @@ export const Help = (): React.ReactElement => {
                         <tr>
                             <td>Rate development index</td>
                             <td>The rate certification must include an index that identifies the page number or the section number for each item described within this guidance. In cases where not all sections of this guidance are relevant for a particular rate certification (i.e., a rate amendment that adds a new benefit for part of the year), inapplicable sections of the guidance must be included and marked as “Not Applicable” in the index.</td>
-                            <td>For all "contract action and rate certification" submissions. All rate certifications must be accompanied by an index and this index should also follow the structure of the most recent <a href="https://www.medicaid.gov/medicaid/managed-care/downloads/2021-2022-medicaid-rate-guide-11102021.pdf" target="_blank">Rate Development Guide</a> from CMS.</td>
-                            <td>§ 438.7(a), § 438.7(d) <br /><br /><a href="https://www.medicaid.gov/medicaid/managed-care/downloads/2021-2022-medicaid-rate-guide-11102021.pdf" target="_blank">Section 1. Item 1.B.v. of the Medicaid Managed Care Rate Development Guide</a></td>
+                            <td>For all "contract action and rate certification" submissions. All rate certifications must be accompanied by an index and this index should also follow the structure of the most recent <a href="https://www.medicaid.gov/medicaid/managed-care/downloads/2021-2022-medicaid-rate-guide-11102021.pdf" target="_blank" rel="noreferrer">Rate Development Guide</a> from CMS.</td>
+                            <td>§ 438.7(a), § 438.7(d) <br /><br /><a href="https://www.medicaid.gov/medicaid/managed-care/downloads/2021-2022-medicaid-rate-guide-11102021.pdf" target="_blank" rel="noreferrer">Section 1. Item 1.B.v. of the Medicaid Managed Care Rate Development Guide</a></td>
                             <td>Rate - supporting</td>
                         </tr>
                         <tr>
                             <td>Accelerated rate review -- rate development summary</td>
-                            <td>In order to receive an accelerated rate review, states must submit a Rate Development Summary that includes all elements listed in the most recent <a href="https://www.medicaid.gov/medicaid/managed-care/downloads/2021-2022-medicaid-rate-guide-11102021.pdf" target="_blank">Rate Development Guide</a> from CMS.</td>
+                            <td>In order to receive an accelerated rate review, states must submit a Rate Development Summary that includes all elements listed in the most recent <a href="https://www.medicaid.gov/medicaid/managed-care/downloads/2021-2022-medicaid-rate-guide-11102021.pdf" target="_blank" rel="noreferrer">Rate Development Guide</a> from CMS.</td>
                             <td>For all "contract action and rate certification" submissions where states elect to use the accelerated rate review process.</td>
-                            <td>§ 438.7(d)<br /><br /><a href="https://www.medicaid.gov/medicaid/managed-care/downloads/2021-2022-medicaid-rate-guide-11102021.pdf" target="_blank">Appendix A of the Medicaid Managed Care Rate Development Guide</a></td>
+                            <td>§ 438.7(d)<br /><br /><a href="https://www.medicaid.gov/medicaid/managed-care/downloads/2021-2022-medicaid-rate-guide-11102021.pdf" target="_blank" rel="noreferrer">Appendix A of the Medicaid Managed Care Rate Development Guide</a></td>
                             <td>Rate-supporting</td>
                         </tr>
                         <tr>
