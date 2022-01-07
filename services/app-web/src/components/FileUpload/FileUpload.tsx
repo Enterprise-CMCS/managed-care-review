@@ -315,7 +315,7 @@ export const FileUpload = ({
     return (
         <FormGroup className="margin-top-0">
             <Label className={isLabelVisible ? '' : 'srOnly'} htmlFor={id}>
-                Select a file
+                {label}
             </Label>
 
             {error && <ErrorMessage id={`${id}-error`}>{error}</ErrorMessage>}
