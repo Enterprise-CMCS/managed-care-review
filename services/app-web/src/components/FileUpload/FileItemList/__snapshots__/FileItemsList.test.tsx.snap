@@ -12,13 +12,19 @@ exports[`FileItemList component renders correctly 1`] = `
     <div
       className="fileItemText"
     >
-      <img
-        alt=""
-        className="usa-file-input__preview-image is-loading usa-file-input__preview-image--pdf"
-        data-testid="file-input-preview-image"
-        id="testFile"
-        src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-      />
+      <div
+        aria-label="Status of file testFile.pdf"
+        aria-valuetext="uploading"
+        role="progressbar"
+      >
+        <img
+          alt=""
+          className="usa-file-input__preview-image is-loading usa-file-input__preview-image--pdf"
+          data-testid="file-input-preview-image"
+          id="testFile"
+          src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+        />
+      </div>
       <span
         style={
           Object {
@@ -58,13 +64,19 @@ exports[`FileItemList component renders correctly 1`] = `
     <div
       className="fileItemText"
     >
-      <img
-        alt=""
-        className="usa-file-input__preview-image usa-file-input__preview-image--pdf"
-        data-testid="file-input-preview-image"
-        id="testFile2"
-        src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-      />
+      <div
+        aria-label="Status of file testFile2.pdf"
+        aria-valuetext="error"
+        role="progressbar"
+      >
+        <img
+          alt=""
+          className="usa-file-input__preview-image usa-file-input__preview-image--pdf"
+          data-testid="file-input-preview-image"
+          id="testFile2"
+          src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+        />
+      </div>
       <span
         style={
           Object {
@@ -117,13 +129,19 @@ exports[`FileItemList component renders correctly 1`] = `
     <div
       className="fileItemText"
     >
-      <img
-        alt=""
-        className="usa-file-input__preview-image usa-file-input__preview-image--pdf"
-        data-testid="file-input-preview-image"
-        id="testFile3"
-        src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-      />
+      <div
+        aria-label="Status of file testFile3.pdf"
+        aria-valuetext="error"
+        role="progressbar"
+      >
+        <img
+          alt=""
+          className="usa-file-input__preview-image usa-file-input__preview-image--pdf"
+          data-testid="file-input-preview-image"
+          id="testFile3"
+          src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+        />
+      </div>
       <span
         style={
           Object {
@@ -171,13 +189,19 @@ exports[`FileItemList component renders correctly 1`] = `
     <div
       className="fileItemText"
     >
-      <img
-        alt=""
-        className="usa-file-input__preview-image usa-file-input__preview-image--pdf"
-        data-testid="file-input-preview-image"
-        id="testFile4"
-        src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-      />
+      <div
+        aria-label="Status of file testFile4.pdf"
+        aria-valuetext=""
+        role="progressbar"
+      >
+        <img
+          alt=""
+          className="usa-file-input__preview-image usa-file-input__preview-image--pdf"
+          data-testid="file-input-preview-image"
+          id="testFile4"
+          src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+        />
+      </div>
       <span
         style={
           Object {
@@ -212,13 +236,19 @@ exports[`FileItemList component renders correctly 1`] = `
     <div
       className="fileItemText"
     >
-      <img
-        alt=""
-        className="usa-file-input__preview-image usa-file-input__preview-image--pdf"
-        data-testid="file-input-preview-image"
-        id="testFile44"
-        src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-      />
+      <div
+        aria-label="Status of file testFile4.pdf"
+        aria-valuetext="error"
+        role="progressbar"
+      >
+        <img
+          alt=""
+          className="usa-file-input__preview-image usa-file-input__preview-image--pdf"
+          data-testid="file-input-preview-image"
+          id="testFile44"
+          src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+        />
+      </div>
       <span
         style={
           Object {
