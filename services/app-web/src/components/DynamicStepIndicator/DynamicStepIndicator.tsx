@@ -36,7 +36,7 @@ export const DynamicStepIndicator = ({
         })
 
     return (
-        <StepIndicator>
+        <StepIndicator headingLevel="h2">
             {formPagesWithStatus.map((formPage) => {
                 return (
                     <StepIndicatorStep

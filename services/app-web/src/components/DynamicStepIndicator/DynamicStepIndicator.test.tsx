@@ -11,7 +11,7 @@ describe('DynamicStepIndicator', () => {
                 currentFormPage={STATE_SUBMISSION_FORM_ROUTES[2]}
             />
         )
-
+        expect(screen.getByRole('heading', { level: 2 })).toBeInTheDocument()
         const steps = screen.getAllByRole('listitem')
 
         expect(steps.length).toBe(STATE_SUBMISSION_FORM_ROUTES.length)
