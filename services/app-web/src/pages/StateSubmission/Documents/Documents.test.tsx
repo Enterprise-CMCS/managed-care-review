@@ -63,7 +63,7 @@ describe('Documents', () => {
             }
         )
 
-        const input = screen.getByLabelText('Upload supporting documents')
+        const input = screen.getByLabelText('Upload any additionalsupporting documents')
         expect(input).toBeInTheDocument()
         userEvent.upload(input, [TEST_DOC_FILE])
 
