@@ -56,6 +56,8 @@ export const FileUpload = ({
 }: FileUploadProps): React.ReactElement => {
     const [fileItems, setFileItems] = useState<FileItemT[]>(initialItems || [])
     const fileInputRef = useRef<FileInputRef>(null) // reference to the HTML input which has files
+    const summaryRef = useRef<HTMLHeadingElement>(null) // reference to the heading that we will focus
+
     const inputRequired = inputProps['aria-required'] || inputProps.required
     // update fileItems in parent
     React.useEffect(() => {
@@ -145,6 +147,10 @@ export const FileUpload = ({
         setFileItems((prevItems) => {
             return refreshItems(prevItems, deletedItem)
         })
+
+        if (summaryRef.current) {
+            summaryRef.current.focus();
+        }
     }
     // Upload to S3 and update file items in component state with the async loading status
     // This includes moving from pending/loading UI to display success or errors
@@ -282,6 +288,12 @@ export const FileUpload = ({
         if (fileInputRef.current?.input) {
             fileInputRef.current.input.value = ''
         }
+
+        setTimeout(function(){
+            if (summaryRef.current) {
+                summaryRef.current.focus();
+            }
+        }, 200)
     }
 
     const handleOnDrop = (e: React.DragEvent): void => {
@@ -298,10 +310,12 @@ export const FileUpload = ({
         addFilesAndUpdateList(files)
     }
 
+    const summary = `${fileItems.length} file${fileItems.length !== 1 ? 's' : ''} selected`
+
     return (
         <FormGroup className="margin-top-0">
             <Label className={isLabelVisible ? '' : 'srOnly'} htmlFor={id}>
-                {label}
+                Select a file
             </Label>
 
             {error && <ErrorMessage id={`${id}-error`}>{error}</ErrorMessage>}
@@ -314,6 +328,9 @@ export const FileUpload = ({
                     {hint}
                 </span>
             )}
+
+            <h5 tabIndex={-1} ref={summaryRef} className="text-normal font-body-sm margin-0">{summary}</h5>
+
             <FileInput
                 id={id}
                 name={`${name}${inputRequired ? ' (required)' : ''}`}
