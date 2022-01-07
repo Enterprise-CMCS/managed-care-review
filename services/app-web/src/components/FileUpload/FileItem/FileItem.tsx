@@ -120,16 +120,27 @@ export const FileItem = ({
         retryItem(item)
     }
 
+    let statusValue = "";
+    if (isLoading) {
+        statusValue = "uploading";
+    } else if (isScanning) {
+        statusValue = "scanning for viruses"
+    } else if (hasDuplicateNameError || hasScanningError || hasUploadError || hasUnexpectedError) {
+        statusValue = "error"
+    }
+
     return (
         <>
             <div className={styles.fileItemText}>
-                <img
-                    id={item.id}
-                    data-testid="file-input-preview-image"
-                    src={SPACER_GIF}
-                    alt=""
-                    className={imageClasses}
-                />
+                <div role="progressbar" aria-valuetext={statusValue} aria-label={`Status of file ${name}`}>
+                    <img
+                        id={item.id}
+                        data-testid="file-input-preview-image"
+                        src={SPACER_GIF}
+                        alt=""
+                        className={imageClasses}
+                    />
+                </div>
                 <span
                     style={{
                         display: 'flex',
