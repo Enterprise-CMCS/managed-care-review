@@ -351,7 +351,7 @@ export const RateDetails = ({
                                                 <Link
                                                     aria-label="Document definitions and requirements (opens in new window)"
                                                     href={
-                                                        'https://www.medicaid.gov/federal-policy-guidance/downloads/cib110819.pdf'
+                                                        '/help#key-documents'
                                                     }
                                                     variant="external"
                                                     target="_blank"
