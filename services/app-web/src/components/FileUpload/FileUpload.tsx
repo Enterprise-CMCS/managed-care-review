@@ -310,7 +310,7 @@ export const FileUpload = ({
         addFilesAndUpdateList(files)
     }
 
-    const summary = `${fileItems.length} file${fileItems.length !== 1 ? 's' : ''} selected`
+    const summary = `${fileItems.length} file${fileItems.length !== 1 ? 's' : ''} added`
 
     return (
         <FormGroup className="margin-top-0">
