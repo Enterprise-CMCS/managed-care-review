@@ -248,15 +248,28 @@ to Cloudtamer.
 
 To verify serverless (and AWS access) is set up properly with ctkey, run:
 
- ```shell
+```shell
 which serverless # should return something like /managed-care-review/scripts/serverless`
 which sls # should return something like /managed-care-review/scripts/sls`
 ```
 
 These should both point to paths inside the codebase (not to paths in /usr/local/bin).
 
-
 Then verify things are working by running any serverless command , e.g. `cd services/app-api && serverless info --stage main`. This command should print information and not return any Serverless Error around "AWS Credentials".
+
+## Adding a Service
+
+The Serverless framework calls encapsulated units of lambdas + AWS infrastructure a "service", so we've inherited this terminology from that project. All of our services live under the `./services/` directory. If you need to add a new service to the project a few things need to happen:
+
+-   `lerna create ${service-name}`. Follow Lerna's prompts and you'll end up with a directory under `./services/` with a generated `package.json` and `README.md` file.
+-   Add a `serverless.yml` file to the root directory of this new service. You can copy off of an existing config or run the `serverless` command in `./services/${service-name}` to use one of their starter templates.
+-   If this service is going to require js or ts code, you'll want to create a `src` directory as well as copy over the appropriate `tsconfig.json` and `.eslintrc` configs. Refer to one of the existing services to get an idea of how we are currently doing this.
+
+You'll need to add this service to our deployment GitHub Actions workflows:
+
+-   If it is only infrastructure it can be added to `./.github/workflows/deploy-infra-to-env.yml`.
+-   Services that include application code can be added to `./.github/workflows/deploy-app-to-env.yml`.
+-   We have a CI script that skips branch redeploys when possible in `./scripts/get-changed-services/index.ts`. Make sure your service is added to that list.
 
 ## Contributing
 

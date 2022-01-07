@@ -9,6 +9,9 @@ on:
       app_version:
         required: true
         type: string
+      changed_services:
+        required: true
+        type: string
     secrets:
       aws_access_key_id:
         required: true
@@ -29,6 +32,7 @@ on:
 
 jobs:
   app-web:
+    if: ${{ contains(inputs.changed_services, 'app-web') }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -53,6 +57,7 @@ jobs:
           pushd services/app-web && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   app-api:
+    if: ${{ contains(inputs.changed_services, 'app-api') }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
