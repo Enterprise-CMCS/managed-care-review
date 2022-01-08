@@ -12,7 +12,7 @@ describe('rate details', () => {
 
             // Navigate to contract details page by clicking back
             cy.findByRole('button', { name: /Back/ }).click()
-            cy.findByRole('heading', { level: 4, name: /Contract details/ })
+            cy.findByRole('heading', { level: 2, name: /Contract details/ })
 
             // Navigate to rate details page
             cy.visit(`/submissions/${draftSubmissionId}/rate-details`)
@@ -28,7 +28,7 @@ describe('rate details', () => {
 
             // Navigate to contacts page by clicking continue
             cy.navigateForm('Continue')
-            cy.findByRole('heading', { level: 4, name: /Contacts/ })
+            cy.findByRole('heading', { level: 2, name: /Contacts/ })
         })
     })
 
@@ -47,7 +47,7 @@ describe('rate details', () => {
 
             // Navigate to contacts page by clicking continue
             cy.navigateForm('Continue')
-            cy.findByRole('heading', { level: 4, name: /Contacts/ })
+            cy.findByRole('heading', { level: 2, name: /Contacts/ })
         })
     })
 })

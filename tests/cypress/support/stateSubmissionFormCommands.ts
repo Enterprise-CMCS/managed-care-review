@@ -9,7 +9,7 @@ Cypress.Commands.add('startNewContractOnlySubmission', () => {
     cy.fillOutContractActionOnly()
 
     cy.navigateForm('Continue')
-    cy.findByRole('heading', { level: 4, name: /Contract details/ })
+    cy.findByRole('heading', { level: 2, name: /Contract details/ })
 })
 
 Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
@@ -23,7 +23,7 @@ Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
     cy.fillOutContractActionAndRateCertification()
 
     cy.navigateForm('Continue')
-    cy.findByRole('heading', { level: 4, name: /Contract details/ })
+    cy.findByRole('heading', { level: 2, name: /Contract details/ })
 })
 
 Cypress.Commands.add('fillOutContractActionOnly', () => {
