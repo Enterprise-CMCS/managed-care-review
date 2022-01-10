@@ -3,9 +3,17 @@
 // GQL SCHEMA MATCHED TYPES
 type SubmissionType = 'CONTRACT_ONLY' | 'CONTRACT_AND_RATES'
 export type CapitationRatesAmendedReason = 'ANNUAL' | 'MIDYEAR' | 'OTHER'
+
+type DocumentCategoryType =
+    | 'CONTRACT'
+    | 'RATES'
+    | 'CONTRACT_RELATED'
+    | 'RATES_RELATED'
+
 type SubmissionDocument = {
     name: string
     s3URL: string
+    documentCategories: DocumentCategoryType[]
 }
 
 type ContractAmendmentInfo = {
@@ -109,6 +117,7 @@ export type DraftSubmissionType = {
 }
 
 export type {
+    DocumentCategoryType,
     SubmissionType,
     SubmissionDocument,
     RateType,

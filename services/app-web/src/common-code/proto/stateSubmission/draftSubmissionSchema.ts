@@ -20,6 +20,16 @@ export const capitationRatesAmendedReasonSchema = z.union([
 const submissionDocumentSchema = z.object({
     name: z.string(),
     s3URL: z.string(),
+    documentCategories: z.array(
+        z
+            .union([
+                z.literal('CONTRACT'),
+                z.literal('RATES'),
+                z.literal('CONTRACT_RELATED'),
+                z.literal('RATES_RELATED'),
+            ])
+            .optional()
+    ),
 })
 
 const contractAmendmentInfoSchema = z.object({
