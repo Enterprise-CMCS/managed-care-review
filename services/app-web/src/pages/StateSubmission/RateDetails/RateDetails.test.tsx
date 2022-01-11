@@ -761,10 +761,12 @@ describe('RateDetails', () => {
                             {
                                 name: 'testFile.doc',
                                 s3URL: expect.any(String),
+                                documentCategories: ['RATES'],
                             },
                             {
                                 name: 'testFile.pdf',
                                 s3URL: expect.any(String),
+                                documentCategories: ['RATES'],
                             },
                         ],
                     }),

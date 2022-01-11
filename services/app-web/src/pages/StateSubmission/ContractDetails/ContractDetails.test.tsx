@@ -858,10 +858,12 @@ describe('ContractDetails', () => {
                             {
                                 name: 'testFile.doc',
                                 s3URL: expect.any(String),
+                                documentCategories: ['CONTRACT'],
                             },
                             {
                                 name: 'testFile.pdf',
                                 s3URL: expect.any(String),
+                                documentCategories: ['CONTRACT'],
                             },
                         ],
                     }),
