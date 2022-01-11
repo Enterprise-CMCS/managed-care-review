@@ -234,30 +234,19 @@ export const Documents = ({
                     <FileUpload
                         id="documents"
                         name="documents"
-                        label="Upload supporting documents"
-                        isLabelVisible={false}
+                        label="Upload any additional supporting documents"
                         hint={
                             <>
                                 <Link
                                     aria-label="Document definitions and requirements (opens in new window)"
                                     href={
-                                        'https://www.medicaid.gov/federal-policy-guidance/downloads/cib110819.pdf'
+                                        '/help#supporting-documents'
                                     }
                                     variant="external"
                                     target="_blank"
                                 >
                                     Document definitions and requirements
                                 </Link>
-
-                                <p
-                                    data-testid="documents-hint"
-                                    className="text-base-darker"
-                                >
-                                    <strong>
-                                        Upload and categorize any additional
-                                        supporting documents
-                                    </strong>
-                                </p>
                                 <span className="srOnly">
                                     This input only accepts PDF, CSV, DOC, DOCX,
                                     XLS, XLSX files.

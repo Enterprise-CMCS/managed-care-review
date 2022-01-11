@@ -408,7 +408,7 @@ export const ContractDetails = ({
                                             <Link
                                                 aria-label="Document definitions and requirements (opens in new window)"
                                                 href={
-                                                    '/help#document-definitions-requirements'
+                                                    '/help#key-documents'
                                                 }
                                                 variant="external"
                                                 target="_blank"
