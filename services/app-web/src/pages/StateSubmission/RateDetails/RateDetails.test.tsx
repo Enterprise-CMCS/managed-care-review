@@ -578,6 +578,7 @@ describe('RateDetails', () => {
                     {
                         name: 'aasdf3423af',
                         s3URL: 's3://bucketname/key/fileName',
+                        documentCategories: ['RATES' as const],
                     },
                 ],
                 rateType: null,

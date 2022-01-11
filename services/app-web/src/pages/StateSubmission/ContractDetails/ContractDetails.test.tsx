@@ -679,6 +679,7 @@ describe('ContractDetails', () => {
                     {
                         name: 'aasdf3423af',
                         s3URL: 's3://bucketname/key/fileName',
+                        documentCategories: ['CONTRACT' as const],
                     },
                 ],
             }

@@ -32,6 +32,7 @@ import {
     isDateRangeEmpty,
 } from '../../../formHelpers'
 import {
+    Document,
     DraftSubmission,
     ContractType,
     FederalAuthority,
@@ -286,11 +287,12 @@ export const ContractDetails = ({
                     formDataDocuments.push({
                         name: fileItem.name,
                         s3URL: fileItem.s3URL,
+                        documentCategories: ['CONTRACT'],
                     })
                 }
                 return formDataDocuments
             },
-            [] as { name: string; s3URL: string }[]
+            [] as Document[]
         )
 
         const updatedDraft = updatesFromSubmission(draftSubmission)
@@ -369,7 +371,7 @@ export const ContractDetails = ({
                         className={styles.formContainer}
                         id="ContractDetailsForm"
                         aria-label="Contract Details Form"
-                        aria-describedby='form-guidance'
+                        aria-describedby="form-guidance"
                         onSubmit={(e) => {
                             setShouldValidate(true)
                             setFocusErrorSummaryHeading(true)
@@ -379,7 +381,9 @@ export const ContractDetails = ({
                         <fieldset className="usa-fieldset">
                             <legend className="srOnly">Contract Details</legend>
                             {formAlert && formAlert}
-                            <span id="form-guidance">All fields are required</span>
+                            <span id="form-guidance">
+                                All fields are required
+                            </span>
 
                             {shouldValidate && (
                                 <ErrorSummary

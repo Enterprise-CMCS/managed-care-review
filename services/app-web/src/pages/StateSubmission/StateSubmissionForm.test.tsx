@@ -248,6 +248,7 @@ describe('StateSubmissionForm', () => {
                 {
                     name: 'somedoc.pdf',
                     s3URL: 's3://bucketName/key',
+                    documentCategories: ['CONTRACT_RELATED'],
                 },
             ]
             const mockSubmission = mockDraft()
