@@ -37,6 +37,7 @@ describe('fetchStateSubmission', () => {
             {
                 name: 'contractDocument.pdf',
                 s3URL: 'fakeS3URL',
+                documentCategories: ['CONTRACT'],
             },
         ])
         const today = new Date()

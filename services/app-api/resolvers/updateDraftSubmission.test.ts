@@ -315,15 +315,23 @@ describe('updateDraftSubmission', () => {
                 {
                     name: 'myfile.pdf',
                     s3URL: 'fakeS3URL',
+                    documentCategories: ['CONTRACT_RELATED'],
                 },
             ],
             contractDocuments: [
                 {
                     name: 'contractDocument.pdf',
                     s3URL: 'fakeS3URL001',
+                    documentCategories: ['CONTRACT'],
                 },
             ],
-            rateDocuments: [],
+            rateDocuments: [
+                {
+                    name: 'rateDocument.pdf',
+                    s3URL: 'fakeS3URL001',
+                    documentCategories: ['RATES'],
+                },
+            ],
             contractType: 'BASE',
             contractDateStart: startDate,
             contractDateEnd: endDate,
@@ -367,6 +375,7 @@ describe('updateDraftSubmission', () => {
             {
                 name: 'myfile.pdf',
                 s3URL: 'fakeS3URL',
+                documentCategories: ['CONTRACT_RELATED'],
             },
         ])
 
@@ -374,6 +383,15 @@ describe('updateDraftSubmission', () => {
             {
                 name: 'contractDocument.pdf',
                 s3URL: 'fakeS3URL001',
+                documentCategories: ['CONTRACT'],
+            },
+        ])
+
+        expect(resultDraft1.rateDocuments).toEqual([
+            {
+                name: 'rateDocument.pdf',
+                s3URL: 'fakeS3URL001',
+                documentCategories: ['RATES'],
             },
         ])
 
@@ -384,12 +402,14 @@ describe('updateDraftSubmission', () => {
             submissionDescription: 'An updated submission',
             documents: [
                 {
-                    name: 'myfile2.pdf',
+                    name: 'addendum.pdf',
                     s3URL: 'fakeS3URL',
+                    documentCategories: ['CONTRACT_RELATED', 'RATES_RELATED'],
                 },
                 {
                     name: 'myfile3.pdf',
                     s3URL: 'fakeS3URL',
+                    documentCategories: ['CONTRACT_RELATED'],
                 },
             ],
             contractType: 'BASE',
@@ -397,15 +417,28 @@ describe('updateDraftSubmission', () => {
                 {
                     name: 'contractDocument2.pdf',
                     s3URL: 'fakeS3URL002',
+                    documentCategories: ['CONTRACT'],
                 },
                 {
                     name: 'contractDocument3.pdf',
                     s3URL: 'fakeS3URL003',
+                    documentCategories: ['CONTRACT'],
                 },
             ],
             contractDateStart: resultDraft1.contractDateStart,
             contractDateEnd: resultDraft1.contractDateEnd,
-            rateDocuments: [],
+            rateDocuments: [
+                {
+                    name: 'rateDocumentUpdated.pdf',
+                    s3URL: 'fakeS3URL003',
+                    documentCategories: ['RATES'],
+                },
+                {
+                    name: 'rateDocumentUpdated2.pdf',
+                    s3URL: 'fakeS3URL003',
+                    documentCategories: ['RATES'],
+                },
+            ],
             managedCareEntities: [],
             federalAuthorities: [],
             stateContacts: [
@@ -446,7 +479,17 @@ describe('updateDraftSubmission', () => {
 
         expect(updateResult2.errors).toBeUndefined()
         expect(resultDraft2.documents.length).toEqual(2)
-        expect(resultDraft2.documents[0].name).toEqual('myfile2.pdf')
+        expect(resultDraft2.documents[0].name).toEqual('addendum.pdf')
+
+        expect(resultDraft2.contractDocuments.length).toEqual(2)
+        expect(resultDraft2.contractDocuments[0].name).toEqual(
+            'contractDocument2.pdf'
+        )
+
+        expect(resultDraft2.rateDocuments.length).toEqual(2)
+        expect(resultDraft2.rateDocuments[0].name).toEqual(
+            'rateDocumentUpdated.pdf'
+        )
     })
 
     it('updates a submission to have state contacts', async () => {
@@ -803,12 +846,14 @@ describe('updateDraftSubmission', () => {
                 {
                     name: 'myfile.pdf',
                     s3URL: 'fakeS3URL',
+                    documentCategories: ['RATES_RELATED'],
                 },
             ],
             contractDocuments: [
                 {
                     name: 'myContractDocument.pdf',
                     s3URL: 'fakeS3URL001',
+                    documentCategories: ['CONTRACT'],
                 },
             ],
             stateContacts: [
@@ -851,6 +896,7 @@ describe('updateDraftSubmission', () => {
             {
                 name: 'myfile.pdf',
                 s3URL: 'fakeS3URL',
+                documentCategories:[ 'RATES_RELATED'],
             },
         ])
 

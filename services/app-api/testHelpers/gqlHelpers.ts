@@ -153,6 +153,7 @@ const createAndUpdateTestDraftSubmission = async (
             {
                 name: 'contractDocument.pdf',
                 s3URL: 'fakeS3URL',
+                documentCategories: ['CONTRACT' as const],
             },
         ],
         managedCareEntities: ['MCO'],
@@ -165,6 +166,7 @@ const createAndUpdateTestDraftSubmission = async (
             {
                 name: 'rateDocument.pdf',
                 s3URL: 'fakeS3URL',
+                documentCategories: ['RATES' as const],
             },
         ],
         ...partialDraftSubmissionUpdates,
