@@ -192,7 +192,7 @@ jobs:
           MSG_MINIMAL: actions url,commit
 
   promote-infra-val:
-    needs: [dev-cypress]
+    needs: [dev-cypress, unit-tests]
     uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
     with:
       stage_name: val
@@ -210,7 +210,7 @@ jobs:
       iam_path: ${{ secrets.IAM_PATH }}
 
   promote-app-val:
-    needs: [dev-cypress, promote-infra-val]
+    needs: [dev-cypress, promote-infra-val, unit-tests]
     uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
     with:
       stage_name: val
@@ -277,7 +277,7 @@ jobs:
           MSG_MINIMAL: actions url,commit
 
   promote-infra-prod:
-    needs: [cypress-val]
+    needs: [cypress-val, unit-tests]
     uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
     with:
       stage_name: prod
@@ -295,7 +295,7 @@ jobs:
       iam_path: ${{ secrets.IAM_PATH }}
 
   promote-app-prod:
-    needs: [cypress-val, promote-infra-prod]
+    needs: [cypress-val, promote-infra-prod, unit-tests]
     uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
     with:
       stage_name: prod
