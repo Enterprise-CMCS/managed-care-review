@@ -29,9 +29,11 @@ const ErrorSummaryMessage = ({
             href={href}
             className={classnames(styles.message)}
             data-testid="error-summary-message"
+            onClick={(event) => {
                 const fieldElement: HTMLElement | null = document.querySelector(fieldSelector);
             
                 if (fieldElement) {
+                    event.preventDefault();
                     fieldElement.focus();
                 }
             }}
