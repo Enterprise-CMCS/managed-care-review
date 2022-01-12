@@ -1,7 +1,7 @@
 import { Resolvers } from '../gen/gqlServer'
 import { Store } from '../postgres'
 import { submissionName } from '../../app-web/src/common-code/domain-models'
-import { pluralize } from './pluralizer'
+import { pluralize } from '../../app-web/src/common-code/formatters'
 
 export function draftSubmissionResolver(
     store: Store

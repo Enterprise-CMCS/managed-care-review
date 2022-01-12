@@ -10,7 +10,7 @@ import {
 } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
-import { pluralize } from './pluralizer'
+import { pluralize } from '../../app-web/src/common-code/formatters'
 
 // This MUTATES the passed in draft, overwriting all the current fields with the updated fields
 export function applyUpdates(
