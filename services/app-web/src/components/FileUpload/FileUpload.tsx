@@ -319,7 +319,7 @@ export const FileUpload = ({
              item.status === 'DUPLICATE_NAME_ERROR'
      ).length
      const pendingCount = fileItems.filter(
-         (item) => item.status === 'PENDING'
+         (item) => item.status === 'PENDING' || item.status === 'SCANNING'
      ).length
 
      const summaryDetailText =
