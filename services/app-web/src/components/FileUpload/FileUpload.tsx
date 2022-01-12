@@ -309,8 +309,27 @@ export const FileUpload = ({
         const files = Array.from(fileInputRef.current?.input?.files || []) // Web API File objects
         addFilesAndUpdateList(files)
     }
+     const uploadedCount = fileItems.filter(
+         (item) => item.status === 'UPLOAD_COMPLETE'
+     ).length
+     const errorCount = fileItems.filter(
+         (item) =>
+             item.status === 'UPLOAD_ERROR' ||
+             item.status === 'SCANNING_ERROR' ||
+             item.status === 'DUPLICATE_NAME_ERROR'
+     ).length
+     const pendingCount = fileItems.filter(
+         (item) => item.status === 'PENDING'
+     ).length
 
-    const summary = `${fileItems.length} file${fileItems.length !== 1 ? 's' : ''} added`
+     const summaryDetailText =
+         fileItems.length > 0
+             ? `(${uploadedCount} complete, ${errorCount} errors, ${pendingCount} pending)`
+             : ''
+
+     const summary = `${fileItems.length} file${
+         fileItems.length !== 1 ? 's' : ''
+     } added ${summaryDetailText}`
 
     return (
         <FormGroup className="margin-top-0">
