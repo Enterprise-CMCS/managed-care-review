@@ -61,7 +61,7 @@ describe('contacts', () => {
             cy.fillOutActuaryContact()
 
             // Add additional state contact
-            cy.findByRole('button', { name: /Add state contact/ }).click()
+            cy.findByRole('button', { name: /Add another state contact/ }).click()
             cy.findAllByLabelText('Name').eq(1).type('State Contact Person 2')
             cy.findAllByLabelText('Title/Role')
                 .eq(1)
@@ -69,7 +69,7 @@ describe('contacts', () => {
             cy.findAllByLabelText('Email').eq(1).type('statecontact2@test.com')
 
             // Add additional actuary contact
-            cy.findByRole('button', { name: /Add actuary contact/ }).click()
+            cy.findByRole('button', { name: /Add another actuary contact/ }).click()
             cy.findAllByLabelText('Name').eq(3).type('Actuary Contact Person 2')
             cy.findAllByLabelText('Title/Role')
                 .eq(3)
