@@ -505,7 +505,7 @@ return (
                                             }}
                                             ref={newStateContactButtonRef}
                                         >
-                                            Add state contact
+                                            Add another state contact
                                         </button>
                                     </div>
                                 )}
@@ -878,7 +878,7 @@ return (
                                                 }}
                                                 ref={newActuaryContactButtonRef}
                                             >
-                                                Add actuary contact
+                                                Add another actuary contact
                                             </button>
                                         </div>
                                     )}

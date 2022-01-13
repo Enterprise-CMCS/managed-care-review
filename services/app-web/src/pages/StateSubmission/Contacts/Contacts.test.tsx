@@ -147,7 +147,7 @@ describe('Contacts', () => {
             }
         )
         const addStateContactButton = screen.getByRole('button', {
-            name: 'Add state contact',
+            name: 'Add another state contact',
         })
         const firstContactName = screen.getByLabelText('Name')
 
@@ -181,7 +181,7 @@ describe('Contacts', () => {
         )
 
         const addActuaryContactButton = screen.getByRole('button', {
-            name: 'Add actuary contact',
+            name: 'Add another actuary contact',
         })
         const firstActuaryContactName = screen.getAllByLabelText('Name')[1]
 
@@ -191,7 +191,7 @@ describe('Contacts', () => {
         addActuaryContactButton.click()
 
         await waitFor(() => {
-            expect(screen.getByText('Add actuary contact')).toBeInTheDocument()
+            expect(screen.getByText('Add another actuary contact')).toBeInTheDocument()
 
             expect(screen.getAllByLabelText('Name').length).toBe(3)
 
@@ -217,7 +217,7 @@ describe('Contacts', () => {
             }
         )
         const addStateContactButton = screen.getByRole('button', {
-            name: 'Add state contact',
+            name: 'Add another state contact',
         })
         addStateContactButton.click()
 
@@ -247,7 +247,7 @@ describe('Contacts', () => {
             }
         )
         const addActuaryContactButton = screen.getByRole('button', {
-            name: 'Add actuary contact',
+            name: 'Add another actuary contact',
         })
         addActuaryContactButton.click()
 
@@ -276,7 +276,7 @@ describe('Contacts', () => {
             }
         )
         const addStateContactButton = screen.getByRole('button', {
-            name: 'Add state contact',
+            name: 'Add another state contact',
         })
         addStateContactButton.click()
 
@@ -299,7 +299,7 @@ describe('Contacts', () => {
             }
         )
         const addActuaryContactButton = screen.getByRole('button', {
-            name: 'Add actuary contact',
+            name: 'Add another actuary contact',
         })
         addActuaryContactButton.click()
         addActuaryContactButton.click()
