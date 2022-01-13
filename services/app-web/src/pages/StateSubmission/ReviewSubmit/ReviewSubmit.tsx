@@ -126,6 +126,7 @@ export const ReviewSubmit = ({
                     <Button
                         type="button"
                         onClick={() => history.push('/dashboard')}
+                        unstyled
                     >
                         Save as draft
                     </Button>
