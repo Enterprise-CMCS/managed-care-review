@@ -1,4 +1,4 @@
-import { pluralize } from '../../app-web/src/common-code/formatters'
+import { pluralize } from './'
 
 describe('pluralize', () => {
     it("pluralizes 'do' and 'does'", () => {
