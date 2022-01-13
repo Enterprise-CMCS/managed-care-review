@@ -101,6 +101,8 @@ export const RateDetails = ({
             : showFileUploadError && !hasValidFiles
             ? ' You must remove all documents with error messages before continuing'
             : undefined
+    const documentsErrorKey =
+        fileItems.length === 0 ? 'rateDocuments' : '#file-items-list'
 
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         (draftSubmission?.rateDocuments &&
@@ -331,7 +333,7 @@ export const RateDetails = ({
                                             errors={
                                                 documentsErrorMessage
                                                     ? {
-                                                          documents:
+                                                          [documentsErrorKey]:
                                                               documentsErrorMessage,
                                                           ...errors,
                                                       }

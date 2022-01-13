@@ -131,6 +131,9 @@ export const ContractDetails = ({
             : showFileUploadError && !hasValidFiles
             ? ' You must remove all documents with error messages before continuing'
             : undefined
+    const documentsErrorKey =
+        fileItems.length === 0 ? 'documents' : '#file-items-list'
+
     // Error summary state management
     const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
     const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
@@ -386,8 +389,7 @@ export const ContractDetails = ({
                                     errors={
                                         documentsErrorMessage
                                             ? {
-                                                  documents:
-                                                      documentsErrorMessage,
+                                                  [documentsErrorKey]: documentsErrorMessage,
                                                   ...errors,
                                               }
                                             : errors
