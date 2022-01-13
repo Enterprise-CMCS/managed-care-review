@@ -27,6 +27,8 @@ export const FileItemsList = ({
         <ul
             data-testid="file-input-preview-list"
             className={styles.fileItemsList}
+            id="file-items-list"
+            tabIndex={-1}
         >
             {fileItems.map((item) => (
                 <li
