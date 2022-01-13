@@ -325,7 +325,7 @@ export const FileUpload = ({
 
     const summaryDetailText =
         fileItems.length > 0
-            ? ` (${uploadedCount} complete, ${errorCount} ${pluralize(
+            ? `(${uploadedCount} complete, ${errorCount} ${pluralize(
                   'error',
                   errorCount
               )}, ${pendingCount} pending)`
@@ -353,16 +353,13 @@ export const FileUpload = ({
                 </span>
             )}
 
-            <div style={{ display: 'flex' }}>
-                <h5
-                    tabIndex={-1}
-                    ref={summaryRef}
-                    className="text-normal font-body-sm margin-0"
-                >
-                    {summary}
-                </h5>
-                <span style={{ paddingLeft: '2px' }}>{summaryDetailText}</span>
-            </div>
+            <h5
+                tabIndex={-1}
+                ref={summaryRef}
+                className="text-normal font-body-sm margin-0"
+            >
+                {`${summary} ${summaryDetailText}`}
+            </h5>
 
             <FileInput
                 id={id}
