@@ -11,34 +11,32 @@ import {
     TEST_TEXT_FILE,
     TEST_VIDEO_FILE,
     dragAndDrop,
+    fakeRequest,
     userClickByRole,
 } from '../../testHelpers/jestHelpers'
-
-const fakeApiRequest = (success: boolean): Promise<S3FileData> => {
-    const timeout = Math.round(Math.random() * 1000)
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            if (success) {
-                resolve({ key: 'testtest', s3URL: 'fakeS3url' })
-            } else {
-                reject(new Error('Error'))
-            }
-        }, timeout)
-    })
-}
 
 describe('FileUpload component', () => {
     const testProps: FileUploadProps = {
         id: 'Default',
         name: 'Default Input',
         label: 'File input label',
-        uploadFile: (file: File) => fakeApiRequest(true),
+        uploadFile: (file: File) =>
+            fakeRequest<S3FileData>(true, {
+                key: 'testtest',
+                s3URL: 'fakeS3url',
+            }),
         deleteFile: async (key: string) => {
-            await fakeApiRequest(true)
+            await fakeRequest<S3FileData>(true, {
+                key: 'testtest',
+                s3URL: 'fakeS3url',
+            })
             return
         },
         scanFile: async (key: string) => {
-            await fakeApiRequest(true)
+            await fakeRequest<S3FileData>(true, {
+                key: 'testtest',
+                s3URL: 'fakeS3url',
+            })
             return
         },
         onFileItemsUpdate: () => {
@@ -268,6 +266,39 @@ describe('FileUpload component', () => {
         await waitFor(() => expect(props.uploadFile).toHaveBeenCalled())
     })
 
+    describe('list summary heading', () => {
+        it('display list count - X files added', async () => {
+            await render(<FileUpload {...testProps} accept=".pdf,.txt" />)
+
+            const input = screen.getByTestId('file-input-input')
+            userEvent.upload(input, [TEST_DOC_FILE])
+            userEvent.upload(input, [TEST_PDF_FILE])
+            await waitFor(() =>
+                expect(screen.getByText(/2 files added/)).toBeInTheDocument()
+            )
+        })
+        it('displays complete, errors, and pending in list - (X complete, X error(s), X pending', async () => {
+            await render(<FileUpload {...testProps} accept=".pdf,.txt" />)
+
+            const input = screen.getByTestId('file-input-input')
+            userEvent.upload(input, [TEST_DOC_FILE])
+            userEvent.upload(input, [TEST_PDF_FILE])
+            userEvent.upload(input, [TEST_DOC_FILE])
+            // while uploading/scanning
+            await waitFor(() => {
+                expect(screen.getByText(/3 files added/)).toBeInTheDocument()
+                expect(
+                    screen.getByText(/0 complete, 1 error, 2 pending/)
+                ).toBeInTheDocument()
+            })
+            // when complete
+            await waitFor(() => {
+                expect(
+                    screen.getByText(/2 complete, 1 error, 0 pending/)
+                ).toBeInTheDocument()
+            })
+        })
+    })
     describe('drag and drop behavior', () => {
         it('does not accept a drop file that has an invalid type', async () => {
             const { getByTestId, queryByTestId } = render(
