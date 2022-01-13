@@ -30,11 +30,13 @@ query fetchStateSubmission($input: FetchStateSubmissionInput!) {
             documents {
                 name
                 s3URL
+                documentCategories
             }
             contractType
             contractDocuments {
                 name
                 s3URL
+                documentCategories
             }
             contractDateStart
             contractDateEnd
@@ -54,6 +56,7 @@ query fetchStateSubmission($input: FetchStateSubmissionInput!) {
             rateDocuments {
                 name
                 s3URL
+                documentCategories
             }
             rateDateStart
             rateDateEnd

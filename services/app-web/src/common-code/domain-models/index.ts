@@ -12,6 +12,7 @@ export type {
 } from './cognitoUserType'
 
 export type {
+    DocumentCategoryType,
     DraftSubmissionType,
     SubmissionType,
     SubmissionDocument,

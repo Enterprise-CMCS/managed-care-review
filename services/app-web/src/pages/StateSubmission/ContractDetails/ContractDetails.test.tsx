@@ -679,6 +679,7 @@ describe('ContractDetails', () => {
                     {
                         name: 'aasdf3423af',
                         s3URL: 's3://bucketname/key/fileName',
+                        documentCategories: ['CONTRACT' as const],
                     },
                 ],
             }
@@ -857,10 +858,12 @@ describe('ContractDetails', () => {
                             {
                                 name: 'testFile.doc',
                                 s3URL: expect.any(String),
+                                documentCategories: ['CONTRACT'],
                             },
                             {
                                 name: 'testFile.pdf',
                                 s3URL: expect.any(String),
+                                documentCategories: ['CONTRACT'],
                             },
                         ],
                     }),

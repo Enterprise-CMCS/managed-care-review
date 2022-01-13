@@ -155,6 +155,10 @@ const toProtoBuffer = (
             contractDocuments: domainData.contractDocuments.map((doc) => ({
                 s3Url: doc.s3URL,
                 name: doc.name,
+                documentCategories: domainEnumArrayToProto(
+                    statesubmission.DocumentCategory,
+                    doc.documentCategories
+                ),
             })),
             contractAmendmentInfo: contractAmendmentInfo
                 ? {
@@ -193,6 +197,10 @@ const toProtoBuffer = (
                 rateDocuments: domainData.rateDocuments.map((doc) => ({
                     s3Url: doc.s3URL,
                     name: doc.name,
+                    documentCategories: domainEnumArrayToProto(
+                        statesubmission.DocumentCategory,
+                        doc.documentCategories
+                    ),
                 })),
                 actuaryContacts: domainData.actuaryContacts.map(
                     (actuaryContact) => {
@@ -230,6 +238,10 @@ const toProtoBuffer = (
         documents: domainData.documents.map((doc) => ({
             s3Url: doc.s3URL,
             name: doc.name,
+            documentCategories: domainEnumArrayToProto(
+                statesubmission.DocumentCategory,
+                doc.documentCategories
+            ),
         })),
     }
 

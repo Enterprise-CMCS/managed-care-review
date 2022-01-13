@@ -7,6 +7,7 @@ import styles from '../StateSubmissionForm.module.scss'
 import {
     DraftSubmission,
     UpdateDraftSubmissionInput,
+    Document,
 } from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
@@ -184,11 +185,12 @@ export const Documents = ({
                         formDataDocuments.push({
                             name: fileItem.name,
                             s3URL: fileItem.s3URL,
+                            documentCategories: [],
                         })
                     }
                     return formDataDocuments
                 },
-                [] as { name: string; s3URL: string }[]
+                [] as Document[]
             )
 
             const updatedDraft = updatesFromSubmission(draftSubmission)

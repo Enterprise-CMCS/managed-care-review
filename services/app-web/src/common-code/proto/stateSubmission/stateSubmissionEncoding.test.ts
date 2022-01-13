@@ -131,17 +131,25 @@ const nowWithDocuments: DraftSubmissionType = {
     documents: [
         {
             s3URL: 'www.example.com/foo.png',
-            name: 'dummy doc',
+            name: 'contract doc',
+            documentCategories: ['CONTRACT_RELATED'],
         },
         {
             s3URL: 'www.example.com/foo.png',
-            name: 'dummy doc2',
+            name: 'rates and contract addendum doc',
+            documentCategories: ['CONTRACT_RELATED', 'RATES_RELATED'],
         },
     ],
     contractType: 'BASE',
     contractDateStart: new Date(Date.UTC(2021, 4, 22)),
     contractDateEnd: new Date(Date.UTC(2022, 4, 21)),
-    contractDocuments: [],
+    contractDocuments: [
+        {
+            s3URL: 'www.example.com/foo.png',
+            name: 'contract doc',
+            documentCategories: ['CONTRACT'],
+        },
+    ],
     rateDocuments: [],
     managedCareEntities: [],
     federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
@@ -187,11 +195,13 @@ const fullRateAmendment: DraftSubmissionType = {
     documents: [
         {
             s3URL: 'www.example.com/foo.png',
-            name: 'dummy doc',
+            name: 'contract doc',
+            documentCategories: ['CONTRACT_RELATED'],
         },
         {
             s3URL: 'www.example.com/foo.png',
-            name: 'dummy doc2',
+            name: 'rates and contract addendum doc',
+            documentCategories: ['CONTRACT_RELATED', 'RATES_RELATED'],
         },
     ],
     contractType: 'BASE',
@@ -252,18 +262,32 @@ const fullContractInfo: DraftSubmissionType = {
     documents: [
         {
             s3URL: 'www.example.com/foo.png',
-            name: 'dummy doc',
+            name: 'contract doc',
+            documentCategories: ['CONTRACT_RELATED'],
         },
         {
             s3URL: 'www.example.com/foo.png',
-            name: 'dummy doc2',
+            name: 'rates and contract addendum doc',
+            documentCategories: ['CONTRACT_RELATED', 'RATES_RELATED'],
         },
     ],
     contractType: 'AMENDMENT',
     contractDateStart: new Date(Date.UTC(2021, 4, 22)),
     contractDateEnd: new Date(Date.UTC(2022, 4, 21)),
-    contractDocuments: [],
-    rateDocuments: [],
+    contractDocuments: [
+        {
+            s3URL: 'www.example.com/foo.png',
+            name: 'contract doc',
+            documentCategories: ['CONTRACT'],
+        },
+    ],
+    rateDocuments: [
+        {
+            s3URL: 'www.example.com/foo.png',
+            name: 'Rates certification',
+            documentCategories: ['RATES'],
+        },
+    ],
     contractAmendmentInfo: {
         itemsBeingAmended: [
             'ENROLLEE_ACCESS',
@@ -332,11 +356,8 @@ const someOthers: DraftSubmissionType = {
     documents: [
         {
             s3URL: 'www.example.com/foo.png',
-            name: 'dummy doc',
-        },
-        {
-            s3URL: 'www.example.com/foo.png',
-            name: 'dummy doc2',
+            name: 'contract doc',
+            documentCategories: ['CONTRACT_RELATED'],
         },
     ],
     contractType: 'AMENDMENT',
@@ -363,12 +384,14 @@ const someOthers: DraftSubmissionType = {
     rateType: 'AMENDMENT',
     rateDocuments: [
         {
-            s3URL: 'www.example.com/test.png',
-            name: 'dummy rate doc',
+            s3URL: 'www.example.com/foo.png',
+            name: 'rates cert 1',
+            documentCategories: ['RATES_RELATED'],
         },
         {
-            s3URL: 'www.example.com/test2.png',
-            name: 'dummy rate doc2',
+            s3URL: 'www.example.com/foo.png',
+            name: 'rates cert 2',
+            documentCategories: ['RATES_RELATED'],
         },
     ],
     rateDateStart: new Date(Date.UTC(2021, 4, 22)),
@@ -425,8 +448,9 @@ const basicCompleteLiteral: StateSubmissionType = {
     contractDateEnd: new Date(Date.UTC(2022, 4, 21)),
     contractDocuments: [
         {
-            name: 'test doc',
-            s3URL: 'https://s3.com/test',
+            s3URL: 'www.example.com/foo.png',
+            name: 'contract doc',
+            documentCategories: ['CONTRACT'],
         },
     ],
     managedCareEntities: ['PIHP'],

@@ -260,16 +260,34 @@ export function mockStateSubmission(): StateSubmission {
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A submitted submission',
         submittedAt: new Date(),
-        documents: [{ s3URL: 'bar', name: 'foo' }],
+        documents: [
+            {
+                s3URL: 'bar',
+                name: 'foo',
+                documentCategories: ['RATES_RELATED' as const],
+            },
+        ],
         contractType: 'BASE',
-        contractDocuments: [{ s3URL: 'bar', name: 'foo' }],
+        contractDocuments: [
+            {
+                s3URL: 'bar',
+                name: 'foo',
+                documentCategories: ['CONTRACT' as const],
+            },
+        ],
         contractDateStart: new Date(),
         contractDateEnd: new Date(),
         contractAmendmentInfo: null,
         managedCareEntities: ['ENROLLMENT_PROCESS'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateType: 'NEW',
-        rateDocuments: [{ s3URL: 'bar', name: 'foo' }],
+        rateDocuments: [
+            {
+                s3URL: 'bar',
+                name: 'foo',
+                documentCategories: ['RATES' as const],
+            },
+        ],
         rateDateStart: new Date(),
         rateDateEnd: new Date(),
         rateDateCertified: new Date(),

@@ -16,6 +16,7 @@ import { v4 as uuidv4 } from 'uuid'
 import styles from '../StateSubmissionForm.module.scss'
 
 import {
+    Document,
     DraftSubmission,
     RateType,
     UpdateDraftSubmissionInput,
@@ -82,7 +83,8 @@ export const RateDetails = ({
     // Rate documents state management
     const { deleteFile, getKey, getS3URL, scanFile, uploadFile } = useS3()
     const [fileItems, setFileItems] = React.useState<FileItemT[]>([])
-    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] = React.useState(false)
+    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
+        React.useState(false)
     const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
 
     const hasValidFiles =
@@ -250,11 +252,12 @@ export const RateDetails = ({
                     formDataDocuments.push({
                         name: fileItem.name,
                         s3URL: fileItem.s3URL,
+                        documentCategories: ['RATES'],
                     })
                 }
                 return formDataDocuments
             },
-            [] as { name: string; s3URL: string }[]
+            [] as Document[]
         )
 
         const updatedDraft = updatesFromSubmission(draftSubmission)
