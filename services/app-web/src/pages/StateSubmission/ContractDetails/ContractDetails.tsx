@@ -6,7 +6,6 @@ import {
     Fieldset,
     Link,
     DateRangePicker,
-    ErrorMessage,
 } from '@trussworks/react-uswds'
 import { v4 as uuidv4 } from 'uuid'
 import { Link as ReactRouterLink, useHistory } from 'react-router-dom'
@@ -15,16 +14,15 @@ import { Formik, FormikErrors } from 'formik'
 import styles from '../StateSubmissionForm.module.scss'
 
 import {
+    FileUpload,
+    S3FileData,
+    FileItemT,
     FieldRadio,
     FieldCheckbox,
     FieldTextInput,
     ErrorSummary,
-} from '../../../components/Form'
-import {
-    FileUpload,
-    S3FileData,
-    FileItemT,
-} from '../../../components/FileUpload'
+    PoliteErrorMessage,
+} from '../../../components'
 import {
     formatForApi,
     formatForForm,
@@ -75,11 +73,11 @@ const ContractDatesErrorMessage = ({
     values: ContractDetailsFormValues
     validationErrorMessage: string
 }): React.ReactElement => (
-    <ErrorMessage>
+    <PoliteErrorMessage>
         {isDateRangeEmpty(values.contractDateStart, values.contractDateEnd)
             ? 'You must provide a start and an end date'
             : validationErrorMessage}
-    </ErrorMessage>
+    </PoliteErrorMessage>
 )
 
 export interface ContractDetailsFormValues {
@@ -411,9 +409,7 @@ export const ContractDetails = ({
                                         <>
                                             <Link
                                                 aria-label="Document definitions and requirements (opens in new window)"
-                                                href={
-                                                    '/help#key-documents'
-                                                }
+                                                href={'/help#key-documents'}
                                                 variant="external"
                                                 target="_blank"
                                             >
@@ -443,9 +439,9 @@ export const ContractDetails = ({
                                     legend="Contract action type"
                                 >
                                     {showFieldErrors(errors.contractType) && (
-                                        <ErrorMessage>
+                                        <PoliteErrorMessage>
                                             {errors.contractType}
-                                        </ErrorMessage>
+                                        </PoliteErrorMessage>
                                     )}
                                     <FieldRadio
                                         id="baseContract"
@@ -578,9 +574,9 @@ export const ContractDetails = ({
                                             {showFieldErrors(
                                                 errors.managedCareEntities
                                             ) && (
-                                                <ErrorMessage>
+                                                <PoliteErrorMessage>
                                                     {errors.managedCareEntities}
-                                                </ErrorMessage>
+                                                </PoliteErrorMessage>
                                             )}
                                             <FieldCheckbox
                                                 id="managedCareOrganization"
@@ -656,9 +652,9 @@ export const ContractDetails = ({
                                             {showFieldErrors(
                                                 errors.federalAuthorities
                                             ) && (
-                                                <ErrorMessage>
+                                                <PoliteErrorMessage>
                                                     {errors.federalAuthorities}
-                                                </ErrorMessage>
+                                                </PoliteErrorMessage>
                                             )}
                                             <FieldCheckbox
                                                 id="1932aStatePlanAuthority"
@@ -761,11 +757,11 @@ export const ContractDetails = ({
                                                     {showFieldErrors(
                                                         errors.itemsAmended
                                                     ) && (
-                                                        <ErrorMessage>
+                                                        <PoliteErrorMessage>
                                                             {
                                                                 errors.itemsAmended
                                                             }
-                                                        </ErrorMessage>
+                                                        </PoliteErrorMessage>
                                                     )}
                                                     <FieldCheckbox
                                                         id="benefitsProvided"
@@ -809,11 +805,11 @@ export const ContractDetails = ({
                                                                     {showFieldErrors(
                                                                         errors.capitationRates
                                                                     ) && (
-                                                                        <ErrorMessage>
+                                                                        <PoliteErrorMessage>
                                                                             {
                                                                                 errors.capitationRates
                                                                             }
-                                                                        </ErrorMessage>
+                                                                        </PoliteErrorMessage>
                                                                     )}
                                                                     <FieldRadio
                                                                         id="annualRateUpdate"
@@ -1040,11 +1036,11 @@ export const ContractDetails = ({
                                                             {showFieldErrors(
                                                                 errors.relatedToCovid19
                                                             ) && (
-                                                                <ErrorMessage>
+                                                                <PoliteErrorMessage>
                                                                     {
                                                                         errors.relatedToCovid19
                                                                     }
-                                                                </ErrorMessage>
+                                                                </PoliteErrorMessage>
                                                             )}
                                                             <FieldRadio
                                                                 id="covidYes"
@@ -1082,11 +1078,11 @@ export const ContractDetails = ({
                                                                 {showFieldErrors(
                                                                     errors.relatedToVaccination
                                                                 ) && (
-                                                                    <ErrorMessage>
+                                                                    <PoliteErrorMessage>
                                                                         {
                                                                             errors.relatedToVaccination
                                                                         }
-                                                                    </ErrorMessage>
+                                                                    </PoliteErrorMessage>
                                                                 )}
                                                                 <FieldRadio
                                                                     id="vaccineYes"

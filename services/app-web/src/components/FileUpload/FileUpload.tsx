@@ -1,12 +1,12 @@
 import React, { useState, useRef } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import {
-    ErrorMessage,
     FormGroup,
     Label,
     FileInput,
     FileInputRef,
 } from '@trussworks/react-uswds'
+import { PoliteErrorMessage } from '../'
 
 import styles from './FileUpload.module.scss'
 
@@ -149,7 +149,7 @@ export const FileUpload = ({
         })
 
         if (summaryRef.current) {
-            summaryRef.current.focus();
+            summaryRef.current.focus()
         }
     }
     // Upload to S3 and update file items in component state with the async loading status
@@ -289,9 +289,9 @@ export const FileUpload = ({
             fileInputRef.current.input.value = ''
         }
 
-        setTimeout(function(){
+        setTimeout(function () {
             if (summaryRef.current) {
-                summaryRef.current.focus();
+                summaryRef.current.focus()
             }
         }, 200)
     }
@@ -310,7 +310,9 @@ export const FileUpload = ({
         addFilesAndUpdateList(files)
     }
 
-    const summary = `${fileItems.length} file${fileItems.length !== 1 ? 's' : ''} added`
+    const summary = `${fileItems.length} file${
+        fileItems.length !== 1 ? 's' : ''
+    } added`
 
     return (
         <FormGroup className="margin-top-0">
@@ -318,7 +320,11 @@ export const FileUpload = ({
                 {label}
             </Label>
 
-            {error && <ErrorMessage id={`${id}-error`}>{error}</ErrorMessage>}
+            {error && (
+                <PoliteErrorMessage id={`${id}-error`}>
+                    {error}
+                </PoliteErrorMessage>
+            )}
             {hint && (
                 <span
                     id={`${id}-hint`}
@@ -329,7 +335,13 @@ export const FileUpload = ({
                 </span>
             )}
 
-            <h5 tabIndex={-1} ref={summaryRef} className="text-normal font-body-sm margin-0">{summary}</h5>
+            <h5
+                tabIndex={-1}
+                ref={summaryRef}
+                className="text-normal font-body-sm margin-0"
+            >
+                {summary}
+            </h5>
 
             <FileInput
                 id={id}
