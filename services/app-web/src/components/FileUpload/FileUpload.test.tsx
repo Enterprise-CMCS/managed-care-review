@@ -293,12 +293,15 @@ describe('FileUpload component', () => {
             })
             // when complete
             await waitFor(() => {
-                 expect(screen.queryAllByText(/Uploading/).length).toBe(0)
-                 expect(screen.queryAllByText(/Scanning/).length).toBe(0)
+                expect(screen.queryAllByText(/Uploading/).length).toBe(0)
+                expect(screen.queryAllByText(/Scanning/).length).toBe(0)
+            })
+            await waitFor(() => {
                 expect(
                     screen.getByText(/2 complete, 1 error, 0 pending/)
                 ).toBeInTheDocument()
             })
+         
         })
     })
     describe('drag and drop behavior', () => {
