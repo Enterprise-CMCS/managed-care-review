@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Alert, Form as UswdsForm, Link } from '@trussworks/react-uswds'
+import { Form as UswdsForm, Link } from '@trussworks/react-uswds'
 import { useHistory } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
