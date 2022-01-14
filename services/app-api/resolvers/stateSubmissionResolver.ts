@@ -1,7 +1,7 @@
 import { submissionName } from '../../app-web/src/common-code/domain-models'
 import { Resolvers } from '../gen/gqlServer'
 import { Store } from '../postgres'
-import { pluralize } from './pluralizer'
+import { pluralize } from '../../app-web/src/common-code/formatters'
 
 export function stateSubmissionResolver(
     store: Store
