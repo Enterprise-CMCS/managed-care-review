@@ -132,7 +132,7 @@ export const FileItem = ({
     return (
         <>
             <div className={styles.fileItemText}>
-                <div role="progressbar" aria-valuetext={statusValue} aria-label={`Status of file ${name}`}>
+                <div role="progressbar" aria-valuetext={statusValue} aria-label={`File status`}>
                     <img
                         id={item.id}
                         data-testid="file-input-preview-image"

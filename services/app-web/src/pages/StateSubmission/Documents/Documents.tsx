@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Alert, Form as UswdsForm, Link } from '@trussworks/react-uswds'
+import { Form as UswdsForm, Link } from '@trussworks/react-uswds'
 import { useHistory } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -18,6 +18,7 @@ import {
 } from '../../../components/FileUpload'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
 import { PageActions } from '../PageActions'
+import { ErrorSummary } from '../../../components/Form'
 
 type DocumentProps = {
     draftSubmission: DraftSubmission
@@ -53,6 +54,8 @@ export const Documents = ({
             : showFileUploadError && !hasValidFiles
             ? ' You must remove all documents with error messages before continuing'
             : undefined
+    const documentsErrorKey =
+        fileItems.length === 0 ? 'documents' : '#file-items-list'
 
     // Error summary state management
     const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
@@ -223,15 +226,18 @@ export const Documents = ({
                 <fieldset className="usa-fieldset">
                     <legend className="srOnly">Supporting Documents</legend>
 
-                    {documentsErrorMessage && (
-                        <Alert
-                            type="error"
-                            heading="Remove files with errors"
-                            className="margin-bottom-2"
-                        >
-                            {documentsErrorMessage}
-                        </Alert>
-                    )}
+                    <ErrorSummary
+                        errors={
+                            documentsErrorMessage
+                                ? {
+                                        [documentsErrorKey]:
+                                            documentsErrorMessage,
+                                    }
+                                : {}
+                        }
+                        headingRef={errorSummaryHeadingRef}
+                    />
+
                     {formAlert && formAlert}
                     <FileUpload
                         id="documents"

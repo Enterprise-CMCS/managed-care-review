@@ -376,8 +376,10 @@ describe('Documents', () => {
             await waitFor(() => {
                 expect(mockUpdateDraftFn).not.toHaveBeenCalled()
                 expect(
-                    screen.queryByText('Remove files with errors')
-                ).toBeInTheDocument()
+                    screen.getAllByText(
+                        'You must remove all documents with error messages before continuing'
+                    )
+                ).toHaveLength(2) 
             })
         })
 
@@ -620,8 +622,10 @@ describe('Documents', () => {
             await waitFor(() => {
                 expect(mockUpdateDraftFn).not.toHaveBeenCalled()
                 expect(
-                    screen.queryByText('Remove files with errors')
-                ).toBeInTheDocument()
+                    screen.getAllByText(
+                        'You must remove all documents with error messages before continuing'
+                    )
+                ).toHaveLength(2)                
             })
         })
     })

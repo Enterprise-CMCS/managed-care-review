@@ -10,17 +10,30 @@ type ErrorSummaryMessageProps = {
 const ErrorSummaryMessage = ({
     errorKey, message
 }: ErrorSummaryMessageProps): React.ReactElement => {
+    let fieldSelector : string;
+    let href: string;
+
+    // Treat keys that begin with # as ids
+    if (errorKey.startsWith("#")) {
+        fieldSelector = errorKey;
+        href = errorKey
+
+    // Otherwise, assume that keys correspond to name attributes and ids
+    } else {
+        href = "#" + errorKey
+        fieldSelector = `[name="${errorKey}"]`;
+    }
+
     return (
         <a
-            href={"#" + errorKey}
+            href={href}
             className={classnames(styles.message)}
             data-testid="error-summary-message"
-            onClick={() => {
-                const fieldElement: HTMLElement | null = document.querySelector(
-                    `[name="${errorKey}"]`
-                );
+            onClick={(event) => {
+                const fieldElement: HTMLElement | null = document.querySelector(fieldSelector);
             
                 if (fieldElement) {
+                    event.preventDefault();
                     fieldElement.focus();
                 }
             }}
@@ -59,6 +72,11 @@ export type ErrorSummaryProps = {
  *
  * This component relies on the errors object returned by Formik, so it should generally
  * rendered inside of a Formik form context.
+ * 
+ * By default, keys in the errors property are assumed to correspond to the name attribute
+ * of the relevant form inputs. By passing a key that begins with a number sign ("#"),
+ * you can have it treated as an ID. This is useful when you want to focus something that
+ * doesn't have a name attribute when an error message is clicked.
  */
 export const ErrorSummary = ({
     errors, headingRef

@@ -4,6 +4,8 @@ exports[`FileItemList component renders correctly 1`] = `
 <ul
   className="fileItemsList"
   data-testid="file-input-preview-list"
+  id="file-items-list"
+  tabIndex={-1}
 >
   <li
     className="fileItem usa-file-input__preview"
@@ -13,7 +15,7 @@ exports[`FileItemList component renders correctly 1`] = `
       className="fileItemText"
     >
       <div
-        aria-label="Status of file testFile.pdf"
+        aria-label="File status"
         aria-valuetext="uploading"
         role="progressbar"
       >
@@ -65,7 +67,7 @@ exports[`FileItemList component renders correctly 1`] = `
       className="fileItemText"
     >
       <div
-        aria-label="Status of file testFile2.pdf"
+        aria-label="File status"
         aria-valuetext="error"
         role="progressbar"
       >
@@ -130,7 +132,7 @@ exports[`FileItemList component renders correctly 1`] = `
       className="fileItemText"
     >
       <div
-        aria-label="Status of file testFile3.pdf"
+        aria-label="File status"
         aria-valuetext="error"
         role="progressbar"
       >
@@ -190,7 +192,7 @@ exports[`FileItemList component renders correctly 1`] = `
       className="fileItemText"
     >
       <div
-        aria-label="Status of file testFile4.pdf"
+        aria-label="File status"
         aria-valuetext=""
         role="progressbar"
       >
@@ -237,7 +239,7 @@ exports[`FileItemList component renders correctly 1`] = `
       className="fileItemText"
     >
       <div
-        aria-label="Status of file testFile4.pdf"
+        aria-label="File status"
         aria-valuetext="error"
         role="progressbar"
       >
