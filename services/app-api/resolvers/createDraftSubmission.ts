@@ -3,7 +3,7 @@ import { isStateUser } from '../../app-web/src/common-code/domain-models'
 import { MutationResolvers, State } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { InsertDraftSubmissionArgsType, isStoreError, Store } from '../postgres'
-import { pluralize } from './pluralizer'
+import { pluralize } from '../../app-web/src/common-code/formatters'
 
 export function createDraftSubmissionResolver(
     store: Store
