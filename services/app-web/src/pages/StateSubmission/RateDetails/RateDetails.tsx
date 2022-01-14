@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react'
 import {
-    ErrorMessage,
     Form as UswdsForm,
     FormGroup,
     Fieldset,
@@ -22,12 +21,14 @@ import {
     UpdateDraftSubmissionInput,
 } from '../../../gen/gqlClient'
 
-import { ErrorSummary, FieldRadio } from '../../../components/Form'
 import {
     FileUpload,
     S3FileData,
     FileItemT,
-} from '../../../components/FileUpload'
+    ErrorSummary,
+    FieldRadio,
+    PoliteErrorMessage,
+} from '../../../components'
 import {
     formatForForm,
     isDateRangeEmpty,
@@ -50,11 +51,11 @@ const RateDatesErrorMessage = ({
     endDate: string
     validationErrorMessage: string
 }): React.ReactElement => (
-    <ErrorMessage>
+    <PoliteErrorMessage>
         {isDateRangeEmpty(startDate, endDate)
             ? 'You must provide a start and an end date'
             : validationErrorMessage}
-    </ErrorMessage>
+    </PoliteErrorMessage>
 )
 export interface RateDetailsFormValues {
     rateType: RateType | undefined
@@ -353,9 +354,7 @@ export const RateDetails = ({
                                             <>
                                                 <Link
                                                     aria-label="Document definitions and requirements (opens in new window)"
-                                                    href={
-                                                        '/help#key-documents'
-                                                    }
+                                                    href={'/help#key-documents'}
                                                     variant="external"
                                                     target="_blank"
                                                 >
@@ -388,9 +387,9 @@ export const RateDetails = ({
                                         aria-required
                                     >
                                         {showFieldErrors(errors.rateType) && (
-                                            <ErrorMessage>
+                                            <PoliteErrorMessage>
                                                 {errors.rateType}
-                                            </ErrorMessage>
+                                            </PoliteErrorMessage>
                                         )}
                                         <FieldRadio
                                             id="newRate"
@@ -589,9 +588,9 @@ export const RateDetails = ({
                                             {showFieldErrors(
                                                 errors.rateDateCertified
                                             ) && (
-                                                <ErrorMessage>
+                                                <PoliteErrorMessage>
                                                     {errors.rateDateCertified}
-                                                </ErrorMessage>
+                                                </PoliteErrorMessage>
                                             )}
                                             <DatePicker
                                                 aria-required

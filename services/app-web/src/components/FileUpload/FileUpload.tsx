@@ -1,12 +1,12 @@
 import React, { useState, useRef } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import {
-    ErrorMessage,
     FormGroup,
     Label,
     FileInput,
     FileInputRef,
 } from '@trussworks/react-uswds'
+import { PoliteErrorMessage } from '../'
 
 import styles from './FileUpload.module.scss'
 
@@ -342,7 +342,11 @@ export const FileUpload = ({
                 {label}
             </Label>
 
-            {error && <ErrorMessage id={`${id}-error`}>{error}</ErrorMessage>}
+            {error && (
+                <PoliteErrorMessage id={`${id}-error`}>
+                    {error}
+                </PoliteErrorMessage>
+            )}
             {hint && (
                 <span
                     id={`${id}-hint`}

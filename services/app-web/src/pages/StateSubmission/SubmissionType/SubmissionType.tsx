@@ -2,7 +2,6 @@ import React, { useEffect } from 'react'
 import * as Yup from 'yup'
 import {
     Alert,
-    ErrorMessage,
     Form as UswdsForm,
     Fieldset,
     FormGroup,
@@ -25,14 +24,18 @@ import {
 import styles from '../StateSubmissionForm.module.scss'
 
 import { useAuth } from '../../../contexts/AuthContext'
-import { FieldTextarea, FieldRadio } from '../../../components/Form'
+import {
+    ErrorSummary,
+    FieldTextarea,
+    FieldRadio,
+    PoliteErrorMessage,
+} from '../../../components'
 import { SubmissionTypeRecord } from '../../../constants/submissions'
 import {
     cleanDraftSubmission,
     updatesFromSubmission,
 } from '../updateSubmissionTransform'
 import { PageActions } from '../PageActions'
-import { ErrorSummary } from '../../../components/Form/ErrorSummary/ErrorSummary'
 
 // Formik setup
 // Should be listed in order of appearance on field to allow errors to focus as expected
@@ -76,7 +79,8 @@ export const SubmissionType = ({
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const { loggedInUser } = useAuth()
     const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
-    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] = React.useState(false)
+    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
+        React.useState(false)
 
     let programs: Program[] = []
     if (loggedInUser && loggedInUser.__typename === 'StateUser') {
@@ -142,7 +146,7 @@ export const SubmissionType = ({
         if (focusErrorSummaryHeading && errorSummaryHeadingRef.current) {
             errorSummaryHeadingRef.current.focus()
         }
-        setFocusErrorSummaryHeading(false);
+        setFocusErrorSummaryHeading(false)
     }, [focusErrorSummaryHeading])
 
     if ((error || formAlert) && !showFormAlert) {
@@ -278,9 +282,9 @@ export const SubmissionType = ({
                             >
                                 <Label htmlFor="programIDs">Program(s)</Label>
                                 {showFieldErrors(errors.programIDs) && (
-                                    <ErrorMessage>
+                                    <PoliteErrorMessage>
                                         {errors.programIDs}
-                                    </ErrorMessage>
+                                    </PoliteErrorMessage>
                                 )}
                                 <Field name="programIDs">
                                     {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
@@ -326,9 +330,9 @@ export const SubmissionType = ({
                                     legend="Choose submission type"
                                 >
                                     {showFieldErrors(errors.submissionType) && (
-                                        <ErrorMessage>
+                                        <PoliteErrorMessage>
                                             {errors.submissionType}
-                                        </ErrorMessage>
+                                        </PoliteErrorMessage>
                                     )}
                                     <FieldRadio
                                         checked={
