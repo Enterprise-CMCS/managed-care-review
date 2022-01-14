@@ -28,6 +28,7 @@ notes/
 /scripts/collect_ci_runtime_stats.js*
 /scripts/recent_actions_cache.json
 /scripts/get-changed-services/index.js*
+/scripts/destroy_stage.js*
 
 services/app-web/public/env-config.js
 services/app-web/storybook-static
