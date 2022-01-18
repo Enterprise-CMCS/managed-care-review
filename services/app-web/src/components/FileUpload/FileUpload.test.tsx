@@ -282,36 +282,6 @@ describe('FileUpload component', () => {
                 expect(screen.getByText(/2 files added/)).toBeInTheDocument()
             )
         })
-        it('displays complete, errors, and pending in list - (X complete, X error(s), X pending', async () => {
-            await render(<FileUpload {...testProps} accept=".pdf,.txt" />)
-
-            const input = screen.getByTestId('file-input-input')
-            userEvent.upload(input, [TEST_DOC_FILE])
-            userEvent.upload(input, [TEST_PDF_FILE])
-            userEvent.upload(input, [TEST_DOC_FILE])
-
-            // while uploading/scanning
-            await waitFor(() => {
-                expect(screen.getByText(/3 files added/)).toBeInTheDocument()
-                expect(
-                    screen.getByText(/0 complete, 1 error, 2 pending/)
-                ).toBeInTheDocument()
-            })
-            // when complete
-            await waitForElementToBeRemoved(() =>
-                screen.queryAllByText(/Uploading/)
-            )
-
-            await waitForElementToBeRemoved(() =>
-                screen.queryAllByText(/Scanning/)
-            )
-
-            await waitFor(() => {
-                expect(
-                    screen.getByText(/2 complete, 1 error, 0 pending/)
-                ).toBeInTheDocument()
-            })
-        })
     })
     describe('drag and drop behavior', () => {
         it('does not accept a drop file that has an invalid type', async () => {
