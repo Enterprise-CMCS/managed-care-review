@@ -1,9 +1,9 @@
 import AWS from 'aws-sdk'
+import { version } from 'prettier'
 
 AWS.config.update({
     region: 'us-east-1',
 })
-/*
 const stackPrefixes = [
     'app-web',
     'app-api',
@@ -14,9 +14,6 @@ const stackPrefixes = [
     'infra-api',
     'ui',
 ]
-*/
-
-const stackPrefixes = ['app-web']
 
 const stage = process.argv[2]
 
@@ -24,25 +21,17 @@ const cf = new AWS.CloudFormation()
 const s3 = new AWS.S3()
 
 async function main() {
-    Promise.all(
-        stackPrefixes.map(async (prefix) => {
-            try {
-                const sn = `${prefix}-${stage}`
-                const clearBucketOutput = await clearServerlessDeployBucket(sn)
-                if (clearBucketOutput instanceof Error) {
-                    console.log(clearBucketOutput)
-                }
-                const deleteStackOutput = await deleteStack(sn)
-                if (deleteStackOutput instanceof Error) {
-                    console.log(deleteStackOutput)
-                }
-
-                return
-            } catch (err) {
-                return Promise.reject(err)
-            }
-        })
-    )
+    stackPrefixes.map(async (prefix) => {
+        const sn = `${prefix}-${stage}`
+        const clearBucketOutput = await clearServerlessDeployBucket(sn)
+        if (clearBucketOutput instanceof Error) {
+            console.log(clearBucketOutput)
+        }
+        const deleteStackOutput = await deleteStack(sn)
+        if (deleteStackOutput instanceof Error) {
+            console.log(deleteStackOutput)
+        }
+    })
 }
 
 interface s3ObjectKey {
@@ -67,33 +56,85 @@ async function clearServerlessDeployBucket(
         return resource.ResourceType === 'AWS::S3::Bucket'
     })
 
-    // TODO: Suspend bucket versioning.
-
     // clean out each of those buckets
     buckets.map(async (bucket) => {
-        console.log(`Deleting ${bucket.PhysicalResourceId}`)
-        const bucketParams = {
-            Bucket: bucket.PhysicalResourceId ?? '',
-        }
-        const objects = await s3.listObjects(bucketParams).promise()
+        console.log(
+            `Turning off bucket versioning on bucket: ${bucket.PhysicalResourceId}`
+        )
 
-        if (objects.Contents === undefined) {
-            return
-        }
-
-        if (objects.Contents?.length > 0) {
-            const keys: s3ObjectKey[] = objects.Contents?.map((c) => {
-                return { Key: c.Key ?? '' }
-            })
-
-            const deleteParams: AWS.S3.DeleteObjectsRequest = {
+        try {
+            const versionParams = {
                 Bucket: bucket.PhysicalResourceId ?? '',
-                Delete: {
-                    Objects: keys,
-                },
+                VersioningConfiguration: { Status: 'Suspended' },
             }
 
-            await s3.deleteObjects(deleteParams).promise()
+            await s3.putBucketVersioning(versionParams).promise()
+        } catch (err) {
+            return new Error(`Could not turn off bucket versioning: ${err}`)
+        }
+
+        console.log(`Clearing bucket: ${bucket.PhysicalResourceId}`)
+        try {
+            const bucketParams = {
+                Bucket: bucket.PhysicalResourceId ?? '',
+            }
+
+            const objectVersions = await s3
+                .listObjectVersions(bucketParams)
+                .promise()
+
+            // check if we have a returned object versions
+            if (
+                objectVersions.Versions === undefined ||
+                objectVersions.DeleteMarkers === undefined
+            ) {
+                return new Error(`Could not find object versions in bucket`)
+            }
+
+            if (
+                objectVersions.Versions?.length > 0 ||
+                objectVersions.DeleteMarkers?.length > 0
+            ) {
+                const versionKeys: s3ObjectKey[] = objectVersions.Versions?.map(
+                    (c) => {
+                        return {
+                            Key: c.Key ?? '',
+                            VersionId: c.VersionId ?? '',
+                        }
+                    }
+                )
+
+                const deleteMarkerKeys: s3ObjectKey[] =
+                    objectVersions.DeleteMarkers?.map((c) => {
+                        return {
+                            Key: c.Key ?? '',
+                            VersionId: c.VersionId ?? '',
+                        }
+                    })
+
+                const keys = [...versionKeys, ...deleteMarkerKeys]
+
+                const deleteParams: AWS.S3.DeleteObjectsRequest = {
+                    Bucket: bucket.PhysicalResourceId ?? '',
+                    Delete: {
+                        Objects: keys,
+                    },
+                }
+
+                const deleteObjectsResponse = await s3
+                    .deleteObjects(deleteParams)
+                    .promise()
+                console.log(
+                    `deleted objects: ${deleteObjectsResponse.$response.data}`
+                )
+                if (deleteObjectsResponse.$response.error != null) {
+                    return new Error(
+                        `Error on deleteObjects: ${stack.$response.error}`
+                    )
+                }
+            }
+        } catch (err) {
+            return new Error(`Error clearing bucket: ${stack.$response.error} `)
         }
     })
 
@@ -101,7 +142,7 @@ async function clearServerlessDeployBucket(
 }
 
 async function deleteStack(stackName: string): Promise<{} | Error> {
-    console.log(`Looking up up stack ${stackName}`)
+    console.log(`deleteStack: Looking up stack ${stackName}`)
     const stackParams = {
         StackName: stackName,
     }
@@ -122,21 +163,27 @@ async function deleteStack(stackName: string): Promise<{} | Error> {
         return new Error(`Could not find stack ${stackName}`)
     }
 
-    console.log(stack.Stacks[0].Outputs)
-
-    console.log(`Deleting stack ${stackName}`)
+    console.log(`deleteStack: Deleting stack ${stackName}`)
     // get the stack ID so we can check it's status
+
     let stackId = stack.Stacks[0].StackId
-    const deleteReturn = await cf.deleteStack(stackParams).promise()
-    if (deleteReturn.$response.error != null) {
-        return new Error(
-            'Error on deleteStack: ' + deleteReturn.$response.error.message
-        )
+
+    try {
+        await cf.deleteStack(stackParams).promise()
+    } catch (err) {
+        return new Error('Error on deleteStack: ' + err)
     }
 
-    await cf.waitFor('stackDeleteComplete', { StackName: stackId }).promise()
+    try {
+        await cf
+            .waitFor('stackDeleteComplete', { StackName: stackId })
+            .promise()
+    } catch (err) {
+        return new Error('Error on waitFor: ' + err.message)
+    }
 
     // deleteStack just returns {} if successful, so:
+    console.log(`deleteStack: Stack ${stackName} deleted`)
     return {}
 }
 
