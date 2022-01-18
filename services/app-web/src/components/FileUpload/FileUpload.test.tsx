@@ -1,7 +1,6 @@
 import {
     render,
     waitFor,
-    waitForElementToBeRemoved,
     screen,
 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
