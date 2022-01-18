@@ -75,15 +75,19 @@ async function clearServerlessDeployBucket(
 
         console.log(`Clearing bucket: ${bucket.PhysicalResourceId}`)
         try {
+            // Versioned buckets will have extra files in them, all of which
+            // must be cleared out before CloudFormation can delete the bucket.
+            // We have to remove all the versions and any delete markers that exist.
             const bucketParams = {
                 Bucket: bucket.PhysicalResourceId ?? '',
             }
 
+            // get all versioned objects
             const objectVersions = await s3
                 .listObjectVersions(bucketParams)
                 .promise()
 
-            // check if we have a returned object versions
+            // check if we have a returned versions object
             if (
                 objectVersions.Versions === undefined ||
                 objectVersions.DeleteMarkers === undefined
@@ -95,6 +99,7 @@ async function clearServerlessDeployBucket(
                 objectVersions.Versions?.length > 0 ||
                 objectVersions.DeleteMarkers?.length > 0
             ) {
+                // get all the version keys of files
                 const versionKeys: s3ObjectKey[] = objectVersions.Versions?.map(
                     (c) => {
                         return {
@@ -104,6 +109,7 @@ async function clearServerlessDeployBucket(
                     }
                 )
 
+                // get all the delete marker keys of files
                 const deleteMarkerKeys: s3ObjectKey[] =
                     objectVersions.DeleteMarkers?.map((c) => {
                         return {
@@ -112,8 +118,10 @@ async function clearServerlessDeployBucket(
                         }
                     })
 
+                // combine the two arrays
                 const keys = [...versionKeys, ...deleteMarkerKeys]
 
+                // construct the delete
                 const deleteParams: AWS.S3.DeleteObjectsRequest = {
                     Bucket: bucket.PhysicalResourceId ?? '',
                     Delete: {
@@ -121,6 +129,7 @@ async function clearServerlessDeployBucket(
                     },
                 }
 
+                // delete all the files, including their versions
                 const deleteObjectsResponse = await s3
                     .deleteObjects(deleteParams)
                     .promise()
