@@ -1,5 +1,4 @@
 import AWS from 'aws-sdk'
-import { version } from 'prettier'
 
 AWS.config.update({
     region: 'us-east-1',
