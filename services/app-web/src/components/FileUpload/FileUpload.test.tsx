@@ -1,4 +1,9 @@
-import { render, waitFor, screen } from '@testing-library/react'
+import {
+    render,
+    waitFor,
+    waitForElementToBeRemoved,
+    screen,
+} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { FileUpload, FileUploadProps, S3FileData } from './FileUpload'
@@ -284,6 +289,7 @@ describe('FileUpload component', () => {
             userEvent.upload(input, [TEST_DOC_FILE])
             userEvent.upload(input, [TEST_PDF_FILE])
             userEvent.upload(input, [TEST_DOC_FILE])
+
             // while uploading/scanning
             await waitFor(() => {
                 expect(screen.getByText(/3 files added/)).toBeInTheDocument()
@@ -292,16 +298,19 @@ describe('FileUpload component', () => {
                 ).toBeInTheDocument()
             })
             // when complete
-            await waitFor(() => {
-                expect(screen.queryAllByText(/Uploading/).length).toBe(0)
-                expect(screen.queryAllByText(/Scanning/).length).toBe(0)
-            })
+            await waitForElementToBeRemoved(() =>
+                screen.queryAllByText(/Uploading/)
+            )
+
+            await waitForElementToBeRemoved(() =>
+                screen.queryAllByText(/Scanning/)
+            )
+
             await waitFor(() => {
                 expect(
                     screen.getByText(/2 complete, 1 error, 0 pending/)
                 ).toBeInTheDocument()
             })
-         
         })
     })
     describe('drag and drop behavior', () => {
