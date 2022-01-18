@@ -1,3 +1,12 @@
+@import '../../styles/uswdsImports.scss';
+@import '../../styles/custom';
+
+.warningRow {
+    & td {
+        background-color: $cms-color-error-lighter;
+    }
+}
+
 .fileInput {
     max-width: none;
 }

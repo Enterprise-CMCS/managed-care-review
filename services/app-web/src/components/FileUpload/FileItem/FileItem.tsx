@@ -120,27 +120,44 @@ export const FileItem = ({
         retryItem(item)
     }
 
-    let statusValue = "";
+    let statusValue = ''
     if (isLoading) {
-        statusValue = "uploading";
+        statusValue = 'uploading'
     } else if (isScanning) {
-        statusValue = "scanning for viruses"
-    } else if (hasDuplicateNameError || hasScanningError || hasUploadError || hasUnexpectedError) {
-        statusValue = "error"
+        statusValue = 'scanning for viruses'
+    } else if (
+        hasDuplicateNameError ||
+        hasScanningError ||
+        hasUploadError ||
+        hasUnexpectedError
+    ) {
+        statusValue = 'error'
     }
 
     return (
-        <>
-            <div className={styles.fileItemText}>
-                <div role="progressbar" aria-valuetext={statusValue} aria-label={`Status of file ${name}`}>
+        <tr
+            className={
+                hasUploadError || hasScanningError || hasUnexpectedError
+                    ? styles.warningRow
+                    : undefined
+            }
+        >
+            {/* <div className={styles.fileItemText}> */}
+            <td>
+                <span
+                    role="progressbar"
+                    aria-valuetext={statusValue}
+                    aria-label={`Status of file ${name}`}
+                >
                     <img
+                        style={{ float: 'left' }}
                         id={item.id}
                         data-testid="file-input-preview-image"
                         src={SPACER_GIF}
                         alt=""
                         className={imageClasses}
                     />
-                </div>
+                </span>
                 <span
                     style={{
                         display: 'flex',
@@ -154,19 +171,19 @@ export const FileItem = ({
                         hasUploadError={hasUploadError}
                         hasUnexpectedError={hasUnexpectedError}
                     />
-                    <>
-                        {(isLoading || isScanning) && (
-                            <span className={styles.fileItemBoldMessage}>
-                                {isLoading
-                                    ? 'Step 1 of 2: Uploading'
-                                    : 'Step 2 of 2: Scanning'}
-                            </span>
-                        )}
-                        <span>{name}</span>
-                    </>
+
+                    {(isLoading || isScanning) && (
+                        <span className={styles.fileItemBoldMessage}>
+                            {isLoading
+                                ? 'Step 1 of 2: Uploading'
+                                : 'Step 2 of 2: Scanning'}
+                        </span>
+                    )}
+                    <span>{name}</span>
                 </span>
-            </div>
-            <div className={styles.fileItemButtons}>
+            </td>
+            <td>date uploaded</td>
+            <td>
                 <Button
                     type="button"
                     size="small"
@@ -175,6 +192,8 @@ export const FileItem = ({
                 >
                     Remove
                 </Button>
+                {(hasUploadError || hasScanningError) &&
+                    !hasUnexpectedError && <span> or </span>}
                 {(hasUploadError || hasScanningError) && !hasUnexpectedError && (
                     <Button
                         type="button"
@@ -185,7 +204,8 @@ export const FileItem = ({
                         Retry
                     </Button>
                 )}
-            </div>
-        </>
+            </td>
+            {/* </div> */}
+        </tr>
     )
 }
