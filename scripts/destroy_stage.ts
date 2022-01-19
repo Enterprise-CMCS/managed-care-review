@@ -1,4 +1,5 @@
 import AWS from 'aws-sdk'
+import { AwsAccount } from 'aws-sdk/clients/workspaces'
 
 AWS.config.update({
     region: 'us-east-1',
@@ -51,19 +52,9 @@ async function clearServerlessDeployBucket(
 
     // clean out each of those buckets
     buckets.map(async (bucket) => {
-        console.log(
-            `Turning off bucket versioning on bucket: ${bucket.PhysicalResourceId}`
-        )
-
-        try {
-            const versionParams = {
-                Bucket: bucket.PhysicalResourceId ?? '',
-                VersioningConfiguration: { Status: 'Suspended' },
-            }
-
-            await s3.putBucketVersioning(versionParams).promise()
-        } catch (err) {
-            return new Error(`Could not turn off bucket versioning: ${err}`)
+        const versionResponse = await turnOffVersioningOnBucket(bucket)
+        if (versionResponse instanceof Error) {
+            return versionResponse
         }
 
         console.log(`Clearing bucket: ${bucket.PhysicalResourceId}`)
@@ -165,6 +156,27 @@ async function getBucketsInStack(
     } catch (err) {
         return new Error(`Could not get stack resources: ${err}`)
     }
+}
+
+async function turnOffVersioningOnBucket(
+    bucket: AWS.CloudFormation.StackResource
+): Promise<{} | Error> {
+    console.log(
+        `Turning off bucket versioning on bucket: ${bucket.PhysicalResourceId}`
+    )
+
+    const versionParams = {
+        Bucket: bucket.PhysicalResourceId ?? '',
+        VersioningConfiguration: { Status: 'Suspended' },
+    }
+
+    try {
+        await s3.putBucketVersioning(versionParams).promise()
+    } catch (err) {
+        return new Error(`Could not turn off bucket versioning: ${err}`)
+    }
+
+    return {}
 }
 
 async function deleteStack(stackName: string): Promise<{} | Error> {
