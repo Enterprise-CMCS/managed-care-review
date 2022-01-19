@@ -52,79 +52,39 @@ async function clearServerlessDeployBucket(
 
     // clean out each of those buckets
     buckets.map(async (bucket) => {
+        // turn off versioning on the bucket
         const versionResponse = await turnOffVersioningOnBucket(bucket)
         if (versionResponse instanceof Error) {
             return versionResponse
         }
 
+        // get all the versioned files in the bucket
         console.log(`Clearing bucket: ${bucket.PhysicalResourceId}`)
+        const keys = await getVersionedFilesInBucket(bucket)
+        if (keys instanceof Error) {
+            return keys
+        }
+
         try {
-            // Versioned buckets will have extra files in them, all of which
-            // must be cleared out before CloudFormation can delete the bucket.
-            // We have to remove all the versions and any delete markers that exist.
-            const bucketParams = {
+            // construct the delete
+            const deleteParams: AWS.S3.DeleteObjectsRequest = {
                 Bucket: bucket.PhysicalResourceId ?? '',
+                Delete: {
+                    Objects: keys,
+                },
             }
 
-            // get all versioned objects
-            const objectVersions = await s3
-                .listObjectVersions(bucketParams)
+            // delete all the files, including their versions
+            const deleteObjectsResponse = await s3
+                .deleteObjects(deleteParams)
                 .promise()
-
-            // check if we have a returned versions object
-            if (
-                objectVersions.Versions === undefined ||
-                objectVersions.DeleteMarkers === undefined
-            ) {
-                return new Error(`Could not find object versions in bucket`)
-            }
-
-            if (
-                objectVersions.Versions?.length > 0 ||
-                objectVersions.DeleteMarkers?.length > 0
-            ) {
-                // get all the version keys of files
-                const versionKeys: s3ObjectKey[] = objectVersions.Versions?.map(
-                    (c) => {
-                        return {
-                            Key: c.Key ?? '',
-                            VersionId: c.VersionId ?? '',
-                        }
-                    }
+            console.log(
+                `deleted objects: ${deleteObjectsResponse.$response.data}`
+            )
+            if (deleteObjectsResponse.$response.error != null) {
+                return new Error(
+                    `Error on deleteObjects: ${deleteObjectsResponse.$response.error}`
                 )
-
-                // get all the delete marker keys of files
-                const deleteMarkerKeys: s3ObjectKey[] =
-                    objectVersions.DeleteMarkers?.map((c) => {
-                        return {
-                            Key: c.Key ?? '',
-                            VersionId: c.VersionId ?? '',
-                        }
-                    })
-
-                // combine the two arrays
-                const keys = [...versionKeys, ...deleteMarkerKeys]
-
-                // construct the delete
-                const deleteParams: AWS.S3.DeleteObjectsRequest = {
-                    Bucket: bucket.PhysicalResourceId ?? '',
-                    Delete: {
-                        Objects: keys,
-                    },
-                }
-
-                // delete all the files, including their versions
-                const deleteObjectsResponse = await s3
-                    .deleteObjects(deleteParams)
-                    .promise()
-                console.log(
-                    `deleted objects: ${deleteObjectsResponse.$response.data}`
-                )
-                if (deleteObjectsResponse.$response.error != null) {
-                    return new Error(
-                        `Error on deleteObjects: ${deleteObjectsResponse.$response.error}`
-                    )
-                }
             }
         } catch (err) {
             return new Error(
@@ -177,6 +137,55 @@ async function turnOffVersioningOnBucket(
     }
 
     return {}
+}
+
+async function getVersionedFilesInBucket(
+    bucket: AWS.CloudFormation.StackResource
+): Promise<s3ObjectKey[] | Error> {
+    // Versioned buckets will have extra files in them, all of which
+    // must be cleared out before CloudFormation can delete the bucket.
+    // We have to remove all the versions and any delete markers that exist.
+    const bucketParams = {
+        Bucket: bucket.PhysicalResourceId ?? '',
+    }
+
+    // get all versioned objects
+    let allVersionKeys: s3ObjectKey[] = []
+    const objectVersions = await s3.listObjectVersions(bucketParams).promise()
+
+    // check if we have a returned versions object
+    if (
+        objectVersions.Versions === undefined ||
+        objectVersions.DeleteMarkers === undefined
+    ) {
+        return new Error(`Could not find object versions in bucket`)
+    }
+
+    if (
+        objectVersions.Versions?.length > 0 ||
+        objectVersions.DeleteMarkers?.length > 0
+    ) {
+        // get all the version keys of files
+        const versionKeys: s3ObjectKey[] = objectVersions.Versions?.map((c) => {
+            return {
+                Key: c.Key ?? '',
+                VersionId: c.VersionId ?? '',
+            }
+        })
+
+        // get all the delete marker keys of files
+        const deleteMarkerKeys: s3ObjectKey[] =
+            objectVersions.DeleteMarkers?.map((c) => {
+                return {
+                    Key: c.Key ?? '',
+                    VersionId: c.VersionId ?? '',
+                }
+            })
+
+        // combine the two arrays
+        allVersionKeys = [...versionKeys, ...deleteMarkerKeys]
+    }
+    return allVersionKeys
 }
 
 async function deleteStack(stackName: string): Promise<{} | Error> {
