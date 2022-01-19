@@ -50,6 +50,7 @@ exports[`FileItemList component renders correctly 1`] = `
       className="fileItemButtons"
     >
       <button
+        aria-label="Remove testFile.pdf document"
         className="usa-button usa-button--small usa-button--unstyled"
         data-testid="button"
         onClick={[Function]}
@@ -107,6 +108,7 @@ exports[`FileItemList component renders correctly 1`] = `
       className="fileItemButtons"
     >
       <button
+        aria-label="Remove testFile2.pdf document"
         className="usa-button usa-button--small usa-button--unstyled"
         data-testid="button"
         onClick={[Function]}
@@ -115,6 +117,7 @@ exports[`FileItemList component renders correctly 1`] = `
         Remove
       </button>
       <button
+        aria-label="Retry upload for testFile2.pdf document"
         className="usa-button usa-button--small usa-button--unstyled"
         data-testid="button"
         onClick={[Function]}
@@ -167,6 +170,7 @@ exports[`FileItemList component renders correctly 1`] = `
       className="fileItemButtons"
     >
       <button
+        aria-label="Remove testFile3.pdf document"
         className="usa-button usa-button--small usa-button--unstyled"
         data-testid="button"
         onClick={[Function]}
@@ -175,6 +179,7 @@ exports[`FileItemList component renders correctly 1`] = `
         Remove
       </button>
       <button
+        aria-label="Retry upload for testFile3.pdf document"
         className="usa-button usa-button--small usa-button--unstyled"
         data-testid="button"
         onClick={[Function]}
@@ -222,6 +227,7 @@ exports[`FileItemList component renders correctly 1`] = `
       className="fileItemButtons"
     >
       <button
+        aria-label="Remove testFile4.pdf document"
         className="usa-button usa-button--small usa-button--unstyled"
         data-testid="button"
         onClick={[Function]}
@@ -279,6 +285,7 @@ exports[`FileItemList component renders correctly 1`] = `
       className="fileItemButtons"
     >
       <button
+        aria-label="Remove testFile4.pdf document"
         className="usa-button usa-button--small usa-button--unstyled"
         data-testid="button"
         onClick={[Function]}

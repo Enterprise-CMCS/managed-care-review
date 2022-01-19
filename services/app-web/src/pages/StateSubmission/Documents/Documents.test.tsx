@@ -275,7 +275,7 @@ describe('Documents', () => {
         })
 
         // Remove duplicate document and remove error
-        userEvent.click(screen.queryAllByText('Remove')[0])
+        userEvent.click(screen.queryAllByText(/Remove/)[0])
         expect(screen.queryAllByText(TEST_DOC_FILE.name).length).toBe(1)
         expect(screen.queryByText('Duplicate file')).toBeNull()
     })

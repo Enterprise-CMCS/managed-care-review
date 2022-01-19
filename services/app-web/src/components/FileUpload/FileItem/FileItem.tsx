@@ -132,7 +132,11 @@ export const FileItem = ({
     return (
         <>
             <div className={styles.fileItemText}>
-                <div role="progressbar" aria-valuetext={statusValue} aria-label={`File status`}>
+                <div
+                    role="progressbar"
+                    aria-valuetext={statusValue}
+                    aria-label={`File status`}
+                >
                     <img
                         id={item.id}
                         data-testid="file-input-preview-image"
@@ -169,6 +173,7 @@ export const FileItem = ({
             <div className={styles.fileItemButtons}>
                 <Button
                     type="button"
+                    aria-label={`Remove ${name} document`}
                     size="small"
                     unstyled
                     onClick={handleDelete}
@@ -179,6 +184,7 @@ export const FileItem = ({
                     <Button
                         type="button"
                         size="small"
+                        aria-label={`Retry upload for ${name} document`}
                         unstyled
                         onClick={handleRetry}
                     >
