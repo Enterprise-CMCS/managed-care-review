@@ -41,19 +41,13 @@ interface s3ObjectKey {
 async function clearServerlessDeployBucket(
     stackName: string
 ): Promise<{} | Error> {
-    const stackParams = {
-        StackName: stackName,
+    // find all the buckets in our stack
+    const buckets = await getBucketsInStack(stackName)
+    if (buckets instanceof Error) {
+        return new Error(
+            `Could not get buckets in stack ${stackName}: ${buckets}`
+        )
     }
-
-    // get all the resources in the stack
-    const stack = await cf.describeStackResources(stackParams).promise()
-    if (stack.StackResources === undefined) {
-        return new Error('could not find stack')
-    }
-    // filter the resources to get our S3 buckets
-    const buckets = stack.StackResources.filter((resource) => {
-        return resource.ResourceType === 'AWS::S3::Bucket'
-    })
 
     // clean out each of those buckets
     buckets.map(async (bucket) => {
@@ -137,16 +131,40 @@ async function clearServerlessDeployBucket(
                 )
                 if (deleteObjectsResponse.$response.error != null) {
                     return new Error(
-                        `Error on deleteObjects: ${stack.$response.error}`
+                        `Error on deleteObjects: ${deleteObjectsResponse.$response.error}`
                     )
                 }
             }
         } catch (err) {
-            return new Error(`Error clearing bucket: ${stack.$response.error} `)
+            return new Error(
+                `Error clearing bucket: ${bucket.PhysicalResourceId}: ${err}`
+            )
         }
     })
 
     return {}
+}
+
+async function getBucketsInStack(
+    stackName: string
+): Promise<AWS.CloudFormation.StackResource[] | Error> {
+    // get all the resources in the stack
+    try {
+        const stack = await cf
+            .describeStackResources({ StackName: stackName })
+            .promise()
+
+        if (stack.StackResources === undefined) {
+            return new Error('could not find stack')
+        }
+
+        // filter the resources to get our S3 buckets
+        return stack.StackResources.filter((resource) => {
+            return resource.ResourceType === 'AWS::S3::Bucket'
+        })
+    } catch (err) {
+        return new Error(`Could not get stack resources: ${err}`)
+    }
 }
 
 async function deleteStack(stackName: string): Promise<{} | Error> {
