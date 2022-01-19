@@ -150,42 +150,43 @@ async function getVersionedFilesInBucket(
     }
 
     // get all versioned objects
-    let allVersionKeys: s3ObjectKey[] = []
+    let versionKeys: s3ObjectKey[] = []
+    let deleteMarkerKeys: s3ObjectKey[] = []
+
     const objectVersions = await s3.listObjectVersions(bucketParams).promise()
+    // AWSError is unfortunately not backed by Error, so we can't just
+    // check it is an instanceof, we don't get good type info :(
+    // https://github.com/aws/aws-sdk-js/issues/2611
 
-    // check if we have a returned versions object
+    // get version keys of files
     if (
-        objectVersions.Versions === undefined ||
-        objectVersions.DeleteMarkers === undefined
-    ) {
-        return new Error(`Could not find object versions in bucket`)
-    }
-
-    if (
-        objectVersions.Versions?.length > 0 ||
-        objectVersions.DeleteMarkers?.length > 0
+        objectVersions.Versions != undefined &&
+        objectVersions.Versions?.length > 0
     ) {
         // get all the version keys of files
-        const versionKeys: s3ObjectKey[] = objectVersions.Versions?.map((c) => {
+        versionKeys = objectVersions.Versions?.map((c) => {
             return {
                 Key: c.Key ?? '',
                 VersionId: c.VersionId ?? '',
             }
         })
-
-        // get all the delete marker keys of files
-        const deleteMarkerKeys: s3ObjectKey[] =
-            objectVersions.DeleteMarkers?.map((c) => {
-                return {
-                    Key: c.Key ?? '',
-                    VersionId: c.VersionId ?? '',
-                }
-            })
-
-        // combine the two arrays
-        allVersionKeys = [...versionKeys, ...deleteMarkerKeys]
     }
-    return allVersionKeys
+
+    // get all the delete marker keys of files
+    if (
+        objectVersions.DeleteMarkers != undefined &&
+        objectVersions.DeleteMarkers?.length > 0
+    ) {
+        deleteMarkerKeys = objectVersions.DeleteMarkers?.map((c) => {
+            return {
+                Key: c.Key ?? '',
+                VersionId: c.VersionId ?? '',
+            }
+        })
+    }
+
+    // combine the two arrays and return
+    return [...versionKeys, ...deleteMarkerKeys]
 }
 
 async function deleteStack(stackName: string): Promise<{} | Error> {
