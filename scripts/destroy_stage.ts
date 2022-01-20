@@ -235,7 +235,6 @@ async function getVersionedFilesInBucket(
 }
 
 async function deleteStack(stackName: string): Promise<void | Error> {
-    console.log(`deleteStack: Looking up stack ${stackName}`)
     const stackParams = {
         StackName: stackName,
     }
