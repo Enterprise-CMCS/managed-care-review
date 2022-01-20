@@ -21,17 +21,66 @@ const cf = new AWS.CloudFormation()
 const s3 = new AWS.S3()
 
 async function main() {
-    stackPrefixes.map(async (prefix) => {
-        const sn = `${prefix}-${stage}`
-        const clearBucketOutput = await clearServerlessDeployBucket(sn)
-        if (clearBucketOutput instanceof Error) {
-            console.log(clearBucketOutput)
+    const stacksToDestroy = await getStacksFromStage(stage)
+    stacksToDestroy.map(async (sn) => {
+        console.log(`Destroying stack: ${sn}`)
+
+        try {
+            const clearBucketOutput = await clearServerlessDeployBucket(sn)
+            if (clearBucketOutput instanceof Error) {
+                console.log(clearBucketOutput)
+            }
+        } catch (err) {
+            console.log(`Could not clear bucket: ${err}`)
         }
-        const deleteStackOutput = await deleteStack(sn)
-        if (deleteStackOutput instanceof Error) {
-            console.log(deleteStackOutput)
+
+        try {
+            const deleteStackOutput = await deleteStack(sn)
+            if (deleteStackOutput instanceof Error) {
+                console.log(deleteStackOutput)
+            }
+        } catch (err) {
+            console.log(`Could not delete stack: ${err}`)
         }
     })
+}
+
+async function getStacksFromStage(stageName: string): Promise<string[]> {
+    const stacks = await Promise.all(
+        stackPrefixes.map(async (prefix) => {
+            const stackName = `${prefix}-${stageName}`
+            try {
+                const stacks = await cf
+                    .describeStacks({ StackName: stackName })
+                    .promise()
+
+                if (
+                    stacks.$response.error != null ||
+                    typeof stacks.Stacks === 'undefined'
+                ) {
+                    console.log(`Stack ${stackName} does not exist. Skipping.`)
+                    return []
+                }
+
+                // type guard
+                const isStack = (
+                    stack: string | undefined
+                ): stack is string => {
+                    return !!stack
+                }
+
+                const types = stacks?.Stacks?.map((stack) => {
+                    return stack.StackName
+                }).filter(isStack)
+
+                return types
+            } catch (err) {
+                console.log(`Stack ${stackName} does not exist. Skipping.`)
+                return []
+            }
+        })
+    )
+    return stacks.flat()
 }
 
 interface s3ObjectKey {
@@ -78,9 +127,7 @@ async function clearServerlessDeployBucket(
             const deleteObjectsResponse = await s3
                 .deleteObjects(deleteParams)
                 .promise()
-            console.log(
-                `deleted objects: ${deleteObjectsResponse.$response.data}`
-            )
+
             if (deleteObjectsResponse.$response.error != null) {
                 return new Error(
                     `Error on deleteObjects: ${deleteObjectsResponse.$response.error}`
