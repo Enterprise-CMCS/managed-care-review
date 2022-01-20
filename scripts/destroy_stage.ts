@@ -200,6 +200,12 @@ async function getVersionedFilesInBucket(
     // AWSError is unfortunately not backed by Error, so we can't just
     // check it is an instanceof, we don't get good type info :(
     // https://github.com/aws/aws-sdk-js/issues/2611
+    if (objectVersions.$response.error != null) {
+        return new Error(
+            'Error on listObjectVersions: ' +
+                objectVersions.$response.error.message
+        )
+    }
 
     // get version keys of files
     if (
