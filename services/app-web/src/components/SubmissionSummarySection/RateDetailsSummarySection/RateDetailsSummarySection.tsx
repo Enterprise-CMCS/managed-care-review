@@ -107,7 +107,7 @@ export const RateDetailsSummarySection = ({
                         submission.rateAmendmentInfo ? (
                             <DataDetail
                                 id="effectiveRatingPeriod"
-                                label="Effective dates of rate amendment"
+                                label="Rate amendment effective dates"
                                 data={`${dayjs(
                                     submission.rateAmendmentInfo
                                         .effectiveDateStart
