@@ -105,6 +105,11 @@ export const FileItem = ({
 
     const imageClasses = classnames('usa-file-input__preview-image', {
         'is-loading': isLoading || isScanning,
+        'usa-file-input__preview-image--pdf': isPDF,
+        'usa-file-input__preview-image--word': isWord,
+        'usa-file-input__preview-image--video': isVideo,
+        'usa-file-input__preview-image--excel': isExcel,
+        'usa-file-input__preview-image--generic': isGeneric,
     })
 
     const handleDelete = (_e: React.MouseEvent) => {
@@ -130,27 +135,21 @@ export const FileItem = ({
     }
 
     return (
-        <tr className={statusValue === 'error' ? styles.warningRow : undefined}>
-            {/* <div className={styles.fileItemText}> */}
-            <td>
-                {isLoading || isScanning ? (
-                    <span
-                        role="progressbar"
-                        aria-valuetext={statusValue}
-                        aria-label={`Status of file ${name}`}
-                    >
-                        <img
-                            style={{ float: 'left' }}
-                            id={item.id}
-                            data-testid="file-input-preview-image"
-                            src={SPACER_GIF}
-                            alt=""
-                            className={imageClasses}
-                        />
-                    </span>
-                ) : (
-                    ''
-                )}
+        <>
+            <div className={styles.fileItemText}>
+                <div
+                    role="progressbar"
+                    aria-valuetext={statusValue}
+                    aria-label={`File status`}
+                >
+                    <img
+                        id={item.id}
+                        data-testid="file-input-preview-image"
+                        src={SPACER_GIF}
+                        alt=""
+                        className={imageClasses}
+                    />
+                </div>
                 <span
                     style={{
                         display: 'flex',
@@ -164,21 +163,20 @@ export const FileItem = ({
                         hasUploadError={hasUploadError}
                         hasUnexpectedError={hasUnexpectedError}
                     />
-
-                    {(isLoading || isScanning) && (
-                        <span className={styles.fileItemBoldMessage}>
-                            {isLoading
-                                ? 'Step 1 of 2: Uploading'
-                                : 'Step 2 of 2: Scanning'}
-                        </span>
-                    )}
-                    <span>{name}</span>
+                    <>
+                        {(isLoading || isScanning) && (
+                            <span className={styles.fileItemBoldMessage}>
+                                {isLoading
+                                    ? 'Step 1 of 2: Uploading'
+                                    : 'Step 2 of 2: Scanning'}
+                            </span>
+                        )}
+                        <span>{name}</span>
+                    </>
                 </span>
-            </td>
-            <td>01/19/2022</td>
-            <td>
+            </div>
+            <div className={styles.fileItemButtons}>
                 <Button
-                    style={{ marginTop: 0 }}
                     type="button"
                     size="small"
                     unstyled
@@ -186,11 +184,8 @@ export const FileItem = ({
                 >
                     Remove
                 </Button>
-                {(hasUploadError || hasScanningError) &&
-                    !hasUnexpectedError && <span> or </span>}
                 {(hasUploadError || hasScanningError) && !hasUnexpectedError && (
                     <Button
-                        style={{ marginTop: 0 }}
                         type="button"
                         size="small"
                         unstyled
@@ -199,8 +194,7 @@ export const FileItem = ({
                         Retry
                     </Button>
                 )}
-            </td>
-            {/* </div> */}
-        </tr>
+            </div>
+        </>
     )
 }

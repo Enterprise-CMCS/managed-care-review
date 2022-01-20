@@ -22,6 +22,7 @@ export type FileUploadProps = {
     id: string
     name: string
     label: string
+    renderMode: 'list' | 'table'
     error?: string
     hint?: React.ReactNode
     initialItems?: FileItemT[]
@@ -44,6 +45,7 @@ export const FileUpload = ({
     id,
     name,
     label,
+    renderMode,
     hint,
     error,
     initialItems,
@@ -355,6 +357,7 @@ export const FileUpload = ({
                 retryItem={retryFile}
                 deleteItem={deleteItem}
                 fileItems={fileItems}
+                renderMode={renderMode}
             />
         </FormGroup>
     )

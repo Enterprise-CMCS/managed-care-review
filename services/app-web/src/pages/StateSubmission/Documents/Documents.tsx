@@ -235,13 +235,12 @@ export const Documents = ({
                         id="documents"
                         name="documents"
                         label="Upload any additional supporting documents"
+                        renderMode="table"
                         hint={
                             <>
                                 <Link
                                     aria-label="Document definitions and requirements (opens in new window)"
-                                    href={
-                                        '/help#supporting-documents'
-                                    }
+                                    href={'/help#supporting-documents'}
                                     variant="external"
                                     target="_blank"
                                 >

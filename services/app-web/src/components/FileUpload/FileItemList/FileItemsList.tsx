@@ -2,16 +2,19 @@ import React from 'react'
 import classnames from 'classnames'
 import { Table } from '@trussworks/react-uswds'
 import { FileItem, FileItemT, FileStatus } from '../FileItem/FileItem'
+import { FileRow } from '../FileRow/FileRow'
 import styles from '../FileUpload.module.scss'
 
 export const FileItemsList = ({
     fileItems,
     deleteItem,
     retryItem,
+    renderMode,
 }: {
     fileItems: FileItemT[]
     deleteItem: (id: FileItemT) => void
     retryItem: (item: FileItemT) => void
+    renderMode: 'table' | 'list'
 }): React.ReactElement => {
     const liClasses = (status: FileStatus): string => {
         const hasError =
@@ -24,43 +27,48 @@ export const FileItemsList = ({
         })
     }
 
-    return (
-        <Table fullWidth>
-            <thead>
-                <tr>
-                    <th>Document name</th>
-                    <th>Date uploaded</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
+    if (renderMode === 'table') {
+        return (
+            <Table fullWidth>
+                <thead>
+                    <tr>
+                        <th>Document name</th>
+                        <th>Date uploaded</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {fileItems.map((item) => (
+                        <FileRow
+                            key={item.id}
+                            deleteItem={deleteItem}
+                            retryItem={retryItem}
+                            item={item}
+                        />
+                    ))}
+                </tbody>
+            </Table>
+        )
+    } else {
+        return (
+            <ul
+                data-testid="file-input-preview-list"
+                className={styles.fileItemsList}
+            >
                 {fileItems.map((item) => (
-                    <FileItem
+                    <li
                         key={item.id}
-                        deleteItem={deleteItem}
-                        retryItem={retryItem}
-                        item={item}
-                    />
+                        id={item.id}
+                        className={liClasses(item.status)}
+                    >
+                        <FileItem
+                            deleteItem={deleteItem}
+                            retryItem={retryItem}
+                            item={item}
+                        />
+                    </li>
                 ))}
-            </tbody>
-        </Table>
-        // <ul
-        //     data-testid="file-input-preview-list"
-        //     className={styles.fileItemsList}
-        // >
-        //     {fileItems.map((item) => (
-        //         <li
-        //             key={item.id}
-        //             id={item.id}
-        //             className={liClasses(item.status)}
-        //         >
-        //             <FileItem
-        //                 deleteItem={deleteItem}
-        //                 retryItem={retryItem}
-        //                 item={item}
-        //             />
-        //         </li>
-        //     ))}
-        // </ul>
-    )
+            </ul>
+        )
+    }
 }

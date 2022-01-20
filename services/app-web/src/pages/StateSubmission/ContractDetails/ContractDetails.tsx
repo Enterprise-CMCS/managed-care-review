@@ -369,7 +369,7 @@ export const ContractDetails = ({
                         className={styles.formContainer}
                         id="ContractDetailsForm"
                         aria-label="Contract Details Form"
-                        aria-describedby='form-guidance'
+                        aria-describedby="form-guidance"
                         onSubmit={(e) => {
                             setShouldValidate(true)
                             setFocusErrorSummaryHeading(true)
@@ -379,7 +379,9 @@ export const ContractDetails = ({
                         <fieldset className="usa-fieldset">
                             <legend className="srOnly">Contract Details</legend>
                             {formAlert && formAlert}
-                            <span id="form-guidance">All fields are required</span>
+                            <span id="form-guidance">
+                                All fields are required
+                            </span>
 
                             {shouldValidate && (
                                 <ErrorSummary
@@ -401,15 +403,14 @@ export const ContractDetails = ({
                                     id="documents"
                                     name="documents"
                                     label="Upload contract"
+                                    renderMode="list"
                                     aria-required
                                     error={documentsErrorMessage}
                                     hint={
                                         <>
                                             <Link
                                                 aria-label="Document definitions and requirements (opens in new window)"
-                                                href={
-                                                    '/help#key-documents'
-                                                }
+                                                href={'/help#key-documents'}
                                                 variant="external"
                                                 target="_blank"
                                             >

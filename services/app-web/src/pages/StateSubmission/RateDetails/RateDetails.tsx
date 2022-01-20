@@ -82,7 +82,8 @@ export const RateDetails = ({
     // Rate documents state management
     const { deleteFile, getKey, getS3URL, scanFile, uploadFile } = useS3()
     const [fileItems, setFileItems] = React.useState<FileItemT[]>([])
-    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] = React.useState(false)
+    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
+        React.useState(false)
     const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
 
     const hasValidFiles =
@@ -344,15 +345,14 @@ export const RateDetails = ({
                                         id="rateDocuments"
                                         name="rateDocuments"
                                         label="Upload rate certification"
+                                        renderMode="list"
                                         aria-required
                                         error={documentsErrorMessage}
                                         hint={
                                             <>
                                                 <Link
                                                     aria-label="Document definitions and requirements (opens in new window)"
-                                                    href={
-                                                        '/help#key-documents'
-                                                    }
+                                                    href={'/help#key-documents'}
                                                     variant="external"
                                                     target="_blank"
                                                 >

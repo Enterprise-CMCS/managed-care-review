@@ -79,16 +79,16 @@ const DocumentError = ({
     }
 }
 
-type FileItemProps = {
+type FileRowProps = {
     item: FileItemT
     deleteItem: (item: FileItemT) => void
     retryItem: (item: FileItemT) => void
 }
-export const FileItem = ({
+export const FileRow = ({
     item,
     deleteItem,
     retryItem,
-}: FileItemProps): React.ReactElement => {
+}: FileRowProps): React.ReactElement => {
     const { name, status, file } = item
     const hasDuplicateNameError = status === 'DUPLICATE_NAME_ERROR'
     const hasScanningError = status === 'SCANNING_ERROR'
@@ -96,12 +96,6 @@ export const FileItem = ({
     const hasUnexpectedError = status === 'UPLOAD_ERROR' && file === undefined
     const isLoading = status === 'PENDING'
     const isScanning = status === 'SCANNING'
-
-    const isPDF = name.indexOf('.pdf') > 0
-    const isWord = name.indexOf('.doc') > 0 || name.indexOf('.pages') > 0
-    const isVideo = name.indexOf('.mov') > 0 || name.indexOf('.mp4') > 0
-    const isExcel = name.indexOf('.xls') > 0 || name.indexOf('.numbers') > 0
-    const isGeneric = !isPDF && !isWord && !isVideo && !isExcel
 
     const imageClasses = classnames('usa-file-input__preview-image', {
         'is-loading': isLoading || isScanning,
@@ -131,7 +125,6 @@ export const FileItem = ({
 
     return (
         <tr className={statusValue === 'error' ? styles.warningRow : undefined}>
-            {/* <div className={styles.fileItemText}> */}
             <td>
                 {isLoading || isScanning ? (
                     <span
@@ -200,7 +193,6 @@ export const FileItem = ({
                     </Button>
                 )}
             </td>
-            {/* </div> */}
         </tr>
     )
 }
