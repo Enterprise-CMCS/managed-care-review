@@ -67,7 +67,7 @@ describe('RateDetailsSummarySection', () => {
         ).toBeInTheDocument()
         expect(
             screen.getByRole('definition', {
-                name: 'Effective dates of rate amendment',
+                name: 'Rate amendment effective dates',
             })
         ).toBeInTheDocument()
     })

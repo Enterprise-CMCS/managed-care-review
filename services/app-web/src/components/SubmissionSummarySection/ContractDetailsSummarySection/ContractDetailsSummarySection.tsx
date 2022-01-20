@@ -140,7 +140,7 @@ export const ContractDetailsSummarySection = ({
                     right={
                         <DataDetail
                             id="contractEffectiveDates"
-                            label="Contract effective dates"
+                            label={submission.contractType === "BASE"? "Contract effective dates": "Contract amendment effective dates"}
                             data={`${dayjs(submission.contractDateStart).format(
                                 'MM/DD/YYYY'
                             )} to ${dayjs(submission.contractDateEnd).format(

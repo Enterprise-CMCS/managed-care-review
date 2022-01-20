@@ -418,7 +418,7 @@ export const ContractDetails = ({
                                                 Document definitions and
                                                 requirements
                                             </Link>
-                                            <span className="srOnly">
+                                            <span>
                                                 This input only accepts PDF,
                                                 CSV, DOC, DOCX, XLS, XLSX files.
                                             </span>

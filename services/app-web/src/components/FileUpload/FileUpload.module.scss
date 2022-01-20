@@ -1,7 +1,12 @@
 .fileInput {
     max-width: none;
 }
-
+.fileInputHint{
+    display: flex;
+    flex-direction: column;
+    color: #71767a;
+    margin-bottom: 0.5rem;
+}
 .fileItemsList {
     list-style-type: none;
     display: inline-block;

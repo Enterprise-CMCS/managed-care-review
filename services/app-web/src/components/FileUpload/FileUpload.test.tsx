@@ -1,4 +1,8 @@
-import { render, waitFor, screen } from '@testing-library/react'
+import {
+    render,
+    waitFor,
+    screen,
+} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { FileUpload, FileUploadProps, S3FileData } from './FileUpload'
@@ -262,7 +266,7 @@ describe('FileUpload component', () => {
             expect(props.onFileItemsUpdate).toHaveBeenCalled()
         })
 
-        userClickByRole(screen, 'button', { name: 'Retry' })
+        userClickByRole(screen, 'button', { name: /Retry/ })
         await waitFor(() => expect(props.uploadFile).toHaveBeenCalled())
     })
 
@@ -276,27 +280,6 @@ describe('FileUpload component', () => {
             await waitFor(() =>
                 expect(screen.getByText(/2 files added/)).toBeInTheDocument()
             )
-        })
-        it('displays complete, errors, and pending in list - (X complete, X error(s), X pending', async () => {
-            await render(<FileUpload {...testProps} accept=".pdf,.txt" />)
-
-            const input = screen.getByTestId('file-input-input')
-            userEvent.upload(input, [TEST_DOC_FILE])
-            userEvent.upload(input, [TEST_PDF_FILE])
-            userEvent.upload(input, [TEST_DOC_FILE])
-            // while uploading/scanning
-            await waitFor(() => {
-                expect(screen.getByText(/3 files added/)).toBeInTheDocument()
-                expect(
-                    screen.getByText(/0 complete, 1 error, 2 pending/)
-                ).toBeInTheDocument()
-            })
-            // when complete
-            await waitFor(() => {
-                expect(
-                    screen.getByText(/2 complete, 1 error, 0 pending/)
-                ).toBeInTheDocument()
-            })
         })
     })
     describe('drag and drop behavior', () => {

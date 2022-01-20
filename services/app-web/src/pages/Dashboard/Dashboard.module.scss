@@ -60,7 +60,8 @@
 }
 
 .programTag {
-    background: $cms-color-primary;
+    background: $theme-color-secondary-lighter;
+    color: $theme-color-base-ink;
     display: inline-block;
 }
 
@@ -70,4 +71,5 @@
 
 .draftTag {
     background: $theme-color-warning-dark;
+    color: $theme-color-base-ink;
 }
