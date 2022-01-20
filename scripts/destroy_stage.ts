@@ -29,8 +29,9 @@ async function main() {
 
         const clearBucketOutput = await clearServerlessDeployBucket(sn)
         if (clearBucketOutput instanceof Error) {
+            // We don't process.exit(1) here because sometimes buckets in a stack
+            // have already been removed. We can still delete the stack.
             console.log(`Could not clear buckets in ${sn} ${clearBucketOutput}`)
-            process.exit(1)
         }
 
         const deleteStackOutput = await deleteStack(sn)
@@ -96,45 +97,54 @@ async function clearServerlessDeployBucket(
     }
 
     // clean out each of those buckets
-    buckets.map(async (bucket) => {
-        // turn off versioning on the bucket
-        const versionResponse = await turnOffVersioningOnBucket(bucket)
-        if (versionResponse instanceof Error) {
-            return versionResponse
-        }
-
-        // get all the versioned files in the bucket
-        console.log(`Clearing bucket: ${bucket.PhysicalResourceId}`)
-        const keys = await getVersionedFilesInBucket(bucket)
-        if (keys instanceof Error) {
-            return keys
-        }
-
-        try {
-            // construct the delete
-            const deleteParams: AWS.S3.DeleteObjectsRequest = {
-                Bucket: bucket.PhysicalResourceId ?? '',
-                Delete: {
-                    Objects: keys,
-                },
+    const clearBucketOutput = await Promise.all(
+        buckets.map(async (bucket) => {
+            // turn off versioning on the bucket
+            const versionResponse = await turnOffVersioningOnBucket(bucket)
+            if (versionResponse instanceof Error) {
+                return versionResponse
             }
 
-            // delete all the files, including their versions
-            const deleteObjectsResponse = await s3
-                .deleteObjects(deleteParams)
-                .promise()
+            // get all the versioned files in the bucket
+            console.log(`Clearing bucket: ${bucket.PhysicalResourceId}`)
+            const keys = await getVersionedFilesInBucket(bucket)
+            if (keys instanceof Error) {
+                return keys
+            }
 
-            if (deleteObjectsResponse.$response.error != null) {
+            try {
+                // construct the delete
+                const deleteParams: AWS.S3.DeleteObjectsRequest = {
+                    Bucket: bucket.PhysicalResourceId ?? '',
+                    Delete: {
+                        Objects: keys,
+                    },
+                }
+
+                // delete all the files, including their versions
+                const deleteObjectsResponse = await s3
+                    .deleteObjects(deleteParams)
+                    .promise()
+
+                if (deleteObjectsResponse.$response.error != null) {
+                    return new Error(
+                        `Error on deleteObjects: ${deleteObjectsResponse.$response.error}`
+                    )
+                }
+            } catch (err) {
                 return new Error(
-                    `Error on deleteObjects: ${deleteObjectsResponse.$response.error}`
+                    `Error clearing bucket: ${bucket.PhysicalResourceId}: ${err}`
                 )
             }
-        } catch (err) {
-            return new Error(
-                `Error clearing bucket: ${bucket.PhysicalResourceId}: ${err}`
-            )
-        }
-    })
+        })
+    )
+
+    clearBucketOutput.filter((output) => output instanceof Error)
+    if (clearBucketOutput.length > 0) {
+        return new Error(
+            `Encountered errors while clearing buckets: ${clearBucketOutput}`
+        )
+    }
 }
 
 async function getBucketsInStack(
