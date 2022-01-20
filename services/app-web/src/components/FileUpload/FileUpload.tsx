@@ -351,7 +351,7 @@ export const FileUpload = ({
                 <span
                     id={`${id}-hint`}
                     aria-labelledby={id}
-                    className="usa-hint margin-top-1"
+                    className={styles.fileInputHint}
                 >
                     {hint}
                 </span>
