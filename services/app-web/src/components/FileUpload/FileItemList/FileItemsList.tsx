@@ -30,7 +30,7 @@ export const FileItemsList = ({
                 <tr>
                     <th>Document name</th>
                     <th>Date uploaded</th>
-                    <th>Do</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
