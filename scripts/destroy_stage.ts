@@ -1,9 +1,9 @@
 import AWS from 'aws-sdk'
-import { AwsAccount } from 'aws-sdk/clients/workspaces'
 
 AWS.config.update({
     region: 'us-east-1',
 })
+
 const stackPrefixes = [
     'app-web',
     'app-api',
@@ -41,7 +41,7 @@ interface s3ObjectKey {
 
 async function clearServerlessDeployBucket(
     stackName: string
-): Promise<{} | Error> {
+): Promise<void | Error> {
     // find all the buckets in our stack
     const buckets = await getBucketsInStack(stackName)
     if (buckets instanceof Error) {
@@ -92,8 +92,6 @@ async function clearServerlessDeployBucket(
             )
         }
     })
-
-    return {}
 }
 
 async function getBucketsInStack(
@@ -120,7 +118,7 @@ async function getBucketsInStack(
 
 async function turnOffVersioningOnBucket(
     bucket: AWS.CloudFormation.StackResource
-): Promise<{} | Error> {
+): Promise<void | Error> {
     console.log(
         `Turning off bucket versioning on bucket: ${bucket.PhysicalResourceId}`
     )
@@ -135,8 +133,6 @@ async function turnOffVersioningOnBucket(
     } catch (err) {
         return new Error(`Could not turn off bucket versioning: ${err}`)
     }
-
-    return {}
 }
 
 async function getVersionedFilesInBucket(
@@ -189,7 +185,7 @@ async function getVersionedFilesInBucket(
     return [...versionKeys, ...deleteMarkerKeys]
 }
 
-async function deleteStack(stackName: string): Promise<{} | Error> {
+async function deleteStack(stackName: string): Promise<void | Error> {
     console.log(`deleteStack: Looking up stack ${stackName}`)
     const stackParams = {
         StackName: stackName,
@@ -232,7 +228,6 @@ async function deleteStack(stackName: string): Promise<{} | Error> {
 
     // deleteStack just returns {} if successful, so:
     console.log(`deleteStack: Stack ${stackName} deleted`)
-    return {}
 }
 
 // run the script
