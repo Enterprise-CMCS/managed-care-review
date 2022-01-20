@@ -67,7 +67,13 @@ describe('FileItemList component', () => {
     beforeEach(() => jest.clearAllMocks())
     it('renders without errors', () => {
         const fileItems = [pending, uploadError]
-        render(<FileItemsList fileItems={fileItems} {...buttonActionProps} />)
+        render(
+            <FileItemsList
+                renderMode="list"
+                fileItems={fileItems}
+                {...buttonActionProps}
+            />
+        )
 
         expect(screen.getAllByRole('listitem').length).toEqual(fileItems.length)
         expect(screen.getByText(/testFile.pdf/)).toBeInTheDocument()
@@ -84,7 +90,11 @@ describe('FileItemList component', () => {
         ]
         const tree = renderer
             .create(
-                <FileItemsList fileItems={fileItems} {...buttonActionProps} />
+                <FileItemsList
+                    renderMode="list"
+                    fileItems={fileItems}
+                    {...buttonActionProps}
+                />
             )
             .toJSON()
         expect(tree).toMatchSnapshot()
@@ -92,7 +102,13 @@ describe('FileItemList component', () => {
 
     it('button actions work as expected', () => {
         const fileItems = [uploadError]
-        render(<FileItemsList fileItems={fileItems} {...buttonActionProps} />)
+        render(
+            <FileItemsList
+                renderMode="list"
+                fileItems={fileItems}
+                {...buttonActionProps}
+            />
+        )
 
         userEvent.click(screen.getByRole('button', { name: 'Retry' }))
         expect(buttonActionProps.retryItem).toHaveBeenCalled()
@@ -110,7 +126,13 @@ describe('FileItemList component', () => {
             duplicateError,
             scanning,
         ]
-        render(<FileItemsList fileItems={fileItems} {...buttonActionProps} />)
+        render(
+            <FileItemsList
+                renderMode="list"
+                fileItems={fileItems}
+                {...buttonActionProps}
+            />
+        )
 
         const listItems = screen.getAllByRole('listitem')
         const loadingListItem = listItems[0]

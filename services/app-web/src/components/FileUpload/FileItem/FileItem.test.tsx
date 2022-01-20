@@ -64,12 +64,24 @@ describe('FileItem component', () => {
 
     beforeEach(() => jest.clearAllMocks())
     it('renders without errors', () => {
-        render(<FileItem item={uploadComplete} {...buttonActionProps} />)
+        render(
+            <FileItem
+                renderMode="list"
+                item={uploadComplete}
+                {...buttonActionProps}
+            />
+        )
 
         expect(screen.getByText(uploadComplete.name)).toBeInTheDocument()
     })
     it('button actions work as expected', () => {
-        render(<FileItem item={uploadError} {...buttonActionProps} />)
+        render(
+            <FileItem
+                renderMode="list"
+                item={uploadError}
+                {...buttonActionProps}
+            />
+        )
 
         userEvent.click(screen.getByRole('button', { name: 'Retry' }))
         expect(buttonActionProps.retryItem).toHaveBeenCalled()
@@ -79,7 +91,9 @@ describe('FileItem component', () => {
     })
 
     it('displays loading image, loading text, and remove button when status is LOADING', () => {
-        render(<FileItem item={pending} {...buttonActionProps} />)
+        render(
+            <FileItem renderMode="list" item={pending} {...buttonActionProps} />
+        )
         expect(screen.getByText('Step 1 of 2: Uploading')).toBeInTheDocument()
         const imageEl = screen.getByTestId('file-input-preview-image')
         expect(imageEl).toHaveClass('is-loading')
@@ -90,7 +104,13 @@ describe('FileItem component', () => {
     })
 
     it('displays loading image, scanning text, and remove button when status is SCANNING', () => {
-        render(<FileItem item={scanning} {...buttonActionProps} />)
+        render(
+            <FileItem
+                renderMode="list"
+                item={scanning}
+                {...buttonActionProps}
+            />
+        )
         expect(screen.getByText('Step 2 of 2: Scanning')).toBeInTheDocument()
         const imageEl = screen.getByTestId('file-input-preview-image')
         expect(imageEl).toHaveClass('is-loading')
@@ -101,7 +121,13 @@ describe('FileItem component', () => {
     })
 
     it('displays file image and remove button when status is UPLOAD_COMPLETE', () => {
-        render(<FileItem item={uploadComplete} {...buttonActionProps} />)
+        render(
+            <FileItem
+                renderMode="list"
+                item={uploadComplete}
+                {...buttonActionProps}
+            />
+        )
         const imageEl = screen.getByTestId('file-input-preview-image')
         expect(imageEl).not.toHaveClass('is-loading')
         expect(imageEl).toHaveClass('usa-file-input__preview-image--pdf')
@@ -112,7 +138,13 @@ describe('FileItem component', () => {
     })
 
     it('displays upload failed message and both retry and remove buttons when status is UPLOAD_ERROR', () => {
-        render(<FileItem item={uploadError} {...buttonActionProps} />)
+        render(
+            <FileItem
+                renderMode="list"
+                item={uploadError}
+                {...buttonActionProps}
+            />
+        )
 
         const imageEl = screen.getByTestId('file-input-preview-image')
         expect(imageEl).not.toHaveClass('is-loading')
@@ -132,7 +164,13 @@ describe('FileItem component', () => {
     })
 
     it('displays security scan failed message and  both retry and remove buttons when status is SCANNING_ERROR', () => {
-        render(<FileItem item={scanningError} {...buttonActionProps} />)
+        render(
+            <FileItem
+                renderMode="list"
+                item={scanningError}
+                {...buttonActionProps}
+            />
+        )
 
         const imageEl = screen.getByTestId('file-input-preview-image')
         expect(imageEl).not.toHaveClass('is-loading')
@@ -148,7 +186,13 @@ describe('FileItem component', () => {
     })
 
     it('displays duplicate name error message and remove button when status is DUPLICATE_NAME_ERROR', () => {
-        render(<FileItem item={duplicateError} {...buttonActionProps} />)
+        render(
+            <FileItem
+                renderMode="list"
+                item={duplicateError}
+                {...buttonActionProps}
+            />
+        )
 
         const imageEl = screen.getByTestId('file-input-preview-image')
         expect(imageEl).not.toHaveClass('is-loading')
@@ -162,6 +206,7 @@ describe('FileItem component', () => {
     it('displays unexpected error message and remove button when status is UPLOAD_ERROR but file reference is undefined (this is an unexpected state but it would mean the upload cannot be retried)', () => {
         render(
             <FileItem
+                renderMode="list"
                 item={{ ...uploadError, file: undefined }}
                 {...buttonActionProps}
             />

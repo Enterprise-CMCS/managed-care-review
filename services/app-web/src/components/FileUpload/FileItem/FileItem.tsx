@@ -83,11 +83,13 @@ type FileItemProps = {
     item: FileItemT
     deleteItem: (item: FileItemT) => void
     retryItem: (item: FileItemT) => void
+    renderMode: 'table' | 'list'
 }
 export const FileItem = ({
     item,
     deleteItem,
     retryItem,
+    renderMode,
 }: FileItemProps): React.ReactElement => {
     const { name, status, file } = item
     const hasDuplicateNameError = status === 'DUPLICATE_NAME_ERROR'
@@ -134,36 +136,111 @@ export const FileItem = ({
         statusValue = 'error'
     }
 
-    return (
-        <>
-            <div className={styles.fileItemText}>
-                <div
-                    role="progressbar"
-                    aria-valuetext={statusValue}
-                    aria-label={`File status`}
-                >
-                    <img
-                        id={item.id}
-                        data-testid="file-input-preview-image"
-                        src={SPACER_GIF}
-                        alt=""
-                        className={imageClasses}
-                    />
+    if (renderMode === 'list') {
+        return (
+            <>
+                <div className={styles.fileItemText}>
+                    <div
+                        role="progressbar"
+                        aria-valuetext={statusValue}
+                        aria-label={`File status`}
+                    >
+                        <img
+                            id={item.id}
+                            data-testid="file-input-preview-image"
+                            src={SPACER_GIF}
+                            alt=""
+                            className={imageClasses}
+                        />
+                    </div>
+                    <span
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            fontSize: 'inherit',
+                        }}
+                    >
+                        <DocumentError
+                            hasDuplicateNameError={hasDuplicateNameError}
+                            hasScanningError={hasScanningError}
+                            hasUploadError={hasUploadError}
+                            hasUnexpectedError={hasUnexpectedError}
+                        />
+                        <>
+                            {(isLoading || isScanning) && (
+                                <span className={styles.fileItemBoldMessage}>
+                                    {isLoading
+                                        ? 'Step 1 of 2: Uploading'
+                                        : 'Step 2 of 2: Scanning'}
+                                </span>
+                            )}
+                            <span>{name}</span>
+                        </>
+                    </span>
                 </div>
-                <span
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        fontSize: 'inherit',
-                    }}
-                >
-                    <DocumentError
-                        hasDuplicateNameError={hasDuplicateNameError}
-                        hasScanningError={hasScanningError}
-                        hasUploadError={hasUploadError}
-                        hasUnexpectedError={hasUnexpectedError}
-                    />
-                    <>
+                <div className={styles.fileItemButtons}>
+                    <Button
+                        type="button"
+                        size="small"
+                        unstyled
+                        onClick={handleDelete}
+                    >
+                        Remove
+                    </Button>
+                    {(hasUploadError || hasScanningError) &&
+                        !hasUnexpectedError && (
+                            <Button
+                                type="button"
+                                size="small"
+                                unstyled
+                                onClick={handleRetry}
+                            >
+                                Retry
+                            </Button>
+                        )}
+                </div>
+            </>
+        )
+    } else {
+        return (
+            <tr
+                className={
+                    statusValue === 'error' ? styles.warningRow : undefined
+                }
+            >
+                <td>
+                    {isLoading || isScanning ? (
+                        <span
+                            role="progressbar"
+                            aria-valuetext={statusValue}
+                            aria-label={`Status of file ${name}`}
+                        >
+                            <img
+                                style={{ float: 'left' }}
+                                id={item.id}
+                                data-testid="file-input-preview-image"
+                                src={SPACER_GIF}
+                                alt=""
+                                className={imageClasses}
+                            />
+                        </span>
+                    ) : (
+                        ''
+                    )}
+                    <span
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            fontSize: 'inherit',
+                        }}
+                    >
+                        <DocumentError
+                            hasDuplicateNameError={hasDuplicateNameError}
+                            hasScanningError={hasScanningError}
+                            hasUploadError={hasUploadError}
+                            hasUnexpectedError={hasUnexpectedError}
+                        />
+
                         {(isLoading || isScanning) && (
                             <span className={styles.fileItemBoldMessage}>
                                 {isLoading
@@ -172,29 +249,35 @@ export const FileItem = ({
                             </span>
                         )}
                         <span>{name}</span>
-                    </>
-                </span>
-            </div>
-            <div className={styles.fileItemButtons}>
-                <Button
-                    type="button"
-                    size="small"
-                    unstyled
-                    onClick={handleDelete}
-                >
-                    Remove
-                </Button>
-                {(hasUploadError || hasScanningError) && !hasUnexpectedError && (
+                    </span>
+                </td>
+                <td>01/19/2022</td>
+                <td>
                     <Button
+                        style={{ marginTop: 0 }}
                         type="button"
                         size="small"
                         unstyled
-                        onClick={handleRetry}
+                        onClick={handleDelete}
                     >
-                        Retry
+                        Remove
                     </Button>
-                )}
-            </div>
-        </>
-    )
+                    {(hasUploadError || hasScanningError) &&
+                        !hasUnexpectedError && <span> or </span>}
+                    {(hasUploadError || hasScanningError) &&
+                        !hasUnexpectedError && (
+                            <Button
+                                style={{ marginTop: 0 }}
+                                type="button"
+                                size="small"
+                                unstyled
+                                onClick={handleRetry}
+                            >
+                                Retry
+                            </Button>
+                        )}
+                </td>
+            </tr>
+        )
+    }
 }

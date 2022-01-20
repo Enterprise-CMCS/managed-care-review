@@ -2,7 +2,6 @@ import React from 'react'
 import classnames from 'classnames'
 import { Table } from '@trussworks/react-uswds'
 import { FileItem, FileItemT, FileStatus } from '../FileItem/FileItem'
-import { FileRow } from '../FileRow/FileRow'
 import styles from '../FileUpload.module.scss'
 
 export const FileItemsList = ({
@@ -39,11 +38,12 @@ export const FileItemsList = ({
                 </thead>
                 <tbody>
                     {fileItems.map((item) => (
-                        <FileRow
+                        <FileItem
                             key={item.id}
                             deleteItem={deleteItem}
                             retryItem={retryItem}
                             item={item}
+                            renderMode="table"
                         />
                     ))}
                 </tbody>
@@ -65,6 +65,7 @@ export const FileItemsList = ({
                             deleteItem={deleteItem}
                             retryItem={retryItem}
                             item={item}
+                            renderMode="list"
                         />
                     </li>
                 ))}
