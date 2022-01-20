@@ -13,6 +13,8 @@ const stackPrefixes = [
     'storybook',
     'infra-api',
     'ui',
+    'database',
+    'stream-functions',
 ]
 
 const stage = process.argv[2]
@@ -25,22 +27,16 @@ async function main() {
     stacksToDestroy.map(async (sn) => {
         console.log(`Destroying stack: ${sn}`)
 
-        try {
-            const clearBucketOutput = await clearServerlessDeployBucket(sn)
-            if (clearBucketOutput instanceof Error) {
-                console.log(clearBucketOutput)
-            }
-        } catch (err) {
-            console.log(`Could not clear bucket: ${err}`)
+        const clearBucketOutput = await clearServerlessDeployBucket(sn)
+        if (clearBucketOutput instanceof Error) {
+            console.log(`Could not clear buckets in ${sn} ${clearBucketOutput}`)
+            process.exit(1)
         }
 
-        try {
-            const deleteStackOutput = await deleteStack(sn)
-            if (deleteStackOutput instanceof Error) {
-                console.log(deleteStackOutput)
-            }
-        } catch (err) {
-            console.log(`Could not delete stack: ${err}`)
+        const deleteStackOutput = await deleteStack(sn)
+        if (deleteStackOutput instanceof Error) {
+            console.log(`Could not delete ${sn}. ${deleteStackOutput}`)
+            process.exit(1)
         }
     })
 }
@@ -276,7 +272,7 @@ async function deleteStack(stackName: string): Promise<void | Error> {
             .waitFor('stackDeleteComplete', { StackName: stackId })
             .promise()
     } catch (err) {
-        return new Error('Error on waitFor: ' + err.message)
+        return new Error(err.message)
     }
 
     // deleteStack just returns {} if successful, so:
