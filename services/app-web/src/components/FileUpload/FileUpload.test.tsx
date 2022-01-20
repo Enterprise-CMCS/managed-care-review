@@ -266,7 +266,7 @@ describe('FileUpload component', () => {
             expect(props.onFileItemsUpdate).toHaveBeenCalled()
         })
 
-        userClickByRole(screen, 'button', { name: 'Retry' })
+        userClickByRole(screen, 'button', { name: /Retry/ })
         await waitFor(() => expect(props.uploadFile).toHaveBeenCalled())
     })
 
