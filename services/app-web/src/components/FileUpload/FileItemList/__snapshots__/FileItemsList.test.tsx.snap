@@ -15,7 +15,7 @@ exports[`FileItemList component renders correctly 1`] = `
       className="fileItemText"
     >
       <div
-        aria-label="File status"
+        aria-label="Status of file testFile.pdf"
         aria-valuetext="uploading"
         role="progressbar"
       >
@@ -68,7 +68,7 @@ exports[`FileItemList component renders correctly 1`] = `
       className="fileItemText"
     >
       <div
-        aria-label="File status"
+        aria-label="Status of file testFile2.pdf"
         aria-valuetext="error"
         role="progressbar"
       >
@@ -135,7 +135,7 @@ exports[`FileItemList component renders correctly 1`] = `
       className="fileItemText"
     >
       <div
-        aria-label="File status"
+        aria-label="Status of file testFile3.pdf"
         aria-valuetext="error"
         role="progressbar"
       >
@@ -197,7 +197,7 @@ exports[`FileItemList component renders correctly 1`] = `
       className="fileItemText"
     >
       <div
-        aria-label="File status"
+        aria-label="Status of file testFile4.pdf"
         aria-valuetext=""
         role="progressbar"
       >
@@ -245,7 +245,7 @@ exports[`FileItemList component renders correctly 1`] = `
       className="fileItemText"
     >
       <div
-        aria-label="File status"
+        aria-label="Status of file testFile4.pdf"
         aria-valuetext="error"
         role="progressbar"
       >

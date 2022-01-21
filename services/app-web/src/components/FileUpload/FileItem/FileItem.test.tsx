@@ -76,9 +76,19 @@ describe('FileItem component', () => {
     })
 
     it('includes appropriate aria- attributes', () => {
-        render(<FileItem item={uploadError} {...buttonActionProps} />)
+        render(
+            <FileItem
+                renderMode="list"
+                item={uploadError}
+                {...buttonActionProps}
+            />
+        )
 
-        expect(screen.getByLabelText(`Retry upload for ${uploadError.name} document`)).toBeInTheDocument()
+        expect(
+            screen.getByLabelText(
+                `Retry upload for ${uploadError.name} document`
+            )
+        ).toBeInTheDocument()
         expect(
             screen.getByLabelText(`Remove ${uploadError.name} document`)
         ).toBeInTheDocument()
