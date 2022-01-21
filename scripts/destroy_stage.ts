@@ -112,24 +112,7 @@ async function clearServerlessDeployBucket(
                 return keys
             }
 
-            // construct the delete
-            const deleteParams: AWS.S3.DeleteObjectsRequest = {
-                Bucket: bucket.PhysicalResourceId ?? '',
-                Delete: {
-                    Objects: keys,
-                },
-            }
-
-            // delete all the files, including their versions
-            const deleteObjectsResponse = await s3
-                .deleteObjects(deleteParams)
-                .promise()
-
-            if (deleteObjectsResponse.$response.error != null) {
-                return new Error(
-                    `Error on deleteObjects: ${deleteObjectsResponse.$response.error}`
-                )
-            }
+            return await deleteKeysFromS3Bucket(bucket, keys)
         })
     )
 
@@ -137,6 +120,41 @@ async function clearServerlessDeployBucket(
     if (clearBucketOutput.length > 0) {
         return new Error(
             `Encountered errors while clearing buckets: ${clearBucketOutput}`
+        )
+    }
+}
+
+async function deleteKeysFromS3Bucket(
+    bucket: AWS.CloudFormation.StackResource,
+    keys: s3ObjectKey[]
+): Promise<void | Error> {
+    // deleteObjects is limited to 1000 keys per request
+    const keysArray = Array.from(
+        { length: Math.ceil(keys.length / 999) },
+        (v, i) => keys.slice(i * 999, i * 999 + 999)
+    )
+
+    const emptyBucketOutput = await Promise.all(
+        keysArray.map(async function (k) {
+            // construct the delete params
+            const deleteParams: AWS.S3.DeleteObjectsRequest = {
+                Bucket: bucket.PhysicalResourceId ?? '',
+                Delete: {
+                    Objects: k,
+                },
+            }
+
+            try {
+                await s3.deleteObjects(deleteParams).promise()
+            } catch (err) {
+                return new Error(`Could not delete keys: ${err}`)
+            }
+        })
+    )
+    emptyBucketOutput.filter((output) => output instanceof Error)
+    if (emptyBucketOutput.length > 0) {
+        return new Error(
+            `Encountered errors while deleting keys: ${emptyBucketOutput}`
         )
     }
 }
