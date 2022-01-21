@@ -17,12 +17,27 @@ const stackPrefixes = [
     'stream-functions',
 ]
 
+const protectedStages = [
+    'develop',
+    'main',
+    'master',
+    'impl',
+    'val',
+    'prod',
+    'production',
+]
+
 const stage = process.argv[2]
 
 const cf = new AWS.CloudFormation()
 const s3 = new AWS.S3()
 
 async function main() {
+    if (protectedStages.includes(stage)) {
+        console.log(`Stage ${stage} is protected. Aborting destroy.`)
+        process.exit(1)
+    }
+
     const stacksToDestroy = await getStacksFromStage(stage)
     stacksToDestroy.map(async (sn) => {
         console.log(`Destroying stack: ${sn}`)
