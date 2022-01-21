@@ -369,6 +369,7 @@ export const SubmissionType = ({
                                 id="submissionDescription"
                                 name="submissionDescription"
                                 aria-required
+                                aria-describedby='submissionDescriptionHelp'
                                 showError={showFieldErrors(
                                     errors.submissionDescription
                                 )}
@@ -386,7 +387,7 @@ export const SubmissionType = ({
                                             View description examples
                                         </Link>
 
-                                        <p>
+                                        <p id="submissionDescriptionHelp">
                                             Provide a description of any major
                                             changes or updates
                                         </p>
