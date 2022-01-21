@@ -150,14 +150,23 @@ enum ActuaryCommunicationType {
     OACT_TO_STATE
 }
 
+enum DocumentCategory {
+    CONTRACT
+    RATES
+    CONTRACT_RELATED
+    RATES_RELATED
+}
+
 type Document {
     name: String!
     s3URL: String!
+    documentCategories: [DocumentCategory!]!
 }
 
 input DocumentInput {
     name: String!
     s3URL: String!
+    documentCategories: [DocumentCategory!]!
 }
 
 type CapitationRatesAmendedInfo {

@@ -1,11 +1,7 @@
 import React from 'react'
 import { useField } from 'formik'
-import {
-    ErrorMessage,
-    Label,
-    Textarea,
-    FormGroup,
-} from '@trussworks/react-uswds'
+import { Label, Textarea, FormGroup } from '@trussworks/react-uswds'
+import { PoliteErrorMessage } from '../..'
 
 /**
  * This component renders a ReactUSWDS TextArea component inside of a FormGroup,
@@ -43,7 +39,7 @@ export const FieldTextarea = ({
                 {label}
             </Label>
             {showError && meta.error && (
-                <ErrorMessage>{meta.error}</ErrorMessage>
+                <PoliteErrorMessage>{meta.error}</PoliteErrorMessage>
             )}
             {hint && (
                 <div aria-labelledby={id} className="usa-hint margin-top-1">

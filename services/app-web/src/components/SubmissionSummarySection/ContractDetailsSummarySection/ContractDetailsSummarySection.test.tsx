@@ -7,13 +7,13 @@ import {
 } from '../../../testHelpers/apolloHelpers'
 
 describe('ContractDetailsSummarySection', () => {
-    const draftSubmission = mockContractAndRatesDraft()
-    const stateSubmission = mockStateSubmission()
+    const draftContractAndRatesSubmission = mockContractAndRatesDraft()
+    const stateBaseContractOnlySubmission = mockStateSubmission()
 
     it('can render draft submission without errors (review and submit behavior)', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
-                submission={draftSubmission}
+                submission={draftContractAndRatesSubmission}
                 navigateTo="contract-details"
             />
         )
@@ -36,7 +36,7 @@ describe('ContractDetailsSummarySection', () => {
 
     it('can render state submission on summary page without errors (submission summary behavior)', () => {
         renderWithProviders(
-            <ContractDetailsSummarySection submission={stateSubmission} />
+            <ContractDetailsSummarySection submission={stateBaseContractOnlySubmission} />
         )
 
         expect(
@@ -56,7 +56,7 @@ describe('ContractDetailsSummarySection', () => {
     it('can render all contract details fields', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
-                submission={draftSubmission}
+                submission={draftContractAndRatesSubmission}
                 navigateTo="contract-details"
             />
         )
@@ -65,7 +65,7 @@ describe('ContractDetailsSummarySection', () => {
             screen.getByRole('definition', { name: 'Contract action type' })
         ).toBeInTheDocument()
         expect(
-            screen.getByRole('definition', { name: 'Contract effective dates' })
+            screen.getByRole('definition', { name: 'Contract amendment effective dates' })
         ).toBeInTheDocument()
         expect(
             screen.getByRole('definition', { name: 'Managed care entities' })
@@ -92,11 +92,11 @@ describe('ContractDetailsSummarySection', () => {
         ).toBeInTheDocument()
     })
 
-    it('can hide contract amendment fields for base contract submission', () => {
+    it('displays correct text content for contract a base contract', () => {
         renderWithProviders(
-            <ContractDetailsSummarySection submission={stateSubmission} />
+            <ContractDetailsSummarySection submission={stateBaseContractOnlySubmission} />
         )
-
+        expect(screen.getByText('Contract effective dates')).toBeInTheDocument()
         expect(
             screen.queryByText('Items being amended')
         ).not.toBeInTheDocument()
@@ -110,5 +110,26 @@ describe('ContractDetailsSummarySection', () => {
                 'Is this related to coverage and reimbursement for vaccine administration?'
             )
         ).not.toBeInTheDocument()
+    })
+
+      it('displays correct text content for a contract amendment', () => {
+          renderWithProviders(
+            <ContractDetailsSummarySection submission={draftContractAndRatesSubmission} />
+        )
+         expect(screen.getByText('Contract amendment effective dates')).toBeInTheDocument()
+        expect(
+            screen.queryByText('Items being amended')
+        ).toBeInTheDocument()
+
+                expect(
+            screen.queryByText(
+                'Is this contract action related to the COVID-19 public health emergency'
+            )
+        ).toBeInTheDocument()
+        expect(
+            screen.queryByText(
+                'Is this related to coverage and reimbursement for vaccine administration?'
+            )
+        ).toBeInTheDocument()
     })
 })

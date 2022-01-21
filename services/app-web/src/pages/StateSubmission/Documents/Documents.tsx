@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Alert, Form as UswdsForm, Link } from '@trussworks/react-uswds'
+import { Form as UswdsForm, Link } from '@trussworks/react-uswds'
 import { useHistory } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -7,6 +7,7 @@ import styles from '../StateSubmissionForm.module.scss'
 import {
     DraftSubmission,
     UpdateDraftSubmissionInput,
+    Document,
 } from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
@@ -18,6 +19,7 @@ import {
 import { updatesFromSubmission } from '../updateSubmissionTransform'
 import { PageActions } from '../PageActions'
 import classNames from 'classnames'
+import { ErrorSummary } from '../../../components/Form'
 
 type DocumentProps = {
     draftSubmission: DraftSubmission
@@ -53,6 +55,8 @@ export const Documents = ({
             : showFileUploadError && !hasValidFiles
             ? ' You must remove all documents with error messages before continuing'
             : undefined
+    const documentsErrorKey =
+        fileItems.length === 0 ? 'documents' : '#file-items-list'
 
     // Error summary state management
     const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
@@ -185,11 +189,12 @@ export const Documents = ({
                         formDataDocuments.push({
                             name: fileItem.name,
                             s3URL: fileItem.s3URL,
+                            documentCategories: [],
                         })
                     }
                     return formDataDocuments
                 },
-                [] as { name: string; s3URL: string }[]
+                [] as Document[]
             )
 
             const updatedDraft = updatesFromSubmission(draftSubmission)
@@ -225,15 +230,18 @@ export const Documents = ({
                 <fieldset className="usa-fieldset">
                     <legend className="srOnly">Supporting Documents</legend>
 
-                    {documentsErrorMessage && (
-                        <Alert
-                            type="error"
-                            heading="Remove files with errors"
-                            className="margin-bottom-2"
-                        >
-                            {documentsErrorMessage}
-                        </Alert>
-                    )}
+                    <ErrorSummary
+                        errors={
+                            documentsErrorMessage
+                                ? {
+                                      [documentsErrorKey]:
+                                          documentsErrorMessage,
+                                  }
+                                : {}
+                        }
+                        headingRef={errorSummaryHeadingRef}
+                    />
+
                     {formAlert && formAlert}
                     <FileUpload
                         id="documents"
@@ -250,7 +258,7 @@ export const Documents = ({
                                 >
                                     Document definitions and requirements
                                 </Link>
-                                <span className="srOnly">
+                                <span>
                                     This input only accepts PDF, CSV, DOC, DOCX,
                                     XLS, XLSX files.
                                 </span>

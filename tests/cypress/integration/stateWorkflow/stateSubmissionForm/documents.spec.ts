@@ -20,11 +20,15 @@ describe('documents', () => {
             // give the page time to load (wait) then let cypress wait for the spinner to go away
             cy.wait(10000)
             cy.findByTestId('file-input-loading-image').should('not.exist')
+            cy.findByText(/0 complete, 1 error, 1 pending/).should('exist')
+            // give the page time to load (wait) then let cypress wait for the spinner to go away
+            cy.wait(10000)
+            cy.findByTestId('file-input-loading-image').should('not.exist')
+            cy.findByText(/1 complete, 1 error, 0 pending/).should('exist')
             cy.findByText('Duplicate file').should('exist')
-
-            // Add two valid documents and one duplicate, then navigate back
             cy.visit(`/submissions/${draftSubmissionID}/documents`)
-            // HM-TODO: Why doesn't level attribute work here?
+
+            // Add two more valid documents, then navigate back
             cy.findByRole('heading', { name: /Supporting documents/ })
             cy.findByTestId('file-input-input').attachFile([
                 'documents/trussel-guide.pdf',
@@ -38,10 +42,22 @@ describe('documents', () => {
             cy.findByTestId('file-input-loading-image').should('not.exist')
             cy.findByText('Duplicate file').should('exist')
             cy.findAllByRole('row').should('have.length', 4)
+
+            cy.findByText(/3 files added/).should('exist')
+            cy.findByText(/0 complete, 1 error, 2 pending/).should('exist')
+
+            // give the page time to load (wait) then let cypress wait for the spinner to go away
+            cy.wait(10000)
+            cy.findByTestId('file-input-loading-image').should('not.exist')
+            cy.findByText('Duplicate file').should('exist')
+            cy.findByTestId('file-input-preview-list')
+                .findAllByRole('listitem')
+                .should('have.length', 3)
+            cy.findByText(/2 complete, 1 error, 0 pending/)
             cy.navigateForm('Back')
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
 
-            // reload page, see two documents,  duplicate was discarded on Back
+            // reload page, see two documents, duplicate was discarded on Back
             cy.visit(`/submissions/${draftSubmissionID}/documents`)
             cy.findAllByRole('row').should('have.length', 3)
             cy.verifyDocumentsHaveNoErrors()

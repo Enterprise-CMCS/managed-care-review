@@ -27,3 +27,20 @@ ErrorSummaryMultiple.args = {
         summary: "You must provide a summary"
     }
 }
+
+const ErrorSummaryFocusIdsTemplate : Story<ErrorSummaryProps> = (args) => <>
+  <ErrorSummary {...args} />
+  <label>Title: <input name="title"></input></label>
+  <ul tabIndex={-1} id="list">
+    <li>Item 1</li>
+    <li>Item with error</li>
+  </ul>
+</>
+
+export const ErrorSummaryFocusIds = ErrorSummaryFocusIdsTemplate.bind({})
+ErrorSummaryFocusIds.args = {
+    errors: {
+        title: "You must provide a title",
+        "#list" : "You have errors in your list",
+    }
+}

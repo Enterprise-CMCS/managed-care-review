@@ -90,6 +90,23 @@ function dragAndDrop(inputDropTarget: HTMLElement, files: File[]): void {
     return
 }
 
+function fakeRequest<T>(
+    success: boolean,
+    returnData: T,
+    timeout?: number
+): Promise<T> {
+    const t = timeout || Math.round(Math.random() * 1000)
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            if (success) {
+                resolve(returnData)
+            } else {
+                reject(new Error('Error'))
+            }
+        }, t)
+    })
+}
+
 const TEST_TEXT_FILE = new File(['Test File Contents'], 'testFile.txt', {
     type: 'text/plain',
 })
@@ -115,6 +132,7 @@ const TEST_PNG_FILE = new File(['Test PNG Image'], 'testFile.png', {
 })
 
 export {
+    fakeRequest,
     dragAndDrop,
     renderWithProviders,
     userClickByRole,

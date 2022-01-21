@@ -6,7 +6,6 @@ import {
     Fieldset,
     Link,
     DateRangePicker,
-    ErrorMessage,
 } from '@trussworks/react-uswds'
 import { v4 as uuidv4 } from 'uuid'
 import { Link as ReactRouterLink, useHistory } from 'react-router-dom'
@@ -15,16 +14,15 @@ import { Formik, FormikErrors } from 'formik'
 import styles from '../StateSubmissionForm.module.scss'
 
 import {
+    FileUpload,
+    S3FileData,
+    FileItemT,
     FieldRadio,
     FieldCheckbox,
     FieldTextInput,
     ErrorSummary,
-} from '../../../components/Form'
-import {
-    FileUpload,
-    S3FileData,
-    FileItemT,
-} from '../../../components/FileUpload'
+    PoliteErrorMessage,
+} from '../../../components'
 import {
     formatForApi,
     formatForForm,
@@ -32,6 +30,7 @@ import {
     isDateRangeEmpty,
 } from '../../../formHelpers'
 import {
+    Document,
     DraftSubmission,
     ContractType,
     FederalAuthority,
@@ -74,11 +73,11 @@ const ContractDatesErrorMessage = ({
     values: ContractDetailsFormValues
     validationErrorMessage: string
 }): React.ReactElement => (
-    <ErrorMessage>
+    <PoliteErrorMessage>
         {isDateRangeEmpty(values.contractDateStart, values.contractDateEnd)
             ? 'You must provide a start and an end date'
             : validationErrorMessage}
-    </ErrorMessage>
+    </PoliteErrorMessage>
 )
 
 export interface ContractDetailsFormValues {
@@ -131,6 +130,9 @@ export const ContractDetails = ({
             : showFileUploadError && !hasValidFiles
             ? ' You must remove all documents with error messages before continuing'
             : undefined
+    const documentsErrorKey =
+        fileItems.length === 0 ? 'documents' : '#file-items-list'
+
     // Error summary state management
     const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
     const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
@@ -286,11 +288,12 @@ export const ContractDetails = ({
                     formDataDocuments.push({
                         name: fileItem.name,
                         s3URL: fileItem.s3URL,
+                        documentCategories: ['CONTRACT'],
                     })
                 }
                 return formDataDocuments
             },
-            [] as { name: string; s3URL: string }[]
+            [] as Document[]
         )
 
         const updatedDraft = updatesFromSubmission(draftSubmission)
@@ -388,8 +391,7 @@ export const ContractDetails = ({
                                     errors={
                                         documentsErrorMessage
                                             ? {
-                                                  documents:
-                                                      documentsErrorMessage,
+                                                  [documentsErrorKey]: documentsErrorMessage,
                                                   ...errors,
                                               }
                                             : errors
@@ -417,7 +419,7 @@ export const ContractDetails = ({
                                                 Document definitions and
                                                 requirements
                                             </Link>
-                                            <span className="srOnly">
+                                            <span>
                                                 This input only accepts PDF,
                                                 CSV, DOC, DOCX, XLS, XLSX files.
                                             </span>
@@ -440,9 +442,9 @@ export const ContractDetails = ({
                                     legend="Contract action type"
                                 >
                                     {showFieldErrors(errors.contractType) && (
-                                        <ErrorMessage>
+                                        <PoliteErrorMessage>
                                             {errors.contractType}
-                                        </ErrorMessage>
+                                        </PoliteErrorMessage>
                                     )}
                                     <FieldRadio
                                         id="baseContract"
@@ -575,9 +577,9 @@ export const ContractDetails = ({
                                             {showFieldErrors(
                                                 errors.managedCareEntities
                                             ) && (
-                                                <ErrorMessage>
+                                                <PoliteErrorMessage>
                                                     {errors.managedCareEntities}
-                                                </ErrorMessage>
+                                                </PoliteErrorMessage>
                                             )}
                                             <FieldCheckbox
                                                 id="managedCareOrganization"
@@ -653,9 +655,9 @@ export const ContractDetails = ({
                                             {showFieldErrors(
                                                 errors.federalAuthorities
                                             ) && (
-                                                <ErrorMessage>
+                                                <PoliteErrorMessage>
                                                     {errors.federalAuthorities}
-                                                </ErrorMessage>
+                                                </PoliteErrorMessage>
                                             )}
                                             <FieldCheckbox
                                                 id="1932aStatePlanAuthority"
@@ -758,11 +760,11 @@ export const ContractDetails = ({
                                                     {showFieldErrors(
                                                         errors.itemsAmended
                                                     ) && (
-                                                        <ErrorMessage>
+                                                        <PoliteErrorMessage>
                                                             {
                                                                 errors.itemsAmended
                                                             }
-                                                        </ErrorMessage>
+                                                        </PoliteErrorMessage>
                                                     )}
                                                     <FieldCheckbox
                                                         id="benefitsProvided"
@@ -806,11 +808,11 @@ export const ContractDetails = ({
                                                                     {showFieldErrors(
                                                                         errors.capitationRates
                                                                     ) && (
-                                                                        <ErrorMessage>
+                                                                        <PoliteErrorMessage>
                                                                             {
                                                                                 errors.capitationRates
                                                                             }
-                                                                        </ErrorMessage>
+                                                                        </PoliteErrorMessage>
                                                                     )}
                                                                     <FieldRadio
                                                                         id="annualRateUpdate"
@@ -1037,11 +1039,11 @@ export const ContractDetails = ({
                                                             {showFieldErrors(
                                                                 errors.relatedToCovid19
                                                             ) && (
-                                                                <ErrorMessage>
+                                                                <PoliteErrorMessage>
                                                                     {
                                                                         errors.relatedToCovid19
                                                                     }
-                                                                </ErrorMessage>
+                                                                </PoliteErrorMessage>
                                                             )}
                                                             <FieldRadio
                                                                 id="covidYes"
@@ -1079,11 +1081,11 @@ export const ContractDetails = ({
                                                                 {showFieldErrors(
                                                                     errors.relatedToVaccination
                                                                 ) && (
-                                                                    <ErrorMessage>
+                                                                    <PoliteErrorMessage>
                                                                         {
                                                                             errors.relatedToVaccination
                                                                         }
-                                                                    </ErrorMessage>
+                                                                    </PoliteErrorMessage>
                                                                 )}
                                                                 <FieldRadio
                                                                     id="vaccineYes"

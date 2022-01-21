@@ -29,11 +29,13 @@ mutation updateDraftSubmission($input: UpdateDraftSubmissionInput!) {
             documents {
                 name
                 s3URL
+                documentCategories
             }
             contractType
             contractDocuments {
                 name
                 s3URL
+                documentCategories
             }
             contractDateStart
             contractDateEnd
@@ -53,6 +55,7 @@ mutation updateDraftSubmission($input: UpdateDraftSubmissionInput!) {
             rateDocuments {
                 name
                 s3URL
+                documentCategories
             }
             rateDateStart
             rateDateEnd

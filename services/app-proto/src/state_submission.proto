@@ -190,9 +190,19 @@ enum ActuarialFirmType {
 
     
 /// Generic sub types
+enum DocumentCategory {
+  DOCUMENT_CATEGORY_UNSPECIFIED = 0;
+  DOCUMENT_CATEGORY_CONTRACT = 1;
+  DOCUMENT_CATEGORY_RATES = 2;
+  DOCUMENT_CATEGORY_CONTRACT_RELATED = 3;
+  DOCUMENT_CATEGORY_RATES_RELATED = 4;
+}
+
+
 message Document {
   optional string name = 1;
   optional string s3_url = 2;
+  repeated DocumentCategory document_categories = 3;
 }
 
 enum StateCode {

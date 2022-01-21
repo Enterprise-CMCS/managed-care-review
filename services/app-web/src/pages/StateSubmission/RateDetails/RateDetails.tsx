@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react'
 import {
-    ErrorMessage,
     Form as UswdsForm,
     FormGroup,
     Fieldset,
@@ -16,17 +15,20 @@ import { v4 as uuidv4 } from 'uuid'
 import styles from '../StateSubmissionForm.module.scss'
 
 import {
+    Document,
     DraftSubmission,
     RateType,
     UpdateDraftSubmissionInput,
 } from '../../../gen/gqlClient'
 
-import { ErrorSummary, FieldRadio } from '../../../components/Form'
 import {
     FileUpload,
     S3FileData,
     FileItemT,
-} from '../../../components/FileUpload'
+    ErrorSummary,
+    FieldRadio,
+    PoliteErrorMessage,
+} from '../../../components'
 import {
     formatForForm,
     isDateRangeEmpty,
@@ -49,11 +51,11 @@ const RateDatesErrorMessage = ({
     endDate: string
     validationErrorMessage: string
 }): React.ReactElement => (
-    <ErrorMessage>
+    <PoliteErrorMessage>
         {isDateRangeEmpty(startDate, endDate)
             ? 'You must provide a start and an end date'
             : validationErrorMessage}
-    </ErrorMessage>
+    </PoliteErrorMessage>
 )
 export interface RateDetailsFormValues {
     rateType: RateType | undefined
@@ -102,6 +104,8 @@ export const RateDetails = ({
             : showFileUploadError && !hasValidFiles
             ? ' You must remove all documents with error messages before continuing'
             : undefined
+    const documentsErrorKey =
+        fileItems.length === 0 ? 'rateDocuments' : '#file-items-list'
 
     const fileItemsFromDraftSubmission: FileItemT[] | undefined =
         (draftSubmission?.rateDocuments &&
@@ -251,11 +255,12 @@ export const RateDetails = ({
                     formDataDocuments.push({
                         name: fileItem.name,
                         s3URL: fileItem.s3URL,
+                        documentCategories: ['RATES'],
                     })
                 }
                 return formDataDocuments
             },
-            [] as { name: string; s3URL: string }[]
+            [] as Document[]
         )
 
         const updatedDraft = updatesFromSubmission(draftSubmission)
@@ -332,7 +337,7 @@ export const RateDetails = ({
                                             errors={
                                                 documentsErrorMessage
                                                     ? {
-                                                          documents:
+                                                          [documentsErrorKey]:
                                                               documentsErrorMessage,
                                                           ...errors,
                                                       }
@@ -359,7 +364,7 @@ export const RateDetails = ({
                                                     Document definitions and
                                                     requirements
                                                 </Link>
-                                                <span className="srOnly">
+                                                <span>
                                                     This input only accepts PDF,
                                                     CSV, DOC, DOCX, XLS, XLSX
                                                     files.
@@ -385,9 +390,9 @@ export const RateDetails = ({
                                         aria-required
                                     >
                                         {showFieldErrors(errors.rateType) && (
-                                            <ErrorMessage>
+                                            <PoliteErrorMessage>
                                                 {errors.rateType}
-                                            </ErrorMessage>
+                                            </PoliteErrorMessage>
                                         )}
                                         <FieldRadio
                                             id="newRate"
@@ -586,9 +591,9 @@ export const RateDetails = ({
                                             {showFieldErrors(
                                                 errors.rateDateCertified
                                             ) && (
-                                                <ErrorMessage>
+                                                <PoliteErrorMessage>
                                                     {errors.rateDateCertified}
-                                                </ErrorMessage>
+                                                </PoliteErrorMessage>
                                             )}
                                             <DatePicker
                                                 aria-required

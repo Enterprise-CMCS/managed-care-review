@@ -110,10 +110,10 @@ describe('FileItemList component', () => {
             />
         )
 
-        userEvent.click(screen.getByRole('button', { name: 'Retry' }))
+        userEvent.click(screen.getByRole('button', { name: /Retry/ }))
         expect(buttonActionProps.retryItem).toHaveBeenCalled()
 
-        userEvent.click(screen.getByRole('button', { name: 'Remove' }))
+        userEvent.click(screen.getByRole('button', { name: /Remove/ }))
         expect(buttonActionProps.deleteItem).toHaveBeenCalled()
     })
 

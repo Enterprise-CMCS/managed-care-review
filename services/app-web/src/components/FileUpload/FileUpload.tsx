@@ -1,17 +1,18 @@
 import React, { useState, useRef } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import {
-    ErrorMessage,
     FormGroup,
     Label,
     FileInput,
     FileInputRef,
 } from '@trussworks/react-uswds'
+import { PoliteErrorMessage } from '../'
 
 import styles from './FileUpload.module.scss'
 
 import { FileItemT } from './FileItem/FileItem'
 import { FileItemsList } from './FileItemList/FileItemsList'
+import { pluralize } from '../../common-code/formatters'
 
 export type S3FileData = {
     key: string
@@ -311,10 +312,31 @@ export const FileUpload = ({
         const files = Array.from(fileInputRef.current?.input?.files || []) // Web API File objects
         addFilesAndUpdateList(files)
     }
+    const uploadedCount = fileItems.filter(
+        (item) => item.status === 'UPLOAD_COMPLETE'
+    ).length
+    const errorCount = fileItems.filter(
+        (item) =>
+            item.status === 'UPLOAD_ERROR' ||
+            item.status === 'SCANNING_ERROR' ||
+            item.status === 'DUPLICATE_NAME_ERROR'
+    ).length
+    const pendingCount = fileItems.filter(
+        (item) => item.status === 'PENDING' || item.status === 'SCANNING'
+    ).length
 
-    const summary = `${fileItems.length} file${
-        fileItems.length !== 1 ? 's' : ''
-    } added`
+    const summaryDetailText =
+        fileItems.length > 0
+            ? `(${uploadedCount} complete, ${errorCount} ${pluralize(
+                  'error',
+                  errorCount
+              )}, ${pendingCount} pending)`
+            : ''
+
+    const summary = `${fileItems.length} ${pluralize(
+        'file',
+        fileItems.length
+    )} added `
 
     return (
         <FormGroup className="margin-top-0">
@@ -322,12 +344,16 @@ export const FileUpload = ({
                 {label}
             </Label>
 
-            {error && <ErrorMessage id={`${id}-error`}>{error}</ErrorMessage>}
+            {error && (
+                <PoliteErrorMessage id={`${id}-error`}>
+                    {error}
+                </PoliteErrorMessage>
+            )}
             {hint && (
                 <span
                     id={`${id}-hint`}
                     aria-labelledby={id}
-                    className="usa-hint margin-top-1"
+                    className={styles.fileInputHint}
                 >
                     {hint}
                 </span>
@@ -338,7 +364,7 @@ export const FileUpload = ({
                 ref={summaryRef}
                 className="text-normal font-body-sm margin-0"
             >
-                {summary}
+                {`${summary} ${summaryDetailText}`}
             </h5>
 
             <FileInput

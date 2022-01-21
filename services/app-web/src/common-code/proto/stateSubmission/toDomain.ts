@@ -3,6 +3,7 @@ import { draftSubmissionTypeSchema } from './draftSubmissionSchema'
 import {
     DraftSubmissionType,
     StateSubmissionType,
+    DocumentCategoryType,
     ActuarialFirmType,
     ContractAmendmentInfo,
     FederalAuthority,
@@ -178,6 +179,10 @@ function parseProtoDocuments(
     return replaceNullsWithUndefineds(docs).map((doc) => ({
         s3URL: doc.s3Url,
         name: doc.name,
+        documentCategories: protoEnumArrayToDomain(
+            statesubmission.DocumentCategory,
+            doc.documentCategories
+        ) as DocumentCategoryType[],
     }))
 }
 

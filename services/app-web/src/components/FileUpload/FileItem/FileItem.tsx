@@ -184,6 +184,7 @@ export const FileItem = ({
                         size="small"
                         unstyled
                         onClick={handleDelete}
+                        aria-label={`Remove ${name} document`}
                     >
                         Remove
                     </Button>
@@ -194,6 +195,7 @@ export const FileItem = ({
                                 size="small"
                                 unstyled
                                 onClick={handleRetry}
+                                aria-label={`Retry upload for ${name} document`}
                             >
                                 Retry
                             </Button>
@@ -257,6 +259,7 @@ export const FileItem = ({
                         style={{ marginTop: 0 }}
                         type="button"
                         size="small"
+                        aria-label={`Retry upload for ${name} document`}
                         unstyled
                         onClick={handleDelete}
                     >
