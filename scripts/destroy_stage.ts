@@ -46,7 +46,7 @@ async function main() {
         if (clearBucketOutput instanceof Error) {
             // We don't process.exit(1) here because sometimes buckets in a stack
             // have already been removed. We can still delete the stack.
-            console.log(`Could not clear buckets in ${sn} ${clearBucketOutput}`)
+            console.log(`Could not clear buckets in ${sn}`)
         }
 
         const deleteStackOutput = await deleteStack(sn)
