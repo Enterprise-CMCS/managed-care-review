@@ -375,6 +375,10 @@ export const SubmissionType = ({
                                 )}
                                 hint={
                                     <>
+
+                                        <p id="submissionDescriptionHelp">
+                                            Provide a 1-2 paragraph summary of your submission that highlights any important changes CMS reviewers will need to be aware of
+                                        </p>
                                         <Link
                                             variant="external"
                                             asCustom={ReactRouterLink}
@@ -386,11 +390,6 @@ export const SubmissionType = ({
                                         >
                                             View description examples
                                         </Link>
-
-                                        <p id="submissionDescriptionHelp">
-                                            Provide a description of any major
-                                            changes or updates
-                                        </p>
                                     </>
                                 }
                             />
