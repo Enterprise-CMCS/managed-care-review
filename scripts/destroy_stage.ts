@@ -112,28 +112,22 @@ async function clearServerlessDeployBucket(
                 return keys
             }
 
-            try {
-                // construct the delete
-                const deleteParams: AWS.S3.DeleteObjectsRequest = {
-                    Bucket: bucket.PhysicalResourceId ?? '',
-                    Delete: {
-                        Objects: keys,
-                    },
-                }
+            // construct the delete
+            const deleteParams: AWS.S3.DeleteObjectsRequest = {
+                Bucket: bucket.PhysicalResourceId ?? '',
+                Delete: {
+                    Objects: keys,
+                },
+            }
 
-                // delete all the files, including their versions
-                const deleteObjectsResponse = await s3
-                    .deleteObjects(deleteParams)
-                    .promise()
+            // delete all the files, including their versions
+            const deleteObjectsResponse = await s3
+                .deleteObjects(deleteParams)
+                .promise()
 
-                if (deleteObjectsResponse.$response.error != null) {
-                    return new Error(
-                        `Error on deleteObjects: ${deleteObjectsResponse.$response.error}`
-                    )
-                }
-            } catch (err) {
+            if (deleteObjectsResponse.$response.error != null) {
                 return new Error(
-                    `Error clearing bucket: ${bucket.PhysicalResourceId}: ${err}`
+                    `Error on deleteObjects: ${deleteObjectsResponse.$response.error}`
                 )
             }
         })
