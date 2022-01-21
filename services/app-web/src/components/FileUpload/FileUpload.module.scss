@@ -3,14 +3,14 @@
 
 .warningRow {
     & td {
-        background-color: $cms-color-error-lighter;
+        background-color: $theme-color-secondary-lighter;
     }
 }
 
 .fileInput {
     max-width: none;
 }
-.fileInputHint{
+.fileInputHint {
     display: flex;
     flex-direction: column;
     color: #71767a;
