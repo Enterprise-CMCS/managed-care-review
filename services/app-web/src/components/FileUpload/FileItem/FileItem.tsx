@@ -136,6 +136,10 @@ export const FileItem = ({
         statusValue = 'error'
     }
 
+    const errorRowClass = classnames({
+        'bg-secondary-lighter': statusValue === 'error',
+    })
+
     if (renderMode === 'list') {
         return (
             <>
@@ -205,11 +209,7 @@ export const FileItem = ({
         )
     } else {
         return (
-            <tr
-                className={
-                    statusValue === 'error' ? styles.warningRow : undefined
-                }
-            >
+            <tr className={`${errorRowClass} ${styles.warningRow}`}>
                 <td>
                     {isLoading || isScanning ? (
                         <span
