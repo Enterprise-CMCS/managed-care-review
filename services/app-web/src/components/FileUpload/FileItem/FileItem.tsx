@@ -253,7 +253,6 @@ export const FileItem = ({
                         <span>{name}</span>
                     </span>
                 </td>
-                <td>01/19/2022</td>
                 <td style={{ textAlign: 'right' }}>
                     <Button
                         style={{ marginTop: 0 }}

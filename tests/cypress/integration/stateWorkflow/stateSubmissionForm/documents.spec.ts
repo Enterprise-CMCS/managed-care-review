@@ -18,8 +18,8 @@ describe('documents', () => {
                 'documents/trussel-guide.pdf'
             )
             // give the page time to load (wait) then let cypress wait for the spinner to go away
-            cy.wait(10000)
-            cy.findByTestId('file-input-loading-image').should('not.exist')
+            // cy.wait(10000)
+            // cy.findByTestId('file-input-loading-image').should('not.exist')
             cy.findByText(/0 complete, 1 error, 1 pending/).should('exist')
             // give the page time to load (wait) then let cypress wait for the spinner to go away
             cy.wait(10000)
@@ -38,8 +38,8 @@ describe('documents', () => {
                 'documents/trussel-guide.pdf'
             )
             // give the page time to load (wait) then let cypress wait for the spinner to go away
-            cy.wait(10000)
-            cy.findByTestId('file-input-loading-image').should('not.exist')
+            // cy.wait(10000)
+            // cy.findByTestId('file-input-loading-image').should('not.exist')
             cy.findByText('Duplicate file').should('exist')
             cy.findAllByRole('row').should('have.length', 4)
 
@@ -50,9 +50,7 @@ describe('documents', () => {
             cy.wait(10000)
             cy.findByTestId('file-input-loading-image').should('not.exist')
             cy.findByText('Duplicate file').should('exist')
-            cy.findByTestId('file-input-preview-list')
-                .findAllByRole('listitem')
-                .should('have.length', 3)
+            cy.findAllByRole('row').should('have.length', 4)
             cy.findByText(/2 complete, 1 error, 0 pending/)
             cy.navigateForm('Back')
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
