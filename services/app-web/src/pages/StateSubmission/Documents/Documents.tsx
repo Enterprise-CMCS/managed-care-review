@@ -17,6 +17,7 @@ import {
 } from '../../../components/FileUpload'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
 import { PageActions } from '../PageActions'
+import classNames from 'classnames'
 
 type DocumentProps = {
     draftSubmission: DraftSubmission
@@ -211,7 +212,10 @@ export const Documents = ({
     return (
         <>
             <UswdsForm
-                className={styles.formContainer}
+                className={classNames(
+                    styles.tableContainer,
+                    styles.formContainer
+                )}
                 id="DocumentsForm"
                 aria-label="Documents Form"
                 onSubmit={() => {

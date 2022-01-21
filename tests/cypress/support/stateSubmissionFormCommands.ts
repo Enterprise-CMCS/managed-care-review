@@ -155,7 +155,7 @@ Cypress.Commands.add('fillOutDocuments', () => {
     )
 
     cy.verifyDocumentsHaveNoErrors()
-    cy.waitForDocumentsToLoad()
+    cy.wait(10000)
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 

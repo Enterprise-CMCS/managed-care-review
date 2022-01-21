@@ -1,6 +1,11 @@
 @import '../../styles/uswdsImports.scss';
 @import '../../styles/custom';
 
+.tableContainer {
+    max-width: 100%;
+    width: 66rem;
+}
+
 .formHeader {
     text-align: center;
     width: 100%;

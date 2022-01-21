@@ -17,7 +17,9 @@ describe('documents', () => {
             cy.findByTestId('file-input-input').attachFile(
                 'documents/trussel-guide.pdf'
             )
-            cy.waitForDocumentsToLoad()
+            // give the page time to load (wait) then let cypress wait for the spinner to go away
+            cy.wait(10000)
+            cy.findByTestId('file-input-loading-image').should('not.exist')
             cy.findByText('Duplicate file').should('exist')
 
             // Add two valid documents and one duplicate, then navigate back
@@ -31,19 +33,17 @@ describe('documents', () => {
             cy.findByTestId('file-input-input').attachFile(
                 'documents/trussel-guide.pdf'
             )
-            cy.waitForDocumentsToLoad()
+            // give the page time to load (wait) then let cypress wait for the spinner to go away
+            cy.wait(10000)
+            cy.findByTestId('file-input-loading-image').should('not.exist')
             cy.findByText('Duplicate file').should('exist')
-            cy.findByTestId('file-input-preview-list')
-                .findAllByRole('listitem')
-                .should('have.length', 3)
+            cy.findAllByRole('row').should('have.length', 4)
             cy.navigateForm('Back')
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
 
             // reload page, see two documents,  duplicate was discarded on Back
             cy.visit(`/submissions/${draftSubmissionID}/documents`)
-            cy.findByTestId('file-input-preview-list')
-                .findAllByRole('listitem')
-                .should('have.length', 2)
+            cy.findAllByRole('row').should('have.length', 3)
             cy.verifyDocumentsHaveNoErrors()
 
             //  Save as draft
@@ -91,11 +91,13 @@ describe('documents', () => {
                         force: true,
                     }
                 )
-            cy.findAllByTestId('file-input-preview-image').should(
+            cy.findAllByRole('row').should(
                 'have.length',
-                2
+                3
             )
-            cy.waitForDocumentsToLoad()
+            // give the page time to load (wait) then let cypress wait for the spinner to go away
+            cy.wait(10000)
+            cy.findByTestId('file-input-loading-image').should('not.exist')
             cy.verifyDocumentsHaveNoErrors()
 
             cy.navigateForm('Continue')

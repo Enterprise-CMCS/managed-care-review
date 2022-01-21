@@ -143,7 +143,7 @@ export const FileItem = ({
                     <div
                         role="progressbar"
                         aria-valuetext={statusValue}
-                        aria-label={`File status`}
+                        aria-label={`Status of file ${name}`}
                     >
                         <img
                             id={item.id}
@@ -218,7 +218,7 @@ export const FileItem = ({
                             <img
                                 style={{ float: 'left' }}
                                 id={item.id}
-                                data-testid="file-input-preview-image"
+                                data-testid="file-input-loading-image"
                                 src={SPACER_GIF}
                                 alt=""
                                 className={imageClasses}
@@ -252,7 +252,7 @@ export const FileItem = ({
                     </span>
                 </td>
                 <td>01/19/2022</td>
-                <td>
+                <td style={{ textAlign: 'right' }}>
                     <Button
                         style={{ marginTop: 0 }}
                         type="button"
