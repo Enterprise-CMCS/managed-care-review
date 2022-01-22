@@ -9,6 +9,16 @@ describe('dashboard', () => {
         cy.findByRole('heading', { level: 1, name: /New submission/ })
     })
 
+    it.only('scan accessibility of dashboard', () => {
+        cy.logInAsStateUser()
+        cy.findByRole('heading', { level: 1, name: /Dashboard/ })
+
+        // check accessibility of dashboard
+        cy.pa11y({
+            wait: 3000,
+        })
+    })
+
     it('can see submission summary', () => {
         cy.logInAsStateUser()
 

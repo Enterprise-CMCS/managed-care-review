@@ -3373,6 +3373,19 @@
   resolved "https://registry.yarnpkg.com/@csstools/normalize.css/-/normalize.css-10.1.0.tgz#f0950bba18819512d42f7197e56c518aa491cf18"
   integrity sha512-ij4wRiunFfaJxjB0BdrYHIH8FxBJpOwNPhhAcunlmPdXudL1WQV1qoP9un6JsEBAgQH+7UXyyjh0g7jTxXK6tg==
 
+"@cypress-audit/pa11y@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@cypress-audit/pa11y/-/pa11y-1.1.0.tgz#6f48ac32a88129f37b43c51a3e55e2c27216e7cb"
+  integrity sha512-RDyBMTGNb9F01rmg4+NH/73zKlxSh8X7wsCRwdovVCcc3K5jaDYB38Z5+Ps1GEQKGP4bS+n/a5ud5MnuM4Yk7Q==
+  dependencies:
+    "@cypress-audit/shared" "^1.1.0"
+    pa11y "^6.0.1"
+
+"@cypress-audit/shared@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@cypress-audit/shared/-/shared-1.1.0.tgz#769e033c112fbb39d15f0e2c0dcba40f82d560f2"
+  integrity sha512-A/3aBN8/Gw+NCyCGXPyDpQx/0QawZH+ibSM5NDNc7MqW9PbZ+lc6tt0Rc2ffDaJhLGTALiLb0pmHo7U28SIv9g==
+
 "@cypress/request@^2.88.10":
   version "2.88.10"
   resolved "https://registry.yarnpkg.com/@cypress/request/-/request-2.88.10.tgz#b66d76b07f860d3a4b8d7a0604d020c662752cce"
@@ -19543,7 +19556,7 @@ pa11y-ci@^3.0.0:
     puppeteer "~9.1.1"
     wordwrap "~1.0.0"
 
-pa11y@~6.1.0:
+pa11y@^6.0.1, pa11y@~6.1.0:
   version "6.1.1"
   resolved "https://registry.yarnpkg.com/pa11y/-/pa11y-6.1.1.tgz#b204ecd172a664de4ade56f31a58fe5b3342800e"
   integrity sha512-2NzqA3D9CUlDWj8WuOI4fM2P0qM1d/IUxsRRpzCOfDT5eMR1oEgmUwW2TAk+f90ff/GVck0BewdYT4et4BANew==

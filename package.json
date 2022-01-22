@@ -36,6 +36,7 @@
     },
     "homepage": "https://github.com/CMSgov/managed-care-review#readme",
     "devDependencies": {
+        "@cypress-audit/pa11y": "^1.1.0",
         "chromedriver": "^96.0.0",
         "cypress": "^9.1.1",
         "cypress-pipe": "^2.0.0",
