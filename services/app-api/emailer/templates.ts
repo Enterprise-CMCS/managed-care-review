@@ -29,11 +29,11 @@ const newPackageCMSEmailTemplate = (
             ? 'Contract amendment effective dates'
             : 'Contract effective dates'
     }: ${
-        dayjs(submission.contractDateStart).format('YYYY-MM-DD') +
+        dayjs(submission.contractDateStart).format('MM/DD/YYYY') +
         ' to ' +
-        dayjs(submission.contractDateEnd).format('YYYY-MM-DD')
+        dayjs(submission.contractDateEnd).format('MM/DD/YYYY')
     }`
-    const ratingPeriod = `${submission.submissionType === 'CONTRACT_AND_RATES' ? `Rating period: ${dayjs(submission.rateDateStart).format('YYYY-MM-DD') + ' to ' + dayjs(submission.rateDateEnd).format('YYYY-MM-DD')}`: ''}` // displays nothing if submission is CONTRACT_ONLY
+    const ratingPeriod = `${submission.submissionType === 'CONTRACT_AND_RATES' ? `Rating period: ${dayjs(submission.rateDateStart).format('MM/DD/YYYY') + ' to ' + dayjs(submission.rateDateEnd).format('MM/DD/YYYY')}`: ''}` // displays nothing if submission is CONTRACT_ONLY
 
     return {
         toAddresses: reviewerEmails,

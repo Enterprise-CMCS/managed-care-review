@@ -56,8 +56,8 @@ describe('Email templates', () => {
         it('includes expected data summary for a contract only submission', () => { 
             const sub: StateSubmissionType  = {
                 ...mockContractOnlySubmission(),
-                contractDateStart: new Date('01-01-2021'),
-                contractDateEnd: new Date('01-01-2025')
+                contractDateStart: new Date('01/01/2021'),
+                contractDateEnd: new Date('01/01/2025')
             }
             const template = newPackageCMSEmailTemplate(
                 sub,
@@ -81,7 +81,7 @@ describe('Email templates', () => {
                expect(template).toEqual(
                    expect.objectContaining({
                        bodyText: expect.stringContaining(
-                           'Contract effective dates: 2021-01-01 to 2025-01-01'
+                           'Contract effective dates: 01/01/2021 to 01/01/2025'
                        ),
                    })
                )
@@ -91,10 +91,10 @@ describe('Email templates', () => {
         it('includes expected data summary for a contract and rates submission', () => {
              const sub: StateSubmissionType = {
                  ...mockContractAndRatesSubmission(),
-                 contractDateStart: new Date('01-01-2021'),
-                 contractDateEnd: new Date('01-01-2025'),
-                 rateDateStart: new Date('01-01-2021'),
-                 rateDateEnd: new Date('01-01-2022'),
+                 contractDateStart: new Date('01/01/2021'),
+                 contractDateEnd: new Date('01/01/2025'),
+                 rateDateStart: new Date('01/01/2021'),
+                 rateDateEnd: new Date('01/01/2022'),
              }
             const template = newPackageCMSEmailTemplate(sub, testEmailConfig)
               
@@ -108,7 +108,7 @@ describe('Email templates', () => {
               expect(template).toEqual(
                   expect.objectContaining({
                       bodyText: expect.stringContaining(
-                         'Rating period: 2021-01-01 to 2022-01-01'
+                         'Rating period: 01/01/2021 to 01/01/2022'
                       ),
                   })
               )
@@ -116,7 +116,7 @@ describe('Email templates', () => {
                expect(template).toEqual(
                    expect.objectContaining({
                        bodyText: expect.stringContaining(
-                           'Contract effective dates: 2021-01-01 to 2025-01-01'
+                           'Contract effective dates: 01/01/2021 to 01/01/2025'
                        ),
                    })
                )
@@ -125,10 +125,10 @@ describe('Email templates', () => {
         it('includes expected data summary for a contract amendment submission', () => {
                  const sub: StateSubmissionType = {
                      ...mockContractAmendmentSubmission(),
-                     contractDateStart: new Date('01-01-2021'),
-                     contractDateEnd: new Date('01-01-2025'),
-                     rateDateStart: new Date('01-01-2021'),
-                     rateDateEnd: new Date('01-01-2022'),
+                     contractDateStart: new Date('01/01/2021'),
+                     contractDateEnd: new Date('01/01/2025'),
+                     rateDateStart: new Date('01/01/2021'),
+                     rateDateEnd: new Date('01/01/2022'),
                  }
             const template = newPackageCMSEmailTemplate(sub, testEmailConfig)
             
@@ -142,7 +142,7 @@ describe('Email templates', () => {
                      expect(template).toEqual(
                          expect.objectContaining({
                              bodyText: expect.stringContaining(
-                                 'Rating period: 2021-01-01 to 2022-01-01'
+                                 'Rating period: 01/01/2021 to 01/01/2022'
                              ),
                          })
                      )
@@ -150,7 +150,7 @@ describe('Email templates', () => {
                      expect(template).toEqual(
                          expect.objectContaining({
                              bodyText: expect.stringContaining(
-                                 'Contract amendment effective dates: 2021-01-01 to 2025-01-01'
+                                 'Contract amendment effective dates: 01/01/2021 to 01/01/2025'
                              ),
                          })
                      )
