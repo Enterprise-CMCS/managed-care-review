@@ -1,20 +1,12 @@
 import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitDraftSubmission.graphql'
-import {
-    StateSubmissionType,
-    CognitoUserType,
-} from '../../app-web/src/common-code/domain-models'
 import { StateSubmission } from '../gen/gqlServer'
-import {
-    EmailData,
-    Emailer,
-    newPackageCMSEmailTemplate,
-    newPackageStateEmailTemplate,
-} from '../emailer'
 import {
     constructTestPostgresServer,
     createAndUpdateTestDraftSubmission,
     fetchTestStateSubmissionById,
+    defaultContext,
 } from '../testHelpers/gqlHelpers'
+import {testEmailConfig, testEmailer} from '../testHelpers/emailerHelpers'
 
 describe('submitDraftSubmission', () => {
     it('returns a StateSubmission if complete', async () => {
@@ -197,41 +189,7 @@ describe('submitDraftSubmission', () => {
         )
     })
 
-    // move to test helpers
-    const testEmailer = (): Emailer => {
-        const config = {
-            emailSource: 'local@example.com',
-            stage: 'local',
-            baseUrl: 'http://localhost',
-            cmsReviewSharedEmails: ['test@example.com'],
-        }
-        return {
-            sendEmail: jest.fn(
-                async (emailData: EmailData): Promise<void | Error> => {
-                    console.log('Email content' + emailData)
-                }
-            ),
-            sendCMSNewPackage: function async(
-                submission: StateSubmissionType
-            ): Promise<void | Error> {
-                const emailData = newPackageCMSEmailTemplate(submission, config)
-                return this.sendEmail(emailData)
-            },
-            sendStateNewPackage: function async(
-                submission: StateSubmissionType,
-                user: CognitoUserType
-            ): Promise<void | Error> {
-                const emailData = newPackageStateEmailTemplate(
-                    submission,
-                    user,
-                    config
-                )
-                return this.sendEmail(emailData)
-            },
-        }
-    }
-
-    it('send email to CMS if submission is valid', async () => {
+    it('sends two emails', async () => {
         const mockEmailer = testEmailer()
 
         //mock invoke email submit lambda
@@ -252,10 +210,32 @@ describe('submitDraftSubmission', () => {
         })
 
         expect(submitResult.errors).toBeUndefined()
+        expect(mockEmailer.sendEmail).toHaveBeenCalledTimes(2)
+    })
+
+    it('send CMS email to CMS if submission is valid', async () => {
+        const config = testEmailConfig
+        const mockEmailer = testEmailer(config)
+        //mock invoke email submit lambda
+        const server = await constructTestPostgresServer({
+            emailer: mockEmailer,
+        })
+        const draft = await createAndUpdateTestDraftSubmission(server, {})
+        const draftID = draft.id
+
+        await new Promise((resolve) => setTimeout(resolve, 2000)) // TODO: why is this here in other tests??
+        const submitResult = await server.executeOperation({
+            query: SUBMIT_DRAFT_SUBMISSION,
+            variables: {
+                input: {
+                    submissionID: draftID,
+                },
+            },
+        })
+
 
         const sub = submitResult?.data?.submitDraftSubmission
             ?.submission as StateSubmission
-        expect(mockEmailer.sendEmail).toHaveBeenCalledTimes(2)
 
         // email subject line is correct for CMS email
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
@@ -263,44 +243,54 @@ describe('submitDraftSubmission', () => {
                 subject: expect.stringContaining(
                     `TEST New Managed Care Submission: ${sub.name}`
                 ),
-            })
-        )
-        //email body text includes warning about unofficial submission
-        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
-            expect.objectContaining({
-                bodyText: expect.stringContaining(
-                    `This is NOT an official submission`
-                ),
-            })
-        )
-
-        // email body text includes submission type
-        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
-            expect.objectContaining({
-                bodyText: expect.stringContaining(
-                    'Submission type: Contract action and rate certification'
-                ),
-            })
-        )
-        // email body text includes submission description
-        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
-            expect.objectContaining({
-                bodyText: expect.stringContaining(
-                    'Submission description: An updated submission'
-                ),
-            })
-        )
-        // email body text includes link to submission
-        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
-            expect.objectContaining({
-                bodyText: expect.stringContaining(
-                    `http://localhost/submissions/${sub.id}`
+                sourceEmail: config.emailSource,
+                toAddresses: expect.arrayContaining(
+                    Array.from(config.cmsReviewSharedEmails)
                 ),
             })
         )
     })
 
-    it('send email to user if submission is valid', async () => {
+    it('send state email to logged in user if submission is valid', async () => {
+        const config = testEmailConfig
+        const mockEmailer = testEmailer(config)
+        const server = await constructTestPostgresServer({
+            emailer: mockEmailer,
+        })
+
+        const currentUser  = defaultContext().user // need this to reach into gql tests and understand who current user is
+        const draft = await createAndUpdateTestDraftSubmission(server, {})
+        const draftID = draft.id
+
+        await new Promise((resolve) => setTimeout(resolve, 2000)) // TODO: why is this here in other tests??
+        const submitResult = await server.executeOperation({
+            query: SUBMIT_DRAFT_SUBMISSION,
+            variables: {
+                input: {
+                    submissionID: draftID,
+                },
+            },
+        })
+
+        expect(submitResult.errors).toBeUndefined()
+
+        const sub = submitResult?.data?.submitDraftSubmission
+            ?.submission as StateSubmission
+
+        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `TEST ${sub.name} was sent to CMS`
+                ),
+                sourceEmail: config.emailSource,
+                toAddresses: expect.arrayContaining(
+                   [currentUser.email]
+                ),
+            })
+        )
+    })
+
+    it('send state email to all state contacts if submission is valid', async () => {
         const mockEmailer = testEmailer()
         const server = await constructTestPostgresServer({
             emailer: mockEmailer,
@@ -323,96 +313,14 @@ describe('submitDraftSubmission', () => {
         const sub = submitResult?.data?.submitDraftSubmission
             ?.submission as StateSubmission
 
-        // email subject line is correct for state email
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
             expect.objectContaining({
                 subject: expect.stringContaining(
                     `TEST ${sub.name} was sent to CMS`
                 ),
+                toAddresses: expect.arrayContaining([sub.stateContacts[0].email])
             })
         )
-
-        // email body text includes warning about unofficial submission
-        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
-            expect.objectContaining({
-                bodyText: expect.stringContaining(
-                    `This is NOT an official submission`
-                ),
-            })
-        )
-
-        // email body text includes submission name
-        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
-            expect.objectContaining({
-                bodyText: expect.stringContaining(
-                    `${sub.name} was successfully submitted.`
-                ),
-            })
-        )
-        // email body text includes items of what's next list
-        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
-            expect.objectContaining({
-                bodyText: expect.stringContaining('What comes next:'),
-            })
-        )
-        // email body text includes link to submission
-        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
-            expect.objectContaining({
-                bodyText: expect.stringContaining(
-                    `http://localhost/submissions/${sub.id}`
-                ),
-            })
-        )
-    })
-
-    it('send email to all state contacts if submission is valid', async () => {
-        const mockEmailer = testEmailer()
-        const server = await constructTestPostgresServer({
-            emailer: mockEmailer,
-        })
-        const draft = await createAndUpdateTestDraftSubmission(server, {})
-        const draftID = draft.id
-
-        await new Promise((resolve) => setTimeout(resolve, 2000)) // TODO: why is this here in other tests??
-        const submitResult = await server.executeOperation({
-            query: SUBMIT_DRAFT_SUBMISSION,
-            variables: {
-                input: {
-                    submissionID: draftID,
-                },
-            },
-        })
-
-        expect(submitResult.errors).toBeUndefined()
-
-        const sub = submitResult?.data?.submitDraftSubmission
-            ?.submission as StateSubmission
-
-        // email subject line is correct for state email
-        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
-            expect.objectContaining({
-                subject: expect.stringContaining(
-                    `TEST ${sub.name} was sent to CMS`
-                ),
-            })
-        )
-
-        // email body text includes warning about unofficial submission
-        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
-            expect.objectContaining({
-                bodyText: expect.stringContaining(
-                    `This is NOT an official submission`
-                ),
-            })
-        )
-
-        sub.stateContacts.forEach((contact) => {
-            expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    toAddresses: expect.arrayContaining([contact.email]),
-                })
-            )
-        })
     })
 
 
