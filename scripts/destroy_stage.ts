@@ -44,7 +44,7 @@ async function main() {
         process.exit(0)
     }
 
-    // AWS can rate limit us if we go to fast. Using a regular
+    // AWS can rate limit us if we go too fast. Using a regular
     // for construct to wait on async to slow us down a bit.
     for (const stack of stacksToDestroy) {
         console.log(`Destroying stack: ${stack}`)
