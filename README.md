@@ -227,18 +227,29 @@ System Preferences > Security > General and click to allow ctkey.
 scripts
 ├── aws -> ctkey-wrapper
 ├── ctkey-wrapper
-└── sls -> ctkey-wrapper
+└── serverless -> ctkey-wrapper
 ```
 
-`ctkey-wrapper` is a small bash script that runs the `ctkey` command to set your
-AWS environment variables. With `ctkey-wrapper` in place, you can simply run
-`aws` or `sls` commands in this directory and `ctkey-wrapper` manages all
+`ctkey-wrapper` is a small bash script that runs the `ctkey` command to generate your temporary
+CloudTamer credentials and exports them to your local environment.
+With `ctkey-wrapper` in place, you can simply run
+`aws` or `serverless` commands in this directory and `ctkey-wrapper` manages all
 of the `ctkey` complexity behind the scenes.
 
-Set the `CTKEY_USERNAME` and `CTKEY_PASSWORD` environment variables in
-.envrc.local or another suitable location. These are are the same credentials
-used for logging into Cloudtamer and will need to be updated whenever your
-Cloudtamer credentials are updated.
+First, you'll need to add the following to your `.envrc.local`:
+
+```
+# the following add's ./scripts to the head of your PATH
+PATH_add ./scripts
+
+export CTKEY_USERNAME=''
+export CTKEY_PASSWORD=''
+export AWS_ACCOUNT_ID=''
+```
+
+Your `CTKEY_USERNAME` and `CTKEY_PASSWORD` should be the credentials you use to log in to EUA. They will need to be updated whenever your EUA password expires and has been rotated.
+
+Your `AWS_ACCOUNT_ID` is the ID of the environment you wish to access locally. Typically this will be the AWS ID of the dev environment.
 
 Currently, `ctkey-wrapper` requires the user to be running the openconnect-tinyproxy
 container [here](https://github.com/trussworks/openconnect-tinyproxy) to connect
@@ -249,8 +260,8 @@ to Cloudtamer.
 To verify serverless (and AWS access) is set up properly with ctkey, run:
 
 ```shell
-which serverless # should return something like /managed-care-review/scripts/serverless`
-which sls # should return something like /managed-care-review/scripts/sls`
+which serverless # should return something like /managed-care-review/scripts/serverless
+which sls # should return something like /managed-care-review/scripts/sls
 ```
 
 These should both point to paths inside the codebase (not to paths in /usr/local/bin).
