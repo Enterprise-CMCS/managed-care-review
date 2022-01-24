@@ -39,22 +39,31 @@ async function main() {
     }
 
     const stacksToDestroy = await getStacksFromStage(stage)
-    stacksToDestroy.map(async (sn) => {
-        console.log(`Destroying stack: ${sn}`)
+    if (stacksToDestroy.length === 0) {
+        console.log(`No stacks to destroy. Skipping destroy.`)
+        process.exit(0)
+    }
 
-        const clearBucketOutput = await clearServerlessDeployBucket(sn)
+    // AWS can rate limit us if we go too fast. Using a regular
+    // for construct to wait on async to slow us down a bit.
+    for (const stack of stacksToDestroy) {
+        console.log(`Destroying stack: ${stack}`)
+
+        const clearBucketOutput = await clearServerlessDeployBucket(stack)
         if (clearBucketOutput instanceof Error) {
             // We don't process.exit(1) here because sometimes buckets in a stack
             // have already been removed. We can still delete the stack.
-            console.log(`Could not clear buckets in ${sn}`)
+            console.log(`Could not clear buckets in ${stack}`)
         }
 
-        const deleteStackOutput = await deleteStack(sn)
+        const deleteStackOutput = await deleteStack(stack)
         if (deleteStackOutput instanceof Error) {
-            console.log(`Could not delete ${sn}. ${deleteStackOutput}`)
+            console.log(`Could not delete ${stack}. ${deleteStackOutput}`)
             process.exit(1)
         }
-    })
+
+        console.log(`Destroy successful: ${stack}`)
+    }
 }
 
 async function getStacksFromStage(stageName: string): Promise<string[]> {
