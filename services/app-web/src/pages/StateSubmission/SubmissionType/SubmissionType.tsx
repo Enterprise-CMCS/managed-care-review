@@ -390,14 +390,6 @@ export const SubmissionType = ({
                                         >
                                             View description examples
                                         </Link>
-<<<<<<< HEAD
-
-                                        <p className='margin-y-05'>
-                                            Provide a description of any major
-                                            changes or updates
-                                        </p>
-=======
->>>>>>> main
                                     </>
                                 }
                             />
