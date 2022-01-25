@@ -15,7 +15,7 @@ describe('dashboard', () => {
 
         // check accessibility of dashboard
         cy.pa11y({
-            wait: 3000,
+            wait: 10000,
         })
     })
 
