@@ -1,7 +1,9 @@
 import React from 'react'
-import { Button } from '@trussworks/react-uswds'
+// import { Button } from '@trussworks/react-uswds'
 import classnames from 'classnames'
-import { SPACER_GIF } from '../constants'
+// import { SPACER_GIF } from '../constants'
+import { FileRow } from '../FileRow/FileRow'
+import { FileListItem } from '../FileListItem/FileListItem'
 
 import styles from '../FileUpload.module.scss'
 
@@ -142,144 +144,53 @@ export const FileItem = ({
 
     if (renderMode === 'list') {
         return (
-            <>
-                <div className={styles.fileItemText}>
-                    <div
-                        role="progressbar"
-                        aria-valuetext={statusValue}
-                        aria-label={`Status of file ${name}`}
-                    >
-                        <img
-                            id={item.id}
-                            data-testid="file-input-preview-image"
-                            src={SPACER_GIF}
-                            alt=""
-                            className={imageClasses}
-                        />
-                    </div>
-                    <span
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            fontSize: 'inherit',
-                        }}
-                    >
-                        <DocumentError
-                            hasDuplicateNameError={hasDuplicateNameError}
-                            hasScanningError={hasScanningError}
-                            hasUploadError={hasUploadError}
-                            hasUnexpectedError={hasUnexpectedError}
-                        />
-                        <>
-                            {(isLoading || isScanning) && (
-                                <span className={styles.fileItemBoldMessage}>
-                                    {isLoading
-                                        ? 'Step 1 of 2: Uploading'
-                                        : 'Step 2 of 2: Scanning'}
-                                </span>
-                            )}
-                            <span>{name}</span>
-                        </>
-                    </span>
-                </div>
-                <div className={styles.fileItemButtons}>
-                    <Button
-                        type="button"
-                        size="small"
-                        unstyled
-                        onClick={handleDelete}
-                        aria-label={`Remove ${name} document`}
-                    >
-                        Remove
-                    </Button>
-                    {(hasUploadError || hasScanningError) &&
-                        !hasUnexpectedError && (
-                            <Button
-                                type="button"
-                                size="small"
-                                unstyled
-                                onClick={handleRetry}
-                                aria-label={`Retry upload for ${name} document`}
-                            >
-                                Retry
-                            </Button>
-                        )}
-                </div>
-            </>
+            <FileListItem
+                errorRowClass={errorRowClass}
+                isLoading={isLoading}
+                isScanning={isScanning}
+                statusValue={statusValue}
+                item={item}
+                imageClasses={imageClasses}
+                documentError={
+                    <DocumentError
+                        hasDuplicateNameError={hasDuplicateNameError}
+                        hasScanningError={hasScanningError}
+                        hasUploadError={hasUploadError}
+                        hasUnexpectedError={hasUnexpectedError}
+                    />
+                }
+                hasDuplicateNameError={hasDuplicateNameError}
+                hasScanningError={hasScanningError}
+                hasUploadError={hasUploadError}
+                hasUnexpectedError={hasUnexpectedError}
+                handleDelete={handleDelete}
+                handleRetry={handleRetry}
+            />
         )
     } else {
         return (
-            <tr className={`${errorRowClass} ${styles.warningRow}`}>
-                <td>
-                    {isLoading || isScanning ? (
-                        <span
-                            role="progressbar"
-                            aria-valuetext={statusValue}
-                            aria-label={`Status of file ${name}`}
-                        >
-                            <img
-                                style={{ float: 'left' }}
-                                id={item.id}
-                                data-testid="file-input-loading-image"
-                                src={SPACER_GIF}
-                                alt=""
-                                className={imageClasses}
-                            />
-                        </span>
-                    ) : (
-                        ''
-                    )}
-                    <span
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            fontSize: 'inherit',
-                        }}
-                    >
-                        <DocumentError
-                            hasDuplicateNameError={hasDuplicateNameError}
-                            hasScanningError={hasScanningError}
-                            hasUploadError={hasUploadError}
-                            hasUnexpectedError={hasUnexpectedError}
-                        />
-
-                        {(isLoading || isScanning) && (
-                            <span className={styles.fileItemBoldMessage}>
-                                {isLoading
-                                    ? 'Step 1 of 2: Uploading'
-                                    : 'Step 2 of 2: Scanning'}
-                            </span>
-                        )}
-                        <span>{name}</span>
-                    </span>
-                </td>
-                <td style={{ textAlign: 'right' }}>
-                    <Button
-                        style={{ marginTop: 0 }}
-                        type="button"
-                        size="small"
-                        aria-label={`Retry upload for ${name} document`}
-                        unstyled
-                        onClick={handleDelete}
-                    >
-                        Remove
-                    </Button>
-                    {(hasUploadError || hasScanningError) &&
-                        !hasUnexpectedError && <span> or </span>}
-                    {(hasUploadError || hasScanningError) &&
-                        !hasUnexpectedError && (
-                            <Button
-                                style={{ marginTop: 0 }}
-                                type="button"
-                                size="small"
-                                unstyled
-                                onClick={handleRetry}
-                            >
-                                Retry
-                            </Button>
-                        )}
-                </td>
-            </tr>
+            <FileRow
+                errorRowClass={errorRowClass}
+                isLoading={isLoading}
+                isScanning={isScanning}
+                statusValue={statusValue}
+                item={item}
+                imageClasses={imageClasses}
+                documentError={
+                    <DocumentError
+                        hasDuplicateNameError={hasDuplicateNameError}
+                        hasScanningError={hasScanningError}
+                        hasUploadError={hasUploadError}
+                        hasUnexpectedError={hasUnexpectedError}
+                    />
+                }
+                hasDuplicateNameError={hasDuplicateNameError}
+                hasScanningError={hasScanningError}
+                hasUploadError={hasUploadError}
+                hasUnexpectedError={hasUnexpectedError}
+                handleDelete={handleDelete}
+                handleRetry={handleRetry}
+            />
         )
     }
 }
