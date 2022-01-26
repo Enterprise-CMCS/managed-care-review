@@ -155,7 +155,7 @@ Cypress.Commands.add('fillOutDocuments', () => {
     )
 
     cy.verifyDocumentsHaveNoErrors()
-    cy.findByTestId('upload-finished-indicator')
+    cy.findByTestId('upload-finished-indicator', {timeout: 120000})
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
