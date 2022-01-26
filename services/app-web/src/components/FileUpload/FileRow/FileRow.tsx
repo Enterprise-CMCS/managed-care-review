@@ -1,5 +1,5 @@
 import React from 'react'
-import { FileItemT } from '../FileItem/FileItem'
+import { FileItemT } from '../FileProcessor/FileProcessor'
 
 import styles from '../FileUpload.module.scss'
 import { Button } from '@trussworks/react-uswds'
@@ -41,12 +41,11 @@ export const FileRow = ({
                         aria-label={`Status of file ${name}`}
                     >
                         <img
-                            style={{ float: 'left' }}
                             id={item.id}
                             data-testid="file-input-loading-image"
                             src={SPACER_GIF}
                             alt=""
-                            className={imageClasses}
+                            className={`${imageClasses} ${styles.loadingImage}`}
                         />
                     </span>
                 ) : (
@@ -76,7 +75,7 @@ export const FileRow = ({
                     style={{ marginTop: 0 }}
                     type="button"
                     size="small"
-                    aria-label={`Retry upload for ${name} document`}
+                    aria-label={`Remove ${name} document`}
                     unstyled
                     onClick={handleDelete}
                 >
@@ -88,6 +87,7 @@ export const FileRow = ({
                         style={{ marginTop: 0 }}
                         type="button"
                         size="small"
+                        aria-label={`Retry upload for ${name} document`}
                         unstyled
                         onClick={handleRetry}
                     >

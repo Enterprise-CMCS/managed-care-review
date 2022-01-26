@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-import { FileItem, FileItemT } from './FileItem'
+import { FileItem, FileItemT } from './FileProcessor'
 import { TEST_PDF_FILE } from '../../../testHelpers/jestHelpers'
 
 describe('FileItem component', () => {
@@ -63,7 +63,7 @@ describe('FileItem component', () => {
     }
 
     beforeEach(() => jest.clearAllMocks())
-    it('renders without errors', () => {
+    it('renders a list without errors', () => {
         render(
             <FileItem
                 renderMode="list"
@@ -75,7 +75,19 @@ describe('FileItem component', () => {
         expect(screen.getByText(uploadComplete.name)).toBeInTheDocument()
     })
 
-    it('includes appropriate aria- attributes', () => {
+    it('renders a table without errors', () => {
+        render(
+            <FileItem
+                renderMode="table"
+                item={uploadComplete}
+                {...buttonActionProps}
+            />
+        )
+
+        expect(screen.getByText(uploadComplete.name)).toBeInTheDocument()
+    })
+
+    it('includes appropriate aria- attributes in the list', () => {
         render(
             <FileItem
                 renderMode="list"
@@ -94,7 +106,26 @@ describe('FileItem component', () => {
         ).toBeInTheDocument()
     })
 
-    it('button actions work as expected', () => {
+    it('includes appropriate aria- attributes in the table', () => {
+        render(
+            <FileItem
+                renderMode="table"
+                item={uploadError}
+                {...buttonActionProps}
+            />
+        )
+
+        expect(
+            screen.getByLabelText(
+                `Retry upload for ${uploadError.name} document`
+            )
+        ).toBeInTheDocument()
+        expect(
+            screen.getByLabelText(`Remove ${uploadError.name} document`)
+        ).toBeInTheDocument()
+    })
+
+    it('button actions work as expected in the list', () => {
         render(
             <FileItem
                 renderMode="list"
@@ -110,7 +141,23 @@ describe('FileItem component', () => {
         expect(buttonActionProps.deleteItem).toHaveBeenCalled()
     })
 
-    it('displays loading image, loading text, and remove button when status is LOADING', () => {
+    it('button actions work as expected in the table', () => {
+        render(
+            <FileItem
+                renderMode="list"
+                item={uploadError}
+                {...buttonActionProps}
+            />
+        )
+
+        userEvent.click(screen.getByText('Retry'))
+        expect(buttonActionProps.retryItem).toHaveBeenCalled()
+
+        userEvent.click(screen.getByText('Remove'))
+        expect(buttonActionProps.deleteItem).toHaveBeenCalled()
+    })
+
+    it('displays loading image, loading text, and remove button when status is LOADING in the list', () => {
         render(
             <FileItem renderMode="list" item={pending} {...buttonActionProps} />
         )
@@ -123,7 +170,20 @@ describe('FileItem component', () => {
         expect(screen.queryByRole('button', { name: /Retry/ })).toBeNull()
     })
 
-    it('displays loading image, scanning text, and remove button when status is SCANNING', () => {
+    it('displays loading image, loading text, and remove button when status is LOADING in the table', () => {
+        render(
+            <FileItem
+                renderMode="table"
+                item={pending}
+                {...buttonActionProps}
+            />
+        )
+        expect(screen.getByText('Step 1 of 2: Uploading')).toBeInTheDocument()
+        expect(screen.getByText('Remove')).toBeInTheDocument()
+        expect(screen.queryByText('Retry')).not.toBeInTheDocument()
+    })
+
+    it('displays loading image, scanning text, and remove button when status is SCANNING in the list', () => {
         render(
             <FileItem
                 renderMode="list"
@@ -140,7 +200,20 @@ describe('FileItem component', () => {
         expect(screen.queryByRole('button', { name: /Retry/ })).toBeNull()
     })
 
-    it('displays file image and remove button when status is UPLOAD_COMPLETE', () => {
+    it('displays loading image, scanning text, and remove button when status is SCANNING in the table', () => {
+        render(
+            <FileItem
+                renderMode="table"
+                item={scanning}
+                {...buttonActionProps}
+            />
+        )
+        expect(screen.getByText('Step 2 of 2: Scanning')).toBeInTheDocument()
+        expect(screen.getByText('Remove')).toBeInTheDocument()
+        expect(screen.queryByText('Retry')).not.toBeInTheDocument()
+    })
+
+    it('displays file image and remove button when status is UPLOAD_COMPLETE in a list', () => {
         render(
             <FileItem
                 renderMode="list"
@@ -157,7 +230,19 @@ describe('FileItem component', () => {
         expect(screen.queryByRole('button', { name: /Retry/ })).toBeNull()
     })
 
-    it('displays upload failed message and both retry and remove buttons when status is UPLOAD_ERROR', () => {
+    it('displays the remove button when status is UPLOAD_COMPLETE in a table', () => {
+        render(
+            <FileItem
+                renderMode="table"
+                item={uploadComplete}
+                {...buttonActionProps}
+            />
+        )
+        expect(screen.getByText('Remove')).toBeInTheDocument()
+        expect(screen.queryByText('Retry')).not.toBeInTheDocument()
+    })
+
+    it('displays upload failed message and both retry and remove buttons when status is UPLOAD_ERROR in a list', () => {
         render(
             <FileItem
                 renderMode="list"
@@ -183,7 +268,27 @@ describe('FileItem component', () => {
         expect(buttonActionProps.deleteItem).toHaveBeenCalled()
     })
 
-    it('displays security scan failed message and  both retry and remove buttons when status is SCANNING_ERROR', () => {
+    it('displays upload failed message and both retry and remove buttons when status is UPLOAD_ERROR in a table', () => {
+        render(
+            <FileItem
+                renderMode="table"
+                item={uploadError}
+                {...buttonActionProps}
+            />
+        )
+
+        expect(screen.getByText('Upload failed')).toBeInTheDocument()
+        expect(screen.getByText('Remove')).toBeInTheDocument()
+        expect(screen.getByText('Retry')).toBeInTheDocument()
+
+        userEvent.click(screen.getByText('Retry'))
+        expect(buttonActionProps.retryItem).toHaveBeenCalled()
+
+        userEvent.click(screen.getByText('Remove'))
+        expect(buttonActionProps.deleteItem).toHaveBeenCalled()
+    })
+
+    it('displays security scan failed message and both retry and remove buttons when status is SCANNING_ERROR in a list', () => {
         render(
             <FileItem
                 renderMode="list"
@@ -205,7 +310,29 @@ describe('FileItem component', () => {
         ).toBeInTheDocument()
     })
 
-    it('displays duplicate name error message and remove button when status is DUPLICATE_NAME_ERROR', () => {
+    it('displays security scan failed message and both retry and remove buttons when status is SCANNING_ERROR in a table', () => {
+        render(
+            <FileItem
+                renderMode="table"
+                item={scanningError}
+                {...buttonActionProps}
+            />
+        )
+
+        expect(
+            screen.getByText('Failed security scan, please remove')
+        ).toBeInTheDocument()
+        expect(screen.getByText('Remove')).toBeInTheDocument()
+        expect(screen.getByText('Retry')).toBeInTheDocument()
+
+        userEvent.click(screen.getByText('Retry'))
+        expect(buttonActionProps.retryItem).toHaveBeenCalled()
+
+        userEvent.click(screen.getByText('Remove'))
+        expect(buttonActionProps.deleteItem).toHaveBeenCalled()
+    })
+
+    it('displays duplicate name error message and remove button when status is DUPLICATE_NAME_ERROR in a list', () => {
         render(
             <FileItem
                 renderMode="list"
@@ -223,7 +350,21 @@ describe('FileItem component', () => {
         expect(screen.queryByRole('button', { name: /Retry/ })).toBeNull()
     })
 
-    it('displays unexpected error message and remove button when status is UPLOAD_ERROR but file reference is undefined (this is an unexpected state but it would mean the upload cannot be retried)', () => {
+    it('displays duplicate name error message and remove button when status is DUPLICATE_NAME_ERROR in a table', () => {
+        render(
+            <FileItem
+                renderMode="table"
+                item={duplicateError}
+                {...buttonActionProps}
+            />
+        )
+
+        expect(screen.getByText('Duplicate file')).toBeInTheDocument()
+        expect(screen.getByText('Remove')).toBeInTheDocument()
+        expect(screen.queryByText('Retry')).not.toBeInTheDocument()
+    })
+
+    it('displays unexpected error message and remove button when status is UPLOAD_ERROR but file reference is undefined (this is an unexpected state but it would mean the upload cannot be retried) in a list', () => {
         render(
             <FileItem
                 renderMode="list"
@@ -242,5 +383,22 @@ describe('FileItem component', () => {
             screen.getByRole('button', { name: /Remove/ })
         ).toBeInTheDocument()
         expect(screen.queryByRole('button', { name: /Retry/ })).toBeNull()
+    })
+
+    it('displays unexpected error message and remove button when status is UPLOAD_ERROR but file reference is undefined (this is an unexpected state but it would mean the upload cannot be retried) in a table', () => {
+        render(
+            <FileItem
+                renderMode="table"
+                item={{ ...uploadError, file: undefined }}
+                {...buttonActionProps}
+            />
+        )
+
+        expect(screen.getByText('Upload failed')).toBeInTheDocument()
+        expect(
+            screen.getByText('Unexpected error. Please remove.')
+        ).toBeInTheDocument()
+        expect(screen.getByText('Remove')).toBeInTheDocument()
+        expect(screen.queryByText('Retry')).not.toBeInTheDocument()
     })
 })

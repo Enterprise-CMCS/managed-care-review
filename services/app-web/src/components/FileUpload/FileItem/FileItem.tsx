@@ -1,186 +1,93 @@
 import React from 'react'
-import classnames from 'classnames'
-import { FileRow } from '../FileRow/FileRow'
-import { FileListItem } from '../FileListItem/FileListItem'
+import { FileItemT } from '../FileProcessor/FileProcessor'
 
 import styles from '../FileUpload.module.scss'
+import { Button } from '@trussworks/react-uswds'
+import { SPACER_GIF } from '../constants'
 
-export type FileStatus =
-    | 'DUPLICATE_NAME_ERROR'
-    | 'PENDING'
-    | 'SCANNING'
-    | 'SCANNING_ERROR'
-    | 'UPLOAD_COMPLETE'
-    | 'UPLOAD_ERROR'
-
-export type FileItemT = {
-    id: string
-    name: string
-    file?: File // this becomes undefined after both uploading and scanning has completed with success
-    key?: string // only items uploaded to s3 have this
-    s3URL?: string // only items uploaded to s3 have this
-    status: FileStatus
-}
-
-const DocumentError = ({
-    hasDuplicateNameError,
-    hasScanningError,
-    hasUploadError,
-    hasUnexpectedError,
-}: {
-    hasDuplicateNameError: boolean
-    hasScanningError: boolean
-    hasUploadError: boolean
-    hasUnexpectedError: boolean
-}): React.ReactElement | null => {
-    if (hasDuplicateNameError)
-        return (
-            <>
-                <span className={styles.fileItemBoldMessage}>
-                    Duplicate file
-                </span>
-                <span className={styles.fileItemBoldMessage}>
-                    Please remove
-                </span>
-            </>
-        )
-    else if (hasScanningError && !hasUnexpectedError)
-        return (
-            <>
-                <span className={styles.fileItemBoldMessage}>
-                    Failed security scan, please remove
-                </span>
-            </>
-        )
-    else if (hasUploadError && !hasUnexpectedError)
-        return (
-            <>
-                <span className={styles.fileItemBoldMessage}>
-                    Upload failed
-                </span>
-                <span className={styles.fileItemBoldMessage}>
-                    Please remove or retry
-                </span>
-            </>
-        )
-    else if (hasUnexpectedError) {
-        return (
-            <>
-                <span className={styles.fileItemBoldMessage}>
-                    Upload failed
-                </span>
-                <span className={styles.fileItemBoldMessage}>
-                    Unexpected error. Please remove.
-                </span>
-            </>
-        )
-    } else {
-        return null
-    }
-}
-
-type FileItemProps = {
+type FileListItemProps = {
+    errorRowClass?: string
+    isLoading: boolean
+    isScanning: boolean
+    statusValue: string
     item: FileItemT
-    deleteItem: (item: FileItemT) => void
-    retryItem: (item: FileItemT) => void
-    renderMode: 'table' | 'list'
+    imageClasses: string
+    documentError: React.ReactElement | null
+    hasRecoverableError: boolean
+    handleDelete: (_e: React.MouseEvent) => void
+    handleRetry: (_e: React.MouseEvent) => void
 }
-export const FileItem = ({
+
+export const FileListItem = ({
+    isLoading,
+    isScanning,
+    statusValue,
     item,
-    deleteItem,
-    retryItem,
-    renderMode,
-}: FileItemProps): React.ReactElement => {
-    const { name, status, file } = item
-    const hasDuplicateNameError = status === 'DUPLICATE_NAME_ERROR'
-    const hasScanningError = status === 'SCANNING_ERROR'
-    const hasUploadError = status === 'UPLOAD_ERROR'
-    const hasUnexpectedError = status === 'UPLOAD_ERROR' && file === undefined
-    const hasRecoverableError =
-        (hasUploadError || hasScanningError) && !hasUnexpectedError
-    const isLoading = status === 'PENDING'
-    const isScanning = status === 'SCANNING'
-
-    const isPDF = name.indexOf('.pdf') > 0
-    const isWord = name.indexOf('.doc') > 0 || name.indexOf('.pages') > 0
-    const isVideo = name.indexOf('.mov') > 0 || name.indexOf('.mp4') > 0
-    const isExcel = name.indexOf('.xls') > 0 || name.indexOf('.numbers') > 0
-    const isGeneric = !isPDF && !isWord && !isVideo && !isExcel
-
-    const imageClasses = classnames('usa-file-input__preview-image', {
-        'is-loading': isLoading || isScanning,
-        'usa-file-input__preview-image--pdf': isPDF,
-        'usa-file-input__preview-image--word': isWord,
-        'usa-file-input__preview-image--video': isVideo,
-        'usa-file-input__preview-image--excel': isExcel,
-        'usa-file-input__preview-image--generic': isGeneric,
-    })
-
-    const handleDelete = (_e: React.MouseEvent) => {
-        deleteItem(item)
-    }
-
-    const handleRetry = (_e: React.MouseEvent) => {
-        retryItem(item)
-    }
-
-    let statusValue = ''
-    if (isLoading) {
-        statusValue = 'uploading'
-    } else if (isScanning) {
-        statusValue = 'scanning for viruses'
-    } else if (
-        hasDuplicateNameError ||
-        hasScanningError ||
-        hasUploadError ||
-        hasUnexpectedError
-    ) {
-        statusValue = 'error'
-    }
-
-    const errorRowClass = classnames({
-        'bg-secondary-lighter': statusValue === 'error',
-    })
-
-    return renderMode === 'table' ? (
-        <FileRow
-            errorRowClass={errorRowClass}
-            isLoading={isLoading}
-            isScanning={isScanning}
-            statusValue={statusValue}
-            item={item}
-            imageClasses={imageClasses}
-            documentError={
-                <DocumentError
-                    hasDuplicateNameError={hasDuplicateNameError}
-                    hasScanningError={hasScanningError}
-                    hasUploadError={hasUploadError}
-                    hasUnexpectedError={hasUnexpectedError}
-                />
-            }
-            hasRecoverableError={hasRecoverableError}
-            handleDelete={handleDelete}
-            handleRetry={handleRetry}
-        />
-    ) : (
-        <FileListItem
-            errorRowClass={errorRowClass}
-            isLoading={isLoading}
-            isScanning={isScanning}
-            statusValue={statusValue}
-            item={item}
-            imageClasses={imageClasses}
-            documentError={
-                <DocumentError
-                    hasDuplicateNameError={hasDuplicateNameError}
-                    hasScanningError={hasScanningError}
-                    hasUploadError={hasUploadError}
-                    hasUnexpectedError={hasUnexpectedError}
-                />
-            }
-            hasRecoverableError={hasRecoverableError}
-            handleDelete={handleDelete}
-            handleRetry={handleRetry}
-        />
+    imageClasses,
+    documentError,
+    hasRecoverableError,
+    handleDelete,
+    handleRetry,
+}: FileListItemProps): React.ReactElement => {
+    const { name } = item
+    return (
+        <>
+            <div className={styles.fileItemText}>
+                <div
+                    role="progressbar"
+                    aria-valuetext={statusValue}
+                    aria-label={`Status of file ${name}`}
+                >
+                    <img
+                        id={item.id}
+                        data-testid="file-input-preview-image"
+                        src={SPACER_GIF}
+                        alt=""
+                        className={imageClasses}
+                    />
+                </div>
+                <span
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        fontSize: 'inherit',
+                    }}
+                >
+                    {documentError}
+                    <>
+                        {(isLoading || isScanning) && (
+                            <span className={styles.fileItemBoldMessage}>
+                                {isLoading
+                                    ? 'Step 1 of 2: Uploading'
+                                    : 'Step 2 of 2: Scanning'}
+                            </span>
+                        )}
+                        <span>{name}</span>
+                    </>
+                </span>
+            </div>
+            <div className={styles.fileItemButtons}>
+                <Button
+                    type="button"
+                    size="small"
+                    unstyled
+                    onClick={handleDelete}
+                    aria-label={`Remove ${name} document`}
+                >
+                    Remove
+                </Button>
+                {hasRecoverableError && (
+                    <Button
+                        type="button"
+                        size="small"
+                        unstyled
+                        onClick={handleRetry}
+                        aria-label={`Retry upload for ${name} document`}
+                    >
+                        Retry
+                    </Button>
+                )}
+            </div>
+        </>
     )
 }

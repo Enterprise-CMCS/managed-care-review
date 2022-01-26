@@ -10,7 +10,7 @@ import { PoliteErrorMessage } from '../'
 
 import styles from './FileUpload.module.scss'
 
-import { FileItemT } from './FileItem/FileItem'
+import { FileItemT } from './FileProcessor/FileProcessor'
 import { FileItemsList } from './FileItemList/FileItemsList'
 import { pluralize } from '../../common-code/formatters'
 

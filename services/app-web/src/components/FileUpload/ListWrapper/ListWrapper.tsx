@@ -1,5 +1,5 @@
 import React from 'react'
-import { FileItem, FileItemT } from '../FileItem/FileItem'
+import { FileItem, FileItemT } from '../FileProcessor/FileProcessor'
 import styles from '../FileUpload.module.scss'
 
 type ListWrapperProps = {

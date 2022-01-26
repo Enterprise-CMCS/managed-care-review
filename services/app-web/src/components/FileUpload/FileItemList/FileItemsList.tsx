@@ -1,6 +1,6 @@
 import React from 'react'
 import classnames from 'classnames'
-import { FileItemT, FileStatus } from '../FileItem/FileItem'
+import { FileItemT, FileStatus } from '../FileProcessor/FileProcessor'
 import styles from '../FileUpload.module.scss'
 import { TableWrapper } from '../TableWrapper/TableWrapper'
 import { ListWrapper } from '../ListWrapper/ListWrapper'
