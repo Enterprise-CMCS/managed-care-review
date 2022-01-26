@@ -1,7 +1,5 @@
 import React from 'react'
-// import { Button } from '@trussworks/react-uswds'
 import classnames from 'classnames'
-// import { SPACER_GIF } from '../constants'
 import { FileRow } from '../FileRow/FileRow'
 import { FileListItem } from '../FileListItem/FileListItem'
 
@@ -98,6 +96,8 @@ export const FileItem = ({
     const hasScanningError = status === 'SCANNING_ERROR'
     const hasUploadError = status === 'UPLOAD_ERROR'
     const hasUnexpectedError = status === 'UPLOAD_ERROR' && file === undefined
+    const hasRecoverableError =
+        (hasUploadError || hasScanningError) && !hasUnexpectedError
     const isLoading = status === 'PENDING'
     const isScanning = status === 'SCANNING'
 
@@ -142,55 +142,45 @@ export const FileItem = ({
         'bg-secondary-lighter': statusValue === 'error',
     })
 
-    if (renderMode === 'list') {
-        return (
-            <FileListItem
-                errorRowClass={errorRowClass}
-                isLoading={isLoading}
-                isScanning={isScanning}
-                statusValue={statusValue}
-                item={item}
-                imageClasses={imageClasses}
-                documentError={
-                    <DocumentError
-                        hasDuplicateNameError={hasDuplicateNameError}
-                        hasScanningError={hasScanningError}
-                        hasUploadError={hasUploadError}
-                        hasUnexpectedError={hasUnexpectedError}
-                    />
-                }
-                hasDuplicateNameError={hasDuplicateNameError}
-                hasScanningError={hasScanningError}
-                hasUploadError={hasUploadError}
-                hasUnexpectedError={hasUnexpectedError}
-                handleDelete={handleDelete}
-                handleRetry={handleRetry}
-            />
-        )
-    } else {
-        return (
-            <FileRow
-                errorRowClass={errorRowClass}
-                isLoading={isLoading}
-                isScanning={isScanning}
-                statusValue={statusValue}
-                item={item}
-                imageClasses={imageClasses}
-                documentError={
-                    <DocumentError
-                        hasDuplicateNameError={hasDuplicateNameError}
-                        hasScanningError={hasScanningError}
-                        hasUploadError={hasUploadError}
-                        hasUnexpectedError={hasUnexpectedError}
-                    />
-                }
-                hasDuplicateNameError={hasDuplicateNameError}
-                hasScanningError={hasScanningError}
-                hasUploadError={hasUploadError}
-                hasUnexpectedError={hasUnexpectedError}
-                handleDelete={handleDelete}
-                handleRetry={handleRetry}
-            />
-        )
-    }
+    return renderMode === 'table' ? (
+        <FileRow
+            errorRowClass={errorRowClass}
+            isLoading={isLoading}
+            isScanning={isScanning}
+            statusValue={statusValue}
+            item={item}
+            imageClasses={imageClasses}
+            documentError={
+                <DocumentError
+                    hasDuplicateNameError={hasDuplicateNameError}
+                    hasScanningError={hasScanningError}
+                    hasUploadError={hasUploadError}
+                    hasUnexpectedError={hasUnexpectedError}
+                />
+            }
+            hasRecoverableError={hasRecoverableError}
+            handleDelete={handleDelete}
+            handleRetry={handleRetry}
+        />
+    ) : (
+        <FileListItem
+            errorRowClass={errorRowClass}
+            isLoading={isLoading}
+            isScanning={isScanning}
+            statusValue={statusValue}
+            item={item}
+            imageClasses={imageClasses}
+            documentError={
+                <DocumentError
+                    hasDuplicateNameError={hasDuplicateNameError}
+                    hasScanningError={hasScanningError}
+                    hasUploadError={hasUploadError}
+                    hasUnexpectedError={hasUnexpectedError}
+                />
+            }
+            hasRecoverableError={hasRecoverableError}
+            handleDelete={handleDelete}
+            handleRetry={handleRetry}
+        />
+    )
 }

@@ -1,8 +1,9 @@
 import React from 'react'
 import classnames from 'classnames'
-import { Table } from '@trussworks/react-uswds'
-import { FileItem, FileItemT, FileStatus } from '../FileItem/FileItem'
+import { FileItemT, FileStatus } from '../FileItem/FileItem'
 import styles from '../FileUpload.module.scss'
+import { TableWrapper } from '../TableWrapper/TableWrapper'
+import { ListWrapper } from '../ListWrapper/ListWrapper'
 
 export const FileItemsList = ({
     fileItems,
@@ -26,51 +27,18 @@ export const FileItemsList = ({
         })
     }
 
-    if (renderMode === 'table') {
-        return (
-            <Table fullWidth>
-                <thead>
-                    <tr>
-                        <th>Document name</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {fileItems.map((item) => (
-                        <FileItem
-                            key={item.id}
-                            deleteItem={deleteItem}
-                            retryItem={retryItem}
-                            item={item}
-                            renderMode="table"
-                        />
-                    ))}
-                </tbody>
-            </Table>
-        )
-    } else {
-        return (
-            <ul
-                data-testid="file-input-preview-list"
-                className={styles.fileItemsList}
-                id="file-items-list"
-                tabIndex={-1}
-            >
-                {fileItems.map((item) => (
-                    <li
-                        key={item.id}
-                        id={item.id}
-                        className={liClasses(item.status)}
-                    >
-                        <FileItem
-                            deleteItem={deleteItem}
-                            retryItem={retryItem}
-                            item={item}
-                            renderMode="list"
-                        />
-                    </li>
-                ))}
-            </ul>
-        )
-    }
+    return renderMode === 'table' ? (
+        <TableWrapper
+            fileItems={fileItems}
+            deleteItem={deleteItem}
+            retryItem={retryItem}
+        />
+    ) : (
+        <ListWrapper
+            fileItems={fileItems}
+            deleteItem={deleteItem}
+            retryItem={retryItem}
+            liClasses={liClasses}
+        />
+    )
 }

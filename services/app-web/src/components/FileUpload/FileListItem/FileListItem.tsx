@@ -13,26 +13,19 @@ type FileListItemProps = {
     item: FileItemT
     imageClasses: string
     documentError: React.ReactElement | null
-    hasDuplicateNameError: boolean
-    hasScanningError: boolean
-    hasUploadError: boolean
-    hasUnexpectedError: boolean
+    hasRecoverableError: boolean
     handleDelete: (_e: React.MouseEvent) => void
     handleRetry: (_e: React.MouseEvent) => void
 }
 
 export const FileListItem = ({
-    errorRowClass,
     isLoading,
     isScanning,
     statusValue,
     item,
     imageClasses,
     documentError,
-    hasDuplicateNameError,
-    hasScanningError,
-    hasUploadError,
-    hasUnexpectedError,
+    hasRecoverableError,
     handleDelete,
     handleRetry,
 }: FileListItemProps): React.ReactElement => {
@@ -83,7 +76,7 @@ export const FileListItem = ({
                 >
                     Remove
                 </Button>
-                {(hasUploadError || hasScanningError) && !hasUnexpectedError && (
+                {hasRecoverableError && (
                     <Button
                         type="button"
                         size="small"

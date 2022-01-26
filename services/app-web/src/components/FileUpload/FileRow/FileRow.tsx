@@ -13,10 +13,7 @@ type FileRowProps = {
     item: FileItemT
     imageClasses: string
     documentError: React.ReactElement | null
-    hasDuplicateNameError: boolean
-    hasScanningError: boolean
-    hasUploadError: boolean
-    hasUnexpectedError: boolean
+    hasRecoverableError: boolean
     handleDelete: (_e: React.MouseEvent) => void
     handleRetry: (_e: React.MouseEvent) => void
 }
@@ -29,10 +26,7 @@ export const FileRow = ({
     item,
     imageClasses,
     documentError,
-    hasDuplicateNameError,
-    hasScanningError,
-    hasUploadError,
-    hasUnexpectedError,
+    hasRecoverableError,
     handleDelete,
     handleRetry,
 }: FileRowProps): React.ReactElement => {
@@ -88,9 +82,8 @@ export const FileRow = ({
                 >
                     Remove
                 </Button>
-                {(hasUploadError || hasScanningError) &&
-                    !hasUnexpectedError && <span> or </span>}
-                {(hasUploadError || hasScanningError) && !hasUnexpectedError && (
+                {hasRecoverableError && <span> or </span>}
+                {hasRecoverableError && (
                     <Button
                         style={{ marginTop: 0 }}
                         type="button"
