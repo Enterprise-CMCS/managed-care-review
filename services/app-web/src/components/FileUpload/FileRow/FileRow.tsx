@@ -49,7 +49,7 @@ export const FileRow = ({
                         />
                     </span>
                 ) : (
-                    ''
+                    <span data-testid="upload-finished-indicator"></span>
                 )}
                 <span
                     style={{
