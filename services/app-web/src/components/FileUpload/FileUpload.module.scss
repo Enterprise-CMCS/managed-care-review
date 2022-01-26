@@ -20,6 +20,15 @@
     color: #71767a;
     margin-bottom: 0.5rem;
 }
+
+.fileSummary {
+    font-weight: normal;
+    @include u-font('sans', 'sm');
+    @include u-padding(1);
+    @include u-margin-y(1px);
+    background: $theme-color-primary-lighter;
+}
+
 .fileItemsList {
     list-style-type: none;
     display: inline-block;
@@ -52,6 +61,7 @@
     justify-content: space-around;
     flex-direction: column;
     flex: 1;
+    align-items: flex-end;
     > button {
         margin-top: 0 !important;
         padding-left: 5px;

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 
 import { Alert, GridContainer } from '@trussworks/react-uswds'
 import { Switch, Route, useParams, useLocation } from 'react-router-dom'
+import styles from './StateSubmissionForm.module.scss'
 
 import { Error404 } from '../Errors/Error404'
 import { ErrorInvalidSubmissionStatus } from '../Errors/ErrorInvalidSubmissionStatus'
@@ -132,10 +133,12 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
     return (
         <>
-            <DynamicStepIndicator
-                formPages={activeFormPages(draft)}
-                currentFormPage={currentRoute}
-            />
+            <div className={styles.stepIndicator}>
+                <DynamicStepIndicator
+                    formPages={activeFormPages(draft)}
+                    currentFormPage={currentRoute}
+                />
+            </div>
             <StateSubmissionContainer>
                 <Switch>
                     <Route path={RoutesRecord.SUBMISSIONS_TYPE}>

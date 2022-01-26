@@ -359,13 +359,6 @@ export const FileUpload = ({
                 </span>
             )}
 
-            <h5
-                tabIndex={-1}
-                ref={summaryRef}
-                className="text-normal font-body-sm margin-0"
-            >
-                {`${summary} ${summaryDetailText}`}
-            </h5>
 
             <FileInput
                 id={id}
@@ -379,6 +372,13 @@ export const FileUpload = ({
                 ref={fileInputRef}
                 aria-required={inputRequired}
             />
+            <h5
+                tabIndex={-1}
+                ref={summaryRef}
+                className={styles.fileSummary}
+            >
+                {`${summary} ${summaryDetailText}`}
+            </h5>
             <FileItemsList
                 retryItem={retryFile}
                 deleteItem={deleteItem}

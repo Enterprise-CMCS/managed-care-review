@@ -6,6 +6,15 @@
     width: 66rem;
 }
 
+.stepIndicator {
+    @include grid-container;
+    width: 100%;
+
+    > [class^='usa-step-indicator'] {
+        width: 100%;
+    }
+}
+
 .formHeader {
     text-align: center;
     width: 100%;
