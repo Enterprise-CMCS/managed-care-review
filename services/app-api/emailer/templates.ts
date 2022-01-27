@@ -13,7 +13,7 @@ const SubmissionTypeRecord: Record<SubmissionType, string> = {
     CONTRACT_AND_RATES: 'Contract action and rate certification',
 }
 
-const newPackageCMSEmailTemplate = (
+const newPackageCMSEmail = (
     submission: StateSubmissionType,
     config: EmailConfiguration
 ): EmailData => {
@@ -71,7 +71,7 @@ const newPackageCMSEmailTemplate = (
     }
 }
 
-const newPackageStateEmailTemplate = (
+const newPackageStateEmail = (
     submission: StateSubmissionType,
     user: CognitoUserType,
     config: EmailConfiguration
@@ -132,5 +132,5 @@ const newPackageStateEmailTemplate = (
     }
 }
 
-export { newPackageCMSEmailTemplate, newPackageStateEmailTemplate }
+export { newPackageCMSEmail, newPackageStateEmail }
 

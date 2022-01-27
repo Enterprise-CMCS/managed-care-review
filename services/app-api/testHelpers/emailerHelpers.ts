@@ -1,7 +1,7 @@
     import {EmailConfiguration, EmailData,
         Emailer,
-        newPackageCMSEmailTemplate,
-        newPackageStateEmailTemplate,
+        newPackageCMSEmail,
+        newPackageStateEmail,
     } from '../emailer'
     import { StateSubmissionType, CognitoUserType, CognitoStateUserType } from '../../app-web/src/common-code/domain-models'
 
@@ -23,14 +23,14 @@
             sendCMSNewPackage: function async(
                 submission: StateSubmissionType
             ): Promise<void | Error> {
-                const emailData = newPackageCMSEmailTemplate(submission, config)
+                const emailData = newPackageCMSEmail(submission, config)
                 return this.sendEmail(emailData)
             },
             sendStateNewPackage: function async(
                 submission: StateSubmissionType,
                 user: CognitoUserType
             ): Promise<void | Error> {
-                const emailData = newPackageStateEmailTemplate(
+                const emailData = newPackageStateEmail(
                     submission,
                     user,
                     config
