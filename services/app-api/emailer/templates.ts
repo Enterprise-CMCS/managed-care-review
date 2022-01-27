@@ -26,14 +26,14 @@ const newPackageCMSEmail = (
 
     const contractEffectiveDatesText = `${
         submission.contractType === 'AMENDMENT'
-            ? 'Contract amendment effective dates'
-            : 'Contract effective dates'
+            ? '<b>Contract amendment effective dates</b>'
+            : '<b>Contract effective dates</b>'
     }: ${
         dayjs(submission.contractDateStart).format('MM/DD/YYYY') +
         ' to ' +
         dayjs(submission.contractDateEnd).format('MM/DD/YYYY')
     }`
-    const ratingPeriod = `${submission.submissionType === 'CONTRACT_AND_RATES' ? `Rating period: ${dayjs(submission.rateDateStart).format('MM/DD/YYYY') + ' to ' + dayjs(submission.rateDateEnd).format('MM/DD/YYYY')}`: ''}` // displays nothing if submission is CONTRACT_ONLY
+    const ratingPeriod = `${submission.submissionType === 'CONTRACT_AND_RATES' ? `<b>Rating period:</b> ${dayjs(submission.rateDateStart).format('MM/DD/YYYY') + ' to ' + dayjs(submission.rateDateEnd).format('MM/DD/YYYY')}`: ''}` // displays nothing if submission is CONTRACT_ONLY
 
     return {
         toAddresses: reviewerEmails,
@@ -42,7 +42,7 @@ const newPackageCMSEmail = (
             isTestEnvironment ? `[${config.stage}] ` : ''
         }TEST New Managed Care Submission: ${submissionName(submission)}`,
         bodyText: `Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.
-        ${submissionName(submission)} was received from ${submission.stateCode}.
+        Managed Care submission: <b>${submissionName(submission)}</b> was received from <b>${submission.stateCode}</b>.
 
             Submission type: ${SubmissionTypeRecord[submission.submissionType]}
             ${contractEffectiveDatesText}
@@ -56,14 +56,13 @@ const newPackageCMSEmail = (
             ${submissionName(submission)} was received from ${
             submission.stateCode
         }.<br /><br />
-            Submission type: ${
+            <b>Submission type:<b> ${
                 SubmissionTypeRecord[submission.submissionType]
             }<br />
             ${contractEffectiveDatesText}
             <br />
-            ${ratingPeriod}
-            <br />
-            Submission description: ${
+            ${ratingPeriod}${ratingPeriod.length > 0? '<br />' : ''}
+            <b>Submission description:</b> ${
                 submission.submissionDescription
             }<br /><br />
             <a href="${submissionURL}">View submission</a>
