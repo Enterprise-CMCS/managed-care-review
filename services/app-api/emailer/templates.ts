@@ -1,5 +1,5 @@
 import { URL } from 'url'
-
+import dayjs from 'dayjs'
 import {
     SubmissionType,
     StateSubmissionType,
@@ -22,8 +22,18 @@ const newPackageCMSEmailTemplate = (
         config.baseUrl
     ).href
     const isTestEnvironment = config.stage !== 'prod'
-
     const reviewerEmails = config.cmsReviewSharedEmails
+
+    const contractEffectiveDatesText = `${
+        submission.contractType === 'AMENDMENT'
+            ? 'Contract amendment effective dates'
+            : 'Contract effective dates'
+    }: ${
+        dayjs(submission.contractDateStart).format('MM/DD/YYYY') +
+        ' to ' +
+        dayjs(submission.contractDateEnd).format('MM/DD/YYYY')
+    }`
+    const ratingPeriod = `${submission.submissionType === 'CONTRACT_AND_RATES' ? `Rating period: ${dayjs(submission.rateDateStart).format('MM/DD/YYYY') + ' to ' + dayjs(submission.rateDateEnd).format('MM/DD/YYYY')}`: ''}` // displays nothing if submission is CONTRACT_ONLY
 
     return {
         toAddresses: reviewerEmails,
@@ -35,8 +45,10 @@ const newPackageCMSEmailTemplate = (
         ${submissionName(submission)} was received from ${submission.stateCode}.
 
             Submission type: ${SubmissionTypeRecord[submission.submissionType]}
+            ${contractEffectiveDatesText}
+            ${ratingPeriod}
             Submission description: ${submission.submissionDescription}
-
+  
             View submission: ${submissionURL}`,
         bodyHTML: `
             <span style="color:#FF0000;font-weight:bold;">Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.</span>
@@ -47,6 +59,10 @@ const newPackageCMSEmailTemplate = (
             Submission type: ${
                 SubmissionTypeRecord[submission.submissionType]
             }<br />
+            ${contractEffectiveDatesText}
+            <br />
+            ${ratingPeriod}
+            <br />
             Submission description: ${
                 submission.submissionDescription
             }<br /><br />
