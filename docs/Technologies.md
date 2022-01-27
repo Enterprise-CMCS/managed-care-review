@@ -39,6 +39,10 @@ If you would like to run pa11y against individual urls or with custom config as 
 
 To adjust warning levels, ignore certain types of warnings, or create actions (such as button clicks or user login) that happens in test runs reference the [pa11y configuration docs]((https://github.com/pa11y/pa11y#configuration).
 
+#### pa11y with cypress-audit
+
+We are running pa11y on every page of our form inside of our Cypress tests using the cypress-audit library. This allows us to sign in and fill out the form using Cypress, and only rely on pa11y to scan those pages. This is also one place in our app where we have implemented a ratchet in CI. The issues present when we started testing with pa11y have been ignored, allowing CI to ensure that we aren't adding new errors in the future. Tickets have been filed to address those existing issues.
+
 ### Todo:
 
 -   GraphQL

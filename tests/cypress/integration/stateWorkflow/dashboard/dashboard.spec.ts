@@ -9,7 +9,7 @@ describe('dashboard', () => {
         cy.findByRole('heading', { level: 1, name: /New submission/ })
     })
 
-    it.only('scan accessibility of dashboard', () => {
+    it('scan accessibility of dashboard', () => {
         cy.logInAsStateUser()
         cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
