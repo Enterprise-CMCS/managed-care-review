@@ -17,7 +17,7 @@
         return {
             sendEmail: jest.fn(
                 async (emailData: EmailData): Promise<void | Error> => {
-                    console.log('Email content' + emailData)
+                    console.log('Email content' + JSON.stringify(emailData))
                 }
             ),
             sendCMSNewPackage: function async(
