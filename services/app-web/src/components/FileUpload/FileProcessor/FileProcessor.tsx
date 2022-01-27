@@ -4,6 +4,7 @@ import { FileRow } from '../FileRow/FileRow'
 import { FileListItem } from '../FileListItem/FileListItem'
 
 import styles from '../FileUpload.module.scss'
+import { DocumentCategoryType } from '../../../common-code/domain-models'
 
 export type FileStatus =
     | 'DUPLICATE_NAME_ERROR'
@@ -20,6 +21,7 @@ export type FileItemT = {
     key?: string // only items uploaded to s3 have this
     s3URL?: string // only items uploaded to s3 have this
     status: FileStatus
+    documentCategories: DocumentCategoryType[]
 }
 
 const DocumentError = ({

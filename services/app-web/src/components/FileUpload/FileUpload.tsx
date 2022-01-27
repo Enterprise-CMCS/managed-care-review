@@ -94,6 +94,7 @@ export const FileUpload = ({
                 key: undefined,
                 s3URL: undefined,
                 status: 'PENDING',
+                documentCategories: [],
             }
 
             if (isDuplicateItem(fileItems, newItem)) {
@@ -359,7 +360,6 @@ export const FileUpload = ({
                 </span>
             )}
 
-
             <FileInput
                 id={id}
                 name={`${name}${inputRequired ? ' (required)' : ''}`}
@@ -372,11 +372,7 @@ export const FileUpload = ({
                 ref={fileInputRef}
                 aria-required={inputRequired}
             />
-            <h5
-                tabIndex={-1}
-                ref={summaryRef}
-                className={styles.fileSummary}
-            >
+            <h5 tabIndex={-1} ref={summaryRef} className={styles.fileSummary}>
                 {`${summary} ${summaryDetailText}`}
             </h5>
             <FileItemsList

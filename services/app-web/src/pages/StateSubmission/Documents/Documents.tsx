@@ -83,6 +83,7 @@ export const Documents = ({
                     key: 'INVALID_KEY',
                     s3URL: undefined,
                     status: 'UPLOAD_ERROR',
+                    documentCategories: doc.documentCategories,
                 }
             }
             return {
@@ -91,6 +92,7 @@ export const Documents = ({
                 key: key,
                 s3URL: doc.s3URL,
                 status: 'UPLOAD_COMPLETE',
+                documentCategories: doc.documentCategories,
             }
         })
 
