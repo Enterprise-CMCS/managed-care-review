@@ -45,4 +45,25 @@ describe('review and submit', () => {
             cy.findByRole('heading', { level: 4, name: /Submission Error/ })
         })
     })
+
+    it('check accessibility of an empty review and submit page', () => {
+        cy.logInAsStateUser()
+        cy.startNewContractAndRatesSubmission()
+
+        // Navigate to review and submit page
+        cy.location().then((fullUrl) => {
+            const { pathname } = fullUrl
+            const pathnameArray = pathname.split('/')
+            const draftSubmissionId = pathnameArray[2]
+            cy.visit(`/submissions/${draftSubmissionId}/review-and-submit`)
+
+            // check accessibility of review and submit page
+            cy.pa11y({
+                actions: [
+                    'wait for element #submissionTypeSection to be visible',
+                ],
+                threshold: 24, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15950
+            })
+        })
+    })
 })

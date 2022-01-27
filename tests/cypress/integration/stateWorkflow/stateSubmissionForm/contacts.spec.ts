@@ -43,6 +43,14 @@ describe('contacts', () => {
             cy.navigateForm('Continue')
             // HM-TODO: Why doesn't level attribute work here?
             cy.findByRole('heading', { name: /Supporting documents/ })
+
+            // check accessibility of filled out contacts page
+            cy.findByRole('button', { name: /Back/ }).click()
+            cy.findByRole('heading', { name: /Contacts/ })
+            cy.pa11y({
+                actions: ['wait for element #form-guidance to be visible'],
+                threshold: 7, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15948
+            })
         })
     })
 
@@ -61,7 +69,9 @@ describe('contacts', () => {
             cy.fillOutActuaryContact()
 
             // Add additional state contact
-            cy.findByRole('button', { name: /Add another state contact/ }).click()
+            cy.findByRole('button', {
+                name: /Add another state contact/,
+            }).click()
             cy.findAllByLabelText('Name').eq(1).type('State Contact Person 2')
             cy.findAllByLabelText('Title/Role')
                 .eq(1)
@@ -69,7 +79,9 @@ describe('contacts', () => {
             cy.findAllByLabelText('Email').eq(1).type('statecontact2@test.com')
 
             // Add additional actuary contact
-            cy.findByRole('button', { name: /Add another actuary contact/ }).click()
+            cy.findByRole('button', {
+                name: /Add another actuary contact/,
+            }).click()
             cy.findAllByLabelText('Name').eq(3).type('Actuary Contact Person 2')
             cy.findAllByLabelText('Title/Role')
                 .eq(3)

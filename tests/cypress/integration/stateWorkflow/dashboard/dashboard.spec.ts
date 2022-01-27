@@ -15,7 +15,8 @@ describe('dashboard', () => {
 
         // check accessibility of dashboard
         cy.pa11y({
-            wait: 10000,
+            actions: ['wait for element #dashboard-header to be visible'],
+            threshold: 2, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15947
         })
     })
 
