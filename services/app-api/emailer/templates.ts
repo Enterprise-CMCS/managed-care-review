@@ -59,10 +59,10 @@ const newPackageCMSEmail = (
         ).href
     const bodyHTML = `<span style="color:#FF0000;font-weight:bold;">Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.</span>
             <br /><br />
-            ${submissionName(submission)} was received from ${
+            Managed Care submission: <b>${submissionName(submission)}</b> was received from <b>${
             submission.stateCode
-        }.<br /><br />
-            <b>Submission type:<b> ${
+        }</b>.<br /><br />
+            <b>Submission type:</b> ${
                 SubmissionTypeRecord[submission.submissionType]
             }<br />
             ${contractEffectiveDatesText}
