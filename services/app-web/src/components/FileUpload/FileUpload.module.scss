@@ -1,10 +1,20 @@
 @import '../../styles/uswdsImports.scss';
 @import '../../styles/custom';
 
+.warningRow {
+    & td {
+        background-color: transparent;
+    }
+}
+
+.loadingImage {
+    float: left;
+}
+
 .fileInput {
     max-width: none;
 }
-.fileInputHint{
+.fileInputHint {
     display: flex;
     flex-direction: column;
     color: #71767a;

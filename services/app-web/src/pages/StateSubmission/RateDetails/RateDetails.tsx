@@ -350,6 +350,7 @@ export const RateDetails = ({
                                         id="rateDocuments"
                                         name="rateDocuments"
                                         label="Upload rate certification"
+                                        renderMode="list"
                                         aria-required
                                         error={documentsErrorMessage}
                                         hint={

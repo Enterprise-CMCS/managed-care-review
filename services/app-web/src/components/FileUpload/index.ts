@@ -1,4 +1,4 @@
-export type { FileItemT } from './FileItem/FileItem'
+export type { FileItemT } from './FileProcessor/FileProcessor'
 export type { S3FileData } from './FileUpload'
 
 export { UploadErrorAlert } from './UploadErrorAlert/UploadErrorAlert'

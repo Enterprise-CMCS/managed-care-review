@@ -18,6 +18,7 @@ import {
 } from '../../../components/FileUpload'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
 import { PageActions } from '../PageActions'
+import classNames from 'classnames'
 import { ErrorSummary } from '../../../components/Form'
 
 type DocumentProps = {
@@ -216,7 +217,10 @@ export const Documents = ({
     return (
         <>
             <UswdsForm
-                className={styles.formContainer}
+                className={classNames(
+                    styles.tableContainer,
+                    styles.formContainer
+                )}
                 id="DocumentsForm"
                 aria-label="Documents Form"
                 onSubmit={() => {
@@ -230,9 +234,9 @@ export const Documents = ({
                         errors={
                             documentsErrorMessage
                                 ? {
-                                        [documentsErrorKey]:
-                                            documentsErrorMessage,
-                                    }
+                                      [documentsErrorKey]:
+                                          documentsErrorMessage,
+                                  }
                                 : {}
                         }
                         headingRef={errorSummaryHeadingRef}
@@ -243,13 +247,12 @@ export const Documents = ({
                         id="documents"
                         name="documents"
                         label="Upload any additional supporting documents"
+                        renderMode="table"
                         hint={
                             <>
                                 <Link
                                     aria-label="Document definitions and requirements (opens in new window)"
-                                    href={
-                                        '/help#supporting-documents'
-                                    }
+                                    href={'/help#supporting-documents'}
                                     variant="external"
                                     target="_blank"
                                 >

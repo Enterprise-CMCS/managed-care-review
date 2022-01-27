@@ -405,6 +405,7 @@ export const ContractDetails = ({
                                     id="documents"
                                     name="documents"
                                     label="Upload contract"
+                                    renderMode="list"
                                     aria-required
                                     error={documentsErrorMessage}
                                     hint={

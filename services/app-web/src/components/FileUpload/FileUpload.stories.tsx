@@ -23,6 +23,7 @@ export const DemoFileUploadSuccess = (): React.ReactElement => {
             id="Default"
             name="Default Input"
             label="FileInput"
+            renderMode="list"
             uploadFile={(file: File) => fakeApiRequest(true)}
             deleteFile={async (key: string) => {
                 await fakeApiRequest(true)
@@ -39,6 +40,7 @@ export const DemoFileUploadFailure = (): React.ReactElement => {
             id="Default"
             name="Default Input"
             label="FileInput"
+            renderMode="list"
             uploadFile={(file: File) => fakeApiRequest(false)}
             deleteFile={async (key: string) => {
                 await fakeApiRequest(true)

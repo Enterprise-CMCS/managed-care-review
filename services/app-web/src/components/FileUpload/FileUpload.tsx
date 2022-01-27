@@ -10,7 +10,7 @@ import { PoliteErrorMessage } from '../'
 
 import styles from './FileUpload.module.scss'
 
-import { FileItemT } from './FileItem/FileItem'
+import { FileItemT } from './FileProcessor/FileProcessor'
 import { FileItemsList } from './FileItemList/FileItemsList'
 import { pluralize } from '../../common-code/formatters'
 
@@ -23,6 +23,7 @@ export type FileUploadProps = {
     id: string
     name: string
     label: string
+    renderMode: 'list' | 'table'
     error?: string
     hint?: React.ReactNode
     initialItems?: FileItemT[]
@@ -45,6 +46,7 @@ export const FileUpload = ({
     id,
     name,
     label,
+    renderMode,
     hint,
     error,
     initialItems,
@@ -381,6 +383,7 @@ export const FileUpload = ({
                 retryItem={retryFile}
                 deleteItem={deleteItem}
                 fileItems={fileItems}
+                renderMode={renderMode}
             />
         </FormGroup>
     )
