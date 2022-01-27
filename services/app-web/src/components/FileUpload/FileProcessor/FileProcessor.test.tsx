@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-import { FileItem, FileItemT } from './FileProcessor'
+import { FileProcessor, FileItemT } from './FileProcessor'
 import { TEST_PDF_FILE } from '../../../testHelpers/jestHelpers'
 
-describe('FileItem component', () => {
+describe('FileProcessor component', () => {
     const pending: FileItemT = {
         id: 'testFile',
         file: TEST_PDF_FILE,
@@ -65,7 +65,7 @@ describe('FileItem component', () => {
     beforeEach(() => jest.clearAllMocks())
     it('renders a list without errors', () => {
         render(
-            <FileItem
+            <FileProcessor
                 renderMode="list"
                 item={uploadComplete}
                 {...buttonActionProps}
@@ -77,7 +77,7 @@ describe('FileItem component', () => {
 
     it('renders a table without errors', () => {
         render(
-            <FileItem
+            <FileProcessor
                 renderMode="table"
                 item={uploadComplete}
                 {...buttonActionProps}
@@ -89,7 +89,7 @@ describe('FileItem component', () => {
 
     it('includes appropriate aria- attributes in the list', () => {
         render(
-            <FileItem
+            <FileProcessor
                 renderMode="list"
                 item={uploadError}
                 {...buttonActionProps}
@@ -108,7 +108,7 @@ describe('FileItem component', () => {
 
     it('includes appropriate aria- attributes in the table', () => {
         render(
-            <FileItem
+            <FileProcessor
                 renderMode="table"
                 item={uploadError}
                 {...buttonActionProps}
@@ -127,7 +127,7 @@ describe('FileItem component', () => {
 
     it('button actions work as expected in the list', () => {
         render(
-            <FileItem
+            <FileProcessor
                 renderMode="list"
                 item={uploadError}
                 {...buttonActionProps}
@@ -143,7 +143,7 @@ describe('FileItem component', () => {
 
     it('button actions work as expected in the table', () => {
         render(
-            <FileItem
+            <FileProcessor
                 renderMode="list"
                 item={uploadError}
                 {...buttonActionProps}
@@ -159,7 +159,11 @@ describe('FileItem component', () => {
 
     it('displays loading image, loading text, and remove button when status is LOADING in the list', () => {
         render(
-            <FileItem renderMode="list" item={pending} {...buttonActionProps} />
+            <FileProcessor
+                renderMode="list"
+                item={pending}
+                {...buttonActionProps}
+            />
         )
         expect(screen.getByText('Step 1 of 2: Uploading')).toBeInTheDocument()
         const imageEl = screen.getByTestId('file-input-preview-image')
@@ -172,7 +176,7 @@ describe('FileItem component', () => {
 
     it('displays loading image, loading text, and remove button when status is LOADING in the table', () => {
         render(
-            <FileItem
+            <FileProcessor
                 renderMode="table"
                 item={pending}
                 {...buttonActionProps}
@@ -185,7 +189,7 @@ describe('FileItem component', () => {
 
     it('displays loading image, scanning text, and remove button when status is SCANNING in the list', () => {
         render(
-            <FileItem
+            <FileProcessor
                 renderMode="list"
                 item={scanning}
                 {...buttonActionProps}
@@ -202,7 +206,7 @@ describe('FileItem component', () => {
 
     it('displays loading image, scanning text, and remove button when status is SCANNING in the table', () => {
         render(
-            <FileItem
+            <FileProcessor
                 renderMode="table"
                 item={scanning}
                 {...buttonActionProps}
@@ -215,7 +219,7 @@ describe('FileItem component', () => {
 
     it('displays file image and remove button when status is UPLOAD_COMPLETE in a list', () => {
         render(
-            <FileItem
+            <FileProcessor
                 renderMode="list"
                 item={uploadComplete}
                 {...buttonActionProps}
@@ -232,7 +236,7 @@ describe('FileItem component', () => {
 
     it('displays the remove button when status is UPLOAD_COMPLETE in a table', () => {
         render(
-            <FileItem
+            <FileProcessor
                 renderMode="table"
                 item={uploadComplete}
                 {...buttonActionProps}
@@ -244,7 +248,7 @@ describe('FileItem component', () => {
 
     it('displays upload failed message and both retry and remove buttons when status is UPLOAD_ERROR in a list', () => {
         render(
-            <FileItem
+            <FileProcessor
                 renderMode="list"
                 item={uploadError}
                 {...buttonActionProps}
@@ -270,7 +274,7 @@ describe('FileItem component', () => {
 
     it('displays upload failed message and both retry and remove buttons when status is UPLOAD_ERROR in a table', () => {
         render(
-            <FileItem
+            <FileProcessor
                 renderMode="table"
                 item={uploadError}
                 {...buttonActionProps}
@@ -290,7 +294,7 @@ describe('FileItem component', () => {
 
     it('displays security scan failed message and both retry and remove buttons when status is SCANNING_ERROR in a list', () => {
         render(
-            <FileItem
+            <FileProcessor
                 renderMode="list"
                 item={scanningError}
                 {...buttonActionProps}
@@ -312,7 +316,7 @@ describe('FileItem component', () => {
 
     it('displays security scan failed message and both retry and remove buttons when status is SCANNING_ERROR in a table', () => {
         render(
-            <FileItem
+            <FileProcessor
                 renderMode="table"
                 item={scanningError}
                 {...buttonActionProps}
@@ -334,7 +338,7 @@ describe('FileItem component', () => {
 
     it('displays duplicate name error message and remove button when status is DUPLICATE_NAME_ERROR in a list', () => {
         render(
-            <FileItem
+            <FileProcessor
                 renderMode="list"
                 item={duplicateError}
                 {...buttonActionProps}
@@ -352,7 +356,7 @@ describe('FileItem component', () => {
 
     it('displays duplicate name error message and remove button when status is DUPLICATE_NAME_ERROR in a table', () => {
         render(
-            <FileItem
+            <FileProcessor
                 renderMode="table"
                 item={duplicateError}
                 {...buttonActionProps}
@@ -366,7 +370,7 @@ describe('FileItem component', () => {
 
     it('displays unexpected error message and remove button when status is UPLOAD_ERROR but file reference is undefined (this is an unexpected state but it would mean the upload cannot be retried) in a list', () => {
         render(
-            <FileItem
+            <FileProcessor
                 renderMode="list"
                 item={{ ...uploadError, file: undefined }}
                 {...buttonActionProps}
@@ -387,7 +391,7 @@ describe('FileItem component', () => {
 
     it('displays unexpected error message and remove button when status is UPLOAD_ERROR but file reference is undefined (this is an unexpected state but it would mean the upload cannot be retried) in a table', () => {
         render(
-            <FileItem
+            <FileProcessor
                 renderMode="table"
                 item={{ ...uploadError, file: undefined }}
                 {...buttonActionProps}

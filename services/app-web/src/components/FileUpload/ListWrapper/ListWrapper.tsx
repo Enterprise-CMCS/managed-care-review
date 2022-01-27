@@ -1,5 +1,5 @@
 import React from 'react'
-import { FileItem, FileItemT } from '../FileProcessor/FileProcessor'
+import { FileProcessor, FileItemT } from '../FileProcessor/FileProcessor'
 import styles from '../FileUpload.module.scss'
 
 type ListWrapperProps = {
@@ -28,7 +28,7 @@ export const ListWrapper = ({
                     id={item.id}
                     className={liClasses(item.status)}
                 >
-                    <FileItem
+                    <FileProcessor
                         deleteItem={deleteItem}
                         retryItem={retryItem}
                         item={item}

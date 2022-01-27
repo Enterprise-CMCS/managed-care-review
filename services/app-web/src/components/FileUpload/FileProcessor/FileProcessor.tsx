@@ -1,7 +1,7 @@
 import React from 'react'
 import classnames from 'classnames'
 import { FileRow } from '../FileRow/FileRow'
-import { FileListItem } from '../FileItem/FileItem'
+import { FileListItem } from '../FileListItem/FileListItem'
 
 import styles from '../FileUpload.module.scss'
 
@@ -79,18 +79,18 @@ const DocumentError = ({
     }
 }
 
-type FileItemProps = {
+type FileProcessorProps = {
     item: FileItemT
     deleteItem: (item: FileItemT) => void
     retryItem: (item: FileItemT) => void
     renderMode: 'table' | 'list'
 }
-export const FileItem = ({
+export const FileProcessor = ({
     item,
     deleteItem,
     retryItem,
     renderMode,
-}: FileItemProps): React.ReactElement => {
+}: FileProcessorProps): React.ReactElement => {
     const { name, status, file } = item
     const hasDuplicateNameError = status === 'DUPLICATE_NAME_ERROR'
     const hasScanningError = status === 'SCANNING_ERROR'

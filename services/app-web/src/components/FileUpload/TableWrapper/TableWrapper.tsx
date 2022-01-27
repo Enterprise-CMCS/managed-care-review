@@ -1,5 +1,5 @@
 import React from 'react'
-import { FileItem, FileItemT } from '../FileProcessor/FileProcessor'
+import { FileProcessor, FileItemT } from '../FileProcessor/FileProcessor'
 import { Table } from '@trussworks/react-uswds'
 
 type TableWrapperProps = {
@@ -23,7 +23,7 @@ export const TableWrapper = ({
             </thead>
             <tbody>
                 {fileItems.map((item) => (
-                    <FileItem
+                    <FileProcessor
                         key={item.id}
                         deleteItem={deleteItem}
                         retryItem={retryItem}
