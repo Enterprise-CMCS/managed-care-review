@@ -19,7 +19,7 @@ describe('documents', () => {
             )
             cy.findByText(/0 complete, 1 error, 1 pending/).should('exist')
             // give the page time to load (wait) then let cypress wait for the spinner to go away
-            cy.findByTestId('upload-finished-indicator', {timeout: 120000}).should("exist")
+            cy.findAllByTestId('upload-finished-indicator', {timeout: 120000}).should("have.length", 2)
             cy.findByTestId('file-input-loading-image').should('not.exist')
             cy.findByText(/1 complete, 1 error, 0 pending/).should('exist')
             cy.findByText('Duplicate file').should('exist')
@@ -41,7 +41,7 @@ describe('documents', () => {
             cy.findByText(/0 complete, 1 error, 2 pending/).should('exist')
 
             // give the page time to load (wait) then let cypress wait for the spinner to go away
-            cy.findByTestId('upload-finished-indicator', {timeout: 120000}).should("exist")
+            cy.findAllByTestId('upload-finished-indicator', {timeout: 120000}).should("have.length", 3)
             cy.findByTestId('file-input-loading-image').should('not.exist')
             cy.findByText('Duplicate file').should('exist')
             cy.findAllByRole('row').should('have.length', 4)
@@ -104,7 +104,7 @@ describe('documents', () => {
                 3
             )
             // give the page time to load (wait) then let cypress wait for the spinner to go away
-            cy.findByTestId('upload-finished-indicator', {timeout: 120000}).should("exist")
+            cy.findAllByTestId('upload-finished-indicator', {timeout: 120000}).should("have.length", 2)
             cy.findByTestId('file-input-loading-image').should('not.exist')
             cy.verifyDocumentsHaveNoErrors()
 
