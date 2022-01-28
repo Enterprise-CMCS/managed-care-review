@@ -51,6 +51,13 @@ describe('dashboard', () => {
             submissionId = pathnameArray[2]
         })
 
+        // check accessibility of filled out review and submit page
+        cy.findByRole('heading', { level: 2, name: /Review and submit/ })
+        cy.pa11y({
+            actions: ['wait for element #submissionTypeSection to be visible'],
+            threshold: 22, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15950
+        })
+
         // Submit, sent to dashboard
         cy.submitStateSubmissionForm()
         cy.waitForApiToLoad()
@@ -77,6 +84,15 @@ describe('dashboard', () => {
             cy.findByText('New rate certification').should('exist')
             cy.findByText('02/29/2024 to 02/28/2025').should('exist')
             cy.findByText('Download all contract documents').should('exist')
+
+            // check accessibility of filled out submission summary page
+            cy.pa11y({
+                actions: [
+                    'wait for element #submissionTypeSection to be visible',
+                ],
+                threshold: 19, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15952
+            })
+
             // Link back to dashboard, submission visible in default program
             cy.findByText('Back to state dashboard').should('exist').click()
             cy.findByText('Dashboard').should('exist')

@@ -86,5 +86,4 @@ describe('CMS User can view submission', () => {
     //             cy.findByTestId('submission-summary').should('exist')
     //         })
     //     })
-    // TODO: add cy.pa11y call to this test
 })
