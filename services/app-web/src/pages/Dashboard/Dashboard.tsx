@@ -97,7 +97,7 @@ export const Dashboard = (): React.ReactElement => {
 
     return (
         <>
-            <div className={styles.wrapper}>
+            <div id="dashboard-page" className={styles.wrapper}>
                 <GridContainer
                     className={styles.container}
                     data-testid="dashboard-page"
@@ -110,7 +110,7 @@ export const Dashboard = (): React.ReactElement => {
                                 />
                             )}
                             <div className={styles.panelHeader}>
-                                <h2 id="dashboard-header">Submissions</h2>
+                                <h2>Submissions</h2>
                                 <div>
                                     <Link
                                         asCustom={NavLink}
