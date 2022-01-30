@@ -191,7 +191,7 @@ export const Documents = ({
                         formDataDocuments.push({
                             name: fileItem.name,
                             s3URL: fileItem.s3URL,
-                            documentCategories: [],
+                            documentCategories: fileItem.documentCategories,
                         })
                     }
                     return formDataDocuments
@@ -200,7 +200,6 @@ export const Documents = ({
             )
 
             const updatedDraft = updatesFromSubmission(draftSubmission)
-
             updatedDraft.documents = documents
 
             try {

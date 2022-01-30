@@ -7,6 +7,7 @@ type ListWrapperProps = {
     liClasses: (status: FileItemT['status']) => string
     deleteItem: (id: FileItemT) => void
     retryItem: (item: FileItemT) => void
+    handleCheckboxClick: (event: React.ChangeEvent<HTMLInputElement>) => void
 }
 
 export const ListWrapper = ({
@@ -14,6 +15,7 @@ export const ListWrapper = ({
     liClasses,
     deleteItem,
     retryItem,
+    handleCheckboxClick,
 }: ListWrapperProps): React.ReactElement => {
     return (
         <ul
@@ -33,6 +35,7 @@ export const ListWrapper = ({
                         retryItem={retryItem}
                         item={item}
                         renderMode="list"
+                        handleCheckboxClick={handleCheckboxClick}
                     />
                 </li>
             ))}

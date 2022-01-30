@@ -61,6 +61,30 @@ export const FileUpload = ({
     const fileInputRef = useRef<FileInputRef>(null) // reference to the HTML input which has files
     const summaryRef = useRef<HTMLHeadingElement>(null) // reference to the heading that we will focus
 
+    const handleCheckboxClick = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const changeType =
+            event.target.name === 'contract-supporting'
+                ? 'CONTRACT_RELATED'
+                : 'RATES_RELATED'
+        const id = event.target.id.substring(0, event.target.id.indexOf('--'))
+        const fileIndex = fileItems.findIndex((file) => file.id === id)
+        if (fileIndex === -1) return
+        if (fileItems[fileIndex].documentCategories.includes(changeType)) {
+            fileItems[fileIndex].documentCategories = fileItems[
+                fileIndex
+            ].documentCategories.filter((category) => category !== changeType)
+        } else {
+            fileItems[fileIndex].documentCategories = [
+                ...fileItems[fileIndex].documentCategories,
+                changeType,
+            ]
+        }
+
+        setFileItems([...fileItems])
+    }
+
     const inputRequired = inputProps['aria-required'] || inputProps.required
     // update fileItems in parent
     React.useEffect(() => {
@@ -380,6 +404,7 @@ export const FileUpload = ({
                 deleteItem={deleteItem}
                 fileItems={fileItems}
                 renderMode={renderMode}
+                handleCheckboxClick={handleCheckboxClick}
             />
         </FormGroup>
     )

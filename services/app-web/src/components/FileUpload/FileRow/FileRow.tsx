@@ -2,13 +2,15 @@ import React from 'react'
 import { FileItemT } from '../FileProcessor/FileProcessor'
 
 import styles from '../FileUpload.module.scss'
-import { Button } from '@trussworks/react-uswds'
+import { Button, Checkbox } from '@trussworks/react-uswds'
 import { SPACER_GIF } from '../constants'
 
 type FileRowProps = {
     errorRowClass?: string
     isLoading: boolean
     isScanning: boolean
+    isContractSupporting: boolean
+    isRateSupporting: boolean
     statusValue: string
     item: FileItemT
     imageClasses: string
@@ -16,12 +18,15 @@ type FileRowProps = {
     hasRecoverableError: boolean
     handleDelete: (_e: React.MouseEvent) => void
     handleRetry: (_e: React.MouseEvent) => void
+    handleCheckboxClick: (event: React.ChangeEvent<HTMLInputElement>) => void
 }
 
 export const FileRow = ({
     errorRowClass,
     isLoading,
     isScanning,
+    isContractSupporting,
+    isRateSupporting,
     statusValue,
     item,
     imageClasses,
@@ -29,8 +34,10 @@ export const FileRow = ({
     hasRecoverableError,
     handleDelete,
     handleRetry,
+    handleCheckboxClick,
 }: FileRowProps): React.ReactElement => {
     const { name } = item
+
     return (
         <tr className={`${errorRowClass} ${styles.warningRow}`}>
             <td>
@@ -69,6 +76,28 @@ export const FileRow = ({
                     )}
                     <span>{name}</span>
                 </span>
+            </td>
+            <td>
+                <Checkbox
+                    className={styles.checkbox}
+                    label=""
+                    id={`${item.id}--contract`}
+                    name="contract-supporting"
+                    aria-label="contract-supporting"
+                    checked={isContractSupporting}
+                    onChange={handleCheckboxClick}
+                />
+            </td>
+            <td>
+                <Checkbox
+                    className={styles.checkbox}
+                    label=""
+                    id={`${item.id}--rate`}
+                    name="rate-supporting"
+                    aria-label="rate-supporting"
+                    checked={isRateSupporting}
+                    onChange={handleCheckboxClick}
+                />
             </td>
             <td style={{ textAlign: 'right' }}>
                 <Button

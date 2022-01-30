@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { FileProcessor, FileItemT } from './FileProcessor'
@@ -12,6 +12,7 @@ describe('FileProcessor component', () => {
         key: undefined,
         s3URL: undefined,
         status: 'PENDING',
+        documentCategories: [],
     }
     const scanning: FileItemT = {
         id: 'testFile1',
@@ -20,6 +21,7 @@ describe('FileProcessor component', () => {
         key: '4545454-testFile1',
         s3URL: 'tests3://uploaded-12313123213/4545454-testFile1',
         status: 'SCANNING',
+        documentCategories: [],
     }
     const uploadError: FileItemT = {
         id: 'testFile2',
@@ -28,6 +30,7 @@ describe('FileProcessor component', () => {
         key: undefined,
         s3URL: undefined,
         status: 'UPLOAD_ERROR',
+        documentCategories: [],
     }
 
     const scanningError: FileItemT = {
@@ -37,6 +40,7 @@ describe('FileProcessor component', () => {
         key: '4545454-testFile3',
         s3URL: 'tests3://uploaded-12313123213/4545454-testFile3',
         status: 'SCANNING_ERROR',
+        documentCategories: [],
     }
 
     const uploadComplete: FileItemT = {
@@ -46,6 +50,7 @@ describe('FileProcessor component', () => {
         key: '4545454-testFile4',
         s3URL: 'tests3://uploaded-12313123213/4545454-testFile4',
         status: 'UPLOAD_COMPLETE',
+        documentCategories: [],
     }
 
     const duplicateError: FileItemT = {
@@ -55,11 +60,16 @@ describe('FileProcessor component', () => {
         key: '4545454-testFile4',
         s3URL: 'tests3://uploaded-12313123213/4545454-testFile4',
         status: 'DUPLICATE_NAME_ERROR',
+        documentCategories: [],
     }
 
     const buttonActionProps = {
         deleteItem: jest.fn(),
         retryItem: jest.fn(),
+    }
+
+    const categoryCheckboxProps = {
+        handleCheckboxClick: jest.fn(),
     }
 
     beforeEach(() => jest.clearAllMocks())
@@ -69,6 +79,7 @@ describe('FileProcessor component', () => {
                 renderMode="list"
                 item={uploadComplete}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
 
@@ -81,6 +92,7 @@ describe('FileProcessor component', () => {
                 renderMode="table"
                 item={uploadComplete}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
 
@@ -93,6 +105,7 @@ describe('FileProcessor component', () => {
                 renderMode="list"
                 item={uploadError}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
 
@@ -112,6 +125,7 @@ describe('FileProcessor component', () => {
                 renderMode="table"
                 item={uploadError}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
 
@@ -131,6 +145,7 @@ describe('FileProcessor component', () => {
                 renderMode="list"
                 item={uploadError}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
 
@@ -147,6 +162,7 @@ describe('FileProcessor component', () => {
                 renderMode="list"
                 item={uploadError}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
 
@@ -163,6 +179,7 @@ describe('FileProcessor component', () => {
                 renderMode="list"
                 item={pending}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
         expect(screen.getByText('Step 1 of 2: Uploading')).toBeInTheDocument()
@@ -180,6 +197,7 @@ describe('FileProcessor component', () => {
                 renderMode="table"
                 item={pending}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
         expect(screen.getByText('Step 1 of 2: Uploading')).toBeInTheDocument()
@@ -193,6 +211,7 @@ describe('FileProcessor component', () => {
                 renderMode="list"
                 item={scanning}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
         expect(screen.getByText('Step 2 of 2: Scanning')).toBeInTheDocument()
@@ -210,6 +229,7 @@ describe('FileProcessor component', () => {
                 renderMode="table"
                 item={scanning}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
         expect(screen.getByText('Step 2 of 2: Scanning')).toBeInTheDocument()
@@ -223,6 +243,7 @@ describe('FileProcessor component', () => {
                 renderMode="list"
                 item={uploadComplete}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
         const imageEl = screen.getByTestId('file-input-preview-image')
@@ -234,12 +255,46 @@ describe('FileProcessor component', () => {
         expect(screen.queryByRole('button', { name: /Retry/ })).toBeNull()
     })
 
+    it('has clickable document category checkboxes', async () => {
+        render(
+            <FileProcessor
+                renderMode="table"
+                item={uploadComplete}
+                {...buttonActionProps}
+                {...categoryCheckboxProps}
+            />
+        )
+        const contractCheckbox = screen.getByRole('checkbox', {
+            name: 'contract-supporting',
+        })
+        const ratesCheckbox = screen.getByRole('checkbox', {
+            name: 'rate-supporting',
+        })
+        userEvent.click(contractCheckbox)
+        expect(categoryCheckboxProps.handleCheckboxClick).toHaveBeenCalledWith(
+            expect.objectContaining({
+                target: expect.objectContaining({
+                    name: 'contract-supporting',
+                }),
+            })
+        )
+        userEvent.click(ratesCheckbox)
+        expect(categoryCheckboxProps.handleCheckboxClick).toHaveBeenCalledWith(
+            expect.objectContaining({
+                target: expect.objectContaining({
+                    name: 'rate-supporting',
+                }),
+            })
+        )
+    })
+
     it('displays the remove button when status is UPLOAD_COMPLETE in a table', () => {
         render(
             <FileProcessor
                 renderMode="table"
                 item={uploadComplete}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
         expect(screen.getByText('Remove')).toBeInTheDocument()
@@ -252,6 +307,7 @@ describe('FileProcessor component', () => {
                 renderMode="list"
                 item={uploadError}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
 
@@ -278,6 +334,7 @@ describe('FileProcessor component', () => {
                 renderMode="table"
                 item={uploadError}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
 
@@ -298,6 +355,7 @@ describe('FileProcessor component', () => {
                 renderMode="list"
                 item={scanningError}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
 
@@ -320,6 +378,7 @@ describe('FileProcessor component', () => {
                 renderMode="table"
                 item={scanningError}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
 
@@ -342,6 +401,7 @@ describe('FileProcessor component', () => {
                 renderMode="list"
                 item={duplicateError}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
 
@@ -360,6 +420,7 @@ describe('FileProcessor component', () => {
                 renderMode="table"
                 item={duplicateError}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
 
@@ -374,6 +435,7 @@ describe('FileProcessor component', () => {
                 renderMode="list"
                 item={{ ...uploadError, file: undefined }}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
 
@@ -395,6 +457,7 @@ describe('FileProcessor component', () => {
                 renderMode="table"
                 item={{ ...uploadError, file: undefined }}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
 
