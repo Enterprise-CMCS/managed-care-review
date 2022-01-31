@@ -84,6 +84,7 @@ export const FileRow = ({
                     id={`${item.id}--contract`}
                     name="contract-supporting"
                     aria-label="contract-supporting"
+                    aria-checked={isContractSupporting}
                     checked={isContractSupporting}
                     onChange={handleCheckboxClick}
                 />
@@ -95,6 +96,7 @@ export const FileRow = ({
                     id={`${item.id}--rate`}
                     name="rate-supporting"
                     aria-label="rate-supporting"
+                    aria-checked={isRateSupporting}
                     checked={isRateSupporting}
                     onChange={handleCheckboxClick}
                 />
