@@ -80,7 +80,7 @@ export const ContractDetailsSummarySection = ({
         void fetchZipUrl()
     }, [getKey, getBulkDlURL, submission])
     const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
-
+    const contractSupportingDocuments = submission.documents.filter(doc => doc.documentCategories.includes('CONTRACT_RELATED'))
     const isSubmitted = submission.__typename === 'StateSubmission'
     // Array of values from a checkbox field is displayed in an unordered list
     const capitationRateChangeReason = (): string | null => {
@@ -140,7 +140,11 @@ export const ContractDetailsSummarySection = ({
                     right={
                         <DataDetail
                             id="contractEffectiveDates"
-                            label={submission.contractType === "BASE"? "Contract effective dates": "Contract amendment effective dates"}
+                            label={
+                                submission.contractType === 'BASE'
+                                    ? 'Contract effective dates'
+                                    : 'Contract amendment effective dates'
+                            }
                             data={`${dayjs(submission.contractDateStart).format(
                                 'MM/DD/YYYY'
                             )} to ${dayjs(submission.contractDateEnd).format(
@@ -228,7 +232,17 @@ export const ContractDetailsSummarySection = ({
                     documents={submission.contractDocuments}
                     caption="Contract"
                     documentCategory="Contract"
+                
                 />
+                {contractSupportingDocuments.length > 0 && (
+                    <UploadedDocumentsTable
+                        documents={contractSupportingDocuments}
+                        caption="Contract supporting documents"
+                        documentCategory="Contract-supporting"
+                        isSupportingDocuments
+                    />
+                )}
+
             </dl>
         </section>
     )
