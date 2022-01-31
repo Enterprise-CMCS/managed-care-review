@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { FileProcessor, FileItemT } from './FileProcessor'
@@ -255,7 +255,7 @@ describe('FileProcessor component', () => {
         expect(screen.queryByRole('button', { name: /Retry/ })).toBeNull()
     })
 
-    it('has clickable document category checkboxes', async () => {
+    it('has clickable document category checkboxes', () => {
         render(
             <FileProcessor
                 renderMode="table"
