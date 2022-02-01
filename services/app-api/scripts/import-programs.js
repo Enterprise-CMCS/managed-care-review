@@ -1,19 +1,78 @@
 const csv = require('csv-parser');
 const fs = require('fs');
-const slugify = require("slugify")
+const slugify = require("slugify");
+const { v5: uuidv5 } = require('uuid');
 
-const stateNames = { "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas", "CA": "California", "CO": "Colorado", "CT": "Connecticut", "DE": "Delaware", "FL": "Florida", "GA": "Georgia", "HI": "Hawaii", "ID": "Idaho", "IL": "Illinois", "IN": "Indiana", "IA": "Iowa", "KS": "Kansas", "KY": "Kentucky", "LA": "Louisiana", "ME": "Maine", "MD": "Maryland", "MA": "Massachusetts", "MI": "Michigan", "MN": "Minnesota", "MS": "Mississippi", "MO": "Missouri", "MT": "Montana", "NE": "Nebraska", "NV": "Nevada", "NH": "New Hampshire", "NJ": "New Jersey", "NM": "New Mexico", "NY": "New York", "NC": "North Carolina", "ND": "North Dakota", "OH": "Ohio", "OK": "Oklahoma", "OR": "Oregon", "PA": "Pennsylvania", "RI": "Rhode Island", "SC": "South Carolina", "SD": "South Dakota", "TN": "Tennessee", "TX": "Texas", "UT": "Utah", "VT": "Vermont", "VA": "Virginia", "WA": "Washington", "WV": "West Virginia", "WI": "Wisconsin", "WY": "Wyoming", "DC": "Washington, DC", "PR": "Puerto Rico" };
+const stateNames = {
+    "AL": "Alabama",
+    "AK": "Alaska",
+    "AZ": "Arizona",
+    "AR": "Arkansas",
+    "CA": "California",
+    "CO": "Colorado",
+    "CT": "Connecticut",
+    "DE": "Delaware",
+    "FL": "Florida",
+    "GA": "Georgia",
+    "HI": "Hawaii",
+    "ID": "Idaho",
+    "IL": "Illinois",
+    "IN": "Indiana",
+    "IA": "Iowa",
+    "KS": "Kansas",
+    "KY": "Kentucky",
+    "LA": "Louisiana",
+    "ME": "Maine",
+    "MD": "Maryland",
+    "MA": "Massachusetts",
+    "MI": "Michigan",
+    "MN": "Minnesota",
+    "MS": "Mississippi",
+    "MO": "Missouri",
+    "MT": "Montana",
+    "NE": "Nebraska",
+    "NV": "Nevada",
+    "NH": "New Hampshire",
+    "NJ": "New Jersey",
+    "NM": "New Mexico",
+    "NY": "New York",
+    "NC": "North Carolina",
+    "ND": "North Dakota",
+    "OH": "Ohio",
+    "OK": "Oklahoma",
+    "OR": "Oregon",
+    "PA": "Pennsylvania",
+    "RI": "Rhode Island",
+    "SC": "South Carolina",
+    "SD": "South Dakota",
+    "TN": "Tennessee",
+    "TX": "Texas",
+    "UT": "Utah",
+    "VT": "Vermont",
+    "VA": "Virginia",
+    "WA": "Washington",
+    "WV": "West Virginia",
+    "WI": "Wisconsin",
+    "WY": "Wyoming",
+    "DC": "Washington, DC",
+    "PR": "Puerto Rico"
+};
+
+const uuidNamespace = "272e1db0-25b7-4fc3-a742-9e062c80539f";
 
 
-// Create a URL-safe slug for a program using its name.
-//
-// This is fairly specific to the incoming dataset. Additional punctuation appearing in that input
-// might 
-function generateSlug(name) {
-    return slugify(name, {
+// Create a URL-safe slug for a program using its name, namespaced using the state or territory abbreviation.
+function generateSlug(stateAbbreviation, programName) {
+    const slug = slugify(programName, {
         lower: true,
         strict: true,
     })
+
+    return `${stateAbbreviation.toLowerCase()}-${slug}`;
+}
+
+function generateUUID(id) {
+    return uuidv5(id, uuidNamespace);
 }
 
 const states = {};
@@ -31,7 +90,7 @@ fs.createReadStream('State programs, population, and nicknames.xlsx - Sheet1.csv
             };
         }
 
-        const id = generateSlug(data.Program)
+        const id = generateSlug(code, data.Program)
 
         if (programIDs.includes(id)) {
             console.error(`Error processing row:\n\n${JSON.stringify(data)}\n`)
@@ -47,6 +106,7 @@ fs.createReadStream('State programs, population, and nicknames.xlsx - Sheet1.csv
         } else {
             states[code].programs.push({
                 id: id,
+                uuid: generateUUID(id),
                 fullName: data.Program,
                 name: data.Nickname,
             })
