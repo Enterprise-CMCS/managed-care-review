@@ -52,23 +52,28 @@ const newPackageCMSEmail = (
         ' to ' +
         dayjs(submission.contractDateEnd).format('MM/DD/YYYY')
     }`
-    const ratingPeriod = `${submission.submissionType === 'CONTRACT_AND_RATES' ? `<b>Rating period:</b> ${dayjs(submission.rateDateStart).format('MM/DD/YYYY') + ' to ' + dayjs(submission.rateDateEnd).format('MM/DD/YYYY')}`: ''}` // displays nothing if submission is CONTRACT_ONLY
+    const ratingPeriodText= `${
+        submission.rateType === 'NEW'
+            ? '<b>Rating period</b>'
+            : '<b>Rate amendment effective dates</b>'
+    }`
+    const rateRelatedDatesText = `${submission.submissionType === 'CONTRACT_AND_RATES' ? `${ratingPeriodText}: ${dayjs(submission.rateDateStart).format('MM/DD/YYYY') + ' to ' + dayjs(submission.rateDateEnd).format('MM/DD/YYYY')}`: ''}` // displays nothing if submission is CONTRACT_ONLY
         const submissionURL = new URL(
             `submissions/${submission.id}`,
             config.baseUrl
         ).href
     const bodyHTML = `<span style="color:#FF0000;font-weight:bold;">Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.</span>
             <br /><br />
-            Managed Care submission: <b>${submissionName(submission)}</b> was received from <b>${
-            submission.stateCode
-        }</b>.<br /><br />
-            <b>Submission type:</b> ${
+            Managed Care submission: <b>${submissionName(
+                submission
+            )}</b> was received from <b>${submission.stateCode}</b>.<br /><br />
+            <b>Submission type</b>: ${
                 SubmissionTypeRecord[submission.submissionType]
             }<br />
             ${contractEffectiveDatesText}
             <br />
-            ${ratingPeriod}${ratingPeriod.length > 0? '<br />' : ''}
-            <b>Submission description:</b> ${
+            ${rateRelatedDatesText}${rateRelatedDatesText.length > 0 ? '<br />' : ''}
+            <b>Submission description</b>: ${
                 submission.submissionDescription
             }<br /><br />
             <a href="${submissionURL}">View submission</a>
