@@ -80,7 +80,7 @@ export const ContractDetailsSummarySection = ({
         void fetchZipUrl()
     }, [getKey, getBulkDlURL, submission])
     const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
-    const contractSupportingDocuments = submission.documents.filter(doc => doc.documentCategories.includes('CONTRACT_RELATED'))
+    const contractSupportingDocuments = submission.documents.filter(doc => doc.documentCategories.includes('CONTRACT_RELATED' as const))
     const isSubmitted = submission.__typename === 'StateSubmission'
     // Array of values from a checkbox field is displayed in an unordered list
     const capitationRateChangeReason = (): string | null => {

@@ -144,24 +144,26 @@ describe('ContractDetailsSummarySection', () => {
     it('render supporting contract docs when they exist', async () => {
         const testSubmission = {
             ...draftContractAndRatesSubmission,
-            contractDocuments: [{
+            contractDocuments: [
+                {
                     s3URL: 's3://foo/bar/contract',
                     name: 'contract test 1',
                     documentCategories: ['CONTRACT' as const],
-                }],
+                },
+            ],
             documents: [
                 {
-                    s3URL: 's3://foo/bar/test-1',
+                    s3URL: 's3://bucketname/key/test1',
                     name: 'supporting docs test 1',
                     documentCategories: ['CONTRACT_RELATED' as const],
                 },
                 {
-                    s3URL: 's3://foo/bar/test-2',
+                    s3URL: 's3://bucketname/key/test2',
                     name: 'supporting docs test 2',
                     documentCategories: ['RATES_RELATED' as const],
                 },
                 {
-                    s3URL: 's3://foo/bar/test-3',
+                    s3URL: 's3://bucketname/key/test3',
                     name: 'supporting docs test 3',
                     documentCategories: [
                         'CONTRACT_RELATED' as const,
@@ -174,18 +176,28 @@ describe('ContractDetailsSummarySection', () => {
             <ContractDetailsSummarySection submission={testSubmission} />
         )
 
-        const supportingDocsTable = screen.getByRole('table', {
-            name: 'Contract supporting documents',
-        })
+  
         const contractDocsTable = screen.getByRole('table', {
             name: 'Contract',
         })
         expect(
           contractDocsTable).toBeInTheDocument()
-        expect(supportingDocsTable).toBeInTheDocument()
+        
+    
+        const supportingDocsTable = screen.getByRole('table', {
+            name: 'Contract supporting documents',
+        })
 
+       
         await waitFor(() => {
+            expect(supportingDocsTable).toBeInTheDocument()
+            
             // check row content
+            expect(
+                within(contractDocsTable).getByRole('row', {
+                    name: /contract test 1/,
+                })
+            ).toBeInTheDocument()
             expect(
                 within(supportingDocsTable).getByText('supporting docs test 1')
             ).toBeInTheDocument()
@@ -193,16 +205,13 @@ describe('ContractDetailsSummarySection', () => {
                 within(supportingDocsTable).getByText('*supporting docs test 3')
             ).toBeInTheDocument()
 
-            // check both contract and supporting docs contract docs are on page
-                expect(
-                    within(supportingDocsTable).getAllByText(
-                        'Contract-supporting'
-                    ).length
-                ).toEqual(2)
+            // check correct category on supporting docs
             expect(
-                within(contractDocsTable).getAllByText('Contract-supporting')
-                    .length
-            ).toEqual(1)
+                within(supportingDocsTable).getAllByText(
+                    'Contract-supporting'
+                ).length
+            ).toEqual(2)
+
         })
     })
 

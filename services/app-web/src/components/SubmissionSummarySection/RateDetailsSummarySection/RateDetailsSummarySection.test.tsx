@@ -130,7 +130,7 @@ describe('RateDetailsSummarySection', () => {
             name: 'Rate certification',
         })
 
-        expect(screen.getByRole(rateDocsTable)).toBeInTheDocument()
+        expect(rateDocsTable).toBeInTheDocument()
         expect(supportingDocsTable).toBeInTheDocument()
 
         await waitFor (() => {
@@ -140,22 +140,22 @@ describe('RateDetailsSummarySection', () => {
 
             // check row content
             expect(
+                within(rateDocsTable).getByRole('row', {
+                    name: /rate docs test 1/,
+                })
+            ).toBeInTheDocument()
+            expect(
                 within(supportingDocsTable).getByText('supporting docs test 2')
             ).toBeInTheDocument()
             expect(
                 within(supportingDocsTable).getByText('*supporting docs test 3')
             ).toBeInTheDocument()
-           
-             // check both rate and supporting docs contract docs are on page
+
+            // check correct category on supporting docs
             expect(
-                    within(supportingDocsTable).getAllByText(
-                        'Rate-supporting'
-                    ).length
-                ).toEqual(2)
-            expect(
-                within(rateDocsTable).getAllByText('Rate-supporting')
+                within(supportingDocsTable).getAllByText('Rate-supporting')
                     .length
-            ).toEqual(1)
+            ).toEqual(2)
         })
        
     })
