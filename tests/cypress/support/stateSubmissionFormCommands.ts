@@ -167,10 +167,11 @@ Cypress.Commands.add('fillOutSupportingDocuments', () => {
     cy.findAllByRole('checkbox', {
         name: 'rate-supporting',
     }).eq(0).click({ force: true })
-       
+
+    // twice because there could be validation errors with checkbox
     cy.verifyDocumentsHaveNoErrors()
 
-    cy.findByTestId('upload-finished-indicator', {timeout: 120000}).should("exist")
+    cy.findAllByTestId('upload-finished-indicator', {timeout: 120000}).should('have.have.length', 2)
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 

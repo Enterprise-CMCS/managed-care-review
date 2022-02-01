@@ -133,6 +133,7 @@ export const RateDetailsSummarySection = ({
                         caption="Rate supporting documents"
                         documentCategory="Rate-supporting"
                         isSupportingDocuments
+                        isSubmitted={isSubmitted}
                     />
                 )}
             </dl>
