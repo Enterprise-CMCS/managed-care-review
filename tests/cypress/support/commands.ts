@@ -3,6 +3,7 @@
 // commands please read more here:
 // https://on.cypress.io/custom-commands
 // ***********************************************
+import '@cypress-audit/pa11y/commands'
 import '@testing-library/cypress/add-commands'
 import 'cypress-file-upload'
 import 'cypress-pipe'

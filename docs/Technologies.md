@@ -33,11 +33,15 @@ We have end to end testing (in the live browser) with [cypress](https://www.cypr
 
 ### pa11y
 
-`pa11y` is a tool for accessibility testing. `pa11y-ci` is a tool to against the list of urls declared in the config file or a sitemap (if configured). To run locally, you need to global install [pa11y-ci](https://github.com/pa11y/pa11y-ci) `yarn global add pa11y-ci`. For context, By default, pa11y uses the WCAG2AA standard.
+`pa11y` is a tool for accessibility testing. For context, By default, pa11y uses the WCAG2AA standard.
 
 If you would like to run pa11y against individual urls or with custom config as part of local development, consider installing plain ol' [pa11y](https://github.com/pa11y/pa11y) `yarn global add pa11y`. This allows you to do things like `pa11y --runner axe --runner htmlcs --standard WCAG2AAA http://localhost:3000`.
 
 To adjust warning levels, ignore certain types of warnings, or create actions (such as button clicks or user login) that happens in test runs reference the [pa11y configuration docs]((https://github.com/pa11y/pa11y#configuration).
+
+#### pa11y with cypress-audit
+
+We are running pa11y on every page of our form inside of our Cypress tests using the cypress-audit library. This allows us to sign in and fill out the form using Cypress, and only rely on pa11y to scan those pages. This is also one place in our app where we have implemented a ratchet in CI. The issues present when we started testing with pa11y have been ignored, allowing CI to ensure that we aren't adding new errors in the future. Tickets have been filed to address those existing issues.
 
 ### Todo:
 

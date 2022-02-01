@@ -9,6 +9,17 @@ describe('dashboard', () => {
         cy.findByRole('heading', { level: 1, name: /New submission/ })
     })
 
+    it('scan accessibility of dashboard', () => {
+        cy.logInAsStateUser()
+        cy.findByRole('heading', { level: 1, name: /Dashboard/ })
+
+        // check accessibility of dashboard
+        cy.pa11y({
+            actions: ['wait for element #dashboard-page to be visible'],
+            threshold: 2, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15947
+        })
+    })
+
     it('can see submission summary', () => {
         cy.logInAsStateUser()
 
@@ -40,6 +51,13 @@ describe('dashboard', () => {
             submissionId = pathnameArray[2]
         })
 
+        // check accessibility of filled out review and submit page
+        cy.findByRole('heading', { level: 2, name: /Review and submit/ })
+        cy.pa11y({
+            actions: ['wait for element #submissionTypeSection to be visible'],
+            threshold: 23, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15950
+        })
+
         // Submit, sent to dashboard
         cy.submitStateSubmissionForm()
         cy.waitForApiToLoad()
@@ -66,6 +84,15 @@ describe('dashboard', () => {
             cy.findByText('New rate certification').should('exist')
             cy.findByText('02/29/2024 to 02/28/2025').should('exist')
             cy.findByText('Download all contract documents').should('exist')
+
+            // check accessibility of filled out submission summary page
+            cy.pa11y({
+                actions: [
+                    'wait for element #submissionTypeSection to be visible',
+                ],
+                threshold: 19, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15952
+            })
+
             // Link back to dashboard, submission visible in default program
             cy.findByText('Back to state dashboard').should('exist').click()
             cy.findByText('Dashboard').should('exist')

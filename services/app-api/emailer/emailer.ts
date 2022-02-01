@@ -1,8 +1,8 @@
 import { Lambda } from 'aws-sdk'
 import {
     getSESEmailParams,
-    newPackageCMSEmailTemplate,
-    newPackageStateEmailTemplate,
+    newPackageCMSEmail,
+    newPackageStateEmail,
 } from './'
 import {
     StateSubmissionType,
@@ -57,14 +57,14 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
             }
         },
         sendCMSNewPackage: async function (submission: StateSubmissionType) {
-            const emailData = newPackageCMSEmailTemplate(submission, config)
+            const emailData = newPackageCMSEmail(submission, config)
             return await this.sendEmail(emailData)
         },
         sendStateNewPackage: async function (
             submission: StateSubmissionType,
             user: CognitoUserType
         ) {
-            const emailData = newPackageStateEmailTemplate(
+            const emailData = newPackageStateEmail(
                 submission,
                 user,
                 config
@@ -86,7 +86,7 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
         `)
         },
         sendCMSNewPackage: async (submission: StateSubmissionType) => {
-            const emailData = newPackageCMSEmailTemplate(submission, config)
+            const emailData = newPackageCMSEmail(submission, config)
             const emailRequestParams = getSESEmailParams(emailData)
             console.log(`
             EMAIL SENT
@@ -99,7 +99,7 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
             submission: StateSubmissionType,
             user: CognitoUserType
         ) => {
-            const emailData = newPackageStateEmailTemplate(
+            const emailData = newPackageStateEmail(
                 submission,
                 user,
                 config

@@ -12,7 +12,7 @@ describe('documents', () => {
             // Add two of the same document
             cy.visit(`/submissions/${draftSubmissionID}/documents`)
             cy.findByTestId('file-input-input').attachFile([
-                'documents/trussel-guide.pdf'
+                'documents/trussel-guide.pdf',
             ])
             cy.findByTestId('file-input-input').attachFile(
                 'documents/trussel-guide.pdf'
@@ -117,6 +117,13 @@ describe('documents', () => {
 
             cy.navigateForm('Continue')
             cy.findByRole('heading', { level: 2, name: /Review and submit/ })
+
+            // check accessibility of filled out documents page
+            cy.findByRole('button', { name: /Back/ }).click()
+            cy.pa11y({
+                actions: ['wait for element #documents-hint to be visible'],
+                threshold: 9, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15949
+            })
         })
     })
 })
