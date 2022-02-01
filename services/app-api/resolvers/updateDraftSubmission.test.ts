@@ -1,16 +1,15 @@
-import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
-import {
-    DraftSubmissionUpdates,
-    CreateDraftSubmissionInput,
-} from '../gen/gqlServer'
 import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
 import UPDATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/updateDraftSubmission.graphql'
+import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
+import {
+    CreateDraftSubmissionInput,
+    DraftSubmissionUpdates,
+} from '../gen/gqlServer'
 import {
     constructTestPostgresServer,
     createTestDraftSubmission,
     fetchTestDraftSubmissionById,
 } from '../testHelpers/gqlHelpers'
-
 import { applyUpdates } from './updateDraftSubmission'
 
 describe('updateDraftSubmission', () => {
@@ -297,7 +296,7 @@ describe('updateDraftSubmission', () => {
         expect(resultDraft.rateDateStart).toBe(startDate)
         expect(resultDraft.rateDateEnd).toBe(endDate)
         expect(resultDraft.rateDateCertified).toBe(certifiedDate)
-    })
+    }, 10000)
 
     it('updates a submission to have documents', async () => {
         const server = await constructTestPostgresServer()
@@ -896,7 +895,7 @@ describe('updateDraftSubmission', () => {
             {
                 name: 'myfile.pdf',
                 s3URL: 'fakeS3URL',
-                documentCategories:[ 'RATES_RELATED'],
+                documentCategories: ['RATES_RELATED'],
             },
         ])
 
