@@ -124,7 +124,7 @@ describe('RateDetailsSummarySection', () => {
         )
 
         const supportingDocsTable = screen.getByRole('table', {
-            name: 'Rate supporting documents',
+            name: /Rate supporting documents/,
         })
         const rateDocsTable = screen.getByRole('table', {
             name: 'Rate certification',
@@ -168,7 +168,7 @@ describe('RateDetailsSummarySection', () => {
         )
 
      expect(screen.queryByRole('table', {
-            name: 'Rate supporting documents',
+            name: /Rate supporting documents/,
         })).toBeNull()
 
     })

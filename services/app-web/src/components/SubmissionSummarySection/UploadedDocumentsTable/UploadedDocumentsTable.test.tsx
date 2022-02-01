@@ -59,7 +59,7 @@ describe('UploadedDocumentsTable', () => {
          expect(
              screen.getByRole('table', {
 
-                 name: 'Contract supporting',
+                 name: /Contract supporting/,
              })
          ).toBeInTheDocument()
          await waitFor( () => {

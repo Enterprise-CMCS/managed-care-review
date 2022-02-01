@@ -185,7 +185,7 @@ describe('ContractDetailsSummarySection', () => {
         
     
         const supportingDocsTable = screen.getByRole('table', {
-            name: 'Contract supporting documents',
+            name: /Contract supporting documents/,
         })
 
        
@@ -224,7 +224,7 @@ describe('ContractDetailsSummarySection', () => {
 
         expect(
             screen.queryByRole('table', {
-                name: 'Contract supporting documents',
+                name: /Contract supporting documents/,
             })
         ).toBeNull()
     })
