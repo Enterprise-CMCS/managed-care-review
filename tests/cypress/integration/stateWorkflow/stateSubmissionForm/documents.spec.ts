@@ -1,7 +1,7 @@
 describe('documents', () => {
     it('can navigate to and from the documents page, saving documents each time', () => {
         cy.logInAsStateUser()
-        cy.startNewContractOnlySubmission()
+        cy.startNewContractAndRatesSubmission()
 
         // Navigate to documents page
         cy.location().then((fullUrl) => {
@@ -12,7 +12,7 @@ describe('documents', () => {
             // Add two of the same document
             cy.visit(`/submissions/${draftSubmissionID}/documents`)
             cy.findByTestId('file-input-input').attachFile([
-                'documents/trussel-guide.pdf'
+                'documents/trussel-guide.pdf',
             ])
             cy.findByTestId('file-input-input').attachFile(
                 'documents/trussel-guide.pdf'
@@ -46,12 +46,19 @@ describe('documents', () => {
             cy.findByText('Duplicate file').should('exist')
             cy.findAllByRole('row').should('have.length', 4)
             cy.findByText(/2 complete, 1 error, 0 pending/)
+            // click the second column in the second row to make sure multiple rows are handled correctly
+            cy.findAllByRole('checkbox', {
+                name: 'rate-supporting',
+            }).eq(1).click({ force: true })
             cy.navigateForm('Back')
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
 
             // reload page, see two documents, duplicate was discarded on Back
             cy.visit(`/submissions/${draftSubmissionID}/documents`)
             cy.findAllByRole('row').should('have.length', 3)
+            cy.findAllByRole('checkbox', {
+                name: 'rate-supporting',
+            }).eq(1).should('be.checked')
             cy.verifyDocumentsHaveNoErrors()
 
             //  Save as draft
@@ -110,6 +117,13 @@ describe('documents', () => {
 
             cy.navigateForm('Continue')
             cy.findByRole('heading', { level: 2, name: /Review and submit/ })
+
+            // check accessibility of filled out documents page
+            cy.findByRole('button', { name: /Back/ }).click()
+            cy.pa11y({
+                actions: ['wait for element #documents-hint to be visible'],
+                threshold: 9, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15949
+            })
         })
     })
 })

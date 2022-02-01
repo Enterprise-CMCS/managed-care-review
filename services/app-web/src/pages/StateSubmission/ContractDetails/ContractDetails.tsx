@@ -158,6 +158,7 @@ export const ContractDetails = ({
                     key: 'INVALID_KEY',
                     s3URL: undefined,
                     status: 'UPLOAD_ERROR',
+                    documentCategories: doc.documentCategories,
                 }
             }
             return {
@@ -166,6 +167,7 @@ export const ContractDetails = ({
                 key: key,
                 s3URL: doc.s3URL,
                 status: 'UPLOAD_COMPLETE',
+                documentCategories: doc.documentCategories,
             }
         })
 
@@ -391,7 +393,8 @@ export const ContractDetails = ({
                                     errors={
                                         documentsErrorMessage
                                             ? {
-                                                  [documentsErrorKey]: documentsErrorMessage,
+                                                  [documentsErrorKey]:
+                                                      documentsErrorMessage,
                                                   ...errors,
                                               }
                                             : errors

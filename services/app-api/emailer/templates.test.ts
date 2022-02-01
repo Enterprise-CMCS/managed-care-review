@@ -3,13 +3,13 @@ import {
     submissionName,
     StateSubmissionType
 } from '../../app-web/src/common-code/domain-models'
-import {newPackageCMSEmailTemplate, newPackageStateEmailTemplate} from './'
+import {newPackageCMSEmail, newPackageStateEmail} from './'
 
 describe('Email templates', () => {
     describe('CMS email', () => {
         it('to addresses list includes review email addresses from email config', () => {
             const sub = mockContractOnlySubmission()
-            const template = newPackageCMSEmailTemplate(
+            const template = newPackageCMSEmail(
                 sub,
                 testEmailConfig
             )
@@ -27,7 +27,7 @@ describe('Email templates', () => {
         it('subject line is correct', () => {
             const sub  = mockContractOnlySubmission()
             const name = submissionName(sub)
-            const template = newPackageCMSEmailTemplate(sub,testEmailConfig)
+            const template = newPackageCMSEmail(sub,testEmailConfig)
             
             expect(template).toEqual(
                 expect.objectContaining({
@@ -41,7 +41,7 @@ describe('Email templates', () => {
 
         it('includes warning about unofficial submission', () => {
             const sub = mockContractOnlySubmission()
-            const template = newPackageCMSEmailTemplate( sub, testEmailConfig)
+            const template = newPackageCMSEmail( sub, testEmailConfig)
              expect(template).toEqual(
                  expect.objectContaining({
                      bodyText: expect.stringMatching(
@@ -59,7 +59,7 @@ describe('Email templates', () => {
                 contractDateStart: new Date('01/01/2021'),
                 contractDateEnd: new Date('01/01/2025')
             }
-            const template = newPackageCMSEmailTemplate(
+            const template = newPackageCMSEmail(
                 sub,
                 testEmailConfig
             )
@@ -96,7 +96,7 @@ describe('Email templates', () => {
                  rateDateStart: new Date('01/01/2021'),
                  rateDateEnd: new Date('01/01/2022'),
              }
-            const template = newPackageCMSEmailTemplate(sub, testEmailConfig)
+            const template = newPackageCMSEmail(sub, testEmailConfig)
               
               expect(template).toEqual(
                   expect.objectContaining({
@@ -130,7 +130,7 @@ describe('Email templates', () => {
                      rateDateStart: new Date('01/01/2021'),
                      rateDateEnd: new Date('01/01/2022'),
                  }
-            const template = newPackageCMSEmailTemplate(sub, testEmailConfig)
+            const template = newPackageCMSEmail(sub, testEmailConfig)
             
             expect(template).toEqual(
                          expect.objectContaining({
@@ -158,7 +158,7 @@ describe('Email templates', () => {
         })
         it('includes link to submission', () => {
             const sub = mockContractAmendmentSubmission()
-            const template = newPackageCMSEmailTemplate(
+            const template = newPackageCMSEmail(
                 sub,
                 testEmailConfig
             )
@@ -176,7 +176,7 @@ describe('Email templates', () => {
          it('to addresses list includes current user', () => {
              const sub = mockContractOnlySubmission()
              const user = mockUser()
-             const template = newPackageStateEmailTemplate(
+             const template = newPackageStateEmail(
                  sub,
                  user,
                  testEmailConfig
@@ -193,7 +193,7 @@ describe('Email templates', () => {
         it('to addresses list includes all state contacts on submission', () => {
             const sub: StateSubmissionType = {...mockContractOnlySubmission(), stateContacts: [{name: 'test1', titleRole: 'Foo1', email: 'test1@example.com'}, {name: 'test2', titleRole: 'Foo2', email: 'test2@example.com'}]}
             const user = mockUser()
-            const template = newPackageStateEmailTemplate(
+            const template = newPackageStateEmail(
                 sub,
                 user,
                 testEmailConfig
@@ -211,7 +211,7 @@ describe('Email templates', () => {
              const sub = mockContractOnlySubmission()
              const name = submissionName(sub)
              const user = mockUser()
-             const template = newPackageStateEmailTemplate(
+             const template = newPackageStateEmail(
                  sub,
                  user,
                  testEmailConfig
@@ -233,7 +233,7 @@ describe('Email templates', () => {
          it('includes warning about unofficial submission', () => {
              const sub = mockContractOnlySubmission()
              const user = mockUser()
-             const template = newPackageStateEmailTemplate(
+             const template = newPackageStateEmail(
                  sub,
                  user,
                  testEmailConfig
@@ -250,7 +250,7 @@ describe('Email templates', () => {
         it('includes link to submission', () => {
             const sub = mockContractAmendmentSubmission()
             const user = mockUser()
-            const template = newPackageStateEmailTemplate(
+            const template = newPackageStateEmail(
                 sub,
                 user,
                 testEmailConfig
@@ -267,7 +267,7 @@ describe('Email templates', () => {
         it('includes information about what is next', () => {
             const sub = mockContractAmendmentSubmission()
             const user = mockUser()
-            const template = newPackageStateEmailTemplate(
+            const template = newPackageStateEmail(
                 sub,
                 user,
                 testEmailConfig

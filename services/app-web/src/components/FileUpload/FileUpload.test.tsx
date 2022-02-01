@@ -42,6 +42,7 @@ describe('FileUpload component', () => {
         onFileItemsUpdate: () => {
             return
         },
+        renderMode: 'list',
     }
     beforeEach(() => jest.clearAllMocks())
     it('renders without errors', async () => {
@@ -59,6 +60,7 @@ describe('FileUpload component', () => {
                 name: 'Trussel Guide to Truss - trussels-guide.pdf',
                 s3URL: "s3://local-uploads/1620164967212-Trussels' Guide to Truss - trussels-guide.pdf/Trussels' Guide to Truss - trussels-guide.pdf",
                 status: 'UPLOAD_COMPLETE',
+                documentCategories: [],
             },
         ]
 
@@ -199,6 +201,7 @@ describe('FileUpload component', () => {
             scanFile: jest.fn().mockResolvedValue(undefined),
             onFileItemsUpdate: jest.fn().mockResolvedValue(undefined),
             accept: '.pdf,.txt',
+            renderMode: 'list',
         }
 
         render(<FileUpload {...props} />)
@@ -225,6 +228,7 @@ describe('FileUpload component', () => {
             scanFile: jest.fn().mockRejectedValue(new Error('failed')),
             onFileItemsUpdate: jest.fn().mockResolvedValue(undefined),
             accept: '.pdf,.txt',
+            renderMode: 'list',
         }
 
         render(<FileUpload {...props} />)
@@ -251,6 +255,7 @@ describe('FileUpload component', () => {
             scanFile: jest.fn().mockRejectedValue(new Error('failed')),
             onFileItemsUpdate: jest.fn().mockResolvedValue(undefined),
             accept: '.pdf,.txt',
+            renderMode: 'list',
         }
 
         render(<FileUpload {...props} />)

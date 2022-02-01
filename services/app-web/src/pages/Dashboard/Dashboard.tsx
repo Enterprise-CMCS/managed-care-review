@@ -1,16 +1,14 @@
-import React, { useState } from 'react'
-import dayjs from 'dayjs'
 import { Alert, GridContainer, Link, Table, Tag } from '@trussworks/react-uswds'
+import dayjs from 'dayjs'
+import React, { useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-
-import styles from './Dashboard.module.scss'
-
 import { Loading } from '../../components/Loading'
 import { useAuth } from '../../contexts/AuthContext'
 import {
-    useIndexSubmissionsQuery,
     SubmissionType as GQLSubmissionType,
+    useIndexSubmissionsQuery,
 } from '../../gen/gqlClient'
+import styles from './Dashboard.module.scss'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
 
 const isSubmitted = (typename: string) =>
@@ -99,7 +97,7 @@ export const Dashboard = (): React.ReactElement => {
 
     return (
         <>
-            <div className={styles.wrapper}>
+            <div id="dashboard-page" className={styles.wrapper}>
                 <GridContainer
                     className={styles.container}
                     data-testid="dashboard-page"

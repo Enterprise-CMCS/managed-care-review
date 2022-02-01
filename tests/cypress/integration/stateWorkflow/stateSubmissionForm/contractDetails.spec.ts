@@ -52,5 +52,12 @@ describe('contract details', () => {
         // Navigate to contacts page by clicking continue for contract only submission
         cy.navigateForm('Continue')
         cy.findByRole('heading', { level: 2, name: /Contacts/ })
+
+        // check accessibility of filled out contract details page
+        cy.findByRole('button', { name: /Back/ }).click()
+        cy.pa11y({
+            actions: ['wait for element #form-guidance to be visible'],
+            threshold: 15, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15946
+        })
     })
 })

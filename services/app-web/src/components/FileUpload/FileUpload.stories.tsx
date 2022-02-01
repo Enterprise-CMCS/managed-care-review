@@ -30,6 +30,7 @@ export const DemoFileUploadSuccess = (): React.ReactElement => {
                 return
             }}
             onFileItemsUpdate={() => console.log('Async load complete')}
+            isContractOnly={false}
         />
     )
 }
@@ -47,6 +48,7 @@ export const DemoFileUploadFailure = (): React.ReactElement => {
                 return
             }}
             onFileItemsUpdate={() => console.log('Async load complete')}
+            isContractOnly={false}
         />
     )
 }

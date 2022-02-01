@@ -1,3 +1,5 @@
+import { pa11y, prepareAudit } from '@cypress-audit/pa11y'
+
 /// <reference types="cypress" />
 // ***********************************************************
 // the plugins file with the 'pluginsFile' configuration option.
@@ -17,6 +19,16 @@ module.exports = (on, config) => {
     const newConfig = config
     newConfig.env.AUTH_MODE = process.env.REACT_APP_AUTH_MODE
     newConfig.env.TEST_USERS_PASS = process.env.TEST_USERS_PASS
+
+    on('before:browser:launch', (browser = {}, launchOptions) => {
+        // pa11y configuration
+        prepareAudit(launchOptions)
+    })
+
+    on('task', {
+        // pa11y configuration
+        pa11y: pa11y(),
+    })
 
     return config
 }

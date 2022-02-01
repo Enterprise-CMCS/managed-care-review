@@ -2,7 +2,6 @@ import React from 'react'
 import { render, screen } from '@testing-library/react'
 import renderer from 'react-test-renderer'
 import userEvent from '@testing-library/user-event'
-import prettyDOM from '@testing-library/react'
 
 import { FileItemT } from '../FileProcessor/FileProcessor'
 import { FileItemsList } from './FileItemsList'
@@ -16,6 +15,7 @@ describe('FileItemList component', () => {
         key: undefined,
         s3URL: undefined,
         status: 'PENDING',
+        documentCategories: [],
     }
     const scanning: FileItemT = {
         id: 'testFile1',
@@ -24,6 +24,7 @@ describe('FileItemList component', () => {
         key: '4545454-testFile1',
         s3URL: 'tests3://uploaded-12313123213/4545454-testFile1',
         status: 'SCANNING',
+        documentCategories: [],
     }
     const uploadError: FileItemT = {
         id: 'testFile2',
@@ -32,6 +33,7 @@ describe('FileItemList component', () => {
         key: undefined,
         s3URL: undefined,
         status: 'UPLOAD_ERROR',
+        documentCategories: [],
     }
 
     const scanningError: FileItemT = {
@@ -41,6 +43,7 @@ describe('FileItemList component', () => {
         key: '4545454-testFile3',
         s3URL: 'tests3://uploaded-12313123213/4545454-testFile3',
         status: 'SCANNING_ERROR',
+        documentCategories: [],
     }
 
     const complete: FileItemT = {
@@ -50,6 +53,7 @@ describe('FileItemList component', () => {
         key: '4545454-testFile4',
         s3URL: 'tests3://uploaded-12313123213/4545454-testFile4',
         status: 'UPLOAD_COMPLETE',
+        documentCategories: [],
     }
 
     const duplicateError: FileItemT = {
@@ -59,10 +63,15 @@ describe('FileItemList component', () => {
         key: '1234545454-testFile4',
         s3URL: 'tests3://uploaded-12313123213/1234545454-testFile4',
         status: 'DUPLICATE_NAME_ERROR',
+        documentCategories: [],
     }
     const buttonActionProps = {
         deleteItem: jest.fn(),
         retryItem: jest.fn(),
+    }
+
+    const categoryCheckboxProps = {
+        handleCheckboxClick: jest.fn(),
     }
 
     beforeEach(() => jest.clearAllMocks())
@@ -73,6 +82,7 @@ describe('FileItemList component', () => {
                 renderMode="list"
                 fileItems={fileItems}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
 
@@ -88,6 +98,7 @@ describe('FileItemList component', () => {
                 renderMode="table"
                 fileItems={fileItems}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
         // the table has a header row so we need to add 1 to the length
@@ -110,6 +121,7 @@ describe('FileItemList component', () => {
                     renderMode="list"
                     fileItems={fileItems}
                     {...buttonActionProps}
+                    {...categoryCheckboxProps}
                 />
             )
             .toJSON()
@@ -123,6 +135,7 @@ describe('FileItemList component', () => {
                 renderMode="list"
                 fileItems={fileItems}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
 
@@ -140,6 +153,7 @@ describe('FileItemList component', () => {
                 renderMode="table"
                 fileItems={fileItems}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
 
@@ -164,6 +178,7 @@ describe('FileItemList component', () => {
                 renderMode="list"
                 fileItems={fileItems}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
 
@@ -212,6 +227,7 @@ describe('FileItemList component', () => {
                 renderMode="table"
                 fileItems={fileItems}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
 
