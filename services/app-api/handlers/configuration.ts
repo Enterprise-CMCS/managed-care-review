@@ -46,8 +46,6 @@ async function configurePostgres(
     dbURL: string,
     secretName: string | undefined
 ): Promise<PrismaClient | Error> {
-    console.log('Getting Postgres Connection')
-
     const dbConnResult = await getPostgresURL(dbURL, secretName)
     if (dbConnResult instanceof Error) {
         return dbConnResult

@@ -1,3 +1,10 @@
+import { registerInstrumentations } from '@opentelemetry/instrumentation'
+import { AwsLambdaInstrumentation } from '@opentelemetry/instrumentation-aws-lambda'
+import {
+    ConsoleSpanExporter,
+    SimpleSpanProcessor,
+} from '@opentelemetry/sdk-trace-base'
+import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { ApolloServer } from 'apollo-server-lambda'
 import {
     APIGatewayProxyEvent,
@@ -18,6 +25,31 @@ import { newLocalEmailer, newSESEmailer } from '../emailer'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import { configureResolvers } from '../resolvers'
 import { configurePostgres } from './configuration'
+
+const provider = new NodeTracerProvider()
+provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()))
+provider.register()
+
+registerInstrumentations({
+    instrumentations: [
+        new AwsLambdaInstrumentation({
+            requestHook: (span, { event, context }) => {
+                console.log('IN REQUEST HOOK WOIFNEWOINFWIOFN')
+                span.setAttribute('app.name', context.functionName)
+                span.setAttribute('started', true)
+            },
+            responseHook: (span, { err, res }) => {
+                console.log('IN RESPONSE HOOK WOEINFWOINFIOWEF')
+                span.setAttribute('finished', true)
+                if (err instanceof Error)
+                    span.setAttribute('app.error', err.message)
+                if (res) span.setAttribute('app.res', res)
+            },
+        }),
+    ],
+})
+
+// -------- no more setup for OTEL --------
 
 // The Context type passed to all of our GraphQL resolvers
 export interface Context {
