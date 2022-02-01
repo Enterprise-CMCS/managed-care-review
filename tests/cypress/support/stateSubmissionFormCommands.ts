@@ -148,12 +148,22 @@ Cypress.Commands.add('fillOutActuaryContact', () => {
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
-Cypress.Commands.add('fillOutDocuments', () => {
+Cypress.Commands.add('fillOutSupportingDocuments', () => {
     // Must be on '/submissions/:id/documents'
     cy.findByTestId('file-input-input').attachFile(
         'documents/trussel-guide.pdf'
     )
+    cy.findAllByRole('checkbox', {
+                name: 'rate-supporting',
+            }).eq(1).click({ force: true })
 
+    cy.findByTestId('file-input-input').attachFile(
+        'documents/testing.csv'
+    )
+
+        cy.findAllByRole('checkbox', {
+            name: 'contract-supporting',
+        }).eq(2).click({ force: true })
     cy.verifyDocumentsHaveNoErrors()
     cy.findByTestId('upload-finished-indicator', {timeout: 120000}).should("exist")
     cy.findAllByTestId('errorMessage').should('have.length', 0)
