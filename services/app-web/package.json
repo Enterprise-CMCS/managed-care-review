@@ -63,7 +63,7 @@
     },
     "dependencies": {
         "@apollo/client": "^3.4.15",
-        "@trussworks/react-uswds": "^2.6.0",
+        "@trussworks/react-uswds": "^2.7.1",
         "@types/classnames": "^2.2.11",
         "@types/jest": "^27.0.1",
         "@types/react": "^17.0.5",
