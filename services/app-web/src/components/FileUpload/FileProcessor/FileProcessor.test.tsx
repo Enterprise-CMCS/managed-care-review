@@ -288,6 +288,26 @@ describe('FileProcessor component', () => {
         )
     })
 
+    it('does not have clickable document category checkboxes for a contract-only submission', () => {
+        render(
+            <FileProcessor
+                renderMode="table"
+                isContractOnly={true}
+                item={uploadComplete}
+                {...buttonActionProps}
+                {...categoryCheckboxProps}
+            />
+        )
+        const contractCheckbox = screen.queryByRole('checkbox', {
+            name: 'contract-supporting',
+        })
+        const ratesCheckbox = screen.queryByRole('checkbox', {
+            name: 'rate-supporting',
+        })
+        expect(contractCheckbox).not.toBeInTheDocument()
+        expect(ratesCheckbox).not.toBeInTheDocument()
+    })
+
     it('displays the remove button when status is UPLOAD_COMPLETE in a table', () => {
         render(
             <FileProcessor

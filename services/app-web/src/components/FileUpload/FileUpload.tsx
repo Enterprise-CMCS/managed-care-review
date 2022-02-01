@@ -32,6 +32,7 @@ export type FileUploadProps = {
     scanFile?: (key: string) => Promise<void | Error> // optional function to be called after uploading (used for scanning)
     deleteFile: (key: string) => Promise<void>
     onFileItemsUpdate: ({ fileItems }: { fileItems: FileItemT[] }) => void
+    isContractOnly?: boolean
 } & JSX.IntrinsicElements['input']
 
 /*  FileUpload handles async file upload to S3 and displays inline errors per file.
@@ -55,6 +56,7 @@ export const FileUpload = ({
     scanFile,
     deleteFile,
     onFileItemsUpdate,
+    isContractOnly,
     ...inputProps
 }: FileUploadProps): React.ReactElement => {
     const [fileItems, setFileItems] = useState<FileItemT[]>(initialItems || [])
@@ -118,7 +120,7 @@ export const FileUpload = ({
                 key: undefined,
                 s3URL: undefined,
                 status: 'PENDING',
-                documentCategories: [],
+                documentCategories: isContractOnly ? ['CONTRACT_RELATED'] : [],
             }
 
             if (isDuplicateItem(fileItems, newItem)) {
@@ -405,6 +407,7 @@ export const FileUpload = ({
                 fileItems={fileItems}
                 renderMode={renderMode}
                 handleCheckboxClick={handleCheckboxClick}
+                isContractOnly={isContractOnly}
             />
         </FormGroup>
     )

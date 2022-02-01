@@ -11,12 +11,14 @@ export const FileItemsList = ({
     retryItem,
     renderMode,
     handleCheckboxClick,
+    isContractOnly,
 }: {
     fileItems: FileItemT[]
     deleteItem: (id: FileItemT) => void
     retryItem: (item: FileItemT) => void
     renderMode: 'table' | 'list'
     handleCheckboxClick: (event: React.ChangeEvent<HTMLInputElement>) => void
+    isContractOnly?: boolean
 }): React.ReactElement => {
     const liClasses = (status: FileStatus): string => {
         const hasError =
@@ -35,6 +37,7 @@ export const FileItemsList = ({
             deleteItem={deleteItem}
             retryItem={retryItem}
             handleCheckboxClick={handleCheckboxClick}
+            isContractOnly={isContractOnly}
         />
     ) : (
         <ListWrapper

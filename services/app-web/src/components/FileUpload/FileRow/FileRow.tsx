@@ -19,6 +19,7 @@ type FileRowProps = {
     handleDelete: (_e: React.MouseEvent) => void
     handleRetry: (_e: React.MouseEvent) => void
     handleCheckboxClick: (event: React.ChangeEvent<HTMLInputElement>) => void
+    isContractOnly?: boolean
 }
 
 export const FileRow = ({
@@ -35,6 +36,7 @@ export const FileRow = ({
     handleDelete,
     handleRetry,
     handleCheckboxClick,
+    isContractOnly,
 }: FileRowProps): React.ReactElement => {
     const { name } = item
 
@@ -77,30 +79,34 @@ export const FileRow = ({
                     <span>{name}</span>
                 </span>
             </td>
-            <td>
-                <Checkbox
-                    className={styles.checkbox}
-                    label=""
-                    id={`${item.id}--contract`}
-                    name="contract-supporting"
-                    aria-label="contract-supporting"
-                    aria-checked={isContractSupporting}
-                    checked={isContractSupporting}
-                    onChange={handleCheckboxClick}
-                />
-            </td>
-            <td>
-                <Checkbox
-                    className={styles.checkbox}
-                    label=""
-                    id={`${item.id}--rate`}
-                    name="rate-supporting"
-                    aria-label="rate-supporting"
-                    aria-checked={isRateSupporting}
-                    checked={isRateSupporting}
-                    onChange={handleCheckboxClick}
-                />
-            </td>
+            {!isContractOnly && (
+                <td>
+                    <Checkbox
+                        className={styles.checkbox}
+                        label=""
+                        id={`${item.id}--contract`}
+                        name="contract-supporting"
+                        aria-label="contract-supporting"
+                        aria-checked={isContractSupporting}
+                        checked={isContractSupporting}
+                        onChange={handleCheckboxClick}
+                    />
+                </td>
+            )}
+            {!isContractOnly && (
+                <td>
+                    <Checkbox
+                        className={styles.checkbox}
+                        label=""
+                        id={`${item.id}--rate`}
+                        name="rate-supporting"
+                        aria-label="rate-supporting"
+                        aria-checked={isRateSupporting}
+                        checked={isRateSupporting}
+                        onChange={handleCheckboxClick}
+                    />
+                </td>
+            )}
             <td style={{ textAlign: 'right' }}>
                 <Button
                     style={{ marginTop: 0 }}

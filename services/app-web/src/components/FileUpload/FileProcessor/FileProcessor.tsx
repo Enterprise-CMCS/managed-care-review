@@ -87,6 +87,7 @@ type FileProcessorProps = {
     retryItem: (item: FileItemT) => void
     renderMode: 'table' | 'list'
     handleCheckboxClick: (event: React.ChangeEvent<HTMLInputElement>) => void
+    isContractOnly?: boolean
 }
 export const FileProcessor = ({
     item,
@@ -94,6 +95,7 @@ export const FileProcessor = ({
     retryItem,
     renderMode,
     handleCheckboxClick,
+    isContractOnly,
 }: FileProcessorProps): React.ReactElement => {
     const { name, status, file } = item
     const isRateSupporting = item.documentCategories.includes('RATES_RELATED')
@@ -171,6 +173,7 @@ export const FileProcessor = ({
             handleDelete={handleDelete}
             handleRetry={handleRetry}
             handleCheckboxClick={handleCheckboxClick}
+            isContractOnly={isContractOnly}
         />
     ) : (
         <FileListItem

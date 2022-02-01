@@ -7,6 +7,7 @@ type TableWrapperProps = {
     deleteItem: (id: FileItemT) => void
     retryItem: (item: FileItemT) => void
     handleCheckboxClick: (event: React.ChangeEvent<HTMLInputElement>) => void
+    isContractOnly?: boolean
 }
 
 export const TableWrapper = ({
@@ -14,14 +15,15 @@ export const TableWrapper = ({
     deleteItem,
     retryItem,
     handleCheckboxClick,
+    isContractOnly,
 }: TableWrapperProps): React.ReactElement => {
     return (
         <Table fullWidth>
             <thead>
                 <tr>
                     <th>Document name</th>
-                    <th>Contract-supporting</th>
-                    <th>Rate-supporting</th>
+                    {!isContractOnly && <th>Contract-supporting</th>}
+                    {!isContractOnly && <th>Rate-supporting</th>}
                     <th></th>
                 </tr>
             </thead>
@@ -34,6 +36,7 @@ export const TableWrapper = ({
                         item={item}
                         renderMode="table"
                         handleCheckboxClick={handleCheckboxClick}
+                        isContractOnly={isContractOnly}
                     />
                 ))}
             </tbody>

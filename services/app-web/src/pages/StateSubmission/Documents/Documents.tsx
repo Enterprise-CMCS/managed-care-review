@@ -35,6 +35,7 @@ export const Documents = ({
     formAlert = undefined,
 }: DocumentProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = useState(false)
+    const isContractOnly = draftSubmission.submissionType === 'CONTRACT_ONLY'
     const history = useHistory()
 
     // Documents state management
@@ -272,6 +273,7 @@ export const Documents = ({
                         scanFile={handleScanFile}
                         deleteFile={handleDeleteFile}
                         onFileItemsUpdate={onFileItemsUpdate}
+                        isContractOnly={isContractOnly}
                     />
                 </fieldset>
                 <PageActions
