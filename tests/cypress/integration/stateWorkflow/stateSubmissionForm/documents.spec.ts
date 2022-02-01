@@ -1,7 +1,7 @@
 describe('documents', () => {
     it('can navigate to and from the documents page, saving documents each time', () => {
         cy.logInAsStateUser()
-        cy.startNewContractOnlySubmission()
+        cy.startNewContractAndRatesSubmission()
 
         // Navigate to documents page
         cy.location().then((fullUrl) => {
