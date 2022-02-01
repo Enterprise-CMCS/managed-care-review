@@ -240,6 +240,7 @@ export const ContractDetailsSummarySection = ({
                         caption="Contract supporting documents"
                         documentCategory="Contract-supporting"
                         isSupportingDocuments
+                        isSubmitted={isSubmitted}
                     />
                 )}
 

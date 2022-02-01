@@ -14,15 +14,20 @@ export type SupportingDocumentsSummarySectionProps = {
     navigateTo?: string
 }
 
+// This component is only used for supporting docs that are not categorized (not expected behavior but still possible)
+// since supporting documents are now displayed in the rate and contract sections 
 export const SupportingDocumentsSummarySection = ({
     submission,
     navigateTo,
-}: SupportingDocumentsSummarySectionProps): React.ReactElement => {
+}: SupportingDocumentsSummarySectionProps): React.ReactElement| null => {
     const { getURL, getKey, getBulkDlURL } = useS3()
     useEffect(() => {
         const refreshDocuments = async () => {
+                const uncategorizedDocuments = submission.documents.filter(
+                    (doc) => doc.documentCategories === []
+                )
             const newDocuments = await Promise.all(
-                submission.documents.map(async (doc) => {
+                uncategorizedDocuments.map(async (doc) => {
                     const key = getKey(doc.s3URL)
                     if (!key)
                         return {
@@ -54,9 +59,11 @@ export const SupportingDocumentsSummarySection = ({
 
     useEffect(() => {
         // get all the keys for the documents we want to zip
+            const uncategorizedDocuments = submission.documents.filter(
+                (doc) => doc.documentCategories === []
+            )
         async function fetchZipUrl() {
-            console.log(submission)
-            const keysFromDocs = submission.documents
+            const keysFromDocs = uncategorizedDocuments
                 .map((doc) => {
                     const key = getKey(doc.s3URL)
                     if (!key) return ''
@@ -82,6 +89,8 @@ export const SupportingDocumentsSummarySection = ({
 
     const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
     const isSubmitted = submission.__typename === 'StateSubmission'
+    // when there are no uncategorized supporting documents, remove this section entirely
+    if (!refreshedDocs) return null
 
     return (
         <section id="documents" className={styles.summarySection}>

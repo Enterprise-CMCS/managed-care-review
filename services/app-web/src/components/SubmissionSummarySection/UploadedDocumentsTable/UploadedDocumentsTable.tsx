@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
-import styles from './UploadedDocumentsTable.module.scss'
+import { NavLink } from 'react-router-dom'
 import { Link } from '@trussworks/react-uswds'
+
+import styles from './UploadedDocumentsTable.module.scss'
+
 import { useS3 } from '../../../contexts/S3Context'
 import { Document } from '../../../gen/gqlClient'
 
@@ -9,6 +12,7 @@ export type UploadedDocumentsTableProps = {
     caption: string | null
     documentCategory: string
     isSupportingDocuments?: boolean 
+    isSubmitted?: boolean
 }
 
 type DocumentWithLink = { url: string | null } & Document
@@ -21,10 +25,17 @@ export const UploadedDocumentsTable = ({
     documents,
     caption,
     documentCategory,
-    isSupportingDocuments = false
+    isSupportingDocuments = false,
+    isSubmitted = false
 }: UploadedDocumentsTableProps): React.ReactElement => {
     const { getURL, getKey } = useS3()
     const [refreshedDocs, setRefreshedDocs] = useState<DocumentWithLink[]>([])
+    const shouldShowEditButton = !isSubmitted && isSupportingDocuments
+    const shouldShowAsteriskExplainer = refreshedDocs.some(
+        (doc) =>
+            doc.documentCategories.includes('RATES_RELATED') &&
+            doc.documentCategories.includes('CONTRACT_RELATED')
+    )
     useEffect(() => {
         const refreshDocuments = async () => {
             const newDocuments = await Promise.all(
@@ -51,12 +62,29 @@ export const UploadedDocumentsTable = ({
 
         void refreshDocuments()
     }, [documents, getKey, getURL])
+    
     return (
         <>
             <table
-                className={`borderTopLinearGradient ${styles.uploadedDocumentsTable}`}
+                className={`borderTopLinearGradient ${
+                    styles.uploadedDocumentsTable
+                } ${isSupportingDocuments ? styles.withMarginTop : ''}`}
             >
-                <caption className="text-bold">{caption}</caption>
+                <caption className="text-bold">
+                    <div className={styles.captionContainer}>
+                        <span>{caption}</span>
+                        {shouldShowEditButton && (
+                            <Link
+                                variant="unstyled"
+                                asCustom={NavLink}
+                                className="usa-button usa-button--outline"
+                                to="documents"
+                            >
+                                Edit <span className="srOnly">{caption}</span>
+                            </Link>
+                        )}
+                    </div>
+                </caption>
                 <thead>
                     <tr>
                         <th scope="col">Document name</th>
@@ -90,7 +118,7 @@ export const UploadedDocumentsTable = ({
                     ))}
                 </tbody>
             </table>
-            {isSupportingDocuments && (
+            {shouldShowAsteriskExplainer && (
                 <span>
                     * Listed as both a contract and rate supporting document
                 </span>
