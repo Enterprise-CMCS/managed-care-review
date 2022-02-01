@@ -35,6 +35,7 @@ export const Documents = ({
     formAlert = undefined,
 }: DocumentProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = useState(false)
+    const isContractOnly = draftSubmission.submissionType === 'CONTRACT_ONLY'
     const history = useHistory()
 
     // Documents state management
@@ -83,6 +84,7 @@ export const Documents = ({
                     key: 'INVALID_KEY',
                     s3URL: undefined,
                     status: 'UPLOAD_ERROR',
+                    documentCategories: doc.documentCategories,
                 }
             }
             return {
@@ -91,6 +93,7 @@ export const Documents = ({
                 key: key,
                 s3URL: doc.s3URL,
                 status: 'UPLOAD_COMPLETE',
+                documentCategories: doc.documentCategories,
             }
         })
 
@@ -189,7 +192,7 @@ export const Documents = ({
                         formDataDocuments.push({
                             name: fileItem.name,
                             s3URL: fileItem.s3URL,
-                            documentCategories: [],
+                            documentCategories: fileItem.documentCategories,
                         })
                     }
                     return formDataDocuments
@@ -198,7 +201,6 @@ export const Documents = ({
             )
 
             const updatedDraft = updatesFromSubmission(draftSubmission)
-
             updatedDraft.documents = documents
 
             try {
@@ -271,6 +273,7 @@ export const Documents = ({
                         scanFile={handleScanFile}
                         deleteFile={handleDeleteFile}
                         onFileItemsUpdate={onFileItemsUpdate}
+                        isContractOnly={isContractOnly}
                     />
                 </fieldset>
                 <PageActions
