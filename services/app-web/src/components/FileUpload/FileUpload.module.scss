@@ -1,10 +1,27 @@
 @import '../../styles/uswdsImports.scss';
 @import '../../styles/custom';
 
+.warningRow {
+    & td {
+        background-color: transparent;
+    }
+}
+
+.loadingImage {
+    float: left;
+}
+
+.checkbox {
+    & label {
+        margin-top: 0px;
+        padding-bottom: 20px;
+    }
+}
+
 .fileInput {
     max-width: none;
 }
-.fileInputHint{
+.fileInputHint {
     display: flex;
     flex-direction: column;
     color: #71767a;

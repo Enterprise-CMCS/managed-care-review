@@ -120,6 +120,7 @@ export const RateDetails = ({
                         key: 'INVALID_KEY',
                         s3URL: undefined,
                         status: 'UPLOAD_ERROR',
+                        documentCategories: doc.documentCategories,
                     }
                 }
                 return {
@@ -128,6 +129,7 @@ export const RateDetails = ({
                     key: key,
                     s3URL: doc.s3URL,
                     status: 'UPLOAD_COMPLETE',
+                    documentCategories: doc.documentCategories,
                 }
             })) ||
         undefined
@@ -350,6 +352,7 @@ export const RateDetails = ({
                                         id="rateDocuments"
                                         name="rateDocuments"
                                         label="Upload rate certification"
+                                        renderMode="list"
                                         aria-required
                                         error={documentsErrorMessage}
                                         hint={

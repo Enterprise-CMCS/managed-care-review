@@ -1,9 +1,10 @@
 import React from 'react'
-import { Button } from '@trussworks/react-uswds'
 import classnames from 'classnames'
-import { SPACER_GIF } from '../constants'
+import { FileRow } from '../FileRow/FileRow'
+import { FileListItem } from '../FileListItem/FileListItem'
 
 import styles from '../FileUpload.module.scss'
+import { DocumentCategoryType } from '../../../common-code/domain-models'
 
 export type FileStatus =
     | 'DUPLICATE_NAME_ERROR'
@@ -20,6 +21,7 @@ export type FileItemT = {
     key?: string // only items uploaded to s3 have this
     s3URL?: string // only items uploaded to s3 have this
     status: FileStatus
+    documentCategories: DocumentCategoryType[]
 }
 
 const DocumentError = ({
@@ -79,21 +81,32 @@ const DocumentError = ({
     }
 }
 
-type FileItemProps = {
+type FileProcessorProps = {
     item: FileItemT
     deleteItem: (item: FileItemT) => void
     retryItem: (item: FileItemT) => void
+    renderMode: 'table' | 'list'
+    handleCheckboxClick: (event: React.ChangeEvent<HTMLInputElement>) => void
+    isContractOnly?: boolean
 }
-export const FileItem = ({
+export const FileProcessor = ({
     item,
     deleteItem,
     retryItem,
-}: FileItemProps): React.ReactElement => {
+    renderMode,
+    handleCheckboxClick,
+    isContractOnly,
+}: FileProcessorProps): React.ReactElement => {
     const { name, status, file } = item
+    const isRateSupporting = item.documentCategories.includes('RATES_RELATED')
+    const isContractSupporting =
+        item.documentCategories.includes('CONTRACT_RELATED')
     const hasDuplicateNameError = status === 'DUPLICATE_NAME_ERROR'
     const hasScanningError = status === 'SCANNING_ERROR'
     const hasUploadError = status === 'UPLOAD_ERROR'
     const hasUnexpectedError = status === 'UPLOAD_ERROR' && file === undefined
+    const hasRecoverableError =
+        (hasUploadError || hasScanningError) && !hasUnexpectedError
     const isLoading = status === 'PENDING'
     const isScanning = status === 'SCANNING'
 
@@ -120,78 +133,68 @@ export const FileItem = ({
         retryItem(item)
     }
 
-    let statusValue = "";
+    let statusValue = ''
     if (isLoading) {
-        statusValue = "uploading";
+        statusValue = 'uploading'
     } else if (isScanning) {
-        statusValue = "scanning for viruses"
-    } else if (hasDuplicateNameError || hasScanningError || hasUploadError || hasUnexpectedError) {
-        statusValue = "error"
+        statusValue = 'scanning for viruses'
+    } else if (
+        hasDuplicateNameError ||
+        hasScanningError ||
+        hasUploadError ||
+        hasUnexpectedError
+    ) {
+        statusValue = 'error'
     }
 
-    return (
-        <>
-            <div className={styles.fileItemText}>
-                <div
-                    role="progressbar"
-                    aria-valuetext={statusValue}
-                    aria-label={`File status`}
-                >
-                    <img
-                        id={item.id}
-                        data-testid="file-input-preview-image"
-                        src={SPACER_GIF}
-                        alt=""
-                        className={imageClasses}
-                    />
-                </div>
-                <span
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        fontSize: 'inherit',
-                    }}
-                >
-                    <DocumentError
-                        hasDuplicateNameError={hasDuplicateNameError}
-                        hasScanningError={hasScanningError}
-                        hasUploadError={hasUploadError}
-                        hasUnexpectedError={hasUnexpectedError}
-                    />
-                    <>
-                        {(isLoading || isScanning) && (
-                            <span className={styles.fileItemBoldMessage}>
-                                {isLoading
-                                    ? 'Step 1 of 2: Uploading'
-                                    : 'Step 2 of 2: Scanning'}
-                            </span>
-                        )}
-                        <span>{name}</span>
-                    </>
-                </span>
-            </div>
-            <div className={styles.fileItemButtons}>
-                <Button
-                    type="button"
-                    aria-label={`Remove ${name} document`}
-                    size="small"
-                    unstyled
-                    onClick={handleDelete}
-                >
-                    Remove
-                </Button>
-                {(hasUploadError || hasScanningError) && !hasUnexpectedError && (
-                    <Button
-                        type="button"
-                        size="small"
-                        aria-label={`Retry upload for ${name} document`}
-                        unstyled
-                        onClick={handleRetry}
-                    >
-                        Retry
-                    </Button>
-                )}
-            </div>
-        </>
+    const errorRowClass = classnames({
+        'bg-secondary-lighter': statusValue === 'error',
+    })
+
+    return renderMode === 'table' ? (
+        <FileRow
+            errorRowClass={errorRowClass}
+            isLoading={isLoading}
+            isScanning={isScanning}
+            isContractSupporting={isContractSupporting}
+            isRateSupporting={isRateSupporting}
+            statusValue={statusValue}
+            item={item}
+            imageClasses={imageClasses}
+            documentError={
+                <DocumentError
+                    hasDuplicateNameError={hasDuplicateNameError}
+                    hasScanningError={hasScanningError}
+                    hasUploadError={hasUploadError}
+                    hasUnexpectedError={hasUnexpectedError}
+                />
+            }
+            hasRecoverableError={hasRecoverableError}
+            handleDelete={handleDelete}
+            handleRetry={handleRetry}
+            handleCheckboxClick={handleCheckboxClick}
+            isContractOnly={isContractOnly}
+        />
+    ) : (
+        <FileListItem
+            errorRowClass={errorRowClass}
+            isLoading={isLoading}
+            isScanning={isScanning}
+            statusValue={statusValue}
+            item={item}
+            imageClasses={imageClasses}
+            documentError={
+                <DocumentError
+                    hasDuplicateNameError={hasDuplicateNameError}
+                    hasScanningError={hasScanningError}
+                    hasUploadError={hasUploadError}
+                    hasUnexpectedError={hasUnexpectedError}
+                />
+            }
+            hasRecoverableError={hasRecoverableError}
+            handleDelete={handleDelete}
+            handleRetry={handleRetry}
+            handleCheckboxClick={handleCheckboxClick}
+        />
     )
 }

@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import {
@@ -15,7 +15,6 @@ import {
     mockDraft,
 } from '../../../testHelpers/apolloHelpers'
 import { Documents } from './Documents'
-
 
 describe('Documents', () => {
     it('renders without errors', async () => {
@@ -40,12 +39,9 @@ describe('Documents', () => {
             expect(
                 screen.getByRole('button', { name: 'Continue' })
             ).not.toBeDisabled()
-            expect(
-                within(
-                    screen.getByTestId('file-input-preview-list')
-                ).queryAllByRole('listitem').length
-            ).toBe(0)
         })
+        const rows = await screen.findAllByRole('row')
+        expect(rows[0]).toHaveTextContent('Document name')
     })
 
     it('accepts a new document', async () => {
@@ -63,7 +59,9 @@ describe('Documents', () => {
             }
         )
 
-        const input = screen.getByLabelText('Upload any additional supporting documents')
+        const input = screen.getByLabelText(
+            'Upload any additional supporting documents'
+        )
         expect(input).toBeInTheDocument()
         userEvent.upload(input, [TEST_DOC_FILE])
 
@@ -84,7 +82,9 @@ describe('Documents', () => {
             }
         )
 
-        const input = screen.getByLabelText('Upload any additional supporting documents')
+        const input = screen.getByLabelText(
+            'Upload any additional supporting documents'
+        )
         expect(input).toBeInTheDocument()
         expect(input).toHaveAttribute(
             'accept',
@@ -183,7 +183,9 @@ describe('Documents', () => {
                 },
             }
         )
-        const input = screen.getByLabelText('Upload any additional supporting documents')
+        const input = screen.getByLabelText(
+            'Upload any additional supporting documents'
+        )
         userEvent.upload(input, [TEST_DOC_FILE])
         userEvent.upload(input, [TEST_PDF_FILE])
         userEvent.upload(input, [TEST_DOC_FILE])
@@ -210,29 +212,23 @@ describe('Documents', () => {
                 },
             }
         )
-        const input = screen.getByLabelText('Upload any additional supporting documents')
+        const input = screen.getByLabelText(
+            'Upload any additional supporting documents'
+        )
 
         userEvent.upload(input, [TEST_XLS_FILE])
 
         await waitFor(() => {
             expect(screen.queryAllByText('Duplicate file').length).toBe(0)
-            expect(
-                within(
-                    screen.getByTestId('file-input-preview-list')
-                ).queryAllByRole('listitem').length
-            ).toBe(1)
+            expect(screen.queryAllByRole('row').length).toBe(2)
         })
         // note: userEvent.upload does not re-trigger input event when selected files are the same as before, this is why we upload nothing in between
         userEvent.upload(input, [])
         userEvent.upload(input, [TEST_XLS_FILE])
 
         await waitFor(() => {
-            expect(
-                within(
-                    screen.getByTestId('file-input-preview-list')
-                ).queryAllByRole('listitem').length
-            ).toBe(2)
             expect(screen.queryAllByText('Duplicate file').length).toBe(1)
+            expect(screen.queryAllByRole('row').length).toBe(3)
         })
 
         userEvent.upload(input, [])
@@ -240,11 +236,7 @@ describe('Documents', () => {
 
         await waitFor(() => {
             expect(screen.queryAllByText('Duplicate file').length).toBe(2)
-            expect(
-                within(
-                    screen.getByTestId('file-input-preview-list')
-                ).queryAllByRole('listitem').length
-            ).toBe(3)
+            expect(screen.queryAllByRole('row').length).toBe(4)
         })
     })
 
@@ -263,7 +255,9 @@ describe('Documents', () => {
                 },
             }
         )
-        const input = screen.getByLabelText('Upload any additional supporting documents')
+        const input = screen.getByLabelText(
+            'Upload any additional supporting documents'
+        )
         userEvent.upload(input, [TEST_DOC_FILE])
         userEvent.upload(input, [TEST_PDF_FILE])
         userEvent.upload(input, [TEST_DOC_FILE])
@@ -301,7 +295,9 @@ describe('Documents', () => {
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
-            const input = screen.getByLabelText('Upload any additional supporting documents')
+            const input = screen.getByLabelText(
+                'Upload any additional supporting documents'
+            )
 
             userEvent.upload(input, [TEST_DOC_FILE])
 
@@ -330,7 +326,9 @@ describe('Documents', () => {
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
-            const input = screen.getByLabelText('Upload any additional supporting documents')
+            const input = screen.getByLabelText(
+                'Upload any additional supporting documents'
+            )
             const targetEl = screen.getByTestId('file-input-droptarget')
 
             userEvent.upload(input, [TEST_DOC_FILE])
@@ -360,7 +358,9 @@ describe('Documents', () => {
                     },
                 }
             )
-            const input = screen.getByLabelText('Upload any additional supporting documents')
+            const input = screen.getByLabelText(
+                'Upload any additional supporting documents'
+            )
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
             })
@@ -379,7 +379,7 @@ describe('Documents', () => {
                     screen.getAllByText(
                         'You must remove all documents with error messages before continuing'
                     )
-                ).toHaveLength(2) 
+                ).toHaveLength(2)
             })
         })
 
@@ -433,7 +433,9 @@ describe('Documents', () => {
                 name: 'Continue',
             })
 
-            const input = screen.getByLabelText('Upload any additional supporting documents')
+            const input = screen.getByLabelText(
+                'Upload any additional supporting documents'
+            )
             const targetEl = screen.getByTestId('file-input-droptarget')
 
             userEvent.upload(input, [TEST_DOC_FILE])
@@ -475,17 +477,14 @@ describe('Documents', () => {
 
             // upload one file
             dragAndDrop(targetEl, [TEST_PDF_FILE])
-            const imageElFile1 = screen.getByTestId('file-input-preview-image')
+            const imageElFile1 = screen.getByTestId('file-input-loading-image')
             expect(imageElFile1).toHaveClass('is-loading')
-            await waitFor(() =>
-                expect(imageElFile1).not.toHaveClass('is-loading')
-            )
 
             // upload second file
             dragAndDrop(targetEl, [TEST_DOC_FILE])
 
             const imageElFile2 = screen.getAllByTestId(
-                'file-input-preview-image'
+                'file-input-loading-image'
             )[1]
             expect(imageElFile2).toHaveClass('is-loading')
 
@@ -522,7 +521,9 @@ describe('Documents', () => {
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
             })
-            const input = screen.getByLabelText('Upload any additional supporting documents')
+            const input = screen.getByLabelText(
+                'Upload any additional supporting documents'
+            )
 
             userEvent.upload(input, [TEST_DOC_FILE])
 
@@ -551,7 +552,9 @@ describe('Documents', () => {
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
             })
-            const input = screen.getByLabelText('Upload any additional supporting documents')
+            const input = screen.getByLabelText(
+                'Upload any additional supporting documents'
+            )
             const targetEl = screen.getByTestId('file-input-droptarget')
 
             userEvent.upload(input, [TEST_DOC_FILE])
@@ -606,7 +609,9 @@ describe('Documents', () => {
                     },
                 }
             )
-            const input = screen.getByLabelText('Upload any additional supporting documents')
+            const input = screen.getByLabelText(
+                'Upload any additional supporting documents'
+            )
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
             })
@@ -625,7 +630,7 @@ describe('Documents', () => {
                     screen.getAllByText(
                         'You must remove all documents with error messages before continuing'
                     )
-                ).toHaveLength(2)                
+                ).toHaveLength(2)
             })
         })
     })
@@ -652,7 +657,9 @@ describe('Back button', () => {
         const backButton = screen.getByRole('button', {
             name: 'Back',
         })
-        const input = screen.getByLabelText('Upload any additional supporting documents')
+        const input = screen.getByLabelText(
+            'Upload any additional supporting documents'
+        )
 
         userEvent.upload(input, [TEST_DOC_FILE])
 
@@ -681,7 +688,9 @@ describe('Back button', () => {
         const backButton = screen.getByRole('button', {
             name: 'Back',
         })
-        const input = screen.getByLabelText('Upload any additional supporting documents')
+        const input = screen.getByLabelText(
+            'Upload any additional supporting documents'
+        )
         const targetEl = screen.getByTestId('file-input-droptarget')
 
         userEvent.upload(input, [TEST_DOC_FILE])
@@ -737,7 +746,9 @@ describe('Back button', () => {
                 },
             }
         )
-        const input = screen.getByLabelText('Upload any additional supporting documents')
+        const input = screen.getByLabelText(
+            'Upload any additional supporting documents'
+        )
         const backButton = screen.getByRole('button', {
             name: 'Back',
         })

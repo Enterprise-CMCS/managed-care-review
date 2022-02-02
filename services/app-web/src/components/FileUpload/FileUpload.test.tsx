@@ -1,12 +1,8 @@
-import {
-    render,
-    waitFor,
-    screen,
-} from '@testing-library/react'
+import { render, waitFor, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { FileUpload, FileUploadProps, S3FileData } from './FileUpload'
-import { FileItemT } from './FileItem/FileItem'
+import { FileItemT } from './FileProcessor/FileProcessor'
 import { SPACER_GIF } from './constants'
 import {
     TEST_DOC_FILE,
@@ -46,6 +42,7 @@ describe('FileUpload component', () => {
         onFileItemsUpdate: () => {
             return
         },
+        renderMode: 'list',
     }
     beforeEach(() => jest.clearAllMocks())
     it('renders without errors', async () => {
@@ -63,6 +60,7 @@ describe('FileUpload component', () => {
                 name: 'Trussel Guide to Truss - trussels-guide.pdf',
                 s3URL: "s3://local-uploads/1620164967212-Trussels' Guide to Truss - trussels-guide.pdf/Trussels' Guide to Truss - trussels-guide.pdf",
                 status: 'UPLOAD_COMPLETE',
+                documentCategories: [],
             },
         ]
 
@@ -203,6 +201,7 @@ describe('FileUpload component', () => {
             scanFile: jest.fn().mockResolvedValue(undefined),
             onFileItemsUpdate: jest.fn().mockResolvedValue(undefined),
             accept: '.pdf,.txt',
+            renderMode: 'list',
         }
 
         render(<FileUpload {...props} />)
@@ -229,6 +228,7 @@ describe('FileUpload component', () => {
             scanFile: jest.fn().mockRejectedValue(new Error('failed')),
             onFileItemsUpdate: jest.fn().mockResolvedValue(undefined),
             accept: '.pdf,.txt',
+            renderMode: 'list',
         }
 
         render(<FileUpload {...props} />)
@@ -255,6 +255,7 @@ describe('FileUpload component', () => {
             scanFile: jest.fn().mockRejectedValue(new Error('failed')),
             onFileItemsUpdate: jest.fn().mockResolvedValue(undefined),
             accept: '.pdf,.txt',
+            renderMode: 'list',
         }
 
         render(<FileUpload {...props} />)

@@ -1,16 +1,24 @@
 import React from 'react'
 import classnames from 'classnames'
-import { FileItem, FileItemT, FileStatus } from '../FileItem/FileItem'
+import { FileItemT, FileStatus } from '../FileProcessor/FileProcessor'
 import styles from '../FileUpload.module.scss'
+import { TableWrapper } from '../TableWrapper/TableWrapper'
+import { ListWrapper } from '../ListWrapper/ListWrapper'
 
 export const FileItemsList = ({
     fileItems,
     deleteItem,
     retryItem,
+    renderMode,
+    handleCheckboxClick,
+    isContractOnly,
 }: {
     fileItems: FileItemT[]
     deleteItem: (id: FileItemT) => void
     retryItem: (item: FileItemT) => void
+    renderMode: 'table' | 'list'
+    handleCheckboxClick: (event: React.ChangeEvent<HTMLInputElement>) => void
+    isContractOnly?: boolean
 }): React.ReactElement => {
     const liClasses = (status: FileStatus): string => {
         const hasError =
@@ -23,26 +31,21 @@ export const FileItemsList = ({
         })
     }
 
-    return (
-        <ul
-            data-testid="file-input-preview-list"
-            className={styles.fileItemsList}
-            id="file-items-list"
-            tabIndex={-1}
-        >
-            {fileItems.map((item) => (
-                <li
-                    key={item.id}
-                    id={item.id}
-                    className={liClasses(item.status)}
-                >
-                    <FileItem
-                        deleteItem={deleteItem}
-                        retryItem={retryItem}
-                        item={item}
-                    />
-                </li>
-            ))}
-        </ul>
+    return renderMode === 'table' ? (
+        <TableWrapper
+            fileItems={fileItems}
+            deleteItem={deleteItem}
+            retryItem={retryItem}
+            handleCheckboxClick={handleCheckboxClick}
+            isContractOnly={isContractOnly}
+        />
+    ) : (
+        <ListWrapper
+            fileItems={fileItems}
+            deleteItem={deleteItem}
+            retryItem={retryItem}
+            liClasses={liClasses}
+            handleCheckboxClick={handleCheckboxClick}
+        />
     )
 }

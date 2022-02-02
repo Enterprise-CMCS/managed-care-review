@@ -1,5 +1,5 @@
 import { URL } from 'url'
-
+import dayjs from 'dayjs'
 import {
     SubmissionType,
     StateSubmissionType,
@@ -13,49 +13,78 @@ const SubmissionTypeRecord: Record<SubmissionType, string> = {
     CONTRACT_AND_RATES: 'Contract action and rate certification',
 }
 
-const newPackageCMSEmailTemplate = (
+// Clean out HTML tags from an HTML based template
+// this way we still have a text alternative for email client rendering html in plaintext
+// plaintext is also referenced for unit testing
+const stripHTMLFromTemplate = (template: string) => {
+    let formatted = template
+    // remove BR tags and replace them with line break
+    formatted = formatted.replace(/<br>/gi, '\n')
+    formatted = formatted.replace(/<br\s\/>/gi, '\n')
+    formatted = formatted.replace(/<br\/>/gi, '\n')
+
+    // remove P and A tags but preserve what's inside of them
+    formatted = formatted.replace(/<p.*>/gi, '\n')
+    formatted = formatted.replace(
+        /<a.*href="(.*?)".*>(.*?)<\/a>/gi,
+        ' $2 ($1)'
+    )
+
+    // everything else
+   return formatted.replace(/(<([^>]+)>)/gi, '')
+}
+
+const newPackageCMSEmail = (
     submission: StateSubmissionType,
     config: EmailConfiguration
 ): EmailData => {
-    const submissionURL = new URL(
-        `submissions/${submission.id}`,
-        config.baseUrl
-    ).href
+    // config
     const isTestEnvironment = config.stage !== 'prod'
-
     const reviewerEmails = config.cmsReviewSharedEmails
 
+    // template
+    const contractEffectiveDatesText = `${
+        submission.contractType === 'AMENDMENT'
+            ? '<b>Contract amendment effective dates</b>'
+            : '<b>Contract effective dates</b>'
+    }: ${
+        dayjs(submission.contractDateStart).format('MM/DD/YYYY') +
+        ' to ' +
+        dayjs(submission.contractDateEnd).format('MM/DD/YYYY')
+    }`
+    const ratingPeriod = `${submission.submissionType === 'CONTRACT_AND_RATES' ? `<b>Rating period:</b> ${dayjs(submission.rateDateStart).format('MM/DD/YYYY') + ' to ' + dayjs(submission.rateDateEnd).format('MM/DD/YYYY')}`: ''}` // displays nothing if submission is CONTRACT_ONLY
+        const submissionURL = new URL(
+            `submissions/${submission.id}`,
+            config.baseUrl
+        ).href
+    const bodyHTML = `<span style="color:#FF0000;font-weight:bold;">Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.</span>
+            <br /><br />
+            Managed Care submission: <b>${submissionName(submission)}</b> was received from <b>${
+            submission.stateCode
+        }</b>.<br /><br />
+            <b>Submission type:</b> ${
+                SubmissionTypeRecord[submission.submissionType]
+            }<br />
+            ${contractEffectiveDatesText}
+            <br />
+            ${ratingPeriod}${ratingPeriod.length > 0? '<br />' : ''}
+            <b>Submission description:</b> ${
+                submission.submissionDescription
+            }<br /><br />
+            <a href="${submissionURL}">View submission</a>
+        `
     return {
         toAddresses: reviewerEmails,
         sourceEmail: config.emailSource,
         subject: `${
             isTestEnvironment ? `[${config.stage}] ` : ''
         }TEST New Managed Care Submission: ${submissionName(submission)}`,
-        bodyText: `Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.
-        ${submissionName(submission)} was received from ${submission.stateCode}.
-
-            Submission type: ${SubmissionTypeRecord[submission.submissionType]}
-            Submission description: ${submission.submissionDescription}
-
-            View submission: ${submissionURL}`,
-        bodyHTML: `
-            <span style="color:#FF0000;font-weight:bold;">Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.</span>
-            <br /><br />
-            ${submissionName(submission)} was received from ${
-            submission.stateCode
-        }.<br /><br />
-            Submission type: ${
-                SubmissionTypeRecord[submission.submissionType]
-            }<br />
-            Submission description: ${
-                submission.submissionDescription
-            }<br /><br />
-            <a href="${submissionURL}">View submission</a>
-        `,
+        bodyText: stripHTMLFromTemplate(bodyHTML),
+        bodyHTML: bodyHTML,
     }
 }
 
-const newPackageStateEmailTemplate = (
+const newPackageStateEmail = (
     submission: StateSubmissionType,
     user: CognitoUserType,
     config: EmailConfiguration
@@ -68,27 +97,7 @@ const newPackageStateEmailTemplate = (
     const receiverEmails: string[] = [currentUserEmail].concat(
         submission.stateContacts.map((contact) => contact.email)
     )
-    return {
-        toAddresses: receiverEmails,
-        sourceEmail: config.emailSource,
-        subject: `${
-            config.stage !== 'prod' ? `[${config.stage}] ` : ''
-        }TEST ${submissionName(submission)} was sent to CMS`,
-        bodyText: `Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.
-
-            ${submissionName(submission)} was successfully submitted.
-        
-            View submission: ${submissionURL}
-            
-            If you need to make any changes, please contact CMS.
-        
-            What comes next:
-            1. Check for completeness: CMS will review all documentation submitted to ensure all required materials were received.
-            2. CMS review: Your submission will be reviewed by CMS for adherence to federal regulations. If a rate certification is included, it will be reviewed for policy adherence and actuarial soundness.
-            3. Questions: You may receive questions via email from CMS as they conduct their review.
-            4. Decision: Once all questions have been addressed, CMS will contact you with their final recommendation.`,
-        bodyHTML: `
-            <span style="color:#FF0000;font-weight:bold;">Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.</span>
+    const bodyHTML =  `<span style="color:#FF0000;font-weight:bold;">Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.</span>
             <br /><br />
              ${submissionName(submission)} was successfully submitted.
             <br /><br />
@@ -112,9 +121,17 @@ const newPackageStateEmailTemplate = (
 
                 </li>
             </ol>
-        `,
+        `
+    return {
+        toAddresses: receiverEmails,
+        sourceEmail: config.emailSource,
+        subject: `${
+            config.stage !== 'prod' ? `[${config.stage}] ` : ''
+        }TEST ${submissionName(submission)} was sent to CMS`,
+        bodyText: stripHTMLFromTemplate(bodyHTML),
+        bodyHTML: bodyHTML,
     }
 }
 
-export { newPackageCMSEmailTemplate, newPackageStateEmailTemplate }
+export { newPackageCMSEmail, newPackageStateEmail }
 
