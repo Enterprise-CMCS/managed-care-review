@@ -8,6 +8,7 @@ const stateNames = {
     "AK": "Alaska",
     "AZ": "Arizona",
     "AR": "Arkansas",
+    "AS": "American Samoa",
     "CA": "California",
     "CO": "Colorado",
     "CT": "Connecticut",
