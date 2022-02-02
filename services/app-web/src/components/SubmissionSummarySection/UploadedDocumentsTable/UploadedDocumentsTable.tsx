@@ -33,8 +33,7 @@ export const UploadedDocumentsTable = ({
     const shouldShowEditButton = !isSubmitted && isSupportingDocuments
     const shouldShowAsteriskExplainer = refreshedDocs.some(
         (doc) =>
-            doc.documentCategories.includes('RATES_RELATED') &&
-            doc.documentCategories.includes('CONTRACT_RELATED')
+           isBothContractAndRateSupporting(doc)
     )
     useEffect(() => {
         const refreshDocuments = async () => {
