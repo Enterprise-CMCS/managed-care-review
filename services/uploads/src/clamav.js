@@ -8,6 +8,26 @@ const utils = require('./utils');
 const S3 = new AWS.S3();
 
 /**
+ * Lists all the files from a bucket
+ *
+ * returns a list of keys
+ */
+async function listBucketFiles(bucketName) {
+    try {
+        const listFilesResult = await S3.listObjectsV2({
+            Bucket: constants.CLAMAV_BUCKET_NAME,
+        }).promise();
+
+        const keys = listFilesResult.Contents.map((c) => c.Key);
+        return keys;
+    } catch (err) {
+        utils.generateSystemMessage(`Error listing files`);
+        console.log(err);
+        throw err;
+    }
+}
+
+/**
  * Updates the definitions using freshclam.
  *
  * It will download the definitions to the current work dir.
@@ -44,21 +64,10 @@ function updateAVDefinitonsWithFreshclam() {
  */
 async function downloadAVDefinitions() {
     // list all the files in that bucket
-    var definitionFileKeys = undefined;
-    try {
-        const listFilesResult = await S3.listObjects({
-            Bucket: constants.CLAMAV_BUCKET_NAME,
-        }).promise();
-
-        const keys = listFilesResult.Contents.map((c) => c.Key)
-            .filter((key) => key.startsWith(constants.PATH_TO_AV_DEFINITIONS))
-            .map((fullPath) => path.basename(fullPath));
-        definitionFileKeys = keys;
-    } catch (err) {
-        utils.generateSystemMessage(`Error listing definition files`);
-        console.log(err);
-        throw err;
-    }
+    util.generateSystemMessage('Downloading Definitions');
+    var definitionFileKeys = await listBucketFiles(constants.CLAMAV_BUCKET_NAME)
+        .filter((key) => key.startsWith(constants.PATH_TO_AV_DEFINITIONS))
+        .map((fullPath) => path.basename(fullPath));
 
     // download each file in the bucket.
     const downloadPromises = definitionFileKeys.map((filenameToDownload) => {
@@ -105,31 +114,23 @@ async function downloadAVDefinitions() {
 async function uploadAVDefinitions() {
     // delete all the definitions currently in the bucket.
     // first list them.
-    var s3DefinitionFileFullKeys = undefined;
-    try {
-        const listFilesResult = await S3.listObjectsV2({
-            Bucket: constants.CLAMAV_BUCKET_NAME,
-        }).promise();
-
-        const keys = listFilesResult.Contents.map((c) => c.Key).filter((key) =>
-            key.startsWith(constants.PATH_TO_AV_DEFINITIONS)
-        );
-        s3DefinitionFileFullKeys = keys;
-    } catch (err) {
-        utils.generateSystemMessage(`Error listing definition files`);
-        console.log(err);
-        throw err;
-    }
+    util.generateSystemMessage('Uploading Definitions');
+    var s3DefinitionFileFullKeys = await listBucketFiles(
+        constants.CLAMAV_BUCKET_NAME
+    ).filter((key) => key.startsWith(constants.PATH_TO_AV_DEFINITIONS));
 
     // If there are any s3 Definition files in the s3 bucket, delete them.
     if (s3DefinitionFileFullKeys.length != 0) {
         try {
-            const deleteFileResult = await S3.deleteObjects({
+            await S3.deleteObjects({
                 Bucket: constants.CLAMAV_BUCKET_NAME,
                 Delete: {
                     Objects: s3DefinitionFileFullKeys,
                 },
             }).promise();
+            utils.generateSystemMessage(
+                `Deleted extant definitions: ${s3DefinitionFileFullKeys}`
+            );
         } catch (err) {
             utils.generateSystemMessage(
                 `Error deleting current definition files: ${s3DefinitionFileFullKeys}`
@@ -139,7 +140,7 @@ async function uploadAVDefinitions() {
         }
     }
 
-    // list all the files in the work dir
+    // list all the files in the work dir for upload
     const definitionFiles = fs.readdirSync(constants.FRESHCLAM_WORK_DIR);
 
     const uploadPromises = definitionFiles.map((filenameToUpload) => {
