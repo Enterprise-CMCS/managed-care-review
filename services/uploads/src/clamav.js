@@ -14,12 +14,16 @@ const S3 = new AWS.S3();
  */
 function updateAVDefinitonsWithFreshclam() {
     try {
+        console.log('BEFORE', fs.readdirSync(constants.FRESHCLAM_WORK_DIR));
+
         let executionResult = execSync(
             `${constants.PATH_TO_FRESHCLAM} --config-file=${constants.FRESHCLAM_CONFIG} --datadir=${constants.FRESHCLAM_WORK_DIR}`
         );
 
         utils.generateSystemMessage('Update message');
         console.log(executionResult.toString());
+
+        console.log('AFTER', fs.readdirSync(constants.FRESHCLAM_WORK_DIR));
 
         if (executionResult.stderr) {
             utils.generateSystemMessage('stderr');
@@ -94,7 +98,10 @@ async function uploadAVDefinitions() {
                     Bucket: constants.CLAMAV_BUCKET_NAME,
                     Key: `${constants.PATH_TO_AV_DEFINITIONS}/${filenameToUpload}`,
                     Body: fs.createReadStream(
-                        path.join('/tmp/', filenameToUpload)
+                        path.join(
+                            constants.FRESHCLAM_WORK_DIR,
+                            filenameToUpload
+                        )
                     ),
                     ACL: 'public-read',
                 };
