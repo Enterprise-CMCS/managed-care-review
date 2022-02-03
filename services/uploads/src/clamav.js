@@ -121,19 +121,22 @@ async function uploadAVDefinitions() {
         throw err;
     }
 
-    try {
-        const deleteFileResult = await S3.deleteObjects({
-            Bucket: constants.CLAMAV_BUCKET_NAME,
-            Delete: {
-                Objects: s3DefinitionFileFullKeys,
-            },
-        }).promise();
-    } catch (err) {
-        utils.generateSystemMessage(
-            `Error deleting current definition files: ${s3DefinitionFileFullKeys}`
-        );
-        console.log(err);
-        throw err;
+    // If there are any s3 Definition files in the s3 bucket, delete them.
+    if (s3DefinitionFileFullKeys.length != 0) {
+        try {
+            const deleteFileResult = await S3.deleteObjects({
+                Bucket: constants.CLAMAV_BUCKET_NAME,
+                Delete: {
+                    Objects: s3DefinitionFileFullKeys,
+                },
+            }).promise();
+        } catch (err) {
+            utils.generateSystemMessage(
+                `Error deleting current definition files: ${s3DefinitionFileFullKeys}`
+            );
+            console.log(err);
+            throw err;
+        }
     }
 
     // list all the files in the work dir
