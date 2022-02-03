@@ -127,7 +127,7 @@ async function uploadAVDefinitions() {
             Delete: {
                 Objects: s3DefinitionFileFullKeys,
             },
-        }).promse();
+        }).promise();
     } catch (err) {
         utils.generateSystemMessage(
             `Error deleting current definition files: ${s3DefinitionFileFullKeys}`
