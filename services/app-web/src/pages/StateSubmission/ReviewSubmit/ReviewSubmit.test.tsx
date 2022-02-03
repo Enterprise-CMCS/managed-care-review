@@ -84,9 +84,6 @@ describe('ReviewSubmit', () => {
             expect(
                 screen.getByRole('heading', { name: 'State contacts' })
             ).toBeInTheDocument()
-            expect(
-                screen.getByRole('heading', { name: 'Supporting documents' })
-            ).toBeInTheDocument()
 
             const sectionHeadings = screen.queryAllByRole('heading', {
                 level: 2,

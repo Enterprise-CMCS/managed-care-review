@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { SupportingDocumentsSummarySection } from './SupportingDocumentsSummarySection'
 import {
@@ -10,15 +10,37 @@ describe('SupportingDocumentsSummarySection', () => {
     const draftSubmission = mockContractAndRatesDraft()
     const stateSubmission = mockStateSubmission()
 
-    it('can render draft submission without errors', () => {
+    it('can render uncategorized documents in draft submission without errors', async() => {
+        const testSubmission = {
+            ...draftSubmission,
+            documents: [
+                {
+                    s3URL: 's3://foo/bar/test-1',
+                    name: 'supporting docs test 1',
+                    documentCategories: ['CONTRACT_RELATED' as const],
+                },
+                {
+                    s3URL: 's3://foo/bar/test-2',
+                    name: 'supporting docs test 2',
+                    documentCategories: ['RATES_RELATED' as const],
+                },
+                {
+                    s3URL: 's3://foo/bar/test-3',
+                    name: 'supporting docs test 3',
+                    documentCategories: [],
+                },
+            ],
+        }
+
         renderWithProviders(
             <SupportingDocumentsSummarySection
-                submission={draftSubmission}
+                submission={testSubmission}
                 navigateTo="documents"
             />
         )
 
-        expect(
+        await waitFor (() => {
+            expect(
             screen.getByRole('heading', {
                 level: 2,
                 name: 'Supporting documents',
@@ -27,20 +49,45 @@ describe('SupportingDocumentsSummarySection', () => {
         expect(
             screen.getByRole('link', { name: 'Edit Supporting documents' })
         ).toHaveAttribute('href', '/documents')
+          expect(screen.queryByText('supporting docs test 2')).toBeNull()
+        expect(screen.getByText('supporting docs test 3')).toBeInTheDocument()
+        })
     })
 
-    it('can render state submission without errors', () => {
-        renderWithProviders(
-            <SupportingDocumentsSummarySection submission={stateSubmission} />
-        )
+    it('can render uncategorized documents state submission without errors', async () => {
+          const testSubmission = {
+              ...stateSubmission,
+              documents: [
+                  {
+                      s3URL: 's3://foo/bar/test-1',
+                      name: 'supporting docs test 1',
+                      documentCategories: [],
+                  },
+                  {
+                      s3URL: 's3://foo/bar/test-2',
+                      name: 'supporting docs test 2',
+                      documentCategories: [],
+                  },
+              ],
+          }
 
-        expect(
-            screen.getByRole('heading', {
-                level: 2,
-                name: 'Supporting documents',
-            })
-        ).toBeInTheDocument()
-        // Is this the best way to check that the link is not present?
-        expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+
+        renderWithProviders(
+            <SupportingDocumentsSummarySection submission={testSubmission} />
+        )
+        
+        await waitFor( () => {
+ expect(
+     screen.getByRole('heading', {
+         level: 2,
+         name: 'Supporting documents',
+     })
+ ).toBeInTheDocument()
+
+ expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+ expect(screen.getByText('supporting docs test 1')).toBeInTheDocument()
+ expect(screen.getByText('supporting docs test 2')).toBeInTheDocument()
+        })
+       
     })
 })

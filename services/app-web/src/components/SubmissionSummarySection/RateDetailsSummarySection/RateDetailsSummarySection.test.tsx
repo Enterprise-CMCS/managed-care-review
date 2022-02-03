@@ -132,7 +132,12 @@ describe('RateDetailsSummarySection', () => {
 
         expect(rateDocsTable).toBeInTheDocument()
         expect(supportingDocsTable).toBeInTheDocument()
-
+        expect(
+            screen.getByRole('link', {
+                name: /Edit Rate supporting documents/,
+            })
+        ).toHaveAttribute('href', '/documents')
+        
         await waitFor (() => {
             const supportingDocsTableRows =
                 within(supportingDocsTable).getAllByRole('rowgroup')

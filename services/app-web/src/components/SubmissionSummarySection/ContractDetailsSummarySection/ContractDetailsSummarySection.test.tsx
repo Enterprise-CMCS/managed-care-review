@@ -11,9 +11,28 @@ describe('ContractDetailsSummarySection', () => {
     const stateBaseContractOnlySubmission = mockStateSubmission()
 
     it('can render draft submission without errors (review and submit behavior)', () => {
+        const testSubmission = {
+            ...draftContractAndRatesSubmission,
+            documents: [
+                {
+                    s3URL: 's3://bucketname/key/test1',
+                    name: 'supporting docs test 1',
+                    documentCategories: ['CONTRACT_RELATED' as const],
+                }, 
+                {
+                    s3URL: 's3://bucketname/key/test3',
+                    name: 'supporting docs test 3',
+                    documentCategories: [
+                        'CONTRACT_RELATED' as const,
+                        'RATES_RELATED' as const,
+                    ],
+                },
+            ],
+        }
+
         renderWithProviders(
             <ContractDetailsSummarySection
-                submission={draftContractAndRatesSubmission}
+                submission={testSubmission}
                 navigateTo="contract-details"
             />
         )
@@ -27,6 +46,11 @@ describe('ContractDetailsSummarySection', () => {
         expect(
             screen.getByRole('link', { name: 'Edit Contract details' })
         ).toHaveAttribute('href', '/contract-details')
+        expect(
+            screen.getByRole('link', {
+                name: /Edit Contract supporting documents/,
+            })
+        ).toHaveAttribute('href', '/documents')
         expect(
             screen.queryByRole('button', {
                 name: 'Download all contract documents',
