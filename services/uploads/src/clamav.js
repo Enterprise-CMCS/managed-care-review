@@ -15,7 +15,7 @@ const S3 = new AWS.S3();
 async function listBucketFiles(bucketName) {
     try {
         const listFilesResult = await S3.listObjectsV2({
-            Bucket: constants.CLAMAV_BUCKET_NAME,
+            Bucket: bucketName,
         }).promise();
 
         const keys = listFilesResult.Contents.map((c) => c.Key);
@@ -130,7 +130,7 @@ async function uploadAVDefinitions() {
                 Bucket: constants.CLAMAV_BUCKET_NAME,
                 Delete: {
                     Objects: s3DefinitionFileFullKeys.map((k) => {
-                        Key: k;
+                        return { Key: k };
                     }),
                 },
             }).promise();
