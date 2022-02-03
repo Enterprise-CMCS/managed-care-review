@@ -65,7 +65,9 @@ function updateAVDefinitonsWithFreshclam() {
 async function downloadAVDefinitions() {
     // list all the files in that bucket
     utils.generateSystemMessage('Downloading Definitions');
-    var definitionFileKeys = await listBucketFiles(constants.CLAMAV_BUCKET_NAME)
+    const allFileKeys = await listBucketFiles(constants.CLAMAV_BUCKET_NAME);
+
+    const definitionFileKeys = allFileKeys
         .filter((key) => key.startsWith(constants.PATH_TO_AV_DEFINITIONS))
         .map((fullPath) => path.basename(fullPath));
 
@@ -115,9 +117,11 @@ async function uploadAVDefinitions() {
     // delete all the definitions currently in the bucket.
     // first list them.
     utils.generateSystemMessage('Uploading Definitions');
-    var s3DefinitionFileFullKeys = await listBucketFiles(
-        constants.CLAMAV_BUCKET_NAME
-    ).filter((key) => key.startsWith(constants.PATH_TO_AV_DEFINITIONS));
+    const s3AllFullKeys = await listBucketFiles(constants.CLAMAV_BUCKET_NAME);
+
+    const s3DefinitionFileFullKeys = s3AllFullKeys.filter((key) =>
+        key.startsWith(constants.PATH_TO_AV_DEFINITIONS)
+    );
 
     // If there are any s3 Definition files in the s3 bucket, delete them.
     if (s3DefinitionFileFullKeys.length != 0) {
