@@ -129,7 +129,9 @@ async function uploadAVDefinitions() {
             await S3.deleteObjects({
                 Bucket: constants.CLAMAV_BUCKET_NAME,
                 Delete: {
-                    Objects: s3DefinitionFileFullKeys,
+                    Objects: s3DefinitionFileFullKeys.map((k) => {
+                        Key: k;
+                    }),
                 },
             }).promise();
             utils.generateSystemMessage(
