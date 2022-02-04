@@ -19,7 +19,7 @@ export const Help = (): React.ReactElement => {
             <h2>Help documentation</h2>
             <section className={styles.helpSection}>
                 <h3 id="submission-description">
-                    Submission Description Examples
+                    Submission description examples
                 </h3>
                 <h4>Example #1</h4>
                 <p className="line-height-sans-4 measure-6">
@@ -52,6 +52,19 @@ export const Help = (): React.ReactElement => {
                     expense rate calculation time frames; the CY 20 Quality
                     Performance Program measures; and general reporting
                     requirements to remove duplicates.
+                </p>
+            </section>
+            <section className={styles.helpSection}>
+                <h3 id="effective-date-guidance">
+                    Effective date guidance
+                </h3>
+                <h4>Contract effective dates</h4>
+                <p className="line-height-sans-4 measure-6">
+                    These dates should reflect the full length of your initial base contract, which may span multiple years.
+                </p>
+                <h4>Amendment effective dates</h4>
+                <p className="line-height-sans-4 measure-6">
+                    These dates should reflect the length of your contract amendment, which could be for a subset of your base contract, for the entire remaining length of the base contract, or an extension beyond the original end date of your base contract.
                 </p>
             </section>
             <section className={styles.helpSection}>
@@ -187,6 +200,19 @@ export const Help = (): React.ReactElement => {
                         </tr>
                     </tbody>
                 </Table>
+            </section>
+            <section className={styles.helpSection}>
+                <h3 id="rate-cert-type-definitions">
+                    Rate certification type definitions
+                </h3>
+                <h4>New rate certification</h4>
+                <p className="line-height-sans-4 measure-6">
+                    This should be selected for all rate certifications for initial base contracts and rate certifications for required annual rate updates. If you do not have existing rates for the 12-month rating period on your certification, it is considered new.
+                </p>
+                <h4>Amendment to prior rate certification</h4>
+                <p className="line-height-sans-4 measure-6">
+                    This should be selected for any rate certifications that are making changes to capitation rates in your current 12-month rating period.
+                </p>
             </section>
             <section className={styles.helpSection}>
                 <h3 id="document-definitions-requirements">
