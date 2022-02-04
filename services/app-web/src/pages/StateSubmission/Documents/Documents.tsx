@@ -44,6 +44,10 @@ export const Documents = ({
     const hasValidFiles = fileItems.every(
         (item) => item.status === 'UPLOAD_COMPLETE'
     )
+    const hasMissingCategories =
+        fileItems.every((item) => item.documentCategories.length === 0) &&
+        !isContractOnly &&
+        fileItems.length > 0
     const hasLoadingFiles =
         fileItems.some((item) => item.status === 'PENDING') ||
         fileItems.some((item) => item.status === 'SCANNING')
@@ -54,8 +58,11 @@ export const Documents = ({
         showFileUploadError && hasLoadingFiles
             ? 'You must wait for all documents to finish uploading before continuing'
             : showFileUploadError && !hasValidFiles
-            ? ' You must remove all documents with error messages before continuing'
+            ? 'You must remove all documents with error messages before continuing'
+            : shouldValidate && hasMissingCategories
+            ? 'You must select at least one document category for each document'
             : undefined
+
     const documentsErrorKey =
         fileItems.length === 0 ? 'documents' : '#file-items-list'
 
@@ -163,7 +170,7 @@ export const Documents = ({
             // Currently documents validation happens (outside of the yup schema, which only handles the formik form data)
             // if there are any errors present in the documents list and we are in a validation state (relevant for Save as Draft) force user to clear validations to continue
             if (shouldValidateDocuments) {
-                if (!hasValidFiles) {
+                if (!hasValidFiles || hasMissingCategories) {
                     setShouldValidate(true)
                     setFocusErrorSummaryHeading(true)
                     return
@@ -274,6 +281,7 @@ export const Documents = ({
                         deleteFile={handleDeleteFile}
                         onFileItemsUpdate={onFileItemsUpdate}
                         isContractOnly={isContractOnly}
+                        shouldValidate={shouldValidate}
                     />
                 </fieldset>
                 <PageActions

@@ -20,6 +20,7 @@ type FileRowProps = {
     handleRetry: (_e: React.MouseEvent) => void
     handleCheckboxClick: (event: React.ChangeEvent<HTMLInputElement>) => void
     isContractOnly?: boolean
+    shouldValidate?: boolean
 }
 
 export const FileRow = ({
@@ -37,11 +38,16 @@ export const FileRow = ({
     handleRetry,
     handleCheckboxClick,
     isContractOnly,
+    shouldValidate,
 }: FileRowProps): React.ReactElement => {
     const { name } = item
 
     return (
-        <tr className={`${errorRowClass} ${styles.warningRow}`}>
+        <tr
+            className={`${shouldValidate ? errorRowClass : ''} ${
+                styles.warningRow
+            }`}
+        >
             <td>
                 {isLoading || isScanning ? (
                     <span
@@ -82,7 +88,9 @@ export const FileRow = ({
             {!isContractOnly && (
                 <td>
                     <Checkbox
-                        className={styles.checkbox}
+                        className={`${shouldValidate ? errorRowClass : ''} ${
+                            styles.checkbox
+                        }`}
                         label=""
                         id={`${item.id}--contract`}
                         name="contract-supporting"
@@ -96,7 +104,9 @@ export const FileRow = ({
             {!isContractOnly && (
                 <td>
                     <Checkbox
-                        className={styles.checkbox}
+                        className={`${shouldValidate ? errorRowClass : ''} ${
+                            styles.checkbox
+                        }`}
                         label=""
                         id={`${item.id}--rate`}
                         name="rate-supporting"

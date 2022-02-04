@@ -33,6 +33,7 @@ export type FileUploadProps = {
     deleteFile: (key: string) => Promise<void>
     onFileItemsUpdate: ({ fileItems }: { fileItems: FileItemT[] }) => void
     isContractOnly?: boolean
+    shouldValidate?: boolean
 } & JSX.IntrinsicElements['input']
 
 /*  FileUpload handles async file upload to S3 and displays inline errors per file.
@@ -57,6 +58,7 @@ export const FileUpload = ({
     deleteFile,
     onFileItemsUpdate,
     isContractOnly,
+    shouldValidate,
     ...inputProps
 }: FileUploadProps): React.ReactElement => {
     const [fileItems, setFileItems] = useState<FileItemT[]>(initialItems || [])
@@ -408,6 +410,7 @@ export const FileUpload = ({
                 renderMode={renderMode}
                 handleCheckboxClick={handleCheckboxClick}
                 isContractOnly={isContractOnly}
+                shouldValidate={shouldValidate}
             />
         </FormGroup>
     )
