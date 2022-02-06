@@ -505,6 +505,14 @@ export const ContractDetails = ({
                                                     }
                                                 />
                                             )}
+                                            <Link
+                                                aria-label="Effective date guidance (opens in new window)"
+                                                href={'/help#effective-date-guidance'}
+                                                variant="external"
+                                                target="_blank"
+                                            >
+                                                Effective date guidance
+                                            </Link>
                                             <DateRangePicker
                                                 className={
                                                     styles.dateRangePicker
