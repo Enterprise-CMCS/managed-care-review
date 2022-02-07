@@ -106,7 +106,7 @@ provider:
     SES_SOURCE_EMAIL_ADDRESS: ${self:custom.emailSource}
     SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${self:custom.emailReviewTeamAddresses}
     APPLICATION_ENDPOINT: ${self:custom.applicationEndpoint}
-    NODE_OPTIONS: --require otlp_lambda_wrapper
+    OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
 
 layers:
   prismaClient:
@@ -163,6 +163,8 @@ functions:
           authorizer: aws_iam
     layers:
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-0-1:1
+    package:
+      - collector.yml
 
   postgres:
     handler: handlers/postgres_check.main
