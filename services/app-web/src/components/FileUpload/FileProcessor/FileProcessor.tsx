@@ -4,6 +4,7 @@ import { FileRow } from '../FileRow/FileRow'
 import { FileListItem } from '../FileListItem/FileListItem'
 
 import styles from '../FileUpload.module.scss'
+import { DocumentCategoryType } from '../../../common-code/domain-models'
 
 export type FileStatus =
     | 'DUPLICATE_NAME_ERROR'
@@ -20,6 +21,7 @@ export type FileItemT = {
     key?: string // only items uploaded to s3 have this
     s3URL?: string // only items uploaded to s3 have this
     status: FileStatus
+    documentCategories: DocumentCategoryType[]
 }
 
 const DocumentError = ({
@@ -84,14 +86,21 @@ type FileProcessorProps = {
     deleteItem: (item: FileItemT) => void
     retryItem: (item: FileItemT) => void
     renderMode: 'table' | 'list'
+    handleCheckboxClick: (event: React.ChangeEvent<HTMLInputElement>) => void
+    isContractOnly?: boolean
 }
 export const FileProcessor = ({
     item,
     deleteItem,
     retryItem,
     renderMode,
+    handleCheckboxClick,
+    isContractOnly,
 }: FileProcessorProps): React.ReactElement => {
     const { name, status, file } = item
+    const isRateSupporting = item.documentCategories.includes('RATES_RELATED')
+    const isContractSupporting =
+        item.documentCategories.includes('CONTRACT_RELATED')
     const hasDuplicateNameError = status === 'DUPLICATE_NAME_ERROR'
     const hasScanningError = status === 'SCANNING_ERROR'
     const hasUploadError = status === 'UPLOAD_ERROR'
@@ -147,6 +156,8 @@ export const FileProcessor = ({
             errorRowClass={errorRowClass}
             isLoading={isLoading}
             isScanning={isScanning}
+            isContractSupporting={isContractSupporting}
+            isRateSupporting={isRateSupporting}
             statusValue={statusValue}
             item={item}
             imageClasses={imageClasses}
@@ -161,6 +172,8 @@ export const FileProcessor = ({
             hasRecoverableError={hasRecoverableError}
             handleDelete={handleDelete}
             handleRetry={handleRetry}
+            handleCheckboxClick={handleCheckboxClick}
+            isContractOnly={isContractOnly}
         />
     ) : (
         <FileListItem
@@ -181,6 +194,7 @@ export const FileProcessor = ({
             hasRecoverableError={hasRecoverableError}
             handleDelete={handleDelete}
             handleRetry={handleRetry}
+            handleCheckboxClick={handleCheckboxClick}
         />
     )
 }

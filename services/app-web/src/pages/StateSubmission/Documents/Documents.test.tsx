@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import {
@@ -379,7 +379,7 @@ describe('Documents', () => {
                     screen.getAllByText(
                         'You must remove all documents with error messages before continuing'
                     )
-                ).toHaveLength(2) 
+                ).toHaveLength(2)
             })
         })
 
@@ -630,7 +630,7 @@ describe('Documents', () => {
                     screen.getAllByText(
                         'You must remove all documents with error messages before continuing'
                     )
-                ).toHaveLength(2)                
+                ).toHaveLength(2)
             })
         })
     })

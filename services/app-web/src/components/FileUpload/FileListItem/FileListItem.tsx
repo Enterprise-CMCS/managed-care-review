@@ -16,6 +16,7 @@ type FileListItemProps = {
     hasRecoverableError: boolean
     handleDelete: (_e: React.MouseEvent) => void
     handleRetry: (_e: React.MouseEvent) => void
+    handleCheckboxClick: (event: React.ChangeEvent<HTMLInputElement>) => void
 }
 
 export const FileListItem = ({
@@ -28,6 +29,7 @@ export const FileListItem = ({
     hasRecoverableError,
     handleDelete,
     handleRetry,
+    handleCheckboxClick,
 }: FileListItemProps): React.ReactElement => {
     const { name } = item
     return (

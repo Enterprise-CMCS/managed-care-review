@@ -11,6 +11,13 @@
     float: left;
 }
 
+.checkbox {
+    & label {
+        margin-top: 0px;
+        padding-bottom: 20px;
+    }
+}
+
 .fileInput {
     max-width: none;
 }
