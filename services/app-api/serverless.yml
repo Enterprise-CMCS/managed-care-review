@@ -106,6 +106,7 @@ provider:
     SES_SOURCE_EMAIL_ADDRESS: ${self:custom.emailSource}
     SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${self:custom.emailReviewTeamAddresses}
     APPLICATION_ENDPOINT: ${self:custom.applicationEndpoint}
+    NODE_OPTIONS: --require otlp_lambda_wrapper
 
 layers:
   prismaClient:
