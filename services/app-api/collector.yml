@@ -7,8 +7,6 @@ receivers:
 exporters:
   otlp:
     endpoint: https://gov-otlp.nr-data.net:4317
-    headers:
-      api-key: 9aa33e93a9dcd7c66aa5dcb0b4536a32FFFFNRAL
   logging:
     loglevel: debug
 
