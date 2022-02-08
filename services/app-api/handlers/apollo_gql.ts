@@ -1,10 +1,4 @@
-import { registerInstrumentations } from '@opentelemetry/instrumentation'
-import { AwsLambdaInstrumentation } from '@opentelemetry/instrumentation-aws-lambda'
-import {
-    ConsoleSpanExporter,
-    SimpleSpanProcessor,
-} from '@opentelemetry/sdk-trace-base'
-import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
+import * as api from '@opentelemetry/api'
 import { ApolloServer } from 'apollo-server-lambda'
 import {
     APIGatewayProxyEvent,
@@ -26,28 +20,54 @@ import { NewPostgresStore } from '../postgres/postgresStore'
 import { configureResolvers } from '../resolvers'
 import { configurePostgres } from './configuration'
 
-const provider = new NodeTracerProvider()
-provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()))
-provider.register()
+const tracer = require('./otel_handler').tracer
 
-registerInstrumentations({
-    instrumentations: [
-        new AwsLambdaInstrumentation({
-            requestHook: (span, { event, context }) => {
-                console.log('IN REQUEST HOOK WOIFNEWOINFWIOFN')
-                span.setAttribute('app.name', context.functionName)
-                span.setAttribute('started', true)
-            },
-            responseHook: (span, { err, res }) => {
-                console.log('IN RESPONSE HOOK WOEINFWOINFIOWEF')
-                span.setAttribute('finished', true)
-                if (err instanceof Error)
-                    span.setAttribute('app.error', err.message)
-                if (res) span.setAttribute('app.res', res)
-            },
-        }),
-    ],
-})
+// console.log('TRACERs', tracer)
+
+// const provider = new NodeTracerProvider()
+// provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()))
+// provider.register()
+
+// const sdk = new NodeSDK({
+//     traceExporter: new ConsoleSpanExporter(),
+//     instrumentations: [
+//         new AwsLambdaInstrumentation({
+//             requestHook: (span, { event, context }) => {
+//                 console.log('IN REQUEST HOOK WOIFNEWOINFWIOFN')
+//                 span.setAttribute('app.name', context.functionName)
+//                 span.setAttribute('started', true)
+//             },
+//             responseHook: (span, { err, res }) => {
+//                 console.log('IN RESPONSE HOOK WOEINFWOINFIOWEF')
+//                 span.setAttribute('finished', true)
+//                 if (err instanceof Error)
+//                     span.setAttribute('app.error', err.message)
+//                 if (res) span.setAttribute('app.res', res)
+//             },
+//         }),
+//     ],
+// })
+
+// sdk.start()
+
+// registerInstrumentations({
+//     instrumentations: [
+//         new AwsLambdaInstrumentation({
+//             requestHook: (span, { event, context }) => {
+//                 console.log('IN REQUEST HOOK WOIFNEWOINFWIOFN')
+//                 span.setAttribute('app.name', context.functionName)
+//                 span.setAttribute('started', true)
+//             },
+//             responseHook: (span, { err, res }) => {
+//                 console.log('IN RESPONSE HOOK WOEINFWOINFIOWEF')
+//                 span.setAttribute('finished', true)
+//                 if (err instanceof Error)
+//                     span.setAttribute('app.error', err.message)
+//                 if (res) span.setAttribute('app.res', res)
+//             },
+//         }),
+//     ],
+// })
 
 // -------- no more setup for OTEL --------
 
@@ -108,6 +128,32 @@ function localAuthMiddleware(
         }
 
         return wrapped(event, context, completion)
+    }
+}
+
+// Tracing Middleware
+function localTracingMiddleware(
+    wrapped: APIGatewayProxyHandler
+): APIGatewayProxyHandler {
+    return function (event, context, completion) {
+        console.log('start Trace', context)
+        const currentSpan = api.trace.getSpan(api.context.active())
+        // display traceid in the terminal
+        if (currentSpan) {
+            console.log(`traceid: ${currentSpan.spanContext().traceId}`)
+        }
+        const span = tracer.startSpan('handleRequest', {
+            kind: 1, // server
+            attributes: { key: 'value' },
+        })
+
+        const result = wrapped(event, context, completion)
+
+        span.addEvent('Past is done')
+        span.setAttribute('foo', 'bar')
+        span.end()
+
+        return result
     }
 }
 
@@ -179,7 +225,7 @@ async function initializeGQLHandler(): Promise<Handler> {
         emailerMode == 'LOCAL'
             ? newLocalEmailer({
                   emailSource: 'local@example.com',
-                  stage: 'local',
+                  stage: 'locasl',
                   baseUrl: applicationEndpoint,
                   cmsReviewSharedEmails: cmsReviewSharedEmails.split(','),
               })
@@ -216,9 +262,11 @@ async function initializeGQLHandler(): Promise<Handler> {
         },
     })
 
+    const tracingHandler = localTracingMiddleware(handler)
+
     // Locally, we wrap our handler in a middleware that returns 403 for unauthenticated requests
     const isLocal = authMode === 'LOCAL'
-    return isLocal ? localAuthMiddleware(handler) : handler
+    return isLocal ? localAuthMiddleware(tracingHandler) : tracingHandler
 }
 
 const handlerPromise = initializeGQLHandler()
