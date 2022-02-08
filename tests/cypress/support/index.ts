@@ -38,7 +38,7 @@ declare global {
             fillOutAmendmentToPriorRateCertification(): void
             fillOutStateContact(): void
             fillOutActuaryContact(): void
-            fillOutDocuments(): void
+            fillOutSupportingDocuments(): void
             waitForDocumentsToLoad(): void
             verifyDocumentsHaveNoErrors(): void
             submitStateSubmissionForm(): void

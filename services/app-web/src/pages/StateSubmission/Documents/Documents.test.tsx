@@ -764,4 +764,71 @@ describe('Back button', () => {
         expect(screen.queryByText('Remove files with errors')).toBeNull()
         expect(mockUpdateDraftFn).toHaveBeenCalled()
     })
+
 })
+
+     describe('document categories checkbox', () => {
+         it('not present on contract only submission, categories default to contract-supporting', async () => {
+            const mockUpdateDraftFn = jest.fn()
+             renderWithProviders(
+                 <Documents
+                     draftSubmission={{
+                         ...mockDraft(),
+                         submissionType: 'CONTRACT_ONLY',
+                     }}
+                     updateDraft={mockUpdateDraftFn}
+                 />,
+                 {
+                     apolloProvider: {
+                         mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                     },
+                 }
+             )
+             expect(screen.queryAllByText('Contract-supporting').length).toBe(0)
+             expect(screen.queryAllByText('Rate-supporting').length).toBe(0)
+
+             const input = screen.getByTestId('file-input-input')
+             userEvent.upload(input, [TEST_PDF_FILE])
+
+             await waitFor(() => {
+                 expect(
+                     screen.getByRole('button', { name: 'Continue' })
+                 ).not.toBeDisabled()
+                 screen.getByRole('button', { name: 'Continue' }).click()
+                 // TODO: check if we have a small loop here, expecting 1 call but consistently getting 10+ calls after button click
+                 const call = mockUpdateDraftFn.mock.calls[0][0]
+                 const documents = call.draftSubmissionUpdates.documents
+
+                 expect(documents.length).toBe(1)
+                 expect(
+                     documents[0].documentCategories.includes(
+                         'CONTRACT_RELATED'
+                     )
+                 ).toBe(true)
+             })
+            })
+
+         it('present on contract and rates submission', async () => {
+             const mockUpdateDraftFn = jest.fn()
+             renderWithProviders(
+                 <Documents
+                     draftSubmission={{
+                         ...mockDraft(),
+                         submissionType: 'CONTRACT_AND_RATES',
+                     }}
+                     updateDraft={mockUpdateDraftFn}
+                 />,
+                 {
+                     apolloProvider: {
+                         mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                     },
+                 }
+             )
+             expect(
+                 screen.getAllByText('Contract-supporting').length
+             ).toBeGreaterThanOrEqual(1)
+             expect(
+                 screen.getAllByText('Rate-supporting').length
+             ).toBeGreaterThanOrEqual(1)
+         })
+     })
