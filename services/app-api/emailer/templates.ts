@@ -57,11 +57,28 @@ const newPackageCMSEmail = (
             ? '<b>Rating period</b>'
             : '<b>Rate amendment effective dates</b>'
     }`
-    const rateRelatedDatesText = `${submission.submissionType === 'CONTRACT_AND_RATES' ? `${ratingPeriodText}: ${dayjs(submission.rateDateStart).format('MM/DD/YYYY') + ' to ' + dayjs(submission.rateDateEnd).format('MM/DD/YYYY')}`: ''}` // displays nothing if submission is CONTRACT_ONLY
-        const submissionURL = new URL(
-            `submissions/${submission.id}`,
-            config.baseUrl
-        ).href
+    const ratingPeriodDates = `${
+        submission.rateType === 'AMENDMENT' && submission.rateAmendmentInfo
+            ? `${
+                  dayjs(submission.rateAmendmentInfo.effectiveDateStart).format(
+                      'MM/DD/YYYY'
+                  ) +
+                  ' to ' +
+                  dayjs(submission.rateAmendmentInfo.effectiveDateEnd).format(
+                      'MM/DD/YYYY'
+                  )
+              }`
+            : `${
+                  dayjs(submission.rateDateStart).format('MM/DD/YYYY') +
+                  ' to ' +
+                  dayjs(submission.rateDateEnd).format('MM/DD/YYYY')
+              }`
+    }`
+    const rateRelatedDatesText = submission.submissionType === 'CONTRACT_AND_RATES' ? `${ratingPeriodText}: ${ratingPeriodDates}` : '' // displays nothing if submission is CONTRACT_ONLY
+    const submissionURL = new URL(
+        `submissions/${submission.id}`,
+        config.baseUrl
+    ).href
     const bodyHTML = `<span style="color:#FF0000;font-weight:bold;">Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.</span>
             <br /><br />
             Managed Care submission: <b>${submissionName(

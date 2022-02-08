@@ -165,6 +165,10 @@ describe('Email templates', () => {
                     contractDateEnd: new Date('01/01/2025'),
                     rateDateStart: new Date('01/01/2021'),
                     rateDateEnd: new Date('01/01/2022'),
+                    rateAmendmentInfo: {
+                        effectiveDateStart: new Date('06/05/2021'),
+                        effectiveDateEnd:  new Date('12/31/2021')
+                    }
                 }
                 const template = newPackageCMSEmail(sub, testEmailConfig)
 
@@ -178,7 +182,7 @@ describe('Email templates', () => {
                 expect(template).toEqual(
                     expect.objectContaining({
                         bodyText: expect.stringContaining(
-                            'Rate amendment effective dates: 01/01/2021 to 01/01/2022'
+                            'Rate amendment effective dates: 06/05/2021 to 12/31/2021'
                         ),
                     })
                 )
