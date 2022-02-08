@@ -23,6 +23,8 @@ on:
         required: true
       full_iam_permissions_boundary_policy:
         required: true
+      nr_license_key:
+        required: true
       react_app_auth_mode:
         required: true
       ses_source_email_address:
@@ -94,6 +96,7 @@ jobs:
           EMAILER_MODE: SES
           SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.ses_review_team_email_addresses }}
           SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.ses_source_email_address }}
+          NR_LICENSE_KEY: ${{ secrets.nr_license_key}}
 
         run: |
           pushd services/app-api && npx serverless deploy --stage ${{ inputs.stage_name }}

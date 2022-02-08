@@ -3,6 +3,7 @@ const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const nodeExternals = require('webpack-node-externals');
 const path = require('path');
 const slsw = require('serverless-webpack');
+const webpack = require('webpack');
 
 const isLocal = slsw.lib.webpack.isLocal;
 
@@ -76,9 +77,23 @@ module.exports = {
                 exclude: /node_modules/,
                 loader: 'graphql-tag/loader',
             },
+            {
+                test: /collector\.yml$/,
+                loader: 'string-replace-loader',
+                options: {
+                    search: '$nr-license-key',
+                    replace(match) {
+                        console.log(
+                            `Replace "${match}" in file "${this.resource}".`
+                        );
+                        return `${process.env.NR_LICENSE_KEY}`;
+                    },
+                },
+            },
         ],
     },
     plugins: [
+        new webpack.EnvironmentPlugin(['NR_LICENSE_KEY']),
         new CopyWebpackPlugin({
             patterns: [
                 {
