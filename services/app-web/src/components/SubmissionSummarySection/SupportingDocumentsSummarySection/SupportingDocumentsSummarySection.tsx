@@ -13,16 +13,26 @@ export type SupportingDocumentsSummarySectionProps = {
     submission: DraftSubmission | StateSubmission
     navigateTo?: string
 }
-
+const getUncategorizedDocuments = (documents: Document[]): Document[] =>
+    documents.filter((doc) => ! doc.documentCategories || doc.documentCategories.length === 0)
+// This component is only used for supporting docs that are not categorized (not expected behavior but still possible)
+// since supporting documents are now displayed in the rate and contract sections
 export const SupportingDocumentsSummarySection = ({
     submission,
     navigateTo,
-}: SupportingDocumentsSummarySectionProps): React.ReactElement => {
+}: SupportingDocumentsSummarySectionProps): React.ReactElement | null => {
     const { getURL, getKey, getBulkDlURL } = useS3()
+    const [refreshedDocs, setRefreshedDocs] = useState<DocumentWithLink[]>([])
+    const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
+    const isSubmitted = submission.__typename === 'StateSubmission'
     useEffect(() => {
         const refreshDocuments = async () => {
+            const uncategorizedDocuments = getUncategorizedDocuments(
+                submission.documents
+            )
+                
             const newDocuments = await Promise.all(
-                submission.documents.map(async (doc) => {
+                uncategorizedDocuments.map(async (doc) => {
                     const key = getKey(doc.s3URL)
                     if (!key)
                         return {
@@ -40,23 +50,19 @@ export const SupportingDocumentsSummarySection = ({
                 console.log(err)
                 return []
             })
+
             setRefreshedDocs(newDocuments)
         }
 
         void refreshDocuments()
     }, [submission, getKey, getURL])
 
-    const [refreshedDocs, setRefreshedDocs] = useState<DocumentWithLink[]>([])
-
-    const documentsSummary = `${refreshedDocs.length} ${
-        refreshedDocs.length === 1 ? 'file' : 'files'
-    }`
-
     useEffect(() => {
         // get all the keys for the documents we want to zip
+        const uncategorizedDocuments = getUncategorizedDocuments(submission.documents)
+      
         async function fetchZipUrl() {
-            console.log(submission)
-            const keysFromDocs = submission.documents
+            const keysFromDocs = uncategorizedDocuments
                 .map((doc) => {
                     const key = getKey(doc.s3URL)
                     if (!key) return ''
@@ -80,8 +86,11 @@ export const SupportingDocumentsSummarySection = ({
         void fetchZipUrl()
     }, [getKey, getBulkDlURL, submission])
 
-    const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
-    const isSubmitted = submission.__typename === 'StateSubmission'
+    const documentsSummary = `${refreshedDocs.length} ${
+        refreshedDocs.length === 1 ? 'file' : 'files'
+    }`
+    // when there are no uncategorized supporting documents, remove this section entirely
+    if (refreshedDocs.length === 0) return null
 
     return (
         <section id="documents" className={styles.summarySection}>

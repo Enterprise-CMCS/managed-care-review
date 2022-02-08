@@ -48,7 +48,9 @@ export const RateDetailsSummarySection = ({
         void fetchZipUrl()
     }, [getKey, getBulkDlURL, submission])
     const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
-
+    const rateSupportingDocuments = submission.documents.filter((doc) =>
+        doc.documentCategories.includes('RATES_RELATED')
+    )
     return (
         <section id="rateDetails" className={styles.summarySection}>
             <dl>
@@ -125,6 +127,15 @@ export const RateDetailsSummarySection = ({
                     caption="Rate certification"
                     documentCategory="Rate certification"
                 />
+                {rateSupportingDocuments.length > 0 && (
+                    <UploadedDocumentsTable
+                        documents={rateSupportingDocuments}
+                        caption="Rate supporting documents"
+                        documentCategory="Rate-supporting"
+                        isSupportingDocuments
+                        isSubmitted={isSubmitted}
+                    />
+                )}
             </dl>
         </section>
     )

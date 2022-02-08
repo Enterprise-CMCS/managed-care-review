@@ -205,7 +205,7 @@ export const Documents = ({
                         formDataDocuments.push({
                             name: fileItem.name,
                             s3URL: fileItem.s3URL,
-                            documentCategories: fileItem.documentCategories,
+                            documentCategories: fileItem.documentCategories || [],
                         })
                     }
                     return formDataDocuments
