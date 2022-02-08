@@ -124,6 +124,9 @@ functions:
           path: health_check
           method: get
           cors: true
+    layers:
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-0-1:1
+    tracing: Active
 
   log_event:
     handler: handlers/log_event.main
@@ -162,9 +165,6 @@ functions:
           method: get
           cors: true
           authorizer: aws_iam
-    layers:
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-0-1:1
-    tracing: Active
 
   postgres:
     handler: handlers/postgres_check.main
