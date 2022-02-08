@@ -396,6 +396,14 @@ export const RateDetails = ({
                                                 {errors.rateType}
                                             </PoliteErrorMessage>
                                         )}
+                                        <Link
+                                            aria-label="Rate certification type defintions (opens in new window)"
+                                            href={'/help#rate-cert-type-definitions'}
+                                            variant="external"
+                                            target="_blank"
+                                        >
+                                            Rate certification type definitions
+                                        </Link>
                                         <FieldRadio
                                             id="newRate"
                                             name="rateType"
