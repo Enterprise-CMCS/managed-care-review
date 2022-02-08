@@ -158,15 +158,18 @@ export const FileProcessor = ({
         hasDuplicateNameError ||
         hasScanningError ||
         hasUploadError ||
-        hasUnexpectedError ||
-        hasMissingCategories
+        hasUnexpectedError
     ) {
         statusValue = 'error'
     }
 
+    const missingCategoryError = shouldValidate && hasMissingCategories
+
     const errorRowClass = classnames({
-        'bg-secondary-lighter': statusValue === 'error',
+        'bg-secondary-lighter': statusValue === 'error' || missingCategoryError,
     })
+
+    const hasNonDocumentError = statusValue === 'error'
 
     return renderMode === 'table' ? (
         <FileRow
@@ -194,6 +197,7 @@ export const FileProcessor = ({
             handleCheckboxClick={handleCheckboxClick}
             isContractOnly={isContractOnly}
             shouldValidate={shouldValidate}
+            hasNonDocumentError={hasNonDocumentError}
         />
     ) : (
         <FileListItem

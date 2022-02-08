@@ -21,6 +21,7 @@ type FileRowProps = {
     handleCheckboxClick: (event: React.ChangeEvent<HTMLInputElement>) => void
     isContractOnly?: boolean
     shouldValidate?: boolean
+    hasNonDocumentError?: boolean
 }
 
 export const FileRow = ({
@@ -38,16 +39,13 @@ export const FileRow = ({
     handleRetry,
     handleCheckboxClick,
     isContractOnly,
-    shouldValidate,
+    hasNonDocumentError,
 }: FileRowProps): React.ReactElement => {
     const { name } = item
+    const shouldHideCheckbox = isContractOnly || hasNonDocumentError
 
     return (
-        <tr
-            className={`${shouldValidate ? errorRowClass : ''} ${
-                styles.warningRow
-            }`}
-        >
+        <tr className={`${errorRowClass} ${styles.warningRow}`}>
             <td>
                 {isLoading || isScanning ? (
                     <span
@@ -85,12 +83,10 @@ export const FileRow = ({
                     <span>{name}</span>
                 </span>
             </td>
-            {!isContractOnly && (
+            {!shouldHideCheckbox ? (
                 <td>
                     <Checkbox
-                        className={`${shouldValidate ? errorRowClass : ''} ${
-                            styles.checkbox
-                        }`}
+                        className={`${errorRowClass} ${styles.checkbox}`}
                         label=""
                         id={`${item.id}--contract`}
                         name="contract-supporting"
@@ -100,13 +96,13 @@ export const FileRow = ({
                         onChange={handleCheckboxClick}
                     />
                 </td>
+            ) : (
+                <td />
             )}
-            {!isContractOnly && (
+            {!shouldHideCheckbox ? (
                 <td>
                     <Checkbox
-                        className={`${shouldValidate ? errorRowClass : ''} ${
-                            styles.checkbox
-                        }`}
+                        className={`${errorRowClass} ${styles.checkbox}`}
                         label=""
                         id={`${item.id}--rate`}
                         name="rate-supporting"
@@ -116,6 +112,8 @@ export const FileRow = ({
                         onChange={handleCheckboxClick}
                     />
                 </td>
+            ) : (
+                <td />
             )}
             <td style={{ textAlign: 'right' }}>
                 <Button

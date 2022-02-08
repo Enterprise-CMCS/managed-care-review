@@ -34,6 +34,7 @@ export type FileUploadProps = {
     onFileItemsUpdate: ({ fileItems }: { fileItems: FileItemT[] }) => void
     isContractOnly?: boolean
     shouldValidate?: boolean
+    hasMissingCategories?: boolean
 } & JSX.IntrinsicElements['input']
 
 /*  FileUpload handles async file upload to S3 and displays inline errors per file.
@@ -59,6 +60,7 @@ export const FileUpload = ({
     onFileItemsUpdate,
     isContractOnly,
     shouldValidate,
+    hasMissingCategories,
     ...inputProps
 }: FileUploadProps): React.ReactElement => {
     const [fileItems, setFileItems] = useState<FileItemT[]>(initialItems || [])

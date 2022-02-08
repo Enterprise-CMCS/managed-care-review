@@ -45,9 +45,15 @@ export const Documents = ({
         (item) => item.status === 'UPLOAD_COMPLETE'
     )
     const hasMissingCategories =
-        fileItems.every((item) => item.documentCategories.length === 0) &&
-        !isContractOnly &&
-        fileItems.length > 0
+        /* fileItems must have some document category.  a contract-only submission
+       must have "CONTRACT_RELATED" as the document category. */
+        fileItems.length > 0 &&
+        (fileItems.some((docs) => docs.documentCategories.length === 0) ||
+            (isContractOnly &&
+                fileItems.some(
+                    (docs) =>
+                        !docs.documentCategories.includes('CONTRACT_RELATED')
+                )))
     const hasLoadingFiles =
         fileItems.some((item) => item.status === 'PENDING') ||
         fileItems.some((item) => item.status === 'SCANNING')
@@ -282,6 +288,7 @@ export const Documents = ({
                         onFileItemsUpdate={onFileItemsUpdate}
                         isContractOnly={isContractOnly}
                         shouldValidate={shouldValidate}
+                        hasMissingCategories={hasMissingCategories}
                     />
                 </fieldset>
                 <PageActions

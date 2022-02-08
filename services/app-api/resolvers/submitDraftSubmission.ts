@@ -3,6 +3,7 @@ import {
     DraftSubmissionType,
     hasValidContract,
     hasValidDocuments,
+    hasValidSupportingDocumentCategories,
     hasValidRates,
     isContractAndRates,
     isStateSubmission,
@@ -54,6 +55,7 @@ function submit(
         submittedAt: new Date(),
     }
 
+    console.log("BLAHBLAHBLAH: ", maybeStateSubmission)
     if (isStateSubmission(maybeStateSubmission)) return maybeStateSubmission
     else if (!hasValidContract(maybeStateSubmission as StateSubmissionType)) {
         return {
@@ -77,7 +79,17 @@ function submit(
             code: 'INCOMPLETE',
             message: 'submissions must have valid documents',
         }
-    } else
+    } else if (
+        !hasValidSupportingDocumentCategories(
+            maybeStateSubmission as StateSubmissionType
+        )
+    ) {
+        return {
+            code: 'INCOMPLETE',
+            message: 'submissions must have valid categories for supporting documents',
+        }
+    }
+    else
         return {
             code: 'INCOMPLETE',
             message: 'submission is missing a required field',

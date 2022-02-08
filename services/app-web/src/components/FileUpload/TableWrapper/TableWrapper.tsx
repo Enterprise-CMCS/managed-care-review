@@ -9,6 +9,7 @@ type TableWrapperProps = {
     handleCheckboxClick: (event: React.ChangeEvent<HTMLInputElement>) => void
     isContractOnly?: boolean
     shouldValidate?: boolean
+    hasMissingCategories?: boolean
 }
 
 export const TableWrapper = ({
