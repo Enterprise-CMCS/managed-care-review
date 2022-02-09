@@ -228,7 +228,7 @@ jobs:
 
   finishing-prep:
     name: Finishing Prep
-    needs: [deploy-infra, begin-deployment, api-unit-tests]
+    needs: [deploy-infra, begin-deployment, deploy-app]
     if: always()
     runs-on: ubuntu-latest
     outputs:
