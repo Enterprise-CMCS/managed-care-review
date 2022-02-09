@@ -167,7 +167,7 @@ export const ContractDetailsSummarySection = ({
                     right={
                         <DataDetail
                             id="federalAuthorities"
-                            label="Federal authority your program operates under"
+                            label="Active federal operating authority"
                             data={createCheckboxList({
                                 list: submission.federalAuthorities,
                                 dict: FederalAuthorityRecord,
