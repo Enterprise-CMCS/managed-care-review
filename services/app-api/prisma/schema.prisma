@@ -23,7 +23,6 @@ model StateSubmission {
   id                  String                    @id
   state               State                     @relation(fields: [stateCode], references: [stateCode])
   stateCode           String
-  submissionFormProto Bytes
   revisions           StateSubmissionRevision[]
 }
 
