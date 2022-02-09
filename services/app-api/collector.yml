@@ -8,7 +8,7 @@ exporters:
   otlp:
     endpoint: https://gov-otlp.nr-data.net:4317
     headers:
-      app-api: NRLICENSEKEY
+      app-api: $NR_LICENSE_KEY
   logging:
     loglevel: debug
 
