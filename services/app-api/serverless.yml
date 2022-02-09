@@ -31,6 +31,7 @@ custom:
   secretsManagerSecret: aurora_postgres_${self:custom.stage} #pragma: allowlist secret
   reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
   dbURL: ${env:DATABASE_URL}
+  nrLicenseKey: ${env:NR_LICENSE_KEY}
   webpack:
     webpackConfig: 'webpack.config.js'
     packager: 'yarn'

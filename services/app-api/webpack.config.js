@@ -3,7 +3,6 @@ const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const nodeExternals = require('webpack-node-externals');
 const path = require('path');
 const slsw = require('serverless-webpack');
-
 const isLocal = slsw.lib.webpack.isLocal;
 
 const tsConfigPath = 'tsconfig.json';
@@ -20,7 +19,8 @@ const extensions = [
 const servicePath = '';
 
 module.exports = (async () => {
-    const nr_license_key = await slsw.lib.serverless.env.NR_LICENSE_KEY;
+    const nr_license_key = await slsw.lib.serverless.configurationInput.custom
+        .nrLicenseKey;
     return {
         entry: slsw.lib.entries,
         target: 'node',
@@ -82,7 +82,7 @@ module.exports = (async () => {
                     test: /collector\.yml$/,
                     loader: 'string-replace-loader',
                     options: {
-                        search: 'NR_LICENSE_KEY',
+                        search: 'NRLICENSEKEY',
                         replace: `${nr_license_key}`,
                         flags: 'g',
                         strict: true,
