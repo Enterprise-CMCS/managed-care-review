@@ -3,7 +3,6 @@ const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const nodeExternals = require('webpack-node-externals');
 const path = require('path');
 const slsw = require('serverless-webpack');
-const webpack = require('webpack');
 
 const isLocal = slsw.lib.webpack.isLocal;
 
@@ -20,94 +19,91 @@ const extensions = [
 ];
 const servicePath = '';
 
-module.exports = {
-    entry: slsw.lib.entries,
-    target: 'node',
-    context: __dirname,
-    mode: isLocal ? 'development' : 'production',
-    performance: {
-        hints: false,
-    },
-    externals: [
-        nodeExternals(),
-        nodeExternals({
-            modulesDir: path.resolve(__dirname, '../../node_modules'),
-        }),
-        'aws-sdk',
-    ],
-    devtool: 'source-map',
-    resolve: {
-        symlinks: false,
-        extensions: extensions,
-        modules: [path.resolve(__dirname, 'node_modules'), 'node_modules'],
-        plugins: [
-            new TsconfigPathsPlugin({
-                configFile: tsConfigPath,
-                extensions: extensions,
+module.exports = (async () => {
+    const nr_license_key = await slsw.lib.serverless.env.NR_LICENSE_KEY;
+    return {
+        entry: slsw.lib.entries,
+        target: 'node',
+        context: __dirname,
+        mode: isLocal ? 'development' : 'production',
+        performance: {
+            hints: false,
+        },
+        externals: [
+            nodeExternals(),
+            nodeExternals({
+                modulesDir: path.resolve(__dirname, '../../node_modules'),
             }),
+            'aws-sdk',
         ],
-    },
-    module: {
-        rules: [
-            {
-                test: /\.mjs$/,
-                include: /node_modules/,
-                type: 'javascript/auto',
-            },
-            {
-                test: /\.(ts|tsx)$/,
-                use: [
-                    {
-                        loader: 'ts-loader',
-                        options: {
-                            projectReferences: true,
-                            configFile: tsConfigPath,
-                            experimentalWatchApi: true,
+        devtool: 'source-map',
+        resolve: {
+            symlinks: false,
+            extensions: extensions,
+            modules: [path.resolve(__dirname, 'node_modules'), 'node_modules'],
+            plugins: [
+                new TsconfigPathsPlugin({
+                    configFile: tsConfigPath,
+                    extensions: extensions,
+                }),
+            ],
+        },
+        module: {
+            rules: [
+                {
+                    test: /\.mjs$/,
+                    include: /node_modules/,
+                    type: 'javascript/auto',
+                },
+                {
+                    test: /\.(ts|tsx)$/,
+                    use: [
+                        {
+                            loader: 'ts-loader',
+                            options: {
+                                projectReferences: true,
+                                configFile: tsConfigPath,
+                                experimentalWatchApi: true,
+                            },
                         },
-                    },
-                ],
-                exclude: [
-                    path.resolve(servicePath, 'node_modules'),
-                    path.resolve(servicePath, '.serverless'),
-                    path.resolve(servicePath, '.webpack'),
-                ],
-            },
-            {
-                test: /\.(graphql|gql)$/,
-                exclude: /node_modules/,
-                loader: 'graphql-tag/loader',
-            },
-            {
-                test: /collector\.yml$/,
-                loader: 'string-replace-loader',
-                options: {
-                    search: 'NR_LICENSE_KEY',
-                    replace: (match, p1, offset, string) => {
-                        console.log(
-                            `Replace "${match}" in file "${this.resource}".`
-                        );
-                        return `${process.env.NR_LICENSE_KEY}`;
-                    },
-                    flags: 'g',
-                    strict: true,
-                },
-            },
-        ],
-    },
-    plugins: [
-        new webpack.EnvironmentPlugin(['NR_LICENSE_KEY']),
-        new CopyWebpackPlugin({
-            patterns: [
-                {
-                    from: path.resolve(
-                        __dirname,
-                        '../../node_modules/.prisma/client/schema.prisma'
-                    ),
+                    ],
+                    exclude: [
+                        path.resolve(servicePath, 'node_modules'),
+                        path.resolve(servicePath, '.serverless'),
+                        path.resolve(servicePath, '.webpack'),
+                    ],
                 },
                 {
-                    from: path.resolve(__dirname, 'collector.yml'),
+                    test: /\.(graphql|gql)$/,
+                    exclude: /node_modules/,
+                    loader: 'graphql-tag/loader',
+                },
+                {
+                    test: /collector\.yml$/,
+                    loader: 'string-replace-loader',
+                    options: {
+                        search: 'NR_LICENSE_KEY',
+                        replace: `${nr_license_key}`,
+                        flags: 'g',
+                        strict: true,
+                    },
                 },
             ],
-        }),
-    ],
-};
+        },
+        plugins: [
+            new CopyWebpackPlugin({
+                patterns: [
+                    {
+                        from: path.resolve(
+                            __dirname,
+                            '../../node_modules/.prisma/client/schema.prisma'
+                        ),
+                    },
+                    {
+                        from: path.resolve(__dirname, 'collector.yml'),
+                    },
+                ],
+            }),
+        ],
+    };
+})();
