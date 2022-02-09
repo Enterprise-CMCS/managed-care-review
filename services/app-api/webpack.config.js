@@ -81,7 +81,7 @@ module.exports = {
                 test: /collector\.yml$/,
                 loader: 'string-replace-loader',
                 options: {
-                    search: '$nr-license-key',
+                    search: 'NR_LICENSE_KEY',
                     replace(match) {
                         console.log(
                             `Replace "${match}" in file "${this.resource}".`
