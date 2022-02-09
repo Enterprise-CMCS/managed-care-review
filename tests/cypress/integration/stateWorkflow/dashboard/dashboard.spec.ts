@@ -40,7 +40,7 @@ describe('dashboard', () => {
         cy.fillOutActuaryContact()
         cy.navigateForm('Continue')
 
-        cy.fillOutDocuments()
+        cy.fillOutSupportingDocuments()
         cy.navigateForm('Continue')
 
         // Store submission name for reference later
@@ -84,7 +84,21 @@ describe('dashboard', () => {
             cy.findByText('New rate certification').should('exist')
             cy.findByText('02/29/2024 to 02/28/2025').should('exist')
             cy.findByText('Download all contract documents').should('exist')
+            cy.findByRole('table', {
+                     name: 'Contract',
+                 }).should('exist')
 
+            cy.findByRole('table', {
+                     name: 'Contract supporting documents',
+                 }).should('exist')
+            cy.findByRole('table', {
+                name: 'Rate certification',
+            }).should('exist')
+
+            cy.findByRole('table', {
+                name: 'Rate supporting documents',
+            }).should('exist')
+            
             // check accessibility of filled out submission summary page
             cy.pa11y({
                 actions: [

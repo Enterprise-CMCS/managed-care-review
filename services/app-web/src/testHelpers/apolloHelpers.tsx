@@ -262,16 +262,16 @@ export function mockStateSubmission(): StateSubmission {
         submittedAt: new Date(),
         documents: [
             {
-                s3URL: 'bar',
-                name: 'foo',
+                s3URL: 's3://bucketname/key/supporting-documents',
+                name: 'supporting documents',
                 documentCategories: ['RATES_RELATED' as const],
             },
         ],
         contractType: 'BASE',
         contractDocuments: [
             {
-                s3URL: 'bar',
-                name: 'foo',
+                s3URL: 's3://bucketname/key/contract',
+                name: 'contract',
                 documentCategories: ['CONTRACT' as const],
             },
         ],
@@ -283,8 +283,8 @@ export function mockStateSubmission(): StateSubmission {
         rateType: 'NEW',
         rateDocuments: [
             {
-                s3URL: 'bar',
-                name: 'foo',
+                s3URL: 's3://bucketname/key/rate',
+                name: 'rate',
                 documentCategories: ['RATES' as const],
             },
         ],
