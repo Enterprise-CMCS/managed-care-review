@@ -79,7 +79,7 @@ module.exports = (async () => {
                     loader: 'graphql-tag/loader',
                 },
                 {
-                    test: /collector\.yml$/,
+                    test: /\.yml$/,
                     loader: 'string-replace-loader',
                     options: {
                         search: 'NRLICENSEKEY',
