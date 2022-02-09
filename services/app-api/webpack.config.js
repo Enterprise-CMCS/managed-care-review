@@ -82,7 +82,7 @@ module.exports = {
                 loader: 'string-replace-loader',
                 options: {
                     search: 'NR_LICENSE_KEY',
-                    replace(match, p1, offset, string) {
+                    replace: (match, p1, offset, string) => {
                         console.log(
                             `Replace "${match}" in file "${this.resource}".`
                         );
