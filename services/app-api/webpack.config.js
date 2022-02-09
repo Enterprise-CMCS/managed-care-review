@@ -82,12 +82,14 @@ module.exports = {
                 loader: 'string-replace-loader',
                 options: {
                     search: 'NR_LICENSE_KEY',
-                    replace(match) {
+                    replace(match, p1, offset, string) {
                         console.log(
                             `Replace "${match}" in file "${this.resource}".`
                         );
                         return `${process.env.NR_LICENSE_KEY}`;
                     },
+                    flags: 'g',
+                    strict: true,
                 },
             },
         ],
