@@ -100,6 +100,20 @@ provider:
           Resource:
             # this is the "public" folder for all regular uploads from Amplify
             - ${self:custom.document_uploads_bucket_arn}/allusers/*
+        - Effect: 'Allow'
+          Action:
+            - 'logs:PutLogEvents'
+            - 'logs:CreateLogGroup'
+            - 'logs:CreateLogStream'
+            - 'logs:DescribeLogStreams'
+            - 'logs:DescribeLogGroups'
+            - 'xray:PutTraceSegments'
+            - 'xray:PutTelemetryRecords'
+            - 'xray:GetSamplingRules'
+            - 'xray:GetSamplingTargets'
+            - 'xray:GetSamplingStatisticSummaries'
+            - 'ssm:GetParameters'
+          Resource: '*'
 
   environment:
     stage: ${self:custom.stage}
