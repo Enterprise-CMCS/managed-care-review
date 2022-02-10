@@ -6,7 +6,7 @@ receivers:
 
 exporters:
   otlp:
-    endpoint: https://gov-otlp.nr-data.net:4317
+    endpoint: gov-otlp.nr-data.net:4317
     headers:
       app-api: $NR_LICENSE_KEY
   logging:
