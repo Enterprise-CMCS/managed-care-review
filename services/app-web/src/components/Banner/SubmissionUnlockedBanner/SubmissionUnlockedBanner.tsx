@@ -22,11 +22,11 @@ export const SubmissionUnlockedBanner = ({
     reason,
 }: UnlockedProps): React.ReactElement => {
     return (
-        <Alert role={'alert'} type={userType === 'CMS_USER' ? 'warning' : 'info'} heading={'Submission unlocked'} validation={true}>
+        <Alert role="alert" type={userType === "CMS_USER" ? "warning" : "info"} heading="Submission unlocked" validation={true}>
             <div className={styles.unlockedBanner}>
-                <p className={'usa-alert__text'}><b>Unlocked by: </b>{unlockedBy}</p>
-                <p className={'usa-alert__text'}><b>Unlocked on: </b>{dayjs(unlockedOn).format('MM/DD/YYYY hh:mma z')}</p>
-                <p className={'usa-alert__text'}><b>Reason for unlock: </b>{reason}</p>
+                <p className="usa-alert__text"><b>Unlocked by:&nbsp;</b>{unlockedBy}</p>
+                <p className="usa-alert__text"><b>Unlocked on:&nbsp;</b>{dayjs(unlockedOn).format('MM/DD/YYYY hh:mma z')}</p>
+                <p className="usa-alert__text"><b>Reason for unlock:&nbsp;</b>{reason}</p>
             </div>
         </Alert>
     )

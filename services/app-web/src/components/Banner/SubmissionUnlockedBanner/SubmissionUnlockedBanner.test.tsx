@@ -3,6 +3,7 @@ import { SubmissionUnlockedBanner } from "./SubmissionUnlockedBanner";
 import dayjs from "dayjs";
 import advancedFormat from "dayjs/plugin/advancedFormat";
 import timezone from "dayjs/plugin/timezone";
+
 dayjs.extend(advancedFormat)
 dayjs.extend(timezone)
 
@@ -11,10 +12,10 @@ describe('SubmissionUnlockBanner', () => {
         const testDate = new Date()
         render(
             <SubmissionUnlockedBanner
-                userType={'CMS_USER'}
-                unlockedBy={'Loremipsum@email.com'}
+                userType="CMS_USER"
+                unlockedBy="Loremipsum@email.com"
                 unlockedOn={testDate}
-                reason={'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Curabitur.'}
+                reason="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Curabitur."
             />
         )
         expect(screen.getByRole('alert')).toHaveClass('usa-alert--warning')
@@ -27,10 +28,10 @@ describe('SubmissionUnlockBanner', () => {
         const testDate = new Date()
         render(
             <SubmissionUnlockedBanner
-                userType={'STATE_USER'}
-                unlockedBy={'Loremipsum@email.com'}
+                userType="STATE_USER"
+                unlockedBy="Loremipsum@email.com"
                 unlockedOn={testDate}
-                reason={'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Curabitur.'}
+                reason="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Curabitur."
             />
         )
         expect(screen.getByRole('alert')).toHaveClass('usa-alert--info')

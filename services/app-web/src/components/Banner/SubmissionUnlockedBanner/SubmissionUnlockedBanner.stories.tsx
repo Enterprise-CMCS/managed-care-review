@@ -3,7 +3,7 @@ import { Story } from '@storybook/react'
 import { SubmissionUnlockedBanner, UnlockedProps } from "./SubmissionUnlockedBanner";
 
 export default {
-    title: 'Components/SubmissionUnlockedBanner',
+    title: 'Components/Banner/SubmissionUnlockedBanner',
     component: SubmissionUnlockedBanner,
 }
 
