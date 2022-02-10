@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, StateSubmission, StateSubmissionRevision } from '@prisma/client'
 import {
     DraftSubmissionType,
     isDraftSubmission,
@@ -13,6 +13,26 @@ import {
     StoreError,
 } from './storeError'
 
+type SubmissionWithRevisions = StateSubmission & {
+    revisions: StateSubmissionRevision[];
+}
+// Used validate prisma results have useable submission with existing revision
+const getCurrentRevision = (submissionID: string, submissionResult: SubmissionWithRevisions | null): StateSubmissionRevision| StoreError => {
+    if (!submissionResult)
+        return {
+            code: 'UNEXPECTED_EXCEPTION' as const,
+            message: `No submission found for id: ${submissionID}`,
+        }
+
+    if (!submissionResult.revisions || submissionResult.revisions.length < 1)
+        return {
+            code: 'UNEXPECTED_EXCEPTION' as const,
+            message: `No revisions found for submission id: ${submissionID}`,
+        }
+
+    // TODO FIGURE OUT HOW TO ENSURE PROPERLY ORDERED REVISIONS HERE
+    return submissionResult.revisions[0]
+}
 
 export async function updateSubmissionWrapper(
     client: PrismaClient,
@@ -29,9 +49,14 @@ export async function updateSubmissionWrapper(
                 revisions: true
             },
         })
-        // TODO ADD ERROR HANDLING
-        const currentRevision = findResult && findResult.revisions && findResult.revisions[0]
-        if (currentRevision) {
+
+        const currentRevisionOrError = getCurrentRevision(id, findResult)
+        if (isStoreError(currentRevisionOrError)) {
+             return currentRevisionOrError
+        } 
+
+        try {
+            const currentRevision = currentRevisionOrError
             const updateResult = await client.stateSubmission.update( {
                 where: {
                     id
@@ -40,26 +65,31 @@ export async function updateSubmissionWrapper(
                     revisions: {
                         update: {
                             where: {
-                                id: currentRevision.id
+                                id:  currentRevision.id
                             },
                             data: {
                                 submissionFormProto: proto
                             }
                         }
                     }
-                }
+                },
+                    include: {
+                    revisions: true
+                },
             })
-
-            return proto
-        } else{
-            return {
-                code: 'UNEXPECTED_EXCEPTION' as const,
-                message: 'No current revision found'
+            const updatedRevisionOrError = getCurrentRevision(id, updateResult)
+            if (isStoreError(updatedRevisionOrError)) {
+                return updatedRevisionOrError
+            } else {
+                const updatedRevision = updatedRevisionOrError
+                return updatedRevision.submissionFormProto
             }
+        } catch (updateError) {
+            return convertPrismaErrorToStoreError(updateError)
         }
-
-    } catch (e) {
-        return convertPrismaErrorToStoreError(e)
+        
+    } catch (findError) {
+        return convertPrismaErrorToStoreError(findError)
     }
 }
 
