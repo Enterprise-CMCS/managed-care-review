@@ -1,5 +1,4 @@
 /* eslint-disable jest/no-conditional-expect */
-/* eslint-disable jest/no-try-expect */
 import { v4 as uuidv4 } from 'uuid'
 import { PrismaClient } from '@prisma/client'
 import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
@@ -83,7 +82,13 @@ describe('storeError', () => {
                 data: {
                     id: draft.id,
                     stateCode: draft.stateCode,
-                    submissionFormProto: buffer,
+                    revisions: {
+                        create: {
+                            id: uuidv4(),
+                            createdAt: new Date(),
+                            submissionFormProto: buffer,
+                        },
+                    },
                 },
             })
 
@@ -91,7 +96,13 @@ describe('storeError', () => {
                 data: {
                     id: draft.id,
                     stateCode: draft.stateCode,
-                    submissionFormProto: buffer,
+                    revisions: {
+                        create: {
+                            id: uuidv4(),
+                            createdAt: new Date(),
+                            submissionFormProto: buffer,
+                        },
+                    },
                 },
             })
 

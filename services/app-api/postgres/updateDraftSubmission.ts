@@ -1,4 +1,4 @@
-import { PrismaClient, StateSubmission, StateSubmissionRevision } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
 import {
     DraftSubmissionType,
     isDraftSubmission,
@@ -12,27 +12,7 @@ import {
     isStoreError,
     StoreError,
 } from './storeError'
-
-type SubmissionWithRevisions = StateSubmission & {
-    revisions: StateSubmissionRevision[];
-}
-// Used validate prisma results have useable submission with existing revision
-const getCurrentRevision = (submissionID: string, submissionResult: SubmissionWithRevisions | null): StateSubmissionRevision| StoreError => {
-    if (!submissionResult)
-        return {
-            code: 'UNEXPECTED_EXCEPTION' as const,
-            message: `No submission found for id: ${submissionID}`,
-        }
-
-    if (!submissionResult.revisions || submissionResult.revisions.length < 1)
-        return {
-            code: 'UNEXPECTED_EXCEPTION' as const,
-            message: `No revisions found for submission id: ${submissionID}`,
-        }
-
-    // TODO FIGURE OUT HOW TO ENSURE PROPERLY ORDERED REVISIONS HERE
-    return submissionResult.revisions[0]
-}
+import {getCurrentRevision} from './submissionWithRevisionsHelpers'
 
 export async function updateSubmissionWrapper(
     client: PrismaClient,

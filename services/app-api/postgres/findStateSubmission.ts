@@ -6,6 +6,7 @@ import {
 import { toDomain } from '../../app-web/src/common-code/proto/stateSubmission'
 import { findUniqueSubmissionWrapper } from './findDraftSubmission'
 import { isStoreError, StoreError } from './storeError'
+import { getCurrentRevision } from './submissionWithRevisionsHelpers'
 
 export async function findStateSubmission(
     client: PrismaClient,
@@ -21,7 +22,11 @@ export async function findStateSubmission(
         return findResult
     }
 
-    const decodeResult = toDomain(findResult.submissionFormProto)
+    const currentRevisionOrError = getCurrentRevision(id, findResult)
+    if (isStoreError(currentRevisionOrError)) return currentRevisionOrError
+    const currentRevision = currentRevisionOrError
+    
+    const decodeResult = toDomain(currentRevision.submissionFormProto)
 
     if (decodeResult instanceof Error) {
         console.log('ERROR: decoding protobuf; id: ', id, decodeResult)
