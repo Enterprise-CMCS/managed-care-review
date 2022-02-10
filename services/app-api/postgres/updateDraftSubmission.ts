@@ -13,22 +13,51 @@ import {
     StoreError,
 } from './storeError'
 
+
 export async function updateSubmissionWrapper(
     client: PrismaClient,
     id: string,
     proto: Buffer
 ): Promise<Buffer | StoreError> {
+
     try {
-        const updateResult = await client.stateSubmission.update({
+        const findResult = await client.stateSubmission.findUnique({
             where: {
                 id: id,
             },
-            data: {
-                submissionFormProto: proto,
+            include: {
+                revisions: true
             },
         })
+        // TODO ADD ERROR HANDLING
+        const currentRevision = findResult && findResult.revisions && findResult.revisions[0]
+        if (currentRevision) {
+            const updateResult = await client.stateSubmission.update( {
+                where: {
+                    id
+                },
+                data: {
+                    revisions: {
+                        update: {
+                            where: {
+                                id: currentRevision.id
+                            },
+                            data: {
+                                submissionFormProto: proto
+                            }
+                        }
+                    }
+                }
+            })
 
-        return updateResult.submissionFormProto
+            return proto
+        } else{
+            return {
+                code: 'UNEXPECTED_EXCEPTION' as const,
+                message: 'No current revision found'
+            }
+        }
+
     } catch (e) {
         return convertPrismaErrorToStoreError(e)
     }
