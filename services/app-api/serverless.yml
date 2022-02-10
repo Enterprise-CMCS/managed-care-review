@@ -128,6 +128,7 @@ functions:
           path: health_check
           method: get
           cors: true
+    tracing: Active
 
   log_event:
     handler: handlers/log_event.main
