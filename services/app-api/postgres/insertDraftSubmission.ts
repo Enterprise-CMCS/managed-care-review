@@ -89,7 +89,14 @@ export async function insertDraftSubmission(
             data: {
                 id: draft.id,
                 stateCode: draft.stateCode,
-                submissionFormProto: buffer,
+                revisions: {
+                    create:
+                   { 
+                       id: uuidv4(),
+                       createdAt: new Date(),
+                       submissionFormProto: buffer
+                    }
+                }
             },
         })
     } catch (e: unknown) {

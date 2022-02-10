@@ -1,4 +1,4 @@
-import { PrismaClient, StateSubmission } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
 import {
     DraftSubmissionType,
     StateSubmissionType,
@@ -9,22 +9,23 @@ import {
     isStoreError,
     StoreError,
 } from './storeError'
+import { getCurrentRevision, StateSubmissionWithRevisions } from './submissionWithRevisionsHelpers'
 
 async function findAllSubmissionWrapper(
     client: PrismaClient,
     stateCode: string
-): Promise<StateSubmission[] | StoreError> {
+): Promise<StateSubmissionWithRevisions[] | StoreError> {
     try {
-        console.log('making connection')
         const result = await client.stateSubmission.findMany({
             where: {
                 stateCode: {
                     equals: stateCode,
-                },
+                },   
             },
+            include: {
+                revisions: true
+            }
         })
-        console.log('connected:', result)
-
         return result
     } catch (e: unknown) {
         console.log('failed to findAll', e)
@@ -44,14 +45,22 @@ export async function findAllSubmissions(
 
     const drafts: (DraftSubmissionType | StateSubmissionType)[] = []
     const errors: Error[] = []
-    result.forEach((dbDraft) => {
-        const proto = dbDraft.submissionFormProto
+    result.forEach((dbDraftSubmissionWithRevisions) => {
+        const currentRevisionOrError = getCurrentRevision(
+            dbDraftSubmissionWithRevisions.id,
+            dbDraftSubmissionWithRevisions
+        )
+        if (isStoreError(currentRevisionOrError))
+            return currentRevisionOrError
+        const currentRevision = currentRevisionOrError
+
+        const proto = currentRevision.submissionFormProto
 
         const decodeResult = toDomain(proto)
 
         if (decodeResult instanceof Error) {
             console.log(
-                `ERROR: decoding protobuf. id: ${dbDraft.id}: ${decodeResult}`
+                `ERROR: decoding protobuf. id: ${dbDraftSubmissionWithRevisions.id}: ${decodeResult}`
             )
             errors.push(decodeResult)
             return

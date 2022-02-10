@@ -12,25 +12,64 @@ import {
     isStoreError,
     StoreError,
 } from './storeError'
+import {getCurrentRevision} from './submissionWithRevisionsHelpers'
 
 export async function updateSubmissionWrapper(
     client: PrismaClient,
     id: string,
     proto: Buffer
 ): Promise<Buffer | StoreError> {
+
     try {
-        const updateResult = await client.stateSubmission.update({
+        const findResult = await client.stateSubmission.findUnique({
             where: {
                 id: id,
             },
-            data: {
-                submissionFormProto: proto,
+            include: {
+                revisions: true
             },
         })
 
-        return updateResult.submissionFormProto
-    } catch (e) {
-        return convertPrismaErrorToStoreError(e)
+        const currentRevisionOrError = getCurrentRevision(id, findResult)
+        if (isStoreError(currentRevisionOrError)) {
+             return currentRevisionOrError
+        } 
+
+        try {
+            const currentRevision = currentRevisionOrError
+            const updateResult = await client.stateSubmission.update( {
+                where: {
+                    id
+                },
+                data: {
+                    revisions: {
+                        update: {
+                            where: {
+                                id:  currentRevision.id
+                            },
+                            data: {
+                                submissionFormProto: proto
+                            }
+                        }
+                    }
+                },
+                    include: {
+                    revisions: true
+                },
+            })
+            const updatedRevisionOrError = getCurrentRevision(id, updateResult)
+            if (isStoreError(updatedRevisionOrError)) {
+                return updatedRevisionOrError
+            } else {
+                const updatedRevision = updatedRevisionOrError
+                return updatedRevision.submissionFormProto
+            }
+        } catch (updateError) {
+            return convertPrismaErrorToStoreError(updateError)
+        }
+        
+    } catch (findError) {
+        return convertPrismaErrorToStoreError(findError)
     }
 }
 
