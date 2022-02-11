@@ -1,11 +1,6 @@
 import { render, screen } from '@testing-library/react'
-import { SubmissionUnlockedBanner } from "./SubmissionUnlockedBanner";
-import dayjs from "dayjs";
-import advancedFormat from "dayjs/plugin/advancedFormat";
-import timezone from "dayjs/plugin/timezone";
-
-dayjs.extend(advancedFormat)
-dayjs.extend(timezone)
+import { SubmissionUnlockedBanner } from './SubmissionUnlockedBanner';
+import { dayjs } from '../../../dateHelpers';
 
 describe('SubmissionUnlockBanner', () => {
     it('renders without errors and correct background color for CMS User', () => {

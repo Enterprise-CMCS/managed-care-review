@@ -1,12 +1,7 @@
 import React from 'react'
 import styles from './SubmissionUnlockedBanner.module.scss'
 import { Alert } from '@trussworks/react-uswds'
-import dayjs from 'dayjs'
-import timezone from 'dayjs/plugin/timezone.js'
-import advancedFormat from 'dayjs/plugin/advancedFormat.js'
-
-dayjs.extend(advancedFormat)
-dayjs.extend(timezone)
+import { dayjs } from '../../../dateHelpers'
 
 export type UnlockedProps = {
     userType: 'STATE_USER' | 'CMS_USER';
