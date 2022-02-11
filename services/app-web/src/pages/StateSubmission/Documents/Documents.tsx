@@ -59,18 +59,33 @@ export const Documents = ({
         fileItems.some((item) => item.status === 'SCANNING')
     const showFileUploadError = shouldValidate && !hasValidFiles
 
+    const documentsErrorMessages = () => {
+        const errorsObject: { [k: string]: string } = {}
+        fileItems.forEach((item) => {
+            const key = item.id
+            if (item.status === 'DUPLICATE_NAME_ERROR') {
+                errorsObject[key] = 'You must remove duplicate files'
+            } else if (item.status === 'SCANNING_ERROR') {
+                errorsObject[key] =
+                    'You must remove files that failed the security scan'
+            } else if (item.status === 'UPLOAD_ERROR') {
+                errorsObject[key] =
+                    'You must remove or retry files that failed to upload'
+            } else if (item.documentCategories.length === 0) {
+                errorsObject[key] = 'You must select a document category'
+            }
+        })
+        return errorsObject
+    }
+
     // for supporting documents page, empty documents list is allowed
-    const documentsErrorMessage =
+    const errorSummary =
         showFileUploadError && hasLoadingFiles
             ? 'You must wait for all documents to finish uploading before continuing'
-            : showFileUploadError && !hasValidFiles
+            : (showFileUploadError && !hasValidFiles) ||
+              (shouldValidate && hasMissingCategories)
             ? 'You must remove all documents with error messages before continuing'
-            : shouldValidate && hasMissingCategories
-            ? 'You must select at least one document category for each document'
             : undefined
-
-    const documentsErrorKey =
-        fileItems.length === 0 ? 'documents' : '#file-items-list'
 
     // Error summary state management
     const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
@@ -205,7 +220,8 @@ export const Documents = ({
                         formDataDocuments.push({
                             name: fileItem.name,
                             s3URL: fileItem.s3URL,
-                            documentCategories: fileItem.documentCategories || [],
+                            documentCategories:
+                                fileItem.documentCategories || [],
                         })
                     }
                     return formDataDocuments
@@ -247,10 +263,9 @@ export const Documents = ({
 
                     <ErrorSummary
                         errors={
-                            documentsErrorMessage
+                            Object.keys(documentsErrorMessages()).length > 0
                                 ? {
-                                      [documentsErrorKey]:
-                                          documentsErrorMessage,
+                                      ...documentsErrorMessages(),
                                   }
                                 : {}
                         }
@@ -279,7 +294,7 @@ export const Documents = ({
                                 </span>
                             </>
                         }
-                        error={documentsErrorMessage}
+                        error={errorSummary}
                         accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                         initialItems={fileItemsFromDraftSubmission}
                         uploadFile={handleUploadFile}

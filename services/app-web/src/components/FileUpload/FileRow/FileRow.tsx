@@ -41,11 +41,11 @@ export const FileRow = ({
     isContractOnly,
     hasNonDocumentError,
 }: FileRowProps): React.ReactElement => {
-    const { name } = item
+    const { name, id } = item
     const shouldHideCheckbox = isContractOnly || hasNonDocumentError
 
     return (
-        <tr className={`${errorRowClass} ${styles.warningRow}`}>
+        <tr id={id} className={`${errorRowClass} ${styles.warningRow}`}>
             <td>
                 {isLoading || isScanning ? (
                     <span

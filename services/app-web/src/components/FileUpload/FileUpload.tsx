@@ -344,13 +344,15 @@ export const FileUpload = ({
         addFilesAndUpdateList(files)
     }
     const uploadedCount = fileItems.filter(
-        (item) => item.status === 'UPLOAD_COMPLETE'
+        (item) =>
+            item.status === 'UPLOAD_COMPLETE' && item.documentCategories.length
     ).length
     const errorCount = fileItems.filter(
         (item) =>
             item.status === 'UPLOAD_ERROR' ||
             item.status === 'SCANNING_ERROR' ||
-            item.status === 'DUPLICATE_NAME_ERROR'
+            item.status === 'DUPLICATE_NAME_ERROR' ||
+            item.documentCategories.length === 0
     ).length
     const pendingCount = fileItems.filter(
         (item) => item.status === 'PENDING' || item.status === 'SCANNING'
