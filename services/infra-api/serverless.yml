@@ -10,8 +10,8 @@ plugins:
 
 custom:
   stage: ${opt:stage, self:provider.stage}
-  iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
-  iamPath: ${env:IAM_PATH, "/"}
+  # iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
+  # iamPath: ${env:IAM_PATH, "/"}
   serverlessTerminationProtection:
     stages:
       - dev
@@ -26,34 +26,6 @@ provider:
 
 resources:
   Resources:
-    NewRelicInfraRole:
-      Type: AWS::IAM::Role
-      Properties:
-        RoleName: NewRelicInfrastructure-ReadOnly
-        AssumeRolePolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - 'sts:AssumeRole'
-              Principal:
-                AWS:
-                  - '754728514883'
-              Condition:
-                StringEquals:
-                  'sts:ExternalId': '3407984'
-        ManagedPolicyArns:
-          - 'arn:aws:iam::aws:policy/ReadOnlyAccess'
-        Policies:
-          - PolicyName: NewRelicBudget
-            PolicyDocument:
-              Version: '2012-10-17'
-              Statement:
-                - Effect: Allow
-                  Action:
-                    - 'budgets:ViewBudget'
-                  Resource: '*'
-
     AppApiGateway:
       Type: AWS::ApiGateway::RestApi
       Properties:
