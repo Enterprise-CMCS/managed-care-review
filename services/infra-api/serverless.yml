@@ -23,6 +23,20 @@ provider:
   name: aws
   runtime: nodejs14.x
   region: us-east-1
+  iam:
+    role:
+      statements:
+        - Effect: 'Allow'
+          Action:
+            - 'sts:AssumeRole'
+          Principal:
+            AWS:
+              - '754728514883'
+          Condition:
+            StringEquals:
+              'sts:ExternalId': '3407984'
+      managedPolicies:
+        - 'arn:aws:iam::aws:policy/ReadOnlyAccess'
 
 resources:
   Resources:
