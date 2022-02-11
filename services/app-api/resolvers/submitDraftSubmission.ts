@@ -55,7 +55,6 @@ function submit(
         submittedAt: new Date(),
     }
 
-    console.log("BLAHBLAHBLAH: ", maybeStateSubmission)
     if (isStateSubmission(maybeStateSubmission)) return maybeStateSubmission
     else if (!hasValidContract(maybeStateSubmission as StateSubmissionType)) {
         return {
