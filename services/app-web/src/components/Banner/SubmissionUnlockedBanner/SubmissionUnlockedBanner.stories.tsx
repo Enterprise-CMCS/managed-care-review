@@ -1,6 +1,6 @@
 import React from 'react'
 import { Story } from '@storybook/react'
-import { SubmissionUnlockedBanner, UnlockedProps } from "./SubmissionUnlockedBanner";
+import { SubmissionUnlockedBanner, UnlockedProps } from './SubmissionUnlockedBanner';
 
 export default {
     title: 'Components/Banner/SubmissionUnlockedBanner',
