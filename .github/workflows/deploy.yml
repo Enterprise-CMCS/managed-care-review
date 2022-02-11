@@ -196,6 +196,7 @@ jobs:
       okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
       iam_path: ${{ secrets.IAM_PATH }}
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
+      nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
   deploy-app:
     needs:
