@@ -10,6 +10,7 @@ plugins:
 
 custom:
   stage: ${opt:stage, self:provider.stage}
+  nr_license_key: ${env:NR_LICENSE_KEY}
   # iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
   # iamPath: ${env:IAM_PATH, "/"}
   serverlessTerminationProtection:
@@ -325,6 +326,7 @@ resources:
       Type: String
       Description: 40-character hexadecimal string
       NoEcho: true
+      Default: ${self:custom.nr_license_key}
     NewRelicDatacenter:
       Type: String
       Description: EU keys are prefixed with eu0x, US otherwise
