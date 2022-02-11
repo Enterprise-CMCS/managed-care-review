@@ -30,8 +30,6 @@ on:
         required: true
       okta_metadata_url:
         required: true
-      nr_license_key:
-        required: true
 
 jobs:
   postgres:
@@ -138,7 +136,6 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
-          NR_LICENSE_KEY: ${{ secrets.nr_license_key }}
         run: |
           pushd services/infra-api && npx serverless deploy --stage ${{ inputs.stage_name }}
 

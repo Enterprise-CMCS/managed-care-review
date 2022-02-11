@@ -184,7 +184,7 @@ jobs:
 
   deploy-infra:
     needs: [begin-deployment]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@mt-ot-lambda
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
     with:
       stage_name: ${{ needs.begin-deployment.outputs.stage-name}}
       changed_services: ${{ needs.begin-deployment.outputs.changed-services }}
@@ -196,7 +196,6 @@ jobs:
       okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
       iam_path: ${{ secrets.IAM_PATH }}
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
-      nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
   deploy-app:
     needs:
