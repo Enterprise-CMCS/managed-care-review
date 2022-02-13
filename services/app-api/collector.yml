@@ -6,14 +6,12 @@ receivers:
 
 exporters:
   otlp:
-    endpoint: gov-otlp.nr-data.net:4317
+    endpoint: https://gov-otlp.nr-data.net:4317
     headers:
-      app-api: $NR_LICENSE_KEY
-  logging:
-    loglevel: debug
+      api-key: $NR_LICENSE_KEY
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [otlp, logging]
+      exporters: [otlp]
