@@ -32,6 +32,10 @@ h3 {
     font-size: 1.3em;
 }
 
+.usa-logo {
+    @include u-margin-y(2);
+}
+
 .usa-label,
 .usa-legend {
     font-weight: bold;

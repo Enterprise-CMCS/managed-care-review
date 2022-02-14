@@ -1,9 +1,12 @@
 @import '../../styles/uswdsImports.scss';
 @import '../../styles/custom';
 
-.tableContainer {
-    max-width: 100%;
-    width: 66rem;
+.formContainer.tableContainer {
+
+    &[class^='usa-form'] {
+        max-width: 100%;
+        width: 75rem;
+    }
 }
 
 .stepIndicator {
@@ -39,14 +42,19 @@
     }
 
     &[class^='usa-form'] {
-        min-width: 40rem;
+
+        min-width: 100%;
+        max-width: 100%;
+
+        @include at-media(tablet){
+            min-width: 40rem;
+            max-width: 20rem;
+        }
     }
 }
 
-.radioGroup {
-    legend {
-        margin-top: 0;
-    }
+[class^='usa-legend'] {
+    margin-top: 0;
 }
 
 .buttonGroup {

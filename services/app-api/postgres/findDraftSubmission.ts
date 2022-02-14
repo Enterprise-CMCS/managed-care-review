@@ -1,4 +1,4 @@
-import { PrismaClient, StateSubmission } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
 import {
     DraftSubmissionType,
     isDraftSubmission,
@@ -9,15 +9,22 @@ import {
     isStoreError,
     StoreError,
 } from './storeError'
+import {
+    getCurrentRevision,
+    StateSubmissionWithRevisions,
+} from './submissionWithRevisionsHelpers'
 
 export async function findUniqueSubmissionWrapper(
     client: PrismaClient,
     id: string
-): Promise<StateSubmission | StoreError | undefined> {
+): Promise<StateSubmissionWithRevisions | StoreError | undefined> {
     try {
         const findResult = await client.stateSubmission.findUnique({
             where: {
                 id: id,
+            },
+            include: {
+                revisions: true,
             },
         })
 
@@ -45,7 +52,11 @@ export async function findDraftSubmission(
         return findResult
     }
 
-    const decodeResult = toDomain(findResult.submissionFormProto)
+    const currentRevisionOrError = getCurrentRevision(draftUUID, findResult)
+    if (isStoreError(currentRevisionOrError)) return currentRevisionOrError
+    const currentRevision = currentRevisionOrError
+    
+    const decodeResult = toDomain(currentRevision.submissionFormProto)
 
     if (decodeResult instanceof Error) {
         console.log('ERROR: decoding protobuf; id: ', draftUUID, decodeResult)

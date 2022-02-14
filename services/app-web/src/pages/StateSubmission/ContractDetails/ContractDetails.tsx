@@ -646,7 +646,7 @@ export const ContractDetails = ({
                                     >
                                         <Fieldset
                                             aria-required
-                                            legend="Federal authority your program operates under"
+                                            legend="Active federal operating authority"
                                         >
                                             <Link
                                                 variant="external"

@@ -100,7 +100,7 @@ describe('ContractDetailsSummarySection', () => {
         ).toBeInTheDocument()
         expect(
             screen.getByRole('definition', {
-                name: 'Federal authority your program operates under',
+                name: 'Active federal operating authority',
             })
         ).toBeInTheDocument()
         expect(

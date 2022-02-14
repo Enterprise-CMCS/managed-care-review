@@ -13848,9 +13848,9 @@ focus-trap@^6.7.1:
     tabbable "^5.2.1"
 
 follow-redirects@^1.0.0, follow-redirects@^1.14.0, follow-redirects@^1.14.7:
-  version "1.14.7"
-  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.14.7.tgz#2004c02eb9436eee9a21446a6477debf17e81685"
-  integrity sha512-+hbxoLbFMbRKDwohX8GkTataGqO6Jb7jGwpAlwgy2bIz25XtRm7KEzJM76R1WiNT5SwZkX4Y75SwBolkpmE7iQ==
+  version "1.14.8"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.14.8.tgz#016996fb9a11a100566398b1c6839337d7bfa8fc"
+  integrity sha512-1x0S9UVJHsQprFcEC/qnNzBLcIxsjAV905f/UkQxbclCsoTWlacCNOpQa/anodLl2uaEKFhfWOvM2Qg77+15zA==
 
 for-in@^1.0.2:
   version "1.0.2"
@@ -22916,10 +22916,10 @@ serverless-s3-local@^0.6.7:
     serverless-offline "^8.0.0"
     shelljs "^0.8.4"
 
-serverless-s3-sync@^1.14.4:
-  version "1.17.3"
-  resolved "https://registry.yarnpkg.com/serverless-s3-sync/-/serverless-s3-sync-1.17.3.tgz#cf7913dde5f38c215c21dbf7466370974003cf7a"
-  integrity sha512-lnet9qqu8Uh3N8lyywxWt+0eljsfiX4xVDDMLkE2ggWBGEupM4B4xBonsI1GfWgPVpd4EJOTeyFOEWUAWpINeA==
+serverless-s3-sync@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/serverless-s3-sync/-/serverless-s3-sync-2.0.0.tgz#0d1fa6776b35ff2918ade375388d56f2d1ae5236"
+  integrity sha512-4ocFzfxsr2+D71Bhg/Z1XZLORhsiRPzUcmSIZjMtUspcdVWi3rWjx4g64G5J035v2eT43wrPEE0ars0wegf2IA==
   dependencies:
     "@auth0/s3" "^1.0.0"
     bluebird "^3.5.4"
@@ -25240,9 +25240,9 @@ url-parse-lax@^3.0.0:
     prepend-http "^2.0.0"
 
 url-parse@^1.4.3, url-parse@^1.5.2, url-parse@^1.5.3:
-  version "1.5.4"
-  resolved "https://registry.yarnpkg.com/url-parse/-/url-parse-1.5.4.tgz#e4f645a7e2a0852cc8a66b14b292a3e9a11a97fd"
-  integrity sha512-ITeAByWWoqutFClc/lRZnFplgXgEZr3WJ6XngMM/N9DMIm4K8zXPCZ1Jdu0rERwO84w1WC5wkle2ubwTA4NTBg==
+  version "1.5.6"
+  resolved "https://registry.yarnpkg.com/url-parse/-/url-parse-1.5.6.tgz#b2a41d5a233645f3c31204cc8be60e76a15230a2"
+  integrity sha512-xj3QdUJ1DttD1LeSfvJlU1eiF1RvBSBfUu8GplFGdUzSO28y5yUtEl7wb//PI4Af6qh0o/K8545vUmucRrfWsw==
   dependencies:
     querystringify "^2.1.1"
     requires-port "^1.0.0"

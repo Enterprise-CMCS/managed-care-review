@@ -47,6 +47,7 @@ jobs:
       - name: deploy app-web
         id: deploy-app-web
         env:
+          NODE_OPTIONS: --max_old_space_size=6000
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
@@ -82,7 +83,7 @@ jobs:
       - name: deploy app-api
         id: deploy-app-api
         env:
-          NODE_OPTIONS: --max_old_space_size=4096
+          NODE_OPTIONS: --max_old_space_size=6000
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}

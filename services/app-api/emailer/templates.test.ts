@@ -156,6 +156,38 @@ describe('Email templates', () => {
                      )
 
         })
+
+            it('includes expected data summary for a rate amendment submission', () => {
+                const sub: StateSubmissionType = {
+                    ...mockContractAndRatesSubmission(),
+                    rateType: 'AMENDMENT',
+                    contractDateStart: new Date('01/01/2021'),
+                    contractDateEnd: new Date('01/01/2025'),
+                    rateDateStart: new Date('01/01/2021'),
+                    rateDateEnd: new Date('01/01/2022'),
+                    rateAmendmentInfo: {
+                        effectiveDateStart: new Date('06/05/2021'),
+                        effectiveDateEnd:  new Date('12/31/2021')
+                    }
+                }
+                const template = newPackageCMSEmail(sub, testEmailConfig)
+
+                expect(template).toEqual(
+                    expect.objectContaining({
+                        bodyText: expect.stringContaining(
+                            'Submission type: Contract action and rate certification'
+                        ),
+                    })
+                )
+                expect(template).toEqual(
+                    expect.objectContaining({
+                        bodyText: expect.stringContaining(
+                            'Rate amendment effective dates: 06/05/2021 to 12/31/2021'
+                        ),
+                    })
+                )
+
+            })
         it('includes link to submission', () => {
             const sub = mockContractAmendmentSubmission()
             const template = newPackageCMSEmail(
