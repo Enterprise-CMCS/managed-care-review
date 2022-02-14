@@ -263,7 +263,8 @@ export const Documents = ({
 
                     <ErrorSummary
                         errors={
-                            Object.keys(documentsErrorMessages()).length > 0
+                            Object.keys(documentsErrorMessages()).length > 0 &&
+                            shouldValidate
                                 ? {
                                       ...documentsErrorMessages(),
                                   }
