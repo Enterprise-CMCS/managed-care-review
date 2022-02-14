@@ -24,24 +24,26 @@ export const DoubleColumnRows = ({
     const rows: ChildrenPairType = pairedChildren(React.Children.toArray(children))
     return (
         <>
-            {rows.map((childrenPairs, rIndex) =>
-                <Grid
-                    row
-                    gap
-                    className={styles.row}
-                    key={`grid-row-${rIndex}`}
-                    data-testid={`grid-row-${rIndex}`}
-                >
-                    {childrenPairs.map((child, cIndex) =>
-                        <Grid
-                            tablet={{ col: 6 }}
-                            key={`grid-row-${rIndex}-column-${cIndex}`}
-                        >
-                            {child}
-                        </Grid>)
-                    }
-                </Grid>
-            )}
+            {rows.map((childrenPairs, rIndex) => (
+                    <Grid
+                        row
+                        gap
+                        className={styles.row}
+                        key={`grid-row-${rIndex}`}
+                        data-testid={`grid-row-${rIndex}`}
+                    >
+                        {childrenPairs.map((child, cIndex) => (
+                                <Grid
+                                    tablet={{col: 6}}
+                                    key={`grid-row-${rIndex}-column-${cIndex}`}
+                                >
+                                    {child}
+                                </Grid>
+                            )
+                        )}
+                    </Grid>
+                ))
+            }
         </>
     )
 }
