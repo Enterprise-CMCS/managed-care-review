@@ -54,7 +54,7 @@ resources:
     S3FirehoseEventsBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: !Sub newrelic-firehose-${self:custom.stage}-${AWS::AccountID}
+        BucketName: !Sub newrelic-firehose-${self:custom.stage}-${AWS::AccountId}
         PublicAccessBlockConfiguration:
           BlockPublicAcls: true
           BlockPublicPolicy: true
