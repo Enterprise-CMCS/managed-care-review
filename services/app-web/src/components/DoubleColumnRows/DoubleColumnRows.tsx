@@ -24,7 +24,8 @@ export const DoubleColumnRows = ({
     const rows: ChildrenPairType = pairedChildren(React.Children.toArray(children))
     return (
         <>
-            {rows.map((childrenPairs, rIndex) => (
+            {rows.map((childrenPairs, rIndex) => {
+                return (
                     <Grid
                         row
                         gap
@@ -32,7 +33,8 @@ export const DoubleColumnRows = ({
                         key={`grid-row-${rIndex}`}
                         data-testid={`grid-row-${rIndex}`}
                     >
-                        {childrenPairs.map((child, cIndex) => (
+                        {childrenPairs.map((child, cIndex) => {
+                            return (
                                 <Grid
                                     tablet={{col: 6}}
                                     key={`grid-row-${rIndex}-column-${cIndex}`}
@@ -40,9 +42,9 @@ export const DoubleColumnRows = ({
                                     {child}
                                 </Grid>
                             )
-                        )}
+                        })}
                     </Grid>
-                ))
+                )})
             }
         </>
     )
