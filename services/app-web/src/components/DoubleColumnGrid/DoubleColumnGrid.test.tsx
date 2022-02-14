@@ -1,6 +1,6 @@
 import React from 'react'
 import { screen, render } from '@testing-library/react'
-import { DoubleColumnRows, pairedChildren } from './DoubleColumnRows'
+import { DoubleColumnGrid, pairedChildren } from './DoubleColumnGrid'
 
 const createElement = (ele: string, text: string) => React.createElement(ele, { key: text }, text)
 
@@ -19,7 +19,7 @@ const testDataEven = [
     createElement('div', 'Row 2 Column 2'),
 ]
 
-describe('DoubleColumnRows', () => {
+describe('DoubleColumnGrid', () => {
     it('Forms pairs of elements in an array given an array of elements', () => {
         expect(pairedChildren(testDataOdd)).toStrictEqual([
             [
@@ -49,9 +49,9 @@ describe('DoubleColumnRows', () => {
 
     it('Renders odd elements in correct row and column order with no errors', () => {
         render(
-            <DoubleColumnRows>
+            <DoubleColumnGrid>
                 {testDataOdd}
-            </DoubleColumnRows>
+            </DoubleColumnGrid>
         )
 
         expect(screen.getByTestId('grid-row-0')).toHaveTextContent('Row 1 Column 1Row 1 Column 2')
@@ -61,9 +61,9 @@ describe('DoubleColumnRows', () => {
 
     it('Renders even elements in correct row and column order with no errors', () => {
         render(
-            <DoubleColumnRows>
+            <DoubleColumnGrid>
                 {testDataEven}
-            </DoubleColumnRows>
+            </DoubleColumnGrid>
         )
 
         expect(screen.getByTestId('grid-row-0')).toHaveTextContent('Row 1 Column 1Row 1 Column 2')

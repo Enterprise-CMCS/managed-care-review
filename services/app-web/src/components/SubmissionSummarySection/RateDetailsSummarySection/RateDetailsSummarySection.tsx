@@ -3,7 +3,7 @@ import dayjs from 'dayjs'
 import styles from '../SubmissionSummarySection.module.scss'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { DataDetail } from '../../../components/DataDetail'
-import { DoubleColumnRows } from '../../DoubleColumnRows'
+import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
@@ -63,7 +63,7 @@ export const RateDetailsSummarySection = ({
                     )}
                 </SectionHeader>
 
-                <DoubleColumnRows>
+                <DoubleColumnGrid>
                     <DataDetail
                         id="rateType"
                         label="Rate certification type"
@@ -110,7 +110,7 @@ export const RateDetailsSummarySection = ({
                             ).format('MM/DD/YYYY')}`}
                         />
                     ) : null}
-                </DoubleColumnRows>
+                </DoubleColumnGrid>
 
                 <UploadedDocumentsTable
                     documents={submission.rateDocuments}

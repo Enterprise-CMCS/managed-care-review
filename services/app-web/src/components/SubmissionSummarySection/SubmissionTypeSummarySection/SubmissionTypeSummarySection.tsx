@@ -4,7 +4,7 @@ import styles from '../SubmissionSummarySection.module.scss'
 import { SubmissionTypeRecord } from '../../../constants/submissions'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { DataDetail } from '../../../components/DataDetail'
-import { DoubleColumnRows } from '../../DoubleColumnRows'
+import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 import { isStateSubmission } from '../../../gqlHelpers'
 
@@ -23,7 +23,7 @@ export const SubmissionTypeSummarySection = ({
 
             <dl>
                 {isStateSubmission(submission) && (
-                    <DoubleColumnRows>
+                    <DoubleColumnGrid>
                         <DataDetail
                             id="submitted"
                             label="Submitted"
@@ -46,9 +46,9 @@ export const SubmissionTypeSummarySection = ({
                                 </span>
                             }
                         />
-                    </DoubleColumnRows>
+                    </DoubleColumnGrid>
                 )}
-                <DoubleColumnRows>
+                <DoubleColumnGrid>
                     <DataDetail
                         id="program"
                         label="Program(s)"
@@ -61,7 +61,7 @@ export const SubmissionTypeSummarySection = ({
                             SubmissionTypeRecord[submission.submissionType]
                         }
                     />
-                </DoubleColumnRows>
+                </DoubleColumnGrid>
                 <Grid row gap className={styles.reviewDataRow}>
                     <Grid col={12}>
                         <DataDetail

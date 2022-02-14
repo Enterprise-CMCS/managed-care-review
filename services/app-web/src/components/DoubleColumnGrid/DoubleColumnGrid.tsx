@@ -1,11 +1,11 @@
 import React from 'react'
 import { Grid } from '@trussworks/react-uswds'
-import styles from './DoubleColumnRows.module.scss'
+import styles from './DoubleColumnGrid.module.scss'
 
 export type ChildrenType = (React.ReactChild | React.ReactFragment | React.ReactPortal)
 export type ChildrenPairType = ChildrenType[][]
 
-export type DoubleColumnRowsProps = {
+export type DoubleColumnGridProps = {
     children: React.ReactNode
 }
 
@@ -18,14 +18,13 @@ export const pairedChildren = (children: ChildrenType[]) => {
     }, [])
 }
 
-export const DoubleColumnRows = ({
+export const DoubleColumnGrid = ({
     children,
-}: DoubleColumnRowsProps): React.ReactElement => {
+}: DoubleColumnGridProps): React.ReactElement => {
     const rows: ChildrenPairType = pairedChildren(React.Children.toArray(children))
     return (
         <>
-            {rows.map((childrenPairs, rIndex) => {
-                return (
+            {rows.map((childrenPairs, rIndex) => (
                     <Grid
                         row
                         gap
@@ -33,8 +32,7 @@ export const DoubleColumnRows = ({
                         key={`grid-row-${rIndex}`}
                         data-testid={`grid-row-${rIndex}`}
                     >
-                        {childrenPairs.map((child, cIndex) => {
-                            return (
+                        {childrenPairs.map((child, cIndex) => (
                                 <Grid
                                     tablet={{col: 6}}
                                     key={`grid-row-${rIndex}-column-${cIndex}`}
@@ -42,9 +40,9 @@ export const DoubleColumnRows = ({
                                     {child}
                                 </Grid>
                             )
-                        })}
+                        )}
                     </Grid>
-                )})
+                ))
             }
         </>
     )

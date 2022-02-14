@@ -11,7 +11,7 @@ import {
 import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import { DataDetail } from '../../../components/DataDetail'
-import { DoubleColumnRows } from '../../DoubleColumnRows'
+import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
@@ -123,7 +123,7 @@ export const ContractDetailsSummarySection = ({
                 )}
             </SectionHeader>
             <dl>
-                <DoubleColumnRows>
+                <DoubleColumnGrid>
                     <DataDetail
                         id="contractType"
                         label="Contract action type"
@@ -164,11 +164,11 @@ export const ContractDetailsSummarySection = ({
                             dict: FederalAuthorityRecord,
                         })}
                     />
-                </DoubleColumnRows>
+                </DoubleColumnGrid>
                 {submission.contractType === 'AMENDMENT' &&
                     submission.contractAmendmentInfo && (
                         <>
-                            <DoubleColumnRows>
+                            <DoubleColumnGrid>
                                 <DataDetail
                                     id="itemsAmended"
                                     label="Items being amended"
@@ -193,10 +193,10 @@ export const ContractDetailsSummarySection = ({
                                             : 'No'
                                     }
                                 />
-                            </DoubleColumnRows>
+                            </DoubleColumnGrid>
                             {submission.contractAmendmentInfo
                                 .relatedToCovid19 && (
-                                <DoubleColumnRows>
+                                <DoubleColumnGrid>
                                     <DataDetail
                                         id="vaccineRelated"
                                         label="Is this related to coverage and reimbursement for vaccine administration?"
@@ -207,7 +207,7 @@ export const ContractDetailsSummarySection = ({
                                                 : 'No'
                                         }
                                     />
-                                </DoubleColumnRows>
+                                </DoubleColumnGrid>
                             )}
                         </>
                     )}
