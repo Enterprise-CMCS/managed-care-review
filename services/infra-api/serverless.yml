@@ -10,8 +10,9 @@ plugins:
 
 custom:
   stage: ${opt:stage, self:provider.stage}
-  # iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
-  # iamPath: ${env:IAM_PATH, "/"}
+  iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
+  iamPath: ${env:IAM_PATH, "/"}
+  nrLicenseKey: ${env:NR_LICENSE_KEY}
   serverlessTerminationProtection:
     stages:
       - dev
@@ -47,6 +48,237 @@ resources:
           gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
         ResponseType: DEFAULT_5XX
         RestApiId: !Ref AppApiGateway
+
+    S3FirehoseEventsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName:
+          !Join [
+            '-',
+            [
+              !Ref S3BackupBucketName,
+              !Select [
+                0,
+                !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]],
+              ],
+            ],
+          ]
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: true
+          BlockPublicPolicy: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: true
+
+    FirehoseStreamToNewRelic:
+      Type: AWS::KinesisFirehose::DeliveryStream
+      Properties:
+        DeliveryStreamName: !Ref FirehoseStreamName
+        DeliveryStreamType: DirectPut
+        HttpEndpointDestinationConfiguration:
+          RequestConfiguration:
+            ContentEncoding: GZIP
+          EndpointConfiguration:
+            Name: New Relic
+            Url:
+              !FindInMap [
+                DatacenterMap,
+                NewRelicDatacenter,
+                !Ref NewRelicDatacenter,
+              ]
+            AccessKey: ${self:custom.nrLicenseKey}
+          BufferingHints:
+            IntervalInSeconds: 60
+            SizeInMBs: 1
+          RetryOptions:
+            DurationInSeconds: 60
+          S3Configuration:
+            CompressionFormat: GZIP
+            BucketARN: !GetAtt S3FirehoseEventsBucket.Arn
+            RoleARN: !GetAtt FirehoseRole.Arn
+          RoleARN: !GetAtt FirehoseRole.Arn
+
+    MetricStreamRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: 2012-10-17
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - streams.metrics.cloudwatch.amazonaws.com
+              Action:
+                - 'sts:AssumeRole'
+              Condition:
+                StringEquals:
+                  'sts:ExternalId': !Ref AWS::AccountId
+        Path: /service-role/
+        Policies:
+          - PolicyName: MetricStreams-FirehosePutRecords
+            PolicyDocument:
+              Version: 2012-10-17
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - 'firehose:PutRecord'
+                    - 'firehose:PutRecordBatch'
+                  Resource: !GetAtt FirehoseStreamToNewRelic.Arn
+        Description: Role to allow a metric stream put metrics into a firehose
+        RoleName:
+          !Join [
+            '-',
+            [
+              'MetricsStreamRole',
+              !Select [
+                0,
+                !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]],
+              ],
+            ],
+          ]
+
+    FirehoseRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: 2012-10-17
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - firehose.amazonaws.com
+              Action:
+                - 'sts:AssumeRole'
+        Path: /service-role/
+        Policies:
+          - PolicyName: Firehose-S3Access
+            PolicyDocument:
+              Version: 2012-10-17
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - 's3:AbortMultipartUpload'
+                    - 's3:GetBucketLocation'
+                    - 's3:GetObject'
+                    - 's3:ListBucket'
+                    - 's3:ListBucketMultipartUploads'
+                    - 's3:PutObject'
+                  Resource:
+                    - !GetAtt S3FirehoseEventsBucket.Arn
+                    - !Join ['', [!GetAtt S3FirehoseEventsBucket.Arn, '/*']]
+        Description: Role to allow firehose stream put events into S3 backup bucket
+        RoleName:
+          !Join [
+            '-',
+            [
+              'FirehoseRole',
+              !Select [
+                0,
+                !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]],
+              ],
+            ],
+          ]
+
+    CloudWatchMetricStream:
+      Type: AWS::CloudWatch::MetricStream
+      Properties:
+        Name: !Ref CloudWatchMetricStreamName
+        FirehoseArn: !GetAtt FirehoseStreamToNewRelic.Arn
+        RoleArn: !GetAtt MetricStreamRole.Arn
+        OutputFormat: 'opentelemetry0.7'
+
+    ConfigurationRecorder:
+      Type: AWS::Config::ConfigurationRecorder
+      Condition: ShouldCreateConfig
+      Properties:
+        RecordingGroup:
+          AllSupported: true
+        RoleARN: !GetAtt ConfigRole.Arn
+
+    DeliveryChannel:
+      Type: AWS::Config::DeliveryChannel
+      Condition: ShouldCreateConfig
+      Properties:
+        S3BucketName:
+          !Join [
+            '-',
+            [
+              !Ref S3ConfigBucketName,
+              !Select [
+                0,
+                !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]],
+              ],
+            ],
+          ]
+
+    ConfigS3Bucket:
+      Type: AWS::S3::Bucket
+      Condition: ShouldCreateConfig
+      Properties:
+        BucketName:
+          !Join [
+            '-',
+            [
+              !Ref S3ConfigBucketName,
+              !Select [
+                0,
+                !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]],
+              ],
+            ],
+          ]
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: true
+          BlockPublicPolicy: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: true
+
+    ConfigRole:
+      Type: AWS::IAM::Role
+      Condition: ShouldCreateConfig
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: 2012-10-17
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - config.amazonaws.com
+              Action:
+                - 'sts:AssumeRole'
+        Path: /service-role/
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/service-role/AWSConfigRole
+        Policies:
+          - PolicyName: ConfigService-S3Access
+            PolicyDocument:
+              Version: 2012-10-17
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - 's3:PutObject'
+                    - 's3:PutObjectAcl'
+                  Resource:
+                    !Join [
+                      '',
+                      [
+                        'arn:aws:s3:::',
+                        !Ref ConfigS3Bucket,
+                        '/AWSLogs/',
+                        !Ref AWS::AccountId,
+                        '/*',
+                      ],
+                    ]
+        Description: Role to allow Config Service communicate with Delivery Channel
+        RoleName:
+          !Join [
+            '-',
+            [
+              'ConfigRole',
+              !Select [
+                0,
+                !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]],
+              ],
+            ],
+          ]
 
     # AppApiGatewayAcl:
     #   Type: AWS::WAFv2::WebACL
