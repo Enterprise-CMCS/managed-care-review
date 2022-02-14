@@ -50,7 +50,7 @@ describe('DoubleColumnRows', () => {
     it('Renders odd elements in correct row and column order with no errors', () => {
         render(
             <DoubleColumnRows>
-                {testDataOdd.map(child => child)}
+                {testDataOdd}
             </DoubleColumnRows>
         )
 
@@ -62,7 +62,7 @@ describe('DoubleColumnRows', () => {
     it('Renders even elements in correct row and column order with no errors', () => {
         render(
             <DoubleColumnRows>
-                {testDataEven.map(child => child)}
+                {testDataEven}
             </DoubleColumnRows>
         )
 
