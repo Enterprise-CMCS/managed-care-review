@@ -11,7 +11,7 @@ import {
 import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import { DataDetail } from '../../../components/DataDetail'
-import { DoubleColumnRow } from '../../../components/DoubleColumnRow'
+import { DoubleColumnRows } from "../../../components/DoubleColumnRow";
 import { DownloadButton } from '../../DownloadButton'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
@@ -123,116 +123,98 @@ export const ContractDetailsSummarySection = ({
                 )}
             </SectionHeader>
             <dl>
-                <DoubleColumnRow
-                    left={
-                        <DataDetail
-                            id="contractType"
-                            label="Contract action type"
-                            data={
-                                submission.contractType
-                                    ? ContractTypeRecord[
-                                          submission.contractType
-                                      ]
-                                    : ''
-                            }
-                        />
-                    }
-                    right={
-                        <DataDetail
-                            id="contractEffectiveDates"
-                            label={
-                                submission.contractType === 'BASE'
-                                    ? 'Contract effective dates'
-                                    : 'Contract amendment effective dates'
-                            }
-                            data={`${dayjs(submission.contractDateStart).format(
-                                'MM/DD/YYYY'
-                            )} to ${dayjs(submission.contractDateEnd).format(
-                                'MM/DD/YYYY'
-                            )}`}
-                        />
-                    }
-                />
-                <DoubleColumnRow
-                    left={
-                        <DataDetail
-                            id="managedCareEntities"
-                            label="Managed care entities"
-                            data={createCheckboxList({
-                                list: submission.managedCareEntities,
-                                dict: ManagedCareEntityRecord,
-                            })}
-                        />
-                    }
-                    right={
-                        <DataDetail
-                            id="federalAuthorities"
-                            label="Active federal operating authority"
-                            data={createCheckboxList({
-                                list: submission.federalAuthorities,
-                                dict: FederalAuthorityRecord,
-                            })}
-                        />
-                    }
-                />
+                <DoubleColumnRows>
+                    <DataDetail
+                        id="contractType"
+                        label="Contract action type"
+                        data={
+                            submission.contractType
+                                ? ContractTypeRecord[
+                                    submission.contractType
+                                    ]
+                                : ''
+                        }
+                    />
+                    <DataDetail
+                        id="contractEffectiveDates"
+                        label={
+                            submission.contractType === 'BASE'
+                                ? 'Contract effective dates'
+                                : 'Contract amendment effective dates'
+                        }
+                        data={`${dayjs(submission.contractDateStart).format(
+                            'MM/DD/YYYY'
+                        )} to ${dayjs(submission.contractDateEnd).format(
+                            'MM/DD/YYYY'
+                        )}`}
+                    />
+                    <DataDetail
+                        id="managedCareEntities"
+                        label="Managed care entities"
+                        data={createCheckboxList({
+                            list: submission.managedCareEntities,
+                            dict: ManagedCareEntityRecord,
+                        })}
+                    />
+                    <DataDetail
+                        id="federalAuthorities"
+                        label="Active federal operating authority"
+                        data={createCheckboxList({
+                            list: submission.federalAuthorities,
+                            dict: FederalAuthorityRecord,
+                        })}
+                    />
+                </DoubleColumnRows>
                 {submission.contractType === 'AMENDMENT' &&
                     submission.contractAmendmentInfo && (
                         <>
-                            <DoubleColumnRow
-                                left={
+                            <DoubleColumnRows>
+                                <DataDetail
+                                    id="itemsAmended"
+                                    label="Items being amended"
+                                    data={createCheckboxList({
+                                        list: submission.contractAmendmentInfo.itemsBeingAmended.filter(
+                                            (item) =>
+                                                item !==
+                                                    'CAPITATION_RATES' &&
+                                                item !== 'OTHER'
+                                        ),
+                                        dict: AmendableItemsRecord,
+                                        otherReasons: itemsAmendedOtherList,
+                                    })}
+                                />
+                                <DataDetail
+                                    id="covidRelated"
+                                    label="Is this contract action related to the COVID-19 public health emergency"
+                                    data={
+                                        submission.contractAmendmentInfo
+                                            .relatedToCovid19
+                                            ? 'Yes'
+                                            : 'No'
+                                    }
+                                />
+                            </DoubleColumnRows>
+                            {submission.contractAmendmentInfo
+                                .relatedToCovid19 && (
+                                <DoubleColumnRows>
                                     <DataDetail
-                                        id="itemsAmended"
-                                        label="Items being amended"
-                                        data={createCheckboxList({
-                                            list: submission.contractAmendmentInfo.itemsBeingAmended.filter(
-                                                (item) =>
-                                                    item !==
-                                                        'CAPITATION_RATES' &&
-                                                    item !== 'OTHER'
-                                            ),
-                                            dict: AmendableItemsRecord,
-                                            otherReasons: itemsAmendedOtherList,
-                                        })}
-                                    />
-                                }
-                                right={
-                                    <DataDetail
-                                        id="covidRelated"
-                                        label="Is this contract action related to the COVID-19 public health emergency"
+                                        id="vaccineRelated"
+                                        label="Is this related to coverage and reimbursement for vaccine administration?"
                                         data={
                                             submission.contractAmendmentInfo
-                                                .relatedToCovid19
+                                                .relatedToVaccination
                                                 ? 'Yes'
                                                 : 'No'
                                         }
                                     />
-                                }
-                            />
-                            {submission.contractAmendmentInfo
-                                .relatedToCovid19 && (
-                                <DoubleColumnRow
-                                    left={
-                                        <DataDetail
-                                            id="vaccineRelated"
-                                            label="Is this related to coverage and reimbursement for vaccine administration?"
-                                            data={
-                                                submission.contractAmendmentInfo
-                                                    .relatedToVaccination
-                                                    ? 'Yes'
-                                                    : 'No'
-                                            }
-                                        />
-                                    }
-                                />
+                                </DoubleColumnRows>
                             )}
                         </>
                     )}
-
                 <UploadedDocumentsTable
                     documents={submission.contractDocuments}
                     caption="Contract"
                     documentCategory="Contract"
-                
                 />
                 {contractSupportingDocuments.length > 0 && (
                     <UploadedDocumentsTable
@@ -243,7 +225,6 @@ export const ContractDetailsSummarySection = ({
                         isSubmitted={isSubmitted}
                     />
                 )}
-
             </dl>
         </section>
     )
