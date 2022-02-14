@@ -98,7 +98,7 @@ resources:
                 - 'sts:AssumeRole'
               Condition:
                 StringEquals:
-                  'sts:ExternalId': !Ref AWS::AccountId
+                  'sts:ExternalId': ${AWS::AccountId}
         Path: /service-role/
         Policies:
           - PolicyName: MetricStreams-FirehosePutRecords
