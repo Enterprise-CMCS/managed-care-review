@@ -39,10 +39,7 @@ const DocumentError = ({
         return (
             <>
                 <span className={styles.fileItemBoldMessage}>
-                    Duplicate file
-                </span>
-                <span className={styles.fileItemBoldMessage}>
-                    Please remove
+                    Duplicate file, please remove
                 </span>
             </>
         )
@@ -148,7 +145,7 @@ export const FileProcessor = ({
     }
 
     const errorRowClass = classnames({
-        'bg-secondary-lighter': statusValue === 'error',
+        'bg-error-lighter': statusValue === 'error',
     })
 
     return renderMode === 'table' ? (

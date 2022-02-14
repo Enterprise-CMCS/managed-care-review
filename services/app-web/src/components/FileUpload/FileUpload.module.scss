@@ -7,6 +7,10 @@
     }
 }
 
+.fileInputError {
+    background-color: $theme-color-error-lighter;
+}
+
 .loadingImage {
     float: left;
 }
