@@ -210,7 +210,7 @@ jobs:
       always() &&
       (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped')
 
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@mt-otel-lambda
     with:
       stage_name: ${{ needs.begin-deployment.outputs.stage-name }}
       app_version: ${{ needs.begin-deployment.outputs.app-version }}
@@ -224,10 +224,11 @@ jobs:
       iam_path: ${{ secrets.IAM_PATH }}
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
       react_app_auth_mode: AWS_COGNITO
+      nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
   finishing-prep:
     name: Finishing Prep
-    needs: [deploy-infra, begin-deployment]
+    needs: [deploy-infra, begin-deployment, deploy-app]
     if: always()
     runs-on: ubuntu-latest
     outputs:
