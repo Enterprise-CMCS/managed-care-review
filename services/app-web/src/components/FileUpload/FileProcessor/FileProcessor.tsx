@@ -29,11 +29,15 @@ const DocumentError = ({
     hasScanningError,
     hasUploadError,
     hasUnexpectedError,
+    hasMissingCategories,
+    shouldValidate,
 }: {
     hasDuplicateNameError: boolean
     hasScanningError: boolean
     hasUploadError: boolean
     hasUnexpectedError: boolean
+    hasMissingCategories: boolean
+    shouldValidate?: boolean
 }): React.ReactElement | null => {
     if (hasDuplicateNameError)
         return (
@@ -76,6 +80,14 @@ const DocumentError = ({
                 </span>
             </>
         )
+    } else if (shouldValidate && hasMissingCategories) {
+        return (
+            <>
+                <span className={styles.fileItemBoldMessage}>
+                    Must select at least one category checkbox
+                </span>
+            </>
+        )
     } else {
         return null
     }
@@ -88,6 +100,7 @@ type FileProcessorProps = {
     renderMode: 'table' | 'list'
     handleCheckboxClick: (event: React.ChangeEvent<HTMLInputElement>) => void
     isContractOnly?: boolean
+    shouldValidate?: boolean
 }
 export const FileProcessor = ({
     item,
@@ -96,6 +109,7 @@ export const FileProcessor = ({
     renderMode,
     handleCheckboxClick,
     isContractOnly,
+    shouldValidate,
 }: FileProcessorProps): React.ReactElement => {
     const { name, status, file } = item
     const isRateSupporting = item.documentCategories.includes('RATES_RELATED')
@@ -107,6 +121,8 @@ export const FileProcessor = ({
     const hasUnexpectedError = status === 'UPLOAD_ERROR' && file === undefined
     const hasRecoverableError =
         (hasUploadError || hasScanningError) && !hasUnexpectedError
+    const hasMissingCategories =
+        !isContractOnly && item.documentCategories.length === 0
     const isLoading = status === 'PENDING'
     const isScanning = status === 'SCANNING'
 
@@ -147,9 +163,13 @@ export const FileProcessor = ({
         statusValue = 'error'
     }
 
+    const missingCategoryError = shouldValidate && hasMissingCategories
+
     const errorRowClass = classnames({
-        'bg-secondary-lighter': statusValue === 'error',
+        'bg-secondary-lighter': statusValue === 'error' || missingCategoryError,
     })
+
+    const hasNonDocumentError = statusValue === 'error'
 
     return renderMode === 'table' ? (
         <FileRow
@@ -167,6 +187,8 @@ export const FileProcessor = ({
                     hasScanningError={hasScanningError}
                     hasUploadError={hasUploadError}
                     hasUnexpectedError={hasUnexpectedError}
+                    hasMissingCategories={hasMissingCategories}
+                    shouldValidate={shouldValidate}
                 />
             }
             hasRecoverableError={hasRecoverableError}
@@ -174,6 +196,8 @@ export const FileProcessor = ({
             handleRetry={handleRetry}
             handleCheckboxClick={handleCheckboxClick}
             isContractOnly={isContractOnly}
+            shouldValidate={shouldValidate}
+            hasNonDocumentError={hasNonDocumentError}
         />
     ) : (
         <FileListItem
@@ -189,6 +213,7 @@ export const FileProcessor = ({
                     hasScanningError={hasScanningError}
                     hasUploadError={hasUploadError}
                     hasUnexpectedError={hasUnexpectedError}
+                    hasMissingCategories={hasMissingCategories}
                 />
             }
             hasRecoverableError={hasRecoverableError}

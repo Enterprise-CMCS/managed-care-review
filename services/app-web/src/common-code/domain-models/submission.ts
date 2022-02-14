@@ -53,6 +53,20 @@ const hasValidDocuments = (sub: StateSubmissionType): boolean => {
     return validRateDocuments && validContractDocuments
 }
 
+const hasValidSupportingDocumentCategories = (sub: StateSubmissionType): boolean => {
+    // every document must have a category
+    if (!sub.documents.every(doc => doc.documentCategories.length > 0)) {
+        return false;
+    }
+    // if the submission is contract-only, all supporting docs must be 'CONTRACT-RELATED
+    if (sub.submissionType === 'CONTRACT_ONLY' &&
+        sub.documents.length > 0 &&
+        !sub.documents.every(doc => doc.documentCategories.includes('CONTRACT_RELATED'))) {
+            return false;
+        }
+    return true;
+}
+
 const isStateSubmission = (sub: unknown): sub is StateSubmissionType => {
     if (sub && typeof sub === 'object' && 'status' in sub) {
         const maybeStateSub = sub as StateSubmissionType
@@ -92,6 +106,7 @@ function submissionName(submission: SubmissionUnionType): string {
 export {
     hasValidContract,
     hasValidDocuments,
+    hasValidSupportingDocumentCategories,
     hasValidRates,
     isContractOnly,
     isContractAndRates,

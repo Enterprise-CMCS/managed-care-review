@@ -15,7 +15,7 @@ describe('FileItemList component', () => {
         key: undefined,
         s3URL: undefined,
         status: 'PENDING',
-        documentCategories: [],
+        documentCategories: ['CONTRACT_RELATED'],
     }
     const scanning: FileItemT = {
         id: 'testFile1',
@@ -33,7 +33,7 @@ describe('FileItemList component', () => {
         key: undefined,
         s3URL: undefined,
         status: 'UPLOAD_ERROR',
-        documentCategories: [],
+        documentCategories: ['CONTRACT_RELATED'],
     }
 
     const scanningError: FileItemT = {
@@ -53,7 +53,7 @@ describe('FileItemList component', () => {
         key: '4545454-testFile4',
         s3URL: 'tests3://uploaded-12313123213/4545454-testFile4',
         status: 'UPLOAD_COMPLETE',
-        documentCategories: [],
+        documentCategories: ['CONTRACT_RELATED'],
     }
 
     const duplicateError: FileItemT = {
