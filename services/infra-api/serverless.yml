@@ -13,6 +13,8 @@ custom:
   iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
   iamPath: ${env:IAM_PATH, "/"}
   nrLicenseKey: ${env:NR_LICENSE_KEY}
+  nrMetricStreamName: 'NewRelic-Metric-Stream'
+  nrFirehoseStreamName: 'NewRelic-Delivery-Stream'
   serverlessTerminationProtection:
     stages:
       - dev
@@ -52,17 +54,7 @@ resources:
     S3FirehoseEventsBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName:
-          !Join [
-            '-',
-            [
-              !Ref S3BackupBucketName,
-              !Select [
-                0,
-                !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]],
-              ],
-            ],
-          ]
+        BucketName: !Sub newrelic-firehose-${self:custom.stage}-${AWS::AccountID}
         PublicAccessBlockConfiguration:
           BlockPublicAcls: true
           BlockPublicPolicy: true
@@ -72,19 +64,14 @@ resources:
     FirehoseStreamToNewRelic:
       Type: AWS::KinesisFirehose::DeliveryStream
       Properties:
-        DeliveryStreamName: !Ref FirehoseStreamName
+        DeliveryStreamName: ${self:custom.nrFirehoseStreamName}
         DeliveryStreamType: DirectPut
         HttpEndpointDestinationConfiguration:
           RequestConfiguration:
             ContentEncoding: GZIP
           EndpointConfiguration:
             Name: New Relic
-            Url:
-              !FindInMap [
-                DatacenterMap,
-                NewRelicDatacenter,
-                !Ref NewRelicDatacenter,
-              ]
+            Url: 'https://aws-api.newrelic.com/cloudwatch-metrics/v1'
             AccessKey: ${self:custom.nrLicenseKey}
           BufferingHints:
             IntervalInSeconds: 60
@@ -181,7 +168,7 @@ resources:
     CloudWatchMetricStream:
       Type: AWS::CloudWatch::MetricStream
       Properties:
-        Name: !Ref CloudWatchMetricStreamName
+        Name: ${self:custom.nrMetricStreamName}
         FirehoseArn: !GetAtt FirehoseStreamToNewRelic.Arn
         RoleArn: !GetAtt MetricStreamRole.Arn
         OutputFormat: 'opentelemetry0.7'
