@@ -140,6 +140,7 @@ jobs:
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
       ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
       react_app_auth_mode: IDM
+      nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
   dev-cypress:
     name: dev - cypress
@@ -225,6 +226,7 @@ jobs:
       react_app_auth_mode: IDM
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
       ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
+      nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
   cypress-val:
     name: val - cypress
@@ -310,6 +312,7 @@ jobs:
       react_app_auth_mode: IDM
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
       ses_review_team_email_addresses: ${{ secrets.PROD_SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
+      nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
   cypress-prod:
     name: prod - cypress
