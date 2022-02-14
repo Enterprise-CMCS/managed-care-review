@@ -1,1 +1,1 @@
-export { DoubleColumnRow } from './DoubleColumnRow'
+export { DoubleColumnRows } from './DoubleColumnRows'

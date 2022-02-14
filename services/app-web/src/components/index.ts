@@ -1,6 +1,6 @@
 export { DataDetail } from './DataDetail'
 
-export { DoubleColumnRow } from './DoubleColumnRow'
+export { DoubleColumnRows } from './DoubleColumnRow'
 
 export { DownloadButton } from './DownloadButton'
 
