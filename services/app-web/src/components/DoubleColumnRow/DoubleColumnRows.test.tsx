@@ -20,7 +20,7 @@ const testDataEven = [
 ]
 
 describe('DoubleColumnRows', () => {
-    it('Forms pairs of elements in an array given a array of elements', () => {
+    it('Forms pairs of elements in an array given an array of elements', () => {
         expect(pairedChildren(testDataOdd)).toStrictEqual([
             [
                 <div key={'Row 1 Column 1'}>Row 1 Column 1</div>,
