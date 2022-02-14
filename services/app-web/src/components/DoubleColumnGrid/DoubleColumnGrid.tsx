@@ -9,7 +9,7 @@ export type DoubleColumnGridProps = {
     children: React.ReactNode
 }
 
-export const pairedChildren = (children: ChildrenType[]) => {
+export const pairedChildren = (children: ChildrenType[]): ChildrenPairType => {
     return children.reduce((pairedChildren: ChildrenPairType, child, index, array) => {
         if (index % 2 === 0) {
             pairedChildren.push(array.slice(index, index + 2))
