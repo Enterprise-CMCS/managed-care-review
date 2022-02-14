@@ -3,7 +3,7 @@ import dayjs from 'dayjs'
 import styles from '../SubmissionSummarySection.module.scss'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { DataDetail } from '../../../components/DataDetail'
-import { DoubleColumnRows } from '../../../components/DoubleColumnRow';
+import { DoubleColumnRows } from '../../DoubleColumnRows';
 import { DownloadButton } from '../../DownloadButton'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'

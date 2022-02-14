@@ -11,7 +11,7 @@ import {
 import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import { DataDetail } from '../../../components/DataDetail'
-import { DoubleColumnRows } from "../../../components/DoubleColumnRow";
+import { DoubleColumnRows } from "../../DoubleColumnRows";
 import { DownloadButton } from '../../DownloadButton'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'

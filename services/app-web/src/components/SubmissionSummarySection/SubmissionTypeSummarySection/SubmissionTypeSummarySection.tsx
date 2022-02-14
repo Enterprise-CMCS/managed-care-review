@@ -4,7 +4,7 @@ import styles from '../SubmissionSummarySection.module.scss'
 import { SubmissionTypeRecord } from '../../../constants/submissions'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { DataDetail } from '../../../components/DataDetail'
-import { DoubleColumnRows } from "../../../components/DoubleColumnRow";
+import { DoubleColumnRows } from "../../DoubleColumnRows";
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 import { isStateSubmission } from '../../../gqlHelpers'
 
