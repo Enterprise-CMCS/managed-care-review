@@ -23,7 +23,7 @@
         "prettier": "prettier --ignore-path .gitignore \"**/*.+(ts|tsx|json)\"",
         "cypress:open": "cypress open --env AUTH_MODE=LOCAL",
         "cypress:run": "cypress run --env AUTH_MODE=LOCAL",
-        "precommit": "lint-staged"
+        "precommit": "lerna run --concurrency 1 --stream precommit --since HEAD --exclude-dependents"
     },
     "repository": {
         "type": "git",
@@ -42,7 +42,6 @@
         "cypress-pipe": "^2.0.0",
         "husky": "^7.0.4",
         "lerna": "^4.0.0",
-        "lint-staged": "^12.1.2",
         "prettier": "^2.4.1"
     },
     "dependencies": {
