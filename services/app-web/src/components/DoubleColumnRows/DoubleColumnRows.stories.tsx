@@ -1,6 +1,6 @@
 import React from 'react'
 import { Story } from '@storybook/react'
-import { DoubleColumnRows, DoubleColumnRowsProps } from './DoubleColumnRows';
+import { DoubleColumnRows, DoubleColumnRowsProps } from './DoubleColumnRows'
 
 export default {
     title: 'Components/DoubleColumnRows',

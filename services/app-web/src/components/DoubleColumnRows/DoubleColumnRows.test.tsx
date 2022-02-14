@@ -1,6 +1,6 @@
 import React from 'react'
 import { screen, render } from '@testing-library/react'
-import { DoubleColumnRows, pairedChildren } from './DoubleColumnRows';
+import { DoubleColumnRows, pairedChildren } from './DoubleColumnRows'
 
 const createElement = (ele: string, text: string) => React.createElement(ele, { key: text }, text)
 
