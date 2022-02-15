@@ -133,7 +133,7 @@ resources:
                   - firehose.amazonaws.com
               Action:
                 - 'sts:AssumeRole'
-        Path: /developer/newrelic
+        Path: ${self:custom.iamPath}
         Policies:
           - PolicyName: Firehose-S3Access
             PolicyDocument:
