@@ -28,7 +28,7 @@ export const FileItemsList = ({
             status === 'SCANNING_ERROR' ||
             status === 'DUPLICATE_NAME_ERROR'
         return classnames(styles.fileItem, {
-            'bg-secondary-lighter border-secondary margin-top-1px': hasError,
+            'bg-error-lighter border-secondary margin-top-1px': hasError,
             'usa-file-input__preview': !hasError,
         })
     }

@@ -61,7 +61,7 @@ exports[`FileItemList component renders correctly 1`] = `
     </div>
   </li>
   <li
-    className="fileItem bg-secondary-lighter border-secondary margin-top-1px"
+    className="fileItem bg-error-lighter border-secondary margin-top-1px"
     id="testFile2"
   >
     <div
@@ -92,12 +92,7 @@ exports[`FileItemList component renders correctly 1`] = `
         <span
           className="fileItemBoldMessage"
         >
-          Upload failed
-        </span>
-        <span
-          className="fileItemBoldMessage"
-        >
-          Please remove or retry
+          Upload failed, please remove or retry
         </span>
         <span>
           testFile2.pdf
@@ -128,7 +123,7 @@ exports[`FileItemList component renders correctly 1`] = `
     </div>
   </li>
   <li
-    className="fileItem bg-secondary-lighter border-secondary margin-top-1px"
+    className="fileItem bg-error-lighter border-secondary margin-top-1px"
     id="testFile3"
   >
     <div
@@ -238,7 +233,7 @@ exports[`FileItemList component renders correctly 1`] = `
     </div>
   </li>
   <li
-    className="fileItem bg-secondary-lighter border-secondary margin-top-1px"
+    className="fileItem bg-error-lighter border-secondary margin-top-1px"
     id="testFile44"
   >
     <div
@@ -269,12 +264,7 @@ exports[`FileItemList component renders correctly 1`] = `
         <span
           className="fileItemBoldMessage"
         >
-          Duplicate file
-        </span>
-        <span
-          className="fileItemBoldMessage"
-        >
-          Please remove
+          Duplicate file, please remove
         </span>
         <span>
           testFile4.pdf
