@@ -97,7 +97,7 @@ resources:
       Type: AWS::IAM::Role
       Properties:
         AssumeRolePolicyDocument:
-          Version: 2012-10-17
+          Version: '2012-10-17'
           Statement:
             - Effect: Allow
               Principal:
@@ -111,7 +111,7 @@ resources:
         Policies:
           - PolicyName: MetricStreams-FirehosePutRecords
             PolicyDocument:
-              Version: 2012-10-17
+              Version: '2012-10-17'
               Statement:
                 - Effect: Allow
                   Action:
