@@ -4,7 +4,7 @@ import styles from '../SubmissionSummarySection.module.scss'
 import { SubmissionTypeRecord } from '../../../constants/submissions'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { DataDetail } from '../../../components/DataDetail'
-import { DoubleColumnRow } from '../../../components/DoubleColumnRow'
+import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 import { isStateSubmission } from '../../../gqlHelpers'
 
@@ -23,53 +23,45 @@ export const SubmissionTypeSummarySection = ({
 
             <dl>
                 {isStateSubmission(submission) && (
-                    <DoubleColumnRow
-                        left={
-                            <DataDetail
-                                id="submitted"
-                                label="Submitted"
-                                data={
-                                    <span>
-                                        {dayjs(submission.submittedAt).format(
-                                            'MM/DD/YY'
-                                        )}
-                                    </span>
-                                }
-                            />
-                        }
-                        right={
-                            <DataDetail
-                                id="lastUpdated"
-                                label="Last updated"
-                                data={
-                                    <span>
-                                        {dayjs(submission.updatedAt).format(
-                                            'MM/DD/YY'
-                                        )}
-                                    </span>
-                                }
-                            />
-                        }
-                    />
-                )}
-                <DoubleColumnRow
-                    left={
+                    <DoubleColumnGrid>
                         <DataDetail
-                            id="program"
-                            label="Program(s)"
-                            data={submission.programIDs}
-                        />
-                    }
-                    right={
-                        <DataDetail
-                            id="submissionType"
-                            label="Submission type"
+                            id="submitted"
+                            label="Submitted"
                             data={
-                                SubmissionTypeRecord[submission.submissionType]
+                                <span>
+                                    {dayjs(submission.submittedAt).format(
+                                        'MM/DD/YY'
+                                    )}
+                                </span>
                             }
                         />
-                    }
-                />
+                        <DataDetail
+                            id="lastUpdated"
+                            label="Last updated"
+                            data={
+                                <span>
+                                    {dayjs(submission.updatedAt).format(
+                                        'MM/DD/YY'
+                                    )}
+                                </span>
+                            }
+                        />
+                    </DoubleColumnGrid>
+                )}
+                <DoubleColumnGrid>
+                    <DataDetail
+                        id="program"
+                        label="Program(s)"
+                        data={submission.programIDs}
+                    />
+                    <DataDetail
+                        id="submissionType"
+                        label="Submission type"
+                        data={
+                            SubmissionTypeRecord[submission.submissionType]
+                        }
+                    />
+                </DoubleColumnGrid>
                 <Grid row gap className={styles.reviewDataRow}>
                     <Grid col={12}>
                         <DataDetail

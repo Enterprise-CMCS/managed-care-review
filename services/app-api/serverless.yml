@@ -61,6 +61,11 @@ provider:
   apiGateway:
     restApiId: ${self:custom.appApiGatewayId}
     restApiRootResourceId: ${self:custom.appApiGatewayRootResourceId}
+  layers:
+    - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-0-1:1
+  tracing:
+    apiGateway: true
+    lambda: true
   iam:
     role:
       path: ${self:custom.iamPath}
@@ -106,6 +111,8 @@ provider:
     SES_SOURCE_EMAIL_ADDRESS: ${self:custom.emailSource}
     SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${self:custom.emailReviewTeamAddresses}
     APPLICATION_ENDPOINT: ${self:custom.applicationEndpoint}
+    AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
+    OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
 
 layers:
   prismaClient:
@@ -151,6 +158,7 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     layers:
       - !Ref PrismaClientLambdaLayer
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-0-1:1
 
   hello:
     handler: handlers/hello.main
@@ -174,6 +182,7 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     layers:
       - !Ref PrismaClientLambdaLayer
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-0-1:1
 
   migrate:
     handler: handlers/postgres_migrate.main
@@ -184,6 +193,7 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     layers:
       - !Ref PrismaClientLambdaLayer
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-0-1:1
 
   zip_keys:
     handler: handlers/bulk_download.main

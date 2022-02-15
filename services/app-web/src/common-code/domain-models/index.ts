@@ -39,6 +39,7 @@ export { isCognitoUser, isStateUser, isCMSUser } from './user'
 export {
     hasValidContract,
     hasValidDocuments,
+    hasValidSupportingDocumentCategories,
     hasValidRates,
     isContractOnly,
     isContractAndRates,
