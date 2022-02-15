@@ -30,6 +30,11 @@ provider:
     role:
       path: ${self:custom.iamPath}
       permissionsBoundary: ${self:custom.iamPermissionsBoundaryPolicy}
+      statements:
+        - Effect: 'Allow'
+          Action:
+            - '*'
+          Resource: !GetAtt FirehoseStreamToNewRelic.Arn
 
 resources:
   Resources:
@@ -114,17 +119,6 @@ resources:
                     - 'firehose:PutRecordBatch'
                   Resource: !GetAtt FirehoseStreamToNewRelic.Arn
         Description: Role to allow a metric stream put metrics into a firehose
-        RoleName:
-          !Join [
-            '-',
-            [
-              'MetricsStreamRole',
-              !Select [
-                0,
-                !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]],
-              ],
-            ],
-          ]
 
     FirehoseRole:
       Type: AWS::IAM::Role
