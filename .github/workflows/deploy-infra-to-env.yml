@@ -139,6 +139,8 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
           NR_LICENSE_KEY: ${{ secrets.nr_license_key }}
+          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
+          IAM_PATH: ${{ secrets.iam_path }}
         run: |
           pushd services/infra-api && npx serverless deploy --stage ${{ inputs.stage_name }}
 
