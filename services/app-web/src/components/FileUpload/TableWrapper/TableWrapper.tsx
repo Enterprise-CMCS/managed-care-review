@@ -9,6 +9,8 @@ type TableWrapperProps = {
     retryItem: (item: FileItemT) => void
     handleCheckboxClick: (event: React.ChangeEvent<HTMLInputElement>) => void
     isContractOnly?: boolean
+    shouldValidate?: boolean
+    hasMissingCategories?: boolean
 }
 
 export const TableWrapper = ({
@@ -17,6 +19,7 @@ export const TableWrapper = ({
     retryItem,
     handleCheckboxClick,
     isContractOnly,
+    shouldValidate,
 }: TableWrapperProps): React.ReactElement => {
 
     const hasFiles = fileItems.length > 0
@@ -43,6 +46,7 @@ export const TableWrapper = ({
                                 renderMode="table"
                                 handleCheckboxClick={handleCheckboxClick}
                                 isContractOnly={isContractOnly}
+                                shouldValidate={shouldValidate}
                             />
                         ))}
                     </tbody>

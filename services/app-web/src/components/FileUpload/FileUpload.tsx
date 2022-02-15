@@ -33,6 +33,8 @@ export type FileUploadProps = {
     deleteFile: (key: string) => Promise<void>
     onFileItemsUpdate: ({ fileItems }: { fileItems: FileItemT[] }) => void
     isContractOnly?: boolean
+    shouldValidate?: boolean
+    hasMissingCategories?: boolean
 } & JSX.IntrinsicElements['input']
 
 /*  FileUpload handles async file upload to S3 and displays inline errors per file.
@@ -57,6 +59,8 @@ export const FileUpload = ({
     deleteFile,
     onFileItemsUpdate,
     isContractOnly,
+    shouldValidate,
+    hasMissingCategories,
     ...inputProps
 }: FileUploadProps): React.ReactElement => {
     const [fileItems, setFileItems] = useState<FileItemT[]>(initialItems || [])
@@ -340,13 +344,15 @@ export const FileUpload = ({
         addFilesAndUpdateList(files)
     }
     const uploadedCount = fileItems.filter(
-        (item) => item.status === 'UPLOAD_COMPLETE'
+        (item) =>
+            item.status === 'UPLOAD_COMPLETE' && item.documentCategories.length
     ).length
     const errorCount = fileItems.filter(
         (item) =>
             item.status === 'UPLOAD_ERROR' ||
             item.status === 'SCANNING_ERROR' ||
-            item.status === 'DUPLICATE_NAME_ERROR'
+            item.status === 'DUPLICATE_NAME_ERROR' ||
+            item.documentCategories.length === 0
     ).length
     const pendingCount = fileItems.filter(
         (item) => item.status === 'PENDING' || item.status === 'SCANNING'
@@ -408,6 +414,7 @@ export const FileUpload = ({
                 renderMode={renderMode}
                 handleCheckboxClick={handleCheckboxClick}
                 isContractOnly={isContractOnly}
+                shouldValidate={shouldValidate}
             />
         </FormGroup>
     )

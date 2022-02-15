@@ -12,7 +12,7 @@ describe('FileProcessor component', () => {
         key: undefined,
         s3URL: undefined,
         status: 'PENDING',
-        documentCategories: [],
+        documentCategories: ['CONTRACT_RELATED'],
     }
     const scanning: FileItemT = {
         id: 'testFile1',

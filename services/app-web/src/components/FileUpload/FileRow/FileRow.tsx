@@ -20,6 +20,8 @@ type FileRowProps = {
     handleRetry: (_e: React.MouseEvent) => void
     handleCheckboxClick: (event: React.ChangeEvent<HTMLInputElement>) => void
     isContractOnly?: boolean
+    shouldValidate?: boolean
+    hasNonDocumentError?: boolean
 }
 
 export const FileRow = ({
@@ -37,11 +39,13 @@ export const FileRow = ({
     handleRetry,
     handleCheckboxClick,
     isContractOnly,
+    hasNonDocumentError,
 }: FileRowProps): React.ReactElement => {
-    const { name } = item
+    const { name, id } = item
+    const shouldHideCheckbox = isContractOnly || hasNonDocumentError
 
     return (
-        <tr className={`${errorRowClass} ${styles.warningRow}`}>
+        <tr id={id} className={`${errorRowClass} ${styles.warningRow}`}>
             <td>
                 {isLoading || isScanning ? (
                     <span
@@ -79,10 +83,10 @@ export const FileRow = ({
                     <span>{name}</span>
                 </span>
             </td>
-            {!isContractOnly && (
+            {!shouldHideCheckbox ? (
                 <td>
                     <Checkbox
-                        className={styles.checkbox}
+                        className={`${errorRowClass} ${styles.checkbox}`}
                         label=""
                         id={`${item.id}--contract`}
                         name="contract-supporting"
@@ -92,11 +96,13 @@ export const FileRow = ({
                         onChange={handleCheckboxClick}
                     />
                 </td>
+            ) : (
+                <td />
             )}
-            {!isContractOnly && (
+            {!shouldHideCheckbox ? (
                 <td>
                     <Checkbox
-                        className={styles.checkbox}
+                        className={`${errorRowClass} ${styles.checkbox}`}
                         label=""
                         id={`${item.id}--rate`}
                         name="rate-supporting"
@@ -106,6 +112,8 @@ export const FileRow = ({
                         onChange={handleCheckboxClick}
                     />
                 </td>
+            ) : (
+                <td />
             )}
             <td style={{ textAlign: 'right' }}>
                 <Button
