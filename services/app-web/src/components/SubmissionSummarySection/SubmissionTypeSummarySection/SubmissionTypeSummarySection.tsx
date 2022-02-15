@@ -1,25 +1,30 @@
 import { Grid } from '@trussworks/react-uswds'
 import dayjs from 'dayjs'
-import styles from '../SubmissionSummarySection.module.scss'
-import { SubmissionTypeRecord } from '../../../constants/submissions'
-import { SectionHeader } from '../../../components/SectionHeader'
 import { DataDetail } from '../../../components/DataDetail'
 import { DoubleColumnRow } from '../../../components/DoubleColumnRow'
+import { SectionHeader } from '../../../components/SectionHeader'
+import { SubmissionTypeRecord } from '../../../constants/submissions'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 import { isStateSubmission } from '../../../gqlHelpers'
+import styles from '../SubmissionSummarySection.module.scss'
 
 export type SubmissionTypeSummarySectionProps = {
     submission: DraftSubmission | StateSubmission
     navigateTo?: string
+    unlockModalButton?: React.ReactElement
 }
 
 export const SubmissionTypeSummarySection = ({
     submission,
     navigateTo,
+    unlockModalButton,
 }: SubmissionTypeSummarySectionProps): React.ReactElement => {
+
     return (
         <section id="submissionTypeSection" className={styles.summarySection}>
-            <SectionHeader header={submission.name} navigateTo={navigateTo} />
+            <SectionHeader header={submission.name} navigateTo={navigateTo} >
+                {unlockModalButton && unlockModalButton}
+            </SectionHeader>
 
             <dl>
                 {isStateSubmission(submission) && (

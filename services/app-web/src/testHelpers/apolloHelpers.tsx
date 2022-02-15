@@ -1,20 +1,10 @@
-import dayjs from 'dayjs'
-
-import {
-    DraftSubmission,
-    Submission,
-    FetchCurrentUserDocument,
-    User as UserType,
-    CreateDraftSubmissionDocument,
-    FetchDraftSubmissionDocument,
-    UpdateDraftSubmissionDocument,
-    SubmitDraftSubmissionDocument,
-    IndexSubmissionsDocument,
-    DraftSubmissionUpdates,
-    StateSubmission,
-} from '../gen/gqlClient'
 import { MockedResponse } from '@apollo/client/testing'
+import dayjs from 'dayjs'
 import { GraphQLError } from 'graphql'
+import {
+    CreateDraftSubmissionDocument, DraftSubmission, DraftSubmissionUpdates, FetchCurrentUserDocument, FetchDraftSubmissionDocument, FetchStateSubmissionDocument, IndexSubmissionsDocument, StateSubmission, Submission, SubmitDraftSubmissionDocument, UnlockStateSubmissionDocument, UpdateDraftSubmissionDocument, User as UserType
+} from '../gen/gqlClient'
+
 
 /* For use with Apollo MockedProvider in jest tests */
 const mockValidUser: UserType = {
@@ -312,7 +302,7 @@ const fetchCurrentUserMock = ({
     user = mockValidUser,
     statusCode,
 }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
+    fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
     switch (statusCode) {
         case 200:
             return {
@@ -404,6 +394,48 @@ const fetchDraftSubmissionMock = ({
                     data: {
                         fetchDraftSubmission: {
                             draftSubmission: mergedDraftSubmission,
+                        },
+                    },
+                },
+            }
+        case 403:
+            return {
+                request: { query: FetchDraftSubmissionDocument },
+                error: new Error('You are not logged in'),
+            }
+        default:
+            return {
+                request: { query: FetchDraftSubmissionDocument },
+                error: new Error('A network error occurred'),
+            }
+    }
+}
+
+type fetchStateSubmissionMockProps = {
+    stateSubmission?: StateSubmission | Partial<StateSubmission>
+    id: string
+    statusCode: 200 | 403 | 500
+}
+
+const fetchStateSubmissionMock = ({
+    stateSubmission = mockStateSubmission(),
+    id,
+    statusCode, // eslint-disable-next-line @typescript-eslint/no-explicit-any
+}: fetchStateSubmissionMockProps): MockedResponse<Record<string, any>> => {
+    // override the ID of the returned draft to match the queried id.
+    console.log("MOCKING", id)
+    const mergedStateSubmission = Object.assign({}, stateSubmission, { id })
+    switch (statusCode) {
+        case 200:
+            return {
+                request: {
+                    query: FetchStateSubmissionDocument,
+                    variables: { input: { submissionID: id } },
+                },
+                result: {
+                    data: {
+                        fetchStateSubmission: {
+                            submission: mergedStateSubmission,
                         },
                     },
                 },
@@ -513,6 +545,46 @@ const submitDraftSubmissionMockError = ({
     }
 }
 
+type unlockStateSubmissionMockSuccessProps = {
+    draft?: StateSubmission | Partial<StateSubmission>
+    id: string
+}
+
+const unlockStateSubmissionMockSuccess = ({
+    id,
+    draft,
+}: unlockStateSubmissionMockSuccessProps): MockedResponse<
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Record<string, any>
+> => {
+    const submission = draft ?? mockDraft()
+    return {
+        request: {
+            query: UnlockStateSubmissionDocument,
+            variables: { input: { submissionID: id } },
+        },
+        result: { data: { unlockStateSubmission: { draftSubmission: submission } } },
+    }
+}
+
+const unlockStateSubmissionMockError = ({
+    id,
+}: {
+    id: string // eslint-disable-next-line @typescript-eslint/no-explicit-any
+}): MockedResponse<Record<string, any>> => {
+    return {
+        request: {
+            query: UnlockStateSubmissionDocument,
+            variables: { input: { submissionID: id } },
+        },
+        result: {
+            errors: [
+                new GraphQLError('Incomplete submission cannot be submitted'),
+            ],
+        },
+    }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const indexSubmissionsMockSuccess = (
     submissions: Submission[] = [mockDraft(), mockStateSubmission()]
@@ -542,8 +614,11 @@ export {
     fetchCurrentUserMock,
     createDraftSubmissionMock,
     fetchDraftSubmissionMock,
+    fetchStateSubmissionMock,
     updateDraftSubmissionMock,
     submitDraftSubmissionMockSuccess,
     submitDraftSubmissionMockError,
     indexSubmissionsMockSuccess,
+    unlockStateSubmissionMockSuccess,
+    unlockStateSubmissionMockError,
 }
