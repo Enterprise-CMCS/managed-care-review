@@ -1,10 +1,8 @@
 import * as Yup from 'yup'
-import dayjs from 'dayjs'
-import isLeapYear from 'dayjs/plugin/isLeapYear'
+import { dayjs } from '../../../dateHelpers'
 import { validateDateFormat } from '../../../formHelpers'
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
-dayjs.extend(isLeapYear)
 
 const RateDetailsFormSchema = Yup.object().shape({
     rateType: Yup.string().defined('You must choose a rate certification type'),

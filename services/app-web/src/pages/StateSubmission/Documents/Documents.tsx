@@ -35,6 +35,7 @@ export const Documents = ({
     formAlert = undefined,
 }: DocumentProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = useState(false)
+    const isContractOnly = draftSubmission.submissionType === 'CONTRACT_ONLY'
     const history = useHistory()
 
     // Documents state management
@@ -43,20 +44,48 @@ export const Documents = ({
     const hasValidFiles = fileItems.every(
         (item) => item.status === 'UPLOAD_COMPLETE'
     )
+    const hasMissingCategories =
+        /* fileItems must have some document category.  a contract-only submission
+       must have "CONTRACT_RELATED" as the document category. */
+        fileItems.length > 0 &&
+        (fileItems.some((docs) => docs.documentCategories.length === 0) ||
+            (isContractOnly &&
+                fileItems.some(
+                    (docs) =>
+                        !docs.documentCategories.includes('CONTRACT_RELATED')
+                )))
     const hasLoadingFiles =
         fileItems.some((item) => item.status === 'PENDING') ||
         fileItems.some((item) => item.status === 'SCANNING')
     const showFileUploadError = shouldValidate && !hasValidFiles
 
+    const documentsErrorMessages = () => {
+        const errorsObject: { [k: string]: string } = {}
+        fileItems.forEach((item) => {
+            const key = item.id
+            if (item.status === 'DUPLICATE_NAME_ERROR') {
+                errorsObject[key] = 'You must remove duplicate files'
+            } else if (item.status === 'SCANNING_ERROR') {
+                errorsObject[key] =
+                    'You must remove files that failed the security scan'
+            } else if (item.status === 'UPLOAD_ERROR') {
+                errorsObject[key] =
+                    'You must remove or retry files that failed to upload'
+            } else if (item.documentCategories.length === 0) {
+                errorsObject[key] = 'You must select a document category'
+            }
+        })
+        return errorsObject
+    }
+
     // for supporting documents page, empty documents list is allowed
-    const documentsErrorMessage =
+    const errorSummary =
         showFileUploadError && hasLoadingFiles
             ? 'You must wait for all documents to finish uploading before continuing'
-            : showFileUploadError && !hasValidFiles
-            ? ' You must remove all documents with error messages before continuing'
+            : (showFileUploadError && !hasValidFiles) ||
+              (shouldValidate && hasMissingCategories)
+            ? 'You must remove all documents with error messages before continuing'
             : undefined
-    const documentsErrorKey =
-        fileItems.length === 0 ? 'documents' : '#file-items-list'
 
     // Error summary state management
     const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
@@ -83,6 +112,7 @@ export const Documents = ({
                     key: 'INVALID_KEY',
                     s3URL: undefined,
                     status: 'UPLOAD_ERROR',
+                    documentCategories: doc.documentCategories,
                 }
             }
             return {
@@ -91,6 +121,7 @@ export const Documents = ({
                 key: key,
                 s3URL: doc.s3URL,
                 status: 'UPLOAD_COMPLETE',
+                documentCategories: doc.documentCategories,
             }
         })
 
@@ -160,7 +191,7 @@ export const Documents = ({
             // Currently documents validation happens (outside of the yup schema, which only handles the formik form data)
             // if there are any errors present in the documents list and we are in a validation state (relevant for Save as Draft) force user to clear validations to continue
             if (shouldValidateDocuments) {
-                if (!hasValidFiles) {
+                if (!hasValidFiles || hasMissingCategories) {
                     setShouldValidate(true)
                     setFocusErrorSummaryHeading(true)
                     return
@@ -189,7 +220,8 @@ export const Documents = ({
                         formDataDocuments.push({
                             name: fileItem.name,
                             s3URL: fileItem.s3URL,
-                            documentCategories: [],
+                            documentCategories:
+                                fileItem.documentCategories || [],
                         })
                     }
                     return formDataDocuments
@@ -198,7 +230,6 @@ export const Documents = ({
             )
 
             const updatedDraft = updatesFromSubmission(draftSubmission)
-
             updatedDraft.documents = documents
 
             try {
@@ -232,10 +263,10 @@ export const Documents = ({
 
                     <ErrorSummary
                         errors={
-                            documentsErrorMessage
+                            Object.keys(documentsErrorMessages()).length > 0 &&
+                            shouldValidate
                                 ? {
-                                      [documentsErrorKey]:
-                                          documentsErrorMessage,
+                                      ...documentsErrorMessages(),
                                   }
                                 : {}
                         }
@@ -264,13 +295,16 @@ export const Documents = ({
                                 </span>
                             </>
                         }
-                        error={documentsErrorMessage}
+                        error={errorSummary}
                         accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                         initialItems={fileItemsFromDraftSubmission}
                         uploadFile={handleUploadFile}
                         scanFile={handleScanFile}
                         deleteFile={handleDeleteFile}
                         onFileItemsUpdate={onFileItemsUpdate}
+                        isContractOnly={isContractOnly}
+                        shouldValidate={shouldValidate}
+                        hasMissingCategories={hasMissingCategories}
                     />
                 </fieldset>
                 <PageActions

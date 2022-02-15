@@ -1,7 +1,7 @@
 describe('documents', () => {
     it('can navigate to and from the documents page, saving documents each time', () => {
         cy.logInAsStateUser()
-        cy.startNewContractOnlySubmission()
+        cy.startNewContractAndRatesSubmission()
 
         // Navigate to documents page
         cy.location().then((fullUrl) => {
@@ -17,12 +17,16 @@ describe('documents', () => {
             cy.findByTestId('file-input-input').attachFile(
                 'documents/trussel-guide.pdf'
             )
+            // click the checkbox so the row won't be in an error state
+            cy.findAllByRole('checkbox', {
+                name: 'rate-supporting',
+            }).eq(0).click({ force: true })
             cy.findByText(/0 complete, 1 error, 1 pending/).should('exist')
             // give the page time to load (wait) then let cypress wait for the spinner to go away
             cy.findAllByTestId('upload-finished-indicator', {timeout: 120000}).should("have.length", 2)
             cy.findByTestId('file-input-loading-image').should('not.exist')
             cy.findByText(/1 complete, 1 error, 0 pending/).should('exist')
-            cy.findByText('Duplicate file').should('exist')
+            cy.findByText('Duplicate file, please remove').should('exist')
             cy.visit(`/submissions/${draftSubmissionID}/documents`)
 
             // Add two more valid documents, then navigate back
@@ -34,16 +38,23 @@ describe('documents', () => {
             cy.findByTestId('file-input-input').attachFile(
                 'documents/trussel-guide.pdf'
             )
-            cy.findByText('Duplicate file').should('exist')
+            cy.findByText('Duplicate file, please remove').should('exist')
             cy.findAllByRole('row').should('have.length', 4)
 
             cy.findByText(/3 files added/).should('exist')
+            // click the second column in the second row to make sure multiple rows are handled correctly
+            cy.findAllByRole('checkbox', {
+                name: 'rate-supporting',
+            }).eq(0).click({ force: true })
+            cy.findAllByRole('checkbox', {
+                name: 'rate-supporting',
+            }).eq(1).click({ force: true })
             cy.findByText(/0 complete, 1 error, 2 pending/).should('exist')
 
             // give the page time to load (wait) then let cypress wait for the spinner to go away
             cy.findAllByTestId('upload-finished-indicator', {timeout: 120000}).should("have.length", 3)
             cy.findByTestId('file-input-loading-image').should('not.exist')
-            cy.findByText('Duplicate file').should('exist')
+            cy.findByText('Duplicate file, please remove').should('exist')
             cy.findAllByRole('row').should('have.length', 4)
             cy.findByText(/2 complete, 1 error, 0 pending/)
             cy.navigateForm('Back')
@@ -52,6 +63,9 @@ describe('documents', () => {
             // reload page, see two documents, duplicate was discarded on Back
             cy.visit(`/submissions/${draftSubmissionID}/documents`)
             cy.findAllByRole('row').should('have.length', 3)
+            cy.findAllByRole('checkbox', {
+                name: 'rate-supporting',
+            }).eq(1).should('be.checked')
             cy.verifyDocumentsHaveNoErrors()
 
             //  Save as draft

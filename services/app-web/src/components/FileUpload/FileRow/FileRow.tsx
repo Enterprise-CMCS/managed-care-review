@@ -2,13 +2,15 @@ import React from 'react'
 import { FileItemT } from '../FileProcessor/FileProcessor'
 
 import styles from '../FileUpload.module.scss'
-import { Button } from '@trussworks/react-uswds'
+import { Button, Checkbox } from '@trussworks/react-uswds'
 import { SPACER_GIF } from '../constants'
 
 type FileRowProps = {
     errorRowClass?: string
     isLoading: boolean
     isScanning: boolean
+    isContractSupporting: boolean
+    isRateSupporting: boolean
     statusValue: string
     item: FileItemT
     imageClasses: string
@@ -16,12 +18,18 @@ type FileRowProps = {
     hasRecoverableError: boolean
     handleDelete: (_e: React.MouseEvent) => void
     handleRetry: (_e: React.MouseEvent) => void
+    handleCheckboxClick: (event: React.ChangeEvent<HTMLInputElement>) => void
+    isContractOnly?: boolean
+    shouldValidate?: boolean
+    hasNonDocumentError?: boolean
 }
 
 export const FileRow = ({
     errorRowClass,
     isLoading,
     isScanning,
+    isContractSupporting,
+    isRateSupporting,
     statusValue,
     item,
     imageClasses,
@@ -29,10 +37,15 @@ export const FileRow = ({
     hasRecoverableError,
     handleDelete,
     handleRetry,
+    handleCheckboxClick,
+    isContractOnly,
+    hasNonDocumentError,
 }: FileRowProps): React.ReactElement => {
-    const { name } = item
+    const { name, id } = item
+    const shouldHideCheckbox = isContractOnly || hasNonDocumentError
+
     return (
-        <tr className={`${errorRowClass} ${styles.warningRow}`}>
+        <tr id={id} className={`${errorRowClass} ${styles.warningRow}`}>
             <td>
                 {isLoading || isScanning ? (
                     <span
@@ -70,6 +83,38 @@ export const FileRow = ({
                     <span>{name}</span>
                 </span>
             </td>
+            {!shouldHideCheckbox ? (
+                <td>
+                    <Checkbox
+                        className={`${errorRowClass} ${styles.checkbox}`}
+                        label=""
+                        id={`${item.id}--contract`}
+                        name="contract-supporting"
+                        aria-label="contract-supporting"
+                        aria-checked={isContractSupporting}
+                        checked={isContractSupporting}
+                        onChange={handleCheckboxClick}
+                    />
+                </td>
+            ) : (
+                <td />
+            )}
+            {!shouldHideCheckbox ? (
+                <td>
+                    <Checkbox
+                        className={`${errorRowClass} ${styles.checkbox}`}
+                        label=""
+                        id={`${item.id}--rate`}
+                        name="rate-supporting"
+                        aria-label="rate-supporting"
+                        aria-checked={isRateSupporting}
+                        checked={isRateSupporting}
+                        onChange={handleCheckboxClick}
+                    />
+                </td>
+            ) : (
+                <td />
+            )}
             <td style={{ textAlign: 'right' }}>
                 <Button
                     style={{ marginTop: 0 }}

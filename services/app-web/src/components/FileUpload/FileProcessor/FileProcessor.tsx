@@ -4,6 +4,7 @@ import { FileRow } from '../FileRow/FileRow'
 import { FileListItem } from '../FileListItem/FileListItem'
 
 import styles from '../FileUpload.module.scss'
+import { DocumentCategoryType } from '../../../common-code/domain-models'
 
 export type FileStatus =
     | 'DUPLICATE_NAME_ERROR'
@@ -20,6 +21,7 @@ export type FileItemT = {
     key?: string // only items uploaded to s3 have this
     s3URL?: string // only items uploaded to s3 have this
     status: FileStatus
+    documentCategories: DocumentCategoryType[]
 }
 
 const DocumentError = ({
@@ -27,20 +29,21 @@ const DocumentError = ({
     hasScanningError,
     hasUploadError,
     hasUnexpectedError,
+    hasMissingCategories,
+    shouldValidate,
 }: {
     hasDuplicateNameError: boolean
     hasScanningError: boolean
     hasUploadError: boolean
     hasUnexpectedError: boolean
+    hasMissingCategories: boolean
+    shouldValidate?: boolean
 }): React.ReactElement | null => {
     if (hasDuplicateNameError)
         return (
             <>
                 <span className={styles.fileItemBoldMessage}>
-                    Duplicate file
-                </span>
-                <span className={styles.fileItemBoldMessage}>
-                    Please remove
+                    Duplicate file, please remove
                 </span>
             </>
         )
@@ -56,10 +59,7 @@ const DocumentError = ({
         return (
             <>
                 <span className={styles.fileItemBoldMessage}>
-                    Upload failed
-                </span>
-                <span className={styles.fileItemBoldMessage}>
-                    Please remove or retry
+                    Upload failed, please remove or retry
                 </span>
             </>
         )
@@ -67,10 +67,15 @@ const DocumentError = ({
         return (
             <>
                 <span className={styles.fileItemBoldMessage}>
-                    Upload failed
+                    Unexpected error, please remove
                 </span>
+            </>
+        )
+    } else if (shouldValidate && hasMissingCategories) {
+        return (
+            <>
                 <span className={styles.fileItemBoldMessage}>
-                    Unexpected error. Please remove.
+                    Must select at least one category checkbox
                 </span>
             </>
         )
@@ -84,20 +89,31 @@ type FileProcessorProps = {
     deleteItem: (item: FileItemT) => void
     retryItem: (item: FileItemT) => void
     renderMode: 'table' | 'list'
+    handleCheckboxClick: (event: React.ChangeEvent<HTMLInputElement>) => void
+    isContractOnly?: boolean
+    shouldValidate?: boolean
 }
 export const FileProcessor = ({
     item,
     deleteItem,
     retryItem,
     renderMode,
+    handleCheckboxClick,
+    isContractOnly,
+    shouldValidate,
 }: FileProcessorProps): React.ReactElement => {
     const { name, status, file } = item
+    const isRateSupporting = item.documentCategories.includes('RATES_RELATED')
+    const isContractSupporting =
+        item.documentCategories.includes('CONTRACT_RELATED')
     const hasDuplicateNameError = status === 'DUPLICATE_NAME_ERROR'
     const hasScanningError = status === 'SCANNING_ERROR'
     const hasUploadError = status === 'UPLOAD_ERROR'
     const hasUnexpectedError = status === 'UPLOAD_ERROR' && file === undefined
     const hasRecoverableError =
         (hasUploadError || hasScanningError) && !hasUnexpectedError
+    const hasMissingCategories =
+        !isContractOnly && item.documentCategories.length === 0
     const isLoading = status === 'PENDING'
     const isScanning = status === 'SCANNING'
 
@@ -138,15 +154,21 @@ export const FileProcessor = ({
         statusValue = 'error'
     }
 
+    const missingCategoryError = shouldValidate && hasMissingCategories
+
     const errorRowClass = classnames({
-        'bg-secondary-lighter': statusValue === 'error',
+        'bg-error-lighter': statusValue === 'error' || missingCategoryError,
     })
+
+    const hasNonDocumentError = statusValue === 'error'
 
     return renderMode === 'table' ? (
         <FileRow
             errorRowClass={errorRowClass}
             isLoading={isLoading}
             isScanning={isScanning}
+            isContractSupporting={isContractSupporting}
+            isRateSupporting={isRateSupporting}
             statusValue={statusValue}
             item={item}
             imageClasses={imageClasses}
@@ -156,11 +178,17 @@ export const FileProcessor = ({
                     hasScanningError={hasScanningError}
                     hasUploadError={hasUploadError}
                     hasUnexpectedError={hasUnexpectedError}
+                    hasMissingCategories={hasMissingCategories}
+                    shouldValidate={shouldValidate}
                 />
             }
             hasRecoverableError={hasRecoverableError}
             handleDelete={handleDelete}
             handleRetry={handleRetry}
+            handleCheckboxClick={handleCheckboxClick}
+            isContractOnly={isContractOnly}
+            shouldValidate={shouldValidate}
+            hasNonDocumentError={hasNonDocumentError}
         />
     ) : (
         <FileListItem
@@ -176,11 +204,13 @@ export const FileProcessor = ({
                     hasScanningError={hasScanningError}
                     hasUploadError={hasUploadError}
                     hasUnexpectedError={hasUnexpectedError}
+                    hasMissingCategories={hasMissingCategories}
                 />
             }
             hasRecoverableError={hasRecoverableError}
             handleDelete={handleDelete}
             handleRetry={handleRetry}
+            handleCheckboxClick={handleCheckboxClick}
         />
     )
 }

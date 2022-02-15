@@ -40,8 +40,8 @@ describe('CMS User can view submission', () => {
     //         cy.findByTestId('file-input-input').attachFile(
     //             'documents/trussel-guide.pdf'
     //         )
-    //         cy.findByText('Upload failed').should('not.exist')
-    //         cy.findByText('Duplicate file').should('not.exist')
+    //         cy.findByText(/Upload failed/).should('not.exist')
+    //         cy.findByText('Duplicate file, please remove').should('not.exist')
     //         cy.waitForDocumentsToLoad()
     //         // Navigate review and submit page
     //         cy.navigateForm('Continue')

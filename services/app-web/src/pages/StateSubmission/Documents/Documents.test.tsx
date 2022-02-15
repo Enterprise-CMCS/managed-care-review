@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import {
@@ -40,8 +40,9 @@ describe('Documents', () => {
                 screen.getByRole('button', { name: 'Continue' })
             ).not.toBeDisabled()
         })
-        const rows = await screen.findAllByRole('row')
-        expect(rows[0]).toHaveTextContent('Document name')
+        expect(
+            screen.getByText('You have not uploaded any files')
+        ).toBeInTheDocument()
     })
 
     it('accepts a new document', async () => {
@@ -193,7 +194,7 @@ describe('Documents', () => {
         await waitFor(() => {
             expect(screen.queryAllByText(TEST_PDF_FILE.name).length).toBe(1)
             expect(screen.queryAllByText(TEST_DOC_FILE.name).length).toBe(2)
-            expect(screen.queryAllByText('Duplicate file').length).toBe(1)
+            expect(screen.queryAllByText('Duplicate file, please remove').length).toBe(1)
         })
     })
 
@@ -219,7 +220,7 @@ describe('Documents', () => {
         userEvent.upload(input, [TEST_XLS_FILE])
 
         await waitFor(() => {
-            expect(screen.queryAllByText('Duplicate file').length).toBe(0)
+            expect(screen.queryAllByText('Duplicate file, please remove').length).toBe(0)
             expect(screen.queryAllByRole('row').length).toBe(2)
         })
         // note: userEvent.upload does not re-trigger input event when selected files are the same as before, this is why we upload nothing in between
@@ -227,7 +228,7 @@ describe('Documents', () => {
         userEvent.upload(input, [TEST_XLS_FILE])
 
         await waitFor(() => {
-            expect(screen.queryAllByText('Duplicate file').length).toBe(1)
+            expect(screen.queryAllByText('Duplicate file, please remove').length).toBe(1)
             expect(screen.queryAllByRole('row').length).toBe(3)
         })
 
@@ -235,7 +236,7 @@ describe('Documents', () => {
         userEvent.upload(input, [TEST_XLS_FILE])
 
         await waitFor(() => {
-            expect(screen.queryAllByText('Duplicate file').length).toBe(2)
+            expect(screen.queryAllByText('Duplicate file, please remove').length).toBe(2)
             expect(screen.queryAllByRole('row').length).toBe(4)
         })
     })
@@ -265,13 +266,13 @@ describe('Documents', () => {
         await waitFor(() => {
             expect(screen.queryAllByText(TEST_PDF_FILE.name).length).toBe(1)
             expect(screen.queryAllByText(TEST_DOC_FILE.name).length).toBe(2)
-            expect(screen.queryAllByText('Duplicate file').length).toBe(1)
+            expect(screen.queryAllByText('Duplicate file, please remove').length).toBe(1)
         })
 
         // Remove duplicate document and remove error
         userEvent.click(screen.queryAllByText(/Remove/)[0])
         expect(screen.queryAllByText(TEST_DOC_FILE.name).length).toBe(1)
-        expect(screen.queryByText('Duplicate file')).toBeNull()
+        expect(screen.queryByText('Duplicate file, please remove')).toBeNull()
     })
 
     describe('Continue button', () => {
@@ -370,16 +371,20 @@ describe('Documents', () => {
             userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
-                expect(screen.queryAllByText('Duplicate file').length).toBe(1)
+                expect(screen.queryAllByText('Duplicate file, please remove').length).toBe(1)
             })
             userEvent.click(saveAsDraftButton)
             await waitFor(() => {
                 expect(mockUpdateDraftFn).not.toHaveBeenCalled()
-                expect(
-                    screen.getAllByText(
-                        'You must remove all documents with error messages before continuing'
-                    )
-                ).toHaveLength(2) 
+                const errorMessage = screen.getByText(
+                    'You must remove duplicate files'
+                )
+                const errorSummary = screen.getByText(
+                    'You must remove all documents with error messages before continuing'
+                )
+                expect(errorMessage).toBeInTheDocument()
+                expect(errorMessage).toHaveAttribute('href')
+                expect(errorSummary).toBeInTheDocument()
             })
         })
 
@@ -418,7 +423,7 @@ describe('Documents', () => {
                 <Documents
                     draftSubmission={{
                         ...mockDraft(),
-                        submissionType: 'CONTRACT_AND_RATES',
+                        submissionType: 'CONTRACT_ONLY',
                     }}
                     updateDraft={mockUpdateDraftFn}
                 />,
@@ -621,16 +626,19 @@ describe('Documents', () => {
             userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
-                expect(screen.queryAllByText('Duplicate file').length).toBe(1)
+                expect(screen.queryAllByText('Duplicate file, please remove').length).toBe(1)
             })
             userEvent.click(saveAsDraftButton)
             await waitFor(() => {
-                expect(mockUpdateDraftFn).not.toHaveBeenCalled()
-                expect(
-                    screen.getAllByText(
-                        'You must remove all documents with error messages before continuing'
-                    )
-                ).toHaveLength(2)                
+                const errorMessage = screen.getByText(
+                    'You must remove duplicate files'
+                )
+                const errorSummary = screen.getByText(
+                    'You must remove all documents with error messages before continuing'
+                )
+                expect(errorMessage).toBeInTheDocument()
+                expect(errorMessage).toHaveAttribute('href')
+                expect(errorSummary).toBeInTheDocument()
             })
         })
     })
@@ -758,10 +766,83 @@ describe('Back button', () => {
         userEvent.upload(input, [TEST_DOC_FILE])
         await waitFor(() => {
             expect(backButton).not.toBeDisabled()
-            expect(screen.queryAllByText('Duplicate file').length).toBe(1)
+            expect(screen.queryAllByText('Duplicate file, please remove').length).toBe(1)
         })
         userEvent.click(backButton)
         expect(screen.queryByText('Remove files with errors')).toBeNull()
         expect(mockUpdateDraftFn).toHaveBeenCalled()
+    })
+})
+
+describe('Document categories checkbox', () => {
+    it('not present on contract only submission, categories default to contract-supporting', async () => {
+        const mockUpdateDraftFn = jest.fn()
+        renderWithProviders(
+            <Documents
+                draftSubmission={{
+                    ...mockDraft(),
+                    submissionType: 'CONTRACT_ONLY',
+                }}
+                updateDraft={mockUpdateDraftFn}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+        expect(screen.queryAllByText('Contract-supporting').length).toBe(0)
+        expect(screen.queryAllByText('Rate-supporting').length).toBe(0)
+
+        const input = screen.getByTestId('file-input-input')
+        userEvent.upload(input, [TEST_PDF_FILE])
+
+        await waitFor(() => {
+            expect(
+                screen.getByRole('button', { name: 'Continue' })
+            ).not.toBeDisabled()
+            screen.getByRole('button', { name: 'Continue' }).click()
+            // TODO: check if we have a small loop here, expecting 1 call but consistently getting 10+ calls after button click
+            const call = mockUpdateDraftFn.mock.calls[0][0]
+            const documents = call.draftSubmissionUpdates.documents
+
+            expect(documents.length).toBe(1)
+            expect(
+                documents[0].documentCategories.includes('CONTRACT_RELATED')
+            ).toBe(true)
+        })
+    })
+
+    it('present on contract and rates submission', async () => {
+        const mockUpdateDraftFn = jest.fn()
+        renderWithProviders(
+            <Documents
+                draftSubmission={{
+                    ...mockDraft(),
+                    submissionType: 'CONTRACT_AND_RATES',
+                    documents: [
+                    {
+                        s3URL: 's3://bucketname/key/supporting-documents',
+                        name: 'supporting documents',
+                        documentCategories: ['RATES_RELATED' as const],
+                    }
+                    ]
+                }}
+                updateDraft={mockUpdateDraftFn}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+        await waitFor(() => {
+            expect(
+                screen.getAllByText('Contract-supporting').length
+            ).toBeGreaterThanOrEqual(1)
+            expect(
+                screen.getAllByText('Rate-supporting').length
+            ).toBeGreaterThanOrEqual(1)
+        })
     })
 })

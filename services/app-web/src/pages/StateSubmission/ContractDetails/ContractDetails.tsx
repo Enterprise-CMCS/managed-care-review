@@ -158,6 +158,7 @@ export const ContractDetails = ({
                     key: 'INVALID_KEY',
                     s3URL: undefined,
                     status: 'UPLOAD_ERROR',
+                    documentCategories: doc.documentCategories,
                 }
             }
             return {
@@ -166,6 +167,7 @@ export const ContractDetails = ({
                 key: key,
                 s3URL: doc.s3URL,
                 status: 'UPLOAD_COMPLETE',
+                documentCategories: doc.documentCategories,
             }
         })
 
@@ -391,7 +393,8 @@ export const ContractDetails = ({
                                     errors={
                                         documentsErrorMessage
                                             ? {
-                                                  [documentsErrorKey]: documentsErrorMessage,
+                                                  [documentsErrorKey]:
+                                                      documentsErrorMessage,
                                                   ...errors,
                                               }
                                             : errors
@@ -502,6 +505,14 @@ export const ContractDetails = ({
                                                     }
                                                 />
                                             )}
+                                            <Link
+                                                aria-label="Effective date guidance (opens in new window)"
+                                                href={'/help#effective-date-guidance'}
+                                                variant="external"
+                                                target="_blank"
+                                            >
+                                                Effective date guidance
+                                            </Link>
                                             <DateRangePicker
                                                 className={
                                                     styles.dateRangePicker
@@ -635,7 +646,7 @@ export const ContractDetails = ({
                                     >
                                         <Fieldset
                                             aria-required
-                                            legend="Federal authority your program operates under"
+                                            legend="Active federal operating authority"
                                         >
                                             <Link
                                                 variant="external"

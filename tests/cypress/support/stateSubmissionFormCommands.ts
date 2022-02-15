@@ -148,14 +148,30 @@ Cypress.Commands.add('fillOutActuaryContact', () => {
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
-Cypress.Commands.add('fillOutDocuments', () => {
+Cypress.Commands.add('fillOutSupportingDocuments', () => {
     // Must be on '/submissions/:id/documents'
     cy.findByTestId('file-input-input').attachFile(
         'documents/trussel-guide.pdf'
     )
 
+    cy.findByTestId('file-input-input').attachFile(
+        'documents/testing.csv'
+    )
+   
     cy.verifyDocumentsHaveNoErrors()
-    cy.findByTestId('upload-finished-indicator', {timeout: 120000}).should("exist")
+
+    cy.findAllByRole('checkbox', {
+            name: 'contract-supporting',
+        }).eq(1).click({ force: true })
+
+    cy.findAllByRole('checkbox', {
+        name: 'rate-supporting',
+    }).eq(0).click({ force: true })
+
+    // twice because there could be validation errors with checkbox
+    cy.verifyDocumentsHaveNoErrors()
+
+    cy.findAllByTestId('upload-finished-indicator', {timeout: 120000}).should('have.have.length', 2)
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
@@ -171,8 +187,8 @@ Cypress.Commands.add('waitForDocumentsToLoad', () => {
 })
 
 Cypress.Commands.add('verifyDocumentsHaveNoErrors', () => {
-    cy.findByText('Upload failed').should('not.exist')
-    cy.findByText('Duplicate file').should('not.exist')
+    cy.findByText(/Upload failed/).should('not.exist')
+    cy.findByText('Duplicate file, please remove').should('not.exist')
     cy.findByText('Failed security scan, please remove').should('not.exist')
     cy.findByText('Remove files with errors').should('not.exist')
 })

@@ -7,8 +7,19 @@
     }
 }
 
+.fileInputError {
+    background-color: $theme-color-error-lighter;
+}
+
 .loadingImage {
     float: left;
+}
+
+.checkbox {
+    & label {
+        margin-top: 0px;
+        padding-bottom: 20px;
+    }
 }
 
 .fileInput {

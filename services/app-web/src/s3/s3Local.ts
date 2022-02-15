@@ -22,6 +22,13 @@ export function newLocalS3Client(
             const filename = `${Date.now()}-${file.name}`
 
             try {
+                if (file.name === 'upload_error.pdf') {
+                    const err: S3Error = {
+                        code: 'NETWORK_ERROR',
+                        message: 'Network error',
+                    }
+                    throw err
+                }
                 await s3Client
                     .putObject({
                         Bucket: bucketName,

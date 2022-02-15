@@ -2,7 +2,6 @@ import React from 'react'
 import { render, screen } from '@testing-library/react'
 import renderer from 'react-test-renderer'
 import userEvent from '@testing-library/user-event'
-import prettyDOM from '@testing-library/react'
 
 import { FileItemT } from '../FileProcessor/FileProcessor'
 import { FileItemsList } from './FileItemsList'
@@ -16,6 +15,7 @@ describe('FileItemList component', () => {
         key: undefined,
         s3URL: undefined,
         status: 'PENDING',
+        documentCategories: ['CONTRACT_RELATED'],
     }
     const scanning: FileItemT = {
         id: 'testFile1',
@@ -24,6 +24,7 @@ describe('FileItemList component', () => {
         key: '4545454-testFile1',
         s3URL: 'tests3://uploaded-12313123213/4545454-testFile1',
         status: 'SCANNING',
+        documentCategories: [],
     }
     const uploadError: FileItemT = {
         id: 'testFile2',
@@ -32,6 +33,7 @@ describe('FileItemList component', () => {
         key: undefined,
         s3URL: undefined,
         status: 'UPLOAD_ERROR',
+        documentCategories: ['CONTRACT_RELATED'],
     }
 
     const scanningError: FileItemT = {
@@ -41,6 +43,7 @@ describe('FileItemList component', () => {
         key: '4545454-testFile3',
         s3URL: 'tests3://uploaded-12313123213/4545454-testFile3',
         status: 'SCANNING_ERROR',
+        documentCategories: [],
     }
 
     const complete: FileItemT = {
@@ -50,6 +53,7 @@ describe('FileItemList component', () => {
         key: '4545454-testFile4',
         s3URL: 'tests3://uploaded-12313123213/4545454-testFile4',
         status: 'UPLOAD_COMPLETE',
+        documentCategories: ['CONTRACT_RELATED'],
     }
 
     const duplicateError: FileItemT = {
@@ -59,10 +63,15 @@ describe('FileItemList component', () => {
         key: '1234545454-testFile4',
         s3URL: 'tests3://uploaded-12313123213/1234545454-testFile4',
         status: 'DUPLICATE_NAME_ERROR',
+        documentCategories: [],
     }
     const buttonActionProps = {
         deleteItem: jest.fn(),
         retryItem: jest.fn(),
+    }
+
+    const categoryCheckboxProps = {
+        handleCheckboxClick: jest.fn(),
     }
 
     beforeEach(() => jest.clearAllMocks())
@@ -73,6 +82,7 @@ describe('FileItemList component', () => {
                 renderMode="list"
                 fileItems={fileItems}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
 
@@ -88,6 +98,7 @@ describe('FileItemList component', () => {
                 renderMode="table"
                 fileItems={fileItems}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
         // the table has a header row so we need to add 1 to the length
@@ -110,6 +121,7 @@ describe('FileItemList component', () => {
                     renderMode="list"
                     fileItems={fileItems}
                     {...buttonActionProps}
+                    {...categoryCheckboxProps}
                 />
             )
             .toJSON()
@@ -123,6 +135,7 @@ describe('FileItemList component', () => {
                 renderMode="list"
                 fileItems={fileItems}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
 
@@ -140,6 +153,7 @@ describe('FileItemList component', () => {
                 renderMode="table"
                 fileItems={fileItems}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
 
@@ -164,6 +178,7 @@ describe('FileItemList component', () => {
                 renderMode="list"
                 fileItems={fileItems}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
 
@@ -183,18 +198,18 @@ describe('FileItemList component', () => {
         // Items in an error state
         expect(uploadErrorListItem).not.toHaveClass('usa-file-input__preview')
         expect(uploadErrorListItem).toHaveClass(
-            'bg-secondary-lighter border-secondary '
+            'bg-error-lighter border-secondary '
         )
         expect(scanningErrorListItem).not.toHaveClass('usa-file-input__preview')
         expect(scanningErrorListItem).toHaveClass(
-            'bg-secondary-lighter border-secondary '
+            'bg-error-lighter border-secondary '
         )
         expect(completeListItem).toHaveClass('usa-file-input__preview')
         expect(duplicateErrorListItem).not.toHaveClass(
             'usa-file-input__preview'
         )
         expect(duplicateErrorListItem).toHaveClass(
-            'bg-secondary-lighter border-secondary '
+            'bg-error-lighter border-secondary '
         )
     })
 
@@ -212,6 +227,7 @@ describe('FileItemList component', () => {
                 renderMode="table"
                 fileItems={fileItems}
                 {...buttonActionProps}
+                {...categoryCheckboxProps}
             />
         )
 
@@ -224,13 +240,13 @@ describe('FileItemList component', () => {
         const scanningRow = rows[6]
 
         // Items not in error state
-        expect(loadingRow).not.toHaveClass('bg-secondary-lighter')
-        expect(scanningRow).not.toHaveClass('bg-secondary-lighter')
-        expect(completeRow).not.toHaveClass('bg-secondary-lighter')
+        expect(loadingRow).not.toHaveClass('bg-error-lighter')
+        expect(scanningRow).not.toHaveClass('bg-error-lighter')
+        expect(completeRow).not.toHaveClass('bg-error-lighter')
 
         // Items in an error state
-        expect(uploadErrorRow).toHaveClass('bg-secondary-lighter')
-        expect(scanningErrorRow).toHaveClass('bg-secondary-lighter')
-        expect(duplicateErrorRow).toHaveClass('bg-secondary-lighter')
+        expect(uploadErrorRow).toHaveClass('bg-error-lighter')
+        expect(scanningErrorRow).toHaveClass('bg-error-lighter')
+        expect(duplicateErrorRow).toHaveClass('bg-error-lighter')
     })
 })

@@ -23,6 +23,8 @@ on:
         required: true
       full_iam_permissions_boundary_policy:
         required: true
+      nr_license_key:
+        required: true
       react_app_auth_mode:
         required: true
       ses_source_email_address:
@@ -47,6 +49,7 @@ jobs:
       - name: deploy app-web
         id: deploy-app-web
         env:
+          NODE_OPTIONS: --max_old_space_size=6000
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
@@ -82,7 +85,7 @@ jobs:
       - name: deploy app-api
         id: deploy-app-api
         env:
-          NODE_OPTIONS: --max_old_space_size=4096
+          NODE_OPTIONS: --max_old_space_size=6000
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
@@ -94,6 +97,7 @@ jobs:
           EMAILER_MODE: SES
           SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.ses_review_team_email_addresses }}
           SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.ses_source_email_address }}
+          NR_LICENSE_KEY: ${{ secrets.nr_license_key}}
 
         run: |
           pushd services/app-api && npx serverless deploy --stage ${{ inputs.stage_name }}

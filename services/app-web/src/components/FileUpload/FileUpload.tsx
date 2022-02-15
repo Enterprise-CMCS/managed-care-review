@@ -32,6 +32,9 @@ export type FileUploadProps = {
     scanFile?: (key: string) => Promise<void | Error> // optional function to be called after uploading (used for scanning)
     deleteFile: (key: string) => Promise<void>
     onFileItemsUpdate: ({ fileItems }: { fileItems: FileItemT[] }) => void
+    isContractOnly?: boolean
+    shouldValidate?: boolean
+    hasMissingCategories?: boolean
 } & JSX.IntrinsicElements['input']
 
 /*  FileUpload handles async file upload to S3 and displays inline errors per file.
@@ -55,11 +58,38 @@ export const FileUpload = ({
     scanFile,
     deleteFile,
     onFileItemsUpdate,
+    isContractOnly,
+    shouldValidate,
+    hasMissingCategories,
     ...inputProps
 }: FileUploadProps): React.ReactElement => {
     const [fileItems, setFileItems] = useState<FileItemT[]>(initialItems || [])
     const fileInputRef = useRef<FileInputRef>(null) // reference to the HTML input which has files
     const summaryRef = useRef<HTMLHeadingElement>(null) // reference to the heading that we will focus
+
+    const handleCheckboxClick = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const changeType =
+            event.target.name === 'contract-supporting'
+                ? 'CONTRACT_RELATED'
+                : 'RATES_RELATED'
+        const id = event.target.id.substring(0, event.target.id.indexOf('--'))
+        const fileIndex = fileItems.findIndex((file) => file.id === id)
+        if (fileIndex === -1) return
+        if (fileItems[fileIndex].documentCategories.includes(changeType)) {
+            fileItems[fileIndex].documentCategories = fileItems[
+                fileIndex
+            ].documentCategories.filter((category) => category !== changeType)
+        } else {
+            fileItems[fileIndex].documentCategories = [
+                ...fileItems[fileIndex].documentCategories,
+                changeType,
+            ]
+        }
+
+        setFileItems([...fileItems])
+    }
 
     const inputRequired = inputProps['aria-required'] || inputProps.required
     // update fileItems in parent
@@ -94,6 +124,7 @@ export const FileUpload = ({
                 key: undefined,
                 s3URL: undefined,
                 status: 'PENDING',
+                documentCategories: isContractOnly ? ['CONTRACT_RELATED'] : [],
             }
 
             if (isDuplicateItem(fileItems, newItem)) {
@@ -313,13 +344,15 @@ export const FileUpload = ({
         addFilesAndUpdateList(files)
     }
     const uploadedCount = fileItems.filter(
-        (item) => item.status === 'UPLOAD_COMPLETE'
+        (item) =>
+            item.status === 'UPLOAD_COMPLETE' && item.documentCategories.length
     ).length
     const errorCount = fileItems.filter(
         (item) =>
             item.status === 'UPLOAD_ERROR' ||
             item.status === 'SCANNING_ERROR' ||
-            item.status === 'DUPLICATE_NAME_ERROR'
+            item.status === 'DUPLICATE_NAME_ERROR' ||
+            item.documentCategories.length === 0
     ).length
     const pendingCount = fileItems.filter(
         (item) => item.status === 'PENDING' || item.status === 'SCANNING'
@@ -359,7 +392,6 @@ export const FileUpload = ({
                 </span>
             )}
 
-
             <FileInput
                 id={id}
                 name={`${name}${inputRequired ? ' (required)' : ''}`}
@@ -372,11 +404,7 @@ export const FileUpload = ({
                 ref={fileInputRef}
                 aria-required={inputRequired}
             />
-            <h5
-                tabIndex={-1}
-                ref={summaryRef}
-                className={styles.fileSummary}
-            >
+            <h5 tabIndex={-1} ref={summaryRef} className={styles.fileSummary}>
                 {`${summary} ${summaryDetailText}`}
             </h5>
             <FileItemsList
@@ -384,6 +412,9 @@ export const FileUpload = ({
                 deleteItem={deleteItem}
                 fileItems={fileItems}
                 renderMode={renderMode}
+                handleCheckboxClick={handleCheckboxClick}
+                isContractOnly={isContractOnly}
+                shouldValidate={shouldValidate}
             />
         </FormGroup>
     )
