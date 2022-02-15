@@ -55,10 +55,7 @@ const DocumentError = ({
         return (
             <>
                 <span className={styles.fileItemBoldMessage}>
-                    Upload failed
-                </span>
-                <span className={styles.fileItemBoldMessage}>
-                    Please remove or retry
+                    Upload failed, please remove or retry
                 </span>
             </>
         )
@@ -66,10 +63,7 @@ const DocumentError = ({
         return (
             <>
                 <span className={styles.fileItemBoldMessage}>
-                    Upload failed
-                </span>
-                <span className={styles.fileItemBoldMessage}>
-                    Unexpected error. Please remove.
+                    Unexpected error, please remove
                 </span>
             </>
         )

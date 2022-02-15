@@ -633,7 +633,7 @@ describe('RateDetails', () => {
             userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
-                expect(screen.queryAllByText('Duplicate file').length).toBe(1)
+                expect(screen.queryAllByText('Duplicate file, please remove').length).toBe(1)
             })
             userEvent.click(saveAsDraftButton)
             await waitFor(() => {
@@ -750,7 +750,7 @@ describe('RateDetails', () => {
             userEvent.upload(input, [TEST_DOC_FILE])
             await waitFor(() => {
                 expect(backButton).not.toBeDisabled()
-                expect(screen.queryAllByText('Duplicate file').length).toBe(1)
+                expect(screen.queryAllByText('Duplicate file, please remove').length).toBe(1)
             })
             userEvent.click(backButton)
             expect(screen.queryByText('Remove files with errors')).toBeNull()
