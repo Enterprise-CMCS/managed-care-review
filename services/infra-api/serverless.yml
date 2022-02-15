@@ -15,6 +15,7 @@ custom:
   nrLicenseKey: ${env:NR_LICENSE_KEY}
   nrMetricStreamName: 'NewRelic-Metric-Stream'
   nrFirehoseStreamName: 'NewRelic-Delivery-Stream'
+  nrExternalId: '3407984'
   serverlessTerminationProtection:
     stages:
       - dev
@@ -59,6 +60,33 @@ resources:
           gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
         ResponseType: DEFAULT_5XX
         RestApiId: !Ref AppApiGateway
+
+    NewRelicInfraIntegrations:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                AWS:
+                  - 'arn:aws:iam::754728514883:root'
+              Action:
+                - 'sts:AssumeRole'
+              Condition:
+                StringEquals:
+                  'sts:ExternalId': !Sub ${self:custom.nrExternalId}
+        Policies:
+          - PolicyName: NewRelicBudget
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - 'budget:ViewBudge'
+                  Resource: '*'
+        ManagedPolicyArns:
+          - 'arn:aws:iam::aws:policy/ReadOnlyAccess'
 
     S3FirehoseEventsBucket:
       Type: AWS::S3::Bucket
@@ -107,7 +135,7 @@ resources:
                 - 'sts:AssumeRole'
               Condition:
                 StringEquals:
-                  'sts:ExternalId': ${AWS::AccountId}
+                  'sts:ExternalId': !Sub ${AWS::AccountId}
         Policies:
           - PolicyName: MetricStreams-FirehosePutRecords
             PolicyDocument:
