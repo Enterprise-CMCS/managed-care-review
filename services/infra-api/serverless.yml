@@ -108,6 +108,7 @@ resources:
               Condition:
                 StringEquals:
                   'sts:ExternalId': ${AWS::AccountId}
+        Path: /developer/newrelic
         Policies:
           - PolicyName: MetricStreams-FirehosePutRecords
             PolicyDocument:
@@ -132,6 +133,7 @@ resources:
                   - firehose.amazonaws.com
               Action:
                 - 'sts:AssumeRole'
+        Path: /developer/newrelic
         Policies:
           - PolicyName: Firehose-S3Access
             PolicyDocument:
