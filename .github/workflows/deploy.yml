@@ -230,7 +230,7 @@ jobs:
   finishing-prep:
     name: Finishing Prep
     needs: [deploy-infra, begin-deployment, deploy-app]
-    if: always()
+    if: always() && needs.deploy-infra.result == 'success' && needs.deploy-app.result == 'success'
     runs-on: ubuntu-latest
     outputs:
       application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
