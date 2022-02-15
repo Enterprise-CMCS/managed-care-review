@@ -155,17 +155,6 @@ resources:
                     - !GetAtt S3FirehoseEventsBucket.Arn
                     - !Join ['', [!GetAtt S3FirehoseEventsBucket.Arn, '/*']]
         Description: Role to allow firehose stream put events into S3 backup bucket
-        RoleName:
-          !Join [
-            '-',
-            [
-              'FirehoseRole',
-              !Select [
-                0,
-                !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]],
-              ],
-            ],
-          ]
 
     CloudWatchMetricStream:
       Type: AWS::CloudWatch::MetricStream
