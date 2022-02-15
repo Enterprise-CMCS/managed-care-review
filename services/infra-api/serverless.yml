@@ -103,7 +103,6 @@ resources:
               Condition:
                 StringEquals:
                   'sts:ExternalId': ${AWS::AccountId}
-        Path: /service-role/
         Policies:
           - PolicyName: MetricStreams-FirehosePutRecords
             PolicyDocument:
@@ -139,7 +138,6 @@ resources:
                   - firehose.amazonaws.com
               Action:
                 - 'sts:AssumeRole'
-        Path: /service-role/
         Policies:
           - PolicyName: Firehose-S3Access
             PolicyDocument:
