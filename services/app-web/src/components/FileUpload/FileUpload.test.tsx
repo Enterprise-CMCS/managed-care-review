@@ -185,7 +185,7 @@ describe('FileUpload component', () => {
         await waitFor(() => {
             expect(screen.queryAllByText(TEST_PDF_FILE.name).length).toBe(1)
             expect(screen.queryAllByText(TEST_DOC_FILE.name).length).toBe(2)
-            expect(screen.queryAllByText('Duplicate file').length).toBe(1)
+            expect(screen.queryAllByText('Duplicate file, please remove').length).toBe(1)
         })
     })
 

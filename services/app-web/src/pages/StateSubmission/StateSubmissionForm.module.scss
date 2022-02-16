@@ -53,10 +53,8 @@
     }
 }
 
-.radioGroup {
-    legend {
-        margin-top: 0;
-    }
+[class^='usa-legend'] {
+    margin-top: 0;
 }
 
 .buttonGroup {
