@@ -69,6 +69,7 @@ message ContractInfo {
   repeated ManagedCareEntity managed_care_entities = 4;
   repeated FederalAuthority federal_authorities = 5;
   repeated Document contract_documents = 6;
+  optional ContractExecutionStatus contract_execution_status = 7;
 
   optional ContractAmendmentInfo contract_amendment_info  = 50;
 
@@ -116,8 +117,13 @@ enum ContractType {
   CONTRACT_TYPE_UNSPECIFIED = 0;
   CONTRACT_TYPE_BASE = 1;
   CONTRACT_TYPE_AMENDMENT = 2;
-} 
+}
 
+enum ContractExecutionStatus {
+  CONTRACT_EXECUTION_STATUS_UNSPECIFIED = 0;
+  CONTRACT_EXECUTION_STATUS_EXECUTED = 1;
+  CONTRACT_EXECUTION_STATUS_UNEXECUTED = 2;
+}
 
 enum FederalAuthority {
   FEDERAL_AUTHORITY_UNSPECIFIED = 0;
