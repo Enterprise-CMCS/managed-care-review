@@ -41,10 +41,18 @@ resources:
   Conditions:
     CreateNRInfraMonitoring:
       Fn::Or:
-        - Fn::Equals [${self:custom.stage}, 'dev']
-        - Fn::Equals [${self:custom.stage}, 'val']
-        - Fn::Equals [${self:custom.stage}, 'prod']
-        - Fn::Equals [${self:custom.stage}, 'main']
+        - Fn::Equals:
+            - ${self:custom.stage}
+            - 'dev'
+        - Fn::Equals:
+            - ${self:custom.stage}
+            - 'val'
+        - Fn::Equals:
+            - ${self:custom.stage}
+            - 'prod'
+        - Fn::Equals:
+            - ${self:custom.stage}
+            - 'main'
   Resources:
     AppApiGateway:
       Type: AWS::ApiGateway::RestApi
