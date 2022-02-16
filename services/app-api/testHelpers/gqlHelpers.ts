@@ -147,6 +147,7 @@ const createAndUpdateTestDraftSubmission = async (
         ],
         actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
         contractType: 'BASE' as const,
+        contractExecutionStatus: 'EXECUTED' as const,
         contractDateStart: startDate,
         contractDateEnd: endDate,
         contractDocuments: [
