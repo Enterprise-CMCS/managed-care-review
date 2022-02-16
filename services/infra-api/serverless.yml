@@ -38,6 +38,13 @@ provider:
           Resource: !GetAtt FirehoseStreamToNewRelic.Arn
 
 resources:
+  Conditions:
+    CreateNRInfraMonitoring:
+      Fn::Or:
+        - Fn::Equals [${self:custom.stage}, 'dev']
+        - Fn::Equals [${self:custom.stage}, 'val']
+        - Fn::Equals [${self:custom.stage}, 'prod']
+        - Fn::Equals [${self:custom.stage}, 'main']
   Resources:
     AppApiGateway:
       Type: AWS::ApiGateway::RestApi
@@ -63,7 +70,9 @@ resources:
 
     NewRelicInfraIntegrations:
       Type: AWS::IAM::Role
+      Condition: CreateNRInfraMonitoring
       Properties:
+        RoleName: NewRelicInfraIntegrations
         AssumeRolePolicyDocument:
           Version: '2012-10-17'
           Statement:
@@ -90,6 +99,7 @@ resources:
 
     S3FirehoseEventsBucket:
       Type: AWS::S3::Bucket
+      Condition: CreateNRInfraMonitoring
       Properties:
         BucketName: !Sub newrelic-firehose-${self:custom.stage}-${AWS::AccountId}
         PublicAccessBlockConfiguration:
@@ -100,6 +110,7 @@ resources:
 
     FirehoseStreamToNewRelic:
       Type: AWS::KinesisFirehose::DeliveryStream
+      Condition: CreateNRInfraMonitoring
       Properties:
         DeliveryStreamName: ${self:custom.nrFirehoseStreamName}
         DeliveryStreamType: DirectPut
@@ -123,7 +134,9 @@ resources:
 
     MetricStreamRole:
       Type: AWS::IAM::Role
+      Condition: CreateNRInfraMonitoring
       Properties:
+        RoleName: NewRelicInfraMetricStreamRole
         AssumeRolePolicyDocument:
           Version: '2012-10-17'
           Statement:
@@ -150,7 +163,9 @@ resources:
 
     FirehoseRole:
       Type: AWS::IAM::Role
+      Condition: CreateNRInfraMonitoring
       Properties:
+        RoleName: NewRelicInfraFirehoseRole
         AssumeRolePolicyDocument:
           Version: '2012-10-17'
           Statement:
@@ -180,6 +195,7 @@ resources:
 
     CloudWatchMetricStream:
       Type: AWS::CloudWatch::MetricStream
+      Condition: CreateNRInfraMonitoring
       Properties:
         Name: ${self:custom.nrMetricStreamName}
         FirehoseArn: !GetAtt FirehoseStreamToNewRelic.Arn
