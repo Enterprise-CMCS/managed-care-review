@@ -9,6 +9,9 @@ export const ContractDetailsFormSchema = Yup.object().shape({
     contractType: Yup.string().defined(
         'You must choose a contract action type'
     ),
+    contractExecutionStatus: Yup.string().defined(
+        'You must select a contract status'
+    ),
     contractDateStart: Yup.date()
         .when("contractType", (contractType) => {
             if (contractType) {

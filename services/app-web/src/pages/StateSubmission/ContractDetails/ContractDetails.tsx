@@ -33,6 +33,7 @@ import {
     Document,
     DraftSubmission,
     ContractType,
+    ContractExecutionStatus,
     FederalAuthority,
     CapitationRatesAmendedInfo,
     CapitationRatesAmendmentReason,
@@ -82,6 +83,7 @@ const ContractDatesErrorMessage = ({
 
 export interface ContractDetailsFormValues {
     contractType: ContractType | undefined
+    contractExecutionStatus: ContractExecutionStatus | undefined
     contractDateStart: string
     contractDateEnd: string
     managedCareEntities: ManagedCareEntity[]
@@ -211,6 +213,7 @@ export const ContractDetails = ({
 
     const contractDetailsInitialValues: ContractDetailsFormValues = {
         contractType: draftSubmission?.contractType ?? undefined,
+        contractExecutionStatus: draftSubmission?.contractExecutionStatus ?? undefined,
         contractDateStart:
             (draftSubmission &&
                 formatForForm(draftSubmission.contractDateStart)) ??
@@ -300,6 +303,7 @@ export const ContractDetails = ({
 
         const updatedDraft = updatesFromSubmission(draftSubmission)
         updatedDraft.contractType = values.contractType
+        updatedDraft.contractExecutionStatus = values.contractExecutionStatus
         updatedDraft.contractDateStart = values.contractDateStart || null
         updatedDraft.contractDateEnd = values.contractDateEnd || null
         updatedDraft.managedCareEntities = values.managedCareEntities
@@ -469,7 +473,37 @@ export const ContractDetails = ({
                                     />
                                 </Fieldset>
                             </FormGroup>
-
+                            <FormGroup
+                                error={showFieldErrors(errors.contractExecutionStatus)}
+                            >
+                                <Fieldset
+                                    aria-required
+                                    className={styles.radioGroup}
+                                    legend="Contract Status"
+                                >
+                                    {showFieldErrors(errors.contractExecutionStatus) && (
+                                        <PoliteErrorMessage>
+                                            {errors.contractExecutionStatus}
+                                        </PoliteErrorMessage>
+                                    )}
+                                    <FieldRadio
+                                        id="executedContract"
+                                        name="contractExecutionStatus"
+                                        label="Fully executed"
+                                        aria-required
+                                        value={'EXECUTED'}
+                                        checked={values.contractExecutionStatus === 'EXECUTED'}
+                                    />
+                                    <FieldRadio
+                                        id="unexecutedContract"
+                                        name="contractExecutionStatus"
+                                        label="Unexecuted by some or all parties"
+                                        aria-required
+                                        value={'UNEXECUTED'}
+                                        checked={values.contractExecutionStatus === 'UNEXECUTED'}
+                                    />
+                                </Fieldset>
+                            </FormGroup>
                             {!isContractTypeEmpty(values) && (
                                 <>
                                     <FormGroup
