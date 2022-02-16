@@ -10,7 +10,7 @@ import {
 
 
 describe('unlockStateSubmission', () => {
-    it('returns a DraftSubmission', async () => {
+    it('returns a DraftSubmission that can be updated without errors', async () => {
         const stateServer = await constructTestPostgresServer()
 
         // First, create a new submitted submission
