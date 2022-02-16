@@ -7,6 +7,7 @@ import {
     FederalAuthorityRecord,
     RateChangeReasonRecord,
     ManagedCareEntityRecord,
+    ContractExecutionStatusRecord,
 } from '../../../constants/submissions'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
@@ -131,6 +132,17 @@ export const ContractDetailsSummarySection = ({
                             submission.contractType
                                 ? ContractTypeRecord[
                                     submission.contractType
+                                    ]
+                                : ''
+                        }
+                    />
+                    <DataDetail
+                        id="contractExecutionStatus"
+                        label="Contract Status"
+                        data={
+                            submission.contractExecutionStatus
+                                ? ContractExecutionStatusRecord[
+                                    submission.contractExecutionStatus
                                     ]
                                 : ''
                         }
