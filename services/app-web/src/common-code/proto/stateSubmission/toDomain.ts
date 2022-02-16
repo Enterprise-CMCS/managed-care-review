@@ -349,6 +349,11 @@ const toDomain = (
             stateSubmissionMessage?.contractInfo?.contractType
         ),
 
+        contractExecutionStatus: enumToDomain(
+            statesubmission.ContractExecutionStatus,
+            stateSubmissionMessage?.contractInfo?.contractExecutionStatus
+        ),
+
         contractDateStart: protoDateToDomain(
             stateSubmissionMessage.contractInfo?.contractDateStart
         ),
