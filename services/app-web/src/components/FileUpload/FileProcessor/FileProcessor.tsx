@@ -43,10 +43,7 @@ const DocumentError = ({
         return (
             <>
                 <span className={styles.fileItemBoldMessage}>
-                    Duplicate file
-                </span>
-                <span className={styles.fileItemBoldMessage}>
-                    Please remove
+                    Duplicate file, please remove
                 </span>
             </>
         )
@@ -62,10 +59,7 @@ const DocumentError = ({
         return (
             <>
                 <span className={styles.fileItemBoldMessage}>
-                    Upload failed
-                </span>
-                <span className={styles.fileItemBoldMessage}>
-                    Please remove or retry
+                    Upload failed, please remove or retry
                 </span>
             </>
         )
@@ -73,10 +67,7 @@ const DocumentError = ({
         return (
             <>
                 <span className={styles.fileItemBoldMessage}>
-                    Upload failed
-                </span>
-                <span className={styles.fileItemBoldMessage}>
-                    Unexpected error. Please remove.
+                    Unexpected error, please remove
                 </span>
             </>
         )
@@ -166,7 +157,7 @@ export const FileProcessor = ({
     const missingCategoryError = shouldValidate && hasMissingCategories
 
     const errorRowClass = classnames({
-        'bg-secondary-lighter': statusValue === 'error' || missingCategoryError,
+        'bg-error-lighter': statusValue === 'error' || missingCategoryError,
     })
 
     const hasNonDocumentError = statusValue === 'error'

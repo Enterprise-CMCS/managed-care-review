@@ -26,7 +26,7 @@ describe('documents', () => {
             cy.findAllByTestId('upload-finished-indicator', {timeout: 120000}).should("have.length", 2)
             cy.findByTestId('file-input-loading-image').should('not.exist')
             cy.findByText(/1 complete, 1 error, 0 pending/).should('exist')
-            cy.findByText('Duplicate file').should('exist')
+            cy.findByText('Duplicate file, please remove').should('exist')
             cy.visit(`/submissions/${draftSubmissionID}/documents`)
 
             // Add two more valid documents, then navigate back
@@ -38,7 +38,7 @@ describe('documents', () => {
             cy.findByTestId('file-input-input').attachFile(
                 'documents/trussel-guide.pdf'
             )
-            cy.findByText('Duplicate file').should('exist')
+            cy.findByText('Duplicate file, please remove').should('exist')
             cy.findAllByRole('row').should('have.length', 4)
 
             cy.findByText(/3 files added/).should('exist')
@@ -54,7 +54,7 @@ describe('documents', () => {
             // give the page time to load (wait) then let cypress wait for the spinner to go away
             cy.findAllByTestId('upload-finished-indicator', {timeout: 120000}).should("have.length", 3)
             cy.findByTestId('file-input-loading-image').should('not.exist')
-            cy.findByText('Duplicate file').should('exist')
+            cy.findByText('Duplicate file, please remove').should('exist')
             cy.findAllByRole('row').should('have.length', 4)
             cy.findByText(/2 complete, 1 error, 0 pending/)
             cy.navigateForm('Back')

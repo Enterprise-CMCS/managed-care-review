@@ -40,8 +40,9 @@ describe('Documents', () => {
                 screen.getByRole('button', { name: 'Continue' })
             ).not.toBeDisabled()
         })
-        const rows = await screen.findAllByRole('row')
-        expect(rows[0]).toHaveTextContent('Document name')
+        expect(
+            screen.getByText('You have not uploaded any files')
+        ).toBeInTheDocument()
     })
 
     it('accepts a new document', async () => {
@@ -193,7 +194,7 @@ describe('Documents', () => {
         await waitFor(() => {
             expect(screen.queryAllByText(TEST_PDF_FILE.name).length).toBe(1)
             expect(screen.queryAllByText(TEST_DOC_FILE.name).length).toBe(2)
-            expect(screen.queryAllByText('Duplicate file').length).toBe(1)
+            expect(screen.queryAllByText('Duplicate file, please remove').length).toBe(1)
         })
     })
 
@@ -219,7 +220,7 @@ describe('Documents', () => {
         userEvent.upload(input, [TEST_XLS_FILE])
 
         await waitFor(() => {
-            expect(screen.queryAllByText('Duplicate file').length).toBe(0)
+            expect(screen.queryAllByText('Duplicate file, please remove').length).toBe(0)
             expect(screen.queryAllByRole('row').length).toBe(2)
         })
         // note: userEvent.upload does not re-trigger input event when selected files are the same as before, this is why we upload nothing in between
@@ -227,7 +228,7 @@ describe('Documents', () => {
         userEvent.upload(input, [TEST_XLS_FILE])
 
         await waitFor(() => {
-            expect(screen.queryAllByText('Duplicate file').length).toBe(1)
+            expect(screen.queryAllByText('Duplicate file, please remove').length).toBe(1)
             expect(screen.queryAllByRole('row').length).toBe(3)
         })
 
@@ -235,7 +236,7 @@ describe('Documents', () => {
         userEvent.upload(input, [TEST_XLS_FILE])
 
         await waitFor(() => {
-            expect(screen.queryAllByText('Duplicate file').length).toBe(2)
+            expect(screen.queryAllByText('Duplicate file, please remove').length).toBe(2)
             expect(screen.queryAllByRole('row').length).toBe(4)
         })
     })
@@ -265,13 +266,13 @@ describe('Documents', () => {
         await waitFor(() => {
             expect(screen.queryAllByText(TEST_PDF_FILE.name).length).toBe(1)
             expect(screen.queryAllByText(TEST_DOC_FILE.name).length).toBe(2)
-            expect(screen.queryAllByText('Duplicate file').length).toBe(1)
+            expect(screen.queryAllByText('Duplicate file, please remove').length).toBe(1)
         })
 
         // Remove duplicate document and remove error
         userEvent.click(screen.queryAllByText(/Remove/)[0])
         expect(screen.queryAllByText(TEST_DOC_FILE.name).length).toBe(1)
-        expect(screen.queryByText('Duplicate file')).toBeNull()
+        expect(screen.queryByText('Duplicate file, please remove')).toBeNull()
     })
 
     describe('Continue button', () => {
@@ -370,7 +371,7 @@ describe('Documents', () => {
             userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
-                expect(screen.queryAllByText('Duplicate file').length).toBe(1)
+                expect(screen.queryAllByText('Duplicate file, please remove').length).toBe(1)
             })
             userEvent.click(saveAsDraftButton)
             await waitFor(() => {
@@ -625,7 +626,7 @@ describe('Documents', () => {
             userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
-                expect(screen.queryAllByText('Duplicate file').length).toBe(1)
+                expect(screen.queryAllByText('Duplicate file, please remove').length).toBe(1)
             })
             userEvent.click(saveAsDraftButton)
             await waitFor(() => {
@@ -765,7 +766,7 @@ describe('Back button', () => {
         userEvent.upload(input, [TEST_DOC_FILE])
         await waitFor(() => {
             expect(backButton).not.toBeDisabled()
-            expect(screen.queryAllByText('Duplicate file').length).toBe(1)
+            expect(screen.queryAllByText('Duplicate file, please remove').length).toBe(1)
         })
         userEvent.click(backButton)
         expect(screen.queryByText('Remove files with errors')).toBeNull()
@@ -819,6 +820,13 @@ describe('Document categories checkbox', () => {
                 draftSubmission={{
                     ...mockDraft(),
                     submissionType: 'CONTRACT_AND_RATES',
+                    documents: [
+                    {
+                        s3URL: 's3://bucketname/key/supporting-documents',
+                        name: 'supporting documents',
+                        documentCategories: ['RATES_RELATED' as const],
+                    }
+                    ]
                 }}
                 updateDraft={mockUpdateDraftFn}
             />,
@@ -828,11 +836,13 @@ describe('Document categories checkbox', () => {
                 },
             }
         )
-        expect(
-            screen.getAllByText('Contract-supporting').length
-        ).toBeGreaterThanOrEqual(1)
-        expect(
-            screen.getAllByText('Rate-supporting').length
-        ).toBeGreaterThanOrEqual(1)
+        await waitFor(() => {
+            expect(
+                screen.getAllByText('Contract-supporting').length
+            ).toBeGreaterThanOrEqual(1)
+            expect(
+                screen.getAllByText('Rate-supporting').length
+            ).toBeGreaterThanOrEqual(1)
+        })
     })
 })

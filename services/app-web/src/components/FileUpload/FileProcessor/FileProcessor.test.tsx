@@ -333,7 +333,7 @@ describe('FileProcessor component', () => {
 
         const imageEl = screen.getByTestId('file-input-preview-image')
         expect(imageEl).not.toHaveClass('is-loading')
-        expect(screen.getByText('Upload failed')).toBeInTheDocument()
+        expect(screen.getByText(/Upload failed/)).toBeInTheDocument()
         expect(
             screen.getByRole('button', { name: /Remove/ })
         ).toBeInTheDocument()
@@ -358,7 +358,7 @@ describe('FileProcessor component', () => {
             />
         )
 
-        expect(screen.getByText('Upload failed')).toBeInTheDocument()
+        expect(screen.getByText(/Upload failed/)).toBeInTheDocument()
         expect(screen.getByText('Remove')).toBeInTheDocument()
         expect(screen.getByText('Retry')).toBeInTheDocument()
 
@@ -427,7 +427,7 @@ describe('FileProcessor component', () => {
 
         const imageEl = screen.getByTestId('file-input-preview-image')
         expect(imageEl).not.toHaveClass('is-loading')
-        expect(screen.getByText('Duplicate file')).toBeInTheDocument()
+        expect(screen.getByText('Duplicate file, please remove')).toBeInTheDocument()
         expect(
             screen.getByRole('button', { name: /Remove/ })
         ).toBeInTheDocument()
@@ -444,7 +444,7 @@ describe('FileProcessor component', () => {
             />
         )
 
-        expect(screen.getByText('Duplicate file')).toBeInTheDocument()
+        expect(screen.getByText('Duplicate file, please remove')).toBeInTheDocument()
         expect(screen.getByText('Remove')).toBeInTheDocument()
         expect(screen.queryByText('Retry')).not.toBeInTheDocument()
     })
@@ -461,9 +461,8 @@ describe('FileProcessor component', () => {
 
         const imageEl = screen.getByTestId('file-input-preview-image')
         expect(imageEl).not.toHaveClass('is-loading')
-        expect(screen.getByText('Upload failed')).toBeInTheDocument()
         expect(
-            screen.getByText('Unexpected error. Please remove.')
+            screen.getByText(/Unexpected error/)
         ).toBeInTheDocument()
         expect(
             screen.getByRole('button', { name: /Remove/ })
@@ -480,10 +479,8 @@ describe('FileProcessor component', () => {
                 {...categoryCheckboxProps}
             />
         )
-
-        expect(screen.getByText('Upload failed')).toBeInTheDocument()
         expect(
-            screen.getByText('Unexpected error. Please remove.')
+            screen.getByText(/Unexpected error/)
         ).toBeInTheDocument()
         expect(screen.getByText('Remove')).toBeInTheDocument()
         expect(screen.queryByText('Retry')).not.toBeInTheDocument()
