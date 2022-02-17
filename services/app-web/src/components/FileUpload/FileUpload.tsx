@@ -102,7 +102,7 @@ export const FileUpload = ({
 
     const isMissingCategoriesItem = (fileItem: FileItemT) => {
         if (!shouldDisplayMissingCategoriesError) return false // either no missing categories or else missing categories are not relevant
-        return fileItem.documentCategories.length < 1
+        return fileItem.documentCategories.length === 0 
     }
 
     const isAcceptableFile = (file: File): boolean => {
