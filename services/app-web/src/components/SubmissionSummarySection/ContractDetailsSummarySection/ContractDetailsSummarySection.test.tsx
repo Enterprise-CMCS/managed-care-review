@@ -199,21 +199,19 @@ describe('ContractDetailsSummarySection', () => {
         renderWithProviders(
             <ContractDetailsSummarySection submission={testSubmission} />
         )
-
-  
-        const contractDocsTable = screen.getByRole('table', {
-            name: 'Contract',
-        })
-        expect(
-          contractDocsTable).toBeInTheDocument()
-        
-    
-        const supportingDocsTable = screen.getByRole('table', {
-            name: /Contract supporting documents/,
-        })
-
        
         await waitFor(() => {
+            const contractDocsTable = screen.getByRole('table', {
+                name: 'Contract',
+            })
+            
+            const supportingDocsTable = screen.getByRole('table', {
+                name: /Contract supporting documents/,
+            })
+            
+            expect(contractDocsTable).toBeInTheDocument()
+
+        
             expect(supportingDocsTable).toBeInTheDocument()
             
             // check row content
@@ -239,7 +237,7 @@ describe('ContractDetailsSummarySection', () => {
         })
     })
 
-    it('does not render supporting contract documents when they do not exist', () => {
+    it('does not render supporting contract documents table when no documents exist', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
                 submission={draftContractAndRatesSubmission}

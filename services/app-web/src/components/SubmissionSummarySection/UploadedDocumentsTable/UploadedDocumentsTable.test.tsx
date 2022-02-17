@@ -4,7 +4,7 @@ import { UploadedDocumentsTable } from './UploadedDocumentsTable'
 
 describe('UploadedDocumentsTable', () => {
 
-    it('renders documents without errors', () => {
+    it('renders documents without errors', async () => {
         const testDocuments = [
             {
                 s3URL: 's3://foo/bar/test-1',
@@ -19,16 +19,19 @@ describe('UploadedDocumentsTable', () => {
                 documentCategory="Contract"
             />
         )
-
+        await waitFor (() => {
         expect(
-            screen.getByRole('table', {
-                name: 'Contract',
-            })).toBeInTheDocument()
+                    screen.getByRole('table', {
+                        name: 'Contract',
+                    })).toBeInTheDocument()
 
-        expect(screen.getAllByRole('row').length).toEqual(
+        expect(screen.getAllByRole('row').length - 1).toEqual(
             testDocuments.length
         )
-    })
+            })
+        })
+
+       
 
      it('renders supporting contract documents when they exist', async () => {
          const testDocuments = [
@@ -56,13 +59,14 @@ describe('UploadedDocumentsTable', () => {
              />
          )
 
-         expect(
-             screen.getByRole('table', {
-
-                 name: /Contract supporting/,
-             })
-         ).toBeInTheDocument()
+    
          await waitFor( () => {
+            expect(
+                screen.getByRole('table', {
+                    name: /Contract supporting/,
+                })
+            ).toBeInTheDocument()
+
               expect(screen.getAllByRole('row').length - 1).toEqual(
                   testDocuments.length
               )

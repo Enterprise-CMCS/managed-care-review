@@ -130,9 +130,7 @@ export const ContractDetailsSummarySection = ({
                         label="Contract action type"
                         data={
                             submission.contractType
-                                ? ContractTypeRecord[
-                                    submission.contractType
-                                    ]
+                                ? ContractTypeRecord[submission.contractType]
                                 : ''
                         }
                     />
@@ -187,8 +185,7 @@ export const ContractDetailsSummarySection = ({
                                     data={createCheckboxList({
                                         list: submission.contractAmendmentInfo.itemsBeingAmended.filter(
                                             (item) =>
-                                                item !==
-                                                    'CAPITATION_RATES' &&
+                                                item !== 'CAPITATION_RATES' &&
                                                 item !== 'OTHER'
                                         ),
                                         dict: AmendableItemsRecord,
@@ -223,21 +220,19 @@ export const ContractDetailsSummarySection = ({
                             )}
                         </>
                     )}
-                <UploadedDocumentsTable
-                    documents={submission.contractDocuments}
-                    caption="Contract"
-                    documentCategory="Contract"
-                />
-                {contractSupportingDocuments.length > 0 && (
-                    <UploadedDocumentsTable
-                        documents={contractSupportingDocuments}
-                        caption="Contract supporting documents"
-                        documentCategory="Contract-supporting"
-                        isSupportingDocuments
-                        isSubmitted={isSubmitted}
-                    />
-                )}
             </dl>
+            <UploadedDocumentsTable
+                documents={submission.contractDocuments}
+                caption="Contract"
+                documentCategory="Contract"
+            />
+            <UploadedDocumentsTable
+                documents={contractSupportingDocuments}
+                caption="Contract supporting documents"
+                documentCategory="Contract-supporting"
+                isSupportingDocuments
+                isSubmitted={isSubmitted}
+            />
         </section>
     )
 }
