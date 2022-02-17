@@ -33,8 +33,7 @@ export type FileUploadProps = {
     deleteFile: (key: string) => Promise<void>
     onFileItemsUpdate: ({ fileItems }: { fileItems: FileItemT[] }) => void
     isContractOnly?: boolean
-    shouldValidate?: boolean
-    hasMissingCategories?: boolean
+    shouldDisplayMissingCategoriesError?: boolean // by default, false. the parent component may read current files list and requirements of the form to determine otherwise. 
 } & JSX.IntrinsicElements['input']
 
 /*  FileUpload handles async file upload to S3 and displays inline errors per file.
@@ -59,8 +58,7 @@ export const FileUpload = ({
     deleteFile,
     onFileItemsUpdate,
     isContractOnly,
-    shouldValidate,
-    hasMissingCategories,
+    shouldDisplayMissingCategoriesError = false, 
     ...inputProps
 }: FileUploadProps): React.ReactElement => {
     const [fileItems, setFileItems] = useState<FileItemT[]>(initialItems || [])
@@ -101,6 +99,11 @@ export const FileUpload = ({
         existingList: FileItemT[],
         currentItem: FileItemT
     ) => Boolean(existingList.some((item) => item.name === currentItem.name))
+
+    const isMissingCategoriesItem = (fileItem: FileItemT) => {
+        if (!shouldDisplayMissingCategoriesError) return false // either no missing categories or else missing categories are not relevant
+        return fileItem.documentCategories.length === 0 
+    }
 
     const isAcceptableFile = (file: File): boolean => {
         const acceptedTypes = inputProps?.accept?.split(',') || []
@@ -345,14 +348,14 @@ export const FileUpload = ({
     }
     const uploadedCount = fileItems.filter(
         (item) =>
-            item.status === 'UPLOAD_COMPLETE' && item.documentCategories.length
+            item.status === 'UPLOAD_COMPLETE' && !isMissingCategoriesItem(item)
     ).length
     const errorCount = fileItems.filter(
         (item) =>
             item.status === 'UPLOAD_ERROR' ||
             item.status === 'SCANNING_ERROR' ||
             item.status === 'DUPLICATE_NAME_ERROR' ||
-            item.documentCategories.length === 0
+            isMissingCategoriesItem(item)
     ).length
     const pendingCount = fileItems.filter(
         (item) => item.status === 'PENDING' || item.status === 'SCANNING'
@@ -414,7 +417,7 @@ export const FileUpload = ({
                 renderMode={renderMode}
                 handleCheckboxClick={handleCheckboxClick}
                 isContractOnly={isContractOnly}
-                shouldValidate={shouldValidate}
+                shouldValidate={shouldDisplayMissingCategoriesError}
             />
         </FormGroup>
     )
