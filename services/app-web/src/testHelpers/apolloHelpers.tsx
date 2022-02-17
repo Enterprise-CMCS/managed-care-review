@@ -18,9 +18,18 @@ const mockValidUser: UserType = {
             { id: 'snbc', name: 'SNBC' },
         ],
     },
-    role: 'State User',
+    role: 'STATE_USER',
     name: 'Bob it user',
     email: 'bob@dmas.mn.gov',
+}
+
+function mockValidCMSUser(): UserType {
+    return {
+        __typename: 'CMSUser' as const,
+        role: 'CMS_USER',
+        name: 'Bob it user',
+        email: 'bob@dmas.mn.gov',
+    }
 }
 
 export function mockDraft(): DraftSubmission {
@@ -612,6 +621,7 @@ const indexSubmissionsMockSuccess = (
 
 export {
     fetchCurrentUserMock,
+    mockValidCMSUser,
     createDraftSubmissionMock,
     fetchDraftSubmissionMock,
     fetchStateSubmissionMock,

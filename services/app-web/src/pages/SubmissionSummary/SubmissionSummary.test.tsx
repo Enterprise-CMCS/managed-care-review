@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { Route } from 'react-router'
 import { RoutesRecord } from '../../constants/routes'
 import {
-    fetchCurrentUserMock, fetchStateSubmissionMock, unlockStateSubmissionMockError, unlockStateSubmissionMockSuccess
+    fetchCurrentUserMock, fetchStateSubmissionMock, mockValidCMSUser, unlockStateSubmissionMockError, unlockStateSubmissionMockSuccess
 } from '../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { SubmissionSummary } from './SubmissionSummary'
@@ -19,7 +19,7 @@ describe('SubmissionSummary', () => {
             {
                 apolloProvider: {
                     mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchCurrentUserMock({ user: mockValidCMSUser(),  statusCode: 200 }),
                         fetchStateSubmissionMock({
                             id: '15',
                             statusCode: 200,
@@ -46,7 +46,7 @@ describe('SubmissionSummary', () => {
             {
                 apolloProvider: {
                     mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchCurrentUserMock({ user: mockValidCMSUser(),  statusCode: 200 }),
                         fetchStateSubmissionMock({
                             id: '15',
                             statusCode: 200,
@@ -73,7 +73,7 @@ describe('SubmissionSummary', () => {
             {
                 apolloProvider: {
                     mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchCurrentUserMock({ user: mockValidCMSUser(),  statusCode: 200 }),
                         fetchStateSubmissionMock({
                             id: '15',
                             statusCode: 200,
@@ -119,7 +119,7 @@ describe('SubmissionSummary', () => {
     //         {
     //             apolloProvider: {
     //                 mocks: [
-    //                     fetchCurrentUserMock({ statusCode: 200 }),
+    fetchCurrentUserMock({ user: mockValidCMSUser(),  statusCode: 200 }),
     //                     fetchStateSubmissionMock({
     //                         id: '15',
     //                         statusCode: 200,
@@ -155,7 +155,7 @@ describe('SubmissionSummary', () => {
             {
                 apolloProvider: {
                     mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchCurrentUserMock({ user: mockValidCMSUser(),  statusCode: 200 }),
                         fetchStateSubmissionMock({
                             id: '15',
                             statusCode: 200,
