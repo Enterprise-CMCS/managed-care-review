@@ -845,4 +845,53 @@ describe('Document categories checkbox', () => {
             ).toBeGreaterThanOrEqual(1)
         })
     })
+
+    it('present on contract and rates submission in error state', async () => {
+        const mockUpdateDraftFn = jest.fn()
+        renderWithProviders(
+            <Documents
+                draftSubmission={{
+                    ...mockDraft(),
+                    submissionType: 'CONTRACT_AND_RATES',
+                    documents: [
+                        {
+                            s3URL: 's3://bucketname/key/supporting-documents',
+                            name: 'supporting documents',
+                            documentCategories: ['RATES_RELATED' as const],
+                        },
+                    ],
+                }}
+                updateDraft={mockUpdateDraftFn}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        const input = screen.getByLabelText(
+            'Upload any additional supporting documents'
+        )
+
+        userEvent.upload(input, [TEST_DOC_FILE])
+
+        // no errors before validation
+        await waitFor(() => {
+            expect(
+                screen.queryAllByText('You must select a document category')
+                    .length
+            ).toBe(0)
+        })
+
+        userEvent.click(screen.getByRole('button', { name: 'Continue' }))
+
+        // errors after validation
+        await waitFor(() => {
+            expect(
+                screen.queryAllByText('You must select a document category')
+                    .length
+            ).toBe(1)
+        })
+    })
 })

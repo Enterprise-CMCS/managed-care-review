@@ -39,6 +39,7 @@ export const ListWrapper = ({
                         renderMode="list"
                         handleCheckboxClick={handleCheckboxClick}
                         isContractOnly={isContractOnly}
+                        shouldDisplayMissingCategoriesError={false} // not relevant for list view
                     />
                 </li>
             ))}

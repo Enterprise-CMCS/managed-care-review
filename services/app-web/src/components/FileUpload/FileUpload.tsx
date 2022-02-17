@@ -417,7 +417,7 @@ export const FileUpload = ({
                 renderMode={renderMode}
                 handleCheckboxClick={handleCheckboxClick}
                 isContractOnly={isContractOnly}
-                shouldValidate={shouldDisplayMissingCategoriesError}
+                shouldDisplayMissingCategoriesError={shouldDisplayMissingCategoriesError}
             />
         </FormGroup>
     )

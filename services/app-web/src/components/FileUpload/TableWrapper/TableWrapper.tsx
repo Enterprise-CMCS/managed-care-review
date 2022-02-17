@@ -9,8 +9,7 @@ type TableWrapperProps = {
     retryItem: (item: FileItemT) => void
     handleCheckboxClick: (event: React.ChangeEvent<HTMLInputElement>) => void
     isContractOnly?: boolean
-    shouldValidate?: boolean
-    hasMissingCategories?: boolean
+    shouldDisplayMissingCategoriesError: boolean
 }
 
 export const TableWrapper = ({
@@ -19,10 +18,11 @@ export const TableWrapper = ({
     retryItem,
     handleCheckboxClick,
     isContractOnly,
-    shouldValidate,
+    shouldDisplayMissingCategoriesError
 }: TableWrapperProps): React.ReactElement => {
 
     const hasFiles = fileItems.length > 0
+    const shouldIncludeCategoriesCheckbox = !isContractOnly; 
 
     return (
         <>
@@ -31,8 +31,12 @@ export const TableWrapper = ({
                     <thead>
                         <tr>
                             <th>Document name</th>
-                            {!isContractOnly && <th>Contract-supporting</th>}
-                            {!isContractOnly && <th>Rate-supporting</th>}
+                            {shouldIncludeCategoriesCheckbox && (
+                                <th>Contract-supporting</th>
+                            )}
+                            {shouldIncludeCategoriesCheckbox && (
+                                <th>Rate-supporting</th>
+                            )}
                             <th></th>
                         </tr>
                     </thead>
@@ -46,12 +50,14 @@ export const TableWrapper = ({
                                 renderMode="table"
                                 handleCheckboxClick={handleCheckboxClick}
                                 isContractOnly={isContractOnly}
-                                shouldValidate={shouldValidate}
+                                shouldDisplayMissingCategoriesError={
+                                    shouldDisplayMissingCategoriesError
+                                }
                             />
                         ))}
                     </tbody>
                 </Table>
-            ):(
+            ) : (
                 <div className={styles.filesEmpty}>
                     <h3>You have not uploaded any files</h3>
                 </div>
