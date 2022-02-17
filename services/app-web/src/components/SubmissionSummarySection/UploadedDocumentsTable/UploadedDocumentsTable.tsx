@@ -35,6 +35,28 @@ export const UploadedDocumentsTable = ({
         (doc) =>
            isBothContractAndRateSupporting(doc)
     )
+    const borderTopGradientStyles= `borderTopLinearGradient ${
+        styles.uploadedDocumentsTable
+    }`
+    const supportingDocsTopMarginStyles= isSupportingDocuments ? styles.withMarginTop : ''
+     const tableCaptionJSX = (
+        <>
+            <span>{caption}</span>
+            {shouldShowEditButton && (
+                <Link
+                    variant="unstyled"
+                    asCustom={NavLink}
+                    className="usa-button usa-button--outline"
+                    to="documents"
+                >
+                    Edit <span className="srOnly">{caption}</span>
+                </Link>
+            )}
+        </>
+    )
+
+
+    
     useEffect(() => {
         const refreshDocuments = async () => {
             const newDocuments = await Promise.all(
@@ -61,27 +83,29 @@ export const UploadedDocumentsTable = ({
 
         void refreshDocuments()
     }, [documents, getKey, getURL])
-    
+
+    // Empty State
+    if (refreshedDocs.length === 0) {
+        return (
+            <div className={supportingDocsTopMarginStyles}>
+                <b className={styles.captionContainer}>{tableCaptionJSX}</b>
+                <p
+                    className={`${borderTopGradientStyles} ${styles.supportingDocsEmpty}`}
+                >
+                    {isSupportingDocuments
+                        ? 'No supporting documents'
+                        : 'No documents'}
+                </p>
+            </div>
+        )
+    }
+                
     return (
         <>
-            <table
-                className={`borderTopLinearGradient ${
-                    styles.uploadedDocumentsTable
-                } ${isSupportingDocuments ? styles.withMarginTop : ''}`}
-            >
+            <table className={`${borderTopGradientStyles} ${supportingDocsTopMarginStyles}`}>
                 <caption className="text-bold">
                     <div className={styles.captionContainer}>
-                        <span>{caption}</span>
-                        {shouldShowEditButton && (
-                            <Link
-                                variant="unstyled"
-                                asCustom={NavLink}
-                                className="usa-button usa-button--outline"
-                                to="documents"
-                            >
-                                Edit <span className="srOnly">{caption}</span>
-                            </Link>
-                        )}
+                      {tableCaptionJSX}
                     </div>
                 </caption>
                 <thead>
