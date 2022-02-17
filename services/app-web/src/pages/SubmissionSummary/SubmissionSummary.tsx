@@ -1,4 +1,5 @@
 import { Alert, Button, ButtonGroup, GridContainer, Link, Modal, ModalFooter, ModalHeading, ModalRef, ModalToggleButton, Textarea } from '@trussworks/react-uswds'
+import { GraphQLError } from 'graphql'
 import React, { useEffect, useRef, useState } from 'react'
 import { NavLink, useLocation, useParams } from 'react-router-dom'
 import sprite from 'uswds/src/img/sprite.svg'
@@ -9,7 +10,7 @@ import {
 } from '../../components/SubmissionSummarySection'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
-import { useFetchStateSubmissionQuery, useUnlockStateSubmissionMutation } from '../../gen/gqlClient'
+import { DraftSubmission, UnlockStateSubmissionMutationFn, useFetchStateSubmissionQuery, useUnlockStateSubmissionMutation } from '../../gen/gqlClient'
 import { GenericError } from '../Errors/GenericError'
 import styles from './SubmissionSummary.module.scss'
 
@@ -25,6 +26,35 @@ function unlockModalButton(modalRef: React.RefObject<ModalRef>) {
         </ModalToggleButton>
         )
 }
+
+// This wrapper gets us some reasonable errors out of our unlock call. This would be a good candidate
+// for a more general and generic function so that we can get more sensible errors out of all of the 
+// generated mutations.
+async function unlockMutationWrapper(unlockStateSubmission: UnlockStateSubmissionMutationFn, id: string): Promise<DraftSubmission | readonly GraphQLError[] | Error> {
+    try {
+            const result = await unlockStateSubmission({
+                variables: {
+                    input: {
+                        submissionID: id
+                    }
+                }
+            })
+
+            if (result.errors) {
+                return result.errors
+            }
+
+            if (result.data?.unlockStateSubmission.draftSubmission) {
+                return result.data?.unlockStateSubmission.draftSubmission
+            } else {
+                return new Error('No errors, and no unlock result.')
+            }
+            
+        } catch (error) {
+            return error
+        }
+}
+
 
 export const SubmissionSummary = (): React.ReactElement => {
     const { id } = useParams<{ id: string }>()
@@ -46,8 +76,6 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     const [unlockStateSubmission] = useUnlockStateSubmissionMutation()
 
-    console.log("FETCH", id, loading, error, data)
-
     const submission = data?.fetchStateSubmission.submission
 
     useEffect(() => {
@@ -65,36 +93,19 @@ export const SubmissionSummary = (): React.ReactElement => {
     if (error || !submission) return <GenericError />
 
     const onUnlock = async () => {
-        try {
-            const result = await unlockStateSubmission({
-                variables: {
-                    input: {
-                        submissionID: submission.id
-                    }
-                }
-            })
+        const result = await unlockMutationWrapper(unlockStateSubmission, submission.id)
 
-            if (result.errors) {
-                console.error('ERROR: got an error attempting to unlock', result.errors)
-                setUserVisibleUnlockError('Error attempting to unlock. Please try again.')
-                modalRef.current?.toggleModal(undefined, false)
-            }
-
-            if (result.data?.unlockStateSubmission.draftSubmission) {
-                console.log('Submission Unlocked')
-                modalRef.current?.toggleModal(undefined, false)
-            } else {
-                console.error('ERROR: Got nothing back from unlock')
-                modalRef.current?.toggleModal(undefined, false)
-                setUserVisibleUnlockError('Error attempting to unlock. Please try again.')
-            }
-            
-        } catch (error) {
-            console.error('ERROR: got an error attempting to unlock', error)
+        if (result instanceof Error) {
+            console.error('ERROR: got an Apollo Client Error attempting to unlock', result)
             setUserVisibleUnlockError('Error attempting to unlock. Please try again.')
-            modalRef.current?.toggleModal(undefined, false)
+        } else if (Array.isArray(result)) {
+            console.error('ERROR: got a GraphQL error response', result)
+            setUserVisibleUnlockError('Error attempting to unlock. Please try again.')
+        } else {
+            console.log('Submission Unlocked')
         }
 
+        modalRef.current?.toggleModal(undefined, false)
     }
 
     const isContractActionAndRateCertification =

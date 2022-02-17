@@ -15,7 +15,7 @@ import {
     UpdateDraftSubmissionInput
 } from '../gen/gqlServer'
 import { Context } from '../handlers/apollo_gql'
-import { NewPostgresStore } from '../postgres'
+import { NewPostgresStore, Store } from '../postgres'
 import { configureResolvers } from '../resolvers'
 import { sharedTestPrismaClient } from './storeHelpers'
 
@@ -33,13 +33,14 @@ const defaultContext = (): Context => {
 const constructTestPostgresServer = async (opts?: {
     context?: Context
     emailer?: Emailer
+    store?: Store
 }): Promise<ApolloServer> => {
     // set defaults
     const context = opts?.context || defaultContext()
     const emailer = opts?.emailer || constructTestEmailer()
 
     const prismaClient = await sharedTestPrismaClient()
-    const postgresStore = NewPostgresStore(prismaClient)
+    const postgresStore = opts?.store || NewPostgresStore(prismaClient)
     const postgresResolvers = configureResolvers(postgresStore, emailer)
 
     return new ApolloServer({
@@ -233,7 +234,7 @@ const unlockTestDraftSubmission = async (
         throw new Error('updateTestDraftSubmission returned nothing')
     }
 
-    return updateResult.data.unlockStateSubmission.submission
+    return updateResult.data.unlockStateSubmission.draftSubmission
 }
 
 const createTestStateSubmission = async (
