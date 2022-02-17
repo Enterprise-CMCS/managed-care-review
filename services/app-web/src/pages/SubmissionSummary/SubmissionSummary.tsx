@@ -1,5 +1,5 @@
+import { GraphQLErrors } from '@apollo/client/errors'
 import { Alert, Button, ButtonGroup, GridContainer, Link, Modal, ModalFooter, ModalHeading, ModalRef, ModalToggleButton, Textarea } from '@trussworks/react-uswds'
-import { GraphQLError } from 'graphql'
 import React, { useEffect, useRef, useState } from 'react'
 import { NavLink, useLocation, useParams } from 'react-router-dom'
 import sprite from 'uswds/src/img/sprite.svg'
@@ -11,6 +11,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
 import { DraftSubmission, UnlockStateSubmissionMutationFn, useFetchStateSubmissionQuery, useUnlockStateSubmissionMutation } from '../../gen/gqlClient'
+import { isGraphQLErrors } from '../../gqlHelpers'
 import { GenericError } from '../Errors/GenericError'
 import styles from './SubmissionSummary.module.scss'
 
@@ -30,7 +31,7 @@ function unlockModalButton(modalRef: React.RefObject<ModalRef>) {
 // This wrapper gets us some reasonable errors out of our unlock call. This would be a good candidate
 // for a more general and generic function so that we can get more sensible errors out of all of the 
 // generated mutations.
-async function unlockMutationWrapper(unlockStateSubmission: UnlockStateSubmissionMutationFn, id: string): Promise<DraftSubmission | readonly GraphQLError[] | Error> {
+async function unlockMutationWrapper(unlockStateSubmission: UnlockStateSubmissionMutationFn, id: string): Promise<DraftSubmission | GraphQLErrors | Error> {
     try {
             const result = await unlockStateSubmission({
                 variables: {
@@ -98,11 +99,12 @@ export const SubmissionSummary = (): React.ReactElement => {
         if (result instanceof Error) {
             console.error('ERROR: got an Apollo Client Error attempting to unlock', result)
             setUserVisibleUnlockError('Error attempting to unlock. Please try again.')
-        } else if (Array.isArray(result)) {
+        } else if (isGraphQLErrors(result)) {
             console.error('ERROR: got a GraphQL error response', result)
             setUserVisibleUnlockError('Error attempting to unlock. Please try again.')
         } else {
-            console.log('Submission Unlocked')
+            const unlockedSub: DraftSubmission = result
+            console.log('Submission Unlocked', unlockedSub)
         }
 
         modalRef.current?.toggleModal(undefined, false)
