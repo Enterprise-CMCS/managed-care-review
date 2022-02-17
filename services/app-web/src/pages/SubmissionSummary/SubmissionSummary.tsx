@@ -79,6 +79,13 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     const submission = data?.fetchStateSubmission.submission
 
+    // This is a hacky way to fake feature flags before we have feature flags.
+    // please avoid reading env vars outside of index.tsx in general. 
+    const environmentName = process.env.REACT_APP_STAGE_NAME || ''
+    const isProdEnvironment = ['prod', 'val', 'nope'].includes(environmentName)
+
+    const displayUnlockButton = !isProdEnvironment && loggedInUser?.role === 'CMS_USER'
+
     useEffect(() => {
         updateHeading(pathname, submission?.name)
     }, [updateHeading, pathname, submission?.name])
@@ -145,7 +152,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                     </Link>
                 ) : null}
 
-                <SubmissionTypeSummarySection submission={submission} unlockModalButton={unlockModalButton(modalRef)} />
+                <SubmissionTypeSummarySection submission={submission} unlockModalButton={displayUnlockButton ? unlockModalButton(modalRef) : undefined} />
 
                 <ContractDetailsSummarySection submission={submission} />
 
