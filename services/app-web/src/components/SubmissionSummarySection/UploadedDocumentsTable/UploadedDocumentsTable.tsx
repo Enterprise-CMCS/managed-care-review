@@ -85,11 +85,17 @@ export const UploadedDocumentsTable = ({
     }, [documents, getKey, getURL])
 
     // Empty State
-    if (refreshedDocs.length < 1) {
+    if (refreshedDocs.length === 0) {
         return (
             <div className={supportingDocsTopMarginStyles}>
                 <b className={styles.captionContainer}>{tableCaptionJSX}</b>
-                <p className={`${borderTopGradientStyles} ${styles.supportingDocsEmpty}`}>{isSupportingDocuments ? 'No supporting documents' : 'No documents'}</p>
+                <p
+                    className={`${borderTopGradientStyles} ${styles.supportingDocsEmpty}`}
+                >
+                    {isSupportingDocuments
+                        ? 'No supporting documents'
+                        : 'No documents'}
+                </p>
             </div>
         )
     }
