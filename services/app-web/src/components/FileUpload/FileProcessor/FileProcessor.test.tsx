@@ -70,7 +70,6 @@ describe('FileProcessor component', () => {
 
     const categoryCheckboxProps = {
         handleCheckboxClick: jest.fn(),
-        shouldDisplayMissingCategoriesError: true
     }
 
     beforeEach(() => jest.clearAllMocks())
@@ -427,7 +426,7 @@ describe('FileProcessor component', () => {
         )
 
         const imageEl = screen.getByTestId('file-input-preview-image')
-        expect(imageEl).not.toHaveClass('bg-error-lighter g')
+        expect(imageEl).not.toHaveClass('is-loading')
         expect(screen.getByText('Duplicate file, please remove')).toBeInTheDocument()
         expect(
             screen.getByRole('button', { name: /Remove/ })
@@ -449,55 +448,6 @@ describe('FileProcessor component', () => {
         expect(screen.getByText('Remove')).toBeInTheDocument()
         expect(screen.queryByText('Retry')).not.toBeInTheDocument()
     })
-
-
-    it('displays document categories error with checkboxes when expected (in table view)', () => {
-        render(
-            <FileProcessor
-                renderMode="table"
-                item={{ ...uploadComplete, documentCategories: [] }}
-                {...buttonActionProps}
-                {...categoryCheckboxProps}
-                isContractOnly={false}
-            />
-        )
-
-         const contractCheckbox = screen.queryByRole('checkbox', {
-             name: 'contract-supporting',
-         })
-         const ratesCheckbox = screen.queryByRole('checkbox', {
-             name: 'rate-supporting',
-         })
-        const itemTableRow = screen.getByRole('row')
-        expect(itemTableRow).toHaveClass('bg-error-lighter warningRow')
-                
-         expect(contractCheckbox).toBeInTheDocument()
-         expect(ratesCheckbox).toBeInTheDocument()
-  
-        expect(screen.getByText(/Must select at least one category checkbox/)).toBeInTheDocument()
-        expect(screen.queryByRole('button', { name: /Retry/ })).toBeNull()
-    })
-
-      it('does not display document categories error when expected (relevant in table view before validation)', () => {
-          render(
-              <FileProcessor
-                  renderMode="table"
-                  item={{ ...uploadComplete}}
-                  {...buttonActionProps}
-                  {...categoryCheckboxProps}
-                  shouldDisplayMissingCategoriesError={false}
-              />
-          )
-
-        const itemTableRow = screen.getByRole('row')
-        expect(itemTableRow).not.toHaveClass('bg-error-lighter warningRow')
-        
-        expect(
-              screen.queryByText(/Must select at least one category checkbox/)
-          ).not.toBeInTheDocument()
-      })
-
-
 
     it('displays unexpected error message and remove button when status is UPLOAD_ERROR but file reference is undefined (this is an unexpected state but it would mean the upload cannot be retried) in a list', () => {
         render(

@@ -20,6 +20,7 @@ type FileRowProps = {
     handleRetry: (_e: React.MouseEvent) => void
     handleCheckboxClick: (event: React.ChangeEvent<HTMLInputElement>) => void
     isContractOnly?: boolean
+    shouldValidate?: boolean
     hasNonDocumentError?: boolean
 }
 
