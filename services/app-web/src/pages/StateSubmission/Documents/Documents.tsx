@@ -244,7 +244,7 @@ export const Documents = ({
                 onUpdateDraftSubmissionError()
             }
         }
-
+   
     return (
         <>
             <UswdsForm
@@ -303,8 +303,7 @@ export const Documents = ({
                         deleteFile={handleDeleteFile}
                         onFileItemsUpdate={onFileItemsUpdate}
                         isContractOnly={isContractOnly}
-                        shouldValidate={shouldValidate}
-                        hasMissingCategories={hasMissingCategories}
+                        shouldDisplayMissingCategoriesError={!isContractOnly && shouldValidate && hasMissingCategories}
                     />
                 </fieldset>
                 <PageActions
