@@ -123,22 +123,22 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection submission={testSubmission} />
         )
 
-        const supportingDocsTable = screen.getByRole('table', {
-            name: /Rate supporting documents/,
-        })
-        const rateDocsTable = screen.getByRole('table', {
-            name: 'Rate certification',
-        })
-
-        expect(rateDocsTable).toBeInTheDocument()
-        expect(supportingDocsTable).toBeInTheDocument()
-        expect(
-            screen.getByRole('link', {
-                name: /Edit Rate supporting documents/,
-            })
-        ).toHaveAttribute('href', '/documents')
-        
         await waitFor (() => {
+             const supportingDocsTable = screen.getByRole('table', {
+                 name: /Rate supporting documents/,
+             })
+             const rateDocsTable = screen.getByRole('table', {
+                 name: 'Rate certification',
+             })
+
+             expect(rateDocsTable).toBeInTheDocument()
+             expect(supportingDocsTable).toBeInTheDocument()
+             expect(
+                 screen.getByRole('link', {
+                     name: /Edit Rate supporting documents/,
+                 })
+             ).toHaveAttribute('href', '/documents')
+
             const supportingDocsTableRows =
                 within(supportingDocsTable).getAllByRole('rowgroup')
             expect(supportingDocsTableRows.length).toEqual(2)

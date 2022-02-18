@@ -1,30 +1,21 @@
-import React, { useState, useRef } from 'react'
 import {
-    Button,
+    Alert, Button,
     ButtonGroup,
-    GridContainer,
-    Alert,
-    Modal,
-    ModalToggleButton,
-    ModalHeading,
-    ModalFooter,
-    ModalRef,
+    GridContainer, Modal, ModalFooter, ModalHeading, ModalRef, ModalToggleButton
 } from '@trussworks/react-uswds'
+import React, { useRef, useState } from 'react'
 import { useHistory } from 'react-router-dom'
-import styles from './ReviewSubmit.module.scss'
-
 import {
-    SubmissionTypeSummarySection,
-    ContractDetailsSummarySection,
-    RateDetailsSummarySection,
-    ContactsSummarySection,
-    SupportingDocumentsSummarySection,
+    ContactsSummarySection, ContractDetailsSummarySection,
+    RateDetailsSummarySection, SubmissionTypeSummarySection, SupportingDocumentsSummarySection
 } from '../../../components/SubmissionSummarySection'
 import {
     DraftSubmission,
-    useSubmitDraftSubmissionMutation,
+    useSubmitDraftSubmissionMutation
 } from '../../../gen/gqlClient'
 import { PageActionsContainer } from '../PageActions'
+import styles from './ReviewSubmit.module.scss'
+
 
 export const ReviewSubmit = ({
     draftSubmission,
@@ -76,6 +67,10 @@ export const ReviewSubmit = ({
 
             if (data.data?.submitDraftSubmission) {
                 history.push(`/dashboard?justSubmitted=${draftSubmission.name}`)
+            } else {
+                console.error('Got nothing back from submit')
+                showError('Error attempting to submit. Please try again.')
+                modalRef.current?.toggleModal(undefined, false)
             }
         } catch (error) {
             showError('Error attempting to submit. Please try again.')

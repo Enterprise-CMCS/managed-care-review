@@ -348,7 +348,7 @@ describe('FileProcessor component', () => {
         expect(buttonActionProps.deleteItem).toHaveBeenCalled()
     })
 
-    it('displays upload failed message and both retry and remove buttons when status is UPLOAD_ERROR in a table', () => {
+    it('displays upload failed message, without checkboxes, and both retry and remove buttons when status is UPLOAD_ERROR in a table', () => {
         render(
             <FileProcessor
                 renderMode="table"
@@ -357,6 +357,12 @@ describe('FileProcessor component', () => {
                 {...categoryCheckboxProps}
             />
         )
+        expect(
+            screen.queryByRole('checkbox', { name: 'contract-supporting' })
+        ).toBeNull()
+        expect(
+            screen.queryByRole('checkbox', { name: 'rate-supporting' })
+        ).toBeNull()
 
         expect(screen.getByText(/Upload failed/)).toBeInTheDocument()
         expect(screen.getByText('Remove')).toBeInTheDocument()
@@ -392,7 +398,7 @@ describe('FileProcessor component', () => {
         ).toBeInTheDocument()
     })
 
-    it('displays security scan failed message and both retry and remove buttons when status is SCANNING_ERROR in a table', () => {
+    it('displays security scan failed message, without checkboxes, and both retry and remove buttons when status is SCANNING_ERROR in a table', () => {
         render(
             <FileProcessor
                 renderMode="table"
@@ -401,6 +407,12 @@ describe('FileProcessor component', () => {
                 {...categoryCheckboxProps}
             />
         )
+        expect(
+            screen.queryByRole('checkbox', { name: 'contract-supporting' })
+        ).toBeNull()
+        expect(
+            screen.queryByRole('checkbox', { name: 'rate-supporting' })
+        ).toBeNull()
 
         expect(
             screen.getByText('Failed security scan, please remove')
@@ -434,7 +446,7 @@ describe('FileProcessor component', () => {
         expect(screen.queryByRole('button', { name: /Retry/ })).toBeNull()
     })
 
-    it('displays duplicate name error message and remove button when status is DUPLICATE_NAME_ERROR in a table', () => {
+    it('displays duplicate name error message, without checkboxes , and remove button when status is DUPLICATE_NAME_ERROR in a table', () => {
         render(
             <FileProcessor
                 renderMode="table"
@@ -444,10 +456,64 @@ describe('FileProcessor component', () => {
             />
         )
 
+        expect(screen.queryByRole('checkbox', { name: 'contract-supporting',})).toBeNull()
+        expect(
+              screen.queryByRole('checkbox', { name: 'rate-supporting' })
+          ).toBeNull()
+
         expect(screen.getByText('Duplicate file, please remove')).toBeInTheDocument()
         expect(screen.getByText('Remove')).toBeInTheDocument()
         expect(screen.queryByText('Retry')).not.toBeInTheDocument()
     })
+
+     it('displays document categories error with checkboxes when expected for categories error (in table view)', () => {
+         render(
+             <FileProcessor
+                 renderMode="table"
+                 item={{ ...uploadComplete, documentCategories: [] }}
+                 {...buttonActionProps}
+                 {...categoryCheckboxProps}
+                 isContractOnly={false}
+                 shouldValidate={true}
+             />
+         )
+
+         const contractCheckbox = screen.queryByRole('checkbox', {
+             name: 'contract-supporting',
+         })
+         const ratesCheckbox = screen.queryByRole('checkbox', {
+             name: 'rate-supporting',
+         })
+        const itemTableRow = screen.getByRole('row')
+
+         expect(contractCheckbox).toBeInTheDocument()
+         expect(ratesCheckbox).toBeInTheDocument()
+            expect(itemTableRow).toHaveClass('warningRow')
+         expect(
+             screen.getByText(/Must select at least one category checkbox/)
+         ).toBeInTheDocument()
+         expect(screen.queryByRole('button', { name: /Retry/ })).toBeNull()
+     })
+
+     it('does not display document categories error when expected (relevant in table view before validation)', () => {
+         render(
+             <FileProcessor
+                 renderMode="table"
+                 item={{ ...uploadComplete }}
+                 {...buttonActionProps}
+                 {...categoryCheckboxProps}
+                 isContractOnly={false}
+                 shouldValidate={false}
+             />
+         )
+
+         const itemTableRow = screen.getByRole('row')
+         expect(itemTableRow).not.toHaveClass('bg-error-lighter warningRow')
+
+         expect(
+             screen.queryByText(/Must select at least one category checkbox/)
+         ).not.toBeInTheDocument()
+     })
 
     it('displays unexpected error message and remove button when status is UPLOAD_ERROR but file reference is undefined (this is an unexpected state but it would mean the upload cannot be retried) in a list', () => {
         render(

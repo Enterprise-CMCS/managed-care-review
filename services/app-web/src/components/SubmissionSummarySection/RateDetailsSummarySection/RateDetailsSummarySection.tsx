@@ -102,31 +102,26 @@ export const RateDetailsSummarySection = ({
                             id="effectiveRatingPeriod"
                             label="Rate amendment effective dates"
                             data={`${dayjs(
-                                submission.rateAmendmentInfo
-                                    .effectiveDateStart
+                                submission.rateAmendmentInfo.effectiveDateStart
                             ).format('MM/DD/YYYY')} to ${dayjs(
-                                submission.rateAmendmentInfo
-                                    .effectiveDateEnd
+                                submission.rateAmendmentInfo.effectiveDateEnd
                             ).format('MM/DD/YYYY')}`}
                         />
                     ) : null}
                 </DoubleColumnGrid>
-
-                <UploadedDocumentsTable
-                    documents={submission.rateDocuments}
-                    caption="Rate certification"
-                    documentCategory="Rate certification"
-                />
-                {rateSupportingDocuments.length > 0 && (
-                    <UploadedDocumentsTable
-                        documents={rateSupportingDocuments}
-                        caption="Rate supporting documents"
-                        documentCategory="Rate-supporting"
-                        isSupportingDocuments
-                        isSubmitted={isSubmitted}
-                    />
-                )}
             </dl>
+            <UploadedDocumentsTable
+                documents={submission.rateDocuments}
+                caption="Rate certification"
+                documentCategory="Rate certification"
+            />
+            <UploadedDocumentsTable
+                documents={rateSupportingDocuments}
+                caption="Rate supporting documents"
+                documentCategory="Rate-supporting"
+                isSupportingDocuments
+                isSubmitted={isSubmitted}
+            />
         </section>
     )
 }
