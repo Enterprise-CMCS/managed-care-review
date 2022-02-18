@@ -479,7 +479,7 @@ export const ContractDetails = ({
                                 <Fieldset
                                     aria-required
                                     className={styles.radioGroup}
-                                    legend="Contract Status"
+                                    legend="Contract status"
                                 >
                                     {showFieldErrors(errors.contractExecutionStatus) && (
                                         <PoliteErrorMessage>
