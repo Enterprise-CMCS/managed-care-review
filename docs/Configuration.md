@@ -64,6 +64,12 @@ Read by `ui-auth`
 
 This is the metatdata URL configured for reaching out to Otka auth. Reqired for `IDM` type auth.
 
+### `REACT_APP_STAGE_NAME`
+
+Read by `app-web`
+
+This is used for rudimentary feature flags, allow us to switch things off and on based on deploy environment
+
 ### `IAM_PATH`
 
 ### `SECRETS_MANAGER_SECRET`

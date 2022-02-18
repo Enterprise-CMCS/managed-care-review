@@ -23,8 +23,17 @@ const getCurrentRevision = (
             message: `No revisions found for submission id: ${submissionID}`,
         }
 
-    // TODO FIGURE OUT HOW TO ENSURE PROPERLY ORDERED REVISIONS HERE
-    return submissionResult.revisions[0]
+    // run through the list of revisions, get the newest one. 
+    // If we ORDERED BY before getting these, we could probably simplify this.
+    const newestRev = submissionResult.revisions.reduce((acc, revision) => {
+        if (revision.createdAt > acc.createdAt) {
+            return revision
+        } else {
+            return acc
+        }
+    }, submissionResult.revisions[0])
+
+    return newestRev
 }
 
 
