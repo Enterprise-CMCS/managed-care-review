@@ -1,14 +1,12 @@
 import { screen, waitFor } from '@testing-library/react'
 import { createMemoryHistory } from 'history'
-
 import {
     fetchCurrentUserMock,
-    mockCompleteDraft,
-    submitDraftSubmissionMockSuccess,
-    submitDraftSubmissionMockError,
+    mockCompleteDraft, submitDraftSubmissionMockError, submitDraftSubmissionMockSuccess
 } from '../../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { ReviewSubmit } from './ReviewSubmit'
+
 
 describe('ReviewSubmit', () => {
     it('renders without errors', async () => {

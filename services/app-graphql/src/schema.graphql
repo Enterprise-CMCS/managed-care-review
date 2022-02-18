@@ -25,6 +25,10 @@ type Mutation {
     submitDraftSubmission(
         input: SubmitDraftSubmissionInput!
     ): SubmitDraftSubmissionPayload!
+
+    unlockStateSubmission(
+        input: UnlockStateSubmissionInput!
+    ): UnlockStateSubmissionPayload!
 }
 
 input CreateDraftSubmissionInput {
@@ -78,6 +82,15 @@ input SubmitDraftSubmissionInput {
 type SubmitDraftSubmissionPayload {
     submission: StateSubmission!
 }
+
+input UnlockStateSubmissionInput {
+    submissionID: ID!
+}
+
+type UnlockStateSubmissionPayload {
+    draftSubmission: DraftSubmission!
+}
+
 scalar Date
 scalar DateTime
 
