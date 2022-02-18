@@ -8,6 +8,7 @@ plugins:
   - serverless-stack-termination-protection
   - serverless-idempotency-helper
   - serverless-iam-helper
+  - serverless-webpack
 
 # The `provider` block defines where your service will be deployed
 provider:
@@ -70,6 +71,11 @@ custom:
       - prod
       - main
 
+environment:
+  PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions'
+  AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
+  OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
+
 layers:
   clamDefs:
     package:
@@ -83,9 +89,10 @@ functions:
     memorySize: 3008
     layers:
       - !Ref ClamDefsLambdaLayer
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-0-1:1
     environment:
       CLAMAV_BUCKET_NAME: !Ref ClamDefsBucket
-      PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions'
+
   avDownloadDefinitions:
     handler: src/download-definitions.lambdaHandleEvent
     events:
@@ -94,9 +101,9 @@ functions:
     memorySize: 1024
     layers:
       - !Ref ClamDefsLambdaLayer
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-0-1:1
     environment:
       CLAMAV_BUCKET_NAME: !Ref ClamDefsBucket
-      PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions'
 
 resources:
   Resources:
