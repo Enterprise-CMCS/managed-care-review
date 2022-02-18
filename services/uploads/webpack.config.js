@@ -1,0 +1,54 @@
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const nodeExternals = require('webpack-node-externals');
+const slsw = require('serverless-webpack');
+const path = require('path');
+const isLocal = slsw.lib.webpack.isLocal;
+
+const extensions = [
+    '.mjs',
+    '.js',
+    '.jsx',
+    '.json',
+    '.ts',
+    '.tsx',
+    '.graphql',
+    '.gql',
+];
+module.exports = {
+    entry: slsw.lib.entries,
+    target: 'node',
+    context: __dirname,
+    mode: isLocal ? 'development' : 'production',
+    performance: {
+        hints: false,
+    },
+    externals: [
+        nodeExternals({
+            modulesDir: path.resolve(__dirname, '../../node_modules'),
+        }),
+        'aws-sdk',
+    ],
+    devtool: 'source-map',
+    resolve: {
+        symlinks: false,
+        extensions: extensions,
+        modules: [path.resolve(__dirname, 'node_modules'), 'node_modules'],
+    },
+    plugins: [
+        new CopyWebpackPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'collector.yml'),
+                    transform(content) {
+                        return content
+                            .toString()
+                            .replace(
+                                '$NR_LICENSE_KEY',
+                                process.env.NR_LICENSE_KEY
+                            );
+                    },
+                },
+            ],
+        }),
+    ],
+};
