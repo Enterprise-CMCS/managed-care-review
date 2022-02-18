@@ -101,7 +101,7 @@ export const FileUpload = ({
         setFileItems((prevItems) => {
             const newItems = [...prevItems]
             return newItems.map((item) => {
-                if (item.documentCategories.length === 0 || isContractOnly) {
+                if (renderMode === 'table' && isContractOnly) {
                     return {
                         ...item,
                         documentCategories: ['CONTRACT_RELATED'],
@@ -111,7 +111,7 @@ export const FileUpload = ({
                 }
             })
         })
-    }, [isContractOnly])
+    }, [renderMode, isContractOnly])
 
     const isDuplicateItem = (
         existingList: FileItemT[],
