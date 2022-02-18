@@ -136,7 +136,7 @@ export const ContractDetailsSummarySection = ({
                     />
                     <DataDetail
                         id="contractExecutionStatus"
-                        label="Contract Status"
+                        label="Contract status"
                         data={
                             submission.contractExecutionStatus
                                 ? ContractExecutionStatusRecord[
