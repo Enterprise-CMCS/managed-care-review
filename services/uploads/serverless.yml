@@ -71,11 +71,6 @@ custom:
       - prod
       - main
 
-environment:
-  PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions'
-  AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
-  OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
-
 layers:
   clamDefs:
     package:
@@ -92,6 +87,9 @@ functions:
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-0-1:1
     environment:
       CLAMAV_BUCKET_NAME: !Ref ClamDefsBucket
+      PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions'
+      AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
+      OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
 
   avDownloadDefinitions:
     handler: src/download-definitions.lambdaHandleEvent
@@ -104,6 +102,9 @@ functions:
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-0-1:1
     environment:
       CLAMAV_BUCKET_NAME: !Ref ClamDefsBucket
+      PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions'
+      AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
+      OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
 
 resources:
   Resources:
