@@ -20,7 +20,7 @@ import { NewPostgresStore } from '../postgres/postgresStore'
 import { configureResolvers } from '../resolvers'
 import { configurePostgres } from './configuration'
 
-const tracer = require('./otel_handler').tracer
+import { tracer as tracer } from "./otel_handler";
 
 // console.log('TRACERs', tracer)
 
@@ -141,6 +141,8 @@ function localTracingMiddleware(
         // display traceid in the terminal
         if (currentSpan) {
             console.log(`traceid: ${currentSpan.spanContext().traceId}`)
+        } else {
+            console.log('no active span')
         }
         const span = tracer.startSpan('handleRequest', {
             kind: 1, // server

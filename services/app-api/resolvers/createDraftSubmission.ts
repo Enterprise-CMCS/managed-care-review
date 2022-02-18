@@ -4,12 +4,18 @@ import { MutationResolvers, State } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { InsertDraftSubmissionArgsType, isStoreError, Store } from '../postgres'
 import { pluralize } from '../../app-web/src/common-code/formatters'
+import { tracer as tracer } from "../handlers/otel_handler";
 
 export function createDraftSubmissionResolver(
     store: Store
 ): MutationResolvers['createDraftSubmission'] {
     return async (_parent, { input }, context) => {
         // This resolver is only callable by state users
+        console.log("about to submit draft")
+        const span = tracer.startSpan('submitDraft', {
+            kind: 1, // server
+            attributes: { key: 'value' },
+        })
         if (!isStateUser(context.user)) {
             logError(
                 'createDraftSubmission',
@@ -49,6 +55,7 @@ export function createDraftSubmissionResolver(
         }
 
         logSuccess('createDraftSubmission')
+        span.end()
 
         return {
             draftSubmission: draftSubResult,

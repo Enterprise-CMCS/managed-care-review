@@ -11,6 +11,7 @@ import {
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
 import { pluralize } from '../../app-web/src/common-code/formatters'
+const tracer = require('../handlers/otel_handler').tracer
 
 // This MUTATES the passed in draft, overwriting all the current fields with the updated fields
 export function applyUpdates(
@@ -98,6 +99,10 @@ export function updateDraftSubmissionResolver(
     store: Store
 ): MutationResolvers['updateDraftSubmission'] {
     return async (_parent, { input }, context) => {
+        const span = tracer.startSpan('submitDraft', {
+            kind: 1, // server
+            attributes: { key: 'value' },
+        })
         // This resolver is only callable by state users
         if (!isStateUser(context.user)) {
             logError(
@@ -163,6 +168,7 @@ export function updateDraftSubmissionResolver(
         const updatedDraft: DraftSubmissionType = updateResult
 
         logSuccess('updateDraftSubmission')
+        span.end()
         return {
             draftSubmission: updatedDraft,
         }

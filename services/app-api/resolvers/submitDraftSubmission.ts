@@ -15,6 +15,9 @@ import { MutationResolvers, State } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
 
+const tracer = require('../handlers/otel_handler').tracer
+
+
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = typeof SubmissionErrorCodes[number] // iterable union type
 
@@ -49,13 +52,19 @@ export function isSubmissionError(err: unknown): err is SubmissionError {
 function submit(
     draft: DraftSubmissionType
 ): StateSubmissionType | SubmissionError {
+    console.log("about to submit draft")
+    const span = tracer.startSpan('submitDraft', {
+        kind: 1, // server
+        attributes: { key: 'value' },
+    })
     const maybeStateSubmission: Record<string, unknown> = {
         ...draft,
         status: 'SUBMITTED',
         submittedAt: new Date(),
     }
-
+    span.end()
     if (isStateSubmission(maybeStateSubmission)) return maybeStateSubmission
+    
     else if (!hasValidContract(maybeStateSubmission as StateSubmissionType)) {
         return {
             code: 'INCOMPLETE',
