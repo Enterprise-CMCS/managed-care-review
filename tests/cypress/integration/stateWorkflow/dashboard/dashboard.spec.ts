@@ -55,7 +55,7 @@ describe('dashboard', () => {
         cy.findByRole('heading', { level: 2, name: /Review and submit/ })
         cy.pa11y({
             actions: ['wait for element #submissionTypeSection to be visible'],
-            threshold: 23, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15950
+            threshold: 24, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15950
         })
 
         // Submit, sent to dashboard
@@ -104,7 +104,7 @@ describe('dashboard', () => {
                 actions: [
                     'wait for element #submissionTypeSection to be visible',
                 ],
-                threshold: 19, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15952
+                threshold: 20, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15952
             })
 
             // Link back to dashboard, submission visible in default program

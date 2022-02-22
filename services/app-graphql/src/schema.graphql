@@ -234,6 +234,11 @@ enum ContractType {
     AMENDMENT
 }
 
+enum ContractExecutionStatus {
+    EXECUTED
+    UNEXECUTED
+}
+
 enum RateType {
     NEW
     AMENDMENT
@@ -263,6 +268,7 @@ type DraftSubmission {
     actuaryCommunicationPreference: ActuaryCommunicationType
     documents: [Document!]!
     contractType: ContractType
+    contractExecutionStatus: ContractExecutionStatus
     contractDocuments: [Document!]!
     contractDateStart: Date
     contractDateEnd: Date
@@ -294,6 +300,7 @@ type StateSubmission {
     contractAmendmentInfo: ContractAmendmentInfo
     submittedAt: Date!
     contractType: ContractType!
+    contractExecutionStatus: ContractExecutionStatus!
     contractDocuments: [Document!]!
     contractDateStart: Date!
     contractDateEnd: Date!
@@ -318,6 +325,7 @@ input DraftSubmissionUpdates {
     actuaryCommunicationPreference: ActuaryCommunicationType
     documents: [DocumentInput!]!
     contractType: ContractType
+    contractExecutionStatus: ContractExecutionStatus
     contractDocuments: [DocumentInput!]!
     contractDateStart: Date
     contractDateEnd: Date

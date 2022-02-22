@@ -16,6 +16,7 @@ const isRateAmendment = (
 
 const hasValidContract = (sub: StateSubmissionType): boolean =>
     sub.contractType !== undefined &&
+    sub.contractExecutionStatus !== undefined &&
     sub.contractDateStart !== undefined &&
     sub.contractDateEnd !== undefined &&
     sub.managedCareEntities.length !== 0 &&
