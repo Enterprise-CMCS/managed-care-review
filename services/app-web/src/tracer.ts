@@ -9,8 +9,9 @@ import { CollectorTraceExporter } from '@opentelemetry/exporter-collector'
 import { diag, DiagConsoleLogger } from '@opentelemetry/api'
 import { Resource } from '@opentelemetry/resources'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
+import * as api from '@opentelemetry/api'
 
-export function Tracer(serviceName: string) {
+export function NewTracer(serviceName: string): api.Tracer {
     const provider = new WebTracerProvider({
         resource: new Resource({
             [SemanticResourceAttributes.SERVICE_NAME]: 'app-web-testing',
