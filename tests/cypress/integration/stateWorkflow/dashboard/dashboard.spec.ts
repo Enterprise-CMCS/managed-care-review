@@ -1,4 +1,5 @@
 describe('dashboard', () => {
+
     it('can navigate to and from dashboard page', () => {
         cy.logInAsStateUser()
         cy.findByRole('heading', { level: 1, name: /Dashboard/ })
@@ -55,7 +56,11 @@ describe('dashboard', () => {
         cy.findByRole('heading', { level: 2, name: /Review and submit/ })
         cy.pa11y({
             actions: ['wait for element #submissionTypeSection to be visible'],
-            threshold: 24, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15950
+            ignore: [
+                'definition-list',
+                'dlitem'
+            ],
+            threshold: 6, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15950
         })
 
         // Submit, sent to dashboard
