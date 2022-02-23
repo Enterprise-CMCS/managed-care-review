@@ -26,6 +26,7 @@ export type {
     ManagedCareEntity,
     CapitationRatesAmendedReason,
     ContractAmendmentInfo,
+    ContractExecutionStatus,
 } from './DraftSubmissionType'
 
 export type { StateSubmissionType } from './StateSubmissionType'

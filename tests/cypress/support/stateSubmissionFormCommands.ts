@@ -53,6 +53,7 @@ Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
 Cypress.Commands.add('fillOutBaseContractDetails', () => {
     // Must be on '/submissions/:id/contract-details'
     cy.findByText('Base contract').click()
+    cy.findByText('Fully executed').click()
     cy.wait(2000)
     cy.findByLabelText('Start date').type('04/01/2024')
     cy.findByLabelText('End date').type('03/31/2025').blur()
@@ -70,6 +71,7 @@ Cypress.Commands.add('fillOutBaseContractDetails', () => {
 Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
     // Must be on '/submissions/:id/contract-details'
     cy.findByText('Amendment to base contract').click()
+    cy.findByText('Unexecuted by some or all parties').click()
     cy.wait(2000)
     cy.findByLabelText('Start date').type('04/01/2024')
     cy.findByLabelText('End date').type('03/31/2025').blur()

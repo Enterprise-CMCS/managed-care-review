@@ -25,9 +25,9 @@
     tunnel "0.0.6"
 
 "@apollo/client@^3.4.15":
-  version "3.5.6"
-  resolved "https://registry.yarnpkg.com/@apollo/client/-/client-3.5.6.tgz#911929df073280689efd98e5603047b79e0c39a2"
-  integrity sha512-XHoouuEJ4L37mtfftcHHO1caCRrKKAofAwqRoq28UQIPMJk+e7n3X9OtRRNXKk/9tmhNkwelSary+EilfPwI7A==
+  version "3.5.9"
+  resolved "https://registry.yarnpkg.com/@apollo/client/-/client-3.5.9.tgz#306c1f8453d56dbb4ff1afaaaf16b3b719db696c"
+  integrity sha512-Qq3OE3GpyPG2fYXBzi1n4QXcKZ11c6jHdrXK2Kkn9SD+vUymSrllXsldqnKUK9tslxKqkKzNrkCXkLv7PxwfSQ==
   dependencies:
     "@graphql-typed-document-node/core" "^3.0.0"
     "@wry/context" "^0.6.0"
@@ -7739,9 +7739,9 @@
   integrity sha512-8Wje3itJpk/FX+QItca9vjNLjGx5jlEYBw/CpMi03Fphk2DSVeZDUqWTE81BeCI5Bl6Z+zmA1O9L/8e3ZUSeLg==
 
 "@types/uuid@^8.3.1":
-  version "8.3.3"
-  resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-8.3.3.tgz#c6a60686d953dbd1b1d45e66f4ecdbd5d471b4d0"
-  integrity sha512-0LbEEx1zxrYB3pgpd1M5lEhLcXjKJnYghvhTRgaBeUivLHMDM1TzF3IJ6hXU2+8uA4Xz+5BA63mtZo5DjVT8iA==
+  version "8.3.4"
+  resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-8.3.4.tgz#bd86a43617df0594787d38b735f55c805becf1bc"
+  integrity sha512-c/I8ZRb51j+pYGAu5CrFMRxqZ2ke4y2grEBO5AUjgSkSk+qT2Ea+OdWElz/OiMf5MNpn2b17kuVBwZLQJXzihw==
 
 "@types/webpack-env@^1.16.0":
   version "1.16.3"

@@ -119,6 +119,7 @@ jobs:
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
           IAM_PATH: ${{ secrets.iam_path }}
+          NR_LICENSE_KEY: ${{ secrets.nr_license_key }}
         run: |
           pushd services/uploads && npx serverless deploy --stage ${{ inputs.stage_name }}
 

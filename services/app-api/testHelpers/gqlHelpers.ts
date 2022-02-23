@@ -1,6 +1,7 @@
 import { ApolloServer } from 'apollo-server-lambda'
 import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
 import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitDraftSubmission.graphql'
+import UNLOCK_STATE_SUBMISSION from '../../app-graphql/src/mutations/unlockStateSubmission.graphql'
 import UPDATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/updateDraftSubmission.graphql'
 import FETCH_DRAFT_SUBMISSION from '../../app-graphql/src/queries/fetchDraftSubmission.graphql'
 import FETCH_STATE_SUBMISSION from '../../app-graphql/src/queries/fetchStateSubmission.graphql'
@@ -11,10 +12,10 @@ import {
     DraftSubmission,
     DraftSubmissionUpdates,
     StateSubmission,
-    UpdateDraftSubmissionInput,
+    UpdateDraftSubmissionInput
 } from '../gen/gqlServer'
 import { Context } from '../handlers/apollo_gql'
-import { NewPostgresStore } from '../postgres'
+import { NewPostgresStore, Store } from '../postgres'
 import { configureResolvers } from '../resolvers'
 import { sharedTestPrismaClient } from './storeHelpers'
 
@@ -32,13 +33,14 @@ const defaultContext = (): Context => {
 const constructTestPostgresServer = async (opts?: {
     context?: Context
     emailer?: Emailer
+    store?: Store
 }): Promise<ApolloServer> => {
     // set defaults
     const context = opts?.context || defaultContext()
     const emailer = opts?.emailer || constructTestEmailer()
 
     const prismaClient = await sharedTestPrismaClient()
-    const postgresStore = NewPostgresStore(prismaClient)
+    const postgresStore = opts?.store || NewPostgresStore(prismaClient)
     const postgresResolvers = configureResolvers(postgresStore, emailer)
 
     return new ApolloServer({
@@ -147,6 +149,7 @@ const createAndUpdateTestDraftSubmission = async (
         ],
         actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
         contractType: 'BASE' as const,
+        contractExecutionStatus: 'EXECUTED' as const,
         contractDateStart: startDate,
         contractDateEnd: endDate,
         contractDocuments: [
@@ -206,6 +209,33 @@ const submitTestDraftSubmission = async (
     }
 
     return updateResult.data.submitDraftSubmission.submission
+}
+
+const unlockTestDraftSubmission = async (
+    server: ApolloServer,
+    submissionID: string
+) => {
+    const updateResult = await server.executeOperation({
+        query: UNLOCK_STATE_SUBMISSION,
+        variables: {
+            input: {
+                submissionID,
+            },
+        },
+    })
+
+    if (updateResult.errors) {
+        console.log('errors', updateResult.errors)
+        throw new Error(
+            `updateTestDraftSubmission mutation failed with errors ${updateResult.errors}`
+        )
+    }
+
+    if (updateResult.data === undefined || updateResult.data === null) {
+        throw new Error('updateTestDraftSubmission returned nothing')
+    }
+
+    return updateResult.data.unlockStateSubmission.draftSubmission
 }
 
 const createTestStateSubmission = async (
@@ -269,6 +299,8 @@ export {
     updateTestDraftSubmission,
     createAndUpdateTestDraftSubmission,
     fetchTestDraftSubmissionById,
+    submitTestDraftSubmission,
+    unlockTestDraftSubmission,
     fetchTestStateSubmissionById,
     defaultContext
 }

@@ -52,6 +52,7 @@ describe('updateDraftSubmission', () => {
                 documents: [],
                 contractDocuments: [],
                 contractType: null,
+                contractExecutionStatus: null,
                 contractDateStart: null,
                 contractDateEnd: null,
                 managedCareEntities: [],
@@ -72,6 +73,7 @@ describe('updateDraftSubmission', () => {
 
             expect(baseDraft.submissionDescription).toBe('an updated draft')
             expect(baseDraft.contractType).toBeUndefined()
+            expect(baseDraft.contractExecutionStatus).toBeUndefined()
             expect(baseDraft.contractDateStart).toBeUndefined()
             expect(baseDraft.contractDateEnd).toBeUndefined()
             expect(baseDraft.contractAmendmentInfo).toBeUndefined()
@@ -112,6 +114,7 @@ describe('updateDraftSubmission', () => {
                 documents: [],
                 contractDocuments: [],
                 contractType: null,
+                contractExecutionStatus: null,
                 contractDateStart: null,
                 contractDateEnd: null,
                 managedCareEntities: [],
@@ -183,6 +186,7 @@ describe('updateDraftSubmission', () => {
                 documents: [],
                 contractDocuments: [],
                 contractType: null,
+                contractExecutionStatus: null,
                 contractDateStart: null,
                 contractDateEnd: null,
                 managedCareEntities: [],
@@ -236,6 +240,7 @@ describe('updateDraftSubmission', () => {
             submissionDescription: 'An updated submission',
             documents: [],
             contractType: 'BASE',
+            contractExecutionStatus: 'EXECUTED',
             contractDocuments: [],
             contractDateStart: startDate,
             contractDateEnd: endDate,
@@ -286,6 +291,7 @@ describe('updateDraftSubmission', () => {
 
         // Contract details
         expect(resultDraft.contractType).toEqual('BASE')
+        expect(resultDraft.contractExecutionStatus).toEqual('EXECUTED')
         expect(resultDraft.contractDateStart).not.toBeUndefined()
         expect(resultDraft.contractDateStart).toBe(startDate)
         expect(resultDraft.contractDateEnd).toBe(endDate)
@@ -332,6 +338,7 @@ describe('updateDraftSubmission', () => {
                 },
             ],
             contractType: 'BASE',
+            contractExecutionStatus: 'EXECUTED',
             contractDateStart: startDate,
             contractDateEnd: endDate,
             managedCareEntities: [],
@@ -412,6 +419,7 @@ describe('updateDraftSubmission', () => {
                 },
             ],
             contractType: 'BASE',
+            contractExecutionStatus: 'EXECUTED',
             contractDocuments: [
                 {
                     name: 'contractDocument2.pdf',
@@ -520,6 +528,7 @@ describe('updateDraftSubmission', () => {
             actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
             documents: [],
             contractType: 'BASE',
+            contractExecutionStatus: 'EXECUTED',
             contractDocuments: [],
             contractDateStart: null,
             contractDateEnd: null,
@@ -589,6 +598,7 @@ describe('updateDraftSubmission', () => {
             submissionDescription: 'An updated submission',
             documents: [],
             contractType: 'AMENDMENT',
+            contractExecutionStatus: 'UNEXECUTED',
             contractDocuments: [],
             contractDateStart: startDate,
             managedCareEntities: [],
@@ -648,6 +658,7 @@ describe('updateDraftSubmission', () => {
             submissionDescription: 'An updated submission',
             documents: [],
             contractType: 'AMENDMENT',
+            contractExecutionStatus: 'UNEXECUTED',
             contractDocuments: [],
             contractDateStart: startDate,
             managedCareEntities: [],
@@ -954,6 +965,7 @@ describe('updateDraftSubmission', () => {
             submissionDescription: 'An updated submission',
             documents: [],
             contractType: 'BASE',
+            contractExecutionStatus: 'EXECUTED',
             contractDocuments: [],
             rateDocuments: [],
             contractDateStart: startDate,
@@ -1029,6 +1041,7 @@ describe('updateDraftSubmission', () => {
             submissionDescription: 'An updated submission',
             documents: [],
             contractType: 'BASE',
+            contractExecutionStatus: 'EXECUTED',
             contractDocuments: [],
             rateDocuments: [],
             contractDateStart: startDate,
@@ -1072,6 +1085,7 @@ describe('updateDraftSubmission', () => {
             submissionDescription: 'An updated submission',
             documents: [],
             contractType: 'BASE',
+            contractExecutionStatus: 'EXECUTED',
             contractDocuments: [],
             rateDocuments: [],
             contractDateStart: startDate,
