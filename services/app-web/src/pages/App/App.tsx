@@ -6,6 +6,7 @@ import {
     ApolloClient,
     NormalizedCacheObject,
 } from '@apollo/client'
+import { Tracer } from '../../tracer'
 
 import { AppBody } from './AppBody'
 import { logEvent } from '../../log_event'
@@ -15,6 +16,8 @@ import { GenericError } from '../Errors/GenericError'
 import { AuthModeType } from '../../common-code/domain-models'
 import { S3Provider } from '../../contexts/S3Context'
 import type { S3ClientT } from '../../s3'
+
+Tracer('app-testing')
 
 function ErrorFallback({
     error,
