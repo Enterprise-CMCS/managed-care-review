@@ -43,6 +43,7 @@ function updatesFromSubmission(draft: DraftSubmission): DraftSubmissionUpdates {
         submissionDescription: draft.submissionDescription,
         documents: stripTypename(draft.documents),
         contractType: draft.contractType,
+        contractExecutionStatus: draft.contractExecutionStatus,
         contractDocuments: stripTypename(draft.contractDocuments),
         contractDateStart: draft.contractDateStart,
         contractDateEnd: draft.contractDateEnd,

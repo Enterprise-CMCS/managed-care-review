@@ -18,6 +18,7 @@ describe('submission type assertions', () => {
     test.each([
         [mockStateSubmission(), true],
         [{ ...mockStateSubmission(), contractType: undefined }, false],
+        [{ ...mockStateSubmission(), contractExecutionStatus: undefined }, false],
         [{ ...mockStateSubmission(), contractDateStart: undefined }, false],
         [{ ...mockStateSubmission(), contractDateEnd: undefined }, false],
         [{ ...mockStateSubmission(), managedCareEntities: [] }, false],
@@ -279,6 +280,7 @@ describe('submission type assertions', () => {
             false,
         ],
         [{ ...mockStateSubmission(), contractType: undefined }, false],
+        [{ ...mockStateSubmission(), contractExecutionStatus: undefined }, false],
         [mockDraft(), false],
         [mockContractAndRatesDraft(), false],
     ])(

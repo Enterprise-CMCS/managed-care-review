@@ -6,6 +6,7 @@ import {
     AmendableItems,
     ActuarialFirmType,
     ActuaryCommunicationType,
+    ContractExecutionStatus
 } from '../common-code/domain-models/DraftSubmissionType'
 
 const SubmissionTypeRecord: Record<SubmissionType, string> = {
@@ -16,6 +17,11 @@ const SubmissionTypeRecord: Record<SubmissionType, string> = {
 const ContractTypeRecord: Record<ContractType, string> = {
     BASE: 'Base contract',
     AMENDMENT: 'Contract amendment',
+}
+
+const ContractExecutionStatusRecord: Record<ContractExecutionStatus, string> = {
+    EXECUTED: 'Fully executed',
+    UNEXECUTED: 'Unexecuted by some or all parties'
 }
 
 const FederalAuthorityRecord: Record<FederalAuthority, string> = {
@@ -84,4 +90,5 @@ export {
     ManagedCareEntityRecord,
     ActuaryFirmsRecord,
     ActuaryCommunicationRecord,
+    ContractExecutionStatusRecord,
 }

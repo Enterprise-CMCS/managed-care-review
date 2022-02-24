@@ -71,6 +71,7 @@
                },
            ],
            contractType: 'BASE',
+           contractExecutionStatus: 'EXECUTED',
            contractDocuments: [
                {
                    s3URL: 'bar',
@@ -128,6 +129,7 @@
                },
            ],
            contractType: 'BASE',
+           contractExecutionStatus: 'EXECUTED',
            contractDocuments: [
                {
                    s3URL: 'bar',
@@ -174,6 +176,7 @@ const mockContractAmendmentSubmission = (
             },
         ],
         contractType: 'AMENDMENT',
+        contractExecutionStatus: 'UNEXECUTED',
         contractDocuments: [
             {
                 s3URL: 'bar',

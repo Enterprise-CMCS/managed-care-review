@@ -57,7 +57,7 @@ describe('contract details', () => {
         cy.findByRole('button', { name: /Back/ }).click()
         cy.pa11y({
             actions: ['wait for element #form-guidance to be visible'],
-            threshold: 15, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15946
+            threshold: 16, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15946
         })
     })
 })
