@@ -1,5 +1,4 @@
 describe('dashboard', () => {
-
     it('can navigate to and from dashboard page', () => {
         cy.logInAsStateUser()
         cy.findByRole('heading', { level: 1, name: /Dashboard/ })
@@ -59,8 +58,8 @@ describe('dashboard', () => {
             ignore: [
                 'definition-list',
                 'dlitem',
-                'aria-allowed-attr',
-                'color-contrast',
+                //'aria-allowed-attr',
+                //'color-contrast',
             ],
         })
 
