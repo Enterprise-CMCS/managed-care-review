@@ -60,7 +60,7 @@ describe('dashboard', () => {
                 'definition-list',
                 'dlitem'
             ],
-            threshold: 6, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15950
+            threshold: 7, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15950
         })
 
         // Submit, sent to dashboard
