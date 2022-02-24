@@ -17,7 +17,7 @@
         "build-storybook": "build-storybook -s public --quiet"
     },
     "lint-staged": {
-        "src/**/*.{js,jsx,ts,tsx}": [
+        "*.{js,jsx,ts,tsx}": [
             "eslint --fix --max-warnings=0",
             "prettier --write"
         ]

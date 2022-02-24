@@ -22,8 +22,7 @@
         "format": "yarn prettier --write",
         "prettier": "prettier --ignore-path .gitignore \"**/*.+(ts|tsx|json)\"",
         "cypress:open": "cypress open --env AUTH_MODE=LOCAL",
-        "cypress:run": "cypress run --env AUTH_MODE=LOCAL",
-        "precommit": "lerna run --concurrency 1 --stream precommit --since HEAD --exclude-dependents"
+        "cypress:run": "cypress run --env AUTH_MODE=LOCAL"
     },
     "repository": {
         "type": "git",

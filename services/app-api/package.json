@@ -12,8 +12,8 @@
         "clean": "rm -rf node_modules && yarn cache clean"
     },
     "lint-staged": {
-        "src/*.{js,ts}": [
-            "eslint --fix --max-warnings=0",
+        "*.{js,ts}": [
+            "eslint --max-warnings=0",
             "prettier --write"
         ]
     },
