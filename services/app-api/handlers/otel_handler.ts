@@ -144,21 +144,21 @@ const provider = new NodeTracerProvider({
         allowValues: true,
         responseHook: simpleHook,
       }),
-      new AwsLambdaInstrumentation({
-                    disableAwsContextPropagation: true,
-                    requestHook: (span, { event, context }) => {
-                        console.log('IN REQUEST HOOK WOIFNEWOINFWIOFNd')
-                        span.setAttribute('app.name', context.functionName)
-                        span.setAttribute('started', true)
-                    },
-                    responseHook: (span, { err, res }) => {
-                        console.log('IN RESPONSE HOOK WOEINFWOINFIOWEF')
-                        span.setAttribute('finished', true)
-                        if (err instanceof Error)
-                            span.setAttribute('app.error', err.message)
-                        if (res) span.setAttribute('app.res', res)
-                    },
-                }),
+      // new AwsLambdaInstrumentation({
+      //               disableAwsContextPropagation: true,
+      //               requestHook: (span, { event, context }) => {
+      //                   console.log('IN REQUEST HOOK WOIFNEWOINFWIOFNd')
+      //                   span.setAttribute('app.name', context.functionName)
+      //                   span.setAttribute('started', true)
+      //               },
+      //               responseHook: (span, { err, res }) => {
+      //                   console.log('IN RESPONSE HOOK WOEINFWOINFIOWEF')
+      //                   span.setAttribute('finished', true)
+      //                   if (err instanceof Error)
+      //                       span.setAttribute('app.error', err.message)
+      //                   if (res) span.setAttribute('app.res', res)
+      //               },
+      //           }),
     ],
   });
 
