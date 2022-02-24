@@ -1,20 +1,18 @@
-import { useState, useEffect } from 'react'
 import dayjs from 'dayjs'
-import styles from '../SubmissionSummarySection.module.scss'
+import { useEffect, useState } from 'react'
+import { DataDetail } from '../../../components/DataDetail'
+import { SectionHeader } from '../../../components/SectionHeader'
+import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import {
     AmendableItemsRecord,
     ContractTypeRecord,
-    FederalAuthorityRecord,
-    RateChangeReasonRecord,
-    ManagedCareEntityRecord,
+    FederalAuthorityRecord, ManagedCareEntityRecord, RateChangeReasonRecord
 } from '../../../constants/submissions'
-import { SectionHeader } from '../../../components/SectionHeader'
-import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
-import { DataDetail } from '../../../components/DataDetail'
+import { useS3 } from '../../../contexts/S3Context'
+import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
-import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
-import { useS3 } from '../../../contexts/S3Context'
+import styles from '../SubmissionSummarySection.module.scss'
 
 export type ContractDetailsSummarySectionProps = {
     submission: DraftSubmission | StateSubmission
@@ -82,6 +80,8 @@ export const ContractDetailsSummarySection = ({
     const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
     const contractSupportingDocuments = submission.documents.filter(doc => doc.documentCategories.includes('CONTRACT_RELATED' as const))
     const isSubmitted = submission.__typename === 'StateSubmission'
+    console.log("IS SUB", isSubmitted, submission.__typename)
+    const isEditing = !isSubmitted && navigateTo !== undefined
     // Array of values from a checkbox field is displayed in an unordered list
     const capitationRateChangeReason = (): string | null => {
         const { reason, otherReason } =
@@ -219,7 +219,7 @@ export const ContractDetailsSummarySection = ({
                 caption="Contract supporting documents"
                 documentCategory="Contract-supporting"
                 isSupportingDocuments
-                isSubmitted={isSubmitted}
+                isEditing={isEditing}
             />
         </section>
     )

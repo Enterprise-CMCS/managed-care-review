@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react'
 import dayjs from 'dayjs'
-import styles from '../SubmissionSummarySection.module.scss'
-import { SectionHeader } from '../../../components/SectionHeader'
+import { useEffect, useState } from 'react'
 import { DataDetail } from '../../../components/DataDetail'
+import { SectionHeader } from '../../../components/SectionHeader'
+import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
+import { useS3 } from '../../../contexts/S3Context'
+import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
-import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
-import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
-import { useS3 } from '../../../contexts/S3Context'
+import styles from '../SubmissionSummarySection.module.scss'
 
 export type RateDetailsSummarySectionProps = {
     submission: DraftSubmission | StateSubmission
@@ -19,6 +19,7 @@ export const RateDetailsSummarySection = ({
     navigateTo,
 }: RateDetailsSummarySectionProps): React.ReactElement => {
     const isSubmitted = submission.__typename === 'StateSubmission'
+    const isEditing = !isSubmitted && navigateTo !== undefined
     // Get the zip file for the rate details
     const { getKey, getBulkDlURL } = useS3()
     useEffect(() => {
@@ -120,7 +121,7 @@ export const RateDetailsSummarySection = ({
                 caption="Rate supporting documents"
                 documentCategory="Rate-supporting"
                 isSupportingDocuments
-                isSubmitted={isSubmitted}
+                isEditing={isEditing}
             />
         </section>
     )

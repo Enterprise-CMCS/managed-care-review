@@ -3,6 +3,8 @@ import { Alert, Button, ButtonGroup, GridContainer, Link, Modal, ModalFooter, Mo
 import React, { useEffect, useRef, useState } from 'react'
 import { NavLink, useLocation, useParams } from 'react-router-dom'
 import sprite from 'uswds/src/img/sprite.svg'
+import { submissionName } from '../../common-code/domain-models'
+import { toDomain } from '../../common-code/proto/stateSubmission'
 import { Loading } from '../../components/Loading'
 import {
     ContactsSummarySection, ContractDetailsSummarySection,
@@ -10,18 +12,19 @@ import {
 } from '../../components/SubmissionSummarySection'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
-import { DraftSubmission, UnlockStateSubmissionMutationFn, useFetchStateSubmissionQuery, useUnlockStateSubmissionMutation } from '../../gen/gqlClient'
+import { DraftSubmission, StateSubmission, Submission2, UnlockStateSubmissionMutationFn, useFetchSubmission2Query, useUnlockStateSubmissionMutation } from '../../gen/gqlClient'
 import { isGraphQLErrors } from '../../gqlHelpers'
 import { GenericError } from '../Errors/GenericError'
 import styles from './SubmissionSummary.module.scss'
 
-function unlockModalButton(modalRef: React.RefObject<ModalRef>) {
+function unlockModalButton(modalRef: React.RefObject<ModalRef>, disabled: boolean) {
     return (
         <ModalToggleButton
             modalRef={modalRef}
             data-testid="form-submit"
             outline
             opener
+            disabled={disabled}
         >
             Unlock submission
         </ModalToggleButton>
@@ -31,7 +34,7 @@ function unlockModalButton(modalRef: React.RefObject<ModalRef>) {
 // This wrapper gets us some reasonable errors out of our unlock call. This would be a good candidate
 // for a more general and generic function so that we can get more sensible errors out of all of the 
 // generated mutations.
-async function unlockMutationWrapper(unlockStateSubmission: UnlockStateSubmissionMutationFn, id: string): Promise<DraftSubmission | GraphQLErrors | Error> {
+async function unlockMutationWrapper(unlockStateSubmission: UnlockStateSubmissionMutationFn, id: string): Promise<Submission2 | GraphQLErrors | Error> {
     try {
             const result = await unlockStateSubmission({
                 variables: {
@@ -45,13 +48,17 @@ async function unlockMutationWrapper(unlockStateSubmission: UnlockStateSubmissio
                 return result.errors
             }
 
-            if (result.data?.unlockStateSubmission.draftSubmission) {
-                return result.data?.unlockStateSubmission.draftSubmission
+            if (result.data?.unlockStateSubmission.submission) {
+                return result.data?.unlockStateSubmission.submission
             } else {
                 return new Error('No errors, and no unlock result.')
             }
             
         } catch (error) {
+            // this can be an errors object
+            if ('graphQLErrors' in error) {
+                return error.graphQLErrors
+            }
             return error
         }
 }
@@ -67,7 +74,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     >(undefined)
     const modalRef = useRef<ModalRef>(null)
 
-    const { loading, error, data } = useFetchStateSubmissionQuery({
+    const { loading, error, data } = useFetchSubmission2Query({
         variables: {
             input: {
                 submissionID: id,
@@ -77,7 +84,7 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     const [unlockStateSubmission] = useUnlockStateSubmissionMutation()
 
-    const submission = data?.fetchStateSubmission.submission
+    const submissionAndRevisions = data?.fetchSubmission2.submission
 
     // This is a hacky way to fake feature flags before we have feature flags.
     // please avoid reading env vars outside of index.tsx in general. 
@@ -87,8 +94,8 @@ export const SubmissionSummary = (): React.ReactElement => {
     const displayUnlockButton = !isProdEnvironment && loggedInUser?.role === 'CMS_USER'
 
     useEffect(() => {
-        updateHeading(pathname, submission?.name)
-    }, [updateHeading, pathname, submission?.name])
+        updateHeading(pathname, 'TEMP NAME')
+    }, [updateHeading, pathname])
 
     if (loading) {
         return (
@@ -98,24 +105,62 @@ export const SubmissionSummary = (): React.ReactElement => {
         )
     }
 
-    if (error || !submission) return <GenericError />
+    if (error || !submissionAndRevisions) return <GenericError />
 
     const onUnlock = async () => {
-        const result = await unlockMutationWrapper(unlockStateSubmission, submission.id)
+        const result = await unlockMutationWrapper(unlockStateSubmission, submissionAndRevisions.id)
 
         if (result instanceof Error) {
             console.error('ERROR: got an Apollo Client Error attempting to unlock', result)
             setUserVisibleUnlockError('Error attempting to unlock. Please try again.')
         } else if (isGraphQLErrors(result)) {
             console.error('ERROR: got a GraphQL error response', result)
-            setUserVisibleUnlockError('Error attempting to unlock. Please try again.')
+            if (result[0].extensions.code === 'BAD_USER_INPUT') {
+                setUserVisibleUnlockError('Submission is already unlocked. Please refresh and try again.')
+            } else {
+                setUserVisibleUnlockError('Error attempting to unlock. Please try again.')
+            }
         } else {
-            const unlockedSub: DraftSubmission = result
+            const unlockedSub: Submission2 = result
             console.log('Submission Unlocked', unlockedSub)
         }
 
         modalRef.current?.toggleModal(undefined, false)
     }
+
+    const currentRevision = submissionAndRevisions.revisions[0].revision
+
+    const formBinData = Buffer.from(currentRevision.submissionData, 'base64')
+    const submissionResult = toDomain(formBinData)
+    if (submissionResult instanceof Error) {
+        console.error('ERROR: got a proto decoding error', submissionResult)
+        setUserVisibleUnlockError('Error loading submission. Please try again')
+        return <GenericError />
+    }
+
+    // temporary kludge while the display data is expecting the wrong format. 
+    // This is turning our domain model into the GraphQL model which is what
+    // all our frontend stuff expects right now. 
+    const submission: StateSubmission | DraftSubmission = submissionResult.status === 'DRAFT' ? {
+        ...submissionResult,
+        __typename: 'DraftSubmission' as const,
+        name: submissionName(submissionResult),
+        program: {
+            id: 'bogs-id',
+            name: 'bogus-program'
+        },
+    } : {
+        ...submissionResult,
+        __typename: 'StateSubmission' as const,
+        name: submissionName(submissionResult),
+        program: {
+            id: 'bogs-id',
+            name: 'bogus-program'
+        },
+        submittedAt: currentRevision.submitInfo?.updatedAt
+    }
+
+    const disableUnlockButton = ['DRAFT', 'UNLOCKED'].includes(submissionAndRevisions.status)
 
     const isContractActionAndRateCertification =
         submission.submissionType === 'CONTRACT_AND_RATES'
@@ -152,7 +197,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                     </Link>
                 ) : null}
 
-                <SubmissionTypeSummarySection submission={submission} unlockModalButton={displayUnlockButton ? unlockModalButton(modalRef) : undefined} />
+                <SubmissionTypeSummarySection submission={submission} unlockModalButton={displayUnlockButton ? unlockModalButton(modalRef, disableUnlockButton) : undefined} />
 
                 <ContractDetailsSummarySection submission={submission} />
 
@@ -189,7 +234,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                                 data-testid="modal-submit"
                                 onClick={onUnlock}
                             >
-                                Unlock
+                                Submit
                             </Button>
                         </ButtonGroup>
                     </ModalFooter>

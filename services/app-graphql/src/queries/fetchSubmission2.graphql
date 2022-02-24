@@ -1,5 +1,5 @@
-mutation unlockStateSubmission($input: UnlockStateSubmissionInput!) {
-    unlockStateSubmission(input: $input) {
+query fetchSubmission2($input: FetchSubmission2Input!) {
+    fetchSubmission2(input: $input) {
         submission {
             id
             stateCode

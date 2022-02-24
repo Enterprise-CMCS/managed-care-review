@@ -47,6 +47,9 @@ function mockStoreThatErrors(): Store {
         findDraftSubmission: async (draftUUID) => {
             return genericStoreError
         },
+        findSubmissionWithRevisions: async (draftUUID) => {
+            return genericStoreError
+        },
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         findDraftSubmissionByStateNumber: async (_stateCode, _stateNumber) => {
             throw new Error('UNIMPLEMENTED')
