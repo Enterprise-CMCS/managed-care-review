@@ -1,8 +1,10 @@
 import { MockedResponse } from '@apollo/client/testing'
 import dayjs from 'dayjs'
 import { GraphQLError } from 'graphql'
+import { basicStateSubmission } from '../common-code/domain-mocks'
+import { toProtoBuffer } from '../common-code/proto/stateSubmission'
 import {
-    CreateDraftSubmissionDocument, DraftSubmission, DraftSubmissionUpdates, FetchCurrentUserDocument, FetchDraftSubmissionDocument, FetchStateSubmissionDocument, IndexSubmissionsDocument, StateSubmission, Submission, SubmitDraftSubmissionDocument, UnlockStateSubmissionDocument, UpdateDraftSubmissionDocument, User as UserType
+    CreateDraftSubmissionDocument, DraftSubmission, DraftSubmissionUpdates, FetchCurrentUserDocument, FetchDraftSubmissionDocument, FetchStateSubmissionDocument, FetchSubmission2Document, IndexSubmissionsDocument, StateSubmission, Submission, Submission2, SubmitDraftSubmissionDocument, UnlockStateSubmissionDocument, UpdateDraftSubmissionDocument, User as UserType
 } from '../gen/gqlClient'
 
 
@@ -303,6 +305,71 @@ export function mockStateSubmission(): StateSubmission {
     }
 }
 
+export function mockSubmittedSubmission2(): Submission2 {
+
+    // get a submitted DomainModel submission
+    // turn it into proto
+    const submission = basicStateSubmission()
+    const proto = toProtoBuffer(submission)
+    const b64 = Buffer.from(proto).toString('base64')
+
+    return {
+        id: 'test-id-123',
+        status: 'SUBMITTED',
+        submittedAt: '2022-01-01',
+        stateCode: 'MN',
+        revisions: [
+            {
+                revision: {
+                    id: 'revision1',
+                    unlockInfo: null,
+                    submitInfo: {
+                        updatedAt: "2021-01-01"
+                    },
+                    submissionData: b64,
+                }
+            },
+        ]
+    }
+}
+
+export function mockUnlockedSubmission2(): Submission2 {
+
+    // get a submitted DomainModel submission
+    // turn it into proto
+    const submission = basicStateSubmission()
+    const proto = toProtoBuffer(submission)
+    const b64 = Buffer.from(proto).toString('base64')
+
+    return {
+        id: 'test-id-123',
+        status: 'UNLOCKED',
+        submittedAt: '2022-01-01',
+        stateCode: 'MN',
+        revisions: [
+            {
+                revision: {
+                    id: 'revision2',
+                    unlockInfo: null,
+                    submitInfo: null,
+                    submissionData: b64,
+                }
+            },
+            {
+                revision: {
+                    id: 'revision1',
+                    unlockInfo: null,
+                    submitInfo: {
+                        updatedAt: "2021-01-01"
+                    },
+                    submissionData: b64,
+                }
+            },
+        ]
+    }
+}
+
+
 type fetchCurrentUserMockProps = {
     user?: UserType | Partial<UserType>
     statusCode: 200 | 403 | 500
@@ -424,6 +491,35 @@ type fetchStateSubmissionMockProps = {
     stateSubmission?: StateSubmission | Partial<StateSubmission>
     id: string
     statusCode: 200 | 403 | 500
+}
+
+
+type fetchStateSubmission2MockSuccessProps = {
+    stateSubmission?: Submission2 | Partial<Submission2>
+    id: string
+}
+
+const fetchStateSubmission2MockSuccess = ({
+    stateSubmission = mockSubmittedSubmission2(),
+    id, // eslint-disable-next-line @typescript-eslint/no-explicit-any
+}: fetchStateSubmission2MockSuccessProps): MockedResponse<Record<string, any>> => {
+    // override the ID of the returned draft to match the queried id.
+    console.log("MOCKING", id)
+    const mergedStateSubmission = Object.assign({}, stateSubmission, { id })
+
+    return {
+        request: {
+            query: FetchSubmission2Document,
+            variables: { input: { submissionID: id } },
+        },
+        result: {
+            data: {
+                fetchSubmission2: {
+                    submission: mergedStateSubmission
+                },
+            },
+        }
+    }
 }
 
 const fetchStateSubmissionMock = ({
@@ -555,24 +651,23 @@ const submitDraftSubmissionMockError = ({
 }
 
 type unlockStateSubmissionMockSuccessProps = {
-    draft?: StateSubmission | Partial<StateSubmission>
+    submission?: Submission2 | Partial<Submission2>
     id: string
 }
 
 const unlockStateSubmissionMockSuccess = ({
+    submission = mockUnlockedSubmission2(),
     id,
-    draft,
 }: unlockStateSubmissionMockSuccessProps): MockedResponse<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Record<string, any>
 > => {
-    const submission = draft ?? mockDraft()
     return {
         request: {
             query: UnlockStateSubmissionDocument,
             variables: { input: { submissionID: id } },
         },
-        result: { data: { unlockStateSubmission: { draftSubmission: submission } } },
+        result: { data: { unlockStateSubmission: { submission } } },
     }
 }
 
@@ -625,6 +720,7 @@ export {
     createDraftSubmissionMock,
     fetchDraftSubmissionMock,
     fetchStateSubmissionMock,
+    fetchStateSubmission2MockSuccess,
     updateDraftSubmissionMock,
     submitDraftSubmissionMockSuccess,
     submitDraftSubmissionMockError,

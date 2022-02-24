@@ -134,7 +134,6 @@ export const SubmissionSummary = (): React.ReactElement => {
     const submissionResult = toDomain(formBinData)
     if (submissionResult instanceof Error) {
         console.error('ERROR: got a proto decoding error', submissionResult)
-        setUserVisibleUnlockError('Error loading submission. Please try again')
         return <GenericError />
     }
 

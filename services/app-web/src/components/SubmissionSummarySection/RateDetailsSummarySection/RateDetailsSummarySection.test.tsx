@@ -1,10 +1,10 @@
-import { screen,within, waitFor } from '@testing-library/react'
-import { renderWithProviders } from '../../../testHelpers/jestHelpers'
-import { RateDetailsSummarySection } from './RateDetailsSummarySection'
+import { screen, waitFor, within } from '@testing-library/react'
 import {
     mockContractAndRatesDraft,
-    mockStateSubmission,
+    mockStateSubmission
 } from '../../../testHelpers/apolloHelpers'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import { RateDetailsSummarySection } from './RateDetailsSummarySection'
 
 describe('RateDetailsSummarySection', () => {
     const draftSubmission = mockContractAndRatesDraft()
@@ -120,7 +120,7 @@ describe('RateDetailsSummarySection', () => {
             ],
         }
         renderWithProviders(
-            <RateDetailsSummarySection submission={testSubmission} />
+            <RateDetailsSummarySection submission={testSubmission} navigateTo={'/rate-details'}/>
         )
 
         await waitFor (() => {

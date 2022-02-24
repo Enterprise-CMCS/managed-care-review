@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import {
-    Submission2Type,
-    UpdateInfoType
+    Submission2Type
 } from '../../app-web/src/common-code/domain-models'
 import { findUniqueSubmissionWrapper } from './findDraftSubmission'
 import { isStoreError, StoreError } from './storeError'
