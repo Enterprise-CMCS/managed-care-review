@@ -27,7 +27,7 @@
         "@opentelemetry/instrumentation-express": "^0.28.0",
         "@opentelemetry/instrumentation-graphql": "^0.27.0",
         "@opentelemetry/instrumentation-http": "^0.27.0",
-        "@opentelemetry/node": "^0.27.0",
+        "@opentelemetry/node": "^0.24.0",
         "@opentelemetry/sdk-node": "^0.27.0",
         "@opentelemetry/sdk-trace-node": "^1.0.1",
         "@opentelemetry/semantic-conventions": "^1.0.1",

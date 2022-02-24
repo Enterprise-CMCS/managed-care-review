@@ -5817,7 +5817,7 @@
     semver "^7.3.2"
     shimmer "^1.2.1"
 
-"@opentelemetry/node@^0.27.0":
+"@opentelemetry/node@^0.24.0":
   version "0.24.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/node/-/node-0.24.0.tgz#ef3f3ebc249e71eec2513f1372206f2eae089d85"
   integrity sha512-Sy8QooZFOeVUcJIKetw5xsq15/1ivZovWg0RnKWtzURMQrcOxmQ3bGrXPORklOJxOtf5snDHgT37Y7dBgr+c+g==
