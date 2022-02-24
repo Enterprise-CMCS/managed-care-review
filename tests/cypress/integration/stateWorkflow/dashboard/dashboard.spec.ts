@@ -58,9 +58,10 @@ describe('dashboard', () => {
             actions: ['wait for element #submissionTypeSection to be visible'],
             ignore: [
                 'definition-list',
-                'dlitem'
+                'dlitem',
+                'aria-allowed-attr',
+                'color-contrast',
             ],
-            threshold: 7, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15950
         })
 
         // Submit, sent to dashboard
