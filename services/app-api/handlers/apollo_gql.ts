@@ -136,7 +136,7 @@ function localTracingMiddleware(
     wrapped: APIGatewayProxyHandler
 ): APIGatewayProxyHandler {
     return function (event, context, completion) {
-        console.log('start Trace', context)
+        console.log('start Trace, context:', context)
         const currentSpan = api.trace.getSpan(api.context.active())
         // display traceid in the terminal
         if (currentSpan) {
