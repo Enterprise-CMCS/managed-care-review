@@ -58,9 +58,9 @@ describe('dashboard', () => {
             ignore: [
                 'definition-list',
                 'dlitem',
-                //'aria-allowed-attr',
-                //'color-contrast',
+                'aria-allowed-attr',
             ],
+            hideElements: '.usa-step-indicator__segment-label'
         })
 
         // Submit, sent to dashboard
