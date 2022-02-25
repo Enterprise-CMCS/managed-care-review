@@ -141,6 +141,7 @@ function localTracingMiddleware(
         // display traceid in the terminal
         if (currentSpan) {
             console.log(`traceid: ${currentSpan.spanContext().traceId}`)
+            console.log(`spanid: ${currentSpan.spanContext().spanId}`)
         } else {
             console.log('no active span')
         }

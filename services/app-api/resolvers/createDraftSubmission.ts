@@ -5,6 +5,7 @@ import { logError, logSuccess } from '../logger'
 import { InsertDraftSubmissionArgsType, isStoreError, Store } from '../postgres'
 import { pluralize } from '../../app-web/src/common-code/formatters'
 import { tracer as tracer } from "../handlers/otel_handler";
+import * as api from '@opentelemetry/api'
 
 export function createDraftSubmissionResolver(
     store: Store
@@ -12,10 +13,12 @@ export function createDraftSubmissionResolver(
     return async (_parent, { input }, context) => {
         // This resolver is only callable by state users
         console.log("about to submit draft")
+        console.log("spanny: ", api.context.active())
         const span = tracer.startSpan('submitDraft', {
             kind: 1, // server
             attributes: { key: 'value' },
         })
+        span.setAttribute('bloop', 'bloop')
         if (!isStateUser(context.user)) {
             logError(
                 'createDraftSubmission',
