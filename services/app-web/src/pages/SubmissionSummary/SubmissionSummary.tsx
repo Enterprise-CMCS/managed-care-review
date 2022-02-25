@@ -94,10 +94,22 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     const displayUnlockButton = !isProdEnvironment && loggedInUser?.role === 'CMS_USER'
 
+    // pull out the correct revision
     useEffect(() => {
         if (submissionAndRevisions) {
-            const currentRevision = submissionAndRevisions.revisions[0].revision
-            const submissionResult = base64ToDomain(currentRevision.submissionData)
+            // We ignore revisions currently being edited. 
+            // The summary page should only ever called on a package that has been submitted once
+            const currentRevision = submissionAndRevisions.revisions.find(rev => {
+                // we want the most recent revision that has submission info.
+                return (rev.revision.submitInfo)
+            })
+            if (!currentRevision) {
+                console.error('ERROR: submission in summary has no submitted revision', submissionAndRevisions.revisions)
+                setUserVisibleUnlockError('Error fetching the submission. Please try again.')
+                return
+            }
+
+            const submissionResult = base64ToDomain(currentRevision.revision.submissionData)
             if (submissionResult instanceof Error) {
                 console.error('ERROR: got a proto decoding error', submissionResult)
                 setUserVisibleUnlockError('Error fetching the submission. Please try again.')

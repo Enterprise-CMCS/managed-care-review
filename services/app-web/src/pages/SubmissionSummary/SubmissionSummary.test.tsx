@@ -1,6 +1,8 @@
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route } from 'react-router'
+import { basicStateSubmission } from '../../common-code/domain-mocks'
+import { domainToBase64 } from '../../common-code/proto/stateSubmission'
 import { RoutesRecord } from '../../constants/routes'
 import {
     fetchCurrentUserMock, fetchStateSubmission2MockSuccess, mockUnlockedSubmission2, mockValidCMSUser, unlockStateSubmissionMockError, unlockStateSubmissionMockSuccess
@@ -158,6 +160,44 @@ describe('SubmissionSummary', () => {
         await waitFor(() => {
             expect(screen.getByRole('button', { name: 'Unlock submission'})).toBeDisabled()
         })
+    })
+
+    it('renders the OLD data for an unlocked submission, ignoring unsubmitted changes', async () => {
+
+        const submission2 = mockUnlockedSubmission2()
+
+        const oldPackageData = basicStateSubmission()
+        const newPackageData = basicStateSubmission()
+
+        oldPackageData.submissionDescription = 'OLD_DESCRIPTION'
+        newPackageData.submissionDescription = 'NEW_DESCRIPTION'
+
+        submission2.revisions[0].revision.submissionData = domainToBase64(newPackageData)
+        submission2.revisions[1].revision.submissionData = domainToBase64(oldPackageData)
+
+        renderWithProviders(
+            <Route
+                    path={RoutesRecord.SUBMISSIONS_FORM}
+                    component={SubmissionSummary}
+                />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ user: mockValidCMSUser(),  statusCode: 200 }),
+                        fetchStateSubmission2MockSuccess({
+                            id: '15',
+                            stateSubmission: submission2
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15',
+                },
+            }
+        )
+
+        expect(await screen.findByText('OLD_DESCRIPTION')).toBeInTheDocument()
+        expect(screen.queryByText('NEW_DESCRIPTION')).not.toBeInTheDocument()
     })
 
     it('displays an error if unlock fails', async () => {
