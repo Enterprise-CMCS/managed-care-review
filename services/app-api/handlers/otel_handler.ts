@@ -60,8 +60,8 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 // module.exports = (serviceName) => {
 const simpleHook = (span: Span, data: any) => {
-  if (data.data) {
-    span.setAttribute("bloopdoop", JSON.stringify(data.data))
+  if (data) {
+    span.setAttribute("bloopdoop", JSON.stringify(data))
     console.log("graphql data: ", data.data)
   }
 }
