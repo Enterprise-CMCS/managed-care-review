@@ -4,7 +4,7 @@ mutation unlockStateSubmission($input: UnlockStateSubmissionInput!) {
             id
             stateCode
             status
-            submittedAt
+            intiallySubmittedAt
             revisions {
                 revision {
                     id

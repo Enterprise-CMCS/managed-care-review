@@ -51,8 +51,12 @@ async function submitStateSubmissionWrapper(
                         }
                     }
                 },
-                    include: {
-                    revisions: true
+                include: {
+                    revisions: {
+                        orderBy: {
+                            createdAt: 'desc', // We expect our revisions most-recent-first
+                        },
+                    }
                 },
             })
 

@@ -65,7 +65,7 @@ input FetchSubmission2Input {
 }
 
 type FetchSubmission2Payload {
-    submission: Submission2!
+    submission: Submission2
 }
 
 type SubmissionEdge {
@@ -141,7 +141,7 @@ enum Submission2Status {
 type Submission2 {
     id: ID!
     status: Submission2Status!
-    submittedAt: Date
+    intiallySubmittedAt: Date
     stateCode: String!
     revisions: [RevisionEdge!]!
 }

@@ -4,7 +4,7 @@ query fetchSubmission2($input: FetchSubmission2Input!) {
             id
             stateCode
             status
-            submittedAt
+            intiallySubmittedAt
             revisions {
                 revision {
                     id

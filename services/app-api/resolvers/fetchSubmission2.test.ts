@@ -1,5 +1,5 @@
 import FETCH_SUBMISSION_2 from '../../app-graphql/src/queries/fetchSubmission2.graphql'
-import { toDomain } from '../../app-web/src/common-code/proto/stateSubmission'
+import { base64ToDomain } from '../../app-web/src/common-code/proto/stateSubmission'
 import { todaysDate } from '../testHelpers/dateHelpers'
 import {
     constructTestPostgresServer,
@@ -35,9 +35,8 @@ describe('fetchSubmission2', () => {
         expect(resultSub.revisions.length).toEqual(1)
 
         const revision = resultSub.revisions[0].revision
-        const formBinData = Buffer.from(revision.submissionData, 'base64')
 
-        const subData = toDomain(formBinData)
+        const subData = base64ToDomain(revision.submissionData)
         if (subData instanceof Error) {
             throw subData
         } 
@@ -53,6 +52,25 @@ describe('fetchSubmission2', () => {
                 documentCategories: ['CONTRACT'],
             },
         ])
+    })
+
+    it('returns nothing if the ID doesnt exist', async () => {
+        const server = await constructTestPostgresServer()
+
+        // then see if we can fetch that same submission
+        const input = {
+            submissionID: 'BOGUS-ID',
+        }
+
+        const result = await server.executeOperation({
+            query: FETCH_SUBMISSION_2,
+            variables: { input },
+        })
+
+        expect(result.errors).toBeUndefined()
+
+        const resultSub = result.data?.fetchSubmission2.submission
+        expect(resultSub).toBeNull()
     })
 
     it('returns multiple submissions payload with multiple revisions', async () => {
@@ -126,7 +144,7 @@ describe('fetchSubmission2', () => {
         const today = todaysDate()
 
         expect(resultSub.status).toEqual('SUBMITTED')
-        expect(resultSub.submittedAt).toEqual(today)
+        expect(resultSub.intiallySubmittedAt).toEqual(today)
 
 
         // unlock it
@@ -140,7 +158,7 @@ describe('fetchSubmission2', () => {
         expect(unlockResult.errors).toBeUndefined()
 
         expect(unlockResult.data?.fetchSubmission2.submission.status).toEqual('UNLOCKED')
-        expect(unlockResult.data?.fetchSubmission2.submission.submittedAt).toEqual(today)
+        expect(unlockResult.data?.fetchSubmission2.submission.intiallySubmittedAt).toEqual(today)
 
 
         // resubmit it
@@ -154,7 +172,7 @@ describe('fetchSubmission2', () => {
         expect(resubmitResult.errors).toBeUndefined()
 
         expect(resubmitResult.data?.fetchSubmission2.submission.status).toEqual('RESUBMITTED')
-        expect(resubmitResult.data?.fetchSubmission2.submission.submittedAt).toEqual(today)
+        expect(resubmitResult.data?.fetchSubmission2.submission.intiallySubmittedAt).toEqual(today)
 
 
     })

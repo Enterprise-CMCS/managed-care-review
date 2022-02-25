@@ -2,7 +2,7 @@ import { MockedResponse } from '@apollo/client/testing'
 import dayjs from 'dayjs'
 import { GraphQLError } from 'graphql'
 import { basicStateSubmission } from '../common-code/domain-mocks'
-import { toProtoBuffer } from '../common-code/proto/stateSubmission'
+import { domainToBase64 } from '../common-code/proto/stateSubmission'
 import {
     CreateDraftSubmissionDocument, DraftSubmission, DraftSubmissionUpdates, FetchCurrentUserDocument, FetchDraftSubmissionDocument, FetchStateSubmissionDocument, FetchSubmission2Document, IndexSubmissionsDocument, StateSubmission, Submission, Submission2, SubmitDraftSubmissionDocument, UnlockStateSubmissionDocument, UpdateDraftSubmissionDocument, User as UserType
 } from '../gen/gqlClient'
@@ -310,13 +310,12 @@ export function mockSubmittedSubmission2(): Submission2 {
     // get a submitted DomainModel submission
     // turn it into proto
     const submission = basicStateSubmission()
-    const proto = toProtoBuffer(submission)
-    const b64 = Buffer.from(proto).toString('base64')
+    const b64 = domainToBase64(submission)
 
     return {
         id: 'test-id-123',
         status: 'SUBMITTED',
-        submittedAt: '2022-01-01',
+        intiallySubmittedAt: '2022-01-01',
         stateCode: 'MN',
         revisions: [
             {
@@ -338,13 +337,12 @@ export function mockUnlockedSubmission2(): Submission2 {
     // get a submitted DomainModel submission
     // turn it into proto
     const submission = basicStateSubmission()
-    const proto = toProtoBuffer(submission)
-    const b64 = Buffer.from(proto).toString('base64')
+    const b64 = domainToBase64(submission)
 
     return {
         id: 'test-id-123',
         status: 'UNLOCKED',
-        submittedAt: '2022-01-01',
+        intiallySubmittedAt: '2022-01-01',
         stateCode: 'MN',
         revisions: [
             {

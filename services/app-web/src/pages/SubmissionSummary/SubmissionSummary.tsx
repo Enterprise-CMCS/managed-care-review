@@ -3,8 +3,8 @@ import { Alert, Button, ButtonGroup, GridContainer, Link, Modal, ModalFooter, Mo
 import React, { useEffect, useRef, useState } from 'react'
 import { NavLink, useLocation, useParams } from 'react-router-dom'
 import sprite from 'uswds/src/img/sprite.svg'
-import { submissionName } from '../../common-code/domain-models'
-import { toDomain } from '../../common-code/proto/stateSubmission'
+import { submissionName, SubmissionUnionType } from '../../common-code/domain-models'
+import { base64ToDomain } from '../../common-code/proto/stateSubmission'
 import { Loading } from '../../components/Loading'
 import {
     ContactsSummarySection, ContractDetailsSummarySection,
@@ -28,7 +28,7 @@ function unlockModalButton(modalRef: React.RefObject<ModalRef>, disabled: boolea
         >
             Unlock submission
         </ModalToggleButton>
-        )
+    )
 }
 
 // This wrapper gets us some reasonable errors out of our unlock call. This would be a good candidate
@@ -36,31 +36,31 @@ function unlockModalButton(modalRef: React.RefObject<ModalRef>, disabled: boolea
 // generated mutations.
 async function unlockMutationWrapper(unlockStateSubmission: UnlockStateSubmissionMutationFn, id: string): Promise<Submission2 | GraphQLErrors | Error> {
     try {
-            const result = await unlockStateSubmission({
-                variables: {
-                    input: {
-                        submissionID: id
-                    }
+        const result = await unlockStateSubmission({
+            variables: {
+                input: {
+                    submissionID: id
                 }
-            })
+            }
+        })
 
-            if (result.errors) {
-                return result.errors
-            }
-
-            if (result.data?.unlockStateSubmission.submission) {
-                return result.data?.unlockStateSubmission.submission
-            } else {
-                return new Error('No errors, and no unlock result.')
-            }
-            
-        } catch (error) {
-            // this can be an errors object
-            if ('graphQLErrors' in error) {
-                return error.graphQLErrors
-            }
-            return error
+        if (result.errors) {
+            return result.errors
         }
+
+        if (result.data?.unlockStateSubmission.submission) {
+            return result.data?.unlockStateSubmission.submission
+        } else {
+            return new Error('No errors, and no unlock result.')
+        }
+            
+    } catch (error) {
+        // this can be an errors object
+        if ('graphQLErrors' in error) {
+            return error.graphQLErrors
+        }
+        return error
+    }
 }
 
 
@@ -73,6 +73,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         string | undefined
     >(undefined)
     const modalRef = useRef<ModalRef>(null)
+    const [packageData, setPackageData] = useState<SubmissionUnionType | undefined>(undefined)
 
     const { loading, error, data } = useFetchSubmission2Query({
         variables: {
@@ -89,15 +90,30 @@ export const SubmissionSummary = (): React.ReactElement => {
     // This is a hacky way to fake feature flags before we have feature flags.
     // please avoid reading env vars outside of index.tsx in general. 
     const environmentName = process.env.REACT_APP_STAGE_NAME || ''
-    const isProdEnvironment = ['prod', 'val', 'nope'].includes(environmentName)
+    const isProdEnvironment = ['prod', 'val'].includes(environmentName)
 
     const displayUnlockButton = !isProdEnvironment && loggedInUser?.role === 'CMS_USER'
 
     useEffect(() => {
-        updateHeading(pathname, 'TEMP NAME')
-    }, [updateHeading, pathname])
+        if (submissionAndRevisions) {
+            const currentRevision = submissionAndRevisions.revisions[0].revision
+            const submissionResult = base64ToDomain(currentRevision.submissionData)
+            if (submissionResult instanceof Error) {
+                console.error('ERROR: got a proto decoding error', submissionResult)
+                setUserVisibleUnlockError('Error fetching the submission. Please try again.')
+                return
+            }
+            setPackageData(submissionResult)
+        }
+    }, [submissionAndRevisions, setPackageData, setUserVisibleUnlockError])
 
-    if (loading) {
+    useEffect(() => {
+        if (packageData) {
+            updateHeading(pathname, submissionName(packageData))
+        }
+    }, [updateHeading, pathname, packageData])
+
+    if (loading || !submissionAndRevisions || !packageData) {
         return (
             <GridContainer>
                 <Loading />
@@ -105,7 +121,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         )
     }
 
-    if (error || !submissionAndRevisions) return <GenericError />
+    if (error) return <GenericError />
 
     const onUnlock = async () => {
         const result = await unlockMutationWrapper(unlockStateSubmission, submissionAndRevisions.id)
@@ -128,35 +144,26 @@ export const SubmissionSummary = (): React.ReactElement => {
         modalRef.current?.toggleModal(undefined, false)
     }
 
-    const currentRevision = submissionAndRevisions.revisions[0].revision
-
-    const formBinData = Buffer.from(currentRevision.submissionData, 'base64')
-    const submissionResult = toDomain(formBinData)
-    if (submissionResult instanceof Error) {
-        console.error('ERROR: got a proto decoding error', submissionResult)
-        return <GenericError />
-    }
-
     // temporary kludge while the display data is expecting the wrong format. 
     // This is turning our domain model into the GraphQL model which is what
     // all our frontend stuff expects right now. 
-    const submission: StateSubmission | DraftSubmission = submissionResult.status === 'DRAFT' ? {
-        ...submissionResult,
+    const submission: StateSubmission | DraftSubmission = packageData.status === 'DRAFT' ? {
+        ...packageData,
         __typename: 'DraftSubmission' as const,
-        name: submissionName(submissionResult),
+        name: submissionName(packageData),
         program: {
             id: 'bogs-id',
             name: 'bogus-program'
         },
     } : {
-        ...submissionResult,
+        ...packageData,
         __typename: 'StateSubmission' as const,
-        name: submissionName(submissionResult),
+        name: submissionName(packageData),
         program: {
             id: 'bogs-id',
             name: 'bogus-program'
         },
-        submittedAt: currentRevision.submitInfo?.updatedAt
+        submittedAt: submissionAndRevisions.intiallySubmittedAt
     }
 
     const disableUnlockButton = ['DRAFT', 'UNLOCKED'].includes(submissionAndRevisions.status)
