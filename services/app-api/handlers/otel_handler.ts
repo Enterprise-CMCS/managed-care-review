@@ -60,6 +60,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 // module.exports = (serviceName) => {
 const simpleHook = (span: Span, data: any) => {
+  console.log("simplehook called")
   span.setAttribute("shoop", "doo")
   if (data) {
     span.setAttribute("bloopdoop", JSON.stringify(data))
