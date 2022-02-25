@@ -59,11 +59,12 @@ const EXPORTER = process.env.EXPORTER || '';
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 // module.exports = (serviceName) => {
-// const simpleHook = (span: Span, data: any) => {
-//   if (data.data) {
-//     console.log("graphql data: ", data.data)
-//   }
-// }
+const simpleHook = (span: Span, data: any) => {
+  if (data.data) {
+    span.setAttribute("graphql.data", JSON.stringify(data.data))
+    console.log("graphql data: ", data.data)
+  }
+}
 
   const gqlResponseHook = (span: Span, data: graphqlTypes.ExecutionResult) => {
     if (data.errors && data.errors.length > 0) {
@@ -139,7 +140,11 @@ const provider = new NodeTracerProvider({
   registerInstrumentations({
     instrumentations: [
       // new HttpInstrumentation(),
-      new GraphQLInstrumentation(),
+      new GraphQLInstrumentation({
+        mergeItems: true,
+        allowValues: true,
+        responseHook: simpleHook,
+      }),
       // new AwsLambdaInstrumentation({
       //               disableAwsContextPropagation: true,
       //               requestHook: (span, { event, context }) => {
