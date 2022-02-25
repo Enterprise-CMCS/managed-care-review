@@ -1,4 +1,3 @@
-import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
@@ -9,6 +8,7 @@ import {
     FederalAuthorityRecord, ManagedCareEntityRecord, RateChangeReasonRecord
 } from '../../../constants/submissions'
 import { useS3 } from '../../../contexts/S3Context'
+import { formatCalendarDate } from '../../../dateHelpers'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
@@ -139,11 +139,7 @@ export const ContractDetailsSummarySection = ({
                                 ? 'Contract effective dates'
                                 : 'Contract amendment effective dates'
                         }
-                        data={`${dayjs(submission.contractDateStart).format(
-                            'MM/DD/YYYY'
-                        )} to ${dayjs(submission.contractDateEnd).format(
-                            'MM/DD/YYYY'
-                        )}`}
+                        data={`${formatCalendarDate(submission.contractDateStart)} to ${formatCalendarDate(submission.contractDateEnd)}`}
                     />
                     <DataDetail
                         id="managedCareEntities"

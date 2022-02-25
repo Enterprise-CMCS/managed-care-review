@@ -14,6 +14,7 @@ query fetchSubmission2($input: FetchSubmission2Input!) {
                     submitInfo {
                         updatedAt
                     }
+                    createdAt
                     submissionData
                 }
             }

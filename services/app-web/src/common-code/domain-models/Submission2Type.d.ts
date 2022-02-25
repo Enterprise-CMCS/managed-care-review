@@ -14,6 +14,7 @@ type RevisionType = {
     id: string
     unlockInfo?: UpdateInfoType
     submitInfo?: UpdateInfoType
+    createdAt: Date
     submissionFormProto: Uint8Array
 }
 

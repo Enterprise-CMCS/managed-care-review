@@ -11,6 +11,7 @@ export const submission2Resolver: Resolvers['Submission2'] = {
                     id: r.id,
                     unlockInfo: r.unlockInfo,
                     submitInfo: r.submitInfo,
+                    createdAt: r.createdAt,
                     submissionData: protoToBase64(r.submissionFormProto)
                 }
             }

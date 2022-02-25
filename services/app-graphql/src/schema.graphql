@@ -154,6 +154,7 @@ type Revision {
     id: ID!
     unlockInfo: UpdateInformation
     submitInfo: UpdateInformation
+    createdAt: DateTime!
     submissionData: String!
 }
 

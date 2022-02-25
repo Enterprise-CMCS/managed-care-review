@@ -321,6 +321,7 @@ export function mockSubmittedSubmission2(): Submission2 {
             {
                 revision: {
                     id: 'revision1',
+                    createdAt: new Date(),
                     unlockInfo: null,
                     submitInfo: {
                         updatedAt: "2021-01-01"
@@ -348,6 +349,7 @@ export function mockUnlockedSubmission2(): Submission2 {
             {
                 revision: {
                     id: 'revision2',
+                    createdAt: new Date(),
                     unlockInfo: null,
                     submitInfo: null,
                     submissionData: b64,
@@ -356,6 +358,7 @@ export function mockUnlockedSubmission2(): Submission2 {
             {
                 revision: {
                     id: 'revision1',
+                    createdAt: new Date(),
                     unlockInfo: null,
                     submitInfo: {
                         updatedAt: "2021-01-01"

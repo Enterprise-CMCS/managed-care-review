@@ -54,6 +54,7 @@ function convertToSubmission2Type(dbSub: StateSubmissionWithRevisions): Submissi
             return {
                 id: r.id,
                 submitInfo,
+                createdAt: r.createdAt,
                 submissionFormProto: r.submissionFormProto,
             }
         })

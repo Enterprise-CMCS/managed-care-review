@@ -1,9 +1,9 @@
-import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import { useS3 } from '../../../contexts/S3Context'
+import { formatCalendarDate } from '../../../dateHelpers'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
@@ -81,11 +81,7 @@ export const RateDetailsSummarySection = ({
                                 ? 'Rating period of original rate certification'
                                 : 'Rating period'
                         }
-                        data={`${dayjs(submission.rateDateStart).format(
-                            'MM/DD/YYYY'
-                        )} to ${dayjs(submission.rateDateEnd).format(
-                            'MM/DD/YYYY'
-                        )}`}
+                        data={`${formatCalendarDate(submission.rateDateStart)} to ${formatCalendarDate(submission.rateDateEnd)}`}
                     />
                     <DataDetail
                         id="dateCertified"
@@ -94,19 +90,17 @@ export const RateDetailsSummarySection = ({
                                 ? 'Date certified for rate amendment'
                                 : 'Date certified'
                         }
-                        data={dayjs(submission.rateDateCertified).format(
-                            'MM/DD/YYYY'
-                        )}
+                        data={formatCalendarDate(submission.rateDateCertified)}
                     />
                     {submission.rateAmendmentInfo ? (
                         <DataDetail
                             id="effectiveRatingPeriod"
                             label="Rate amendment effective dates"
-                            data={`${dayjs(
+                            data={`${formatCalendarDate(
                                 submission.rateAmendmentInfo.effectiveDateStart
-                            ).format('MM/DD/YYYY')} to ${dayjs(
+                            )} to ${formatCalendarDate(
                                 submission.rateAmendmentInfo.effectiveDateEnd
-                            ).format('MM/DD/YYYY')}`}
+                            )}`}
                         />
                     ) : null}
                 </DoubleColumnGrid>
