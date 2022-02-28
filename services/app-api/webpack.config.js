@@ -25,9 +25,8 @@ module.exports = {
         hints: false,
     },
     externals: [
-        nodeExternals(),
         nodeExternals({
-            modulesDir: path.resolve(__dirname, '../../node_modules'),
+            additionalModuleDirs: path.resolve(__dirname, '../../node_modules'),
         }),
     ],
     devtool: 'source-map',
