@@ -10,10 +10,10 @@ import {
     isStateSubmission,
     StateSubmissionType
 } from '../../domain-models'
-import { toDomain } from './toDomain'
+import { base64ToDomain, domainToBase64, protoToBase64 } from './protoBase64'
 import { toProtoBuffer } from './toProtoBuffer'
 
-describe('Validate encoding to protobuf and decoding back to domain model', () => {
+describe('Validate encoding to base64 and decoding back to domain model', () => {
     if (!isStateSubmission(basicStateSubmission())) {
         throw new Error(
             'Bad test, the state submission is not a state submission'
@@ -33,18 +33,45 @@ describe('Validate encoding to protobuf and decoding back to domain model', () =
     ])(
         'given valid domain model %j expect protobufs to be symmetric)',
         (domainObject: DraftSubmissionType | StateSubmissionType) => {
-            expect(toDomain(toProtoBuffer(domainObject))).toEqual(domainObject)
+            expect(base64ToDomain(domainToBase64(domainObject))).toEqual(domainObject)
+        }
+    )
+})
+
+describe('Validate encoding to proto to base64 and decoding back to domain model', () => {
+    if (!isStateSubmission(basicStateSubmission())) {
+        throw new Error(
+            'Bad test, the state submission is not a state submission'
+        )
+    }
+
+    test.each([
+        newSubmission(),
+        basicSubmission(),
+        contractOnly(),
+        draftWithContacts(),
+        draftWithDocuments(),
+        draftWithFullRates(),
+        draftWithFullContracts(),
+        draftWithALittleBitOfEverything(),
+        basicStateSubmission()
+    ])(
+        'given valid domain model %j expect protobufs to be symmetric)',
+        (domainObject: DraftSubmissionType | StateSubmissionType) => {
+            expect(base64ToDomain(protoToBase64(toProtoBuffer(domainObject)))).toEqual(domainObject)
         }
     )
 })
 
 describe('handles invalid data as expected', () => {
-    it('toDomain errors when passed an empty proto message', () => {
+    it('base64ToDomain errors when passed an empty proto message', () => {
         const protoMessage = new statesubmission.StateSubmissionInfo({})
         const encodedEmpty =
             statesubmission.StateSubmissionInfo.encode(protoMessage).finish()
 
-        const maybeError = toDomain(encodedEmpty)
+        const emptyBase64 = protoToBase64(encodedEmpty)
+
+        const maybeError = base64ToDomain(emptyBase64)
 
         expect(maybeError).toBeInstanceOf(Error)
         expect(maybeError.toString()).toEqual(
@@ -52,7 +79,7 @@ describe('handles invalid data as expected', () => {
         )
     })
 
-    it('toDomain returns a decode error when passed an invalid DraftSubmission', () => {
+    it('base64ToDomain returns a decode error when passed an invalid DraftSubmission', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const invalidDraft = Object.assign({}, basicSubmission()) as any
         delete invalidDraft.id
@@ -60,7 +87,8 @@ describe('handles invalid data as expected', () => {
         invalidDraft.submissionType = 'nonsense'
 
         const encoded = toProtoBuffer(invalidDraft)
-        const decodeErr = toDomain(encoded)
+        const encodedBase64 = protoToBase64(encoded)
+        const decodeErr = base64ToDomain(encodedBase64)
 
         expect(decodeErr).toBeInstanceOf(Error)
 
@@ -73,7 +101,7 @@ describe('handles invalid data as expected', () => {
         ])
     })
 
-    it('toDomain returns a decode error when passed an invalid StateSubmission', () => {
+    it('base64ToDomain returns a decode error when passed an invalid StateSubmission', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const invalidSubmission = Object.assign({}, basicStateSubmission()) as any
         delete invalidSubmission.id
@@ -82,7 +110,8 @@ describe('handles invalid data as expected', () => {
         invalidSubmission.submissionType = 'nonsense'
 
         const encoded = toProtoBuffer(invalidSubmission)
-        const decodeErr = toDomain(encoded)
+        const encodedBase64 = protoToBase64(encoded)
+        const decodeErr = base64ToDomain(encodedBase64)
 
         expect(decodeErr).toBeInstanceOf(Error)
         expect(decodeErr.toString()).toEqual(

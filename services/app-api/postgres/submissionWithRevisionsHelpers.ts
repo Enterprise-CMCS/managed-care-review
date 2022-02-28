@@ -1,4 +1,5 @@
 import { StateSubmission, StateSubmissionRevision } from '@prisma/client'
+import { Submission2Type, UpdateInfoType } from '../../app-web/src/common-code/domain-models'
 import { StoreError } from './storeError'
 
 export type StateSubmissionWithRevisions = StateSubmission & {
@@ -37,7 +38,30 @@ const getCurrentRevision = (
 }
 
 
+// convertToSubmission2Type transforms the DB representation of StateSubmissionWithRevisions into our Submission2Type
+function convertToSubmission2Type(dbSub: StateSubmissionWithRevisions): Submission2Type {
+    return {
+        id: dbSub.id,
+        stateCode: dbSub.stateCode,
+        revisions: dbSub.revisions.map(r => { 
+            let submitInfo: UpdateInfoType | undefined = undefined
+            if (r.submittedAt) {
+                submitInfo = {
+                    updatedAt: r.submittedAt
+                }
+            }
+
+            return {
+                id: r.id,
+                submitInfo,
+                submissionFormProto: r.submissionFormProto,
+            }
+        })
+    }
+}
+
 
 export {
-    getCurrentRevision
+    getCurrentRevision,
+    convertToSubmission2Type,
 }

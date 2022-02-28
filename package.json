@@ -47,7 +47,8 @@
     },
     "dependencies": {
         "aws-sdk": "^2.1018.0",
-        "cypress-file-upload": "^5.0.8"
+        "cypress-file-upload": "^5.0.8",
+        "path-browserify": "^1.0.1"
     },
     "resolutions": {
         "babel-loader": "8.1.0",

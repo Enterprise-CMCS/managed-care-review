@@ -46,6 +46,10 @@ export function unlockStateSubmissionResolver(
         if (isStoreError(result)) {
             const errMessage = `Issue finding a state submission of type ${result.code}. Message: ${result.message}`
             logError('unlockStateSubmission', errMessage)
+
+            if (result.code === 'WRONG_STATUS') {
+                throw new UserInputError('Attempted to unlock submission with wrong status')
+            }
             throw new Error(errMessage)
         }
 
@@ -73,7 +77,7 @@ export function unlockStateSubmissionResolver(
 
         logSuccess('unlockStateSubmission')
 
-        return { draftSubmission: draft }
+        return { submission: revisionResult }
 
     }
 }

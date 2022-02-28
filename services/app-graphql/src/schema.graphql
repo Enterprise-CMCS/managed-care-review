@@ -11,6 +11,9 @@ type Query {
     fetchStateSubmission(
         input: FetchStateSubmissionInput!
     ): FetchStateSubmissionPayload!
+    fetchSubmission2(
+        input: FetchSubmission2Input!
+    ): FetchSubmission2Payload!
 
     indexSubmissions: IndexSubmissionsPayload!
 }
@@ -57,6 +60,14 @@ type FetchStateSubmissionPayload {
     submission: StateSubmission
 }
 
+input FetchSubmission2Input {
+    submissionID: ID!
+}
+
+type FetchSubmission2Payload {
+    submission: Submission2
+}
+
 type SubmissionEdge {
     node: Submission!
 }
@@ -88,7 +99,7 @@ input UnlockStateSubmissionInput {
 }
 
 type UnlockStateSubmissionPayload {
-    draftSubmission: DraftSubmission!
+    submission: Submission2!
 }
 
 scalar Date
@@ -118,6 +129,36 @@ type State {
 type Program {
     id: ID!
     name: String!
+}
+
+enum Submission2Status {
+    DRAFT
+    SUBMITTED
+    UNLOCKED
+    RESUBMITTED
+}
+
+type Submission2 {
+    id: ID!
+    status: Submission2Status!
+    intiallySubmittedAt: Date
+    stateCode: String!
+    revisions: [RevisionEdge!]!
+}
+
+type UpdateInformation {
+    updatedAt: Date
+}
+
+type Revision {
+    id: ID!
+    unlockInfo: UpdateInformation
+    submitInfo: UpdateInformation
+    submissionData: String!
+}
+
+type RevisionEdge {
+    revision: Revision!
 }
 
 type StateContact {
@@ -256,7 +297,7 @@ enum FederalAuthority {
 type DraftSubmission {
     id: ID!
     programIDs: [ID!]!
-    program: Program!
+    program: Program! # This is dead code.
     submissionType: SubmissionType!
     submissionDescription: String!
     stateCode: String!
