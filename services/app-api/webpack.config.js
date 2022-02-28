@@ -16,7 +16,6 @@ const extensions = [
     '.graphql',
     '.gql',
 ];
-const servicePath = '';
 
 module.exports = {
     entry: slsw.lib.entries,
@@ -26,10 +25,10 @@ module.exports = {
         hints: false,
     },
     externals: [
+        nodeExternals(),
         nodeExternals({
             modulesDir: path.resolve(__dirname, '../../node_modules'),
         }),
-        'aws-sdk',
     ],
     devtool: 'source-map',
     resolve: {
@@ -64,9 +63,6 @@ module.exports = {
                 ],
                 exclude: [
                     path.resolve(__dirname, '../../node_modules/.prisma'),
-                    path.resolve(servicePath, 'node_modules'),
-                    path.resolve(servicePath, '.serverless'),
-                    path.resolve(servicePath, '.webpack'),
                 ],
             },
             {
