@@ -47,9 +47,8 @@ import { registerInstrumentations } from "@opentelemetry/instrumentation";
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 import { Resource } from "@opentelemetry/resources";
 import { SemanticResourceAttributes } from "@opentelemetry/semantic-conventions";
-import { SimpleSpanProcessor, ConsoleSpanExporter, OTLPTraceExporter } from "@opentelemetry/sdk-trace-base";
-import { JaegerExporter } from "@opentelemetry/exporter-jaeger";
-import { ZipkinExporter } from "@opentelemetry/exporter-zipkin";
+import { OTLPTraceExporter} from "@opentelemetry/exporter-trace-otlp-grpc"
+import { SimpleSpanProcessor, ConsoleSpanExporter } from "@opentelemetry/sdk-trace-base";
 import { AwsLambdaInstrumentation } from "@opentelemetry/instrumentation-aws-lambda";
 // import { SimpleSpanProcessor, ConsoleSpanExporter } from "@opentelemetry/tracing";
 import { HttpInstrumentation } from "@opentelemetry/instrumentation-http";
@@ -129,24 +128,9 @@ const provider = new NodeTracerProvider({
       })),
 })
 
-  // if (EXPORTER.toLowerCase().startsWith('z')) {
-  //   exporter = new ZipkinExporter();
-  // } else {
-  //   exporter = new JaegerExporter();
-  // }
-
-  const myExporter = new OTLPTraceExporter({
-    serviceName: "my-little-service",
-    endpoint: "http://localhost:4317",
-    // flushInterval: 1000,
-    // maxQueueSize: 1000,
-    // maxBatchSize: 100,
-    // logger: console,
-  });
-
 
   // provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
-  provider.addSpanProcessor(new SimpleSpanProcessor(myExporter))
+  provider.addSpanProcessor(new SimpleSpanProcessor(new OTLPTraceExporter()))
   provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()))
 
   // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
