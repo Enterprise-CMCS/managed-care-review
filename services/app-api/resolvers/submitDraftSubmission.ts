@@ -1,3 +1,4 @@
+import * as api from '@opentelemetry/api'
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import {
     DraftSubmissionType,
@@ -53,16 +54,19 @@ function submit(
     draft: DraftSubmissionType
 ): StateSubmissionType | SubmissionError {
     console.log("about to submit draft")
-    const span = tracer.startSpan('submitDraft', {
-        kind: 1, // server
-        attributes: { key: 'value', bloop: 'bloop' },
-    })
+    const parentSpan = api.trace.getSpan(api.context.active())
+    parentSpan?.setAttribute('fakeyname', 'bloop')
+    parentSpan?.addEvent('submitDraftSubmission', { key: 'about to submit draft' })
+    // const span = tracer.startSpan('submitDraft', {
+    //     kind: 1, // server
+    //     attributes: { key: 'value', bloop: 'bloop' },
+    // })
     const maybeStateSubmission: Record<string, unknown> = {
         ...draft,
         status: 'SUBMITTED',
         submittedAt: new Date(),
     }
-    span.end()
+    // span.end()
     if (isStateSubmission(maybeStateSubmission)) return maybeStateSubmission
     
     else if (!hasValidContract(maybeStateSubmission as StateSubmissionType)) {

@@ -100,10 +100,10 @@ export function updateDraftSubmissionResolver(
     store: Store
 ): MutationResolvers['updateDraftSubmission'] {
     return async (_parent, { input }, context) => {
-        const span = tracer.startSpan('submitDraft', {
-            kind: 1, // server
-            attributes: { key: 'value' },
-        })
+        // const span = tracer.startSpan('submitDraft', {
+        //     kind: 1, // server
+        //     attributes: { key: 'value' },
+        // })
         // This resolver is only callable by state users
         if (!isStateUser(context.user)) {
             logError(
@@ -169,7 +169,7 @@ export function updateDraftSubmissionResolver(
         const updatedDraft: DraftSubmissionType = updateResult
 
         logSuccess('updateDraftSubmission')
-        span.end()
+        // span.end()
         return {
             draftSubmission: updatedDraft,
         }
