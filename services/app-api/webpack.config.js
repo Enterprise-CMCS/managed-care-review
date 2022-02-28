@@ -63,7 +63,7 @@ module.exports = {
                     },
                 ],
                 exclude: [
-                    path.resolve(__dirname, 'node_modules/.prisma'),
+                    path.resolve(__dirname, '../../node_modules/.prisma'),
                     path.resolve(servicePath, 'node_modules'),
                     path.resolve(servicePath, '.serverless'),
                     path.resolve(servicePath, '.webpack'),
