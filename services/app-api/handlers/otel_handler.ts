@@ -141,7 +141,7 @@ const provider = new NodeTracerProvider({
 
   registerInstrumentations({
     instrumentations: [
-      // new HttpInstrumentation(),
+      new HttpInstrumentation(),
       new GraphQLInstrumentation({
         mergeItems: true,
         allowValues: true,

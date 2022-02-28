@@ -12,7 +12,7 @@ export function createDraftSubmissionResolver(
 ): MutationResolvers['createDraftSubmission'] {
     return async (_parent, { input }, context) => {
         // This resolver is only callable by state users
-        console.log("about to submit draft")
+        console.log("about to create draft")
         console.log("spanny: ", api.context.active())
         const span = tracer.startSpan('submitDraft', {
             kind: 1, // server

@@ -55,7 +55,7 @@ function submit(
     console.log("about to submit draft")
     const span = tracer.startSpan('submitDraft', {
         kind: 1, // server
-        attributes: { key: 'value' },
+        attributes: { key: 'value', bloop: 'bloop' },
     })
     const maybeStateSubmission: Record<string, unknown> = {
         ...draft,
