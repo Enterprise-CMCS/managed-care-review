@@ -55,18 +55,18 @@ import { HttpInstrumentation } from "@opentelemetry/instrumentation-http";
 import { GraphQLInstrumentation } from "@opentelemetry/instrumentation-graphql";
 import type * as graphqlTypes from "graphql"
 
-const EXPORTER = process.env.EXPORTER || '';
+// const EXPORTER = process.env.EXPORTER || '';
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 // module.exports = (serviceName) => {
-const simpleHook = (span: Span, data: any) => {
-  console.log("simplehook called")
-  span.setAttribute("shoop", "doo")
-  if (data) {
-    span.setAttribute("bloopdoop", JSON.stringify(data))
-    console.log("graphql data: ", data.data)
-  }
-}
+// const simpleHook = (span: Span, data: any) => {
+//   console.log("simplehook called")
+//   span.setAttribute("shoop", "doo")
+//   if (data) {
+//     span.setAttribute("bloopdoop", JSON.stringify(data))
+//     console.log("graphql data: ", data.data)
+//   }
+// }
 
   // const gqlResponseHook = (span: Span, data: graphqlTypes.ExecutionResult) => {
   //   if (data.errors && data.errors.length > 0) {
@@ -136,14 +136,14 @@ const provider = new NodeTracerProvider({
   // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
   provider.register();
 
-  registerInstrumentations({
-    instrumentations: [
-      new HttpInstrumentation(),
-      new GraphQLInstrumentation({
-        mergeItems: true,
-        allowValues: true,
-        responseHook: simpleHook,
-      }),
+  // registerInstrumentations({
+  //   instrumentations: [
+  //     new HttpInstrumentation(),
+  //     new GraphQLInstrumentation({
+  //       mergeItems: true,
+  //       allowValues: true,
+  //       responseHook: simpleHook,
+  //     }),
       // new AwsLambdaInstrumentation({
       //               disableAwsContextPropagation: true,
       //               requestHook: (span, { event, context }) => {
@@ -159,8 +159,8 @@ const provider = new NodeTracerProvider({
       //                   if (res) span.setAttribute('app.res', res)
       //               },
       //           }),
-    ],
-  });
+  //   ],
+  // });
 
   export const tracer = opentelemetry.trace.getTracer('http-example')
 // };
