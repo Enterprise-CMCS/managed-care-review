@@ -21,13 +21,11 @@ const servicePath = '';
 module.exports = {
     entry: slsw.lib.entries,
     target: 'node',
-    context: __dirname,
     mode: isLocal ? 'development' : 'production',
     performance: {
         hints: false,
     },
     externals: [
-        nodeExternals(),
         nodeExternals({
             modulesDir: path.resolve(__dirname, '../../node_modules'),
         }),
@@ -37,7 +35,7 @@ module.exports = {
     resolve: {
         symlinks: false,
         extensions: extensions,
-        modules: [path.resolve(__dirname, 'node_modules'), 'node_modules'],
+        modules: [path.resolve(__dirname, '../../node_modules')],
         plugins: [
             new TsconfigPathsPlugin({
                 configFile: tsConfigPath,
