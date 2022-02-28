@@ -115,8 +115,10 @@ provider:
     OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
 
 layers:
-  prismaClient:
-    path: lambda-layers-prisma-client
+  prismaClientQuery:
+    path: lambda-layers-prisma-client-query
+  prismaClientMigration:
+    path: lambda-layers-prisma-client-migration
 
 functions:
   email_submit:
@@ -157,7 +159,7 @@ functions:
         - ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
     layers:
-      - !Ref PrismaClientLambdaLayer
+      - !Ref PrismaClientQueryLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-0-1:1
 
   hello:
@@ -181,7 +183,7 @@ functions:
         - ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
     layers:
-      - !Ref PrismaClientLambdaLayer
+      - !Ref PrismaClientQueryLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-0-1:1
 
   migrate:
@@ -192,7 +194,7 @@ functions:
         - ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
     layers:
-      - !Ref PrismaClientLambdaLayer
+      - !Ref PrismaClientMigrationLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-0-1:1
 
   zip_keys:
