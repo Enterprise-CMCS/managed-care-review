@@ -52,6 +52,8 @@ const rateAmendmentInfoSchema = z.object({
 
 const contractTypeSchema = z.union([z.literal('BASE'), z.literal('AMENDMENT')])
 
+const contractExecutionStatusSchema = z.union([z.literal('EXECUTED'), z.literal('UNEXECUTED')])
+
 const actuarialFirmTypeSchema = z.union([
     z.literal('MERCER'),
     z.literal('MILLIMAN'),
@@ -131,6 +133,7 @@ export const draftSubmissionTypeSchema = z.object({
     actuaryCommunicationPreference: actuaryCommunicationTypeSchema.optional(),
     documents: z.array(submissionDocumentSchema),
     contractType: contractTypeSchema.optional(),
+    contractExecutionStatus: contractExecutionStatusSchema.optional(),
     contractDocuments: z.array(submissionDocumentSchema),
     contractDateStart: z.date().optional(),
     contractDateEnd: z.date().optional(),

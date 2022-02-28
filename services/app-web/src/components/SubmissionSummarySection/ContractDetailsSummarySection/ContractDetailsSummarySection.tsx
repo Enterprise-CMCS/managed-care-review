@@ -3,8 +3,7 @@ import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import {
-    AmendableItemsRecord,
-    ContractTypeRecord,
+    AmendableItemsRecord, ContractExecutionStatusRecord, ContractTypeRecord,
     FederalAuthorityRecord, ManagedCareEntityRecord, RateChangeReasonRecord
 } from '../../../constants/submissions'
 import { useS3 } from '../../../contexts/S3Context'
@@ -129,6 +128,17 @@ export const ContractDetailsSummarySection = ({
                         data={
                             submission.contractType
                                 ? ContractTypeRecord[submission.contractType]
+                                : ''
+                        }
+                    />
+                    <DataDetail
+                        id="contractExecutionStatus"
+                        label="Contract status"
+                        data={
+                            submission.contractExecutionStatus
+                                ? ContractExecutionStatusRecord[
+                                    submission.contractExecutionStatus
+                                    ]
                                 : ''
                         }
                     />

@@ -79,6 +79,7 @@ export function applyUpdates(
         updates.actuaryCommunicationPreference ?? undefined
 
     draft.contractType = updates.contractType ?? undefined
+    draft.contractExecutionStatus = updates.contractExecutionStatus ?? undefined
     draft.contractDocuments = updates.contractDocuments ?? []
     draft.contractDateStart = updates.contractDateStart ?? undefined
     draft.contractDateEnd = updates.contractDateEnd ?? undefined

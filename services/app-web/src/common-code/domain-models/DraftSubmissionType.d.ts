@@ -34,6 +34,8 @@ type RateAmendmentInfo = {
 
 type ContractType = 'BASE' | 'AMENDMENT'
 
+type ContractExecutionStatus = 'EXECUTED' | 'UNEXECUTED'
+
 type ActuarialFirmType =
     | 'MERCER'
     | 'MILLIMAN'
@@ -102,6 +104,7 @@ export type DraftSubmissionType = {
     actuaryCommunicationPreference?: ActuaryCommunicationType
     documents: SubmissionDocument[]
     contractType?: ContractType
+    contractExecutionStatus?: ContractExecutionStatus
     contractDocuments: SubmissionDocument[]
     contractDateStart?: Date
     contractDateEnd?: Date
@@ -132,4 +135,5 @@ export type {
     DraftSubmissionType,
     AmendableItems,
     ContractAmendmentInfo,
+    ContractExecutionStatus,
 }
