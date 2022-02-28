@@ -47,10 +47,11 @@ import { registerInstrumentations } from "@opentelemetry/instrumentation";
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 import { Resource } from "@opentelemetry/resources";
 import { SemanticResourceAttributes } from "@opentelemetry/semantic-conventions";
-import { SimpleSpanProcessor } from "@opentelemetry/sdk-trace-base";
+import { SimpleSpanProcessor, ConsoleSpanExporter } from "@opentelemetry/sdk-trace-base";
 import { JaegerExporter } from "@opentelemetry/exporter-jaeger";
 import { ZipkinExporter } from "@opentelemetry/exporter-zipkin";
 import { AwsLambdaInstrumentation } from "@opentelemetry/instrumentation-aws-lambda";
+// import { SimpleSpanProcessor, ConsoleSpanExporter } from "@opentelemetry/tracing";
 import { HttpInstrumentation } from "@opentelemetry/instrumentation-http";
 import { GraphQLInstrumentation } from "@opentelemetry/instrumentation-graphql";
 import type * as graphqlTypes from "graphql"
@@ -128,13 +129,14 @@ const provider = new NodeTracerProvider({
       })),
 })
 
-  if (EXPORTER.toLowerCase().startsWith('z')) {
-    exporter = new ZipkinExporter();
-  } else {
-    exporter = new JaegerExporter();
-  }
+  // if (EXPORTER.toLowerCase().startsWith('z')) {
+  //   exporter = new ZipkinExporter();
+  // } else {
+  //   exporter = new JaegerExporter();
+  // }
 
-  provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
+  // provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
+  provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()))
 
   // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
   provider.register();
