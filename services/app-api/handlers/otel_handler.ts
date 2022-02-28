@@ -47,7 +47,7 @@ import { registerInstrumentations } from "@opentelemetry/instrumentation";
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 import { Resource } from "@opentelemetry/resources";
 import { SemanticResourceAttributes } from "@opentelemetry/semantic-conventions";
-import { SimpleSpanProcessor, ConsoleSpanExporter } from "@opentelemetry/sdk-trace-base";
+import { SimpleSpanProcessor, ConsoleSpanExporter, OTLPTraceExporter } from "@opentelemetry/sdk-trace-base";
 import { JaegerExporter } from "@opentelemetry/exporter-jaeger";
 import { ZipkinExporter } from "@opentelemetry/exporter-zipkin";
 import { AwsLambdaInstrumentation } from "@opentelemetry/instrumentation-aws-lambda";
@@ -69,59 +69,59 @@ const simpleHook = (span: Span, data: any) => {
   }
 }
 
-  const gqlResponseHook = (span: Span, data: graphqlTypes.ExecutionResult) => {
-    if (data.errors && data.errors.length > 0) {
-      span.recordException({
-        name: "graphql.execution.error",
-        message: JSON.stringify(data.errors),
-      })
-      span.setStatus({
-        code: SpanStatusCode.ERROR,
-      })
-      const firstErr = data.errors[0]
-      if (firstErr.message != "") {
-        span.setAttribute("graphql.error.message", firstErr.message)
-      }
-      span.setAttribute("graphql.error.type", firstErr.constructor.name)
-      if (firstErr.path) {
-        span.setAttribute("graphql.error.path", firstErr.path.join("."))
-      }
-      if (firstErr.originalError) {
-        span.setAttribute(
-          `graphql.error.original.type`,
-          firstErr.originalError.constructor.name,
-        )
-        if (firstErr.originalError.message != "") {
-          span.setAttribute(
-            `graphql.error.original.message`,
-            firstErr.originalError.message,
-          )
-        }
-      }
-      data.errors.forEach((err, idx) => {
-        if (err.message != "") {
-          span.setAttribute(`graphql.error.${idx}.message`, err.message)
-        }
-        span.setAttribute(`graphql.error.${idx}.type`, err.constructor.name)
-        if (err.path) {
-          span.setAttribute(`graphql.error.${idx}.path`, err.path.join("."))
-        }
-        if (err.originalError) {
-          span.setAttribute(
-            `graphql.error.${idx}.original.type`,
-            err.originalError.constructor.name,
-          )
-          if (err.originalError.message != "") {
-            span.setAttribute(
-              `graphql.error.${idx}.original.message`,
-              err.originalError.message,
-            )
-          }
-        }
-      })
-    }
-  }
-  let exporter;
+  // const gqlResponseHook = (span: Span, data: graphqlTypes.ExecutionResult) => {
+  //   if (data.errors && data.errors.length > 0) {
+  //     span.recordException({
+  //       name: "graphql.execution.error",
+  //       message: JSON.stringify(data.errors),
+  //     })
+  //     span.setStatus({
+  //       code: SpanStatusCode.ERROR,
+  //     })
+  //     const firstErr = data.errors[0]
+  //     if (firstErr.message != "") {
+  //       span.setAttribute("graphql.error.message", firstErr.message)
+  //     }
+  //     span.setAttribute("graphql.error.type", firstErr.constructor.name)
+  //     if (firstErr.path) {
+  //       span.setAttribute("graphql.error.path", firstErr.path.join("."))
+  //     }
+  //     if (firstErr.originalError) {
+  //       span.setAttribute(
+  //         `graphql.error.original.type`,
+  //         firstErr.originalError.constructor.name,
+  //       )
+  //       if (firstErr.originalError.message != "") {
+  //         span.setAttribute(
+  //           `graphql.error.original.message`,
+  //           firstErr.originalError.message,
+  //         )
+  //       }
+  //     }
+  //     data.errors.forEach((err, idx) => {
+  //       if (err.message != "") {
+  //         span.setAttribute(`graphql.error.${idx}.message`, err.message)
+  //       }
+  //       span.setAttribute(`graphql.error.${idx}.type`, err.constructor.name)
+  //       if (err.path) {
+  //         span.setAttribute(`graphql.error.${idx}.path`, err.path.join("."))
+  //       }
+  //       if (err.originalError) {
+  //         span.setAttribute(
+  //           `graphql.error.${idx}.original.type`,
+  //           err.originalError.constructor.name,
+  //         )
+  //         if (err.originalError.message != "") {
+  //           span.setAttribute(
+  //             `graphql.error.${idx}.original.message`,
+  //             err.originalError.message,
+  //           )
+  //         }
+  //       }
+  //     })
+  //   }
+  // }
+  // let exporter;
 const provider = new NodeTracerProvider({
     resource: Resource.default().merge(new Resource({
         // Replace with any string to identify this service in your system
@@ -135,7 +135,18 @@ const provider = new NodeTracerProvider({
   //   exporter = new JaegerExporter();
   // }
 
+  const myExporter = new OTLPTraceExporter({
+    serviceName: "my-little-service",
+    endpoint: "http://localhost:4317",
+    // flushInterval: 1000,
+    // maxQueueSize: 1000,
+    // maxBatchSize: 100,
+    // logger: console,
+  });
+
+
   // provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
+  provider.addSpanProcessor(new SimpleSpanProcessor(myExporter))
   provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()))
 
   // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
