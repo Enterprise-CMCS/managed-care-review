@@ -179,8 +179,13 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
-          name: lambda-layers-prisma-client
-          path: ./services/app-api/lambda-layers-prisma-client
+          name: lambda-layers-prisma-client-query
+          path: ./services/app-api/lambda-layers-prisma-client-query
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: lambda-layers-prisma-client-migration
+          path: ./services/app-api/lambda-layers-prisma-client-migration
 
   deploy-infra:
     needs: [begin-deployment]
@@ -211,7 +216,7 @@ jobs:
       always() &&
       (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped')
 
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@mt-split-lambda-layer
     with:
       stage_name: ${{ needs.begin-deployment.outputs.stage-name }}
       app_version: ${{ needs.begin-deployment.outputs.app-version }}
