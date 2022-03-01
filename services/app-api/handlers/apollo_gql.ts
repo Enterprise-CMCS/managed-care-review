@@ -170,7 +170,7 @@ async function initializeGQLHandler(): Promise<Handler> {
         emailerMode == 'LOCAL'
             ? newLocalEmailer({
                   emailSource: 'local@example.com',
-                  stage: 'locasl',
+                  stage: 'local',
                   baseUrl: applicationEndpoint,
                   cmsReviewSharedEmails: cmsReviewSharedEmails.split(','),
               })
