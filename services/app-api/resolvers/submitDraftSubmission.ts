@@ -59,7 +59,7 @@ function submit(
     })
     span.setAttribute('submitDraftAttribute', 'works')
     span.setAttribute('submitDraftContext', JSON.stringify(api.context.active()))
-    span.setEvent('submitDraftEvent', JSON.stringify(draft))
+    span.addEvent('submitDraftEvent', JSON.stringify(draft))
 
     const maybeStateSubmission: Record<string, unknown> = {
         ...draft,
