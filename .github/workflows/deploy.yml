@@ -21,7 +21,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v2
         with:
-          fetch-depth: 30
+          fetch-depth: 20
 
       - name: Check for secrets
         uses: ./.github/actions/check_secrets
@@ -235,7 +235,10 @@ jobs:
   finishing-prep:
     name: Finishing Prep
     needs: [deploy-infra, begin-deployment, deploy-app]
-    if: always() && needs.deploy-infra.result == 'success' && needs.deploy-app.result == 'success'
+    if: |
+      always() 
+      && (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped') 
+      && (needs.deploy-app.result == 'success' || needs.deploy-app.result == 'skpped')
     runs-on: ubuntu-latest
     outputs:
       application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
@@ -300,7 +303,7 @@ jobs:
   cypress:
     name: cypress-run
     needs: [deploy-app, finishing-prep]
-    if: always() && (needs.finishing-prep.result == 'success' || needs.finishing-prep.result == 'skipped')
+    if: always() && needs.finishing-prep.result == 'success'
     runs-on: ubuntu-latest
     container: cypress/browsers:node14.17.0-chrome91-ff89
     strategy:
