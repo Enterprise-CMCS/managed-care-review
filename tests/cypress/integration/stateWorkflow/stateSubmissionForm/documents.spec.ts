@@ -129,7 +129,7 @@ describe('documents', () => {
             cy.findByRole('button', { name: /Back/ }).click()
             cy.pa11y({
                 actions: ['wait for element #documents-hint to be visible'],
-                threshold: 9, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15949
+                hideElements: '.usa-step-indicator, #documents-hint'
             })
         })
     })
