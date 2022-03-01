@@ -49,7 +49,6 @@ describe('contacts', () => {
             cy.findByRole('heading', { name: /Contacts/ })
             cy.pa11y({
                 actions: ['wait for element #form-guidance to be visible'],
-                threshold: 7, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15948
             })
         })
     })
