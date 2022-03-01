@@ -22,54 +22,6 @@ import { configurePostgres } from './configuration'
 
 import { tracer as tracer } from "./otel_handler";
 
-// console.log('TRACERs', tracer)
-
-// const provider = new NodeTracerProvider()
-// provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()))
-// provider.register()
-
-// const sdk = new NodeSDK({
-//     traceExporter: new ConsoleSpanExporter(),
-//     instrumentations: [
-//         new AwsLambdaInstrumentation({
-//             requestHook: (span, { event, context }) => {
-//                 console.log('IN REQUEST HOOK WOIFNEWOINFWIOFN')
-//                 span.setAttribute('app.name', context.functionName)
-//                 span.setAttribute('started', true)
-//             },
-//             responseHook: (span, { err, res }) => {
-//                 console.log('IN RESPONSE HOOK WOEINFWOINFIOWEF')
-//                 span.setAttribute('finished', true)
-//                 if (err instanceof Error)
-//                     span.setAttribute('app.error', err.message)
-//                 if (res) span.setAttribute('app.res', res)
-//             },
-//         }),
-//     ],
-// })
-
-// sdk.start()
-
-// registerInstrumentations({
-//     instrumentations: [
-//         new AwsLambdaInstrumentation({
-//             requestHook: (span, { event, context }) => {
-//                 console.log('IN REQUEST HOOK WOIFNEWOINFWIOFN')
-//                 span.setAttribute('app.name', context.functionName)
-//                 span.setAttribute('started', true)
-//             },
-//             responseHook: (span, { err, res }) => {
-//                 console.log('IN RESPONSE HOOK WOEINFWOINFIOWEF')
-//                 span.setAttribute('finished', true)
-//                 if (err instanceof Error)
-//                     span.setAttribute('app.error', err.message)
-//                 if (res) span.setAttribute('app.res', res)
-//             },
-//         }),
-//     ],
-// })
-
-// -------- no more setup for OTEL --------
 
 // The Context type passed to all of our GraphQL resolvers
 export interface Context {
@@ -136,24 +88,14 @@ function localTracingMiddleware(
     wrapped: APIGatewayProxyHandler
 ): APIGatewayProxyHandler {
     return function (event, context, completion) {
-        console.log('start Trace, context:', context)
-        const currentSpan = api.trace.getSpan(api.context.active())
-        // display traceid in the terminal
-        if (currentSpan) {
-            console.log(`traceid: ${currentSpan.spanContext().traceId}`)
-            console.log(`spanid: ${currentSpan.spanContext().spanId}`)
-        } else {
-            console.log('no active span')
-        }
         const span = tracer.startSpan('handleRequest', {
             kind: 1, // server
-            attributes: { key: 'value' },
+            attributes: { middlewareInit: 'works' },
         })
-
         const result = wrapped(event, context, completion)
 
-        span.addEvent('Past is done')
-        span.setAttribute('foo', 'bar')
+        span.addEvent('middleware addEvent called', {data: JSON.stringify(result)})
+        span.setAttribute('middlewareSetAttribute', 'works')
         span.end()
 
         return result

@@ -53,20 +53,20 @@ export function isSubmissionError(err: unknown): err is SubmissionError {
 function submit(
     draft: DraftSubmissionType
 ): StateSubmissionType | SubmissionError {
-    console.log("about to submit draft")
-    const parentSpan = api.trace.getSpan(api.context.active())
-    parentSpan?.setAttribute('fakeyname', 'bloop')
-    parentSpan?.addEvent('submitDraftSubmission', { key: 'about to submit draft' })
-    // const span = tracer.startSpan('submitDraft', {
-    //     kind: 1, // server
-    //     attributes: { key: 'value', bloop: 'bloop' },
-    // })
+    const span = tracer.startSpan('submitDraft', {
+        kind: 1, // server
+        attributes: { submitDraft: 'works' },
+    })
+    span.setAttribute('submitDraftAttribute', 'works')
+    span.setAttribute('submitDraftContext', JSON.stringify(api.context.active()))
+    span.setEvent('submitDraftEvent', JSON.stringify(draft))
+
     const maybeStateSubmission: Record<string, unknown> = {
         ...draft,
         status: 'SUBMITTED',
         submittedAt: new Date(),
     }
-    // span.end()
+    span.end()
     if (isStateSubmission(maybeStateSubmission)) return maybeStateSubmission
     
     else if (!hasValidContract(maybeStateSubmission as StateSubmissionType)) {
