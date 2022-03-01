@@ -300,7 +300,7 @@ jobs:
   cypress:
     name: cypress-run
     needs: [deploy-app, finishing-prep]
-    if: always() && needs.finishing-prep.result == 'success'
+    if: always() && (needs.finishing-prep.result == 'success' || needs.finishing-prep.result == 'skipped')
     runs-on: ubuntu-latest
     container: cypress/browsers:node14.17.0-chrome91-ff89
     strategy:
