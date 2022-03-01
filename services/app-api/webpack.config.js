@@ -16,26 +16,28 @@ const extensions = [
     '.graphql',
     '.gql',
 ];
+const servicePath = '';
 
 module.exports = {
     entry: slsw.lib.entries,
     target: 'node',
+    context: __dirname,
     mode: isLocal ? 'development' : 'production',
     performance: {
         hints: false,
     },
     externals: [
+        nodeExternals(),
         nodeExternals({
-            additionalModuleDirs: [
-                path.resolve(__dirname, '../../node_modules'),
-            ],
+            modulesDir: path.resolve(__dirname, '../../node_modules'),
         }),
+        'aws-sdk',
     ],
     devtool: 'source-map',
     resolve: {
         symlinks: false,
         extensions: extensions,
-        modules: [path.resolve(__dirname, '../../node_modules')],
+        modules: [path.resolve(__dirname, 'node_modules'), 'node_modules'],
         plugins: [
             new TsconfigPathsPlugin({
                 configFile: tsConfigPath,
@@ -45,6 +47,11 @@ module.exports = {
     },
     module: {
         rules: [
+            {
+                test: /\.mjs$/,
+                include: /node_modules/,
+                type: 'javascript/auto',
+            },
             {
                 test: /\.(ts|tsx)$/,
                 use: [
@@ -58,7 +65,9 @@ module.exports = {
                     },
                 ],
                 exclude: [
-                    path.resolve(__dirname, '../../node_modules/.prisma'),
+                    path.resolve(servicePath, 'node_modules'),
+                    path.resolve(servicePath, '.serverless'),
+                    path.resolve(servicePath, '.webpack'),
                 ],
             },
             {
