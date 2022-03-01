@@ -236,8 +236,8 @@ jobs:
     name: Finishing Prep
     needs: [deploy-infra, begin-deployment, deploy-app]
     if: |
-      always() 
-      && (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped') 
+      always() \ 
+      && (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped') \
       && (needs.deploy-app.result == 'success' || needs.deploy-app.result == 'skpped')
     runs-on: ubuntu-latest
     outputs:
