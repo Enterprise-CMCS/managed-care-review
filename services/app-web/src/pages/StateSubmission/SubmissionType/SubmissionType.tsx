@@ -326,6 +326,7 @@ export const SubmissionType = ({
                             >
                                 <Fieldset
                                     className={styles.radioGroup}
+                                    role="radiogroup"
                                     aria-required
                                     legend="Choose submission type"
                                 >
