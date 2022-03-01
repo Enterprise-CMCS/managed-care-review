@@ -29,10 +29,9 @@ function preparePrismaLayer() {
     rsync -av ../../node_modules/@prisma/engines/dist/ lambda-layers-prisma-client-query/nodejs/node_modules/@prisma/engines/dist
 
     echo "Prepare Prisma Client Migration lambda layer"
-    rsync -av ../../node_modules/@prisma/client/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/client
+    rsync -av ../../node_modules/@prisma/ lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma
     rsync -av ../../node_modules/prisma/ lambda-layers-prisma-client-migration/nodejs/node_modules/prisma
     rsync -av ../../node_modules/.prisma/ lambda-layers-prisma-client-migration/nodejs/node_modules/.prisma
-    rsync -av ../../node_modules/@prisma/engines/ lambda-layers-prisma-migration/nodejs/node_modules/@prisma/engines
 
     echo "Copy migration files to layer..."
     rsync -av prisma/ lambda-layers-prisma-client-migration/nodejs/prisma
