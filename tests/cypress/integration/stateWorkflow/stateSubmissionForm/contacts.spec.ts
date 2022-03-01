@@ -49,6 +49,7 @@ describe('contacts', () => {
             cy.findByRole('heading', { name: /Contacts/ })
             cy.pa11y({
                 actions: ['wait for element #form-guidance to be visible'],
+                hideElements: '.usa-step-indicator',
             })
         })
     })
