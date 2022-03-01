@@ -16,7 +16,6 @@ describe('dashboard', () => {
         // check accessibility of dashboard
         cy.pa11y({
             actions: ['wait for element #dashboard-page to be visible'],
-            threshold: 2, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15947
         })
     })
 
@@ -58,9 +57,8 @@ describe('dashboard', () => {
             ignore: [
                 'definition-list',
                 'dlitem',
-                'aria-allowed-attr',
             ],
-            hideElements: '.usa-step-indicator__segment-label'
+            hideElements: '.usa-step-indicator'
         })
 
         // Submit, sent to dashboard
@@ -109,7 +107,10 @@ describe('dashboard', () => {
                 actions: [
                     'wait for element #submissionTypeSection to be visible',
                 ],
-                threshold: 20, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15952
+                ignore: [
+                    'definition-list',
+                    'dlitem',
+                ],
             })
 
             // Link back to dashboard, submission visible in default program
