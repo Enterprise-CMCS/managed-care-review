@@ -4,8 +4,6 @@ import { MutationResolvers, State } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { InsertDraftSubmissionArgsType, isStoreError, Store } from '../postgres'
 import { pluralize } from '../../app-web/src/common-code/formatters'
-import { tracer as tracer } from "../handlers/otel_handler";
-import * as api from '@opentelemetry/api'
 
 export function createDraftSubmissionResolver(
     store: Store

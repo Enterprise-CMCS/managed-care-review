@@ -16,7 +16,7 @@ import { MutationResolvers, State } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
 
-const tracer = require('../handlers/otel_handler').tracer
+import { tracer as tracer } from '../handlers/otel_handler'
 
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
@@ -59,7 +59,7 @@ function submit(
     })
     span.setAttribute('submitDraftAttribute', 'works')
     span.setAttribute('submitDraftContext', JSON.stringify(api.context.active()))
-    span.addEvent('submitDraftEvent', JSON.stringify(draft))
+    span.addEvent('submitDraftEvent')
 
     const maybeStateSubmission: Record<string, unknown> = {
         ...draft,

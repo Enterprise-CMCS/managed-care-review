@@ -1,4 +1,3 @@
-import * as api from '@opentelemetry/api'
 import { ApolloServer } from 'apollo-server-lambda'
 import {
     APIGatewayProxyEvent,
