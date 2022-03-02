@@ -130,7 +130,6 @@ describe('documents', () => {
             cy.pa11y({
                 actions: ['wait for element #documents-hint to be visible'],
                 hideElements: '.usa-step-indicator',
-                threshold: 2,
             })
         })
     })
