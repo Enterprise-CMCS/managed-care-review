@@ -129,8 +129,8 @@ describe('documents', () => {
             cy.findByRole('button', { name: /Back/ }).click()
             cy.pa11y({
                 actions: ['wait for element #documents-hint to be visible'],
-                ignore: ['aria-allowed-attr'],
-                hideElements: '.usa-step-indicator'
+                hideElements: '.usa-step-indicator',
+                threshold: 2,
             })
         })
     })
