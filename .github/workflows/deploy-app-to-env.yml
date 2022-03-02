@@ -74,18 +74,11 @@ jobs:
 
       - uses: actions/download-artifact@v2
         with:
-          name: lambda-layers-prisma-client-query
-          path: ./services/app-api/lambda-layers-prisma-client-query
-
-      - uses: actions/download-artifact@v2
-        with:
           name: lambda-layers-prisma-client-migration
           path: ./services/app-api/lambda-layers-prisma-client-migration
 
       - name: Unzip prisma layer
         run: |
-          tar -C ./services/app-api/lambda-layers-prisma-client-query -xf ./services/app-api/lambda-layers-prisma-client-query/nodejs.tar.gz
-          rm -rf ./services/app-api/lambda-layers-prisma-client-query/nodejs.tar.gz
           tar -C ./services/app-api/lambda-layers-prisma-client-migration -xf ./services/app-api/lambda-layers-prisma-client-migration/nodejs.tar.gz
           rm -rf ./services/app-api/lambda-layers-prisma-client-migration/nodejs.tar.gz
 
