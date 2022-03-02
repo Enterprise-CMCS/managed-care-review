@@ -115,8 +115,6 @@ provider:
     OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
 
 layers:
-  prismaClientQuery:
-    path: lambda-layers-prisma-client-query
   prismaClientMigration:
     path: lambda-layers-prisma-client-migration
 
@@ -158,8 +156,6 @@ functions:
       securityGroupIds:
         - ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
-    layers:
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-0-1:1
 
   hello:
     handler: handlers/hello.main
