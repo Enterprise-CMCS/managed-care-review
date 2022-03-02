@@ -59,11 +59,7 @@ module.exports = {
                         },
                     },
                 ],
-                exclude: [
-                    path.resolve(servicePath, 'node_modules'),
-                    path.resolve(servicePath, '.serverless'),
-                    path.resolve(servicePath, '.webpack'),
-                ],
+                exclude: /node_modules/,
             },
             {
                 test: /\.(graphql|gql)$/,
