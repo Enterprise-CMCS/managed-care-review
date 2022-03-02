@@ -55,8 +55,9 @@ describe('dashboard', () => {
             cy.visit(reviewURL)
 
             // Submit, sent to dashboard
+            cy.intercept('POST', '*/graphql').as('gqlRequest')
             cy.submitStateSubmissionForm()
-            cy.waitForApiToLoad()
+            cy.wait('@gqlRequest')
             cy.findByText('Dashboard').should('exist')
             cy.findByText('Programs').should('exist')
 
