@@ -211,7 +211,7 @@ jobs:
       always() &&
       (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped')
 
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@mt-split-lambda-layer
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
     with:
       stage_name: ${{ needs.begin-deployment.outputs.stage-name }}
       app_version: ${{ needs.begin-deployment.outputs.app-version }}
