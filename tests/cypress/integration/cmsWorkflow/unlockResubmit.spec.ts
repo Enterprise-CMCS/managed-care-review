@@ -47,16 +47,17 @@ describe('dashboard', () => {
             cy.findByRole('button', { name: 'Submit' }).click()
 
             cy.findByRole('button', { name: 'Unlock submission' }).should('be.disabled')
-
+            cy.wait(2000) // Unclear why this is needed, but I don't care enough about figuring out
+                                // cognito logout to care. 
 
             // login as the state user again
             cy.findByRole('button', {name: 'Sign out'}).click()
-            cy.wait(10000)
-
 
             cy.findByText('Medicaid and CHIP Managed Care Reporting and Review System')
 
             cy.logInAsStateUser()
+
+            cy.findByText('Dashboard').should('exist')
 
             cy.visit(reviewURL)
 

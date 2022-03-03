@@ -101,11 +101,10 @@ function AuthProvider({
                   return new Promise<void>((resolve, reject) => {
                       realLogout()
                           .then(() => {
-                            console.log("REfteching")
                               refetch()
                                   .then(() => {
                                       // this would actually be unexpected.
-                                      console.log("We succeeded after logout?")
+                                      console.log("Error: We fetched CurrentUser after logout")
                                       reject(
                                           new Error(
                                               "Logout somehow didn't trigger a 403"

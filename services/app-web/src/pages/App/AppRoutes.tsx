@@ -142,7 +142,6 @@ export const AppRoutes = ({
             }
             // Then, when we login, read that key, if it exists, go forth.
         } else {
-            console.log("Logged In User: ", loggedInUser)
             const redirectPath = LocalStorage.getItem(
                 LOGIN_REDIRECT_STORAGE_KEY
             )

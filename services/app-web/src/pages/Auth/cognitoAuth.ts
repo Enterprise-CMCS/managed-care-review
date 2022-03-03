@@ -159,7 +159,6 @@ export async function signIn(
 export async function signOut(): Promise<null> {
     try {
         await AmplifyAuth.signOut()
-        console.log("amplify Singout Competle")
         return null
     } catch (e) {
         console.log('error signing out: ', e)
