@@ -6,7 +6,9 @@ import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySec
 import {
     AmendableItemsRecord,
     ContractTypeRecord,
-    FederalAuthorityRecord, ManagedCareEntityRecord, RateChangeReasonRecord
+    FederalAuthorityRecord, ManagedCareEntityRecord, 
+    RateChangeReasonRecord,
+    ContractExecutionStatusRecord
 } from '../../../constants/submissions'
 import { useS3 } from '../../../contexts/S3Context'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'

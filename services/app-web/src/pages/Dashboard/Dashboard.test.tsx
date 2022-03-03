@@ -4,7 +4,7 @@ import { screen, waitFor, within } from '@testing-library/react'
 import { Dashboard } from './Dashboard'
 import {
     fetchCurrentUserMock,
-    indexSubmissionsMockSuccess,
+    indexSubmissions2MockSuccess,
     mockDraft,
     mockStateSubmission,
 } from '../../testHelpers/apolloHelpers'
@@ -16,7 +16,7 @@ describe('Dashboard', () => {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200 }),
-                    indexSubmissionsMockSuccess(),
+                    indexSubmissions2MockSuccess(),
                 ],
             },
         })
@@ -36,7 +36,7 @@ describe('Dashboard', () => {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200 }),
-                    indexSubmissionsMockSuccess(),
+                    indexSubmissions2MockSuccess(),
                 ],
             },
         })
@@ -77,7 +77,7 @@ describe('Dashboard', () => {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
-                    indexSubmissionsMockSuccess(submissions),
+                    indexSubmissions2MockSuccess(submissions),
                 ],
             },
         })

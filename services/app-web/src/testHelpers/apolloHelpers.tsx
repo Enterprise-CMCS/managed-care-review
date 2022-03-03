@@ -718,6 +718,32 @@ const indexSubmissionsMockSuccess = (
     }
 }
 
+const indexSubmissions2MockSuccess = (
+    submissions: Submission2[] = [mockUnlockedSubmission2(), mockSubmittedSubmission2()]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): MockedResponse<Record<string, any>> => {
+    
+    const submissionEdges = submissions.map((sub) => {
+        return {
+            node: sub,
+        }
+    })
+    return {
+        request: {
+            query: IndexSubmissionsDocument,
+        },
+        result: {
+            data: {
+                indexSubmissions: {
+                    totalCount: submissionEdges.length,
+                    edges: submissionEdges,
+                },
+            },
+        },
+    }
+}
+
+
 export {
     fetchCurrentUserMock,
     mockValidCMSUser,
@@ -729,6 +755,7 @@ export {
     submitDraftSubmissionMockSuccess,
     submitDraftSubmissionMockError,
     indexSubmissionsMockSuccess,
+    indexSubmissions2MockSuccess,
     unlockStateSubmissionMockSuccess,
     unlockStateSubmissionMockError,
 }

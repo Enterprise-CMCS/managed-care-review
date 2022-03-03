@@ -15,6 +15,8 @@ import { usePage } from '../../contexts/PageContext'
 import { DraftSubmission, StateSubmission, Submission2, UnlockStateSubmissionMutationFn, useFetchSubmission2Query, useUnlockStateSubmissionMutation } from '../../gen/gqlClient'
 import { isGraphQLErrors } from '../../gqlHelpers'
 import { GenericError } from '../Errors/GenericError'
+import { Error404 } from '../Errors/Error404'
+
 import styles from './SubmissionSummary.module.scss'
 
 function unlockModalButton(modalRef: React.RefObject<ModalRef>, disabled: boolean) {
@@ -69,9 +71,10 @@ export const SubmissionSummary = (): React.ReactElement => {
     const { pathname } = useLocation()
     const { loggedInUser } = useAuth()
     const { updateHeading } = usePage()
-    const [userVisibleUnlockError, setUserVisibleUnlockError] = useState<
+    const [pageLevelAlert, setPageLevelAlert] = useState<
         string | undefined
     >(undefined)
+    
     const modalRef = useRef<ModalRef>(null)
     const [packageData, setPackageData] = useState<SubmissionUnionType | undefined>(undefined)
 
@@ -103,21 +106,22 @@ export const SubmissionSummary = (): React.ReactElement => {
                 // we want the most recent revision that has submission info.
                 return (rev.revision.submitInfo)
             })
+    
             if (!currentRevision) {
                 console.error('ERROR: submission in summary has no submitted revision', submissionAndRevisions.revisions)
-                setUserVisibleUnlockError('Error fetching the submission. Please try again.')
+                setPageLevelAlert('Error fetching the submission. Please try again.')
                 return
             }
 
             const submissionResult = base64ToDomain(currentRevision.revision.submissionData)
             if (submissionResult instanceof Error) {
                 console.error('ERROR: got a proto decoding error', submissionResult)
-                setUserVisibleUnlockError('Error fetching the submission. Please try again.')
+                setPageLevelAlert('Error fetching the submission. Please try again.')
                 return
             }
             setPackageData(submissionResult)
         }
-    }, [submissionAndRevisions, setPackageData, setUserVisibleUnlockError])
+    }, [submissionAndRevisions, setPackageData, setPageLevelAlert])
 
     useEffect(() => {
         if (packageData) {
@@ -125,7 +129,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         }
     }, [updateHeading, pathname, packageData])
 
-    if (loading || !submissionAndRevisions || !packageData) {
+    if (loading) {
         return (
             <GridContainer>
                 <Loading />
@@ -133,20 +137,21 @@ export const SubmissionSummary = (): React.ReactElement => {
         )
     }
 
-    if (error) return <GenericError />
+    if (data && (!submissionAndRevisions)) return <Error404 /> // api request resolves but are no revisions likely because invalid submission is queried. This should be "Not Found"
+    if (error || !packageData || !submissionAndRevisions) return <GenericError /> // api failure or protobuf decode failure
 
     const onUnlock = async () => {
         const result = await unlockMutationWrapper(unlockStateSubmission, submissionAndRevisions.id)
 
         if (result instanceof Error) {
             console.error('ERROR: got an Apollo Client Error attempting to unlock', result)
-            setUserVisibleUnlockError('Error attempting to unlock. Please try again.')
+            setPageLevelAlert('Error attempting to unlock. Please try again.')
         } else if (isGraphQLErrors(result)) {
             console.error('ERROR: got a GraphQL error response', result)
             if (result[0].extensions.code === 'BAD_USER_INPUT') {
-                setUserVisibleUnlockError('Submission is already unlocked. Please refresh and try again.')
+                setPageLevelAlert('Submission is already unlocked. Please refresh and try again.')
             } else {
-                setUserVisibleUnlockError('Error attempting to unlock. Please try again.')
+                setPageLevelAlert('Error attempting to unlock. Please try again.')
             }
         } else {
             const unlockedSub: Submission2 = result
@@ -189,9 +194,9 @@ export const SubmissionSummary = (): React.ReactElement => {
                 data-testid="submission-summary"
                 className={styles.container}
             >
-                {userVisibleUnlockError && (
+                {pageLevelAlert && (
                     <Alert type="error" heading="Unlock Error">
-                        {userVisibleUnlockError}
+                        {pageLevelAlert}
                     </Alert>
                 )}
 
@@ -237,8 +242,8 @@ export const SubmissionSummary = (): React.ReactElement => {
                         Reason for unlocking submission
                     </ModalHeading>
                     <Textarea
-                        id={'unlockReason'}
-                        name={'unlockReason'}
+                        id='unlockReason'
+                        name='unlockReason'
                     />
                     <ModalFooter>
                         <ButtonGroup className="float-right">

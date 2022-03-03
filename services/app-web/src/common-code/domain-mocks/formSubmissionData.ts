@@ -480,6 +480,7 @@ function basicStateSubmission(): StateSubmissionType {
             },
         ],
         rateDocuments: [],
+        contractExecutionStatus: 'EXECUTED'
     }
 }
 
