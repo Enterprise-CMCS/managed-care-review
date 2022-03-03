@@ -44,7 +44,7 @@ export const FieldTextInput = ({
                 <PoliteErrorMessage>{meta.error}</PoliteErrorMessage>
             )}
             {hint && (
-                <div aria-labelledby={id} className="usa-hint margin-top-1">
+                <div role="note" aria-labelledby={id} className="usa-hint margin-top-1">
                     {hint}
                 </div>
             )}

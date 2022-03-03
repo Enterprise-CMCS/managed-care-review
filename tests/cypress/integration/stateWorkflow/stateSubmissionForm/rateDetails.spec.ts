@@ -53,7 +53,8 @@ describe('rate details', () => {
             cy.findByRole('button', { name: /Back/ }).click()
             cy.pa11y({
                 actions: ['wait for element #form-guidance to be visible'],
-                threshold: 12, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15947
+                hideElements: '.usa-step-indicator',
+                threshold: 4,
             })
         })
     })

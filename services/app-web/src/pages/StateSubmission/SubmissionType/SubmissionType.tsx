@@ -326,6 +326,7 @@ export const SubmissionType = ({
                             >
                                 <Fieldset
                                     className={styles.radioGroup}
+                                    role="radiogroup"
                                     aria-required
                                     legend="Choose submission type"
                                 >
@@ -375,7 +376,6 @@ export const SubmissionType = ({
                                 )}
                                 hint={
                                     <>
-
                                         <p id="submissionDescriptionHelp">
                                             Provide a 1-2 paragraph summary of your submission that highlights any important changes CMS reviewers will need to be aware of
                                         </p>

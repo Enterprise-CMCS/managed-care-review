@@ -444,6 +444,7 @@ export const ContractDetails = ({
                                 error={showFieldErrors(errors.contractType)}
                             >
                                 <Fieldset
+                                    role="radiogroup"
                                     aria-required
                                     className={styles.radioGroup}
                                     legend="Contract action type"
@@ -477,6 +478,7 @@ export const ContractDetails = ({
                                 error={showFieldErrors(errors.contractExecutionStatus)}
                             >
                                 <Fieldset
+                                    role="radiogroup"
                                     aria-required
                                     className={styles.radioGroup}
                                     legend="Contract status"
@@ -847,6 +849,7 @@ export const ContractDetails = ({
                                                                 }
                                                             >
                                                                 <Fieldset
+                                                                    role="radiogroup"
                                                                     aria-required
                                                                     legend="Select reason for capitation rate change"
                                                                 >
@@ -1078,6 +1081,7 @@ export const ContractDetails = ({
                                                         )}
                                                     >
                                                         <Fieldset
+                                                            role="radiogroup"
                                                             aria-required
                                                             legend="Is this contract action related to the COVID-19 public health emergency?"
                                                         >
@@ -1120,6 +1124,7 @@ export const ContractDetails = ({
                                                             )}
                                                         >
                                                             <Fieldset
+                                                                role="radiogroup"
                                                                 aria-required
                                                                 legend="Is this related to coverage and reimbursement for vaccine administration?"
                                                             >

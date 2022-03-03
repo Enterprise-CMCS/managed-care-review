@@ -116,6 +116,7 @@ export const FileProcessor = ({
         !isContractOnly && item.documentCategories.length === 0
     const isLoading = status === 'PENDING'
     const isScanning = status === 'SCANNING'
+    const isComplete = status === 'UPLOAD_COMPLETE'
 
     const isPDF = name.indexOf('.pdf') > 0
     const isWord = name.indexOf('.doc') > 0 || name.indexOf('.pages') > 0
@@ -145,6 +146,8 @@ export const FileProcessor = ({
         statusValue = 'uploading'
     } else if (isScanning) {
         statusValue = 'scanning for viruses'
+    } else if (isComplete){
+        statusValue = 'upload complete'
     } else if (
         hasDuplicateNameError ||
         hasScanningError ||
