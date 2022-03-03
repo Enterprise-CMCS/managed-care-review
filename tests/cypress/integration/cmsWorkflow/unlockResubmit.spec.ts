@@ -10,14 +10,10 @@ describe('dashboard', () => {
         cy.fillOutBaseContractDetails()
         cy.navigateForm('Continue')
 
-        // cy.fillOutNewRateCertification()
-        // cy.navigateForm('Continue')
-
         cy.fillOutStateContact()
-        // cy.fillOutActuaryContact()
         cy.navigateForm('Continue')
 
-        // cy.fillOutSupportingDocuments()
+        // Skip supporting documents
         cy.findByRole('heading', {name: /Supporting documents/}).should('exist')
         cy.navigateForm('Continue')
         cy.findByRole('heading', {name: /Review and submit/}).should('exist')
