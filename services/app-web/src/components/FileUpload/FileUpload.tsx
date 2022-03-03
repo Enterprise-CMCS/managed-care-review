@@ -33,7 +33,7 @@ export type FileUploadProps = {
     deleteFile: (key: string) => Promise<void>
     onFileItemsUpdate: ({ fileItems }: { fileItems: FileItemT[] }) => void
     isContractOnly?: boolean
-    shouldDisplayMissingCategoriesError?: boolean // by default, false. the parent component may read current files list and requirements of the form to determine otherwise. 
+    shouldDisplayMissingCategoriesError?: boolean // by default, false. the parent component may read current files list and requirements of the form to determine otherwise.
 } & JSX.IntrinsicElements['input']
 
 /*  FileUpload handles async file upload to S3 and displays inline errors per file.
@@ -58,7 +58,7 @@ export const FileUpload = ({
     deleteFile,
     onFileItemsUpdate,
     isContractOnly,
-    shouldDisplayMissingCategoriesError = false, 
+    shouldDisplayMissingCategoriesError = false,
     ...inputProps
 }: FileUploadProps): React.ReactElement => {
     const [fileItems, setFileItems] = useState<FileItemT[]>(initialItems || [])
@@ -95,6 +95,24 @@ export const FileUpload = ({
         onFileItemsUpdate({ fileItems })
     }, [fileItems, onFileItemsUpdate])
 
+    React.useEffect(() => {
+        /* guard against empty documentCategories when user starts with contract & rates
+        and switches to contract-only */
+        setFileItems((prevItems) => {
+            const newItems = [...prevItems]
+            return newItems.map((item) => {
+                if (renderMode === 'table' && isContractOnly) {
+                    return {
+                        ...item,
+                        documentCategories: ['CONTRACT_RELATED'],
+                    } as FileItemT
+                } else {
+                    return item
+                }
+            })
+        })
+    }, [renderMode, isContractOnly])
+
     const isDuplicateItem = (
         existingList: FileItemT[],
         currentItem: FileItemT
@@ -102,7 +120,7 @@ export const FileUpload = ({
 
     const isMissingCategoriesItem = (fileItem: FileItemT) => {
         if (!shouldDisplayMissingCategoriesError) return false // either no missing categories or else missing categories are not relevant
-        return fileItem.documentCategories.length === 0 
+        return fileItem.documentCategories.length === 0
     }
 
     const isAcceptableFile = (file: File): boolean => {
