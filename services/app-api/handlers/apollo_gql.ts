@@ -98,7 +98,9 @@ function localTracingMiddleware(
             attributes: { middlewareInit: 'works' },
         })
         const spanContext = span.spanContext()
+        console.log('spanContext: ', spanContext)
         apiContext.setValue(ctx, spanContext)
+        console.log("valueinmiddleware", apiContext.getValue(ctx))
         const result = wrapped(event, context, completion)
 
         span.addEvent('middleware addEvent called', {data: JSON.stringify(result)})
