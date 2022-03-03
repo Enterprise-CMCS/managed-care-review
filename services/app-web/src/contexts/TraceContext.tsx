@@ -56,6 +56,6 @@ export type TraceProviderProps = {
 
 export default function TraceProvider({
     children,
-}: TraceProviderProps): React.ReactNode {
+}: TraceProviderProps): React.ReactElement {
     return <>{children}</>
 }
