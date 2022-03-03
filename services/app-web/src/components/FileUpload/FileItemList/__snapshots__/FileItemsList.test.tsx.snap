@@ -193,7 +193,7 @@ exports[`FileItemList component renders correctly 1`] = `
     >
       <div
         aria-label="Status of file testFile4.pdf"
-        aria-valuetext=""
+        aria-valuetext="upload complete"
         role="progressbar"
       >
         <img
