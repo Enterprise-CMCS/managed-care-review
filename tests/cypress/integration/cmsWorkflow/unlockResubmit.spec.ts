@@ -5,19 +5,20 @@ describe('dashboard', () => {
         cy.logInAsStateUser()
 
         // a submitted submission
-        cy.startNewContractAndRatesSubmission()
+        cy.startNewContractOnlySubmission()
 
         cy.fillOutBaseContractDetails()
         cy.navigateForm('Continue')
 
-        cy.fillOutNewRateCertification()
-        cy.navigateForm('Continue')
+        // cy.fillOutNewRateCertification()
+        // cy.navigateForm('Continue')
 
         cy.fillOutStateContact()
-        cy.fillOutActuaryContact()
+        // cy.fillOutActuaryContact()
         cy.navigateForm('Continue')
 
-        cy.fillOutSupportingDocuments()
+        // cy.fillOutSupportingDocuments()
+        cy.findByRole('heading', {name: /Supporting documents/}).should('exist')
         cy.navigateForm('Continue')
         cy.findByRole('heading', {name: /Review and submit/}).should('exist')
 
@@ -29,16 +30,16 @@ describe('dashboard', () => {
             const summaryURL = fullUrl.toString()
 
             // Submit, sent to dashboard
+            cy.intercept('POST', '*/graphql').as('gqlRequest')
             cy.submitStateSubmissionForm()
-            cy.waitForApiToLoad()
+            cy.wait('@gqlRequest')
             cy.findByText('Dashboard').should('exist')
             cy.findByText('Programs').should('exist')
 
             // visit the url as a CMS User
             cy.findByRole('button', {name: 'Sign out'}).click()
-            cy.logInAsCMSUser()
-
-            cy.visit(summaryURL)
+            cy.findByText('Medicaid and CHIP Managed Care Reporting and Review System')
+            cy.logInAsCMSUser({initialURL: reviewURL})
 
             // click on the unlock button
             cy.findByRole('button', { name: 'Unlock submission' }).click()
@@ -50,14 +51,19 @@ describe('dashboard', () => {
 
             // login as the state user again
             cy.findByRole('button', {name: 'Sign out'}).click()
+            cy.wait(10000)
+
+
+            cy.findByText('Medicaid and CHIP Managed Care Reporting and Review System')
+
             cy.logInAsStateUser()
 
             cy.visit(reviewURL)
 
             // Submit, sent to dashboard
-            cy.intercept('POST', '*/graphql').as('gqlRequest')
+            cy.intercept('POST', '*/graphql').as('gqlRequest2')
             cy.submitStateSubmissionForm()
-            cy.wait('@gqlRequest')
+            cy.wait('@gqlRequest2')
             cy.findByText('Dashboard').should('exist')
             cy.findByText('Programs').should('exist')
 

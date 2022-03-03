@@ -38,6 +38,8 @@ Cypress.Commands.add(
         const authMode = Cypress.env('AUTH_MODE')
         console.log(authMode, 'authmode')
 
+        cy.intercept('POST', '*/graphql').as('cmsGraphQL')
+
         if (authMode === 'LOCAL') {
             cy.findByTestId('ZukoButton').click()
         } else if (authMode === 'AWS_COGNITO') {
@@ -52,6 +54,6 @@ Cypress.Commands.add(
         } else {
             throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
         }
-        cy.waitForApiToLoad()
+        cy.wait('@cmsGraphQL')
     }
 )

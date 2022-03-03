@@ -1,24 +1,22 @@
 import React, { useEffect, useState } from 'react'
-import { Switch, Route } from 'react-router-dom'
-import { useLocation, useHistory } from 'react-router'
-
-import { CognitoLogin } from '../Auth/CognitoLogin'
-import { LocalLogin } from '../../localAuth'
-import { Error404 } from '../Errors/Error404'
+import { useHistory, useLocation } from 'react-router'
+import { Route, Switch } from 'react-router-dom'
+import { assertNever, AuthModeType } from '../../common-code/domain-models'
+import { getRouteName, PageTitlesRecord, RoutesRecord, RouteT } from '../../constants/routes'
 import { useAuth } from '../../contexts/AuthContext'
-import { Dashboard } from '../Dashboard/Dashboard'
-import { CMSDashboard } from '../Dashboard/CMSDashboard'
-import { Landing } from '../Landing/Landing'
-import { RoutesRecord } from '../../constants/routes'
-import { StateSubmissionForm } from '../StateSubmission'
-import { NewStateSubmissionForm } from '../StateSubmission'
-import { SubmissionSummary } from '../SubmissionSummary'
-import { idmRedirectURL } from '../../pages/Auth/cognitoAuth'
-import { Help } from '../Help/Help'
-import { useTitle } from '../../hooks/useTitle'
-import { getRouteName, PageTitlesRecord, RouteT } from '../../constants/routes'
 import { usePage } from '../../contexts/PageContext'
-import { AuthModeType, assertNever } from '../../common-code/domain-models'
+import { useTitle } from '../../hooks/useTitle'
+import { LocalLogin } from '../../localAuth'
+import { idmRedirectURL } from '../../pages/Auth/cognitoAuth'
+import { CognitoLogin } from '../Auth/CognitoLogin'
+import { CMSDashboard } from '../Dashboard/CMSDashboard'
+import { Dashboard } from '../Dashboard/Dashboard'
+import { Error404 } from '../Errors/Error404'
+import { Help } from '../Help/Help'
+import { Landing } from '../Landing/Landing'
+import { NewStateSubmissionForm, StateSubmissionForm } from '../StateSubmission'
+import { SubmissionSummary } from '../SubmissionSummary'
+
 
 const LOGIN_REDIRECT_STORAGE_KEY = 'LOGIN_REDIRECT'
 const LocalStorage = window.localStorage
@@ -144,6 +142,7 @@ export const AppRoutes = ({
             }
             // Then, when we login, read that key, if it exists, go forth.
         } else {
+            console.log("Logged In User: ", loggedInUser)
             const redirectPath = LocalStorage.getItem(
                 LOGIN_REDIRECT_STORAGE_KEY
             )

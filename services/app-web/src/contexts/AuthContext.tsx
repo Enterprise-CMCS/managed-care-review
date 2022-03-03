@@ -1,9 +1,9 @@
 import * as React from 'react'
-
-import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
+import { AuthModeType } from '../common-code/domain-models'
 import { useFetchCurrentUserQuery, User as UserType } from '../gen/gqlClient'
 import { logoutLocalUser } from '../localAuth'
-import { AuthModeType } from '../common-code/domain-models'
+import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
+
 
 type LogoutFn = () => Promise<null>
 
@@ -101,9 +101,11 @@ function AuthProvider({
                   return new Promise<void>((resolve, reject) => {
                       realLogout()
                           .then(() => {
+                            console.log("REfteching")
                               refetch()
                                   .then(() => {
                                       // this would actually be unexpected.
+                                      console.log("We succeeded after logout?")
                                       reject(
                                           new Error(
                                               "Logout somehow didn't trigger a 403"
