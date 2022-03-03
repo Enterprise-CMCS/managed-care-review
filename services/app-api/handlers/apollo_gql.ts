@@ -30,6 +30,8 @@ export interface Context {
     span?: Span
 }
 
+const ctx = Symbol()
+
 // This function pulls auth info out of the cognitoAuthenticationProvider in the lambda event
 // and turns that into our GQL resolver context object
 function contextForRequestForFetcher(
@@ -90,11 +92,13 @@ function localTracingMiddleware(
     wrapped: APIGatewayProxyHandler
 ): APIGatewayProxyHandler {
     return function (event, context, completion) {
+        const apiContext = api.context.active()
         const span = tracer.startSpan('handleRequest', {
             kind: 1, // server
             attributes: { middlewareInit: 'works' },
         })
-
+        const spanContext = span.spanContext()
+        apiContext.setValue(ctx, spanContext)
         const result = wrapped(event, context, completion)
 
         span.addEvent('middleware addEvent called', {data: JSON.stringify(result)})
@@ -195,6 +199,7 @@ async function initializeGQLHandler(): Promise<Handler> {
     // Our user-context function is parametrized with a local or
     const contextForRequest = contextForRequestForFetcher(userFetcher)
     console.log("themaincontext", api.context.active())
+    console.log("thecontextvalue", api.context.active().getValue(ctx))
 
     const server = new ApolloServer({
         typeDefs,
