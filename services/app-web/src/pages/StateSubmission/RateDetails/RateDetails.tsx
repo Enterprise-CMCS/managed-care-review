@@ -389,6 +389,7 @@ export const RateDetails = ({
                                     <Fieldset
                                         className={styles.radioGroup}
                                         legend="Rate certification type"
+                                        role="radiogroup"
                                         aria-required
                                     >
                                         {showFieldErrors(errors.rateType) && (
