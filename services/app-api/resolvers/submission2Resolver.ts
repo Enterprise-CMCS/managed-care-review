@@ -1,18 +1,24 @@
 import { submissionStatus, submissionSubmittedAt } from '../../app-web/src/common-code/domain-models'
 import { protoToBase64 } from '../../app-web/src/common-code/proto/stateSubmission'
 import { Resolvers } from '../gen/gqlServer'
+import {RevisionType } from '../../app-web/src/common-code/domain-models'
 
+
+const formatRevision = (revision: RevisionType) => {
+return {
+
+        id: revision.id,
+        unlockInfo: revision.unlockInfo,
+        submitInfo: revision.submitInfo,
+        submissionData: protoToBase64(revision.submissionFormProto),
+}
+}
 
 export const submission2Resolver: Resolvers['Submission2'] = {
     revisions(parent) {
         return parent.revisions.map(r => {
             return {
-                revision: {
-                    id: r.id,
-                    unlockInfo: r.unlockInfo,
-                    submitInfo: r.submitInfo,
-                    submissionData: protoToBase64(r.submissionFormProto)
-                }
+                revision: formatRevision(r)
             }
         })
     },

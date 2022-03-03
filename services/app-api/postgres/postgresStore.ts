@@ -7,6 +7,7 @@ import {
 } from '../../app-web/src/common-code/domain-models'
 import { findPrograms } from '../postgres'
 import { findAllSubmissions } from './findAllSubmissions'
+import { findAllSubmissionsWithRevisions } from './findAllSubmissionsWithRevisions'
 import { findDraftSubmission } from './findDraftSubmission'
 import { findStateSubmission } from './findStateSubmission'
 import { findSubmissionWithRevisions } from './findSubmissionWithRevisions'
@@ -31,9 +32,6 @@ type Store = {
     findDraftSubmission: (
         draftUUID: string
     ) => Promise<DraftSubmissionType | undefined | StoreError>
-    findSubmissionWithRevisions: (
-        draftUUID: string
-    ) => Promise<Submission2Type | undefined | StoreError>
 
     findDraftSubmissionByStateNumber: (
         stateCoder: string,
@@ -50,7 +48,7 @@ type Store = {
 
     updateStateSubmission: (
         stateSubmission: StateSubmissionType,
-        submittedAt: Date,
+        submittedAt: Date
     ) => Promise<StateSubmissionType | StoreError>
 
     insertNewRevision: (
@@ -58,7 +56,19 @@ type Store = {
         draft: DraftSubmissionType
     ) => Promise<Submission2Type | StoreError>
 
-    findPrograms: (stateCode: string, programIDs: Array<string>) => ProgramT | undefined
+    findPrograms: (
+        stateCode: string,
+        programIDs: Array<string>
+    ) => ProgramT | undefined
+
+    // new api
+    findSubmissionWithRevisions: (
+        draftUUID: string
+    ) => Promise<Submission2Type | undefined | StoreError>
+
+    findAllSubmissionsWithRevisions: (
+        stateCode: string
+    ) => Promise<(Submission2Type)[] | StoreError>
 }
 
 function NewPostgresStore(client: PrismaClient): Store {
@@ -70,6 +80,8 @@ function NewPostgresStore(client: PrismaClient): Store {
             findDraftSubmission(client, draftUUID),
         findSubmissionWithRevisions: (id) =>
             findSubmissionWithRevisions(client, id),
+        findAllSubmissionsWithRevisions: (stateCode) => 
+            findAllSubmissionsWithRevisions(client, stateCode),
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         findDraftSubmissionByStateNumber: (_stateCode, _stateNumber) => {
             throw new Error('UNIMPLEMENTED')
