@@ -30,8 +30,6 @@ export interface Context {
     span?: Span
 }
 
-const ctx = Symbol()
-
 // This function pulls auth info out of the cognitoAuthenticationProvider in the lambda event
 // and turns that into our GQL resolver context object
 function contextForRequestForFetcher(
@@ -93,14 +91,22 @@ function localTracingMiddleware(
 ): APIGatewayProxyHandler {
     return function (event, context, completion) {
         const apiContext = api.context.active()
+        const rootContext = api.ROOT_CONTEXT
+        console.log('APICONTEXT: ', apiContext)
+        console.log('ROOTCONTEXT: ', rootContext)
         const span = tracer.startSpan('handleRequest', {
             kind: 1, // server
             attributes: { middlewareInit: 'works' },
         })
         const spanContext = span.spanContext()
-        console.log('spanContext: ', spanContext)
-        apiContext.setValue(ctx, spanContext)
-        console.log("valueinmiddleware", apiContext.getValue(ctx))
+        console.log('SPANCONTEXT: ', spanContext)
+        const key = api.createContextKey("keykey");
+        const apiSetKey = apiContext.setValue(key, "isthisanapivalue");
+        const rootSetKey = rootContext.setValue(key, "isthisarootvalue");
+        const apiKeyValue = apiSetKey.getValue(key);
+        const rootKeyValue = rootSetKey.getValue(key);
+        console.log('APIKEYVALUE: ', apiKeyValue);
+        console.log('ROOTKEYVALUE: ', rootKeyValue);
         const result = wrapped(event, context, completion)
 
         span.addEvent('middleware addEvent called', {data: JSON.stringify(result)})
@@ -200,8 +206,8 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     // Our user-context function is parametrized with a local or
     const contextForRequest = contextForRequestForFetcher(userFetcher)
-    console.log("themaincontext", api.context.active())
-    console.log("thecontextvalue", api.context.active().getValue(ctx))
+    console.log("CONTEXTOUTSIDEMIDDLEWARE", api.context.active())
+    console.log("RETRIEVEVALUEOUTSIDE", api.context.active().getValue(ctx))
 
     const server = new ApolloServer({
         typeDefs,
