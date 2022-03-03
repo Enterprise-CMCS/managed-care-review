@@ -4,21 +4,17 @@ import { Resolvers } from '../gen/gqlServer'
 import {RevisionType } from '../../app-web/src/common-code/domain-models'
 
 
-const formatRevision = (revision: RevisionType) => {
-return {
-
-        id: revision.id,
-        unlockInfo: revision.unlockInfo,
-        submitInfo: revision.submitInfo,
-        submissionData: protoToBase64(revision.submissionFormProto),
-}
-}
-
 export const submission2Resolver: Resolvers['Submission2'] = {
     revisions(parent) {
         return parent.revisions.map(r => {
             return {
-                revision: formatRevision(r)
+                revision: {
+                    id: r.id,
+                    unlockInfo: r.unlockInfo,
+                    submitInfo: r.submitInfo,
+                    createdAt: r.createdAt,
+                    submissionData: protoToBase64(r.submissionFormProto)
+                }
             }
         })
     },

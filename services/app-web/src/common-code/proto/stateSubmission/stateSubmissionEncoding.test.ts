@@ -13,6 +13,7 @@ import {
 import { toDomain } from './toDomain'
 import { toProtoBuffer } from './toProtoBuffer'
 
+
 describe('Validate encoding to protobuf and decoding back to domain model', () => {
     if (!isStateSubmission(basicStateSubmission())) {
         throw new Error(

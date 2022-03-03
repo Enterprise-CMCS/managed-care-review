@@ -9,7 +9,7 @@ export { assertIsAuthMode, assertNever } from './config'
 export type { AuthModeType } from './config'
 export type {
     ActuarialFirmType, ActuaryCommunicationType, ActuaryContact, CapitationRatesAmendedReason,
-    ContractAmendmentInfo, ContractType, DocumentCategoryType,
+    ContractAmendmentInfo, ContractExecutionStatus, ContractType, DocumentCategoryType,
     DraftSubmissionType, FederalAuthority, ManagedCareEntity, RateType, StateContact, SubmissionDocument, SubmissionType
 } from './DraftSubmissionType'
 export type { ProgramT } from './ProgramT'

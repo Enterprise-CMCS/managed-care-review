@@ -1,18 +1,18 @@
+import { Alert, Grid, GridContainer } from '@trussworks/react-uswds'
 import React from 'react'
-import { Alert, GridContainer, Grid } from '@trussworks/react-uswds'
 import { NavLink, useHistory } from 'react-router-dom'
-
 import onemacLogo from '../../assets/images/onemac-logo.svg'
+import { AuthModeType } from '../../common-code/domain-models'
 import { getRouteName } from '../../constants/routes'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
-import { AuthModeType } from '../../common-code/domain-models'
 import { Logo } from '../Logo'
-
+import styles from './Header.module.scss'
 import { PageHeadingRow } from './PageHeadingRow/PageHeadingRow'
 import { UserLoginInfo } from './UserLoginInfo/UserLoginInfo'
 
-import styles from './Header.module.scss'
+
+
 
 export type HeaderProps = {
     authMode: AuthModeType
@@ -39,7 +39,8 @@ export const Header = ({
             return
         }
 
-        logout().catch(() => {
+        logout().catch((e) => {
+            console.log('Error with logout: ', e)
             setAlert &&
                 setAlert(
                     <Alert

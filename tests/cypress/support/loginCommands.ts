@@ -26,8 +26,8 @@ Cypress.Commands.add('logInAsStateUser', () => {
     } else {
         throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
     }
-    cy.wait('@fetchCurrentUserQuery')
-    cy.wait('@indexSubmissionsQuery') // this is the first request that engages the db
+    cy.wait('@fetchCurrentUserQuery', {timeout: 10000})
+    cy.wait('@indexSubmissionsQuery', {timeout: 10000}) // this is the first request that engages the db
 })
 
 Cypress.Commands.add(
@@ -37,6 +37,8 @@ Cypress.Commands.add(
         cy.findByRole('link', { name: 'Sign In' }).click()
         const authMode = Cypress.env('AUTH_MODE')
         console.log(authMode, 'authmode')
+
+        cy.intercept('POST', '*/graphql').as('cmsGraphQL')
 
         if (authMode === 'LOCAL') {
             cy.findByTestId('ZukoButton').click()
@@ -52,6 +54,6 @@ Cypress.Commands.add(
         } else {
             throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
         }
-        cy.waitForApiToLoad()
+        cy.wait('@cmsGraphQL')
     }
 )

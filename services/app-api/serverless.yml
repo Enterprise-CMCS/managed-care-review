@@ -4,6 +4,10 @@ frameworkVersion: '2'
 
 package:
   individually: true
+  patterns:
+    - '!node_modules/prisma'
+    - '!node_modules/.prisma'
+    - '!node_modules/@prisma'
 
 plugins:
   - serverless-webpack
@@ -115,8 +119,8 @@ provider:
     OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
 
 layers:
-  prismaClient:
-    path: lambda-layers-prisma-client
+  prismaClientMigration:
+    path: lambda-layers-prisma-client-migration
 
 functions:
   email_submit:
@@ -156,9 +160,6 @@ functions:
       securityGroupIds:
         - ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
-    layers:
-      - !Ref PrismaClientLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-0-1:1
 
   hello:
     handler: handlers/hello.main
@@ -169,21 +170,6 @@ functions:
           cors: true
           authorizer: aws_iam
 
-  postgres:
-    handler: handlers/postgres_check.main
-    events:
-      - http:
-          path: postgres_check
-          method: get
-          cors: true
-    vpc:
-      securityGroupIds:
-        - ${self:custom.sgId}
-      subnetIds: ${self:custom.privateSubnets}
-    layers:
-      - !Ref PrismaClientLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-0-1:1
-
   migrate:
     handler: handlers/postgres_migrate.main
     timeout: 60 # aurora cold start can be long
@@ -192,7 +178,7 @@ functions:
         - ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
     layers:
-      - !Ref PrismaClientLambdaLayer
+      - !Ref PrismaClientMigrationLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-0-1:1
 
   zip_keys:

@@ -296,4 +296,50 @@ describe('fetchSubmission2', () => {
         expect(resultErr?.extensions?.code).toEqual('FORBIDDEN')
     })
 
+    it('returns the revisions in the correct order', async () => {
+        const stateServer = await constructTestPostgresServer()
+
+        // First, create a new submitted submission
+        const stateSubmission = await createTestStateSubmission(stateServer)
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: {
+                    name: 'Zuko',
+                    role: 'CMS_USER',
+                    email: 'zuko@example.com',
+                },
+            },
+        })
+
+        await unlockTestDraftSubmission(cmsServer, stateSubmission.id)
+
+        await submitTestDraftSubmission(stateServer, stateSubmission.id)
+
+        await unlockTestDraftSubmission(cmsServer, stateSubmission.id)
+
+        await submitTestDraftSubmission(stateServer, stateSubmission.id)
+
+        await unlockTestDraftSubmission(cmsServer, stateSubmission.id)
+
+        const input = {
+            submissionID: stateSubmission.id,
+        }
+
+        const result = await cmsServer.executeOperation({
+            query: FETCH_SUBMISSION_2,
+            variables: { input },
+        })
+
+        expect(result.errors).toBeUndefined()
+
+        let maxDate = new Date(8640000000000000);
+        let mostRecentDate = maxDate
+        for (const rev of result?.data?.fetchSubmission2.submission.revisions) {
+            expect(rev.revision.createdAt.getTime()).toBeLessThan(mostRecentDate.getTime())
+            mostRecentDate = rev.revision.createdAt
+        }
+
+    })
+
 })
