@@ -1,4 +1,5 @@
 import { Alert, GridContainer, Link, Table, Tag } from '@trussworks/react-uswds'
+import classnames from 'classnames'
 import dayjs from 'dayjs'
 import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
@@ -12,6 +13,7 @@ import styles from './Dashboard.module.scss'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
 import { base64ToDomain } from '../../common-code/proto/stateSubmission'
 import { submissionName } from '../../common-code/domain-models'
+import { SubmissionStatusRecord } from '../../constants/submissions'
 import {Submission2Status} from '../../common-code/domain-models/Submission2Type'
 
 // We only pull a subset of data out of the submission and revisions for display in Dashboard
@@ -33,16 +35,36 @@ function submissionURL(
     ): string {
         if (status === 'DRAFT') {
             return `/submissions/${id}/type`
-        }
-        return `/submission/${id}`
+        } else if (status === 'UNLOCKED') {
+            return `/submissions/${id}/review-and-submit`
+        } 
+        return `/submissions/${id}`
     }
 
+const StatusTag = ({status} : {status: Submission2Status}): React.ReactElement => {
+    const tagStyles = classnames( '', {
+        [styles.submittedTag]: isSubmitted(status),
+        [styles.draftTag]: status === 'DRAFT',
+        [styles.unlockedTag]: status === 'UNLOCKED'
+     })
+
+
+    const statusText = isSubmitted(status)? SubmissionStatusRecord.SUBMITTED: SubmissionStatusRecord[status]
+
+    return (
+        <Tag
+            className={tagStyles}
+        >
+            {statusText}
+        </Tag>
+    )
+}
 
 export const Dashboard = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
     const location = useLocation()
 
-    const { loading, data, error } = useIndexSubmissions2Query({fetchPolicy: "network-only"})
+    const { loading, data, error } = useIndexSubmissions2Query()
     console.log('DATA', data )
     if (error) {
         console.error('Error indexing submissions: ', error)
@@ -187,21 +209,7 @@ export const Dashboard = (): React.ReactElement => {
                                                         ).format('MM/DD/YYYY')}
                                                     </td>
                                                     <td>
-                                                        <Tag
-                                                            className={
-                                                                isSubmitted(
-                                                                    dashboardSubmission.status
-                                                                )
-                                                                    ? styles.submittedTag
-                                                                    : styles.draftTag
-                                                            }
-                                                        >
-                                                            {isSubmitted(
-                                                                dashboardSubmission.status
-                                                            )
-                                                                ? 'Submitted'
-                                                                : 'Draft'}
-                                                        </Tag>
+                                                        <StatusTag status={dashboardSubmission.status} />
                                                     </td>
                                                 </tr>
                                             )

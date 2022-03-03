@@ -5,8 +5,9 @@ import { Dashboard } from './Dashboard'
 import {
     fetchCurrentUserMock,
     indexSubmissions2MockSuccess,
-    mockDraft,
-    mockStateSubmission,
+    mockDraftSubmission2,
+    mockSubmittedSubmission2,
+    mockUnlockedSubmission2
 } from '../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
@@ -67,7 +68,7 @@ describe('Dashboard', () => {
             email: 'bob@dmas.mn.gov',
         }
 
-        const submissions = [mockDraft(), mockStateSubmission(), mockDraft()]
+        const submissions = [mockDraftSubmission2(), mockSubmittedSubmission2(), mockUnlockedSubmission2()]
         submissions[2].id = 'test-abc-122'
         submissions[2].name = 'MN-MSHO-0002' // the names collide otherwise
         // set middle row to latest updatedAt to test sorting (it should be sorted to top)

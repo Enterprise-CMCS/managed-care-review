@@ -1,10 +1,24 @@
 import { MockedResponse } from '@apollo/client/testing'
 import dayjs from 'dayjs'
 import { GraphQLError } from 'graphql'
-import { basicStateSubmission } from '../common-code/domain-mocks'
+import { basicStateSubmission, basicSubmission } from '../common-code/domain-mocks'
 import { domainToBase64 } from '../common-code/proto/stateSubmission'
 import {
-    CreateDraftSubmissionDocument, DraftSubmission, DraftSubmissionUpdates, FetchCurrentUserDocument, FetchDraftSubmissionDocument, FetchStateSubmissionDocument, FetchSubmission2Document, IndexSubmissionsDocument, StateSubmission, Submission, Submission2, SubmitDraftSubmissionDocument, UnlockStateSubmissionDocument, UpdateDraftSubmissionDocument, User as UserType
+    CreateDraftSubmissionDocument,
+    DraftSubmission,
+    DraftSubmissionUpdates,
+    FetchCurrentUserDocument,
+    FetchDraftSubmissionDocument,
+    FetchStateSubmissionDocument,
+    FetchSubmission2Document,
+    IndexSubmissionsDocument,
+    StateSubmission,
+    Submission,
+    Submission2,
+    IndexSubmissions2Document, SubmitDraftSubmissionDocument,
+    UnlockStateSubmissionDocument,
+    UpdateDraftSubmissionDocument,
+    User as UserType,
 } from '../gen/gqlClient'
 
 
@@ -308,6 +322,31 @@ export function mockStateSubmission(): StateSubmission {
         ],
         actuaryContacts: [],
         actuaryCommunicationPreference: null,
+    }
+}
+
+
+export function mockDraftSubmission2(): Submission2 {
+    const submission = basicSubmission()
+    const b64 = domainToBase64(submission)
+
+    return {
+        id: 'test-id-123',
+        status: 'SUBMITTED',
+        intiallySubmittedAt: '2022-01-01',
+        stateCode: 'MN',
+        revisions: [
+            {
+                revision: {
+                    id: 'revision1',
+                    unlockInfo: null,
+                    submitInfo: {
+                        updatedAt: '2021-01-01',
+                    },
+                    submissionData: b64,
+                },
+            },
+        ],
     }
 }
 
@@ -730,11 +769,11 @@ const indexSubmissions2MockSuccess = (
     })
     return {
         request: {
-            query: IndexSubmissionsDocument,
+            query: IndexSubmissions2Document,
         },
         result: {
             data: {
-                indexSubmissions: {
+                indexSubmissions2: {
                     totalCount: submissionEdges.length,
                     edges: submissionEdges,
                 },
