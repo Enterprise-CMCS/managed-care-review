@@ -30,6 +30,10 @@ export interface Context {
     span?: Span
 }
 
+const apiContext = api.context.active()
+const rootContext = api.ROOT_CONTEXT
+const key = api.createContextKey("keykey");
+
 // This function pulls auth info out of the cognitoAuthenticationProvider in the lambda event
 // and turns that into our GQL resolver context object
 function contextForRequestForFetcher(
@@ -90,8 +94,6 @@ function localTracingMiddleware(
     wrapped: APIGatewayProxyHandler
 ): APIGatewayProxyHandler {
     return function (event, context, completion) {
-        const apiContext = api.context.active()
-        const rootContext = api.ROOT_CONTEXT
         console.log('APICONTEXT: ', apiContext)
         console.log('ROOTCONTEXT: ', rootContext)
         const span = tracer.startSpan('handleRequest', {
@@ -100,7 +102,6 @@ function localTracingMiddleware(
         })
         const spanContext = span.spanContext()
         console.log('SPANCONTEXT: ', spanContext)
-        const key = api.createContextKey("keykey");
         const apiSetKey = apiContext.setValue(key, "isthisanapivalue");
         const rootSetKey = rootContext.setValue(key, "isthisarootvalue");
         const apiKeyValue = apiSetKey.getValue(key);
@@ -207,7 +208,7 @@ async function initializeGQLHandler(): Promise<Handler> {
     // Our user-context function is parametrized with a local or
     const contextForRequest = contextForRequestForFetcher(userFetcher)
     console.log("CONTEXTOUTSIDEMIDDLEWARE", api.context.active())
-    console.log("RETRIEVEVALUEOUTSIDE", api.context.active().getValue(ctx))
+    console.log("ROOTCONTEXTOUTSIDEMIDDLEWARE", api.ROOT_CONTEXT)
 
     const server = new ApolloServer({
         typeDefs,
