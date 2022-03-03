@@ -1,3 +1,5 @@
+import { Span } from '@opentelemetry/api'
+import * as api from '@opentelemetry/api'
 import { ApolloServer } from 'apollo-server-lambda'
 import {
     APIGatewayProxyEvent,
@@ -25,6 +27,7 @@ import { tracer as tracer } from "./otel_handler";
 // The Context type passed to all of our GraphQL resolvers
 export interface Context {
     user: CognitoUserType
+    span?: Span
 }
 
 // This function pulls auth info out of the cognitoAuthenticationProvider in the lambda event
@@ -91,6 +94,7 @@ function localTracingMiddleware(
             kind: 1, // server
             attributes: { middlewareInit: 'works' },
         })
+
         const result = wrapped(event, context, completion)
 
         span.addEvent('middleware addEvent called', {data: JSON.stringify(result)})
@@ -190,6 +194,7 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     // Our user-context function is parametrized with a local or
     const contextForRequest = contextForRequestForFetcher(userFetcher)
+    console.log("themaincontext", api.context.active())
 
     const server = new ApolloServer({
         typeDefs,
