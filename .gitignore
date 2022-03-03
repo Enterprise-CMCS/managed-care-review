@@ -40,3 +40,5 @@ services/uploads/local_buckets
 lambda_response.json
 
 services/app-api/lambda-layers-prisma-client
+services/app-api/lambda-layers-prisma-client-migration
+services/app-api/lambda-layers-prisma-client-query

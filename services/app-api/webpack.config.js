@@ -48,11 +48,6 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.mjs$/,
-                include: /node_modules/,
-                type: 'javascript/auto',
-            },
-            {
                 test: /\.(ts|tsx)$/,
                 use: [
                     {
@@ -64,11 +59,7 @@ module.exports = {
                         },
                     },
                 ],
-                exclude: [
-                    path.resolve(servicePath, 'node_modules'),
-                    path.resolve(servicePath, '.serverless'),
-                    path.resolve(servicePath, '.webpack'),
-                ],
+                exclude: /node_modules/,
             },
             {
                 test: /\.(graphql|gql)$/,
