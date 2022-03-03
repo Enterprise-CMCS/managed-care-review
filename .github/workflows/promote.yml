@@ -103,8 +103,8 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
-          name: lambda-layers-prisma-client
-          path: ./services/app-api/lambda-layers-prisma-client
+          name: lambda-layers-prisma-client-migration
+          path: ./services/app-api/lambda-layers-prisma-client-migration
 
   promote-infra-dev:
     needs: [build-prisma-client-lambda-layer, unit-tests]
