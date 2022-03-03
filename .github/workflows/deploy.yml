@@ -21,7 +21,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v2
         with:
-          fetch-depth: 10
+          fetch-depth: 20
 
       - name: Check for secrets
         uses: ./.github/actions/check_secrets
@@ -154,7 +154,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v2
 
-      - uses: actions/setup-node@v2.5.1
+      - uses: actions/setup-node@v3
         with:
           node-version-file: '.nvmrc'
           cache: yarn
@@ -179,8 +179,8 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
-          name: lambda-layers-prisma-client
-          path: ./services/app-api/lambda-layers-prisma-client
+          name: lambda-layers-prisma-client-migration
+          path: ./services/app-api/lambda-layers-prisma-client-migration
 
   deploy-infra:
     needs: [begin-deployment]
@@ -230,7 +230,10 @@ jobs:
   finishing-prep:
     name: Finishing Prep
     needs: [deploy-infra, begin-deployment, deploy-app]
-    if: always() && needs.deploy-infra.result == 'success' && needs.deploy-app.result == 'success'
+    if: |
+      always() 
+      && (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped') 
+      && (needs.deploy-app.result == 'success' || needs.deploy-app.result == 'skipped')
     runs-on: ubuntu-latest
     outputs:
       application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
