@@ -11,8 +11,11 @@ import reportWebVitals from './reportWebVitals'
 import { localGQLFetch, fakeAmplifyFetch } from './api'
 import { assertIsAuthMode } from './common-code/domain-models'
 import { S3ClientT, newAmplifyS3Client, newLocalS3Client } from './s3'
+import { NewTracer } from './tracer'
 
 const gqlSchema = loader('../../app-web/src/gen/schema.graphql')
+
+NewTracer('app-testing')
 
 // We are using Amplify for communicating with Cognito, for now.
 Amplify.configure({
