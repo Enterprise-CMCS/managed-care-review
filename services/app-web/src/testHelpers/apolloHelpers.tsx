@@ -340,6 +340,7 @@ export function mockDraftSubmission2(): Submission2 {
                 revision: {
                     id: 'revision1',
                     unlockInfo: null,
+                    createdAt: '2019-01-01',
                     submitInfo: {
                         updatedAt: '2021-01-01',
                     },

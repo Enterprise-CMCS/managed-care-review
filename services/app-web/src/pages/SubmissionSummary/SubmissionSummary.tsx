@@ -129,7 +129,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         }
     }, [updateHeading, pathname, packageData])
 
-    if (loading) {
+    if (loading || !submissionAndRevisions || !packageData) {
         return (
             <GridContainer>
                 <Loading />
