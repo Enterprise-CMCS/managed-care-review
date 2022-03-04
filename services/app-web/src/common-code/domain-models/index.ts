@@ -1,50 +1,26 @@
 // TEMPORARY: these files are embedded in app-web for now b/c
 // CRA prevents you from importing code outside of /src
 // The fix is to use yarn workspaces to allow us to import shared packages
-export type { AuthModeType } from './config'
-export { assertIsAuthMode, assertNever } from './config'
-
 // Domain Types
 export type {
-    CognitoUserType,
-    CognitoStateUserType,
-    CognitoCMSUserType,
+    CognitoCMSUserType, CognitoStateUserType, CognitoUserType
 } from './cognitoUserType'
-
+export { assertIsAuthMode, assertNever } from './config'
+export type { AuthModeType } from './config'
 export type {
-    DocumentCategoryType,
-    DraftSubmissionType,
-    SubmissionType,
-    SubmissionDocument,
-    RateType,
-    ContractType,
-    FederalAuthority,
-    StateContact,
-    ActuaryContact,
-    ActuaryCommunicationType,
-    ActuarialFirmType,
-    ManagedCareEntity,
-    CapitationRatesAmendedReason,
-    ContractAmendmentInfo,
-    ContractExecutionStatus,
+    ActuarialFirmType, ActuaryCommunicationType, ActuaryContact, CapitationRatesAmendedReason,
+    ContractAmendmentInfo, ContractExecutionStatus, ContractType, DocumentCategoryType,
+    DraftSubmissionType, FederalAuthority, ManagedCareEntity, RateType, StateContact, SubmissionDocument, SubmissionType
 } from './DraftSubmissionType'
-
-export type { StateSubmissionType } from './StateSubmissionType'
-
-export type { SubmissionUnionType } from './SubmissionUnionType'
-
 export type { ProgramT } from './ProgramT'
-
-// Type checks and type guards
-export { isCognitoUser, isStateUser, isCMSUser } from './user'
+export type { StateSubmissionType } from './StateSubmissionType'
 export {
     hasValidContract,
-    hasValidDocuments,
-    hasValidSupportingDocumentCategories,
-    hasValidRates,
-    isContractOnly,
-    isContractAndRates,
-    isStateSubmission,
-    isDraftSubmission,
-    submissionName,
+    hasValidDocuments, hasValidRates, hasValidSupportingDocumentCategories, isContractAndRates, isContractOnly, isDraftSubmission, isStateSubmission, submissionName
 } from './submission'
+export { submissionCurrentRevision, submissionStatus, submissionSubmittedAt } from './submission2'
+export type { Submission2Type, UpdateInfoType } from './Submission2Type'
+export type { SubmissionUnionType } from './SubmissionUnionType'
+// Type checks and type guards
+export { isCMSUser, isCognitoUser, isStateUser } from './user'
+
