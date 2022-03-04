@@ -5,19 +5,16 @@ describe('dashboard', () => {
         cy.logInAsStateUser()
 
         // a submitted submission
-        cy.startNewContractAndRatesSubmission()
+        cy.startNewContractOnlySubmission()
 
         cy.fillOutBaseContractDetails()
         cy.navigateForm('Continue')
 
-        cy.fillOutNewRateCertification()
-        cy.navigateForm('Continue')
-
         cy.fillOutStateContact()
-        cy.fillOutActuaryContact()
         cy.navigateForm('Continue')
 
-        cy.fillOutSupportingDocuments()
+        // Skip supporting documents
+        cy.findByRole('heading', {name: /Supporting documents/}).should('exist')
         cy.navigateForm('Continue')
         cy.findByRole('heading', {name: /Review and submit/}).should('exist')
 
@@ -29,16 +26,16 @@ describe('dashboard', () => {
             const summaryURL = fullUrl.toString()
 
             // Submit, sent to dashboard
+            cy.intercept('POST', '*/graphql').as('gqlRequest')
             cy.submitStateSubmissionForm()
-            cy.waitForApiToLoad()
+            cy.wait('@gqlRequest')
             cy.findByText('Dashboard').should('exist')
             cy.findByText('Programs').should('exist')
 
             // visit the url as a CMS User
             cy.findByRole('button', {name: 'Sign out'}).click()
-            cy.logInAsCMSUser()
-
-            cy.visit(summaryURL)
+            cy.findByText('Medicaid and CHIP Managed Care Reporting and Review System')
+            cy.logInAsCMSUser({initialURL: reviewURL})
 
             // click on the unlock button
             cy.findByRole('button', { name: 'Unlock submission' }).click()
@@ -46,17 +43,24 @@ describe('dashboard', () => {
             cy.findByRole('button', { name: 'Submit' }).click()
 
             cy.findByRole('button', { name: 'Unlock submission' }).should('be.disabled')
-
+            cy.wait(2000) // Unclear why this is needed, but I don't care enough about figuring out
+                                // cognito logout to care. 
 
             // login as the state user again
             cy.findByRole('button', {name: 'Sign out'}).click()
+
+            cy.findByText('Medicaid and CHIP Managed Care Reporting and Review System')
+
             cy.logInAsStateUser()
+
+            cy.findByText('Dashboard').should('exist')
 
             cy.visit(reviewURL)
 
             // Submit, sent to dashboard
+            cy.intercept('POST', '*/graphql').as('gqlRequest2')
             cy.submitStateSubmissionForm()
-            cy.waitForApiToLoad()
+            cy.wait('@gqlRequest2')
             cy.findByText('Dashboard').should('exist')
             cy.findByText('Programs').should('exist')
 

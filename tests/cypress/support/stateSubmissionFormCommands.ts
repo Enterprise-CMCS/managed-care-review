@@ -184,7 +184,7 @@ Cypress.Commands.add('waitForDocumentsToLoad', () => {
         cy.wait(20000)
     }
     cy.findAllByTestId('file-input-preview-image', {
-        timeout: 20000,
+        timeout: 40000,
     }).should('not.have.class', 'is-loading')
 })
 
