@@ -1,8 +1,6 @@
 import { submissionStatus, submissionSubmittedAt } from '../../app-web/src/common-code/domain-models'
 import { protoToBase64 } from '../../app-web/src/common-code/proto/stateSubmission'
 import { Resolvers } from '../gen/gqlServer'
-import {RevisionType } from '../../app-web/src/common-code/domain-models'
-
 
 export const submission2Resolver: Resolvers['Submission2'] = {
     revisions(parent) {
