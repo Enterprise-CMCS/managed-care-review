@@ -2,12 +2,14 @@ import { PrismaClient } from '@prisma/client'
 import {
     DraftSubmissionType,
     ProgramT,
-    StateSubmissionType
+    StateSubmissionType,
+    Submission2Type
 } from '../../app-web/src/common-code/domain-models'
 import { findPrograms } from '../postgres'
 import { findAllSubmissions } from './findAllSubmissions'
 import { findDraftSubmission } from './findDraftSubmission'
 import { findStateSubmission } from './findStateSubmission'
+import { findSubmissionWithRevisions } from './findSubmissionWithRevisions'
 import {
     insertDraftSubmission,
     InsertDraftSubmissionArgsType
@@ -29,6 +31,10 @@ type Store = {
     findDraftSubmission: (
         draftUUID: string
     ) => Promise<DraftSubmissionType | undefined | StoreError>
+    findSubmissionWithRevisions: (
+        draftUUID: string
+    ) => Promise<Submission2Type | undefined | StoreError>
+
     findDraftSubmissionByStateNumber: (
         stateCoder: string,
         stateNumber: number
@@ -43,13 +49,14 @@ type Store = {
     ) => Promise<StateSubmissionType | undefined | StoreError>
 
     updateStateSubmission: (
-        stateSubmission: StateSubmissionType
+        stateSubmission: StateSubmissionType,
+        submittedAt: Date,
     ) => Promise<StateSubmissionType | StoreError>
 
     insertNewRevision: (
         submissionID: string,
         draft: DraftSubmissionType
-    ) => Promise<StoreError | undefined>
+    ) => Promise<Submission2Type | StoreError>
 
     findPrograms: (stateCode: string, programIDs: Array<string>) => ProgramT | undefined
 }
@@ -61,14 +68,16 @@ function NewPostgresStore(client: PrismaClient): Store {
         insertDraftSubmission: (args) => insertDraftSubmission(client, args),
         findDraftSubmission: (draftUUID) =>
             findDraftSubmission(client, draftUUID),
+        findSubmissionWithRevisions: (id) =>
+            findSubmissionWithRevisions(client, id),
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         findDraftSubmissionByStateNumber: (_stateCode, _stateNumber) => {
             throw new Error('UNIMPLEMENTED')
         },
         updateDraftSubmission: (draftSubmission) =>
             updateDraftSubmission(client, draftSubmission),
-        updateStateSubmission: (submission) =>
-            updateStateSubmission(client, submission),
+        updateStateSubmission: (submission, submittedAt) =>
+            updateStateSubmission(client, submission, submittedAt),
         findStateSubmission: (submissionID) =>
             findStateSubmission(client, submissionID),
         insertNewRevision: (submissionID, draft) => 

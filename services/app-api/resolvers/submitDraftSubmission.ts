@@ -2,13 +2,10 @@ import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import {
     DraftSubmissionType,
     hasValidContract,
-    hasValidDocuments,
-    hasValidSupportingDocumentCategories,
-    hasValidRates,
-    isContractAndRates,
+    hasValidDocuments, hasValidRates, hasValidSupportingDocumentCategories, isContractAndRates,
     isStateSubmission,
     isStateUser,
-    StateSubmissionType,
+    StateSubmissionType
 } from '../../app-web/src/common-code/domain-models'
 import { Emailer } from '../emailer'
 import { MutationResolvers, State } from '../gen/gqlServer'
@@ -173,9 +170,9 @@ export function submitDraftSubmissionResolver(
         const stateSubmission: StateSubmissionType = submissionResult
 
         // Save the submission!
-        const updateResult = await store.updateStateSubmission(stateSubmission)
+        const updateResult = await store.updateStateSubmission(stateSubmission, new Date())
         if (isStoreError(updateResult)) {
-            const errMessage = `Issue updating a state submission of type ${updateResult.code}. Message: ${updateResult.message}`
+            const errMessage = `Issue updating a state submission of ty}pe ${updateResult.code}. Message: ${updateResult.message}`
             logError('submitDraftSubmission', errMessage)
             span?.setAttribute('submitDraftSubmissions.error', errMessage)
             span?.addEvent(`submitDraftSubmissions ${errMessage}`)

@@ -1,17 +1,17 @@
 import { PrismaClient } from '@prisma/client'
 import {
     DraftSubmissionType,
-    isDraftSubmission,
+    isDraftSubmission
 } from '../../app-web/src/common-code/domain-models'
 import { toDomain } from '../../app-web/src/common-code/proto/stateSubmission'
 import {
     convertPrismaErrorToStoreError,
     isStoreError,
-    StoreError,
+    StoreError
 } from './storeError'
 import {
     getCurrentRevision,
-    StateSubmissionWithRevisions,
+    StateSubmissionWithRevisions
 } from './submissionWithRevisionsHelpers'
 
 export async function findUniqueSubmissionWrapper(
@@ -24,7 +24,11 @@ export async function findUniqueSubmissionWrapper(
                 id: id,
             },
             include: {
-                revisions: true,
+                revisions: {
+                    orderBy: {
+                        createdAt: 'desc', // We expect our revisions most-recent-first
+                    },
+                },
             },
         })
 

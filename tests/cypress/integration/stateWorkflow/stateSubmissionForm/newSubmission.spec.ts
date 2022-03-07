@@ -22,7 +22,7 @@ describe('new submission', () => {
         cy.findByRole('button', { name: /Back/ }).click()
         cy.pa11y({
             actions: ['wait for element #form-guidance to be visible'],
-            threshold: 9, // This ratchet is tracked by https://qmacbis.atlassian.net/browse/OY2-15931
+            hideElements: '.usa-step-indicator',
         })
     })
 })

@@ -1,9 +1,11 @@
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route } from 'react-router'
+import { basicStateSubmission } from '../../common-code/domain-mocks'
+import { domainToBase64 } from '../../common-code/proto/stateSubmission'
 import { RoutesRecord } from '../../constants/routes'
 import {
-    fetchCurrentUserMock, fetchStateSubmissionMock, mockValidCMSUser, unlockStateSubmissionMockError, unlockStateSubmissionMockSuccess
+    fetchCurrentUserMock, fetchStateSubmission2MockSuccess, mockUnlockedSubmission2, mockValidCMSUser, unlockStateSubmissionMockError, unlockStateSubmissionMockSuccess
 } from '../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { SubmissionSummary } from './SubmissionSummary'
@@ -20,9 +22,34 @@ describe('SubmissionSummary', () => {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({ user: mockValidCMSUser(),  statusCode: 200 }),
-                        fetchStateSubmissionMock({
+                        fetchStateSubmission2MockSuccess({
                             id: '15',
-                            statusCode: 200,
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15',
+                },
+            }
+        )
+
+        expect(
+           await screen.findByRole('heading', { name: 'Contract details' })
+        ).toBeInTheDocument()
+    })
+
+    it('renders an error when the proto is invalid', async () => {
+        renderWithProviders(
+            <Route
+                    path={RoutesRecord.SUBMISSIONS_FORM}
+                    component={SubmissionSummary}
+                />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ user: mockValidCMSUser(),  statusCode: 200 }),
+                        fetchStateSubmission2MockSuccess({
+                            id: '15',
                         }),
                     ],
                 },
@@ -47,9 +74,8 @@ describe('SubmissionSummary', () => {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({ user: mockValidCMSUser(),  statusCode: 200 }),
-                        fetchStateSubmissionMock({
+                        fetchStateSubmission2MockSuccess({
                             id: '15',
-                            statusCode: 200,
                         }),
                     ],
                 },
@@ -74,9 +100,8 @@ describe('SubmissionSummary', () => {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({ user: mockValidCMSUser(),  statusCode: 200 }),
-                        fetchStateSubmissionMock({
+                        fetchStateSubmission2MockSuccess({
                             id: '15',
-                            statusCode: 200,
                         }),
                         unlockStateSubmissionMockSuccess({id: '15'})
                     ],
@@ -110,41 +135,70 @@ describe('SubmissionSummary', () => {
         )).toBeNull()
     })
 
-    // it.only('disables the unlock button after unlock succeeds', async () => {
-    //     renderWithProviders(
-    //         <Route
-    //                 path={RoutesRecord.SUBMISSIONS_FORM}
-    //                 component={SubmissionSummary}
-    //             />,
-    //         {
-    //             apolloProvider: {
-    //                 mocks: [
-    fetchCurrentUserMock({ user: mockValidCMSUser(),  statusCode: 200 }),
-    //                     fetchStateSubmissionMock({
-    //                         id: '15',
-    //                         statusCode: 200,
-    //                     }),
-    //                     unlockStateSubmissionMockSuccess({id: '15'})
-    //                 ],
-    //             },
-    //             routerProvider: {
-    //                 route: '/submissions/15',
-    //             },
-    //         }
-    //     )
+    it('disables the unlock button for an unlocked submission', async () => {
+        renderWithProviders(
+            <Route
+                    path={RoutesRecord.SUBMISSIONS_FORM}
+                    component={SubmissionSummary}
+                />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ user: mockValidCMSUser(),  statusCode: 200 }),
+                        fetchStateSubmission2MockSuccess({
+                            id: '15',
+                            stateSubmission: mockUnlockedSubmission2()
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15',
+                },
+            }
+        )
 
-    //     const unlockModalButton = await screen.findByRole('button', { name: 'Unlock submission' })
+        await waitFor(() => {
+            expect(screen.getByRole('button', { name: 'Unlock submission'})).toBeDisabled()
+        })
+    })
 
-    //     userEvent.click(unlockModalButton)
+    it('renders the OLD data for an unlocked submission, ignoring unsubmitted changes', async () => {
 
-    //     const unlockButton = await screen.findByTestId('modal-submit')
+        const submission2 = mockUnlockedSubmission2()
 
-    //     userEvent.click(unlockButton)
+        const oldPackageData = basicStateSubmission()
+        const newPackageData = basicStateSubmission()
 
-    //     await waitFor(() => {
-    //         expect(screen.findByRole('button', { name: 'Unlock submission'})).toBeDisabled()
-    //     })
-    // })
+        oldPackageData.submissionDescription = 'OLD_DESCRIPTION'
+        newPackageData.submissionDescription = 'NEW_DESCRIPTION'
+
+        submission2.revisions[0].revision.submissionData = domainToBase64(newPackageData)
+        submission2.revisions[1].revision.submissionData = domainToBase64(oldPackageData)
+
+        renderWithProviders(
+            <Route
+                    path={RoutesRecord.SUBMISSIONS_FORM}
+                    component={SubmissionSummary}
+                />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ user: mockValidCMSUser(),  statusCode: 200 }),
+                        fetchStateSubmission2MockSuccess({
+                            id: '15',
+                            stateSubmission: submission2
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15',
+                },
+            }
+        )
+
+        expect(await screen.findByText('OLD_DESCRIPTION')).toBeInTheDocument()
+        expect(screen.queryByText('NEW_DESCRIPTION')).not.toBeInTheDocument()
+    })
 
     it('displays an error if unlock fails', async () => {
         renderWithProviders(
@@ -156,9 +210,8 @@ describe('SubmissionSummary', () => {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({ user: mockValidCMSUser(),  statusCode: 200 }),
-                        fetchStateSubmissionMock({
+                        fetchStateSubmission2MockSuccess({
                             id: '15',
-                            statusCode: 200,
                         }),
                         unlockStateSubmissionMockError({id: '15'})
                     ],

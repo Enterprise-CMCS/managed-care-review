@@ -12,6 +12,7 @@ import {
     DraftSubmission,
     DraftSubmissionUpdates,
     StateSubmission,
+    Submission2,
     UpdateDraftSubmissionInput
 } from '../gen/gqlServer'
 import { Context } from '../handlers/apollo_gql'
@@ -214,7 +215,7 @@ const submitTestDraftSubmission = async (
 const unlockTestDraftSubmission = async (
     server: ApolloServer,
     submissionID: string
-) => {
+): Promise<Submission2> => {
     const updateResult = await server.executeOperation({
         query: UNLOCK_STATE_SUBMISSION,
         variables: {
@@ -235,7 +236,7 @@ const unlockTestDraftSubmission = async (
         throw new Error('updateTestDraftSubmission returned nothing')
     }
 
-    return updateResult.data.unlockStateSubmission.draftSubmission
+    return updateResult.data.unlockStateSubmission.submission
 }
 
 const createTestStateSubmission = async (

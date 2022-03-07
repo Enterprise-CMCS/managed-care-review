@@ -1,5 +1,4 @@
 import { GraphQLErrors } from '@apollo/client/errors'
-import { GraphQLError } from 'graphql'
 import { DraftSubmission, StateSubmission } from '../gen/gqlClient'
 
 const isStateSubmission = (
@@ -15,7 +14,7 @@ const isGraphQLErrors = (
 ): input is GraphQLErrors => {
     if (Array.isArray(input)) {
         return input.every(i => {
-            return i instanceof GraphQLError
+            return 'extensions' in i && 'message' in i && 'path' in i
         })
     }
     return false

@@ -53,7 +53,7 @@ export async function updateSubmissionWrapper(
                         }
                     }
                 },
-                    include: {
+                include: {
                     revisions: true
                 },
             })

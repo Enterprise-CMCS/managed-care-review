@@ -406,6 +406,7 @@ export const FileUpload = ({
             {hint && (
                 <span
                     id={`${id}-hint`}
+                    role="note"
                     aria-labelledby={id}
                     className={styles.fileInputHint}
                 >
