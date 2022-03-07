@@ -14,7 +14,7 @@ const provider = new NodeTracerProvider({
 
 // log to console and send to New Relic
 provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()))
-// provider.addSpanProcessor(new SimpleSpanProcessor(new OTLPTraceExporter()))
+provider.addSpanProcessor(new SimpleSpanProcessor(new OTLPTraceExporter()))
 
 // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
 provider.register();

@@ -36,7 +36,8 @@ function contextForRequestForFetcher(
     userFetcher: userFromAuthProvider
 ): ({ event }: { event: APIGatewayProxyEvent, context: any }) => Promise<Context> {
     return async ({ event, context }) => {
-        console.log("WHATSINCONTEXT: ", context)
+        // console.log("WHATSINCONTEXT: ", context)
+        // console.log("THESPANWESET: ", context.clientContext.client)
         const authProvider =
             event.requestContext.identity.cognitoAuthenticationProvider
         if (authProvider) {
@@ -46,6 +47,7 @@ function contextForRequestForFetcher(
                 if (!userResult.isErr()) {
                     return {
                         user: userResult.value,
+                        span: context.clientContext.client
                     }
                 } else {
                     throw new Error(
@@ -91,17 +93,11 @@ function localTracingMiddleware(
     wrapped: APIGatewayProxyHandler
 ): APIGatewayProxyHandler {
     return function (event, context, completion) {
-        const apiContext = api.context.active()
-        const key = api.createContextKey("parentID");
-        console.log('APICONTEXT: ', apiContext)
         const span = tracer.startSpan('handleRequest', {
             kind: 1, // server
             attributes: { middlewareInit: 'works' },
         })
         context.clientContext = {client: span} as any
-        const apiSetKey = apiContext.setValue(key, "isthisanapivalue");
-        const apiKeyValue = apiSetKey.getValue(key);
-        console.log('APIKEYVALUE: ', apiKeyValue);
         const result = wrapped(event, context, completion)
 
         span.addEvent('middleware addEvent called', {data: JSON.stringify(result)})
@@ -201,8 +197,6 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     // Our user-context function is parametrized with a local or
     const contextForRequest = contextForRequestForFetcher(userFetcher)
-    console.log("CONTEXTOUTSIDEMIDDLEWARE", api.context.active())
-    console.log("ROOTCONTEXTOUTSIDEMIDDLEWARE", api.ROOT_CONTEXT)
 
     const server = new ApolloServer({
         typeDefs,

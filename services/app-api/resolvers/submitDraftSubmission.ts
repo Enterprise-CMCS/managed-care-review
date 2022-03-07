@@ -115,7 +115,8 @@ export function submitDraftSubmissionResolver(
     emailer: Emailer
 ): MutationResolvers['submitDraftSubmission'] {
     return async (_parent, { input }, context) => {
-        const { user } = context
+        const { user, span } = context
+        console.log("SPANINSUBMIT", span)
         // This resolver is only callable by state users
         if (!isStateUser(user)) {
             logError(
