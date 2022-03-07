@@ -12,7 +12,6 @@ export function indexSubmissionsResolver(
 ): QueryResolvers['indexSubmissions'] {
     return async (_parent, _args, context) => {
         const { span } = context
-        console.log("SPANININDEX", span)
         // This resolver is only callable by state users
         if (!isStateUser(context.user)) {
             logError(
@@ -62,7 +61,6 @@ export function indexSubmissionsResolver(
         logSuccess('indexSubmissions')
         span?.setAttribute('indexSubmissions.success', JSON.stringify(submissions))
         span?.addEvent('indexSubmissions otel success')
-        console.log("SPANSUCCESS", span)
         return { totalCount: edges.length, edges }
     }
 }

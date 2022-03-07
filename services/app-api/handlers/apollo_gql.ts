@@ -67,8 +67,8 @@ function contextForRequestForFetcher(
 // This middleware returns an error if the local request is missing authentication info
 function localAuthMiddleware(
     wrapped: APIGatewayProxyHandler
-): APIGatewayProxyHandler {
-    return function (event, context, completion) {
+): Handler {
+    return async function (event, context, completion) {
         const userHeader =
             event.requestContext.identity.cognitoAuthenticationProvider
 
@@ -84,26 +84,28 @@ function localAuthMiddleware(
             })
         }
 
-        return wrapped(event, context, completion)
+        const result = await wrapped(event, context, completion)
+
+        return result
     }
 }
 
 // Tracing Middleware
 function localTracingMiddleware(
     wrapped: APIGatewayProxyHandler
-): APIGatewayProxyHandler {
-    return function (event, context, completion) {
+): Handler {
+    return async function (event, context, completion) {
         const span = tracer.startSpan('handleRequest', {
             kind: 1, // server
             attributes: { middlewareInit: 'works' },
         })
         context.clientContext = {client: span} as any
-        const result = wrapped(event, context, completion)
+        const result = await wrapped(event, context, completion)
 
         span.addEvent('middleware addEvent called', {data: JSON.stringify(result)})
         span.setAttribute('middlewareSetAttribute', 'works')
         span.end()
-
+        
         return result
     }
 }
