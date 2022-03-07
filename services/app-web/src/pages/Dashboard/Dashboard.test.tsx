@@ -1,5 +1,5 @@
 import React from 'react'
-import { screen, waitFor, within } from '@testing-library/react'
+import {screen, waitFor, within } from '@testing-library/react'
 
 import { Dashboard } from './Dashboard'
 import {
@@ -68,16 +68,16 @@ describe('Dashboard', () => {
             email: 'bob@dmas.mn.gov',
         }
 
-        // set draft current revision to a far future updatedAt. This allows us to test sorting - it should be sorted to top
-        const draft = mockDraftSubmission2({
-            updatedAt: new Date('2100-01-01'),
-        })
+        // set draft current revision to a far future updatedAt. Set unlocked to nearer future. This allows us to test sorting.
+        const draft = mockDraftSubmission2(
+            {updatedAt: new Date('2100-01-01')}
+        )
         const submitted = mockSubmittedSubmission2()
-        const unlocked = mockUnlockedSubmission2()
+        const unlocked = mockUnlockedSubmission2({ updatedAt: new Date('2098-01-01') })
         draft.id = 'test-abc-draft'
         submitted.id = 'test-abc-submitted'
         unlocked.id = 'test-abc-unlocked'
-
+        
         const submissions = [draft, submitted, unlocked]
 
         renderWithProviders(<Dashboard />, {
@@ -106,5 +106,9 @@ describe('Dashboard', () => {
 
         const link3 = within(rows[3]).getByRole('link')
         expect(link3).toHaveAttribute('href', '/submissions/test-abc-submitted')
+
+
+ 
+
     })
 })

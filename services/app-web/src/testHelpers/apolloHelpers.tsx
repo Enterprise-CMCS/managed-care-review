@@ -1,7 +1,11 @@
 import { MockedResponse } from '@apollo/client/testing'
 import dayjs from 'dayjs'
 import { GraphQLError } from 'graphql'
-import { basicStateSubmission, basicSubmission, } from '../common-code/domain-mocks'
+import {
+    basicStateSubmission,
+    basicSubmission,
+    draftWithALittleBitOfEverything,
+} from '../common-code/domain-mocks'
 import {
     DraftSubmissionType,
 } from '../common-code/domain-models'
@@ -335,7 +339,7 @@ export function mockDraftSubmission2(submissionData?: Partial<DraftSubmissionTyp
 
     return {
         id: 'test-id-123',
-        status: 'SUBMITTED',
+        status: 'DRAFT',
         intiallySubmittedAt: '2022-01-01',
         stateCode: 'MN',
         revisions: [
@@ -344,9 +348,7 @@ export function mockDraftSubmission2(submissionData?: Partial<DraftSubmissionTyp
                     id: 'revision1',
                     unlockInfo: null,
                     createdAt: '2019-01-01',
-                    submitInfo: {
-                        updatedAt: '2021-01-01',
-                    },
+                    submitInfo: null,
                     submissionData: b64,
                 },
             },
@@ -382,17 +384,20 @@ export function mockSubmittedSubmission2(): Submission2 {
     }
 }
 
-export function mockUnlockedSubmission2(): Submission2 {
+export function mockUnlockedSubmission2(
+    submissionData?: Partial<DraftSubmissionType>
+): Submission2 {
 
-    // get a submitted DomainModel submission
-    // turn it into proto
-    const submission = basicStateSubmission()
+    const submission = {
+        ...draftWithALittleBitOfEverything(),
+        ...submissionData,
+    }
     const b64 = domainToBase64(submission)
 
     return {
         id: 'test-id-123',
         status: 'UNLOCKED',
-        intiallySubmittedAt: '2022-01-01',
+        intiallySubmittedAt: '2020-01-01',
         stateCode: 'MN',
         revisions: [
             {
@@ -402,20 +407,20 @@ export function mockUnlockedSubmission2(): Submission2 {
                     unlockInfo: null,
                     submitInfo: null,
                     submissionData: b64,
-                }
+                },
             },
             {
                 revision: {
                     id: 'revision1',
-                    createdAt: new Date(),
+                    createdAt: new Date('2020-01-01'),
                     unlockInfo: null,
                     submitInfo: {
-                        updatedAt: "2021-01-01"
+                        updatedAt: '2021-01-01',
                     },
                     submissionData: b64,
-                }
+                },
             },
-        ]
+        ],
     }
 }
 

@@ -47,8 +47,7 @@ const StatusTag = ({status} : {status: Submission2Status}): React.ReactElement =
         [styles.draftTag]: status === 'DRAFT',
         [styles.unlockedTag]: status === 'UNLOCKED'
      })
-
-
+    
     const statusText = isSubmitted(status)? SubmissionStatusRecord.SUBMITTED: SubmissionStatusRecord[status]
 
     return (
@@ -65,7 +64,7 @@ export const Dashboard = (): React.ReactElement => {
     const location = useLocation()
 
     const { loading, data, error } = useIndexSubmissions2Query()
-    console.log('DATA', data )
+
     if (error) {
         console.error('Error indexing submissions: ', error)
         return (
