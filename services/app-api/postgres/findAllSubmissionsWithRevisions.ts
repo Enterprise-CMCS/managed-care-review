@@ -35,8 +35,10 @@ export async function findAllSubmissionsWithRevisions(
             submissionWithRevisions
         )
         if (isStoreError(currentRevisionOrError)) {
-            // TODO: what should I do with these
-            errors.push(currentRevisionOrError)
+             console.log(
+                 `ERROR submission ${submissionWithRevisions.id} does not have a current revision`
+             )
+            console.log(`ERROR findAllSubmissionsWithRevisions for ${stateCode} has ${errors.length} error(s)`)
             return
         }
         const submission = convertToSubmission2Type(submissionWithRevisions)

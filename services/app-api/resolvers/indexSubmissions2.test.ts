@@ -156,7 +156,6 @@ describe('indexSubmissions2', () => {
              },
          })
 
-         // TODO should we type these results
          const result = await otherUserServer.executeOperation({
              query: INDEX_SUBMISSIONS2,
              variables: { input },

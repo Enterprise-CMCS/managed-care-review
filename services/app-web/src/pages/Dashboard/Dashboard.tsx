@@ -96,7 +96,6 @@ export const Dashboard = (): React.ReactElement => {
             const currentSubmissionData = base64ToDomain(
                 currentRevision.revision.submissionData
             )
-            console.log('IN HERE')
             if (currentSubmissionData instanceof Error) {
                 console.error(
                     'ERROR: got a proto decoding error',
@@ -116,7 +115,7 @@ export const Dashboard = (): React.ReactElement => {
             })
         })
 
-        
+    // Sort by updatedAt for current revision    
     submissionRows.sort((a, b) => (a['updatedAt'] > b['updatedAt'] ? -1 : 1))
      
     const justSubmittedSubmissionName = new URLSearchParams(

@@ -1,7 +1,10 @@
 import { MockedResponse } from '@apollo/client/testing'
 import dayjs from 'dayjs'
 import { GraphQLError } from 'graphql'
-import { basicStateSubmission, basicSubmission } from '../common-code/domain-mocks'
+import { basicStateSubmission, basicSubmission, } from '../common-code/domain-mocks'
+import {
+    DraftSubmissionType,
+} from '../common-code/domain-models'
 import { domainToBase64 } from '../common-code/proto/stateSubmission'
 import {
     CreateDraftSubmissionDocument,
@@ -326,8 +329,8 @@ export function mockStateSubmission(): StateSubmission {
 }
 
 
-export function mockDraftSubmission2(): Submission2 {
-    const submission = basicSubmission()
+export function mockDraftSubmission2(submissionData?: Partial<DraftSubmissionType>): Submission2 {
+    const submission = {...basicSubmission(), ...submissionData}
     const b64 = domainToBase64(submission)
 
     return {

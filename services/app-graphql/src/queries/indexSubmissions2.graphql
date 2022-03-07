@@ -10,6 +10,7 @@ query indexSubmissions2 {
                 revisions {
                     revision {
                         id
+                        createdAt
                         unlockInfo {
                             updatedAt
                         }

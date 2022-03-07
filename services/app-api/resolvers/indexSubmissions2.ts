@@ -1,4 +1,4 @@
-import { ApolloError, ForbiddenError } from 'apollo-server-lambda'
+import { ForbiddenError } from 'apollo-server-lambda'
 import {
     isStateUser,
     Submission2Type
@@ -24,20 +24,6 @@ export function indexSubmissions2Resolver(
         const results = await store.findAllSubmissionsWithRevisions(context.user.state_code)
 
         if (isStoreError(results)) {
-            if (results.code === 'WRONG_STATUS') {
-                logError(
-                    'indexSubmissions',
-                    'Submission is not a DraftSubmission'
-                )
-                throw new ApolloError(
-                    `Submission is not a DraftSubmission`,
-                    'WRONG_STATUS',
-                    {
-                        argumentName: 'submissionID',
-                    }
-                )
-            }
-
             const errMessage = `Issue finding a draft submission of type ${results.code}. Message: ${results.message}`
             logError('indexSubmissions2', errMessage)
             throw new Error(errMessage)

@@ -67,18 +67,18 @@ describe('Dashboard', () => {
             name: 'Bob it user',
             email: 'bob@dmas.mn.gov',
         }
-        const draft = mockDraftSubmission2()
+
+        // set draft current revision to a far future updatedAt. This allows us to test sorting - it should be sorted to top
+        const draft = mockDraftSubmission2({
+            updatedAt: new Date('2100-01-01'),
+        })
         const submitted = mockSubmittedSubmission2()
         const unlocked = mockUnlockedSubmission2()
-        
+        draft.id = 'test-abc-draft'
+        submitted.id = 'test-abc-submitted'
+        unlocked.id = 'test-abc-unlocked'
+
         const submissions = [draft, submitted, unlocked]
-
-        // TODO - Figure this test mocking out
-
-        // submissions[2].id = 'test-abc-122'
-        // submissions[2].name = 'MN-MSHO-0002' // the names collide otherwise
-        // // set middle row to latest updatedAt to test sorting (it should be sorted to top)
-        // submissions[1].updatedAt = '2100-01-01T00:00:00.000Z'
 
         renderWithProviders(<Dashboard />, {
             apolloProvider: {
@@ -91,14 +91,20 @@ describe('Dashboard', () => {
 
         // we want to check that there's a table with three submissions, sorted by `updatedAt`.
         const rows = await screen.findAllByRole('row')
-        expect(rows[1]).toHaveTextContent('MSHO-0001')
+
         const link1 = within(rows[1]).getByRole('link')
-        expect(link1).toHaveAttribute('href', '/submissions/test-abc-123/type')
-        expect(rows[2]).toHaveTextContent('MSHO-0003')
+        expect(link1).toHaveAttribute(
+            'href',
+            '/submissions/test-abc-draft/type'
+        )
+
         const link2 = within(rows[2]).getByRole('link')
-        expect(link2).toHaveAttribute('href', '/submissions/test-abc-125')
-        expect(rows[3]).toHaveTextContent('MSHO-0002')
+        expect(link2).toHaveAttribute(
+            'href',
+            '/submissions/test-abc-unlocked/review-and-submit'
+        )
+
         const link3 = within(rows[3]).getByRole('link')
-        expect(link3).toHaveAttribute('href', '/submissions/test-abc-122/review-and-submit')
+        expect(link3).toHaveAttribute('href', '/submissions/test-abc-submitted')
     })
 })
