@@ -30,16 +30,13 @@ export interface Context {
     span?: Span
 }
 
-const apiContext = api.context.active()
-const rootContext = api.ROOT_CONTEXT
-const key = api.createContextKey("keykey");
-
 // This function pulls auth info out of the cognitoAuthenticationProvider in the lambda event
 // and turns that into our GQL resolver context object
 function contextForRequestForFetcher(
     userFetcher: userFromAuthProvider
-): ({ event }: { event: APIGatewayProxyEvent }) => Promise<Context> {
-    return async ({ event }) => {
+): ({ event }: { event: APIGatewayProxyEvent, context: any }) => Promise<Context> {
+    return async ({ event, context }) => {
+        console.log("WHATSINCONTEXT: ", context)
         const authProvider =
             event.requestContext.identity.cognitoAuthenticationProvider
         if (authProvider) {
@@ -94,20 +91,17 @@ function localTracingMiddleware(
     wrapped: APIGatewayProxyHandler
 ): APIGatewayProxyHandler {
     return function (event, context, completion) {
+        const apiContext = api.context.active()
+        const key = api.createContextKey("parentID");
         console.log('APICONTEXT: ', apiContext)
-        console.log('ROOTCONTEXT: ', rootContext)
         const span = tracer.startSpan('handleRequest', {
             kind: 1, // server
             attributes: { middlewareInit: 'works' },
         })
-        const spanContext = span.spanContext()
-        console.log('SPANCONTEXT: ', spanContext)
+        context.clientContext = {client: span} as any
         const apiSetKey = apiContext.setValue(key, "isthisanapivalue");
-        const rootSetKey = rootContext.setValue(key, "isthisarootvalue");
         const apiKeyValue = apiSetKey.getValue(key);
-        const rootKeyValue = rootSetKey.getValue(key);
         console.log('APIKEYVALUE: ', apiKeyValue);
-        console.log('ROOTKEYVALUE: ', rootKeyValue);
         const result = wrapped(event, context, completion)
 
         span.addEvent('middleware addEvent called', {data: JSON.stringify(result)})
