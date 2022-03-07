@@ -206,7 +206,7 @@ export const Dashboard = (): React.ReactElement => {
                                                             dashboardSubmission.updatedAt
                                                         ).format('MM/DD/YYYY')}
                                                     </td>
-                                                    <td>
+                                                    <td data-testid="submission-status">
                                                         <StatusTag status={dashboardSubmission.status} />
                                                     </td>
                                                 </tr>

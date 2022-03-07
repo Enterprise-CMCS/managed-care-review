@@ -10,7 +10,6 @@ import {todaysDate} from '../testHelpers/dateHelpers'
 import {
     Submission2Edge,
     Submission2,
-    IndexSubmissions2Payload,
 } from '../gen/gqlServer'
 import { base64ToDomain } from '../../app-web/src/common-code/proto/stateSubmission'
 
