@@ -61,6 +61,7 @@ export function indexSubmissionsResolver(
         logSuccess('indexSubmissions')
         span?.setAttribute('indexSubmissionsSuccess', JSON.stringify(submissions))
         span?.addEvent('indexSubmissions otel success')
+        span?.end()
         return { totalCount: edges.length, edges }
     }
 }
