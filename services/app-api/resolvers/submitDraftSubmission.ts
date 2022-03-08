@@ -211,6 +211,7 @@ export function submitDraftSubmissionResolver(
         }
 
         logSuccess('submitDraftSubmission')
+        console.log("span in submitDraftSubmission", span)
         span?.setAttribute('submitDraftSubmissionsSuccess', JSON.stringify(updatedSubmission))
         span?.addEvent('submitDraftSubmissions otel success')
         span?.end()

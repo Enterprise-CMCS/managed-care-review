@@ -59,6 +59,7 @@ export function indexSubmissionsResolver(
         })
 
         logSuccess('indexSubmissions')
+        console.log("span in indexsubmissions", span)
         span?.setAttribute('indexSubmissionsSuccess', JSON.stringify(submissions))
         span?.addEvent('indexSubmissions otel success')
         span?.end()
