@@ -107,7 +107,7 @@ export function submitDraftSubmissionResolver(
                 'submitDraftSubmission',
                 'user not authorized to fetch state data'
             )
-            span?.setAttribute('submitDraftSubmissions.error', 'user not authorized to fetch state data')
+            span?.setAttribute('submitDraftSubmissionsError', 'user not authorized to fetch state data')
             span?.addEvent('submitDraftSubmissions unauthorized user')
             throw new ForbiddenError('user not authorized to fetch state data')
         }
@@ -118,7 +118,7 @@ export function submitDraftSubmissionResolver(
         if (isStoreError(result)) {
             const errMessage = `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
             logError('submitDraftSubmission', errMessage)
-            span?.setAttribute('submitDraftSubmissions.error', errMessage)
+            span?.setAttribute('submitDraftSubmissionsError', errMessage)
             span?.addEvent(`submitDraftSubmissions ${errMessage}`)
             throw new Error(errMessage)
         }
@@ -126,7 +126,7 @@ export function submitDraftSubmissionResolver(
         if (result === undefined) {
             const errMessage = `A draft must exist to be submitted: ${input.submissionID}`
             logError('submitDraftSubmission', errMessage)
-            span?.setAttribute('submitDraftSubmissions.error', errMessage)
+            span?.setAttribute('submitDraftSubmissionsError', errMessage)
             span?.addEvent(`submitDraftSubmissions ${errMessage}`)
             throw new UserInputError(errMessage, {
                 argumentName: 'submissionID',
@@ -142,7 +142,7 @@ export function submitDraftSubmissionResolver(
                 'submitDraftSubmission',
                 'user not authorized to fetch data from a different state'
             )
-            span?.setAttribute('submitDraftSubmissions.error', 'user not authorized to fetch data from a different state')
+            span?.setAttribute('submitDraftSubmissionsError', 'user not authorized to fetch data from a different state')
             span?.addEvent(`submitDraftSubmissions user not authorized to fetch data from a different state`)
             throw new ForbiddenError(
                 'user not authorized to fetch data from a different state'
@@ -157,7 +157,7 @@ export function submitDraftSubmissionResolver(
                 'submitDraftSubmission',
                 'Incomplete submission cannot be submitted'
             )
-            span?.setAttribute('submitDraftSubmissions.error', 'Incomplete submission cannot be submitted')
+            span?.setAttribute('submitDraftSubmissionsError', 'Incomplete submission cannot be submitted')
             span?.addEvent(`submitDraftSubmissions Incomplete submission cannot be submitted`)
             throw new UserInputError(
                 'Incomplete submission cannot be submitted',
@@ -174,7 +174,7 @@ export function submitDraftSubmissionResolver(
         if (isStoreError(updateResult)) {
             const errMessage = `Issue updating a state submission of ty}pe ${updateResult.code}. Message: ${updateResult.message}`
             logError('submitDraftSubmission', errMessage)
-            span?.setAttribute('submitDraftSubmissions.error', errMessage)
+            span?.setAttribute('submitDraftSubmissionsError', errMessage)
             span?.addEvent(`submitDraftSubmissions ${errMessage}`)
             throw new Error(errMessage)
         }
@@ -195,7 +195,7 @@ export function submitDraftSubmissionResolver(
                 'submitDraftSubmission - CMS email failed',
                 cmsNewPackageEmailResult
             )
-            span?.setAttribute('submitDraftSubmissions.error', 'CMS email failed')
+            span?.setAttribute('submitDraftSubmissionsError', 'CMS email failed')
             span?.addEvent('submitDraftSubmissions CMS email failed')
             throw cmsNewPackageEmailResult
         }
@@ -205,13 +205,13 @@ export function submitDraftSubmissionResolver(
                 'submitDraftSubmission - state email failed',
                 stateNewPackageEmailResult
             )
-            span?.setAttribute('submitDraftSubmissions.error', 'state email failed')
+            span?.setAttribute('submitDraftSubmissionsError', 'state email failed')
             span?.addEvent('submitDraftSubmissions state email failed')
             throw stateNewPackageEmailResult
         }
 
         logSuccess('submitDraftSubmission')
-        span?.setAttribute('submitDraftSubmissions.success', JSON.stringify(updatedSubmission))
+        span?.setAttribute('submitDraftSubmissionsSuccess', JSON.stringify(updatedSubmission))
         span?.addEvent('submitDraftSubmissions otel success')
 
         return { submission: updatedSubmission }
