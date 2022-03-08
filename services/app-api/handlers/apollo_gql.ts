@@ -20,9 +20,10 @@ import { newLocalEmailer, newSESEmailer } from '../emailer'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import { configureResolvers } from '../resolvers'
 import { configurePostgres } from './configuration'
+import { tracer as tracer } from "./otel_handler"
 
-import { tracer as tracer } from "./otel_handler";
 
+const requestSpanKey = 'REQUEST_SPAN'
 
 // The Context type passed to all of our GraphQL resolvers
 export interface Context {
@@ -38,6 +39,11 @@ function contextForRequestForFetcher(
     return async ({ event, context }) => {
         // console.log("WHATSINCONTEXT: ", context)
         // console.log("THESPANWESET: ", context.clientContext.client)
+        
+        // pull the current span out of the LAMBDA context, to place it in the APOLLO context
+        const anyContext = context as any
+        const requestSpan = anyContext[requestSpanKey]
+
         const authProvider =
             event.requestContext.identity.cognitoAuthenticationProvider
         if (authProvider) {
@@ -47,7 +53,7 @@ function contextForRequestForFetcher(
                 if (!userResult.isErr()) {
                     return {
                         user: userResult.value,
-                        span: context.clientContext.client
+                        span: requestSpan
                     }
                 } else {
                     throw new Error(
@@ -91,15 +97,20 @@ function localAuthMiddleware(
 }
 
 // Tracing Middleware
-function localTracingMiddleware(
-    wrapped: APIGatewayProxyHandler
+function tracingMiddleware(
+    wrapped: Handler
 ): Handler {
     return async function (event, context, completion) {
         const span = tracer.startSpan('handleRequest', {
             kind: 1, // server
             attributes: { middlewareInit: 'works' },
         })
-        context.clientContext = {client: span} as any
+
+        // Put the span into the LAMBDA context, in order to pass it into the APOLLO context in contextForRequestForFetcher
+        // We have to use any here because this context's type is not under our control.
+        const anyContext = context as any
+        anyContext[requestSpanKey] = span
+
         const result = await wrapped(event, context, completion)
 
         span.addEvent('middleware addEvent called', {data: JSON.stringify(result)})
@@ -215,7 +226,7 @@ async function initializeGQLHandler(): Promise<Handler> {
         },
     })
 
-    const tracingHandler = localTracingMiddleware(handler)
+    const tracingHandler = tracingMiddleware(handler)
 
     // Locally, we wrap our handler in a middleware that returns 403 for unauthenticated requests
     const isLocal = authMode === 'LOCAL'
