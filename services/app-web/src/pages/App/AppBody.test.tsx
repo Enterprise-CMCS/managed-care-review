@@ -8,7 +8,7 @@ import {
 import { AppBody } from './AppBody'
 import {
     fetchCurrentUserMock,
-    indexSubmissionsMockSuccess,
+    indexSubmissions2MockSuccess,
 } from '../../testHelpers/apolloHelpers'
 test('App renders without errors', () => {
     renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
@@ -27,7 +27,7 @@ describe('App Body and routes', () => {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({ statusCode: 200 }),
-                        indexSubmissionsMockSuccess(),
+                        indexSubmissions2MockSuccess(),
                     ],
                 },
             })

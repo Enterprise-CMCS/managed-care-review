@@ -20,7 +20,6 @@ describe('dashboard', () => {
 
         // Store submission url for reference later
         cy.location().then((fullUrl) => {
-
             const reviewURL = fullUrl.toString()
             fullUrl.pathname = path.dirname(fullUrl)
             const summaryURL = fullUrl.toString()
@@ -32,40 +31,80 @@ describe('dashboard', () => {
             cy.findByText('Dashboard').should('exist')
             cy.findByText('Programs').should('exist')
 
-            // visit the url as a CMS User
-            cy.findByRole('button', {name: 'Sign out'}).click()
-            cy.findByText('Medicaid and CHIP Managed Care Reporting and Review System')
-            cy.logInAsCMSUser({initialURL: reviewURL})
+            // Login as CMS User
+            cy.findByRole('button', { name: 'Sign out' }).click()
+            cy.findByText(
+                'Medicaid and CHIP Managed Care Reporting and Review System'
+            )
+            cy.logInAsCMSUser({ initialURL: reviewURL })
 
-            // click on the unlock button
+            // click on the unlock button and confirm
             cy.findByRole('button', { name: 'Unlock submission' }).click()
-            // and then the modal
             cy.findByRole('button', { name: 'Submit' }).click()
+            cy.findByRole('button', { name: 'Unlock submission' }).should(
+                'be.disabled'
+            )
 
-            cy.findByRole('button', { name: 'Unlock submission' }).should('be.disabled')
-            cy.wait(2000) // Unclear why this is needed, but I don't care enough about figuring out
-                                // cognito logout to care. 
+            cy.wait(2000) 
 
-            // login as the state user again
-            cy.findByRole('button', {name: 'Sign out'}).click()
+            // Login as state user
+            cy.findByRole('button', { name: 'Sign out' }).click()
 
-            cy.findByText('Medicaid and CHIP Managed Care Reporting and Review System')
+            cy.findByText(
+                'Medicaid and CHIP Managed Care Reporting and Review System'
+            )
 
             cy.logInAsStateUser()
 
+            // state user sees unlocked submission - check tag then submission link
             cy.findByText('Dashboard').should('exist')
+            cy.get('table')
+                .should('exist')
+                .findAllByTestId('submission-status')
+                .first()
+                .should('have.text', 'Unlocked')
+
+            cy.get('table')
+                .findAllByTestId('submission-id')
+                .first()
+                .find('a')
+                .should('have.attr', 'href')
+                .and('include', 'review-and-submit')
 
             cy.visit(reviewURL)
 
-            // Submit, sent to dashboard
+            // state user can resubmit and see resubmitted package in dashboard
             cy.intercept('POST', '*/graphql').as('gqlRequest2')
             cy.submitStateSubmissionForm()
             cy.wait('@gqlRequest2')
             cy.findByText('Dashboard').should('exist')
-            cy.findByText('Programs').should('exist')
+            
+          cy.get('table')
+              .should('exist')
+              .findAllByTestId('submission-status')
+              .first()
+              .should('have.text', 'Submitted')
 
+          cy.get('table')
+              .findAllByTestId('submission-id')
+              .first()
+              .find('a')
+              .should('have.attr', 'href')
+              .and('not.include', 'review-and-submit')
+
+            // Login as CMS User
+            cy.findByRole('button', { name: 'Sign out' }).click()
+            cy.findByText(
+                'Medicaid and CHIP Managed Care Reporting and Review System'
+            )
+            cy.logInAsCMSUser({ initialURL: reviewURL })
+
+            //  CMS user sees resubmitted submission and active unlock button
+            cy.findByRole('button', { name: 'Unlock submission' }).should(
+                'not.be.disabled'
+            )
+            
         })
-        // View submission summary
-        
+       
     })
 })

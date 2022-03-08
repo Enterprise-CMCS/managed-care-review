@@ -1,10 +1,31 @@
 import { MockedResponse } from '@apollo/client/testing'
 import dayjs from 'dayjs'
 import { GraphQLError } from 'graphql'
-import { basicStateSubmission } from '../common-code/domain-mocks'
+import {
+    basicStateSubmission,
+    basicSubmission,
+    draftWithALittleBitOfEverything,
+} from '../common-code/domain-mocks'
+import {
+    DraftSubmissionType,
+} from '../common-code/domain-models'
 import { domainToBase64 } from '../common-code/proto/stateSubmission'
 import {
-    CreateDraftSubmissionDocument, DraftSubmission, DraftSubmissionUpdates, FetchCurrentUserDocument, FetchDraftSubmissionDocument, FetchStateSubmissionDocument, FetchSubmission2Document, IndexSubmissionsDocument, StateSubmission, Submission, Submission2, SubmitDraftSubmissionDocument, UnlockStateSubmissionDocument, UpdateDraftSubmissionDocument, User as UserType
+    CreateDraftSubmissionDocument,
+    DraftSubmission,
+    DraftSubmissionUpdates,
+    FetchCurrentUserDocument,
+    FetchDraftSubmissionDocument,
+    FetchStateSubmissionDocument,
+    FetchSubmission2Document,
+    IndexSubmissionsDocument,
+    StateSubmission,
+    Submission,
+    Submission2,
+    IndexSubmissions2Document, SubmitDraftSubmissionDocument,
+    UnlockStateSubmissionDocument,
+    UpdateDraftSubmissionDocument,
+    User as UserType,
 } from '../gen/gqlClient'
 
 
@@ -311,6 +332,30 @@ export function mockStateSubmission(): StateSubmission {
     }
 }
 
+
+export function mockDraftSubmission2(submissionData?: Partial<DraftSubmissionType>): Submission2 {
+    const submission = {...basicSubmission(), ...submissionData}
+    const b64 = domainToBase64(submission)
+
+    return {
+        id: 'test-id-123',
+        status: 'DRAFT',
+        intiallySubmittedAt: '2022-01-01',
+        stateCode: 'MN',
+        revisions: [
+            {
+                revision: {
+                    id: 'revision1',
+                    unlockInfo: null,
+                    createdAt: '2019-01-01',
+                    submitInfo: null,
+                    submissionData: b64,
+                },
+            },
+        ],
+    }
+}
+
 export function mockSubmittedSubmission2(): Submission2 {
 
     // get a submitted DomainModel submission
@@ -339,17 +384,20 @@ export function mockSubmittedSubmission2(): Submission2 {
     }
 }
 
-export function mockUnlockedSubmission2(): Submission2 {
+export function mockUnlockedSubmission2(
+    submissionData?: Partial<DraftSubmissionType>
+): Submission2 {
 
-    // get a submitted DomainModel submission
-    // turn it into proto
-    const submission = basicStateSubmission()
+    const submission = {
+        ...draftWithALittleBitOfEverything(),
+        ...submissionData,
+    }
     const b64 = domainToBase64(submission)
 
     return {
         id: 'test-id-123',
         status: 'UNLOCKED',
-        intiallySubmittedAt: '2022-01-01',
+        intiallySubmittedAt: '2020-01-01',
         stateCode: 'MN',
         revisions: [
             {
@@ -359,20 +407,20 @@ export function mockUnlockedSubmission2(): Submission2 {
                     unlockInfo: null,
                     submitInfo: null,
                     submissionData: b64,
-                }
+                },
             },
             {
                 revision: {
                     id: 'revision1',
-                    createdAt: new Date(),
+                    createdAt: new Date('2020-01-01'),
                     unlockInfo: null,
                     submitInfo: {
-                        updatedAt: "2021-01-01"
+                        updatedAt: '2021-01-01',
                     },
                     submissionData: b64,
-                }
+                },
             },
-        ]
+        ],
     }
 }
 
@@ -721,6 +769,32 @@ const indexSubmissionsMockSuccess = (
     }
 }
 
+const indexSubmissions2MockSuccess = (
+    submissions: Submission2[] = [mockUnlockedSubmission2(), mockSubmittedSubmission2()]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): MockedResponse<Record<string, any>> => {
+    
+    const submissionEdges = submissions.map((sub) => {
+        return {
+            node: sub,
+        }
+    })
+    return {
+        request: {
+            query: IndexSubmissions2Document,
+        },
+        result: {
+            data: {
+                indexSubmissions2: {
+                    totalCount: submissionEdges.length,
+                    edges: submissionEdges,
+                },
+            },
+        },
+    }
+}
+
+
 export {
     fetchCurrentUserMock,
     mockValidCMSUser,
@@ -732,6 +806,7 @@ export {
     submitDraftSubmissionMockSuccess,
     submitDraftSubmissionMockError,
     indexSubmissionsMockSuccess,
+    indexSubmissions2MockSuccess,
     unlockStateSubmissionMockSuccess,
     unlockStateSubmissionMockError,
 }
