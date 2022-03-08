@@ -213,7 +213,7 @@ export function submitDraftSubmissionResolver(
         logSuccess('submitDraftSubmission')
         span?.setAttribute('submitDraftSubmissionsSuccess', JSON.stringify(updatedSubmission))
         span?.addEvent('submitDraftSubmissions otel success')
-
+        span?.end()
         return { submission: updatedSubmission }
     }
 }
