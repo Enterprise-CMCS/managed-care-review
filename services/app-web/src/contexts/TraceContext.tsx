@@ -22,11 +22,7 @@ const provider = new WebTracerProvider({
 })
 
 const exporter = new CollectorTraceExporter({
-    url: 'https://gov-otlp.nr-data.net:4318/',
-    headers: {
-        'api-key':
-            '588C674838D827261C771F8080D330A261C4166CC542319CCE28C796D593A556', //pragma: allowlist secret
-    },
+    url: 'http://localhost:4318/v1/traces',
 })
 
 const fetchInstrumentation = new FetchInstrumentation({
