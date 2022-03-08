@@ -3,7 +3,7 @@ import {
     submissionName,
     StateSubmissionType
 } from '../../app-web/src/common-code/domain-models'
-import {newPackageCMSEmail, newPackageStateEmail} from './'
+import {newPackageCMSEmail, newPackageStateEmail, unlockPackageCMSEmail} from './'
 
 describe('Email templates', () => {
     describe('CMS email', () => {
@@ -314,4 +314,24 @@ describe('Email templates', () => {
         })
 
      })
+     describe('CMS unlock email', () =>(
+        it('subject line is correct and clearly states submission is unlocked', () => {
+            const sub = mockContractOnlySubmission()
+             const name = submissionName(sub)
+             const user = mockUser()
+             const template = unlockPackageCMSEmail(
+                 sub,
+                 user,
+                 testEmailConfig
+             )
+
+             expect(template).toEqual(
+                 expect.objectContaining({
+                     subject: expect.stringContaining(
+                         `${name} was unlocked`
+                     ),
+                 })
+             )
+        })
+     ))
 })
