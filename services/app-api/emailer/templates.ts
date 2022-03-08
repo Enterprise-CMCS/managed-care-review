@@ -149,5 +149,33 @@ const newPackageStateEmail = (
     }
 }
 
-export { newPackageCMSEmail, newPackageStateEmail }
+const unlockPackageCMSEmail = (
+    submission: StateSubmissionType,
+    config: EmailConfiguration
+): EmailData => {
+    const isTestEnvironment = config.stage !== 'prod'
+    const reviewerEmails = config.cmsReviewSharedEmails
+    const bodyHTML = `
+        <h1>Submission ${submissionName(submission)} was unlocked</h1>
+        </br>
+        <b>Unlocked by:</b> leslie@hhs.cms.gov
+        </br>
+        <b>Unlocked on:</b> 03/08/22 2:00pm ET
+        </br>
+        <b>Reason for unlock:</b> The submission was missing a rate development guide that should be submitted along with the rate certification.
+        </br>
+        You will receive another notification when the state resubmits.
+    `
+    return {
+        toAddresses: reviewerEmails,
+        sourceEmail: config.emailSource,
+        subject: `${
+            isTestEnvironment ? `[${config.stage}] ` : ''
+        }${submissionName(submission)} was unlocked`,
+        bodyText: stripHTMLFromTemplate(bodyHTML),
+        bodyHTML: bodyHTML,
+    }
+}
+
+export { newPackageCMSEmail, newPackageStateEmail, unlockPackageCMSEmail }
 
