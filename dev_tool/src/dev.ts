@@ -6,6 +6,7 @@ import {
     compileProto,
     runAPILocally,
     runPostgresLocally,
+    runOtelLocally,
     runS3Locally,
     runStorybookLocally,
     runWebAgainstAWS,
@@ -71,6 +72,7 @@ type runLocalFlags = {
     runAPI: boolean
     runWeb: boolean
     runPostgres: boolean
+    runOtel: boolean
     runS3: boolean
     runStoryBook: boolean
 }
@@ -78,12 +80,14 @@ async function runAllLocally({
     runAPI,
     runWeb,
     runPostgres,
+    runOtel,
     runS3,
     runStoryBook,
 }: runLocalFlags) {
     const runner = new LabeledProcessRunner()
 
     runPostgres && runPostgresLocally(runner)
+    runOtel && runOtelLocally(runner)
     runS3 && runS3Locally(runner)
     runAPI && runAPILocally(runner)
     runWeb && runWebLocally(runner)
@@ -196,6 +200,10 @@ function main() {
                                     type: 'boolean',
                                     describe: 'run postgres locally',
                                 })
+                                .option('otel', {
+                                    type: 'boolean',
+                                    describe: 'run otel locally',
+                                })
                                 .example([
                                     ['$0 local', 'run all local services'],
                                     [
@@ -213,6 +221,7 @@ function main() {
                                 runAPI: args.api,
                                 runWeb: args.web,
                                 runPostgres: args.postgres,
+                                runOtel: args.otel,
                                 runS3: args.s3,
                                 runStoryBook: args.storybook,
                             }
