@@ -22,7 +22,7 @@ const provider = new WebTracerProvider({
 })
 
 const exporter = new CollectorTraceExporter({
-    url: process.env.OTEL_COLLECTOR_URL,
+    url: process.env.REACT_APP_OTEL_COLLECTOR_URL,
 })
 
 const fetchInstrumentation = new FetchInstrumentation({

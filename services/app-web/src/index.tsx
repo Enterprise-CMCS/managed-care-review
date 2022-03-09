@@ -94,6 +94,11 @@ if (s3Region) {
     )
 }
 
+const otelCollectorUrl = process.env.REACT_APP_OTEL_COLLECTOR_URL
+if (otelCollectorUrl === undefined) {
+    throw new Error('To configure OTEL, you must set OTEL_COLLECTOR_URL')
+}
+
 ReactDOM.render(
     <React.StrictMode>
         <App
