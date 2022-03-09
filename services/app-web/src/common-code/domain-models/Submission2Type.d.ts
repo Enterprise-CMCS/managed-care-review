@@ -8,6 +8,8 @@ type Submission2Type = {
 
 type UpdateInfoType = {
     updatedAt: Date
+    updatedBy: string
+    updatedReason: string
 }
 
 type RevisionType = {
