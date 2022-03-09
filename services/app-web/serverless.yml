@@ -31,7 +31,6 @@ custom:
   storybook_s3_bucket_name: ${cf:storybook-${self:custom.stage}.S3BucketName}
   storybook_cloudfront_distribution_id: ${cf:storybook-${self:custom.stage}.CloudFrontDistributionId}
   react_app_auth_mode: ${env:REACT_APP_AUTH_MODE}
-  otel_collector_url: ${cf:ui-${self:custom.stage}.CloudFrontEndpointUrl}/otel
   serverlessTerminationProtection:
     stages:
       - dev
@@ -71,7 +70,7 @@ custom:
         export REACT_APP_S3_REGION=${self:custom.s3_documents_bucket_region}
         export REACT_APP_S3_DOCUMENTS_BUCKET=${self:custom.s3_documents_bucket_name}
         export REACT_APP_STAGE_NAME=${self:custom.stage}
-        export OTEL_COLLECTOR_URL=${self:custom.otel_collector_url}
+        export OTEL_COLLECTOR_URL=${self:custom.application_endpoint_url}/otel
 
         # run the app-api build and the storybook build in parallel. 
         # this isn't elegant but saves us CI time, it's probably more correct to break
