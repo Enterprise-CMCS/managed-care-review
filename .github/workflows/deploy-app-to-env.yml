@@ -31,7 +31,7 @@ on:
         required: true
       ses_review_team_email_addresses:
         required: true
-      otel_colelctor_url:
+      otel_collector_url:
         required: true
 
 jobs:
