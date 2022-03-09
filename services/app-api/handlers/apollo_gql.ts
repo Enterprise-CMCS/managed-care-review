@@ -115,7 +115,7 @@ function tracingMiddleware(
 
         span.addEvent('middleware addEvent called', {data: JSON.stringify(result)})
         span.setAttribute('middlewareSetAttribute', 'works')
-        // span.end()
+        span.end()
         
         return result
     }

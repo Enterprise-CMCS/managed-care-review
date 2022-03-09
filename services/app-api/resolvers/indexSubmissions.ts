@@ -6,20 +6,35 @@ import {
 import { QueryResolvers } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
+import { tracer as tracer } from "../handlers/otel_handler"
 
 export function indexSubmissionsResolver(
     store: Store
 ): QueryResolvers['indexSubmissions'] {
     return async (_parent, _args, context) => {
         const { span } = context
+        let spanContext
+        let spanOptions
+        if (span) {
+        spanContext = span?.spanContext()
+        spanOptions = {
+            links: [
+              {
+                 context: spanContext
+              }
+            ]
+          };
+        }
+        const localSpan = tracer.startSpan('indexSubmissions', spanOptions);
+        
         // This resolver is only callable by state users
         if (!isStateUser(context.user)) {
             logError(
                 'indexSubmissions',
                 'user not authorized to fetch state data'
             )
-            span?.setAttribute('indexSubmissionsError', JSON.stringify(logError))
-            span?.addEvent('indexSubmissions unauthorized user')
+            localSpan?.setAttribute('indexSubmissionsError', JSON.stringify(logError))
+            localSpan?.addEvent('indexSubmissions unauthorized user')
             throw new ForbiddenError('user not authorized to fetch state data')
         }
 
@@ -32,8 +47,8 @@ export function indexSubmissionsResolver(
                     'indexSubmissions',
                     'Submission is not a DraftSubmission'
                 )
-                span?.setAttribute('indexSubmissionsError', JSON.stringify(logError))
-                span?.addEvent('indexSubmissions wrong status')
+                localSpan?.setAttribute('indexSubmissionsError', JSON.stringify(logError))
+                localSpan?.addEvent('indexSubmissions wrong status')
                 throw new ApolloError(
                     `Submission is not a DraftSubmission`,
                     'WRONG_STATUS',
@@ -45,8 +60,8 @@ export function indexSubmissionsResolver(
 
             const errMessage = `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
             logError('indexSubmissions', errMessage)
-            span?.setAttribute('indexSubmissionsError', errMessage)
-            span?.addEvent(`indexSubmissions ${errMessage}`)
+            localSpan?.setAttribute('indexSubmissionsError', errMessage)
+            localSpan?.addEvent(`indexSubmissions ${errMessage}`)
             throw new Error(errMessage)
         }
 
@@ -59,10 +74,10 @@ export function indexSubmissionsResolver(
         })
 
         logSuccess('indexSubmissions')
-        console.log("span in indexsubmissions", span)
-        span?.setAttribute('indexSubmissionsSuccess', JSON.stringify(submissions))
-        span?.addEvent('indexSubmissions otel success')
-        span?.end()
+        // console.log("span in indexsubmissions", localSpan)
+        localSpan?.setAttribute('indexSubmissionsSuccess', JSON.stringify(submissions))
+        localSpan?.addEvent('indexSubmissions otel success')
+        localSpan?.end()
         return { totalCount: edges.length, edges }
     }
 }

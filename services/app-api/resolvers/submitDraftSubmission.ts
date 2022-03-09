@@ -11,6 +11,7 @@ import { Emailer } from '../emailer'
 import { MutationResolvers, State } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
+import { tracer as tracer } from "../handlers/otel_handler";
 
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
@@ -101,14 +102,27 @@ export function submitDraftSubmissionResolver(
 ): MutationResolvers['submitDraftSubmission'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
+        let spanContext
+        let spanOptions
+        if (span) {
+        spanContext = span?.spanContext()
+        spanOptions = {
+            links: [
+              {
+                 context: spanContext
+              }
+            ]
+          };
+        }
+        const localSpan = tracer.startSpan('indexSubmissions', spanOptions);
         // This resolver is only callable by state users
         if (!isStateUser(user)) {
             logError(
                 'submitDraftSubmission',
                 'user not authorized to fetch state data'
             )
-            span?.setAttribute('submitDraftSubmissionsError', 'user not authorized to fetch state data')
-            span?.addEvent('submitDraftSubmissions unauthorized user')
+            localSpan?.setAttribute('submitDraftSubmissionsError', 'user not authorized to fetch state data')
+            localSpan?.addEvent('submitDraftSubmissions unauthorized user')
             throw new ForbiddenError('user not authorized to fetch state data')
         }
 
@@ -118,16 +132,16 @@ export function submitDraftSubmissionResolver(
         if (isStoreError(result)) {
             const errMessage = `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
             logError('submitDraftSubmission', errMessage)
-            span?.setAttribute('submitDraftSubmissionsError', errMessage)
-            span?.addEvent(`submitDraftSubmissions ${errMessage}`)
+            localSpan?.setAttribute('submitDraftSubmissionsError', errMessage)
+            localSpan?.addEvent(`submitDraftSubmissions ${errMessage}`)
             throw new Error(errMessage)
         }
 
         if (result === undefined) {
             const errMessage = `A draft must exist to be submitted: ${input.submissionID}`
             logError('submitDraftSubmission', errMessage)
-            span?.setAttribute('submitDraftSubmissionsError', errMessage)
-            span?.addEvent(`submitDraftSubmissions ${errMessage}`)
+            localSpan?.setAttribute('submitDraftSubmissionsError', errMessage)
+            localSpan?.addEvent(`submitDraftSubmissions ${errMessage}`)
             throw new UserInputError(errMessage, {
                 argumentName: 'submissionID',
             })
@@ -142,8 +156,8 @@ export function submitDraftSubmissionResolver(
                 'submitDraftSubmission',
                 'user not authorized to fetch data from a different state'
             )
-            span?.setAttribute('submitDraftSubmissionsError', 'user not authorized to fetch data from a different state')
-            span?.addEvent(`submitDraftSubmissions user not authorized to fetch data from a different state`)
+            localSpan?.setAttribute('submitDraftSubmissionsError', 'user not authorized to fetch data from a different state')
+            localSpan?.addEvent(`submitDraftSubmissions user not authorized to fetch data from a different state`)
             throw new ForbiddenError(
                 'user not authorized to fetch data from a different state'
             )
@@ -157,8 +171,8 @@ export function submitDraftSubmissionResolver(
                 'submitDraftSubmission',
                 'Incomplete submission cannot be submitted'
             )
-            span?.setAttribute('submitDraftSubmissionsError', 'Incomplete submission cannot be submitted')
-            span?.addEvent(`submitDraftSubmissions Incomplete submission cannot be submitted`)
+            localSpan?.setAttribute('submitDraftSubmissionsError', 'Incomplete submission cannot be submitted')
+            localSpan?.addEvent(`submitDraftSubmissions Incomplete submission cannot be submitted`)
             throw new UserInputError(
                 'Incomplete submission cannot be submitted',
                 {
@@ -174,8 +188,8 @@ export function submitDraftSubmissionResolver(
         if (isStoreError(updateResult)) {
             const errMessage = `Issue updating a state submission of ty}pe ${updateResult.code}. Message: ${updateResult.message}`
             logError('submitDraftSubmission', errMessage)
-            span?.setAttribute('submitDraftSubmissionsError', errMessage)
-            span?.addEvent(`submitDraftSubmissions ${errMessage}`)
+            localSpan?.setAttribute('submitDraftSubmissionsError', errMessage)
+            localSpan?.addEvent(`submitDraftSubmissions ${errMessage}`)
             throw new Error(errMessage)
         }
 
@@ -195,8 +209,8 @@ export function submitDraftSubmissionResolver(
                 'submitDraftSubmission - CMS email failed',
                 cmsNewPackageEmailResult
             )
-            span?.setAttribute('submitDraftSubmissionsError', 'CMS email failed')
-            span?.addEvent('submitDraftSubmissions CMS email failed')
+            localSpan?.setAttribute('submitDraftSubmissionsError', 'CMS email failed')
+            localSpan?.addEvent('submitDraftSubmissions CMS email failed')
             throw cmsNewPackageEmailResult
         }
 
@@ -205,16 +219,16 @@ export function submitDraftSubmissionResolver(
                 'submitDraftSubmission - state email failed',
                 stateNewPackageEmailResult
             )
-            span?.setAttribute('submitDraftSubmissionsError', 'state email failed')
-            span?.addEvent('submitDraftSubmissions state email failed')
+            localSpan?.setAttribute('submitDraftSubmissionsError', 'state email failed')
+            localSpan?.addEvent('submitDraftSubmissions state email failed')
             throw stateNewPackageEmailResult
         }
 
         logSuccess('submitDraftSubmission')
-        console.log("span in submitDraftSubmission", span)
-        span?.setAttribute('submitDraftSubmissionsSuccess', JSON.stringify(updatedSubmission))
-        span?.addEvent('submitDraftSubmissions otel success')
-        span?.end()
+        // console.log("span in submitDraftSubmission", localSpan)
+        localSpan?.setAttribute('submitDraftSubmissionsSuccess', JSON.stringify(updatedSubmission))
+        localSpan?.addEvent('submitDraftSubmissions otel success')
+        localSpan?.end()
         return { submission: updatedSubmission }
     }
 }
