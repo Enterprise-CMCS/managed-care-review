@@ -1,0 +1,11 @@
+@import '../../../styles/uswdsImports.scss';
+@import '../../../styles/custom';
+
+.reviewAndSubmitModal {
+  max-width: 50rem !important;
+  div {
+    div {
+      margin: 0;
+    }
+  }
+}
