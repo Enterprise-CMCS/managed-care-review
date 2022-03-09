@@ -11,7 +11,7 @@ import {
 } from './storeError'
 import { getCurrentRevision, StateSubmissionWithRevisions } from './submissionWithRevisionsHelpers'
 
-async function findAllSubmissionWrapper(
+export async function findAllSubmissionWrapper(
     client: PrismaClient,
     stateCode: string
 ): Promise<StateSubmissionWithRevisions[] | StoreError> {
@@ -20,11 +20,15 @@ async function findAllSubmissionWrapper(
             where: {
                 stateCode: {
                     equals: stateCode,
-                },   
+                },
             },
             include: {
-                revisions: true
-            }
+                revisions: {
+                    orderBy: {
+                        createdAt: 'desc', // We expect our revisions most-recent-first
+                    },
+                },
+            },
         })
         return result
     } catch (e: unknown) {

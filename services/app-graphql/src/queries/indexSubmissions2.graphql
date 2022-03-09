@@ -1,0 +1,26 @@
+query indexSubmissions2 {
+    indexSubmissions2 {
+        totalCount
+        edges {
+            node {
+                id
+                stateCode
+                status
+                intiallySubmittedAt
+                revisions {
+                    revision {
+                        id
+                        createdAt
+                        unlockInfo {
+                            updatedAt
+                        }
+                        submitInfo {
+                            updatedAt
+                        }
+                        submissionData
+                    }
+                }
+            }
+        }
+    }
+}

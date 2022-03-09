@@ -8,6 +8,10 @@ import {
     ActuaryCommunicationType,
     ContractExecutionStatus
 } from '../common-code/domain-models/DraftSubmissionType'
+import {
+    Submission2Status
+} from '../common-code/domain-models/Submission2Type'
+
 
 const SubmissionTypeRecord: Record<SubmissionType, string> = {
     CONTRACT_ONLY: 'Contract action only',
@@ -81,6 +85,13 @@ const RateChangeReasonRecord: Record<'ANNUAL' | 'MIDYEAR' | 'OTHER', string> = {
     OTHER: 'Other (please describe)',
 }
 
+const SubmissionStatusRecord: Record<Submission2Status, string> = {
+    DRAFT: 'Draft',
+    SUBMITTED: 'Submitted',
+    UNLOCKED: 'Unlocked',
+    RESUBMITTED: 'Resubmitted'
+}
+
 export {
     RateChangeReasonRecord,
     AmendableItemsRecord,
@@ -91,4 +102,5 @@ export {
     ActuaryFirmsRecord,
     ActuaryCommunicationRecord,
     ContractExecutionStatusRecord,
+    SubmissionStatusRecord,
 }
