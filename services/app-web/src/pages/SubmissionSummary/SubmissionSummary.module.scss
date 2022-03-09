@@ -10,3 +10,9 @@
     max-width: 50rem; // should match ReviewSubmit max-width
     padding: 2rem 0;
 }
+
+.unlockReasonGroup {
+    textarea {
+        max-width: 100%;
+    }
+}
