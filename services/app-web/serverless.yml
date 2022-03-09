@@ -31,7 +31,7 @@ custom:
   storybook_s3_bucket_name: ${cf:storybook-${self:custom.stage}.S3BucketName}
   storybook_cloudfront_distribution_id: ${cf:storybook-${self:custom.stage}.CloudFrontDistributionId}
   react_app_auth_mode: ${env:REACT_APP_AUTH_MODE}
-  otel_collector_url: ${env:OTEL_COLLECTOR_URL}
+  otel_collector_url: ${cf:ui-${self:custom.stage}.CloudFrontEndpointUrl}/otel
   serverlessTerminationProtection:
     stages:
       - dev
