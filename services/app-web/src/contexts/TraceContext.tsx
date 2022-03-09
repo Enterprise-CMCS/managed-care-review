@@ -22,7 +22,7 @@ const provider = new WebTracerProvider({
 })
 
 const exporter = new CollectorTraceExporter({
-    url: 'http://localhost:4318/v1/traces',
+    url: process.env.OTEL_COLLECTOR_URL,
 })
 
 const fetchInstrumentation = new FetchInstrumentation({
