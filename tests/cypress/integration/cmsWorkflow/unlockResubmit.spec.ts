@@ -38,14 +38,28 @@ describe('dashboard', () => {
             )
             cy.logInAsCMSUser({ initialURL: reviewURL })
 
-            // click on the unlock button and confirm
+            // click on the unlock button, type in reason and confirm
             cy.findByRole('button', { name: 'Unlock submission' }).click()
+            cy.findByTestId('modalWindow')
+                .should('be.visible')
+            cy.get("#unlockReason").type('Unlock submission reason.')
             cy.findByRole('button', { name: 'Submit' }).click()
-            cy.findByRole('button', { name: 'Unlock submission' }).should(
-                'be.disabled'
-            )
+            cy.findByRole('button', { name: 'Unlock submission' })
+                .should('be.disabled')
+            cy.findByTestId('modalWindow')
+                .should('be.hidden')
 
-            cy.wait(2000) 
+            cy.wait(2000)
+
+            //Unlock banner for CMS user show be present with correct data.
+            cy.findByTestId('unlockedBanner')
+                .should('exist')
+                .and('contain.text', 'zuko@example.com')
+                .and('contain.text', 'Unlock submission reason.')
+                .contains(/Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+\s[a-zA-Z]+/i)
+                .should('exist')
+
+            cy.wait(2000)
 
             // Login as state user
             cy.findByRole('button', { name: 'Sign out' }).click()
@@ -103,7 +117,9 @@ describe('dashboard', () => {
             cy.findByRole('button', { name: 'Unlock submission' }).should(
                 'not.be.disabled'
             )
-            
+
+            cy.findByTestId('unlockedBanner')
+                .should('not.exist')
         })
        
     })
