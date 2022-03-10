@@ -51,7 +51,7 @@ export const ReviewAndSubmitModal = ({
                         type="button"
                         key="cancelButton"
                         aria-label="Cancel"
-                        data-testid={"modal-cancel"}
+                        data-testid="modal-cancel"
                         onClick={onCancel}
                         outline
                     >
