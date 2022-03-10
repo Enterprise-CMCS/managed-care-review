@@ -306,7 +306,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                         name="unlockReason"
                         data-testid="unlockReason"
                         aria-describedby="unlockReasonHelp unlockReasonHelp2"
-                        className={styles.textarea}
+                        className={styles.unlockReasonTextarea}
                         aria-required
                         maxLength={300}
                         value={unlockReason}
