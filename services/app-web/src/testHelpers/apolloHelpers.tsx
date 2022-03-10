@@ -708,11 +708,13 @@ const submitDraftSubmissionMockError = ({
 type unlockStateSubmissionMockSuccessProps = {
     submission?: Submission2 | Partial<Submission2>
     id: string
+    reason: string
 }
 
 const unlockStateSubmissionMockSuccess = ({
     submission = mockUnlockedSubmission2(),
     id,
+    reason,
 }: unlockStateSubmissionMockSuccessProps): MockedResponse<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Record<string, any>
@@ -720,7 +722,7 @@ const unlockStateSubmissionMockSuccess = ({
     return {
         request: {
             query: UnlockStateSubmissionDocument,
-            variables: { input: { submissionID: id } },
+            variables: { input: { submissionID: id, unlockedReason: reason } },
         },
         result: { data: { unlockStateSubmission: { submission } } },
     }
@@ -728,13 +730,15 @@ const unlockStateSubmissionMockSuccess = ({
 
 const unlockStateSubmissionMockError = ({
     id,
+    reason
 }: {
     id: string // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    reason: string
 }): MockedResponse<Record<string, any>> => {
     return {
         request: {
             query: UnlockStateSubmissionDocument,
-            variables: { input: { submissionID: id } },
+            variables: { input: { submissionID: id, unlockedReason: reason } },
         },
         result: {
             errors: [
