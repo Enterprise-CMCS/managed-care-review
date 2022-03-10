@@ -1,10 +1,14 @@
 import { URL } from 'url'
 import {
     CognitoUserType, StateSubmissionType,
-    submissionName, SubmissionType
+    submissionName, SubmissionType, RevisionType
 } from '../../app-web/src/common-code/domain-models'
 import { formatCalendarDate } from '../../app-web/src/dateHelpers'
 import { EmailConfiguration, EmailData } from './'
+
+const testEmailAlert = `<span style="color:#FF0000;font-weight:bold;">Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.</span>
+</br>
+</br>`
 
 const SubmissionTypeRecord: Record<SubmissionType, string> = {
     CONTRACT_ONLY: 'Contract action only',
@@ -73,8 +77,8 @@ const newPackageCMSEmail = (
         `submissions/${submission.id}`,
         config.baseUrl
     ).href
-    const bodyHTML = `<span style="color:#FF0000;font-weight:bold;">Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.</span>
-            <br /><br />
+    const bodyHTML = `
+            ${testEmailAlert}
             Managed Care submission: <b>${submissionName(
                 submission
             )}</b> was received from <b>${submission.stateCode}</b>.<br /><br />
@@ -113,9 +117,9 @@ const newPackageStateEmail = (
     const receiverEmails: string[] = [currentUserEmail].concat(
         submission.stateContacts.map((contact) => contact.email)
     )
-    const bodyHTML =  `<span style="color:#FF0000;font-weight:bold;">Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.</span>
-            <br /><br />
-             ${submissionName(submission)} was successfully submitted.
+    const bodyHTML =  `
+            ${testEmailAlert}
+            ${submissionName(submission)} was successfully submitted.
             <br /><br />
             <a href="${submissionURL}">View submission</a>
             <br /><br />
@@ -148,21 +152,27 @@ const newPackageStateEmail = (
         bodyHTML: bodyHTML,
     }
 }
-
+type UnlockData = {
+    submissionName: string
+    unlockedByEmail: string
+    unlockedOnDate: Date
+    unlockReason: string
+}
 const unlockPackageCMSEmail = (
-    submission: StateSubmissionType,
+    unlockData: UnlockData,
     config: EmailConfiguration
 ): EmailData => {
     const isTestEnvironment = config.stage !== 'prod'
     const reviewerEmails = config.cmsReviewSharedEmails
     const bodyHTML = `
-        <h1>Submission ${submissionName(submission)} was unlocked</h1>
+        ${testEmailAlert}
+        <h1>Submission ${unlockData.submissionName} was unlocked</h1>
         </br>
-        <b>Unlocked by:</b> leslie@hhs.cms.gov
+        <b>Unlocked by:</b> ${unlockData.unlockedByEmail}
         </br>
-        <b>Unlocked on:</b> 03/08/22 2:00pm ET
+        <b>Unlocked on:</b> ${formatCalendarDate(unlockData.unlockedOnDate)}
         </br>
-        <b>Reason for unlock:</b> The submission was missing a rate development guide that should be submitted along with the rate certification.
+        <b>Reason for unlock:</b> ${unlockData.unlockReason}
         </br>
         You will receive another notification when the state resubmits.
     `
@@ -171,7 +181,7 @@ const unlockPackageCMSEmail = (
         sourceEmail: config.emailSource,
         subject: `${
             isTestEnvironment ? `[${config.stage}] ` : ''
-        }${submissionName(submission)} was unlocked`,
+        }${unlockData.submissionName} was unlocked`,
         bodyText: stripHTMLFromTemplate(bodyHTML),
         bodyHTML: bodyHTML,
     }

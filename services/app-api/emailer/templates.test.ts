@@ -314,24 +314,102 @@ describe('Email templates', () => {
         })
 
      })
-     describe('CMS unlock email', () =>(
+     describe('CMS unlock email', () =>{
         it('subject line is correct and clearly states submission is unlocked', () => {
-            const sub = mockContractOnlySubmission()
-             const name = submissionName(sub)
-             const user = mockUser()
-             const template = unlockPackageCMSEmail(
-                 sub,
-                 user,
-                 testEmailConfig
+            const unlockData = {
+                submissionName: 'MCR-VA-CCCPLUS-0001',
+                unlockedByEmail: 'leslie@example.com',
+                unlockedOnDate: new Date('01/01/2022'),
+                unlockReason: 'Adding rate development guide.'
+            }
+            const template = unlockPackageCMSEmail(
+                unlockData,
+                testEmailConfig
              )
 
              expect(template).toEqual(
                  expect.objectContaining({
                      subject: expect.stringContaining(
-                         `${name} was unlocked`
+                         `${unlockData.submissionName} was unlocked`
                      ),
                  })
              )
         })
-     ))
+        it('includes warning about unofficial submission', () => {
+            const unlockData = {
+                submissionName: 'MCR-VA-CCCPLUS-0001',
+                unlockedByEmail: 'leslie@example.com',
+                unlockedOnDate: new Date('01/01/2022'),
+                unlockReason: 'Adding rate development guide.'
+            }
+            const template = unlockPackageCMSEmail(
+                unlockData,
+                testEmailConfig
+             )
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /This is NOT an official submission/
+                    ),
+                })
+            )
+        })
+        it('unlocked by includes correct email address', () => {
+            const unlockData = {
+                submissionName: 'MCR-VA-CCCPLUS-0001',
+                unlockedByEmail: 'leslie@example.com',
+                unlockedOnDate: new Date('01/01/2022'),
+                unlockReason: 'Adding rate development guide.'
+            }
+            const template = unlockPackageCMSEmail(
+                unlockData,
+                testEmailConfig
+             )
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /Unlocked by: leslie/
+                    ),
+                })
+            )
+        })
+        it('unlocked on includes correct date', () => {
+            const unlockData = {
+                submissionName: 'MCR-VA-CCCPLUS-0001',
+                unlockedByEmail: 'leslie@example.com',
+                unlockedOnDate: new Date('01/01/2022'),
+                unlockReason: 'Adding rate development guide.'
+            }
+            const template = unlockPackageCMSEmail(
+                unlockData,
+                testEmailConfig
+             )
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /Unlocked on: 01/
+                    ),
+                })
+            )
+        })
+        it('includes correct reason', () => {
+            const unlockData = {
+                submissionName: 'MCR-VA-CCCPLUS-0001',
+                unlockedByEmail: 'leslie@example.com',
+                unlockedOnDate: new Date('01/01/2022'),
+                unlockReason: 'Adding rate development guide.'
+            }
+            const template = unlockPackageCMSEmail(
+                unlockData,
+                testEmailConfig
+             )
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /Reason for unlock: Adding rate development guide/
+                    ),
+                })
+            )
+        })
+    })
 })
