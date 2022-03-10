@@ -5,7 +5,6 @@ import {
     GridContainer,
     Link,
     Textarea,
-    FormGroup,
 } from '@trussworks/react-uswds'
 import React, { useEffect, useState } from 'react'
 import { NavLink, useLocation, useParams} from 'react-router-dom'
@@ -297,28 +296,28 @@ export const SubmissionSummary = (): React.ReactElement => {
                     {showError && (
                         <PoliteErrorMessage>Reason for unlocking submission is required</PoliteErrorMessage>
                     )}
-                    <FormGroup error={showError} className={styles.unlockReasonGroup}>
-                        <div role="note" aria-labelledby="unlockReason" className="usa-hint margin-top-1">
-                            <p id="unlockReasonHelp">
-                                Provide reason for unlocking
-                            </p>
-                        </div>
-                        <Textarea
-                            id="unlockReason"
-                            name="unlockReason"
-                            aria-describedby="unlockReasonHelp unlockReasonHelp2"
-                            aria-required
-                            maxLength={300}
-                            value={unlockReason}
-                            error={showError}
-                            onChange={e => setUnlockReason(e.target.value)}
-                        />
-                        <div role="note" className="usa-hint margin-top-1">
-                            <p id="unlockReasonHelp2">
-                                300 characters allowed
-                            </p>
-                        </div>
-                    </FormGroup>
+                    <div role="note" aria-labelledby="unlockReason" className="usa-hint margin-top-1">
+                        <p id="unlockReasonHelp">
+                            Provide reason for unlocking
+                        </p>
+                    </div>
+                    <Textarea
+                        id="unlockReason"
+                        name="unlockReason"
+                        data-testid="unlockReason"
+                        aria-describedby="unlockReasonHelp unlockReasonHelp2"
+                        className={styles.textarea}
+                        aria-required
+                        maxLength={300}
+                        value={unlockReason}
+                        error={showError}
+                        onChange={e => setUnlockReason(e.target.value)}
+                    />
+                    <div role="note" className="usa-hint margin-top-1">
+                        <p id="unlockReasonHelp2">
+                            300 characters allowed
+                        </p>
+                    </div>
                 </ReviewAndSubmitModal>
             </GridContainer>
         </div>
