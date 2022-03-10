@@ -32,7 +32,7 @@ import { Error404 } from '../Errors/Error404'
 
 import styles from './SubmissionSummary.module.scss'
 
-function unlockModalButton(onClick: () => any, disabled: boolean) {
+function unlockModalButton(onClick: () => void, disabled: boolean) {
     return (
         <Button
             data-testid="form-submit"
