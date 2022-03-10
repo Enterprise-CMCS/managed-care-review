@@ -88,6 +88,7 @@ describe('SubmissionSummary', () => {
         expect(
            await screen.findByRole('button', { name: 'Unlock submission' })
         ).toBeInTheDocument()
+
     })
 
     it('displays no error on success', async () => {
@@ -103,7 +104,7 @@ describe('SubmissionSummary', () => {
                         fetchStateSubmission2MockSuccess({
                             id: '15',
                         }),
-                        unlockStateSubmissionMockSuccess({id: '15'})
+                        unlockStateSubmissionMockSuccess({id: '15', reason: 'Test unlock reason'})
                     ],
                 },
                 routerProvider: {
@@ -120,6 +121,9 @@ describe('SubmissionSummary', () => {
             const dialog = screen.getByRole('dialog')
             expect(dialog).toHaveClass('is-visible')
         })
+
+        const textbox = screen.getByTestId('unlockReason')
+        userEvent.type(textbox, 'Test unlock reason')
 
         const unlockButton = screen.getByTestId('modal-submit')
         userEvent.click(unlockButton)
@@ -213,7 +217,56 @@ describe('SubmissionSummary', () => {
                         fetchStateSubmission2MockSuccess({
                             id: '15',
                         }),
-                        unlockStateSubmissionMockError({id: '15'})
+                        unlockStateSubmissionMockError({id: '15', reason: 'Test unlock reason'})
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15',
+                },
+            }
+        )
+
+        const unlockModalButton = await screen.findByRole('button', { name: 'Unlock submission' })
+        userEvent.click(unlockModalButton)
+
+        // the popup dialog should be visible now
+        await waitFor(() => {
+            const dialog = screen.getByRole('dialog')
+            expect(dialog).toHaveClass('is-visible')
+        })
+
+        const textbox = screen.getByTestId('unlockReason')
+        userEvent.type(textbox, 'Test unlock reason')
+
+        const unlockButton = screen.getByTestId('modal-submit')
+        userEvent.click(unlockButton)
+
+        // the popup dialog should be hidden again
+        await waitFor(() => {
+            const dialog = screen.getByRole('dialog')
+            expect(dialog).toHaveClass('is-hidden')
+        })
+
+        expect(await screen.findByText(
+            'Error attempting to unlock. Please try again.'
+        )).toBeInTheDocument()
+    })
+
+    //Test error message on modal when not text is inputted and submit is clicked
+    it('displays error when submitting without a unlock reason', async () => {
+        renderWithProviders(
+            <Route
+                path={RoutesRecord.SUBMISSIONS_FORM}
+                component={SubmissionSummary}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ user: mockValidCMSUser(),  statusCode: 200 }),
+                        fetchStateSubmission2MockSuccess({
+                            id: '15',
+                        }),
+                        unlockStateSubmissionMockSuccess({id: '15', reason: 'Test unlock reason'})
                     ],
                 },
                 routerProvider: {
@@ -234,15 +287,9 @@ describe('SubmissionSummary', () => {
         const unlockButton = screen.getByTestId('modal-submit')
         userEvent.click(unlockButton)
 
-        // the popup dialog should be hidden again
-        await waitFor(() => {
-            const dialog = screen.getByRole('dialog')
-            expect(dialog).toHaveClass('is-hidden')
-        })
-
         expect(await screen.findByText(
-            'Error attempting to unlock. Please try again.'
+            'Reason for unlocking submission is required'
         )).toBeInTheDocument()
     })
-
 })
+
