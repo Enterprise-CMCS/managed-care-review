@@ -6,7 +6,7 @@ import {
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web'
 import { BaseOpenTelemetryComponent } from '@opentelemetry/plugin-react-load'
 import { ZoneContextManager } from '@opentelemetry/context-zone'
-import { CollectorTraceExporter } from '@opentelemetry/exporter-collector'
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { diag, DiagConsoleLogger } from '@opentelemetry/api'
 import { Resource } from '@opentelemetry/resources'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
@@ -21,7 +21,7 @@ const provider = new WebTracerProvider({
     }),
 })
 
-const exporter = new CollectorTraceExporter({
+const exporter = new OTLPTraceExporter({
     url: process.env.REACT_APP_OTEL_COLLECTOR_URL,
 })
 
