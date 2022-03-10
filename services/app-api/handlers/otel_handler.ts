@@ -13,6 +13,7 @@ const provider = new NodeTracerProvider({
 })
 
 // log to console and send to New Relic
+
 provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()))
 provider.addSpanProcessor(new SimpleSpanProcessor(new OTLPTraceExporter()))
 

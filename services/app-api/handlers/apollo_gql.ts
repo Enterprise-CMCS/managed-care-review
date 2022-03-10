@@ -1,5 +1,4 @@
 import { Span } from '@opentelemetry/api'
-import * as api from '@opentelemetry/api'
 import { ApolloServer } from 'apollo-server-lambda'
 import {
     APIGatewayProxyEvent,
@@ -37,9 +36,6 @@ function contextForRequestForFetcher(
     userFetcher: userFromAuthProvider
 ): ({ event }: { event: APIGatewayProxyEvent, context: any }) => Promise<Context> {
     return async ({ event, context }) => {
-        // console.log("WHATSINCONTEXT: ", context)
-        // console.log("THESPANWESET: ", context.clientContext.client)
-        
         // pull the current span out of the LAMBDA context, to place it in the APOLLO context
         const anyContext = context as any
         const requestSpan = anyContext[requestSpanKey]
@@ -103,7 +99,7 @@ function tracingMiddleware(
     return async function (event, context, completion) {
         const span = tracer.startSpan('handleRequest', {
             kind: 1, // server
-            attributes: { middlewareInit: 'works' },
+            attributes: { middlewareInit: true },
         })
 
         // Put the span into the LAMBDA context, in order to pass it into the APOLLO context in contextForRequestForFetcher
@@ -113,10 +109,8 @@ function tracingMiddleware(
 
         const result = await wrapped(event, context, completion)
 
-        span.addEvent('middleware addEvent called', {data: JSON.stringify(result)})
-        span.setAttribute('middlewareSetAttribute', 'works')
         span.end()
-        
+
         return result
     }
 }
