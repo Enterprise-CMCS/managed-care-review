@@ -19,10 +19,9 @@ describe('dashboard', () => {
         cy.findByRole('heading', {name: /Review and submit/}).should('exist')
 
         // Store submission url for reference later
-        cy.location().then((fullUrl) => {
+        cy.location().then( (fullUrl) => {
             const reviewURL = fullUrl.toString()
             fullUrl.pathname = path.dirname(fullUrl)
-            const summaryURL = fullUrl.toString()
 
             // Submit, sent to dashboard
             cy.intercept('POST', '*/graphql').as('gqlRequest')
@@ -51,7 +50,7 @@ describe('dashboard', () => {
 
             cy.wait(2000)
 
-            //Unlock banner for CMS user show be present with correct data.
+            //Unlock banner for CMS user to be present with correct data.
             cy.findByTestId('unlockedBanner')
                 .should('exist')
                 .and('contain.text', 'zuko@example.com')
@@ -61,66 +60,71 @@ describe('dashboard', () => {
 
             cy.wait(2000)
 
-            // Login as state user
-            cy.findByRole('button', { name: 'Sign out' }).click()
+            //Find unlocked submission name
+            cy.get('#submissionName').then(($h2) => {
+                //Set name to variable for later use in finding the unlocked submission
+                const submissionName = $h2.text()
+                // Login as state user
+                cy.findByRole('button', { name: 'Sign out' }).click()
 
-            cy.findByText(
-                'Medicaid and CHIP Managed Care Reporting and Review System'
-            )
+                cy.findByText(
+                    'Medicaid and CHIP Managed Care Reporting and Review System'
+                )
 
-            cy.logInAsStateUser()
+                cy.logInAsStateUser()
 
-            // state user sees unlocked submission - check tag then submission link
-            cy.findByText('Dashboard').should('exist')
-            cy.get('table')
-                .should('exist')
-                .findAllByTestId('submission-status')
-                .first()
-                .should('have.text', 'Unlocked')
+                // state user sees unlocked submission - check tag then submission link
+                cy.findByText('Dashboard').should('exist')
+                cy.get('table')
+                    .should('exist')
+                    .findByText(submissionName)
+                    .parent().parent()
+                    .should('contain.text', 'Unlocked')
 
-            cy.get('table')
-                .findAllByTestId('submission-id')
-                .first()
-                .find('a')
-                .should('have.attr', 'href')
-                .and('include', 'review-and-submit')
 
-            cy.visit(reviewURL)
+                cy.get('table')
+                    .findAllByTestId('submission-id')
+                    .first()
+                    .find('a')
+                    .should('have.attr', 'href')
+                    .and('include', 'review-and-submit')
 
-            // state user can resubmit and see resubmitted package in dashboard
-            cy.intercept('POST', '*/graphql').as('gqlRequest2')
-            cy.submitStateSubmissionForm()
-            cy.wait('@gqlRequest2')
-            cy.findByText('Dashboard').should('exist')
-            
-          cy.get('table')
-              .should('exist')
-              .findAllByTestId('submission-status')
-              .first()
-              .should('have.text', 'Submitted')
+                cy.visit(reviewURL)
 
-          cy.get('table')
-              .findAllByTestId('submission-id')
-              .first()
-              .find('a')
-              .should('have.attr', 'href')
-              .and('not.include', 'review-and-submit')
+                // state user can resubmit and see resubmitted package in dashboard
+                cy.intercept('POST', '*/graphql').as('gqlRequest2')
+                cy.submitStateSubmissionForm()
+                cy.wait('@gqlRequest2')
+                cy.findByText('Dashboard').should('exist')
 
-            // Login as CMS User
-            cy.findByRole('button', { name: 'Sign out' }).click()
-            cy.findByText(
-                'Medicaid and CHIP Managed Care Reporting and Review System'
-            )
-            cy.logInAsCMSUser({ initialURL: reviewURL })
+                cy.get('table')
+                    .should('exist')
+                    .findAllByTestId('submission-status')
+                    .first()
+                    .should('have.text', 'Submitted')
 
-            //  CMS user sees resubmitted submission and active unlock button
-            cy.findByRole('button', { name: 'Unlock submission' }).should(
-                'not.be.disabled'
-            )
+                cy.get('table')
+                    .findAllByTestId('submission-id')
+                    .first()
+                    .find('a')
+                    .should('have.attr', 'href')
+                    .and('not.include', 'review-and-submit')
 
-            cy.findByTestId('unlockedBanner')
-                .should('not.exist')
+                // Login as CMS User
+                cy.findByRole('button', { name: 'Sign out' }).click()
+                cy.findByText(
+                    'Medicaid and CHIP Managed Care Reporting and Review System'
+                )
+                cy.logInAsCMSUser({ initialURL: reviewURL })
+
+                //  CMS user sees resubmitted submission and active unlock button
+                cy.findByRole('button', { name: 'Unlock submission' })
+                    .should('not.be.disabled')
+
+                cy.findByTestId('unlockedBanner')
+                    .should('not.exist')
+
+            })
         })
-       
     })
 })
