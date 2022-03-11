@@ -85,6 +85,12 @@ export const StateSubmissionForm = (): React.ReactElement => {
                 variables: {
                     input: input,
                 },
+                update(cache, { data }) {
+                    console.log('IN cache evict', id)
+                        cache.evict({ id: `Submission2:${id}` })
+                        cache.gc()
+                 
+                },
             })
             const updatedSubmission: DraftSubmission | undefined =
                 updateResult?.data?.updateDraftSubmission.draftSubmission
