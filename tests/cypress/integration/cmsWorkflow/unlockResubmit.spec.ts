@@ -78,14 +78,14 @@ describe('dashboard', () => {
                 cy.get('table')
                     .should('exist')
                     .findByText(submissionName)
-                    .parent().parent()
-                    .should('contain.text', 'Unlocked')
+                    .parent()
+                    .siblings('[data-testid="submission-status"]')
+                    .should('have.text', 'Unlocked')
 
 
                 cy.get('table')
-                    .findAllByTestId('submission-id')
-                    .first()
-                    .find('a')
+                    .should('exist')
+                    .findByText(submissionName)
                     .should('have.attr', 'href')
                     .and('include', 'review-and-submit')
 
@@ -99,14 +99,13 @@ describe('dashboard', () => {
 
                 cy.get('table')
                     .should('exist')
-                    .findAllByTestId('submission-status')
-                    .first()
+                    .findByText(submissionName)
+                    .parent()
+                    .siblings('[data-testid="submission-status"]')
                     .should('have.text', 'Submitted')
 
                 cy.get('table')
-                    .findAllByTestId('submission-id')
-                    .first()
-                    .find('a')
+                    .findByText(submissionName)
                     .should('have.attr', 'href')
                     .and('not.include', 'review-and-submit')
 
