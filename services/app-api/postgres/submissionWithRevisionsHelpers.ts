@@ -52,8 +52,8 @@ function convertToSubmission2Type(dbSub: StateSubmissionWithRevisions): Submissi
                     updatedBy: ''
                 }
             }
+
             let unlockInfo: UpdateInfoType | undefined = undefined
-            console.log(r)
             if (r.unlockedAt && r.unlockedBy && r.unlockedReason) {
                 unlockInfo = {
                     updatedAt: r.unlockedAt,
