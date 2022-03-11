@@ -2,29 +2,33 @@ import React, { useRef, useEffect } from 'react'
 import {
     Button,
     ButtonGroup,
-    Modal,
+    Modal as UswdsModal,
     ModalFooter,
     ModalHeading,
     ModalRef,
     ModalProps as UswdsModalProps
 } from '@trussworks/react-uswds';
-import styles from './ReviewAndSubmitModal.module.scss'
+import styles from './Modal.module.scss'
 
-interface ReviewAndSubmitModalProps {
-    modalTitle?: string,
+interface ModalComponentProps {
+    modalHeading?: string,
+    modalHeadingId?: string,
     onSubmit?: () => void,
     onCancel?: () => void,
     showModal: boolean,
+    className?: string,
 }
 
-export type ModalProps = ReviewAndSubmitModalProps & UswdsModalProps
+export type ModalProps = ModalComponentProps & UswdsModalProps
 
-export const ReviewAndSubmitModal = ({
+export const Modal = ({
     children,
-    modalTitle,
+    modalHeading,
+    modalHeadingId,
     onSubmit,
     onCancel,
     showModal,
+    className,
     ...divProps
 }: ModalProps): React.ReactElement  => {
     const modalRef = useRef<ModalRef>(null)
@@ -34,17 +38,15 @@ export const ReviewAndSubmitModal = ({
     },[showModal])
 
     return (
-        <Modal
+        <UswdsModal
             {...divProps}
             ref={modalRef}
-            aria-labelledby="review-and-submit-modal-heading"
-            aria-describedby="review-and-submit-modal-description"
-            className={styles.reviewAndSubmitModal}
+            className={`${styles.modal} ${className}`}
             forceAction
         >
-            {modalTitle && (
-                <ModalHeading id="review-and-submit-modal-heading">
-                    {modalTitle}
+            {modalHeading && (
+                <ModalHeading id={modalHeadingId}>
+                    {modalHeading}
                 </ModalHeading>
             )}
             {children}
@@ -71,6 +73,6 @@ export const ReviewAndSubmitModal = ({
                     </Button>
                 </ButtonGroup>
             </ModalFooter>
-        </Modal>
+        </UswdsModal>
     )
 }
