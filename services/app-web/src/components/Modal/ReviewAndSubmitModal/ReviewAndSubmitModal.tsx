@@ -39,7 +39,6 @@ export const ReviewAndSubmitModal = ({
             ref={modalRef}
             aria-labelledby="review-and-submit-modal-heading"
             aria-describedby="review-and-submit-modal-description"
-            id="review-and-submit-modal"
             className={styles.reviewAndSubmitModal}
             forceAction
         >
