@@ -232,8 +232,6 @@ export const SubmissionSummary = (): React.ReactElement => {
     const isContractActionAndRateCertification =
         submission.submissionType === 'CONTRACT_AND_RATES'
 
-    const submissionUnlocked = submissionAndRevisions.status === 'UNLOCKED'
-
     return (
         <div className={styles.background}>
             <GridContainer
@@ -246,7 +244,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                     </Alert>
                 )}
 
-                {submissionUnlocked && unlockedInfo && (
+                {unlockedInfo && (
                     <SubmissionUnlockedBanner
                         userType={loggedInUser?.role === 'CMS_USER' ? 'CMS_USER' : 'STATE_USER'}
                         unlockedBy={unlockedInfo.updatedBy}
