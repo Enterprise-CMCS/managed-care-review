@@ -23,7 +23,7 @@ export const ReviewAndSubmitModal = ({
     onSubmit,
     onCancel,
     showModal,
-}: ModalProps) => {
+}: ModalProps): React.ReactElement  => {
     const modalRef = useRef<ModalRef>(null)
 
     useEffect(() => {
