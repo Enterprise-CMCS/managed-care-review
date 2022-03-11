@@ -152,6 +152,7 @@ const newPackageStateEmail = (
         bodyHTML: bodyHTML,
     }
 }
+
 type UnlockData = {
     submissionName: string
     unlockedByEmail: string
@@ -181,11 +182,48 @@ const unlockPackageCMSEmail = (
         sourceEmail: config.emailSource,
         subject: `${
             isTestEnvironment ? `[${config.stage}] ` : ''
-        }${unlockData.submissionName} was unlocked`,
+        }TEST ${unlockData.submissionName} was unlocked`,
         bodyText: stripHTMLFromTemplate(bodyHTML),
         bodyHTML: bodyHTML,
     }
 }
 
-export { newPackageCMSEmail, newPackageStateEmail, unlockPackageCMSEmail }
+const unlockPackageStateEmail = (
+    submission: StateSubmissionType,
+    user: CognitoUserType,
+    unlockData: UnlockData,
+    config: EmailConfiguration
+): EmailData => {
+    const submissionURL = new URL(
+        `submissions/${submission.id}`,
+        config.baseUrl
+    ).href
+    const currentUserEmail = user.email // is there a current state user if the trigger for the unlock is coming from CMS?
+    const receiverEmails: string[] = [currentUserEmail].concat(
+        submission.stateContacts.map((contact) => contact.email)
+    ) // not sure what to do here, we want the submitter and all state contacts listed on the submission
+    const bodyHTML = `
+        ${testEmailAlert}
+        <h1>Submission ${unlockData.submissionName} was unlocked by CMS</h1>
+        </br>
+        <b>Unlocked by:</b> ${unlockData.unlockedByEmail}
+        </br>
+        <b>Unlocked on:</b> ${formatCalendarDate(unlockData.unlockedOnDate)}
+        </br>
+        <b>Reason for unlock:</b> ${unlockData.unlockReason}
+        </br>
+        <a href="${submissionURL}">Open the submission in MC-Review to make edits.</a>
+    `
+    return {
+        toAddresses: receiverEmails,
+        sourceEmail: config.emailSource,
+        subject: `${
+            config.stage !== 'prod' ? `[${config.stage}] ` : ''
+        }TEST ${unlockData.submissionName} was unlocked by CMS`,
+        bodyText: stripHTMLFromTemplate(bodyHTML),
+        bodyHTML: bodyHTML,
+    }
+}
+
+export { newPackageCMSEmail, newPackageStateEmail, unlockPackageCMSEmail, unlockPackageStateEmail }
 
