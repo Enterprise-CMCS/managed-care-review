@@ -290,6 +290,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                     onSubmit={onUnlock}
                     onCancel={resetModal}
                     showModal={showModal}
+                    id="unlockSubmissionModal"
                 >
                     {showError && (
                         <PoliteErrorMessage>Reason for unlocking submission is required</PoliteErrorMessage>
