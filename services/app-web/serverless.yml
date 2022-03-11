@@ -31,6 +31,7 @@ custom:
   storybook_s3_bucket_name: ${cf:storybook-${self:custom.stage}.S3BucketName}
   storybook_cloudfront_distribution_id: ${cf:storybook-${self:custom.stage}.CloudFrontDistributionId}
   react_app_auth_mode: ${env:REACT_APP_AUTH_MODE}
+  nr_license_key: ${env:NR_LICENSE_KEY}
   serverlessTerminationProtection:
     stages:
       - dev

@@ -6,7 +6,10 @@ import {
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web'
 import { BaseOpenTelemetryComponent } from '@opentelemetry/plugin-react-load'
 import { ZoneContextManager } from '@opentelemetry/context-zone'
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
+import {
+    OTLPTraceExporter,
+    OTLPExporterNodeConfigBase,
+} from '@opentelemetry/exporter-trace-otlp-http'
 import { diag, DiagConsoleLogger } from '@opentelemetry/api'
 import { Resource } from '@opentelemetry/resources'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
@@ -21,9 +24,18 @@ const provider = new WebTracerProvider({
     }),
 })
 
-const exporter = new OTLPTraceExporter({
+const exporterConfig: OTLPExporterNodeConfigBase = {
     url: process.env.REACT_APP_OTEL_COLLECTOR_URL,
-})
+}
+
+if (process.env.NR_LICENSE_KEY) {
+    exporterConfig.headers = { 'api-key': process.env.NR_LICENSE_KEY }
+    exporterConfig.url = 'https://gov-otlp.nr-data.net:4318/v1/traces'
+}
+
+console.log(exporterConfig)
+
+const exporter = new OTLPTraceExporter(exporterConfig)
 
 const fetchInstrumentation = new FetchInstrumentation({
     propagateTraceHeaderCorsUrls: ['/.*/g'],
