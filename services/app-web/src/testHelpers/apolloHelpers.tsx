@@ -15,7 +15,6 @@ import {
     DraftSubmission,
     DraftSubmissionUpdates,
     FetchCurrentUserDocument,
-    FetchDraftSubmissionDocument,
     FetchStateSubmissionDocument,
     FetchSubmission2Document,
     IndexSubmissionsDocument,
@@ -338,6 +337,7 @@ export function mockDraftSubmission2(submissionData?: Partial<DraftSubmissionTyp
     const b64 = domainToBase64(submission)
 
     return {
+        __typename: "Submission2",
         id: 'test-id-123',
         status: 'DRAFT',
         intiallySubmittedAt: '2022-01-01',
@@ -501,42 +501,43 @@ const createDraftSubmissionMock = ({
     }
 }
 
-type fetchDraftSubmissionMockProps = {
-    draftSubmission?: DraftSubmission | Partial<DraftSubmission>
+type fetchSubmission2MockProps = {
+    submission?: Submission2 | Partial<Submission2>
     id: string
     statusCode: 200 | 403 | 500
 }
 
-const fetchDraftSubmissionMock = ({
-    draftSubmission = mockDraft(),
+const fetchSubmission2Mock = ({
+    submission = mockDraftSubmission2(),
     id,
     statusCode, // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}: fetchDraftSubmissionMockProps): MockedResponse<Record<string, any>> => {
+}: fetchSubmission2MockProps): MockedResponse<Record<string, any>> => {
     // override the ID of the returned draft to match the queried id.
-    const mergedDraftSubmission = Object.assign({}, draftSubmission, { id })
+    const mergedDraftSubmission = Object.assign({}, submission, { id })
+
     switch (statusCode) {
         case 200:
             return {
                 request: {
-                    query: FetchDraftSubmissionDocument,
+                    query: FetchSubmission2Document,
                     variables: { input: { submissionID: id } },
                 },
                 result: {
                     data: {
-                        fetchDraftSubmission: {
-                            draftSubmission: mergedDraftSubmission,
+                        fetchSubmission2: {
+                            submission: mergedDraftSubmission,
                         },
                     },
                 },
             }
         case 403:
             return {
-                request: { query: FetchDraftSubmissionDocument },
+                request: { query: FetchSubmission2Document },
                 error: new Error('You are not logged in'),
             }
         default:
             return {
-                request: { query: FetchDraftSubmissionDocument },
+                request: { query: FetchSubmission2Document },
                 error: new Error('A network error occurred'),
             }
     }
@@ -602,12 +603,12 @@ const fetchStateSubmissionMock = ({
             }
         case 403:
             return {
-                request: { query: FetchDraftSubmissionDocument },
+                request: { query: FetchSubmission2Document },
                 error: new Error('You are not logged in'),
             }
         default:
             return {
-                request: { query: FetchDraftSubmissionDocument },
+                request: { query: FetchSubmission2Document },
                 error: new Error('A network error occurred'),
             }
     }
@@ -799,7 +800,7 @@ export {
     fetchCurrentUserMock,
     mockValidCMSUser,
     createDraftSubmissionMock,
-    fetchDraftSubmissionMock,
+    fetchSubmission2Mock,
     fetchStateSubmissionMock,
     fetchStateSubmission2MockSuccess,
     updateDraftSubmissionMock,

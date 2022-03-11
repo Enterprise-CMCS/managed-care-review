@@ -16,6 +16,7 @@ import {
     STATE_SUBMISSION_FORM_ROUTES,
     RouteT,
 } from '../../constants/routes'
+import {getCurrentRevisionFromSubmission2, convertDomainModelFormDataToGQLSubmission, isGQLDraftSubmission} from '../../gqlHelpers'
 import { StateSubmissionContainer } from './StateSubmissionContainer'
 import { ContractDetails } from './ContractDetails'
 import { RateDetails } from './RateDetails'
@@ -28,8 +29,9 @@ import {
     DraftSubmission,
     UpdateDraftSubmissionInput,
     useUpdateDraftSubmissionMutation,
-    useFetchDraftSubmissionQuery,
+    useFetchSubmission2Query
 } from '../../gen/gqlClient'
+import { GQLSubmissionUnionType } from '../../gqlHelpers/submissionWithRevisions'
 
 const GenericFormAlert = () => <Alert type="error">Something went wrong</Alert>
 
@@ -43,12 +45,18 @@ const activeFormPages = (draft: DraftSubmission): RouteT[] => {
             )
     )
 }
+type FormDataError = 'NOT_FOUND' | 'MALFORMATTED_DATA' | 'WRONG_SUBMISSION_STATUS'
 
 export const StateSubmissionForm = (): React.ReactElement => {
     const { id } = useParams<{ id: string }>()
     const { pathname } = useLocation()
     const currentRoute = getRouteName(pathname)
     const { updateHeading } = usePage()
+    const [formDataFromLatestRevision, setFormDataFromLatestRevision] =
+        useState<GQLSubmissionUnionType | null>(null)
+    const [formDataError, setFormDataError] = useState<FormDataError | null>(
+        null
+    )
     const [showFormAlert, setShowFormAlert] = useState(false)
 
     // Set up graphql calls
@@ -56,7 +64,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
         data: fetchData,
         loading,
         error: fetchError,
-    } = useFetchDraftSubmissionQuery({
+    } = useFetchSubmission2Query({
         variables: {
             input: {
                 submissionID: id,
@@ -64,6 +72,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
         },
     })
 
+    const submissionAndRevisions = fetchData?.fetchSubmission2?.submission
     const [updateDraftSubmission, { error: updateError }] =
         useUpdateDraftSubmissionMutation()
 
@@ -89,12 +98,38 @@ export const StateSubmissionForm = (): React.ReactElement => {
         }
     }
 
-    const draft = fetchData?.fetchDraftSubmission?.draftSubmission
-
     // Set up side effects
     useEffect(() => {
-        updateHeading(pathname, draft?.name)
-    }, [updateHeading, pathname, draft?.name])
+        if (formDataFromLatestRevision) {
+            const { name } = formDataFromLatestRevision
+            updateHeading(pathname, name)
+        }
+    }, [updateHeading, pathname, formDataFromLatestRevision])
+
+    useEffect(() => {
+        if (submissionAndRevisions) {
+            const currentRevisionPackageOrError =
+                getCurrentRevisionFromSubmission2(submissionAndRevisions)
+
+            if (currentRevisionPackageOrError instanceof Error) {
+                setFormDataError('MALFORMATTED_DATA')
+            } else {
+                const formattedCurrentRevision = convertDomainModelFormDataToGQLSubmission(currentRevisionPackageOrError)
+                if (
+                    !formattedCurrentRevision
+                ) {
+                    setFormDataError('NOT_FOUND')
+                } else if (
+                    !isGQLDraftSubmission(formattedCurrentRevision)
+                ) {
+                    setFormDataError('WRONG_SUBMISSION_STATUS')
+                } else {
+                    // we think we have valid data
+                    setFormDataFromLatestRevision(formattedCurrentRevision)
+                }
+            } 
+        }
+    }, [submissionAndRevisions])
 
     if (loading) {
         return (
@@ -109,10 +144,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
     }
 
     if (fetchError) {
-        /*  On fetch draft error, check if submission is already submitted
-            if so,  display summary page or already sent to CMS message depending on submissions/:id/route,
-            if not, display generic eror
-        */
+        // This is a sign that we are handling the same error handling logic frontend and backend around invalid status
         let specificContent: React.ReactElement | undefined = undefined
         fetchError.graphQLErrors.forEach((err) => {
             if (err?.extensions?.code === 'WRONG_STATUS') {
@@ -127,9 +159,19 @@ export const StateSubmissionForm = (): React.ReactElement => {
         return specificContent ?? <GenericError />
     }
 
-    if (draft === undefined || draft === null) {
+    if (formDataError === 'MALFORMATTED_DATA') {
+        return <GenericError />
+    }
+
+    if (formDataError === 'NOT_FOUND' || (fetchData &&  !formDataFromLatestRevision)) {
         return <Error404 />
     }
+
+    if (formDataError === 'WRONG_SUBMISSION_STATUS') {
+        return <ErrorInvalidSubmissionStatus />
+    }
+
+    const draft = formDataFromLatestRevision as DraftSubmission
 
     return (
         <>

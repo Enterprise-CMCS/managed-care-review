@@ -1,4 +1,5 @@
-import { DraftSubmission, DraftSubmissionUpdates } from '../../gen/gqlClient'
+import { base64ToDomain } from '../../common-code/proto/stateSubmission'
+import { DraftSubmission, DraftSubmissionUpdates , Submission2} from '../../gen/gqlClient'
 
 /*
     Clean out _typename from submission
@@ -37,28 +38,59 @@ function cleanDraftSubmission(
 // There's probably some Typescript Cleverness™ we could do for this mapping function
 // but for now the compiler complains if you forget anything so ¯\_(ツ)_/¯
 function updatesFromSubmission(draft: DraftSubmission): DraftSubmissionUpdates {
+    console.log('draft', draft)
     return {
         programIDs: draft.programIDs,
         submissionType: draft.submissionType,
         submissionDescription: draft.submissionDescription,
-        documents: stripTypename(draft.documents),
+        documents: draft.documents,
         contractType: draft.contractType,
         contractExecutionStatus: draft.contractExecutionStatus,
-        contractDocuments: stripTypename(draft.contractDocuments),
+        contractDocuments: draft.contractDocuments,
         contractDateStart: draft.contractDateStart,
         contractDateEnd: draft.contractDateEnd,
         federalAuthorities: draft.federalAuthorities,
         managedCareEntities: draft.managedCareEntities,
-        contractAmendmentInfo: stripTypename(draft.contractAmendmentInfo),
+        contractAmendmentInfo: draft.contractAmendmentInfo,
         rateType: draft.rateType,
-        rateDocuments: stripTypename(draft.rateDocuments),
+        rateDocuments: draft.rateDocuments,
         rateDateStart: draft.rateDateStart,
         rateDateEnd: draft.rateDateEnd,
         rateDateCertified: draft.rateDateCertified,
-        rateAmendmentInfo: stripTypename(draft.rateAmendmentInfo),
-        stateContacts: stripTypename(draft.stateContacts),
-        actuaryContacts: stripTypename(draft.actuaryContacts),
+        rateAmendmentInfo: draft.rateAmendmentInfo,
+        stateContacts: draft.stateContacts,
+        actuaryContacts: draft.actuaryContacts,
         actuaryCommunicationPreference: draft.actuaryCommunicationPreference,
+    }
+}
+
+// this is needed as we change our api - right now only used in tests.
+function updatesFromSubmission2(draft: Submission2): DraftSubmissionUpdates {
+    const formData = base64ToDomain(draft.revisions[0].revision.submissionData)
+    if (formData instanceof Error) throw Error 
+
+    return {
+        programIDs: formData.programIDs,
+        submissionType: formData.submissionType,
+        submissionDescription: formData.submissionDescription,
+        documents: formData.documents,
+        contractType: formData.contractType,
+        contractExecutionStatus: formData.contractExecutionStatus,
+        contractDocuments: formData.contractDocuments,
+        contractDateStart: formData.contractDateStart,
+        contractDateEnd: formData.contractDateEnd,
+        federalAuthorities: formData.federalAuthorities,
+        managedCareEntities: formData.managedCareEntities,
+        contractAmendmentInfo: formData.contractAmendmentInfo,
+        rateType: formData.rateType,
+        rateDocuments: formData.rateDocuments,
+        rateDateStart: formData.rateDateStart,
+        rateDateEnd: formData.rateDateEnd,
+        rateDateCertified: formData.rateDateCertified,
+        rateAmendmentInfo: formData.rateAmendmentInfo,
+        stateContacts: formData.stateContacts,
+        actuaryContacts: formData.actuaryContacts,
+        actuaryCommunicationPreference: formData.actuaryCommunicationPreference,
     }
 }
 
@@ -67,4 +99,5 @@ export {
     stripTypename,
     omitTypename,
     updatesFromSubmission,
+    updatesFromSubmission2
 }
