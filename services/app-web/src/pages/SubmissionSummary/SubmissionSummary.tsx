@@ -16,7 +16,7 @@ import {
     ContactsSummarySection, ContractDetailsSummarySection,
     RateDetailsSummarySection, SubmissionTypeSummarySection, SupportingDocumentsSummarySection
 } from '../../components/SubmissionSummarySection'
-import { SubmissionUnlockedBanner, PoliteErrorMessage, ReviewAndSubmitModal } from '../../components'
+import { SubmissionUnlockedBanner, PoliteErrorMessage, Modal } from '../../components'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
 import {
@@ -285,8 +285,10 @@ export const SubmissionSummary = (): React.ReactElement => {
 
                 <SupportingDocumentsSummarySection submission={submission} />
 
-                <ReviewAndSubmitModal
-                    modalTitle="Reason for unlocking submission"
+                <Modal
+                    modalHeading="Reason for unlocking submission"
+                    modalHeadingId="unlockModalHeading"
+                    aria-labelledby="unlockModalHeading"
                     onSubmit={onUnlock}
                     onCancel={resetModal}
                     showModal={showModal}
@@ -317,7 +319,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                             300 characters allowed
                         </p>
                     </div>
-                </ReviewAndSubmitModal>
+                </Modal>
             </GridContainer>
         </div>
     )
