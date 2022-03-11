@@ -6,16 +6,18 @@ import {
     ModalFooter,
     ModalHeading,
     ModalRef,
+    ModalProps as UswdsModalProps
 } from '@trussworks/react-uswds';
 import styles from './ReviewAndSubmitModal.module.scss'
 
-export type ModalProps = {
-    children: React.ReactNode,
-    modalTitle: string | undefined,
-    onSubmit: () => void
-    onCancel: () => void
+interface ReviewAndSubmitModalProps {
+    modalTitle?: string,
+    onSubmit?: () => void,
+    onCancel?: () => void,
     showModal: boolean,
 }
+
+export type ModalProps = ReviewAndSubmitModalProps & UswdsModalProps
 
 export const ReviewAndSubmitModal = ({
     children,
@@ -23,6 +25,7 @@ export const ReviewAndSubmitModal = ({
     onSubmit,
     onCancel,
     showModal,
+    ...divProps
 }: ModalProps): React.ReactElement  => {
     const modalRef = useRef<ModalRef>(null)
 
@@ -32,6 +35,7 @@ export const ReviewAndSubmitModal = ({
 
     return (
         <Modal
+            {...divProps}
             ref={modalRef}
             aria-labelledby="review-and-submit-modal-heading"
             aria-describedby="review-and-submit-modal-description"
