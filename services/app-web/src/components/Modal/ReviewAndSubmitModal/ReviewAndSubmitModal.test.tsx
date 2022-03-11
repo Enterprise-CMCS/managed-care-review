@@ -1,8 +1,8 @@
 import React from 'react'
 import { screen, render } from '@testing-library/react'
-import { ReviewAndSubmitModal, ModalProps } from './ReviewAndSubmitModal';
+import { ReviewAndSubmitModal } from './ReviewAndSubmitModal';
 
-describe('DoubleColumnGrid', () => {
+describe('ReviewAndSubmitModal', () => {
     it('Renders element with modal hidden', () => {
         render(
             <div>
@@ -11,6 +11,10 @@ describe('DoubleColumnGrid', () => {
                     modalTitle="Test Modal Title"
                     showModal={false}
                 >
+                    <textarea
+                        id="textarea"
+                        data-testid="textarea"
+                    />
                 </ReviewAndSubmitModal>
 
             </div>
@@ -56,7 +60,7 @@ describe('DoubleColumnGrid', () => {
         )
 
         expect(screen.getByRole('dialog')).toHaveClass('is-visible')
-        expect(await screen.queryByText('Test Modal Title')).toBeNull()
+        expect(screen.queryByText('Test Modal Title')).toBeNull()
         expect(screen.getByTestId('textarea')).toBeInTheDocument()
     })
 })
