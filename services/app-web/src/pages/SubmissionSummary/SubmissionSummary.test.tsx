@@ -166,6 +166,35 @@ describe('SubmissionSummary', () => {
         })
     })
 
+    it('displays unlock banner with correct data for an unlocked submission', async () => {
+        renderWithProviders(
+            <Route
+                path={RoutesRecord.SUBMISSIONS_FORM}
+                component={SubmissionSummary}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ user: mockValidCMSUser(),  statusCode: 200 }),
+                        fetchStateSubmission2MockSuccess({
+                            id: '15',
+                            stateSubmission: mockUnlockedSubmission2()
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15',
+                },
+            }
+        )
+
+        const banner = expect(await screen.findByTestId('unlockedBanner'))
+        banner.toBeInTheDocument()
+        banner.toHaveTextContent(/Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+\s[a-zA-Z]+/i)
+        banner.toHaveTextContent('Unlocked by: bob@dmas.mn.govUnlocked')
+        banner.toHaveTextContent('Reason for unlock: Test unlock reason')
+    })
+
     it('renders the OLD data for an unlocked submission, ignoring unsubmitted changes', async () => {
 
         const submission2 = mockUnlockedSubmission2()
@@ -252,7 +281,6 @@ describe('SubmissionSummary', () => {
         )).toBeInTheDocument()
     })
 
-    //Test error message on modal when not text is inputted and submit is clicked
     it('displays error when submitting without a unlock reason', async () => {
         renderWithProviders(
             <Route

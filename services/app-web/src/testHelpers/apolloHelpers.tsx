@@ -404,7 +404,11 @@ export function mockUnlockedSubmission2(
                 revision: {
                     id: 'revision2',
                     createdAt: new Date(),
-                    unlockInfo: null,
+                    unlockInfo: {
+                        updatedAt: new Date(),
+                        updatedBy: 'bob@dmas.mn.gov',
+                        updatedReason: 'Test unlock reason'
+                    },
                     submitInfo: null,
                     submissionData: b64,
                 },
