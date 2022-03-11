@@ -1,21 +1,21 @@
 import React from 'react'
 import { screen, render } from '@testing-library/react'
-import { ReviewAndSubmitModal } from './ReviewAndSubmitModal';
+import { Modal } from './Modal';
 
-describe('ReviewAndSubmitModal', () => {
+describe('Modal', () => {
     it('Renders element with modal hidden', () => {
         render(
             <div>
-                <ReviewAndSubmitModal
+                <Modal
                     id="hiddenModal"
-                    modalTitle="Test Modal Title"
+                    modalHeading="Test Modal Title"
                     showModal={false}
                 >
                     <textarea
                         id="textarea"
                         data-testid="textarea"
                     />
-                </ReviewAndSubmitModal>
+                </Modal>
 
             </div>
         )
@@ -26,16 +26,16 @@ describe('ReviewAndSubmitModal', () => {
     it('Renders element with modal visible with modal title', () => {
         render(
             <div>
-                <ReviewAndSubmitModal
+                <Modal
                     id="hiddenModal"
-                    modalTitle="Test Modal Title"
+                    modalHeading="Test Modal Title"
                     showModal={true}
                 >
                     <textarea
                         id="textarea"
                         data-testid="textarea"
                     />
-                </ReviewAndSubmitModal>
+                </Modal>
             </div>
         )
 
@@ -47,7 +47,7 @@ describe('ReviewAndSubmitModal', () => {
     it('Renders element with modal visible without title', async() => {
         render(
             <div>
-                <ReviewAndSubmitModal
+                <Modal
                     id="hiddenModal"
                     showModal={true}
                 >
@@ -55,7 +55,7 @@ describe('ReviewAndSubmitModal', () => {
                         id="textarea"
                         data-testid="textarea"
                     />
-                </ReviewAndSubmitModal>
+                </Modal>
             </div>
         )
 

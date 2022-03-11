@@ -1,0 +1,23 @@
+import React from 'react'
+import { Story } from '@storybook/react'
+import { Modal, ModalProps } from './Modal';
+
+export default {
+    title: 'Components/Modal/Modal',
+    component: Modal,
+}
+
+const Template: Story<ModalProps> = (args) => <Modal {...args} />
+
+export const ModalShow = Template.bind({})
+ModalShow.args = {
+    showModal: true,
+    modalHeading: 'Test Modal Title',
+    modalHeadingId: 'testModalTitle',
+    children: [
+        <div style={{ flexDirection: 'column', display: 'flex', padding: 10}}>
+            <label htmlFor={'textarea1'}>Text Box 1</label>
+            <textarea id={'textarea1'}/>
+        </div>
+    ]
+}

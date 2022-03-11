@@ -1,1 +1,1 @@
-export { ReviewAndSubmitModal } from './ReviewAndSubmitModal/ReviewAndSubmitModal'
+export { Modal } from './Modal'

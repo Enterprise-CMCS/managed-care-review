@@ -44,4 +44,4 @@ export { Tabs, TabPanel } from './Tabs'
 
 export { SubmissionUnlockedBanner } from './Banner'
 
-export { ReviewAndSubmitModal } from './Modal'
+export { Modal } from './Modal'
