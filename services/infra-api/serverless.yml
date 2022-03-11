@@ -1,8 +1,6 @@
 service: infra-api
 variablesResolutionMode: 20210326
 
-# test
-
 frameworkVersion: '2'
 
 plugins:
