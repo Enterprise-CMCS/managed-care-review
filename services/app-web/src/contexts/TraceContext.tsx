@@ -25,15 +25,8 @@ const provider = new WebTracerProvider({
 })
 
 const exporterConfig: OTLPExporterNodeConfigBase = {
-    url: 'https://gov-otlp.nr-data.net:4318/v1/traces',
+    url: process.env.REACT_APP_OTEL_COLLECTOR_URL,
 }
-
-if (process.env.NR_LICENSE_KEY) {
-    exporterConfig.headers = { 'api-key': process.env.NR_LICENSE_KEY }
-    exporterConfig.url = 'https://gov-otlp.nr-data.net:4318/v1/traces'
-}
-
-console.log(exporterConfig)
 
 const exporter = new OTLPTraceExporter(exporterConfig)
 
