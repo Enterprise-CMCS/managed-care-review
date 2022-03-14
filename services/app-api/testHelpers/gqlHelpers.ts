@@ -214,13 +214,15 @@ const submitTestDraftSubmission = async (
 
 const unlockTestDraftSubmission = async (
     server: ApolloServer,
-    submissionID: string
+    submissionID: string,
+    unlockedReason: string,
 ): Promise<Submission2> => {
     const updateResult = await server.executeOperation({
         query: UNLOCK_STATE_SUBMISSION,
         variables: {
             input: {
                 submissionID,
+                unlockedReason
             },
         },
     })

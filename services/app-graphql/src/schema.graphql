@@ -107,6 +107,7 @@ type SubmitDraftSubmissionPayload {
 
 input UnlockStateSubmissionInput {
     submissionID: ID!
+    unlockedReason: String!
 }
 
 type UnlockStateSubmissionPayload {
@@ -159,6 +160,8 @@ type Submission2 {
 
 type UpdateInformation {
     updatedAt: Date
+    updatedBy: String
+    updatedReason: String
 }
 
 type Revision {
