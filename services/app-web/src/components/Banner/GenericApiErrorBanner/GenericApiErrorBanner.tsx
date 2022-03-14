@@ -13,12 +13,12 @@ export const GenericApiErrorBanner = ({
         <Alert
             role="alert"
             type="error"
-            heading="Something went wrong"
+            heading="System error"
             data-testid="genericApiErrorBanner"
         >
             <div className={styles.bannerBodyText}>
                 <p className="usa-alert__text">
-                    <b>{message || 'Your recent action or request failed.'}</b>
+                    <b>{message || "We're having trouble loading this page."}</b>
                 </p>
                 <p className="usa-alert__text">
                     <span>
