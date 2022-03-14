@@ -149,7 +149,6 @@ functions:
           path: otel
           method: post
           cors: true
-          authorizer: aws_iam
 
   graphql:
     handler: handlers/apollo_gql.graphqlHandler
