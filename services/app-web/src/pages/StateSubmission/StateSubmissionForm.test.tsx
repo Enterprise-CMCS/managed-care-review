@@ -9,6 +9,7 @@ import {
     fetchSubmission2Mock,
     updateDraftSubmissionMock,
     mockDraftSubmission2,
+    mockUnlockedSubmission2,
 } from '../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
@@ -196,6 +197,45 @@ describe('StateSubmissionForm', () => {
             })
         })
     })
+
+        describe('loads unlocked submission', () => {
+            it('displays unlock banner with correct data for an unlocked submission', async () => {
+                 renderWithProviders(
+                     <Route
+                         path={RoutesRecord.SUBMISSIONS_FORM}
+                         component={StateSubmissionForm}
+                     />,
+                     {
+                         apolloProvider: {
+                             mocks: [
+                                 fetchCurrentUserMock({ statusCode: 200 }),
+                                 fetchSubmission2Mock({
+                                     id: '15',
+                                     statusCode: 200,
+                                      submission: mockUnlockedSubmission2(),
+                                 }),
+                             ],
+                         },
+                         routerProvider: {
+                             route: '/submissions/15/documents',
+                         },
+                     }
+                 )
+
+                const banner = expect(
+                    await screen.findByTestId('unlockedBanner')
+                )
+                banner.toBeInTheDocument()
+                banner.toHaveClass('usa-alert--info')
+                banner.toHaveTextContent(
+                    /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+\s[a-zA-Z]+/i
+                )
+                banner.toHaveTextContent('Unlocked by: bob@dmas.mn.govUnlocked')
+                banner.toHaveTextContent(
+                    'Reason for unlock: Test unlock reason'
+                )
+            })
+        })
 
     describe('when user edits submission', () => {
         it('change draft submission description and navigate to contract details', async () => {
@@ -388,4 +428,6 @@ describe('StateSubmissionForm', () => {
             expect(loading).toBeInTheDocument()
         })
     })
+
+
 })

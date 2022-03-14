@@ -190,6 +190,7 @@ describe('SubmissionSummary', () => {
 
         const banner = expect(await screen.findByTestId('unlockedBanner'))
         banner.toBeInTheDocument()
+        banner.toHaveClass('usa-alert--warning')
         banner.toHaveTextContent(/Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+\s[a-zA-Z]+/i)
         banner.toHaveTextContent('Unlocked by: bob@dmas.mn.govUnlocked')
         banner.toHaveTextContent('Reason for unlock: Test unlock reason')
