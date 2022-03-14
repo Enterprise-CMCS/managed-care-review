@@ -27,7 +27,7 @@ import {
     useFetchSubmission2Query,
     useUnlockStateSubmissionMutation } from '../../gen/gqlClient'
 import { isGraphQLErrors } from '../../gqlHelpers'
-import { GenericError } from '../Errors/GenericError'
+import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404'
 
 import styles from './SubmissionSummary.module.scss'
@@ -172,7 +172,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     }
 
     if (data && (!submissionAndRevisions)) return <Error404 /> // api request resolves but are no revisions likely because invalid submission is queried. This should be "Not Found"
-    if (error || !packageData || !submissionAndRevisions) return <GenericError /> // api failure or protobuf decode failure
+    if (error || !packageData || !submissionAndRevisions) return <GenericErrorPage /> // api failure or protobuf decode failure
 
     const resetModal = () => {
         setUnlockModalError(undefined)

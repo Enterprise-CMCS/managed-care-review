@@ -23,7 +23,6 @@ import { ErrorSummary } from '../../../components/Form'
 
 type DocumentProps = {
     draftSubmission: DraftSubmission
-    formAlert?: React.ReactElement
     updateDraft: (
         input: UpdateDraftSubmissionInput
     ) => Promise<DraftSubmission | undefined>
@@ -32,7 +31,6 @@ type DocumentProps = {
 export const Documents = ({
     draftSubmission,
     updateDraft,
-    formAlert = undefined,
 }: DocumentProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = useState(false)
     const isContractOnly = draftSubmission.submissionType === 'CONTRACT_ONLY'
@@ -272,8 +270,6 @@ export const Documents = ({
                         }
                         headingRef={errorSummaryHeadingRef}
                     />
-
-                    {formAlert && formAlert}
                     <FileUpload
                         id="documents"
                         name="documents"

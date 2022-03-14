@@ -6,7 +6,7 @@ import styles from './StateSubmissionForm.module.scss'
 
 import { Error404 } from '../Errors/Error404'
 import { ErrorInvalidSubmissionStatus } from '../Errors/ErrorInvalidSubmissionStatus'
-import { GenericError } from '../Errors/GenericError'
+import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Loading } from '../../components/Loading'
 import { DynamicStepIndicator } from '../../components/DynamicStepIndicator'
 import { usePage } from '../../contexts/PageContext'
@@ -36,8 +36,9 @@ import { GQLSubmissionUnionType } from '../../gqlHelpers/submissionWithRevisions
 import {SubmissionUnlockedBanner} from '../../components/Banner'
 import {UpdateInfoType} from '../../common-code/domain-models/Submission2Type'
 import { useAuth } from '../../contexts/AuthContext'
+import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 
-const FormAlert = ({message}:{message?: string}): React.ReactElement => {return message? <Alert type="error">{message}</Alert> : <GenericError />}
+const FormAlert = ({message}:{message?: string}): React.ReactElement => {return message? <Alert type="error">{message}</Alert> : <GenericApiErrorBanner />}
 
 const PageBannerAlerts = ({
     showPageErrorMessage,
@@ -227,11 +228,11 @@ export const StateSubmissionForm = (): React.ReactElement => {
                 }
             }
         })
-        return specificContent ?? <GenericError />
+        return specificContent ?? <GenericErrorPage />
     }
 
     if (formDataError === 'MALFORMATTED_DATA') {
-        return <GenericError />
+        return <GenericErrorPage />
     }
 
     if (formDataError === 'NOT_FOUND' || (fetchData &&  !formDataFromLatestRevision)) {

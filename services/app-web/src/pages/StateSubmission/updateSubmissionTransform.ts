@@ -38,7 +38,6 @@ function cleanDraftSubmission(
 // There's probably some Typescript Cleverness™ we could do for this mapping function
 // but for now the compiler complains if you forget anything so ¯\_(ツ)_/¯
 function updatesFromSubmission(draft: DraftSubmission): DraftSubmissionUpdates {
-    console.log('draft', draft)
     return {
         programIDs: draft.programIDs,
         submissionType: draft.submissionType,
