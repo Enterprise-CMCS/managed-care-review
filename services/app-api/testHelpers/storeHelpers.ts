@@ -41,6 +41,9 @@ function mockStoreThatErrors(): Store {
         findAllSubmissions: async (stateCode) => {
             return genericStoreError
         },
+        findAllSubmissionsWithRevisions: async (stateCode) => {
+            return genericStoreError
+        },
         insertDraftSubmission: async (args) => {
             return genericStoreError
         },

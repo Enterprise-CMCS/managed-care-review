@@ -9,6 +9,7 @@ import { fetchDraftSubmissionResolver } from './fetchDraftSubmission'
 import { fetchStateSubmissionResolver } from './fetchStateSubmission'
 import { fetchSubmission2Resolver } from './fetchSubmission2'
 import { indexSubmissionsResolver } from './indexSubmissions'
+import { indexSubmissions2Resolver } from './indexSubmissions2'
 import { stateSubmissionResolver } from './stateSubmissionResolver'
 import { submission2Resolver } from './submission2Resolver'
 import { submitDraftSubmissionResolver } from './submitDraftSubmission'
@@ -26,6 +27,7 @@ export function configureResolvers(store: Store, emailer: Emailer): Resolvers {
             fetchStateSubmission: fetchStateSubmissionResolver(store),
             fetchSubmission2: fetchSubmission2Resolver(store),
             indexSubmissions: indexSubmissionsResolver(store),
+            indexSubmissions2: indexSubmissions2Resolver(store)
         },
         Mutation: {
             createDraftSubmission: createDraftSubmissionResolver(store),

@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { v4 as uuidv4 } from 'uuid'
 import {
-    DraftSubmissionType, Submission2Type
+    DraftSubmissionType, Submission2Type, UpdateInfoType
 } from '../../app-web/src/common-code/domain-models'
 import { toProtoBuffer } from '../../app-web/src/common-code/proto/stateSubmission'
 import {
@@ -10,7 +10,8 @@ import {
 import { convertToSubmission2Type } from './submissionWithRevisionsHelpers'
 
 export type InsertSubmissionRevisionArgsType = {
-    submissionID: string
+    submissionID: string,
+    unlockInfo: UpdateInfoType,
     draft: DraftSubmissionType
 }
 
@@ -23,10 +24,12 @@ export async function insertSubmissionRevision(
 
     const buffer = Buffer.from(protobuf)
 
+    const { unlockInfo, submissionID } = args
+
     try {
         const submission = await client.stateSubmission.update({
             where: {
-                id: args.submissionID
+                id: submissionID
             },
             data: { 
                 revisions: {
@@ -34,7 +37,10 @@ export async function insertSubmissionRevision(
                         {  
                             id: uuidv4(),
                             createdAt: new Date(),
-                            submissionFormProto: buffer
+                            submissionFormProto: buffer,
+                            unlockedAt: unlockInfo.updatedAt,
+                            unlockedBy: unlockInfo.updatedBy,
+                            unlockedReason: unlockInfo.updatedReason
                         }
                     ]
                 }

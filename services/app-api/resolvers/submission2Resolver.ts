@@ -2,7 +2,6 @@ import { submissionStatus, submissionSubmittedAt } from '../../app-web/src/commo
 import { protoToBase64 } from '../../app-web/src/common-code/proto/stateSubmission'
 import { Resolvers } from '../gen/gqlServer'
 
-
 export const submission2Resolver: Resolvers['Submission2'] = {
     revisions(parent) {
         return parent.revisions.map(r => {

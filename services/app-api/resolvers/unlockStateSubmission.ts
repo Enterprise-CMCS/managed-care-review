@@ -1,6 +1,6 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import {
-    DraftSubmissionType, isCMSUser, StateSubmissionType
+    DraftSubmissionType, isCMSUser, StateSubmissionType, UpdateInfoType
 } from '../../app-web/src/common-code/domain-models'
 import { Emailer } from '../emailer'
 import { MutationResolvers } from '../gen/gqlServer'
@@ -32,6 +32,7 @@ export function unlockStateSubmissionResolver(
     return async (_parent, { input }, context) => {
 
         const { user, span } = context
+        const { unlockedReason, submissionID } = input
         setResolverDetailsOnActiveSpan('createDraftSubmission', user, span)
         // This resolver is only callable by CMS users
         if (!isCMSUser(user)) {
@@ -44,7 +45,7 @@ export function unlockStateSubmissionResolver(
         }
 
         // fetch from the store
-        const result = await store.findStateSubmission(input.submissionID)
+        const result = await store.findStateSubmission(submissionID)
 
         if (isStoreError(result)) {
             const errMessage = `Issue finding a state submission of type ${result.code}. Message: ${result.message}`
@@ -58,7 +59,7 @@ export function unlockStateSubmissionResolver(
         }
 
         if (result === undefined) {
-            const errMessage = `A submission must exist to be unlocked: ${input.submissionID}`
+            const errMessage = `A submission must exist to be unlocked: ${submissionID}`
             logError('unlockStateSubmission', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
@@ -66,12 +67,18 @@ export function unlockStateSubmissionResolver(
             })
         }
 
+        const unlockInfo: UpdateInfoType = {
+            updatedAt: new Date(),
+            updatedBy: context.user.email,
+            updatedReason: unlockedReason
+        }
+
         const submission: StateSubmissionType = result
 
         const draft: DraftSubmissionType = unlock(submission)
 
         // Create a new revision with this draft in it
-        const revisionResult = await store.insertNewRevision(input.submissionID, draft)
+        const revisionResult = await store.insertNewRevision(submissionID, unlockInfo, draft)
 
         // const updateResult = await store.updateStateSubmission(stateSubmission)
         if (isStoreError(revisionResult)) {

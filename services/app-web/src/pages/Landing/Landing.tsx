@@ -63,8 +63,9 @@ export const Landing = (): React.ReactElement => {
                                     dual demonstration contracts)
                                 </li>
                                 <li>State directed preprints</li>
-                                <li>Unexecuted/draft documents</li>
+                                <li>Documents for pre-review</li>
                                 <li>Rate-only submissions</li>
+                                <li>CHIP-only submissions</li>
                             </ul>
 
                             <h2>Before you begin:</h2>
@@ -76,6 +77,9 @@ export const Landing = (): React.ReactElement => {
                                 <li>
                                     Each contract action can tie to one or more
                                     managed care programs
+                                </li>
+                                <li>
+                                    Contracts may be fully executed or unexecuted by some or all parties
                                 </li>
                             </ul>
                         </Grid>
