@@ -211,28 +211,28 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
     const draft = formDataFromLatestRevision as DraftSubmission
 
-    const PageBannerAlerts = (): JSX.Element => {
-        const message = (typeof showPageErrorMessage !== 'boolean' ? showPageErrorMessage : undefined)
-        return (
-            <>
-                {showPageErrorMessage && (
-                    <FormAlert message={message}/>
-                )}
-                {unlockedInfo && (
-                    <SubmissionUnlockedBanner
-                        userType={
-                            loggedInUser?.role === 'CMS_USER'
-                                ? 'CMS_USER'
-                                : 'STATE_USER'
-                        }
-                        unlockedBy={unlockedInfo?.updatedBy || 'Not available'}
-                        unlockedOn={unlockedInfo.updatedAt || 'Not available'}
-                        reason={unlockedInfo.updatedReason || 'Not available'}
-                    />
-                )}
-            </>
-        )
-    }
+    // const PageBannerAlerts = (): JSX.Element => {
+    //     const message = (typeof showPageErrorMessage !== 'boolean' ? showPageErrorMessage : undefined)
+    //     return (
+    //         <>
+    //             {showPageErrorMessage && (
+    //                 <FormAlert message={message}/>
+    //             )}
+    //             {unlockedInfo && (
+    //                 <SubmissionUnlockedBanner
+    //                     userType={
+    //                         loggedInUser?.role === 'CMS_USER'
+    //                             ? 'CMS_USER'
+    //                             : 'STATE_USER'
+    //                     }
+    //                     unlockedBy={unlockedInfo?.updatedBy || 'Not available'}
+    //                     unlockedOn={unlockedInfo.updatedAt || 'Not available'}
+    //                     reason={unlockedInfo.updatedReason || 'Not available'}
+    //                 />
+    //             )}
+    //         </>
+    //     )
+    // }
     return (
         <>
             <div className={styles.stepIndicator}>
@@ -240,7 +240,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     formPages={activeFormPages(draft)}
                     currentFormPage={currentRoute}
                 />
-                <PageBannerAlerts />
+                {/* <PageBannerAlerts /> */}
             </div>
             <StateSubmissionContainer>
                 <Switch>
