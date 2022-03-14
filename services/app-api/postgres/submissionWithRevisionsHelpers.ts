@@ -47,12 +47,24 @@ function convertToSubmission2Type(dbSub: StateSubmissionWithRevisions): Submissi
             let submitInfo: UpdateInfoType | undefined = undefined
             if (r.submittedAt) {
                 submitInfo = {
-                    updatedAt: r.submittedAt
+                    updatedAt: r.submittedAt,
+                    updatedReason: '',
+                    updatedBy: ''
+                }
+            }
+
+            let unlockInfo: UpdateInfoType | undefined = undefined
+            if (r.unlockedAt && r.unlockedBy && r.unlockedReason) {
+                unlockInfo = {
+                    updatedAt: r.unlockedAt,
+                    updatedBy: r.unlockedBy,
+                    updatedReason: r.unlockedReason,
                 }
             }
 
             return {
                 id: r.id,
+                unlockInfo,
                 submitInfo,
                 createdAt: r.createdAt,
                 submissionFormProto: r.submissionFormProto,

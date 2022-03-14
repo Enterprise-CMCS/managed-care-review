@@ -91,7 +91,7 @@ describe('fetchSubmission2', () => {
         const createdID = stateSubmission.id
 
         // unlock it
-        await unlockTestDraftSubmission(cmsServer, createdID)
+        await unlockTestDraftSubmission(cmsServer, createdID, 'Super duper good reason.')
 
         // then see if we can fetch that same submission
         const input = {
@@ -148,7 +148,7 @@ describe('fetchSubmission2', () => {
 
 
         // unlock it
-        await unlockTestDraftSubmission(cmsServer, createdID)
+        await unlockTestDraftSubmission(cmsServer, createdID, 'Super duper good reason.')
 
         const unlockResult = await server.executeOperation({
             query: FETCH_SUBMISSION_2,
@@ -312,15 +312,15 @@ describe('fetchSubmission2', () => {
             },
         })
 
-        await unlockTestDraftSubmission(cmsServer, stateSubmission.id)
+        await unlockTestDraftSubmission(cmsServer, stateSubmission.id, 'Super duper good reason.')
+
+        await submitTestDraftSubmission(stateServer, stateSubmission.id,)
+
+        await unlockTestDraftSubmission(cmsServer, stateSubmission.id, 'Super duper good reason.')
 
         await submitTestDraftSubmission(stateServer, stateSubmission.id)
 
-        await unlockTestDraftSubmission(cmsServer, stateSubmission.id)
-
-        await submitTestDraftSubmission(stateServer, stateSubmission.id)
-
-        await unlockTestDraftSubmission(cmsServer, stateSubmission.id)
+        await unlockTestDraftSubmission(cmsServer, stateSubmission.id, 'Super duper good reason.')
 
         const input = {
             submissionID: stateSubmission.id,

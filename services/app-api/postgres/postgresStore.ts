@@ -3,7 +3,8 @@ import {
     DraftSubmissionType,
     ProgramT,
     StateSubmissionType,
-    Submission2Type
+    Submission2Type,
+    UpdateInfoType
 } from '../../app-web/src/common-code/domain-models'
 import { findPrograms } from '../postgres'
 import { findAllSubmissions } from './findAllSubmissions'
@@ -53,6 +54,7 @@ type Store = {
 
     insertNewRevision: (
         submissionID: string,
+        unlockInfo: UpdateInfoType,
         draft: DraftSubmissionType
     ) => Promise<Submission2Type | StoreError>
 
@@ -92,8 +94,8 @@ function NewPostgresStore(client: PrismaClient): Store {
             updateStateSubmission(client, submission, submittedAt),
         findStateSubmission: (submissionID) =>
             findStateSubmission(client, submissionID),
-        insertNewRevision: (submissionID, draft) => 
-            insertSubmissionRevision(client, {submissionID, draft}),
+        insertNewRevision: (submissionID, unlockInfo, draft) =>
+            insertSubmissionRevision(client, {submissionID, unlockInfo, draft}),
         findPrograms: findPrograms,
     }
 }
