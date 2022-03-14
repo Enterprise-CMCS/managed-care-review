@@ -179,7 +179,7 @@ const unlockPackageCMSEmail = (
     `
     return {
         toAddresses: reviewerEmails,
-        sourceEmail: config.emailSource,
+        sourceEmail: config.emailSource, 
         subject: `${
             isTestEnvironment ? `[${config.stage}] ` : ''
         }TEST ${unlockData.submissionName} was unlocked`,
@@ -190,7 +190,6 @@ const unlockPackageCMSEmail = (
 
 const unlockPackageStateEmail = (
     submission: StateSubmissionType,
-    user: CognitoUserType,
     unlockData: UnlockData,
     config: EmailConfiguration
 ): EmailData => {
@@ -198,10 +197,7 @@ const unlockPackageStateEmail = (
         `submissions/${submission.id}`,
         config.baseUrl
     ).href
-    const currentUserEmail = user.email // is there a current state user if the trigger for the unlock is coming from CMS?
-    const receiverEmails: string[] = [currentUserEmail].concat(
-        submission.stateContacts.map((contact) => contact.email)
-    ) // not sure what to do here, we want the submitter and all state contacts listed on the submission
+    const receiverEmails: string[] = submission.stateContacts.map((contact) => contact.email)
     const bodyHTML = `
         ${testEmailAlert}
         <h1>Submission ${unlockData.submissionName} was unlocked by CMS</h1>
