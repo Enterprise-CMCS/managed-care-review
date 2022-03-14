@@ -87,7 +87,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     const [pageLevelAlert, setPageLevelAlert] = useState<
         string | undefined
     >(undefined)
-    const [showError, setShowError] = useState(false)
+    const [unlockModalError, setUnlockModalError] = useState<string | undefined>(undefined)
     const [unlockReason, setUnlockReason] = useState('')
     const [packageData, setPackageData] = useState<SubmissionUnionType | undefined>(undefined)
     const [unlockedInfo, setUnlockedInfo] = useState<UpdateInfoType | null | undefined>(undefined)
@@ -175,14 +175,18 @@ export const SubmissionSummary = (): React.ReactElement => {
     if (error || !packageData || !submissionAndRevisions) return <GenericError /> // api failure or protobuf decode failure
 
     const resetModal = () => {
-        setShowError(false)
+        setUnlockModalError(undefined)
         setUnlockReason('')
         setShowModal(false)
     }
 
     const onUnlock = async () => {
         if (!unlockReason) {
-            setShowError(true)
+            setUnlockModalError('Reason for unlocking submission is required')
+            return
+        }
+        if (unlockReason.length > 300) {
+            setUnlockModalError('Reason for unlocking submission is too long')
             return
         }
         const result = await unlockMutationWrapper(unlockStateSubmission, submissionAndRevisions.id, unlockReason)
@@ -294,8 +298,8 @@ export const SubmissionSummary = (): React.ReactElement => {
                     showModal={showModal}
                     id="unlockSubmissionModal"
                 >
-                    {showError && (
-                        <PoliteErrorMessage>Reason for unlocking submission is required</PoliteErrorMessage>
+                    {unlockModalError && (
+                        <PoliteErrorMessage>{unlockModalError}</PoliteErrorMessage>
                     )}
                     <div role="note" aria-labelledby="unlockReason" className="usa-hint margin-top-1">
                         <p id="unlockReasonHelp">
@@ -312,7 +316,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                         className={styles.unlockReasonTextarea}
                         aria-required
                         value={unlockReason}
-                        error={showError}
+                        error={!!unlockModalError}
                         onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setUnlockReason(e.target.value)}
                     />
                 </Modal>
