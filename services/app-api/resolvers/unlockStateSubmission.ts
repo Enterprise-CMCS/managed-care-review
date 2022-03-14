@@ -89,12 +89,23 @@ export function unlockStateSubmissionResolver(
         const unlockPackageCMSEmailResult = await
         emailer.sendUnlockPackageCMSEmail(unlockEmailData)
 
+        const unlockPackageStateEmailResult = await
+        emailer.sendUnlockPackageStateEmail(unlockEmailData)
+
         if (unlockPackageCMSEmailResult instanceof Error) {
             logError(
                 'unlockPackageCMSEmail - CMS email failed',
                 unlockPackageCMSEmailResult
             )
             throw unlockPackageCMSEmailResult
+        }
+
+        if (unlockPackageStateEmailResult instanceof Error) {
+            logError(
+                'unlockPackageCMSEmail - CMS email failed',
+                unlockPackageStateEmailResult
+            )
+            throw unlockPackageStateEmailResult
         }
 
         logSuccess('unlockStateSubmission')
