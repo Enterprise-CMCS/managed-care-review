@@ -1,7 +1,7 @@
 import { URL } from 'url'
 import {
     CognitoUserType, StateSubmissionType,
-    submissionName, SubmissionType, RevisionType
+    submissionName, SubmissionType
 } from '../../app-web/src/common-code/domain-models'
 import { formatCalendarDate } from '../../app-web/src/dateHelpers'
 import { EmailConfiguration, EmailData } from './'
@@ -153,14 +153,14 @@ const newPackageStateEmail = (
     }
 }
 
-type UnlockData = {
+type UnlockEmailData = {
     submissionName: string
-    unlockedByEmail: string
-    unlockedOnDate: Date
-    unlockReason: string
+    updatedBy: string
+    updatedAt: Date
+    updatedReason: string
 }
 const unlockPackageCMSEmail = (
-    unlockData: UnlockData,
+    unlockData: UnlockEmailData,
     config: EmailConfiguration
 ): EmailData => {
     const isTestEnvironment = config.stage !== 'prod'
@@ -169,11 +169,11 @@ const unlockPackageCMSEmail = (
         ${testEmailAlert}
         <h1>Submission ${unlockData.submissionName} was unlocked</h1>
         </br>
-        <b>Unlocked by:</b> ${unlockData.unlockedByEmail}
+        <b>Unlocked by:</b> ${unlockData.updatedBy}
         </br>
-        <b>Unlocked on:</b> ${formatCalendarDate(unlockData.unlockedOnDate)}
+        <b>Unlocked on:</b> ${formatCalendarDate(unlockData.updatedAt)}
         </br>
-        <b>Reason for unlock:</b> ${unlockData.unlockReason}
+        <b>Reason for unlock:</b> ${unlockData.updatedReason}
         </br>
         You will receive another notification when the state resubmits.
     `
@@ -190,7 +190,7 @@ const unlockPackageCMSEmail = (
 
 const unlockPackageStateEmail = (
     submission: StateSubmissionType,
-    unlockData: UnlockData,
+    unlockData: UnlockEmailData,
     config: EmailConfiguration
 ): EmailData => {
     const submissionURL = new URL(
@@ -202,11 +202,11 @@ const unlockPackageStateEmail = (
         ${testEmailAlert}
         <h1>Submission ${unlockData.submissionName} was unlocked by CMS</h1>
         </br>
-        <b>Unlocked by:</b> ${unlockData.unlockedByEmail}
+        <b>Unlocked by:</b> ${unlockData.updatedBy}
         </br>
-        <b>Unlocked on:</b> ${formatCalendarDate(unlockData.unlockedOnDate)}
+        <b>Unlocked on:</b> ${formatCalendarDate(unlockData.updatedAt)}
         </br>
-        <b>Reason for unlock:</b> ${unlockData.unlockReason}
+        <b>Reason for unlock:</b> ${unlockData.updatedReason}
         </br>
         <a href="${submissionURL}">Open the submission in MC-Review to make edits.</a>
     `

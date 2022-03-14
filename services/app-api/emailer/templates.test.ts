@@ -318,9 +318,9 @@ describe('Email templates', () => {
         it('subject line is correct and clearly states submission is unlocked', () => {
             const unlockData = {
                 submissionName: 'MCR-VA-CCCPLUS-0001',
-                unlockedByEmail: 'leslie@example.com',
-                unlockedOnDate: new Date('01/01/2022'),
-                unlockReason: 'Adding rate development guide.'
+                updatedBy: 'leslie@example.com',
+                updatedAt: new Date('01/01/2022'),
+                updatedReason: 'Adding rate development guide.'
             }
             const template = unlockPackageCMSEmail(
                 unlockData,
@@ -338,9 +338,9 @@ describe('Email templates', () => {
         it('includes warning about unofficial submission', () => {
             const unlockData = {
                 submissionName: 'MCR-VA-CCCPLUS-0001',
-                unlockedByEmail: 'leslie@example.com',
-                unlockedOnDate: new Date('01/01/2022'),
-                unlockReason: 'Adding rate development guide.'
+                updatedBy: 'leslie@example.com',
+                updatedAt: new Date('01/01/2022'),
+                updatedReason: 'Adding rate development guide.'
             }
             const template = unlockPackageCMSEmail(
                 unlockData,
@@ -357,9 +357,9 @@ describe('Email templates', () => {
         it('unlocked by includes correct email address', () => {
             const unlockData = {
                 submissionName: 'MCR-VA-CCCPLUS-0001',
-                unlockedByEmail: 'leslie@example.com',
-                unlockedOnDate: new Date('01/01/2022'),
-                unlockReason: 'Adding rate development guide.'
+                updatedBy: 'leslie@example.com',
+                updatedAt: new Date('01/01/2022'),
+                updatedReason: 'Adding rate development guide.'
             }
             const template = unlockPackageCMSEmail(
                 unlockData,
@@ -376,9 +376,9 @@ describe('Email templates', () => {
         it('unlocked on includes correct date', () => {
             const unlockData = {
                 submissionName: 'MCR-VA-CCCPLUS-0001',
-                unlockedByEmail: 'leslie@example.com',
-                unlockedOnDate: new Date('01/01/2022'),
-                unlockReason: 'Adding rate development guide.'
+                updatedBy: 'leslie@example.com',
+                updatedAt: new Date('01/01/2022'),
+                updatedReason: 'Adding rate development guide.'
             }
             const template = unlockPackageCMSEmail(
                 unlockData,
@@ -395,9 +395,9 @@ describe('Email templates', () => {
         it('includes correct reason', () => {
             const unlockData = {
                 submissionName: 'MCR-VA-CCCPLUS-0001',
-                unlockedByEmail: 'leslie@example.com',
-                unlockedOnDate: new Date('01/01/2022'),
-                unlockReason: 'Adding rate development guide.'
+                updatedBy: 'leslie@example.com',
+                updatedAt: new Date('01/01/2022'),
+                updatedReason: 'Adding rate development guide.'
             }
             const template = unlockPackageCMSEmail(
                 unlockData,
@@ -416,14 +416,13 @@ describe('Email templates', () => {
         it('subject line is correct and clearly states submission is unlocked', () => {
             const unlockData = {
                 submissionName: 'MCR-VA-CCCPLUS-0001',
-                unlockedByEmail: 'leslie@example.com',
-                unlockedOnDate: new Date('01/01/2022'),
-                unlockReason: 'Adding rate development guide.'
+                updatedBy: 'leslie@example.com',
+                updatedAt: new Date('01/01/2022'),
+                updatedReason: 'Adding rate development guide.'
             }
             const sub = mockContractOnlySubmission()
             const user = mockUser()
             const template = unlockPackageStateEmail(
-                user,
                 sub,
                 unlockData,
                 testEmailConfig
