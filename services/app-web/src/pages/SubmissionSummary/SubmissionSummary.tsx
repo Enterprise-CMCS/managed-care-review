@@ -315,7 +315,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                         aria-describedby="unlockReason-info"
                         className={styles.unlockReasonTextarea}
                         aria-required
-                        value={unlockReason}
+                        defaultValue={unlockReason}
                         error={!!unlockModalError}
                         onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setUnlockReason(e.target.value)}
                     />
