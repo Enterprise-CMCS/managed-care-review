@@ -38,6 +38,7 @@ describe('unlockStateSubmission', () => {
             variables: {
                 input: {
                     submissionID: stateSubmission.id,
+                    unlockedReason: 'Super duper good reason.'
                 },
             },
         })
@@ -59,6 +60,13 @@ describe('unlockStateSubmission', () => {
         expect(unlockedSub.revisions[0].revision.submitInfo).toBeNull()
         expect(unlockedSub.revisions[1].revision.submitInfo).toBeDefined()
         expect(unlockedSub.revisions[1].revision.submitInfo?.updatedAt).toEqual(todaysDate())
+
+        expect(unlockedSub.revisions[0].revision.unlockInfo).toBeDefined()
+        expect(unlockedSub.revisions[0].revision.unlockInfo).toEqual({
+            updatedAt: todaysDate(),
+            updatedBy: 'zuko@example.com',
+            updatedReason: 'Super duper good reason.'
+        })
 
     })
 
@@ -85,6 +93,7 @@ describe('unlockStateSubmission', () => {
             variables: {
                 input: {
                     submissionID: stateSubmission.id,
+                    unlockedReason: 'Super duper good reason.'
                 },
             },
         })
@@ -95,6 +104,12 @@ describe('unlockStateSubmission', () => {
         
         // After unlock, we should get a draft submission back
         expect(unlockedSub.status).toEqual('UNLOCKED')
+        expect(unlockedSub.revisions[0].revision.unlockInfo).toBeDefined()
+        expect(unlockedSub.revisions[0].revision.unlockInfo).toEqual({
+            updatedAt: todaysDate(),
+            updatedBy: 'zuko@example.com',
+            updatedReason: 'Super duper good reason.'
+        })
 
         // after unlock we should be able to update that draft submission and get the results
         const updates = {
@@ -135,16 +150,21 @@ describe('unlockStateSubmission', () => {
             },
         })
 
-        await unlockTestDraftSubmission(cmsServer, stateSubmission.id)
+        await unlockTestDraftSubmission(cmsServer, stateSubmission.id, 'Super duper good reason.')
 
         await submitTestDraftSubmission(stateServer, stateSubmission.id)
 
-        await unlockTestDraftSubmission(cmsServer, stateSubmission.id)
+        await unlockTestDraftSubmission(cmsServer, stateSubmission.id, 'Super duper duper good reason.')
 
         await submitTestDraftSubmission(stateServer, stateSubmission.id)
 
-        const draft = await unlockTestDraftSubmission(cmsServer, stateSubmission.id)
+        const draft = await unlockTestDraftSubmission(cmsServer, stateSubmission.id, 'Very super duper good reason.')
         expect(draft.status).toEqual('UNLOCKED')
+        expect(draft.revisions[0].revision.unlockInfo).toEqual({
+            updatedAt: todaysDate(),
+            updatedBy: 'zuko@example.com',
+            updatedReason: 'Very super duper good reason.'
+        })
 
     })
 
@@ -161,6 +181,7 @@ describe('unlockStateSubmission', () => {
             variables: {
                 input: {
                     submissionID: stateSubmission.id,
+                    unlockedReason: 'Super duper good reason.'
                 },
             },
         })
@@ -194,6 +215,7 @@ describe('unlockStateSubmission', () => {
             variables: {
                 input: {
                     submissionID: stateSubmission.id,
+                    unlockedReason: 'Super duper good reason.'
                 },
             },
         })
@@ -207,7 +229,7 @@ describe('unlockStateSubmission', () => {
         await submitTestDraftSubmission(stateServer, stateSubmission.id)
 
         // Unlock Submission
-        await unlockTestDraftSubmission(cmsServer, stateSubmission.id)
+        await unlockTestDraftSubmission(cmsServer, stateSubmission.id, 'Super duper good reason.')
 
         // Attempt Unlock Unlocked
         const unlockUnlockedResult = await cmsServer.executeOperation({
@@ -215,6 +237,7 @@ describe('unlockStateSubmission', () => {
             variables: {
                 input: {
                     submissionID: stateSubmission.id,
+                    unlockedReason: 'Super duper good reason.'
                 },
             },
         })
@@ -249,6 +272,7 @@ describe('unlockStateSubmission', () => {
             variables: {
                 input: {
                     submissionID: 'foo-bar',
+                    unlockedReason: 'Super duper good reason.'
                 },
             },
         })
@@ -282,6 +306,7 @@ describe('unlockStateSubmission', () => {
             variables: {
                 input: {
                     submissionID: 'foo-bar',
+                    unlockedReason: 'Super duper good reason.'
                 },
             },
         })
@@ -292,6 +317,41 @@ describe('unlockStateSubmission', () => {
         expect(err.extensions['code']).toEqual('INTERNAL_SERVER_ERROR')
         expect(err.message).toEqual('Issue finding a state submission of type UNEXPECTED_EXCEPTION. Message: this error came from the generic store with errors mock')
         
+    })
+
+    it('returns errors if unlocked reason is undefined', async () => {
+        const stateServer = await constructTestPostgresServer()
+
+        // First, create a new submitted submission
+        const stateSubmission = await createTestStateSubmission(stateServer)
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: {
+                    name: 'Zuko',
+                    role: 'CMS_USER',
+                    email: 'zuko@example.com',
+                },
+            },
+        })
+
+        // Attempt Unlock Draft
+        const unlockedResult = await cmsServer.executeOperation({
+            query: UNLOCK_STATE_SUBMISSION,
+            variables: {
+                input: {
+                    submissionID: stateSubmission.id,
+                    unlockedReason: undefined,
+                },
+            },
+        })
+
+        expect(unlockedResult.errors).toBeDefined()
+        const err = (unlockedResult.errors as GraphQLError[])[0]
+
+        expect(err.extensions['code']).toEqual('BAD_USER_INPUT')
+        expect(err.message).toContain('Field "unlockedReason" of required type "String!" was not provided.')
+
     })
 
 })

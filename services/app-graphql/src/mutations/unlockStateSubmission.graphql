@@ -10,6 +10,8 @@ mutation unlockStateSubmission($input: UnlockStateSubmissionInput!) {
                     id
                     unlockInfo {
                         updatedAt
+                        updatedBy
+                        updatedReason
                     }
                     submitInfo {
                         updatedAt

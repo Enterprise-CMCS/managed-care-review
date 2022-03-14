@@ -4,7 +4,7 @@ Cypress.Commands.add('logInAsStateUser', () => {
     // Set up gql intercept for requests on app load
     cy.intercept('POST', '*/graphql', (req) => {
         aliasQuery(req, 'fetchCurrentUser')
-        aliasQuery(req, 'indexSubmissions')
+        aliasQuery(req, 'indexSubmissions2')
     })
 
     cy.visit('/')
@@ -27,18 +27,22 @@ Cypress.Commands.add('logInAsStateUser', () => {
         throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
     }
     cy.wait('@fetchCurrentUserQuery', {timeout: 20000})
-    cy.wait('@indexSubmissionsQuery', {timeout: 20000}) // this is the first request that engages the db
+    cy.wait('@indexSubmissions2Query', {timeout: 20000}) // this is the first request that engages the db
 })
 
 Cypress.Commands.add(
     'logInAsCMSUser',
     ({ initialURL } = { initialURL: '/' }) => {
+        cy.intercept('POST', '*/graphql', (req) => {
+            aliasQuery(req, 'fetchCurrentUser')
+            aliasQuery(req, 'fetchSubmission2')
+        })
+
+
         cy.visit(initialURL)
         cy.findByRole('link', { name: 'Sign In' }).click()
         const authMode = Cypress.env('AUTH_MODE')
         console.log(authMode, 'authmode')
-
-        cy.intercept('POST', '*/graphql').as('cmsGraphQL')
 
         if (authMode === 'LOCAL') {
             cy.findByTestId('ZukoButton').click()
@@ -53,7 +57,8 @@ Cypress.Commands.add(
             cy.findByRole('button', { name: 'Login' }).click()
         } else {
             throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
-        }
-        cy.wait('@cmsGraphQL')
+        } 
+        cy.wait('@fetchCurrentUserQuery', { timeout: 20000 })
+        cy.wait('@fetchSubmission2Query') // we only allow CMS users to go to a specific submission on login
     }
 )

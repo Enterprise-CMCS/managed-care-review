@@ -4,66 +4,84 @@ import { Submission2Status, Submission2Type } from './Submission2Type'
 describe('submission 2 helpers', () => {
     it('status returns the expected status', () => {
         const tests: [Submission2Type, Submission2Status][] = [
-            [{
-                id: 'foo',
-                stateCode: 'FL' as const,
-                revisions: [
-                    {
-                        id: 'bar',
-                        submissionFormProto: Buffer.from([1,2,3])
-              }
-                ]
-            }, 'DRAFT'],
-            [{
-                id: 'foo',
-                stateCode: 'FL' as const,
-                revisions: [
-                    {
-                        id: 'bar',
-                        submitInfo: {
-                            updatedAt: new Date()
+            [
+                {
+                    id: 'foo',
+                    stateCode: 'FL' as const,
+                    revisions: [
+                        {
+                            id: 'bar',
+                            createdAt: new Date(),
+                            submissionFormProto: Buffer.from([1, 2, 3]),
                         },
-                        submissionFormProto: Buffer.from([1,2,3])
-                    }
-                ]
-            }, 'SUBMITTED'],
-            [{
-                id: 'foo',
-                stateCode: 'FL' as const,
-                revisions: [
-                    {
-                        id: 'baz',
-                        submissionFormProto: Buffer.from([1,2,3])
-                    },
-                    {
-                        id: 'bar',
-                        submitInfo: {
-                            updatedAt: new Date()
+                    ],
+                },
+                'DRAFT',
+            ],
+            [
+                {
+                    id: 'foo',
+                    stateCode: 'FL' as const,
+                    revisions: [
+                        {
+                            id: 'bar',
+                            createdAt: new Date(),
+                            submitInfo: {
+                                updatedAt: new Date(),
+                            },
+                            submissionFormProto: Buffer.from([1, 2, 3]),
                         },
-                        submissionFormProto: Buffer.from([1,2,3])
-                    }
-                ]
-            }, 'UNLOCKED'],
-            [{
-                id: 'foo',
-                stateCode: 'FL' as const,
-                revisions: [
-                    {
-                        id: 'baz',
-                        submitInfo: {
-                            updatedAt: new Date()
+                    ],
+                },
+                'SUBMITTED',
+            ],
+            [
+                {
+                    id: 'foo',
+                    stateCode: 'FL' as const,
+                    revisions: [
+                        {
+                            id: 'baz',
+                            createdAt: new Date(),
+                            submissionFormProto: Buffer.from([1, 2, 3]),
                         },
-                        submissionFormProto: Buffer.from([1,2,3])
-                    },
-                    {
-                        id: 'bar',
-                        submitInfo: {
-                            updatedAt: new Date()
+                        {
+                            id: 'bar',
+                            createdAt: new Date('2022-01-01'),
+                            submitInfo: {
+                                updatedAt: new Date(),
+                            },
+                            submissionFormProto: Buffer.from([1, 2, 3]),
                         },
-                        submissionFormProto: Buffer.from([1,2,3])
-                    }
-                ]
-            }, 'RESUBMITTED'],
+                    ],
+                },
+                'UNLOCKED',
+            ],
+            [
+                {
+                    id: 'foo',
+                    stateCode: 'FL' as const,
+                    revisions: [
+                        {
+                            id: 'baz',
+                            createdAt: new Date(),
+                            submitInfo: {
+                                updatedAt: new Date(),
+                            },
+                            submissionFormProto: Buffer.from([1, 2, 3]),
+                        },
+                        {
+                            id: 'bar',
+                            createdAt: new Date('2022-01-01'),
+                            submitInfo: {
+                                updatedAt: new Date(),
+                            },
+                            submissionFormProto: Buffer.from([1, 2, 3]),
+                        },
+                    ],
+                },
+                'RESUBMITTED',
+            ],
         ]
 
 
@@ -98,66 +116,84 @@ describe('submission 2 helpers', () => {
 
     it('submittedAt returns the expected date', () => {
         const tests: [Submission2Type, Date | undefined][] = [
-            [{
-                id: 'foo',
-                stateCode: 'FL' as const,
-                revisions: [
-                    {
-                        id: 'bar',
-                        submissionFormProto: Buffer.from([1,2,3])
-              }
-                ]
-            }, undefined],
-            [{
-                id: 'foo',
-                stateCode: 'FL' as const,
-                revisions: [
-                    {
-                        id: 'bar',
-                        submitInfo: {
-                            updatedAt: new Date(2022,1, 1)
+            [
+                {
+                    id: 'foo',
+                    stateCode: 'FL' as const,
+                    revisions: [
+                        {
+                            id: 'bar',
+                            createdAt: new Date(),
+                            submissionFormProto: Buffer.from([1, 2, 3]),
                         },
-                        submissionFormProto: Buffer.from([1,2,3])
-                    }
-                ]
-            }, new Date(2022,1, 1)],
-            [{
-                id: 'foo',
-                stateCode: 'FL' as const,
-                revisions: [
-                    {
-                        id: 'baz',
-                        submissionFormProto: Buffer.from([1,2,3])
-                    },
-                    {
-                        id: 'bar',
-                        submitInfo: {
-                            updatedAt: new Date(2022,1, 1)
+                    ],
+                },
+                undefined,
+            ],
+            [
+                {
+                    id: 'foo',
+                    stateCode: 'FL' as const,
+                    revisions: [
+                        {
+                            id: 'bar',
+                            createdAt: new Date(),
+                            submitInfo: {
+                                updatedAt: new Date(2022, 1, 1),
+                            },
+                            submissionFormProto: Buffer.from([1, 2, 3]),
                         },
-                        submissionFormProto: Buffer.from([1,2,3])
-                    }
-                ]
-            }, new Date(2022,1, 1)],
-            [{
-                id: 'foo',
-                stateCode: 'FL' as const,
-                revisions: [
-                    {
-                        id: 'baz',
-                        submitInfo: {
-                            updatedAt: new Date(2022,2, 2)
+                    ],
+                },
+                new Date(2022, 1, 1),
+            ],
+            [
+                {
+                    id: 'foo',
+                    stateCode: 'FL' as const,
+                    revisions: [
+                        {
+                            id: 'baz',
+                            createdAt: new Date(),
+                            submissionFormProto: Buffer.from([1, 2, 3]),
                         },
-                        submissionFormProto: Buffer.from([1,2,3])
-                    },
-                    {
-                        id: 'bar',
-                        submitInfo: {
-                            updatedAt: new Date(2022,1, 1)
+                        {
+                            id: 'bar',
+                            createdAt: new Date('2022-01-01'),
+                            submitInfo: {
+                                updatedAt: new Date(2022, 1, 1),
+                            },
+                            submissionFormProto: Buffer.from([1, 2, 3]),
                         },
-                        submissionFormProto: Buffer.from([1,2,3])
-                    }
-                ]
-            }, new Date(2022,1, 1)],
+                    ],
+                },
+                new Date(2022, 1, 1),
+            ],
+            [
+                {
+                    id: 'foo',
+                    stateCode: 'FL' as const,
+                    revisions: [
+                        {
+                            id: 'baz',
+                            createdAt: new Date(),
+                            submitInfo: {
+                                updatedAt: new Date(2022, 2, 2),
+                            },
+                            submissionFormProto: Buffer.from([1, 2, 3]),
+                        },
+                        {
+                            id: 'bar',
+                            createdAt: new Date('2022-01-01'),
+                            submitInfo: {
+                                updatedAt: new Date(2022, 1, 1),
+                            },
+                            submissionFormProto: Buffer.from([1, 2, 3]),
+                        },
+                    ],
+                },
+                new Date(2022, 1, 1),
+            ],
         ]
 
 
