@@ -4,14 +4,14 @@ import { MutationResolvers, State } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { InsertDraftSubmissionArgsType, isStoreError, Store } from '../postgres'
 import { pluralize } from '../../app-web/src/common-code/formatters'
-import { setContextualAttributes, setErrorAttributes, setSuccessAttributes } from './attributeHelper'
+import { setResolverDetails, setErrorAttributes, setSuccessAttributes } from './attributeHelper'
 
 export function createDraftSubmissionResolver(
     store: Store
 ): MutationResolvers['createDraftSubmission'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
-        setContextualAttributes('createDraftSubmission', user, span)
+        setResolverDetails('createDraftSubmission', user, span)
 
         // This resolver is only callable by state users
         if (!isStateUser(user)) {

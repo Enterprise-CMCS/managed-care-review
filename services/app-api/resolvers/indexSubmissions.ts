@@ -6,14 +6,14 @@ import {
 import { QueryResolvers } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
-import { setContextualAttributes, setErrorAttributes, setSuccessAttributes } from './attributeHelper'
+import { setResolverDetails, setErrorAttributes, setSuccessAttributes } from './attributeHelper'
 
 export function indexSubmissionsResolver(
     store: Store
 ): QueryResolvers['indexSubmissions'] {
     return async (_parent, _args, context) => {
         const { user, span } = context
-        setContextualAttributes('indexSubmissions', user, span)
+        setResolverDetails('indexSubmissions', user, span)
         
         // This resolver is only callable by state users
         if (!isStateUser(context.user)) {

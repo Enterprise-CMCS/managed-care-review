@@ -19,7 +19,7 @@ import { newLocalEmailer, newSESEmailer } from '../emailer'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import { configureResolvers } from '../resolvers'
 import { configurePostgres } from './configuration'
-import { tracer as tracer } from "./otel_handler"
+import { tracer as tracer } from "../../otel/otel_handler"
 
 
 const requestSpanKey = 'REQUEST_SPAN'

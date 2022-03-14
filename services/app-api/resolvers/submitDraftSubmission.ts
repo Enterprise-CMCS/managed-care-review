@@ -11,7 +11,7 @@ import { Emailer } from '../emailer'
 import { MutationResolvers, State } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
-import { setContextualAttributes, setErrorAttributes, setSuccessAttributes } from './attributeHelper'
+import { setResolverDetails, setErrorAttributes, setSuccessAttributes } from './attributeHelper'
 
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
@@ -102,7 +102,7 @@ export function submitDraftSubmissionResolver(
 ): MutationResolvers['submitDraftSubmission'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
-        setContextualAttributes('submitDraftSubmission', user, span)
+        setResolverDetails('submitDraftSubmission', user, span)
 
         // This resolver is only callable by state users
         if (!isStateUser(user)) {
