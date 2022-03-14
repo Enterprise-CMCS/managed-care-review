@@ -11,7 +11,7 @@ import {
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
 import { pluralize } from '../../app-web/src/common-code/formatters'
-import { setErrorAttributes, setResolverDetails, setSuccessAttributes } from "./attributeHelper";
+import { setErrorAttributesOnActiveSpan, setResolverDetailsOnActiveSpan, setSuccessAttributesOnActiveSpan } from "./attributeHelper";
 
 // This MUTATES the passed in draft, overwriting all the current fields with the updated fields
 export function applyUpdates(
@@ -101,14 +101,14 @@ export function updateDraftSubmissionResolver(
 ): MutationResolvers['updateDraftSubmission'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
-        setResolverDetails('createDraftSubmission', user, span)
+        setResolverDetailsOnActiveSpan('createDraftSubmission', user, span)
         // This resolver is only callable by state users
         if (!isStateUser(context.user)) {
             logError(
                 'updateDraftSubmission',
                 'user not authorized to modify state data'
             )
-            setErrorAttributes('user not authorized to modify state data', span)
+            setErrorAttributesOnActiveSpan('user not authorized to modify state data', span)
             throw new ForbiddenError('user not authorized to modify state data')
         }
 
@@ -117,14 +117,14 @@ export function updateDraftSubmissionResolver(
         if (isStoreError(result)) {
             const errMessage = `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
             logError('updateDraftSubmission', errMessage)
-            setErrorAttributes(errMessage, span)
+            setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
 
         if (result === undefined) {
             const errMessage = `No submission found to update with that ID: ${input.submissionID}`
             logError('updateDraftSubmission', errMessage)
-            setErrorAttributes(errMessage, span)
+            setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
                 argumentName: 'submissionID',
             })
@@ -138,7 +138,7 @@ export function updateDraftSubmissionResolver(
                 'updateDraftSubmission',
                 'user not authorized to fetch data from a different state'
             )
-            setErrorAttributes('user not authorized to fetch data from a different state', span)
+            setErrorAttributesOnActiveSpan('user not authorized to fetch data from a different state', span)
             throw new ForbiddenError(
                 'user not authorized to fetch data from a different state'
             )
@@ -154,7 +154,7 @@ export function updateDraftSubmissionResolver(
             const count = input.draftSubmissionUpdates.programIDs.length
             const errMessage = `The program ${(pluralize('id', count))} ${input.draftSubmissionUpdates.programIDs.join(', ')} ${(pluralize('does', count))} not exist in state ${stateFromCurrentUser}`
             logError('updateDraftSubmission', errMessage)
-            setErrorAttributes(errMessage, span)
+            setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
                 argumentName: 'programIDs',
             })
@@ -167,13 +167,13 @@ export function updateDraftSubmissionResolver(
         if (isStoreError(updateResult)) {
             const errMessage = `Issue updating a draft submission of type ${updateResult.code}. Message: ${updateResult.message}`
             logError('updateDraftSubmission', errMessage)
-            setErrorAttributes(errMessage, span)
+            setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
         const updatedDraft: DraftSubmissionType = updateResult
 
         logSuccess('updateDraftSubmission')
-        setSuccessAttributes(span)
+        setSuccessAttributesOnActiveSpan(span)
         return {
             draftSubmission: updatedDraft,
         }

@@ -3,7 +3,7 @@ import { SemanticAttributes } from '@opentelemetry/semantic-conventions';
 
 
 /* gather information about what's going on in the request, including user info and the resolver that's being called. */
-export function setResolverDetails(name: string, user: Context["user"], span: Context["span"]): void {
+export function setResolverDetailsOnActiveSpan(name: string, user: Context["user"], span: Context["span"]): void {
     if (!span) return
     span.setAttributes({
         [SemanticAttributes.CODE_FUNCTION]: name,
@@ -12,7 +12,7 @@ export function setResolverDetails(name: string, user: Context["user"], span: Co
     })
 }
 
-export function setErrorAttributes(message: string, span: Context["span"]): void {
+export function setErrorAttributesOnActiveSpan(message: string, span: Context["span"]): void {
     if (!span) return
     span.setAttributes({
         [SemanticAttributes.EXCEPTION_MESSAGE]: message,
@@ -20,7 +20,7 @@ export function setErrorAttributes(message: string, span: Context["span"]): void
     })
 }
 
-export function setSuccessAttributes(span: Context["span"]): void {
+export function setSuccessAttributesOnActiveSpan(span: Context["span"]): void {
     if (!span) return
     span.setAttributes({
         'resolver.success': true,

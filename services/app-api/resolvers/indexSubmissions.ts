@@ -6,14 +6,14 @@ import {
 import { QueryResolvers } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
-import { setResolverDetails, setErrorAttributes, setSuccessAttributes } from './attributeHelper'
+import { setResolverDetailsOnActiveSpan, setErrorAttributesOnActiveSpan, setSuccessAttributesOnActiveSpan } from './attributeHelper'
 
 export function indexSubmissionsResolver(
     store: Store
 ): QueryResolvers['indexSubmissions'] {
     return async (_parent, _args, context) => {
         const { user, span } = context
-        setResolverDetails('indexSubmissions', user, span)
+        setResolverDetailsOnActiveSpan('indexSubmissions', user, span)
         
         // This resolver is only callable by state users
         if (!isStateUser(context.user)) {
@@ -21,7 +21,7 @@ export function indexSubmissionsResolver(
                 'indexSubmissions',
                 'user not authorized to fetch state data'
             )
-            setErrorAttributes('user not authorized to fetch state data', span)
+            setErrorAttributesOnActiveSpan('user not authorized to fetch state data', span)
             throw new ForbiddenError('user not authorized to fetch state data')
         }
 
@@ -34,7 +34,7 @@ export function indexSubmissionsResolver(
                     'indexSubmissions',
                     'Submission is not a DraftSubmission'
                 )
-                setErrorAttributes('Submission is not a DraftSubmission', span)
+                setErrorAttributesOnActiveSpan('Submission is not a DraftSubmission', span)
                 throw new ApolloError(
                     `Submission is not a DraftSubmission`,
                     'WRONG_STATUS',
@@ -46,7 +46,7 @@ export function indexSubmissionsResolver(
 
             const errMessage = `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
             logError('indexSubmissions', errMessage)
-            setErrorAttributes(errMessage, span)
+            setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
 
@@ -59,7 +59,7 @@ export function indexSubmissionsResolver(
         })
 
         logSuccess('indexSubmissions')
-        setSuccessAttributes(span)
+        setSuccessAttributesOnActiveSpan(span)
         return { totalCount: edges.length, edges }
     }
 }

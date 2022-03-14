@@ -11,7 +11,7 @@ import { Emailer } from '../emailer'
 import { MutationResolvers, State } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
-import { setResolverDetails, setErrorAttributes, setSuccessAttributes } from './attributeHelper'
+import { setResolverDetailsOnActiveSpan, setErrorAttributesOnActiveSpan, setSuccessAttributesOnActiveSpan } from './attributeHelper'
 
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
@@ -102,7 +102,7 @@ export function submitDraftSubmissionResolver(
 ): MutationResolvers['submitDraftSubmission'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
-        setResolverDetails('submitDraftSubmission', user, span)
+        setResolverDetailsOnActiveSpan('submitDraftSubmission', user, span)
 
         // This resolver is only callable by state users
         if (!isStateUser(user)) {
@@ -110,7 +110,7 @@ export function submitDraftSubmissionResolver(
                 'submitDraftSubmission',
                 'user not authorized to fetch state data'
             )
-            setErrorAttributes('user not authorized to fetch state data', span)
+            setErrorAttributesOnActiveSpan('user not authorized to fetch state data', span)
             throw new ForbiddenError('user not authorized to fetch state data')
         }
 
@@ -120,14 +120,14 @@ export function submitDraftSubmissionResolver(
         if (isStoreError(result)) {
             const errMessage = `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
             logError('submitDraftSubmission', errMessage)
-            setErrorAttributes(errMessage, span)
+            setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
 
         if (result === undefined) {
             const errMessage = `A draft must exist to be submitted: ${input.submissionID}`
             logError('submitDraftSubmission', errMessage)
-            setErrorAttributes(errMessage, span)
+            setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
                 argumentName: 'submissionID',
             })
@@ -142,7 +142,7 @@ export function submitDraftSubmissionResolver(
                 'submitDraftSubmission',
                 'user not authorized to fetch data from a different state'
             )
-            setErrorAttributes('user not authorized to fetch data from a different state', span)
+            setErrorAttributesOnActiveSpan('user not authorized to fetch data from a different state', span)
             throw new ForbiddenError(
                 'user not authorized to fetch data from a different state'
             )
@@ -156,7 +156,7 @@ export function submitDraftSubmissionResolver(
                 'submitDraftSubmission',
                 'Incomplete submission cannot be submitted'
             )
-            setErrorAttributes('Incomplete submission cannot be submitted', span)
+            setErrorAttributesOnActiveSpan('Incomplete submission cannot be submitted', span)
             throw new UserInputError(
                 'Incomplete submission cannot be submitted',
                 {
@@ -172,7 +172,7 @@ export function submitDraftSubmissionResolver(
         if (isStoreError(updateResult)) {
             const errMessage = `Issue updating a state submission of ty}pe ${updateResult.code}. Message: ${updateResult.message}`
             logError('submitDraftSubmission', errMessage)
-            setErrorAttributes(errMessage, span)
+            setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
 
@@ -192,7 +192,7 @@ export function submitDraftSubmissionResolver(
                 'submitDraftSubmission - CMS email failed',
                 cmsNewPackageEmailResult
             )
-            setErrorAttributes('CMS email failed', span)
+            setErrorAttributesOnActiveSpan('CMS email failed', span)
             throw cmsNewPackageEmailResult
         }
 
@@ -201,12 +201,12 @@ export function submitDraftSubmissionResolver(
                 'submitDraftSubmission - state email failed',
                 stateNewPackageEmailResult
             )
-            setErrorAttributes('state email failed', span)
+            setErrorAttributesOnActiveSpan('state email failed', span)
             throw stateNewPackageEmailResult
         }
 
         logSuccess('submitDraftSubmission')
-        setSuccessAttributes(span)
+        setSuccessAttributesOnActiveSpan(span)
         return { submission: updatedSubmission }
     }
 }

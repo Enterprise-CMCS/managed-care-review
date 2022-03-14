@@ -6,19 +6,19 @@ import {
 import { QueryResolvers, State } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
-import { setErrorAttributes, setResolverDetails, setSuccessAttributes } from "./attributeHelper";
+import { setErrorAttributesOnActiveSpan, setResolverDetailsOnActiveSpan, setSuccessAttributesOnActiveSpan } from "./attributeHelper";
 
 export function fetchDraftSubmissionResolver(
     store: Store
 ): QueryResolvers['fetchDraftSubmission'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
-        setResolverDetails('fetchDraftSubmission', user, span)
+        setResolverDetailsOnActiveSpan('fetchDraftSubmission', user, span)
         // This resolver is only callable by state users
         if (!isStateUser(context.user)) {
             const errMessage = 'user not authorized to fetch state data'
             logError('fetchDraftSubmission', errMessage)
-            setErrorAttributes(errMessage, span)
+            setErrorAttributesOnActiveSpan(errMessage, span)
             throw new ForbiddenError(errMessage)
         }
 
@@ -31,7 +31,7 @@ export function fetchDraftSubmissionResolver(
                     'fetchDraftSubmission',
                     'Submission is not a DraftSubmission'
                 )
-                setErrorAttributes('Submission is not a DraftSubmission', span)
+                setErrorAttributesOnActiveSpan('Submission is not a DraftSubmission', span)
                 throw new ApolloError(
                     `Submission is not a DraftSubmission`,
                     'WRONG_STATUS',
@@ -42,7 +42,7 @@ export function fetchDraftSubmissionResolver(
             }
             const errMessage = `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
             logError('fetchDraftSubmission', errMessage)
-            setErrorAttributes(errMessage, span)
+            setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
 
@@ -61,14 +61,14 @@ export function fetchDraftSubmissionResolver(
                 'fetchDraftSubmission',
                 'user not authorized to fetch data from a different state'
             )
-            setErrorAttributes('user not authorized to fetch data from a different state', span)
+            setErrorAttributesOnActiveSpan('user not authorized to fetch data from a different state', span)
             throw new ForbiddenError(
                 'user not authorized to fetch data from a different state'
             )
         }
 
         logSuccess('fetchDraftSubmission')
-        setSuccessAttributes(span)
+        setSuccessAttributesOnActiveSpan(span)
 
         return { draftSubmission: draft }
     }
