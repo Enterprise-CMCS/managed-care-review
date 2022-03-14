@@ -4,7 +4,7 @@ import {
     Button,
     GridContainer,
     Link,
-    Textarea,
+    CharacterCount,
 } from '@trussworks/react-uswds'
 import React, { useEffect, useState } from 'react'
 import { NavLink, useLocation, useParams} from 'react-router-dom'
@@ -302,23 +302,19 @@ export const SubmissionSummary = (): React.ReactElement => {
                             Provide reason for unlocking
                         </p>
                     </div>
-                    <Textarea
-                        id="unlockReason"
-                        name="unlockReason"
+                    <CharacterCount
+                        id={'unlockReason'}
+                        name={'unlockReason'}
+                        maxLength={300}
+                        isTextArea
                         data-testid="unlockReason"
-                        aria-describedby="unlockReasonHelp unlockReasonHelp2"
+                        aria-describedby="unlockReason-info"
                         className={styles.unlockReasonTextarea}
                         aria-required
-                        maxLength={300}
                         value={unlockReason}
                         error={showError}
-                        onChange={e => setUnlockReason(e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setUnlockReason(e.target.value)}
                     />
-                    <div role="note" className="usa-hint margin-top-1">
-                        <p id="unlockReasonHelp2">
-                            300 characters allowed
-                        </p>
-                    </div>
                 </Modal>
             </GridContainer>
         </div>
