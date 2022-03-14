@@ -32,8 +32,11 @@ import {
     useFetchSubmission2Query
 } from '../../gen/gqlClient'
 import { GQLSubmissionUnionType } from '../../gqlHelpers/submissionWithRevisions'
+import {SubmissionUnlockedBanner} from '../../components/Banner'
+import {UpdateInfoType} from '../../common-code/domain-models/Submission2Type'
+import { useAuth } from '../../contexts/AuthContext'
 
-const GenericFormAlert = () => <Alert type="error">Something went wrong</Alert>
+const FormAlert = (message?: string): JSX.Element => {return message? <Alert type="error">{message}</Alert> : <GenericError />}
 
 const activeFormPages = (draft: DraftSubmission): RouteT[] => {
     // If submission type is contract only, rate details is left out of the step indicator
@@ -57,7 +60,9 @@ export const StateSubmissionForm = (): React.ReactElement => {
     const [formDataError, setFormDataError] = useState<FormDataError | null>(
         null
     )
-    const [showFormAlert, setShowFormAlert] = useState(false)
+    const { loggedInUser } = useAuth()
+    const [showPageErrorMessage, setShowPageErrorMessage] = useState<boolean | string>(false) // string is a custom error message, defaults to generic of true
+    const [unlockedInfo, setUnlockedInfo] = useState<UpdateInfoType | null | undefined>(undefined)
 
     // Set up graphql calls
     const {
@@ -79,14 +84,13 @@ export const StateSubmissionForm = (): React.ReactElement => {
     const updateDraft = async (
         input: UpdateDraftSubmissionInput
     ): Promise<DraftSubmission | undefined> => {
-        setShowFormAlert(false)
+        setShowPageErrorMessage(false)
         try {
             const updateResult = await updateDraftSubmission({
                 variables: {
                     input: input,
                 },
-                update(cache, { data }) {
-                    console.log('IN cache evict', id)
+                update(cache) {
                         cache.evict({ id: `Submission2:${id}` })
                         cache.gc()
                  
@@ -95,11 +99,11 @@ export const StateSubmissionForm = (): React.ReactElement => {
             const updatedSubmission: DraftSubmission | undefined =
                 updateResult?.data?.updateDraftSubmission.draftSubmission
 
-            if (!updatedSubmission) setShowFormAlert(true)
+            if (!updatedSubmission) setShowPageErrorMessage(true)
 
             return updatedSubmission
         } catch (serverError) {
-            setShowFormAlert(true)
+            setShowPageErrorMessage(true)
             return undefined
         }
     }
@@ -117,6 +121,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
             const currentRevisionPackageOrError =
                 getCurrentRevisionFromSubmission2(submissionAndRevisions)
 
+            // set form data
             if (currentRevisionPackageOrError instanceof Error) {
                 setFormDataError('MALFORMATTED_DATA')
             } else {
@@ -134,6 +139,33 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     setFormDataFromLatestRevision(formattedCurrentRevision)
                 }
             } 
+
+            // set unlock info
+            if (submissionAndRevisions.status === 'UNLOCKED') {
+                const unlockedRevision = submissionAndRevisions.revisions.find(
+                    (rev) => rev.revision.unlockInfo
+                )
+                const unlockInfo = unlockedRevision?.revision.unlockInfo
+
+                if (
+                    unlockInfo?.updatedBy &&
+                    unlockInfo?.updatedAt &&
+                    unlockInfo?.updatedReason
+                ) {
+                    setUnlockedInfo({
+                        updatedBy: unlockInfo.updatedBy,
+                        updatedAt: unlockInfo.updatedAt,
+                        updatedReason: unlockInfo.updatedReason,
+                    })
+                } else {
+                    //Maybe could use a better error message.
+                    console.error(
+                        'ERROR: submission in summary has no revision with unlocked information',
+                        submissionAndRevisions.revisions
+                    )
+                    setShowPageErrorMessage('This may be an unlocked submission that is currently being edited. Please reload the page and try again.')
+                }
+            }
         }
     }, [submissionAndRevisions])
 
@@ -145,8 +177,8 @@ export const StateSubmissionForm = (): React.ReactElement => {
         )
     }
 
-    if (updateError && !showFormAlert) {
-        setShowFormAlert(true)
+    if (updateError && !showPageErrorMessage) {
+        setShowPageErrorMessage(true)
     }
 
     if (fetchError) {
@@ -179,6 +211,28 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
     const draft = formDataFromLatestRevision as DraftSubmission
 
+    const PageBannerAlerts = (): JSX.Element => {
+        const message = (typeof showPageErrorMessage === 'string' ? showPageErrorMessage : undefined)
+        return (
+            <>
+                {showPageErrorMessage && (
+                    <FormAlert message={message} />
+                )}
+                {unlockedInfo && (
+                    <SubmissionUnlockedBanner
+                        userType={
+                            loggedInUser?.role === 'CMS_USER'
+                                ? 'CMS_USER'
+                                : 'STATE_USER'
+                        }
+                        unlockedBy={unlockedInfo?.updatedBy || 'Not available'}
+                        unlockedOn={unlockedInfo.updatedAt || 'Not available'}
+                        reason={unlockedInfo.updatedReason || 'Not available'}
+                    />
+                )}
+            </>
+        )
+    }
     return (
         <>
             <div className={styles.stepIndicator}>
@@ -193,45 +247,35 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         <SubmissionType
                             draftSubmission={draft}
                             updateDraft={updateDraft}
-                            formAlert={
-                                showFormAlert ? GenericFormAlert() : undefined
-                            }
+                            formAlert={<PageBannerAlerts />}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}>
                         <ContractDetails
                             draftSubmission={draft}
                             updateDraft={updateDraft}
-                            formAlert={
-                                showFormAlert ? GenericFormAlert() : undefined
-                            }
+                            formAlert={<PageBannerAlerts />}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}>
                         <RateDetails
                             draftSubmission={draft}
                             updateDraft={updateDraft}
-                            formAlert={
-                                showFormAlert ? GenericFormAlert() : undefined
-                            }
+                            formAlert={<PageBannerAlerts />}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_CONTACTS}>
                         <Contacts
                             draftSubmission={draft}
                             updateDraft={updateDraft}
-                            formAlert={
-                                showFormAlert ? GenericFormAlert() : undefined
-                            }
+                            formAlert={<PageBannerAlerts />}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_DOCUMENTS}>
                         <Documents
                             draftSubmission={draft}
                             updateDraft={updateDraft}
-                            formAlert={
-                                showFormAlert ? GenericFormAlert() : undefined
-                            }
+                            formAlert={<PageBannerAlerts />}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}>
