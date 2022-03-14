@@ -2,20 +2,17 @@ import React from 'react'
 import {
     ConsoleSpanExporter,
     SimpleSpanProcessor,
+    BatchSpanProcessor,
 } from '@opentelemetry/sdk-trace-base'
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web'
-import { DocumentLoadInstrumentation } from '@opentelemetry/instrumentation-document-load'
 import { BaseOpenTelemetryComponent } from '@opentelemetry/plugin-react-load'
 import { ZoneContextManager } from '@opentelemetry/context-zone'
-import {
-    OTLPTraceExporter,
-    OTLPExporterNodeConfigBase,
-} from '@opentelemetry/exporter-trace-otlp-http'
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { diag, DiagConsoleLogger } from '@opentelemetry/api'
 import { Resource } from '@opentelemetry/resources'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
-import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch'
+import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web'
 
 const serviceName = 'app-web-testing'
 
@@ -25,21 +22,13 @@ const provider = new WebTracerProvider({
     }),
 })
 
-const exporterConfig: OTLPExporterNodeConfigBase = {
+const exporter = new OTLPTraceExporter({
     url: process.env.REACT_APP_OTEL_COLLECTOR_URL,
     headers: {},
-}
-
-const exporter = new OTLPTraceExporter(exporterConfig)
-
-const fetchInstrumentation = new FetchInstrumentation({
-    propagateTraceHeaderCorsUrls: ['/.*/g'],
-    clearTimingResources: true,
 })
-fetchInstrumentation.setTracerProvider(provider)
 
 provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()))
-provider.addSpanProcessor(new SimpleSpanProcessor(exporter))
+provider.addSpanProcessor(new BatchSpanProcessor(exporter))
 
 provider.register({
     contextManager: new ZoneContextManager(),
@@ -48,8 +37,16 @@ provider.register({
 // Registering instrumentations
 registerInstrumentations({
     instrumentations: [
-        new FetchInstrumentation(),
-        new DocumentLoadInstrumentation(),
+        getWebAutoInstrumentations({
+            // load custom configuration for xml-http-request instrumentation
+            '@opentelemetry/instrumentation-xml-http-request': {
+                propagateTraceHeaderCorsUrls: [/.+/g],
+            },
+            // load custom configuration for fetch instrumentation
+            '@opentelemetry/instrumentation-fetch': {
+                propagateTraceHeaderCorsUrls: [/.+/g],
+            },
+        }),
     ],
 })
 
