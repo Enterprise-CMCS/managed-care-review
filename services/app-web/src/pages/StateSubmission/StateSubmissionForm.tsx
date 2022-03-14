@@ -36,7 +36,7 @@ import {SubmissionUnlockedBanner} from '../../components/Banner'
 import {UpdateInfoType} from '../../common-code/domain-models/Submission2Type'
 import { useAuth } from '../../contexts/AuthContext'
 
-const FormAlert = (message?: string): JSX.Element => {return message? <Alert type="error">{message}</Alert> : <GenericError />}
+const FormAlert = ({message}:{message?: string}): React.ReactElement => {return message? <Alert type="error">{message}</Alert> : <GenericError />}
 
 const activeFormPages = (draft: DraftSubmission): RouteT[] => {
     // If submission type is contract only, rate details is left out of the step indicator
@@ -212,11 +212,11 @@ export const StateSubmissionForm = (): React.ReactElement => {
     const draft = formDataFromLatestRevision as DraftSubmission
 
     const PageBannerAlerts = (): JSX.Element => {
-        const message = (typeof showPageErrorMessage === 'string' ? showPageErrorMessage : undefined)
+        const message = (typeof showPageErrorMessage !== 'boolean' ? showPageErrorMessage : undefined)
         return (
             <>
                 {showPageErrorMessage && (
-                    <FormAlert message={message} />
+                    <FormAlert message={message}/>
                 )}
                 {unlockedInfo && (
                     <SubmissionUnlockedBanner
@@ -240,6 +240,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     formPages={activeFormPages(draft)}
                     currentFormPage={currentRoute}
                 />
+                <PageBannerAlerts />
             </div>
             <StateSubmissionContainer>
                 <Switch>
@@ -247,35 +248,30 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         <SubmissionType
                             draftSubmission={draft}
                             updateDraft={updateDraft}
-                            formAlert={<PageBannerAlerts />}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}>
                         <ContractDetails
                             draftSubmission={draft}
                             updateDraft={updateDraft}
-                            formAlert={<PageBannerAlerts />}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}>
                         <RateDetails
                             draftSubmission={draft}
                             updateDraft={updateDraft}
-                            formAlert={<PageBannerAlerts />}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_CONTACTS}>
                         <Contacts
                             draftSubmission={draft}
                             updateDraft={updateDraft}
-                            formAlert={<PageBannerAlerts />}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_DOCUMENTS}>
                         <Documents
                             draftSubmission={draft}
                             updateDraft={updateDraft}
-                            formAlert={<PageBannerAlerts />}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}>
