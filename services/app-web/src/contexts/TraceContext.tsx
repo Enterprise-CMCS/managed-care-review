@@ -4,6 +4,7 @@ import {
     SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace-base'
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web'
+import { DocumentLoadInstrumentation } from '@opentelemetry/instrumentation-document-load'
 import { BaseOpenTelemetryComponent } from '@opentelemetry/plugin-react-load'
 import { ZoneContextManager } from '@opentelemetry/context-zone'
 import {
@@ -45,7 +46,10 @@ provider.register({
 
 // Registering instrumentations
 registerInstrumentations({
-    instrumentations: [new FetchInstrumentation()],
+    instrumentations: [
+        new FetchInstrumentation(),
+        new DocumentLoadInstrumentation(),
+    ],
 })
 
 BaseOpenTelemetryComponent.setTracer(serviceName)
