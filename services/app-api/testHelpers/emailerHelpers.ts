@@ -2,6 +2,8 @@
         Emailer,
         newPackageCMSEmail,
         newPackageStateEmail,
+        UnlockEmailData,
+        unlockPackageCMSEmail,
     } from '../emailer'
     import { StateSubmissionType, CognitoUserType, CognitoStateUserType } from '../../app-web/src/common-code/domain-models'
 
@@ -33,6 +35,15 @@
                 const emailData = newPackageStateEmail(
                     submission,
                     user,
+                    config
+                )
+                return this.sendEmail(emailData)
+            },
+            sendUnlockPackageCMSEmail: function async(
+                unlockEmailData: UnlockEmailData
+            ): Promise<void | Error> {
+                const emailData = unlockPackageCMSEmail(
+                    unlockEmailData,
                     config
                 )
                 return this.sendEmail(emailData)
