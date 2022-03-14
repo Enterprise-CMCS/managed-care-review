@@ -221,5 +221,5 @@ const unlockPackageStateEmail = (
     }
 }
 
-export { newPackageCMSEmail, newPackageStateEmail, unlockPackageCMSEmail, unlockPackageStateEmail }
+export { newPackageCMSEmail, newPackageStateEmail, unlockPackageCMSEmail, unlockPackageStateEmail, UnlockEmailData }
 
