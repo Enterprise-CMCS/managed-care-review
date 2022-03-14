@@ -29,7 +29,8 @@ import {
     DraftSubmission,
     UpdateDraftSubmissionInput,
     useUpdateDraftSubmissionMutation,
-    useFetchSubmission2Query
+    useFetchSubmission2Query,
+    User
 } from '../../gen/gqlClient'
 import { GQLSubmissionUnionType } from '../../gqlHelpers/submissionWithRevisions'
 import {SubmissionUnlockedBanner} from '../../components/Banner'
@@ -37,6 +38,38 @@ import {UpdateInfoType} from '../../common-code/domain-models/Submission2Type'
 import { useAuth } from '../../contexts/AuthContext'
 
 const FormAlert = ({message}:{message?: string}): React.ReactElement => {return message? <Alert type="error">{message}</Alert> : <GenericError />}
+
+const PageBannerAlerts = ({
+    showPageErrorMessage,
+    loggedInUser,
+    unlockedInfo,
+}: {
+    showPageErrorMessage: string | boolean,
+    loggedInUser?: User,
+    unlockedInfo?: UpdateInfoType | null
+}): JSX.Element => {
+    const message =
+        typeof showPageErrorMessage !== 'boolean'
+            ? showPageErrorMessage
+            : undefined
+    return (
+        <>
+            {showPageErrorMessage && <FormAlert message={message} />}
+            {unlockedInfo && (
+                <SubmissionUnlockedBanner
+                    userType={
+                        loggedInUser?.role === 'CMS_USER'
+                            ? 'CMS_USER'
+                            : 'STATE_USER'
+                    }
+                    unlockedBy={unlockedInfo?.updatedBy || 'Not available'}
+                    unlockedOn={unlockedInfo.updatedAt || 'Not available'}
+                    reason={unlockedInfo.updatedReason || 'Not available'}
+                />
+            )}
+        </>
+    )
+}
 
 const activeFormPages = (draft: DraftSubmission): RouteT[] => {
     // If submission type is contract only, rate details is left out of the step indicator
@@ -211,28 +244,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
     const draft = formDataFromLatestRevision as DraftSubmission
 
-    // const PageBannerAlerts = (): JSX.Element => {
-    //     const message = (typeof showPageErrorMessage !== 'boolean' ? showPageErrorMessage : undefined)
-    //     return (
-    //         <>
-    //             {showPageErrorMessage && (
-    //                 <FormAlert message={message}/>
-    //             )}
-    //             {unlockedInfo && (
-    //                 <SubmissionUnlockedBanner
-    //                     userType={
-    //                         loggedInUser?.role === 'CMS_USER'
-    //                             ? 'CMS_USER'
-    //                             : 'STATE_USER'
-    //                     }
-    //                     unlockedBy={unlockedInfo?.updatedBy || 'Not available'}
-    //                     unlockedOn={unlockedInfo.updatedAt || 'Not available'}
-    //                     reason={unlockedInfo.updatedReason || 'Not available'}
-    //                 />
-    //             )}
-    //         </>
-    //     )
-    // }
     return (
         <>
             <div className={styles.stepIndicator}>
@@ -240,7 +251,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     formPages={activeFormPages(draft)}
                     currentFormPage={currentRoute}
                 />
-                {/* <PageBannerAlerts /> */}
+                <PageBannerAlerts loggedInUser={loggedInUser} unlockedInfo={unlockedInfo} showPageErrorMessage={showPageErrorMessage}/>
             </div>
             <StateSubmissionContainer>
                 <Switch>
