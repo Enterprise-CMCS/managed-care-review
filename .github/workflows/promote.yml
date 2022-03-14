@@ -40,7 +40,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: lock this branch to prevent concurrent builds
         run: ./.github/github-lock.sh
@@ -63,6 +63,7 @@ jobs:
 
       - name: publish code coverage
         uses: paambaati/codeclimate-action@v3.0.0
+        continue-on-error: true
         env:
           CC_TEST_REPORTER_ID: cace182021fe88d327fa8d95355ac6081f420e094a214fe77feb5df2f0259e9d
         with:
@@ -76,7 +77,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - uses: actions/setup-node@v3
         with:
@@ -103,8 +104,8 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
-          name: lambda-layers-prisma-client
-          path: ./services/app-api/lambda-layers-prisma-client
+          name: lambda-layers-prisma-client-migration
+          path: ./services/app-api/lambda-layers-prisma-client-migration
 
   promote-infra-dev:
     needs: [build-prisma-client-lambda-layer, unit-tests]
@@ -154,7 +155,7 @@ jobs:
         # run copies of the current job in parallel
         containers: [1, 2, 3, 4]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -230,7 +231,7 @@ jobs:
         # run copies of the current job in parallel
         containers: [1, 2, 3, 4]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -306,7 +307,7 @@ jobs:
         # run copies of the current job in parallel
         containers: [1, 2, 3, 4]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Setup env
         uses: ./.github/actions/setup_env

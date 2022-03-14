@@ -4,6 +4,10 @@ frameworkVersion: '2'
 
 package:
   individually: true
+  patterns:
+    - '!node_modules/prisma'
+    - '!node_modules/.prisma'
+    - '!node_modules/@prisma'
 
 plugins:
   - serverless-webpack

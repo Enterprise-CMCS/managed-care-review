@@ -35,7 +35,7 @@ export const ReviewSubmit = ({
                 cache.modify({
                     id: 'ROOT_QUERY',
                     fields: {
-                        indexSubmissions(_index, { DELETE }) {
+                        indexSubmissions2(_index, { DELETE }) {
                             return DELETE
                         },
                     },

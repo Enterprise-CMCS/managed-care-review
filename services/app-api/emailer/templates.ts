@@ -1,12 +1,10 @@
 import { URL } from 'url'
-import dayjs from 'dayjs'
 import {
-    SubmissionType,
-    StateSubmissionType,
-    submissionName,
-    CognitoUserType,
+    CognitoUserType, StateSubmissionType,
+    submissionName, SubmissionType
 } from '../../app-web/src/common-code/domain-models'
-import { EmailData, EmailConfiguration } from './'
+import { formatCalendarDate } from '../../app-web/src/dateHelpers'
+import { EmailConfiguration, EmailData } from './'
 
 const SubmissionTypeRecord: Record<SubmissionType, string> = {
     CONTRACT_ONLY: 'Contract action only',
@@ -48,9 +46,9 @@ const newPackageCMSEmail = (
             ? '<b>Contract amendment effective dates</b>'
             : '<b>Contract effective dates</b>'
     }: ${
-        dayjs(submission.contractDateStart).format('MM/DD/YYYY') +
+        formatCalendarDate(submission.contractDateStart) +
         ' to ' +
-        dayjs(submission.contractDateEnd).format('MM/DD/YYYY')
+        formatCalendarDate(submission.contractDateEnd)
     }`
     const ratingPeriodText= `${
         submission.rateType === 'NEW'
@@ -60,19 +58,15 @@ const newPackageCMSEmail = (
     const ratingPeriodDates = `${
         submission.rateType === 'AMENDMENT' && submission.rateAmendmentInfo
             ? `${
-                  dayjs(submission.rateAmendmentInfo.effectiveDateStart).format(
-                      'MM/DD/YYYY'
-                  ) +
+                  formatCalendarDate(submission.rateAmendmentInfo.effectiveDateStart) +
                   ' to ' +
-                  dayjs(submission.rateAmendmentInfo.effectiveDateEnd).format(
-                      'MM/DD/YYYY'
-                  )
+                  formatCalendarDate(submission.rateAmendmentInfo.effectiveDateEnd)
               }`
-            : `${
-                  dayjs(submission.rateDateStart).format('MM/DD/YYYY') +
+            : submission.rateDateStart && submission.rateDateEnd ? `${
+                  formatCalendarDate(submission.rateDateStart) +
                   ' to ' +
-                  dayjs(submission.rateDateEnd).format('MM/DD/YYYY')
-              }`
+                  formatCalendarDate(submission.rateDateEnd)
+              }` : 'Rating Period Dates Not Found'
     }`
     const rateRelatedDatesText = submission.submissionType === 'CONTRACT_AND_RATES' ? `${ratingPeriodText}: ${ratingPeriodDates}` : '' // displays nothing if submission is CONTRACT_ONLY
     const submissionURL = new URL(

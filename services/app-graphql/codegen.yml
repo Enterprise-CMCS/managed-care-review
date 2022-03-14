@@ -21,6 +21,7 @@ generates:
         DraftSubmission: ../../app-web/src/common-code/domain-models#DraftSubmissionType
         StateSubmission: ../../app-web/src/common-code/domain-models#StateSubmissionType
         Submission: ../../app-web/src/common-code/domain-models#SubmissionUnionType
+        Submission2: ../../app-web/src/common-code/domain-models#Submission2Type
   ../app-web/src/gen/gqlClient.tsx:
     documents:
       - src/queries/*.graphql

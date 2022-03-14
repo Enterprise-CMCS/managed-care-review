@@ -1,18 +1,18 @@
+import { Link } from '@trussworks/react-uswds'
 import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { Link } from '@trussworks/react-uswds'
-
-import styles from './UploadedDocumentsTable.module.scss'
-
 import { useS3 } from '../../../contexts/S3Context'
 import { Document } from '../../../gen/gqlClient'
+import styles from './UploadedDocumentsTable.module.scss'
+
+
 
 export type UploadedDocumentsTableProps = {
     documents: Document[]
     caption: string | null
     documentCategory: string
     isSupportingDocuments?: boolean 
-    isSubmitted?: boolean
+    isEditing?: boolean
 }
 
 type DocumentWithLink = { url: string | null } & Document
@@ -26,11 +26,11 @@ export const UploadedDocumentsTable = ({
     caption,
     documentCategory,
     isSupportingDocuments = false,
-    isSubmitted = false
+    isEditing = false
 }: UploadedDocumentsTableProps): React.ReactElement => {
     const { getURL, getKey } = useS3()
     const [refreshedDocs, setRefreshedDocs] = useState<DocumentWithLink[]>([])
-    const shouldShowEditButton = !isSubmitted && isSupportingDocuments
+    const shouldShowEditButton = isEditing && isSupportingDocuments
     const shouldShowAsteriskExplainer = refreshedDocs.some(
         (doc) =>
            isBothContractAndRateSupporting(doc)

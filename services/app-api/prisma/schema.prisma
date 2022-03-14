@@ -32,6 +32,10 @@ model StateSubmissionRevision {
   submission          StateSubmission @relation(fields: [submissionID], references: [id])
   submissionID        String
   submissionFormProto Bytes
+  unlockedBy          String?
+  unlockedReason      String?
+  unlockedAt          DateTime?
+  submittedAt         DateTime?
 }
 
 model State {
