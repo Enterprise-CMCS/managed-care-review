@@ -140,14 +140,12 @@ export const SubmissionSummary = (): React.ReactElement => {
                 const unlockInfo = unlockedRevision?.revision.unlockInfo
 
                 if (unlockInfo?.updatedBy && unlockInfo?.updatedAt && unlockInfo?.updatedReason) {
-                    //For some reason the type for unlockInfo from graphql is <UnlockedInfo | null | undefined>, not sure where the null came from
                     setUnlockedInfo({
                         updatedBy: unlockInfo.updatedBy,
                         updatedAt: unlockInfo.updatedAt,
                         updatedReason: unlockInfo.updatedReason
                     })
                 } else {
-                    //Maybe could use a better error message.
                     console.error('ERROR: submission in summary has no revision with unlocked information', submissionAndRevisions.revisions)
                     setPageLevelAlert('Error fetching the unlocked information. Please try again.')
                 }
