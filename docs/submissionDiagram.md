@@ -7,7 +7,7 @@ Diagrams are drawn using [Mermaid](https://mermaid-js.github.io/mermaid/#/entity
 For more detail, see [prisma schema](../services/app-api/prisma/schema.prisma).
 
 ```mermaid
-erDiagram;
+erDiagram
 
 StateSubmission ||--|{ StateSubmissionRevision: "contains many"
 StateSubmission ||--|| State: "assigned to"
@@ -22,7 +22,7 @@ Other notes:
 - "Health plan package" and "state submission" mean the same thing.
   
 ```mermaid
-erDiagram;
+erDiagram
 HealthPlanPackage {
     date initiallySubmittedAt
     enum status
