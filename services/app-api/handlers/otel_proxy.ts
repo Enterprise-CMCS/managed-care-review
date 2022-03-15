@@ -4,6 +4,10 @@ import { Resource } from '@opentelemetry/resources'
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
 
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc'
+import {
+    SimpleSpanProcessor,
+    ConsoleSpanExporter,
+} from '@opentelemetry/sdk-trace-base'
 
 export const main: APIGatewayProxyHandler = async (event) => {
     if (event.body == null) {
@@ -17,12 +21,13 @@ export const main: APIGatewayProxyHandler = async (event) => {
         }
     }
     const span: Resource = JSON.parse(event.body)
-    console.log(span) // eslint-disable-line no-console
-
     const provider = new NodeTracerProvider({
         resource: span,
     })
 
+    provider.addSpanProcessor(
+        new SimpleSpanProcessor(new ConsoleSpanExporter())
+    )
     provider.addSpanProcessor(new BatchSpanProcessor(new OTLPTraceExporter()))
     provider.register()
 
