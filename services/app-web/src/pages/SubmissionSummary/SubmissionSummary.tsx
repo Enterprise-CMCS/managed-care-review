@@ -4,7 +4,7 @@ import {
     Button,
     GridContainer,
     Link,
-    Textarea,
+    CharacterCount,
 } from '@trussworks/react-uswds'
 import React, { useEffect, useState } from 'react'
 import { NavLink, useLocation, useParams} from 'react-router-dom'
@@ -27,7 +27,7 @@ import {
     useFetchSubmission2Query,
     useUnlockStateSubmissionMutation } from '../../gen/gqlClient'
 import { isGraphQLErrors } from '../../gqlHelpers'
-import { GenericError } from '../Errors/GenericError'
+import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404'
 
 import styles from './SubmissionSummary.module.scss'
@@ -87,10 +87,10 @@ export const SubmissionSummary = (): React.ReactElement => {
     const [pageLevelAlert, setPageLevelAlert] = useState<
         string | undefined
     >(undefined)
-    const [showError, setShowError] = useState(false)
+    const [unlockModalError, setUnlockModalError] = useState<string | undefined>(undefined)
     const [unlockReason, setUnlockReason] = useState('')
     const [packageData, setPackageData] = useState<SubmissionUnionType | undefined>(undefined)
-    const [unlockedInfo, setUnlockedInfo] = useState<UpdateInfoType | null | undefined>(undefined)
+    const [unlockedInfo, setUnlockedInfo] = useState<UpdateInfoType | null>(null)
     const [showModal, setShowModal] = useState(false)
 
     const { loading, error, data } = useFetchSubmission2Query({
@@ -139,15 +139,13 @@ export const SubmissionSummary = (): React.ReactElement => {
                 const unlockedRevision = submissionAndRevisions.revisions.find(rev => rev.revision.unlockInfo)
                 const unlockInfo = unlockedRevision?.revision.unlockInfo
 
-                if (unlockInfo?.updatedBy && unlockInfo?.updatedAt && unlockInfo?.updatedReason) {
-                    //For some reason the type for unlockInfo from graphql is <UnlockedInfo | null | undefined>, not sure where the null came from
+                if (unlockInfo) {
                     setUnlockedInfo({
                         updatedBy: unlockInfo.updatedBy,
                         updatedAt: unlockInfo.updatedAt,
                         updatedReason: unlockInfo.updatedReason
                     })
                 } else {
-                    //Maybe could use a better error message.
                     console.error('ERROR: submission in summary has no revision with unlocked information', submissionAndRevisions.revisions)
                     setPageLevelAlert('Error fetching the unlocked information. Please try again.')
                 }
@@ -172,17 +170,21 @@ export const SubmissionSummary = (): React.ReactElement => {
     }
 
     if (data && (!submissionAndRevisions)) return <Error404 /> // api request resolves but are no revisions likely because invalid submission is queried. This should be "Not Found"
-    if (error || !packageData || !submissionAndRevisions) return <GenericError /> // api failure or protobuf decode failure
+    if (error || !packageData || !submissionAndRevisions) return <GenericErrorPage /> // api failure or protobuf decode failure
 
     const resetModal = () => {
-        setShowError(false)
+        setUnlockModalError(undefined)
         setUnlockReason('')
         setShowModal(false)
     }
 
     const onUnlock = async () => {
         if (!unlockReason) {
-            setShowError(true)
+            setUnlockModalError('Reason for unlocking submission is required')
+            return
+        }
+        if (unlockReason.length > 300) {
+            setUnlockModalError('Reason for unlocking submission is too long')
             return
         }
         const result = await unlockMutationWrapper(unlockStateSubmission, submissionAndRevisions.id, unlockReason)
@@ -294,31 +296,27 @@ export const SubmissionSummary = (): React.ReactElement => {
                     showModal={showModal}
                     id="unlockSubmissionModal"
                 >
-                    {showError && (
-                        <PoliteErrorMessage>Reason for unlocking submission is required</PoliteErrorMessage>
+                    {unlockModalError && (
+                        <PoliteErrorMessage>{unlockModalError}</PoliteErrorMessage>
                     )}
                     <div role="note" aria-labelledby="unlockReason" className="usa-hint margin-top-1">
                         <p id="unlockReasonHelp">
                             Provide reason for unlocking
                         </p>
                     </div>
-                    <Textarea
-                        id="unlockReason"
-                        name="unlockReason"
+                    <CharacterCount
+                        id={'unlockReason'}
+                        name={'unlockReason'}
+                        maxLength={300}
+                        isTextArea
                         data-testid="unlockReason"
-                        aria-describedby="unlockReasonHelp unlockReasonHelp2"
+                        aria-describedby="unlockReason-info"
                         className={styles.unlockReasonTextarea}
                         aria-required
-                        maxLength={300}
-                        value={unlockReason}
-                        error={showError}
-                        onChange={e => setUnlockReason(e.target.value)}
+                        defaultValue={unlockReason}
+                        error={!!unlockModalError}
+                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setUnlockReason(e.target.value)}
                     />
-                    <div role="note" className="usa-hint margin-top-1">
-                        <p id="unlockReasonHelp2">
-                            300 characters allowed
-                        </p>
-                    </div>
                 </Modal>
             </GridContainer>
         </div>

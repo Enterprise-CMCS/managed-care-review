@@ -102,14 +102,12 @@ export const ContractDetails = ({
     draftSubmission,
     showValidations = false,
     updateDraft,
-    formAlert = undefined,
 }: {
     draftSubmission: DraftSubmission
     showValidations?: boolean
     updateDraft: (
         input: UpdateDraftSubmissionInput
     ) => Promise<DraftSubmission | undefined>
-    formAlert?: React.ReactElement
 }): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const history = useHistory()
@@ -387,7 +385,6 @@ export const ContractDetails = ({
                     >
                         <fieldset className="usa-fieldset">
                             <legend className="srOnly">Contract Details</legend>
-                            {formAlert && formAlert}
                             <span id="form-guidance">
                                 All fields are required
                             </span>
