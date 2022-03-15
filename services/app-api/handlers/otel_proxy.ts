@@ -1,6 +1,6 @@
 import { APIGatewayProxyHandler } from 'aws-lambda'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
-import { Resource } from '@opentelemetry/resources'
+import { Resource, ResourceAttributes } from '@opentelemetry/resources'
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
 
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc'
@@ -20,9 +20,9 @@ export const main: APIGatewayProxyHandler = async (event) => {
             },
         }
     }
-    const span: Resource = JSON.parse(event.body)
+    const span: ResourceAttributes = JSON.parse(event.body)
     const provider = new NodeTracerProvider({
-        resource: span,
+        resource: new Resource(span),
     })
 
     provider.addSpanProcessor(
