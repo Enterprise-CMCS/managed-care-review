@@ -3,11 +3,14 @@ import {
     getSESEmailParams,
     newPackageCMSEmail,
     newPackageStateEmail,
+    unlockPackageCMSEmail,
+    unlockPackageStateEmail
 } from './'
 import {
     StateSubmissionType,
     CognitoUserType,
 } from '../../app-web/src/common-code/domain-models'
+import { UnlockEmailData } from './templates'
 
 type EmailConfiguration = {
     stage: string
@@ -36,6 +39,12 @@ type Emailer = {
     sendStateNewPackage: (
         submission: StateSubmissionType,
         user: CognitoUserType
+    ) => Promise<void | Error>
+    sendUnlockPackageCMSEmail: (
+        unlockEmailData: UnlockEmailData
+    ) => Promise<void | Error>
+    sendUnlockPackageStateEmail: (
+        unlockEmailData: UnlockEmailData
     ) => Promise<void | Error>
 }
 
@@ -71,6 +80,14 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
             )
             return await this.sendEmail(emailData)
         },
+        sendUnlockPackageCMSEmail: async function (unlockEmailData){
+            const emailData = unlockPackageCMSEmail(unlockEmailData, config)
+            return await this.sendEmail(emailData)
+        },
+        sendUnlockPackageStateEmail: async function (unlockEmailData){
+            const emailData = unlockPackageStateEmail(unlockEmailData, config)
+            return await this.sendEmail(emailData)
+        }
     }
 }
 
@@ -104,6 +121,30 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
                 user,
                 config
             )
+            const emailRequestParams = getSESEmailParams(emailData)
+            console.log(`
+            EMAIL SENT
+            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
+            ${JSON.stringify(emailRequestParams)}
+            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
+        `)
+        },
+        sendUnlockPackageCMSEmail: async (
+            unlockEmailData: UnlockEmailData
+        ) => {
+            const emailData = unlockPackageCMSEmail(unlockEmailData, config)
+            const emailRequestParams = getSESEmailParams(emailData)
+            console.log(`
+            EMAIL SENT
+            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
+            ${JSON.stringify(emailRequestParams)}
+            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
+        `)
+        },
+        sendUnlockPackageStateEmail: async (
+            unlockEmailData: UnlockEmailData
+        ) => {
+            const emailData = unlockPackageStateEmail(unlockEmailData, config, submission)
             const emailRequestParams = getSESEmailParams(emailData)
             console.log(`
             EMAIL SENT

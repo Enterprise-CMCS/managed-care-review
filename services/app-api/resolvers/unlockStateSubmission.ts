@@ -1,6 +1,6 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import {
-    DraftSubmissionType, isCMSUser, StateSubmissionType, UpdateInfoType
+    DraftSubmissionType, isCMSUser, StateSubmissionType, UpdateInfoType, submissionName
 } from '../../app-web/src/common-code/domain-models'
 import { Emailer } from '../emailer'
 import { MutationResolvers } from '../gen/gqlServer'
@@ -26,7 +26,7 @@ function unlock(submission: StateSubmissionType
 // transforming it from a DraftSubmission to a StateSubmission
 export function unlockStateSubmissionResolver(
     store: Store,
-    _emailer: Emailer
+    emailer: Emailer
 ): MutationResolvers['unlockStateSubmission'] {
     return async (_parent, { input }, context) => {
         const { unlockedReason, submissionID } = input
@@ -79,6 +79,33 @@ export function unlockStateSubmissionResolver(
             const errMessage = `Issue unlocking a state submission of type ${revisionResult.code}. Message: ${revisionResult.message}`
             logError('unlockStateSubmission', errMessage)
             throw new Error(errMessage)
+        }
+
+        // Send emails!
+        const unlockEmailData = {
+            ...unlockInfo, 
+            submissionName: submissionName(submission)
+        }
+        const unlockPackageCMSEmailResult = await
+        emailer.sendUnlockPackageCMSEmail(unlockEmailData)
+
+        const unlockPackageStateEmailResult = await
+        emailer.sendUnlockPackageStateEmail(unlockEmailData)
+
+        if (unlockPackageCMSEmailResult instanceof Error) {
+            logError(
+                'unlockPackageCMSEmail - CMS email failed',
+                unlockPackageCMSEmailResult
+            )
+            throw unlockPackageCMSEmailResult
+        }
+
+        if (unlockPackageStateEmailResult instanceof Error) {
+            logError(
+                'unlockPackageCMSEmail - CMS email failed',
+                unlockPackageStateEmailResult
+            )
+            throw unlockPackageStateEmailResult
         }
 
         logSuccess('unlockStateSubmission')
