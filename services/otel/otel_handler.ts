@@ -4,8 +4,6 @@ import { Resource } from "@opentelemetry/resources";
 import { OTLPTraceExporter} from "@opentelemetry/exporter-trace-otlp-grpc"
 import { SimpleSpanProcessor, ConsoleSpanExporter } from "@opentelemetry/sdk-trace-base";
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
 const provider = new NodeTracerProvider({
     resource: Resource.default().merge(new Resource({
         "service.name": "mc-review",
