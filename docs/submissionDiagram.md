@@ -22,6 +22,7 @@ Other notes:
 - "Health plan package" and "state submission" mean the same thing.
   
 ```mermaid
+erDiagram;
 HealthPlanPackage {
     date initiallySubmittedAt
     enum status
