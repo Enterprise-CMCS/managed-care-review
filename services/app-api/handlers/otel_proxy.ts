@@ -24,6 +24,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
     })
 
     provider.addSpanProcessor(new BatchSpanProcessor(new OTLPTraceExporter()))
+    provider.register()
 
     return {
         statusCode: 200,
