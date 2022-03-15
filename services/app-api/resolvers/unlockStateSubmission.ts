@@ -6,6 +6,7 @@ import { Emailer } from '../emailer'
 import { MutationResolvers } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
+import { setErrorAttributesOnActiveSpan, setResolverDetailsOnActiveSpan, setSuccessAttributesOnActiveSpan } from "./attributeHelper";
 
 // unlock takes a state submission and casts it into a draft submission
 // Since draft submission is a strict subset of submitted submission, this can't error today.
@@ -29,14 +30,17 @@ export function unlockStateSubmissionResolver(
     _emailer: Emailer
 ): MutationResolvers['unlockStateSubmission'] {
     return async (_parent, { input }, context) => {
+
+        const { user, span } = context
         const { unlockedReason, submissionID } = input
-        const { user } = context
+        setResolverDetailsOnActiveSpan('createDraftSubmission', user, span)
         // This resolver is only callable by CMS users
         if (!isCMSUser(user)) {
             logError(
                 'unlockStateSubmission',
                 'user not authorized to unlock submission'
             )
+            setErrorAttributesOnActiveSpan('user not authorized to unlock submission', span)
             throw new ForbiddenError('user not authorized to unlock submission')
         }
 
@@ -46,8 +50,9 @@ export function unlockStateSubmissionResolver(
         if (isStoreError(result)) {
             const errMessage = `Issue finding a state submission of type ${result.code}. Message: ${result.message}`
             logError('unlockStateSubmission', errMessage)
-
+            setErrorAttributesOnActiveSpan(errMessage, span)
             if (result.code === 'WRONG_STATUS') {
+                setErrorAttributesOnActiveSpan('Attempted to unlock submission with wrong status', span)
                 throw new UserInputError('Attempted to unlock submission with wrong status')
             }
             throw new Error(errMessage)
@@ -56,6 +61,7 @@ export function unlockStateSubmissionResolver(
         if (result === undefined) {
             const errMessage = `A submission must exist to be unlocked: ${submissionID}`
             logError('unlockStateSubmission', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
                 argumentName: 'submissionID',
             })
@@ -78,10 +84,12 @@ export function unlockStateSubmissionResolver(
         if (isStoreError(revisionResult)) {
             const errMessage = `Issue unlocking a state submission of type ${revisionResult.code}. Message: ${revisionResult.message}`
             logError('unlockStateSubmission', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
 
         logSuccess('unlockStateSubmission')
+        setSuccessAttributesOnActiveSpan(span)
 
         return { submission: revisionResult }
 
