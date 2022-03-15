@@ -50,9 +50,11 @@
                 return this.sendEmail(emailData)
             },
             sendUnlockPackageStateEmail: function async(
+                submission: StateSubmissionType,
                 unlockEmailData: UnlockEmailData
             ): Promise<void | Error> {
                 const emailData = unlockPackageStateEmail(
+                    submission,
                     unlockEmailData,
                     config
                 )

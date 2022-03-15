@@ -90,7 +90,7 @@ export function unlockStateSubmissionResolver(
         emailer.sendUnlockPackageCMSEmail(unlockEmailData)
 
         const unlockPackageStateEmailResult = await
-        emailer.sendUnlockPackageStateEmail(unlockEmailData)
+        emailer.sendUnlockPackageStateEmail(submission, unlockEmailData)
 
         if (unlockPackageCMSEmailResult instanceof Error) {
             logError(

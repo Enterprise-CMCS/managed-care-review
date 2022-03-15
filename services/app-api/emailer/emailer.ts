@@ -44,6 +44,7 @@ type Emailer = {
         unlockEmailData: UnlockEmailData
     ) => Promise<void | Error>
     sendUnlockPackageStateEmail: (
+        submission: StateSubmissionType,
         unlockEmailData: UnlockEmailData
     ) => Promise<void | Error>
 }
@@ -84,8 +85,11 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
             const emailData = unlockPackageCMSEmail(unlockEmailData, config)
             return await this.sendEmail(emailData)
         },
-        sendUnlockPackageStateEmail: async function (unlockEmailData){
-            const emailData = unlockPackageStateEmail(unlockEmailData, config)
+        sendUnlockPackageStateEmail: async function (submission, unlockEmailData){
+            const emailData = unlockPackageStateEmail(
+                submission,
+                unlockEmailData, 
+                config)
             return await this.sendEmail(emailData)
         }
     }
@@ -142,9 +146,10 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
         `)
         },
         sendUnlockPackageStateEmail: async (
+            submission: StateSubmissionType,
             unlockEmailData: UnlockEmailData
         ) => {
-            const emailData = unlockPackageStateEmail(unlockEmailData, config, submission)
+            const emailData = unlockPackageStateEmail(submission,unlockEmailData, config)
             const emailRequestParams = getSESEmailParams(emailData)
             console.log(`
             EMAIL SENT
