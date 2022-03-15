@@ -96,7 +96,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
     )
     const { loggedInUser } = useAuth()
     const [showPageErrorMessage, setShowPageErrorMessage] = useState<boolean | string>(false) // string is a custom error message, defaults to generic of true
-    const [unlockedInfo, setUnlockedInfo] = useState<UpdateInfoType | null | undefined>(undefined)
+    const [unlockedInfo, setUnlockedInfo] = useState<UpdateInfoType | null>(null)
 
     // Set up graphql calls
     const {
@@ -182,9 +182,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                 const unlockInfo = unlockedRevision?.revision.unlockInfo
 
                 if (
-                    unlockInfo?.updatedBy &&
-                    unlockInfo?.updatedAt &&
-                    unlockInfo?.updatedReason
+                    unlockInfo
                 ) {
                     setUnlockedInfo({
                         updatedBy: unlockInfo.updatedBy,

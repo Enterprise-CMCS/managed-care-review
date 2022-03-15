@@ -1,8 +1,7 @@
 import { base64ToDomain } from '../common-code/proto/stateSubmission'
 import { submissionName, SubmissionUnionType } from '../common-code/domain-models'
-import {  Submission2, DraftSubmission, StateSubmission} from '../gen/gqlClient'
+import {  Submission2, Submission as GQLSubmissionUnionType} from '../gen/gqlClient'
 
-type GQLSubmissionUnionType = DraftSubmission | StateSubmission 
 
 const isGQLDraftSubmission = (sub: GQLSubmissionUnionType): boolean => {
     return sub.__typename === 'DraftSubmission'

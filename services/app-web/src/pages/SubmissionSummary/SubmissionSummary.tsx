@@ -90,7 +90,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     const [unlockModalError, setUnlockModalError] = useState<string | undefined>(undefined)
     const [unlockReason, setUnlockReason] = useState('')
     const [packageData, setPackageData] = useState<SubmissionUnionType | undefined>(undefined)
-    const [unlockedInfo, setUnlockedInfo] = useState<UpdateInfoType | null | undefined>(undefined)
+    const [unlockedInfo, setUnlockedInfo] = useState<UpdateInfoType | null>(null)
     const [showModal, setShowModal] = useState(false)
 
     const { loading, error, data } = useFetchSubmission2Query({
@@ -139,7 +139,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                 const unlockedRevision = submissionAndRevisions.revisions.find(rev => rev.revision.unlockInfo)
                 const unlockInfo = unlockedRevision?.revision.unlockInfo
 
-                if (unlockInfo?.updatedBy && unlockInfo?.updatedAt && unlockInfo?.updatedReason) {
+                if (unlockInfo) {
                     setUnlockedInfo({
                         updatedBy: unlockInfo.updatedBy,
                         updatedAt: unlockInfo.updatedAt,

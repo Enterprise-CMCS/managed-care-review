@@ -375,8 +375,10 @@ export function mockSubmittedSubmission2(): Submission2 {
                     createdAt: new Date(),
                     unlockInfo: null,
                     submitInfo: {
-                        updatedAt: "2021-01-01"
-                    },
+                        updatedAt: "2021-01-01",
+                        updatedBy: 'test@example.com',
+                        updatedReason: 'Initial submit'
+            },
                     submissionData: b64,
                 }
             },
@@ -407,7 +409,7 @@ export function mockUnlockedSubmission2(
                     unlockInfo: {
                         updatedAt: new Date(),
                         updatedBy: 'bob@dmas.mn.gov',
-                        updatedReason: 'Test unlock reason'
+                        updatedReason: 'Test unlock reason',
                     },
                     submitInfo: null,
                     submissionData: b64,
@@ -420,6 +422,8 @@ export function mockUnlockedSubmission2(
                     unlockInfo: null,
                     submitInfo: {
                         updatedAt: '2021-01-01',
+                        updatedBy: 'test@example.com',
+                        updatedReason: 'Initial submit',
                     },
                     submissionData: b64,
                 },

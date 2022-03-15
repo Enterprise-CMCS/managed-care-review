@@ -159,9 +159,9 @@ type Submission2 {
 }
 
 type UpdateInformation {
-    updatedAt: Date
-    updatedBy: String
-    updatedReason: String
+    updatedAt: Date!
+    updatedBy: String!
+    updatedReason: String!
 }
 
 type Revision {
