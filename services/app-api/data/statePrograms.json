@@ -95,6 +95,29 @@
                     "name": "TPPlus"
                 }
             ]
+        },
+        {
+            "code": "AZ",
+            "name": "Arizona",
+            "programs": [
+                {
+                    "id": "AHCCCS",
+                    "name": "Arizona Health Care Cost Containment System"
+                },
+                {
+                    "id": "CHP",
+                    "name": "Comprehensive Health Program"
+                },
+                {
+                    "id": "DES-DDD",
+                    "name": "Department of Economic Security - Division of Developmental Disabilities"
+                },
+                 {
+                    "id": "ALTCS-EPD",
+                    "name": "Arizona Long Term Care System - Elderly and Physical Disability"
+                }
+
+            ]
         }
     ]
 }
