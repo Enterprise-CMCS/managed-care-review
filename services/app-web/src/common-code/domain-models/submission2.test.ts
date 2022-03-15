@@ -197,21 +197,21 @@ describe('submission 2 helpers', () => {
                         {
                             id: 'baz',
                             createdAt: new Date(),
-                            submitInfo: {
-                                updatedAt: new Date(2022, 2, 2),
-                                updatedBy: 'test@example.com',
-                                updatedReason: 'Initial submit',
-                            },
                             submissionFormProto: Buffer.from([1, 2, 3]),
                         },
                         {
                             id: 'bar',
                             createdAt: new Date('2022-01-01'),
+                            submitInfo: {
+                                updatedAt: new Date(2022, 2, 4),
+                                updatedBy: 'test@example.com',
+                                updatedReason: 'Initial submit',
+                            },
                             submissionFormProto: Buffer.from([1, 2, 3]),
                         },
                     ],
                 },
-                new Date(2022, 1, 1),
+                new Date(2022, 2, 4),
             ],
         ]
 
