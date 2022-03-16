@@ -1,9 +1,5 @@
 import React from 'react'
-import {
-    ConsoleSpanExporter,
-    SimpleSpanProcessor,
-    BatchSpanProcessor,
-} from '@opentelemetry/sdk-trace-base'
+import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web'
 import { BaseOpenTelemetryComponent } from '@opentelemetry/plugin-react-load'
 import { ZoneContextManager } from '@opentelemetry/context-zone'
