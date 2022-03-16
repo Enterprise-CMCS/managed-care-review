@@ -170,7 +170,7 @@ export function submitDraftSubmissionResolver(
         // Save the submission!
         const updateResult = await store.updateStateSubmission(stateSubmission, new Date())
         if (isStoreError(updateResult)) {
-            const errMessage = `Issue updating a state submission of ty}pe ${updateResult.code}. Message: ${updateResult.message}`
+            const errMessage = `Issue updating a state submission of type ${updateResult.code}. Message: ${updateResult.message}`
             logError('submitDraftSubmission', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)

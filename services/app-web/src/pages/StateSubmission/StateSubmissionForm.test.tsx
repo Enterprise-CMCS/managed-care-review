@@ -5,15 +5,16 @@ import userEvent from '@testing-library/user-event'
 import { Document } from '../../gen/gqlClient'
 import { RoutesRecord } from '../../constants/routes'
 import {
-    mockDraft,
     fetchCurrentUserMock,
-    fetchDraftSubmissionMock,
+    fetchSubmission2Mock,
     updateDraftSubmissionMock,
+    mockDraftSubmission2,
+    mockUnlockedSubmission2,
 } from '../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
 import { StateSubmissionForm } from './StateSubmissionForm'
-import { updatesFromSubmission } from './updateSubmissionTransform'
+import { updatesFromSubmission2 } from './updateSubmissionTransform'
 
 describe('StateSubmissionForm', () => {
     describe('loads draft submission', () => {
@@ -27,7 +28,7 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchDraftSubmissionMock({
+                            fetchSubmission2Mock({
                                 id: '15',
                                 statusCode: 200,
                             }),
@@ -45,6 +46,12 @@ describe('StateSubmissionForm', () => {
         })
 
         it('loads submission type fields for /submissions/:id/type', async () => {
+             const mockSubmission = mockDraftSubmission2({
+                 submissionDescription: 'A real submission',
+                 submissionType: 'CONTRACT_ONLY',
+                 programIDs: ['snbc']
+
+             })
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
@@ -54,9 +61,10 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchDraftSubmissionMock({
+                            fetchSubmission2Mock({
                                 id: '15',
                                 statusCode: 200,
+                                submission: mockSubmission
                             }),
                         ],
                     },
@@ -81,10 +89,9 @@ describe('StateSubmissionForm', () => {
         })
 
         it('loads contract details fields for /submissions/:id/contract-details with amendments', async () => {
-            const mockAmendment = mockDraft()
-
-            mockAmendment.contractType = 'AMENDMENT'
-            mockAmendment.contractAmendmentInfo = {
+            const mockAmendment = mockDraftSubmission2({
+                contractType: 'AMENDMENT',
+                contractAmendmentInfo: {
                 itemsBeingAmended: [
                     'CAPITATION_RATES',
                     'GEO_AREA_SERVED',
@@ -93,11 +100,11 @@ describe('StateSubmissionForm', () => {
                 otherItemBeingAmended: 'foobar',
                 capitationRatesAmendedInfo: {
                     reason: 'MIDYEAR',
-                    otherReason: null,
                 },
                 relatedToCovid19: true,
-                relatedToVaccination: false,
-            }
+                relatedToVaccination: false}
+            })
+
 
             renderWithProviders(
                 <Route
@@ -108,10 +115,10 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchDraftSubmissionMock({
+                            fetchSubmission2Mock({
                                 id: '12',
                                 statusCode: 200,
-                                draftSubmission: mockAmendment,
+                                submission: mockAmendment,
                             }),
                         ],
                     },
@@ -170,7 +177,7 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchDraftSubmissionMock({
+                            fetchSubmission2Mock({
                                 id: '12',
                                 statusCode: 200,
                             }),
@@ -191,10 +198,50 @@ describe('StateSubmissionForm', () => {
         })
     })
 
+        describe('loads unlocked submission', () => {
+            it('displays unlock banner with correct data for an unlocked submission', async () => {
+                 renderWithProviders(
+                     <Route
+                         path={RoutesRecord.SUBMISSIONS_FORM}
+                         component={StateSubmissionForm}
+                     />,
+                     {
+                         apolloProvider: {
+                             mocks: [
+                                 fetchCurrentUserMock({ statusCode: 200 }),
+                                 fetchSubmission2Mock({
+                                     id: '15',
+                                     statusCode: 200,
+                                      submission: mockUnlockedSubmission2(),
+                                 }),
+                             ],
+                         },
+                         routerProvider: {
+                             route: '/submissions/15/documents',
+                         },
+                     }
+                 )
+
+                const banner = expect(
+                    await screen.findByTestId('unlockedBanner')
+                )
+                banner.toBeInTheDocument()
+                banner.toHaveClass('usa-alert--info')
+                banner.toHaveTextContent(
+                    /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+\s[a-zA-Z]+/i
+                )
+                banner.toHaveTextContent('Unlocked by: bob@dmas.mn.govUnlocked')
+                banner.toHaveTextContent(
+                    'Reason for unlock: Test unlock reason'
+                )
+            })
+        })
+
     describe('when user edits submission', () => {
         it('change draft submission description and navigate to contract details', async () => {
-            const mockSubmission = mockDraft()
-            const mockUpdate = updatesFromSubmission(mockSubmission)
+            const mockSubmission = mockDraftSubmission2({submissionDescription:
+                'A real submission but updated something'})
+            const mockUpdate = updatesFromSubmission2(mockSubmission)
             mockUpdate.submissionDescription =
                 'A real submission but updated something'
 
@@ -207,8 +254,8 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchDraftSubmissionMock({
-                                draftSubmission: mockSubmission,
+                            fetchSubmission2Mock({
+                                submission: mockSubmission,
                                 id: '15',
                                 statusCode: 200,
                             }),
@@ -217,7 +264,7 @@ describe('StateSubmissionForm', () => {
                                 updates: mockUpdate,
                                 statusCode: 200,
                             }),
-                            fetchDraftSubmissionMock({
+                            fetchSubmission2Mock({
                                 id: '15',
                                 statusCode: 200,
                             }),
@@ -251,11 +298,13 @@ describe('StateSubmissionForm', () => {
                     documentCategories: ['CONTRACT_RELATED'],
                 },
             ]
-            const mockSubmission = mockDraft()
-            mockSubmission.id = '15'
-            mockSubmission.documents = mockDocs
+            const mockSubmission = mockDraftSubmission2({
+                id: '15',
+                documents: mockDocs
+            })
+    
 
-            const mockUpdate = updatesFromSubmission(mockSubmission)
+            const mockUpdate = updatesFromSubmission2(mockSubmission)
             mockUpdate.submissionDescription =
                 'A real submission but updated something'
 
@@ -268,9 +317,9 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchDraftSubmissionMock({
+                            fetchSubmission2Mock({
                                 id: '15',
-                                draftSubmission: mockSubmission,
+                                submission: mockSubmission,
                                 statusCode: 200,
                             }),
                             updateDraftSubmissionMock({
@@ -278,7 +327,7 @@ describe('StateSubmissionForm', () => {
                                 updates: mockUpdate,
                                 statusCode: 200,
                             }),
-                            fetchDraftSubmissionMock({
+                            fetchSubmission2Mock({
                                 id: '15',
                                 statusCode: 200,
                             }),
@@ -316,7 +365,7 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchDraftSubmissionMock({
+                            fetchSubmission2Mock({
                                 id: '15',
                                 statusCode: 403,
                             }),
@@ -326,7 +375,7 @@ describe('StateSubmissionForm', () => {
                 }
             )
 
-            const loading = await screen.findByText('Something went wrong...')
+            const loading = await screen.findByText('System error')
             expect(loading).toBeInTheDocument()
         })
         it('shows a generic error fetching submission fails at contract details', async () => {
@@ -339,7 +388,7 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchDraftSubmissionMock({
+                            fetchSubmission2Mock({
                                 id: '15',
                                 statusCode: 403,
                             }),
@@ -351,7 +400,7 @@ describe('StateSubmissionForm', () => {
                 }
             )
 
-            const loading = await screen.findByText('Something went wrong...')
+            const loading = await screen.findByText('System error')
             expect(loading).toBeInTheDocument()
         })
 
@@ -365,7 +414,7 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchDraftSubmissionMock({
+                            fetchSubmission2Mock({
                                 id: '15',
                                 statusCode: 403,
                             }),
@@ -375,8 +424,10 @@ describe('StateSubmissionForm', () => {
                 }
             )
 
-            const loading = await screen.findByText('Something went wrong...')
+            const loading = await screen.findByText('System error')
             expect(loading).toBeInTheDocument()
         })
     })
+
+
 })

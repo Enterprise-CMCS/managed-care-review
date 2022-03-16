@@ -3,7 +3,7 @@ import {
     submissionName,
     StateSubmissionType
 } from '../../app-web/src/common-code/domain-models'
-import {newPackageCMSEmail, newPackageStateEmail} from './'
+import {newPackageCMSEmail, newPackageStateEmail, unlockPackageCMSEmail, unlockPackageStateEmail} from './'
 
 describe('Email templates', () => {
     describe('CMS email', () => {
@@ -314,4 +314,210 @@ describe('Email templates', () => {
         })
 
      })
+     describe('CMS unlock email', () =>{
+        it('subject line is correct and clearly states submission is unlocked', () => {
+            const unlockData = {
+                submissionName: 'MCR-VA-CCCPLUS-0001',
+                updatedBy: 'leslie@example.com',
+                updatedAt: new Date('01/01/2022'),
+                updatedReason: 'Adding rate development guide.'
+            }
+            const template = unlockPackageCMSEmail(
+                unlockData,
+                testEmailConfig
+             )
+
+             expect(template).toEqual(
+                 expect.objectContaining({
+                     subject: expect.stringContaining(
+                         `${unlockData.submissionName} was unlocked`
+                     ),
+                 })
+             )
+        })
+        it('includes warning about unofficial submission', () => {
+            const unlockData = {
+                submissionName: 'MCR-VA-CCCPLUS-0001',
+                updatedBy: 'leslie@example.com',
+                updatedAt: new Date('01/01/2022'),
+                updatedReason: 'Adding rate development guide.'
+            }
+            const template = unlockPackageCMSEmail(
+                unlockData,
+                testEmailConfig
+             )
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /This is NOT an official submission/
+                    ),
+                })
+            )
+        })
+        it('unlocked by includes correct email address', () => {
+            const unlockData = {
+                submissionName: 'MCR-VA-CCCPLUS-0001',
+                updatedBy: 'leslie@example.com',
+                updatedAt: new Date('01/01/2022'),
+                updatedReason: 'Adding rate development guide.'
+            }
+            const template = unlockPackageCMSEmail(
+                unlockData,
+                testEmailConfig
+             )
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /Unlocked by: leslie/
+                    ),
+                })
+            )
+        })
+        it('unlocked on includes correct date', () => {
+            const unlockData = {
+                submissionName: 'MCR-VA-CCCPLUS-0001',
+                updatedBy: 'leslie@example.com',
+                updatedAt: new Date('01/01/2022'),
+                updatedReason: 'Adding rate development guide.'
+            }
+            const template = unlockPackageCMSEmail(
+                unlockData,
+                testEmailConfig
+             )
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /Unlocked on: 01/
+                    ),
+                })
+            )
+        })
+        it('includes correct reason', () => {
+            const unlockData = {
+                submissionName: 'MCR-VA-CCCPLUS-0001',
+                updatedBy: 'leslie@example.com',
+                updatedAt: new Date('01/01/2022'),
+                updatedReason: 'Adding rate development guide.'
+            }
+            const template = unlockPackageCMSEmail(
+                unlockData,
+                testEmailConfig
+             )
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /Reason for unlock: Adding rate development guide/
+                    ),
+                })
+            )
+        })
+    })
+    describe('State unlock email', () =>{
+        it('subject line is correct and clearly states submission is unlocked', () => {
+            const unlockData = {
+                submissionName: 'MCR-VA-CCCPLUS-0002',
+                updatedBy: 'josh@example.com',
+                updatedAt: new Date('02/01/2022'),
+                updatedReason: 'Adding rate certification.'
+            }
+            const sub = mockContractOnlySubmission()
+            const template = unlockPackageStateEmail(
+                sub,
+                unlockData,
+                testEmailConfig
+             )
+
+             expect(template).toEqual(
+                 expect.objectContaining({
+                     subject: expect.stringContaining(
+                         `${unlockData.submissionName} was unlocked by CMS`
+                     ),
+                 })
+             )
+        })
+        it('includes warning about unofficial submission', () => {
+            const unlockData = {
+                submissionName: 'MCR-VA-CCCPLUS-0002',
+                updatedBy: 'josh@example.com',
+                updatedAt: new Date('02/01/2022'),
+                updatedReason: 'Adding rate certification.'
+            }
+            const sub = mockContractOnlySubmission()
+            const template = unlockPackageStateEmail(
+                sub,
+                unlockData,
+                testEmailConfig
+             )
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /This is NOT an official submission/
+                    ),
+                })
+            )
+        })
+        it('unlocked by includes correct email address', () => {
+            const unlockData = {
+                submissionName: 'MCR-VA-CCCPLUS-0002',
+                updatedBy: 'josh@example.com',
+                updatedAt: new Date('02/01/2022'),
+                updatedReason: 'Adding rate certification.'
+            }
+            const sub = mockContractOnlySubmission()
+            const template = unlockPackageStateEmail(
+                sub,
+                unlockData,
+                testEmailConfig
+             )
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /Unlocked by: josh/
+                    ),
+                })
+            )
+        })
+        it('unlocked on includes correct date', () => {
+            const unlockData = {
+                submissionName: 'MCR-VA-CCCPLUS-0002',
+                updatedBy: 'josh@example.com',
+                updatedAt: new Date('02/01/2022'),
+                updatedReason: 'Adding rate certification.'
+            }
+            const sub = mockContractOnlySubmission()
+            const template = unlockPackageStateEmail(
+                sub,
+                unlockData,
+                testEmailConfig
+             )
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /Unlocked on: 02/
+                    ),
+                })
+            )
+        })
+        it('includes correct reason', () => {
+            const unlockData = {
+                submissionName: 'MCR-VA-CCCPLUS-0002',
+                updatedBy: 'josh@example.com',
+                updatedAt: new Date('02/01/2022'),
+                updatedReason: 'Adding rate certification.'
+            }
+            const sub = mockContractOnlySubmission()
+            const template = unlockPackageStateEmail(
+                sub,
+                unlockData,
+                testEmailConfig
+             )
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /Reason for unlock: Adding rate certification./
+                    ),
+                })
+            )
+        })
+    })
 })

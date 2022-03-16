@@ -6,10 +6,9 @@ describe('dashboard', () => {
 
         // a submitted submission
         cy.startNewContractOnlySubmission()
-
         cy.fillOutBaseContractDetails()
+        cy.findByTestId('unlockedBanner').should('not.exist')
         cy.navigateForm('Continue')
-
         cy.fillOutStateContact()
         cy.navigateForm('Continue')
 
@@ -73,7 +72,7 @@ describe('dashboard', () => {
 
                 cy.logInAsStateUser()
 
-                // state user sees unlocked submission - check tag then submission link
+                // State user sees unlocked submission - check tag then submission link
                 cy.findByText('Dashboard').should('exist')
                 cy.get('table')
                     .should('exist')
@@ -81,7 +80,6 @@ describe('dashboard', () => {
                     .parent()
                     .siblings('[data-testid="submission-status"]')
                     .should('have.text', 'Unlocked')
-
 
                 cy.get('table')
                     .should('exist')
@@ -91,8 +89,19 @@ describe('dashboard', () => {
 
                 cy.visit(reviewURL)
 
-                // state user can resubmit and see resubmitted package in dashboard
+                // State user can resubmit and see resubmitted package in dashboard
                 cy.intercept('POST', '*/graphql').as('gqlRequest2')
+
+                //Unlock banner for state user to be present with correct data.
+                cy.findByTestId('unlockedBanner')
+                    .should('exist')
+                    .and('contain.text', 'zuko@example.com')
+                    .and('contain.text', 'Unlock submission reason.')
+                    .contains(
+                        /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+\s[a-zA-Z]+/i
+                    )
+                    .should('exist')
+
                 cy.submitStateSubmissionForm()
                 cy.wait('@gqlRequest2')
                 cy.findByText('Dashboard').should('exist')
@@ -117,12 +126,11 @@ describe('dashboard', () => {
                 cy.logInAsCMSUser({ initialURL: reviewURL })
 
                 //  CMS user sees resubmitted submission and active unlock button
-                cy.findByRole('button', { name: 'Unlock submission' })
-                    .should('not.be.disabled')
+                cy.findByRole('button', { name: 'Unlock submission' }).should(
+                    'not.be.disabled'
+                )
 
-                cy.findByTestId('unlockedBanner')
-                    .should('not.exist')
-
+                cy.findByTestId('unlockedBanner').should('not.exist')
             })
         })
     })
