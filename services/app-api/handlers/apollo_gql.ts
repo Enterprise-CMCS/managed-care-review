@@ -1,3 +1,4 @@
+import { Span } from '@opentelemetry/api'
 import { ApolloServer } from 'apollo-server-lambda'
 import {
     APIGatewayProxyEvent,
@@ -18,18 +19,27 @@ import { newLocalEmailer, newSESEmailer } from '../emailer'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import { configureResolvers } from '../resolvers'
 import { configurePostgres } from './configuration'
+import { tracer as tracer } from '../../otel/otel_handler'
+
+
+const requestSpanKey = 'REQUEST_SPAN'
 
 // The Context type passed to all of our GraphQL resolvers
 export interface Context {
     user: CognitoUserType
+    span?: Span
 }
 
 // This function pulls auth info out of the cognitoAuthenticationProvider in the lambda event
 // and turns that into our GQL resolver context object
 function contextForRequestForFetcher(
     userFetcher: userFromAuthProvider
-): ({ event }: { event: APIGatewayProxyEvent }) => Promise<Context> {
-    return async ({ event }) => {
+): ({ event }: { event: APIGatewayProxyEvent, context: any }) => Promise<Context> {
+    return async ({ event, context }) => {
+        // pull the current span out of the LAMBDA context, to place it in the APOLLO context
+        const anyContext = context as any
+        const requestSpan = anyContext[requestSpanKey]
+
         const authProvider =
             event.requestContext.identity.cognitoAuthenticationProvider
         if (authProvider) {
@@ -39,6 +49,7 @@ function contextForRequestForFetcher(
                 if (!userResult.isErr()) {
                     return {
                         user: userResult.value,
+                        span: requestSpan
                     }
                 } else {
                     throw new Error(
@@ -58,8 +69,8 @@ function contextForRequestForFetcher(
 // This middleware returns an error if the local request is missing authentication info
 function localAuthMiddleware(
     wrapped: APIGatewayProxyHandler
-): APIGatewayProxyHandler {
-    return function (event, context, completion) {
+): Handler {
+    return async function (event, context, completion) {
         const userHeader =
             event.requestContext.identity.cognitoAuthenticationProvider
 
@@ -75,7 +86,32 @@ function localAuthMiddleware(
             })
         }
 
-        return wrapped(event, context, completion)
+        const result = await wrapped(event, context, completion)
+
+        return result
+    }
+}
+
+// Tracing Middleware
+function tracingMiddleware(
+    wrapped: Handler
+): Handler {
+    return async function (event, context, completion) {
+        const span = tracer.startSpan('handleRequest', {
+            kind: 1, // server
+            attributes: { middlewareInit: true },
+        })
+
+        // Put the span into the LAMBDA context, in order to pass it into the APOLLO context in contextForRequestForFetcher
+        // We have to use any here because this context's type is not under our control.
+        const anyContext = context as any
+        anyContext[requestSpanKey] = span
+
+        const result = await wrapped(event, context, completion)
+
+        span.end()
+
+        return result
     }
 }
 
@@ -184,9 +220,11 @@ async function initializeGQLHandler(): Promise<Handler> {
         },
     })
 
+    const tracingHandler = tracingMiddleware(handler)
+
     // Locally, we wrap our handler in a middleware that returns 403 for unauthenticated requests
     const isLocal = authMode === 'LOCAL'
-    return isLocal ? localAuthMiddleware(handler) : handler
+    return isLocal ? localAuthMiddleware(tracingHandler) : tracingHandler
 }
 
 const handlerPromise = initializeGQLHandler()
