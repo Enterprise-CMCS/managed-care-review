@@ -36,6 +36,8 @@ model StateSubmissionRevision {
   unlockedReason      String?
   unlockedAt          DateTime?
   submittedAt         DateTime?
+  submittedBy         String?
+  submittedReason     String?
 }
 
 model State {
