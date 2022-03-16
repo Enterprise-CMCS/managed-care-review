@@ -6,7 +6,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
         headers: { 'content-type': 'application/json' },
     }
 
-    await axios.post('localhost:55681/api/v1/trace', event.body, options)
+    await axios.post('http://localhost:55681/api/v1/trace', event.body, options)
 
     return {
         statusCode: 200,
