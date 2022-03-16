@@ -27,7 +27,6 @@ const exporter = new OTLPTraceExporter({
     headers: {},
 })
 
-provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()))
 provider.addSpanProcessor(new BatchSpanProcessor(exporter))
 
 provider.register({
