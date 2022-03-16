@@ -37,7 +37,9 @@ provider.register({
 // Registering instrumentations
 registerInstrumentations({
     instrumentations: [
-        getWebAutoInstrumentations({
+        getWebAutoInstrumentations(),
+        /* Disabling for now to test header issues
+            {
             // load custom configuration for xml-http-request instrumentation
             '@opentelemetry/instrumentation-xml-http-request': {
                 propagateTraceHeaderCorsUrls: [/.+/g],
@@ -46,7 +48,8 @@ registerInstrumentations({
             '@opentelemetry/instrumentation-fetch': {
                 propagateTraceHeaderCorsUrls: [/.+/g],
             },
-        }),
+        }
+        */
     ],
 })
 
