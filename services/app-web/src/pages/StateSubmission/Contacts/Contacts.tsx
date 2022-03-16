@@ -163,11 +163,9 @@ export const Contacts = ({
     draftSubmission,
     showValidations = false,
     updateDraft,
-    formAlert = undefined,
 }: {
     draftSubmission: DraftSubmission
     showValidations?: boolean
-    formAlert?: React.ReactElement
     updateDraft: (
         input: UpdateDraftSubmissionInput
     ) => Promise<DraftSubmission | undefined>
@@ -318,7 +316,6 @@ return (
                     >
                         <fieldset className="usa-fieldset">
                             <h3>State contacts</h3>
-                            {formAlert && formAlert}
                             <p>
                                 Enter contact information for the state
                                 personnel you'd like to receive all CMS
@@ -514,8 +511,8 @@ return (
 
                         {includeActuaryContacts && (
                             <fieldset className="usa-fieldset">
-                                <h3>Actuary contacts</h3>
-                                {formAlert && formAlert}
+                            <h3>Actuary contacts</h3>
+                
                                 <p>
                                     Provide contact information for the
                                     actuaries who worked directly on this
@@ -524,8 +521,7 @@ return (
                                 <legend className="srOnly">
                                     Actuary contacts
                                 </legend>
-                                {formAlert && formAlert}
-
+                        
                                 <FieldArray name="actuaryContacts">
                                     {({ remove, push }) => (
                                         <div

@@ -1,10 +1,15 @@
 import { GraphQLErrors } from '@apollo/client/errors'
-import { Alert, Button, ButtonGroup, GridContainer, Link, Modal, ModalFooter, ModalHeading, ModalRef, ModalToggleButton, Textarea } from '@trussworks/react-uswds'
-import React, { useEffect, useRef, useState } from 'react'
+import {
+    Alert,
+    Button, CharacterCount, GridContainer,
+    Link
+} from '@trussworks/react-uswds'
+import React, { useEffect, useState } from 'react'
 import { NavLink, useLocation, useParams } from 'react-router-dom'
 import sprite from 'uswds/src/img/sprite.svg'
-import { submissionName, SubmissionUnionType } from '../../common-code/domain-models'
+import { submissionName, SubmissionUnionType, UpdateInfoType } from '../../common-code/domain-models'
 import { base64ToDomain } from '../../common-code/proto/stateSubmission'
+import { Modal, PoliteErrorMessage, SubmissionUnlockedBanner } from '../../components'
 import { Loading } from '../../components/Loading'
 import {
     ContactsSummarySection, ContractDetailsSummarySection,
@@ -12,36 +17,43 @@ import {
 } from '../../components/SubmissionSummarySection'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
-import { DraftSubmission, StateSubmission, Submission2, UnlockStateSubmissionMutationFn, useFetchSubmission2Query, useUnlockStateSubmissionMutation } from '../../gen/gqlClient'
+import {
+    DraftSubmission,
+    StateSubmission,
+    Submission2,
+    UnlockStateSubmissionMutationFn,
+    useFetchSubmission2Query,
+    useUnlockStateSubmissionMutation
+} from '../../gen/gqlClient'
 import { isGraphQLErrors } from '../../gqlHelpers'
 import { Error404 } from '../Errors/Error404'
-import { GenericError } from '../Errors/GenericError'
+import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './SubmissionSummary.module.scss'
 
-
-function unlockModalButton(modalRef: React.RefObject<ModalRef>, disabled: boolean) {
+function unlockModalButton(onClick: () => void, disabled: boolean) {
     return (
-        <ModalToggleButton
-            modalRef={modalRef}
+        <Button
             data-testid="form-submit"
+            type="button"
             outline
-            opener
+            onClick={onClick}
             disabled={disabled}
         >
             Unlock submission
-        </ModalToggleButton>
+        </Button>
     )
 }
 
 // This wrapper gets us some reasonable errors out of our unlock call. This would be a good candidate
 // for a more general and generic function so that we can get more sensible errors out of all of the 
 // generated mutations.
-async function unlockMutationWrapper(unlockStateSubmission: UnlockStateSubmissionMutationFn, id: string): Promise<Submission2 | GraphQLErrors | Error> {
+async function unlockMutationWrapper(unlockStateSubmission: UnlockStateSubmissionMutationFn, id: string, unlockedReason: string): Promise<Submission2 | GraphQLErrors | Error> {
     try {
         const result = await unlockStateSubmission({
             variables: {
                 input: {
-                    submissionID: id
+                    submissionID: id,
+                    unlockedReason
                 }
             }
         })
@@ -65,7 +77,6 @@ async function unlockMutationWrapper(unlockStateSubmission: UnlockStateSubmissio
     }
 }
 
-
 export const SubmissionSummary = (): React.ReactElement => {
     const { id } = useParams<{ id: string }>()
     const { pathname } = useLocation()
@@ -74,9 +85,11 @@ export const SubmissionSummary = (): React.ReactElement => {
     const [pageLevelAlert, setPageLevelAlert] = useState<
         string | undefined
     >(undefined)
-    
-    const modalRef = useRef<ModalRef>(null)
+    const [unlockModalError, setUnlockModalError] = useState<string | undefined>(undefined)
+    const [unlockReason, setUnlockReason] = useState('')
     const [packageData, setPackageData] = useState<SubmissionUnionType | undefined>(undefined)
+    const [unlockedInfo, setUnlockedInfo] = useState<UpdateInfoType | null>(null)
+    const [showModal, setShowModal] = useState(false)
 
     const { loading, error, data } = useFetchSubmission2Query({
         variables: {
@@ -106,7 +119,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                 // we want the most recent revision that has submission info.
                 return (rev.revision.submitInfo)
             })
-    
+
             if (!currentRevision) {
                 console.error('ERROR: submission in summary has no submitted revision', submissionAndRevisions.revisions)
                 setPageLevelAlert('Error fetching the submission. Please try again.')
@@ -119,6 +132,23 @@ export const SubmissionSummary = (): React.ReactElement => {
                 setPageLevelAlert('Error fetching the submission. Please try again.')
                 return
             }
+
+            if (submissionAndRevisions.status === 'UNLOCKED') {
+                const unlockedRevision = submissionAndRevisions.revisions.find(rev => rev.revision.unlockInfo)
+                const unlockInfo = unlockedRevision?.revision.unlockInfo
+
+                if (unlockInfo) {
+                    setUnlockedInfo({
+                        updatedBy: unlockInfo.updatedBy,
+                        updatedAt: unlockInfo.updatedAt,
+                        updatedReason: unlockInfo.updatedReason
+                    })
+                } else {
+                    console.error('ERROR: submission in summary has no revision with unlocked information', submissionAndRevisions.revisions)
+                    setPageLevelAlert('Error fetching the unlocked information. Please try again.')
+                }
+            }
+
             setPackageData(submissionResult)
         }
     }, [submissionAndRevisions, setPackageData, setPageLevelAlert])
@@ -138,10 +168,24 @@ export const SubmissionSummary = (): React.ReactElement => {
     }
 
     if (data && (!submissionAndRevisions)) return <Error404 /> // api request resolves but are no revisions likely because invalid submission is queried. This should be "Not Found"
-    if (error || !packageData || !submissionAndRevisions) return <GenericError /> // api failure or protobuf decode failure
+    if (error || !packageData || !submissionAndRevisions) return <GenericErrorPage /> // api failure or protobuf decode failure
+
+    const resetModal = () => {
+        setUnlockModalError(undefined)
+        setUnlockReason('')
+        setShowModal(false)
+    }
 
     const onUnlock = async () => {
-        const result = await unlockMutationWrapper(unlockStateSubmission, submissionAndRevisions.id)
+        if (!unlockReason) {
+            setUnlockModalError('Reason for unlocking submission is required')
+            return
+        }
+        if (unlockReason.length > 300) {
+            setUnlockModalError('Reason for unlocking submission is too long')
+            return
+        }
+        const result = await unlockMutationWrapper(unlockStateSubmission, submissionAndRevisions.id, unlockReason)
 
         if (result instanceof Error) {
             console.error('ERROR: got an Apollo Client Error attempting to unlock', result)
@@ -158,7 +202,7 @@ export const SubmissionSummary = (): React.ReactElement => {
             console.log('Submission Unlocked', unlockedSub)
         }
 
-        modalRef.current?.toggleModal(undefined, false)
+        resetModal()
     }
 
     // temporary kludge while the display data is expecting the wrong format. 
@@ -192,6 +236,15 @@ export const SubmissionSummary = (): React.ReactElement => {
                     </Alert>
                 )}
 
+                {unlockedInfo && (
+                    <SubmissionUnlockedBanner
+                        userType={loggedInUser?.role === 'CMS_USER' ? 'CMS_USER' : 'STATE_USER'}
+                        unlockedBy={unlockedInfo.updatedBy}
+                        unlockedOn={unlockedInfo.updatedAt}
+                        reason={unlockedInfo.updatedReason}
+                    />
+                )}
+
                 {loggedInUser?.__typename === 'StateUser' ? (
                     <Link
                         asCustom={NavLink}
@@ -212,7 +265,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                     </Link>
                 ) : null}
 
-                <SubmissionTypeSummarySection submission={submission} unlockModalButton={displayUnlockButton ? unlockModalButton(modalRef, disableUnlockButton) : undefined} />
+                <SubmissionTypeSummarySection submission={submission} unlockModalButton={displayUnlockButton ? unlockModalButton(() => setShowModal(true), disableUnlockButton) : undefined} />
 
                 <ContractDetailsSummarySection submission={submission} />
 
@@ -225,36 +278,36 @@ export const SubmissionSummary = (): React.ReactElement => {
                 <SupportingDocumentsSummarySection submission={submission} />
 
                 <Modal
-                    ref={modalRef}
-                    aria-labelledby="review-and-submit-modal-heading"
-                    aria-describedby="review-and-submit-modal-description"
-                    id="review-and-submit-modal"
+                    modalHeading="Reason for unlocking submission"
+                    modalHeadingId="unlockModalHeading"
+                    aria-labelledby="unlockModalHeading"
+                    onSubmit={onUnlock}
+                    onCancel={resetModal}
+                    showModal={showModal}
+                    id="unlockSubmissionModal"
                 >
-                    <ModalHeading id="review-and-submit-modal-heading">
-                        Reason for unlocking submission
-                    </ModalHeading>
-                    <Textarea
-                        id='unlockReason'
-                        name='unlockReason'
+                    {unlockModalError && (
+                        <PoliteErrorMessage>{unlockModalError}</PoliteErrorMessage>
+                    )}
+                    <div role="note" aria-labelledby="unlockReason" className="usa-hint margin-top-1">
+                        <p id="unlockReasonHelp">
+                            Provide reason for unlocking
+                        </p>
+                    </div>
+                    <CharacterCount
+                        id={'unlockReason'}
+                        name={'unlockReason'}
+                        maxLength={300}
+                        isTextArea
+                        data-testid="unlockReason"
+                        aria-describedby="unlockReason-info"
+                        className={styles.unlockReasonTextarea}
+                        aria-required
+                        defaultValue={unlockReason}
+                        error={!!unlockModalError}
+                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setUnlockReason(e.target.value)}
                     />
-                    <ModalFooter>
-                        <ButtonGroup className="float-right">
-                            <ModalToggleButton modalRef={modalRef} closer outline>
-                                Cancel
-                            </ModalToggleButton>
-                            <Button
-                                type="button"
-                                key="submitButton"
-                                aria-label="Submit"
-                                data-testid="modal-submit"
-                                onClick={onUnlock}
-                            >
-                                Submit
-                            </Button>
-                        </ButtonGroup>
-                    </ModalFooter>
                 </Modal>
-
             </GridContainer>
         </div>
     )

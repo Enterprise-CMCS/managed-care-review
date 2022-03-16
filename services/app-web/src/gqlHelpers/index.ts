@@ -1,6 +1,10 @@
 import { GraphQLErrors } from '@apollo/client/errors'
 import { DraftSubmission, StateSubmission } from '../gen/gqlClient'
-
+import {
+    getCurrentRevisionFromSubmission2,
+    isGQLDraftSubmission,
+    convertDomainModelFormDataToGQLSubmission,
+} from './submissionWithRevisions'
 const isStateSubmission = (
     submission: DraftSubmission | StateSubmission
 ): submission is StateSubmission => {
@@ -20,4 +24,4 @@ const isGraphQLErrors = (
     return false
 }
 
-export { isStateSubmission, isGraphQLErrors }
+export {convertDomainModelFormDataToGQLSubmission,  getCurrentRevisionFromSubmission2, isStateSubmission, isGraphQLErrors, isGQLDraftSubmission }

@@ -69,11 +69,9 @@ export const RateDetails = ({
     draftSubmission,
     showValidations = false,
     updateDraft,
-    formAlert = undefined,
 }: {
     draftSubmission: DraftSubmission
     showValidations?: boolean
-    formAlert?: React.ReactElement
     updateDraft: (
         input: UpdateDraftSubmissionInput
     ) => Promise<DraftSubmission | undefined>
@@ -328,7 +326,6 @@ export const RateDetails = ({
                         >
                             <fieldset className="usa-fieldset">
                                 <legend className="srOnly">Rate Details</legend>
-                                {formAlert && formAlert}
                                 <span id="form-guidance">
                                     All fields are required
                                 </span>

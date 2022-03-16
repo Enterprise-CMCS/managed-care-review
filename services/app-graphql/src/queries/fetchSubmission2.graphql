@@ -10,9 +10,13 @@ query fetchSubmission2($input: FetchSubmission2Input!) {
                     id
                     unlockInfo {
                         updatedAt
+                        updatedBy
+                        updatedReason
                     }
                     submitInfo {
                         updatedAt
+                        updatedBy
+                        updatedReason
                     }
                     createdAt
                     submissionData

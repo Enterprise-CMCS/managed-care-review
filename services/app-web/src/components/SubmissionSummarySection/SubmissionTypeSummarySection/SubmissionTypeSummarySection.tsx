@@ -22,7 +22,7 @@ export const SubmissionTypeSummarySection = ({
 
     return (
         <section id="submissionTypeSection" className={styles.summarySection}>
-            <SectionHeader header={submission.name} navigateTo={navigateTo} >
+            <SectionHeader header={submission.name} navigateTo={navigateTo} headerId={"submissionName"}>
                 {unlockModalButton && unlockModalButton}
             </SectionHeader>
 

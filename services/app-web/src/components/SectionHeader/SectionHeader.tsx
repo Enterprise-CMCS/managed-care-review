@@ -6,16 +6,20 @@ export type SectionHeaderProps = {
     header: string
     navigateTo?: string
     children?: React.ReactNode
+    sectionId?: string,
+    headerId?: string,
 }
 
 export const SectionHeader = ({
     header,
     navigateTo,
     children,
-}: SectionHeaderProps): React.ReactElement => {
+    sectionId,
+    headerId,
+}: SectionHeaderProps & JSX.IntrinsicElements["div"]): React.ReactElement => {
     return (
-        <div className={styles.summarySectionHeader}>
-            <h2>{header}</h2>
+        <div className={styles.summarySectionHeader} id={sectionId}>
+            <h2 id={headerId}>{header}</h2>
             <div>
                 {navigateTo && (
                     <Link

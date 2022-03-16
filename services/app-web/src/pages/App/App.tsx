@@ -11,7 +11,7 @@ import { AppBody } from './AppBody'
 import { logEvent } from '../../log_event'
 import { AuthProvider } from '../../contexts/AuthContext'
 import { PageProvider } from '../../contexts/PageContext'
-import { GenericError } from '../Errors/GenericError'
+import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { AuthModeType } from '../../common-code/domain-models'
 import { S3Provider } from '../../contexts/S3Context'
 import type { S3ClientT } from '../../s3'
@@ -22,8 +22,7 @@ function ErrorFallback({
     error: Error
     resetErrorBoundary?: () => void
 }): React.ReactElement {
-    console.log('generic error', error)
-    return <GenericError />
+    return <GenericErrorPage />
 }
 
 function App({

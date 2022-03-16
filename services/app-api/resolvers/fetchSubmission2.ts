@@ -3,11 +3,14 @@ import { isCMSUser, isStateUser, Submission2Type, submissionStatus } from '../..
 import { QueryResolvers, State } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
+import { setErrorAttributesOnActiveSpan, setResolverDetailsOnActiveSpan, setSuccessAttributesOnActiveSpan } from "./attributeHelper";
 
 export function fetchSubmission2Resolver(
     store: Store
 ): QueryResolvers['fetchSubmission2'] {
     return async (_parent, { input }, context) => {
+        const { user, span } = context
+        setResolverDetailsOnActiveSpan('createDraftSubmission', user, span)
         // fetch from the store
         const result = await store.findSubmissionWithRevisions(input.submissionID)
 
@@ -15,6 +18,7 @@ export function fetchSubmission2Resolver(
             console.log('Error finding a submission', result)
             const errMessage = `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
             logError('fetchStateSubmission', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
 
@@ -34,6 +38,7 @@ export function fetchSubmission2Resolver(
                     'fetchStateSubmission',
                     'user not authorized to fetch data from a different state'
                 )
+                setErrorAttributesOnActiveSpan('user not authorized to fetch data from a different state', span)
                 throw new ForbiddenError(
                     'user not authorized to fetch data from a different state'
                 )
@@ -44,16 +49,19 @@ export function fetchSubmission2Resolver(
                     'fetchStateSubmission',
                     'CMS user not authorized to fetch a draft'
                 )
+                setErrorAttributesOnActiveSpan('CMS user not authorized to fetch a draft', span)
                 throw new ForbiddenError(
                     'CMS user not authorized to fetch a draft'
                 )
             }
         } else {
             logError('fetchStateSubmission', 'unknown user type')
+            setErrorAttributesOnActiveSpan('unknown user type', span)
             throw new ForbiddenError(`unknown user type`)
         }
 
         logSuccess('fetchSubmission2')
+        setSuccessAttributesOnActiveSpan(span)
         return { submission }
     }
 }

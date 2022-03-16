@@ -86,8 +86,8 @@ describe('indexSubmissions2', () => {
         const relockedSubmission = await createTestStateSubmission(server)
 
         // unlock two
-        await unlockTestDraftSubmission(cmsServer, unlockedSubmission.id)
-        await unlockTestDraftSubmission(cmsServer, relockedSubmission.id)
+        await unlockTestDraftSubmission(cmsServer, unlockedSubmission.id, 'Test reason')
+        await unlockTestDraftSubmission(cmsServer, relockedSubmission.id, 'Test reason')
 
         // resubmit one
         await submitTestDraftSubmission(server, relockedSubmission.id)
