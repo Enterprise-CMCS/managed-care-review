@@ -4,13 +4,15 @@ import {
     newPackageCMSEmail,
     newPackageStateEmail,
     unlockPackageCMSEmail,
-    unlockPackageStateEmail
+    unlockPackageStateEmail,
+    resubmittedStateEmail,
+    resubmittedCMSEmail,
+    UpdatedEmailData
 } from './'
 import {
     StateSubmissionType,
     CognitoUserType,
 } from '../../app-web/src/common-code/domain-models'
-import { UnlockEmailData } from './templates'
 
 type EmailConfiguration = {
     stage: string
@@ -41,11 +43,19 @@ type Emailer = {
         user: CognitoUserType
     ) => Promise<void | Error>
     sendUnlockPackageCMSEmail: (
-        unlockEmailData: UnlockEmailData
+        updatedEmailData: UpdatedEmailData
     ) => Promise<void | Error>
     sendUnlockPackageStateEmail: (
         submission: StateSubmissionType,
-        unlockEmailData: UnlockEmailData
+        updatedEmailData: UpdatedEmailData
+    ) => Promise<void | Error>
+    sendResubmittedStateEmail: (
+        submission: StateSubmissionType,
+        updatedEmailData: UpdatedEmailData
+    ) => Promise<void | Error>
+    sendResubmittedCMSEmail: (
+        submission: StateSubmissionType,
+        updatedEmailData: UpdatedEmailData
     ) => Promise<void | Error>
 }
 
@@ -81,15 +91,23 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
             )
             return await this.sendEmail(emailData)
         },
-        sendUnlockPackageCMSEmail: async function (unlockEmailData){
-            const emailData = unlockPackageCMSEmail(unlockEmailData, config)
+        sendUnlockPackageCMSEmail: async function (updatedEmailData){
+            const emailData = unlockPackageCMSEmail(updatedEmailData, config)
             return await this.sendEmail(emailData)
         },
-        sendUnlockPackageStateEmail: async function (submission, unlockEmailData){
+        sendUnlockPackageStateEmail: async function (submission, updatedEmailData){
             const emailData = unlockPackageStateEmail(
                 submission,
-                unlockEmailData, 
+                updatedEmailData,
                 config)
+            return await this.sendEmail(emailData)
+        },
+        sendResubmittedStateEmail: async function (submission,updatedEmailData){
+            const emailData = resubmittedStateEmail(submission, updatedEmailData, config)
+            return await this.sendEmail(emailData)
+        },
+        sendResubmittedCMSEmail: async function (submission, updatedEmailData){
+            const emailData = resubmittedCMSEmail(submission, updatedEmailData, config)
             return await this.sendEmail(emailData)
         }
     }
@@ -134,9 +152,9 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
         `)
         },
         sendUnlockPackageCMSEmail: async (
-            unlockEmailData: UnlockEmailData
+            updatedEmailData: UpdatedEmailData
         ) => {
-            const emailData = unlockPackageCMSEmail(unlockEmailData, config)
+            const emailData = unlockPackageCMSEmail(updatedEmailData, config)
             const emailRequestParams = getSESEmailParams(emailData)
             console.log(`
             EMAIL SENT
@@ -147,9 +165,35 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
         },
         sendUnlockPackageStateEmail: async (
             submission: StateSubmissionType,
-            unlockEmailData: UnlockEmailData
+            updatedEmailData: UpdatedEmailData
         ) => {
-            const emailData = unlockPackageStateEmail(submission,unlockEmailData, config)
+            const emailData = unlockPackageStateEmail(submission, updatedEmailData, config)
+            const emailRequestParams = getSESEmailParams(emailData)
+            console.log(`
+            EMAIL SENT
+            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
+            ${JSON.stringify(emailRequestParams)}
+            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
+        `)
+        },
+        sendResubmittedStateEmail: async (
+            submission: StateSubmissionType,
+            updatedEmailData: UpdatedEmailData
+        ) => {
+            const emailData = resubmittedStateEmail(submission, updatedEmailData, config)
+            const emailRequestParams = getSESEmailParams(emailData)
+            console.log(`
+            EMAIL SENT
+            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
+            ${JSON.stringify(emailRequestParams)}
+            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
+        `)
+        },
+        sendResubmittedCMSEmail: async (
+            submission: StateSubmissionType,
+            updatedEmailData: UpdatedEmailData
+        ) => {
+            const emailData = resubmittedCMSEmail(submission, updatedEmailData, config)
             const emailRequestParams = getSESEmailParams(emailData)
             console.log(`
             EMAIL SENT
