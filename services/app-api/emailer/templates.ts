@@ -79,6 +79,7 @@ const newPackageCMSEmail = (
     ).href
     const bodyHTML = `
             ${testEmailAlert}
+            <br /><br />
             Managed Care submission: <b>${submissionName(
                 submission
             )}</b> was received from <b>${submission.stateCode}</b>.<br /><br />
@@ -119,6 +120,7 @@ const newPackageStateEmail = (
     )
     const bodyHTML =  `
             ${testEmailAlert}
+            <br /><br />
             ${submissionName(submission)} was successfully submitted.
             <br /><br />
             <a href="${submissionURL}">View submission</a>
@@ -167,14 +169,15 @@ const unlockPackageCMSEmail = (
     const reviewerEmails = config.cmsReviewSharedEmails
     const bodyHTML = `
         ${testEmailAlert}
-        <h1>Submission ${unlockData.submissionName} was unlocked</h1>
-        </br>
+        <br /><br />
+        Submission ${unlockData.submissionName} was unlocked
+        <br /><br />
         <b>Unlocked by:</b> ${unlockData.updatedBy}
-        </br>
+        <br /><br />
         <b>Unlocked on:</b> ${formatCalendarDate(unlockData.updatedAt)}
-        </br>
+        <br /><br />
         <b>Reason for unlock:</b> ${unlockData.updatedReason}
-        </br>
+        <br /><br />
         You will receive another notification when the state resubmits.
     `
     return {
@@ -194,20 +197,21 @@ const unlockPackageStateEmail = (
     config: EmailConfiguration
 ): EmailData => {
     const submissionURL = new URL(
-        `submissions/${submission.id}`,
+        `submissions/${submission.id}/review-and-submit`,
         config.baseUrl
     ).href
     const receiverEmails: string[] = submission.stateContacts.map((contact) => contact.email)
     const bodyHTML = `
         ${testEmailAlert}
-        <h1>Submission ${unlockData.submissionName} was unlocked by CMS</h1>
-        </br>
+        <br /><br />
+        Submission ${unlockData.submissionName} was unlocked by CMS
+        <br /><br />
         <b>Unlocked by:</b> ${unlockData.updatedBy}
-        </br>
+        <br /><br />
         <b>Unlocked on:</b> ${formatCalendarDate(unlockData.updatedAt)}
-        </br>
+        <br /><br />
         <b>Reason for unlock:</b> ${unlockData.updatedReason}
-        </br>
+        <br /><br />
         <a href="${submissionURL}">Open the submission in MC-Review to make edits.</a>
     `
     return {
