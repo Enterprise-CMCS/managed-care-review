@@ -2,13 +2,14 @@
         Emailer,
         newPackageCMSEmail,
         newPackageStateEmail,
-        UnlockEmailData,
+        UpdatedEmailData,
         unlockPackageCMSEmail,
-        unlockPackageStateEmail
+        unlockPackageStateEmail,
+        resubmittedStateEmail,
+        resubmittedCMSEmail,
     } from '../emailer'
     import { StateSubmissionType, CognitoUserType, CognitoStateUserType } from '../../app-web/src/common-code/domain-models'
 
-       
     const testEmailConfig: EmailConfiguration = {
         stage: 'LOCAL',
         baseUrl: 'http://localhost',
@@ -41,25 +42,47 @@
                 return this.sendEmail(emailData)
             },
             sendUnlockPackageCMSEmail: function async(
-                unlockEmailData: UnlockEmailData
+                updatedEmailData: UpdatedEmailData
             ): Promise<void | Error> {
                 const emailData = unlockPackageCMSEmail(
-                    unlockEmailData,
+                    updatedEmailData,
                     config
                 )
                 return this.sendEmail(emailData)
             },
             sendUnlockPackageStateEmail: function async(
                 submission: StateSubmissionType,
-                unlockEmailData: UnlockEmailData
+                updatedEmailData: UpdatedEmailData
             ): Promise<void | Error> {
                 const emailData = unlockPackageStateEmail(
                     submission,
-                    unlockEmailData,
+                    updatedEmailData,
                     config
                 )
                 return this.sendEmail(emailData)
             },
+            sendResubmittedStateEmail: function async(
+                submission: StateSubmissionType,
+                updatedEmailData: UpdatedEmailData
+            ): Promise<void | Error> {
+                const emailData = resubmittedStateEmail(
+                    submission,
+                    updatedEmailData,
+                    config
+                )
+                return this.sendEmail(emailData)
+            },
+            sendResubmittedCMSEmail: function async(
+                submission: StateSubmissionType,
+                updatedEmailData: UpdatedEmailData
+            ): Promise<void | Error> {
+                const emailData = resubmittedCMSEmail(
+                    submission,
+                    updatedEmailData,
+                    config
+                )
+                return this.sendEmail(emailData)
+            }
         }
     }
     
