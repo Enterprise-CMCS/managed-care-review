@@ -28,6 +28,8 @@ describe('submission 2 helpers', () => {
                             createdAt: new Date(),
                             submitInfo: {
                                 updatedAt: new Date(),
+                                updatedBy: 'test@example.com',
+                                updatedReason: 'Initial submit',
                             },
                             submissionFormProto: Buffer.from([1, 2, 3]),
                         },
@@ -48,8 +50,11 @@ describe('submission 2 helpers', () => {
                         {
                             id: 'bar',
                             createdAt: new Date('2022-01-01'),
-                            submitInfo: {
+                            unlockInfo: {
                                 updatedAt: new Date(),
+                                updatedBy: 'test@example.com',
+                                updatedReason:
+                                    'This is the reason for unlocking',
                             },
                             submissionFormProto: Buffer.from([1, 2, 3]),
                         },
@@ -67,14 +72,25 @@ describe('submission 2 helpers', () => {
                             createdAt: new Date(),
                             submitInfo: {
                                 updatedAt: new Date(),
+                                updatedBy: 'test@example.com',
+                                updatedReason: 'Initial submit',
                             },
                             submissionFormProto: Buffer.from([1, 2, 3]),
                         },
                         {
                             id: 'bar',
                             createdAt: new Date('2022-01-01'),
+                            unlockInfo: {
+                                updatedAt: new Date(),
+                                updatedBy: 'test@example.com',
+                                updatedReason:
+                                    'This is the reason for unlocking',
+                            },
                             submitInfo: {
                                 updatedAt: new Date(),
+                                updatedBy: 'test@example.com',
+                                updatedReason:
+                                    'This is the reason for resubmitting',
                             },
                             submissionFormProto: Buffer.from([1, 2, 3]),
                         },
@@ -140,6 +156,8 @@ describe('submission 2 helpers', () => {
                             createdAt: new Date(),
                             submitInfo: {
                                 updatedAt: new Date(2022, 1, 1),
+                                updatedBy: 'test@example.com',
+                                updatedReason: 'Initial submit',
                             },
                             submissionFormProto: Buffer.from([1, 2, 3]),
                         },
@@ -162,6 +180,8 @@ describe('submission 2 helpers', () => {
                             createdAt: new Date('2022-01-01'),
                             submitInfo: {
                                 updatedAt: new Date(2022, 1, 1),
+                                updatedBy: 'test@example.com',
+                                updatedReason: 'Initial submit',
                             },
                             submissionFormProto: Buffer.from([1, 2, 3]),
                         },
@@ -177,22 +197,21 @@ describe('submission 2 helpers', () => {
                         {
                             id: 'baz',
                             createdAt: new Date(),
-                            submitInfo: {
-                                updatedAt: new Date(2022, 2, 2),
-                            },
                             submissionFormProto: Buffer.from([1, 2, 3]),
                         },
                         {
                             id: 'bar',
                             createdAt: new Date('2022-01-01'),
                             submitInfo: {
-                                updatedAt: new Date(2022, 1, 1),
+                                updatedAt: new Date(2022, 2, 4),
+                                updatedBy: 'test@example.com',
+                                updatedReason: 'Initial submit',
                             },
                             submissionFormProto: Buffer.from([1, 2, 3]),
                         },
                     ],
                 },
-                new Date(2022, 1, 1),
+                new Date(2022, 2, 4),
             ],
         ]
 

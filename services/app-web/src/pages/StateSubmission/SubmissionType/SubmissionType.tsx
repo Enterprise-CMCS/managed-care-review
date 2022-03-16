@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react'
 import * as Yup from 'yup'
 import {
-    Alert,
     Form as UswdsForm,
     Fieldset,
     FormGroup,
@@ -36,6 +35,7 @@ import {
     updatesFromSubmission,
 } from '../updateSubmissionTransform'
 import { PageActions } from '../PageActions'
+import { GenericApiErrorBanner } from '../../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 
 // Formik setup
 // Should be listed in order of appearance on field to allow errors to focus as expected
@@ -73,7 +73,6 @@ export const SubmissionType = ({
     showValidations = false,
     draftSubmission,
     updateDraft,
-    formAlert,
 }: SubmissionTypeProps): React.ReactElement => {
     const [showFormAlert, setShowFormAlert] = React.useState(false)
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
@@ -130,7 +129,7 @@ export const SubmissionType = ({
         setFocusErrorSummaryHeading(false)
     }, [focusErrorSummaryHeading])
 
-    if ((error || formAlert) && !showFormAlert) {
+    if ((error) && !showFormAlert) {
         setShowFormAlert(true)
     }
 
@@ -242,11 +241,7 @@ export const SubmissionType = ({
                         <fieldset className="usa-fieldset">
                             <legend className="srOnly">Submission type</legend>
                             {showFormAlert &&
-                                (formAlert || (
-                                    <Alert type="error">
-                                        Something went wrong
-                                    </Alert>
-                                ))}
+                                <GenericApiErrorBanner />}
                             <span id="form-guidance">
                                 All fields are required
                             </span>

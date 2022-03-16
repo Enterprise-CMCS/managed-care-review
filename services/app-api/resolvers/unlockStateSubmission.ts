@@ -1,6 +1,6 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import {
-    DraftSubmissionType, isCMSUser, StateSubmissionType, UpdateInfoType
+    DraftSubmissionType, isCMSUser, StateSubmissionType, UpdateInfoType, submissionName
 } from '../../app-web/src/common-code/domain-models'
 import { Emailer } from '../emailer'
 import { MutationResolvers } from '../gen/gqlServer'
@@ -27,7 +27,7 @@ function unlock(submission: StateSubmissionType
 // transforming it from a DraftSubmission to a StateSubmission
 export function unlockStateSubmissionResolver(
     store: Store,
-    _emailer: Emailer
+    emailer: Emailer
 ): MutationResolvers['unlockStateSubmission'] {
     return async (_parent, { input }, context) => {
 
@@ -86,6 +86,33 @@ export function unlockStateSubmissionResolver(
             logError('unlockStateSubmission', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
+        }
+
+        // Send emails!
+        const unlockEmailData = {
+            ...unlockInfo, 
+            submissionName: submissionName(submission)
+        }
+        const unlockPackageCMSEmailResult = await
+        emailer.sendUnlockPackageCMSEmail(unlockEmailData)
+
+        const unlockPackageStateEmailResult = await
+        emailer.sendUnlockPackageStateEmail(submission, unlockEmailData)
+
+        if (unlockPackageCMSEmailResult instanceof Error) {
+            logError(
+                'unlockPackageCMSEmail - CMS email failed',
+                unlockPackageCMSEmailResult
+            )
+            throw unlockPackageCMSEmailResult
+        }
+
+        if (unlockPackageStateEmailResult instanceof Error) {
+            logError(
+                'unlockPackageCMSEmail - CMS email failed',
+                unlockPackageStateEmailResult
+            )
+            throw unlockPackageStateEmailResult
         }
 
         logSuccess('unlockStateSubmission')
