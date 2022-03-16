@@ -1,10 +1,8 @@
 import { PrismaClient } from '@prisma/client'
 import {
-    isStateSubmission,
-    StateSubmissionType
+    StateSubmissionType, Submission2Type
 } from '../../app-web/src/common-code/domain-models'
 import {
-    toDomain,
     toProtoBuffer
 } from '../../app-web/src/common-code/proto/stateSubmission'
 import { convertPrismaErrorToStoreError, isStoreError, StoreError } from './storeError'
@@ -15,7 +13,7 @@ async function submitStateSubmissionWrapper(
     id: string,
     submittedAt: Date,
     proto: Buffer
-): Promise<Buffer | StoreError> {
+): Promise<Submission2Type | StoreError> {
 
     try {
         const findResult = await client.stateSubmission.findUnique({
@@ -34,7 +32,7 @@ async function submitStateSubmissionWrapper(
 
         try {
             const currentRevision = currentRevisionOrError
-            const updateResult = await client.stateSubmission.update( {
+            return await client.stateSubmission.update( {
                 where: {
                     id
                 },
@@ -59,14 +57,6 @@ async function submitStateSubmissionWrapper(
                     }
                 },
             })
-
-            const updatedRevisionOrError = getCurrentRevision(id, updateResult)
-            if (isStoreError(updatedRevisionOrError)) {
-                return updatedRevisionOrError
-            } else {
-                const updatedRevision = updatedRevisionOrError
-                return updatedRevision.submissionFormProto
-            }
         } catch (updateError) {
             return convertPrismaErrorToStoreError(updateError)
         }
@@ -81,7 +71,7 @@ export async function updateStateSubmission(
     client: PrismaClient,
     stateSubmission: StateSubmissionType,
     submittedAt: Date,
-): Promise<StateSubmissionType | StoreError> {
+): Promise<Submission2Type | StoreError> {
     stateSubmission.updatedAt = new Date()
 
     const proto = toProtoBuffer(stateSubmission)
@@ -98,26 +88,5 @@ export async function updateStateSubmission(
         return updateResult
     }
 
-    const decodeUpdated = toDomain(updateResult)
-
-    if (decodeUpdated instanceof Error) {
-        console.log(
-            'ERROR: decoding protobuf with id: ',
-            stateSubmission.id,
-            decodeUpdated
-        )
-        return {
-            code: 'PROTOBUF_ERROR',
-            message: 'Error decoding protobuf',
-        }
-    }
-
-    if (!isStateSubmission(decodeUpdated)) {
-        return {
-            code: 'WRONG_STATUS',
-            message: 'The updated submission is not a DraftSubmission',
-        }
-    }
-
-    return decodeUpdated
+    return updateResult
 }

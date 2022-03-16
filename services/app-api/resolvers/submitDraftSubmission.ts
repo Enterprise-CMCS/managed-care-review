@@ -5,14 +5,15 @@ import {
     hasValidDocuments, hasValidRates, hasValidSupportingDocumentCategories, isContractAndRates,
     isStateSubmission,
     isStateUser,
-    StateSubmissionType
+    StateSubmissionType, Submission2Type,
+    submissionStatus
 } from '../../app-web/src/common-code/domain-models'
 import { Emailer } from '../emailer'
 import { MutationResolvers, State } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
 import { setResolverDetailsOnActiveSpan, setErrorAttributesOnActiveSpan, setSuccessAttributesOnActiveSpan } from './attributeHelper'
-
+import { toDomain } from 'app-web/src/common-code/proto/stateSubmission'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = typeof SubmissionErrorCodes[number] // iterable union type
@@ -54,7 +55,7 @@ function submit(
         submittedAt: new Date(),
     }
     if (isStateSubmission(maybeStateSubmission)) return maybeStateSubmission
-    
+
     else if (!hasValidContract(maybeStateSubmission as StateSubmissionType)) {
         return {
             code: 'INCOMPLETE',
@@ -115,7 +116,7 @@ export function submitDraftSubmissionResolver(
         }
 
         // fetch from the store
-        const result = await store.findDraftSubmission(input.submissionID)
+        const result = await store.findSubmissionWithRevisions(input.submissionID)
 
         if (isStoreError(result)) {
             const errMessage = `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
@@ -133,11 +134,12 @@ export function submitDraftSubmissionResolver(
             })
         }
 
-        const draft: DraftSubmissionType = result
+        const planPackage: Submission2Type = result
+        const currentRevision = planPackage.revisions[0]
 
         // Authorization
         const stateFromCurrentUser: State['code'] = user.state_code
-        if (draft.stateCode !== stateFromCurrentUser) {
+        if (planPackage.stateCode !== stateFromCurrentUser) {
             logError(
                 'submitDraftSubmission',
                 'user not authorized to fetch data from a different state'
@@ -148,8 +150,22 @@ export function submitDraftSubmissionResolver(
             )
         }
 
+        const draftResult = toDomain(currentRevision.submissionFormProto)
+
+        if (draftResult instanceof Error) {
+            const errMessage = `Failed to decode draft proto ${draftResult}.`
+            logError('submitDraftSubmission', errMessage)
+            throw new Error(errMessage)
+        }
+
+        if (draftResult.status === 'SUBMITTED') {
+            const errMessage = `Attempted to submit and already submitted package.`
+            logError('submitDraftSubmission', errMessage)
+            throw new Error(errMessage)
+        }
+
         // attempt to parse into a StateSubmission
-        const submissionResult = submit(draft)
+        const submissionResult = submit(draftResult)
 
         if (isSubmissionError(submissionResult)) {
             logError(
@@ -168,6 +184,7 @@ export function submitDraftSubmissionResolver(
         const stateSubmission: StateSubmissionType = submissionResult
 
         // Save the submission!
+
         const updateResult = await store.updateStateSubmission(stateSubmission, new Date())
         if (isStoreError(updateResult)) {
             const errMessage = `Issue updating a state submission of type ${updateResult.code}. Message: ${updateResult.message}`
@@ -176,7 +193,10 @@ export function submitDraftSubmissionResolver(
             throw new Error(errMessage)
         }
 
-        const updatedSubmission: StateSubmissionType = updateResult
+        const updatedSubmission: Submission2Type = updateResult
+
+        //TODO: Add check for resubmitted submission and switch emailer to notify of resubmission.
+        const status = submissionStatus(updatedSubmission)
 
         // Send emails!
         const cmsNewPackageEmailResult = await

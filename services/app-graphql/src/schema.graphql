@@ -102,7 +102,7 @@ input SubmitDraftSubmissionInput {
 }
 
 type SubmitDraftSubmissionPayload {
-    submission: StateSubmission!
+    submission: Submission2!
 }
 
 input UnlockStateSubmissionInput {

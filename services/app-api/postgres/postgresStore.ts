@@ -50,7 +50,7 @@ type Store = {
     updateStateSubmission: (
         stateSubmission: StateSubmissionType,
         submittedAt: Date
-    ) => Promise<StateSubmissionType | StoreError>
+    ) => Promise<Submission2Type | StoreError>
 
     insertNewRevision: (
         submissionID: string,
