@@ -1,4 +1,5 @@
 import { DraftSubmissionType } from './DraftSubmissionType'
+import { ProgramT } from './ProgramT'
 import { StateSubmissionType } from './StateSubmissionType'
 import { SubmissionUnionType } from './SubmissionUnionType'
 
@@ -104,6 +105,24 @@ function submissionName(submission: SubmissionUnionType): string {
     return `MCR-${submission.stateCode.toUpperCase()}-${submission.programIDs.sort(naturalSort).join('-').toUpperCase()}-${padNumber}`
 }
 
+// Pull out the programs names for display from the program IDs
+function programNames(programs: ProgramT[], programIDs: string[]): string[] {
+    return programIDs.map(id => {
+        const program = programs.find(p => p.id === id)
+        if (!program) {
+            return "Unknown Program"
+        }
+        return program.name
+    })
+}
+
+function submissionNameWithPrograms(submission: SubmissionUnionType, statePrograms: ProgramT[]): string {
+    const padNumber = submission.stateNumber.toString().padStart(4, '0')
+    const pNames = programNames(statePrograms, submission.programIDs)
+    const formattedProgramNames = pNames.sort(naturalSort).map(n => n.replace(/\s/g, '-').replace(/[^a-zA-Z0-9+]/g, '').toUpperCase()).join('-')
+    return `MCR-${submission.stateCode.toUpperCase()}-${formattedProgramNames}-${padNumber}`
+}
+
 export {
     hasValidContract,
     hasValidDocuments,
@@ -114,4 +133,5 @@ export {
     isStateSubmission,
     isDraftSubmission,
     submissionName,
+    submissionNameWithPrograms,
 }

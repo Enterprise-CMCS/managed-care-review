@@ -1,41 +1,29 @@
+import {
+    Alert, Fieldset, Form as UswdsForm, FormGroup, Label, Link
+} from '@trussworks/react-uswds'
+import { Field, Formik, FormikErrors, FormikHelpers } from 'formik'
 import React, { useEffect } from 'react'
+import { Link as ReactRouterLink, useHistory } from 'react-router-dom'
+import Select, { AriaOnFocus } from 'react-select'
 import * as Yup from 'yup'
 import {
-    Alert,
-    Form as UswdsForm,
-    Fieldset,
-    FormGroup,
-    Link,
-    Label,
-} from '@trussworks/react-uswds'
-import { Formik, FormikHelpers, FormikErrors, Field } from 'formik'
-import { useHistory, Link as ReactRouterLink } from 'react-router-dom'
-import Select, { AriaOnFocus } from 'react-select'
-
-import {
-    CreateDraftSubmissionInput,
-    DraftSubmission,
-    SubmissionType as SubmissionTypeT,
-    useCreateDraftSubmissionMutation,
-    UpdateDraftSubmissionInput,
-    Program,
-} from '../../../gen/gqlClient'
-
-import styles from '../StateSubmissionForm.module.scss'
-
-import { useAuth } from '../../../contexts/AuthContext'
-import {
-    ErrorSummary,
-    FieldTextarea,
-    FieldRadio,
-    PoliteErrorMessage,
+    ErrorSummary, FieldRadio, FieldTextarea, PoliteErrorMessage
 } from '../../../components'
 import { SubmissionTypeRecord } from '../../../constants/submissions'
+import { useAuth } from '../../../contexts/AuthContext'
+import {
+    CreateDraftSubmissionInput,
+    DraftSubmission, Program, SubmissionType as SubmissionTypeT, UpdateDraftSubmissionInput, useCreateDraftSubmissionMutation
+} from '../../../gen/gqlClient'
+import { PageActions } from '../PageActions'
+import styles from '../StateSubmissionForm.module.scss'
 import {
     cleanDraftSubmission,
-    updatesFromSubmission,
+    updatesFromSubmission
 } from '../updateSubmissionTransform'
-import { PageActions } from '../PageActions'
+
+
+
 
 // Formik setup
 // Should be listed in order of appearance on field to allow errors to focus as expected
@@ -273,10 +261,17 @@ export const SubmissionType = ({
                                     {({ field, form }) => (
                                         <Select
                                             defaultValue={values.programIDs.map(
-                                                (item) => {
+                                                (programID) => {
+                                                    const program = programs.find(p => p.id === programID)
+                                                    if (!program) {
+                                                        return {
+                                                            value: programID,
+                                                            label: 'Unknown Program'
+                                                        }
+                                                    }
                                                     return {
-                                                        value: item,
-                                                        label: item.toUpperCase(),
+                                                        value: program.id,
+                                                        label: program.name,
                                                     }
                                                 }
                                             )}

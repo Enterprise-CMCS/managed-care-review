@@ -4,10 +4,10 @@ import { GraphQLError } from 'graphql'
 import {
     basicStateSubmission,
     basicSubmission,
-    draftWithALittleBitOfEverything,
+    draftWithALittleBitOfEverything
 } from '../common-code/domain-mocks'
 import {
-    DraftSubmissionType,
+    DraftSubmissionType
 } from '../common-code/domain-models'
 import { domainToBase64 } from '../common-code/proto/stateSubmission'
 import {
@@ -17,15 +17,13 @@ import {
     FetchCurrentUserDocument,
     FetchDraftSubmissionDocument,
     FetchStateSubmissionDocument,
-    FetchSubmission2Document,
-    IndexSubmissionsDocument,
+    FetchSubmission2Document, IndexSubmissions2Document, IndexSubmissionsDocument,
     StateSubmission,
     Submission,
-    Submission2,
-    IndexSubmissions2Document, SubmitDraftSubmissionDocument,
+    Submission2, SubmitDraftSubmissionDocument,
     UnlockStateSubmissionDocument,
     UpdateDraftSubmissionDocument,
-    User as UserType,
+    User as UserType
 } from '../gen/gqlClient'
 
 
@@ -63,10 +61,6 @@ export function mockDraft(): DraftSubmission {
         id: 'test-abc-123',
         stateCode: 'MN',
         programIDs: ['snbc'],
-        program: {
-            id: 'snbc',
-            name: 'SNBC',
-        },
         name: 'MN-MSHO-0001',
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A real submission',
@@ -99,10 +93,6 @@ export function mockContactAndRatesDraft(): DraftSubmission {
         id: 'test-abc-123',
         stateCode: 'MN',
         programIDs: ['snbc'],
-        program: {
-            id: 'snbc',
-            name: 'SNBC',
-        },
         name: 'MN-MSHO-0001',
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A real submission',
@@ -134,10 +124,6 @@ export function mockCompleteDraft(): DraftSubmission {
         id: 'test-abc-123',
         stateCode: 'MN',
         programIDs: ['snbc'],
-        program: {
-            id: 'snbc',
-            name: 'SNBC',
-        },
         name: 'MN-MSHO-0001',
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A real submission',
@@ -175,10 +161,6 @@ export function mockContractAndRatesDraft(): DraftSubmission {
         id: 'test-abc-123',
         stateCode: 'MN',
         programIDs: ['pmap'],
-        program: {
-            id: 'pmap',
-            name: 'PMAP',
-        },
         name: 'MN-PMAP-0001',
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A real submission',
@@ -244,10 +226,6 @@ function mockNewDraft(): DraftSubmission {
         id: 'test-abc-124',
         stateCode: 'MN',
         programIDs: ['snbc'],
-        program: {
-            id: 'snbc',
-            name: 'SNBC',
-        },
         name: 'MN-MSHO-0002',
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A real submission',
@@ -279,10 +257,6 @@ export function mockStateSubmission(): StateSubmission {
         id: 'test-abc-125',
         stateCode: 'MN',
         programIDs: ['snbc'],
-        program: {
-            id: 'snbc',
-            name: 'SNBC',
-        },
         name: 'MN-MSHO-0003',
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A submitted submission',

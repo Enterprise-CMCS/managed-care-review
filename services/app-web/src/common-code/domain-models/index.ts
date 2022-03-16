@@ -16,10 +16,10 @@ export type { ProgramT } from './ProgramT'
 export type { StateSubmissionType } from './StateSubmissionType'
 export {
     hasValidContract,
-    hasValidDocuments, hasValidRates, hasValidSupportingDocumentCategories, isContractAndRates, isContractOnly, isDraftSubmission, isStateSubmission, submissionName
+    hasValidDocuments, hasValidRates, hasValidSupportingDocumentCategories, isContractAndRates, isContractOnly, isDraftSubmission, isStateSubmission, submissionName, submissionNameWithPrograms
 } from './submission'
 export { submissionCurrentRevision, submissionStatus, submissionSubmittedAt } from './submission2'
-export type { Submission2Type, UpdateInfoType, RevisionType } from './Submission2Type'
+export type { RevisionType, Submission2Type, UpdateInfoType } from './Submission2Type'
 export type { SubmissionUnionType } from './SubmissionUnionType'
 // Type checks and type guards
 export { isCMSUser, isCognitoUser, isStateUser } from './user'

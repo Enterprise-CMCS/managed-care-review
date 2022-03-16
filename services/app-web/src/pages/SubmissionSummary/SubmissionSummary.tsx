@@ -14,10 +14,10 @@ import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
 import { DraftSubmission, StateSubmission, Submission2, UnlockStateSubmissionMutationFn, useFetchSubmission2Query, useUnlockStateSubmissionMutation } from '../../gen/gqlClient'
 import { isGraphQLErrors } from '../../gqlHelpers'
-import { GenericError } from '../Errors/GenericError'
 import { Error404 } from '../Errors/Error404'
-
+import { GenericError } from '../Errors/GenericError'
 import styles from './SubmissionSummary.module.scss'
+
 
 function unlockModalButton(modalRef: React.RefObject<ModalRef>, disabled: boolean) {
     return (
@@ -168,18 +168,10 @@ export const SubmissionSummary = (): React.ReactElement => {
         ...packageData,
         __typename: 'DraftSubmission' as const,
         name: submissionName(packageData),
-        program: {
-            id: 'bogs-id',
-            name: 'bogus-program'
-        },
     } : {
         ...packageData,
         __typename: 'StateSubmission' as const,
         name: submissionName(packageData),
-        program: {
-            id: 'bogs-id',
-            name: 'bogus-program'
-        },
         submittedAt: submissionAndRevisions.intiallySubmittedAt
     }
 

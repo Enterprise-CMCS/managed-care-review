@@ -3,18 +3,17 @@ import classnames from 'classnames'
 import dayjs from 'dayjs'
 import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
+import { submissionNameWithPrograms } from '../../common-code/domain-models'
+import { Submission2Status } from '../../common-code/domain-models/Submission2Type'
+import { base64ToDomain } from '../../common-code/proto/stateSubmission'
 import { Loading } from '../../components/Loading'
+import { SubmissionStatusRecord } from '../../constants/submissions'
 import { useAuth } from '../../contexts/AuthContext'
 import {
-    SubmissionType as GQLSubmissionType,
-    useIndexSubmissions2Query,
+    Program, SubmissionType as GQLSubmissionType, useIndexSubmissions2Query
 } from '../../gen/gqlClient'
 import styles from './Dashboard.module.scss'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
-import { base64ToDomain } from '../../common-code/proto/stateSubmission'
-import { submissionName } from '../../common-code/domain-models'
-import { SubmissionStatusRecord } from '../../constants/submissions'
-import {Submission2Status} from '../../common-code/domain-models/Submission2Type'
 
 // We only pull a subset of data out of the submission and revisions for display in Dashboard
 type SubmissionInDashboard = {
@@ -57,6 +56,17 @@ const StatusTag = ({status} : {status: Submission2Status}): React.ReactElement =
             {statusText}
         </Tag>
     )
+}
+
+// Pull out the programs names for display from the program IDs
+function programNames(programs: Program[], programIDs: string[]) {
+    return programIDs.map(id => {
+        const program = programs.find(p => p.id === id)
+        if (!program) {
+            return "Unknown Program"
+        }
+        return program.name
+    })
 }
 
 export const Dashboard = (): React.ReactElement => {
@@ -105,8 +115,8 @@ export const Dashboard = (): React.ReactElement => {
 
             submissionRows.push({
                 id: sub.id,
-                name: submissionName(currentSubmissionData),
-                programIDs: currentSubmissionData.programIDs,
+                name: submissionNameWithPrograms(currentSubmissionData, programs),
+                programIDs: programNames(programs, currentSubmissionData.programIDs),
                 submittedAt: sub.intiallySubmittedAt,
                 status: sub.status,
                 updatedAt: currentSubmissionData.updatedAt,

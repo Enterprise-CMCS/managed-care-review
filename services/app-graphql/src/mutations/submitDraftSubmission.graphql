@@ -7,10 +7,6 @@ mutation submitDraftSubmission($input: SubmitDraftSubmissionInput!) {
             updatedAt
             submittedAt
             programIDs
-            program {
-                name
-                id
-            }
             stateCode
             submissionType
             submissionDescription

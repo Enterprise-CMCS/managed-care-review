@@ -1,14 +1,11 @@
 import { PrismaClient } from '@prisma/client'
 import { Submission2Type } from '../../app-web/src/common-code/domain-models'
-import {findAllSubmissionWrapper} from './findAllSubmissions'
+import { findAllSubmissionWrapper } from './findAllSubmissions'
 import {
     isStoreError,
-    StoreError,
+    StoreError
 } from './storeError'
-import { convertToSubmission2Type } from './submissionWithRevisionsHelpers'
-import {
-    getCurrentRevision,
-} from './submissionWithRevisionsHelpers'
+import { convertToSubmission2Type, getCurrentRevision } from './submissionWithRevisionsHelpers'
 
 
 

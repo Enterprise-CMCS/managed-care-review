@@ -59,7 +59,7 @@ type Store = {
     findPrograms: (
         stateCode: string,
         programIDs: Array<string>
-    ) => ProgramT | undefined
+    ) => ProgramT[] | undefined
 
     // new api
     findSubmissionWithRevisions: (
