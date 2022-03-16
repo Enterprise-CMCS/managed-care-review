@@ -14,7 +14,7 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
 import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web'
 
-const serviceName = 'app-web'
+const serviceName = 'app-web-' + process.env.REACT_APP_STAGE_NAME
 
 const provider = new WebTracerProvider({
     resource: new Resource({
