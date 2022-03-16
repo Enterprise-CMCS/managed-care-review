@@ -190,6 +190,7 @@ describe('SubmissionSummary', () => {
 
         const banner = expect(await screen.findByTestId('unlockedBanner'))
         banner.toBeInTheDocument()
+        banner.toHaveClass('usa-alert--warning')
         banner.toHaveTextContent(/Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+\s[a-zA-Z]+/i)
         banner.toHaveTextContent('Unlocked by: bob@dmas.mn.govUnlocked')
         banner.toHaveTextContent('Reason for unlock: Test unlock reason')
@@ -317,6 +318,55 @@ describe('SubmissionSummary', () => {
 
         expect(await screen.findByText(
             'Reason for unlocking submission is required'
+        )).toBeInTheDocument()
+    })
+
+    it('displays error when submitting unlock reason over 300 characters', async () => {
+        renderWithProviders(
+            <Route
+                path={RoutesRecord.SUBMISSIONS_FORM}
+                component={SubmissionSummary}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ user: mockValidCMSUser(),  statusCode: 200 }),
+                        fetchStateSubmission2MockSuccess({
+                            id: '15',
+                        }),
+                        unlockStateSubmissionMockSuccess(
+                            {
+                                id: '15',
+                                reason: 'Test Reason'
+                            })
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15',
+                },
+            }
+        )
+
+        const unlockModalButton = await screen.findByRole('button', { name: 'Unlock submission' })
+        userEvent.click(unlockModalButton)
+
+        // the popup dialog should be visible now
+        await waitFor(() => {
+            const dialog = screen.getByRole('dialog')
+            expect(dialog).toHaveClass('is-visible')
+        })
+
+        const textbox = screen.getByTestId('unlockReason')
+        userEvent.type(
+            textbox,
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin vulputate ultricies suscipit. Suspendisse consequat at mauris a iaculis. Praesent lorem massa, pellentesque et tempor et, laoreet quis lectus. Vestibulum finibus condimentum nulla, vel tristique tellus pretium sollicitudin. Curabitur velit enim, pulvinar eu fermentum vel, fringilla quis leo.'
+        )
+
+        const unlockButton = screen.getByTestId('modal-submit')
+        userEvent.click(unlockButton)
+
+        expect(await screen.findByText(
+            'Reason for unlocking submission is too long'
         )).toBeInTheDocument()
     })
 })

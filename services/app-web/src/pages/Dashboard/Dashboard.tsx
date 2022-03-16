@@ -1,4 +1,4 @@
-import { Alert, GridContainer, Link, Table, Tag } from '@trussworks/react-uswds'
+import { GridContainer, Link, Table, Tag } from '@trussworks/react-uswds'
 import classnames from 'classnames'
 import dayjs from 'dayjs'
 import React from 'react'
@@ -15,6 +15,7 @@ import { base64ToDomain } from '../../common-code/proto/stateSubmission'
 import { submissionName } from '../../common-code/domain-models'
 import { SubmissionStatusRecord } from '../../constants/submissions'
 import {Submission2Status} from '../../common-code/domain-models/Submission2Type'
+import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 
 // We only pull a subset of data out of the submission and revisions for display in Dashboard
 type SubmissionInDashboard = {
@@ -69,9 +70,10 @@ export const Dashboard = (): React.ReactElement => {
         console.error('Error indexing submissions: ', error)
         return (
             <div id="dashboard-page" className={styles.wrapper}>
-                <Alert type="error">
-                    Unexpected error loading your submissions, please try again.
-                </Alert>
+                {/*  this div is needed for positioning */}
+                <div>
+                    <GenericApiErrorBanner message="We're having trouble loading this page. Please refresh your browser and if you continue to experience an error, let us know." />
+                </div>
             </div>
         )
     }
