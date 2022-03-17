@@ -17,6 +17,7 @@ import {
     FetchCurrentUserDocument,
     FetchStateSubmissionDocument,
     FetchSubmission2Document, IndexSubmissions2Document, IndexSubmissionsDocument,
+    State,
     StateSubmission,
     Submission,
     Submission2, SubmitDraftSubmissionDocument,
@@ -305,6 +306,30 @@ export function mockStateSubmission(): StateSubmission {
     }
 }
 
+export function mockMNState(): State {
+    return {
+      "name": "Minnesota",
+      "programs": [
+        {
+          "id": "abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce",
+          "name": "SNBC"
+        },
+        {
+          "id": "d95394e5-44d1-45df-8151-1cc1ee66f100",
+          "name": "PMAP"
+        },
+        {
+          "id": "ea16a6c0-5fc6-4df8-adac-c627e76660ab",
+          "name": "MSC+"
+        },
+        {
+          "id": "3fd36500-bf2c-47bc-80e8-e7aa417184c5",
+          "name": "MSHO"
+        }
+      ],
+      "code": "MN"
+    }
+}
 
 export function mockDraftSubmission2(submissionData?: Partial<DraftSubmissionType>): Submission2 {
     const submission = {...basicSubmission(), ...submissionData}
@@ -316,6 +341,7 @@ export function mockDraftSubmission2(submissionData?: Partial<DraftSubmissionTyp
         status: 'DRAFT',
         intiallySubmittedAt: '2022-01-01',
         stateCode: 'MN',
+        state: mockMNState(),
         revisions: [
             {
                 revision: {
@@ -342,6 +368,7 @@ export function mockSubmittedSubmission2(): Submission2 {
         status: 'SUBMITTED',
         intiallySubmittedAt: '2022-01-01',
         stateCode: 'MN',
+        state: mockMNState(),
         revisions: [
             {
                 revision: {
@@ -375,6 +402,7 @@ export function mockUnlockedSubmission2(
         status: 'UNLOCKED',
         intiallySubmittedAt: '2020-01-01',
         stateCode: 'MN',
+        state: mockMNState(),
         revisions: [
             {
                 revision: {

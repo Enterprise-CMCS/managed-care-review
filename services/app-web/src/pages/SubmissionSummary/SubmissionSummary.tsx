@@ -7,7 +7,7 @@ import {
 import React, { useEffect, useState } from 'react'
 import { NavLink, useLocation, useParams } from 'react-router-dom'
 import sprite from 'uswds/src/img/sprite.svg'
-import { submissionName, SubmissionUnionType, UpdateInfoType } from '../../common-code/domain-models'
+import { submissionName, submissionNameWithPrograms, SubmissionUnionType, UpdateInfoType } from '../../common-code/domain-models'
 import { base64ToDomain } from '../../common-code/proto/stateSubmission'
 import { Modal, PoliteErrorMessage, SubmissionUnlockedBanner } from '../../components'
 import { Loading } from '../../components/Loading'
@@ -25,7 +25,7 @@ import {
     useFetchSubmission2Query,
     useUnlockStateSubmissionMutation
 } from '../../gen/gqlClient'
-import { isGraphQLErrors } from '../../gqlHelpers'
+import { convertDomainModelFormDataToGQLSubmission, isGraphQLErrors } from '../../gqlHelpers'
 import { Error404 } from '../Errors/Error404'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './SubmissionSummary.module.scss'
@@ -154,8 +154,9 @@ export const SubmissionSummary = (): React.ReactElement => {
     }, [submissionAndRevisions, setPackageData, setPageLevelAlert])
 
     useEffect(() => {
-        if (packageData) {
-            updateHeading(pathname, submissionName(packageData))
+        if (packageData && submissionAndRevisions) {
+            const programs = submissionAndRevisions.state.programs
+            updateHeading(pathname, submissionNameWithPrograms(packageData, programs))
         }
     }, [updateHeading, pathname, packageData])
 
@@ -205,19 +206,12 @@ export const SubmissionSummary = (): React.ReactElement => {
         resetModal()
     }
 
+    const statePrograms = submissionAndRevisions.state.programs
+
     // temporary kludge while the display data is expecting the wrong format. 
     // This is turning our domain model into the GraphQL model which is what
     // all our frontend stuff expects right now. 
-    const submission: StateSubmission | DraftSubmission = packageData.status === 'DRAFT' ? {
-        ...packageData,
-        __typename: 'DraftSubmission' as const,
-        name: submissionName(packageData),
-    } : {
-        ...packageData,
-        __typename: 'StateSubmission' as const,
-        name: submissionName(packageData),
-        submittedAt: submissionAndRevisions.intiallySubmittedAt
-    }
+    const submission = convertDomainModelFormDataToGQLSubmission(packageData, statePrograms)
 
     const disableUnlockButton = ['DRAFT', 'UNLOCKED'].includes(submissionAndRevisions.status)
 
@@ -265,7 +259,11 @@ export const SubmissionSummary = (): React.ReactElement => {
                     </Link>
                 ) : null}
 
-                <SubmissionTypeSummarySection submission={submission} unlockModalButton={displayUnlockButton ? unlockModalButton(() => setShowModal(true), disableUnlockButton) : undefined} statePrograms={[]} />
+                <SubmissionTypeSummarySection 
+                    submission={submission} 
+                    unlockModalButton={displayUnlockButton ? unlockModalButton(() => setShowModal(true), disableUnlockButton) : undefined} 
+                    statePrograms={statePrograms} 
+                />
 
                 <ContractDetailsSummarySection submission={submission} />
 

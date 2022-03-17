@@ -155,6 +155,7 @@ type Submission2 {
     status: Submission2Status!
     intiallySubmittedAt: Date
     stateCode: String!
+    state: State!
     revisions: [RevisionEdge!]!
 }
 
