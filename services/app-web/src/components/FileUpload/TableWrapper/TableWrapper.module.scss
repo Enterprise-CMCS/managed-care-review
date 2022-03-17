@@ -1,0 +1,12 @@
+@import '../../../styles/uswdsImports.scss';
+@import '../../../styles/custom';
+
+.filesEmpty {
+    margin-top: units(8);
+    
+    h3 {
+        font-weight: font-weight('normal');
+        color: color('base');
+        text-align: center;
+    }
+}

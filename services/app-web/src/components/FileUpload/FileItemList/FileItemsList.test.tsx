@@ -15,7 +15,7 @@ describe('FileItemList component', () => {
         key: undefined,
         s3URL: undefined,
         status: 'PENDING',
-        documentCategories: [],
+        documentCategories: ['CONTRACT_RELATED'],
     }
     const scanning: FileItemT = {
         id: 'testFile1',
@@ -33,7 +33,7 @@ describe('FileItemList component', () => {
         key: undefined,
         s3URL: undefined,
         status: 'UPLOAD_ERROR',
-        documentCategories: [],
+        documentCategories: ['CONTRACT_RELATED'],
     }
 
     const scanningError: FileItemT = {
@@ -53,7 +53,7 @@ describe('FileItemList component', () => {
         key: '4545454-testFile4',
         s3URL: 'tests3://uploaded-12313123213/4545454-testFile4',
         status: 'UPLOAD_COMPLETE',
-        documentCategories: [],
+        documentCategories: ['CONTRACT_RELATED'],
     }
 
     const duplicateError: FileItemT = {
@@ -198,18 +198,18 @@ describe('FileItemList component', () => {
         // Items in an error state
         expect(uploadErrorListItem).not.toHaveClass('usa-file-input__preview')
         expect(uploadErrorListItem).toHaveClass(
-            'bg-secondary-lighter border-secondary '
+            'bg-error-lighter border-secondary '
         )
         expect(scanningErrorListItem).not.toHaveClass('usa-file-input__preview')
         expect(scanningErrorListItem).toHaveClass(
-            'bg-secondary-lighter border-secondary '
+            'bg-error-lighter border-secondary '
         )
         expect(completeListItem).toHaveClass('usa-file-input__preview')
         expect(duplicateErrorListItem).not.toHaveClass(
             'usa-file-input__preview'
         )
         expect(duplicateErrorListItem).toHaveClass(
-            'bg-secondary-lighter border-secondary '
+            'bg-error-lighter border-secondary '
         )
     })
 
@@ -240,13 +240,13 @@ describe('FileItemList component', () => {
         const scanningRow = rows[6]
 
         // Items not in error state
-        expect(loadingRow).not.toHaveClass('bg-secondary-lighter')
-        expect(scanningRow).not.toHaveClass('bg-secondary-lighter')
-        expect(completeRow).not.toHaveClass('bg-secondary-lighter')
+        expect(loadingRow).not.toHaveClass('bg-error-lighter')
+        expect(scanningRow).not.toHaveClass('bg-error-lighter')
+        expect(completeRow).not.toHaveClass('bg-error-lighter')
 
         // Items in an error state
-        expect(uploadErrorRow).toHaveClass('bg-secondary-lighter')
-        expect(scanningErrorRow).toHaveClass('bg-secondary-lighter')
-        expect(duplicateErrorRow).toHaveClass('bg-secondary-lighter')
+        expect(uploadErrorRow).toHaveClass('bg-error-lighter')
+        expect(scanningErrorRow).toHaveClass('bg-error-lighter')
+        expect(duplicateErrorRow).toHaveClass('bg-error-lighter')
     })
 })

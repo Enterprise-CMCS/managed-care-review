@@ -50,6 +50,7 @@ describe('submitDraftSubmission', () => {
 
         // Contract details fields should still be set
         expect(resultDraft.contractType).toEqual(draft.contractType)
+        expect(resultDraft.contractExecutionStatus).toEqual(draft.contractExecutionStatus)
         expect(resultDraft.contractDateStart).toEqual(draft.contractDateStart)
         expect(resultDraft.contractDateEnd).toEqual(draft.contractDateEnd)
         expect(resultDraft.managedCareEntities).toEqual(
@@ -104,6 +105,7 @@ describe('submitDraftSubmission', () => {
 
         const draft = await createAndUpdateTestDraftSubmission(server, {
             contractType: undefined,
+            contractExecutionStatus: undefined,
             managedCareEntities: [],
             federalAuthorities: [],
         })

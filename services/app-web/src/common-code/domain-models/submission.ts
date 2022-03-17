@@ -16,6 +16,7 @@ const isRateAmendment = (
 
 const hasValidContract = (sub: StateSubmissionType): boolean =>
     sub.contractType !== undefined &&
+    sub.contractExecutionStatus !== undefined &&
     sub.contractDateStart !== undefined &&
     sub.contractDateEnd !== undefined &&
     sub.managedCareEntities.length !== 0 &&
@@ -51,6 +52,20 @@ const hasValidDocuments = (sub: StateSubmissionType): boolean => {
 
     const validContractDocuments = sub.contractDocuments.length !== 0
     return validRateDocuments && validContractDocuments
+}
+
+const hasValidSupportingDocumentCategories = (sub: StateSubmissionType): boolean => {
+    // every document must have a category
+    if (!sub.documents.every(doc => doc.documentCategories.length > 0)) {
+        return false;
+    }
+    // if the submission is contract-only, all supporting docs must be 'CONTRACT-RELATED
+    if (sub.submissionType === 'CONTRACT_ONLY' &&
+        sub.documents.length > 0 &&
+        !sub.documents.every(doc => doc.documentCategories.includes('CONTRACT_RELATED'))) {
+            return false;
+        }
+    return true;
 }
 
 const isStateSubmission = (sub: unknown): sub is StateSubmissionType => {
@@ -92,6 +107,7 @@ function submissionName(submission: SubmissionUnionType): string {
 export {
     hasValidContract,
     hasValidDocuments,
+    hasValidSupportingDocumentCategories,
     hasValidRates,
     isContractOnly,
     isContractAndRates,

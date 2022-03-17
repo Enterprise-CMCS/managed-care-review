@@ -158,6 +158,8 @@ If you want to test that schema before you generate the migration that will be c
 
 When you're happy with your schema.prisma, use [`./dev prisma -- migrate dev`](https://www.prisma.io/docs/concepts/components/prisma-migrate) to generate a new migration file. (if you have run `prisma db push` you will have to wipe your local db to do so). That file gets checked in and used to make the changes in all other environments.
 
+If you are going to need to modify the migration that prisma generates you can use `./dev prisma -- migrate dev --create-only`. That will generate the migration file but not actually apply it to the database. `./dev prisma -- migrate dev` will apply it.
+
 Whenever you run `./dev postgres` we start a new postgres docker container and run `prisma migrate reset --force` to clean it out and run all of our checked in migrations there. After that you should be ready to develop.
 
 ## Build & Deploy

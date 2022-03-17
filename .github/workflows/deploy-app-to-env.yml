@@ -23,6 +23,8 @@ on:
         required: true
       full_iam_permissions_boundary_policy:
         required: true
+      nr_license_key:
+        required: true
       react_app_auth_mode:
         required: true
       ses_source_email_address:
@@ -36,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -53,6 +55,7 @@ jobs:
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
           IAM_PATH: ${{ secrets.iam_path }}
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
+          NR_LICENSE_KEY: ${{ secrets.nr_license_key}}
 
         run: |
           pushd services/app-web && npx serverless deploy --stage ${{ inputs.stage_name }}
@@ -62,7 +65,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -72,13 +75,13 @@ jobs:
 
       - uses: actions/download-artifact@v2
         with:
-          name: lambda-layers-prisma-client
-          path: ./services/app-api/lambda-layers-prisma-client
+          name: lambda-layers-prisma-client-migration
+          path: ./services/app-api/lambda-layers-prisma-client-migration
 
       - name: Unzip prisma layer
         run: |
-          tar -C ./services/app-api/lambda-layers-prisma-client -xf ./services/app-api/lambda-layers-prisma-client/nodejs.tar.gz
-          rm -rf ./services/app-api/lambda-layers-prisma-client/nodejs.tar.gz
+          tar -C ./services/app-api/lambda-layers-prisma-client-migration -xf ./services/app-api/lambda-layers-prisma-client-migration/nodejs.tar.gz
+          rm -rf ./services/app-api/lambda-layers-prisma-client-migration/nodejs.tar.gz
 
       - name: deploy app-api
         id: deploy-app-api
@@ -95,6 +98,7 @@ jobs:
           EMAILER_MODE: SES
           SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.ses_review_team_email_addresses }}
           SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.ses_source_email_address }}
+          NR_LICENSE_KEY: ${{ secrets.nr_license_key}}
 
         run: |
           pushd services/app-api && npx serverless deploy --stage ${{ inputs.stage_name }}

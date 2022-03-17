@@ -2,17 +2,17 @@ import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import {
     DraftSubmissionType,
     hasValidContract,
-    hasValidDocuments,
-    hasValidRates,
-    isContractAndRates,
+    hasValidDocuments, hasValidRates, hasValidSupportingDocumentCategories, isContractAndRates,
     isStateSubmission,
     isStateUser,
-    StateSubmissionType,
+    StateSubmissionType
 } from '../../app-web/src/common-code/domain-models'
 import { Emailer } from '../emailer'
 import { MutationResolvers, State } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
+import { setResolverDetailsOnActiveSpan, setErrorAttributesOnActiveSpan, setSuccessAttributesOnActiveSpan } from './attributeHelper'
+
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = typeof SubmissionErrorCodes[number] // iterable union type
@@ -53,8 +53,8 @@ function submit(
         status: 'SUBMITTED',
         submittedAt: new Date(),
     }
-
     if (isStateSubmission(maybeStateSubmission)) return maybeStateSubmission
+    
     else if (!hasValidContract(maybeStateSubmission as StateSubmissionType)) {
         return {
             code: 'INCOMPLETE',
@@ -77,7 +77,17 @@ function submit(
             code: 'INCOMPLETE',
             message: 'submissions must have valid documents',
         }
-    } else
+    } else if (
+        !hasValidSupportingDocumentCategories(
+            maybeStateSubmission as StateSubmissionType
+        )
+    ) {
+        return {
+            code: 'INCOMPLETE',
+            message: 'submissions must have valid categories for supporting documents',
+        }
+    }
+    else
         return {
             code: 'INCOMPLETE',
             message: 'submission is missing a required field',
@@ -91,13 +101,16 @@ export function submitDraftSubmissionResolver(
     emailer: Emailer
 ): MutationResolvers['submitDraftSubmission'] {
     return async (_parent, { input }, context) => {
-        const { user } = context
+        const { user, span } = context
+        setResolverDetailsOnActiveSpan('submitDraftSubmission', user, span)
+
         // This resolver is only callable by state users
         if (!isStateUser(user)) {
             logError(
                 'submitDraftSubmission',
                 'user not authorized to fetch state data'
             )
+            setErrorAttributesOnActiveSpan('user not authorized to fetch state data', span)
             throw new ForbiddenError('user not authorized to fetch state data')
         }
 
@@ -107,12 +120,14 @@ export function submitDraftSubmissionResolver(
         if (isStoreError(result)) {
             const errMessage = `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
             logError('submitDraftSubmission', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
 
         if (result === undefined) {
             const errMessage = `A draft must exist to be submitted: ${input.submissionID}`
             logError('submitDraftSubmission', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
                 argumentName: 'submissionID',
             })
@@ -127,6 +142,7 @@ export function submitDraftSubmissionResolver(
                 'submitDraftSubmission',
                 'user not authorized to fetch data from a different state'
             )
+            setErrorAttributesOnActiveSpan('user not authorized to fetch data from a different state', span)
             throw new ForbiddenError(
                 'user not authorized to fetch data from a different state'
             )
@@ -140,6 +156,7 @@ export function submitDraftSubmissionResolver(
                 'submitDraftSubmission',
                 'Incomplete submission cannot be submitted'
             )
+            setErrorAttributesOnActiveSpan('Incomplete submission cannot be submitted', span)
             throw new UserInputError(
                 'Incomplete submission cannot be submitted',
                 {
@@ -151,10 +168,11 @@ export function submitDraftSubmissionResolver(
         const stateSubmission: StateSubmissionType = submissionResult
 
         // Save the submission!
-        const updateResult = await store.updateStateSubmission(stateSubmission)
+        const updateResult = await store.updateStateSubmission(stateSubmission, new Date())
         if (isStoreError(updateResult)) {
             const errMessage = `Issue updating a state submission of type ${updateResult.code}. Message: ${updateResult.message}`
             logError('submitDraftSubmission', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
 
@@ -174,6 +192,7 @@ export function submitDraftSubmissionResolver(
                 'submitDraftSubmission - CMS email failed',
                 cmsNewPackageEmailResult
             )
+            setErrorAttributesOnActiveSpan('CMS email failed', span)
             throw cmsNewPackageEmailResult
         }
 
@@ -182,11 +201,12 @@ export function submitDraftSubmissionResolver(
                 'submitDraftSubmission - state email failed',
                 stateNewPackageEmailResult
             )
+            setErrorAttributesOnActiveSpan('state email failed', span)
             throw stateNewPackageEmailResult
         }
 
         logSuccess('submitDraftSubmission')
-
+        setSuccessAttributesOnActiveSpan(span)
         return { submission: updatedSubmission }
     }
 }

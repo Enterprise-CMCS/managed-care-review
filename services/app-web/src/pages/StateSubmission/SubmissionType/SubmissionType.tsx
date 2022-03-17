@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react'
 import * as Yup from 'yup'
 import {
-    Alert,
     Form as UswdsForm,
     Fieldset,
     FormGroup,
@@ -36,6 +35,7 @@ import {
     updatesFromSubmission,
 } from '../updateSubmissionTransform'
 import { PageActions } from '../PageActions'
+import { GenericApiErrorBanner } from '../../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 
 // Formik setup
 // Should be listed in order of appearance on field to allow errors to focus as expected
@@ -73,7 +73,6 @@ export const SubmissionType = ({
     showValidations = false,
     draftSubmission,
     updateDraft,
-    formAlert,
 }: SubmissionTypeProps): React.ReactElement => {
     const [showFormAlert, setShowFormAlert] = React.useState(false)
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
@@ -105,33 +104,14 @@ export const SubmissionType = ({
 
     const [createDraftSubmission, { error }] = useCreateDraftSubmissionMutation(
         {
-            // This function updates the Apollo Client Cache after we create a new DraftSubmission
-            // Without it, we wouldn't show this newly created submission on the dashboard page
-            // without a refresh. Anytime a mutation does more than "modify an existing object"
-            // you'll need to handle the cache.
+            // An alternative to messing with the cache like we do with create, just zero it out.
             update(cache, { data }) {
                 if (data) {
                     cache.modify({
+                        id: 'ROOT_QUERY',
                         fields: {
-                            indexSubmissions(
-                                index = { totalCount: 0, edges: [] }
-                            ) {
-                                const newID = cache.identify(
-                                    data.createDraftSubmission.draftSubmission
-                                )
-                                // This isn't quite what is documented, but it's clear this
-                                // is how things work from looking at the dev-tools
-                                const newRef = { __ref: newID }
-
-                                return {
-                                    totalCount: index.totalCount + 1,
-                                    edges: [
-                                        {
-                                            node: newRef,
-                                        },
-                                        ...index.edges,
-                                    ],
-                                }
+                            indexSubmissions2(_index, { DELETE }) {
+                                return DELETE
                             },
                         },
                     })
@@ -149,7 +129,7 @@ export const SubmissionType = ({
         setFocusErrorSummaryHeading(false)
     }, [focusErrorSummaryHeading])
 
-    if ((error || formAlert) && !showFormAlert) {
+    if ((error) && !showFormAlert) {
         setShowFormAlert(true)
     }
 
@@ -261,11 +241,7 @@ export const SubmissionType = ({
                         <fieldset className="usa-fieldset">
                             <legend className="srOnly">Submission type</legend>
                             {showFormAlert &&
-                                (formAlert || (
-                                    <Alert type="error">
-                                        Something went wrong
-                                    </Alert>
-                                ))}
+                                <GenericApiErrorBanner />}
                             <span id="form-guidance">
                                 All fields are required
                             </span>
@@ -326,6 +302,7 @@ export const SubmissionType = ({
                             >
                                 <Fieldset
                                     className={styles.radioGroup}
+                                    role="radiogroup"
                                     aria-required
                                     legend="Choose submission type"
                                 >
@@ -375,7 +352,6 @@ export const SubmissionType = ({
                                 )}
                                 hint={
                                     <>
-
                                         <p id="submissionDescriptionHelp">
                                             Provide a 1-2 paragraph summary of your submission that highlights any important changes CMS reviewers will need to be aware of
                                         </p>

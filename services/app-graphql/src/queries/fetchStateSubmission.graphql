@@ -33,6 +33,7 @@ query fetchStateSubmission($input: FetchStateSubmissionInput!) {
                 documentCategories
             }
             contractType
+            contractExecutionStatus
             contractDocuments {
                 name
                 s3URL

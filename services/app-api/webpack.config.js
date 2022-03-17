@@ -3,7 +3,6 @@ const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const nodeExternals = require('webpack-node-externals');
 const path = require('path');
 const slsw = require('serverless-webpack');
-
 const isLocal = slsw.lib.webpack.isLocal;
 
 const tsConfigPath = 'tsconfig.json';
@@ -49,11 +48,6 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.mjs$/,
-                include: /node_modules/,
-                type: 'javascript/auto',
-            },
-            {
                 test: /\.(ts|tsx)$/,
                 use: [
                     {
@@ -65,11 +59,7 @@ module.exports = {
                         },
                     },
                 ],
-                exclude: [
-                    path.resolve(servicePath, 'node_modules'),
-                    path.resolve(servicePath, '.serverless'),
-                    path.resolve(servicePath, '.webpack'),
-                ],
+                exclude: /node_modules/,
             },
             {
                 test: /\.(graphql|gql)$/,
@@ -86,6 +76,17 @@ module.exports = {
                         __dirname,
                         '../../node_modules/.prisma/client/schema.prisma'
                     ),
+                },
+                {
+                    from: path.resolve(__dirname, 'collector.yml'),
+                    transform(content) {
+                        return content
+                            .toString()
+                            .replace(
+                                '$NR_LICENSE_KEY',
+                                process.env.NR_LICENSE_KEY
+                            );
+                    },
                 },
             ],
         }),

@@ -1,0 +1,27 @@
+query fetchSubmission2($input: FetchSubmission2Input!) {
+    fetchSubmission2(input: $input) {
+        submission {
+            id
+            stateCode
+            status
+            intiallySubmittedAt
+            revisions {
+                revision {
+                    id
+                    unlockInfo {
+                        updatedAt
+                        updatedBy
+                        updatedReason
+                    }
+                    submitInfo {
+                        updatedAt
+                        updatedBy
+                        updatedReason
+                    }
+                    createdAt
+                    submissionData
+                }
+            }
+        }
+    }
+}

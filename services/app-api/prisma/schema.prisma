@@ -20,18 +20,22 @@ model TestUser {
 
 // The StateSubmission Form Data
 model StateSubmission {
-  id                  String                    @id
-  state               State                     @relation(fields: [stateCode], references: [stateCode])
-  stateCode           String
-  revisions           StateSubmissionRevision[]
+  id        String                    @id
+  state     State                     @relation(fields: [stateCode], references: [stateCode])
+  stateCode String
+  revisions StateSubmissionRevision[]
 }
 
 model StateSubmissionRevision {
   id                  String          @id
-  createdAt           DateTime        
+  createdAt           DateTime
   submission          StateSubmission @relation(fields: [submissionID], references: [id])
   submissionID        String
   submissionFormProto Bytes
+  unlockedBy          String?
+  unlockedReason      String?
+  unlockedAt          DateTime?
+  submittedAt         DateTime?
 }
 
 model State {

@@ -1,6 +1,6 @@
 export { DataDetail } from './DataDetail'
 
-export { DoubleColumnRow } from './DoubleColumnRow'
+export { DoubleColumnGrid } from './DoubleColumnGrid'
 
 export { DownloadButton } from './DownloadButton'
 
@@ -41,3 +41,7 @@ export {
 export { SubmissionCard } from './SubmissionCard'
 
 export { Tabs, TabPanel } from './Tabs'
+
+export { SubmissionUnlockedBanner } from './Banner'
+
+export { Modal } from './Modal'

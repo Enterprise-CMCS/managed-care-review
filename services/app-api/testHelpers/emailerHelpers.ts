@@ -2,6 +2,9 @@
         Emailer,
         newPackageCMSEmail,
         newPackageStateEmail,
+        UnlockEmailData,
+        unlockPackageCMSEmail,
+        unlockPackageStateEmail
     } from '../emailer'
     import { StateSubmissionType, CognitoUserType, CognitoStateUserType } from '../../app-web/src/common-code/domain-models'
 
@@ -33,6 +36,26 @@
                 const emailData = newPackageStateEmail(
                     submission,
                     user,
+                    config
+                )
+                return this.sendEmail(emailData)
+            },
+            sendUnlockPackageCMSEmail: function async(
+                unlockEmailData: UnlockEmailData
+            ): Promise<void | Error> {
+                const emailData = unlockPackageCMSEmail(
+                    unlockEmailData,
+                    config
+                )
+                return this.sendEmail(emailData)
+            },
+            sendUnlockPackageStateEmail: function async(
+                submission: StateSubmissionType,
+                unlockEmailData: UnlockEmailData
+            ): Promise<void | Error> {
+                const emailData = unlockPackageStateEmail(
+                    submission,
+                    unlockEmailData,
                     config
                 )
                 return this.sendEmail(emailData)
@@ -71,6 +94,7 @@
                },
            ],
            contractType: 'BASE',
+           contractExecutionStatus: 'EXECUTED',
            contractDocuments: [
                {
                    s3URL: 'bar',
@@ -128,6 +152,7 @@
                },
            ],
            contractType: 'BASE',
+           contractExecutionStatus: 'EXECUTED',
            contractDocuments: [
                {
                    s3URL: 'bar',
@@ -174,6 +199,7 @@ const mockContractAmendmentSubmission = (
             },
         ],
         contractType: 'AMENDMENT',
+        contractExecutionStatus: 'UNEXECUTED',
         contractDocuments: [
             {
                 s3URL: 'bar',

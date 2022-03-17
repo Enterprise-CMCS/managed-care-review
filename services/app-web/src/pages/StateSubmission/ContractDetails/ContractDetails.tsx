@@ -33,6 +33,7 @@ import {
     Document,
     DraftSubmission,
     ContractType,
+    ContractExecutionStatus,
     FederalAuthority,
     CapitationRatesAmendedInfo,
     CapitationRatesAmendmentReason,
@@ -82,6 +83,7 @@ const ContractDatesErrorMessage = ({
 
 export interface ContractDetailsFormValues {
     contractType: ContractType | undefined
+    contractExecutionStatus: ContractExecutionStatus | undefined
     contractDateStart: string
     contractDateEnd: string
     managedCareEntities: ManagedCareEntity[]
@@ -100,14 +102,12 @@ export const ContractDetails = ({
     draftSubmission,
     showValidations = false,
     updateDraft,
-    formAlert = undefined,
 }: {
     draftSubmission: DraftSubmission
     showValidations?: boolean
     updateDraft: (
         input: UpdateDraftSubmissionInput
     ) => Promise<DraftSubmission | undefined>
-    formAlert?: React.ReactElement
 }): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const history = useHistory()
@@ -211,6 +211,7 @@ export const ContractDetails = ({
 
     const contractDetailsInitialValues: ContractDetailsFormValues = {
         contractType: draftSubmission?.contractType ?? undefined,
+        contractExecutionStatus: draftSubmission?.contractExecutionStatus ?? undefined,
         contractDateStart:
             (draftSubmission &&
                 formatForForm(draftSubmission.contractDateStart)) ??
@@ -300,6 +301,7 @@ export const ContractDetails = ({
 
         const updatedDraft = updatesFromSubmission(draftSubmission)
         updatedDraft.contractType = values.contractType
+        updatedDraft.contractExecutionStatus = values.contractExecutionStatus
         updatedDraft.contractDateStart = values.contractDateStart || null
         updatedDraft.contractDateEnd = values.contractDateEnd || null
         updatedDraft.managedCareEntities = values.managedCareEntities
@@ -383,7 +385,6 @@ export const ContractDetails = ({
                     >
                         <fieldset className="usa-fieldset">
                             <legend className="srOnly">Contract Details</legend>
-                            {formAlert && formAlert}
                             <span id="form-guidance">
                                 All fields are required
                             </span>
@@ -440,6 +441,7 @@ export const ContractDetails = ({
                                 error={showFieldErrors(errors.contractType)}
                             >
                                 <Fieldset
+                                    role="radiogroup"
                                     aria-required
                                     className={styles.radioGroup}
                                     legend="Contract action type"
@@ -469,7 +471,38 @@ export const ContractDetails = ({
                                     />
                                 </Fieldset>
                             </FormGroup>
-
+                            <FormGroup
+                                error={showFieldErrors(errors.contractExecutionStatus)}
+                            >
+                                <Fieldset
+                                    role="radiogroup"
+                                    aria-required
+                                    className={styles.radioGroup}
+                                    legend="Contract status"
+                                >
+                                    {showFieldErrors(errors.contractExecutionStatus) && (
+                                        <PoliteErrorMessage>
+                                            {errors.contractExecutionStatus}
+                                        </PoliteErrorMessage>
+                                    )}
+                                    <FieldRadio
+                                        id="executedContract"
+                                        name="contractExecutionStatus"
+                                        label="Fully executed"
+                                        aria-required
+                                        value={'EXECUTED'}
+                                        checked={values.contractExecutionStatus === 'EXECUTED'}
+                                    />
+                                    <FieldRadio
+                                        id="unexecutedContract"
+                                        name="contractExecutionStatus"
+                                        label="Unexecuted by some or all parties"
+                                        aria-required
+                                        value={'UNEXECUTED'}
+                                        checked={values.contractExecutionStatus === 'UNEXECUTED'}
+                                    />
+                                </Fieldset>
+                            </FormGroup>
                             {!isContractTypeEmpty(values) && (
                                 <>
                                     <FormGroup
@@ -813,6 +846,7 @@ export const ContractDetails = ({
                                                                 }
                                                             >
                                                                 <Fieldset
+                                                                    role="radiogroup"
                                                                     aria-required
                                                                     legend="Select reason for capitation rate change"
                                                                 >
@@ -1044,6 +1078,7 @@ export const ContractDetails = ({
                                                         )}
                                                     >
                                                         <Fieldset
+                                                            role="radiogroup"
                                                             aria-required
                                                             legend="Is this contract action related to the COVID-19 public health emergency?"
                                                         >
@@ -1086,6 +1121,7 @@ export const ContractDetails = ({
                                                             )}
                                                         >
                                                             <Fieldset
+                                                                role="radiogroup"
                                                                 aria-required
                                                                 legend="Is this related to coverage and reimbursement for vaccine administration?"
                                                             >

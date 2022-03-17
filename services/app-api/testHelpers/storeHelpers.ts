@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { NewPrismaClient } from '../postgres'
+import { NewPrismaClient, Store, StoreError } from '../postgres'
 
 async function configurePrismaClient(): Promise<PrismaClient> {
     const dbURL = process.env.DATABASE_URL
@@ -31,4 +31,48 @@ async function sharedTestPrismaClient(): Promise<PrismaClient> {
     return await sharedClientPromise
 }
 
-export { sharedTestPrismaClient }
+function mockStoreThatErrors(): Store {
+    const genericStoreError: StoreError = {
+        code: 'UNEXPECTED_EXCEPTION',
+        message: 'this error came from the generic store with errors mock'
+    }
+
+    return {
+        findAllSubmissions: async (stateCode) => {
+            return genericStoreError
+        },
+        findAllSubmissionsWithRevisions: async (stateCode) => {
+            return genericStoreError
+        },
+        insertDraftSubmission: async (args) => {
+            return genericStoreError
+        },
+        findDraftSubmission: async (draftUUID) => {
+            return genericStoreError
+        },
+        findSubmissionWithRevisions: async (draftUUID) => {
+            return genericStoreError
+        },
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        findDraftSubmissionByStateNumber: async (_stateCode, _stateNumber) => {
+            throw new Error('UNIMPLEMENTED')
+        },
+        updateDraftSubmission: async (draftSubmission) => {
+            return genericStoreError
+        },
+        updateStateSubmission: async (submission) => {
+            return genericStoreError
+        },
+        findStateSubmission: async (submissionID) => {
+            return genericStoreError
+        },
+        insertNewRevision: async (submissionID, draft) => {
+            return genericStoreError
+        },
+        findPrograms: () => {
+            return undefined
+        },
+    }
+}
+
+export { sharedTestPrismaClient, mockStoreThatErrors }

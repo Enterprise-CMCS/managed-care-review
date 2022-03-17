@@ -140,6 +140,10 @@ const toProtoBuffer = (
                 domainData.contractType,
                 statesubmission.ContractType
             ),
+            contractExecutionStatus: domainEnumToProto(
+                domainData.contractExecutionStatus,
+                statesubmission.ContractExecutionStatus
+            ),
             contractDateStart: domainDateToProtoDate(
                 domainData.contractDateStart
             ),

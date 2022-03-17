@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react'
-import dayjs from 'dayjs'
-import styles from '../SubmissionSummarySection.module.scss'
-import { SectionHeader } from '../../../components/SectionHeader'
+import { useEffect, useState } from 'react'
 import { DataDetail } from '../../../components/DataDetail'
-import { DoubleColumnRow } from '../../../components/DoubleColumnRow'
-import { DownloadButton } from '../../DownloadButton'
+import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
-import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
+import { formatCalendarDate } from '../../../dateHelpers'
+import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
+import { DoubleColumnGrid } from '../../DoubleColumnGrid'
+import { DownloadButton } from '../../DownloadButton'
+import styles from '../SubmissionSummarySection.module.scss'
 
 export type RateDetailsSummarySectionProps = {
     submission: DraftSubmission | StateSubmission
@@ -19,6 +19,7 @@ export const RateDetailsSummarySection = ({
     navigateTo,
 }: RateDetailsSummarySectionProps): React.ReactElement => {
     const isSubmitted = submission.__typename === 'StateSubmission'
+    const isEditing = !isSubmitted && navigateTo !== undefined
     // Get the zip file for the rate details
     const { getKey, getBulkDlURL } = useS3()
     useEffect(() => {
@@ -63,80 +64,59 @@ export const RateDetailsSummarySection = ({
                     )}
                 </SectionHeader>
 
-                <DoubleColumnRow
-                    left={
+                <DoubleColumnGrid>
+                    <DataDetail
+                        id="rateType"
+                        label="Rate certification type"
+                        data={
+                            submission.rateAmendmentInfo
+                                ? 'Amendment to prior rate certification'
+                                : 'New rate certification'
+                        }
+                    />
+                    <DataDetail
+                        id="ratingPeriod"
+                        label={
+                            submission.rateAmendmentInfo
+                                ? 'Rating period of original rate certification'
+                                : 'Rating period'
+                        }
+                        data={`${formatCalendarDate(submission.rateDateStart)} to ${formatCalendarDate(submission.rateDateEnd)}`}
+                    />
+                    <DataDetail
+                        id="dateCertified"
+                        label={
+                            submission.rateAmendmentInfo
+                                ? 'Date certified for rate amendment'
+                                : 'Date certified'
+                        }
+                        data={formatCalendarDate(submission.rateDateCertified)}
+                    />
+                    {submission.rateAmendmentInfo ? (
                         <DataDetail
-                            id="rateType"
-                            label="Rate certification type"
-                            data={
-                                submission.rateAmendmentInfo
-                                    ? 'Amendment to prior rate certification'
-                                    : 'New rate certification'
-                            }
-                        />
-                    }
-                    right={
-                        <DataDetail
-                            id="ratingPeriod"
-                            label={
-                                submission.rateAmendmentInfo
-                                    ? 'Rating period of original rate certification'
-                                    : 'Rating period'
-                            }
-                            data={`${dayjs(submission.rateDateStart).format(
-                                'MM/DD/YYYY'
-                            )} to ${dayjs(submission.rateDateEnd).format(
-                                'MM/DD/YYYY'
+                            id="effectiveRatingPeriod"
+                            label="Rate amendment effective dates"
+                            data={`${formatCalendarDate(
+                                submission.rateAmendmentInfo.effectiveDateStart
+                            )} to ${formatCalendarDate(
+                                submission.rateAmendmentInfo.effectiveDateEnd
                             )}`}
                         />
-                    }
-                />
-                <DoubleColumnRow
-                    left={
-                        <DataDetail
-                            id="dateCertified"
-                            label={
-                                submission.rateAmendmentInfo
-                                    ? 'Date certified for rate amendment'
-                                    : 'Date certified'
-                            }
-                            data={dayjs(submission.rateDateCertified).format(
-                                'MM/DD/YYYY'
-                            )}
-                        />
-                    }
-                    right={
-                        submission.rateAmendmentInfo ? (
-                            <DataDetail
-                                id="effectiveRatingPeriod"
-                                label="Rate amendment effective dates"
-                                data={`${dayjs(
-                                    submission.rateAmendmentInfo
-                                        .effectiveDateStart
-                                ).format('MM/DD/YYYY')} to ${dayjs(
-                                    submission.rateAmendmentInfo
-                                        .effectiveDateEnd
-                                ).format('MM/DD/YYYY')}`}
-                            />
-                        ) : null
-                    }
-                />
-
-                <UploadedDocumentsTable
-                    documents={submission.rateDocuments}
-                    caption="Rate certification"
-                    documentCategory="Rate certification"
-                />
-                {rateSupportingDocuments.length > 0 && (
-                    <UploadedDocumentsTable
-                        documents={rateSupportingDocuments}
-                        caption="Rate supporting documents"
-                        documentCategory="Rate-supporting"
-                        isSupportingDocuments
-                        isSubmitted={isSubmitted}
-                    />
-                )}
+                    ) : null}
+                </DoubleColumnGrid>
             </dl>
+            <UploadedDocumentsTable
+                documents={submission.rateDocuments}
+                caption="Rate certification"
+                documentCategory="Rate certification"
+            />
+            <UploadedDocumentsTable
+                documents={rateSupportingDocuments}
+                caption="Rate supporting documents"
+                documentCategory="Rate-supporting"
+                isSupportingDocuments
+                isEditing={isEditing}
+            />
         </section>
     )
 }

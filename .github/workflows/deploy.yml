@@ -19,9 +19,9 @@ jobs:
       changed-services: ${{ steps.changed-services-action.outputs.changed-services }}
     steps:
       - name: Check out repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
-          fetch-depth: 10
+          fetch-depth: 20
 
       - name: Check for secrets
         uses: ./.github/actions/check_secrets
@@ -86,7 +86,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -99,6 +99,7 @@ jobs:
 
       - name: publish code coverage
         uses: paambaati/codeclimate-action@v3.0.0
+        continue-on-error: true
         env:
           CC_TEST_REPORTER_ID: cace182021fe88d327fa8d95355ac6081f420e094a214fe77feb5df2f0259e9d
         with:
@@ -127,7 +128,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -140,6 +141,7 @@ jobs:
 
       - name: publish code coverage
         uses: paambaati/codeclimate-action@v3.0.0
+        continue-on-error: true
         env:
           CC_TEST_REPORTER_ID: cace182021fe88d327fa8d95355ac6081f420e094a214fe77feb5df2f0259e9d
         with:
@@ -152,9 +154,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v2.5.1
+      - uses: actions/setup-node@v3
         with:
           node-version-file: '.nvmrc'
           cache: yarn
@@ -179,8 +181,8 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
-          name: lambda-layers-prisma-client
-          path: ./services/app-api/lambda-layers-prisma-client
+          name: lambda-layers-prisma-client-migration
+          path: ./services/app-api/lambda-layers-prisma-client-migration
 
   deploy-infra:
     needs: [begin-deployment]
@@ -196,6 +198,7 @@ jobs:
       okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
       iam_path: ${{ secrets.IAM_PATH }}
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
+      nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
   deploy-app:
     needs:
@@ -224,17 +227,21 @@ jobs:
       iam_path: ${{ secrets.IAM_PATH }}
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
       react_app_auth_mode: AWS_COGNITO
+      nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
   finishing-prep:
     name: Finishing Prep
-    needs: [deploy-infra, begin-deployment]
-    if: always()
+    needs: [deploy-infra, begin-deployment, deploy-app]
+    if: |
+      always() 
+      && (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped') 
+      && (needs.deploy-app.result == 'success' || needs.deploy-app.result == 'skipped')
     runs-on: ubuntu-latest
     outputs:
       application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -271,7 +278,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Update deployment status (failure)
         if: failure() && needs.begin-deployment.result == 'success'
@@ -293,7 +300,7 @@ jobs:
   cypress:
     name: cypress-run
     needs: [deploy-app, finishing-prep]
-    if: always()
+    if: always() && needs.finishing-prep.result == 'success'
     runs-on: ubuntu-latest
     container: cypress/browsers:node14.17.0-chrome91-ff89
     strategy:
@@ -302,7 +309,7 @@ jobs:
         # run copies of the current job in parallel
         containers: [1, 2, 3, 4, 5, 6]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Cypress -- Chrome
         id: cypress

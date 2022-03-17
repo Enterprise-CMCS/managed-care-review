@@ -1,18 +1,18 @@
+import { Link } from '@trussworks/react-uswds'
 import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { Link } from '@trussworks/react-uswds'
-
-import styles from './UploadedDocumentsTable.module.scss'
-
 import { useS3 } from '../../../contexts/S3Context'
 import { Document } from '../../../gen/gqlClient'
+import styles from './UploadedDocumentsTable.module.scss'
+
+
 
 export type UploadedDocumentsTableProps = {
     documents: Document[]
     caption: string | null
     documentCategory: string
     isSupportingDocuments?: boolean 
-    isSubmitted?: boolean
+    isEditing?: boolean
 }
 
 type DocumentWithLink = { url: string | null } & Document
@@ -26,15 +26,37 @@ export const UploadedDocumentsTable = ({
     caption,
     documentCategory,
     isSupportingDocuments = false,
-    isSubmitted = false
+    isEditing = false
 }: UploadedDocumentsTableProps): React.ReactElement => {
     const { getURL, getKey } = useS3()
     const [refreshedDocs, setRefreshedDocs] = useState<DocumentWithLink[]>([])
-    const shouldShowEditButton = !isSubmitted && isSupportingDocuments
+    const shouldShowEditButton = isEditing && isSupportingDocuments
     const shouldShowAsteriskExplainer = refreshedDocs.some(
         (doc) =>
            isBothContractAndRateSupporting(doc)
     )
+    const borderTopGradientStyles= `borderTopLinearGradient ${
+        styles.uploadedDocumentsTable
+    }`
+    const supportingDocsTopMarginStyles= isSupportingDocuments ? styles.withMarginTop : ''
+     const tableCaptionJSX = (
+        <>
+            <span>{caption}</span>
+            {shouldShowEditButton && (
+                <Link
+                    variant="unstyled"
+                    asCustom={NavLink}
+                    className="usa-button usa-button--outline"
+                    to="documents"
+                >
+                    Edit <span className="srOnly">{caption}</span>
+                </Link>
+            )}
+        </>
+    )
+
+
+    
     useEffect(() => {
         const refreshDocuments = async () => {
             const newDocuments = await Promise.all(
@@ -61,27 +83,29 @@ export const UploadedDocumentsTable = ({
 
         void refreshDocuments()
     }, [documents, getKey, getURL])
-    
+
+    // Empty State
+    if (refreshedDocs.length === 0) {
+        return (
+            <div className={supportingDocsTopMarginStyles}>
+                <b className={styles.captionContainer}>{tableCaptionJSX}</b>
+                <p
+                    className={`${borderTopGradientStyles} ${styles.supportingDocsEmpty}`}
+                >
+                    {isSupportingDocuments
+                        ? 'No supporting documents'
+                        : 'No documents'}
+                </p>
+            </div>
+        )
+    }
+                
     return (
         <>
-            <table
-                className={`borderTopLinearGradient ${
-                    styles.uploadedDocumentsTable
-                } ${isSupportingDocuments ? styles.withMarginTop : ''}`}
-            >
+            <table className={`${borderTopGradientStyles} ${supportingDocsTopMarginStyles}`}>
                 <caption className="text-bold">
                     <div className={styles.captionContainer}>
-                        <span>{caption}</span>
-                        {shouldShowEditButton && (
-                            <Link
-                                variant="unstyled"
-                                asCustom={NavLink}
-                                className="usa-button usa-button--outline"
-                                to="documents"
-                            >
-                                Edit <span className="srOnly">{caption}</span>
-                            </Link>
-                        )}
+                      {tableCaptionJSX}
                     </div>
                 </caption>
                 <thead>

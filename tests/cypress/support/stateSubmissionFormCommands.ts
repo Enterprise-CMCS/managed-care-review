@@ -53,6 +53,7 @@ Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
 Cypress.Commands.add('fillOutBaseContractDetails', () => {
     // Must be on '/submissions/:id/contract-details'
     cy.findByText('Base contract').click()
+    cy.findByText('Fully executed').click()
     cy.wait(2000)
     cy.findByLabelText('Start date').type('04/01/2024')
     cy.findByLabelText('End date').type('03/31/2025').blur()
@@ -70,6 +71,7 @@ Cypress.Commands.add('fillOutBaseContractDetails', () => {
 Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
     // Must be on '/submissions/:id/contract-details'
     cy.findByText('Amendment to base contract').click()
+    cy.findByText('Unexecuted by some or all parties').click()
     cy.wait(2000)
     cy.findByLabelText('Start date').type('04/01/2024')
     cy.findByLabelText('End date').type('03/31/2025').blur()
@@ -182,13 +184,13 @@ Cypress.Commands.add('waitForDocumentsToLoad', () => {
         cy.wait(20000)
     }
     cy.findAllByTestId('file-input-preview-image', {
-        timeout: 20000,
+        timeout: 40000,
     }).should('not.have.class', 'is-loading')
 })
 
 Cypress.Commands.add('verifyDocumentsHaveNoErrors', () => {
-    cy.findByText('Upload failed').should('not.exist')
-    cy.findByText('Duplicate file').should('not.exist')
+    cy.findByText(/Upload failed/).should('not.exist')
+    cy.findByText('Duplicate file, please remove').should('not.exist')
     cy.findByText('Failed security scan, please remove').should('not.exist')
     cy.findByText('Remove files with errors').should('not.exist')
 })

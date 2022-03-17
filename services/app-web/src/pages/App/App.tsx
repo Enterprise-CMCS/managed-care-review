@@ -11,7 +11,8 @@ import { AppBody } from './AppBody'
 import { logEvent } from '../../log_event'
 import { AuthProvider } from '../../contexts/AuthContext'
 import { PageProvider } from '../../contexts/PageContext'
-import { GenericError } from '../Errors/GenericError'
+import TraceProvider from '../../contexts/TraceContext'
+import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { AuthModeType } from '../../common-code/domain-models'
 import { S3Provider } from '../../contexts/S3Context'
 import type { S3ClientT } from '../../s3'
@@ -22,8 +23,7 @@ function ErrorFallback({
     error: Error
     resetErrorBoundary?: () => void
 }): React.ReactElement {
-    console.log('generic error', error)
-    return <GenericError />
+    return <GenericErrorPage />
 }
 
 function App({
@@ -42,15 +42,17 @@ function App({
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>
             <BrowserRouter>
-                <ApolloProvider client={apolloClient}>
-                    <S3Provider client={s3Client}>
-                        <AuthProvider authMode={authMode}>
-                            <PageProvider>
-                                <AppBody authMode={authMode} />
-                            </PageProvider>
-                        </AuthProvider>
-                    </S3Provider>
-                </ApolloProvider>
+                <TraceProvider>
+                    <ApolloProvider client={apolloClient}>
+                        <S3Provider client={s3Client}>
+                            <AuthProvider authMode={authMode}>
+                                <PageProvider>
+                                    <AppBody authMode={authMode} />
+                                </PageProvider>
+                            </AuthProvider>
+                        </S3Provider>
+                    </ApolloProvider>
+                </TraceProvider>
             </BrowserRouter>
         </ErrorBoundary>
     )

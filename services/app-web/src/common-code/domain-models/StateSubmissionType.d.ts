@@ -10,6 +10,7 @@ import type {
     SubmissionType,
     ContractType,
     RateType,
+    ContractExecutionStatus
 } from './DraftSubmissionType'
 
 export type StateSubmissionType = {
@@ -25,6 +26,7 @@ export type StateSubmissionType = {
     updatedAt: DateTime
     documents: SubmissionDocument[]
     contractType: ContractType
+    contractExecutionStatus: ContractExecutionStatus
     contractDocuments: SubmissionDocument[]
     contractDateStart: Date
     contractDateEnd: Date

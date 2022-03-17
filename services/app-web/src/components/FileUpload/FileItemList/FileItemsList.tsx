@@ -12,6 +12,7 @@ export const FileItemsList = ({
     renderMode,
     handleCheckboxClick,
     isContractOnly,
+    shouldValidate,
 }: {
     fileItems: FileItemT[]
     deleteItem: (id: FileItemT) => void
@@ -19,6 +20,7 @@ export const FileItemsList = ({
     renderMode: 'table' | 'list'
     handleCheckboxClick: (event: React.ChangeEvent<HTMLInputElement>) => void
     isContractOnly?: boolean
+    shouldValidate?: boolean
 }): React.ReactElement => {
     const liClasses = (status: FileStatus): string => {
         const hasError =
@@ -26,7 +28,7 @@ export const FileItemsList = ({
             status === 'SCANNING_ERROR' ||
             status === 'DUPLICATE_NAME_ERROR'
         return classnames(styles.fileItem, {
-            'bg-secondary-lighter border-secondary margin-top-1px': hasError,
+            'bg-error-lighter border-secondary margin-top-1px': hasError,
             'usa-file-input__preview': !hasError,
         })
     }
@@ -38,6 +40,7 @@ export const FileItemsList = ({
             retryItem={retryItem}
             handleCheckboxClick={handleCheckboxClick}
             isContractOnly={isContractOnly}
+            shouldValidate={shouldValidate}
         />
     ) : (
         <ListWrapper

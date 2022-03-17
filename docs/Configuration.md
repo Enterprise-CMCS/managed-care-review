@@ -64,6 +64,12 @@ Read by `ui-auth`
 
 This is the metatdata URL configured for reaching out to Otka auth. Reqired for `IDM` type auth.
 
+### `REACT_APP_STAGE_NAME`
+
+Read by `app-web`
+
+This is used for rudimentary feature flags, allow us to switch things off and on based on deploy environment
+
 ### `IAM_PATH`
 
 ### `SECRETS_MANAGER_SECRET`
@@ -156,3 +162,9 @@ This is the key used by Cypress to send results to Cypress Dashboard.
 Read by codeclimate-action
 
 This key allows uploads to CodeClimate for our code coverage stats.
+
+### `OTEL_COLLECTOR_URL`
+
+Read by Trace Context
+
+This URL defines where we export traces to. It should differ between local dev and deployed environments.

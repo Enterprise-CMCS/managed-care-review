@@ -1,10 +1,10 @@
-import { screen,within, waitFor } from '@testing-library/react'
-import { renderWithProviders } from '../../../testHelpers/jestHelpers'
-import { RateDetailsSummarySection } from './RateDetailsSummarySection'
+import { screen, waitFor, within } from '@testing-library/react'
 import {
     mockContractAndRatesDraft,
-    mockStateSubmission,
+    mockStateSubmission
 } from '../../../testHelpers/apolloHelpers'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import { RateDetailsSummarySection } from './RateDetailsSummarySection'
 
 describe('RateDetailsSummarySection', () => {
     const draftSubmission = mockContractAndRatesDraft()
@@ -120,25 +120,25 @@ describe('RateDetailsSummarySection', () => {
             ],
         }
         renderWithProviders(
-            <RateDetailsSummarySection submission={testSubmission} />
+            <RateDetailsSummarySection submission={testSubmission} navigateTo={'/rate-details'}/>
         )
 
-        const supportingDocsTable = screen.getByRole('table', {
-            name: /Rate supporting documents/,
-        })
-        const rateDocsTable = screen.getByRole('table', {
-            name: 'Rate certification',
-        })
-
-        expect(rateDocsTable).toBeInTheDocument()
-        expect(supportingDocsTable).toBeInTheDocument()
-        expect(
-            screen.getByRole('link', {
-                name: /Edit Rate supporting documents/,
-            })
-        ).toHaveAttribute('href', '/documents')
-        
         await waitFor (() => {
+             const supportingDocsTable = screen.getByRole('table', {
+                 name: /Rate supporting documents/,
+             })
+             const rateDocsTable = screen.getByRole('table', {
+                 name: 'Rate certification',
+             })
+
+             expect(rateDocsTable).toBeInTheDocument()
+             expect(supportingDocsTable).toBeInTheDocument()
+             expect(
+                 screen.getByRole('link', {
+                     name: /Edit Rate supporting documents/,
+                 })
+             ).toHaveAttribute('href', '/documents')
+
             const supportingDocsTableRows =
                 within(supportingDocsTable).getAllByRole('rowgroup')
             expect(supportingDocsTableRows.length).toEqual(2)

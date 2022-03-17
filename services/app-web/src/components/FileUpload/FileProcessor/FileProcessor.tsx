@@ -29,20 +29,21 @@ const DocumentError = ({
     hasScanningError,
     hasUploadError,
     hasUnexpectedError,
+    hasMissingCategories,
+    shouldValidate,
 }: {
     hasDuplicateNameError: boolean
     hasScanningError: boolean
     hasUploadError: boolean
     hasUnexpectedError: boolean
+    hasMissingCategories: boolean
+    shouldValidate?: boolean
 }): React.ReactElement | null => {
     if (hasDuplicateNameError)
         return (
             <>
                 <span className={styles.fileItemBoldMessage}>
-                    Duplicate file
-                </span>
-                <span className={styles.fileItemBoldMessage}>
-                    Please remove
+                    Duplicate file, please remove
                 </span>
             </>
         )
@@ -58,10 +59,7 @@ const DocumentError = ({
         return (
             <>
                 <span className={styles.fileItemBoldMessage}>
-                    Upload failed
-                </span>
-                <span className={styles.fileItemBoldMessage}>
-                    Please remove or retry
+                    Upload failed, please remove or retry
                 </span>
             </>
         )
@@ -69,10 +67,15 @@ const DocumentError = ({
         return (
             <>
                 <span className={styles.fileItemBoldMessage}>
-                    Upload failed
+                    Unexpected error, please remove
                 </span>
+            </>
+        )
+    } else if (shouldValidate && hasMissingCategories) {
+        return (
+            <>
                 <span className={styles.fileItemBoldMessage}>
-                    Unexpected error. Please remove.
+                    Must select at least one category checkbox
                 </span>
             </>
         )
@@ -88,6 +91,7 @@ type FileProcessorProps = {
     renderMode: 'table' | 'list'
     handleCheckboxClick: (event: React.ChangeEvent<HTMLInputElement>) => void
     isContractOnly?: boolean
+    shouldValidate?: boolean
 }
 export const FileProcessor = ({
     item,
@@ -96,6 +100,7 @@ export const FileProcessor = ({
     renderMode,
     handleCheckboxClick,
     isContractOnly,
+    shouldValidate,
 }: FileProcessorProps): React.ReactElement => {
     const { name, status, file } = item
     const isRateSupporting = item.documentCategories.includes('RATES_RELATED')
@@ -107,8 +112,11 @@ export const FileProcessor = ({
     const hasUnexpectedError = status === 'UPLOAD_ERROR' && file === undefined
     const hasRecoverableError =
         (hasUploadError || hasScanningError) && !hasUnexpectedError
+    const hasMissingCategories =
+        !isContractOnly && item.documentCategories.length === 0
     const isLoading = status === 'PENDING'
     const isScanning = status === 'SCANNING'
+    const isComplete = status === 'UPLOAD_COMPLETE'
 
     const isPDF = name.indexOf('.pdf') > 0
     const isWord = name.indexOf('.doc') > 0 || name.indexOf('.pages') > 0
@@ -138,6 +146,8 @@ export const FileProcessor = ({
         statusValue = 'uploading'
     } else if (isScanning) {
         statusValue = 'scanning for viruses'
+    } else if (isComplete){
+        statusValue = 'upload complete'
     } else if (
         hasDuplicateNameError ||
         hasScanningError ||
@@ -147,9 +157,13 @@ export const FileProcessor = ({
         statusValue = 'error'
     }
 
+    const missingCategoryError = shouldValidate && hasMissingCategories
+
     const errorRowClass = classnames({
-        'bg-secondary-lighter': statusValue === 'error',
+        'bg-error-lighter': statusValue === 'error' || missingCategoryError,
     })
+
+    const hasNonDocumentError = statusValue === 'error'
 
     return renderMode === 'table' ? (
         <FileRow
@@ -167,6 +181,8 @@ export const FileProcessor = ({
                     hasScanningError={hasScanningError}
                     hasUploadError={hasUploadError}
                     hasUnexpectedError={hasUnexpectedError}
+                    hasMissingCategories={hasMissingCategories}
+                    shouldValidate={shouldValidate}
                 />
             }
             hasRecoverableError={hasRecoverableError}
@@ -174,6 +190,8 @@ export const FileProcessor = ({
             handleRetry={handleRetry}
             handleCheckboxClick={handleCheckboxClick}
             isContractOnly={isContractOnly}
+            shouldValidate={shouldValidate}
+            hasNonDocumentError={hasNonDocumentError}
         />
     ) : (
         <FileListItem
@@ -189,6 +207,7 @@ export const FileProcessor = ({
                     hasScanningError={hasScanningError}
                     hasUploadError={hasUploadError}
                     hasUnexpectedError={hasUnexpectedError}
+                    hasMissingCategories={hasMissingCategories}
                 />
             }
             hasRecoverableError={hasRecoverableError}

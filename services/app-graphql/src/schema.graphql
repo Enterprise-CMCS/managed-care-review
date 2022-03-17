@@ -11,8 +11,14 @@ type Query {
     fetchStateSubmission(
         input: FetchStateSubmissionInput!
     ): FetchStateSubmissionPayload!
-
     indexSubmissions: IndexSubmissionsPayload!
+
+    # new api
+    fetchSubmission2(
+        input: FetchSubmission2Input!
+    ): FetchSubmission2Payload!
+    indexSubmissions2: IndexSubmissions2Payload!
+
 }
 
 type Mutation {
@@ -25,6 +31,10 @@ type Mutation {
     submitDraftSubmission(
         input: SubmitDraftSubmissionInput!
     ): SubmitDraftSubmissionPayload!
+
+    unlockStateSubmission(
+        input: UnlockStateSubmissionInput!
+    ): UnlockStateSubmissionPayload!
 }
 
 input CreateDraftSubmissionInput {
@@ -53,13 +63,29 @@ type FetchStateSubmissionPayload {
     submission: StateSubmission
 }
 
+input FetchSubmission2Input {
+    submissionID: ID!
+}
+
+type FetchSubmission2Payload {
+    submission: Submission2
+}
+
 type SubmissionEdge {
     node: Submission!
 }
 
+type Submission2Edge {
+    node: Submission2!
+}
 type IndexSubmissionsPayload {
     totalCount: Int
     edges: [SubmissionEdge!]!
+}
+
+type IndexSubmissions2Payload {
+    totalCount: Int
+    edges: [Submission2Edge!]!
 }
 
 input UpdateDraftSubmissionInput {
@@ -78,6 +104,16 @@ input SubmitDraftSubmissionInput {
 type SubmitDraftSubmissionPayload {
     submission: StateSubmission!
 }
+
+input UnlockStateSubmissionInput {
+    submissionID: ID!
+    unlockedReason: String!
+}
+
+type UnlockStateSubmissionPayload {
+    submission: Submission2!
+}
+
 scalar Date
 scalar DateTime
 
@@ -105,6 +141,39 @@ type State {
 type Program {
     id: ID!
     name: String!
+}
+
+enum Submission2Status {
+    DRAFT
+    SUBMITTED
+    UNLOCKED
+    RESUBMITTED
+}
+
+type Submission2 {
+    id: ID!
+    status: Submission2Status!
+    intiallySubmittedAt: Date
+    stateCode: String!
+    revisions: [RevisionEdge!]!
+}
+
+type UpdateInformation {
+    updatedAt: Date!
+    updatedBy: String!
+    updatedReason: String!
+}
+
+type Revision {
+    id: ID!
+    unlockInfo: UpdateInformation
+    submitInfo: UpdateInformation
+    createdAt: DateTime!
+    submissionData: String!
+}
+
+type RevisionEdge {
+    revision: Revision!
 }
 
 type StateContact {
@@ -221,6 +290,11 @@ enum ContractType {
     AMENDMENT
 }
 
+enum ContractExecutionStatus {
+    EXECUTED
+    UNEXECUTED
+}
+
 enum RateType {
     NEW
     AMENDMENT
@@ -238,7 +312,7 @@ enum FederalAuthority {
 type DraftSubmission {
     id: ID!
     programIDs: [ID!]!
-    program: Program!
+    program: Program! # This is dead code.
     submissionType: SubmissionType!
     submissionDescription: String!
     stateCode: String!
@@ -250,6 +324,7 @@ type DraftSubmission {
     actuaryCommunicationPreference: ActuaryCommunicationType
     documents: [Document!]!
     contractType: ContractType
+    contractExecutionStatus: ContractExecutionStatus
     contractDocuments: [Document!]!
     contractDateStart: Date
     contractDateEnd: Date
@@ -281,6 +356,7 @@ type StateSubmission {
     contractAmendmentInfo: ContractAmendmentInfo
     submittedAt: Date!
     contractType: ContractType!
+    contractExecutionStatus: ContractExecutionStatus!
     contractDocuments: [Document!]!
     contractDateStart: Date!
     contractDateEnd: Date!
@@ -305,6 +381,7 @@ input DraftSubmissionUpdates {
     actuaryCommunicationPreference: ActuaryCommunicationType
     documents: [DocumentInput!]!
     contractType: ContractType
+    contractExecutionStatus: ContractExecutionStatus
     contractDocuments: [DocumentInput!]!
     contractDateStart: Date
     contractDateEnd: Date

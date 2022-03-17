@@ -37,7 +37,7 @@
 
         h3 {
             font-weight: font-weight('normal');
-            color: color('base-light');
+            color: color('base');
             text-align: center;
         }
     }
@@ -71,5 +71,10 @@
 
 .draftTag {
     background: $theme-color-warning-dark;
+    color: $theme-color-base-ink;
+}
+
+.unlockedTag {
+    background: #99deea;
     color: $theme-color-base-ink;
 }
