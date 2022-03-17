@@ -103,7 +103,6 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     // Unlock modal state
     const [focusErrorsInModal, setFocusErrorsInModal] = useState(true)
-    const modalErrorRef = useRef<HTMLDivElement>(null)
     const modalRef = useRef<ModalRef>(null)
     const modalFormInitialValues = {
         unlockReason: '',
@@ -208,17 +207,24 @@ export const SubmissionSummary = (): React.ReactElement => {
         }
     }, [updateHeading, pathname, packageData])
 
-    // Focus errors in the unlock modal on initial click when errors exist
+    // Focus unlockReason field in the unlock modal on submit click when errors exist
     useEffect(() => {
         if (
             focusErrorsInModal &&
-            formik.errors.unlockReason &&
-            modalErrorRef.current
+            formik.errors.unlockReason
         ) {
-            modalErrorRef.current.focus()
+            const fieldElement: HTMLElement | null = document.querySelector(
+                `[name="unlockReason"]`
+            )
+
+            if (fieldElement) {
+                fieldElement.focus()
+                setFocusErrorsInModal(false)
+            } else {
+                console.log('Attempting to focus element that does not exist')
+            }
         }
-        setFocusErrorsInModal(false)
-    }, [focusErrorsInModal, formik.errors, modalErrorRef])
+    }, [focusErrorsInModal, formik.errors])
 
     // Clear form data when unlock modal closes without changes
     useEffect(() => {
@@ -388,7 +394,6 @@ export const SubmissionSummary = (): React.ReactElement => {
                             {formik.errors.unlockReason && (
                                 <PoliteErrorMessage
                                     role="alert"
-                                    ref={modalErrorRef}
                                 >
                                     {formik.errors.unlockReason}
                                 </PoliteErrorMessage>
