@@ -42,7 +42,6 @@ export const Modal = ({
             {...divProps}
             ref={modalRef}
             className={`${styles.modal} ${className}`}
-            forceAction
         >
             {modalHeading && (
                 <ModalHeading id={modalHeadingId}>
