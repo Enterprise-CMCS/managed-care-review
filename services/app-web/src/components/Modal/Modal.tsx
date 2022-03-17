@@ -10,15 +10,14 @@ import {
     ModalToggleButton
 } from '@trussworks/react-uswds';
 import styles from './Modal.module.scss'
-import { stringMap } from 'aws-sdk/clients/backup';
 
 interface ModalComponentProps {
     id: string,
     modalHeading?: string,
     onSubmit?: () => void,
-    onCancel?: () => void,
     className?: string,
     modalRef: React.RefObject<ModalRef>
+    submitButtonProps?: JSX.IntrinsicElements['button']
 }
 
 export type ModalProps = ModalComponentProps & UswdsModalProps
@@ -28,15 +27,17 @@ export const Modal = ({
     children,
     modalHeading,
     onSubmit,
-    onCancel,
     className,
     modalRef,
+    submitButtonProps,
     ...divProps
 }: ModalProps): React.ReactElement  => {
-
+    
 
     return (
         <UswdsModal
+            aria-labelledby={`${id}-heading`}
+            aria-describedby={`${id}-description`}
             {...divProps}
             id={id}
             ref={modalRef}
@@ -45,13 +46,13 @@ export const Modal = ({
             {modalHeading && (
                 <ModalHeading id={`${id}-heading`}>{modalHeading}</ModalHeading>
             )}
-            {children}
+            <div id={`${id}-modal-description`}>{children}</div>
             <ModalFooter>
                 <ButtonGroup className="float-right">
                     <ModalToggleButton
                         data-testid="modal-cancel"
                         modalRef={modalRef}
-                        id={`${id}=closer`}
+                        id={`${id}-closer`}
                         closer
                         outline
                     >
@@ -61,8 +62,9 @@ export const Modal = ({
                         type="button"
                         aria-label="Submit"
                         data-testid="modal-submit"
-                        id={`${id}=submit`}
+                        id={`${id}-submit`}
                         onClick={onSubmit}
+                        {...submitButtonProps}
                     >
                         Submit
                     </Button>

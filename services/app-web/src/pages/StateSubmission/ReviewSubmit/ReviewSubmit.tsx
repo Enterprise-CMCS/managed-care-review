@@ -1,7 +1,6 @@
 import {
     Alert, Button,
-    ButtonGroup,
-    GridContainer, Modal, ModalFooter, ModalHeading, ModalRef, ModalToggleButton
+    GridContainer, ModalRef, ModalToggleButton
 } from '@trussworks/react-uswds'
 import React, { useRef, useState } from 'react'
 import { useHistory } from 'react-router-dom'
@@ -14,6 +13,7 @@ import {
     useSubmitDraftSubmissionMutation
 } from '../../../gen/gqlClient'
 import { PageActionsContainer } from '../PageActions'
+import {Modal} from '../../../components/Modal'
 import styles from './ReviewSubmit.module.scss'
 
 
@@ -48,9 +48,7 @@ export const ReviewSubmit = ({
         setUserVisibleError(error)
     }
 
-    const handleFormSubmit = async (e: React.FormEvent): Promise<void> => {
-        e.preventDefault()
-
+    const handleFormSubmit = async (): Promise<void> => {
         try {
             const data = await submitDraftSubmission({
                 variables: {
@@ -145,35 +143,16 @@ export const ReviewSubmit = ({
             </PageActionsContainer>
 
             <Modal
-                ref={modalRef}
-                aria-labelledby="review-and-submit-modal-heading"
-                aria-describedby="review-and-submit-modal-description"
+                modalRef={modalRef}
                 id="review-and-submit-modal"
+                modalHeading="Ready to submit?"
+                submitButtonProps={{ className: styles.submitButton }}
+                onSubmit={handleFormSubmit}
             >
-                <ModalHeading id="review-and-submit-modal-heading">
-                    Ready to submit?
-                </ModalHeading>
-                <p id="review-and-submit-description">
+                <p>
                     Submitting this package will send it to CMS to begin their
                     review.
                 </p>
-                <ModalFooter>
-                    <ButtonGroup className="float-right">
-                        <ModalToggleButton modalRef={modalRef} closer outline>
-                            Cancel
-                        </ModalToggleButton>
-                        <Button
-                            type="button"
-                            key="submitButton"
-                            aria-label="Submit"
-                            data-testid="modal-submit"
-                            className={styles.submitButton}
-                            onClick={handleFormSubmit}
-                        >
-                            Submit
-                        </Button>
-                    </ButtonGroup>
-                </ModalFooter>
             </Modal>
         </GridContainer>
     )
