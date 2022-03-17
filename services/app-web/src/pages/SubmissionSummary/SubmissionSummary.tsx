@@ -265,7 +265,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                     </Link>
                 ) : null}
 
-                <SubmissionTypeSummarySection submission={submission} unlockModalButton={displayUnlockButton ? unlockModalButton(() => setShowModal(true), disableUnlockButton) : undefined} />
+                <SubmissionTypeSummarySection submission={submission} unlockModalButton={displayUnlockButton ? unlockModalButton(() => setShowModal(true), disableUnlockButton) : undefined} statePrograms={[]} />
 
                 <ContractDetailsSummarySection submission={submission} />
 

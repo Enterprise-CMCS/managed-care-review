@@ -9,6 +9,7 @@ import {
     ContactsSummarySection, ContractDetailsSummarySection,
     RateDetailsSummarySection, SubmissionTypeSummarySection, SupportingDocumentsSummarySection
 } from '../../../components/SubmissionSummarySection'
+import { useAuth } from '../../../contexts/AuthContext'
 import {
     DraftSubmission,
     useSubmitDraftSubmissionMutation
@@ -27,6 +28,10 @@ export const ReviewSubmit = ({
     >(undefined)
     const history = useHistory()
     const modalRef = useRef<ModalRef>(null)
+    const { loggedInUser } = useAuth()
+
+    // pull the programs off the user
+    const statePrograms = loggedInUser && 'state' in loggedInUser && loggedInUser.state.programs || []
 
     const [submitDraftSubmission] = useSubmitDraftSubmissionMutation({
         // An alternative to messing with the cache like we do with create, just zero it out.
@@ -92,6 +97,7 @@ export const ReviewSubmit = ({
             <SubmissionTypeSummarySection
                 submission={draftSubmission}
                 navigateTo="type"
+                statePrograms={statePrograms}
             />
 
             <ContractDetailsSummarySection

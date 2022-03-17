@@ -32,11 +32,11 @@ import {
     useFetchSubmission2Query,
     User
 } from '../../gen/gqlClient'
-import { GQLSubmissionUnionType } from '../../gqlHelpers/submissionWithRevisions'
 import {SubmissionUnlockedBanner} from '../../components/Banner'
 import {UpdateInfoType} from '../../common-code/domain-models/Submission2Type'
 import { useAuth } from '../../contexts/AuthContext'
 import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
+import { DraftSubmissionType, submissionNameWithPrograms } from '../../common-code/domain-models'
 
 const FormAlert = ({message}:{message?: string}): React.ReactElement => {return message? <Alert type="error">{message}</Alert> : <GenericApiErrorBanner />}
 
@@ -90,7 +90,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
     const currentRoute = getRouteName(pathname)
     const { updateHeading } = usePage()
     const [formDataFromLatestRevision, setFormDataFromLatestRevision] =
-        useState<GQLSubmissionUnionType | null>(null)
+        useState<DraftSubmissionType | null>(null)
     const [formDataError, setFormDataError] = useState<FormDataError | null>(
         null
     )
@@ -110,6 +110,8 @@ export const StateSubmissionForm = (): React.ReactElement => {
             },
         },
     })
+
+    const statePrograms = loggedInUser && 'state' in loggedInUser && loggedInUser.state.programs || []
 
     const submissionAndRevisions = fetchData?.fetchSubmission2?.submission
     const [updateDraftSubmission, { error: updateError }] =
@@ -145,7 +147,8 @@ export const StateSubmissionForm = (): React.ReactElement => {
     // Set up side effects
     useEffect(() => {
         if (formDataFromLatestRevision) {
-            const { name } = formDataFromLatestRevision
+            const programs = statePrograms
+            const name = submissionNameWithPrograms(formDataFromLatestRevision, programs)
             updateHeading(pathname, name)
         }
     }, [updateHeading, pathname, formDataFromLatestRevision])
@@ -158,28 +161,21 @@ export const StateSubmissionForm = (): React.ReactElement => {
             // set form data
             if (currentRevisionPackageOrError instanceof Error) {
                 setFormDataError('MALFORMATTED_DATA')
-            } else {
-                const formattedCurrentRevision = convertDomainModelFormDataToGQLSubmission(currentRevisionPackageOrError)
-                if (
-                    !formattedCurrentRevision
-                ) {
-                    setFormDataError('NOT_FOUND')
-                } else if (
-                    !isGQLDraftSubmission(formattedCurrentRevision)
-                ) {
-                    setFormDataError('WRONG_SUBMISSION_STATUS')
-                } else {
-                    // we think we have valid data
-                    setFormDataFromLatestRevision(formattedCurrentRevision)
-                }
+                return
             } 
+
+            const [revision, planFormData] = currentRevisionPackageOrError
+
+            if (planFormData.status !== 'DRAFT') {
+                setFormDataError('WRONG_SUBMISSION_STATUS')
+                return 
+            }
+
+            setFormDataFromLatestRevision(planFormData)
 
             // set unlock info
             if (submissionAndRevisions.status === 'UNLOCKED') {
-                const unlockedRevision = submissionAndRevisions.revisions.find(
-                    (rev) => rev.revision.unlockInfo
-                )
-                const unlockInfo = unlockedRevision?.revision.unlockInfo
+                const unlockInfo = revision.unlockInfo
 
                 if (
                     unlockInfo
@@ -233,7 +229,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
         return <GenericErrorPage />
     }
 
-    if (formDataError === 'NOT_FOUND' || (fetchData &&  !formDataFromLatestRevision)) {
+    if (formDataError === 'NOT_FOUND' || !formDataFromLatestRevision) {
         return <Error404 />
     }
 
@@ -241,7 +237,8 @@ export const StateSubmissionForm = (): React.ReactElement => {
         return <ErrorInvalidSubmissionStatus />
     }
 
-    const draft = formDataFromLatestRevision as DraftSubmission
+    // Hacky way to not have to change the individual pages yet. 
+    const draft = convertDomainModelFormDataToGQLSubmission(formDataFromLatestRevision, statePrograms) as DraftSubmission
 
     return (
         <>

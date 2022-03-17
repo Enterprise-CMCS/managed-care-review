@@ -1,13 +1,13 @@
-import { submissionName, SubmissionUnionType } from '../common-code/domain-models'
+import { submissionNameWithPrograms, SubmissionUnionType, ProgramT } from '../common-code/domain-models'
 import { base64ToDomain } from '../common-code/proto/stateSubmission'
-import { Submission as GQLSubmissionUnionType, Submission2 } from '../gen/gqlClient'
+import { Revision, Submission as GQLSubmissionUnionType, Submission2 } from '../gen/gqlClient'
 
 
 const isGQLDraftSubmission = (sub: GQLSubmissionUnionType): boolean => {
     return sub.__typename === 'DraftSubmission'
 }
 
-const getCurrentRevisionFromSubmission2 = (submissionAndRevisions?: Submission2 | null): SubmissionUnionType | Error => {
+const getCurrentRevisionFromSubmission2 = (submissionAndRevisions: Submission2): [Revision, SubmissionUnionType] | Error => {
     // check that package and valid revisions exist
     if (submissionAndRevisions) {
         if (
@@ -44,16 +44,16 @@ const getCurrentRevisionFromSubmission2 = (submissionAndRevisions?: Submission2 
             )
             return new Error('Error decoding the submission. Please try again.')
         } else {
-            return healthPlanPackageFormDataResult
+            return [newestRev, healthPlanPackageFormDataResult]
         }
     } else {
         console.error('ERROR: no submission exists')
         return new Error('Error fetching the submission. Please try again.')
     }
 
-    }
-    
-const convertDomainModelFormDataToGQLSubmission = (submissionDomainModel: SubmissionUnionType): GQLSubmissionUnionType => {
+}
+
+const convertDomainModelFormDataToGQLSubmission = (submissionDomainModel: SubmissionUnionType, statePrograms: ProgramT[]): GQLSubmissionUnionType => {
     // convert from domain model back into GQL types
     const GQLSubmission: GQLSubmissionUnionType =
         submissionDomainModel.status === 'DRAFT'
@@ -61,12 +61,12 @@ const convertDomainModelFormDataToGQLSubmission = (submissionDomainModel: Submis
                   ...submissionDomainModel,
 
                   __typename: 'DraftSubmission' as const,
-                  name: submissionName(submissionDomainModel),
+                  name: submissionNameWithPrograms(submissionDomainModel, statePrograms),
               }
             : {
                   ...submissionDomainModel,
                   __typename: 'StateSubmission' as const,
-                  name: submissionName(submissionDomainModel),
+                  name: submissionNameWithPrograms(submissionDomainModel, statePrograms),
                   submittedAt:submissionDomainModel.submittedAt
               }
 
