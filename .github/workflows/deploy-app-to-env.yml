@@ -55,6 +55,7 @@ jobs:
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
           IAM_PATH: ${{ secrets.iam_path }}
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
+          NR_LICENSE_KEY: ${{ secrets.nr_license_key}}
 
         run: |
           pushd services/app-web && npx serverless deploy --stage ${{ inputs.stage_name }}

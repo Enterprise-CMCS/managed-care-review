@@ -162,3 +162,9 @@ This is the key used by Cypress to send results to Cypress Dashboard.
 Read by codeclimate-action
 
 This key allows uploads to CodeClimate for our code coverage stats.
+
+### `OTEL_COLLECTOR_URL`
+
+Read by Trace Context
+
+This URL defines where we export traces to. It should differ between local dev and deployed environments.

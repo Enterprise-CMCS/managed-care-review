@@ -142,6 +142,14 @@ functions:
           method: post
           cors: true
 
+  otel:
+    handler: handlers/otel_proxy.main
+    events:
+      - http:
+          path: otel
+          method: post
+          cors: true
+
   graphql:
     handler: handlers/apollo_gql.graphqlHandler
     events:
