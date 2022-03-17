@@ -102,6 +102,8 @@ export const SubmissionSummary = (): React.ReactElement => {
     )
 
     // Unlock modal state
+    const [focusErrorsInModal, setFocusErrorsInModal] = useState(true)
+    const modalErrorRef = useRef<HTMLDivElement>(null)
     const modalRef = useRef<ModalRef>(null)
     const modalFormInitialValues = {
         unlockReason: '',
@@ -206,17 +208,25 @@ export const SubmissionSummary = (): React.ReactElement => {
         }
     }, [updateHeading, pathname, packageData])
 
+    // Focus errors in the unlock modal on initial click when errors exist
+    useEffect(() => {
+        if (
+            focusErrorsInModal &&
+            formik.errors.unlockReason &&
+            modalErrorRef.current
+        ) {
+            modalErrorRef.current.focus()
+        }
+        setFocusErrorsInModal(false)
+    }, [focusErrorsInModal, formik.errors, modalErrorRef])
 
     // Clear form data when unlock modal closes without changes
     useEffect(() => {
-        console.log(formik.dirty)
-        console.log(modalRef.current)
         if (formik.dirty && !modalRef?.current?.modalIsOpen ) {
-                console.log('trying to reset here')
                 formik.resetForm()
         }
     }, [formik, modalRef.current?.modalIsOpen])
-          console.log(modalRef.current)
+
     if (loading || !submissionAndRevisions || !packageData) {
         return (
             <GridContainer>
@@ -230,7 +240,6 @@ export const SubmissionSummary = (): React.ReactElement => {
         return <GenericErrorPage /> // api failure or protobuf decode failure
 
     const onModalSubmit = async (values: typeof modalFormInitialValues) => {
-        console.log('in modal submit')
         const { unlockReason } = values
         await onUnlock(unlockReason)
         modalRef.current?.toggleModal(undefined, false)
@@ -369,7 +378,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                     id="unlock-modal"
                     aria-labelledby="unlockModalHeading"
                     onSubmit={() => {
-                        console.log('in this')
+                        setFocusErrorsInModal(true)
                         formik.handleSubmit()
                     }}
                     modalRef={modalRef}
@@ -379,6 +388,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                             {formik.errors.unlockReason && (
                                 <PoliteErrorMessage
                                     role="alert"
+                                    ref={modalErrorRef}
                                 >
                                     {formik.errors.unlockReason}
                                 </PoliteErrorMessage>
@@ -397,6 +407,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                                 maxLength={300}
                                 isTextArea
                                 data-testid="unlockReason"
+                                aria-label="Reason for unlocking submission"
                                 aria-describedby="unlockReason-info"
                                 className={styles.unlockReasonTextarea}
                                 aria-required
