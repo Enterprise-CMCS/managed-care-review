@@ -68,7 +68,6 @@ async function submitStateSubmissionWrapper(
     }
 }
 
-
 export async function updateStateSubmission(
     client: PrismaClient,
     stateSubmission: StateSubmissionType,
