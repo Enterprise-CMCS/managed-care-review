@@ -144,7 +144,7 @@ export const ReviewSubmit = ({
 
             <Modal
                 modalRef={modalRef}
-                id="review-and-submit-modal"
+                id="review-and-submit"
                 modalHeading="Ready to submit?"
                 submitButtonProps={{ className: styles.submitButton }}
                 onSubmit={handleFormSubmit}

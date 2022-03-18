@@ -226,12 +226,6 @@ export const SubmissionSummary = (): React.ReactElement => {
         }
     }, [focusErrorsInModal, formik.errors])
 
-    // Clear form data when unlock modal closes without changes
-    useEffect(() => {
-        if (formik.dirty && !modalRef?.current?.modalIsOpen ) {
-                formik.resetForm()
-        }
-    }, [formik, modalRef.current?.modalIsOpen])
 
     if (loading || !submissionAndRevisions || !packageData) {
         return (
@@ -381,7 +375,7 @@ export const SubmissionSummary = (): React.ReactElement => {
 
                 <Modal
                     modalHeading="Reason for unlocking submission"
-                    id="unlock-modal"
+                    id="unlockReason"
                     aria-labelledby="unlockModalHeading"
                     onSubmit={() => {
                         setFocusErrorsInModal(true)
@@ -407,7 +401,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                             </span>
 
                             <CharacterCount
-                                id="unlockReason"
+                                id="unlockReasonCharacterCount"
                                 name="unlockReason"
                                 maxLength={300}
                                 isTextArea

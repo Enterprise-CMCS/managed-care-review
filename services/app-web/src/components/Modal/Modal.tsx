@@ -50,7 +50,7 @@ export const Modal = ({
             <ModalFooter>
                 <ButtonGroup className="float-right">
                     <ModalToggleButton
-                        data-testid="modal-cancel"
+                        data-testid={`${id}-modal-cancel`}
                         modalRef={modalRef}
                         id={`${id}-closer`}
                         closer
@@ -61,7 +61,7 @@ export const Modal = ({
                     <Button
                         type="button"
                         aria-label="Submit"
-                        data-testid="modal-submit"
+                        data-testid={`${id}-modal-submit`}
                         id={`${id}-submit`}
                         onClick={onSubmit}
                         {...submitButtonProps}
