@@ -1,19 +1,20 @@
 import { PrismaClient } from '@prisma/client'
 import {
-    StateSubmissionType, Submission2Type
+    StateSubmissionType, Submission2Type, UpdateInfoType
 } from '../../app-web/src/common-code/domain-models'
 import {
     toProtoBuffer
 } from '../../app-web/src/common-code/proto/stateSubmission'
 import { convertPrismaErrorToStoreError, isStoreError, StoreError } from './storeError'
-import { getCurrentRevision } from './submissionWithRevisionsHelpers'
+import { getCurrentRevision, convertToSubmission2Type } from './submissionWithRevisionsHelpers'
 
 async function submitStateSubmissionWrapper(
     client: PrismaClient,
     id: string,
-    submittedAt: Date,
+    submitInfo: UpdateInfoType,
     proto: Buffer
 ): Promise<Submission2Type | StoreError> {
+    const { updatedBy, updatedAt, updatedReason } = submitInfo
 
     try {
         const findResult = await client.stateSubmission.findUnique({
@@ -32,7 +33,7 @@ async function submitStateSubmissionWrapper(
 
         try {
             const currentRevision = currentRevisionOrError
-            return await client.stateSubmission.update( {
+            const submission = await client.stateSubmission.update({
                 where: {
                     id
                 },
@@ -44,7 +45,9 @@ async function submitStateSubmissionWrapper(
                             },
                             data: {
                                 submissionFormProto: proto,
-                                submittedAt,
+                                submittedAt: updatedAt,
+                                submittedBy: updatedBy,
+                                submittedReason: updatedReason
                             }
                         }
                     }
@@ -57,6 +60,7 @@ async function submitStateSubmissionWrapper(
                     }
                 },
             })
+            return convertToSubmission2Type(submission)
         } catch (updateError) {
             return convertPrismaErrorToStoreError(updateError)
         }
@@ -70,7 +74,7 @@ async function submitStateSubmissionWrapper(
 export async function updateStateSubmission(
     client: PrismaClient,
     stateSubmission: StateSubmissionType,
-    submittedAt: Date,
+    submitInfo: UpdateInfoType,
 ): Promise<Submission2Type | StoreError> {
     stateSubmission.updatedAt = new Date()
 
@@ -80,7 +84,7 @@ export async function updateStateSubmission(
     const updateResult = await submitStateSubmissionWrapper(
         client,
         stateSubmission.id,
-        submittedAt,
+        submitInfo,
         buffer
     )
 
