@@ -43,6 +43,7 @@ function UnlockModalButton({disabled, modalRef} : {disabled: boolean, modalRef: 
             className={styles.submitButton}
             data-testid="form-submit"
             disabled={disabled}
+            outline
             opener
         >
             Unlock submission
