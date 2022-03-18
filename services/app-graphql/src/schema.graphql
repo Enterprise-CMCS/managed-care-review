@@ -99,6 +99,7 @@ type UpdateDraftSubmissionPayload {
 
 input SubmitDraftSubmissionInput {
     submissionID: ID!
+    submittedReason: String
 }
 
 type SubmitDraftSubmissionPayload {
