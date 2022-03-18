@@ -1,4 +1,4 @@
-import { Lambda } from 'aws-sdk'
+import { SES, Lambda } from 'aws-sdk'
 import {
     getSESEmailParams,
     newPackageCMSEmail,
@@ -118,26 +118,23 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
     }
 }
 
+const localEmailerLogger = (emailRequestParams: SES.SendEmailRequest) =>
+    console.log(`
+        EMAIL SENT
+        ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
+        ${JSON.stringify(emailRequestParams)}
+        ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
+    `)
+
+
 function newLocalEmailer(config: EmailConfiguration): Emailer {
     return {
         sendEmail: async (emailData: EmailData): Promise<void | Error> => {
-            const emailRequestParams = getSESEmailParams(emailData)
-            console.log(`
-            EMAIL SENT
-            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
-            ${JSON.stringify(emailRequestParams)}
-            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
-        `)
+            localEmailerLogger(getSESEmailParams(emailData))
         },
         sendCMSNewPackage: async (submission: StateSubmissionType) => {
             const emailData = newPackageCMSEmail(submission, config)
-            const emailRequestParams = getSESEmailParams(emailData)
-            console.log(`
-            EMAIL SENT
-            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
-            ${JSON.stringify(emailRequestParams)}
-            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
-        `)
+            localEmailerLogger(getSESEmailParams(emailData))
         },
         sendStateNewPackage: async (
             submission: StateSubmissionType,
@@ -148,38 +145,20 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
                 user,
                 config
             )
-            const emailRequestParams = getSESEmailParams(emailData)
-            console.log(`
-            EMAIL SENT
-            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
-            ${JSON.stringify(emailRequestParams)}
-            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
-        `)
+            localEmailerLogger(getSESEmailParams(emailData))
         },
         sendUnlockPackageCMSEmail: async (
             updatedEmailData: UpdatedEmailData
         ) => {
             const emailData = unlockPackageCMSEmail(updatedEmailData, config)
-            const emailRequestParams = getSESEmailParams(emailData)
-            console.log(`
-            EMAIL SENT
-            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
-            ${JSON.stringify(emailRequestParams)}
-            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
-        `)
+            localEmailerLogger(getSESEmailParams(emailData))
         },
         sendUnlockPackageStateEmail: async (
             submission: StateSubmissionType,
             updatedEmailData: UpdatedEmailData
         ) => {
             const emailData = unlockPackageStateEmail(submission, updatedEmailData, config)
-            const emailRequestParams = getSESEmailParams(emailData)
-            console.log(`
-            EMAIL SENT
-            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
-            ${JSON.stringify(emailRequestParams)}
-            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
-        `)
+            localEmailerLogger(getSESEmailParams(emailData))
         },
         sendResubmittedStateEmail: async (
             submission: StateSubmissionType,
@@ -187,26 +166,14 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
             user: CognitoUserType
         ) => {
             const emailData = resubmittedStateEmail(submission, user, updatedEmailData, config)
-            const emailRequestParams = getSESEmailParams(emailData)
-            console.log(`
-            EMAIL SENT
-            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
-            ${JSON.stringify(emailRequestParams)}
-            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
-        `)
+            localEmailerLogger(getSESEmailParams(emailData))
         },
         sendResubmittedCMSEmail: async (
             submission: StateSubmissionType,
             updatedEmailData: UpdatedEmailData
         ) => {
             const emailData = resubmittedCMSEmail(submission, updatedEmailData, config)
-            const emailRequestParams = getSESEmailParams(emailData)
-            console.log(`
-            EMAIL SENT
-            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
-            ${JSON.stringify(emailRequestParams)}
-            ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
-        `)
+            localEmailerLogger(getSESEmailParams(emailData))
         },
     }
 }
