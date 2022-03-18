@@ -220,20 +220,23 @@ const unlockPackageStateEmail = (
 
 const resubmittedStateEmail = (
     submission: StateSubmissionType,
+    user: CognitoUserType,
     resubmittedData: UpdatedEmailData,
     config: EmailConfiguration
 ): EmailData => {
-    const receiverEmails: string[] = submission.stateContacts.map((contact) => contact.email)
+    const currentUserEmail = user.email
+    const receiverEmails: string[] = [currentUserEmail].concat(
+        submission.stateContacts.map((contact) => contact.email)
+    )
     const bodyHTML = `
-        ${testEmailAlert}
-        <h1>Submission ${resubmittedData.submissionName} was successfully resubmitted</h1>
-        <br/>
-        <b>Submitted by:</b> ${resubmittedData.updatedBy}
-        <br/>
-        <b>Updated on:</b> ${formatCalendarDate(resubmittedData.updatedAt)}
-        <br/>
-        <b>Changes made:</b> ${resubmittedData.updatedReason}
-        <br/>
+        ${testEmailAlert}<br />
+        <br />
+        <h1>Submission ${resubmittedData.submissionName} was successfully resubmitted</h1><br />
+        <br />
+        <b>Submitted by:</b> ${resubmittedData.updatedBy}<br />
+        <b>Updated on:</b> ${formatCalendarDate(resubmittedData.updatedAt)}<br />
+        <b>Changes made:</b> ${resubmittedData.updatedReason}<br />
+        <br />
         <p>If you need to make any further changes, please contact CMS.</p>
     `
     return {
@@ -253,19 +256,19 @@ const resubmittedCMSEmail = (
     config: EmailConfiguration
 ): EmailData => {
     const reviewerEmails = config.cmsReviewSharedEmails
-
     const submissionURL = new URL(
         `submissions/${submission.id}`,
         config.baseUrl
     ).href
 
     const bodyHTML = `
-        ${testEmailAlert}
-        <h1>The state completed their edits on submission ${resubmittedData.submissionName}</h1>
+        ${testEmailAlert}<br/>
         <br/>
-        <b>Submitted by:</b> ${resubmittedData.updatedBy}
-        <b>Updated on:</b> ${formatCalendarDate(resubmittedData.updatedAt)}
-        <b>Changes made:</b> ${resubmittedData.updatedReason}
+        <h1>The state completed their edits on submission ${resubmittedData.submissionName}</h1><br/>
+        <br/>
+        <b>Submitted by:</b> ${resubmittedData.updatedBy}<br/>
+        <b>Updated on:</b> ${formatCalendarDate(resubmittedData.updatedAt)}<br/>
+        <b>Changes made:</b> ${resubmittedData.updatedReason}<br/>
         <br/>
         <a href="${submissionURL}">View submission</a>
     `
@@ -281,4 +284,3 @@ const resubmittedCMSEmail = (
 }
 
 export { newPackageCMSEmail, newPackageStateEmail, unlockPackageCMSEmail, unlockPackageStateEmail, resubmittedStateEmail, resubmittedCMSEmail, UpdatedEmailData }
-
