@@ -449,9 +449,11 @@ describe('Email templates', () => {
             updatedAt: new Date('02/01/2022'),
             updatedReason: 'Added rate certification.'
         }
+        const user = mockUser()
         const submission = mockContractOnlySubmission()
         const template = resubmittedStateEmail(
             submission,
+            user,
             resubmitData,
             testEmailConfig
         )
