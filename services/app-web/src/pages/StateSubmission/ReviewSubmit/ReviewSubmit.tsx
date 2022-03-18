@@ -19,8 +19,10 @@ import styles from './ReviewSubmit.module.scss'
 
 export const ReviewSubmit = ({
     draftSubmission,
+    unlocked
 }: {
-    draftSubmission: DraftSubmission
+    draftSubmission: DraftSubmission,
+    unlocked: boolean
 }): React.ReactElement => {
     const [userVisibleError, setUserVisibleError] = useState<
         string | undefined
@@ -51,13 +53,20 @@ export const ReviewSubmit = ({
     const handleFormSubmit = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault()
 
+        const input = { submissionID: draftSubmission.id }
+
+        if (unlocked) {
+            Object.assign(input, {
+                //This is placeholder text until we get the resubmission reason input modal added in.
+                submittedReason: 'Placeholder resubmission reason'
+            })
+        }
+
         try {
             const data = await submitDraftSubmission({
                 variables: {
-                    input: {
-                        submissionID: draftSubmission.id,
-                    },
-                },
+                    input
+                }
             })
 
             if (data.errors) {

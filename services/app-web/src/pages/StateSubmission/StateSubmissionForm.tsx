@@ -285,7 +285,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}>
-                        <ReviewSubmit draftSubmission={draft} />
+                        <ReviewSubmit draftSubmission={draft} unlocked={!!unlockedInfo} />
                     </Route>
                 </Switch>
             </StateSubmissionContainer>
