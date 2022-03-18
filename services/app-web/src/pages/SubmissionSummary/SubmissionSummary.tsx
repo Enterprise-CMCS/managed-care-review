@@ -242,8 +242,8 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     const onModalSubmit = async (values: typeof modalFormInitialValues) => {
         const { unlockReason } = values
-        await onUnlock(unlockReason)
         modalRef.current?.toggleModal(undefined, false)
+        await onUnlock(unlockReason)
     }
 
     const onUnlock = async (unlockReason: string) => {
@@ -387,7 +387,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                         <FormGroup error={Boolean(formik.errors.unlockReason)}>
                             {formik.errors.unlockReason && (
                                 <PoliteErrorMessage
-                                    role="alert"
+                                    role="alert"    
                                 >
                                     {formik.errors.unlockReason}
                                 </PoliteErrorMessage>
