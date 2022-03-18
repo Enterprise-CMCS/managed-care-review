@@ -14,8 +14,6 @@ async function submitStateSubmissionWrapper(
     submitInfo: UpdateInfoType,
     proto: Buffer
 ): Promise<Submission2Type | StoreError> {
-    const { updatedBy, updatedAt, updatedReason } = submitInfo
-
     try {
         const findResult = await client.stateSubmission.findUnique({
             where: {
@@ -45,9 +43,9 @@ async function submitStateSubmissionWrapper(
                             },
                             data: {
                                 submissionFormProto: proto,
-                                submittedAt: updatedAt,
-                                submittedBy: updatedBy,
-                                submittedReason: updatedReason
+                                submittedAt: submitInfo.updatedAt,
+                                submittedBy: submitInfo.updatedBy,
+                                submittedReason: submitInfo.updatedReason
                             }
                         }
                     }
