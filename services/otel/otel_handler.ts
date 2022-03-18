@@ -7,6 +7,8 @@ import {
     ConsoleSpanExporter,
     BasicTracerProvider,
 } from '@opentelemetry/sdk-trace-base'
+import { B3Propagator } from '@opentelemetry/propagator-b3'
+import { ZoneContextManager } from '@opentelemetry/context-zone'
 
 const serviceName = 'app-api-' + process.env.REACT_APP_STAGE_NAME
 const provider = new BasicTracerProvider({
@@ -25,6 +27,9 @@ provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()))
 provider.addSpanProcessor(new SimpleSpanProcessor(exporter))
 
 // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
-provider.register()
+provider.register({
+    contextManager: new ZoneContextManager(),
+    propagator: new B3Propagator(),
+})
 
-export const tracer = opentelemetry.trace.getTracer('tracer-provider')
+export const tracer = opentelemetry.trace.getTracer(serviceName)

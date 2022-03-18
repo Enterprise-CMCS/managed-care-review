@@ -1,4 +1,4 @@
-import { Span } from '@opentelemetry/api'
+import { propagation, ROOT_CONTEXT, Span } from '@opentelemetry/api'
 import { ApolloServer } from 'apollo-server-lambda'
 import {
     APIGatewayProxyEvent,
@@ -20,7 +20,7 @@ import { NewPostgresStore } from '../postgres/postgresStore'
 import { configureResolvers } from '../resolvers'
 import { configurePostgres } from './configuration'
 import { tracer as tracer } from '../../otel/otel_handler'
-
+import opentelemetry from '@opentelemetry/api'
 
 const requestSpanKey = 'REQUEST_SPAN'
 
@@ -34,7 +34,12 @@ export interface Context {
 // and turns that into our GQL resolver context object
 function contextForRequestForFetcher(
     userFetcher: userFromAuthProvider
-): ({ event }: { event: APIGatewayProxyEvent, context: any }) => Promise<Context> {
+): ({
+    event,
+}: {
+    event: APIGatewayProxyEvent
+    context: any
+}) => Promise<Context> {
     return async ({ event, context }) => {
         // pull the current span out of the LAMBDA context, to place it in the APOLLO context
         const anyContext = context as any
@@ -49,7 +54,7 @@ function contextForRequestForFetcher(
                 if (!userResult.isErr()) {
                     return {
                         user: userResult.value,
-                        span: requestSpan
+                        span: requestSpan,
                     }
                 } else {
                     throw new Error(
@@ -67,9 +72,7 @@ function contextForRequestForFetcher(
 }
 
 // This middleware returns an error if the local request is missing authentication info
-function localAuthMiddleware(
-    wrapped: APIGatewayProxyHandler
-): Handler {
+function localAuthMiddleware(wrapped: APIGatewayProxyHandler): Handler {
     return async function (event, context, completion) {
         const userHeader =
             event.requestContext.identity.cognitoAuthenticationProvider
@@ -93,14 +96,18 @@ function localAuthMiddleware(
 }
 
 // Tracing Middleware
-function tracingMiddleware(
-    wrapped: Handler
-): Handler {
+function tracingMiddleware(wrapped: Handler): Handler {
     return async function (event, context, completion) {
-        const span = tracer.startSpan('handleRequest', {
-            kind: 1, // server
-            attributes: { middlewareInit: true },
-        })
+        // get the parent context from headers
+        const ctx = propagation.extract(ROOT_CONTEXT, event.headers)
+        const span = tracer.startSpan(
+            'handleRequest',
+            {
+                kind: 1, // server
+                attributes: { middlewareInit: true },
+            },
+            ctx
+        )
 
         // Put the span into the LAMBDA context, in order to pass it into the APOLLO context in contextForRequestForFetcher
         // We have to use any here because this context's type is not under our control.
