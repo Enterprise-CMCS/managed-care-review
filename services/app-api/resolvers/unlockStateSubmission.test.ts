@@ -8,13 +8,12 @@ import {
     fetchTestDraftSubmissionById,
     submitTestDraftSubmission,
     unlockTestDraftSubmission,
-    updateTestDraftSubmission
+    updateTestDraftSubmission,
+    resubmitTestDraftSubmission
 } from '../testHelpers/gqlHelpers'
 import { mockStoreThatErrors } from '../testHelpers/storeHelpers'
 
-
 describe('unlockStateSubmission', () => {
-
     it('returns a Submission2 with all revisions', async () => {
         const stateServer = await constructTestPostgresServer()
 
@@ -67,7 +66,6 @@ describe('unlockStateSubmission', () => {
             updatedBy: 'zuko@example.com',
             updatedReason: 'Super duper good reason.'
         })
-
     })
 
     it('returns a DraftSubmission that can be updated without errors', async () => {
@@ -131,7 +129,6 @@ describe('unlockStateSubmission', () => {
         const refetched = await fetchTestDraftSubmissionById(stateServer, stateSubmission.id)
 
         expect(refetched.submissionDescription).toEqual('UPDATED_AFTER_UNLOCK')
-
     })
 
     it('can be unlocked repeatedly', async () => {
@@ -152,11 +149,11 @@ describe('unlockStateSubmission', () => {
 
         await unlockTestDraftSubmission(cmsServer, stateSubmission.id, 'Super duper good reason.')
 
-        await submitTestDraftSubmission(stateServer, stateSubmission.id)
+        await resubmitTestDraftSubmission(stateServer, stateSubmission.id, 'Test first resubmission reason')
 
         await unlockTestDraftSubmission(cmsServer, stateSubmission.id, 'Super duper duper good reason.')
 
-        await submitTestDraftSubmission(stateServer, stateSubmission.id)
+        await resubmitTestDraftSubmission(stateServer, stateSubmission.id, 'Test second resubmission reason')
 
         const draft = await unlockTestDraftSubmission(cmsServer, stateSubmission.id, 'Very super duper good reason.')
         expect(draft.status).toEqual('UNLOCKED')
@@ -165,7 +162,6 @@ describe('unlockStateSubmission', () => {
             updatedBy: 'zuko@example.com',
             updatedReason: 'Very super duper good reason.'
         })
-
     })
 
     it('returns errors if a state user tries to unlock', async () => {
@@ -191,7 +187,6 @@ describe('unlockStateSubmission', () => {
 
         expect(err.extensions['code']).toEqual('FORBIDDEN')
         expect(err.message).toEqual('user not authorized to unlock submission')
-
     })
 
     it('returns errors if unlocked from the wrong state', async () => {
@@ -247,8 +242,6 @@ describe('unlockStateSubmission', () => {
 
         expect(unlockErr.extensions['code']).toEqual('BAD_USER_INPUT')
         expect(unlockErr.message).toEqual('Attempted to unlock submission with wrong status')
-
-
     })
 
     it('returns an error if the submission does not exit', async () => {
@@ -316,7 +309,6 @@ describe('unlockStateSubmission', () => {
 
         expect(err.extensions['code']).toEqual('INTERNAL_SERVER_ERROR')
         expect(err.message).toEqual('Issue finding a state submission of type UNEXPECTED_EXCEPTION. Message: this error came from the generic store with errors mock')
-        
     })
 
     it('returns errors if unlocked reason is undefined', async () => {
@@ -351,7 +343,5 @@ describe('unlockStateSubmission', () => {
 
         expect(err.extensions['code']).toEqual('BAD_USER_INPUT')
         expect(err.message).toContain('Field "unlockedReason" of required type "String!" was not provided.')
-
     })
-
 })
