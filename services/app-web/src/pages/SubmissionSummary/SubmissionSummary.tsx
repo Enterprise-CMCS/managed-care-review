@@ -377,7 +377,6 @@ export const SubmissionSummary = (): React.ReactElement => {
                 <Modal
                     modalHeading="Reason for unlocking submission"
                     id="unlockReason"
-                    aria-labelledby="unlockModalHeading"
                     onSubmit={() => {
                         setFocusErrorsInModal(true)
                         formik.handleSubmit()
@@ -396,7 +395,6 @@ export const SubmissionSummary = (): React.ReactElement => {
                             <span
                                 id="unlockReason-hint"
                                 role="note"
-                                aria-labelledby="unlockReason"
                             >
                                 Provide reason for unlocking
                             </span>
@@ -407,8 +405,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                                 maxLength={300}
                                 isTextArea
                                 data-testid="unlockReason"
-                                aria-label="Reason for unlocking submission"
-                                aria-describedby="unlockReason-info"
+                                aria-labelledby="unlockReason-hint"
                                 className={styles.unlockReasonTextarea}
                                 aria-required
                                 error={!!formik.errors.unlockReason}
