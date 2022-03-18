@@ -51,7 +51,8 @@ type Emailer = {
     ) => Promise<void | Error>
     sendResubmittedStateEmail: (
         submission: StateSubmissionType,
-        updatedEmailData: UpdatedEmailData
+        updatedEmailData: UpdatedEmailData,
+        user: CognitoUserType
     ) => Promise<void | Error>
     sendResubmittedCMSEmail: (
         submission: StateSubmissionType,
@@ -102,8 +103,12 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
                 config)
             return await this.sendEmail(emailData)
         },
-        sendResubmittedStateEmail: async function (submission,updatedEmailData){
-            const emailData = resubmittedStateEmail(submission, updatedEmailData, config)
+        sendResubmittedStateEmail: async function (
+            submission,
+            updatedEmailData,
+            user: CognitoUserType
+        ){
+            const emailData = resubmittedStateEmail(submission, user, updatedEmailData, config)
             return await this.sendEmail(emailData)
         },
         sendResubmittedCMSEmail: async function (submission, updatedEmailData){
@@ -178,9 +183,10 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
         },
         sendResubmittedStateEmail: async (
             submission: StateSubmissionType,
-            updatedEmailData: UpdatedEmailData
+            updatedEmailData: UpdatedEmailData,
+            user: CognitoUserType
         ) => {
-            const emailData = resubmittedStateEmail(submission, updatedEmailData, config)
+            const emailData = resubmittedStateEmail(submission, user, updatedEmailData, config)
             const emailRequestParams = getSESEmailParams(emailData)
             console.log(`
             EMAIL SENT

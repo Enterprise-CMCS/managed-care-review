@@ -63,10 +63,12 @@
             },
             sendResubmittedStateEmail: function async(
                 submission: StateSubmissionType,
-                updatedEmailData: UpdatedEmailData
+                updatedEmailData: UpdatedEmailData,
+                user: CognitoUserType
             ): Promise<void | Error> {
                 const emailData = resubmittedStateEmail(
                     submission,
+                    user,
                     updatedEmailData,
                     config
                 )
