@@ -49,7 +49,7 @@ type Store = {
 
     updateStateSubmission: (
         stateSubmission: StateSubmissionType,
-        submittedAt: Date
+        submitInfo: UpdateInfoType
     ) => Promise<Submission2Type | StoreError>
 
     insertNewRevision: (
@@ -90,8 +90,8 @@ function NewPostgresStore(client: PrismaClient): Store {
         },
         updateDraftSubmission: (draftSubmission) =>
             updateDraftSubmission(client, draftSubmission),
-        updateStateSubmission: (submission, submittedAt) =>
-            updateStateSubmission(client, submission, submittedAt),
+        updateStateSubmission: (submission, submitInfo) =>
+            updateStateSubmission(client, submission, submitInfo),
         findStateSubmission: (submissionID) =>
             findStateSubmission(client, submissionID),
         insertNewRevision: (submissionID, unlockInfo, draft) =>
