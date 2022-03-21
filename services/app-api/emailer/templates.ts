@@ -231,7 +231,7 @@ const resubmittedStateEmail = (
     const bodyHTML = `
         ${testEmailAlert}<br />
         <br />
-        <h1>Submission ${resubmittedData.submissionName} was successfully resubmitted</h1><br />
+        Submission ${resubmittedData.submissionName} was successfully resubmitted<br />
         <br />
         <b>Submitted by:</b> ${resubmittedData.updatedBy}<br />
         <b>Updated on:</b> ${formatCalendarDate(resubmittedData.updatedAt)}<br />
@@ -262,14 +262,14 @@ const resubmittedCMSEmail = (
     ).href
 
     const bodyHTML = `
-        ${testEmailAlert}<br/>
-        <br/>
-        <h1>The state completed their edits on submission ${resubmittedData.submissionName}</h1><br/>
-        <br/>
-        <b>Submitted by:</b> ${resubmittedData.updatedBy}<br/>
-        <b>Updated on:</b> ${formatCalendarDate(resubmittedData.updatedAt)}<br/>
-        <b>Changes made:</b> ${resubmittedData.updatedReason}<br/>
-        <br/>
+        ${testEmailAlert}<br />
+        <br />
+        The state completed their edits on submission ${resubmittedData.submissionName}<br />
+        <br />
+        <b>Submitted by:</b> ${resubmittedData.updatedBy}<br />
+        <b>Updated on:</b> ${formatCalendarDate(resubmittedData.updatedAt)}<br />
+        <b>Changes made:</b> ${resubmittedData.updatedReason}<br />
+        <br />
         <a href="${submissionURL}">View submission</a>
     `
     return {
