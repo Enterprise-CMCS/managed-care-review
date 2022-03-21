@@ -21,8 +21,8 @@ Use LaunchDarkly because of the robust feature flag management tools that will a
 
 * `+` No change, no extra dependencies. Continue to release code to users as it is ready and users will see changes reflected in their environments.
 * `+` No communication needed around what code is available on what environment. If its merged,  it is immediately useable in the higher environments.
-* `-` Incremental changes due to continuous delivery, including incomplete work, is visible to users. There are already cases where this has become confusing or resulted in a broken user experience.
-* `-` A high level of coordination is needed between the team to make sure higher environments are is a good state before testing new users with features.
+* `-` Incremental feature changes that are part of larger incomplete epics will visible to users in production, which can cause confusion or result in a broken user experience (such as with CMS unlock and submission editing epic).
+* `-` A high level of coordination is needed across the team to make sure higher environments are is a good state before testing new users with features.
 * `-` No ability to selectively test groups of changes together on production without also making them immediately visible to users.
 
 ### Manage ourselves by using environment variables to toggle features on and off
@@ -41,9 +41,9 @@ These tools include [AWS AppConfig](https://docs.aws.amazon.com/appconfig/latest
 
 * `+` Built in to AWS, integrates with Lambda, and already approved by CMS.
 * `+` Changes to flags do not require a code change or deployment. De-couples the act of delivering code from the act of enabling a new feature.
-* `+` Users who have AWS access have birds-eye visibility into where/when/why features are flagged. This is limited to developers/
+* `+` Users who have AWS access have birds-eye visibility into where/when/why features are flagged. This is limited to developers.
 * `+` Includes ability for non boolean flags and multivariate flags.
-* `-` No visibility for product and design since they do not have AWS access.
+* `-` No visibility or control over feature flagging for product and design since they do not have AWS access.
 * `-` Any custom handling of flags on by user or by state basis (rules) have to be custom built or will require additional third party libraries.
 
 ### Launch Darkly
@@ -58,3 +58,4 @@ These tools include [AWS AppConfig](https://docs.aws.amazon.com/appconfig/latest
 * `+` Any custom handling of flags on by user or by state basis can be configured within the LD by applying rules. Extensive documentation about the best use of rules exists.
 * `-` Adds a dependency on a new external service and requires us to implement integration
 * `-` Involves using the official Launch Darkly APIs
+* `-` Tracking and maintaining feature flags (i.e. reviewing active flags, retiring flags, deprecating retired flags from code) requires additional overhead 
