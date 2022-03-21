@@ -58,4 +58,31 @@ describe('rate details', () => {
             })
         })
     })
+
+    it('can get and set dates correctly', () => {
+        cy.logInAsStateUser()
+        cy.startNewContractAndRatesSubmission()
+
+        // Navigate to rate details page
+        cy.location().then((fullUrl) => {
+            const { pathname } = fullUrl
+            const pathnameArray = pathname.split('/')
+            const draftSubmissionId = pathnameArray[2]
+            cy.visit(`/submissions/${draftSubmissionId}/rate-details`)
+
+            cy.fillOutAmendmentToPriorRateCertification()
+
+            // Navigate to contacts page by clicking continue
+            cy.navigateForm('Continue')
+            cy.findByRole('heading', { level: 2, name: /Contacts/ })
+
+            
+            cy.fillOutStateContact()
+            cy.fillOutActuaryContact()
+            cy.navigateForm('Continue')
+
+            cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
+
+        })
+    })
 })
