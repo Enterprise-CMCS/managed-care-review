@@ -70,10 +70,9 @@ export const Dashboard = (): React.ReactElement => {
         console.error('Error indexing submissions: ', error)
         return (
             <div id="dashboard-page" className={styles.wrapper}>
-                {/*  this div is needed for positioning */}
-                <div>
-                    <GenericApiErrorBanner message="We're having trouble loading this page. Please refresh your browser and if you continue to experience an error, let us know." />
-                </div>
+                <GridContainer className={styles.container}>
+                    <GenericApiErrorBanner />
+                </GridContainer>
             </div>
         )
     }
