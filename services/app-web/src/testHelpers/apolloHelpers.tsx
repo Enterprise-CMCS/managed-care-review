@@ -568,7 +568,6 @@ const fetchStateSubmission2MockSuccess = ({
     id, // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }: fetchStateSubmission2MockSuccessProps): MockedResponse<Record<string, any>> => {
     // override the ID of the returned draft to match the queried id.
-    console.log("MOCKING", id)
     const mergedStateSubmission = Object.assign({}, stateSubmission, { id })
 
     return {

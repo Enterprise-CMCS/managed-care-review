@@ -1,4 +1,4 @@
-import React from 'react'
+import React,  {forwardRef} from 'react'
 import classnames from 'classnames'
 
 type PoliteErrorMessageProps = {
@@ -7,13 +7,14 @@ type PoliteErrorMessageProps = {
     className?: string
 } & JSX.IntrinsicElements['span']
 
+export type PoliteErrorMessageRef = React.Ref<HTMLSpanElement> | null
 // This component is almost the same as react-uswds ErrorMessage, but by default polite :). It also is more flexible in handling other html attributes and aria-roles through remaining props
-export const PoliteErrorMessage = ({
+export const PoliteErrorMessage = forwardRef(({
     children,
     className,
     id,
     ...remainingProps
-}: PoliteErrorMessageProps): React.ReactElement => {
+}: PoliteErrorMessageProps, ref: PoliteErrorMessageRef): React.ReactElement => {
     const classes = classnames('usa-error-message', className)
 
     return (
@@ -24,10 +25,11 @@ export const PoliteErrorMessage = ({
             role="alert"
             aria-live="polite"
             {...remainingProps}
+            ref={ref}
         >
             {children}
         </span>
     )
-}
+})
 
 export default PoliteErrorMessage

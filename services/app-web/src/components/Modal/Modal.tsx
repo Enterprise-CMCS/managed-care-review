@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react'
+import React from 'react'
 import {
     Button,
     ButtonGroup,
@@ -6,68 +6,65 @@ import {
     ModalFooter,
     ModalHeading,
     ModalRef,
-    ModalProps as UswdsModalProps
+    ModalProps as UswdsModalProps,
+    ModalToggleButton
 } from '@trussworks/react-uswds';
 import styles from './Modal.module.scss'
 
 interface ModalComponentProps {
+    id: string,
     modalHeading?: string,
-    modalHeadingId?: string,
     onSubmit?: () => void,
-    onCancel?: () => void,
-    showModal: boolean,
     className?: string,
+    modalRef: React.RefObject<ModalRef>
+    submitButtonProps?: JSX.IntrinsicElements['button']
 }
 
 export type ModalProps = ModalComponentProps & UswdsModalProps
 
 export const Modal = ({
+    id,
     children,
     modalHeading,
-    modalHeadingId,
     onSubmit,
-    onCancel,
-    showModal,
     className,
+    modalRef,
+    submitButtonProps,
     ...divProps
 }: ModalProps): React.ReactElement  => {
-    const modalRef = useRef<ModalRef>(null)
-
-    useEffect(() => {
-        modalRef.current?.toggleModal(undefined, showModal)
-    },[showModal])
+    
 
     return (
         <UswdsModal
+            aria-labelledby={`${id}-heading`}
+            aria-describedby={`${id}-description`}
             {...divProps}
+            id={id}
             ref={modalRef}
             className={`${styles.modal} ${className}`}
-            forceAction
         >
             {modalHeading && (
-                <ModalHeading id={modalHeadingId}>
-                    {modalHeading}
-                </ModalHeading>
+                <ModalHeading id={`${id}-heading`}>{modalHeading}</ModalHeading>
             )}
-            {children}
+            <div id={`${id}-modal-description`}>{children}</div>
             <ModalFooter>
                 <ButtonGroup className="float-right">
-                    <Button
-                        type="button"
-                        key="cancelButton"
-                        aria-label="Cancel"
-                        data-testid="modal-cancel"
-                        onClick={onCancel}
+                    <ModalToggleButton
+                        data-testid={`${id}-modal-cancel`}
+                        modalRef={modalRef}
+                        id={`${id}-closer`}
+                        closer
                         outline
                     >
                         Cancel
-                    </Button>
+                    </ModalToggleButton>
                     <Button
                         type="button"
-                        key="submitButton"
                         aria-label="Submit"
-                        data-testid="modal-submit"
+                        data-testid={`${id}-modal-submit`}
+                        id={`${id}-submit`}
                         onClick={onSubmit}
+                        {...submitButtonProps}
                     >
                         Submit
                     </Button>
