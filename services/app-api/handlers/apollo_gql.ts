@@ -20,7 +20,6 @@ import { NewPostgresStore } from '../postgres/postgresStore'
 import { configureResolvers } from '../resolvers'
 import { configurePostgres } from './configuration'
 import { tracer as tracer } from '../../otel/otel_handler'
-import opentelemetry from '@opentelemetry/api'
 
 const requestSpanKey = 'REQUEST_SPAN'
 
