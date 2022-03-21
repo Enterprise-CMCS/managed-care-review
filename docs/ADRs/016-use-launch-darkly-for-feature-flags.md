@@ -14,14 +14,16 @@ In other words: we want to be able to **selectively show features to users, whil
 ## Decision Outcome
 
 Use LaunchDarkly because of the robust feature flag management tools that will allow our multidisciplinary team to effectively test, validate, and selectively expose new, complex features.
+
 ## Pros and Cons of the Alternatives
 
 ### Do nothing
 
 * `+` No change, no extra dependencies. Continue to release code to users as it is ready and users will see changes reflected in their environments.
 * `+` No communication needed around what code is available on what environment. If its merged,  it is immediately useable in the higher environments.
-* `-` Incremental changes due to continuous delivery, including incomplete work is visible to users. There already cases where this has become confusing or resulted in a broken experience.
-* `-` We don't have the ability to test groups of changes together as an epic before making it visible to users.
+* `-` Incremental changes due to continuous delivery, including incomplete work, is visible to users. There are already cases where this has become confusing or resulted in a broken user experience.
+* `-` A high level of coordination is needed between the team to make sure higher environments are is a good state before testing new users with features.
+* `-` No ability to selectively test groups of changes together on production without also making them immediately visible to users.
 
 ### Manage ourselves by using environment variables to toggle features on and off
 
@@ -33,7 +35,7 @@ Use LaunchDarkly because of the robust feature flag management tools that will a
 * `-` Any custom handling of flags such as by user or by state, or multi-variant flags, has to be built by developers. The potential for bugs increases with this complexity.
 * `-` Client-side and server-side feature flags may need separate handling and approaches
 
-### Use AWS feature flag management tools 
+### Use AWS feature flag management tools
 
 These tools include [AWS AppConfig](https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html), which is part of AWS Systems Manager, and [CloudWatch Evidently](https://aws.amazon.com/blogs/aws/cloudwatch-evidently/).
 
