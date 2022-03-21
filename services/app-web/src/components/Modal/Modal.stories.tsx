@@ -11,9 +11,8 @@ const Template: Story<ModalProps> = (args) => <Modal {...args} />
 
 export const ModalShow = Template.bind({})
 ModalShow.args = {
-    showModal: true,
     modalHeading: 'Test Modal Title',
-    modalHeadingId: 'testModalTitle',
+    id: 'test-modal',
     children: [
         <div style={{ flexDirection: 'column', display: 'flex', padding: 10}}>
             <label htmlFor={'textarea1'}>Text Box 1</label>

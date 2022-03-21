@@ -40,7 +40,7 @@ describe('dashboard', () => {
             cy.findByRole('button', { name: 'Unlock submission' }).click()
             cy.findByTestId('modalWindow')
                 .should('be.visible')
-            cy.get("#unlockReason").type('Unlock submission reason.')
+            cy.get("#unlockReasonCharacterCount").type('Unlock submission reason.')
             cy.findByRole('button', { name: 'Submit' }).click()
             cy.findByRole('button', { name: 'Unlock submission' })
                 .should('be.disabled')

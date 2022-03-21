@@ -156,7 +156,7 @@ describe('ReviewSubmit', () => {
         submitButton.click()
 
         await waitFor(() => {
-            const confirmSubmit = screen.getByTestId('modal-submit')
+            const confirmSubmit = screen.getByTestId('review-and-submit-modal-submit')
             expect(confirmSubmit).toBeInTheDocument()
             expect(screen.getByText('Ready to submit?')).toBeInTheDocument()
             expect(
@@ -192,11 +192,11 @@ describe('ReviewSubmit', () => {
             }
         )
 
-        const submit = screen.getByTestId('modal-submit')
+        const submit = screen.getByTestId('review-and-submit-modal-submit')
         submit.click()
 
         await waitFor(() => {
-            const confirmSubmit = screen.getByTestId('modal-submit')
+            const confirmSubmit = screen.getByTestId('review-and-submit-modal-submit')
             expect(confirmSubmit).toBeInTheDocument()
             confirmSubmit.click()
         })
@@ -228,7 +228,7 @@ describe('ReviewSubmit', () => {
 
         submitButton.click()
 
-        const confirmSubmit = screen.getByTestId('modal-submit')
+        const confirmSubmit = screen.getByTestId('review-and-submit-modal-submit')
         expect(confirmSubmit).toBeInTheDocument()
         confirmSubmit.click()
 
