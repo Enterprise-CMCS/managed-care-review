@@ -20,7 +20,8 @@ Use LaunchDarkly because of the robust feature flag management tools that will a
 ### Do nothing
 
 * `+` No change, no extra dependencies. Continue to release code to users as it is ready and users will see changes reflected in their environments.
-* `+` No communication needed around what code is available on what environment. If its merged,  it is immediately useable in the higher environments.
+* `+` No communication needed around what code is available on what environment. If it's merged,  it is immediately usable in the higher environments.
+* `+` No team overhead required to manage flags.
 * `-` Incremental feature changes that are part of larger incomplete epics will visible to users in production, which can cause confusion or result in a broken user experience (such as with CMS unlock and submission editing epic).
 * `-` A high level of coordination is needed across the team to make sure higher environments are is a good state before testing new users with features.
 * `-` No ability to selectively test groups of changes together on production without also making them immediately visible to users.
