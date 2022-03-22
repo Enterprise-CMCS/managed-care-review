@@ -29,26 +29,25 @@ HealthPlanPackage {
     string stateCode
     array revisions
 }
-HealthPlanPackage ||--|| HealthPlanPackageRevision: contains
+HealthPlanPackage ||--|| HealthPlanPackageRevision: revisions
 
 HealthPlanPackageRevision {
     date createdAt
+    UpdateInfo unlockInfo
+    UpdateInfo submitInfo
+    FormData submissionFormProto
 }
 
-HealthPlanPackageRevision ||--|| HealthPlanPackageFormData: contains
-HealthPlanPackageRevision ||--|| SubmitInfo : contains
-SubmitInfo {
+HealthPlanPackageRevision ||--|| HealthPlanPackageFormData: submissionFormProto
+
+HealthPlanPackageRevision ||--|| UpdateInfo : "submitInfo"
+HealthPlanPackageRevision ||--|| UpdateInfo : "unlockInfo"
+UpdateInfo {
   date updatedAt
   string updatedBy
   string updatedReason
 }
 
-HealthPlanPackageRevision ||--|| UnlockInfo : contains
-UnlockInfo {
-  date updatedAt
-  string updatedBy
-  string updatedReason
-}
 
 HealthPlanPackageFormData {
     string id
@@ -58,59 +57,81 @@ HealthPlanPackageFormData {
     string submissionDescription
     enum submissionType
     array programIDs
+    date submittedAt
+    date createdAt
+    date updatedAt
+    array stateContacts
+    array documents
+    ContractInfo  contractInfo
+    RateInfo rateInfo
+}
+
+HealthPlanPackageFormData || -- || ContractInfo : contractInfo
+ContractInfo {
     enum contractType
     enum contractExecutionStatus
     date contractDateStart
     date contractDateEnd
     array managedCareEntities
     array federalAuthorities
+    array contractDocuments
+    ContractAmendmentInfo contractAmendmentInfo
+}
+
+ContractInfo ||--|| ContractAmendmentInfo : contractAmendmentInfo
+ContractAmendmentInfo {
+    array itemsBeingAmended
+    string otherItemBeingAmended
+    boolean relatedToCovid19
+    boolean relatedToVaccination
+    CapitationRatesAmendedInfo capitationRatesAmendedInfo
+}
+
+ContractAmendmentInfo ||--|| CapitationRatesAmendedInfo : capitationRatesAmendedInfo
+CapitationRatesAmendedInfo {
+    string reason
+    string otherReason
+}
+
+
+Document {
+    string name
+    string S3URL
+    array documentCategories
+}
+
+
+Contact {
+    string name
+    string titleRole
+    string email
+}
+
+HealthPlanPackageFormData ||--|{ RateInfo : rateInfo
+   RateInfo {
     enum rateType
     date rateDateStart
     date rateDateEnd
     date rateDateCertified
-    date submittedAt
-    date createdAt
-    date updatedAt
-    object rateAmendmentInfo
-    object contractAmendmentInfo
-    array stateContacts
-    array documents
-}
-
-HealthPlanPackageFormData ||--|{ Document : contains
-    Document {
-        string name
-        string S3URL
-        array documentCategories
-
+    array actuaryContacts
+    enum actuaryCommunicationPreference
+    array rateDocuments
+    RateAmendmentInfo rateAmendmentInfo
     }
 
+HealthPlanPackageFormData ||--|{ Contact : "stateContacts"
+RateInfo ||--|{ Contact : "actuaryContacts"
 
-HealthPlanPackageFormData ||--|{ Contact : contains
-    Contact {
-        string name
-        string titleRole
-        string email
-    }
-
-HealthPlanPackageFormData ||--|| ContractAmendmentInfo : contains
-   ContractAmendmentInfo {
-      array itemsBeingAmended
-      string otherItemBeingAmended
-      boolean relatedToCovid19
-      boolean relatedToVaccination
-    }
-
- ContractAmendmentInfo ||--|| CapitationRatesAmendedInfo : contains
-   CapitationRatesAmendedInfo {
-      string reason
-      string otherReason
-    }
-
-
-HealthPlanPackageFormData ||--|{ RateAmendmentInfo : contains
+RateInfo ||--|{ RateAmendmentInfo : rateAmendmentInfo
    RateAmendmentInfo {
-      date effectiveDateStart
-       date effectiveDateEnd
+    date effectiveDateStart
+    date effectiveDateEnd
     }
+
+
+ContractInfo ||--|{ Document : "contractDocuments"
+HealthPlanPackageFormData ||--|{ Document : "documents"
+RateInfo ||--|{ Document : "rateDocuments"
+
+
 ```
