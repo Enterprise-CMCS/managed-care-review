@@ -89,15 +89,15 @@ export function unlockStateSubmissionResolver(
         }
 
         // Send emails!
-        const unlockEmailData = {
+        const updatedEmailData = {
             ...unlockInfo, 
             submissionName: submissionName(submission)
         }
         const unlockPackageCMSEmailResult = await
-        emailer.sendUnlockPackageCMSEmail(unlockEmailData)
+        emailer.sendUnlockPackageCMSEmail(updatedEmailData)
 
         const unlockPackageStateEmailResult = await
-        emailer.sendUnlockPackageStateEmail(submission, unlockEmailData)
+        emailer.sendUnlockPackageStateEmail(submission, updatedEmailData)
 
         if (unlockPackageCMSEmailResult instanceof Error) {
             logError(
