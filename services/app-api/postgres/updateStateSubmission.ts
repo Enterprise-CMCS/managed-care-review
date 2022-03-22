@@ -31,7 +31,7 @@ async function submitStateSubmissionWrapper(
 
         try {
             const currentRevision = currentRevisionOrError
-            const submission = await client.stateSubmission.update({
+            const submissionResult = await client.stateSubmission.update({
                 where: {
                     id
                 },
@@ -58,7 +58,7 @@ async function submitStateSubmissionWrapper(
                     }
                 },
             })
-            return convertToSubmission2Type(submission)
+            return convertToSubmission2Type(submissionResult)
         } catch (updateError) {
             return convertPrismaErrorToStoreError(updateError)
         }
