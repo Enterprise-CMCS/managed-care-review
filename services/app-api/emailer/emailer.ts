@@ -1,4 +1,4 @@
-import { SES, Lambda } from 'aws-sdk'
+import { Lambda } from 'aws-sdk'
 import {
     getSESEmailParams,
     newPackageCMSEmail,
@@ -9,10 +9,7 @@ import {
     resubmittedCMSEmail,
     UpdatedEmailData
 } from './'
-import {
-    StateSubmissionType,
-    CognitoUserType,
-} from '../../app-web/src/common-code/domain-models'
+import { StateSubmissionType, CognitoUserType } from '../../app-web/src/common-code/domain-models'
 
 type EmailConfiguration = {
     stage: string
@@ -118,11 +115,11 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
     }
 }
 
-const localEmailerLogger = (emailRequestParams: SES.SendEmailRequest) =>
+const localEmailerLogger = (emailData: EmailData) =>
     console.log(`
         EMAIL SENT
         ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
-        ${JSON.stringify(emailRequestParams)}
+        ${JSON.stringify(getSESEmailParams(emailData))}
         ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
     `)
 
@@ -130,11 +127,11 @@ const localEmailerLogger = (emailRequestParams: SES.SendEmailRequest) =>
 function newLocalEmailer(config: EmailConfiguration): Emailer {
     return {
         sendEmail: async (emailData: EmailData): Promise<void | Error> => {
-            localEmailerLogger(getSESEmailParams(emailData))
+            localEmailerLogger(emailData)
         },
         sendCMSNewPackage: async (submission: StateSubmissionType) => {
             const emailData = newPackageCMSEmail(submission, config)
-            localEmailerLogger(getSESEmailParams(emailData))
+            localEmailerLogger(emailData)
         },
         sendStateNewPackage: async (
             submission: StateSubmissionType,
@@ -145,20 +142,20 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
                 user,
                 config
             )
-            localEmailerLogger(getSESEmailParams(emailData))
+            localEmailerLogger(emailData)
         },
         sendUnlockPackageCMSEmail: async (
             updatedEmailData: UpdatedEmailData
         ) => {
             const emailData = unlockPackageCMSEmail(updatedEmailData, config)
-            localEmailerLogger(getSESEmailParams(emailData))
+            localEmailerLogger(emailData)
         },
         sendUnlockPackageStateEmail: async (
             submission: StateSubmissionType,
             updatedEmailData: UpdatedEmailData
         ) => {
             const emailData = unlockPackageStateEmail(submission, updatedEmailData, config)
-            localEmailerLogger(getSESEmailParams(emailData))
+            localEmailerLogger(emailData)
         },
         sendResubmittedStateEmail: async (
             submission: StateSubmissionType,
@@ -166,14 +163,14 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
             user: CognitoUserType
         ) => {
             const emailData = resubmittedStateEmail(submission, user, updatedEmailData, config)
-            localEmailerLogger(getSESEmailParams(emailData))
+            localEmailerLogger(emailData)
         },
         sendResubmittedCMSEmail: async (
             submission: StateSubmissionType,
             updatedEmailData: UpdatedEmailData
         ) => {
             const emailData = resubmittedCMSEmail(submission, updatedEmailData, config)
-            localEmailerLogger(getSESEmailParams(emailData))
+            localEmailerLogger(emailData)
         },
     }
 }
