@@ -240,7 +240,9 @@ describe('ReviewSubmit', () => {
 
         expect(errorText).toBeInTheDocument()
     })
+})
 
+describe('Resubmitting plan packages', () => {
     it('opens submission modal with summary input when submit button is clicked on unlocked plan package', async () => {
         renderWithProviders(
             <ReviewSubmit draftSubmission={mockCompleteDraft()} unlocked={true}/>,
