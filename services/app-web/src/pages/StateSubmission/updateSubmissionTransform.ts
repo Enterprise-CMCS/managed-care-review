@@ -1,5 +1,5 @@
 import { base64ToDomain } from '../../common-code/proto/stateSubmission'
-import { DraftSubmission, DraftSubmissionUpdates , Submission2} from '../../gen/gqlClient'
+import { DraftSubmission, DraftSubmissionUpdates , Maybe, RateAmendmentInfo, Submission2} from '../../gen/gqlClient'
 import { formatGQLDate } from '../../dateHelpers'
 /*
     Clean out _typename from submission
@@ -56,10 +56,23 @@ function updatesFromSubmission(draft: DraftSubmission): DraftSubmissionUpdates {
         rateDateStart: formatGQLDate(draft.rateDateStart),
         rateDateEnd: formatGQLDate(draft.rateDateEnd),
         rateDateCertified: formatGQLDate(draft.rateDateCertified),
-        rateAmendmentInfo: draft.rateAmendmentInfo,
+        rateAmendmentInfo: updatesFromRateAmendmentInfo(draft.rateAmendmentInfo),
         stateContacts: draft.stateContacts,
         actuaryContacts: draft.actuaryContacts,
         actuaryCommunicationPreference: draft.actuaryCommunicationPreference,
+    }
+}
+
+// This is more code that should go away when we finish the refactor
+// Because this sub-object has dates in it, we need to format those dates correctly.
+// we don't need to fix contacts or documents in the same way.
+function updatesFromRateAmendmentInfo(rateInfo: Maybe<RateAmendmentInfo> | undefined): DraftSubmissionUpdates["rateAmendmentInfo"] {
+    if (!rateInfo) {
+        return undefined
+    }
+    return {
+        effectiveDateEnd: formatGQLDate(rateInfo.effectiveDateEnd),
+        effectiveDateStart: formatGQLDate(rateInfo.effectiveDateStart),
     }
 }
 

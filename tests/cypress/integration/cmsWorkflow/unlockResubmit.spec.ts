@@ -40,14 +40,15 @@ describe('dashboard', () => {
             cy.findByRole('button', { name: 'Unlock submission' }).click()
             cy.findByTestId('modalWindow')
                 .should('be.visible')
-            cy.get("#unlockReason").type('Unlock submission reason.')
+            cy.get("#unlockReasonCharacterCount").type('Unlock submission reason.')
             cy.findByRole('button', { name: 'Submit' }).click()
+
+            cy.wait(2000)
+
             cy.findByRole('button', { name: 'Unlock submission' })
                 .should('be.disabled')
             cy.findByTestId('modalWindow')
                 .should('be.hidden')
-
-            cy.wait(2000)
 
             //Unlock banner for CMS user to be present with correct data.
             cy.findByTestId('unlockedBanner')

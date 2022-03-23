@@ -79,6 +79,7 @@ const newPackageCMSEmail = (
     ).href
     const bodyHTML = `
             ${testEmailAlert}
+            <br /><br />
             Managed Care submission: <b>${submissionName(
                 submission
             )}</b> was received from <b>${submission.stateCode}</b>.<br /><br />
@@ -119,6 +120,7 @@ const newPackageStateEmail = (
     )
     const bodyHTML =  `
             ${testEmailAlert}
+            <br /><br />
             ${submissionName(submission)} was successfully submitted.
             <br /><br />
             <a href="${submissionURL}">View submission</a>
@@ -153,33 +155,31 @@ const newPackageStateEmail = (
     }
 }
 
-type UnlockEmailData = {
+type UpdatedEmailData = {
     submissionName: string
     updatedBy: string
     updatedAt: Date
     updatedReason: string
 }
+
 const unlockPackageCMSEmail = (
-    unlockData: UnlockEmailData,
+    unlockData: UpdatedEmailData,
     config: EmailConfiguration
 ): EmailData => {
     const isTestEnvironment = config.stage !== 'prod'
     const reviewerEmails = config.cmsReviewSharedEmails
     const bodyHTML = `
         ${testEmailAlert}
-        <h1>Submission ${unlockData.submissionName} was unlocked</h1>
-        </br>
-        <b>Unlocked by:</b> ${unlockData.updatedBy}
-        </br>
-        <b>Unlocked on:</b> ${formatCalendarDate(unlockData.updatedAt)}
-        </br>
-        <b>Reason for unlock:</b> ${unlockData.updatedReason}
-        </br>
+        <br /><br />
+        Submission ${unlockData.submissionName} was unlocked<br /><br />
+        <b>Unlocked by:</b> ${unlockData.updatedBy}<br /><br />
+        <b>Unlocked on:</b> ${formatCalendarDate(unlockData.updatedAt)}<br /><br />
+        <b>Reason for unlock:</b> ${unlockData.updatedReason}<br /><br />
         You will receive another notification when the state resubmits.
     `
     return {
         toAddresses: reviewerEmails,
-        sourceEmail: config.emailSource, 
+        sourceEmail: config.emailSource,
         subject: `${
             isTestEnvironment ? `[${config.stage}] ` : ''
         }TEST ${unlockData.submissionName} was unlocked`,
@@ -190,24 +190,21 @@ const unlockPackageCMSEmail = (
 
 const unlockPackageStateEmail = (
     submission: StateSubmissionType,
-    unlockData: UnlockEmailData,
+    unlockData: UpdatedEmailData,
     config: EmailConfiguration
 ): EmailData => {
     const submissionURL = new URL(
-        `submissions/${submission.id}`,
+        `submissions/${submission.id}/review-and-submit`,
         config.baseUrl
     ).href
     const receiverEmails: string[] = submission.stateContacts.map((contact) => contact.email)
     const bodyHTML = `
         ${testEmailAlert}
-        <h1>Submission ${unlockData.submissionName} was unlocked by CMS</h1>
-        </br>
-        <b>Unlocked by:</b> ${unlockData.updatedBy}
-        </br>
-        <b>Unlocked on:</b> ${formatCalendarDate(unlockData.updatedAt)}
-        </br>
-        <b>Reason for unlock:</b> ${unlockData.updatedReason}
-        </br>
+        <br /><br />
+        Submission ${unlockData.submissionName} was unlocked by CMS<br /><br /> 
+        <b>Unlocked by:</b> ${unlockData.updatedBy}<br /><br />
+        <b>Unlocked on:</b> ${formatCalendarDate(unlockData.updatedAt)}<br /><br />
+        <b>Reason for unlock:</b> ${unlockData.updatedReason}<br /><br />
         <a href="${submissionURL}">Open the submission in MC-Review to make edits.</a>
     `
     return {
@@ -221,5 +218,69 @@ const unlockPackageStateEmail = (
     }
 }
 
-export { newPackageCMSEmail, newPackageStateEmail, unlockPackageCMSEmail, unlockPackageStateEmail, UnlockEmailData }
+const resubmittedStateEmail = (
+    submission: StateSubmissionType,
+    user: CognitoUserType,
+    resubmittedData: UpdatedEmailData,
+    config: EmailConfiguration
+): EmailData => {
+    const currentUserEmail = user.email
+    const receiverEmails: string[] = [currentUserEmail].concat(
+        submission.stateContacts.map((contact) => contact.email)
+    )
+    const bodyHTML = `
+        ${testEmailAlert}<br />
+        <br />
+        Submission ${resubmittedData.submissionName} was successfully resubmitted<br />
+        <br />
+        <b>Submitted by:</b> ${resubmittedData.updatedBy}<br />
+        <b>Updated on:</b> ${formatCalendarDate(resubmittedData.updatedAt)}<br />
+        <b>Changes made:</b> ${resubmittedData.updatedReason}<br />
+        <br />
+        <p>If you need to make any further changes, please contact CMS.</p>
+    `
+    return {
+        toAddresses: receiverEmails,
+        sourceEmail: config.emailSource,
+        subject: `${
+            config.stage !== 'prod' ? `[${config.stage}] ` : ''
+        }TEST ${resubmittedData.submissionName} was resubmitted`,
+        bodyText: stripHTMLFromTemplate(bodyHTML),
+        bodyHTML: bodyHTML,
+    }
+}
 
+const resubmittedCMSEmail = (
+    submission: StateSubmissionType,
+    resubmittedData: UpdatedEmailData,
+    config: EmailConfiguration
+): EmailData => {
+    const reviewerEmails = config.cmsReviewSharedEmails
+    const submissionURL = new URL(
+        `submissions/${submission.id}`,
+        config.baseUrl
+    ).href
+
+    const bodyHTML = `
+        ${testEmailAlert}<br />
+        <br />
+        The state completed their edits on submission ${resubmittedData.submissionName}<br />
+        <br />
+        <b>Submitted by:</b> ${resubmittedData.updatedBy}<br />
+        <b>Updated on:</b> ${formatCalendarDate(resubmittedData.updatedAt)}<br />
+        <b>Changes made:</b> ${resubmittedData.updatedReason}<br />
+        <br />
+        <a href="${submissionURL}">View submission</a>
+    `
+    return {
+        toAddresses: reviewerEmails,
+        sourceEmail: config.emailSource,
+        subject: `${
+            config.stage !== 'prod' ? `[${config.stage}] ` : ''
+        }TEST ${resubmittedData.submissionName} was resubmitted`,
+        bodyText: stripHTMLFromTemplate(bodyHTML),
+        bodyHTML: bodyHTML,
+    }
+}
+
+export { newPackageCMSEmail, newPackageStateEmail, unlockPackageCMSEmail, unlockPackageStateEmail, resubmittedStateEmail, resubmittedCMSEmail, UpdatedEmailData }
