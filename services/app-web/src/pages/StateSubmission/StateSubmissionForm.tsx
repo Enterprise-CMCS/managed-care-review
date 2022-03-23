@@ -254,11 +254,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     formPages={activeFormPages(draft)}
                     currentFormPage={currentRoute}
                 />
-                <PageBannerAlerts
-                    loggedInUser={loggedInUser}
-                    unlockedInfo={unlockedInfo}
-                    showPageErrorMessage={showPageErrorMessage}
-                />
+                <PageBannerAlerts loggedInUser={loggedInUser} unlockedInfo={unlockedInfo} showPageErrorMessage={showPageErrorMessage}/>
             </div>
             <StateSubmissionContainer>
                 <Switch>
@@ -293,13 +289,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}>
-                        <ReviewSubmit
-                            draftSubmission={draft}
-                            unlocked={!!unlockedInfo}
-                        />
-                    </Route>
-                    <Route path='*'>
-                        <Error404 />
+                        <ReviewSubmit draftSubmission={draft} unlocked={!!unlockedInfo} />
                     </Route>
                 </Switch>
             </StateSubmissionContainer>
