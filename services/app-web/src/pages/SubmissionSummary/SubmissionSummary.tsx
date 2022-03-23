@@ -6,21 +6,32 @@ import {
     CharacterCount,
     ModalRef,
     ModalToggleButton,
-    FormGroup
+    FormGroup,
 } from '@trussworks/react-uswds'
 import * as Yup from 'yup'
-import { useFormik} from 'formik'
+import { useFormik } from 'formik'
 import React, { useEffect, useState, useRef } from 'react'
-import { NavLink, useLocation, useParams} from 'react-router-dom'
+import { NavLink, useLocation, useParams } from 'react-router-dom'
 import sprite from 'uswds/src/img/sprite.svg'
-import {submissionName, SubmissionUnionType, UpdateInfoType } from '../../common-code/domain-models'
+import {
+    submissionName,
+    SubmissionUnionType,
+    UpdateInfoType,
+} from '../../common-code/domain-models'
 import { base64ToDomain } from '../../common-code/proto/stateSubmission'
 import { Loading } from '../../components/Loading'
 import {
-    ContactsSummarySection, ContractDetailsSummarySection,
-    RateDetailsSummarySection, SubmissionTypeSummarySection, SupportingDocumentsSummarySection
+    ContactsSummarySection,
+    ContractDetailsSummarySection,
+    RateDetailsSummarySection,
+    SubmissionTypeSummarySection,
+    SupportingDocumentsSummarySection,
 } from '../../components/SubmissionSummarySection'
-import { SubmissionUnlockedBanner,Modal, PoliteErrorMessage, } from '../../components'
+import {
+    SubmissionUnlockedBanner,
+    Modal,
+    PoliteErrorMessage,
+} from '../../components'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
 import {
@@ -29,14 +40,22 @@ import {
     Submission2,
     UnlockStateSubmissionMutationFn,
     useFetchSubmission2Query,
-    useUnlockStateSubmissionMutation } from '../../gen/gqlClient'
+    useUnlockStateSubmissionMutation,
+} from '../../gen/gqlClient'
 import { isGraphQLErrors } from '../../gqlHelpers'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404'
 
 import styles from './SubmissionSummary.module.scss'
+import { ChangeHistory } from '../../components/ChangeHistory/ChangeHistory'
 
-function UnlockModalButton({disabled, modalRef} : {disabled: boolean, modalRef: React.RefObject<ModalRef> }) {
+function UnlockModalButton({
+    disabled,
+    modalRef,
+}: {
+    disabled: boolean
+    modalRef: React.RefObject<ModalRef>
+}) {
     return (
         <ModalToggleButton
             modalRef={modalRef}
@@ -52,17 +71,21 @@ function UnlockModalButton({disabled, modalRef} : {disabled: boolean, modalRef: 
 }
 
 // This wrapper gets us some reasonable errors out of our unlock call. This would be a good candidate
-// for a more general and generic function so that we can get more sensible errors out of all of the 
+// for a more general and generic function so that we can get more sensible errors out of all of the
 // generated mutations.
-async function unlockMutationWrapper(unlockStateSubmission: UnlockStateSubmissionMutationFn, id: string, unlockedReason: string): Promise<Submission2 | GraphQLErrors | Error> {
+async function unlockMutationWrapper(
+    unlockStateSubmission: UnlockStateSubmissionMutationFn,
+    id: string,
+    unlockedReason: string
+): Promise<Submission2 | GraphQLErrors | Error> {
     try {
         const result = await unlockStateSubmission({
             variables: {
                 input: {
                     submissionID: id,
-                    unlockedReason
-                }
-            }
+                    unlockedReason,
+                },
+            },
         })
 
         if (result.errors) {
@@ -74,7 +97,6 @@ async function unlockMutationWrapper(unlockStateSubmission: UnlockStateSubmissio
         } else {
             return new Error('No errors, and no unlock result.')
         }
-            
     } catch (error) {
         // this can be an errors object
         if ('graphQLErrors' in error) {
@@ -210,10 +232,7 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     // Focus unlockReason field in the unlock modal on submit click when errors exist
     useEffect(() => {
-        if (
-            focusErrorsInModal &&
-            formik.errors.unlockReason
-        ) {
+        if (focusErrorsInModal && formik.errors.unlockReason) {
             const fieldElement: HTMLElement | null = document.querySelector(
                 `[name="unlockReason"]`
             )
@@ -226,7 +245,6 @@ export const SubmissionSummary = (): React.ReactElement => {
             }
         }
     }, [focusErrorsInModal, formik.errors])
-
 
     if (loading || !submissionAndRevisions || !packageData) {
         return (
@@ -374,6 +392,8 @@ export const SubmissionSummary = (): React.ReactElement => {
 
                 <SupportingDocumentsSummarySection submission={submission} />
 
+                <ChangeHistory submission={submissionAndRevisions} />
+
                 <Modal
                     modalHeading="Reason for unlocking submission"
                     id="unlockReason"
@@ -386,16 +406,11 @@ export const SubmissionSummary = (): React.ReactElement => {
                     <form>
                         <FormGroup error={Boolean(formik.errors.unlockReason)}>
                             {formik.errors.unlockReason && (
-                                <PoliteErrorMessage
-                                    role="alert"    
-                                >
+                                <PoliteErrorMessage role="alert">
                                     {formik.errors.unlockReason}
                                 </PoliteErrorMessage>
                             )}
-                            <span
-                                id="unlockReason-hint"
-                                role="note"
-                            >
+                            <span id="unlockReason-hint" role="note">
                                 Provide reason for unlocking
                             </span>
 
