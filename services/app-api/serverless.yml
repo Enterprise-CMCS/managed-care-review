@@ -132,7 +132,10 @@ functions:
       - http:
           path: health_check
           method: get
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - b3
 
   log_event:
     handler: handlers/log_event.main
@@ -140,7 +143,10 @@ functions:
       - http:
           path: log_event
           method: post
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - b3
 
   otel:
     handler: handlers/otel_proxy.main
@@ -148,7 +154,10 @@ functions:
       - http:
           path: otel
           method: post
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - b3
 
   graphql:
     handler: handlers/apollo_gql.graphqlHandler
@@ -204,7 +213,10 @@ functions:
       - http:
           path: zip
           method: post
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - b3
           authorizer: aws_iam
 
 resources:
