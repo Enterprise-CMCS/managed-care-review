@@ -69,6 +69,49 @@ describe('Modal', () => {
         expect(onSubmit).toHaveBeenCalled()
     })
 
+    it('renders onSubmitText prop string on Submit button when one is passed', async () => {
+        const modalRef = createRef<ModalRef>()
+        const handleOpen = () => modalRef.current?.toggleModal(undefined, true)
+        const onSubmit = jest.fn()
+        render(
+            <div>
+                <Modal
+                    id="test"
+                    modalHeading="Test Modal Title"
+                    modalRef={modalRef}
+                    onSubmit={onSubmit}
+                    onSubmitText={'Resubmit'}
+                >
+                    <textarea id="textarea" data-testid="textarea" />
+                </Modal>
+            </div>
+        )
+        await waitFor(() => handleOpen())
+        const onSubmitButton = await screen.findByTestId('test-modal-submit')
+        expect(onSubmitButton).toHaveTextContent('Resubmit')
+    })
+
+    it('renders default submit button text when onSubmitText is undefined', async () => {
+        const modalRef = createRef<ModalRef>()
+        const handleOpen = () => modalRef.current?.toggleModal(undefined, true)
+        const onSubmit = jest.fn()
+        render(
+            <div>
+                <Modal
+                    id="test"
+                    modalHeading="Test Modal Title"
+                    modalRef={modalRef}
+                    onSubmit={onSubmit}
+                >
+                    <textarea id="textarea" data-testid="textarea" />
+                </Modal>
+            </div>
+        )
+        await waitFor(() => handleOpen())
+        const onSubmitButton = await screen.findByTestId('test-modal-submit')
+        expect(onSubmitButton).toHaveTextContent('Submit')
+    })
+
     describe('opening and closing the modal', () => {
         it('Opens modal via ref.current.toggleModal', async () => {
             const modalRef = createRef<ModalRef>()
