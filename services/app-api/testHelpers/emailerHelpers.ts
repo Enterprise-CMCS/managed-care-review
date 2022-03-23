@@ -24,17 +24,20 @@
                 }
             ),
             sendCMSNewPackage: function async(
-                submission: StateSubmissionType
+                submission: StateSubmissionType,
+                submissionName: string, 
             ): Promise<void | Error> {
-                const emailData = newPackageCMSEmail(submission, config)
+                const emailData = newPackageCMSEmail(submission, submissionName, config)
                 return this.sendEmail(emailData)
             },
             sendStateNewPackage: function async(
                 submission: StateSubmissionType,
+                submissionName: string,
                 user: CognitoUserType
             ): Promise<void | Error> {
                 const emailData = newPackageStateEmail(
                     submission,
+                    submissionName,
                     user,
                     config
                 )

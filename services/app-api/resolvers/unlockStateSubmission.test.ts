@@ -5,6 +5,7 @@ import { todaysDate } from '../testHelpers/dateHelpers'
 import {
     constructTestPostgresServer, createAndUpdateTestDraftSubmission,
     createTestStateSubmission,
+    defaultFloridaProgram,
     fetchTestDraftSubmissionById,
     submitTestDraftSubmission,
     unlockTestDraftSubmission,
@@ -113,7 +114,7 @@ describe('unlockStateSubmission', () => {
 
         // after unlock we should be able to update that draft submission and get the results
         const updates = {
-            programIDs: ['cnet'],
+            programIDs: [defaultFloridaProgram().id],
             submissionType: 'CONTRACT_AND_RATES' as const,
             submissionDescription: 'UPDATED_AFTER_UNLOCK',
             documents: [],

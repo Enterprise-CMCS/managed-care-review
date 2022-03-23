@@ -49,8 +49,7 @@ describe('StateSubmissionForm', () => {
              const mockSubmission = mockDraftSubmission2({
                  submissionDescription: 'A real submission',
                  submissionType: 'CONTRACT_ONLY',
-                 programIDs: ['snbc']
-
+                 programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce']
              })
             renderWithProviders(
                 <Route

@@ -1,7 +1,7 @@
 import { URL } from 'url'
 import {
     CognitoUserType, StateSubmissionType,
-    submissionName, SubmissionType
+    SubmissionType, SubmissionUnionType
 } from '../../app-web/src/common-code/domain-models'
 import { formatCalendarDate } from '../../app-web/src/dateHelpers'
 import { EmailConfiguration, EmailData } from './'
@@ -38,6 +38,7 @@ const stripHTMLFromTemplate = (template: string) => {
 
 const newPackageCMSEmail = (
     submission: StateSubmissionType,
+    submissionName: string,
     config: EmailConfiguration
 ): EmailData => {
     // config
@@ -79,9 +80,7 @@ const newPackageCMSEmail = (
     ).href
     const bodyHTML = `
             ${testEmailAlert}
-            Managed Care submission: <b>${submissionName(
-                submission
-            )}</b> was received from <b>${submission.stateCode}</b>.<br /><br />
+            Managed Care submission: <b>${submissionName}</b> was received from <b>${submission.stateCode}</b>.<br /><br />
             <b>Submission type</b>: ${
                 SubmissionTypeRecord[submission.submissionType]
             }<br />
@@ -98,7 +97,7 @@ const newPackageCMSEmail = (
         sourceEmail: config.emailSource,
         subject: `${
             isTestEnvironment ? `[${config.stage}] ` : ''
-        }TEST New Managed Care Submission: ${submissionName(submission)}`,
+        }TEST New Managed Care Submission: ${submissionName}`,
         bodyText: stripHTMLFromTemplate(bodyHTML),
         bodyHTML: bodyHTML,
     }
@@ -106,6 +105,7 @@ const newPackageCMSEmail = (
 
 const newPackageStateEmail = (
     submission: StateSubmissionType,
+    submissionName: string,
     user: CognitoUserType,
     config: EmailConfiguration
 ): EmailData => {
@@ -119,7 +119,7 @@ const newPackageStateEmail = (
     )
     const bodyHTML =  `
             ${testEmailAlert}
-            ${submissionName(submission)} was successfully submitted.
+            ${submissionName} was successfully submitted.
             <br /><br />
             <a href="${submissionURL}">View submission</a>
             <br /><br />
@@ -147,7 +147,7 @@ const newPackageStateEmail = (
         sourceEmail: config.emailSource,
         subject: `${
             config.stage !== 'prod' ? `[${config.stage}] ` : ''
-        }TEST ${submissionName(submission)} was sent to CMS`,
+        }TEST ${submissionName} was sent to CMS`,
         bodyText: stripHTMLFromTemplate(bodyHTML),
         bodyHTML: bodyHTML,
     }

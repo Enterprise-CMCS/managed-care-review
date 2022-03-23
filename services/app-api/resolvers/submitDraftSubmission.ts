@@ -5,7 +5,8 @@ import {
     hasValidDocuments, hasValidRates, hasValidSupportingDocumentCategories, isContractAndRates,
     isStateSubmission,
     isStateUser,
-    StateSubmissionType
+    StateSubmissionType,
+    submissionNameWithPrograms
 } from '../../app-web/src/common-code/domain-models'
 import { Emailer } from '../emailer'
 import { MutationResolvers, State } from '../gen/gqlServer'
@@ -178,12 +179,23 @@ export function submitDraftSubmissionResolver(
 
         const updatedSubmission: StateSubmissionType = updateResult
 
+        const programs = store.findPrograms(updatedSubmission.stateCode, updatedSubmission.programIDs)
+        if (!programs || programs.length !== updatedSubmission.programIDs.length) {
+            const errMessage = `Can't find programs ${updatedSubmission.programIDs} from state ${updatedSubmission.stateCode}, ${updatedSubmission.id}`
+            logError('unlockStateSubmission', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new Error(errMessage)
+        }
+
         // Send emails!
+        const submissionName = submissionNameWithPrograms(updatedSubmission, programs)
+
         const cmsNewPackageEmailResult = await
-        emailer.sendCMSNewPackage(stateSubmission)
+        emailer.sendCMSNewPackage(stateSubmission, submissionName)
 
         const stateNewPackageEmailResult = await emailer.sendStateNewPackage(
             stateSubmission,
+            submissionName,
             user
         )
 

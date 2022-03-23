@@ -11,6 +11,7 @@ describe('Email templates', () => {
             const sub = mockContractOnlySubmission()
             const template = newPackageCMSEmail(
                 sub,
+                'some-title',
                 testEmailConfig
             )
             testEmailConfig.cmsReviewSharedEmails.forEach((emailAddress) => {
@@ -27,7 +28,7 @@ describe('Email templates', () => {
         it('subject line is correct', () => {
             const sub  = mockContractOnlySubmission()
             const name = submissionName(sub)
-            const template = newPackageCMSEmail(sub,testEmailConfig)
+            const template = newPackageCMSEmail(sub, name, testEmailConfig)
             
             expect(template).toEqual(
                 expect.objectContaining({
@@ -41,7 +42,7 @@ describe('Email templates', () => {
 
         it('includes warning about unofficial submission', () => {
             const sub = mockContractOnlySubmission()
-            const template = newPackageCMSEmail( sub, testEmailConfig)
+            const template = newPackageCMSEmail( sub, 'some-title', testEmailConfig)
              expect(template).toEqual(
                  expect.objectContaining({
                      bodyText: expect.stringMatching(
@@ -61,6 +62,7 @@ describe('Email templates', () => {
             }
             const template = newPackageCMSEmail(
                 sub,
+                'some-title',
                 testEmailConfig
             )
               expect(template).toEqual(
@@ -96,7 +98,7 @@ describe('Email templates', () => {
                  rateDateStart: new Date('01/01/2021'),
                  rateDateEnd: new Date('01/01/2022'),
              }
-            const template = newPackageCMSEmail(sub, testEmailConfig)
+            const template = newPackageCMSEmail(sub, 'some-title', testEmailConfig)
               
               expect(template).toEqual(
                   expect.objectContaining({
@@ -130,7 +132,7 @@ describe('Email templates', () => {
                      rateDateStart: new Date('01/01/2021'),
                      rateDateEnd: new Date('01/01/2022'),
                  }
-            const template = newPackageCMSEmail(sub, testEmailConfig)
+            const template = newPackageCMSEmail(sub, 'some-title', testEmailConfig)
             
             expect(template).toEqual(
                          expect.objectContaining({
@@ -170,7 +172,7 @@ describe('Email templates', () => {
                         effectiveDateEnd:  new Date('12/31/2021')
                     }
                 }
-                const template = newPackageCMSEmail(sub, testEmailConfig)
+                const template = newPackageCMSEmail(sub, 'some-title', testEmailConfig)
 
                 expect(template).toEqual(
                     expect.objectContaining({
@@ -192,6 +194,7 @@ describe('Email templates', () => {
             const sub = mockContractAmendmentSubmission()
             const template = newPackageCMSEmail(
                 sub,
+                'some-title',
                 testEmailConfig
             )
              expect(template).toEqual(
@@ -210,6 +213,7 @@ describe('Email templates', () => {
              const user = mockUser()
              const template = newPackageStateEmail(
                  sub,
+                 'some-title',
                  user,
                  testEmailConfig
              )
@@ -227,6 +231,7 @@ describe('Email templates', () => {
             const user = mockUser()
             const template = newPackageStateEmail(
                 sub,
+                'some-title',
                 user,
                 testEmailConfig
             )
@@ -245,6 +250,7 @@ describe('Email templates', () => {
              const user = mockUser()
              const template = newPackageStateEmail(
                  sub,
+                 name,
                  user,
                  testEmailConfig
              )
@@ -267,6 +273,7 @@ describe('Email templates', () => {
              const user = mockUser()
              const template = newPackageStateEmail(
                  sub,
+                 'some-title',
                  user,
                  testEmailConfig
              )
@@ -284,6 +291,7 @@ describe('Email templates', () => {
             const user = mockUser()
             const template = newPackageStateEmail(
                 sub,
+                'some-title',
                 user,
                 testEmailConfig
             )
@@ -301,6 +309,7 @@ describe('Email templates', () => {
             const user = mockUser()
             const template = newPackageStateEmail(
                 sub,
+                'some-title',
                 user,
                 testEmailConfig
             )

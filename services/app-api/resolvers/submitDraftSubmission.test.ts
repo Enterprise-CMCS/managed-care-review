@@ -5,6 +5,7 @@ import {
     createAndUpdateTestDraftSubmission,
     fetchTestStateSubmissionById,
     defaultContext,
+    defaultFloridaProgram,
 } from '../testHelpers/gqlHelpers'
 import {testEmailConfig, testEmailer} from '../testHelpers/emailerHelpers'
 
@@ -40,7 +41,7 @@ describe('submitDraftSubmission', () => {
         // The submission fields should still be set
         expect(resultDraft.id).toEqual(createdID)
         expect(resultDraft.submissionType).toEqual('CONTRACT_AND_RATES')
-        expect(resultDraft.program.id).toEqual('cnet')
+        expect(resultDraft.programIDs).toEqual([defaultFloridaProgram().id])
         // check that the stateNumber is being returned the same
         expect(resultDraft.name.split('-')[2]).toEqual(draft.name.split('-')[2])
         expect(resultDraft.submissionDescription).toEqual(

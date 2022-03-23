@@ -28,20 +28,14 @@ import {
 
 
 /* For use with Apollo MockedProvider in jest tests */
-const mockValidUser: UserType = {
-    __typename: 'StateUser' as const,
-    state: {
-        name: 'Minnesota',
-        code: 'MN',
-        programs: [
-            { id: 'msho', name: 'MSHO' },
-            { id: 'pmap', name: 'PMAP' },
-            { id: 'snbc', name: 'SNBC' },
-        ],
-    },
-    role: 'STATE_USER',
-    name: 'Bob it user',
-    email: 'bob@dmas.mn.gov',
+function mockValidUser(): UserType {
+    return {
+        __typename: 'StateUser' as const,
+        state: mockMNState(),
+        role: 'STATE_USER',
+        name: 'Bob it user',
+        email: 'bob@dmas.mn.gov',
+    }
 }
 
 function mockValidCMSUser(): UserType {
@@ -60,7 +54,7 @@ export function mockDraft(): DraftSubmission {
         updatedAt: new Date(),
         id: 'test-abc-123',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         name: 'MN-MSHO-0001',
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A real submission',
@@ -92,7 +86,7 @@ export function mockContactAndRatesDraft(): DraftSubmission {
         updatedAt: new Date(),
         id: 'test-abc-123',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         name: 'MN-MSHO-0001',
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A real submission',
@@ -123,7 +117,7 @@ export function mockCompleteDraft(): DraftSubmission {
         updatedAt: new Date(),
         id: 'test-abc-123',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         name: 'MN-MSHO-0001',
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A real submission',
@@ -225,7 +219,7 @@ function mockNewDraft(): DraftSubmission {
         updatedAt: new Date(),
         id: 'test-abc-124',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         name: 'MN-MSHO-0002',
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A real submission',
@@ -256,7 +250,7 @@ export function mockStateSubmission(): StateSubmission {
         updatedAt: new Date(),
         id: 'test-abc-125',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         name: 'MN-MSHO-0003',
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A submitted submission',
@@ -440,7 +434,7 @@ type fetchCurrentUserMockProps = {
     statusCode: 200 | 403 | 500
 }
 const fetchCurrentUserMock = ({
-    user = mockValidUser,
+    user = mockValidUser(),
     statusCode,
 }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
     fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {

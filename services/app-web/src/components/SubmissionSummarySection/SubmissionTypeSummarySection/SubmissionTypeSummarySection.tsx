@@ -1,6 +1,6 @@
 import { Grid } from '@trussworks/react-uswds'
 import dayjs from 'dayjs'
-import { ProgramT, submissionNameWithPrograms } from '../../../common-code/domain-models'
+import { ProgramT } from '../../../common-code/domain-models'
 import { DataDetail } from '../../../components/DataDetail'
 import { DoubleColumnGrid } from '../../../components/DoubleColumnGrid'
 import { SectionHeader } from '../../../components/SectionHeader'

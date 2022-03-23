@@ -1,6 +1,6 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import {
-    DraftSubmissionType, isCMSUser, StateSubmissionType, UpdateInfoType, submissionName
+    DraftSubmissionType, isCMSUser, StateSubmissionType, UpdateInfoType, submissionName, submissionNameWithPrograms
 } from '../../app-web/src/common-code/domain-models'
 import { Emailer } from '../emailer'
 import { MutationResolvers } from '../gen/gqlServer'
@@ -88,10 +88,20 @@ export function unlockStateSubmissionResolver(
             throw new Error(errMessage)
         }
 
+        const programs = store.findPrograms(submission.stateCode, submission.programIDs)
+        if (!programs || programs.length !== submission.programIDs.length) {
+            const errMessage = `Can't find programs ${submission.programIDs} from state ${submission.stateCode}, ${submission.id}`
+            logError('unlockStateSubmission', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new Error(errMessage)
+        }
+
         // Send emails!
+        const submissionName = submissionNameWithPrograms(submission, programs)
+
         const unlockEmailData = {
             ...unlockInfo, 
-            submissionName: submissionName(submission)
+            submissionName
         }
         const unlockPackageCMSEmailResult = await
         emailer.sendUnlockPackageCMSEmail(unlockEmailData)

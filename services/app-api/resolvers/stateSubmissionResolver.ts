@@ -1,4 +1,4 @@
-import { submissionName } from '../../app-web/src/common-code/domain-models'
+import { submissionNameWithPrograms } from '../../app-web/src/common-code/domain-models'
 import { pluralize } from '../../app-web/src/common-code/formatters'
 import { Resolvers } from '../gen/gqlServer'
 import { Store } from '../postgres'
@@ -8,19 +8,19 @@ export function stateSubmissionResolver(
 ): Resolvers['StateSubmission'] {
     return {
         name(parent) {
-            const program = store.findPrograms(
+            const count = parent.programIDs.length
+            const programs = store.findPrograms(
                 parent.stateCode,
                 parent.programIDs
             )
-            const count = parent.programIDs.length
 
-            if (program === undefined) {
+            if (programs === undefined) {
                 throw new Error(
-                    `The program ${(pluralize('id', count))}  ${parent.programIDs.join(', ')} ${(pluralize('does', count))} not exist in state ${parent.stateCode}`
+                    `The program ${pluralize('id', count)} ${parent.programIDs.join(', ')} ${pluralize('does', count)} not exist in state ${parent.stateCode}`
                 )
             }
 
-            return submissionName(parent)
+            return submissionNameWithPrograms(parent, programs)
         },
     }
 }
