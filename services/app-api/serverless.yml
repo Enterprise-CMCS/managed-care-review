@@ -156,12 +156,18 @@ functions:
       - http:
           path: graphql
           method: post
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - b3
           authorizer: aws_iam
       - http:
           path: graphql
           method: get
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - b3
           authorizer: aws_iam
     timeout: 60 # aurora cold start can be long
     vpc:
@@ -175,7 +181,10 @@ functions:
       - http:
           path: hello
           method: get
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - b3
           authorizer: aws_iam
 
   migrate:
