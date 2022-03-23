@@ -6,7 +6,7 @@ import {
     submitDraftSubmissionMockError,
     submitDraftSubmissionMockSuccess,
 } from '../../../testHelpers/apolloHelpers'
-import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import { renderWithProviders, userClickByTestId } from '../../../testHelpers/jestHelpers'
 import { ReviewSubmit } from './ReviewSubmit'
 import userEvent from '@testing-library/user-event'
 
@@ -422,7 +422,7 @@ describe('ReviewSubmit', () => {
         ).toBeInTheDocument()
     })
 
-    it('draws focus to submitted reason input when form validation errors exist', async () => {
+    it('draws focus to submitted summary textarea when form validation errors exist', async () => {
         renderWithProviders(
             <ReviewSubmit draftSubmission={mockCompleteDraft()} unlocked={true}/>,
             {
@@ -436,15 +436,17 @@ describe('ReviewSubmit', () => {
                 },
             }
         )
-        const submitButton = screen.getByTestId('form-submit')
-        userEvent.click(submitButton)
+        userClickByTestId(screen, 'form-submit')
 
         // the popup dialog should be visible now
         await waitFor(() =>  screen.getByText('Provide summary of all changes made to this submission'))
 
+        // Using findBy because it seems like the timeout in findBy gives it enough time to find the textarea?
+        const textbox = await screen.findByTestId('submittedReason')
+        expect(textbox).toBeInTheDocument()
+
         // submit without entering anything
-        const resubmitButton = screen.getByTestId('review-and-submit-modal-submit')
-        userEvent.click(resubmitButton)
+        userClickByTestId(screen, 'review-and-submit-modal-submit')
 
         expect(
             await screen.findByText(
@@ -453,9 +455,6 @@ describe('ReviewSubmit', () => {
         ).toBeInTheDocument()
 
         // check focus after error
-
-        //TODO: This is not focusing the submission modal input text box, need to figure out why
-        //const textbox = screen.getByTestId('submittedReason')
-        //expect(textbox).toHaveFocus()
+        expect(textbox).toHaveFocus()
     })
 })
