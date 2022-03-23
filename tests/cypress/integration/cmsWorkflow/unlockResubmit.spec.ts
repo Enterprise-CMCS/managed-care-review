@@ -103,7 +103,11 @@ describe('dashboard', () => {
                     )
                     .should('exist')
 
-                cy.submitStateSubmissionForm()
+                // submit unlocked plan package.
+                cy.navigateForm('Submit')
+                cy.get("#submittedReasonCharacterCount").type('Resubmission reason.')
+                cy.findByRole('button', { name: 'Submit' }).click()
+
                 cy.wait('@gqlRequest2')
                 cy.findByText('Dashboard').should('exist')
 
