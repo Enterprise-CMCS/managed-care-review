@@ -31,7 +31,7 @@ Use LaunchDarkly because of the robust feature flag management tools that will a
 * `+` We can hide groups of changes behind an environment flag and make sure it is tested together before making it visible to users.
 * `+` We already use environment variables to configure many parts of the application.
 * `+` JS libraries exist to make this easier such as [Unleash](https://github.com/Unleash)
-* `-` Does not de-couple the act of delivering code from the act of enabling a new feature. A release is still required. 
+* `-` Does not de-couple the act of delivering code from the act of enabling a new feature. A release is still required.
 * `-` No birds-eye visibility for product and design about where/when/why features are flagged. Also developers would be required to turn flags on and off.
 * `-` Any custom handling of flags such as by user or by state, or multi-variant flags, has to be built by developers. The potential for bugs increases with this complexity.
 * `-` Client-side and server-side feature flags may need separate handling and approaches
@@ -45,7 +45,8 @@ These tools include [AWS AppConfig](https://docs.aws.amazon.com/appconfig/latest
 * `+` Users who have AWS access have birds-eye visibility into where/when/why features are flagged. This is limited to developers.
 * `+` Includes ability for non boolean flags and multivariate flags.
 * `-` No visibility or control over feature flagging for product and design since they do not have AWS access.
-* `-` Any custom handling of flags on by user or by state basis (rules) have to be custom built or will require additional third party libraries.
+* `-` Any custom handling of flags by user or by state basis (rules) have to be custom built or will require additional third party libraries.
+* `-` This tool is relatively new (6 months out) and lacks many features and polish that LD has
 
 ### Launch Darkly
 
