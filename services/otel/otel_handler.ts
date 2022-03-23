@@ -26,6 +26,7 @@ const exporter = new OTLPTraceExporter({
     headers: {},
 })
 
+provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()))
 provider.addSpanProcessor(new SimpleSpanProcessor(exporter))
 
 // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
