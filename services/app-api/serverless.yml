@@ -140,7 +140,16 @@ functions:
       - http:
           path: log_event
           method: post
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+              - b3
 
   otel:
     handler: handlers/otel_proxy.main
@@ -148,7 +157,16 @@ functions:
       - http:
           path: otel
           method: post
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+              - b3
 
   graphql:
     handler: handlers/apollo_gql.graphqlHandler
@@ -213,7 +231,16 @@ functions:
       - http:
           path: zip
           method: post
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+              - b3
           authorizer: aws_iam
 
 resources:
