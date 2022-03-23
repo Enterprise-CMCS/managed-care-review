@@ -98,6 +98,7 @@ function localAuthMiddleware(wrapped: APIGatewayProxyHandler): Handler {
 function tracingMiddleware(wrapped: Handler): Handler {
     return async function (event, context, completion) {
         // get the parent context from headers
+        console.log(event.headers)
         const ctx = propagation.extract(ROOT_CONTEXT, event.headers)
         const span = tracer.startSpan(
             'handleRequest',
