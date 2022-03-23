@@ -132,10 +132,7 @@ functions:
       - http:
           path: health_check
           method: get
-          cors:
-            origin: '*'
-            headers:
-              - b3
+          cors: true
 
   log_event:
     handler: handlers/log_event.main
@@ -143,10 +140,7 @@ functions:
       - http:
           path: log_event
           method: post
-          cors:
-            origin: '*'
-            headers:
-              - b3
+          cors: true
 
   otel:
     handler: handlers/otel_proxy.main
@@ -154,10 +148,7 @@ functions:
       - http:
           path: otel
           method: post
-          cors:
-            origin: '*'
-            headers:
-              - b3
+          cors: true
 
   graphql:
     handler: handlers/apollo_gql.graphqlHandler
@@ -168,6 +159,12 @@ functions:
           cors:
             origin: '*'
             headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
               - b3
           authorizer: aws_iam
       - http:
@@ -176,6 +173,12 @@ functions:
           cors:
             origin: '*'
             headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
               - b3
           authorizer: aws_iam
     timeout: 60 # aurora cold start can be long
@@ -190,10 +193,7 @@ functions:
       - http:
           path: hello
           method: get
-          cors:
-            origin: '*'
-            headers:
-              - b3
+          cors: true
           authorizer: aws_iam
 
   migrate:
@@ -213,10 +213,7 @@ functions:
       - http:
           path: zip
           method: post
-          cors:
-            origin: '*'
-            headers:
-              - b3
+          cors: true
           authorizer: aws_iam
 
 resources:
