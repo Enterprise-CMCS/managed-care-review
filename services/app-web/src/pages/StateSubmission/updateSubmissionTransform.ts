@@ -1,5 +1,6 @@
-import { DraftSubmission, DraftSubmissionUpdates } from '../../gen/gqlClient'
-
+import { base64ToDomain } from '../../common-code/proto/stateSubmission'
+import { DraftSubmission, DraftSubmissionUpdates , Maybe, RateAmendmentInfo, Submission2} from '../../gen/gqlClient'
+import { formatGQLDate } from '../../dateHelpers'
 /*
     Clean out _typename from submission
     If you pass gql __typename within a mutation input things break; however,  __typename comes down on cached queries by default
@@ -41,24 +42,67 @@ function updatesFromSubmission(draft: DraftSubmission): DraftSubmissionUpdates {
         programIDs: draft.programIDs,
         submissionType: draft.submissionType,
         submissionDescription: draft.submissionDescription,
-        documents: stripTypename(draft.documents),
+        documents: draft.documents,
         contractType: draft.contractType,
         contractExecutionStatus: draft.contractExecutionStatus,
-        contractDocuments: stripTypename(draft.contractDocuments),
-        contractDateStart: draft.contractDateStart,
-        contractDateEnd: draft.contractDateEnd,
+        contractDocuments: draft.contractDocuments,
+        contractDateStart: formatGQLDate(draft.contractDateStart),
+        contractDateEnd: formatGQLDate(draft.contractDateEnd),
         federalAuthorities: draft.federalAuthorities,
         managedCareEntities: draft.managedCareEntities,
-        contractAmendmentInfo: stripTypename(draft.contractAmendmentInfo),
+        contractAmendmentInfo: draft.contractAmendmentInfo,
         rateType: draft.rateType,
-        rateDocuments: stripTypename(draft.rateDocuments),
-        rateDateStart: draft.rateDateStart,
-        rateDateEnd: draft.rateDateEnd,
-        rateDateCertified: draft.rateDateCertified,
-        rateAmendmentInfo: stripTypename(draft.rateAmendmentInfo),
-        stateContacts: stripTypename(draft.stateContacts),
-        actuaryContacts: stripTypename(draft.actuaryContacts),
+        rateDocuments: draft.rateDocuments,
+        rateDateStart: formatGQLDate(draft.rateDateStart),
+        rateDateEnd: formatGQLDate(draft.rateDateEnd),
+        rateDateCertified: formatGQLDate(draft.rateDateCertified),
+        rateAmendmentInfo: updatesFromRateAmendmentInfo(draft.rateAmendmentInfo),
+        stateContacts: draft.stateContacts,
+        actuaryContacts: draft.actuaryContacts,
         actuaryCommunicationPreference: draft.actuaryCommunicationPreference,
+    }
+}
+
+// This is more code that should go away when we finish the refactor
+// Because this sub-object has dates in it, we need to format those dates correctly.
+// we don't need to fix contacts or documents in the same way.
+function updatesFromRateAmendmentInfo(rateInfo: Maybe<RateAmendmentInfo> | undefined): DraftSubmissionUpdates["rateAmendmentInfo"] {
+    if (!rateInfo) {
+        return undefined
+    }
+    return {
+        effectiveDateEnd: formatGQLDate(rateInfo.effectiveDateEnd),
+        effectiveDateStart: formatGQLDate(rateInfo.effectiveDateStart),
+    }
+}
+
+// this is needed as we change our api - right now only used in tests.
+function updatesFromSubmission2(draft: Submission2): DraftSubmissionUpdates {
+    const formData = base64ToDomain(draft.revisions[0].revision.submissionData)
+    if (formData instanceof Error) throw Error 
+
+    return {
+        programIDs: formData.programIDs,
+        submissionType: formData.submissionType,
+        submissionDescription: formData.submissionDescription,
+        documents: formData.documents,
+        contractType: formData.contractType,
+        contractExecutionStatus: formData.contractExecutionStatus,
+        contractDocuments: formData.contractDocuments,
+        contractDateStart: formData.contractDateStart,
+        contractDateEnd: formData.contractDateEnd,
+        federalAuthorities: formData.federalAuthorities,
+        managedCareEntities: formData.managedCareEntities,
+        contractAmendmentInfo: formData.contractAmendmentInfo,
+        rateType: formData.rateType,
+        rateDocuments: formData.rateDocuments,
+        rateDateStart: formData.rateDateStart,
+        rateDateEnd: formData.rateDateEnd,
+        rateDateCertified: formData.rateDateCertified,
+        rateAmendmentInfo: formData.rateAmendmentInfo,
+        stateContacts: formData.stateContacts,
+        actuaryContacts: formData.actuaryContacts,
+        actuaryCommunicationPreference: formData.actuaryCommunicationPreference,
     }
 }
 
@@ -67,4 +111,5 @@ export {
     stripTypename,
     omitTypename,
     updatesFromSubmission,
+    updatesFromSubmission2
 }

@@ -57,7 +57,7 @@ describe('documents', () => {
             cy.findByText('Duplicate file, please remove').should('exist')
             cy.findAllByRole('row').should('have.length', 4)
             cy.findByText(/2 complete, 1 error, 0 pending/)
-            cy.navigateForm('Back')
+            cy.navigateForm('BACK')
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
 
             // reload page, see two documents, duplicate was discarded on Back
@@ -69,7 +69,7 @@ describe('documents', () => {
             cy.verifyDocumentsHaveNoErrors()
 
             //  Save as draft
-            cy.navigateForm('Save as draft')
+            cy.navigateForm('SAVE_DRAFT')
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
         })
     })
@@ -122,11 +122,11 @@ describe('documents', () => {
             cy.findByTestId('file-input-loading-image').should('not.exist')
             cy.verifyDocumentsHaveNoErrors()
 
-            cy.navigateForm('Continue')
+            cy.navigateForm('CONTINUE')
             cy.findByRole('heading', { level: 2, name: /Review and submit/ })
 
             // check accessibility of filled out documents page
-            cy.findByRole('button', { name: /Back/ }).click()
+            cy.navigateForm('BACK')
             cy.pa11y({
                 actions: ['wait for element #documents-hint to be visible'],
                 hideElements: '.usa-step-indicator',

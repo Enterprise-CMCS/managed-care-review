@@ -1,8 +1,14 @@
 # Use Launch Darkly for feature flags
 
+<<<<<<< HEAD
 MC-Review uses continuous deployment approach. This means every merged code change that passes through all stages of the production pipeline (including extensive automated tests) is released to users. This is an excellent way to accelerate both software development cycles and the feedback loop with users. However, as new large features are built out in the application and deployed, we would benefit from a way to prevent users from using partially implemented functionality that is still a work in progress.
 
 In other words: we want to **selectively show features to users, while still getting the benefits of continuous deployment**. We are interested in the ability to show different versions of the app to different types of users as well, e.g. be able to test a new feature only with users from the state of California or only with users that are part of a predetermined test group. A common way to approach this technical problem is through the use of [feature flags](https://martinfowler.com/articles/feature-toggles.html). There are several approaches to consider.
+=======
+Our application, much like others built off the [CMS MacPro QuickStart](https://github.com/CMSgov/macpro-quickstart-serverless), uses a continuous deployment approach. This means every merged code change that passes through all stages of the production pipeline (including extensive automated tests) is released to users. This approach is an excellent way to accelerate both development and the feedback loop with users. However, as new large features are built out in the application, we would like a way to prevent users from attempting to use partially implemented functionality as it rolls out over multiple sprint cycles.
+
+In other words: we want to be able to **selectively show features to users, while still getting the benefits of continuous deployment**. We are also interested in the ability to show different versions of the app to different types of users, e.g. be able to test a new feature only with users from the state of California or only with users that are part of a predetermined test group. A common way to approach this technical problem is through the use of [feature flags](https://martinfowler.com/articles/feature-toggles.html). There are several approaches to consider.
+>>>>>>> origin/main
 
 ## Considered Alternatives
 
@@ -31,7 +37,11 @@ Use LaunchDarkly because of the robust feature flag management tools that will a
 * `+` We can hide groups of changes behind an environment flag and make sure it is tested together before making it visible to users.
 * `+` We already use environment variables to configure many parts of the application.
 * `+` JS libraries exist to make this easier such as [Unleash](https://github.com/Unleash)
+<<<<<<< HEAD
 * `-` Does not de-couple the act of delivering code from the act of enabling a new feature. A release is still required.
+=======
+* `-` Does not de-couple the act of delivering code from the act of enabling a new feature. A release is still required. 
+>>>>>>> origin/main
 * `-` No birds-eye visibility for product and design about where/when/why features are flagged. Also developers would be required to turn flags on and off.
 * `-` Any custom handling of flags such as by user or by state, or multi-variant flags, has to be built by developers. The potential for bugs increases with this complexity.
 * `-` Client-side and server-side feature flags may need separate handling and approaches
@@ -45,8 +55,12 @@ These tools include [AWS AppConfig](https://docs.aws.amazon.com/appconfig/latest
 * `+` Users who have AWS access have birds-eye visibility into where/when/why features are flagged. This is limited to developers.
 * `+` Includes ability for non boolean flags and multivariate flags.
 * `-` No visibility or control over feature flagging for product and design since they do not have AWS access.
+<<<<<<< HEAD
 * `-` Any custom handling of flags by user or by state basis (rules) have to be custom built or will require additional third party libraries.
 * `-` This tool is relatively new (6 months out) and lacks many features and polish that LD has
+=======
+* `-` Any custom handling of flags on by user or by state basis (rules) have to be custom built or will require additional third party libraries.
+>>>>>>> origin/main
 
 ### Launch Darkly
 

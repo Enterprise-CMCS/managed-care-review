@@ -9,36 +9,30 @@ describe('contract details', () => {
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[2]
 
-            // Navigate to type page by clicking back
-            cy.findByRole('button', { name: /Back/ }).click()
-            cy.findByRole('heading', { level: 2, name: /Submission type/ })
-
-            // Navigate to contract details page
-            cy.visit(`/submissions/${draftSubmissionId}/contract-details`)
-
-            // Navigate to dashboard page by clicking save as draft
-            cy.findByRole('button', { name: /Save as draft/ }).click()
-            cy.findByRole('heading', { level: 1, name: /Dashboard/ })
-
-            // Navigate to contract details page
-            cy.visit(`/submissions/${draftSubmissionId}/contract-details`)
-
+            // CONTINUE for contract only submission goes to Contacts page
             cy.fillOutBaseContractDetails()
-
-            // Navigate to contacts page by clicking continue for contract only submission
-            cy.navigateForm('Continue')
+            cy.navigateForm('CONTINUE')
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
 
-            // Navigate to type page to switch to contract and rates submission
+            // BACK to contract details, switch some fields, and SAVE AS DRAFT
+            cy.navigateForm('BACK')
+            cy.findByLabelText(/Prepaid Inpatient Health Plan/).safeClick()
+            cy.findByLabelText(
+                /Primary Care Case Management Entity/
+            ).safeClick()
+            cy.navigateForm('SAVE_DRAFT')
+            cy.findByRole('heading', { level: 1, name: /Dashboard/ })
+
+            // Navigate to submission type page, switch to contract and rates submission
             cy.visit(`/submissions/${draftSubmissionId}/type`)
             cy.findByText('Contract action and rate certification').click()
-            cy.navigateForm('Continue')
+            cy.navigateForm('CONTINUE')
+            cy.findByRole('heading', { level: 2, name: /Contract details/ })
+            // this prevents flakes- watch for step indicator to update to show rerenders after update call are complete
+            cy.findByTestId('step-indicator').contains('span', 'Rate details')
 
-            // Navigate to contract details page
-            cy.visit(`/submissions/${draftSubmissionId}/contract-details`)
-
-            // Navigate to contacts page by clicking continue for contract and rates submission
-            cy.navigateForm('Continue')
+            // CONTINUE for contract and rates submission goes to Rate details page
+            cy.navigateForm('CONTINUE')
             cy.findByRole('heading', { level: 2, name: /Rate details/ })
         })
     })
@@ -48,13 +42,11 @@ describe('contract details', () => {
         cy.startNewContractOnlySubmission()
 
         cy.fillOutAmendmentToBaseContractDetails()
-
-        // Navigate to contacts page by clicking continue for contract only submission
-        cy.navigateForm('Continue')
+        cy.navigateForm('CONTINUE')
         cy.findByRole('heading', { level: 2, name: /Contacts/ })
 
         // check accessibility of filled out contract details page
-        cy.findByRole('button', { name: /Back/ }).click()
+        cy.navigateForm('BACK')
         cy.pa11y({
             actions: ['wait for element #form-guidance to be visible'],
             hideElements: '.usa-step-indicator',

@@ -24,23 +24,23 @@ describe('dashboard', () => {
 
         // add a draft submission
         cy.startNewContractAndRatesSubmission()
-        cy.findByRole('button', { name: /Save as draft/ }).click()
+        cy.navigateForm('SAVE_DRAFT')
 
         // a submitted submission
         cy.startNewContractAndRatesSubmission()
 
         cy.fillOutBaseContractDetails()
-        cy.navigateForm('Continue')
+        cy.navigateForm('CONTINUE')
 
         cy.fillOutNewRateCertification()
-        cy.navigateForm('Continue')
+        cy.navigateForm('CONTINUE')
 
         cy.fillOutStateContact()
         cy.fillOutActuaryContact()
-        cy.navigateForm('Continue')
+        cy.navigateForm('CONTINUE')
 
         cy.fillOutSupportingDocuments()
-        cy.navigateForm('Continue')
+        cy.navigateForm('CONTINUE')
 
         // Store submission name for reference later
         let submissionId = ''
@@ -63,7 +63,6 @@ describe('dashboard', () => {
 
         // Submit, sent to dashboard
         cy.submitStateSubmissionForm()
-        cy.waitForApiToLoad()
         cy.findByText('Dashboard').should('exist')
         cy.findByText('Programs').should('exist')
 

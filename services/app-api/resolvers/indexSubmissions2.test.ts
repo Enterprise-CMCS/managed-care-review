@@ -3,8 +3,8 @@ import {
     constructTestPostgresServer,
     createTestDraftSubmission,
     createTestStateSubmission,
-    submitTestDraftSubmission,
     unlockTestDraftSubmission,
+    resubmitTestDraftSubmission,
 } from '../testHelpers/gqlHelpers'
 import {todaysDate} from '../testHelpers/dateHelpers'
 import {
@@ -34,6 +34,13 @@ describe('indexSubmissions2', () => {
             query: INDEX_SUBMISSIONS2,
         })
 
+        //Parse state submission proto data
+        const currentRevision = stateSub?.revisions[0]?.revision
+        const stateSubData = base64ToDomain(currentRevision.submissionData)
+        if (stateSubData instanceof Error) {
+            throw stateSubData
+        }
+
         expect(result.errors).toBeUndefined()
 
         const submissionsIndex = result.data?.indexSubmissions2
@@ -47,7 +54,7 @@ describe('indexSubmissions2', () => {
                 [draftSub.id, stateSub.id].includes(sub.id)
             )
         // specific submissions by id exist
-        expect(theseSubmissions.length).toBe(2)    
+        expect(theseSubmissions.length).toBe(2)
 
         // confirm some submission data is correct too, first in list will be draft, second is the submitted
         expect(theseSubmissions[0].intiallySubmittedAt).toBe(null)
@@ -62,8 +69,7 @@ describe('indexSubmissions2', () => {
         expect(
             currentRevisionSubmissionFormData(theseSubmissions[1])
                 ?.submissionDescription
-        ).toBe(stateSub.submissionDescription)
- 
+        ).toBe(stateSubData.submissionDescription)
     })
 
     it('synthesizes the right statuses as a submission is submitted/unlocked/etc', async () => {
@@ -90,7 +96,7 @@ describe('indexSubmissions2', () => {
         await unlockTestDraftSubmission(cmsServer, relockedSubmission.id, 'Test reason')
 
         // resubmit one
-        await submitTestDraftSubmission(server, relockedSubmission.id)
+        await resubmitTestDraftSubmission(server, relockedSubmission.id, 'Test first resubmission')
 
         // index submissions api request
         const result = await server.executeOperation({

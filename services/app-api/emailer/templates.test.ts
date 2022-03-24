@@ -1,9 +1,22 @@
-import {testEmailConfig, mockContractAmendmentSubmission, mockContractOnlySubmission, mockContractAndRatesSubmission, mockUser} from '../testHelpers/emailerHelpers'
+import {
+    testEmailConfig,
+    mockContractAmendmentSubmission,
+    mockContractOnlySubmission,
+    mockContractAndRatesSubmission,
+    mockUser
+} from '../testHelpers/emailerHelpers'
 import {
     submissionName,
     StateSubmissionType
 } from '../../app-web/src/common-code/domain-models'
-import {newPackageCMSEmail, newPackageStateEmail} from './'
+import {
+    newPackageCMSEmail,
+    newPackageStateEmail,
+    unlockPackageCMSEmail,
+    unlockPackageStateEmail,
+    resubmittedCMSEmail,
+    resubmittedStateEmail
+} from './'
 
 describe('Email templates', () => {
     describe('CMS email', () => {
@@ -204,7 +217,7 @@ describe('Email templates', () => {
         })
 
     })
-     describe('State email', () => {
+    describe('State email', () => {
          it('to addresses list includes current user', () => {
              const sub = mockContractOnlySubmission()
              const user = mockUser()
@@ -256,8 +269,7 @@ describe('Email templates', () => {
                      ),
                       bodyText: expect.stringContaining(
                            `${name} was successfully submitted.`
-                    ),
-      
+                     ),
                  })
              )
          })
@@ -314,4 +326,262 @@ describe('Email templates', () => {
         })
 
      })
+    describe('CMS unlock email', () =>{
+        const unlockData = {
+            submissionName: 'MCR-VA-CCCPLUS-0001',
+            updatedBy: 'leslie@example.com',
+            updatedAt: new Date('01/01/2022'),
+            updatedReason: 'Adding rate development guide.'
+        }
+        const template = unlockPackageCMSEmail(
+            unlockData,
+            testEmailConfig
+        )
+        it('subject line is correct and clearly states submission is unlocked', () => {
+             expect(template).toEqual(
+                 expect.objectContaining({
+                     subject: expect.stringContaining(
+                         `${unlockData.submissionName} was unlocked`
+                     ),
+                 })
+             )
+        })
+        it('includes warning about unofficial submission', () => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /This is NOT an official submission/
+                    ),
+                })
+            )
+        })
+        it('unlocked by includes correct email address', () => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /Unlocked by: leslie/
+                    ),
+                })
+            )
+        })
+        it('unlocked on includes correct date', () => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /Unlocked on: 01/
+                    ),
+                })
+            )
+        })
+        it('includes correct reason', () => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /Reason for unlock: Adding rate development guide/
+                    ),
+                })
+            )
+        })
+    })
+    describe('State unlock email', () =>{
+        const unlockData = {
+            submissionName: 'MCR-VA-CCCPLUS-0002',
+            updatedBy: 'josh@example.com',
+            updatedAt: new Date('02/01/2022'),
+            updatedReason: 'Adding rate certification.'
+        }
+        const sub = mockContractOnlySubmission()
+        const template = unlockPackageStateEmail(
+            sub,
+            unlockData,
+            testEmailConfig
+        )
+        it('subject line is correct and clearly states submission is unlocked', () => {
+             expect(template).toEqual(
+                 expect.objectContaining({
+                     subject: expect.stringContaining(
+                         `${unlockData.submissionName} was unlocked by CMS`
+                     ),
+                 })
+             )
+        })
+        it('includes warning about unofficial submission', () => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /This is NOT an official submission/
+                    ),
+                })
+            )
+        })
+        it('unlocked by includes correct email address', () => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /Unlocked by: josh/
+                    ),
+                })
+            )
+        })
+        it('unlocked on includes correct date', () => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /Unlocked on: 02/
+                    ),
+                })
+            )
+        })
+        it('includes correct reason', () => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /Reason for unlock: Adding rate certification./
+                    ),
+                })
+            )
+        })
+    })
+    describe('State resubmission email', () => {
+        const resubmitData = {
+            submissionName: 'MCR-VA-CCCPLUS-0002',
+            updatedBy: 'bob@example.com',
+            updatedAt: new Date('02/01/2022'),
+            updatedReason: 'Added rate certification.'
+        }
+        const user = mockUser()
+        const submission = mockContractOnlySubmission()
+        const template = resubmittedStateEmail(
+            submission,
+            user,
+            resubmitData,
+            testEmailConfig
+        )
+        it('contains correct subject and clearly states successful resubmission', () => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    subject: expect.stringContaining(
+                        `${resubmitData.submissionName} was resubmitted`
+                    ),
+                    bodyText: expect.stringMatching(
+                        `${resubmitData.submissionName} was successfully resubmitted`
+                    ),
+                })
+            )
+        })
+        it('includes warning about unofficial submission', () => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /This is NOT an official submission/
+                    ),
+                })
+            )
+        })
+        it('Submitted by contains correct email address', () => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /Submitted by: bob@example.com/
+                    )
+                })
+            )
+        })
+        it('Updated on contains correct date', () => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /Updated on: 02\/01\/2022/
+                    )
+                })
+            )
+        })
+        it('Changes made contains correct changes made', () => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /Changes made: Added rate certification./
+                    )
+                })
+            )
+        })
+        it('includes instructions for further changes', () => {
+            expect.objectContaining({
+                bodyText: expect.stringMatching(
+                    /If you need to make any further changes, please contact CMS./
+                )
+            })
+        })
+    })
+    describe('CMS resubmission email', () => {
+        const resubmitData = {
+            submissionName: 'MCR-VA-CCCPLUS-0002',
+            updatedBy: 'bob@example.com',
+            updatedAt: new Date('02/01/2022'),
+            updatedReason: 'Added rate certification.'
+        }
+        const submission = mockContractOnlySubmission()
+        const template = resubmittedCMSEmail(
+            submission,
+            resubmitData,
+            testEmailConfig
+        )
+        it('contains correct subject and clearly states submission edits are completed', () => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    subject: expect.stringContaining(
+                        `${resubmitData.submissionName} was resubmitted`
+                    ),
+                    bodyText: expect.stringMatching(
+                        `The state completed their edits on submission ${resubmitData.submissionName}`
+                    ),
+                })
+            )
+        })
+        it('includes warning about unofficial submission', () => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /This is NOT an official submission/
+                    ),
+                })
+            )
+        })
+        it('Submitted by contains correct email address', () => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /Submitted by: bob@example.com/
+                    )
+                })
+            )
+        })
+        it('Updated on contains correct date', () => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /Updated on: 02\/01\/2022/
+                    )
+                })
+            )
+        })
+        it('Changes made contains correct changes made', () => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /Changes made: Added rate certification./
+                    )
+                })
+            )
+        })
+        it('includes link to submission', () => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringContaining(
+                        `http://localhost/submissions/${submission.id}`
+                    ),
+                })
+            )
+        })
+    })
 })

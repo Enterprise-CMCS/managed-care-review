@@ -45,11 +45,11 @@ function convertToSubmission2Type(dbSub: StateSubmissionWithRevisions): Submissi
         stateCode: dbSub.stateCode,
         revisions: dbSub.revisions.map(r => { 
             let submitInfo: UpdateInfoType | undefined = undefined
-            if (r.submittedAt) {
+            if (r.submittedAt && r.submittedReason && r.submittedBy) {
                 submitInfo = {
                     updatedAt: r.submittedAt,
-                    updatedReason: '',
-                    updatedBy: ''
+                    updatedReason: r.submittedReason,
+                    updatedBy: r.submittedBy
                 }
             }
 

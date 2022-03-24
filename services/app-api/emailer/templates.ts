@@ -6,6 +6,10 @@ import {
 import { formatCalendarDate } from '../../app-web/src/dateHelpers'
 import { EmailConfiguration, EmailData } from './'
 
+const testEmailAlert = `<span style="color:#FF0000;font-weight:bold;">Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.</span>
+</br>
+</br>`
+
 const SubmissionTypeRecord: Record<SubmissionType, string> = {
     CONTRACT_ONLY: 'Contract action only',
     CONTRACT_AND_RATES: 'Contract action and rate certification',
@@ -73,7 +77,8 @@ const newPackageCMSEmail = (
         `submissions/${submission.id}`,
         config.baseUrl
     ).href
-    const bodyHTML = `<span style="color:#FF0000;font-weight:bold;">Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.</span>
+    const bodyHTML = `
+            ${testEmailAlert}
             <br /><br />
             Managed Care submission: <b>${submissionName(
                 submission
@@ -113,9 +118,10 @@ const newPackageStateEmail = (
     const receiverEmails: string[] = [currentUserEmail].concat(
         submission.stateContacts.map((contact) => contact.email)
     )
-    const bodyHTML =  `<span style="color:#FF0000;font-weight:bold;">Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.</span>
+    const bodyHTML =  `
+            ${testEmailAlert}
             <br /><br />
-             ${submissionName(submission)} was successfully submitted.
+            ${submissionName(submission)} was successfully submitted.
             <br /><br />
             <a href="${submissionURL}">View submission</a>
             <br /><br />
@@ -149,5 +155,132 @@ const newPackageStateEmail = (
     }
 }
 
-export { newPackageCMSEmail, newPackageStateEmail }
+type UpdatedEmailData = {
+    submissionName: string
+    updatedBy: string
+    updatedAt: Date
+    updatedReason: string
+}
 
+const unlockPackageCMSEmail = (
+    unlockData: UpdatedEmailData,
+    config: EmailConfiguration
+): EmailData => {
+    const isTestEnvironment = config.stage !== 'prod'
+    const reviewerEmails = config.cmsReviewSharedEmails
+    const bodyHTML = `
+        ${testEmailAlert}
+        <br /><br />
+        Submission ${unlockData.submissionName} was unlocked<br /><br />
+        <b>Unlocked by:</b> ${unlockData.updatedBy}<br /><br />
+        <b>Unlocked on:</b> ${formatCalendarDate(unlockData.updatedAt)}<br /><br />
+        <b>Reason for unlock:</b> ${unlockData.updatedReason}<br /><br />
+        You will receive another notification when the state resubmits.
+    `
+    return {
+        toAddresses: reviewerEmails,
+        sourceEmail: config.emailSource,
+        subject: `${
+            isTestEnvironment ? `[${config.stage}] ` : ''
+        }TEST ${unlockData.submissionName} was unlocked`,
+        bodyText: stripHTMLFromTemplate(bodyHTML),
+        bodyHTML: bodyHTML,
+    }
+}
+
+const unlockPackageStateEmail = (
+    submission: StateSubmissionType,
+    unlockData: UpdatedEmailData,
+    config: EmailConfiguration
+): EmailData => {
+    const submissionURL = new URL(
+        `submissions/${submission.id}/review-and-submit`,
+        config.baseUrl
+    ).href
+    const receiverEmails: string[] = submission.stateContacts.map((contact) => contact.email)
+    const bodyHTML = `
+        ${testEmailAlert}
+        <br /><br />
+        Submission ${unlockData.submissionName} was unlocked by CMS<br /><br /> 
+        <b>Unlocked by:</b> ${unlockData.updatedBy}<br /><br />
+        <b>Unlocked on:</b> ${formatCalendarDate(unlockData.updatedAt)}<br /><br />
+        <b>Reason for unlock:</b> ${unlockData.updatedReason}<br /><br />
+        <a href="${submissionURL}">Open the submission in MC-Review to make edits.</a>
+    `
+    return {
+        toAddresses: receiverEmails,
+        sourceEmail: config.emailSource,
+        subject: `${
+            config.stage !== 'prod' ? `[${config.stage}] ` : ''
+        }TEST ${unlockData.submissionName} was unlocked by CMS`,
+        bodyText: stripHTMLFromTemplate(bodyHTML),
+        bodyHTML: bodyHTML,
+    }
+}
+
+const resubmittedStateEmail = (
+    submission: StateSubmissionType,
+    user: CognitoUserType,
+    resubmittedData: UpdatedEmailData,
+    config: EmailConfiguration
+): EmailData => {
+    const currentUserEmail = user.email
+    const receiverEmails: string[] = [currentUserEmail].concat(
+        submission.stateContacts.map((contact) => contact.email)
+    )
+    const bodyHTML = `
+        ${testEmailAlert}<br />
+        <br />
+        Submission ${resubmittedData.submissionName} was successfully resubmitted<br />
+        <br />
+        <b>Submitted by:</b> ${resubmittedData.updatedBy}<br />
+        <b>Updated on:</b> ${formatCalendarDate(resubmittedData.updatedAt)}<br />
+        <b>Changes made:</b> ${resubmittedData.updatedReason}<br />
+        <br />
+        <p>If you need to make any further changes, please contact CMS.</p>
+    `
+    return {
+        toAddresses: receiverEmails,
+        sourceEmail: config.emailSource,
+        subject: `${
+            config.stage !== 'prod' ? `[${config.stage}] ` : ''
+        }TEST ${resubmittedData.submissionName} was resubmitted`,
+        bodyText: stripHTMLFromTemplate(bodyHTML),
+        bodyHTML: bodyHTML,
+    }
+}
+
+const resubmittedCMSEmail = (
+    submission: StateSubmissionType,
+    resubmittedData: UpdatedEmailData,
+    config: EmailConfiguration
+): EmailData => {
+    const reviewerEmails = config.cmsReviewSharedEmails
+    const submissionURL = new URL(
+        `submissions/${submission.id}`,
+        config.baseUrl
+    ).href
+
+    const bodyHTML = `
+        ${testEmailAlert}<br />
+        <br />
+        The state completed their edits on submission ${resubmittedData.submissionName}<br />
+        <br />
+        <b>Submitted by:</b> ${resubmittedData.updatedBy}<br />
+        <b>Updated on:</b> ${formatCalendarDate(resubmittedData.updatedAt)}<br />
+        <b>Changes made:</b> ${resubmittedData.updatedReason}<br />
+        <br />
+        <a href="${submissionURL}">View submission</a>
+    `
+    return {
+        toAddresses: reviewerEmails,
+        sourceEmail: config.emailSource,
+        subject: `${
+            config.stage !== 'prod' ? `[${config.stage}] ` : ''
+        }TEST ${resubmittedData.submissionName} was resubmitted`,
+        bodyText: stripHTMLFromTemplate(bodyHTML),
+        bodyHTML: bodyHTML,
+    }
+}
+
+export { newPackageCMSEmail, newPackageStateEmail, unlockPackageCMSEmail, unlockPackageStateEmail, resubmittedStateEmail, resubmittedCMSEmail, UpdatedEmailData }
