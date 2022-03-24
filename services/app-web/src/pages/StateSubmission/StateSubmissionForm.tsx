@@ -228,14 +228,18 @@ export const StateSubmissionForm = (): React.ReactElement => {
         })
         return specificContent ?? <GenericErrorPage />
     }
+    if (
+        (fetchData && formDataError === 'NOT_FOUND') ||
+        (fetchData && !formDataFromLatestRevision)
+    ) {
+        return <Error404 />
+    }
+
 
     if (formDataError === 'MALFORMATTED_DATA') {
         return <GenericErrorPage />
     }
 
-    if (formDataError === 'NOT_FOUND' || (fetchData &&  !formDataFromLatestRevision)) {
-        return <Error404 />
-    }
 
     if (formDataError === 'WRONG_SUBMISSION_STATUS') {
         return <ErrorInvalidSubmissionStatus />
@@ -285,7 +289,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}>
-                        <ReviewSubmit draftSubmission={draft} />
+                        <ReviewSubmit draftSubmission={draft} unlocked={!!unlockedInfo} />
                     </Route>
                 </Switch>
             </StateSubmissionContainer>
