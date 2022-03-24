@@ -7,7 +7,6 @@
     "videosFolder": "tests/cypress/videos",
     "supportFile": "tests/cypress/support",
     "projectId": "tt5hbz",
-    "defaultCommandTimeout": 10000,
     "retries": {
         "runMode": 2,
         "openMode": 0
