@@ -18,7 +18,7 @@ describe('submission type', () => {
             cy.visit(`/submissions/${draftSubmissionId}/type`)
 
             // Navigate to contract details page by clicking continue for contract only submission
-            cy.navigateForm('Continue')
+            cy.navigateForm('CONTINUE')
             cy.findByRole('heading', { level: 2, name: /Contract details/ })
         })
     })
@@ -37,7 +37,7 @@ describe('submission type', () => {
             cy.findByText('Contract action and rate certification').click()
 
             // Navigate to contract details page by clicking continue for contract and rates submission
-            cy.navigateForm('Continue')
+            cy.navigateForm('CONTINUE')
             cy.findByRole('heading', { level: 2, name: /Contract details/ })
 
             // Navigate to type page
