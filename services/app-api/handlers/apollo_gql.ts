@@ -100,6 +100,7 @@ function tracingMiddleware(wrapped: Handler): Handler {
         // get the parent context from headers
         console.log(event.headers)
         const ctx = propagation.extract(ROOT_CONTEXT, event.headers)
+        console.log(ctx)
         const span = tracer.startSpan(
             'handleRequest',
             {
