@@ -233,6 +233,7 @@ Cypress.Commands.add(
             aliasQuery(req, 'indexSubmissions2')
             aliasQuery(req, 'fetchSubmission2')
             aliasMutation(req, 'createDraftSubmission')
+            aliasMutation(req, 'updateDraftSubmission')
         })
 
         cy.findByRole('button', {
@@ -252,7 +253,10 @@ Cypress.Commands.add(
                 'exist'
             ) 
         } else if (buttonKey === 'CONTINUE'){
-            if (waitForLoad) cy.wait('@fetchSubmission2Query')
+            if (waitForLoad){
+                cy.wait('@updateDraftSubmissionMutation')
+                cy.wait('@fetchSubmission2Query')
+            }
             cy.findByTestId('state-submission-form-page').should('exist')
         } else {
             // don't wait for api on BACK
