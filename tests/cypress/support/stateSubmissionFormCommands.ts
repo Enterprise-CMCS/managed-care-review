@@ -196,7 +196,7 @@ Cypress.Commands.add('verifyDocumentsHaveNoErrors', () => {
     cy.findByText('Remove files with errors').should('not.exist')
 })
 
-Cypress.Commands.add('submitStateSubmissionForm', () => {
+Cypress.Commands.add('submitStateSubmissionForm', (success = true) => {
       cy.intercept('POST', '*/graphql', (req) => {
           aliasMutation(req, 'submitDraftSubmission')
           aliasQuery(req, 'indexSubmissions2')
@@ -212,7 +212,9 @@ Cypress.Commands.add('submitStateSubmissionForm', () => {
             cy.findByTestId('review-and-submit-modal-submit').click()
         })
     cy.wait('@submitDraftSubmissionMutation', { timeout: 50000 })
-    cy.wait('@indexSubmissions2Query', { timeout: 50000 })
+    if (success) {
+        cy.wait('@indexSubmissions2Query', { timeout: 50000 })
+    }
 })
 
 type FormButtonKey =  'CONTINUE_FROM_START_NEW'| 'CONTINUE' | 'SAVE_DRAFT' | 'BACK'
@@ -249,10 +251,12 @@ Cypress.Commands.add(
             cy.findByTestId('state-submission-form-page').should(
                 'exist'
             ) 
-        } else {
-            // Going BACK or CONTINUE on a regular form page
+        } else if (buttonKey === 'CONTINUE'){
             if (waitForLoad) cy.wait('@fetchSubmission2Query')
             cy.findByTestId('state-submission-form-page').should('exist')
+        } else {
+            // don't wait for api on BACK
+              cy.findByTestId('state-submission-form-page').should('exist')
         }
 
     }
