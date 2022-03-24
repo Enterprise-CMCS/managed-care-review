@@ -100,7 +100,6 @@ function tracingMiddleware(wrapped: Handler): Handler {
         // get the parent context from headers
         console.log(event.headers)
         const ctx = propagation.extract(ROOT_CONTEXT, event.headers)
-        console.log(ctx)
         const span = tracer.startSpan(
             'handleRequest',
             {
@@ -109,6 +108,7 @@ function tracingMiddleware(wrapped: Handler): Handler {
             },
             ctx
         )
+        console.log(span)
 
         // Put the span into the LAMBDA context, in order to pass it into the APOLLO context in contextForRequestForFetcher
         // We have to use any here because this context's type is not under our control.
@@ -140,6 +140,7 @@ async function initializeGQLHandler(): Promise<Handler> {
     const emailSource = process.env.SES_SOURCE_EMAIL_ADDRESS
     const emailerMode = process.env.EMAILER_MODE
     const cmsReviewSharedEmails = process.env.SES_REVIEW_TEAM_EMAIL_ADDRESSES
+    const otelCollectorUrl = process.env.REACT_APP_OTEL_COLLECTOR_URL,
 
     // Print out all the variables we've been configured with. Leave sensitive ones out, please.
     console.info('Running With Config: ', {
@@ -149,6 +150,7 @@ async function initializeGQLHandler(): Promise<Handler> {
         applicationEndpoint,
         emailSource,
         emailerMode,
+        otelCollectorUrl
     })
 
     // START Assert configuration is valid
@@ -176,6 +178,10 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     if (!dbURL) {
         throw new Error('Init Error: DATABASE_URL is required to run app-api')
+    }
+
+    if (otelCollectorUrl === undefined || otelCollectorUrl === '') {
+        throw new Error('Configuration Error: REACT_APP_OTEL_COLLECTOR_URL is required to run app-api')
     }
     // END
 
