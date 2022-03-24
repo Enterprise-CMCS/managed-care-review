@@ -3,7 +3,7 @@ describe('CMS User can view submission', () => {
     //         cy.logInAsStateUser()
     //         cy.waitForApiToLoad()
     //         cy.startNewContractAndRatesSubmission()
-    //         cy.navigateForm('Continue')
+    //         cy.navigateForm('CONTINUE')
     //         cy.findByText(/^MN-PMAP-/).should('exist')
     //         // Fill out contract details
     //         cy.findByText('Base contract').click()
@@ -12,13 +12,13 @@ describe('CMS User can view submission', () => {
     //         cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
     //         cy.findByLabelText('1932(a) State Plan Authority').safeClick()
     //         cy.findAllByTestId('errorMessage').should('have.length', 0)
-    //         cy.navigateForm('Continue')
+    //         cy.navigateForm('CONTINUE')
     //         //Fill out rate details
     //         cy.findByText('New rate certification').click()
     //         cy.findByLabelText('Start date').type('02/29/2024')
     //         cy.findByLabelText('End date').type('02/28/2025')
     //         cy.findByLabelText('Date certified').type('03/01/2024')
-    //         cy.navigateForm('Continue')
+    //         cy.navigateForm('CONTINUE')
     //         // fill out state contacts
     //         cy.findAllByLabelText('Name').eq(0).type('Test Person')
     //         cy.findAllByLabelText('Title/Role').eq(0).type('Fancy Title')
@@ -44,7 +44,7 @@ describe('CMS User can view submission', () => {
     //         cy.findByText('Duplicate file, please remove').should('not.exist')
     //         cy.waitForDocumentsToLoad()
     //         // Navigate review and submit page
-    //         cy.navigateForm('Continue')
+    //         cy.navigateForm('CONTINUE')
     //         // Store submission name for reference later
     //         let submissionId = ''
     //         cy.location().then((fullUrl) => {
@@ -53,9 +53,9 @@ describe('CMS User can view submission', () => {
     //             submissionId = pathnameArray[2]
     //         })
     //         // Submit, sent to dashboard
-    //         cy.navigateForm('Submit')
+    //         cy.navigateForm('SUBMIT')
     //         cy.findByRole('dialog').should('exist')
-    //         cy.navigateForm('Submit')
+    //         cy.navigateForm('SUBMIT')
     //         cy.waitForApiToLoad()
     //         cy.findByText('Dashboard').should('exist')
     //         cy.findByText('PMAP').should('exist')
