@@ -196,7 +196,7 @@ Cypress.Commands.add('verifyDocumentsHaveNoErrors', () => {
     cy.findByText('Remove files with errors').should('not.exist')
 })
 
-Cypress.Commands.add('submitStateSubmissionForm', (success = true) => {
+Cypress.Commands.add('submitStateSubmissionForm', (success = true, resubmission = false) => {
       cy.intercept('POST', '*/graphql', (req) => {
           aliasMutation(req, 'submitDraftSubmission')
           aliasQuery(req, 'indexSubmissions2')
@@ -209,6 +209,9 @@ Cypress.Commands.add('submitStateSubmissionForm', (success = true) => {
     cy.findAllByTestId('modalWindow')
         .should('exist')
         .within(($modal) => {
+            if (resubmission) {
+                cy.get('#submittedReasonCharacterCount').type('Resubmission summary')
+            }
             cy.findByTestId('review-and-submit-modal-submit').click()
         })
     cy.wait('@submitDraftSubmissionMutation', { timeout: 50000 })

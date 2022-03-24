@@ -105,7 +105,7 @@ describe('dashboard', () => {
                     )
                     .should('exist')
 
-                cy.submitStateSubmissionForm()
+                cy.submitStateSubmissionForm(true, true)
 
                 cy.findByText('Dashboard').should('exist')
 
