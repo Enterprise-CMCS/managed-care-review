@@ -13,14 +13,13 @@
 import './commands'
 import './loginCommands'
 import './stateSubmissionFormCommands'
+type FormButtonKey = 'CONTINUE_FROM_START_NEW' | 'CONTINUE' | 'SAVE_DRAFT' | 'BACK' 
 
 declare global {
     namespace Cypress {
         interface Chainable<Subject = any> {
             // commands
             safeClick(): void
-            navigateForm(buttonName: string): Chainable<Element>
-            waitForApiToLoad(): void
 
             // login commands
             logInAsStateUser(): void
@@ -42,6 +41,7 @@ declare global {
             waitForDocumentsToLoad(): void
             verifyDocumentsHaveNoErrors(): void
             submitStateSubmissionForm(): void
+            navigateForm(buttonName: FormButtonKey, waitForLoad?: boolean): void
         }
     }
 }

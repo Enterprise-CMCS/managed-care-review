@@ -11,14 +11,14 @@ describe('rate details', () => {
             cy.visit(`/submissions/${draftSubmissionId}/rate-details`)
 
             // Navigate to contract details page by clicking back
-            cy.findByRole('button', { name: /Back/ }).click()
+           cy.navigateForm('BACK')
             cy.findByRole('heading', { level: 2, name: /Contract details/ })
 
             // Navigate to rate details page
             cy.visit(`/submissions/${draftSubmissionId}/rate-details`)
 
             // Navigate to dashboard page by clicking save as draft
-            cy.findByRole('button', { name: /Save as draft/ }).click()
+            cy.navigateForm('SAVE_DRAFT')
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // Navigate to rate details page
@@ -27,7 +27,7 @@ describe('rate details', () => {
             cy.fillOutNewRateCertification()
 
             // Navigate to contacts page by clicking continue
-            cy.navigateForm('Continue')
+            cy.navigateForm('CONTINUE')
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
         })
     })
@@ -46,11 +46,11 @@ describe('rate details', () => {
             cy.fillOutAmendmentToPriorRateCertification()
 
             // Navigate to contacts page by clicking continue
-            cy.navigateForm('Continue')
+            cy.navigateForm('CONTINUE')
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
 
             // check accessibility of filled out rate details page
-            cy.findByRole('button', { name: /Back/ }).click()
+            cy.navigateForm('BACK')
             cy.pa11y({
                 actions: ['wait for element #form-guidance to be visible'],
                 hideElements: '.usa-step-indicator',
