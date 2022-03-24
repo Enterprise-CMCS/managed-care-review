@@ -14,7 +14,7 @@ import styles from './Modal.module.scss'
 interface ModalComponentProps {
     id: string,
     modalHeading?: string,
-    onSubmit?: () => void,
+    onSubmit?: React.MouseEventHandler<HTMLButtonElement> | undefined,
     className?: string,
     modalRef: React.RefObject<ModalRef>
     submitButtonProps?: JSX.IntrinsicElements['button']

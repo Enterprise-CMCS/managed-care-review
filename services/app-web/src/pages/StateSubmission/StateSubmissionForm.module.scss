@@ -1,6 +1,10 @@
 @import '../../styles/uswdsImports.scss';
 @import '../../styles/custom';
 
+.formPage {
+    width: 100%; 
+}
+
 .formContainer.tableContainer {
 
     &[class^='usa-form'] {
@@ -50,6 +54,7 @@
         @include at-media(tablet){
             min-width: 40rem;
             max-width: 20rem;
+            margin: 0 auto;
         }
     }
 }

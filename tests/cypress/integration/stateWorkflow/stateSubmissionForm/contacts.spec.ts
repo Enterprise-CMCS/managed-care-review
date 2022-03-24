@@ -11,26 +11,26 @@ describe('contacts', () => {
             cy.visit(`/submissions/${draftSubmissionId}/contacts`)
 
             // Navigate to contract details page by clicking back for contract only submission
-            cy.findByRole('button', { name: /Back/ }).click()
+            cy.navigateForm('BACK')
             cy.findByRole('heading', { level: 2, name: /Contract details/ })
 
             // Navigate to type page to switch to contract and rates submission
             cy.visit(`/submissions/${draftSubmissionId}/type`)
             cy.findByText('Contract action and rate certification').click()
-            cy.navigateForm('Continue')
+            cy.navigateForm('CONTINUE')
 
             // Navigate to contacts page
             cy.visit(`/submissions/${draftSubmissionId}/contacts`)
 
             // Navigate to rate details page by clicking back for contract and rates submission
-            cy.findByRole('button', { name: /Back/ }).click()
+             cy.navigateForm('BACK')
             cy.findByRole('heading', { level: 2, name: /Rate details/ })
 
             // Navigate to contacts page
             cy.visit(`/submissions/${draftSubmissionId}/contacts`)
 
             // Navigate to dashboard page by clicking save as draft
-            cy.findByRole('button', { name: /Save as draft/ }).click()
+           cy.navigateForm('SAVE_DRAFT')
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // Navigate to contacts page
@@ -40,12 +40,12 @@ describe('contacts', () => {
             cy.fillOutActuaryContact()
 
             // Navigate to documents page by clicking continue
-            cy.navigateForm('Continue')
+            cy.navigateForm('CONTINUE')
             // HM-TODO: Why doesn't level attribute work here?
             cy.findByRole('heading', { name: /Supporting documents/ })
 
             // check accessibility of filled out contacts page
-            cy.findByRole('button', { name: /Back/ }).click()
+           cy.navigateForm('BACK')
             cy.findByRole('heading', { name: /Contacts/ })
             cy.pa11y({
                 actions: ['wait for element #form-guidance to be visible'],
@@ -94,7 +94,7 @@ describe('contacts', () => {
             cy.findAllByLabelText('Mercer').eq(1).safeClick()
 
             // Navigate to documents page by clicking continue
-            cy.navigateForm('Continue')
+            cy.navigateForm('CONTINUE')
             // HM-TODO: Why doesn't level attribute work here?
             cy.findByRole('heading', { name: /Supporting documents/ })
 
