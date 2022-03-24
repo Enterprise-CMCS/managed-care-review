@@ -20,7 +20,7 @@ import {
     ContactsSummarySection, ContractDetailsSummarySection,
     RateDetailsSummarySection, SubmissionTypeSummarySection, SupportingDocumentsSummarySection
 } from '../../components/SubmissionSummarySection'
-import { SubmissionUnlockedBanner,Modal, PoliteErrorMessage, } from '../../components'
+import { SubmissionUnlockedBanner,Modal, PoliteErrorMessage, PreviousSubmissionBanner } from '../../components'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
 import {
@@ -93,6 +93,9 @@ export const SubmissionSummary = (): React.ReactElement => {
     const [pageLevelAlert, setPageLevelAlert] = useState<string | undefined>(
         undefined
     )
+
+    // Previous submission state
+    const [isPrevSubmission, setIsPrevSubmission] = useState<boolean>(false)
 
     // Api fetched data state
     const [packageData, setPackageData] = useState<
@@ -318,6 +321,10 @@ export const SubmissionSummary = (): React.ReactElement => {
                     <Alert type="error" heading="Unlock Error">
                         {pageLevelAlert}
                     </Alert>
+                )}
+
+                {isPrevSubmission && (
+                    <PreviousSubmissionBanner link="submissionUUIDhere"/>
                 )}
 
                 {unlockedInfo && (
