@@ -8,14 +8,14 @@
     "license": "MIT",
     "scripts": {
         "precommit": "lint-staged",
-        "lint": "tsc --noEmit && eslint",
+        "lint": "tsc --noEmit && eslint --max-warnings=0",
         "clean": "rm -rf node_modules && yarn cache clean",
         "format": "prettier --write src/**/*.ts{,x}",
         "build": "tsc"
     },
     "lint-staged": {
-        "dev_tool/src/**/*.{js,ts}": [
-            "eslint --fix",
+        "*.{js,ts}": [
+            "eslint --fix --max-warnings=0",
             "prettier --write src/**/*.ts{,x}"
         ]
     },

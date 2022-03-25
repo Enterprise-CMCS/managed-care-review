@@ -14,7 +14,7 @@
         "build:ci-scripts": "tsc"
     },
     "lint-staged": {
-        "scripts/*.sh": [
+        "*.sh": [
             "shellcheck"
         ]
     },
