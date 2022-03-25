@@ -92,4 +92,20 @@ describe('Change History', () => {
             screen.getByText('Placeholder resubmission reason')
         ).not.toBeVisible()
     })
+    it('should list the submission events in reverse chronological order', () => {
+        render(<ChangeHistory submission={submissionData} />)
+        expect(
+            screen.getByText('Placeholder resubmission reason')
+        ).not.toBeVisible()
+        const accordionRows = screen.getAllByRole('button')
+        expect(accordionRows[0]).toHaveTextContent(
+            '03/23/22 9:19pm ET - Submission'
+        )
+        expect(accordionRows[1]).toHaveTextContent(
+            '03/23/22 9:18pm ET - Unlock'
+        )
+        expect(accordionRows[2]).toHaveTextContent(
+            '03/22/22 10:08pm ET - Submission'
+        )
+    })
 })
