@@ -57,6 +57,7 @@ describe('dashboard', () => {
             ignore: [
                 'definition-list',
                 'dlitem',
+                'color-contrast',
             ],
             hideElements: '.usa-step-indicator'
         })
@@ -109,6 +110,7 @@ describe('dashboard', () => {
                 ignore: [
                     'definition-list',
                     'dlitem',
+                    'color-contrast',
                 ],
             })
 
