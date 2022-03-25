@@ -1,10 +1,11 @@
 import React from 'react'
+import { dayjs } from '../../dateHelpers/dayjs'
 import { SectionHeader } from '../SectionHeader'
 import { Accordion } from '@trussworks/react-uswds'
 import { Submission2 } from '../../gen/gqlClient'
 import { UpdateInfoType } from '../../common-code/domain-models'
 import styles from './ChangeHistory.module.scss'
-export type ChangeHistoryProps = {
+type ChangeHistoryProps = {
     submission: Submission2
 }
 
@@ -42,38 +43,47 @@ export const ChangeHistory = ({
         const isSubsequentSubmission = r.kind === 'submit'
         return {
             title: (
-                <span>
-                    {r.updatedAt} -{' '}
-                    {isSubsequentSubmission ? 'Submission' : 'Unlock'}
-                </span>
+                <div>
+                    {dayjs
+                        .utc(r.updatedAt)
+                        .tz('America/New_York')
+                        .format('MM/DD/YY h:mma')}{' '}
+                    ET - {isSubsequentSubmission ? 'Submission' : 'Unlock'}
+                </div>
             ),
             content: isInitialSubmission ? (
-                <React.Fragment>
-                    <div>Submitted by: {r.updatedBy}</div>
-                </React.Fragment>
+                <>
+                    <span className={styles.tag}>Submitted by:</span>
+                    <span> {r.updatedBy}</span>
+                </>
             ) : (
-                <React.Fragment>
+                <>
                     <div>
-                        {isSubsequentSubmission
-                            ? 'Submitted by: '
-                            : 'Unlocked by: '}{' '}
-                        {r.updatedBy}
+                        <span className={styles.tag}>
+                            {isSubsequentSubmission
+                                ? 'Submitted by: '
+                                : 'Unlocked by: '}{' '}
+                        </span>
+                        <span>{r.updatedBy}</span>
                     </div>
                     <div>
-                        {isSubsequentSubmission
-                            ? 'Changes made: '
-                            : 'Reason for unlock: '}
-                        {r.updatedReason}
+                        <span className={styles.tag}>
+                            {isSubsequentSubmission
+                                ? 'Changes made: '
+                                : 'Reason for unlock: '}
+                        </span>
+                        <span>{r.updatedReason}</span>
                     </div>
-                </React.Fragment>
+                </>
             ),
             expanded: false,
             id: r.updatedAt.toString(),
         }
     })
+    console.log(revisedItems)
     return (
         <section id="changeHistory" className={styles.summarySection}>
-            <SectionHeader header="Change history" />
+            <SectionHeader header="Change history" hideBorder />
             <Accordion items={revisedItems} />
         </section>
     )

@@ -1,5 +1,7 @@
 import { SectionHeader } from './SectionHeader'
 import { screen } from '@testing-library/react'
+// eslint-disable-next-line testing-library/no-dom-import
+import { prettyDOM } from '@testing-library/dom'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
 describe('SectionHeader', () => {
@@ -40,5 +42,15 @@ describe('SectionHeader', () => {
         expect(
             screen.getByRole('link', { name: 'Edit Page 2' })
         ).toHaveAttribute('href', '/some-edit-path')
+    })
+    it('respects the hideBorder prop', () => {
+        renderWithProviders(
+            <SectionHeader header="This is a section" hideBorder />
+        )
+        expect(
+            screen
+                .getByRole('heading', { name: 'This is a section' })
+                .closest('div')
+        ).not.toHaveClass('summarySectionHeaderBorder')
     })
 })
