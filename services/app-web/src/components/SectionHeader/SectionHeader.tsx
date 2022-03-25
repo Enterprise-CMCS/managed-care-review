@@ -6,8 +6,9 @@ export type SectionHeaderProps = {
     header: string
     navigateTo?: string
     children?: React.ReactNode
-    sectionId?: string,
-    headerId?: string,
+    sectionId?: string
+    headerId?: string
+    hideBorder?: boolean
 }
 
 export const SectionHeader = ({
@@ -16,9 +17,15 @@ export const SectionHeader = ({
     children,
     sectionId,
     headerId,
-}: SectionHeaderProps & JSX.IntrinsicElements["div"]): React.ReactElement => {
+    hideBorder,
+}: SectionHeaderProps & JSX.IntrinsicElements['div']): React.ReactElement => {
     return (
-        <div className={styles.summarySectionHeader} id={sectionId}>
+        <div
+            className={`${styles.summarySectionHeader} ${
+                !hideBorder ? styles.summarySectionHeaderBorder : ''
+            }`}
+            id={sectionId}
+        >
             <h2 id={headerId}>{header}</h2>
             <div>
                 {navigateTo && (
