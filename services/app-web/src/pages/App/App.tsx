@@ -38,6 +38,12 @@ function App({
     useEffect(() => {
         logEvent('on_load', { success: true })
     }, [])
+    // This is a hacky way to fake feature flags before we have feature flags.
+    // please avoid reading env vars outside of index.tsx in general.
+    const environmentName = process.env.REACT_APP_STAGE_NAME || ''
+    const isProdEnvironment = ['prod', 'val'].includes(environmentName)
+
+    const jiraTicketCollectorHTML = `<script type="text/javascript" src="https://truss-learning.atlassian.net/s/d41d8cd98f00b204e9800998ecf8427e-T/-9zew5j/b/7/c95134bc67d3a521bb3f4331beb9b804/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector.js?locale=en-US&collectorId=1b8f91f1"></script>`
 
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>
@@ -47,7 +53,14 @@ function App({
                         <S3Provider client={s3Client}>
                             <AuthProvider authMode={authMode}>
                                 <PageProvider>
-                                    <AppBody authMode={authMode} />
+                                    <>
+                                        <AppBody authMode={authMode} />
+                                       {!isProdEnvironment &&  <div
+                                            dangerouslySetInnerHTML={{
+                                                __html: jiraTicketCollectorHTML,
+                                            }}
+                                        ></div>}
+                                    </>
                                 </PageProvider>
                             </AuthProvider>
                         </S3Provider>
