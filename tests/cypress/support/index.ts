@@ -40,7 +40,7 @@ declare global {
             fillOutSupportingDocuments(): void
             waitForDocumentsToLoad(): void
             verifyDocumentsHaveNoErrors(): void
-            submitStateSubmissionForm(success?: boolean): void
+            submitStateSubmissionForm(success?: boolean, resubmission?: boolean): void
             navigateForm(buttonName: FormButtonKey, waitForLoad?: boolean): void
         }
     }
