@@ -22,7 +22,7 @@ describe('dashboard', () => {
 
             // Submit, sent to dashboard
             cy.submitStateSubmissionForm()
-          
+
             cy.findByText('Dashboard').should('exist')
             cy.findByText('Programs').should('exist')
 
@@ -105,7 +105,7 @@ describe('dashboard', () => {
                     )
                     .should('exist')
 
-                cy.submitStateSubmissionForm()
+                cy.submitStateSubmissionForm(true, true)
 
                 cy.findByText('Dashboard').should('exist')
 
