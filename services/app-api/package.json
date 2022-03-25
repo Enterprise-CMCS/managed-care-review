@@ -41,7 +41,7 @@
         "graphql": "^16.2.0",
         "graphql-scalars": "^1.11.1",
         "neverthrow": "^4.2.2",
-        "prisma": "^3.10.0",
+        "prisma": "^3.11.1",
         "protobufjs": "^6.11.2",
         "request": "^2.88.2",
         "uuid": "^8.3.2",
