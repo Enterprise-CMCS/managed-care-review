@@ -80,7 +80,6 @@ export const ChangeHistory = ({
             id: r.updatedAt.toString(),
         }
     })
-    console.log(revisedItems)
     return (
         <section id="changeHistory" className={styles.summarySection}>
             <SectionHeader header="Change history" hideBorder />
