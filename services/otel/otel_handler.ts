@@ -25,6 +25,9 @@ const exporter = new OTLPTraceExporter({
     url: process.env.REACT_APP_OTEL_COLLECTOR_URL,
     headers: {},
 })
+console.log('--------- debug the config --------------')
+console.log(serviceName)
+console.log(exporter)
 
 provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()))
 provider.addSpanProcessor(new SimpleSpanProcessor(exporter))
