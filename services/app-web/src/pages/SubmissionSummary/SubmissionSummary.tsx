@@ -129,13 +129,9 @@ export const SubmissionSummary = (): React.ReactElement => {
     const [unlockStateSubmission] = useUnlockStateSubmissionMutation()
     const submissionAndRevisions = data?.fetchSubmission2.submission
 
-    // This is a hacky way to fake feature flags before we have feature flags.
-    // please avoid reading env vars outside of index.tsx in general.
-    const environmentName = process.env.REACT_APP_STAGE_NAME || ''
-    const isProdEnvironment = ['prod', 'val'].includes(environmentName)
 
     const displayUnlockButton =
-        !isProdEnvironment && loggedInUser?.role === 'CMS_USER'
+        loggedInUser?.role === 'CMS_USER'
 
     // Pull out the correct revision form api request, display errors for bad dad
     useEffect(() => {
