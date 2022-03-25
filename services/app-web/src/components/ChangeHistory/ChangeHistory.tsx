@@ -83,7 +83,7 @@ export const ChangeHistory = ({
     return (
         <section id="changeHistory" className={styles.summarySection}>
             <SectionHeader header="Change history" hideBorder />
-            <Accordion items={revisedItems} />
+            <Accordion items={revisedItems} multiselectable />
         </section>
     )
 }
