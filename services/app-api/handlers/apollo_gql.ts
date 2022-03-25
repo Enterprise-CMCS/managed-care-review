@@ -98,6 +98,7 @@ function localAuthMiddleware(wrapped: APIGatewayProxyHandler): Handler {
 function tracingMiddleware(wrapped: Handler): Handler {
     return async function (event, context, completion) {
         // get the parent context from headers
+        console.log('--------- debug the config --------------')
         console.log(event.headers)
         const ctx = propagation.extract(ROOT_CONTEXT, event.headers)
         const span = tracer.startSpan(
@@ -108,6 +109,7 @@ function tracingMiddleware(wrapped: Handler): Handler {
             },
             ctx
         )
+        console.log(JSON.stringify(ctx))
         console.log(span)
 
         // Put the span into the LAMBDA context, in order to pass it into the APOLLO context in contextForRequestForFetcher
