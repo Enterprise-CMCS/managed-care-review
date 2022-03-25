@@ -2,65 +2,25 @@ mutation submitDraftSubmission($input: SubmitDraftSubmissionInput!) {
     submitDraftSubmission(input: $input) {
         submission {
             id
-            name
-            createdAt
-            updatedAt
-            submittedAt
-            programIDs
             stateCode
-            submissionType
-            submissionDescription
-            stateContacts {
-                name
-                titleRole
-                email
-            }
-            actuaryContacts {
-                name
-                titleRole
-                email
-                actuarialFirm
-                actuarialFirmOther
-            }
-            actuaryCommunicationPreference
-            documents {
-                name
-                s3URL
-                documentCategories
-            }
-            contractType
-            contractExecutionStatus
-            contractDocuments {
-                name
-                s3URL
-                documentCategories
-            }
-            contractDateStart
-            contractDateEnd
-            managedCareEntities
-            federalAuthorities
-            contractAmendmentInfo {
-                itemsBeingAmended
-                otherItemBeingAmended
-                capitationRatesAmendedInfo {
-                    reason
-                    otherReason
+            status
+            intiallySubmittedAt
+            revisions {
+                revision {
+                    id
+                    unlockInfo {
+                        updatedAt
+                        updatedBy
+                        updatedReason
+                    }
+                    submitInfo {
+                        updatedAt
+                        updatedBy
+                        updatedReason
+                    }
+                    createdAt
+                    submissionData
                 }
-                relatedToCovid19
-                relatedToVaccination
-            }
-            rateType
-            rateDocuments {
-                name
-                s3URL
-                documentCategories
-            }
-            rateDateStart
-            rateDateEnd
-            rateDateCertified
-            rateAmendmentInfo {
-                effectiveDateStart
-                effectiveDateEnd
             }
         }
     }

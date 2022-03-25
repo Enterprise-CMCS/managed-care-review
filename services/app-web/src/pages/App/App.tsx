@@ -11,6 +11,7 @@ import { AppBody } from './AppBody'
 import { logEvent } from '../../log_event'
 import { AuthProvider } from '../../contexts/AuthContext'
 import { PageProvider } from '../../contexts/PageContext'
+import TraceProvider from '../../contexts/TraceContext'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { AuthModeType } from '../../common-code/domain-models'
 import { S3Provider } from '../../contexts/S3Context'
@@ -41,15 +42,17 @@ function App({
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>
             <BrowserRouter>
-                <ApolloProvider client={apolloClient}>
-                    <S3Provider client={s3Client}>
-                        <AuthProvider authMode={authMode}>
-                            <PageProvider>
-                                <AppBody authMode={authMode} />
-                            </PageProvider>
-                        </AuthProvider>
-                    </S3Provider>
-                </ApolloProvider>
+                <TraceProvider>
+                    <ApolloProvider client={apolloClient}>
+                        <S3Provider client={s3Client}>
+                            <AuthProvider authMode={authMode}>
+                                <PageProvider>
+                                    <AppBody authMode={authMode} />
+                                </PageProvider>
+                            </AuthProvider>
+                        </S3Provider>
+                    </ApolloProvider>
+                </TraceProvider>
             </BrowserRouter>
         </ErrorBoundary>
     )

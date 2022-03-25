@@ -15,3 +15,5 @@ export {
     runWebAgainstDocker,
     runWebLocally,
 } from './web.js'
+
+export { runOtelLocally } from './otel.js'

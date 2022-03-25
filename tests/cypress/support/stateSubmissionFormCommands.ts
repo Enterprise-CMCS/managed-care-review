@@ -202,6 +202,6 @@ Cypress.Commands.add('submitStateSubmissionForm', () => {
     cy.findAllByTestId('modalWindow')
         .should('exist')
         .within(($modal) => {
-            cy.findByTestId('modal-submit').click()
+            cy.findByTestId('review-and-submit-modal-submit').click()
         })
 })
