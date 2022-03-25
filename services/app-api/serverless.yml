@@ -150,6 +150,7 @@ functions:
               - X-Amz-Security-Token
               - X-Amz-User-Agent
               - b3
+              - traceparent
 
   otel:
     handler: handlers/otel_proxy.main
@@ -167,6 +168,7 @@ functions:
               - X-Amz-Security-Token
               - X-Amz-User-Agent
               - b3
+              - traceparent
 
   graphql:
     handler: handlers/apollo_gql.graphqlHandler
@@ -184,6 +186,7 @@ functions:
               - X-Amz-Security-Token
               - X-Amz-User-Agent
               - b3
+              - traceparent
           authorizer: aws_iam
       - http:
           path: graphql
@@ -198,6 +201,7 @@ functions:
               - X-Amz-Security-Token
               - X-Amz-User-Agent
               - b3
+              - traceparent
           authorizer: aws_iam
     timeout: 60 # aurora cold start can be long
     vpc:
@@ -241,6 +245,7 @@ functions:
               - X-Amz-Security-Token
               - X-Amz-User-Agent
               - b3
+              - traceparent
           authorizer: aws_iam
 
 resources:
