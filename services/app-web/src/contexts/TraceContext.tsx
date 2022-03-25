@@ -9,7 +9,6 @@ import { Resource } from '@opentelemetry/resources'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
 import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web'
-//import { B3Propagator } from '@opentelemetry/propagator-b3'
 
 const serviceName = 'app-web-' + process.env.REACT_APP_STAGE_NAME
 
@@ -28,7 +27,6 @@ provider.addSpanProcessor(new BatchSpanProcessor(exporter))
 
 provider.register({
     contextManager: new ZoneContextManager(),
-    //propagator: new B3Propagator(),
 })
 
 // Registering instrumentations
