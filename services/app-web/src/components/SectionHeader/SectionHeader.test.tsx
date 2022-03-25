@@ -1,7 +1,5 @@
 import { SectionHeader } from './SectionHeader'
 import { screen } from '@testing-library/react'
-// eslint-disable-next-line testing-library/no-dom-import
-import { prettyDOM } from '@testing-library/dom'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
 describe('SectionHeader', () => {
