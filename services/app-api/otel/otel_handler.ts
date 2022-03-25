@@ -5,6 +5,7 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import {
     SimpleSpanProcessor,
     ConsoleSpanExporter,
+    BatchSpanProcessor,
 } from '@opentelemetry/sdk-trace-base'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { ZoneContextManager } from '@opentelemetry/context-zone'
@@ -29,7 +30,7 @@ console.log(serviceName)
 console.log(exporter)
 
 provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()))
-provider.addSpanProcessor(new SimpleSpanProcessor(exporter))
+provider.addSpanProcessor(new BatchSpanProcessor(exporter))
 
 // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
 provider.register({
