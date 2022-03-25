@@ -19,7 +19,7 @@ import { newLocalEmailer, newSESEmailer } from '../emailer'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import { configureResolvers } from '../resolvers'
 import { configurePostgres } from './configuration'
-import { tracer as tracer } from '../../otel/otel_handler'
+import { tracer as tracer } from '../otel/otel_handler'
 
 const requestSpanKey = 'REQUEST_SPAN'
 
@@ -98,7 +98,7 @@ function localAuthMiddleware(wrapped: APIGatewayProxyHandler): Handler {
 function tracingMiddleware(wrapped: Handler): Handler {
     return async function (event, context, completion) {
         // get the parent context from headers
-        console.log('--------- debug the config --------------')
+        console.log('--------- debug apollo_gql.ts --------------')
         console.log(event.headers)
         const ctx = propagation.extract(ROOT_CONTEXT, event.headers)
         const span = tracer.startSpan(
@@ -109,7 +109,6 @@ function tracingMiddleware(wrapped: Handler): Handler {
             },
             ctx
         )
-        console.log(JSON.stringify(ctx))
         console.log(span)
 
         // Put the span into the LAMBDA context, in order to pass it into the APOLLO context in contextForRequestForFetcher

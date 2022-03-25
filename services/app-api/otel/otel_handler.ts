@@ -7,7 +7,6 @@ import {
     ConsoleSpanExporter,
 } from '@opentelemetry/sdk-trace-base'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
-import { B3Propagator } from '@opentelemetry/propagator-b3'
 import { ZoneContextManager } from '@opentelemetry/context-zone'
 import { GraphQLInstrumentation } from '@opentelemetry/instrumentation-graphql'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
@@ -25,7 +24,7 @@ const exporter = new OTLPTraceExporter({
     url: process.env.REACT_APP_OTEL_COLLECTOR_URL,
     headers: {},
 })
-console.log('--------- debug the config --------------')
+console.log('--------- debug otel_handler.ts --------------')
 console.log(serviceName)
 console.log(exporter)
 
@@ -35,7 +34,6 @@ provider.addSpanProcessor(new SimpleSpanProcessor(exporter))
 // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
 provider.register({
     contextManager: new ZoneContextManager(),
-    propagator: new B3Propagator(),
 })
 
 registerInstrumentations({
