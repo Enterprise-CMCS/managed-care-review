@@ -1,3 +1,4 @@
+import { aliasQuery, aliasMutation } from '../utils/graphql-test-utils'
 Cypress.Commands.add('startNewContractOnlySubmission', () => {
     // Must be on '/submissions/new'
     cy.findByTestId('dashboard-page').should('exist')
@@ -8,7 +9,7 @@ Cypress.Commands.add('startNewContractOnlySubmission', () => {
 
     cy.fillOutContractActionOnly()
 
-    cy.navigateForm('Continue')
+    cy.navigateForm('CONTINUE_FROM_START_NEW')
     cy.findByRole('heading', { level: 2, name: /Contract details/ })
 })
 
@@ -22,7 +23,7 @@ Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
 
     cy.fillOutContractActionAndRateCertification()
 
-    cy.navigateForm('Continue')
+    cy.navigateForm('CONTINUE_FROM_START_NEW')
     cy.findByRole('heading', { level: 2, name: /Contract details/ })
 })
 
@@ -195,13 +196,75 @@ Cypress.Commands.add('verifyDocumentsHaveNoErrors', () => {
     cy.findByText('Remove files with errors').should('not.exist')
 })
 
-Cypress.Commands.add('submitStateSubmissionForm', () => {
-    // Must be on '/submissions/:id/review-and-submit'
-    cy.navigateForm('Submit')
-    // HM-TODO: Move this check to dashboard page
+Cypress.Commands.add('submitStateSubmissionForm', (success = true, resubmission = false) => {
+      cy.intercept('POST', '*/graphql', (req) => {
+          aliasMutation(req, 'submitDraftSubmission')
+          aliasQuery(req, 'indexSubmissions2')
+      })
+    cy.findByRole('heading', { level: 2, name: /Review and submit/ })
+    cy.findByRole('button', {
+        name: 'Submit'
+    }).safeClick()
+
     cy.findAllByTestId('modalWindow')
         .should('exist')
         .within(($modal) => {
+            if (resubmission) {
+                cy.get('#submittedReasonCharacterCount').type('Resubmission summary')
+            }
             cy.findByTestId('review-and-submit-modal-submit').click()
         })
+    cy.wait('@submitDraftSubmissionMutation', { timeout: 50000 })
+    if (success) {
+        cy.wait('@indexSubmissions2Query', { timeout: 50000 })
+    }
 })
+
+type FormButtonKey =  'CONTINUE_FROM_START_NEW'| 'CONTINUE' | 'SAVE_DRAFT' | 'BACK'
+type FormButtons = { [key in FormButtonKey]: string }
+const buttonsWithLabels: FormButtons = {
+    CONTINUE: 'Continue',
+    CONTINUE_FROM_START_NEW: 'Continue',
+    SAVE_DRAFT: 'Save as draft',
+    BACK: 'Back',
+}
+
+Cypress.Commands.add(
+    'navigateForm',
+    (buttonKey: FormButtonKey, waitForLoad = true) => {
+        cy.intercept('POST', '*/graphql', (req) => {
+            aliasQuery(req, 'indexSubmissions2')
+            aliasQuery(req, 'fetchSubmission2')
+            aliasMutation(req, 'createDraftSubmission')
+            aliasMutation(req, 'updateDraftSubmission')
+        })
+
+        cy.findByRole('button', {
+            name: buttonsWithLabels[buttonKey],
+        }).safeClick()
+
+        if (buttonKey === 'SAVE_DRAFT') {
+            if (waitForLoad) cy.wait('@indexSubmissions2Query', { timeout: 20000 })
+            cy.findByTestId('dashboard-page').should('exist')
+
+        } else if (buttonKey === 'CONTINUE_FROM_START_NEW') {
+                 if (waitForLoad){
+                    cy.wait('@createDraftSubmissionMutation', { timeout: 50000 })
+                    cy.wait('@fetchSubmission2Query')
+                 }
+            cy.findByTestId('state-submission-form-page').should(
+                'exist'
+            ) 
+        } else if (buttonKey === 'CONTINUE'){
+            if (waitForLoad){
+                cy.wait('@updateDraftSubmissionMutation')
+                cy.wait('@fetchSubmission2Query')
+            }
+            cy.findByTestId('state-submission-form-page').should('exist')
+        } else {
+            // don't wait for api on BACK
+              cy.findByTestId('state-submission-form-page').should('exist')
+        }
+
+    }
+)

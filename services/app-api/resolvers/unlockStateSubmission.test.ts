@@ -59,14 +59,16 @@ describe('unlockStateSubmission', () => {
 
         expect(unlockedSub.revisions[0].revision.submitInfo).toBeNull()
         expect(unlockedSub.revisions[1].revision.submitInfo).toBeDefined()
-        expect(unlockedSub.revisions[1].revision.submitInfo?.updatedAt).toEqual(todaysDate())
+        expect(unlockedSub.revisions[1].revision.submitInfo?.updatedAt.toISOString()).toContain(todaysDate())
+        // check that the date has full ISO time eg. 2022-03-25T03:09:54.864Z
+        expect(unlockedSub.revisions[1].revision.submitInfo?.updatedAt.toISOString()).toContain('Z')
 
         expect(unlockedSub.revisions[0].revision.unlockInfo).toBeDefined()
-        expect(unlockedSub.revisions[0].revision.unlockInfo).toEqual({
-            updatedAt: todaysDate(),
-            updatedBy: 'zuko@example.com',
-            updatedReason: 'Super duper good reason.'
-        })
+        expect(unlockedSub.revisions[0].revision.unlockInfo?.updatedBy).toEqual('zuko@example.com')
+        expect(unlockedSub.revisions[0].revision.unlockInfo?.updatedReason).toEqual('Super duper good reason.')
+        expect(unlockedSub.revisions[0].revision.unlockInfo?.updatedAt.toISOString()).toContain(todaysDate())
+        // check that the date has full ISO time eg. 2022-03-25T03:09:54.864Z
+        expect(unlockedSub.revisions[0].revision.unlockInfo?.updatedAt.toISOString()).toContain('Z')
     })
 
     it('returns a DraftSubmission that can be updated without errors', async () => {
@@ -104,11 +106,11 @@ describe('unlockStateSubmission', () => {
         // After unlock, we should get a draft submission back
         expect(unlockedSub.status).toEqual('UNLOCKED')
         expect(unlockedSub.revisions[0].revision.unlockInfo).toBeDefined()
-        expect(unlockedSub.revisions[0].revision.unlockInfo).toEqual({
-            updatedAt: todaysDate(),
-            updatedBy: 'zuko@example.com',
-            updatedReason: 'Super duper good reason.'
-        })
+        expect(unlockedSub.revisions[0].revision.unlockInfo?.updatedBy).toEqual('zuko@example.com')
+        expect(unlockedSub.revisions[0].revision.unlockInfo?.updatedReason).toEqual('Super duper good reason.')
+        expect(unlockedSub.revisions[0].revision.unlockInfo?.updatedAt.toISOString()).toContain(todaysDate())
+        // check that the date has full ISO time eg. 2022-03-25T03:09:54.864Z
+        expect(unlockedSub.revisions[0].revision.unlockInfo?.updatedAt.toISOString()).toContain('Z')
 
         // after unlock we should be able to update that draft submission and get the results
         const updates = {
@@ -158,11 +160,11 @@ describe('unlockStateSubmission', () => {
 
         const draft = await unlockTestDraftSubmission(cmsServer, stateSubmission.id, 'Very super duper good reason.')
         expect(draft.status).toEqual('UNLOCKED')
-        expect(draft.revisions[0].revision.unlockInfo).toEqual({
-            updatedAt: todaysDate(),
-            updatedBy: 'zuko@example.com',
-            updatedReason: 'Very super duper good reason.'
-        })
+        expect(draft.revisions[0].revision.unlockInfo?.updatedBy).toEqual('zuko@example.com')
+        expect(draft.revisions[0].revision.unlockInfo?.updatedReason).toEqual('Very super duper good reason.')
+        expect(draft.revisions[0].revision.unlockInfo?.updatedAt.toISOString()).toContain(todaysDate())
+        // check that the date has full ISO time eg. 2022-03-25T03:09:54.864Z
+        expect(draft.revisions[0].revision.unlockInfo?.updatedAt.toISOString()).toContain('Z')
     })
 
     it('returns errors if a state user tries to unlock', async () => {

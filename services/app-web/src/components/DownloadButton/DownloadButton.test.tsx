@@ -9,7 +9,7 @@ describe('DownloadButton', () => {
                 zippedFilesURL="https://example.com"
             />
         )
-        expect(screen.getByTestId('button')).toHaveClass(
+        expect(screen.getByRole('link', {name: 'Download all documents'})).toHaveClass(
             'usa-button usa-button--small'
         )
         expect(screen.getByText('Download all documents')).toBeInTheDocument()

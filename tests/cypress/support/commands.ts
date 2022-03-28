@@ -41,18 +41,3 @@ Cypress.Commands.add('safeClick', { prevSubject: 'element' }, ($element) => {
     return cy.wrap($element).should('exist').should('be.visible').pipe(click)
 })
 
-Cypress.Commands.add(
-    'navigateForm',
-    (buttonAccessibleName: string, waitForLoad = true) => {
-        cy.findByRole('button', {
-            name: buttonAccessibleName,
-        }).safeClick()
-        if (waitForLoad) cy.waitForApiToLoad()
-        cy.findByTestId('state-submission-form-page').should('exist')
-    }
-)
-
-Cypress.Commands.add('waitForApiToLoad', () => {
-    cy.intercept('POST', '*/graphql').as('gqlRequest')
-    cy.wait('@gqlRequest')
-})

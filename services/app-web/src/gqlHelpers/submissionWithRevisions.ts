@@ -1,6 +1,7 @@
 import { submissionName, SubmissionUnionType, ProgramT } from '../common-code/domain-models'
 import { base64ToDomain } from '../common-code/proto/stateSubmission'
-import { Revision, Submission as GQLSubmissionUnionType, Submission2 } from '../gen/gqlClient'
+import { Revision, Submission2, Submission as GQLSubmissionUnionType} from '../gen/gqlClient'
+import { formatGQLDate } from '../dateHelpers'
 
 
 const isGQLDraftSubmission = (sub: GQLSubmissionUnionType): boolean => {
@@ -51,20 +52,46 @@ const getCurrentRevisionFromSubmission2 = (submissionAndRevisions: Submission2):
         return new Error('Error fetching the submission. Please try again.')
     }
 
+    }
+    
+// This is more code that should go away when we finish the refactor
+// Because this sub-object has dates in it, we need to format those dates correctly.
+// we don't need to fix contacts or documents in the same way.
+function datesFromRateAmendmentInfo(rateInfo: SubmissionUnionType["rateAmendmentInfo"] | undefined): GQLSubmissionUnionType["rateAmendmentInfo"] {
+    if (!rateInfo) {
+        return undefined
+    }
+    return {
+        effectiveDateEnd: formatGQLDate(rateInfo.effectiveDateEnd),
+        effectiveDateStart: formatGQLDate(rateInfo.effectiveDateStart),
+    }
 }
+
 
 const convertDomainModelFormDataToGQLSubmission = (submissionDomainModel: SubmissionUnionType, statePrograms: ProgramT[]): GQLSubmissionUnionType => {
     // convert from domain model back into GQL types
+
+    // CalendarDates are Dates in the domain model, but strings in GQL
+    const convertedDates = {
+        contractDateStart: formatGQLDate(submissionDomainModel.contractDateStart),
+        contractDateEnd: formatGQLDate(submissionDomainModel.contractDateEnd),
+        rateDateStart: formatGQLDate(submissionDomainModel.rateDateStart),
+        rateDateEnd: formatGQLDate(submissionDomainModel.rateDateEnd),
+        rateDateCertified: formatGQLDate(submissionDomainModel.rateDateCertified),
+        rateAmendmentInfo: datesFromRateAmendmentInfo(submissionDomainModel.rateAmendmentInfo),
+    }
+
     const GQLSubmission: GQLSubmissionUnionType =
         submissionDomainModel.status === 'DRAFT'
             ? {
                   ...submissionDomainModel,
-
+                  ...convertedDates,
                   __typename: 'DraftSubmission' as const,
                   name: submissionName(submissionDomainModel, statePrograms),
               }
             : {
                   ...submissionDomainModel,
+                  ...convertedDates,
                   __typename: 'StateSubmission' as const,
                   name: submissionName(submissionDomainModel, statePrograms),
                   submittedAt:submissionDomainModel.submittedAt

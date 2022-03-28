@@ -672,11 +672,13 @@ const updateDraftSubmissionMock = ({
 type submitDraftSubmissionMockSuccessProps = {
     stateSubmission?: StateSubmission | Partial<StateSubmission>
     id: string
+    submittedReason?: string
 }
 
 const submitDraftSubmissionMockSuccess = ({
-    id,
     stateSubmission,
+    id,
+    submittedReason,
 }: submitDraftSubmissionMockSuccessProps): MockedResponse<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Record<string, any>
@@ -685,7 +687,7 @@ const submitDraftSubmissionMockSuccess = ({
     return {
         request: {
             query: SubmitDraftSubmissionDocument,
-            variables: { input: { submissionID: id } },
+            variables: { input: { submissionID: id, submittedReason } },
         },
         result: { data: { submitDraftSubmission: { submission: submission } } },
     }

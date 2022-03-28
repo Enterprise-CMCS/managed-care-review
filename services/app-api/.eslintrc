@@ -4,13 +4,17 @@
         "project": "./tsconfig.json",
         "sourceType": "module"
     },
-    "plugins": ["@typescript-eslint"],
+    "plugins": ["@typescript-eslint", "jest"],
     "extends": [
         "eslint:recommended",
         "plugin:jest/recommended",
+        "plugin:jest/style",
         "plugin:@typescript-eslint/recommended",
         "prettier"
     ],
+    "env": {
+        "jest/globals": true
+    },
     "ignorePatterns": ["gen/*", "webpack.config.js"],
     "rules": {
         "prefer-promise-reject-errors": "error",
