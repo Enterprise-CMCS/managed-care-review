@@ -11,6 +11,7 @@ import { ZoneContextManager } from '@opentelemetry/context-zone'
 import { GraphQLInstrumentation } from '@opentelemetry/instrumentation-graphql'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http'
+import { AWSXRayPropagator } from '@opentelemetry/propagator-aws-xray'
 
 const serviceName = 'app-api-' + process.env.REACT_APP_STAGE_NAME
 const provider = new NodeTracerProvider({
@@ -34,6 +35,7 @@ provider.addSpanProcessor(new SimpleSpanProcessor(exporter))
 // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
 provider.register({
     contextManager: new ZoneContextManager(),
+    propagator: new AWSXRayPropagator(),
 })
 
 registerInstrumentations({

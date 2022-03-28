@@ -9,6 +9,7 @@ import { Resource } from '@opentelemetry/resources'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
 import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web'
+import { AWSXRayPropagator } from '@opentelemetry/propagator-aws-xray'
 
 const serviceName = 'app-web-' + process.env.REACT_APP_STAGE_NAME
 
@@ -27,6 +28,7 @@ provider.addSpanProcessor(new BatchSpanProcessor(exporter))
 
 provider.register({
     contextManager: new ZoneContextManager(),
+    propagator: new AWSXRayPropagator(),
 })
 
 // Registering instrumentations
