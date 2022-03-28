@@ -201,11 +201,12 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     // Update header with submission name
     useEffect(() => {
-        if (packageData && submissionAndRevisions) {
-            const programs = submissionAndRevisions.state.programs
+        const subWithRevisions = data?.fetchSubmission2.submission
+        if (packageData && subWithRevisions) {
+            const programs = subWithRevisions.state.programs
             updateHeading(pathname, submissionName(packageData, programs))
         }
-    }, [updateHeading, pathname, packageData])
+    }, [updateHeading, pathname, packageData, data])
 
     // Focus unlockReason field in the unlock modal on submit click when errors exist
     useEffect(() => {

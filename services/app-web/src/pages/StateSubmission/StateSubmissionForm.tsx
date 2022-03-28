@@ -111,8 +111,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
         },
     })
 
-    const statePrograms = loggedInUser && 'state' in loggedInUser && loggedInUser.state.programs || []
-
     const submissionAndRevisions = fetchData?.fetchSubmission2?.submission
     const [updateDraftSubmission, { error: updateError }] =
         useUpdateDraftSubmissionMutation()
@@ -147,11 +145,11 @@ export const StateSubmissionForm = (): React.ReactElement => {
     // Set up side effects
     useEffect(() => {
         if (formDataFromLatestRevision) {
-            const programs = statePrograms
-            const name = submissionName(formDataFromLatestRevision, programs)
+            const statePrograms = (loggedInUser && 'state' in loggedInUser && loggedInUser.state.programs) || []
+            const name = submissionName(formDataFromLatestRevision, statePrograms)
             updateHeading(pathname, name)
         }
-    }, [updateHeading, pathname, formDataFromLatestRevision])
+    }, [updateHeading, pathname, formDataFromLatestRevision, loggedInUser])
 
     useEffect(() => {
         if (submissionAndRevisions) {
@@ -245,6 +243,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
     }
 
     // Hacky way to not have to change the individual pages yet. 
+    const statePrograms = (loggedInUser && 'state' in loggedInUser && loggedInUser.state.programs) || []
     const draft = convertDomainModelFormDataToGQLSubmission(formDataFromLatestRevision, statePrograms) as DraftSubmission
 
     return (

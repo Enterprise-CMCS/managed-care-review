@@ -33,7 +33,7 @@ export const ReviewSubmit = ({
     const { loggedInUser } = useAuth()
 
     // pull the programs off the user
-    const statePrograms = loggedInUser && 'state' in loggedInUser && loggedInUser.state.programs || []
+    const statePrograms = (loggedInUser && ('state' in loggedInUser) && loggedInUser.state.programs) || []
 
     const [submitDraftSubmission] = useSubmitDraftSubmissionMutation({
         // An alternative to messing with the cache like we do with create, just zero it out.
