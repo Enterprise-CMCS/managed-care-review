@@ -5890,6 +5890,13 @@
     "@opentelemetry/resources" "1.0.1"
     "@opentelemetry/sdk-trace-base" "1.0.1"
 
+"@opentelemetry/id-generator-aws-xray@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/id-generator-aws-xray/-/id-generator-aws-xray-1.0.1.tgz#6c5445b0fd6f450e3e1b338c6abbadf658f10866"
+  integrity sha512-7Po/fYcrJRcC1IPNS4vSZAJirTgG5k0N1RGPGjIHT19+GNy6F1i1lXXbz07ezt+S6ilHxx0binRoZ33Bl3Kwsw==
+  dependencies:
+    "@opentelemetry/core" "^1.0.0"
+
 "@opentelemetry/instrumentation-amqplib@^0.28.0":
   version "0.28.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation-amqplib/-/instrumentation-amqplib-0.28.0.tgz#c2c0c675b7af89b17980a2633c2c292da1a066a9"

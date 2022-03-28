@@ -10,10 +10,12 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
 import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web'
 import { AWSXRayPropagator } from '@opentelemetry/propagator-aws-xray'
+import { AWSXRayIdGenerator } from '@opentelemetry/id-generator-aws-xray'
 
 const serviceName = 'app-web-' + process.env.REACT_APP_STAGE_NAME
 
 const provider = new WebTracerProvider({
+    idGenerator: new AWSXRayIdGenerator(),
     resource: new Resource({
         [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
     }),

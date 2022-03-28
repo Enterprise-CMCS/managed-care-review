@@ -12,9 +12,11 @@ import { GraphQLInstrumentation } from '@opentelemetry/instrumentation-graphql'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http'
 import { AWSXRayPropagator } from '@opentelemetry/propagator-aws-xray'
+import { AWSXRayIdGenerator } from '@opentelemetry/id-generator-aws-xray'
 
 const serviceName = 'app-api-' + process.env.REACT_APP_STAGE_NAME
 const provider = new NodeTracerProvider({
+    idGenerator: new AWSXRayIdGenerator(),
     resource: new Resource({
         [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
     }),
