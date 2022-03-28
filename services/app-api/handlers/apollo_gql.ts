@@ -31,16 +31,16 @@ export interface Context {
 
 // This function pulls auth info out of the cognitoAuthenticationProvider in the lambda event
 // and turns that into our GQL resolver context object
-function contextForRequestForFetcher(
-    userFetcher: userFromAuthProvider
-): ({
+function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
     event,
 }: {
     event: APIGatewayProxyEvent
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     context: any
 }) => Promise<Context> {
     return async ({ event, context }) => {
         // pull the current span out of the LAMBDA context, to place it in the APOLLO context
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const anyContext = context as any
         const requestSpan = anyContext[requestSpanKey]
 
@@ -99,8 +99,14 @@ function tracingMiddleware(wrapped: Handler): Handler {
     return async function (event, context, completion) {
         // get the parent context from headers
         console.log('--------- debug apollo_gql.ts --------------')
+        console.log('--------- event headers -------------')
         console.log(event.headers)
         const ctx = propagation.extract(ROOT_CONTEXT, event.headers)
+        console.log('--------- extracted ctx ------------ ')
+        console.log(ctx)
+
+        console.log('---------- tracer ---------')
+        console.log(tracer)
         const span = tracer.startSpan(
             'handleRequest',
             {
@@ -109,10 +115,13 @@ function tracingMiddleware(wrapped: Handler): Handler {
             },
             ctx
         )
+        console.log('----------- span ------------')
         console.log(span)
 
         // Put the span into the LAMBDA context, in order to pass it into the APOLLO context in contextForRequestForFetcher
         // We have to use any here because this context's type is not under our control.
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const anyContext = context as any
         anyContext[requestSpanKey] = span
 
