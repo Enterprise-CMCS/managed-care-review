@@ -22,10 +22,16 @@ export const RateDetailsSummarySection = ({
     const isEditing = !isSubmitted && navigateTo !== undefined
     // Get the zip file for the rate details
     const { getKey, getBulkDlURL } = useS3()
+    const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
+    const rateSupportingDocuments = submission.documents.filter((doc) =>
+        doc.documentCategories.includes('RATES_RELATED')
+    )
+
+
     useEffect(() => {
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
-            const keysFromDocs = submission.rateDocuments
+            const keysFromDocs = submission.rateDocuments.concat(rateSupportingDocuments)
                 .map((doc) => {
                     const key = getKey(doc.s3URL)
                     if (!key) return ''
@@ -47,11 +53,8 @@ export const RateDetailsSummarySection = ({
         }
 
         void fetchZipUrl()
-    }, [getKey, getBulkDlURL, submission])
-    const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
-    const rateSupportingDocuments = submission.documents.filter((doc) =>
-        doc.documentCategories.includes('RATES_RELATED')
-    )
+    }, [getKey, getBulkDlURL, submission, rateSupportingDocuments])
+
     return (
         <section id="rateDetails" className={styles.summarySection}>
             <dl>
