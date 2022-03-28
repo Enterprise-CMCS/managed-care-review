@@ -8,12 +8,12 @@
         "precommit": "lint-staged",
         "test": "jest --watch",
         "test:once": "jest --runInBand --ci",
-        "lint": "tsc --noEmit && eslint .",
+        "lint": "tsc --noEmit && eslint . --max-warnings=0",
         "clean": "rm -rf node_modules && yarn cache clean"
     },
     "lint-staged": {
-        "app-api/*.{js,ts}": [
-            "eslint --fix",
+        "*.{js,ts}": [
+            "eslint --max-warnings=0",
             "prettier --write"
         ]
     },

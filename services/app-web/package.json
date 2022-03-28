@@ -3,23 +3,23 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
+        "precommit": "lint-staged",
         "start": "react-scripts start",
         "build": "react-scripts build",
         "test": "react-scripts test",
         "eject": "react-scripts eject",
         "clean": "rm -rf node_modules && yarn cache clean",
         "format": "prettier --write src/**/*.ts{,x}",
-        "lint": "tsc --noEmit && eslint src/",
-        "precommit": "lint-staged",
+        "lint": "tsc --noEmit && eslint src/ --max-warnings=0",
         "test:once": "react-scripts test --watchAll=false --runInBand --ci",
         "test:update": "react-scripts test -u",
         "storybook": "start-storybook -p 6006 -s public --quiet",
         "build-storybook": "build-storybook -s public --quiet"
     },
     "lint-staged": {
-        "app-web/src/**/*.{js,jsx,ts,tsx}": [
-            "eslint --fix",
-            "prettier --write src/**/*.ts{,x}"
+        "*.{js,jsx,ts,tsx}": [
+            "eslint --fix --max-warnings=0",
+            "prettier --write"
         ]
     },
     "jest": {

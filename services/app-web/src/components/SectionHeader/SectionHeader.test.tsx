@@ -41,4 +41,14 @@ describe('SectionHeader', () => {
             screen.getByRole('link', { name: 'Edit Page 2' })
         ).toHaveAttribute('href', '/some-edit-path')
     })
+    it('respects the hideBorder prop', () => {
+        renderWithProviders(
+            <SectionHeader header="This is a section" hideBorder />
+        )
+        expect(
+            screen
+                .getByRole('heading', { name: 'This is a section' })
+                .closest('div')
+        ).not.toHaveClass('summarySectionHeaderBorder')
+    })
 })
