@@ -15,4 +15,4 @@ done
 git diff --staged --name-only -z | xargs -0 detect-secrets-hook
 
 # Run "precommit" in all yarn repos
-lerna run precommit --concurrency 3 --stream
+npx lint-staged --allow-empty

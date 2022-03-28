@@ -460,7 +460,7 @@ describe('SubmissionSummary', () => {
               // the popup dialog should be visible now
               await waitFor(() =>  screen.getByText('Provide reason for unlocking'))
 
-              const textbox = screen.getByTestId('unlockReason')
+              const textbox = await screen.findByTestId('unlockReason')
     
               // submit without entering anything
               userClickByTestId(screen, 'unlockReason-modal-submit')
@@ -475,7 +475,5 @@ describe('SubmissionSummary', () => {
               expect(textbox).toHaveFocus()
           })
     })
-
-
 })
 

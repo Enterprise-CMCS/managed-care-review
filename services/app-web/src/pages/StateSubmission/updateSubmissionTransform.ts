@@ -1,6 +1,5 @@
 import { base64ToDomain } from '../../common-code/proto/stateSubmission'
 import { DraftSubmission, DraftSubmissionUpdates , Submission2} from '../../gen/gqlClient'
-import { formatGQLDate } from '../../dateHelpers'
 /*
     Clean out _typename from submission
     If you pass gql __typename within a mutation input things break; however,  __typename comes down on cached queries by default
@@ -46,16 +45,16 @@ function updatesFromSubmission(draft: DraftSubmission): DraftSubmissionUpdates {
         contractType: draft.contractType,
         contractExecutionStatus: draft.contractExecutionStatus,
         contractDocuments: draft.contractDocuments,
-        contractDateStart: formatGQLDate(draft.contractDateStart),
-        contractDateEnd: formatGQLDate(draft.contractDateEnd),
+        contractDateStart: draft.contractDateStart,
+        contractDateEnd: draft.contractDateEnd,
         federalAuthorities: draft.federalAuthorities,
         managedCareEntities: draft.managedCareEntities,
         contractAmendmentInfo: draft.contractAmendmentInfo,
         rateType: draft.rateType,
         rateDocuments: draft.rateDocuments,
-        rateDateStart: formatGQLDate(draft.rateDateStart),
-        rateDateEnd: formatGQLDate(draft.rateDateEnd),
-        rateDateCertified: formatGQLDate(draft.rateDateCertified),
+        rateDateStart: draft.rateDateStart,
+        rateDateEnd: draft.rateDateEnd,
+        rateDateCertified: draft.rateDateCertified,
         rateAmendmentInfo: draft.rateAmendmentInfo,
         stateContacts: draft.stateContacts,
         actuaryContacts: draft.actuaryContacts,

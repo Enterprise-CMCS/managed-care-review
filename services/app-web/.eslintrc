@@ -8,13 +8,13 @@
     "extends": [
         "eslint:recommended",
         "plugin:jest/recommended",
+        "plugin:jest/style",
         "plugin:jsx-a11y/recommended",
         "plugin:@typescript-eslint/recommended",
         "prettier",
         "prettier/react",
         "prettier/@typescript-eslint",
-        "react-app",
-        "react-app/jest"
+        "react-app"
     ],
     "env": {
     "jest/globals": true

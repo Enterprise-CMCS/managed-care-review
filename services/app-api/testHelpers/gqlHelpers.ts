@@ -212,6 +212,35 @@ const submitTestDraftSubmission = async (
     return updateResult.data.submitDraftSubmission.submission
 }
 
+const resubmitTestDraftSubmission = async (
+    server: ApolloServer,
+    submissionID: string,
+    submittedReason: string
+) => {
+    const updateResult = await server.executeOperation({
+        query: SUBMIT_DRAFT_SUBMISSION,
+        variables: {
+            input: {
+                submissionID,
+                submittedReason
+            },
+        },
+    })
+
+    if (updateResult.errors) {
+        console.log('errors', updateResult.errors)
+        throw new Error(
+            `updateTestDraftSubmission mutation failed with errors ${updateResult.errors}`
+        )
+    }
+
+    if (updateResult.data === undefined || updateResult.data === null) {
+        throw new Error('updateTestDraftSubmission returned nothing')
+    }
+
+    return updateResult.data.submitDraftSubmission.submission
+}
+
 const unlockTestDraftSubmission = async (
     server: ApolloServer,
     submissionID: string,
@@ -243,7 +272,7 @@ const unlockTestDraftSubmission = async (
 
 const createTestStateSubmission = async (
     server: ApolloServer
-): Promise<StateSubmission> => {
+): Promise<Submission2> => {
     const draft = await createAndUpdateTestDraftSubmission(server)
 
     const updatedSubmission = await submitTestDraftSubmission(server, draft.id)
@@ -305,5 +334,6 @@ export {
     submitTestDraftSubmission,
     unlockTestDraftSubmission,
     fetchTestStateSubmissionById,
-    defaultContext
+    defaultContext,
+    resubmitTestDraftSubmission
 }

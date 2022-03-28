@@ -8,13 +8,12 @@ import {
     fetchTestDraftSubmissionById,
     submitTestDraftSubmission,
     unlockTestDraftSubmission,
-    updateTestDraftSubmission
+    updateTestDraftSubmission,
+    resubmitTestDraftSubmission
 } from '../testHelpers/gqlHelpers'
 import { mockStoreThatErrors } from '../testHelpers/storeHelpers'
 
-
 describe('unlockStateSubmission', () => {
-
     it('returns a Submission2 with all revisions', async () => {
         const stateServer = await constructTestPostgresServer()
 
@@ -59,15 +58,16 @@ describe('unlockStateSubmission', () => {
 
         expect(unlockedSub.revisions[0].revision.submitInfo).toBeNull()
         expect(unlockedSub.revisions[1].revision.submitInfo).toBeDefined()
-        expect(unlockedSub.revisions[1].revision.submitInfo?.updatedAt).toEqual(todaysDate())
+        expect(unlockedSub.revisions[1].revision.submitInfo?.updatedAt.toISOString()).toContain(todaysDate())
+        // check that the date has full ISO time eg. 2022-03-25T03:09:54.864Z
+        expect(unlockedSub.revisions[1].revision.submitInfo?.updatedAt.toISOString()).toContain('Z')
 
         expect(unlockedSub.revisions[0].revision.unlockInfo).toBeDefined()
-        expect(unlockedSub.revisions[0].revision.unlockInfo).toEqual({
-            updatedAt: todaysDate(),
-            updatedBy: 'zuko@example.com',
-            updatedReason: 'Super duper good reason.'
-        })
-
+        expect(unlockedSub.revisions[0].revision.unlockInfo?.updatedBy).toEqual('zuko@example.com')
+        expect(unlockedSub.revisions[0].revision.unlockInfo?.updatedReason).toEqual('Super duper good reason.')
+        expect(unlockedSub.revisions[0].revision.unlockInfo?.updatedAt.toISOString()).toContain(todaysDate())
+        // check that the date has full ISO time eg. 2022-03-25T03:09:54.864Z
+        expect(unlockedSub.revisions[0].revision.unlockInfo?.updatedAt.toISOString()).toContain('Z')
     })
 
     it('returns a DraftSubmission that can be updated without errors', async () => {
@@ -105,11 +105,11 @@ describe('unlockStateSubmission', () => {
         // After unlock, we should get a draft submission back
         expect(unlockedSub.status).toEqual('UNLOCKED')
         expect(unlockedSub.revisions[0].revision.unlockInfo).toBeDefined()
-        expect(unlockedSub.revisions[0].revision.unlockInfo).toEqual({
-            updatedAt: todaysDate(),
-            updatedBy: 'zuko@example.com',
-            updatedReason: 'Super duper good reason.'
-        })
+        expect(unlockedSub.revisions[0].revision.unlockInfo?.updatedBy).toEqual('zuko@example.com')
+        expect(unlockedSub.revisions[0].revision.unlockInfo?.updatedReason).toEqual('Super duper good reason.')
+        expect(unlockedSub.revisions[0].revision.unlockInfo?.updatedAt.toISOString()).toContain(todaysDate())
+        // check that the date has full ISO time eg. 2022-03-25T03:09:54.864Z
+        expect(unlockedSub.revisions[0].revision.unlockInfo?.updatedAt.toISOString()).toContain('Z')
 
         // after unlock we should be able to update that draft submission and get the results
         const updates = {
@@ -131,7 +131,6 @@ describe('unlockStateSubmission', () => {
         const refetched = await fetchTestDraftSubmissionById(stateServer, stateSubmission.id)
 
         expect(refetched.submissionDescription).toEqual('UPDATED_AFTER_UNLOCK')
-
     })
 
     it('can be unlocked repeatedly', async () => {
@@ -152,20 +151,19 @@ describe('unlockStateSubmission', () => {
 
         await unlockTestDraftSubmission(cmsServer, stateSubmission.id, 'Super duper good reason.')
 
-        await submitTestDraftSubmission(stateServer, stateSubmission.id)
+        await resubmitTestDraftSubmission(stateServer, stateSubmission.id, 'Test first resubmission reason')
 
         await unlockTestDraftSubmission(cmsServer, stateSubmission.id, 'Super duper duper good reason.')
 
-        await submitTestDraftSubmission(stateServer, stateSubmission.id)
+        await resubmitTestDraftSubmission(stateServer, stateSubmission.id, 'Test second resubmission reason')
 
         const draft = await unlockTestDraftSubmission(cmsServer, stateSubmission.id, 'Very super duper good reason.')
         expect(draft.status).toEqual('UNLOCKED')
-        expect(draft.revisions[0].revision.unlockInfo).toEqual({
-            updatedAt: todaysDate(),
-            updatedBy: 'zuko@example.com',
-            updatedReason: 'Very super duper good reason.'
-        })
-
+        expect(draft.revisions[0].revision.unlockInfo?.updatedBy).toEqual('zuko@example.com')
+        expect(draft.revisions[0].revision.unlockInfo?.updatedReason).toEqual('Very super duper good reason.')
+        expect(draft.revisions[0].revision.unlockInfo?.updatedAt.toISOString()).toContain(todaysDate())
+        // check that the date has full ISO time eg. 2022-03-25T03:09:54.864Z
+        expect(draft.revisions[0].revision.unlockInfo?.updatedAt.toISOString()).toContain('Z')
     })
 
     it('returns errors if a state user tries to unlock', async () => {
@@ -191,7 +189,6 @@ describe('unlockStateSubmission', () => {
 
         expect(err.extensions['code']).toEqual('FORBIDDEN')
         expect(err.message).toEqual('user not authorized to unlock submission')
-
     })
 
     it('returns errors if unlocked from the wrong state', async () => {
@@ -247,8 +244,6 @@ describe('unlockStateSubmission', () => {
 
         expect(unlockErr.extensions['code']).toEqual('BAD_USER_INPUT')
         expect(unlockErr.message).toEqual('Attempted to unlock submission with wrong status')
-
-
     })
 
     it('returns an error if the submission does not exit', async () => {
@@ -316,7 +311,6 @@ describe('unlockStateSubmission', () => {
 
         expect(err.extensions['code']).toEqual('INTERNAL_SERVER_ERROR')
         expect(err.message).toEqual('Issue finding a state submission of type UNEXPECTED_EXCEPTION. Message: this error came from the generic store with errors mock')
-        
     })
 
     it('returns errors if unlocked reason is undefined', async () => {
@@ -351,7 +345,5 @@ describe('unlockStateSubmission', () => {
 
         expect(err.extensions['code']).toEqual('BAD_USER_INPUT')
         expect(err.message).toContain('Field "unlockedReason" of required type "String!" was not provided.')
-
     })
-
 })
