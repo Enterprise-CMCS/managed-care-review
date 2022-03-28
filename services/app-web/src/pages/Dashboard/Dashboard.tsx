@@ -3,7 +3,7 @@ import classnames from 'classnames'
 import dayjs from 'dayjs'
 import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { submissionNameWithPrograms } from '../../common-code/domain-models'
+import { submissionName } from '../../common-code/domain-models'
 import { Submission2Status } from '../../common-code/domain-models/Submission2Type'
 import { base64ToDomain } from '../../common-code/proto/stateSubmission'
 import { Loading } from '../../components/Loading'
@@ -116,7 +116,7 @@ export const Dashboard = (): React.ReactElement => {
 
             submissionRows.push({
                 id: sub.id,
-                name: submissionNameWithPrograms(currentSubmissionData, programs),
+                name: submissionName(currentSubmissionData, programs),
                 programIDs: programNames(programs, currentSubmissionData.programIDs),
                 submittedAt: sub.intiallySubmittedAt,
                 status: sub.status,

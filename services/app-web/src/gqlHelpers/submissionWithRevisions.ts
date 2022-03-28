@@ -1,4 +1,4 @@
-import { submissionNameWithPrograms, SubmissionUnionType, ProgramT } from '../common-code/domain-models'
+import { submissionName, SubmissionUnionType, ProgramT } from '../common-code/domain-models'
 import { base64ToDomain } from '../common-code/proto/stateSubmission'
 import { Revision, Submission as GQLSubmissionUnionType, Submission2 } from '../gen/gqlClient'
 
@@ -61,12 +61,12 @@ const convertDomainModelFormDataToGQLSubmission = (submissionDomainModel: Submis
                   ...submissionDomainModel,
 
                   __typename: 'DraftSubmission' as const,
-                  name: submissionNameWithPrograms(submissionDomainModel, statePrograms),
+                  name: submissionName(submissionDomainModel, statePrograms),
               }
             : {
                   ...submissionDomainModel,
                   __typename: 'StateSubmission' as const,
-                  name: submissionNameWithPrograms(submissionDomainModel, statePrograms),
+                  name: submissionName(submissionDomainModel, statePrograms),
                   submittedAt:submissionDomainModel.submittedAt
               }
 

@@ -100,11 +100,6 @@ const naturalSort = (a: string, b: string): number => {
     return a.localeCompare(b, "en", { numeric: true })
 }
 
-function submissionName(submission: SubmissionUnionType): string {
-    const padNumber = submission.stateNumber.toString().padStart(4, '0')
-    return `MCR-${submission.stateCode.toUpperCase()}-${submission.programIDs.sort(naturalSort).join('-').toUpperCase()}-${padNumber}`
-}
-
 // Pull out the programs names for display from the program IDs
 function programNames(programs: ProgramT[], programIDs: string[]): string[] {
     return programIDs.map(id => {
@@ -116,7 +111,7 @@ function programNames(programs: ProgramT[], programIDs: string[]): string[] {
     })
 }
 
-function submissionNameWithPrograms(submission: SubmissionUnionType, statePrograms: ProgramT[]): string {
+function submissionName(submission: SubmissionUnionType, statePrograms: ProgramT[]): string {
     const padNumber = submission.stateNumber.toString().padStart(4, '0')
     const pNames = programNames(statePrograms, submission.programIDs)
     const formattedProgramNames = pNames.sort(naturalSort).map(n => n.replace(/\s/g, '-').replace(/[^a-zA-Z0-9+]/g, '').toUpperCase()).join('-')
@@ -133,5 +128,4 @@ export {
     isStateSubmission,
     isDraftSubmission,
     submissionName,
-    submissionNameWithPrograms,
 }

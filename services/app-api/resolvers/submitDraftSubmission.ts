@@ -10,7 +10,7 @@ import {
     isStateUser,
     StateSubmissionType,
     Submission2Type,
-    submissionNameWithPrograms,
+    submissionName,
     submissionStatus,
     UpdateInfoType
 } from '../../app-web/src/common-code/domain-models'
@@ -240,7 +240,7 @@ export function submitDraftSubmissionResolver(
         }
 
         // Send emails!
-        const submissionName = submissionNameWithPrograms(stateSubmission, programs)
+        const name = submissionName(stateSubmission, programs)
 
 		const status = submissionStatus(updatedSubmission)
         let cmsPackageEmailResult
@@ -251,15 +251,15 @@ export function submitDraftSubmissionResolver(
             logSuccess('It was resubmitted')
             const updatedEmailData = {
                 ...submitInfo,
-                submissionName: submissionName
+                submissionName: name
             }
             cmsPackageEmailResult = await emailer.sendResubmittedCMSEmail(stateSubmission, updatedEmailData)
             statePackageEmailResult =
                 await emailer.sendResubmittedStateEmail(stateSubmission, updatedEmailData, user)
         } else if (status === 'SUBMITTED') {
-            cmsPackageEmailResult = await emailer.sendCMSNewPackage(stateSubmission, submissionName)
+            cmsPackageEmailResult = await emailer.sendCMSNewPackage(stateSubmission, name)
             statePackageEmailResult =
-                await emailer.sendStateNewPackage(stateSubmission, submissionName, user)
+                await emailer.sendStateNewPackage(stateSubmission, name, user)
         }
 
         if (cmsPackageEmailResult instanceof Error) {

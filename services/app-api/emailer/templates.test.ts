@@ -6,7 +6,6 @@ import {
     mockUser
 } from '../testHelpers/emailerHelpers'
 import {
-    submissionName,
     StateSubmissionType
 } from '../../app-web/src/common-code/domain-models'
 import {
@@ -40,7 +39,7 @@ describe('Email templates', () => {
 
         it('subject line is correct', () => {
             const sub  = mockContractOnlySubmission()
-            const name = submissionName(sub)
+            const name = 'FL-MMA-001'
             const template = newPackageCMSEmail(sub, name, testEmailConfig)
             
             expect(template).toEqual(
@@ -259,7 +258,7 @@ describe('Email templates', () => {
          
          it('subject line is correct and clearly states submission is complete', () => {
              const sub = mockContractOnlySubmission()
-             const name = submissionName(sub)
+             const name = 'FL-MMA-001'
              const user = mockUser()
              const template = newPackageStateEmail(
                  sub,

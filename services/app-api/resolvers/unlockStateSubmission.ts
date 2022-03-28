@@ -1,6 +1,6 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import {
-    DraftSubmissionType, isCMSUser, StateSubmissionType, UpdateInfoType, submissionName, submissionNameWithPrograms
+    DraftSubmissionType, isCMSUser, StateSubmissionType, UpdateInfoType, submissionName
 } from '../../app-web/src/common-code/domain-models'
 import { Emailer } from '../emailer'
 import { MutationResolvers } from '../gen/gqlServer'
@@ -97,11 +97,11 @@ export function unlockStateSubmissionResolver(
         }
 
         // Send emails!
-        const submissionName = submissionNameWithPrograms(submission, programs)
+        const name = submissionName(submission, programs)
 
         const updatedEmailData = {
             ...unlockInfo, 
-            submissionName
+            submissionName: name
         }
         const unlockPackageCMSEmailResult = await
         emailer.sendUnlockPackageCMSEmail(updatedEmailData)

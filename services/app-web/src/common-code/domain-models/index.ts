@@ -16,7 +16,7 @@ export type { ProgramT } from './ProgramT'
 export type { StateSubmissionType } from './StateSubmissionType'
 export {
     hasValidContract,
-    hasValidDocuments, hasValidRates, hasValidSupportingDocumentCategories, isContractAndRates, isContractOnly, isDraftSubmission, isStateSubmission, submissionName, submissionNameWithPrograms
+    hasValidDocuments, hasValidRates, hasValidSupportingDocumentCategories, isContractAndRates, isContractOnly, isDraftSubmission, isStateSubmission, submissionName
 } from './submission'
 export { submissionCurrentRevision, submissionStatus, submissionSubmittedAt } from './submission2'
 export type { RevisionType, Submission2Type, UpdateInfoType } from './Submission2Type'

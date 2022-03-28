@@ -16,7 +16,7 @@ import {
     STATE_SUBMISSION_FORM_ROUTES,
     RouteT,
 } from '../../constants/routes'
-import {getCurrentRevisionFromSubmission2, convertDomainModelFormDataToGQLSubmission, isGQLDraftSubmission} from '../../gqlHelpers'
+import {getCurrentRevisionFromSubmission2, convertDomainModelFormDataToGQLSubmission} from '../../gqlHelpers'
 import { StateSubmissionContainer } from './StateSubmissionContainer'
 import { ContractDetails } from './ContractDetails'
 import { RateDetails } from './RateDetails'
@@ -36,7 +36,7 @@ import {SubmissionUnlockedBanner} from '../../components/Banner'
 import {UpdateInfoType} from '../../common-code/domain-models/Submission2Type'
 import { useAuth } from '../../contexts/AuthContext'
 import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
-import { DraftSubmissionType, submissionNameWithPrograms } from '../../common-code/domain-models'
+import { DraftSubmissionType, submissionName } from '../../common-code/domain-models'
 
 const FormAlert = ({message}:{message?: string}): React.ReactElement => {return message? <Alert type="error">{message}</Alert> : <GenericApiErrorBanner />}
 
@@ -148,7 +148,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
     useEffect(() => {
         if (formDataFromLatestRevision) {
             const programs = statePrograms
-            const name = submissionNameWithPrograms(formDataFromLatestRevision, programs)
+            const name = submissionName(formDataFromLatestRevision, programs)
             updateHeading(pathname, name)
         }
     }, [updateHeading, pathname, formDataFromLatestRevision])

@@ -13,7 +13,7 @@ import { useFormik} from 'formik'
 import React, { useEffect, useState, useRef } from 'react'
 import { NavLink, useLocation, useParams} from 'react-router-dom'
 import sprite from 'uswds/src/img/sprite.svg'
-import { submissionNameWithPrograms, SubmissionUnionType, UpdateInfoType } from '../../common-code/domain-models'
+import { submissionName, SubmissionUnionType, UpdateInfoType } from '../../common-code/domain-models'
 import { base64ToDomain } from '../../common-code/proto/stateSubmission'
 import { Modal, PoliteErrorMessage, SubmissionUnlockedBanner } from '../../components'
 import { Loading } from '../../components/Loading'
@@ -203,7 +203,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     useEffect(() => {
         if (packageData && submissionAndRevisions) {
             const programs = submissionAndRevisions.state.programs
-            updateHeading(pathname, submissionNameWithPrograms(packageData, programs))
+            updateHeading(pathname, submissionName(packageData, programs))
         }
     }, [updateHeading, pathname, packageData])
 

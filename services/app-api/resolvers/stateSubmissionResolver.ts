@@ -1,4 +1,4 @@
-import { submissionNameWithPrograms } from '../../app-web/src/common-code/domain-models'
+import { submissionName } from '../../app-web/src/common-code/domain-models'
 import { pluralize } from '../../app-web/src/common-code/formatters'
 import { Resolvers } from '../gen/gqlServer'
 import { Store } from '../postgres'
@@ -20,7 +20,7 @@ export function stateSubmissionResolver(
                 )
             }
 
-            return submissionNameWithPrograms(parent, programs)
+            return submissionName(parent, programs)
         },
     }
 }
