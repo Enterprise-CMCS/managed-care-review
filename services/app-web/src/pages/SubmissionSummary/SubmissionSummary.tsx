@@ -151,9 +151,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     const [unlockStateSubmission] = useUnlockStateSubmissionMutation()
     const submissionAndRevisions = data?.fetchSubmission2.submission
 
-
-    const displayUnlockButton =
-        loggedInUser?.role === 'CMS_USER'
+    const displayUnlockButton = loggedInUser?.role === 'CMS_USER'
 
     // Pull out the correct revision form api request, display errors for bad dad
     useEffect(() => {
@@ -369,7 +367,7 @@ export const SubmissionSummary = (): React.ReactElement => {
 
                 <SubmissionTypeSummarySection
                     submission={submission}
-                    unlockModalButton={
+                    headerChildComponent={
                         displayUnlockButton ? (
                             <UnlockModalButton
                                 modalRef={modalRef}
