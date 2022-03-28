@@ -21,7 +21,7 @@ import { Help } from '../Help/Help'
 import { Landing } from '../Landing/Landing'
 import { NewStateSubmissionForm, StateSubmissionForm } from '../StateSubmission'
 import { SubmissionSummary } from '../SubmissionSummary'
-import { PreviousSubmissionSummary } from '../PreviousSumissionSummary'
+import { SubmissionRevisionSummary } from '../SubmissionRevisionSummary'
 
 const LOGIN_REDIRECT_STORAGE_KEY = 'LOGIN_REDIRECT'
 const LocalStorage = window.localStorage
@@ -62,7 +62,7 @@ const StateUserRoutes = (): React.ReactElement => {
             />
             <Route
                 path={RoutesRecord.SUBMISSIONS_REVISION}
-                component={PreviousSubmissionSummary}
+                component={SubmissionRevisionSummary}
                 exact
             />
             <Route path={RoutesRecord.HELP} component={Help} />
@@ -84,7 +84,7 @@ const CMSUserRoutes = (): React.ReactElement => {
             <Route
                 path={RoutesRecord.SUBMISSIONS_REVISION}
                 exact
-                component={PreviousSubmissionSummary}
+                component={SubmissionRevisionSummary}
             />
             <Route path="*" component={Error404} />
         </Switch>
