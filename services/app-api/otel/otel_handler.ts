@@ -1,4 +1,4 @@
-import opentelemetry from '@opentelemetry/api'
+import { trace } from '@opentelemetry/api'
 import { Resource } from '@opentelemetry/resources'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
@@ -48,4 +48,4 @@ registerInstrumentations({
     ],
 })
 
-export const tracer = opentelemetry.trace.getTracer(serviceName)
+export const tracer = trace.getTracer(serviceName)

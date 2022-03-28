@@ -110,7 +110,7 @@ function tracingMiddleware(wrapped: Handler): Handler {
         const span = tracer.startSpan(
             'handleRequest',
             {
-                kind: 1, // server
+                kind: 1,
                 attributes: { middlewareInit: true },
             },
             ctx
