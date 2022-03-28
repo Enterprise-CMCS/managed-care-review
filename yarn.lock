@@ -5879,9 +5879,9 @@
     "@opentelemetry/semantic-conventions" "1.0.1"
 
 "@opentelemetry/instrumentation-graphql@^0.27.0":
-  version "0.27.3"
-  resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation-graphql/-/instrumentation-graphql-0.27.3.tgz#5b249728a9e63fc521e11756a9d00f8a8a63c474"
-  integrity sha512-jobfcnSxuBBevbiqOhisvTCe3N7/mKMFL5laH1hQ3PPmUC61h/MXOoHx+yg5tTQPXhgfi1JiBXa9nZxxPItH5Q==
+  version "0.27.4"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation-graphql/-/instrumentation-graphql-0.27.4.tgz#bc76a07ff3a88a170c56b3c448de6e2924ea3f13"
+  integrity sha512-fgb0mmS/XOPIlfe8b3heibeLfTrGIwsr2HOR4srf8jdCYA/2KbbGioWHoZDOTsu7n54Yj9MtMXDxa+OouJqcEg==
   dependencies:
     "@opentelemetry/instrumentation" "^0.27.0"
     graphql "^15.5.1"
