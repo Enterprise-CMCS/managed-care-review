@@ -61,4 +61,30 @@ describe('SubmissionTypeSummarySection', () => {
             screen.getByRole('definition', { name: 'Submission description' })
         ).toBeInTheDocument()
     })
+    it('does not render Last Updated field', () => {
+        const draftSubmission = mockStateSubmission()
+        renderWithProviders(
+            <SubmissionTypeSummarySection
+                submission={draftSubmission}
+                navigateTo="submission-type"
+                showLastUpdated={false}
+            />
+        )
+        expect(
+            screen.queryByRole('definition', { name: 'Last updated' })
+        ).not.toBeInTheDocument()
+    })
+    it('renders headerChildComponent component', () => {
+        const draftSubmission = mockStateSubmission()
+        renderWithProviders(
+            <SubmissionTypeSummarySection
+                submission={draftSubmission}
+                navigateTo="submission-type"
+                headerChildComponent={<button>Test button</button>}
+            />
+        )
+        expect(
+            screen.queryByRole('button', { name: 'Test button' })
+        ).toBeInTheDocument()
+    })
 })
