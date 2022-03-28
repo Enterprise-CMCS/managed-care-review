@@ -149,6 +149,7 @@ functions:
               - X-Api-Key
               - X-Amz-Security-Token
               - X-Amz-User-Agent
+              - x-amzn-trace-id
               - b3
               - traceparent
 
@@ -167,6 +168,7 @@ functions:
               - X-Api-Key
               - X-Amz-Security-Token
               - X-Amz-User-Agent
+              - x-amzn-trace-id
               - b3
               - traceparent
 
@@ -185,6 +187,7 @@ functions:
               - X-Api-Key
               - X-Amz-Security-Token
               - X-Amz-User-Agent
+              - x-amzn-trace-id
               - b3
               - traceparent
           authorizer: aws_iam
@@ -200,6 +203,7 @@ functions:
               - X-Api-Key
               - X-Amz-Security-Token
               - X-Amz-User-Agent
+              - x-amzn-trace-id
               - b3
               - traceparent
           authorizer: aws_iam
@@ -244,6 +248,7 @@ functions:
               - X-Api-Key
               - X-Amz-Security-Token
               - X-Amz-User-Agent
+              - x-amzn-trace-id
               - b3
               - traceparent
           authorizer: aws_iam
