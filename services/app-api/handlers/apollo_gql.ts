@@ -1,4 +1,4 @@
-import { propagation, ROOT_CONTEXT, Span } from '@opentelemetry/api'
+import { propagation, ROOT_CONTEXT, Span, context } from '@opentelemetry/api'
 import { ApolloServer } from 'apollo-server-lambda'
 import {
     APIGatewayProxyEvent,
@@ -256,6 +256,7 @@ async function initializeGQLHandler(): Promise<Handler> {
 const handlerPromise = initializeGQLHandler()
 
 const gqlHandler: Handler = async (event, context, completion) => {
+    console.log(tracer)
     // Once initialized, future awaits will return immediately
     const initializedHandler = await handlerPromise
 
