@@ -56,14 +56,13 @@ const StateUserRoutes = (): React.ReactElement => {
                 exact
             />
             <Route
-                path={RoutesRecord.SUBMISSIONS_FORM}
-                component={StateSubmissionForm}
-                exact
-            />
-            <Route
                 path={RoutesRecord.SUBMISSIONS_REVISION}
                 component={SubmissionRevisionSummary}
                 exact
+            />
+            <Route
+                path={RoutesRecord.SUBMISSIONS_FORM}
+                component={StateSubmissionForm}
             />
             <Route path={RoutesRecord.HELP} component={Help} />
             <Route path="*" component={Error404} />
@@ -78,13 +77,13 @@ const CMSUserRoutes = (): React.ReactElement => {
             <Route path={RoutesRecord.DASHBOARD} component={CMSDashboard} />
             <Route
                 path={RoutesRecord.SUBMISSIONS_FORM}
-                exact
                 component={SubmissionSummary}
+                exact
             />
             <Route
                 path={RoutesRecord.SUBMISSIONS_REVISION}
-                exact
                 component={SubmissionRevisionSummary}
+                exact
             />
             <Route path="*" component={Error404} />
         </Switch>
