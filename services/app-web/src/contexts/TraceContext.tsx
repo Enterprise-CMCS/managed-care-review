@@ -2,7 +2,6 @@ import React from 'react'
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web'
 import { BaseOpenTelemetryComponent } from '@opentelemetry/plugin-react-load'
-import { ZoneContextManager } from '@opentelemetry/context-zone'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { diag, DiagConsoleLogger } from '@opentelemetry/api'
 import { Resource } from '@opentelemetry/resources'
@@ -29,7 +28,6 @@ const exporter = new OTLPTraceExporter({
 provider.addSpanProcessor(new BatchSpanProcessor(exporter))
 
 provider.register({
-    contextManager: new ZoneContextManager(),
     propagator: new AWSXRayPropagator(),
 })
 

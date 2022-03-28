@@ -7,7 +7,6 @@ import {
     ConsoleSpanExporter,
 } from '@opentelemetry/sdk-trace-base'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
-import { ZoneContextManager } from '@opentelemetry/context-zone'
 import { GraphQLInstrumentation } from '@opentelemetry/instrumentation-graphql'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http'
@@ -36,7 +35,6 @@ provider.addSpanProcessor(new SimpleSpanProcessor(exporter))
 
 // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
 provider.register({
-    contextManager: new ZoneContextManager(),
     propagator: new AWSXRayPropagator(),
 })
 

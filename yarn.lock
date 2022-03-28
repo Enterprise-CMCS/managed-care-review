@@ -5815,25 +5815,12 @@
   resolved "https://registry.yarnpkg.com/@opentelemetry/context-zone-peer-dep/-/context-zone-peer-dep-1.0.1.tgz#802957f44e189f91222268a206d58f270b9e375e"
   integrity sha512-rJJFXWjzuuVGOuy0gCUYhbQAFuGrMnNroV+cfm4n+c+H5ewW2yS9NwH+P07OKKCWJbpJpuwEVH2j+oEfHrtVyQ==
 
-"@opentelemetry/context-zone-peer-dep@1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@opentelemetry/context-zone-peer-dep/-/context-zone-peer-dep-1.1.1.tgz#a48564201bb81207409806903bcb8c3a3d14dc21"
-  integrity sha512-O1Efq4Y8SN8m+JLvORBJ1h9IWMcnSBtsJ9WdBeeEoI/Ui/amgBEmyPps7bIm7NF6X3FkdeuoBSxs+QVMVMWNIg==
-
 "@opentelemetry/context-zone@^1.0.0":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@opentelemetry/context-zone/-/context-zone-1.0.1.tgz#dc1af9cbc20ded069f26cb25fe46e28bb7a7c38d"
   integrity sha512-k1kyqCC75qfTpyr/V2HJIaorUKOLJ89unW4Pk9P9tV8e78vLC93olb1drRkXqmUzSzhEZBlvj1/sG1l7QQeeFw==
   dependencies:
     "@opentelemetry/context-zone-peer-dep" "1.0.1"
-    zone.js "^0.11.0"
-
-"@opentelemetry/context-zone@^1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@opentelemetry/context-zone/-/context-zone-1.1.1.tgz#9c48fb1f5c0ed083bb6b67bd66af08f8a1f6e51e"
-  integrity sha512-KbM4VFoHFDPMreVIVXN49LZwdlXL+o4pipc06E34+L9w26eTsxJihX+KtUbmeYQzvfq94a9px/WM4zn85aalWA==
-  dependencies:
-    "@opentelemetry/context-zone-peer-dep" "1.1.1"
     zone.js "^0.11.0"
 
 "@opentelemetry/core@0.25.0":
@@ -5906,17 +5893,6 @@
     "@opentelemetry/instrumentation" "^0.27.0"
     "@opentelemetry/semantic-conventions" "^1.0.0"
     "@types/amqplib" "^0.5.17"
-
-"@opentelemetry/instrumentation-aws-lambda@^0.28.1":
-  version "0.28.1"
-  resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation-aws-lambda/-/instrumentation-aws-lambda-0.28.1.tgz#a36b50312ebfbbb425f6c8ea76507303b314edde"
-  integrity sha512-+eNylNeMNIFSqcmunfPBKy5QY7RBKDQ3ipmrzV+jEfK84jXAAleL314SP2U0LyeTKMc8cc0iPi6qICJ/oQyQKg==
-  dependencies:
-    "@opentelemetry/instrumentation" "^0.27.0"
-    "@opentelemetry/propagator-aws-xray" "^1.0.1"
-    "@opentelemetry/resources" "^1.0.0"
-    "@opentelemetry/semantic-conventions" "^1.0.0"
-    "@types/aws-lambda" "8.10.81"
 
 "@opentelemetry/instrumentation-aws-lambda@^0.30.0":
   version "0.30.0"
