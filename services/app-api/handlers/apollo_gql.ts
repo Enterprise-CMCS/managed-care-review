@@ -23,7 +23,6 @@ import { createTracer } from '../otel/otel_handler'
 
 const requestSpanKey = 'REQUEST_SPAN'
 let tracer: Tracer
-//const tracer = createTracer(process.env.stage || 'testing')
 
 // The Context type passed to all of our GraphQL resolvers
 export interface Context {
