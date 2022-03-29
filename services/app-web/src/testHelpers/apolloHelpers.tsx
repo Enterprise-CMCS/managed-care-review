@@ -6,9 +6,7 @@ import {
     basicSubmission,
     draftWithALittleBitOfEverything,
 } from '../common-code/domain-mocks'
-import {
-    DraftSubmissionType,
-} from '../common-code/domain-models'
+import { DraftSubmissionType } from '../common-code/domain-models'
 import { domainToBase64 } from '../common-code/proto/stateSubmission'
 import {
     CreateDraftSubmissionDocument,
@@ -21,12 +19,12 @@ import {
     StateSubmission,
     Submission,
     Submission2,
-    IndexSubmissions2Document, SubmitDraftSubmissionDocument,
+    IndexSubmissions2Document,
+    SubmitDraftSubmissionDocument,
     UnlockStateSubmissionDocument,
     UpdateDraftSubmissionDocument,
     User as UserType,
 } from '../gen/gqlClient'
-
 
 /* For use with Apollo MockedProvider in jest tests */
 const mockValidUser: UserType = {
@@ -331,13 +329,14 @@ export function mockStateSubmission(): StateSubmission {
     }
 }
 
-
-export function mockDraftSubmission2(submissionData?: Partial<DraftSubmissionType>): Submission2 {
-    const submission = {...basicSubmission(), ...submissionData}
+export function mockDraftSubmission2(
+    submissionData?: Partial<DraftSubmissionType>
+): Submission2 {
+    const submission = { ...basicSubmission(), ...submissionData }
     const b64 = domainToBase64(submission)
 
     return {
-        __typename: "Submission2",
+        __typename: 'Submission2',
         id: 'test-id-123',
         status: 'DRAFT',
         intiallySubmittedAt: '2022-01-01',
@@ -357,7 +356,6 @@ export function mockDraftSubmission2(submissionData?: Partial<DraftSubmissionTyp
 }
 
 export function mockSubmittedSubmission2(): Submission2 {
-
     // get a submitted DomainModel submission
     // turn it into proto
     const submission = basicStateSubmission()
@@ -375,21 +373,84 @@ export function mockSubmittedSubmission2(): Submission2 {
                     createdAt: new Date(),
                     unlockInfo: null,
                     submitInfo: {
-                        updatedAt: "2021-01-01",
+                        updatedAt: '2021-01-01',
                         updatedBy: 'test@example.com',
-                        updatedReason: 'Initial submit'
-            },
+                        updatedReason: 'Initial submit',
+                    },
                     submissionData: b64,
-                }
+                },
             },
-        ]
+        ],
+    }
+}
+
+export function mockSubmittedSubmission2WithRevisions(): Submission2 {
+    // get a submitted DomainModel submission
+    // turn it into proto
+    const submission = basicStateSubmission()
+    const b64 = domainToBase64(submission)
+
+    return {
+        id: 'test-id-123',
+        status: 'SUBMITTED',
+        intiallySubmittedAt: '2022-01-01',
+        stateCode: 'MN',
+        revisions: [
+            {
+                revision: {
+                    id: 'sd596de8-852d-4e42-ab0a-c9c9bf78c3c1',
+                    unlockInfo: {
+                        updatedAt: '2022-03-25T01:18:44.663Z',
+                        updatedBy: 'zuko@example.com',
+                        updatedReason: 'Latest unlock',
+                    },
+                    submitInfo: {
+                        updatedAt: '2022-03-25T01:19:46.154Z',
+                        updatedBy: 'aang@example.com',
+                        updatedReason: 'Should be latest resubmission',
+                        __typename: 'UpdateInformation',
+                    },
+                    createdAt: '2022-03-25T01:18:44.665Z',
+                    submissionData: b64,
+                },
+            },
+            {
+                revision: {
+                    id: '26596de8-852d-4e42-bb0a-c9c9bf78c3de',
+                    unlockInfo: {
+                        updatedAt: '2022-03-24T01:18:44.663Z',
+                        updatedBy: 'zuko@example.com',
+                        updatedReason: 'testing stuff',
+                    },
+                    submitInfo: {
+                        updatedAt: '2022-03-24T01:19:46.154Z',
+                        updatedBy: 'aang@example.com',
+                        updatedReason: 'Placeholder resubmission reason',
+                    },
+                    createdAt: '2022-03-24T01:18:44.665Z',
+                    submissionData: b64,
+                },
+            },
+            {
+                revision: {
+                    id: 'e048cdcf-5b19-4acb-8ead-d7dc2fd6cd30',
+                    unlockInfo: null,
+                    submitInfo: {
+                        updatedAt: '2022-03-23T02:08:52.259Z',
+                        updatedBy: 'aang@example.com',
+                        updatedReason: 'Initial submission',
+                    },
+                    createdAt: '2022-03-23T02:08:14.241Z',
+                    submissionData: b64,
+                },
+            },
+        ],
     }
 }
 
 export function mockUnlockedSubmission2(
     submissionData?: Partial<DraftSubmissionType>
 ): Submission2 {
-
     const submission = {
         ...draftWithALittleBitOfEverything(),
         ...submissionData,
@@ -432,7 +493,6 @@ export function mockUnlockedSubmission2(
     }
 }
 
-
 type fetchCurrentUserMockProps = {
     user?: UserType | Partial<UserType>
     statusCode: 200 | 403 | 500
@@ -441,7 +501,7 @@ const fetchCurrentUserMock = ({
     user = mockValidUser,
     statusCode,
 }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
+fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
     switch (statusCode) {
         case 200:
             return {
@@ -557,7 +617,6 @@ type fetchStateSubmissionMockProps = {
     statusCode: 200 | 403 | 500
 }
 
-
 type fetchStateSubmission2MockSuccessProps = {
     stateSubmission?: Submission2 | Partial<Submission2>
     id: string
@@ -566,7 +625,9 @@ type fetchStateSubmission2MockSuccessProps = {
 const fetchStateSubmission2MockSuccess = ({
     stateSubmission = mockSubmittedSubmission2(),
     id, // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}: fetchStateSubmission2MockSuccessProps): MockedResponse<Record<string, any>> => {
+}: fetchStateSubmission2MockSuccessProps): MockedResponse<
+    Record<string, any>
+> => {
     // override the ID of the returned draft to match the queried id.
     const mergedStateSubmission = Object.assign({}, stateSubmission, { id })
 
@@ -578,10 +639,10 @@ const fetchStateSubmission2MockSuccess = ({
         result: {
             data: {
                 fetchSubmission2: {
-                    submission: mergedStateSubmission
+                    submission: mergedStateSubmission,
                 },
             },
-        }
+        },
     }
 }
 
@@ -591,7 +652,7 @@ const fetchStateSubmissionMock = ({
     statusCode, // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }: fetchStateSubmissionMockProps): MockedResponse<Record<string, any>> => {
     // override the ID of the returned draft to match the queried id.
-    console.log("MOCKING", id)
+    console.log('MOCKING', id)
     const mergedStateSubmission = Object.assign({}, stateSubmission, { id })
     switch (statusCode) {
         case 200:
@@ -740,11 +801,11 @@ const unlockStateSubmissionMockSuccess = ({
 
 const unlockStateSubmissionMockError = ({
     id,
-    reason
+    reason,
 }: {
     id: string // eslint-disable-next-line @typescript-eslint/no-explicit-any
     reason: string
-}): MockedResponse<Record<string, any>> => {
+}): MockedResponse<Record<string, unknown>> => {
     return {
         request: {
             query: UnlockStateSubmissionDocument,
@@ -784,10 +845,12 @@ const indexSubmissionsMockSuccess = (
 }
 
 const indexSubmissions2MockSuccess = (
-    submissions: Submission2[] = [mockUnlockedSubmission2(), mockSubmittedSubmission2()]
+    submissions: Submission2[] = [
+        mockUnlockedSubmission2(),
+        mockSubmittedSubmission2(),
+    ]
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): MockedResponse<Record<string, any>> => {
-    
     const submissionEdges = submissions.map((sub) => {
         return {
             node: sub,
@@ -807,7 +870,6 @@ const indexSubmissions2MockSuccess = (
         },
     }
 }
-
 
 export {
     fetchCurrentUserMock,
