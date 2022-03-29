@@ -3,7 +3,11 @@ import {
     constructTestPostgresServer,
     createAndUpdateTestDraftSubmission,
     fetchTestStateSubmissionById,
-    defaultContext, unlockTestDraftSubmission, resubmitTestDraftSubmission, createTestStateSubmission,
+    defaultContext,
+    defaultFloridaProgram,
+	unlockTestDraftSubmission,
+	resubmitTestDraftSubmission,
+	createTestStateSubmission,
 } from '../testHelpers/gqlHelpers'
 import { testEmailConfig, testEmailer } from '../testHelpers/emailerHelpers'
 import { base64ToDomain } from '../../app-web/src/common-code/proto/stateSubmission'
@@ -41,7 +45,7 @@ describe('submitDraftSubmission', () => {
         // The submission fields should still be set
         expect(resultDraft.id).toEqual(createdID)
         expect(resultDraft.submissionType).toEqual('CONTRACT_AND_RATES')
-        expect(resultDraft.program.id).toEqual('cnet')
+        expect(resultDraft.programIDs).toEqual([defaultFloridaProgram().id])
         // check that the stateNumber is being returned the same
         expect(resultDraft.name.split('-')[2]).toEqual(draft.name.split('-')[2])
         expect(resultDraft.submissionDescription).toEqual(
@@ -244,11 +248,14 @@ describe('submitDraftSubmission', () => {
             throw sub
         }
 
+        const programs = [defaultFloridaProgram()]
+        const name = submissionName(sub, programs)
+
         // email subject line is correct for CMS email
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
             expect.objectContaining({
                 subject: expect.stringContaining(
-                    `TEST New Managed Care Submission: ${submissionName(sub)}`
+                    `TEST New Managed Care Submission: ${name}`
                 ),
                 sourceEmail: config.emailSource,
                 toAddresses: expect.arrayContaining(
@@ -289,10 +296,13 @@ describe('submitDraftSubmission', () => {
             throw sub
         }
 
+        const programs = [defaultFloridaProgram()]
+        const name = submissionName(sub, programs)
+
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
             expect.objectContaining({
                 subject: expect.stringContaining(
-                    `TEST ${submissionName(sub)} was sent to CMS`
+                    `TEST ${name} was sent to CMS`
                 ),
                 sourceEmail: config.emailSource,
                 toAddresses: expect.arrayContaining(
@@ -330,10 +340,13 @@ describe('submitDraftSubmission', () => {
             throw sub
         }
 
+        const programs = [defaultFloridaProgram()]
+        const name = submissionName(sub, programs)
+
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
             expect.objectContaining({
                 subject: expect.stringContaining(
-                    `TEST ${submissionName(sub)} was sent to CMS`
+                    `TEST ${name} was sent to CMS`
                 ),
                 toAddresses: expect.arrayContaining([sub.stateContacts[0].email])
             })
@@ -379,14 +392,17 @@ describe('submitDraftSubmission', () => {
             throw sub
         }
 
+        const programs = [defaultFloridaProgram()]
+        const name = submissionName(sub, programs)
+
         // email subject line is correct for CMS email and contains correct email body text
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
             expect.objectContaining({
                 subject: expect.stringContaining(
-                    `TEST ${submissionName(sub)} was resubmitted`
+                    `TEST ${name} was resubmitted`
                 ),
                 sourceEmail: config.emailSource,
-                bodyText: expect.stringContaining(`The state completed their edits on submission ${submissionName(sub)}`),
+                bodyText: expect.stringContaining(`The state completed their edits on submission ${name}`),
                 toAddresses: expect.arrayContaining(
                     Array.from(config.cmsReviewSharedEmails)
                 ),
@@ -427,11 +443,14 @@ describe('submitDraftSubmission', () => {
             throw sub
         }
 
+        const programs = [defaultFloridaProgram()]
+        const name = submissionName(sub, programs)
+
         // email subject line is correct for CMS email and contains correct email body text
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
             expect.objectContaining({
                 subject: expect.stringContaining(
-                    `TEST ${submissionName(sub)} was resubmitted`
+                    `TEST ${name} was resubmitted`
                 ),
                 sourceEmail: config.emailSource,
                 toAddresses: expect.arrayContaining(

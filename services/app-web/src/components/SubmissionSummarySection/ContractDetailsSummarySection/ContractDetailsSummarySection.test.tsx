@@ -52,7 +52,7 @@ describe('ContractDetailsSummarySection', () => {
             })
         ).toHaveAttribute('href', '/documents')
         expect(
-            screen.queryByRole('button', {
+            screen.queryByRole('link', {
                 name: 'Download all contract documents',
             })
         ).toBeNull()
@@ -73,7 +73,7 @@ describe('ContractDetailsSummarySection', () => {
         ).toBeInTheDocument()
         expect(screen.queryByText('Edit')).not.toBeInTheDocument()
         expect(
-            screen.getByRole('button', {
+            screen.getByRole('link', {
                 name: 'Download all contract documents',
             })
         ).toBeInTheDocument()

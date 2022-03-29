@@ -33,10 +33,12 @@ type EmailData = {
 type Emailer = {
     sendEmail: (emailData: EmailData) => Promise<void | Error>
     sendCMSNewPackage: (
-        submission: StateSubmissionType
+        submission: StateSubmissionType,
+        submissionName: string,
     ) => Promise<void | Error>
     sendStateNewPackage: (
         submission: StateSubmissionType,
+        submissionName: string,
         user: CognitoUserType
     ) => Promise<void | Error>
     sendUnlockPackageCMSEmail: (
@@ -74,16 +76,18 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
                 return new Error('SES email send failed. ' + err)
             }
         },
-        sendCMSNewPackage: async function (submission: StateSubmissionType) {
-            const emailData = newPackageCMSEmail(submission, config)
+        sendCMSNewPackage: async function (submission: StateSubmissionType, submissionName: string) {
+            const emailData = newPackageCMSEmail(submission, submissionName, config)
             return await this.sendEmail(emailData)
         },
         sendStateNewPackage: async function (
             submission: StateSubmissionType,
+            submissionName: string,
             user: CognitoUserType
         ) {
             const emailData = newPackageStateEmail(
                 submission,
+                submissionName,
                 user,
                 config
             )
@@ -130,15 +134,17 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
             localEmailerLogger(emailData)
         },
         sendCMSNewPackage: async (submission: StateSubmissionType) => {
-            const emailData = newPackageCMSEmail(submission, config)
+            const emailData = newPackageCMSEmail(submission, 'some-title', config)
             localEmailerLogger(emailData)
         },
         sendStateNewPackage: async (
             submission: StateSubmissionType,
+            submissionName: string,
             user: CognitoUserType
         ) => {
             const emailData = newPackageStateEmail(
                 submission,
+                submissionName,
                 user,
                 config
             )

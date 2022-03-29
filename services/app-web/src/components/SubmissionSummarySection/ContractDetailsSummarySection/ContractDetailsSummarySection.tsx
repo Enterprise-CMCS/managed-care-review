@@ -50,10 +50,17 @@ export const ContractDetailsSummarySection = ({
 }: ContractDetailsSummarySectionProps): React.ReactElement => {
     // Get the zip file for the contract
     const { getKey, getBulkDlURL } = useS3()
+    const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
+    const contractSupportingDocuments = submission.documents.filter((doc) =>
+        doc.documentCategories.includes('CONTRACT_RELATED' as const)
+    )
+    const isSubmitted = submission.__typename === 'StateSubmission'
+    const isEditing = !isSubmitted && navigateTo !== undefined
+
     useEffect(() => {
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
-            const keysFromDocs = submission.contractDocuments
+            const keysFromDocs = submission.contractDocuments.concat(contractSupportingDocuments)
                 .map((doc) => {
                     const key = getKey(doc.s3URL)
                     if (!key) return ''
@@ -75,11 +82,8 @@ export const ContractDetailsSummarySection = ({
         }
 
         void fetchZipUrl()
-    }, [getKey, getBulkDlURL, submission])
-    const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
-    const contractSupportingDocuments = submission.documents.filter(doc => doc.documentCategories.includes('CONTRACT_RELATED' as const))
-    const isSubmitted = submission.__typename === 'StateSubmission'
-    const isEditing = !isSubmitted && navigateTo !== undefined
+    }, [getKey, getBulkDlURL, submission, contractSupportingDocuments])
+
     // Array of values from a checkbox field is displayed in an unordered list
     const capitationRateChangeReason = (): string | null => {
         const { reason, otherReason } =

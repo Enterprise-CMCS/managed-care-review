@@ -42,7 +42,7 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
             try {
                 const stored = await Storage.put(`${uuid}.${ext}`, file, {
                     contentType: file.type,
-                    contentDisposition: `attachment; filename="${file.name}"`,
+                    contentDisposition: `attachment; filename=${file.name}`,
                 })
 
                 assertIsS3PutResponse(stored)

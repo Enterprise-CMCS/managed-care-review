@@ -4,12 +4,12 @@ import statePrograms from '../data/statePrograms.json'
 function findPrograms(
     stateCode: string,
     programIDs: string[]
-): ProgramT | undefined {
-    const program = statePrograms.states
+): ProgramT[] | undefined {
+    const programs = statePrograms.states
         .find((state) => state.code === stateCode)
-        ?.programs.find((program) => programIDs.includes(program.id))
+        ?.programs.filter((program) => programIDs.includes(program.id))
 
-    return program
+    return programs
 }
 
 export { findPrograms }
