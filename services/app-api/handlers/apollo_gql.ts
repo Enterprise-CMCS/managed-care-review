@@ -1,4 +1,4 @@
-import { propagation, ROOT_CONTEXT, Span, context } from '@opentelemetry/api'
+import { propagation, ROOT_CONTEXT, Span, Tracer } from '@opentelemetry/api'
 import { ApolloServer } from 'apollo-server-lambda'
 import {
     APIGatewayProxyEvent,
@@ -19,9 +19,11 @@ import { newLocalEmailer, newSESEmailer } from '../emailer'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import { configureResolvers } from '../resolvers'
 import { configurePostgres } from './configuration'
-import { tracer as tracer } from '../otel/otel_handler'
+import { createTracer } from '../otel/otel_handler'
 
 const requestSpanKey = 'REQUEST_SPAN'
+let tracer: Tracer
+//const tracer = createTracer(process.env.stage || 'testing')
 
 // The Context type passed to all of our GraphQL resolvers
 export interface Context {
@@ -246,6 +248,8 @@ async function initializeGQLHandler(): Promise<Handler> {
         },
     })
 
+    // init tracer and set the middleware. tracer needs to be global.
+    tracer = createTracer('app-api-' + stageName)
     const tracingHandler = tracingMiddleware(handler)
 
     // Locally, we wrap our handler in a middleware that returns 403 for unauthenticated requests
