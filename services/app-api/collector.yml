@@ -5,7 +5,6 @@ receivers:
       http:
 
 exporters:
-  logging:
   otlp:
     endpoint: https://gov-otlp.nr-data.net:4317
     headers:
@@ -15,4 +14,4 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [otlp, logging]
+      exporters: [otlp]
