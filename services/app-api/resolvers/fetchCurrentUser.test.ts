@@ -15,10 +15,10 @@ describe('currentUser', () => {
 
         expect(res.data?.fetchCurrentUser.email).toBe('james@example.com')
         expect(res.data?.fetchCurrentUser.state.code).toBe('FL')
-        expect(res.data?.fetchCurrentUser.state.programs).toHaveLength(4)
+        expect(res.data?.fetchCurrentUser.state.programs).toHaveLength(6)
     })
 
-    it('returns a state with no programs if the state is not in valid state list', async () => {
+    it('returns programs for MI', async () => {
         const customContext: Context = {
             user: {
                 name: 'james brown',
@@ -41,7 +41,8 @@ describe('currentUser', () => {
         expect(res.data?.fetchCurrentUser.email).toBe('james@example.com')
         expect(res.data?.fetchCurrentUser.state.code).toBe('MI')
         expect(res.data?.fetchCurrentUser.state.name).toBe(
-            'This state is not part of the pilot'
+            'Michigan'
         )
+        expect(res.data?.fetchCurrentUser.state.programs).toHaveLength(6)
     })
 })

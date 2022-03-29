@@ -42,7 +42,7 @@ describe('fetchSubmission2', () => {
         } 
 
         expect(subData.id).toEqual(createdID)
-        expect(subData.programIDs).toEqual(['cnet'])
+        expect(subData.programIDs).toEqual(['5c10fe9f-bec9-416f-a20c-718b152ad633'])
         expect(subData.submissionDescription).toEqual('An updated submission')
         expect(subData.documents).toEqual([])
         expect(subData.contractDocuments).toEqual([

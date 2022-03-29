@@ -9,6 +9,11 @@ export default {
 const submissionData: Submission2 = {
     id: '440d6a53-bb0a-49ae-9a9c-da7c5352789f',
     stateCode: 'MN',
+    state: {
+        name: 'Minnesota',
+        code: 'MN',
+        programs: [],
+    },
     status: 'RESUBMITTED',
     intiallySubmittedAt: '2022-03-23',
     revisions: [

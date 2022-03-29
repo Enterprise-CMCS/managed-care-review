@@ -35,17 +35,14 @@ import {
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
 import {
-    DraftSubmission,
-    StateSubmission,
     Submission2,
     UnlockStateSubmissionMutationFn,
     useFetchSubmission2Query,
     useUnlockStateSubmissionMutation,
 } from '../../gen/gqlClient'
-import { isGraphQLErrors } from '../../gqlHelpers'
-import { GenericErrorPage } from '../Errors/GenericErrorPage'
+import { convertDomainModelFormDataToGQLSubmission, isGraphQLErrors } from '../../gqlHelpers'
 import { Error404 } from '../Errors/Error404'
-
+import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './SubmissionSummary.module.scss'
 import { ChangeHistory } from '../../components/ChangeHistory/ChangeHistory'
 
@@ -221,10 +218,12 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     // Update header with submission name
     useEffect(() => {
-        if (packageData) {
-            updateHeading(pathname, submissionName(packageData))
+        const subWithRevisions = data?.fetchSubmission2.submission
+        if (packageData && subWithRevisions) {
+            const programs = subWithRevisions.state.programs
+            updateHeading(pathname, submissionName(packageData, programs))
         }
-    }, [updateHeading, pathname, packageData])
+    }, [updateHeading, pathname, packageData, data])
 
     // Focus unlockReason field in the unlock modal on submit click when errors exist
     useEffect(() => {
@@ -290,34 +289,14 @@ export const SubmissionSummary = (): React.ReactElement => {
         }
     }
 
-    // temporary kludge while the display data is expecting the wrong format.
-    // This is turning our domain model into the GraphQL model which is what
-    // all our frontend stuff expects right now.
-    const submission: StateSubmission | DraftSubmission =
-        packageData.status === 'DRAFT'
-            ? {
-                  ...packageData,
-                  __typename: 'DraftSubmission' as const,
-                  name: submissionName(packageData),
-                  program: {
-                      id: 'bogs-id',
-                      name: 'bogus-program',
-                  },
-              }
-            : {
-                  ...packageData,
-                  __typename: 'StateSubmission' as const,
-                  name: submissionName(packageData),
-                  program: {
-                      id: 'bogs-id',
-                      name: 'bogus-program',
-                  },
-                  submittedAt: submissionAndRevisions.intiallySubmittedAt,
-              }
+    const statePrograms = submissionAndRevisions.state.programs
 
-    const disableUnlockButton = ['DRAFT', 'UNLOCKED'].includes(
-        submissionAndRevisions.status
-    )
+    // temporary kludge while the display data is expecting the wrong format. 
+    // This is turning our domain model into the GraphQL model which is what
+    // all our frontend stuff expects right now. 
+    const submission = convertDomainModelFormDataToGQLSubmission(packageData, statePrograms)
+
+    const disableUnlockButton = ['DRAFT', 'UNLOCKED'].includes(submissionAndRevisions.status)
 
     const isContractActionAndRateCertification =
         submission.submissionType === 'CONTRACT_AND_RATES'
@@ -377,6 +356,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                             />
                         ) : undefined
                     }
+					statePrograms={statePrograms}
                 />
                 <ContractDetailsSummarySection submission={submission} />
 

@@ -3,6 +3,14 @@ mutation unlockStateSubmission($input: UnlockStateSubmissionInput!) {
         submission {
             id
             stateCode
+            state {
+                code
+                name
+                programs {
+                    id
+                    name
+                }
+            }
             status
             intiallySubmittedAt
             revisions {
