@@ -11,7 +11,7 @@ type ChangeHistoryProps = {
 
 type flatRevisions = UpdateInfoType & {
     kind: 'submit' | 'unlock'
-    revisionVersion: number | undefined
+    revisionVersion: string | undefined
 }
 
 export const ChangeHistory = ({
@@ -37,7 +37,9 @@ export const ChangeHistory = ({
 
                 //Only set revisionVersion if not the latest revision.
                 const revisionVersion =
-                    index !== reversedRevisions.length - 1 ? index : undefined
+                    index !== reversedRevisions.length - 1
+                        ? String(index)
+                        : undefined
 
                 newSubmit.updatedAt = r.revision.submitInfo.updatedAt
                 newSubmit.updatedBy = r.revision.submitInfo.updatedBy
@@ -68,12 +70,14 @@ export const ChangeHistory = ({
                     <span className={styles.tag}>Submitted by:</span>
                     <span> {r.updatedBy}</span>
                     <br />
-                    <Link
-                        href={`/submissions/${submission.id}/revisions/${r.revisionVersion}`}
-                        data-testid={`revision-link-${r.revisionVersion}`}
-                    >
-                        View past submission version
-                    </Link>
+                    {r.revisionVersion && (
+                        <Link
+                            href={`/submissions/${submission.id}/revisions/${r.revisionVersion}`}
+                            data-testid={`revision-link-${r.revisionVersion}`}
+                        >
+                            View past submission version
+                        </Link>
+                    )}
                 </>
             ) : (
                 <>

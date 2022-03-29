@@ -71,6 +71,32 @@ const submissionData: Submission2 = {
     __typename: 'Submission2',
 }
 
+const submissionDataInitialSubmission: Submission2 = {
+    id: '440d6a53-bb0a-49ae-9a9c-da7c5352789f',
+    stateCode: 'MN',
+    status: 'RESUBMITTED',
+    intiallySubmittedAt: '2022-03-23',
+    revisions: [
+        {
+            revision: {
+                id: 'e048cdcf-5b19-4acb-8ead-d7dc2fd6cd30',
+                unlockInfo: null,
+                submitInfo: {
+                    updatedAt: '2022-03-23T02:08:52.259Z',
+                    updatedBy: 'aang@example.com',
+                    updatedReason: 'Initial submission',
+                    __typename: 'UpdateInformation',
+                },
+                createdAt: '2022-03-23T02:08:14.241Z',
+                submissionData: 'nmzxcv;lasf',
+                __typename: 'Revision',
+            },
+            __typename: 'RevisionEdge',
+        },
+    ],
+    __typename: 'Submission2',
+}
+
 describe('Change History', () => {
     it('renders without errors', () => {
         render(<ChangeHistory submission={submissionData} />)
@@ -166,5 +192,12 @@ describe('Change History', () => {
         expect(
             screen.getByTestId('accordionItem_2022-03-23T02:08:52.259Z')
         ).toHaveTextContent('View past submission version')
+    })
+    it('should not list links for initial submission without revisions', () => {
+        render(<ChangeHistory submission={submissionDataInitialSubmission} />)
+        //Initial submission should not have a link
+        expect(
+            screen.getByTestId('accordionItem_2022-03-23T02:08:52.259Z')
+        ).not.toHaveTextContent('View past submission version')
     })
 })
