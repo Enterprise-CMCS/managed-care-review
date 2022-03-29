@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useRouteMatch } from 'react-router-dom'
 import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
@@ -15,12 +16,12 @@ import { formatCalendarDate } from '../../../dateHelpers'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
+import { RoutesRecord } from '../../../constants/routes'
 import styles from '../SubmissionSummarySection.module.scss'
 
 export type ContractDetailsSummarySectionProps = {
     submission: DraftSubmission | StateSubmission
     navigateTo?: string
-    disableDownload?: boolean
 }
 
 const createCheckboxList = ({
@@ -52,8 +53,10 @@ const createCheckboxList = ({
 export const ContractDetailsSummarySection = ({
     submission,
     navigateTo,
-    disableDownload,
 }: ContractDetailsSummarySectionProps): React.ReactElement => {
+    //Checks if submission is a previous submission
+    const { path } = useRouteMatch()
+    const isPreviousSubmission = path === RoutesRecord.SUBMISSIONS_REVISION
     // Get the zip file for the contract
     const { getKey, getBulkDlURL } = useS3()
     useEffect(() => {
@@ -121,7 +124,7 @@ export const ContractDetailsSummarySection = ({
     return (
         <section id="contractDetailsSection" className={styles.summarySection}>
             <SectionHeader header="Contract details" navigateTo={navigateTo}>
-                {isSubmitted && !disableDownload && (
+                {isSubmitted && !isPreviousSubmission && (
                     <DownloadButton
                         text="Download all contract documents"
                         zippedFilesURL={zippedFilesURL}

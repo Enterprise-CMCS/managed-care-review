@@ -5,6 +5,9 @@ import {
 } from '../../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'
+import { createMemoryHistory } from 'history'
+import { Route } from 'react-router'
+import { RoutesRecord } from '../../../constants/routes'
 
 describe('RateDetailsSummarySection', () => {
     const draftSubmission = mockContractAndRatesDraft()
@@ -178,14 +181,22 @@ describe('RateDetailsSummarySection', () => {
         ).toBeNull()
     })
 
-    it('does not render download all button when disabled', () => {
+    it('does not render download all button when on previous submission', () => {
+        const history = createMemoryHistory()
         renderWithProviders(
-            <RateDetailsSummarySection
-                submission={draftSubmission}
-                disableDownload
-            />
+            <Route
+                path={RoutesRecord.SUBMISSIONS_REVISION}
+                component={() => (
+                    <RateDetailsSummarySection submission={stateSubmission} />
+                )}
+            />,
+            {
+                routerProvider: {
+                    route: '/submissions/15/revisions/2',
+                    routerProps: { history: history },
+                },
+            }
         )
-
         expect(
             screen.queryByRole('button', {
                 name: 'Download all rate documents',
