@@ -4,10 +4,10 @@ import { GraphQLError } from 'graphql'
 import {
     basicStateSubmission,
     basicSubmission,
-    draftWithALittleBitOfEverything,
+    draftWithALittleBitOfEverything
 } from '../common-code/domain-mocks'
 import {
-    DraftSubmissionType,
+    DraftSubmissionType
 } from '../common-code/domain-models'
 import { domainToBase64 } from '../common-code/proto/stateSubmission'
 import {
@@ -16,33 +16,26 @@ import {
     DraftSubmissionUpdates,
     FetchCurrentUserDocument,
     FetchStateSubmissionDocument,
-    FetchSubmission2Document,
-    IndexSubmissionsDocument,
+    FetchSubmission2Document, IndexSubmissions2Document, IndexSubmissionsDocument,
+    State,
     StateSubmission,
     Submission,
-    Submission2,
-    IndexSubmissions2Document, SubmitDraftSubmissionDocument,
+    Submission2, SubmitDraftSubmissionDocument,
     UnlockStateSubmissionDocument,
     UpdateDraftSubmissionDocument,
-    User as UserType,
+    User as UserType
 } from '../gen/gqlClient'
 
 
 /* For use with Apollo MockedProvider in jest tests */
-const mockValidUser: UserType = {
-    __typename: 'StateUser' as const,
-    state: {
-        name: 'Minnesota',
-        code: 'MN',
-        programs: [
-            { id: 'msho', name: 'MSHO' },
-            { id: 'pmap', name: 'PMAP' },
-            { id: 'snbc', name: 'SNBC' },
-        ],
-    },
-    role: 'STATE_USER',
-    name: 'Bob it user',
-    email: 'bob@dmas.mn.gov',
+function mockValidUser(): UserType {
+    return {
+        __typename: 'StateUser' as const,
+        state: mockMNState(),
+        role: 'STATE_USER',
+        name: 'Bob it user',
+        email: 'bob@dmas.mn.gov',
+    }
 }
 
 function mockValidCMSUser(): UserType {
@@ -61,11 +54,7 @@ export function mockDraft(): DraftSubmission {
         updatedAt: new Date(),
         id: 'test-abc-123',
         stateCode: 'MN',
-        programIDs: ['snbc'],
-        program: {
-            id: 'snbc',
-            name: 'SNBC',
-        },
+        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         name: 'MN-MSHO-0001',
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A real submission',
@@ -97,11 +86,7 @@ export function mockContactAndRatesDraft(): DraftSubmission {
         updatedAt: new Date(),
         id: 'test-abc-123',
         stateCode: 'MN',
-        programIDs: ['snbc'],
-        program: {
-            id: 'snbc',
-            name: 'SNBC',
-        },
+        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         name: 'MN-MSHO-0001',
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A real submission',
@@ -132,11 +117,7 @@ export function mockCompleteDraft(): DraftSubmission {
         updatedAt: new Date(),
         id: 'test-abc-123',
         stateCode: 'MN',
-        programIDs: ['snbc'],
-        program: {
-            id: 'snbc',
-            name: 'SNBC',
-        },
+        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         name: 'MN-MSHO-0001',
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A real submission',
@@ -174,10 +155,6 @@ export function mockContractAndRatesDraft(): DraftSubmission {
         id: 'test-abc-123',
         stateCode: 'MN',
         programIDs: ['pmap'],
-        program: {
-            id: 'pmap',
-            name: 'PMAP',
-        },
         name: 'MN-PMAP-0001',
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A real submission',
@@ -242,11 +219,7 @@ function mockNewDraft(): DraftSubmission {
         updatedAt: new Date(),
         id: 'test-abc-124',
         stateCode: 'MN',
-        programIDs: ['snbc'],
-        program: {
-            id: 'snbc',
-            name: 'SNBC',
-        },
+        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         name: 'MN-MSHO-0002',
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A real submission',
@@ -277,11 +250,7 @@ export function mockStateSubmission(): StateSubmission {
         updatedAt: new Date(),
         id: 'test-abc-125',
         stateCode: 'MN',
-        programIDs: ['snbc'],
-        program: {
-            id: 'snbc',
-            name: 'SNBC',
-        },
+        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         name: 'MN-MSHO-0003',
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A submitted submission',
@@ -331,6 +300,30 @@ export function mockStateSubmission(): StateSubmission {
     }
 }
 
+export function mockMNState(): State {
+    return {
+      "name": "Minnesota",
+      "programs": [
+        {
+          "id": "abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce",
+          "name": "SNBC"
+        },
+        {
+          "id": "d95394e5-44d1-45df-8151-1cc1ee66f100",
+          "name": "PMAP"
+        },
+        {
+          "id": "ea16a6c0-5fc6-4df8-adac-c627e76660ab",
+          "name": "MSC+"
+        },
+        {
+          "id": "3fd36500-bf2c-47bc-80e8-e7aa417184c5",
+          "name": "MSHO"
+        }
+      ],
+      "code": "MN"
+    }
+}
 
 export function mockDraftSubmission2(submissionData?: Partial<DraftSubmissionType>): Submission2 {
     const submission = {...basicSubmission(), ...submissionData}
@@ -342,6 +335,7 @@ export function mockDraftSubmission2(submissionData?: Partial<DraftSubmissionTyp
         status: 'DRAFT',
         intiallySubmittedAt: '2022-01-01',
         stateCode: 'MN',
+        state: mockMNState(),
         revisions: [
             {
                 revision: {
@@ -368,6 +362,7 @@ export function mockSubmittedSubmission2(): Submission2 {
         status: 'SUBMITTED',
         intiallySubmittedAt: '2022-01-01',
         stateCode: 'MN',
+        state: mockMNState(),
         revisions: [
             {
                 revision: {
@@ -401,6 +396,7 @@ export function mockUnlockedSubmission2(
         status: 'UNLOCKED',
         intiallySubmittedAt: '2020-01-01',
         stateCode: 'MN',
+        state: mockMNState(),
         revisions: [
             {
                 revision: {
@@ -438,7 +434,7 @@ type fetchCurrentUserMockProps = {
     statusCode: 200 | 403 | 500
 }
 const fetchCurrentUserMock = ({
-    user = mockValidUser,
+    user = mockValidUser(),
     statusCode,
 }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
     fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
@@ -676,11 +672,13 @@ const updateDraftSubmissionMock = ({
 type submitDraftSubmissionMockSuccessProps = {
     stateSubmission?: StateSubmission | Partial<StateSubmission>
     id: string
+    submittedReason?: string
 }
 
 const submitDraftSubmissionMockSuccess = ({
-    id,
     stateSubmission,
+    id,
+    submittedReason,
 }: submitDraftSubmissionMockSuccessProps): MockedResponse<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Record<string, any>
@@ -689,7 +687,7 @@ const submitDraftSubmissionMockSuccess = ({
     return {
         request: {
             query: SubmitDraftSubmissionDocument,
-            variables: { input: { submissionID: id } },
+            variables: { input: { submissionID: id, submittedReason } },
         },
         result: { data: { submitDraftSubmission: { submission: submission } } },
     }

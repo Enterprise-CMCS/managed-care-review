@@ -7,10 +7,6 @@ query fetchStateSubmission($input: FetchStateSubmissionInput!) {
             updatedAt
             submittedAt
             programIDs
-            program {
-                name
-                id
-            }
             stateCode
             submissionType
             submissionDescription

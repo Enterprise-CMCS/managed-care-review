@@ -1,12 +1,17 @@
 import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitDraftSubmission.graphql'
-import { StateSubmission } from '../gen/gqlServer'
 import {
     constructTestPostgresServer,
     createAndUpdateTestDraftSubmission,
     fetchTestStateSubmissionById,
     defaultContext,
+    defaultFloridaProgram,
+	unlockTestDraftSubmission,
+	resubmitTestDraftSubmission,
+	createTestStateSubmission,
 } from '../testHelpers/gqlHelpers'
-import {testEmailConfig, testEmailer} from '../testHelpers/emailerHelpers'
+import { testEmailConfig, testEmailer } from '../testHelpers/emailerHelpers'
+import { base64ToDomain } from '../../app-web/src/common-code/proto/stateSubmission'
+import { submissionName } from '../../app-web/src/common-code/domain-models'
 
 describe('submitDraftSubmission', () => {
     it('returns a StateSubmission if complete', async () => {
@@ -40,7 +45,7 @@ describe('submitDraftSubmission', () => {
         // The submission fields should still be set
         expect(resultDraft.id).toEqual(createdID)
         expect(resultDraft.submissionType).toEqual('CONTRACT_AND_RATES')
-        expect(resultDraft.program.id).toEqual('cnet')
+        expect(resultDraft.programIDs).toEqual([defaultFloridaProgram().id])
         // check that the stateNumber is being returned the same
         expect(resultDraft.name.split('-')[2]).toEqual(draft.name.split('-')[2])
         expect(resultDraft.submissionDescription).toEqual(
@@ -235,15 +240,22 @@ describe('submitDraftSubmission', () => {
             },
         })
 
+        const currentRevision = submitResult?.data?.submitDraftSubmission
+            ?.submission.revisions[0].revision
 
-        const sub = submitResult?.data?.submitDraftSubmission
-            ?.submission as StateSubmission
+        const sub = base64ToDomain(currentRevision.submissionData)
+        if (sub instanceof Error) {
+            throw sub
+        }
+
+        const programs = [defaultFloridaProgram()]
+        const name = submissionName(sub, programs)
 
         // email subject line is correct for CMS email
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
             expect.objectContaining({
                 subject: expect.stringContaining(
-                    `TEST New Managed Care Submission: ${sub.name}`
+                    `TEST New Managed Care Submission: ${name}`
                 ),
                 sourceEmail: config.emailSource,
                 toAddresses: expect.arrayContaining(
@@ -276,13 +288,21 @@ describe('submitDraftSubmission', () => {
 
         expect(submitResult.errors).toBeUndefined()
 
-        const sub = submitResult?.data?.submitDraftSubmission
-            ?.submission as StateSubmission
+        const currentRevision = submitResult?.data?.submitDraftSubmission
+            ?.submission.revisions[0].revision
+
+        const sub = base64ToDomain(currentRevision.submissionData)
+        if (sub instanceof Error) {
+            throw sub
+        }
+
+        const programs = [defaultFloridaProgram()]
+        const name = submissionName(sub, programs)
 
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
             expect.objectContaining({
                 subject: expect.stringContaining(
-                    `TEST ${sub.name} was sent to CMS`
+                    `TEST ${name} was sent to CMS`
                 ),
                 sourceEmail: config.emailSource,
                 toAddresses: expect.arrayContaining(
@@ -312,19 +332,133 @@ describe('submitDraftSubmission', () => {
 
         expect(submitResult.errors).toBeUndefined()
 
-        const sub = submitResult?.data?.submitDraftSubmission
-            ?.submission as StateSubmission
+        const currentRevision = submitResult?.data?.submitDraftSubmission
+            ?.submission.revisions[0].revision
+
+        const sub = base64ToDomain(currentRevision.submissionData)
+        if (sub instanceof Error) {
+            throw sub
+        }
+
+        const programs = [defaultFloridaProgram()]
+        const name = submissionName(sub, programs)
 
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
             expect.objectContaining({
                 subject: expect.stringContaining(
-                    `TEST ${sub.name} was sent to CMS`
+                    `TEST ${name} was sent to CMS`
                 ),
                 toAddresses: expect.arrayContaining([sub.stateContacts[0].email])
             })
         )
     })
 
+    it('send CMS email to CMS on valid resubmission', async () => {
+        const config = testEmailConfig
+        const mockEmailer = testEmailer(config)
+        //mock invoke email submit lambda
+        const stateServer = await constructTestPostgresServer({
+            emailer: mockEmailer,
+        })
+
+        const stateSubmission = await createTestStateSubmission(stateServer)
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: {
+                    name: 'Zuko',
+                    role: 'CMS_USER',
+                    email: 'zuko@example.com',
+                },
+            },
+        })
+
+        await unlockTestDraftSubmission(cmsServer, stateSubmission.id, 'Test unlock reason.')
+
+        const submitResult = await stateServer.executeOperation({
+            query: SUBMIT_DRAFT_SUBMISSION,
+            variables: {
+                input: {
+                    submissionID: stateSubmission.id,
+                    submittedReason: 'Test resubmitted reason'
+                },
+            },
+        })
+
+        const currentRevision = submitResult?.data?.submitDraftSubmission
+            ?.submission.revisions[0].revision
+
+        const sub = base64ToDomain(currentRevision.submissionData)
+        if (sub instanceof Error) {
+            throw sub
+        }
+
+        const programs = [defaultFloridaProgram()]
+        const name = submissionName(sub, programs)
+
+        // email subject line is correct for CMS email and contains correct email body text
+        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `TEST ${name} was resubmitted`
+                ),
+                sourceEmail: config.emailSource,
+                bodyText: expect.stringContaining(`The state completed their edits on submission ${name}`),
+                toAddresses: expect.arrayContaining(
+                    Array.from(config.cmsReviewSharedEmails)
+                ),
+            })
+        )
+    })
+
+    it('send state email to state contacts and current user on valid resubmission', async () => {
+        const config = testEmailConfig
+        const mockEmailer = testEmailer(config)
+        //mock invoke email submit lambda
+        const stateServer = await constructTestPostgresServer({
+            emailer: mockEmailer,
+        })
+
+        const currentUser  = defaultContext().user
+
+        const stateSubmission = await createTestStateSubmission(stateServer)
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: {
+                    name: 'Zuko',
+                    role: 'CMS_USER',
+                    email: 'zuko@example.com',
+                },
+            },
+        })
+
+        await  unlockTestDraftSubmission(cmsServer, stateSubmission.id, 'Test unlock reason.')
+
+        const submitResult = await resubmitTestDraftSubmission(stateServer, stateSubmission.id, 'Test resubmission reason')
+
+        const currentRevision = submitResult?.revisions[0].revision
+
+        const sub = base64ToDomain(currentRevision.submissionData)
+        if (sub instanceof Error) {
+            throw sub
+        }
+
+        const programs = [defaultFloridaProgram()]
+        const name = submissionName(sub, programs)
+
+        // email subject line is correct for CMS email and contains correct email body text
+        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `TEST ${name} was resubmitted`
+                ),
+                sourceEmail: config.emailSource,
+                toAddresses: expect.arrayContaining(
+                    [currentUser.email, sub.stateContacts[0].email]
+                ),
+            })
+        )
+    })
 
     it('does not send any emails if submission fails', async () => {
         const mockEmailer = testEmailer()

@@ -25,9 +25,9 @@ export function createDraftSubmissionResolver(
 
         const stateFromCurrentUser: State['code'] = user.state_code
 
-        const program = store.findPrograms(stateFromCurrentUser, input.programIDs)
+        const programs = store.findPrograms(stateFromCurrentUser, input.programIDs)
 
-        if (program === undefined) {
+        if (programs === undefined || programs.length !== input.programIDs.length) {
             const count = input.programIDs.length
             const errMessage = `The program ${pluralize('id', count)} ${input.programIDs.join(', ')} ${pluralize('does', count)} not exist in state ${stateFromCurrentUser}`
             logError('createDraftSubmission', errMessage)

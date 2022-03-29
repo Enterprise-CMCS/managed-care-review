@@ -14,7 +14,8 @@ import styles from './Modal.module.scss'
 interface ModalComponentProps {
     id: string,
     modalHeading?: string,
-    onSubmit?: () => void,
+    onSubmit?: React.MouseEventHandler<HTMLButtonElement> | undefined,
+    onSubmitText?: string,
     className?: string,
     modalRef: React.RefObject<ModalRef>
     submitButtonProps?: JSX.IntrinsicElements['button']
@@ -30,10 +31,9 @@ export const Modal = ({
     className,
     modalRef,
     submitButtonProps,
+    onSubmitText,
     ...divProps
 }: ModalProps): React.ReactElement  => {
-    
-
     return (
         <UswdsModal
             aria-labelledby={`${id}-heading`}
@@ -66,7 +66,7 @@ export const Modal = ({
                         onClick={onSubmit}
                         {...submitButtonProps}
                     >
-                        Submit
+                        {onSubmitText || 'Submit'}
                     </Button>
                 </ButtonGroup>
             </ModalFooter>

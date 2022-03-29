@@ -14,11 +14,8 @@ type Query {
     indexSubmissions: IndexSubmissionsPayload!
 
     # new api
-    fetchSubmission2(
-        input: FetchSubmission2Input!
-    ): FetchSubmission2Payload!
+    fetchSubmission2(input: FetchSubmission2Input!): FetchSubmission2Payload!
     indexSubmissions2: IndexSubmissions2Payload!
-
 }
 
 type Mutation {
@@ -99,10 +96,11 @@ type UpdateDraftSubmissionPayload {
 
 input SubmitDraftSubmissionInput {
     submissionID: ID!
+    submittedReason: String
 }
 
 type SubmitDraftSubmissionPayload {
-    submission: StateSubmission!
+    submission: Submission2!
 }
 
 input UnlockStateSubmissionInput {
@@ -155,11 +153,12 @@ type Submission2 {
     status: Submission2Status!
     intiallySubmittedAt: Date
     stateCode: String!
+    state: State!
     revisions: [RevisionEdge!]!
 }
 
 type UpdateInformation {
-    updatedAt: Date!
+    updatedAt: DateTime!
     updatedBy: String!
     updatedReason: String!
 }
@@ -312,7 +311,6 @@ enum FederalAuthority {
 type DraftSubmission {
     id: ID!
     programIDs: [ID!]!
-    program: Program! # This is dead code.
     submissionType: SubmissionType!
     submissionDescription: String!
     stateCode: String!
@@ -342,7 +340,6 @@ type DraftSubmission {
 type StateSubmission {
     id: ID!
     programIDs: [ID!]!
-    program: Program!
     submissionType: SubmissionType!
     submissionDescription: String!
     stateCode: String!

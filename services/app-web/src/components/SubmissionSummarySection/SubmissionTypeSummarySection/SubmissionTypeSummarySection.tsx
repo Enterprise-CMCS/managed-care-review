@@ -1,5 +1,6 @@
 import { Grid } from '@trussworks/react-uswds'
 import dayjs from 'dayjs'
+import { ProgramT } from '../../../common-code/domain-models'
 import { DataDetail } from '../../../components/DataDetail'
 import { DoubleColumnGrid } from '../../../components/DoubleColumnGrid'
 import { SectionHeader } from '../../../components/SectionHeader'
@@ -10,15 +11,19 @@ import styles from '../SubmissionSummarySection.module.scss'
 
 export type SubmissionTypeSummarySectionProps = {
     submission: DraftSubmission | StateSubmission
+    statePrograms: ProgramT[]
     navigateTo?: string
     unlockModalButton?: React.ReactElement
 }
 
 export const SubmissionTypeSummarySection = ({
     submission,
+    statePrograms,
     navigateTo,
     unlockModalButton,
 }: SubmissionTypeSummarySectionProps): React.ReactElement => {
+
+    const programNames = statePrograms.filter(p => submission.programIDs.includes(p.id)).map(p => p.name)
 
     return (
         <section id="submissionTypeSection" className={styles.summarySection}>
@@ -57,7 +62,7 @@ export const SubmissionTypeSummarySection = ({
                     <DataDetail
                         id="program"
                         label="Program(s)"
-                        data={submission.programIDs}
+                        data={programNames}
                     />
                     <DataDetail
                         id="submissionType"

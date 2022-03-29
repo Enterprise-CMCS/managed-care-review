@@ -6,6 +6,7 @@ import UPDATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/updateDraft
 import FETCH_DRAFT_SUBMISSION from '../../app-graphql/src/queries/fetchDraftSubmission.graphql'
 import FETCH_STATE_SUBMISSION from '../../app-graphql/src/queries/fetchStateSubmission.graphql'
 import typeDefs from '../../app-graphql/src/schema.graphql'
+import { ProgramT } from '../../app-web/src/common-code/domain-models'
 import { Emailer, newLocalEmailer } from '../emailer'
 import {
     CreateDraftSubmissionInput,
@@ -19,6 +20,15 @@ import { Context } from '../handlers/apollo_gql'
 import { NewPostgresStore, Store } from '../postgres'
 import { configureResolvers } from '../resolvers'
 import { sharedTestPrismaClient } from './storeHelpers'
+
+// Since our programs are checked into source code, we have a program we
+// use as our default
+function defaultFloridaProgram(): ProgramT {
+    return {
+        id: '5c10fe9f-bec9-416f-a20c-718b152ad633',
+        name: 'MMA',
+    }
+}
 
 const defaultContext = (): Context => {
     return {
@@ -65,7 +75,7 @@ const createTestDraftSubmission = async (
     server: ApolloServer
 ): Promise<DraftSubmission> => {
     const input: CreateDraftSubmissionInput = {
-        programIDs: ['smmc'],
+        programIDs: [defaultFloridaProgram().id],
         submissionType: 'CONTRACT_ONLY' as const,
         submissionDescription: 'A created submission',
     }
@@ -127,7 +137,7 @@ const createAndUpdateTestDraftSubmission = async (
     const dateCertified = '2025-03-15'
 
     const updates = {
-        programIDs: ['cnet'],
+        programIDs: [defaultFloridaProgram().id],
         submissionType: 'CONTRACT_AND_RATES' as const,
         submissionDescription: 'An updated submission',
         documents: [],
@@ -212,6 +222,35 @@ const submitTestDraftSubmission = async (
     return updateResult.data.submitDraftSubmission.submission
 }
 
+const resubmitTestDraftSubmission = async (
+    server: ApolloServer,
+    submissionID: string,
+    submittedReason: string
+) => {
+    const updateResult = await server.executeOperation({
+        query: SUBMIT_DRAFT_SUBMISSION,
+        variables: {
+            input: {
+                submissionID,
+                submittedReason
+            },
+        },
+    })
+
+    if (updateResult.errors) {
+        console.log('errors', updateResult.errors)
+        throw new Error(
+            `updateTestDraftSubmission mutation failed with errors ${updateResult.errors}`
+        )
+    }
+
+    if (updateResult.data === undefined || updateResult.data === null) {
+        throw new Error('updateTestDraftSubmission returned nothing')
+    }
+
+    return updateResult.data.submitDraftSubmission.submission
+}
+
 const unlockTestDraftSubmission = async (
     server: ApolloServer,
     submissionID: string,
@@ -243,7 +282,7 @@ const unlockTestDraftSubmission = async (
 
 const createTestStateSubmission = async (
     server: ApolloServer
-): Promise<StateSubmission> => {
+): Promise<Submission2> => {
     const draft = await createAndUpdateTestDraftSubmission(server)
 
     const updatedSubmission = await submitTestDraftSubmission(server, draft.id)
@@ -305,5 +344,7 @@ export {
     submitTestDraftSubmission,
     unlockTestDraftSubmission,
     fetchTestStateSubmissionById,
-    defaultContext
+    defaultContext,
+	defaultFloridaProgram,
+    resubmitTestDraftSubmission
 }

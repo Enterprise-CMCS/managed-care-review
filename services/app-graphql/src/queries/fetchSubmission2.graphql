@@ -3,6 +3,14 @@ query fetchSubmission2($input: FetchSubmission2Input!) {
         submission {
             id
             stateCode
+            state {
+                code
+                name
+                programs {
+                    id
+                    name
+                }
+            }
             status
             intiallySubmittedAt
             revisions {

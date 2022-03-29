@@ -6,10 +6,6 @@ query fetchDraftSubmission($input: FetchDraftSubmissionInput!) {
             createdAt
             updatedAt
             programIDs
-            program {
-                name
-                id
-            }
             stateCode
             submissionType
             submissionDescription

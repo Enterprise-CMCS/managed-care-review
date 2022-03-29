@@ -5,8 +5,8 @@ import {
     constructTestPostgresServer,
     createTestDraftSubmission,
     createTestStateSubmission,
-    submitTestDraftSubmission,
-    unlockTestDraftSubmission
+    unlockTestDraftSubmission,
+    resubmitTestDraftSubmission
 } from '../testHelpers/gqlHelpers'
 
 describe('fetchSubmission2', () => {
@@ -42,7 +42,7 @@ describe('fetchSubmission2', () => {
         } 
 
         expect(subData.id).toEqual(createdID)
-        expect(subData.programIDs).toEqual(['cnet'])
+        expect(subData.programIDs).toEqual(['5c10fe9f-bec9-416f-a20c-718b152ad633'])
         expect(subData.submissionDescription).toEqual('An updated submission')
         expect(subData.documents).toEqual([])
         expect(subData.contractDocuments).toEqual([
@@ -162,7 +162,7 @@ describe('fetchSubmission2', () => {
 
 
         // resubmit it
-        await submitTestDraftSubmission(server, createdID)
+        await resubmitTestDraftSubmission(server, createdID, 'Test resubmission reason')
 
         const resubmitResult = await server.executeOperation({
             query: FETCH_SUBMISSION_2,
@@ -173,8 +173,6 @@ describe('fetchSubmission2', () => {
 
         expect(resubmitResult.data?.fetchSubmission2.submission.status).toEqual('RESUBMITTED')
         expect(resubmitResult.data?.fetchSubmission2.submission.intiallySubmittedAt).toEqual(today)
-
-
     })
 
     it('a different user from the same state can fetch the draft', async () => {
@@ -314,11 +312,11 @@ describe('fetchSubmission2', () => {
 
         await unlockTestDraftSubmission(cmsServer, stateSubmission.id, 'Super duper good reason.')
 
-        await submitTestDraftSubmission(stateServer, stateSubmission.id,)
+        await resubmitTestDraftSubmission(stateServer, stateSubmission.id, 'Test first resubmission')
 
         await unlockTestDraftSubmission(cmsServer, stateSubmission.id, 'Super duper good reason.')
 
-        await submitTestDraftSubmission(stateServer, stateSubmission.id)
+        await resubmitTestDraftSubmission(stateServer, stateSubmission.id, 'Test second resubmission')
 
         await unlockTestDraftSubmission(cmsServer, stateSubmission.id, 'Super duper good reason.')
 

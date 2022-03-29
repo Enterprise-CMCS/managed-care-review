@@ -49,8 +49,8 @@ type Store = {
 
     updateStateSubmission: (
         stateSubmission: StateSubmissionType,
-        submittedAt: Date
-    ) => Promise<StateSubmissionType | StoreError>
+        submitInfo: UpdateInfoType
+    ) => Promise<Submission2Type | StoreError>
 
     insertNewRevision: (
         submissionID: string,
@@ -61,7 +61,7 @@ type Store = {
     findPrograms: (
         stateCode: string,
         programIDs: Array<string>
-    ) => ProgramT | undefined
+    ) => ProgramT[] | undefined
 
     // new api
     findSubmissionWithRevisions: (
@@ -90,8 +90,8 @@ function NewPostgresStore(client: PrismaClient): Store {
         },
         updateDraftSubmission: (draftSubmission) =>
             updateDraftSubmission(client, draftSubmission),
-        updateStateSubmission: (submission, submittedAt) =>
-            updateStateSubmission(client, submission, submittedAt),
+        updateStateSubmission: (submission, submitInfo) =>
+            updateStateSubmission(client, submission, submitInfo),
         findStateSubmission: (submissionID) =>
             findStateSubmission(client, submissionID),
         insertNewRevision: (submissionID, unlockInfo, draft) =>

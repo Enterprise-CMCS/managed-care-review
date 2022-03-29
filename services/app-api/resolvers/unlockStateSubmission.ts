@@ -88,16 +88,26 @@ export function unlockStateSubmissionResolver(
             throw new Error(errMessage)
         }
 
+        const programs = store.findPrograms(submission.stateCode, submission.programIDs)
+        if (!programs || programs.length !== submission.programIDs.length) {
+            const errMessage = `Can't find programs ${submission.programIDs} from state ${submission.stateCode}, ${submission.id}`
+            logError('unlockStateSubmission', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new Error(errMessage)
+        }
+
         // Send emails!
-        const unlockEmailData = {
+        const name = submissionName(submission, programs)
+
+        const updatedEmailData = {
             ...unlockInfo, 
-            submissionName: submissionName(submission)
+            submissionName: name
         }
         const unlockPackageCMSEmailResult = await
-        emailer.sendUnlockPackageCMSEmail(unlockEmailData)
+        emailer.sendUnlockPackageCMSEmail(updatedEmailData)
 
         const unlockPackageStateEmailResult = await
-        emailer.sendUnlockPackageStateEmail(submission, unlockEmailData)
+        emailer.sendUnlockPackageStateEmail(submission, updatedEmailData)
 
         if (unlockPackageCMSEmailResult instanceof Error) {
             logError(
