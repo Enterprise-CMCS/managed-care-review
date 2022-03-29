@@ -49,6 +49,10 @@ import { Error404 } from '../Errors/Error404'
 import styles from './SubmissionSummary.module.scss'
 import { ChangeHistory } from '../../components/ChangeHistory/ChangeHistory'
 
+export type DocumentDateLookupTable = {
+    [key: string]: string
+}
+
 function UnlockModalButton({
     disabled,
     modalRef,
@@ -130,6 +134,40 @@ export const SubmissionSummary = (): React.ReactElement => {
     const modalFormInitialValues = {
         unlockReason: '',
     }
+
+    // document date lookup state
+    const [documentDates, setDocumentDates] = useState<DocumentDateLookupTable>(
+        {}
+    )
+
+    const makeDateTable = (submissions: Submission2) => {
+        const docBuckets = [
+            'contractDocuments',
+            'rateDocuments',
+            'documents',
+        ] as const
+        const lookupTable = {} as DocumentDateLookupTable
+        if (submissions) {
+            submissions.revisions.forEach((revision) => {
+                const revisionData = base64ToDomain(
+                    revision.revision.submissionData
+                )
+                if (revisionData instanceof Error) {
+                    console.error(
+                        'failed to read submission data; unable to display document dates'
+                    )
+                    return
+                }
+                docBuckets.forEach((bucket) => {
+                    revisionData[bucket].forEach((doc) => {
+                        lookupTable[doc.name] = revisionData.updatedAt
+                    })
+                })
+            })
+            console.log('LOOKUP TABLE: ', lookupTable)
+            setDocumentDates(lookupTable)
+        }
+    }
     const formik = useFormik({
         initialValues: modalFormInitialValues,
         validationSchema: Yup.object().shape({
@@ -151,13 +189,12 @@ export const SubmissionSummary = (): React.ReactElement => {
     const [unlockStateSubmission] = useUnlockStateSubmissionMutation()
     const submissionAndRevisions = data?.fetchSubmission2.submission
 
-
-    const displayUnlockButton =
-        loggedInUser?.role === 'CMS_USER'
+    const displayUnlockButton = loggedInUser?.role === 'CMS_USER'
 
     // Pull out the correct revision form api request, display errors for bad dad
     useEffect(() => {
         if (submissionAndRevisions) {
+            makeDateTable(submissionAndRevisions)
             // We ignore revisions currently being edited.
             // The summary page should only ever called on a package that has been submitted once
             const currentRevision = submissionAndRevisions.revisions.find(
@@ -378,10 +415,16 @@ export const SubmissionSummary = (): React.ReactElement => {
                         ) : undefined
                     }
                 />
-                <ContractDetailsSummarySection submission={submission} />
+                <ContractDetailsSummarySection
+                    submission={submission}
+                    documentDateLookupTable={documentDates}
+                />
 
                 {isContractActionAndRateCertification && (
-                    <RateDetailsSummarySection submission={submission} />
+                    <RateDetailsSummarySection
+                        submission={submission}
+                        documentDateLookupTable={documentDates}
+                    />
                 )}
 
                 <ContactsSummarySection submission={submission} />

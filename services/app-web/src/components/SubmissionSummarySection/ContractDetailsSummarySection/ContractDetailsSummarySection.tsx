@@ -2,9 +2,14 @@ import { useEffect, useState } from 'react'
 import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
+import { DocumentDateLookupTable } from '../../../pages/SubmissionSummary/SubmissionSummary'
 import {
-    AmendableItemsRecord, ContractExecutionStatusRecord, ContractTypeRecord,
-    FederalAuthorityRecord, ManagedCareEntityRecord, RateChangeReasonRecord
+    AmendableItemsRecord,
+    ContractExecutionStatusRecord,
+    ContractTypeRecord,
+    FederalAuthorityRecord,
+    ManagedCareEntityRecord,
+    RateChangeReasonRecord,
 } from '../../../constants/submissions'
 import { useS3 } from '../../../contexts/S3Context'
 import { formatCalendarDate } from '../../../dateHelpers'
@@ -16,6 +21,7 @@ import styles from '../SubmissionSummarySection.module.scss'
 export type ContractDetailsSummarySectionProps = {
     submission: DraftSubmission | StateSubmission
     navigateTo?: string
+    documentDateLookupTable?: DocumentDateLookupTable
 }
 
 const createCheckboxList = ({
@@ -47,6 +53,7 @@ const createCheckboxList = ({
 export const ContractDetailsSummarySection = ({
     submission,
     navigateTo,
+    documentDateLookupTable,
 }: ContractDetailsSummarySectionProps): React.ReactElement => {
     // Get the zip file for the contract
     const { getKey, getBulkDlURL } = useS3()
@@ -60,7 +67,8 @@ export const ContractDetailsSummarySection = ({
     useEffect(() => {
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
-            const keysFromDocs = submission.contractDocuments.concat(contractSupportingDocuments)
+            const keysFromDocs = submission.contractDocuments
+                .concat(contractSupportingDocuments)
                 .map((doc) => {
                     const key = getKey(doc.s3URL)
                     if (!key) return ''
@@ -141,8 +149,8 @@ export const ContractDetailsSummarySection = ({
                         data={
                             submission.contractExecutionStatus
                                 ? ContractExecutionStatusRecord[
-                                    submission.contractExecutionStatus
-                                    ]
+                                      submission.contractExecutionStatus
+                                  ]
                                 : ''
                         }
                     />
@@ -153,7 +161,11 @@ export const ContractDetailsSummarySection = ({
                                 ? 'Contract effective dates'
                                 : 'Contract amendment effective dates'
                         }
-                        data={`${formatCalendarDate(submission.contractDateStart)} to ${formatCalendarDate(submission.contractDateEnd)}`}
+                        data={`${formatCalendarDate(
+                            submission.contractDateStart
+                        )} to ${formatCalendarDate(
+                            submission.contractDateEnd
+                        )}`}
                     />
                     <DataDetail
                         id="managedCareEntities"
@@ -220,11 +232,13 @@ export const ContractDetailsSummarySection = ({
             </dl>
             <UploadedDocumentsTable
                 documents={submission.contractDocuments}
+                documentDateLookupTable={documentDateLookupTable}
                 caption="Contract"
                 documentCategory="Contract"
             />
             <UploadedDocumentsTable
                 documents={contractSupportingDocuments}
+                documentDateLookupTable={documentDateLookupTable}
                 caption="Contract supporting documents"
                 documentCategory="Contract-supporting"
                 isSupportingDocuments
