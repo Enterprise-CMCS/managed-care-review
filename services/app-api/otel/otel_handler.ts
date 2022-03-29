@@ -2,10 +2,7 @@ import { trace, Tracer } from '@opentelemetry/api'
 import { Resource } from '@opentelemetry/resources'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
-import {
-    SimpleSpanProcessor,
-    ConsoleSpanExporter,
-} from '@opentelemetry/sdk-trace-base'
+import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { GraphQLInstrumentation } from '@opentelemetry/instrumentation-graphql'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
@@ -26,13 +23,7 @@ export function createTracer(serviceName: string): Tracer {
         url: process.env.REACT_APP_OTEL_COLLECTOR_URL,
         headers: {},
     })
-    console.log('--------- debug otel_handler.ts --------------')
-    console.log(serviceName)
-    console.log(exporter)
 
-    provider.addSpanProcessor(
-        new SimpleSpanProcessor(new ConsoleSpanExporter())
-    )
     provider.addSpanProcessor(new SimpleSpanProcessor(exporter))
 
     // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
