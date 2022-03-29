@@ -110,7 +110,6 @@ fs.createReadStream(file)
             };
         }
 
-        // Check to see if the id is unique. If it isn't abort and print some useful information.
         states[code]!.programs.push({
             id: data.id,
             fullName: data.Program,

@@ -55,18 +55,24 @@ const hasValidDocuments = (sub: StateSubmissionType): boolean => {
     return validRateDocuments && validContractDocuments
 }
 
-const hasValidSupportingDocumentCategories = (sub: StateSubmissionType): boolean => {
+const hasValidSupportingDocumentCategories = (
+    sub: StateSubmissionType
+): boolean => {
     // every document must have a category
-    if (!sub.documents.every(doc => doc.documentCategories.length > 0)) {
-        return false;
+    if (!sub.documents.every((doc) => doc.documentCategories.length > 0)) {
+        return false
     }
     // if the submission is contract-only, all supporting docs must be 'CONTRACT-RELATED
-    if (sub.submissionType === 'CONTRACT_ONLY' &&
+    if (
+        sub.submissionType === 'CONTRACT_ONLY' &&
         sub.documents.length > 0 &&
-        !sub.documents.every(doc => doc.documentCategories.includes('CONTRACT_RELATED'))) {
-            return false;
-        }
-    return true;
+        !sub.documents.every((doc) =>
+            doc.documentCategories.includes('CONTRACT_RELATED')
+        )
+    ) {
+        return false
+    }
+    return true
 }
 
 const isStateSubmission = (sub: unknown): sub is StateSubmissionType => {
@@ -97,24 +103,35 @@ const isDraftSubmission = (sub: unknown): sub is DraftSubmissionType => {
 }
 
 const naturalSort = (a: string, b: string): number => {
-    return a.localeCompare(b, "en", { numeric: true })
+    return a.localeCompare(b, 'en', { numeric: true })
 }
 
 // Pull out the programs names for display from the program IDs
 function programNames(programs: ProgramT[], programIDs: string[]): string[] {
-    return programIDs.map(id => {
-        const program = programs.find(p => p.id === id)
+    return programIDs.map((id) => {
+        const program = programs.find((p) => p.id === id)
         if (!program) {
-            return "Unknown Program"
+            return 'Unknown Program'
         }
         return program.name
     })
 }
 
-function submissionName(submission: SubmissionUnionType, statePrograms: ProgramT[]): string {
+function submissionName(
+    submission: SubmissionUnionType,
+    statePrograms: ProgramT[]
+): string {
     const padNumber = submission.stateNumber.toString().padStart(4, '0')
     const pNames = programNames(statePrograms, submission.programIDs)
-    const formattedProgramNames = pNames.sort(naturalSort).map(n => n.replace(/\s/g, '-').replace(/[^a-zA-Z0-9+]/g, '').toUpperCase()).join('-')
+    const formattedProgramNames = pNames
+        .sort(naturalSort)
+        .map((n) =>
+            n
+                .replace(/\s/g, '-')
+                .replace(/[^a-zA-Z0-9+]/g, '')
+                .toUpperCase()
+        )
+        .join('-')
     return `MCR-${submission.stateCode.toUpperCase()}-${formattedProgramNames}-${padNumber}`
 }
 
@@ -127,5 +144,6 @@ export {
     isContractAndRates,
     isStateSubmission,
     isDraftSubmission,
+    programNames,
     submissionName,
 }
