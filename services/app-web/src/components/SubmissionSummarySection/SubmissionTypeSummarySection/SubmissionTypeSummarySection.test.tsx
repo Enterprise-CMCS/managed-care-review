@@ -60,6 +60,9 @@ describe('SubmissionTypeSummarySection', () => {
         expect(
             screen.getByRole('definition', { name: 'Submission description' })
         ).toBeInTheDocument()
+        expect(
+            screen.queryByRole('definition', { name: 'Last updated' })
+        ).toBeInTheDocument()
     })
     it('does not render Last Updated field', () => {
         const draftSubmission = mockStateSubmission()
