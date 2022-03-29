@@ -59,10 +59,8 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         //Find revision by revisionVersion.
         if (submissionAndRevisions) {
             const revision = [...submissionAndRevisions.revisions]
-                .reverse()
+                .reverse() //Reversing revisions to get correct submission order
                 .find((revision, index) => index === Number(revisionVersion))
-
-            console.log(revision)
 
             if (!revision) {
                 console.error(
@@ -166,23 +164,20 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                     showLastUpdated={false}
                     headerChildComponent={
                         submitInfo && (
-                            <p id="submissionVersion">{`${dayjs
-                                .utc(submitInfo?.updatedAt)
-                                .tz('America/New_York')
-                                .format('MM/DD/YY h:mma z')} ET version`}</p>
+                            <p className={styles.submissionVersion}>
+                                {`${dayjs
+                                    .utc(submitInfo?.updatedAt)
+                                    .tz('America/New_York')
+                                    .format('MM/DD/YY h:mma z')} ET version`}
+                            </p>
                         )
                     }
                 />
-                <ContractDetailsSummarySection
-                    submission={submission}
-                    disableDownload
-                />
+
+                <ContractDetailsSummarySection submission={submission} />
 
                 {isContractActionAndRateCertification && (
-                    <RateDetailsSummarySection
-                        submission={submission}
-                        disableDownload
-                    />
+                    <RateDetailsSummarySection submission={submission} />
                 )}
 
                 <ContactsSummarySection submission={submission} />
