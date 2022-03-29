@@ -73,13 +73,13 @@ describe('rate details', () => {
             cy.fillOutAmendmentToPriorRateCertification()
 
             // Navigate to contacts page by clicking continue
-            cy.navigateForm('Continue')
+            cy.navigateForm('CONTINUE')
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
 
             
             cy.fillOutStateContact()
             cy.fillOutActuaryContact()
-            cy.navigateForm('Continue')
+            cy.navigateForm('CONTINUE')
 
             cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
 
