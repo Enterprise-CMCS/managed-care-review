@@ -7,8 +7,9 @@ import {
 } from '../../../testHelpers/apolloHelpers'
 
 describe('SubmissionTypeSummarySection', () => {
+    const draftSubmission = mockContractAndRatesDraft()
+    const stateSubmission = mockStateSubmission()
     it('can render draft submission without errors', () => {
-        const draftSubmission = mockContractAndRatesDraft()
         renderWithProviders(
             <SubmissionTypeSummarySection
                 submission={draftSubmission}
@@ -28,7 +29,6 @@ describe('SubmissionTypeSummarySection', () => {
     })
 
     it('can render state submission without errors', () => {
-        const stateSubmission = mockStateSubmission()
         renderWithProviders(
             <SubmissionTypeSummarySection submission={stateSubmission} />
         )
@@ -42,8 +42,7 @@ describe('SubmissionTypeSummarySection', () => {
         expect(screen.queryByRole('link', { name: 'Edit' })).toBeNull()
     })
 
-    it('can render all submission type fields', () => {
-        const draftSubmission = mockContractAndRatesDraft()
+    it('can render all draft submission type fields', () => {
         renderWithProviders(
             <SubmissionTypeSummarySection
                 submission={draftSubmission}
@@ -60,12 +59,32 @@ describe('SubmissionTypeSummarySection', () => {
         expect(
             screen.getByRole('definition', { name: 'Submission description' })
         ).toBeInTheDocument()
+    })
+    it('can render all state submission type fields', () => {
+        renderWithProviders(
+            <SubmissionTypeSummarySection
+                submission={stateSubmission}
+                navigateTo="submission-type"
+            />
+        )
+
+        expect(
+            screen.getByRole('definition', { name: 'Program(s)' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', { name: 'Submission type' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', { name: 'Submission description' })
+        ).toBeInTheDocument()
         expect(
             screen.queryByRole('definition', { name: 'Last updated' })
         ).toBeInTheDocument()
+        expect(
+            screen.queryByRole('definition', { name: 'Submitted' })
+        ).toBeInTheDocument()
     })
     it('does not render Last Updated field', () => {
-        const draftSubmission = mockStateSubmission()
         renderWithProviders(
             <SubmissionTypeSummarySection
                 submission={draftSubmission}
@@ -78,7 +97,6 @@ describe('SubmissionTypeSummarySection', () => {
         ).not.toBeInTheDocument()
     })
     it('renders headerChildComponent component', () => {
-        const draftSubmission = mockStateSubmission()
         renderWithProviders(
             <SubmissionTypeSummarySection
                 submission={draftSubmission}
