@@ -7,7 +7,7 @@
 }
 
 .container {
-    max-width: 50rem; // should match ReviewSubmit max-width
+    max-width: $width-max-contained;
     padding: 2rem 0;
 }
 
