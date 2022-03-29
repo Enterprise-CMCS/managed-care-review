@@ -12,11 +12,13 @@ import styles from '../SubmissionSummarySection.module.scss'
 export type RateDetailsSummarySectionProps = {
     submission: DraftSubmission | StateSubmission
     navigateTo?: string
+    disableDownload?: boolean
 }
 
 export const RateDetailsSummarySection = ({
     submission,
     navigateTo,
+    disableDownload,
 }: RateDetailsSummarySectionProps): React.ReactElement => {
     const isSubmitted = submission.__typename === 'StateSubmission'
     const isEditing = !isSubmitted && navigateTo !== undefined
@@ -56,7 +58,7 @@ export const RateDetailsSummarySection = ({
         <section id="rateDetails" className={styles.summarySection}>
             <dl>
                 <SectionHeader header="Rate details" navigateTo={navigateTo}>
-                    {isSubmitted && (
+                    {isSubmitted && !disableDownload && (
                         <DownloadButton
                             text="Download all rate documents"
                             zippedFilesURL={zippedFilesURL}
@@ -81,7 +83,9 @@ export const RateDetailsSummarySection = ({
                                 ? 'Rating period of original rate certification'
                                 : 'Rating period'
                         }
-                        data={`${formatCalendarDate(submission.rateDateStart)} to ${formatCalendarDate(submission.rateDateEnd)}`}
+                        data={`${formatCalendarDate(
+                            submission.rateDateStart
+                        )} to ${formatCalendarDate(submission.rateDateEnd)}`}
                     />
                     <DataDetail
                         id="dateCertified"

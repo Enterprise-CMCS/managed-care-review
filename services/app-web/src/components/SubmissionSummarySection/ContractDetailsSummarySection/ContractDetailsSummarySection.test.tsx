@@ -1,4 +1,4 @@
-import { screen,waitFor,within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { ContractDetailsSummarySection } from './ContractDetailsSummarySection'
 import {
@@ -18,7 +18,7 @@ describe('ContractDetailsSummarySection', () => {
                     s3URL: 's3://bucketname/key/test1',
                     name: 'supporting docs test 1',
                     documentCategories: ['CONTRACT_RELATED' as const],
-                }, 
+                },
                 {
                     s3URL: 's3://bucketname/key/test3',
                     name: 'supporting docs test 3',
@@ -145,7 +145,7 @@ describe('ContractDetailsSummarySection', () => {
         ).not.toBeInTheDocument()
     })
 
-    it('displays correct text content for a contract amendment',  () => {
+    it('displays correct text content for a contract amendment', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
                 submission={draftContractAndRatesSubmission}
@@ -202,21 +202,20 @@ describe('ContractDetailsSummarySection', () => {
         renderWithProviders(
             <ContractDetailsSummarySection submission={testSubmission} />
         )
-       
+
         await waitFor(() => {
             const contractDocsTable = screen.getByRole('table', {
                 name: 'Contract',
             })
-            
+
             const supportingDocsTable = screen.getByRole('table', {
                 name: /Contract supporting documents/,
             })
-            
+
             expect(contractDocsTable).toBeInTheDocument()
 
-        
             expect(supportingDocsTable).toBeInTheDocument()
-            
+
             // check row content
             expect(
                 within(contractDocsTable).getByRole('row', {
@@ -232,11 +231,8 @@ describe('ContractDetailsSummarySection', () => {
 
             // check correct category on supporting docs
             expect(
-                within(supportingDocsTable).getAllByText(
-                    'Contract-supporting'
-                ).length
-            ).toEqual(2)
-
+                within(supportingDocsTable).getAllByText('Contract-supporting')
+            ).toHaveLength(2)
         })
     })
 
@@ -250,6 +246,21 @@ describe('ContractDetailsSummarySection', () => {
         expect(
             screen.queryByRole('table', {
                 name: /Contract supporting documents/,
+            })
+        ).toBeNull()
+    })
+
+    it('does not render download all button when disabled', () => {
+        renderWithProviders(
+            <ContractDetailsSummarySection
+                submission={draftContractAndRatesSubmission}
+                disableDownload
+            />
+        )
+
+        expect(
+            screen.queryByRole('button', {
+                name: 'Download all contract documents',
             })
         ).toBeNull()
     })

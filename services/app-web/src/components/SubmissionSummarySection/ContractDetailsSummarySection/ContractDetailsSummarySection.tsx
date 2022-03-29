@@ -3,8 +3,12 @@ import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import {
-    AmendableItemsRecord, ContractExecutionStatusRecord, ContractTypeRecord,
-    FederalAuthorityRecord, ManagedCareEntityRecord, RateChangeReasonRecord
+    AmendableItemsRecord,
+    ContractExecutionStatusRecord,
+    ContractTypeRecord,
+    FederalAuthorityRecord,
+    ManagedCareEntityRecord,
+    RateChangeReasonRecord,
 } from '../../../constants/submissions'
 import { useS3 } from '../../../contexts/S3Context'
 import { formatCalendarDate } from '../../../dateHelpers'
@@ -16,6 +20,7 @@ import styles from '../SubmissionSummarySection.module.scss'
 export type ContractDetailsSummarySectionProps = {
     submission: DraftSubmission | StateSubmission
     navigateTo?: string
+    disableDownload?: boolean
 }
 
 const createCheckboxList = ({
@@ -47,6 +52,7 @@ const createCheckboxList = ({
 export const ContractDetailsSummarySection = ({
     submission,
     navigateTo,
+    disableDownload,
 }: ContractDetailsSummarySectionProps): React.ReactElement => {
     // Get the zip file for the contract
     const { getKey, getBulkDlURL } = useS3()
@@ -77,7 +83,9 @@ export const ContractDetailsSummarySection = ({
         void fetchZipUrl()
     }, [getKey, getBulkDlURL, submission])
     const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
-    const contractSupportingDocuments = submission.documents.filter(doc => doc.documentCategories.includes('CONTRACT_RELATED' as const))
+    const contractSupportingDocuments = submission.documents.filter((doc) =>
+        doc.documentCategories.includes('CONTRACT_RELATED' as const)
+    )
     const isSubmitted = submission.__typename === 'StateSubmission'
     const isEditing = !isSubmitted && navigateTo !== undefined
     // Array of values from a checkbox field is displayed in an unordered list
@@ -113,7 +121,7 @@ export const ContractDetailsSummarySection = ({
     return (
         <section id="contractDetailsSection" className={styles.summarySection}>
             <SectionHeader header="Contract details" navigateTo={navigateTo}>
-                {isSubmitted && (
+                {isSubmitted && !disableDownload && (
                     <DownloadButton
                         text="Download all contract documents"
                         zippedFilesURL={zippedFilesURL}
@@ -137,8 +145,8 @@ export const ContractDetailsSummarySection = ({
                         data={
                             submission.contractExecutionStatus
                                 ? ContractExecutionStatusRecord[
-                                    submission.contractExecutionStatus
-                                    ]
+                                      submission.contractExecutionStatus
+                                  ]
                                 : ''
                         }
                     />
@@ -149,7 +157,11 @@ export const ContractDetailsSummarySection = ({
                                 ? 'Contract effective dates'
                                 : 'Contract amendment effective dates'
                         }
-                        data={`${formatCalendarDate(submission.contractDateStart)} to ${formatCalendarDate(submission.contractDateEnd)}`}
+                        data={`${formatCalendarDate(
+                            submission.contractDateStart
+                        )} to ${formatCalendarDate(
+                            submission.contractDateEnd
+                        )}`}
                     />
                     <DataDetail
                         id="managedCareEntities"
