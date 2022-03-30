@@ -164,7 +164,6 @@ export const SubmissionSummary = (): React.ReactElement => {
                     })
                 })
             })
-            console.log('LOOKUP TABLE: ', lookupTable)
             setDocumentDates(lookupTable)
         }
     }
