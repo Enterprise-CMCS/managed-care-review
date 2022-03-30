@@ -135,6 +135,25 @@ describe('dashboard', () => {
                 )
 
                 cy.findByTestId('unlockedBanner').should('not.exist')
+
+                //Open all change history accordion items
+                cy.findByTestId('accordion')
+                    .should('exist')
+
+                cy.get('[data-testid^="accordionButton_"]')
+                    .each( button => {
+                        button.trigger('click')
+                    })
+                //Click on link in the initial accordion item
+                cy.findByTestId('revision-link-0')
+                    .should('exist')
+                    .click()
+                //Making sure we are on SubmissionRevisionSummary page and contains version text
+                cy.findByTestId('revision-version')
+                    .should('exist')
+                    .contains(
+                    /(0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET version/i
+                )
             })
         })
     })
