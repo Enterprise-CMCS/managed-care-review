@@ -16,15 +16,12 @@ import {
     SupportingDocumentsSummarySection,
 } from '../../components/SubmissionSummarySection'
 import { usePage } from '../../contexts/PageContext'
-import {
-    DraftSubmission,
-    StateSubmission,
-    useFetchSubmission2Query,
-} from '../../gen/gqlClient'
+import { useFetchSubmission2Query } from '../../gen/gqlClient'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404'
 import { dayjs } from '../../dateHelpers'
 import styles from './SubmissionRevisionSummary.module.scss'
+import { convertDomainModelFormDataToGQLSubmission } from '../../gqlHelpers'
 
 export const SubmissionRevisionSummary = (): React.ReactElement => {
     // Page level state
@@ -102,10 +99,12 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
 
     // Update header with submission name
     useEffect(() => {
-        if (packageData) {
-            updateHeading(pathname, submissionName(packageData))
+        const subWithRevisions = data?.fetchSubmission2.submission
+        if (packageData && subWithRevisions) {
+            const programs = subWithRevisions.state.programs
+            updateHeading(pathname, submissionName(packageData, programs))
         }
-    }, [updateHeading, pathname, packageData])
+    }, [updateHeading, pathname, packageData, data])
 
     if (loading || !submissionAndRevisions || !packageData) {
         return (
@@ -119,30 +118,15 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
     if (error || !packageData || !submissionAndRevisions)
         return <GenericErrorPage /> // api failure or protobuf decode failure
 
+    const statePrograms = submissionAndRevisions.state.programs
+
     // temporary kludge while the display data is expecting the wrong format.
     // This is turning our domain model into the GraphQL model which is what
     // all our frontend stuff expects right now.
-    const submission: StateSubmission | DraftSubmission =
-        packageData.status === 'DRAFT'
-            ? {
-                  ...packageData,
-                  __typename: 'DraftSubmission' as const,
-                  name: submissionName(packageData),
-                  program: {
-                      id: 'bogs-id',
-                      name: 'bogus-program',
-                  },
-              }
-            : {
-                  ...packageData,
-                  __typename: 'StateSubmission' as const,
-                  name: submissionName(packageData),
-                  program: {
-                      id: 'bogs-id',
-                      name: 'bogus-program',
-                  },
-                  submittedAt: submissionAndRevisions.intiallySubmittedAt,
-              }
+    const submission = convertDomainModelFormDataToGQLSubmission(
+        packageData,
+        statePrograms
+    )
 
     const isContractActionAndRateCertification =
         submission.submissionType === 'CONTRACT_AND_RATES'
@@ -161,6 +145,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
 
                 <SubmissionTypeSummarySection
                     submission={submission}
+                    statePrograms={statePrograms}
                     showLastUpdated={false}
                     headerChildComponent={
                         submitInfo && (
