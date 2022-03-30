@@ -1,8 +1,7 @@
 import { useEffect } from 'react'
 
 // Add script to bottom of page, with handling for some generic boolean value to flag on or off
-const useScript = (url: string, featureFlag: boolean ) => {
-
+const useScript = (url: string, featureFlag: boolean): void => {
     useEffect(() => {
         if (featureFlag) {
             const script = document.createElement('script')
@@ -17,8 +16,7 @@ const useScript = (url: string, featureFlag: boolean ) => {
                 document.body.removeChild(script)
             }
         }
-        
     }, [url, featureFlag])
 }
 
-export {useScript}
+export { useScript }
