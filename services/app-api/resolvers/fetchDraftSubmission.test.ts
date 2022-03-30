@@ -9,7 +9,7 @@ describe('fetchDraftSubmission', () => {
 
         // First, create a new submission
         const createInput: CreateDraftSubmissionInput = {
-            programIDs: ['managed-medical-assistance'],
+            programIDs: ['5c10fe9f-bec9-416f-a20c-718b152ad633'],
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
         }
@@ -35,9 +35,7 @@ describe('fetchDraftSubmission', () => {
 
         const resultDraft = result.data?.fetchDraftSubmission.draftSubmission
         expect(resultDraft.id).toEqual(createdID)
-        expect(resultDraft.program.id).toEqual('managed-medical-assistance')
-        expect(resultDraft.program.name).toBe('Managed Medical Assistance')
-        expect(resultDraft.name).toContain('FL-MANAGED-MEDICAL-ASSISTANCE')
+        expect(resultDraft.name).toContain('FL-MMA')
         expect(resultDraft.submissionDescription).toEqual('A real submission')
         expect(resultDraft.documents).toEqual([])
     })
@@ -64,7 +62,7 @@ describe('fetchDraftSubmission', () => {
 
         // First, create a new submission
         const createInput: CreateDraftSubmissionInput = {
-            programIDs: ['smmc'],
+            programIDs: ['5c10fe9f-bec9-416f-a20c-718b152ad633'],
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
         }
@@ -111,7 +109,7 @@ describe('fetchDraftSubmission', () => {
 
         // First, create a new submission
         const createInput: CreateDraftSubmissionInput = {
-            programIDs: ['smmc'],
+            programIDs: ['5c10fe9f-bec9-416f-a20c-718b152ad633'],
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
         }

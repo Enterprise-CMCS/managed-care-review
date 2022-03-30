@@ -3,6 +3,7 @@ import {
     constructTestPostgresServer,
     createTestStateSubmission,
     createAndUpdateTestDraftSubmission,
+    defaultFloridaProgram,
 } from '../testHelpers/gqlHelpers'
 
 describe('fetchStateSubmission', () => {
@@ -28,9 +29,8 @@ describe('fetchStateSubmission', () => {
 
         const resultSub = result.data?.fetchStateSubmission.submission
         expect(resultSub.id).toEqual(createdID)
-        expect(resultSub.program.id).toEqual('cnet')
-        expect(resultSub.program.name).toBe('CNET')
-        expect(resultSub.name).toContain('FL-CNET')
+        expect(resultSub.programIDs).toEqual([defaultFloridaProgram().id])
+        expect(resultSub.name).toContain('FL-MMA')
         expect(resultSub.submissionDescription).toEqual('An updated submission')
         expect(resultSub.documents).toEqual([])
         expect(resultSub.contractDocuments).toEqual([

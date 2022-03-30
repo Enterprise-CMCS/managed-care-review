@@ -34,6 +34,7 @@ custom:
   document_uploads_bucket_arn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${self:custom.stage}.DocumentUploadsBucketArn}
   secretsManagerSecret: aurora_postgres_${self:custom.stage} #pragma: allowlist secret
   reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
+  reactAppOtelCollectorUrl: ${env:REACT_APP_OTEL_COLLECTOR_URL}
   dbURL: ${env:DATABASE_URL}
   webpack:
     webpackConfig: 'webpack.config.js'
@@ -110,6 +111,7 @@ provider:
     appVersion: ${self:custom.appVersion}
     DATABASE_URL: ${self:custom.dbURL}
     REACT_APP_AUTH_MODE: ${self:custom.reactAppAuthMode}
+    REACT_APP_OTEL_COLLECTOR_URL: ${self:custom.reactAppOtelCollectorUrl}
     SECRETS_MANAGER_SECRET: ${self:custom.secretsManagerSecret}
     EMAILER_MODE: ${self:custom.emailerMode}
     SES_SOURCE_EMAIL_ADDRESS: ${self:custom.emailSource}
@@ -140,7 +142,18 @@ functions:
       - http:
           path: log_event
           method: post
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+              - x-amzn-trace-id
+              - b3
+              - traceparent
 
   otel:
     handler: handlers/otel_proxy.main
@@ -148,7 +161,18 @@ functions:
       - http:
           path: otel
           method: post
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+              - x-amzn-trace-id
+              - b3
+              - traceparent
 
   graphql:
     handler: handlers/apollo_gql.graphqlHandler
@@ -156,12 +180,34 @@ functions:
       - http:
           path: graphql
           method: post
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+              - x-amzn-trace-id
+              - b3
+              - traceparent
           authorizer: aws_iam
       - http:
           path: graphql
           method: get
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+              - x-amzn-trace-id
+              - b3
+              - traceparent
           authorizer: aws_iam
     timeout: 60 # aurora cold start can be long
     vpc:
@@ -195,7 +241,18 @@ functions:
       - http:
           path: zip
           method: post
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+              - x-amzn-trace-id
+              - b3
+              - traceparent
           authorizer: aws_iam
 
 resources:

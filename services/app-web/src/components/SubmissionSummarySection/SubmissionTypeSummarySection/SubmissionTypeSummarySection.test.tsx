@@ -4,6 +4,7 @@ import { SubmissionTypeSummarySection } from './SubmissionTypeSummarySection'
 import {
     mockContractAndRatesDraft,
     mockStateSubmission,
+    mockMNState,
 } from '../../../testHelpers/apolloHelpers'
 
 describe('SubmissionTypeSummarySection', () => {
@@ -12,6 +13,7 @@ describe('SubmissionTypeSummarySection', () => {
         renderWithProviders(
             <SubmissionTypeSummarySection
                 submission={draftSubmission}
+                statePrograms={mockMNState().programs}
                 navigateTo="submission-type"
             />
         )
@@ -30,7 +32,7 @@ describe('SubmissionTypeSummarySection', () => {
     it('can render state submission without errors', () => {
         const stateSubmission = mockStateSubmission()
         renderWithProviders(
-            <SubmissionTypeSummarySection submission={stateSubmission} />
+            <SubmissionTypeSummarySection submission={stateSubmission} statePrograms={mockMNState().programs} />
         )
 
         expect(
@@ -47,6 +49,7 @@ describe('SubmissionTypeSummarySection', () => {
         renderWithProviders(
             <SubmissionTypeSummarySection
                 submission={draftSubmission}
+                statePrograms={mockMNState().programs}
                 navigateTo="submission-type"
             />
         )

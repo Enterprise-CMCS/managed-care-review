@@ -3,7 +3,11 @@ import classnames from 'classnames'
 import dayjs from 'dayjs'
 import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
+import { submissionName, programNames } from '../../common-code/domain-models'
+import { Submission2Status } from '../../common-code/domain-models/Submission2Type'
+import { base64ToDomain } from '../../common-code/proto/stateSubmission'
 import { Loading } from '../../components/Loading'
+import { SubmissionStatusRecord } from '../../constants/submissions'
 import { useAuth } from '../../contexts/AuthContext'
 import {
     SubmissionType as GQLSubmissionType,
@@ -11,10 +15,6 @@ import {
 } from '../../gen/gqlClient'
 import styles from './Dashboard.module.scss'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
-import { base64ToDomain } from '../../common-code/proto/stateSubmission'
-import { submissionName } from '../../common-code/domain-models'
-import { SubmissionStatusRecord } from '../../constants/submissions'
-import {Submission2Status} from '../../common-code/domain-models/Submission2Type'
 import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 
 // We only pull a subset of data out of the submission and revisions for display in Dashboard
@@ -28,36 +28,37 @@ type SubmissionInDashboard = {
     submissionType: GQLSubmissionType
 }
 
-const isSubmitted = (status: Submission2Status) => status === 'SUBMITTED' || status === 'RESUBMITTED'
+const isSubmitted = (status: Submission2Status) =>
+    status === 'SUBMITTED' || status === 'RESUBMITTED'
 
 function submissionURL(
-        id: SubmissionInDashboard['id'],
-        status: SubmissionInDashboard['status']
-    ): string {
-        if (status === 'DRAFT') {
-            return `/submissions/${id}/type`
-        } else if (status === 'UNLOCKED') {
-            return `/submissions/${id}/review-and-submit`
-        } 
-        return `/submissions/${id}`
+    id: SubmissionInDashboard['id'],
+    status: SubmissionInDashboard['status']
+): string {
+    if (status === 'DRAFT') {
+        return `/submissions/${id}/type`
+    } else if (status === 'UNLOCKED') {
+        return `/submissions/${id}/review-and-submit`
     }
+    return `/submissions/${id}`
+}
 
-const StatusTag = ({status} : {status: Submission2Status}): React.ReactElement => {
-    const tagStyles = classnames( '', {
+const StatusTag = ({
+    status,
+}: {
+    status: Submission2Status
+}): React.ReactElement => {
+    const tagStyles = classnames('', {
         [styles.submittedTag]: isSubmitted(status),
         [styles.draftTag]: status === 'DRAFT',
-        [styles.unlockedTag]: status === 'UNLOCKED'
-     })
-    
-    const statusText = isSubmitted(status)? SubmissionStatusRecord.SUBMITTED: SubmissionStatusRecord[status]
+        [styles.unlockedTag]: status === 'UNLOCKED',
+    })
 
-    return (
-        <Tag
-            className={tagStyles}
-        >
-            {statusText}
-        </Tag>
-    )
+    const statusText = isSubmitted(status)
+        ? SubmissionStatusRecord.SUBMITTED
+        : SubmissionStatusRecord[status]
+
+    return <Tag className={tagStyles}>{statusText}</Tag>
 }
 
 export const Dashboard = (): React.ReactElement => {
@@ -82,9 +83,12 @@ export const Dashboard = (): React.ReactElement => {
     }
 
     if (loggedInUser.__typename !== 'StateUser') {
-        return <div id="dashboard-page" className={styles.wrapper}><div>CMS Users not supported yet.</div> </div>
+        return (
+            <div id="dashboard-page" className={styles.wrapper}>
+                <div>CMS Users not supported yet.</div>{' '}
+            </div>
+        )
     }
-
 
     const programs = loggedInUser.state.programs
     const submissionRows: SubmissionInDashboard[] = []
@@ -106,8 +110,11 @@ export const Dashboard = (): React.ReactElement => {
 
             submissionRows.push({
                 id: sub.id,
-                name: submissionName(currentSubmissionData),
-                programIDs: currentSubmissionData.programIDs,
+                name: submissionName(currentSubmissionData, programs),
+                programIDs: programNames(
+                    programs,
+                    currentSubmissionData.programIDs
+                ),
                 submittedAt: sub.intiallySubmittedAt,
                 status: sub.status,
                 updatedAt: currentSubmissionData.updatedAt,
@@ -115,9 +122,9 @@ export const Dashboard = (): React.ReactElement => {
             })
         })
 
-    // Sort by updatedAt for current revision    
+    // Sort by updatedAt for current revision
     submissionRows.sort((a, b) => (a['updatedAt'] > b['updatedAt'] ? -1 : 1))
-     
+
     const justSubmittedSubmissionName = new URLSearchParams(
         location.search
     ).get('justSubmitted')
@@ -165,54 +172,70 @@ export const Dashboard = (): React.ReactElement => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {submissionRows.map((dashboardSubmission) => {
-                                            return (
-                                                <tr key={dashboardSubmission.id}>
-                                                    <td data-testid="submission-id">
-                                                        <NavLink
-                                                            to={submissionURL(
-                                                                dashboardSubmission.id,
-                                                                dashboardSubmission.status
+                                        {submissionRows.map(
+                                            (dashboardSubmission) => {
+                                                return (
+                                                    <tr
+                                                        key={
+                                                            dashboardSubmission.id
+                                                        }
+                                                    >
+                                                        <td data-testid="submission-id">
+                                                            <NavLink
+                                                                to={submissionURL(
+                                                                    dashboardSubmission.id,
+                                                                    dashboardSubmission.status
+                                                                )}
+                                                            >
+                                                                {
+                                                                    dashboardSubmission.name
+                                                                }
+                                                            </NavLink>
+                                                        </td>
+                                                        <td>
+                                                            {dashboardSubmission.programIDs.map(
+                                                                (id) => {
+                                                                    return (
+                                                                        <Tag
+                                                                            data-testid="program-tag"
+                                                                            key={
+                                                                                id
+                                                                            }
+                                                                            className={`radius-pill ${styles.programTag}`}
+                                                                        >
+                                                                            {id}
+                                                                        </Tag>
+                                                                    )
+                                                                }
                                                             )}
-                                                        >
-                                                            {dashboardSubmission.name}
-                                                        </NavLink>
-                                                    </td>
-                                                    <td>
-                                                        {dashboardSubmission.programIDs.map(
-                                                            (id) => {
-                                                                return (
-                                                                    <Tag
-                                                                        data-testid="program-tag"
-                                                                        key={id}
-                                                                        className={`radius-pill ${styles.programTag}`}
-                                                                    >
-                                                                        {id}
-                                                                    </Tag>
-                                                                )
-                                                            }
-                                                        )}
-                                                    </td>
-                                                    <td data-testid="submission-date">
-                                                        {dashboardSubmission.submittedAt
-                                                            ? dayjs(
-                                                                  dashboardSubmission.submittedAt
-                                                              ).format(
-                                                                  'MM/DD/YYYY'
-                                                              )
-                                                            : ''}
-                                                    </td>
-                                                    <td>
-                                                        {dayjs(
-                                                            dashboardSubmission.updatedAt
-                                                        ).format('MM/DD/YYYY')}
-                                                    </td>
-                                                    <td data-testid="submission-status">
-                                                        <StatusTag status={dashboardSubmission.status} />
-                                                    </td>
-                                                </tr>
-                                            )
-                                        })}
+                                                        </td>
+                                                        <td data-testid="submission-date">
+                                                            {dashboardSubmission.submittedAt
+                                                                ? dayjs(
+                                                                      dashboardSubmission.submittedAt
+                                                                  ).format(
+                                                                      'MM/DD/YYYY'
+                                                                  )
+                                                                : ''}
+                                                        </td>
+                                                        <td>
+                                                            {dayjs(
+                                                                dashboardSubmission.updatedAt
+                                                            ).format(
+                                                                'MM/DD/YYYY'
+                                                            )}
+                                                        </td>
+                                                        <td data-testid="submission-status">
+                                                            <StatusTag
+                                                                status={
+                                                                    dashboardSubmission.status
+                                                                }
+                                                            />
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            }
+                                        )}
                                     </tbody>
                                 </Table>
                             ) : (

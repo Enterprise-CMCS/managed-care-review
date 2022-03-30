@@ -231,8 +231,18 @@ export function submitDraftSubmissionResolver(
 
         const updatedSubmission: Submission2Type = updateResult
 
-        const status = submissionStatus(updatedSubmission)
+        const programs = store.findPrograms(updatedSubmission.stateCode, stateSubmission.programIDs)
+        if (!programs || programs.length !== stateSubmission.programIDs.length) {
+            const errMessage = `Can't find programs ${stateSubmission.programIDs} from state ${stateSubmission.stateCode}, ${stateSubmission.id}`
+            logError('unlockStateSubmission', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new Error(errMessage)
+        }
 
+        // Send emails!
+        const name = submissionName(stateSubmission, programs)
+
+		const status = submissionStatus(updatedSubmission)
         let cmsPackageEmailResult
         let statePackageEmailResult
 
@@ -241,15 +251,15 @@ export function submitDraftSubmissionResolver(
             logSuccess('It was resubmitted')
             const updatedEmailData = {
                 ...submitInfo,
-                submissionName: submissionName(stateSubmission)
+                submissionName: name
             }
             cmsPackageEmailResult = await emailer.sendResubmittedCMSEmail(stateSubmission, updatedEmailData)
             statePackageEmailResult =
                 await emailer.sendResubmittedStateEmail(stateSubmission, updatedEmailData, user)
         } else if (status === 'SUBMITTED') {
-            cmsPackageEmailResult = await emailer.sendCMSNewPackage(stateSubmission)
+            cmsPackageEmailResult = await emailer.sendCMSNewPackage(stateSubmission, name)
             statePackageEmailResult =
-                await emailer.sendStateNewPackage(stateSubmission, user)
+                await emailer.sendStateNewPackage(stateSubmission, name, user)
         }
 
         if (cmsPackageEmailResult instanceof Error) {

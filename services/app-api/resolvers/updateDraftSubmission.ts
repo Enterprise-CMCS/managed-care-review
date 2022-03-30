@@ -145,14 +145,14 @@ export function updateDraftSubmissionResolver(
         }
 
         // Validate the programIDs
-        const program = store.findPrograms(
+        const programs = store.findPrograms(
             stateFromCurrentUser,
             input.draftSubmissionUpdates.programIDs
         )
 
-        if (program === undefined) {
+        if (programs?.length !== input.draftSubmissionUpdates.programIDs.length) {
             const count = input.draftSubmissionUpdates.programIDs.length
-            const errMessage = `The program ${(pluralize('id', count))} ${input.draftSubmissionUpdates.programIDs.join(', ')} ${(pluralize('does', count))} not exist in state ${stateFromCurrentUser}`
+            const errMessage = `The programs ${(pluralize('id', count))} ${input.draftSubmissionUpdates.programIDs.join(', ')} ${(pluralize('does', count))} not exist in state ${stateFromCurrentUser}`
             logError('updateDraftSubmission', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {

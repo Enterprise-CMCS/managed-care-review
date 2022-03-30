@@ -8,6 +8,7 @@ import {
 import {
     constructTestPostgresServer,
     createTestDraftSubmission,
+    defaultFloridaProgram,
     fetchTestDraftSubmissionById,
 } from '../testHelpers/gqlHelpers'
 import { applyUpdates } from './updateDraftSubmission'
@@ -235,7 +236,7 @@ describe('updateDraftSubmission', () => {
         await new Promise((resolve) => setTimeout(resolve, 2000))
 
         const updatedDraft = {
-            programIDs: ['cnet'],
+            programIDs: [defaultFloridaProgram().id],
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [],
@@ -273,7 +274,7 @@ describe('updateDraftSubmission', () => {
         // General
         expect(resultDraft.id).toEqual(createdID)
         expect(resultDraft.submissionType).toEqual('CONTRACT_AND_RATES')
-        expect(resultDraft.program.id).toEqual('cnet')
+        expect(resultDraft.programIDs).toEqual([defaultFloridaProgram().id])
         // check that the stateNumber is being returned the same
         expect(resultDraft.name.split('-')[3]).toEqual(
             createdDraft.name.split('-')[3]
@@ -313,7 +314,7 @@ describe('updateDraftSubmission', () => {
         const endDate = '2021-07-12'
 
         const updatedDraft = {
-            programIDs: ['cnet'],
+            programIDs: [defaultFloridaProgram().id],
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [
@@ -403,7 +404,7 @@ describe('updateDraftSubmission', () => {
 
         // Update with two more documents
         const updatedDraft2 = {
-            programIDs: ['cnet'],
+            programIDs: [defaultFloridaProgram().id],
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [
@@ -506,7 +507,7 @@ describe('updateDraftSubmission', () => {
         const createdID = createdDraft.id
 
         const updatedDraft = {
-            programIDs: ['cnet'],
+            programIDs: [defaultFloridaProgram().id],
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             stateContacts: [
@@ -593,7 +594,7 @@ describe('updateDraftSubmission', () => {
         const startDate = '2021-07-06'
 
         const updatedDraft = {
-            programIDs: ['cnet'],
+            programIDs: [defaultFloridaProgram().id],
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [],
@@ -653,7 +654,7 @@ describe('updateDraftSubmission', () => {
         const startDate = '2021-07-06'
 
         const updatedDraft = {
-            programIDs: ['cnet'],
+            programIDs: [defaultFloridaProgram().id],
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [],
@@ -740,7 +741,7 @@ describe('updateDraftSubmission', () => {
         }
 
         const updatedDraft = {
-            programIDs: ['cnet'],
+            programIDs: [defaultFloridaProgram().id],
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [],
@@ -797,7 +798,7 @@ describe('updateDraftSubmission', () => {
         }
 
         const updatedDraft = {
-            programIDs: ['cnet'],
+            programIDs: [defaultFloridaProgram().id],
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [],
@@ -846,7 +847,7 @@ describe('updateDraftSubmission', () => {
         const createdID = createdDraft.id
 
         const updatedDraftWithDocs = {
-            programIDs: ['cnet'],
+            programIDs: [defaultFloridaProgram().id],
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             managedCareEntities: [],
@@ -960,7 +961,7 @@ describe('updateDraftSubmission', () => {
         const endDate = '2021-07-12'
 
         const updatedDraft = {
-            programIDs: ['cnet'],
+            programIDs: [defaultFloridaProgram().id],
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [],
@@ -1004,7 +1005,7 @@ describe('updateDraftSubmission', () => {
 
         // SETUP: First, create a new submission
         const createInput: CreateDraftSubmissionInput = {
-            programIDs: ['smmc'],
+            programIDs: ['5c10fe9f-bec9-416f-a20c-718b152ad633'],
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A created submission',
         }
@@ -1036,7 +1037,7 @@ describe('updateDraftSubmission', () => {
         const startDate = '2021-07-06'
         const endDate = '2021-07-12'
         const updatedDraft = {
-            programIDs: ['cnet'],
+            programIDs: [defaultFloridaProgram().id],
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An updated submission',
             documents: [],

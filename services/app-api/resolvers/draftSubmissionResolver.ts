@@ -1,42 +1,26 @@
-import { Resolvers } from '../gen/gqlServer'
-import { Store } from '../postgres'
 import { submissionName } from '../../app-web/src/common-code/domain-models'
 import { pluralize } from '../../app-web/src/common-code/formatters'
+import { Resolvers } from '../gen/gqlServer'
+import { Store } from '../postgres'
 
 export function draftSubmissionResolver(
     store: Store
 ): Resolvers['DraftSubmission'] {
     return {
-        program(parent) {
-            const count = parent.programIDs.length
-            const program = store.findPrograms(
-                parent.stateCode,
-                parent.programIDs
-            )
-
-            if (program === undefined) {
-                throw new Error(
-                    `The program ${pluralize('id', count)} ${parent.programIDs.join(', ')} ${pluralize('does', count)} not exist in state ${parent.stateCode}`
-                )
-            }
-
-            return program
-        },
-
         name(parent) {
             const count = parent.programIDs.length
-            const program = store.findPrograms(
+            const programs = store.findPrograms(
                 parent.stateCode,
                 parent.programIDs
             )
 
-            if (program === undefined) {
+            if (programs === undefined) {
                 throw new Error(
                     `The program ${pluralize('id', count)} ${parent.programIDs.join(', ')} ${pluralize('does', count)} not exist in state ${parent.stateCode}`
                 )
             }
 
-            return submissionName(parent)
+            return submissionName(parent, programs)
         },
     }
 }

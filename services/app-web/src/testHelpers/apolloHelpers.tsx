@@ -15,11 +15,12 @@ import {
     FetchCurrentUserDocument,
     FetchStateSubmissionDocument,
     FetchSubmission2Document,
+    IndexSubmissions2Document,
     IndexSubmissionsDocument,
+    State,
     StateSubmission,
     Submission,
     Submission2,
-    IndexSubmissions2Document,
     SubmitDraftSubmissionDocument,
     UnlockStateSubmissionDocument,
     UpdateDraftSubmissionDocument,
@@ -27,20 +28,14 @@ import {
 } from '../gen/gqlClient'
 
 /* For use with Apollo MockedProvider in jest tests */
-const mockValidUser: UserType = {
-    __typename: 'StateUser' as const,
-    state: {
-        name: 'Minnesota',
-        code: 'MN',
-        programs: [
-            { id: 'msho', name: 'MSHO' },
-            { id: 'pmap', name: 'PMAP' },
-            { id: 'snbc', name: 'SNBC' },
-        ],
-    },
-    role: 'STATE_USER',
-    name: 'Bob it user',
-    email: 'bob@dmas.mn.gov',
+function mockValidUser(): UserType {
+    return {
+        __typename: 'StateUser' as const,
+        state: mockMNState(),
+        role: 'STATE_USER',
+        name: 'Bob it user',
+        email: 'bob@dmas.mn.gov',
+    }
 }
 
 function mockValidCMSUser(): UserType {
@@ -59,11 +54,7 @@ export function mockDraft(): DraftSubmission {
         updatedAt: new Date(),
         id: 'test-abc-123',
         stateCode: 'MN',
-        programIDs: ['snbc'],
-        program: {
-            id: 'snbc',
-            name: 'SNBC',
-        },
+        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         name: 'MN-MSHO-0001',
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A real submission',
@@ -95,11 +86,7 @@ export function mockContactAndRatesDraft(): DraftSubmission {
         updatedAt: new Date(),
         id: 'test-abc-123',
         stateCode: 'MN',
-        programIDs: ['snbc'],
-        program: {
-            id: 'snbc',
-            name: 'SNBC',
-        },
+        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         name: 'MN-MSHO-0001',
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A real submission',
@@ -130,11 +117,7 @@ export function mockCompleteDraft(): DraftSubmission {
         updatedAt: new Date(),
         id: 'test-abc-123',
         stateCode: 'MN',
-        programIDs: ['snbc'],
-        program: {
-            id: 'snbc',
-            name: 'SNBC',
-        },
+        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         name: 'MN-MSHO-0001',
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A real submission',
@@ -172,10 +155,6 @@ export function mockContractAndRatesDraft(): DraftSubmission {
         id: 'test-abc-123',
         stateCode: 'MN',
         programIDs: ['pmap'],
-        program: {
-            id: 'pmap',
-            name: 'PMAP',
-        },
         name: 'MN-PMAP-0001',
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A real submission',
@@ -240,11 +219,7 @@ function mockNewDraft(): DraftSubmission {
         updatedAt: new Date(),
         id: 'test-abc-124',
         stateCode: 'MN',
-        programIDs: ['snbc'],
-        program: {
-            id: 'snbc',
-            name: 'SNBC',
-        },
+        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         name: 'MN-MSHO-0002',
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A real submission',
@@ -275,11 +250,7 @@ export function mockStateSubmission(): StateSubmission {
         updatedAt: new Date(),
         id: 'test-abc-125',
         stateCode: 'MN',
-        programIDs: ['snbc'],
-        program: {
-            id: 'snbc',
-            name: 'SNBC',
-        },
+        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         name: 'MN-MSHO-0003',
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A submitted submission',
@@ -329,6 +300,31 @@ export function mockStateSubmission(): StateSubmission {
     }
 }
 
+export function mockMNState(): State {
+    return {
+        name: 'Minnesota',
+        programs: [
+            {
+                id: 'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                name: 'SNBC',
+            },
+            {
+                id: 'd95394e5-44d1-45df-8151-1cc1ee66f100',
+                name: 'PMAP',
+            },
+            {
+                id: 'ea16a6c0-5fc6-4df8-adac-c627e76660ab',
+                name: 'MSC+',
+            },
+            {
+                id: '3fd36500-bf2c-47bc-80e8-e7aa417184c5',
+                name: 'MSHO',
+            },
+        ],
+        code: 'MN',
+    }
+}
+
 export function mockDraftSubmission2(
     submissionData?: Partial<DraftSubmissionType>
 ): Submission2 {
@@ -341,6 +337,7 @@ export function mockDraftSubmission2(
         status: 'DRAFT',
         intiallySubmittedAt: '2022-01-01',
         stateCode: 'MN',
+        state: mockMNState(),
         revisions: [
             {
                 revision: {
@@ -366,6 +363,7 @@ export function mockSubmittedSubmission2(): Submission2 {
         status: 'SUBMITTED',
         intiallySubmittedAt: '2022-01-01',
         stateCode: 'MN',
+        state: mockMNState(),
         revisions: [
             {
                 revision: {
@@ -398,6 +396,7 @@ export function mockUnlockedSubmission2(
         status: 'UNLOCKED',
         intiallySubmittedAt: '2020-01-01',
         stateCode: 'MN',
+        state: mockMNState(),
         revisions: [
             {
                 revision: {
@@ -429,85 +428,12 @@ export function mockUnlockedSubmission2(
     }
 }
 
-export function mockSubmittedSubmission2WithRevision(): Submission2 {
-    return {
-        __typename: 'Submission2',
-        id: '07f9efbf-d4d1-44ae-8674-56d9d6b75ce6',
-        stateCode: 'MN',
-        status: 'RESUBMITTED',
-        intiallySubmittedAt: '2022-03-25',
-        revisions: [
-            {
-                __typename: 'RevisionEdge',
-                revision: {
-                    __typename: 'Revision',
-                    id: '135972bf-e056-40d3-859c-6a69d9c982ad',
-                    unlockInfo: {
-                        __typename: 'UpdateInformation',
-                        updatedAt: '2022-03-28T17:54:39.173Z',
-                        updatedBy: 'zuko@example.com',
-                        updatedReason: 'prepare to add documents',
-                    },
-                    submitInfo: {
-                        __typename: 'UpdateInformation',
-                        updatedAt: '2022-03-28T17:56:32.952Z',
-                        updatedBy: 'aang@example.com',
-                        updatedReason: 'Placeholder resubmission reason',
-                    },
-                    createdAt: '2022-03-28T17:54:39.175Z',
-                    submissionData:
-                        'ChBTVEFURV9TVUJNSVNTSU9OEAEaJDA3ZjllZmJmLWQ0ZDEtNDRhZS04Njc0LTU2ZDlkNmI3NWNlNiIJU1VCTUlUVEVEKgcI5g8QAhgZMgwI0O2HkgYQwMC2xgM6DAjQ7YeSBhCAvPnFA0gYUBJaBHBtYXBgA2onZGVzY3JpcHRpb24gb2YgY29udHJhY3Qgb25seSBzdWJtaXNzaW9uchUKAWESAWEaDWFAZXhhbXBsZS5jb2168AEIARIHCOYPEAIYBRoHCOYPEAIYEyIBASoBATJ0ChlBbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmElRzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjYzMjE1Ny1BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmL0FtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYaAQEyXAoRbGlmZW9mZ2FsaWxlby5wZGYSRHMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4NDkwMTYyNjQxLWxpZmVvZmdhbGlsZW8ucGRmL2xpZmVvZmdhbGlsZW8ucGRmGgEBOAGCAYABCh1BbWVyaWdyb3VwIFRleGFzIEluYyBjb3B5LnBkZhJcczM6Ly9sb2NhbC11cGxvYWRzLzE2NDgyNDI3MTE0MjEtQW1lcmlncm91cCBUZXhhcyBJbmMgY29weS5wZGYvQW1lcmlncm91cCBUZXhhcyBJbmMgY29weS5wZGYaAQOCAbcBCi81MjktMTAtMDAyMC0wMDAwM19TdXBlcmlvcl9IZWFsdGggUGxhbiwgSW5jLnBkZhKAAXMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyNzExNDIxLTUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmLzUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmGgEEggGbAQomY292aWQtaWZjLTItZmx1LXJzdi1jb2RlcyA1LTUtMjAyMS5wZGYSbnMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyODczMjI5LWNvdmlkLWlmYy0yLWZsdS1yc3YtY29kZXMgNS01LTIwMjEucGRmL2NvdmlkLWlmYy0yLWZsdS1yc3YtY29kZXMgNS01LTIwMjEucGRmGgEEkgOyARABGgcI5g8QAhgZIgcI5g8QAhgaKgcI5g8QAhgZMhsKFQoBYhIBYhoNYkBleGFtcGxlLmNvbRABGgA4AUJ0ChlBbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmElRzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjY2NTYzNC1BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmL0FtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYaAQI=', //pragma: allowlist secret
-                },
-            },
-            {
-                __typename: 'RevisionEdge',
-                revision: {
-                    __typename: 'Revision',
-                    id: '9aa14122-2d37-462a-b788-e25c1c30e8dc',
-                    unlockInfo: {
-                        __typename: 'UpdateInformation',
-                        updatedAt: '2022-03-25T21:13:56.174Z',
-                        updatedBy: 'zuko@example.com',
-                        updatedReason: 'test',
-                    },
-                    submitInfo: {
-                        __typename: 'UpdateInformation',
-                        updatedAt: '2022-03-25T21:14:43.057Z',
-                        updatedBy: 'aang@example.com',
-                        updatedReason: 'Placeholder resubmission reason',
-                    },
-                    createdAt: '2022-03-25T21:13:56.176Z',
-                    submissionData:
-                        'ChBTVEFURV9TVUJNSVNTSU9OEAEaJDA3ZjllZmJmLWQ0ZDEtNDRhZS04Njc0LTU2ZDlkNmI3NWNlNiIJU1VCTUlUVEVEKgcI5g8QAhgZMgsIw+H4kQYQwICXGzoLCMPh+JEGEMCAlxtIGFASWgRwbWFwYANqJ2Rlc2NyaXB0aW9uIG9mIGNvbnRyYWN0IG9ubHkgc3VibWlzc2lvbnIVCgFhEgFhGg1hQGV4YW1wbGUuY29tepIBCAESBwjmDxACGAUaBwjmDxACGBMiAQEqAQEydAoZQW1lcmlncm91cCBUZXhhcywgSW5jLnBkZhJUczM6Ly9sb2NhbC11cGxvYWRzLzE2NDgyNDI2MzIxNTctQW1lcmlncm91cCBUZXhhcywgSW5jLnBkZi9BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmGgEBOAGCAYABCh1BbWVyaWdyb3VwIFRleGFzIEluYyBjb3B5LnBkZhJcczM6Ly9sb2NhbC11cGxvYWRzLzE2NDgyNDI3MTE0MjEtQW1lcmlncm91cCBUZXhhcyBJbmMgY29weS5wZGYvQW1lcmlncm91cCBUZXhhcyBJbmMgY29weS5wZGYaAQOCAbcBCi81MjktMTAtMDAyMC0wMDAwM19TdXBlcmlvcl9IZWFsdGggUGxhbiwgSW5jLnBkZhKAAXMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyNzExNDIxLTUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmLzUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmGgEEggGbAQomY292aWQtaWZjLTItZmx1LXJzdi1jb2RlcyA1LTUtMjAyMS5wZGYSbnMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyODczMjI5LWNvdmlkLWlmYy0yLWZsdS1yc3YtY29kZXMgNS01LTIwMjEucGRmL2NvdmlkLWlmYy0yLWZsdS1yc3YtY29kZXMgNS01LTIwMjEucGRmGgEEkgOyARABGgcI5g8QAhgZIgcI5g8QAhgaKgcI5g8QAhgZMhsKFQoBYhIBYhoNYkBleGFtcGxlLmNvbRABGgA4AUJ0ChlBbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmElRzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjY2NTYzNC1BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmL0FtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYaAQI=', // pragma: allowlist secret
-                },
-            },
-            {
-                __typename: 'RevisionEdge',
-                revision: {
-                    __typename: 'Revision',
-                    id: '95fa29ec-c8b1-4195-82c1-5615bcda7bac',
-                    unlockInfo: null,
-                    submitInfo: {
-                        __typename: 'UpdateInformation',
-                        updatedAt: '2022-03-25T21:13:20.419Z',
-                        updatedBy: 'aang@example.com',
-                        updatedReason: 'Initial submission',
-                    },
-                    createdAt: '2022-03-25T03:28:56.244Z',
-                    submissionData:
-                        'ChBTVEFURV9TVUJNSVNTSU9OEAEaJDA3ZjllZmJmLWQ0ZDEtNDRhZS04Njc0LTU2ZDlkNmI3NWNlNiIJU1VCTUlUVEVEKgcI5g8QAhgZMgwI8OD4kQYQgOKiyAE6DAjw4PiRBhDA3eXHAUgYUBJaBHBtYXBgA2onZGVzY3JpcHRpb24gb2YgY29udHJhY3Qgb25seSBzdWJtaXNzaW9uchUKAWESAWEaDWFAZXhhbXBsZS5jb216kgEIARIHCOYPEAIYBRoHCOYPEAIYEyIBASoBATJ0ChlBbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmElRzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjYzMjE1Ny1BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmL0FtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYaAQE4AYIBgAEKHUFtZXJpZ3JvdXAgVGV4YXMgSW5jIGNvcHkucGRmElxzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjcxMTQyMS1BbWVyaWdyb3VwIFRleGFzIEluYyBjb3B5LnBkZi9BbWVyaWdyb3VwIFRleGFzIEluYyBjb3B5LnBkZhoBA4IBtwEKLzUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmEoABczM6Ly9sb2NhbC11cGxvYWRzLzE2NDgyNDI3MTE0MjEtNTI5LTEwLTAwMjAtMDAwMDNfU3VwZXJpb3JfSGVhbHRoIFBsYW4sIEluYy5wZGYvNTI5LTEwLTAwMjAtMDAwMDNfU3VwZXJpb3JfSGVhbHRoIFBsYW4sIEluYy5wZGYaAQSSA7IBEAEaBwjmDxACGBkiBwjmDxACGBoqBwjmDxACGBkyGwoVCgFiEgFiGg1iQGV4YW1wbGUuY29tEAEaADgBQnQKGUFtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYSVHMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyNjY1NjM0LUFtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYvQW1lcmlncm91cCBUZXhhcywgSW5jLnBkZhoBAg==', // pragma: allowlist secret
-                },
-            },
-        ],
-    }
-}
-
 type fetchCurrentUserMockProps = {
     user?: UserType | Partial<UserType>
     statusCode: 200 | 403 | 500
 }
 const fetchCurrentUserMock = ({
-    user = mockValidUser,
+    user = mockValidUser(),
     statusCode,
 }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
 fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
@@ -692,6 +618,79 @@ const fetchStateSubmissionMock = ({
     }
 }
 
+const mockSubmittedSubmission2WithRevision = (): Submission2 => {
+    return {
+        __typename: 'Submission2',
+        id: '07f9efbf-d4d1-44ae-8674-56d9d6b75ce6',
+        stateCode: 'MN',
+        status: 'RESUBMITTED',
+        intiallySubmittedAt: '2022-03-25',
+        revisions: [
+            {
+                __typename: 'RevisionEdge',
+                revision: {
+                    __typename: 'Revision',
+                    id: '135972bf-e056-40d3-859c-6a69d9c982ad',
+                    unlockInfo: {
+                        __typename: 'UpdateInformation',
+                        updatedAt: '2022-03-28T17:54:39.173Z',
+                        updatedBy: 'zuko@example.com',
+                        updatedReason: 'prepare to add documents',
+                    },
+                    submitInfo: {
+                        __typename: 'UpdateInformation',
+                        updatedAt: '2022-03-28T17:56:32.952Z',
+                        updatedBy: 'aang@example.com',
+                        updatedReason: 'Placeholder resubmission reason',
+                    },
+                    createdAt: '2022-03-28T17:54:39.175Z',
+                    submissionData:
+                        'ChBTVEFURV9TVUJNSVNTSU9OEAEaJDA3ZjllZmJmLWQ0ZDEtNDRhZS04Njc0LTU2ZDlkNmI3NWNlNiIJU1VCTUlUVEVEKgcI5g8QAhgZMgwI0O2HkgYQwMC2xgM6DAjQ7YeSBhCAvPnFA0gYUBJaBHBtYXBgA2onZGVzY3JpcHRpb24gb2YgY29udHJhY3Qgb25seSBzdWJtaXNzaW9uchUKAWESAWEaDWFAZXhhbXBsZS5jb2168AEIARIHCOYPEAIYBRoHCOYPEAIYEyIBASoBATJ0ChlBbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmElRzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjYzMjE1Ny1BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmL0FtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYaAQEyXAoRbGlmZW9mZ2FsaWxlby5wZGYSRHMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4NDkwMTYyNjQxLWxpZmVvZmdhbGlsZW8ucGRmL2xpZmVvZmdhbGlsZW8ucGRmGgEBOAGCAYABCh1BbWVyaWdyb3VwIFRleGFzIEluYyBjb3B5LnBkZhJcczM6Ly9sb2NhbC11cGxvYWRzLzE2NDgyNDI3MTE0MjEtQW1lcmlncm91cCBUZXhhcyBJbmMgY29weS5wZGYvQW1lcmlncm91cCBUZXhhcyBJbmMgY29weS5wZGYaAQOCAbcBCi81MjktMTAtMDAyMC0wMDAwM19TdXBlcmlvcl9IZWFsdGggUGxhbiwgSW5jLnBkZhKAAXMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyNzExNDIxLTUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmLzUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmGgEEggGbAQomY292aWQtaWZjLTItZmx1LXJzdi1jb2RlcyA1LTUtMjAyMS5wZGYSbnMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyODczMjI5LWNvdmlkLWlmYy0yLWZsdS1yc3YtY29kZXMgNS01LTIwMjEucGRmL2NvdmlkLWlmYy0yLWZsdS1yc3YtY29kZXMgNS01LTIwMjEucGRmGgEEkgOyARABGgcI5g8QAhgZIgcI5g8QAhgaKgcI5g8QAhgZMhsKFQoBYhIBYhoNYkBleGFtcGxlLmNvbRABGgA4AUJ0ChlBbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmElRzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjY2NTYzNC1BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmL0FtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYaAQI=', //pragma: allowlist secret
+                },
+            },
+            {
+                __typename: 'RevisionEdge',
+                revision: {
+                    __typename: 'Revision',
+                    id: '9aa14122-2d37-462a-b788-e25c1c30e8dc',
+                    unlockInfo: {
+                        __typename: 'UpdateInformation',
+                        updatedAt: '2022-03-25T21:13:56.174Z',
+                        updatedBy: 'zuko@example.com',
+                        updatedReason: 'test',
+                    },
+                    submitInfo: {
+                        __typename: 'UpdateInformation',
+                        updatedAt: '2022-03-25T21:14:43.057Z',
+                        updatedBy: 'aang@example.com',
+                        updatedReason: 'Placeholder resubmission reason',
+                    },
+                    createdAt: '2022-03-25T21:13:56.176Z',
+                    submissionData:
+                        'ChBTVEFURV9TVUJNSVNTSU9OEAEaJDA3ZjllZmJmLWQ0ZDEtNDRhZS04Njc0LTU2ZDlkNmI3NWNlNiIJU1VCTUlUVEVEKgcI5g8QAhgZMgsIw+H4kQYQwICXGzoLCMPh+JEGEMCAlxtIGFASWgRwbWFwYANqJ2Rlc2NyaXB0aW9uIG9mIGNvbnRyYWN0IG9ubHkgc3VibWlzc2lvbnIVCgFhEgFhGg1hQGV4YW1wbGUuY29tepIBCAESBwjmDxACGAUaBwjmDxACGBMiAQEqAQEydAoZQW1lcmlncm91cCBUZXhhcywgSW5jLnBkZhJUczM6Ly9sb2NhbC11cGxvYWRzLzE2NDgyNDI2MzIxNTctQW1lcmlncm91cCBUZXhhcywgSW5jLnBkZi9BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmGgEBOAGCAYABCh1BbWVyaWdyb3VwIFRleGFzIEluYyBjb3B5LnBkZhJcczM6Ly9sb2NhbC11cGxvYWRzLzE2NDgyNDI3MTE0MjEtQW1lcmlncm91cCBUZXhhcyBJbmMgY29weS5wZGYvQW1lcmlncm91cCBUZXhhcyBJbmMgY29weS5wZGYaAQOCAbcBCi81MjktMTAtMDAyMC0wMDAwM19TdXBlcmlvcl9IZWFsdGggUGxhbiwgSW5jLnBkZhKAAXMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyNzExNDIxLTUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmLzUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmGgEEggGbAQomY292aWQtaWZjLTItZmx1LXJzdi1jb2RlcyA1LTUtMjAyMS5wZGYSbnMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyODczMjI5LWNvdmlkLWlmYy0yLWZsdS1yc3YtY29kZXMgNS01LTIwMjEucGRmL2NvdmlkLWlmYy0yLWZsdS1yc3YtY29kZXMgNS01LTIwMjEucGRmGgEEkgOyARABGgcI5g8QAhgZIgcI5g8QAhgaKgcI5g8QAhgZMhsKFQoBYhIBYhoNYkBleGFtcGxlLmNvbRABGgA4AUJ0ChlBbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmElRzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjY2NTYzNC1BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmL0FtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYaAQI=', // pragma: allowlist secret
+                },
+            },
+            {
+                __typename: 'RevisionEdge',
+                revision: {
+                    __typename: 'Revision',
+                    id: '95fa29ec-c8b1-4195-82c1-5615bcda7bac',
+                    unlockInfo: null,
+                    submitInfo: {
+                        __typename: 'UpdateInformation',
+                        updatedAt: '2022-03-25T21:13:20.419Z',
+                        updatedBy: 'aang@example.com',
+                        updatedReason: 'Initial submission',
+                    },
+                    createdAt: '2022-03-25T03:28:56.244Z',
+                    submissionData:
+                        'ChBTVEFURV9TVUJNSVNTSU9OEAEaJDA3ZjllZmJmLWQ0ZDEtNDRhZS04Njc0LTU2ZDlkNmI3NWNlNiIJU1VCTUlUVEVEKgcI5g8QAhgZMgwI8OD4kQYQgOKiyAE6DAjw4PiRBhDA3eXHAUgYUBJaBHBtYXBgA2onZGVzY3JpcHRpb24gb2YgY29udHJhY3Qgb25seSBzdWJtaXNzaW9uchUKAWESAWEaDWFAZXhhbXBsZS5jb216kgEIARIHCOYPEAIYBRoHCOYPEAIYEyIBASoBATJ0ChlBbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmElRzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjYzMjE1Ny1BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmL0FtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYaAQE4AYIBgAEKHUFtZXJpZ3JvdXAgVGV4YXMgSW5jIGNvcHkucGRmElxzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjcxMTQyMS1BbWVyaWdyb3VwIFRleGFzIEluYyBjb3B5LnBkZi9BbWVyaWdyb3VwIFRleGFzIEluYyBjb3B5LnBkZhoBA4IBtwEKLzUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmEoABczM6Ly9sb2NhbC11cGxvYWRzLzE2NDgyNDI3MTE0MjEtNTI5LTEwLTAwMjAtMDAwMDNfU3VwZXJpb3JfSGVhbHRoIFBsYW4sIEluYy5wZGYvNTI5LTEwLTAwMjAtMDAwMDNfU3VwZXJpb3JfSGVhbHRoIFBsYW4sIEluYy5wZGYaAQSSA7IBEAEaBwjmDxACGBkiBwjmDxACGBoqBwjmDxACGBkyGwoVCgFiEgFiGg1iQGV4YW1wbGUuY29tEAEaADgBQnQKGUFtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYSVHMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyNjY1NjM0LUFtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYvQW1lcmlncm91cCBUZXhhcywgSW5jLnBkZhoBAg==', // pragma: allowlist secret
+                },
+            },
+        ],
+    }
+}
+
 type updateDraftSubmissionMockProps = {
     draftSubmission?: DraftSubmission | Partial<DraftSubmission>
     id: string
@@ -813,8 +812,9 @@ const unlockStateSubmissionMockError = ({
     id,
     reason,
 }: {
+    id: string
     reason: string
-    id: string // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }): MockedResponse<Record<string, any>> => {
     return {
         request: {
@@ -895,4 +895,5 @@ export {
     indexSubmissions2MockSuccess,
     unlockStateSubmissionMockSuccess,
     unlockStateSubmissionMockError,
+    mockSubmittedSubmission2WithRevision,
 }

@@ -153,6 +153,7 @@ type Submission2 {
     status: Submission2Status!
     intiallySubmittedAt: Date
     stateCode: String!
+    state: State!
     revisions: [RevisionEdge!]!
 }
 
@@ -310,7 +311,6 @@ enum FederalAuthority {
 type DraftSubmission {
     id: ID!
     programIDs: [ID!]!
-    program: Program! # This is dead code.
     submissionType: SubmissionType!
     submissionDescription: String!
     stateCode: String!
@@ -340,7 +340,6 @@ type DraftSubmission {
 type StateSubmission {
     id: ID!
     programIDs: [ID!]!
-    program: Program!
     submissionType: SubmissionType!
     submissionDescription: String!
     stateCode: String!
