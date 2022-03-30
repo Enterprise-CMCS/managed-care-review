@@ -148,11 +148,14 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                     statePrograms={statePrograms}
                     headerChildComponent={
                         submitInfo && (
-                            <p className={styles.submissionVersion}>
+                            <p
+                                className={styles.submissionVersion}
+                                data-testid="revision-version"
+                            >
                                 {`${dayjs
                                     .utc(submitInfo?.updatedAt)
                                     .tz('America/New_York')
-                                    .format('MM/DD/YY h:mma z')} ET version`}
+                                    .format('MM/DD/YY h:mma')} ET version`}
                             </p>
                         )
                     }
