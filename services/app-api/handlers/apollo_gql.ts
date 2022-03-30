@@ -1,4 +1,4 @@
-import { Span } from '@opentelemetry/api'
+import { propagation, ROOT_CONTEXT, Span, Tracer } from '@opentelemetry/api'
 import { ApolloServer } from 'apollo-server-lambda'
 import {
     APIGatewayProxyEvent,
@@ -19,10 +19,10 @@ import { newLocalEmailer, newSESEmailer } from '../emailer'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import { configureResolvers } from '../resolvers'
 import { configurePostgres } from './configuration'
-import { tracer as tracer } from '../../otel/otel_handler'
-
+import { createTracer } from '../otel/otel_handler'
 
 const requestSpanKey = 'REQUEST_SPAN'
+let tracer: Tracer
 
 // The Context type passed to all of our GraphQL resolvers
 export interface Context {
@@ -32,11 +32,16 @@ export interface Context {
 
 // This function pulls auth info out of the cognitoAuthenticationProvider in the lambda event
 // and turns that into our GQL resolver context object
-function contextForRequestForFetcher(
-    userFetcher: userFromAuthProvider
-): ({ event }: { event: APIGatewayProxyEvent, context: any }) => Promise<Context> {
+function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
+    event,
+}: {
+    event: APIGatewayProxyEvent
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    context: any
+}) => Promise<Context> {
     return async ({ event, context }) => {
         // pull the current span out of the LAMBDA context, to place it in the APOLLO context
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const anyContext = context as any
         const requestSpan = anyContext[requestSpanKey]
 
@@ -49,7 +54,7 @@ function contextForRequestForFetcher(
                 if (!userResult.isErr()) {
                     return {
                         user: userResult.value,
-                        span: requestSpan
+                        span: requestSpan,
                     }
                 } else {
                     throw new Error(
@@ -67,9 +72,7 @@ function contextForRequestForFetcher(
 }
 
 // This middleware returns an error if the local request is missing authentication info
-function localAuthMiddleware(
-    wrapped: APIGatewayProxyHandler
-): Handler {
+function localAuthMiddleware(wrapped: APIGatewayProxyHandler): Handler {
     return async function (event, context, completion) {
         const userHeader =
             event.requestContext.identity.cognitoAuthenticationProvider
@@ -93,17 +96,23 @@ function localAuthMiddleware(
 }
 
 // Tracing Middleware
-function tracingMiddleware(
-    wrapped: Handler
-): Handler {
+function tracingMiddleware(wrapped: Handler): Handler {
     return async function (event, context, completion) {
-        const span = tracer.startSpan('handleRequest', {
-            kind: 1, // server
-            attributes: { middlewareInit: true },
-        })
+        // get the parent context from headers
+        const ctx = propagation.extract(ROOT_CONTEXT, event.headers)
+
+        const span = tracer.startSpan(
+            'handleRequest',
+            {
+                kind: 1,
+                attributes: { middlewareInit: true },
+            },
+            ctx
+        )
 
         // Put the span into the LAMBDA context, in order to pass it into the APOLLO context in contextForRequestForFetcher
         // We have to use any here because this context's type is not under our control.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const anyContext = context as any
         anyContext[requestSpanKey] = span
 
@@ -132,6 +141,7 @@ async function initializeGQLHandler(): Promise<Handler> {
     const emailSource = process.env.SES_SOURCE_EMAIL_ADDRESS
     const emailerMode = process.env.EMAILER_MODE
     const cmsReviewSharedEmails = process.env.SES_REVIEW_TEAM_EMAIL_ADDRESSES
+    const otelCollectorUrl = process.env.REACT_APP_OTEL_COLLECTOR_URL
 
     // Print out all the variables we've been configured with. Leave sensitive ones out, please.
     console.info('Running With Config: ', {
@@ -141,6 +151,7 @@ async function initializeGQLHandler(): Promise<Handler> {
         applicationEndpoint,
         emailSource,
         emailerMode,
+        otelCollectorUrl,
     })
 
     // START Assert configuration is valid
@@ -168,6 +179,12 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     if (!dbURL) {
         throw new Error('Init Error: DATABASE_URL is required to run app-api')
+    }
+
+    if (otelCollectorUrl === undefined || otelCollectorUrl === '') {
+        throw new Error(
+            'Configuration Error: REACT_APP_OTEL_COLLECTOR_URL is required to run app-api'
+        )
     }
     // END
 
@@ -220,6 +237,8 @@ async function initializeGQLHandler(): Promise<Handler> {
         },
     })
 
+    // init tracer and set the middleware. tracer needs to be global.
+    tracer = createTracer('app-api-' + stageName)
     const tracingHandler = tracingMiddleware(handler)
 
     // Locally, we wrap our handler in a middleware that returns 403 for unauthenticated requests
@@ -230,6 +249,7 @@ async function initializeGQLHandler(): Promise<Handler> {
 const handlerPromise = initializeGQLHandler()
 
 const gqlHandler: Handler = async (event, context, completion) => {
+    console.log(tracer)
     // Once initialized, future awaits will return immediately
     const initializedHandler = await handlerPromise
 

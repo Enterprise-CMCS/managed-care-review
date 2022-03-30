@@ -2,17 +2,19 @@ import React from 'react'
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web'
 import { BaseOpenTelemetryComponent } from '@opentelemetry/plugin-react-load'
-import { ZoneContextManager } from '@opentelemetry/context-zone'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { diag, DiagConsoleLogger } from '@opentelemetry/api'
 import { Resource } from '@opentelemetry/resources'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
 import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web'
+import { AWSXRayPropagator } from '@opentelemetry/propagator-aws-xray'
+import { AWSXRayIdGenerator } from '@opentelemetry/id-generator-aws-xray'
 
 const serviceName = 'app-web-' + process.env.REACT_APP_STAGE_NAME
 
 const provider = new WebTracerProvider({
+    idGenerator: new AWSXRayIdGenerator(),
     resource: new Resource({
         [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
     }),
@@ -26,15 +28,13 @@ const exporter = new OTLPTraceExporter({
 provider.addSpanProcessor(new BatchSpanProcessor(exporter))
 
 provider.register({
-    contextManager: new ZoneContextManager(),
+    propagator: new AWSXRayPropagator(),
 })
 
 // Registering instrumentations
 registerInstrumentations({
     instrumentations: [
-        getWebAutoInstrumentations(),
-        /* Disabling for now to test header issues
-            {
+        getWebAutoInstrumentations({
             // load custom configuration for xml-http-request instrumentation
             '@opentelemetry/instrumentation-xml-http-request': {
                 propagateTraceHeaderCorsUrls: [/.+/g],
@@ -43,8 +43,7 @@ registerInstrumentations({
             '@opentelemetry/instrumentation-fetch': {
                 propagateTraceHeaderCorsUrls: [/.+/g],
             },
-        }
-        */
+        }),
     ],
 })
 
