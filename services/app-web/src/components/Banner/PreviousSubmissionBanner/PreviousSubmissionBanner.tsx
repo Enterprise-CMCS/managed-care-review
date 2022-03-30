@@ -15,7 +15,10 @@ export const PreviousSubmissionBanner = ({
             heading="Previous Submission"
             data-testid="previousSubmissionBanner"
         >
-            <p className="usa-alert__text">
+            <p
+                className="usa-alert__text"
+                data-testid="previous-submission-banner"
+            >
                 <span>This is a past version of this submission.&nbsp;</span>
                 <Link href={link}>
                     View most recent version of this submission
