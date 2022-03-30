@@ -623,6 +623,11 @@ const mockSubmittedSubmission2WithRevision = (): Submission2 => {
         __typename: 'Submission2',
         id: '07f9efbf-d4d1-44ae-8674-56d9d6b75ce6',
         stateCode: 'MN',
+        state: {
+            name: 'Minnesota',
+            code: 'MN',
+            programs: [],
+        },
         status: 'RESUBMITTED',
         intiallySubmittedAt: '2022-03-25',
         revisions: [
