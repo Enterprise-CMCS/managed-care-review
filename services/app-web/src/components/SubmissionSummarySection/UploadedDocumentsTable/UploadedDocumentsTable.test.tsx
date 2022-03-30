@@ -127,4 +127,51 @@ describe('UploadedDocumentsTable', () => {
             ).toBeNull()
         })
     })
+    it('renders date added when supplied with a date lookup table', async () => {
+        const testDocuments = [
+            {
+                s3URL: 's3://foo/bar/test-1',
+                name: 'supporting docs test 1',
+                documentCategories: ['CONTRACT_RELATED' as const],
+            },
+            {
+                s3URL: 's3://foo/bar/test-2',
+                name: 'supporting docs test 2',
+                documentCategories: ['RATES_RELATED' as const],
+            },
+            {
+                s3URL: 's3://foo/bar/test-3',
+                name: 'supporting docs test 3',
+                documentCategories: [
+                    'CONTRACT_RELATED' as const,
+                    'RATES_RELATED' as const,
+                ],
+            },
+        ]
+        const dateLookupTable = {
+            'supporting docs test 1':
+                'Fri Mar 25 2022 16:13:20 GMT-0500 (Central Daylight Time)',
+            'supporting docs test 2':
+                'Sat Mar 26 2022 16:13:20 GMT-0500 (Central Daylight Time)',
+            'supporting docs test 3':
+                'Sun Mar 27 2022 16:13:20 GMT-0500 (Central Daylight Time)',
+        }
+        renderWithProviders(
+            <UploadedDocumentsTable
+                documents={testDocuments}
+                caption="Contract supporting"
+                documentCategory="Contract-supporting"
+                isSupportingDocuments
+                documentDateLookupTable={dateLookupTable}
+            />
+        )
+        await waitFor(() => {
+            const rows = screen.getAllByRole('row')
+            expect(rows).toHaveLength(4)
+            expect(rows[0]).toHaveTextContent('Date added')
+            expect(rows[1]).toHaveTextContent('3/25/22')
+            expect(rows[2]).toHaveTextContent('3/26/22')
+            expect(rows[3]).toHaveTextContent('3/27/22')
+        })
+    })
 })
