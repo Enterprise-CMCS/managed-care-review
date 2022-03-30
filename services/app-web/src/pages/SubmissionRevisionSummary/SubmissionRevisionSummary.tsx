@@ -22,6 +22,7 @@ import { Error404 } from '../Errors/Error404'
 import { dayjs } from '../../dateHelpers'
 import styles from './SubmissionRevisionSummary.module.scss'
 import { convertDomainModelFormDataToGQLSubmission } from '../../gqlHelpers'
+import { PreviousSubmissionBanner } from '../../components'
 
 export const SubmissionRevisionSummary = (): React.ReactElement => {
     // Page level state
@@ -142,6 +143,8 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                         {pageLevelAlert}
                     </Alert>
                 )}
+
+                <PreviousSubmissionBanner link={`/submissions/${id}`} />
 
                 <SubmissionTypeSummarySection
                     submission={submission}
