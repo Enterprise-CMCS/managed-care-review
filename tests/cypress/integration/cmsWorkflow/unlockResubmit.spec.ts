@@ -154,6 +154,11 @@ describe('dashboard', () => {
                     .contains(
                     /(0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET version/i
                 )
+                //Previous submission banner should exist and able to click link to go back to current submission
+                cy.findByTestId('previous-submission-banner')
+                    .should('exist')
+                    .and('contain.text', 'This is a past version of this submission. View most recent version of this submission')
+                cy.findByText('View most recent version of this submission').click()
             })
         })
     })
