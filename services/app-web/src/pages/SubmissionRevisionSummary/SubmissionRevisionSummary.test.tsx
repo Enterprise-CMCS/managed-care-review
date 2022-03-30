@@ -44,7 +44,7 @@ describe('SubmissionRevisionSummary', () => {
         const submissionVersion = `${dayjs
             .utc('2022-03-24T01:19:46.154Z')
             .tz('America/New_York')
-            .format('MM/DD/YY h:mma z')} ET version`
+            .format('MM/DD/YY h:mma')} ET version`
         expect(await screen.findByText(submissionVersion)).toBeInTheDocument()
     })
 })
