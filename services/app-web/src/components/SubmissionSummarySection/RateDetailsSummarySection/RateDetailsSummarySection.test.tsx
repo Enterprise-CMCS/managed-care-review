@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import {
     mockContractAndRatesDraft,
-    mockStateSubmission
+    mockStateSubmission,
 } from '../../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'
@@ -91,12 +91,12 @@ describe('RateDetailsSummarySection', () => {
     it('render supporting rates docs when they exist', async () => {
         const testSubmission = {
             ...draftSubmission,
-            rateDocuments:[
-                 {
+            rateDocuments: [
+                {
                     s3URL: 's3://foo/bar/rate',
                     name: 'rate docs test 1',
                     documentCategories: ['RATES' as const],
-                }
+                },
             ],
             documents: [
                 {
@@ -120,28 +120,31 @@ describe('RateDetailsSummarySection', () => {
             ],
         }
         renderWithProviders(
-            <RateDetailsSummarySection submission={testSubmission} navigateTo={'/rate-details'}/>
+            <RateDetailsSummarySection
+                submission={testSubmission}
+                navigateTo={'/rate-details'}
+            />
         )
 
-        await waitFor (() => {
-             const supportingDocsTable = screen.getByRole('table', {
-                 name: /Rate supporting documents/,
-             })
-             const rateDocsTable = screen.getByRole('table', {
-                 name: 'Rate certification',
-             })
+        await waitFor(() => {
+            const supportingDocsTable = screen.getByRole('table', {
+                name: /Rate supporting documents/,
+            })
+            const rateDocsTable = screen.getByRole('table', {
+                name: 'Rate certification',
+            })
 
-             expect(rateDocsTable).toBeInTheDocument()
-             expect(supportingDocsTable).toBeInTheDocument()
-             expect(
-                 screen.getByRole('link', {
-                     name: /Edit Rate supporting documents/,
-                 })
-             ).toHaveAttribute('href', '/documents')
+            expect(rateDocsTable).toBeInTheDocument()
+            expect(supportingDocsTable).toBeInTheDocument()
+            expect(
+                screen.getByRole('link', {
+                    name: /Edit Rate supporting documents/,
+                })
+            ).toHaveAttribute('href', '/documents')
 
             const supportingDocsTableRows =
                 within(supportingDocsTable).getAllByRole('rowgroup')
-            expect(supportingDocsTableRows.length).toEqual(2)
+            expect(supportingDocsTableRows.length).toHaveLength(2)
 
             // check row content
             expect(
@@ -159,22 +162,19 @@ describe('RateDetailsSummarySection', () => {
             // check correct category on supporting docs
             expect(
                 within(supportingDocsTable).getAllByText('Rate-supporting')
-                    .length
-            ).toEqual(2)
+            ).toHaveLength(2)
         })
-       
     })
 
     it('does not render supporting rate documents when they do not exist', () => {
         renderWithProviders(
-            <RateDetailsSummarySection
-                submission={draftSubmission}
-            />
+            <RateDetailsSummarySection submission={draftSubmission} />
         )
 
-     expect(screen.queryByRole('table', {
-            name: /Rate supporting documents/,
-        })).toBeNull()
-
+        expect(
+            screen.queryByRole('table', {
+                name: /Rate supporting documents/,
+            })
+        ).toBeNull()
     })
 })

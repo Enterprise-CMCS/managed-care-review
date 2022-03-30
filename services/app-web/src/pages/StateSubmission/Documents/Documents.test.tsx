@@ -117,12 +117,8 @@ describe('Documents', () => {
         const targetEl = screen.getByTestId('file-input-droptarget')
         dragAndDrop(targetEl, [TEST_PNG_FILE, TEST_VIDEO_FILE])
 
-        expect(
-            screen.queryByText(TEST_PNG_FILE.name)
-        ).not.toBeInTheDocument()
-        expect(
-            screen.queryByText(TEST_VIDEO_FILE.name)
-        ).not.toBeInTheDocument()
+        expect(screen.queryByText(TEST_PNG_FILE.name)).not.toBeInTheDocument()
+        expect(screen.queryByText(TEST_VIDEO_FILE.name)).not.toBeInTheDocument()
 
         await waitFor(() => {
             expect(screen.getByTestId('file-input-error')).toHaveClass(
@@ -139,7 +135,6 @@ describe('Documents', () => {
             ).not.toBeInTheDocument()
         })
     })
-
 
     describe('inline errors', () => {
         it('shown in input when invalid file types dropped', async () => {
@@ -198,12 +193,15 @@ describe('Documents', () => {
             userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
-                expect(screen.queryAllByText(TEST_PDF_FILE.name).length).toBe(1)
-                expect(screen.queryAllByText(TEST_DOC_FILE.name).length).toBe(2)
+                expect(screen.queryAllByText(TEST_PDF_FILE.name)).toHaveLength(
+                    1
+                )
+                expect(screen.queryAllByText(TEST_DOC_FILE.name)).toHaveLength(
+                    2
+                )
                 expect(
                     screen.queryAllByText('Duplicate file, please remove')
-                        .length
-                ).toBe(1)
+                ).toHaveLength(1)
             })
         })
 
@@ -231,9 +229,8 @@ describe('Documents', () => {
             await waitFor(() => {
                 expect(
                     screen.queryAllByText('Duplicate file, please remove')
-                        .length
-                ).toBe(0)
-                expect(screen.queryAllByRole('row').length).toBe(2)
+                ).toHaveLength(0)
+                expect(screen.queryAllByRole('row')).toHaveLength(2)
             })
             // note: userEvent.upload does not re-trigger input event when selected files are the same as before, this is why we upload nothing in between
             userEvent.upload(input, [])
@@ -242,9 +239,8 @@ describe('Documents', () => {
             await waitFor(() => {
                 expect(
                     screen.queryAllByText('Duplicate file, please remove')
-                        .length
-                ).toBe(1)
-                expect(screen.queryAllByRole('row').length).toBe(3)
+                ).toHaveLength(1)
+                expect(screen.queryAllByRole('row')).toHaveLength(3)
             })
 
             userEvent.upload(input, [])
@@ -253,9 +249,8 @@ describe('Documents', () => {
             await waitFor(() => {
                 expect(
                     screen.queryAllByText('Duplicate file, please remove')
-                        .length
-                ).toBe(2)
-                expect(screen.queryAllByRole('row').length).toBe(4)
+                ).toHaveLength(2)
+                expect(screen.queryAllByRole('row')).toHaveLength(4)
             })
         })
 
@@ -282,17 +277,20 @@ describe('Documents', () => {
             userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
-                expect(screen.queryAllByText(TEST_PDF_FILE.name).length).toBe(1)
-                expect(screen.queryAllByText(TEST_DOC_FILE.name).length).toBe(2)
+                expect(screen.queryAllByText(TEST_PDF_FILE.name)).toHaveLength(
+                    1
+                )
+                expect(screen.queryAllByText(TEST_DOC_FILE.name)).toHaveLength(
+                    2
+                )
                 expect(
                     screen.queryAllByText('Duplicate file, please remove')
-                        .length
-                ).toBe(1)
+                ).toHaveLength(1)
             })
 
             // Remove duplicate document and remove error
             userEvent.click(screen.queryAllByText(/Remove/)[0])
-            expect(screen.queryAllByText(TEST_DOC_FILE.name).length).toBe(1)
+            expect(screen.queryAllByText(TEST_DOC_FILE.name)).toHaveLength(1)
             expect(
                 screen.queryByText('Duplicate file, please remove')
             ).toBeNull()
@@ -325,13 +323,13 @@ describe('Documents', () => {
                 expect(
                     screen.queryAllByText(
                         'Must select at least one category checkbox'
-                    ).length
-                ).toBe(0)
+                    )
+                ).toHaveLength(0)
             })
 
             // check a category for the second row
             const rows = screen.getAllByRole('row')
-            expect(rows.length).toBe(3)
+            expect(rows).toHaveLength(3)
             userEvent.click(
                 within(rows[1]).getByRole('checkbox', {
                     name: 'contract-supporting',
@@ -342,8 +340,8 @@ describe('Documents', () => {
                 expect(
                     screen.queryAllByText(
                         'Must select at least one category checkbox'
-                    ).length
-                ).toBe(0)
+                    )
+                ).toHaveLength(0)
             })
 
             // click continue and enter validation state
@@ -353,63 +351,59 @@ describe('Documents', () => {
                 expect(
                     screen.queryAllByText(
                         'Must select at least one category checkbox'
-                    ).length
-                ).toBe(1)
+                    )
+                ).toHaveLength(1)
             })
         })
     })
-    
+
     describe('error summary at top of page', () => {
-        it('displayed as expected',  async () => {
-    const mockUpdateDraftFn = jest.fn()
-    renderWithProviders(
-        <Documents
-            draftSubmission={{
-                ...mockDraft(),
-                submissionType: 'CONTRACT_AND_RATES',
-            }}
-            updateDraft={mockUpdateDraftFn}
-        />,
-        {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-        }
-    )
+        it('displayed as expected', async () => {
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <Documents
+                    draftSubmission={{
+                        ...mockDraft(),
+                        submissionType: 'CONTRACT_AND_RATES',
+                    }}
+                    updateDraft={mockUpdateDraftFn}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
 
-    const input = screen.getByLabelText(
-        'Upload any additional supporting documents'
-    )
+            const input = screen.getByLabelText(
+                'Upload any additional supporting documents'
+            )
 
-    userEvent.upload(input, [TEST_DOC_FILE])
-    userEvent.upload(input, [TEST_PDF_FILE])
-    userEvent.upload(input, [TEST_DOC_FILE])
+            userEvent.upload(input, [TEST_DOC_FILE])
+            userEvent.upload(input, [TEST_PDF_FILE])
+            userEvent.upload(input, [TEST_DOC_FILE])
 
-    await waitFor(() => {
-        // error summary messages don't appear on load
-        expect(
-            screen.queryAllByText('You must select a document category').length
-        ).toBe(0)
-        expect(
-            screen.queryAllByText('You must remove duplicate files')
-                .length
-        ).toBe(0)
-    })
+            await waitFor(() => {
+                // error summary messages don't appear on load
+                expect(
+                    screen.queryAllByText('You must select a document category')
+                ).toHaveLength(0)
+                expect(
+                    screen.queryAllByText('You must remove duplicate files')
+                ).toHaveLength(0)
+            })
 
-    // click continue and enter validation state
-    userEvent.click(screen.getByRole('button', { name: 'Continue' }))
+            // click continue and enter validation state
+            userEvent.click(screen.getByRole('button', { name: 'Continue' }))
 
-    await waitFor(() => {
-        expect(
-            screen.queryAllByText('You must select a document category').length
-        ).toBe(2)
-        expect(
-            screen.queryAllByText('You must remove duplicate files')
-                .length
-        ).toBe(1)
-    })
-
-
+            await waitFor(() => {
+                expect(
+                    screen.queryAllByText('You must select a document category')
+                ).toHaveLength(2)
+                expect(
+                    screen.queryAllByText('You must remove duplicate files')
+                ).toHaveLength(1)
+            })
         })
     })
 
@@ -509,7 +503,9 @@ describe('Documents', () => {
             userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
-                expect(screen.queryAllByText('Duplicate file, please remove').length).toBe(1)
+                expect(
+                    screen.queryAllByText('Duplicate file, please remove')
+                ).toHaveLength(1)
             })
             userEvent.click(saveAsDraftButton)
             await waitFor(() => {
@@ -764,7 +760,9 @@ describe('Documents', () => {
             userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
-                expect(screen.queryAllByText('Duplicate file, please remove').length).toBe(1)
+                expect(
+                    screen.queryAllByText('Duplicate file, please remove')
+                ).toHaveLength(1)
             })
             userEvent.click(saveAsDraftButton)
             await waitFor(() => {
@@ -780,7 +778,6 @@ describe('Documents', () => {
             })
         })
     })
-
 
     describe('Back button', () => {
         it('enabled when valid files are present', async () => {
@@ -904,7 +901,9 @@ describe('Documents', () => {
             userEvent.upload(input, [TEST_DOC_FILE])
             await waitFor(() => {
                 expect(backButton).not.toBeDisabled()
-                expect(screen.queryAllByText('Duplicate file, please remove').length).toBe(1)
+                expect(
+                    screen.queryAllByText('Duplicate file, please remove')
+                ).toHaveLength(1)
             })
             userEvent.click(backButton)
             expect(screen.queryByText('Remove files with errors')).toBeNull()
@@ -929,8 +928,8 @@ describe('Documents', () => {
                     },
                 }
             )
-            expect(screen.queryAllByText('Contract-supporting').length).toBe(0)
-            expect(screen.queryAllByText('Rate-supporting').length).toBe(0)
+            expect(screen.queryAllByText('Contract-supporting')).toHaveLength(0)
+            expect(screen.queryAllByText('Rate-supporting')).toHaveLength(0)
 
             const input = screen.getByTestId('file-input-input')
             userEvent.upload(input, [TEST_PDF_FILE])
@@ -944,10 +943,10 @@ describe('Documents', () => {
                 const call = mockUpdateDraftFn.mock.calls[0][0]
                 const documents = call.draftSubmissionUpdates.documents
 
-                expect(documents.length).toBe(1)
-                expect(
-                    documents[0].documentCategories.includes('CONTRACT_RELATED')
-                ).toBe(true)
+                expect(documents).toHaveLength(1)
+                expect(documents[0].documentCategories).toContain(
+                    'CONTRACT_RELATED'
+                )
             })
         })
 
@@ -959,12 +958,12 @@ describe('Documents', () => {
                         ...mockDraft(),
                         submissionType: 'CONTRACT_AND_RATES',
                         documents: [
-                        {
-                            s3URL: 's3://bucketname/key/supporting-documents',
-                            name: 'supporting documents',
-                            documentCategories: ['RATES_RELATED' as const],
-                        }
-                        ]
+                            {
+                                s3URL: 's3://bucketname/key/supporting-documents',
+                                name: 'supporting documents',
+                                documentCategories: ['RATES_RELATED' as const],
+                            },
+                        ],
                     }}
                     updateDraft={mockUpdateDraftFn}
                 />,
@@ -982,7 +981,6 @@ describe('Documents', () => {
                     screen.getAllByText('Rate-supporting').length
                 ).toBeGreaterThanOrEqual(1)
             })
-
         })
 
         it('present on contract and rates submission in categories error state', async () => {
@@ -1019,12 +1017,12 @@ describe('Documents', () => {
             await waitFor(() => {
                 expect(
                     screen.queryAllByText('You must select a document category')
-                        .length
-                ).toBe(0)
+                ).toHaveLength(0)
 
-                expect(screen.queryAllByText('Contract-supporting').length).toBe(1)
-                expect(screen.queryAllByText('Rate-supporting').length).toBe(1)
-
+                expect(
+                    screen.queryAllByText('Contract-supporting')
+                ).toHaveLength(1)
+                expect(screen.queryAllByText('Rate-supporting')).toHaveLength(1)
             })
 
             userEvent.click(screen.getByRole('button', { name: 'Continue' }))
@@ -1033,10 +1031,11 @@ describe('Documents', () => {
             await waitFor(() => {
                 expect(
                     screen.queryAllByText('You must select a document category')
-                        .length
-                ).toBe(1)
-                expect(screen.queryAllByText('Contract-supporting').length).toBe(1)
-                expect(screen.queryAllByText('Rate-supporting').length).toBe(1)
+                ).toHaveLength(1)
+                expect(
+                    screen.queryAllByText('Contract-supporting')
+                ).toHaveLength(1)
+                expect(screen.queryAllByText('Rate-supporting')).toHaveLength(1)
             })
         })
 
@@ -1066,8 +1065,8 @@ describe('Documents', () => {
             userEvent.upload(input, [TEST_DOC_FILE])
 
             const rows = screen.getAllByRole('row')
-            await waitFor(() => expect(rows.length).toBe(4))
-    
+            await waitFor(() => expect(rows).toHaveLength(4))
+
             // check a category for the second row
             userEvent.click(
                 within(rows[2]).getByRole('checkbox', {
@@ -1081,41 +1080,31 @@ describe('Documents', () => {
             const duplicateNameRow = rows[3]
 
             expect(
-                within(missingDocumentCategoriesRow).getAllByRole(
-                    'checkbox'
-                )
-            .length).toBe(2)
-            
+                within(missingDocumentCategoriesRow).getAllByRole('checkbox')
+            ).toHaveLength(2)
+
             expect(
                 within(validAndHasCategoriesRow).getAllByRole('checkbox')
-            .length).toBe(2)
-            expect(
-                within(duplicateNameRow).queryByRole('checkbox')
-            ).toBeNull()
-            
+            ).toHaveLength(2)
+            expect(within(duplicateNameRow).queryByRole('checkbox')).toBeNull()
+
             // click continue and enter validation state
             userEvent.click(screen.getByRole('button', { name: 'Continue' }))
-            await waitFor( () => {
+            await waitFor(() => {
                 expect(
-                    screen.queryAllByText('You must select a document category').length
-                 ).toBe(1)
+                    screen.queryAllByText('You must select a document category')
+                ).toHaveLength(1)
             })
 
             // checkboxes presence is unchanged
             expect(
                 within(missingDocumentCategoriesRow).getAllByRole('checkbox')
-            .length).toBe(2)
-    
-            expect(
-                within(validAndHasCategoriesRow).getAllByRole(
-                'checkbox'
-            )
-            .length).toBe(2)
-            expect(
-                within(duplicateNameRow).queryByRole(
-                    'checkbox'
-                )).toBeNull()
-        })
+            ).toHaveLength(2)
 
+            expect(
+                within(validAndHasCategoriesRow).getAllByRole('checkbox')
+            ).toHaveLength(2)
+            expect(within(duplicateNameRow).queryByRole('checkbox')).toBeNull()
+        })
     })
 })

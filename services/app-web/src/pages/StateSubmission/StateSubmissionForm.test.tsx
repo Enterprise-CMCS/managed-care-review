@@ -46,12 +46,11 @@ describe('StateSubmissionForm', () => {
         })
 
         it('loads submission type fields for /submissions/:id/type', async () => {
-             const mockSubmission = mockDraftSubmission2({
-                 submissionDescription: 'A real submission',
-                 submissionType: 'CONTRACT_ONLY',
-                 programIDs: ['snbc']
-
-             })
+            const mockSubmission = mockDraftSubmission2({
+                submissionDescription: 'A real submission',
+                submissionType: 'CONTRACT_ONLY',
+                programIDs: ['snbc'],
+            })
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
@@ -64,7 +63,7 @@ describe('StateSubmissionForm', () => {
                             fetchSubmission2Mock({
                                 id: '15',
                                 statusCode: 200,
-                                submission: mockSubmission
+                                submission: mockSubmission,
                             }),
                         ],
                     },
@@ -76,7 +75,7 @@ describe('StateSubmissionForm', () => {
                 'Submission description'
             )
             expect(description).toBeInTheDocument()
-            expect(description.textContent).toEqual('A real submission')
+            expect(description.textContent).toBe('A real submission')
 
             expect(
                 await screen.findByLabelText('Contract action only')
@@ -92,19 +91,19 @@ describe('StateSubmissionForm', () => {
             const mockAmendment = mockDraftSubmission2({
                 contractType: 'AMENDMENT',
                 contractAmendmentInfo: {
-                itemsBeingAmended: [
-                    'CAPITATION_RATES',
-                    'GEO_AREA_SERVED',
-                    'OTHER',
-                ],
-                otherItemBeingAmended: 'foobar',
-                capitationRatesAmendedInfo: {
-                    reason: 'MIDYEAR',
+                    itemsBeingAmended: [
+                        'CAPITATION_RATES',
+                        'GEO_AREA_SERVED',
+                        'OTHER',
+                    ],
+                    otherItemBeingAmended: 'foobar',
+                    capitationRatesAmendedInfo: {
+                        reason: 'MIDYEAR',
+                    },
+                    relatedToCovid19: true,
+                    relatedToVaccination: false,
                 },
-                relatedToCovid19: true,
-                relatedToVaccination: false}
             })
-
 
             renderWithProviders(
                 <Route
@@ -191,56 +190,56 @@ describe('StateSubmissionForm', () => {
 
             await waitFor(() => {
                 expect(
-                    screen.getByText('Upload any additional supporting documents')
+                    screen.getByText(
+                        'Upload any additional supporting documents'
+                    )
                 ).toBeInTheDocument()
                 expect(screen.getByTestId('file-input')).toBeInTheDocument()
             })
         })
     })
 
-        describe('loads unlocked submission', () => {
-            it('displays unlock banner with correct data for an unlocked submission', async () => {
-                 renderWithProviders(
-                     <Route
-                         path={RoutesRecord.SUBMISSIONS_FORM}
-                         component={StateSubmissionForm}
-                     />,
-                     {
-                         apolloProvider: {
-                             mocks: [
-                                 fetchCurrentUserMock({ statusCode: 200 }),
-                                 fetchSubmission2Mock({
-                                     id: '15',
-                                     statusCode: 200,
-                                      submission: mockUnlockedSubmission2(),
-                                 }),
-                             ],
-                         },
-                         routerProvider: {
-                             route: '/submissions/15/documents',
-                         },
-                     }
-                 )
+    describe('loads unlocked submission', () => {
+        it('displays unlock banner with correct data for an unlocked submission', async () => {
+            renderWithProviders(
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_FORM}
+                    component={StateSubmissionForm}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchSubmission2Mock({
+                                id: '15',
+                                statusCode: 200,
+                                submission: mockUnlockedSubmission2(),
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/documents',
+                    },
+                }
+            )
 
-                const banner = expect(
-                    await screen.findByTestId('unlockedBanner')
-                )
-                banner.toBeInTheDocument()
-                banner.toHaveClass('usa-alert--info')
-                banner.toHaveTextContent(
-                    /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+\s[a-zA-Z]+/i
-                )
-                banner.toHaveTextContent('Unlocked by: bob@dmas.mn.govUnlocked')
-                banner.toHaveTextContent(
-                    'Reason for unlock: Test unlock reason'
-                )
-            })
+            const banner = expect(await screen.findByTestId('unlockedBanner'))
+            banner.toBeInTheDocument()
+            banner.toHaveClass('usa-alert--info')
+            banner.toHaveTextContent(
+                /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+\s[a-zA-Z]+/i
+            )
+            banner.toHaveTextContent('Unlocked by: bob@dmas.mn.govUnlocked')
+            banner.toHaveTextContent('Reason for unlock: Test unlock reason')
         })
+    })
 
     describe('when user edits submission', () => {
         it('change draft submission description and navigate to contract details', async () => {
-            const mockSubmission = mockDraftSubmission2({submissionDescription:
-                'A real submission but updated something'})
+            const mockSubmission = mockDraftSubmission2({
+                submissionDescription:
+                    'A real submission but updated something',
+            })
             const mockUpdate = updatesFromSubmission2(mockSubmission)
             mockUpdate.submissionDescription =
                 'A real submission but updated something'
@@ -300,9 +299,8 @@ describe('StateSubmissionForm', () => {
             ]
             const mockSubmission = mockDraftSubmission2({
                 id: '15',
-                documents: mockDocs
+                documents: mockDocs,
             })
-    
 
             const mockUpdate = updatesFromSubmission2(mockSubmission)
             mockUpdate.submissionDescription =
@@ -428,6 +426,4 @@ describe('StateSubmissionForm', () => {
             expect(loading).toBeInTheDocument()
         })
     })
-
-
 })

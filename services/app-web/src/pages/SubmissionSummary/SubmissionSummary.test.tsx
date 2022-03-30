@@ -1,50 +1,55 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route } from 'react-router'
 import { basicStateSubmission } from '../../common-code/domain-mocks'
 import { domainToBase64 } from '../../common-code/proto/stateSubmission'
 import { RoutesRecord } from '../../constants/routes'
 import {
-    fetchCurrentUserMock, fetchStateSubmission2MockSuccess, mockUnlockedSubmission2, mockValidCMSUser, unlockStateSubmissionMockError, unlockStateSubmissionMockSuccess
+    fetchCurrentUserMock,
+    fetchStateSubmission2MockSuccess,
+    mockUnlockedSubmission2,
+    mockValidCMSUser,
+    unlockStateSubmissionMockError,
+    unlockStateSubmissionMockSuccess,
+    mockSubmittedSubmission2WithRevision,
 } from '../../testHelpers/apolloHelpers'
-import { renderWithProviders, userClickByTestId } from '../../testHelpers/jestHelpers'
+import {
+    renderWithProviders,
+    userClickByTestId,
+} from '../../testHelpers/jestHelpers'
 import { SubmissionSummary } from './SubmissionSummary'
 
-
 describe('SubmissionSummary', () => {
-        it('renders without errors', async () => {
-            renderWithProviders(
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={SubmissionSummary}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                user: mockValidCMSUser(),
-                                statusCode: 200,
-                            }),
-                            fetchStateSubmission2MockSuccess({
-                                id: '15',
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15',
-                    },
-                }
-            )
+    it('renders without errors', async () => {
+        renderWithProviders(
+            <Route
+                path={RoutesRecord.SUBMISSIONS_FORM}
+                component={SubmissionSummary}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchStateSubmission2MockSuccess({
+                            id: '15',
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15',
+                },
+            }
+        )
 
-            expect(
-                await screen.findByRole('heading', { name: 'Contract details' })
-            ).toBeInTheDocument()
+        expect(
+            await screen.findByRole('heading', { name: 'Contract details' })
+        ).toBeInTheDocument()
+    })
 
-        })
-
-
-    describe('Submission package data display', () =>{
-
+    describe('Submission package data display', () => {
         it('renders the OLD data for an unlocked submission for CMS user, ignoring unsubmitted changes from state user', async () => {
             const submission2 = mockUnlockedSubmission2()
 
@@ -92,10 +97,7 @@ describe('SubmissionSummary', () => {
         })
 
         it.todo('renders an error when the proto is invalid')
-
     })
-
-
 
     describe('CMS user unlock submission', () => {
         it('renders the unlock button', async () => {
@@ -187,6 +189,46 @@ describe('SubmissionSummary', () => {
             ).toBeNull()
         })
 
+        it('extracts the correct dates from the submission and displays them in tables', async () => {
+            renderWithProviders(
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_FORM}
+                    component={SubmissionSummary}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidCMSUser(),
+                                statusCode: 200,
+                            }),
+                            fetchStateSubmission2MockSuccess({
+                                id: '15',
+                                stateSubmission:
+                                    mockSubmittedSubmission2WithRevision(),
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15',
+                    },
+                }
+            )
+            await waitFor(() => {
+                const rows = screen.getAllByRole('row')
+                expect(rows).toHaveLength(10)
+                expect(
+                    within(rows[0]).getByText('Date added')
+                ).toBeInTheDocument()
+                expect(within(rows[1]).getByText('3/25/22')).toBeInTheDocument()
+                expect(within(rows[2]).getByText('3/28/22')).toBeInTheDocument()
+                expect(
+                    within(rows[7]).getByText('Date added')
+                ).toBeInTheDocument()
+                expect(within(rows[9]).getByText('3/25/22')).toBeInTheDocument()
+            })
+        })
+
         it('disables the unlock button for an unlocked submission', async () => {
             renderWithProviders(
                 <Route
@@ -246,20 +288,15 @@ describe('SubmissionSummary', () => {
                 }
             )
 
-            const banner = expect(
-                await screen.findByTestId('unlockedBanner')
-            )
+            const banner = expect(await screen.findByTestId('unlockedBanner'))
             banner.toBeInTheDocument()
             banner.toHaveClass('usa-alert--warning')
             banner.toHaveTextContent(
                 /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+\s[a-zA-Z]+/i
             )
             banner.toHaveTextContent('Unlocked by: bob@dmas.mn.govUnlocked')
-            banner.toHaveTextContent(
-                'Reason for unlock: Test unlock reason'
-            )
+            banner.toHaveTextContent('Reason for unlock: Test unlock reason')
         })
-
 
         it('displays page alert banner error if unlock api request fails', async () => {
             renderWithProviders(
@@ -403,12 +440,14 @@ describe('SubmissionSummary', () => {
 
             // the popup dialog should be visible now
             await waitFor(() => {
-               expect(screen.getByRole('dialog')).toHaveClass('is-visible')
-               expect(screen.getByText('Provide reason for unlocking')).toBeInTheDocument()
+                expect(screen.getByRole('dialog')).toHaveClass('is-visible')
+                expect(
+                    screen.getByText('Provide reason for unlocking')
+                ).toBeInTheDocument()
             })
 
             const textbox = screen.getByTestId('unlockReason')
-            // Don't use userEvent.type here because it messes with jest timers with this length of content 
+            // Don't use userEvent.type here because it messes with jest timers with this length of content
             userEvent.paste(
                 textbox,
                 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin vulputate ultricies suscipit. Suspendisse consequat at mauris a iaculis. Praesent lorem massa, pellentesque et tempor et, laoreet quis lectus. Vestibulum finibus condimentum nulla, vel tristique tellus pretium sollicitudin. Curabitur velit enim, pulvinar eu fermentum vel, fringilla quis leo.'
@@ -424,56 +463,57 @@ describe('SubmissionSummary', () => {
             ).toBeInTheDocument()
         })
 
-          it('draws focus to unlock reason input when form validation errors exist', async () => {
-              renderWithProviders(
-                  <Route
-                      path={RoutesRecord.SUBMISSIONS_FORM}
-                      component={SubmissionSummary}
-                  />,
-                  {
-                      apolloProvider: {
-                          mocks: [
-                              fetchCurrentUserMock({
-                                  user: mockValidCMSUser(),
-                                  statusCode: 200,
-                              }),
-                              fetchStateSubmission2MockSuccess({
-                                  id: '15',
-                              }),
-                              unlockStateSubmissionMockSuccess({
-                                  id: '15',
-                                  reason: 'Test Reason',
-                              }),
-                          ],
-                      },
-                      routerProvider: {
-                          route: '/submissions/15',
-                      },
-                  }
-              )
+        it('draws focus to unlock reason input when form validation errors exist', async () => {
+            renderWithProviders(
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_FORM}
+                    component={SubmissionSummary}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidCMSUser(),
+                                statusCode: 200,
+                            }),
+                            fetchStateSubmission2MockSuccess({
+                                id: '15',
+                            }),
+                            unlockStateSubmissionMockSuccess({
+                                id: '15',
+                                reason: 'Test Reason',
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15',
+                    },
+                }
+            )
 
-              const unlockModalButton = await screen.findByRole('button', {
-                  name: 'Unlock submission',
-              })
-              userEvent.click(unlockModalButton)
+            const unlockModalButton = await screen.findByRole('button', {
+                name: 'Unlock submission',
+            })
+            userEvent.click(unlockModalButton)
 
-              // the popup dialog should be visible now
-              await waitFor(() =>  screen.getByText('Provide reason for unlocking'))
+            // the popup dialog should be visible now
+            await waitFor(() =>
+                screen.getByText('Provide reason for unlocking')
+            )
 
-              const textbox = await screen.findByTestId('unlockReason')
-    
-              // submit without entering anything
-              userClickByTestId(screen, 'unlockReason-modal-submit')
+            const textbox = await screen.findByTestId('unlockReason')
 
-              expect(
-                  await screen.findByText(
-                      'Reason for unlocking submission is required'
-                  )
-              ).toBeInTheDocument()
+            // submit without entering anything
+            userClickByTestId(screen, 'unlockReason-modal-submit')
 
-              // check focus after error
-              expect(textbox).toHaveFocus()
-          })
+            expect(
+                await screen.findByText(
+                    'Reason for unlocking submission is required'
+                )
+            ).toBeInTheDocument()
+
+            // check focus after error
+            expect(textbox).toHaveFocus()
+        })
     })
 })
-

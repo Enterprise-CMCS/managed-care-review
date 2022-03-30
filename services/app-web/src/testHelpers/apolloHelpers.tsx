@@ -6,9 +6,7 @@ import {
     basicSubmission,
     draftWithALittleBitOfEverything,
 } from '../common-code/domain-mocks'
-import {
-    DraftSubmissionType,
-} from '../common-code/domain-models'
+import { DraftSubmissionType } from '../common-code/domain-models'
 import { domainToBase64 } from '../common-code/proto/stateSubmission'
 import {
     CreateDraftSubmissionDocument,
@@ -21,12 +19,12 @@ import {
     StateSubmission,
     Submission,
     Submission2,
-    IndexSubmissions2Document, SubmitDraftSubmissionDocument,
+    IndexSubmissions2Document,
+    SubmitDraftSubmissionDocument,
     UnlockStateSubmissionDocument,
     UpdateDraftSubmissionDocument,
     User as UserType,
 } from '../gen/gqlClient'
-
 
 /* For use with Apollo MockedProvider in jest tests */
 const mockValidUser: UserType = {
@@ -331,13 +329,14 @@ export function mockStateSubmission(): StateSubmission {
     }
 }
 
-
-export function mockDraftSubmission2(submissionData?: Partial<DraftSubmissionType>): Submission2 {
-    const submission = {...basicSubmission(), ...submissionData}
+export function mockDraftSubmission2(
+    submissionData?: Partial<DraftSubmissionType>
+): Submission2 {
+    const submission = { ...basicSubmission(), ...submissionData }
     const b64 = domainToBase64(submission)
 
     return {
-        __typename: "Submission2",
+        __typename: 'Submission2',
         id: 'test-id-123',
         status: 'DRAFT',
         intiallySubmittedAt: '2022-01-01',
@@ -357,7 +356,6 @@ export function mockDraftSubmission2(submissionData?: Partial<DraftSubmissionTyp
 }
 
 export function mockSubmittedSubmission2(): Submission2 {
-
     // get a submitted DomainModel submission
     // turn it into proto
     const submission = basicStateSubmission()
@@ -375,21 +373,20 @@ export function mockSubmittedSubmission2(): Submission2 {
                     createdAt: new Date(),
                     unlockInfo: null,
                     submitInfo: {
-                        updatedAt: "2021-01-01",
+                        updatedAt: '2021-01-01',
                         updatedBy: 'test@example.com',
-                        updatedReason: 'Initial submit'
-            },
+                        updatedReason: 'Initial submit',
+                    },
                     submissionData: b64,
-                }
+                },
             },
-        ]
+        ],
     }
 }
 
 export function mockUnlockedSubmission2(
     submissionData?: Partial<DraftSubmissionType>
 ): Submission2 {
-
     const submission = {
         ...draftWithALittleBitOfEverything(),
         ...submissionData,
@@ -432,6 +429,78 @@ export function mockUnlockedSubmission2(
     }
 }
 
+export function mockSubmittedSubmission2WithRevision(): Submission2 {
+    return {
+        __typename: 'Submission2',
+        id: '07f9efbf-d4d1-44ae-8674-56d9d6b75ce6',
+        stateCode: 'MN',
+        status: 'RESUBMITTED',
+        intiallySubmittedAt: '2022-03-25',
+        revisions: [
+            {
+                __typename: 'RevisionEdge',
+                revision: {
+                    __typename: 'Revision',
+                    id: '135972bf-e056-40d3-859c-6a69d9c982ad',
+                    unlockInfo: {
+                        __typename: 'UpdateInformation',
+                        updatedAt: '2022-03-28T17:54:39.173Z',
+                        updatedBy: 'zuko@example.com',
+                        updatedReason: 'prepare to add documents',
+                    },
+                    submitInfo: {
+                        __typename: 'UpdateInformation',
+                        updatedAt: '2022-03-28T17:56:32.952Z',
+                        updatedBy: 'aang@example.com',
+                        updatedReason: 'Placeholder resubmission reason',
+                    },
+                    createdAt: '2022-03-28T17:54:39.175Z',
+                    submissionData:
+                        'ChBTVEFURV9TVUJNSVNTSU9OEAEaJDA3ZjllZmJmLWQ0ZDEtNDRhZS04Njc0LTU2ZDlkNmI3NWNlNiIJU1VCTUlUVEVEKgcI5g8QAhgZMgwI0O2HkgYQwMC2xgM6DAjQ7YeSBhCAvPnFA0gYUBJaBHBtYXBgA2onZGVzY3JpcHRpb24gb2YgY29udHJhY3Qgb25seSBzdWJtaXNzaW9uchUKAWESAWEaDWFAZXhhbXBsZS5jb2168AEIARIHCOYPEAIYBRoHCOYPEAIYEyIBASoBATJ0ChlBbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmElRzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjYzMjE1Ny1BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmL0FtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYaAQEyXAoRbGlmZW9mZ2FsaWxlby5wZGYSRHMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4NDkwMTYyNjQxLWxpZmVvZmdhbGlsZW8ucGRmL2xpZmVvZmdhbGlsZW8ucGRmGgEBOAGCAYABCh1BbWVyaWdyb3VwIFRleGFzIEluYyBjb3B5LnBkZhJcczM6Ly9sb2NhbC11cGxvYWRzLzE2NDgyNDI3MTE0MjEtQW1lcmlncm91cCBUZXhhcyBJbmMgY29weS5wZGYvQW1lcmlncm91cCBUZXhhcyBJbmMgY29weS5wZGYaAQOCAbcBCi81MjktMTAtMDAyMC0wMDAwM19TdXBlcmlvcl9IZWFsdGggUGxhbiwgSW5jLnBkZhKAAXMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyNzExNDIxLTUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmLzUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmGgEEggGbAQomY292aWQtaWZjLTItZmx1LXJzdi1jb2RlcyA1LTUtMjAyMS5wZGYSbnMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyODczMjI5LWNvdmlkLWlmYy0yLWZsdS1yc3YtY29kZXMgNS01LTIwMjEucGRmL2NvdmlkLWlmYy0yLWZsdS1yc3YtY29kZXMgNS01LTIwMjEucGRmGgEEkgOyARABGgcI5g8QAhgZIgcI5g8QAhgaKgcI5g8QAhgZMhsKFQoBYhIBYhoNYkBleGFtcGxlLmNvbRABGgA4AUJ0ChlBbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmElRzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjY2NTYzNC1BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmL0FtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYaAQI=', //pragma: allowlist secret
+                },
+            },
+            {
+                __typename: 'RevisionEdge',
+                revision: {
+                    __typename: 'Revision',
+                    id: '9aa14122-2d37-462a-b788-e25c1c30e8dc',
+                    unlockInfo: {
+                        __typename: 'UpdateInformation',
+                        updatedAt: '2022-03-25T21:13:56.174Z',
+                        updatedBy: 'zuko@example.com',
+                        updatedReason: 'test',
+                    },
+                    submitInfo: {
+                        __typename: 'UpdateInformation',
+                        updatedAt: '2022-03-25T21:14:43.057Z',
+                        updatedBy: 'aang@example.com',
+                        updatedReason: 'Placeholder resubmission reason',
+                    },
+                    createdAt: '2022-03-25T21:13:56.176Z',
+                    submissionData:
+                        'ChBTVEFURV9TVUJNSVNTSU9OEAEaJDA3ZjllZmJmLWQ0ZDEtNDRhZS04Njc0LTU2ZDlkNmI3NWNlNiIJU1VCTUlUVEVEKgcI5g8QAhgZMgsIw+H4kQYQwICXGzoLCMPh+JEGEMCAlxtIGFASWgRwbWFwYANqJ2Rlc2NyaXB0aW9uIG9mIGNvbnRyYWN0IG9ubHkgc3VibWlzc2lvbnIVCgFhEgFhGg1hQGV4YW1wbGUuY29tepIBCAESBwjmDxACGAUaBwjmDxACGBMiAQEqAQEydAoZQW1lcmlncm91cCBUZXhhcywgSW5jLnBkZhJUczM6Ly9sb2NhbC11cGxvYWRzLzE2NDgyNDI2MzIxNTctQW1lcmlncm91cCBUZXhhcywgSW5jLnBkZi9BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmGgEBOAGCAYABCh1BbWVyaWdyb3VwIFRleGFzIEluYyBjb3B5LnBkZhJcczM6Ly9sb2NhbC11cGxvYWRzLzE2NDgyNDI3MTE0MjEtQW1lcmlncm91cCBUZXhhcyBJbmMgY29weS5wZGYvQW1lcmlncm91cCBUZXhhcyBJbmMgY29weS5wZGYaAQOCAbcBCi81MjktMTAtMDAyMC0wMDAwM19TdXBlcmlvcl9IZWFsdGggUGxhbiwgSW5jLnBkZhKAAXMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyNzExNDIxLTUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmLzUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmGgEEggGbAQomY292aWQtaWZjLTItZmx1LXJzdi1jb2RlcyA1LTUtMjAyMS5wZGYSbnMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyODczMjI5LWNvdmlkLWlmYy0yLWZsdS1yc3YtY29kZXMgNS01LTIwMjEucGRmL2NvdmlkLWlmYy0yLWZsdS1yc3YtY29kZXMgNS01LTIwMjEucGRmGgEEkgOyARABGgcI5g8QAhgZIgcI5g8QAhgaKgcI5g8QAhgZMhsKFQoBYhIBYhoNYkBleGFtcGxlLmNvbRABGgA4AUJ0ChlBbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmElRzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjY2NTYzNC1BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmL0FtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYaAQI=', // pragma: allowlist secret
+                },
+            },
+            {
+                __typename: 'RevisionEdge',
+                revision: {
+                    __typename: 'Revision',
+                    id: '95fa29ec-c8b1-4195-82c1-5615bcda7bac',
+                    unlockInfo: null,
+                    submitInfo: {
+                        __typename: 'UpdateInformation',
+                        updatedAt: '2022-03-25T21:13:20.419Z',
+                        updatedBy: 'aang@example.com',
+                        updatedReason: 'Initial submission',
+                    },
+                    createdAt: '2022-03-25T03:28:56.244Z',
+                    submissionData:
+                        'ChBTVEFURV9TVUJNSVNTSU9OEAEaJDA3ZjllZmJmLWQ0ZDEtNDRhZS04Njc0LTU2ZDlkNmI3NWNlNiIJU1VCTUlUVEVEKgcI5g8QAhgZMgwI8OD4kQYQgOKiyAE6DAjw4PiRBhDA3eXHAUgYUBJaBHBtYXBgA2onZGVzY3JpcHRpb24gb2YgY29udHJhY3Qgb25seSBzdWJtaXNzaW9uchUKAWESAWEaDWFAZXhhbXBsZS5jb216kgEIARIHCOYPEAIYBRoHCOYPEAIYEyIBASoBATJ0ChlBbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmElRzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjYzMjE1Ny1BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmL0FtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYaAQE4AYIBgAEKHUFtZXJpZ3JvdXAgVGV4YXMgSW5jIGNvcHkucGRmElxzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjcxMTQyMS1BbWVyaWdyb3VwIFRleGFzIEluYyBjb3B5LnBkZi9BbWVyaWdyb3VwIFRleGFzIEluYyBjb3B5LnBkZhoBA4IBtwEKLzUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmEoABczM6Ly9sb2NhbC11cGxvYWRzLzE2NDgyNDI3MTE0MjEtNTI5LTEwLTAwMjAtMDAwMDNfU3VwZXJpb3JfSGVhbHRoIFBsYW4sIEluYy5wZGYvNTI5LTEwLTAwMjAtMDAwMDNfU3VwZXJpb3JfSGVhbHRoIFBsYW4sIEluYy5wZGYaAQSSA7IBEAEaBwjmDxACGBkiBwjmDxACGBoqBwjmDxACGBkyGwoVCgFiEgFiGg1iQGV4YW1wbGUuY29tEAEaADgBQnQKGUFtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYSVHMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyNjY1NjM0LUFtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYvQW1lcmlncm91cCBUZXhhcywgSW5jLnBkZhoBAg==', // pragma: allowlist secret
+                },
+            },
+        ],
+    }
+}
 
 type fetchCurrentUserMockProps = {
     user?: UserType | Partial<UserType>
@@ -441,7 +510,7 @@ const fetchCurrentUserMock = ({
     user = mockValidUser,
     statusCode,
 }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
+fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
     switch (statusCode) {
         case 200:
             return {
@@ -557,7 +626,6 @@ type fetchStateSubmissionMockProps = {
     statusCode: 200 | 403 | 500
 }
 
-
 type fetchStateSubmission2MockSuccessProps = {
     stateSubmission?: Submission2 | Partial<Submission2>
     id: string
@@ -565,8 +633,11 @@ type fetchStateSubmission2MockSuccessProps = {
 
 const fetchStateSubmission2MockSuccess = ({
     stateSubmission = mockSubmittedSubmission2(),
-    id, // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}: fetchStateSubmission2MockSuccessProps): MockedResponse<Record<string, any>> => {
+    id,
+}: fetchStateSubmission2MockSuccessProps): MockedResponse<
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Record<string, any>
+> => {
     // override the ID of the returned draft to match the queried id.
     const mergedStateSubmission = Object.assign({}, stateSubmission, { id })
 
@@ -578,10 +649,10 @@ const fetchStateSubmission2MockSuccess = ({
         result: {
             data: {
                 fetchSubmission2: {
-                    submission: mergedStateSubmission
+                    submission: mergedStateSubmission,
                 },
             },
-        }
+        },
     }
 }
 
@@ -591,7 +662,7 @@ const fetchStateSubmissionMock = ({
     statusCode, // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }: fetchStateSubmissionMockProps): MockedResponse<Record<string, any>> => {
     // override the ID of the returned draft to match the queried id.
-    console.log("MOCKING", id)
+    console.log('MOCKING', id)
     const mergedStateSubmission = Object.assign({}, stateSubmission, { id })
     switch (statusCode) {
         case 200:
@@ -740,10 +811,10 @@ const unlockStateSubmissionMockSuccess = ({
 
 const unlockStateSubmissionMockError = ({
     id,
-    reason
+    reason,
 }: {
-    id: string // eslint-disable-next-line @typescript-eslint/no-explicit-any
     reason: string
+    id: string // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }): MockedResponse<Record<string, any>> => {
     return {
         request: {
@@ -784,10 +855,12 @@ const indexSubmissionsMockSuccess = (
 }
 
 const indexSubmissions2MockSuccess = (
-    submissions: Submission2[] = [mockUnlockedSubmission2(), mockSubmittedSubmission2()]
+    submissions: Submission2[] = [
+        mockUnlockedSubmission2(),
+        mockSubmittedSubmission2(),
+    ]
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): MockedResponse<Record<string, any>> => {
-    
     const submissionEdges = submissions.map((sub) => {
         return {
             node: sub,
@@ -807,7 +880,6 @@ const indexSubmissions2MockSuccess = (
         },
     }
 }
-
 
 export {
     fetchCurrentUserMock,
