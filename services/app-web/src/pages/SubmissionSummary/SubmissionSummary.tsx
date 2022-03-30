@@ -40,7 +40,10 @@ import {
     useFetchSubmission2Query,
     useUnlockStateSubmissionMutation,
 } from '../../gen/gqlClient'
-import { convertDomainModelFormDataToGQLSubmission, isGraphQLErrors } from '../../gqlHelpers'
+import {
+    convertDomainModelFormDataToGQLSubmission,
+    isGraphQLErrors,
+} from '../../gqlHelpers'
 import { Error404 } from '../Errors/Error404'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './SubmissionSummary.module.scss'
@@ -148,9 +151,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     const [unlockStateSubmission] = useUnlockStateSubmissionMutation()
     const submissionAndRevisions = data?.fetchSubmission2.submission
 
-
-    const displayUnlockButton =
-        loggedInUser?.role === 'CMS_USER'
+    const displayUnlockButton = loggedInUser?.role === 'CMS_USER'
 
     // Pull out the correct revision form api request, display errors for bad dad
     useEffect(() => {
@@ -291,12 +292,17 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     const statePrograms = submissionAndRevisions.state.programs
 
-    // temporary kludge while the display data is expecting the wrong format. 
+    // temporary kludge while the display data is expecting the wrong format.
     // This is turning our domain model into the GraphQL model which is what
-    // all our frontend stuff expects right now. 
-    const submission = convertDomainModelFormDataToGQLSubmission(packageData, statePrograms)
+    // all our frontend stuff expects right now.
+    const submission = convertDomainModelFormDataToGQLSubmission(
+        packageData,
+        statePrograms
+    )
 
-    const disableUnlockButton = ['DRAFT', 'UNLOCKED'].includes(submissionAndRevisions.status)
+    const disableUnlockButton = ['DRAFT', 'UNLOCKED'].includes(
+        submissionAndRevisions.status
+    )
 
     const isContractActionAndRateCertification =
         submission.submissionType === 'CONTRACT_AND_RATES'
@@ -348,7 +354,7 @@ export const SubmissionSummary = (): React.ReactElement => {
 
                 <SubmissionTypeSummarySection
                     submission={submission}
-                    unlockModalButton={
+                    headerChildComponent={
                         displayUnlockButton ? (
                             <UnlockModalButton
                                 modalRef={modalRef}
@@ -356,7 +362,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                             />
                         ) : undefined
                     }
-					statePrograms={statePrograms}
+                    statePrograms={statePrograms}
                 />
                 <ContractDetailsSummarySection submission={submission} />
 

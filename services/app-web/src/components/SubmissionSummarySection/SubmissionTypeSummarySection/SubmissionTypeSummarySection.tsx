@@ -13,22 +13,29 @@ export type SubmissionTypeSummarySectionProps = {
     submission: DraftSubmission | StateSubmission
     statePrograms: ProgramT[]
     navigateTo?: string
-    unlockModalButton?: React.ReactElement
+    headerChildComponent?: React.ReactElement
+    showLastUpdated?: boolean
 }
 
 export const SubmissionTypeSummarySection = ({
     submission,
     statePrograms,
     navigateTo,
-    unlockModalButton,
+    headerChildComponent,
+    showLastUpdated = true,
 }: SubmissionTypeSummarySectionProps): React.ReactElement => {
-
-    const programNames = statePrograms.filter(p => submission.programIDs.includes(p.id)).map(p => p.name)
+    const programNames = statePrograms
+        .filter((p) => submission.programIDs.includes(p.id))
+        .map((p) => p.name)
 
     return (
         <section id="submissionTypeSection" className={styles.summarySection}>
-            <SectionHeader header={submission.name} navigateTo={navigateTo} headerId={"submissionName"}>
-                {unlockModalButton && unlockModalButton}
+            <SectionHeader
+                header={submission.name}
+                navigateTo={navigateTo}
+                headerId={'submissionName'}
+            >
+                {headerChildComponent && headerChildComponent}
             </SectionHeader>
 
             <dl>
@@ -45,17 +52,21 @@ export const SubmissionTypeSummarySection = ({
                                 </span>
                             }
                         />
-                        <DataDetail
-                            id="lastUpdated"
-                            label="Last updated"
-                            data={
-                                <span>
-                                    {dayjs(submission.updatedAt).format(
-                                        'MM/DD/YY'
-                                    )}
-                                </span>
-                            }
-                        />
+                        {showLastUpdated ? (
+                            <DataDetail
+                                id="lastUpdated"
+                                label="Last updated"
+                                data={
+                                    <span>
+                                        {dayjs(submission.updatedAt).format(
+                                            'MM/DD/YY'
+                                        )}
+                                    </span>
+                                }
+                            />
+                        ) : (
+                            <></>
+                        )}
                     </DoubleColumnGrid>
                 )}
                 <DoubleColumnGrid>
@@ -67,9 +78,7 @@ export const SubmissionTypeSummarySection = ({
                     <DataDetail
                         id="submissionType"
                         label="Submission type"
-                        data={
-                            SubmissionTypeRecord[submission.submissionType]
-                        }
+                        data={SubmissionTypeRecord[submission.submissionType]}
                     />
                 </DoubleColumnGrid>
                 <Grid row gap className={styles.reviewDataRow}>

@@ -2,7 +2,12 @@ import React, { useEffect, useState } from 'react'
 import { useHistory, useLocation } from 'react-router'
 import { Route, Switch } from 'react-router-dom'
 import { assertNever, AuthModeType } from '../../common-code/domain-models'
-import { getRouteName, PageTitlesRecord, RoutesRecord, RouteT } from '../../constants/routes'
+import {
+    getRouteName,
+    PageTitlesRecord,
+    RoutesRecord,
+    RouteT,
+} from '../../constants/routes'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
 import { useTitle } from '../../hooks/useTitle'
@@ -16,7 +21,7 @@ import { Help } from '../Help/Help'
 import { Landing } from '../Landing/Landing'
 import { NewStateSubmissionForm, StateSubmissionForm } from '../StateSubmission'
 import { SubmissionSummary } from '../SubmissionSummary'
-
+import { SubmissionRevisionSummary } from '../SubmissionRevisionSummary'
 
 const LOGIN_REDIRECT_STORAGE_KEY = 'LOGIN_REDIRECT'
 const LocalStorage = window.localStorage
@@ -51,6 +56,11 @@ const StateUserRoutes = (): React.ReactElement => {
                 exact
             />
             <Route
+                path={RoutesRecord.SUBMISSIONS_REVISION}
+                component={SubmissionRevisionSummary}
+                exact
+            />
+            <Route
                 path={RoutesRecord.SUBMISSIONS_FORM}
                 component={StateSubmissionForm}
             />
@@ -68,6 +78,12 @@ const CMSUserRoutes = (): React.ReactElement => {
             <Route
                 path={RoutesRecord.SUBMISSIONS_FORM}
                 component={SubmissionSummary}
+                exact
+            />
+            <Route
+                path={RoutesRecord.SUBMISSIONS_REVISION}
+                component={SubmissionRevisionSummary}
+                exact
             />
             <Route path="*" component={Error404} />
         </Switch>

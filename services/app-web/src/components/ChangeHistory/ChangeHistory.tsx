@@ -1,7 +1,7 @@
 import React from 'react'
 import { dayjs } from '../../dateHelpers/dayjs'
 import { SectionHeader } from '../SectionHeader'
-import { Accordion } from '@trussworks/react-uswds'
+import { Accordion, Link } from '@trussworks/react-uswds'
 import { Submission2 } from '../../gen/gqlClient'
 import { UpdateInfoType } from '../../common-code/domain-models'
 import styles from './ChangeHistory.module.scss'
@@ -11,6 +11,7 @@ type ChangeHistoryProps = {
 
 type flatRevisions = UpdateInfoType & {
     kind: 'submit' | 'unlock'
+    revisionVersion: string | undefined
 }
 
 export const ChangeHistory = ({
@@ -18,22 +19,35 @@ export const ChangeHistory = ({
 }: ChangeHistoryProps): React.ReactElement => {
     const flattenedRevisions = (): flatRevisions[] => {
         const result: flatRevisions[] = []
-        submission.revisions.forEach((r) => {
-            if (r.revision.submitInfo) {
-                const newSubmit: flatRevisions = {} as flatRevisions
-                newSubmit.updatedAt = r.revision.submitInfo.updatedAt
-                newSubmit.updatedBy = r.revision.submitInfo.updatedBy
-                newSubmit.updatedReason = r.revision.submitInfo.updatedReason
-                newSubmit.kind = 'submit'
-                result.push(newSubmit)
-            }
+        //Reverse revisions to order from earliest to latest revision. This is to correctly set version for each
+        // submission & resubmission.
+        const reversedRevisions = [...submission.revisions].reverse()
+        reversedRevisions.forEach((r, index) => {
             if (r.revision.unlockInfo) {
                 const newUnlock: flatRevisions = {} as flatRevisions
                 newUnlock.updatedAt = r.revision.unlockInfo.updatedAt
                 newUnlock.updatedBy = r.revision.unlockInfo.updatedBy
                 newUnlock.updatedReason = r.revision.unlockInfo.updatedReason
                 newUnlock.kind = 'unlock'
-                result.push(newUnlock)
+                //Use unshift to push the latest revision unlock info to the beginning of the array
+                result.unshift(newUnlock)
+            }
+            if (r.revision.submitInfo) {
+                const newSubmit: flatRevisions = {} as flatRevisions
+
+                //Only set revisionVersion if not the latest revision.
+                const revisionVersion =
+                    index !== reversedRevisions.length - 1
+                        ? String(index)
+                        : undefined
+
+                newSubmit.updatedAt = r.revision.submitInfo.updatedAt
+                newSubmit.updatedBy = r.revision.submitInfo.updatedBy
+                newSubmit.updatedReason = r.revision.submitInfo.updatedReason
+                newSubmit.kind = 'submit'
+                newSubmit.revisionVersion = revisionVersion
+                //Use unshift to push the latest revision submit info to the beginning of the array
+                result.unshift(newSubmit)
             }
         })
         return result
@@ -55,6 +69,15 @@ export const ChangeHistory = ({
                 <>
                     <span className={styles.tag}>Submitted by:</span>
                     <span> {r.updatedBy}</span>
+                    <br />
+                    {r.revisionVersion && (
+                        <Link
+                            href={`/submissions/${submission.id}/revisions/${r.revisionVersion}`}
+                            data-testid={`revision-link-${r.revisionVersion}`}
+                        >
+                            View past submission version
+                        </Link>
+                    )}
                 </>
             ) : (
                 <>
@@ -74,6 +97,14 @@ export const ChangeHistory = ({
                         </span>
                         <span>{r.updatedReason}</span>
                     </div>
+                    {isSubsequentSubmission && r.revisionVersion && (
+                        <Link
+                            href={`/submissions/${submission.id}/revisions/${r.revisionVersion}`}
+                            data-testid={`revision-link-${r.revisionVersion}`}
+                        >
+                            View past submission version
+                        </Link>
+                    )}
                 </>
             ),
             expanded: false,

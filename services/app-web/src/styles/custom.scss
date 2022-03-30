@@ -67,6 +67,8 @@ h3 {
     margin-top: 1rem;
 }
 
+$width-max-contained: 50rem;
+
 // Remove link styles from button-styled links
 a[class^='usa-button usa-button--outline'] {
     text-decoration: none !important;

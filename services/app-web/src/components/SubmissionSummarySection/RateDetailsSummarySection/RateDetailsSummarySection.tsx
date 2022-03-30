@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useRouteMatch } from 'react-router-dom'
 import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
@@ -7,6 +8,7 @@ import { formatCalendarDate } from '../../../dateHelpers'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
+import { RoutesRecord } from '../../../constants/routes'
 import styles from '../SubmissionSummarySection.module.scss'
 
 export type RateDetailsSummarySectionProps = {
@@ -20,6 +22,9 @@ export const RateDetailsSummarySection = ({
 }: RateDetailsSummarySectionProps): React.ReactElement => {
     const isSubmitted = submission.__typename === 'StateSubmission'
     const isEditing = !isSubmitted && navigateTo !== undefined
+    //Checks if submission is a previous submission
+    const { path } = useRouteMatch()
+    const isPreviousSubmission = path === RoutesRecord.SUBMISSIONS_REVISION
     // Get the zip file for the rate details
     const { getKey, getBulkDlURL } = useS3()
     const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
@@ -27,11 +32,11 @@ export const RateDetailsSummarySection = ({
         doc.documentCategories.includes('RATES_RELATED')
     )
 
-
     useEffect(() => {
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
-            const keysFromDocs = submission.rateDocuments.concat(rateSupportingDocuments)
+            const keysFromDocs = submission.rateDocuments
+                .concat(rateSupportingDocuments)
                 .map((doc) => {
                     const key = getKey(doc.s3URL)
                     if (!key) return ''
@@ -59,7 +64,7 @@ export const RateDetailsSummarySection = ({
         <section id="rateDetails" className={styles.summarySection}>
             <dl>
                 <SectionHeader header="Rate details" navigateTo={navigateTo}>
-                    {isSubmitted && (
+                    {isSubmitted && !isPreviousSubmission && (
                         <DownloadButton
                             text="Download all rate documents"
                             zippedFilesURL={zippedFilesURL}
@@ -84,7 +89,9 @@ export const RateDetailsSummarySection = ({
                                 ? 'Rating period of original rate certification'
                                 : 'Rating period'
                         }
-                        data={`${formatCalendarDate(submission.rateDateStart)} to ${formatCalendarDate(submission.rateDateEnd)}`}
+                        data={`${formatCalendarDate(
+                            submission.rateDateStart
+                        )} to ${formatCalendarDate(submission.rateDateEnd)}`}
                     />
                     <DataDetail
                         id="dateCertified"
