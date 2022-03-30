@@ -146,7 +146,6 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                 <SubmissionTypeSummarySection
                     submission={submission}
                     statePrograms={statePrograms}
-                    showLastUpdated={false}
                     headerChildComponent={
                         submitInfo && (
                             <p className={styles.submissionVersion}>
