@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { useRouteMatch } from 'react-router-dom'
 import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
@@ -16,7 +15,7 @@ import { formatCalendarDate } from '../../../dateHelpers'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
-import { RoutesRecord } from '../../../constants/routes'
+import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../SubmissionSummarySection.module.scss'
 
 export type ContractDetailsSummarySectionProps = {
@@ -55,8 +54,7 @@ export const ContractDetailsSummarySection = ({
     navigateTo,
 }: ContractDetailsSummarySectionProps): React.ReactElement => {
     //Checks if submission is a previous submission
-    const { path } = useRouteMatch()
-    const isPreviousSubmission = path === RoutesRecord.SUBMISSIONS_REVISION
+    const isPreviousSubmission = usePreviousSubmission()
     // Get the zip file for the contract
     const { getKey, getBulkDlURL } = useS3()
     const [zippedFilesURL, setZippedFilesURL] = useState<string>('')

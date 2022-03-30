@@ -7,6 +7,7 @@ import { SectionHeader } from '../../../components/SectionHeader'
 import { SubmissionTypeRecord } from '../../../constants/submissions'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 import { isStateSubmission } from '../../../gqlHelpers'
+import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../SubmissionSummarySection.module.scss'
 
 export type SubmissionTypeSummarySectionProps = {
@@ -14,7 +15,6 @@ export type SubmissionTypeSummarySectionProps = {
     statePrograms: ProgramT[]
     navigateTo?: string
     headerChildComponent?: React.ReactElement
-    showLastUpdated?: boolean
 }
 
 export const SubmissionTypeSummarySection = ({
@@ -22,8 +22,8 @@ export const SubmissionTypeSummarySection = ({
     statePrograms,
     navigateTo,
     headerChildComponent,
-    showLastUpdated = true,
 }: SubmissionTypeSummarySectionProps): React.ReactElement => {
+    const isPreviousSubmission = usePreviousSubmission()
     const programNames = statePrograms
         .filter((p) => submission.programIDs.includes(p.id))
         .map((p) => p.name)
@@ -52,7 +52,7 @@ export const SubmissionTypeSummarySection = ({
                                 </span>
                             }
                         />
-                        {showLastUpdated ? (
+                        {!isPreviousSubmission ? (
                             <DataDetail
                                 id="lastUpdated"
                                 label="Last updated"
