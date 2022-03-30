@@ -144,7 +144,7 @@ describe('RateDetailsSummarySection', () => {
 
             const supportingDocsTableRows =
                 within(supportingDocsTable).getAllByRole('rowgroup')
-            expect(supportingDocsTableRows.length).toHaveLength(2)
+            expect(supportingDocsTableRows).toHaveLength(2)
 
             // check row content
             expect(
