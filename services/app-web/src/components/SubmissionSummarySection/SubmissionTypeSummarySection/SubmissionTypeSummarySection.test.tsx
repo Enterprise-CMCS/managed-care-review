@@ -70,6 +70,7 @@ describe('SubmissionTypeSummarySection', () => {
         renderWithProviders(
             <SubmissionTypeSummarySection
                 submission={stateSubmission}
+                statePrograms={mockMNState().programs}
                 navigateTo="submission-type"
             />
         )
@@ -94,8 +95,8 @@ describe('SubmissionTypeSummarySection', () => {
         renderWithProviders(
             <SubmissionTypeSummarySection
                 submission={draftSubmission}
+                statePrograms={mockMNState().programs}
                 navigateTo="submission-type"
-                showLastUpdated={false}
             />
         )
         expect(
@@ -106,6 +107,7 @@ describe('SubmissionTypeSummarySection', () => {
         renderWithProviders(
             <SubmissionTypeSummarySection
                 submission={draftSubmission}
+                statePrograms={mockMNState().programs}
                 navigateTo="submission-type"
                 headerChildComponent={<button>Test button</button>}
             />
