@@ -256,7 +256,6 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     const onModalSubmit = async (values: typeof modalFormInitialValues) => {
         const { unlockReason } = values
-        modalRef.current?.toggleModal(undefined, false)
         await onUnlock(unlockReason)
     }
 
@@ -273,6 +272,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                 result
             )
             setPageLevelAlert('Error attempting to unlock. Please try again.')
+            modalRef.current?.toggleModal(undefined, false)
         } else if (isGraphQLErrors(result)) {
             console.error('ERROR: got a GraphQL error response', result)
             if (result[0].extensions.code === 'BAD_USER_INPUT') {
@@ -284,8 +284,10 @@ export const SubmissionSummary = (): React.ReactElement => {
                     'Error attempting to unlock. Please try again.'
                 )
             }
+            modalRef.current?.toggleModal(undefined, false)
         } else {
             const unlockedSub: Submission2 = result
+            modalRef.current?.toggleModal(undefined, false)
             console.log('Submission Unlocked', unlockedSub)
         }
     }
