@@ -6,6 +6,7 @@ import {
     SubmissionUnionType,
     UpdateInfoType,
 } from '../../common-code/domain-models'
+import { makeDateTable } from '../../common-code/data-helpers/makeDocumentDateLookupTable'
 import { base64ToDomain } from '../../common-code/proto/stateSubmission'
 import { Loading } from '../../components/Loading'
 import {
@@ -23,6 +24,7 @@ import { dayjs } from '../../dateHelpers'
 import styles from './SubmissionRevisionSummary.module.scss'
 import { convertDomainModelFormDataToGQLSubmission } from '../../gqlHelpers'
 import { PreviousSubmissionBanner } from '../../components'
+import { DocumentDateLookupTable } from '../SubmissionSummary/SubmissionSummary'
 
 export const SubmissionRevisionSummary = (): React.ReactElement => {
     // Page level state
@@ -42,6 +44,11 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         SubmissionUnionType | undefined
     >(undefined)
 
+    // document date lookup state
+    const [documentDates, setDocumentDates] = useState<
+        DocumentDateLookupTable | undefined
+    >({})
+
     const { loading, error, data } = useFetchSubmission2Query({
         variables: {
             input: {
@@ -56,6 +63,8 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
     useEffect(() => {
         //Find revision by revisionVersion.
         if (submissionAndRevisions) {
+            const lookupTable = makeDateTable(submissionAndRevisions)
+            setDocumentDates(lookupTable)
             const revision = [...submissionAndRevisions.revisions]
                 .reverse() //Reversing revisions to get correct submission order
                 .find((revision, index) => index === Number(revisionVersion))
@@ -88,6 +97,11 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                 )
                 return
             }
+            console.log('submissionResult', submissionResult)
+            console.log(
+                'revision.revision.submitInfo',
+                revision.revision.submitInfo
+            )
             setSubmitInfo(revision.revision.submitInfo)
             setPackageData(submissionResult)
         }
@@ -164,10 +178,16 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                     }
                 />
 
-                <ContractDetailsSummarySection submission={submission} />
+                <ContractDetailsSummarySection
+                    submission={submission}
+                    documentDateLookupTable={documentDates}
+                />
 
                 {isContractActionAndRateCertification && (
-                    <RateDetailsSummarySection submission={submission} />
+                    <RateDetailsSummarySection
+                        submission={submission}
+                        documentDateLookupTable={documentDates}
+                    />
                 )}
 
                 <ContactsSummarySection submission={submission} />

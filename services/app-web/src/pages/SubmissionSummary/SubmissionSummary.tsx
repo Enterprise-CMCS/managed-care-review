@@ -18,6 +18,7 @@ import {
     SubmissionUnionType,
     UpdateInfoType,
 } from '../../common-code/domain-models'
+import { makeDateTable } from '../../common-code/data-helpers/makeDocumentDateLookupTable'
 import { base64ToDomain } from '../../common-code/proto/stateSubmission'
 import { Loading } from '../../components/Loading'
 import {
@@ -136,37 +137,37 @@ export const SubmissionSummary = (): React.ReactElement => {
     }
 
     // document date lookup state
-    const [documentDates, setDocumentDates] = useState<DocumentDateLookupTable>(
-        {}
-    )
+    const [documentDates, setDocumentDates] = useState<
+        DocumentDateLookupTable | undefined
+    >({})
 
-    const makeDateTable = (submissions: Submission2) => {
-        const docBuckets = [
-            'contractDocuments',
-            'rateDocuments',
-            'documents',
-        ] as const
-        const lookupTable = {} as DocumentDateLookupTable
-        if (submissions) {
-            submissions.revisions.forEach((revision) => {
-                const revisionData = base64ToDomain(
-                    revision.revision.submissionData
-                )
-                if (revisionData instanceof Error) {
-                    console.error(
-                        'failed to read submission data; unable to display document dates'
-                    )
-                    return
-                }
-                docBuckets.forEach((bucket) => {
-                    revisionData[bucket].forEach((doc) => {
-                        lookupTable[doc.name] = revisionData.updatedAt
-                    })
-                })
-            })
-            setDocumentDates(lookupTable)
-        }
-    }
+    // const makeDateTable = (submissions: Submission2) => {
+    //     const docBuckets = [
+    //         'contractDocuments',
+    //         'rateDocuments',
+    //         'documents',
+    //     ] as const
+    //     const lookupTable = {} as DocumentDateLookupTable
+    //     if (submissions) {
+    //         submissions.revisions.forEach((revision) => {
+    //             const revisionData = base64ToDomain(
+    //                 revision.revision.submissionData
+    //             )
+    //             if (revisionData instanceof Error) {
+    //                 console.error(
+    //                     'failed to read submission data; unable to display document dates'
+    //                 )
+    //                 return
+    //             }
+    //             docBuckets.forEach((bucket) => {
+    //                 revisionData[bucket].forEach((doc) => {
+    //                     lookupTable[doc.name] = revisionData.updatedAt
+    //                 })
+    //             })
+    //         })
+    //         setDocumentDates(lookupTable)
+    //     }
+    // }
     const formik = useFormik({
         initialValues: modalFormInitialValues,
         validationSchema: Yup.object().shape({
@@ -193,7 +194,8 @@ export const SubmissionSummary = (): React.ReactElement => {
     // Pull out the correct revision form api request, display errors for bad dad
     useEffect(() => {
         if (submissionAndRevisions) {
-            makeDateTable(submissionAndRevisions)
+            const lookupTable = makeDateTable(submissionAndRevisions)
+            setDocumentDates(lookupTable)
             // We ignore revisions currently being edited.
             // The summary page should only ever called on a package that has been submitted once
             const currentRevision = submissionAndRevisions.revisions.find(
