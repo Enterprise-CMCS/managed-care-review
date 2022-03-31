@@ -18,6 +18,7 @@ describe('dashboard', () => {
         // Store submission url for reference later
         cy.location().then( (fullUrl) => {
             const reviewURL = fullUrl.toString()
+            const submissionURL = reviewURL.replace('/review-and-submit', '')
             fullUrl.pathname = path.dirname(fullUrl)
 
             // Submit, sent to dashboard
@@ -31,7 +32,7 @@ describe('dashboard', () => {
             cy.findByText(
                 'Medicaid and CHIP Managed Care Reporting and Review System'
             )
-            cy.logInAsCMSUser({ initialURL: reviewURL })
+            cy.logInAsCMSUser({ initialURL: submissionURL })
 
             // click on the unlock button, type in reason and confirm
             cy.wait(2000)
@@ -126,7 +127,7 @@ describe('dashboard', () => {
                 cy.findByText(
                     'Medicaid and CHIP Managed Care Reporting and Review System'
                 )
-                cy.logInAsCMSUser({ initialURL: reviewURL })
+                cy.logInAsCMSUser({ initialURL: submissionURL })
 
                 //  CMS user sees resubmitted submission and active unlock button
                 cy.findByRole('button', { name: 'Unlock submission' }).should(
@@ -134,6 +135,25 @@ describe('dashboard', () => {
                 )
 
                 cy.findByTestId('unlockedBanner').should('not.exist')
+
+                //Open all change history accordion items
+                cy.findByTestId('accordion')
+                    .should('exist')
+
+                cy.get('[data-testid^="accordionButton_"]')
+                    .each( button => {
+                        button.trigger('click')
+                    })
+                //Click on link in the initial accordion item
+                cy.findByTestId('revision-link-0')
+                    .should('exist')
+                    .click()
+                //Making sure we are on SubmissionRevisionSummary page and contains version text
+                cy.findByTestId('revision-version')
+                    .should('exist')
+                    .contains(
+                    /(0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET version/i
+                )
             })
         })
     })

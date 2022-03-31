@@ -18,6 +18,7 @@ const ROUTES = [
     'SUBMISSIONS_CONTACTS',
     'SUBMISSIONS_DOCUMENTS',
     'SUBMISSIONS_REVIEW_SUBMIT',
+    'SUBMISSIONS_REVISION',
 ] as const // iterable union type
 type RouteT = typeof ROUTES[number]
 
@@ -44,6 +45,7 @@ const RoutesRecord: Record<RouteT, string> = {
     SUBMISSIONS_CONTACTS: '/submissions/:id/contacts',
     SUBMISSIONS_DOCUMENTS: '/submissions/:id/documents',
     SUBMISSIONS_REVIEW_SUBMIT: '/submissions/:id/review-and-submit',
+    SUBMISSIONS_REVISION: '/submissions/:id/revisions/:revisionVersion',
 }
 
 // Static page headings used in <header> h1 when logged in. Dynamic headings, when necessary, are set in page specific parent component.
@@ -69,6 +71,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     SUBMISSIONS_CONTACTS: 'Contacts',
     SUBMISSIONS_DOCUMENTS: 'Supporting documents',
     SUBMISSIONS_REVIEW_SUBMIT: 'Review and submit',
+    SUBMISSIONS_REVISION: 'Submission Revision',
     UNKNOWN_ROUTE: 'Not found',
 }
 
