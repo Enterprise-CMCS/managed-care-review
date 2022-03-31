@@ -382,6 +382,71 @@ export function mockSubmittedSubmission2(): Submission2 {
     }
 }
 
+export function mockSubmittedSubmission2WithRevisions(): Submission2 {
+    // get a submitted DomainModel submission
+    // turn it into proto
+    const submission = basicStateSubmission()
+    const b64 = domainToBase64(submission)
+
+    return {
+        id: 'test-id-123',
+        status: 'SUBMITTED',
+        intiallySubmittedAt: '2022-01-01',
+        stateCode: 'MN',
+        state: mockMNState(),
+        revisions: [
+            {
+                revision: {
+                    id: 'sd596de8-852d-4e42-ab0a-c9c9bf78c3c1',
+                    unlockInfo: {
+                        updatedAt: '2022-03-25T01:18:44.663Z',
+                        updatedBy: 'zuko@example.com',
+                        updatedReason: 'Latest unlock',
+                    },
+                    submitInfo: {
+                        updatedAt: '2022-03-25T01:19:46.154Z',
+                        updatedBy: 'aang@example.com',
+                        updatedReason: 'Should be latest resubmission',
+                        __typename: 'UpdateInformation',
+                    },
+                    createdAt: '2022-03-25T01:18:44.665Z',
+                    submissionData: b64,
+                },
+            },
+            {
+                revision: {
+                    id: '26596de8-852d-4e42-bb0a-c9c9bf78c3de',
+                    unlockInfo: {
+                        updatedAt: '2022-03-24T01:18:44.663Z',
+                        updatedBy: 'zuko@example.com',
+                        updatedReason: 'testing stuff',
+                    },
+                    submitInfo: {
+                        updatedAt: '2022-03-24T01:19:46.154Z',
+                        updatedBy: 'aang@example.com',
+                        updatedReason: 'Placeholder resubmission reason',
+                    },
+                    createdAt: '2022-03-24T01:18:44.665Z',
+                    submissionData: b64,
+                },
+            },
+            {
+                revision: {
+                    id: 'e048cdcf-5b19-4acb-8ead-d7dc2fd6cd30',
+                    unlockInfo: null,
+                    submitInfo: {
+                        updatedAt: '2022-03-23T02:08:52.259Z',
+                        updatedBy: 'aang@example.com',
+                        updatedReason: 'Initial submission',
+                    },
+                    createdAt: '2022-03-23T02:08:14.241Z',
+                    submissionData: b64,
+                },
+            },
+        ],
+    }
+}
+
 export function mockUnlockedSubmission2(
     submissionData?: Partial<DraftSubmissionType>
 ): Submission2 {

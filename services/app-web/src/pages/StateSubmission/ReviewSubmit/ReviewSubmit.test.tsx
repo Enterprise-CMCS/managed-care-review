@@ -6,14 +6,20 @@ import {
     submitDraftSubmissionMockError,
     submitDraftSubmissionMockSuccess,
 } from '../../../testHelpers/apolloHelpers'
-import { renderWithProviders, userClickByTestId } from '../../../testHelpers/jestHelpers'
+import {
+    renderWithProviders,
+    userClickByTestId,
+} from '../../../testHelpers/jestHelpers'
 import { ReviewSubmit } from './ReviewSubmit'
 import userEvent from '@testing-library/user-event'
 
 describe('ReviewSubmit', () => {
     it('renders without errors', async () => {
         renderWithProviders(
-            <ReviewSubmit draftSubmission={mockCompleteDraft()} unlocked={false}/>,
+            <ReviewSubmit
+                draftSubmission={mockCompleteDraft()}
+                unlocked={false}
+            />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -27,7 +33,10 @@ describe('ReviewSubmit', () => {
 
     it('displays edit buttons for every section', async () => {
         renderWithProviders(
-            <ReviewSubmit draftSubmission={mockCompleteDraft()} unlocked={false}/>,
+            <ReviewSubmit
+                draftSubmission={mockCompleteDraft()}
+                unlocked={false}
+            />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -50,7 +59,10 @@ describe('ReviewSubmit', () => {
 
     it('does not display zip download buttons', async () => {
         renderWithProviders(
-            <ReviewSubmit draftSubmission={mockCompleteDraft()} unlocked={false} />,
+            <ReviewSubmit
+                draftSubmission={mockCompleteDraft()}
+                unlocked={false}
+            />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -62,13 +74,16 @@ describe('ReviewSubmit', () => {
             const bulkDownloadButtons = screen.queryAllByRole('button', {
                 name: /documents/,
             })
-            expect(bulkDownloadButtons.length).toBe(0)
+            expect(bulkDownloadButtons).toHaveLength(0)
         })
     })
 
     it('renders info from a DraftSubmission', async () => {
         renderWithProviders(
-            <ReviewSubmit draftSubmission={mockCompleteDraft()} unlocked={false} />,
+            <ReviewSubmit
+                draftSubmission={mockCompleteDraft()}
+                unlocked={false}
+            />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -103,7 +118,10 @@ describe('ReviewSubmit', () => {
 
     it('displays back and save as draft buttons', async () => {
         renderWithProviders(
-            <ReviewSubmit draftSubmission={mockCompleteDraft()} unlocked={false}/>,
+            <ReviewSubmit
+                draftSubmission={mockCompleteDraft()}
+                unlocked={false}
+            />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -129,7 +147,10 @@ describe('ReviewSubmit', () => {
 
     it('displays submit button', async () => {
         renderWithProviders(
-            <ReviewSubmit draftSubmission={mockCompleteDraft()} unlocked={false}/>,
+            <ReviewSubmit
+                draftSubmission={mockCompleteDraft()}
+                unlocked={false}
+            />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -144,7 +165,10 @@ describe('ReviewSubmit', () => {
 
     it('submit button opens confirmation modal', async () => {
         renderWithProviders(
-            <ReviewSubmit draftSubmission={mockCompleteDraft()} unlocked={false}/>,
+            <ReviewSubmit
+                draftSubmission={mockCompleteDraft()}
+                unlocked={false}
+            />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -158,7 +182,9 @@ describe('ReviewSubmit', () => {
         submitButton.click()
 
         await waitFor(() => {
-            const confirmSubmit = screen.getByTestId('review-and-submit-modal-submit')
+            const confirmSubmit = screen.getByTestId(
+                'review-and-submit-modal-submit'
+            )
             expect(confirmSubmit).toBeInTheDocument()
             expect(screen.getByText('Ready to submit?')).toBeInTheDocument()
             expect(
@@ -173,7 +199,10 @@ describe('ReviewSubmit', () => {
         const history = createMemoryHistory()
 
         renderWithProviders(
-            <ReviewSubmit draftSubmission={mockCompleteDraft()} unlocked={false}/>,
+            <ReviewSubmit
+                draftSubmission={mockCompleteDraft()}
+                unlocked={false}
+            />,
             {
                 apolloProvider: {
                     mocks: [
@@ -198,14 +227,16 @@ describe('ReviewSubmit', () => {
         submit.click()
 
         await waitFor(() => {
-            const confirmSubmit = screen.getByTestId('review-and-submit-modal-submit')
+            const confirmSubmit = screen.getByTestId(
+                'review-and-submit-modal-submit'
+            )
             expect(confirmSubmit).toBeInTheDocument()
             confirmSubmit.click()
         })
 
         await waitFor(() => {
-            expect(history.location.pathname).toEqual(`/dashboard`)
-            expect(history.location.search).toEqual(
+            expect(history.location.pathname).toBe(`/dashboard`)
+            expect(history.location.search).toBe(
                 `?justSubmitted=${mockCompleteDraft().name}`
             )
         })
@@ -213,7 +244,10 @@ describe('ReviewSubmit', () => {
 
     it('displays an error if submission fails', async () => {
         renderWithProviders(
-            <ReviewSubmit draftSubmission={mockCompleteDraft()} unlocked={false}/>,
+            <ReviewSubmit
+                draftSubmission={mockCompleteDraft()}
+                unlocked={false}
+            />,
             {
                 apolloProvider: {
                     mocks: [
@@ -230,7 +264,9 @@ describe('ReviewSubmit', () => {
 
         submitButton.click()
 
-        const confirmSubmit = screen.getByTestId('review-and-submit-modal-submit')
+        const confirmSubmit = screen.getByTestId(
+            'review-and-submit-modal-submit'
+        )
         expect(confirmSubmit).toBeInTheDocument()
         confirmSubmit.click()
 
@@ -245,7 +281,10 @@ describe('ReviewSubmit', () => {
 describe('Resubmitting plan packages', () => {
     it('opens submission modal with summary input when submit button is clicked on unlocked plan package', async () => {
         renderWithProviders(
-            <ReviewSubmit draftSubmission={mockCompleteDraft()} unlocked={true}/>,
+            <ReviewSubmit
+                draftSubmission={mockCompleteDraft()}
+                unlocked={true}
+            />,
             {
                 apolloProvider: {
                     mocks: [
@@ -260,7 +299,9 @@ describe('Resubmitting plan packages', () => {
         screen.getByTestId('form-submit').click()
 
         await waitFor(() => {
-            expect(screen.getByTestId('review-and-submit-modal-submit')).toBeInTheDocument()
+            expect(
+                screen.getByTestId('review-and-submit-modal-submit')
+            ).toBeInTheDocument()
             expect(screen.getByText('Summarize changes')).toBeInTheDocument()
             expect(
                 screen.getByText(
@@ -273,7 +314,9 @@ describe('Resubmitting plan packages', () => {
                 )
             ).toBeInTheDocument()
             expect(screen.getByTestId('submittedReason')).toBeInTheDocument()
-            expect(screen.getByTestId('review-and-submit-modal-submit')).toHaveTextContent('Resubmit')
+            expect(
+                screen.getByTestId('review-and-submit-modal-submit')
+            ).toHaveTextContent('Resubmit')
         })
     })
 
@@ -281,14 +324,17 @@ describe('Resubmitting plan packages', () => {
         const history = createMemoryHistory()
 
         renderWithProviders(
-            <ReviewSubmit draftSubmission={mockCompleteDraft()} unlocked={true}/>,
+            <ReviewSubmit
+                draftSubmission={mockCompleteDraft()}
+                unlocked={true}
+            />,
             {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({ statusCode: 200 }),
                         submitDraftSubmissionMockSuccess({
                             id: mockCompleteDraft().id,
-                            submittedReason: 'Test submission summary'
+                            submittedReason: 'Test submission summary',
                         }),
                     ],
                 },
@@ -317,8 +363,8 @@ describe('Resubmitting plan packages', () => {
         })
 
         await waitFor(() => {
-            expect(history.location.pathname).toEqual(`/dashboard`)
-            expect(history.location.search).toEqual(
+            expect(history.location.pathname).toBe(`/dashboard`)
+            expect(history.location.search).toBe(
                 `?justSubmitted=${mockCompleteDraft().name}`
             )
         })
@@ -326,7 +372,10 @@ describe('Resubmitting plan packages', () => {
 
     it('displays an error if submission fails on unlocked plan package', async () => {
         renderWithProviders(
-            <ReviewSubmit draftSubmission={mockCompleteDraft()} unlocked={true}/>,
+            <ReviewSubmit
+                draftSubmission={mockCompleteDraft()}
+                unlocked={true}
+            />,
             {
                 apolloProvider: {
                     mocks: [
@@ -351,21 +400,26 @@ describe('Resubmitting plan packages', () => {
             expect(screen.getByRole('dialog')).toHaveClass('is-hidden')
         })
 
-        expect(await screen.findByText(
-            'Error attempting to submit. Please try again.'
-        )).toBeInTheDocument()
+        expect(
+            await screen.findByText(
+                'Error attempting to submit. Please try again.'
+            )
+        ).toBeInTheDocument()
     })
 
     it('displays form validation error when summary for submission is over 300 characters', async () => {
         renderWithProviders(
-            <ReviewSubmit draftSubmission={mockCompleteDraft()} unlocked={true}/>,
+            <ReviewSubmit
+                draftSubmission={mockCompleteDraft()}
+                unlocked={true}
+            />,
             {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({ statusCode: 200 }),
                         submitDraftSubmissionMockSuccess({
                             id: mockCompleteDraft().id,
-                            submittedReason: 'Test submission summary'
+                            submittedReason: 'Test submission summary',
                         }),
                     ],
                 },
@@ -387,22 +441,23 @@ describe('Resubmitting plan packages', () => {
         screen.getByTestId('review-and-submit-modal-submit').click()
 
         expect(
-            await screen.findByText(
-                'Summary for submission is too long'
-            )
+            await screen.findByText('Summary for submission is too long')
         ).toBeInTheDocument()
     })
 
     it('displays form validation error when submitting without an submission summary', async () => {
         renderWithProviders(
-            <ReviewSubmit draftSubmission={mockCompleteDraft()} unlocked={true}/>,
+            <ReviewSubmit
+                draftSubmission={mockCompleteDraft()}
+                unlocked={true}
+            />,
             {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({ statusCode: 200 }),
                         submitDraftSubmissionMockSuccess({
                             id: mockCompleteDraft().id,
-                            submittedReason: 'Test submission summary'
+                            submittedReason: 'Test submission summary',
                         }),
                     ],
                 },
@@ -418,21 +473,22 @@ describe('Resubmitting plan packages', () => {
         screen.getByTestId('review-and-submit-modal-submit').click()
 
         expect(
-            await screen.findByText(
-                'Summary for submission is required'
-            )
+            await screen.findByText('Summary for submission is required')
         ).toBeInTheDocument()
     })
 
     it('draws focus to submitted summary textarea when form validation errors exist', async () => {
         renderWithProviders(
-            <ReviewSubmit draftSubmission={mockCompleteDraft()} unlocked={true}/>,
+            <ReviewSubmit
+                draftSubmission={mockCompleteDraft()}
+                unlocked={true}
+            />,
             {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({ statusCode: 200 }),
                         submitDraftSubmissionMockSuccess({
-                            id: mockCompleteDraft().id
+                            id: mockCompleteDraft().id,
                         }),
                     ],
                 },
@@ -441,7 +497,11 @@ describe('Resubmitting plan packages', () => {
         userClickByTestId(screen, 'form-submit')
 
         // the popup dialog should be visible now
-        await waitFor(() =>  screen.getByText('Provide summary of all changes made to this submission'))
+        await waitFor(() =>
+            screen.getByText(
+                'Provide summary of all changes made to this submission'
+            )
+        )
 
         // Using findBy because it seems like the timeout in findBy gives it enough time to find the textarea?
         const textbox = await screen.findByTestId('submittedReason')
@@ -451,9 +511,7 @@ describe('Resubmitting plan packages', () => {
         userClickByTestId(screen, 'review-and-submit-modal-submit')
 
         expect(
-            await screen.findByText(
-                'Summary for submission is required'
-            )
+            await screen.findByText('Summary for submission is required')
         ).toBeInTheDocument()
 
         // check focus after error
