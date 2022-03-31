@@ -122,6 +122,7 @@ export const ReviewSubmit = ({
             }
 
             if (data.data?.submitDraftSubmission) {
+                modalRef.current?.toggleModal(undefined, false)
                 history.push(`/dashboard?justSubmitted=${draftSubmission.name}`)
             } else {
                 console.error('Got nothing back from submit')
