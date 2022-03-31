@@ -3,14 +3,19 @@ import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import {
-    AmendableItemsRecord, ContractExecutionStatusRecord, ContractTypeRecord,
-    FederalAuthorityRecord, ManagedCareEntityRecord, RateChangeReasonRecord
+    AmendableItemsRecord,
+    ContractExecutionStatusRecord,
+    ContractTypeRecord,
+    FederalAuthorityRecord,
+    ManagedCareEntityRecord,
+    RateChangeReasonRecord,
 } from '../../../constants/submissions'
 import { useS3 } from '../../../contexts/S3Context'
 import { formatCalendarDate } from '../../../dateHelpers'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
+import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../SubmissionSummarySection.module.scss'
 
 export type ContractDetailsSummarySectionProps = {
@@ -48,6 +53,8 @@ export const ContractDetailsSummarySection = ({
     submission,
     navigateTo,
 }: ContractDetailsSummarySectionProps): React.ReactElement => {
+    //Checks if submission is a previous submission
+    const isPreviousSubmission = usePreviousSubmission()
     // Get the zip file for the contract
     const { getKey, getBulkDlURL } = useS3()
     const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
@@ -60,7 +67,8 @@ export const ContractDetailsSummarySection = ({
     useEffect(() => {
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
-            const keysFromDocs = submission.contractDocuments.concat(contractSupportingDocuments)
+            const keysFromDocs = submission.contractDocuments
+                .concat(contractSupportingDocuments)
                 .map((doc) => {
                     const key = getKey(doc.s3URL)
                     if (!key) return ''
@@ -117,7 +125,7 @@ export const ContractDetailsSummarySection = ({
     return (
         <section id="contractDetailsSection" className={styles.summarySection}>
             <SectionHeader header="Contract details" navigateTo={navigateTo}>
-                {isSubmitted && (
+                {isSubmitted && !isPreviousSubmission && (
                     <DownloadButton
                         text="Download all contract documents"
                         zippedFilesURL={zippedFilesURL}
@@ -141,8 +149,8 @@ export const ContractDetailsSummarySection = ({
                         data={
                             submission.contractExecutionStatus
                                 ? ContractExecutionStatusRecord[
-                                    submission.contractExecutionStatus
-                                    ]
+                                      submission.contractExecutionStatus
+                                  ]
                                 : ''
                         }
                     />
@@ -153,7 +161,11 @@ export const ContractDetailsSummarySection = ({
                                 ? 'Contract effective dates'
                                 : 'Contract amendment effective dates'
                         }
-                        data={`${formatCalendarDate(submission.contractDateStart)} to ${formatCalendarDate(submission.contractDateEnd)}`}
+                        data={`${formatCalendarDate(
+                            submission.contractDateStart
+                        )} to ${formatCalendarDate(
+                            submission.contractDateEnd
+                        )}`}
                     />
                     <DataDetail
                         id="managedCareEntities"
