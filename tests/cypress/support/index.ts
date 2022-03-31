@@ -13,6 +13,7 @@
 import './commands'
 import './loginCommands'
 import './stateSubmissionFormCommands'
+import './submissionCommands'
 type FormButtonKey = 'CONTINUE_FROM_START_NEW' | 'CONTINUE' | 'SAVE_DRAFT' | 'BACK' 
 
 declare global {
@@ -42,6 +43,8 @@ declare global {
             verifyDocumentsHaveNoErrors(): void
             submitStateSubmissionForm(success?: boolean, resubmission?: boolean): void
             navigateForm(buttonName: FormButtonKey, waitForLoad?: boolean): void
+            navigateBackToCurrentSubmission(): void
+            navigateToSubmissionRevision(linkTestId: string): void
         }
     }
 }

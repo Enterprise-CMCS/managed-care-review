@@ -46,5 +46,8 @@ describe('SubmissionRevisionSummary', () => {
             .tz('America/New_York')
             .format('MM/DD/YY h:mma')} ET version`
         expect(await screen.findByText(submissionVersion)).toBeInTheDocument()
+        expect(
+            await screen.findByTestId('previous-submission-banner')
+        ).toBeInTheDocument()
     })
 })

@@ -145,15 +145,23 @@ describe('dashboard', () => {
                         button.trigger('click')
                     })
                 //Click on link in the initial accordion item
-                cy.findByTestId('revision-link-0')
-                    .should('exist')
-                    .click()
+                cy.navigateToSubmissionRevision('revision-link-0')
                 //Making sure we are on SubmissionRevisionSummary page and contains version text
                 cy.findByTestId('revision-version')
                     .should('exist')
                     .contains(
                     /(0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET version/i
                 )
+                //Previous submission banner should exist and able to click link to go back to current submission
+                cy.findByTestId('previous-submission-banner')
+                    .should('exist')
+                //Navigate back to current submission using link inside banner.
+                cy.navigateBackToCurrentSubmission()
+                //MAke sure banner and revision version text are gone.
+                cy.findByTestId('previous-submission-banner')
+                    .should('not.exist')
+                cy.findByTestId('revision-version')
+                    .should('not.exist')
             })
         })
     })
