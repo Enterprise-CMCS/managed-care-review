@@ -38,7 +38,7 @@ export const ChangeHistory = ({
                 //Only set revisionVersion if not the latest revision.
                 const revisionVersion =
                     index !== reversedRevisions.length - 1
-                        ? String(index)
+                        ? String(index + 1) //Offset version, we want to start at 1
                         : undefined
 
                 newSubmit.updatedAt = r.revision.submitInfo.updatedAt
