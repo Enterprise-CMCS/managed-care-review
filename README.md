@@ -284,6 +284,21 @@ You'll need to add this service to our deployment GitHub Actions workflows:
 -   Services that include application code can be added to `./.github/workflows/deploy-app-to-env.yml`.
 -   We have a CI script that skips branch redeploys when possible in `./scripts/get-changed-services/index.ts`. Make sure your service is added to that list.
 
+## Monitoring
+
+We currently are using Open Telemetry for distributed tracing, with our OTEL exporters pointed to New Relic. In order to access our New Relic dashboard, you'll first need to request access from someone on the team. Once access has been granted, the following should be used to sign in to your account:
+
+```
+1. Open https://one.newrelic.com and log in to your account using your `@teamtrussworks.com` email address.
+2. You will be redirected to the CMS SSO for Active Directory in Azure.
+3. Log in with an email address consisting of your EUA ID + `@cloud.cms.gov`.
+4. Enter your EUA password at the next screen.
+5. You should be prompted to choose your MFA type, either by SMS or by phone.
+6. Enter your MFA token.
+```
+
+You should now be at our New Relic dashboard where all our OTEL metrics are being displayed.
+
 ## Contributing
 
 We welcome contributions to this project. MC Review is an internal CMS tool for facilitating the review of state Medicaid contracts. It is developed by a federal contracting team under contract with CMS and is deployed internally for that purpose. MC Review is built using agile development processes and accepts both issues and feature requests via GitHub issues on this repository. If you’d like to contribute back any changes to this code base, please create a Pull Request and a team member will review your work. While this repository is dedicated primarily to delivering MC Review to the government, if you find any parts of it useful or find any errors in the code we would love your contributions and feedback. All contributors are required to follow our [Code of Conduct](./CODE_OF_CONDUCT.md)
