@@ -65,9 +65,11 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         if (submissionAndRevisions) {
             const lookupTable = makeDateTable(submissionAndRevisions)
             setDocumentDates(lookupTable)
+            //We offset version by +1 of index, remove offset to find revision in revisions
+            const revisionIndex = Number(revisionVersion) - 1
             const revision = [...submissionAndRevisions.revisions]
                 .reverse() //Reversing revisions to get correct submission order
-                .find((revision, index) => index === Number(revisionVersion))
+                .find((revision, index) => index === revisionIndex)
 
             if (!revision) {
                 console.error(

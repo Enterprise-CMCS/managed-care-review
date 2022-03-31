@@ -33,7 +33,7 @@ describe('SubmissionRevisionSummary', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/revisions/1',
+                    route: '/submissions/15/revisions/2',
                 },
             }
         )

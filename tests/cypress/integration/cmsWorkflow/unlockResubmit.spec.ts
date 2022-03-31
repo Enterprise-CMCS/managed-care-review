@@ -145,7 +145,7 @@ describe('dashboard', () => {
                         button.trigger('click')
                     })
                 //Click on link in the initial accordion item
-                cy.navigateToSubmissionRevision('revision-link-0')
+                cy.navigateToSubmissionRevision('revision-link-1')
                 //Making sure we are on SubmissionRevisionSummary page and contains version text
                 cy.findByTestId('revision-version')
                     .should('exist')
