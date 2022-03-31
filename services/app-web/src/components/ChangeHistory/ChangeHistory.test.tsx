@@ -166,13 +166,13 @@ describe('Change History', () => {
     })
     it('has correct href values for previous submission links', () => {
         render(<ChangeHistory submission={submissionData} />)
-        expect(screen.getByTestId(`revision-link-0`)).toHaveAttribute(
-            'href',
-            `/submissions/440d6a53-bb0a-49ae-9a9c-da7c5352789f/revisions/0`
-        )
         expect(screen.getByTestId(`revision-link-1`)).toHaveAttribute(
             'href',
             `/submissions/440d6a53-bb0a-49ae-9a9c-da7c5352789f/revisions/1`
+        )
+        expect(screen.getByTestId(`revision-link-2`)).toHaveAttribute(
+            'href',
+            `/submissions/440d6a53-bb0a-49ae-9a9c-da7c5352789f/revisions/2`
         )
     })
     it('should list accordion items with links when appropriate', () => {
