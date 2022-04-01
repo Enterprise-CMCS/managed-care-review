@@ -1,15 +1,12 @@
-import React from 'react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryHistory } from 'history'
 import { screen, waitFor } from '@testing-library/react'
 import selectEvent from 'react-select-event'
-import {
-    fetchCurrentUserMock,
-    mockDraft,
-} from '../../../testHelpers/apolloHelpers'
+import { fetchCurrentUserMock } from '../../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { SubmissionType, SubmissionTypeFormValues } from './'
 import { Formik } from 'formik'
+import { contractOnly } from '../../../common-code/domain-mocks'
 
 describe('SubmissionType', () => {
     const SubmissionTypeInitialValues: SubmissionTypeFormValues = {
@@ -62,11 +59,14 @@ describe('SubmissionType', () => {
     })
 
     it('displays with draft submission when expected', async () => {
-        renderWithProviders(<SubmissionType draftSubmission={mockDraft()} />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-        })
+        renderWithProviders(
+            <SubmissionType draftSubmission={contractOnly()} />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
 
         await waitFor(() =>
             expect(
@@ -166,7 +166,7 @@ describe('SubmissionType', () => {
         const combobox = await screen.findByRole('combobox')
 
         await waitFor(async () => {
-            await selectEvent.openMenu(combobox)
+            selectEvent.openMenu(combobox)
         })
 
         await waitFor(() => {
