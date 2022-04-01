@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route } from 'react-router'
 import { basicStateSubmission } from '../../common-code/domain-mocks'
@@ -11,7 +11,7 @@ import {
     mockValidCMSUser,
     unlockStateSubmissionMockError,
     unlockStateSubmissionMockSuccess,
-    mockSubmittedSubmission2WithRevisions,
+    mockSubmittedSubmission2WithRevision,
 } from '../../testHelpers/apolloHelpers'
 import {
     renderWithProviders,
@@ -50,7 +50,7 @@ describe('SubmissionSummary', () => {
     })
 
     it('renders submission updated banner', async () => {
-        const submissionsWithRevisions = mockSubmittedSubmission2WithRevisions()
+        const submissionsWithRevisions = mockSubmittedSubmission2WithRevision()
         renderWithProviders(
             <Route
                 path={RoutesRecord.SUBMISSIONS_FORM}
@@ -225,6 +225,46 @@ describe('SubmissionSummary', () => {
                     'Error attempting to unlock. Please try again.'
                 )
             ).toBeNull()
+        })
+
+        it('extracts the correct dates from the submission and displays them in tables', async () => {
+            renderWithProviders(
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_FORM}
+                    component={SubmissionSummary}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidCMSUser(),
+                                statusCode: 200,
+                            }),
+                            fetchStateSubmission2MockSuccess({
+                                id: '15',
+                                stateSubmission:
+                                    mockSubmittedSubmission2WithRevision(),
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15',
+                    },
+                }
+            )
+            await waitFor(() => {
+                const rows = screen.getAllByRole('row')
+                expect(rows).toHaveLength(10)
+                expect(
+                    within(rows[0]).getByText('Date added')
+                ).toBeInTheDocument()
+                expect(within(rows[1]).getByText('3/25/22')).toBeInTheDocument()
+                expect(within(rows[2]).getByText('3/28/22')).toBeInTheDocument()
+                expect(
+                    within(rows[7]).getByText('Date added')
+                ).toBeInTheDocument()
+                expect(within(rows[9]).getByText('3/25/22')).toBeInTheDocument()
+            })
         })
 
         it('disables the unlock button for an unlocked submission', async () => {

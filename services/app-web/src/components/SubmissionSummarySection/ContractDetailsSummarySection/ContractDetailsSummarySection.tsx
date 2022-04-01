@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
+import { DocumentDateLookupTable } from '../../../pages/SubmissionSummary/SubmissionSummary'
 import {
     AmendableItemsRecord,
     ContractExecutionStatusRecord,
@@ -21,6 +22,7 @@ import styles from '../SubmissionSummarySection.module.scss'
 export type ContractDetailsSummarySectionProps = {
     submission: DraftSubmission | StateSubmission
     navigateTo?: string
+    documentDateLookupTable?: DocumentDateLookupTable
 }
 
 const createCheckboxList = ({
@@ -52,6 +54,7 @@ const createCheckboxList = ({
 export const ContractDetailsSummarySection = ({
     submission,
     navigateTo,
+    documentDateLookupTable,
 }: ContractDetailsSummarySectionProps): React.ReactElement => {
     //Checks if submission is a previous submission
     const isPreviousSubmission = usePreviousSubmission()
@@ -232,11 +235,13 @@ export const ContractDetailsSummarySection = ({
             </dl>
             <UploadedDocumentsTable
                 documents={submission.contractDocuments}
+                documentDateLookupTable={documentDateLookupTable}
                 caption="Contract"
                 documentCategory="Contract"
             />
             <UploadedDocumentsTable
                 documents={contractSupportingDocuments}
+                documentDateLookupTable={documentDateLookupTable}
                 caption="Contract supporting documents"
                 documentCategory="Contract-supporting"
                 isSupportingDocuments

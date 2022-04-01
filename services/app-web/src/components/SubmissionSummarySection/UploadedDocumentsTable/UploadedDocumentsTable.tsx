@@ -1,45 +1,46 @@
 import { Link } from '@trussworks/react-uswds'
 import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
+import dayjs from 'dayjs'
 import { useS3 } from '../../../contexts/S3Context'
 import { Document } from '../../../gen/gqlClient'
+import { DocumentDateLookupTable } from '../../../pages/SubmissionSummary/SubmissionSummary'
 import styles from './UploadedDocumentsTable.module.scss'
-
-
 
 export type UploadedDocumentsTableProps = {
     documents: Document[]
     caption: string | null
     documentCategory: string
-    isSupportingDocuments?: boolean 
+    documentDateLookupTable?: DocumentDateLookupTable
+    isSupportingDocuments?: boolean
     isEditing?: boolean
 }
 
 type DocumentWithLink = { url: string | null } & Document
 
 const isBothContractAndRateSupporting = (doc: Document) =>
-doc.documentCategories.includes('CONTRACT_RELATED') &&
-doc.documentCategories.includes('RATES_RELATED') 
+    doc.documentCategories.includes('CONTRACT_RELATED') &&
+    doc.documentCategories.includes('RATES_RELATED')
 
 export const UploadedDocumentsTable = ({
     documents,
     caption,
     documentCategory,
+    documentDateLookupTable,
     isSupportingDocuments = false,
-    isEditing = false
+    isEditing = false,
 }: UploadedDocumentsTableProps): React.ReactElement => {
     const { getURL, getKey } = useS3()
     const [refreshedDocs, setRefreshedDocs] = useState<DocumentWithLink[]>([])
     const shouldShowEditButton = isEditing && isSupportingDocuments
-    const shouldShowAsteriskExplainer = refreshedDocs.some(
-        (doc) =>
-           isBothContractAndRateSupporting(doc)
+    const shouldShowAsteriskExplainer = refreshedDocs.some((doc) =>
+        isBothContractAndRateSupporting(doc)
     )
-    const borderTopGradientStyles= `borderTopLinearGradient ${
-        styles.uploadedDocumentsTable
-    }`
-    const supportingDocsTopMarginStyles= isSupportingDocuments ? styles.withMarginTop : ''
-     const tableCaptionJSX = (
+    const borderTopGradientStyles = `borderTopLinearGradient ${styles.uploadedDocumentsTable}`
+    const supportingDocsTopMarginStyles = isSupportingDocuments
+        ? styles.withMarginTop
+        : ''
+    const tableCaptionJSX = (
         <>
             <span>{caption}</span>
             {shouldShowEditButton && (
@@ -55,8 +56,6 @@ export const UploadedDocumentsTable = ({
         </>
     )
 
-
-    
     useEffect(() => {
         const refreshDocuments = async () => {
             const newDocuments = await Promise.all(
@@ -99,19 +98,21 @@ export const UploadedDocumentsTable = ({
             </div>
         )
     }
-                
+
     return (
         <>
-            <table className={`${borderTopGradientStyles} ${supportingDocsTopMarginStyles}`}>
+            <table
+                className={`${borderTopGradientStyles} ${supportingDocsTopMarginStyles}`}
+            >
                 <caption className="text-bold">
                     <div className={styles.captionContainer}>
-                      {tableCaptionJSX}
+                        {tableCaptionJSX}
                     </div>
                 </caption>
                 <thead>
                     <tr>
                         <th scope="col">Document name</th>
-                        <th scope="col"></th>
+                        <th scope="col">Date added</th>
                         <th scope="col">Document category</th>
                     </tr>
                 </thead>
@@ -135,7 +136,13 @@ export const UploadedDocumentsTable = ({
                             ) : (
                                 <td>{doc.name}</td>
                             )}
-                            <td></td>
+                            <td>
+                                {documentDateLookupTable
+                                    ? dayjs(
+                                          documentDateLookupTable[doc.name]
+                                      ).format('M/D/YY')
+                                    : ''}
+                            </td>
                             <td>{documentCategory}</td>
                         </tr>
                     ))}
