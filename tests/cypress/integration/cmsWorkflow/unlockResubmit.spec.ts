@@ -54,7 +54,7 @@ describe('dashboard', () => {
                 .should('exist')
                 .and('contain.text', 'zuko@example.com')
                 .and('contain.text', 'Unlock submission reason.')
-                .contains(/Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+\s[a-zA-Z]+/i)
+                .contains(/Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i)
                 .should('exist')
 
             cy.wait(2000)
@@ -102,7 +102,7 @@ describe('dashboard', () => {
                     .and('contain.text', 'zuko@example.com')
                     .and('contain.text', 'Unlock submission reason.')
                     .contains(
-                        /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+\s[a-zA-Z]+/i
+                        /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET+/i
                     )
                     .should('exist')
 
@@ -122,6 +122,13 @@ describe('dashboard', () => {
                     .should('have.attr', 'href')
                     .and('not.include', 'review-and-submit')
 
+                //Navigate to resubmitted submission and check for submission updated banner
+                cy.get('table')
+                    .findByText(submissionName)
+                    .click()
+                cy.wait('@fetchSubmission2Query')
+                cy.findByTestId('updatedSubmissionBanner').should('exist')
+
                 // Login as CMS User
                 cy.findByRole('button', { name: 'Sign out' }).click()
                 cy.findByText(
@@ -134,7 +141,9 @@ describe('dashboard', () => {
                     'not.be.disabled'
                 )
 
+                //CSM user should not see unlock banner and should see updated submission banner
                 cy.findByTestId('unlockedBanner').should('not.exist')
+                cy.findByTestId('updatedSubmissionBanner').should('exist')
 
                 //Open all change history accordion items
                 cy.findByTestId('accordion')
@@ -144,8 +153,8 @@ describe('dashboard', () => {
                     .each( button => {
                         button.trigger('click')
                     })
-                //Click on link in the initial accordion item
-                cy.navigateToSubmissionRevision('revision-link-1')
+                //Check for view previous submission link in the initial accordion item to exist
+                cy.navigateToSubmissionByUserInteraction('revision-link-1')
                 //Making sure we are on SubmissionRevisionSummary page and contains version text
                 cy.findByTestId('revision-version')
                     .should('exist')
@@ -156,12 +165,14 @@ describe('dashboard', () => {
                 cy.findByTestId('previous-submission-banner')
                     .should('exist')
                 //Navigate back to current submission using link inside banner.
-                cy.navigateBackToCurrentSubmission()
+                cy.navigateToSubmissionByUserInteraction('currentSubmissionLink')
                 //MAke sure banner and revision version text are gone.
                 cy.findByTestId('previous-submission-banner')
                     .should('not.exist')
                 cy.findByTestId('revision-version')
                     .should('not.exist')
+
+                cy.findByRole('button', { name: 'Sign out' }).click()
             })
         })
     })
