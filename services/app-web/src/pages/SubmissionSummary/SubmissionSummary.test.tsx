@@ -84,7 +84,9 @@ describe('SubmissionSummary', () => {
             /Updated on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
         )
         banner.toHaveTextContent('Submitted by: aang@example.com')
-        banner.toHaveTextContent('Changes made: Should be latest resubmission')
+        banner.toHaveTextContent(
+            'Changes made: Placeholder resubmission reason'
+        )
     })
 
     describe('Submission package data display', () => {
