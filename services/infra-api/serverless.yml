@@ -115,6 +115,10 @@ resources:
           BlockPublicPolicy: true
           IgnorePublicAcls: true
           RestrictPublicBuckets: true
+        BucketEncryption:
+          ServerSideEncryptionConfiguration:
+            - ServerSideEncryptionByDefault:
+                SSEAlgorithm: AES256
 
     FirehoseStreamToNewRelic:
       Type: AWS::KinesisFirehose::DeliveryStream
