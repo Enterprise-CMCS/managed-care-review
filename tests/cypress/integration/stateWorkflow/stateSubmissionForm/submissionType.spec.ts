@@ -12,7 +12,6 @@ describe('submission type', () => {
 
             // Navigate to dashboard page by clicking cancel
             cy.findByRole('button', { name: /Cancel/ }).click()
-            cy.wait('@fetchSubmission2Query')
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // Navigate to type page
