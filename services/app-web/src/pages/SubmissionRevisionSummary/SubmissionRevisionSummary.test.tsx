@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import { Route } from 'react-router'
 import { RoutesRecord } from '../../constants/routes'
 import {
@@ -49,5 +49,39 @@ describe('SubmissionRevisionSummary', () => {
         expect(
             await screen.findByTestId('previous-submission-banner')
         ).toBeInTheDocument()
+    })
+    it('extracts the correct dates from the submission and displays them in tables', async () => {
+        renderWithProviders(
+            <Route
+                path={RoutesRecord.SUBMISSIONS_REVISION}
+                component={SubmissionRevisionSummary}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchStateSubmission2MockSuccess({
+                            stateSubmission:
+                                mockSubmittedSubmission2WithRevisions(),
+                            id: '15',
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15/revisions/2',
+                },
+            }
+        )
+        await waitFor(() => {
+            const rows = screen.getAllByRole('row')
+            expect(rows).toHaveLength(2)
+            expect(within(rows[0]).getByText('Date added')).toBeInTheDocument()
+            expect(
+                within(rows[1]).getByText(dayjs(new Date()).format('M/D/YY'))
+            ).toBeInTheDocument()
+        })
     })
 })
