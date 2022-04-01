@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
+import { DocumentDateLookupTable } from '../../../pages/SubmissionSummary/SubmissionSummary'
 import { useS3 } from '../../../contexts/S3Context'
 import { formatCalendarDate } from '../../../dateHelpers'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
@@ -13,11 +14,13 @@ import styles from '../SubmissionSummarySection.module.scss'
 export type RateDetailsSummarySectionProps = {
     submission: DraftSubmission | StateSubmission
     navigateTo?: string
+    documentDateLookupTable?: DocumentDateLookupTable
 }
 
 export const RateDetailsSummarySection = ({
     submission,
     navigateTo,
+    documentDateLookupTable,
 }: RateDetailsSummarySectionProps): React.ReactElement => {
     const isSubmitted = submission.__typename === 'StateSubmission'
     const isEditing = !isSubmitted && navigateTo !== undefined
@@ -115,11 +118,13 @@ export const RateDetailsSummarySection = ({
             </dl>
             <UploadedDocumentsTable
                 documents={submission.rateDocuments}
+                documentDateLookupTable={documentDateLookupTable}
                 caption="Rate certification"
                 documentCategory="Rate certification"
             />
             <UploadedDocumentsTable
                 documents={rateSupportingDocuments}
+                documentDateLookupTable={documentDateLookupTable}
                 caption="Rate supporting documents"
                 documentCategory="Rate-supporting"
                 isSupportingDocuments
