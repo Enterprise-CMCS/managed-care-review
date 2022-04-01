@@ -390,7 +390,7 @@ export function mockSubmittedSubmission2WithRevisions(): Submission2 {
 
     return {
         id: 'test-id-123',
-        status: 'SUBMITTED',
+        status: 'RESUBMITTED',
         intiallySubmittedAt: '2022-01-01',
         stateCode: 'MN',
         state: mockMNState(),
@@ -626,7 +626,7 @@ const fetchStateSubmission2MockSuccess = ({
     stateSubmission = mockSubmittedSubmission2(),
     id, // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }: fetchStateSubmission2MockSuccessProps): MockedResponse<
-    Record<string, any>
+    Record<string, unknown>
 > => {
     // override the ID of the returned draft to match the queried id.
     const mergedStateSubmission = Object.assign({}, stateSubmission, { id })
