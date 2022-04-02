@@ -12,6 +12,7 @@ describe('submission type', () => {
 
             // Navigate to dashboard page by clicking cancel
             cy.findByRole('button', { name: /Cancel/ }).click()
+            cy.wait('@indexSubmissions2Query', { timeout: 50000 })
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // Navigate to type page
