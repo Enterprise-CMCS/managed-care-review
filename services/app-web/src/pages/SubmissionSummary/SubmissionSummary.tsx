@@ -141,33 +141,6 @@ export const SubmissionSummary = (): React.ReactElement => {
         DocumentDateLookupTable | undefined
     >({})
 
-    // const makeDateTable = (submissions: Submission2) => {
-    //     const docBuckets = [
-    //         'contractDocuments',
-    //         'rateDocuments',
-    //         'documents',
-    //     ] as const
-    //     const lookupTable = {} as DocumentDateLookupTable
-    //     if (submissions) {
-    //         submissions.revisions.forEach((revision) => {
-    //             const revisionData = base64ToDomain(
-    //                 revision.revision.submissionData
-    //             )
-    //             if (revisionData instanceof Error) {
-    //                 console.error(
-    //                     'failed to read submission data; unable to display document dates'
-    //                 )
-    //                 return
-    //             }
-    //             docBuckets.forEach((bucket) => {
-    //                 revisionData[bucket].forEach((doc) => {
-    //                     lookupTable[doc.name] = revisionData.updatedAt
-    //                 })
-    //             })
-    //         })
-    //         setDocumentDates(lookupTable)
-    //     }
-    // }
     const formik = useFormik({
         initialValues: modalFormInitialValues,
         validationSchema: Yup.object().shape({
@@ -189,7 +162,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     const [unlockStateSubmission] = useUnlockStateSubmissionMutation()
     const submissionAndRevisions = data?.fetchSubmission2.submission
 
-    const displayUnlockButton = loggedInUser?.role === 'CMS_USER'
+    const isCMSUser = loggedInUser?.role === 'CMS_USER'
 
     // Pull out the correct revision form api request, display errors for bad dad
     useEffect(() => {
@@ -397,7 +370,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                 <SubmissionTypeSummarySection
                     submission={submission}
                     headerChildComponent={
-                        displayUnlockButton ? (
+                        isCMSUser ? (
                             <UnlockModalButton
                                 modalRef={modalRef}
                                 disabled={disableUnlockButton}
@@ -409,12 +382,14 @@ export const SubmissionSummary = (): React.ReactElement => {
                 <ContractDetailsSummarySection
                     submission={submission}
                     documentDateLookupTable={documentDates}
+                    isCMSUser={isCMSUser}
                 />
 
                 {isContractActionAndRateCertification && (
                     <RateDetailsSummarySection
                         submission={submission}
                         documentDateLookupTable={documentDates}
+                        isCMSUser={isCMSUser}
                     />
                 )}
 

@@ -15,12 +15,14 @@ export type RateDetailsSummarySectionProps = {
     submission: DraftSubmission | StateSubmission
     navigateTo?: string
     documentDateLookupTable?: DocumentDateLookupTable
+    isCMSUser?: boolean
 }
 
 export const RateDetailsSummarySection = ({
     submission,
     navigateTo,
     documentDateLookupTable,
+    isCMSUser,
 }: RateDetailsSummarySectionProps): React.ReactElement => {
     const isSubmitted = submission.__typename === 'StateSubmission'
     const isEditing = !isSubmitted && navigateTo !== undefined
@@ -119,12 +121,14 @@ export const RateDetailsSummarySection = ({
             <UploadedDocumentsTable
                 documents={submission.rateDocuments}
                 documentDateLookupTable={documentDateLookupTable}
+                isCMSUser={isCMSUser}
                 caption="Rate certification"
                 documentCategory="Rate certification"
             />
             <UploadedDocumentsTable
                 documents={rateSupportingDocuments}
                 documentDateLookupTable={documentDateLookupTable}
+                isCMSUser={isCMSUser}
                 caption="Rate supporting documents"
                 documentCategory="Rate-supporting"
                 isSupportingDocuments
