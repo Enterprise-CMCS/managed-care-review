@@ -73,6 +73,11 @@ describe('RateDetailsSummarySection', () => {
                 name: 'Rate amendment effective dates',
             })
         ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', {
+                name: 'Rate ID',
+            })
+        ).toBeInTheDocument()
     })
 
     it('can render all rate details fields for new rate certification submission', () => {
@@ -88,6 +93,11 @@ describe('RateDetailsSummarySection', () => {
         ).toBeInTheDocument()
         expect(
             screen.getByRole('definition', { name: 'Date certified' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', {
+                name: 'Rate ID',
+            })
         ).toBeInTheDocument()
     })
 
