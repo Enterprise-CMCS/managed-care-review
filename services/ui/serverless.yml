@@ -65,16 +65,6 @@ resources:
               Resource: !Sub arn:aws:s3:::${S3Bucket}/*
               Principal:
                 CanonicalUser: !GetAtt CloudFrontOriginAccessIdentity.S3CanonicalUserId
-            - Action:
-                - 's3:GetObject'
-                - 's3:PutObject'
-              Effect: Deny
-              Principal: '*'
-              Condition:
-                Bool:
-                  'aws:SecureTransport': false
-              Resource: !Sub ${S3Bucket.Arn}/*
-              Sid: DenyUnencryptedConnections
         Bucket: !Ref S3Bucket
     CloudFrontWebAcl:
       Type: AWS::WAFv2::WebACL

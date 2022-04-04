@@ -167,16 +167,6 @@ resources:
                 - !Sub ${DocumentUploadsBucket.Arn}/*.xls
                 - !Sub ${DocumentUploadsBucket.Arn}/*.xlsx
                 - !Sub ${DocumentUploadsBucket.Arn}/*.zip
-            - Action:
-                - 's3:GetObject'
-                - 's3:PutObject'
-              Effect: Deny
-              Principal: '*'
-              Condition:
-                Bool:
-                  'aws:SecureTransport': false
-              Resource: !Sub ${DocumentUploadsBucket.Arn}/*
-              Sid: DenyUnencryptedConnections
 
     LambdaInvokePermission:
       Type: AWS::Lambda::Permission
