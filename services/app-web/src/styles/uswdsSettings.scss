@@ -4,8 +4,10 @@ https://designsystem.digital.gov/documentation/settings/
 */
 
 /* GENERAL */
-// $theme-font-path: 'uswds/dist/fonts';
-// $theme-image-path: 'uswds/dist/img';
+// without the relative path it will try to load images and fonts from uswds/dist/scss/core/(path)
+$theme-font-path: '../../../fonts';
+$theme-image-path: '../../../img';
+// $theme-hero-image: '../../../img/hero.png';
 
 $theme-show-notifications: false;
 
