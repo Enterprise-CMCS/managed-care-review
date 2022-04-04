@@ -42,6 +42,10 @@ export { SubmissionCard } from './SubmissionCard'
 
 export { Tabs, TabPanel } from './Tabs'
 
-export { SubmissionUnlockedBanner, PreviousSubmissionBanner } from './Banner'
+export {
+    SubmissionUnlockedBanner,
+    PreviousSubmissionBanner,
+    SubmissionUpdatedBanner,
+} from './Banner'
 
 export { Modal } from './Modal'

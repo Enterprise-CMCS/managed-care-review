@@ -43,8 +43,7 @@ declare global {
             verifyDocumentsHaveNoErrors(): void
             submitStateSubmissionForm(success?: boolean, resubmission?: boolean): void
             navigateForm(buttonName: FormButtonKey, waitForLoad?: boolean): void
-            navigateBackToCurrentSubmission(): void
-            navigateToSubmissionRevision(linkTestId: string): void
+            navigateToSubmissionByUserInteraction(testId: string): void
         }
     }
 }

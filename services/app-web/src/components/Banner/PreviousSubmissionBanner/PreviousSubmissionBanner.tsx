@@ -20,7 +20,7 @@ export const PreviousSubmissionBanner = ({
                 data-testid="previous-submission-banner"
             >
                 <span>This is a past version of this submission.&nbsp;</span>
-                <Link href={link}>
+                <Link href={link} data-testid="currentSubmissionLink">
                     View most recent version of this submission
                 </Link>
             </p>

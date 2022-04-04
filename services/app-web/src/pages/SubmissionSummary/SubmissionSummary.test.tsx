@@ -49,6 +49,46 @@ describe('SubmissionSummary', () => {
         ).toBeInTheDocument()
     })
 
+    it('renders submission updated banner', async () => {
+        const submissionsWithRevisions = mockSubmittedSubmission2WithRevision()
+        renderWithProviders(
+            <Route
+                path={RoutesRecord.SUBMISSIONS_FORM}
+                component={SubmissionSummary}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchStateSubmission2MockSuccess({
+                            stateSubmission: submissionsWithRevisions,
+                            id: '15',
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15',
+                },
+            }
+        )
+
+        const banner = expect(
+            await screen.findByTestId('updatedSubmissionBanner')
+        )
+        banner.toBeInTheDocument()
+        banner.toHaveClass('usa-alert--info')
+        banner.toHaveTextContent(
+            /Updated on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
+        )
+        banner.toHaveTextContent('Submitted by: aang@example.com')
+        banner.toHaveTextContent(
+            'Changes made: Placeholder resubmission reason'
+        )
+    })
+
     describe('Submission package data display', () => {
         it('renders the OLD data for an unlocked submission for CMS user, ignoring unsubmitted changes from state user', async () => {
             const submission2 = mockUnlockedSubmission2()
@@ -292,7 +332,7 @@ describe('SubmissionSummary', () => {
             banner.toBeInTheDocument()
             banner.toHaveClass('usa-alert--warning')
             banner.toHaveTextContent(
-                /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+\s[a-zA-Z]+/i
+                /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
             )
             banner.toHaveTextContent('Unlocked by: bob@dmas.mn.govUnlocked')
             banner.toHaveTextContent('Reason for unlock: Test unlock reason')

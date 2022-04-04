@@ -32,6 +32,7 @@ import {
     SubmissionUnlockedBanner,
     Modal,
     PoliteErrorMessage,
+    SubmissionUpdatedBanner,
 } from '../../components'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
@@ -40,6 +41,7 @@ import {
     UnlockStateSubmissionMutationFn,
     useFetchSubmission2Query,
     useUnlockStateSubmissionMutation,
+    Submission2Status,
 } from '../../gen/gqlClient'
 import {
     convertDomainModelFormDataToGQLSubmission,
@@ -125,9 +127,9 @@ export const SubmissionSummary = (): React.ReactElement => {
     const [packageData, setPackageData] = useState<
         SubmissionUnionType | undefined
     >(undefined)
-    const [unlockedInfo, setUnlockedInfo] = useState<UpdateInfoType | null>(
-        null
-    )
+    const [updateInfo, setUpdateInfo] = useState<UpdateInfoType | null>(null)
+    const [submissionStatus, setSubmissionStatus] =
+        useState<Submission2Status | null>(null)
 
     // Unlock modal state
     const [focusErrorsInModal, setFocusErrorsInModal] = useState(true)
@@ -203,25 +205,34 @@ export const SubmissionSummary = (): React.ReactElement => {
                 return
             }
 
-            if (submissionAndRevisions.status === 'UNLOCKED') {
-                const unlockedRevision = submissionAndRevisions.revisions.find(
-                    (rev) => rev.revision.unlockInfo
-                )
-                const unlockInfo = unlockedRevision?.revision.unlockInfo
+            const submissionStatus = submissionAndRevisions.status
+            if (
+                submissionStatus === 'UNLOCKED' ||
+                submissionStatus === 'RESUBMITTED'
+            ) {
+                const updateInfo =
+                    submissionStatus === 'UNLOCKED'
+                        ? submissionAndRevisions.revisions.find(
+                              (rev) => rev.revision.unlockInfo
+                          )?.revision.unlockInfo
+                        : currentRevision.revision.submitInfo
 
-                if (unlockInfo) {
-                    setUnlockedInfo({
-                        updatedBy: unlockInfo.updatedBy,
-                        updatedAt: unlockInfo.updatedAt,
-                        updatedReason: unlockInfo.updatedReason,
+                if (updateInfo) {
+                    setSubmissionStatus(submissionStatus)
+                    setUpdateInfo({
+                        ...updateInfo,
                     })
                 } else {
+                    const info =
+                        submissionStatus === 'UNLOCKED'
+                            ? 'unlock information'
+                            : 'resubmission information'
                     console.error(
-                        'ERROR: submission in summary has no revision with unlocked information',
+                        `ERROR: Encountered error when fetching ${info}`,
                         submissionAndRevisions.revisions
                     )
                     setPageLevelAlert(
-                        'Error fetching the unlocked information. Please try again.'
+                        `Error fetching ${info}. Please try again.`
                     )
                 }
             }
@@ -329,21 +340,35 @@ export const SubmissionSummary = (): React.ReactElement => {
                 className={styles.container}
             >
                 {pageLevelAlert && (
-                    <Alert type="error" heading="Unlock Error">
+                    <Alert
+                        type="error"
+                        heading="Unlock Error"
+                        className={styles.banner}
+                    >
                         {pageLevelAlert}
                     </Alert>
                 )}
 
-                {unlockedInfo && (
+                {submissionStatus === 'UNLOCKED' && updateInfo && (
                     <SubmissionUnlockedBanner
                         userType={
                             loggedInUser?.role === 'CMS_USER'
                                 ? 'CMS_USER'
                                 : 'STATE_USER'
                         }
-                        unlockedBy={unlockedInfo.updatedBy}
-                        unlockedOn={unlockedInfo.updatedAt}
-                        reason={unlockedInfo.updatedReason}
+                        unlockedBy={updateInfo.updatedBy}
+                        unlockedOn={updateInfo.updatedAt}
+                        reason={updateInfo.updatedReason}
+                        className={styles.banner}
+                    />
+                )}
+
+                {submissionStatus === 'RESUBMITTED' && updateInfo && (
+                    <SubmissionUpdatedBanner
+                        submittedBy={updateInfo.updatedBy}
+                        updatedOn={updateInfo.updatedAt}
+                        changesMade={updateInfo.updatedReason}
+                        className={styles.banner}
                     />
                 )}
 

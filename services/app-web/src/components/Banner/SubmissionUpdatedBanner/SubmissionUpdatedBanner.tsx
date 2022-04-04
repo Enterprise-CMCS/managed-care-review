@@ -3,48 +3,45 @@ import styles from '../Banner.module.scss'
 import { Alert } from '@trussworks/react-uswds'
 import { dayjs } from '../../../dateHelpers'
 
-export type UnlockedProps = {
-    userType: 'STATE_USER' | 'CMS_USER'
-    unlockedBy: string
-    unlockedOn: Date
-    reason: string
+export type UpdatedProps = {
+    submittedBy: string
+    updatedOn: Date
+    changesMade: string
 }
 
-export const SubmissionUnlockedBanner = ({
-    userType,
-    unlockedBy,
-    unlockedOn,
-    reason,
+export const SubmissionUpdatedBanner = ({
+    submittedBy,
+    updatedOn,
+    changesMade,
     className,
     ...props
-}: UnlockedProps &
-    React.HTMLAttributes<HTMLDivElement>): React.ReactElement => {
+}: UpdatedProps & React.HTMLAttributes<HTMLDivElement>): React.ReactElement => {
     return (
         <Alert
             role="alert"
-            type={userType === 'CMS_USER' ? 'warning' : 'info'}
-            heading="Submission unlocked"
+            type="info"
+            heading="Submission updated"
             validation={true}
-            data-testid="unlockedBanner"
+            data-testid="updatedSubmissionBanner"
             className={className}
             {...props}
         >
             <div className={styles.bannerBodyText}>
                 <p className="usa-alert__text">
-                    <b>Unlocked by:&nbsp;</b>
-                    {unlockedBy}
+                    <b>Submitted by:&nbsp;</b>
+                    {submittedBy}
                 </p>
                 <p className="usa-alert__text">
-                    <b>Unlocked on:&nbsp;</b>
+                    <b>Updated on:&nbsp;</b>
                     {dayjs
-                        .utc(unlockedOn)
+                        .utc(updatedOn)
                         .tz('America/New_York')
                         .format('MM/DD/YY h:mma')}
                     &nbsp;ET
                 </p>
                 <p className="usa-alert__text">
-                    <b>Reason for unlock:&nbsp;</b>
-                    {reason}
+                    <b>Changes made:&nbsp;</b>
+                    {changesMade}
                 </p>
             </div>
         </Alert>

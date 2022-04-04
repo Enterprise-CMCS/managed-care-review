@@ -390,7 +390,7 @@ export function mockSubmittedSubmission2WithRevisions(): Submission2 {
 
     return {
         id: 'test-id-123',
-        status: 'SUBMITTED',
+        status: 'RESUBMITTED',
         intiallySubmittedAt: '2022-01-01',
         stateCode: 'MN',
         state: mockMNState(),
