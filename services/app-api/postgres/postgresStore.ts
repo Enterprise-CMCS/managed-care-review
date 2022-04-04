@@ -4,7 +4,7 @@ import {
     ProgramT,
     StateSubmissionType,
     Submission2Type,
-    UpdateInfoType
+    UpdateInfoType,
 } from '../../app-web/src/common-code/domain-models'
 import { findPrograms } from '../postgres'
 import { findAllSubmissions } from './findAllSubmissions'
@@ -14,7 +14,7 @@ import { findStateSubmission } from './findStateSubmission'
 import { findSubmissionWithRevisions } from './findSubmissionWithRevisions'
 import {
     insertDraftSubmission,
-    InsertDraftSubmissionArgsType
+    InsertDraftSubmissionArgsType,
 } from './insertDraftSubmission'
 import { insertSubmissionRevision } from './insertSubmissionRevision'
 import { StoreError } from './storeError'
@@ -24,7 +24,7 @@ import { updateStateSubmission } from './updateStateSubmission'
 type Store = {
     insertDraftSubmission: (
         args: InsertDraftSubmissionArgsType
-    ) => Promise<DraftSubmissionType | StoreError>
+    ) => Promise<Submission2Type | StoreError>
 
     findAllSubmissions: (
         stateCode: string
@@ -70,7 +70,7 @@ type Store = {
 
     findAllSubmissionsWithRevisions: (
         stateCode: string
-    ) => Promise<(Submission2Type)[] | StoreError>
+    ) => Promise<Submission2Type[] | StoreError>
 }
 
 function NewPostgresStore(client: PrismaClient): Store {
@@ -82,7 +82,7 @@ function NewPostgresStore(client: PrismaClient): Store {
             findDraftSubmission(client, draftUUID),
         findSubmissionWithRevisions: (id) =>
             findSubmissionWithRevisions(client, id),
-        findAllSubmissionsWithRevisions: (stateCode) => 
+        findAllSubmissionsWithRevisions: (stateCode) =>
             findAllSubmissionsWithRevisions(client, stateCode),
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         findDraftSubmissionByStateNumber: (_stateCode, _stateNumber) => {
@@ -95,7 +95,11 @@ function NewPostgresStore(client: PrismaClient): Store {
         findStateSubmission: (submissionID) =>
             findStateSubmission(client, submissionID),
         insertNewRevision: (submissionID, unlockInfo, draft) =>
-            insertSubmissionRevision(client, {submissionID, unlockInfo, draft}),
+            insertSubmissionRevision(client, {
+                submissionID,
+                unlockInfo,
+                draft,
+            }),
         findPrograms: findPrograms,
     }
 }

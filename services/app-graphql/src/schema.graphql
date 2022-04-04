@@ -32,6 +32,11 @@ type Mutation {
     unlockStateSubmission(
         input: UnlockStateSubmissionInput!
     ): UnlockStateSubmissionPayload!
+
+    # new API
+    createSubmission2(
+        input: CreateSubmission2Input!
+    ): CreateSubmission2Payload!
 }
 
 input CreateDraftSubmissionInput {
@@ -42,6 +47,16 @@ input CreateDraftSubmissionInput {
 
 type CreateDraftSubmissionPayload {
     draftSubmission: DraftSubmission!
+}
+
+input CreateSubmission2Input {
+    programIDs: [ID!]!
+    submissionType: SubmissionType!
+    submissionDescription: String!
+}
+
+type CreateSubmission2Payload {
+    submission: Submission2!
 }
 
 input FetchDraftSubmissionInput {
