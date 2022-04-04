@@ -8797,10 +8797,10 @@
   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-2.0.0.tgz#f544a148d3ab35801c1f633a7441fd87c2e484bf"
   integrity sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==
 
-"@trussworks/react-uswds@^2.7.1":
-  version "2.7.1"
-  resolved "https://registry.yarnpkg.com/@trussworks/react-uswds/-/react-uswds-2.7.1.tgz#a2622feae6309217680f92bd8e682fdfa815cb8c"
-  integrity sha512-JbHJqoA/g0U/9Z4RGKMf9aaS4U1yGzklCqeGwLyZOT2vo0IranB542Vgw0yBqGvSrDBiZm3vfYVmqWSkrLPEtg==
+"@trussworks/react-uswds@^2.8.0":
+  version "2.8.0"
+  resolved "https://registry.yarnpkg.com/@trussworks/react-uswds/-/react-uswds-2.8.0.tgz#f9ccd642db6ee01b18a1abeb190a5473d471ecf7"
+  integrity sha512-M8TPJobIzU4fGy+pMXurrVd5Ak+sjj0BCIrtxggSSLPMKscgtvVndAdY5uBZ/UHGkx4IaV0vskvTPvX7PH82bw==
 
 "@trysound/sax@0.2.0":
   version "0.2.0"
@@ -15714,20 +15714,6 @@ fn.name@1.x.x:
   resolved "https://registry.yarnpkg.com/fn.name/-/fn.name-1.1.0.tgz#26cad8017967aea8731bc42961d04a3d5988accc"
   integrity sha512-GRnmB5gPyJpAhTQdSZTSp9uaPSvl09KoYcMQtsB9rQoOmzs9dH6ffeccH+Z+cv6P68Hu5bC6JjRh4Ah/mHSNRw==
 
-focus-trap-react@^8.1.0:
-  version "8.8.2"
-  resolved "https://registry.yarnpkg.com/focus-trap-react/-/focus-trap-react-8.8.2.tgz#ac374819cddd8937b8687eaf7f351b3c10ed3c34"
-  integrity sha512-YgacIMxeAOytHOEbzBWL7+itBkn4ARMwQhtt6hYVHqHzPUPhmfEyKJ/nqsyMerzOK1DzlDv8Q8phRAY8vpa0rA==
-  dependencies:
-    focus-trap "^6.7.1"
-
-focus-trap@^6.7.1:
-  version "6.7.1"
-  resolved "https://registry.yarnpkg.com/focus-trap/-/focus-trap-6.7.1.tgz#d474f86dbaf3c7fbf0d53cf0b12295f4f4068d10"
-  integrity sha512-a6czHbT9twVpy2RpkWQA9vIgwQgB9Nx1PIxNNUxQT4nugG/3QibwxO+tWTh9i+zSY2SFiX4pnYhTaFaQF/6ZAg==
-  dependencies:
-    tabbable "^5.2.1"
-
 follow-redirects@^1.0.0, follow-redirects@^1.14.0, follow-redirects@^1.14.7:
   version "1.14.8"
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.14.8.tgz#016996fb9a11a100566398b1c6839337d7bfa8fc"
@@ -20564,11 +20550,6 @@ no-case@^3.0.4:
     lower-case "^2.0.2"
     tslib "^2.0.3"
 
-no-scroll@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/no-scroll/-/no-scroll-2.1.1.tgz#f37e08cb159b75a5bdbfc0a87cd9223e120e6e27"
-  integrity sha512-YTzGAJOo/B6hkodeT5SKKHpOhAzjMfkUCCXjLJwjWk2F4/InIg+HbdH9kmT7bKpleDuqLZDTRy2OdNtAj0IVyQ==
-
 node-abi@^2.7.0:
   version "2.30.1"
   resolved "https://registry.yarnpkg.com/node-abi/-/node-abi-2.30.1.tgz#c437d4b1fe0e285aaf290d45b45d4d7afedac4cf"
@@ -23103,15 +23084,6 @@ react-app-polyfill@^3.0.0:
     regenerator-runtime "^0.13.9"
     whatwg-fetch "^3.6.2"
 
-react-aria-modal@^4.0.0:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/react-aria-modal/-/react-aria-modal-4.0.1.tgz#67047ba99710c047d7d29f5e3e9f48a45dfb78af"
-  integrity sha512-UZ+4dMS1wK4vHiBrsDriN9FtXmiQ5fegcVBi4zjC0GcKLO/zVLv08YtJ2SL4HcA91t7UNbpGOzOPqYOM5Wlt3A==
-  dependencies:
-    focus-trap-react "^8.1.0"
-    no-scroll "^2.1.1"
-    react-displace "^2.3.0"
-
 react-colorful@^5.1.2:
   version "5.5.1"
   resolved "https://registry.yarnpkg.com/react-colorful/-/react-colorful-5.5.1.tgz#29d9c4e496f2ca784dd2bb5053a3a4340cfaf784"
@@ -23176,11 +23148,6 @@ react-dev-utils@^12.0.0:
     shell-quote "^1.7.3"
     strip-ansi "^6.0.1"
     text-table "^0.2.0"
-
-react-displace@^2.3.0:
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/react-displace/-/react-displace-2.3.0.tgz#6915f8f2f279a29a7b58442405c26edc3d441429"
-  integrity sha512-T8g/lyn3IX8kxLO4k4vJ/oIO9G72pRTc9GYslqKsfPcN4gY5+FYR5OHxeTH1skPjVylJrveGE3OC2qCt3BuHeA==
 
 react-docgen-typescript@^2.0.0:
   version "2.2.1"
@@ -25953,11 +25920,6 @@ synchronous-promise@^2.0.15:
   version "2.0.15"
   resolved "https://registry.yarnpkg.com/synchronous-promise/-/synchronous-promise-2.0.15.tgz#07ca1822b9de0001f5ff73595f3d08c4f720eb8e"
   integrity sha512-k8uzYIkIVwmT+TcglpdN50pS2y1BDcUnBPK9iJeGu0Pl1lOI8pD6wtzgw91Pjpe+RxtTncw32tLxs/R0yNL2Mg==
-
-tabbable@^5.2.1:
-  version "5.2.1"
-  resolved "https://registry.yarnpkg.com/tabbable/-/tabbable-5.2.1.tgz#e3fda7367ddbb172dcda9f871c0fdb36d1c4cd9c"
-  integrity sha512-40pEZ2mhjaZzK0BnI+QGNjJO8UYx9pP5v7BGe17SORTO0OEuuaAwQTkAp8whcZvqon44wKFOikD+Al11K3JICQ==
 
 tabtab@^3.0.2:
   version "3.0.2"
