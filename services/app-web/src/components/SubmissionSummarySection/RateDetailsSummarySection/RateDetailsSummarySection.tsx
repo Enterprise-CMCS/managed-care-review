@@ -9,6 +9,7 @@ import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
+import dayjs from 'dayjs'
 import styles from '../SubmissionSummarySection.module.scss'
 
 export type RateDetailsSummarySectionProps = {
@@ -34,6 +35,13 @@ export const RateDetailsSummarySection = ({
     const rateSupportingDocuments = submission.documents.filter((doc) =>
         doc.documentCategories.includes('RATES_RELATED')
     )
+    const dateString = (date: string | Date): string =>
+        dayjs(date).format('YYYYMMDD')
+    const rateName = `${submission.name}-RATE-${dateString(
+        submission.rateDateStart
+    )}-${dateString(submission.rateDateEnd)}-CERTIFICATION-${dateString(
+        submission.rateDateCertified
+    )}`
 
     useEffect(() => {
         // get all the keys for the documents we want to zip
@@ -74,6 +82,12 @@ export const RateDetailsSummarySection = ({
                         />
                     )}
                 </SectionHeader>
+
+                <div aria-label="Rate ID" id="rateID">
+                    <h4 role="definition" aria-labelledby="rateID">
+                        {rateName}
+                    </h4>
+                </div>
 
                 <DoubleColumnGrid>
                     <DataDetail
