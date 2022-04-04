@@ -5,6 +5,7 @@ frameworkVersion: '2'
 plugins:
   - serverless-plugin-scripts
   - serverless-s3-local
+  - serverless-s3-bucket-helper
   - serverless-stack-termination-protection
   - serverless-idempotency-helper
   - serverless-iam-helper
