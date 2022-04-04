@@ -11,21 +11,24 @@ import { Link as ReactRouterLink, useHistory } from 'react-router-dom'
 import Select, { AriaOnFocus } from 'react-select'
 import * as Yup from 'yup'
 import {
-    ErrorSummary, FieldRadio, FieldTextarea, PoliteErrorMessage
+    ErrorSummary,
+    FieldRadio,
+    FieldTextarea,
+    PoliteErrorMessage,
 } from '../../../components'
 import { SubmissionTypeRecord } from '../../../constants/submissions'
 import { useAuth } from '../../../contexts/AuthContext'
 import {
     CreateDraftSubmissionInput,
-    DraftSubmission, Program, SubmissionType as SubmissionTypeT, UpdateDraftSubmissionInput, useCreateDraftSubmissionMutation
+    DraftSubmission,
+    Program,
+    SubmissionType as SubmissionTypeT,
+    useCreateDraftSubmissionMutation,
 } from '../../../gen/gqlClient'
 import { PageActions } from '../PageActions'
 import styles from '../StateSubmissionForm.module.scss'
-import {
-    cleanDraftSubmission,
-    updatesFromSubmission
-} from '../updateSubmissionTransform'
 import { GenericApiErrorBanner } from '../../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
+import { DraftSubmissionType } from '../../../common-code/domain-models'
 
 // Formik setup
 // Should be listed in order of appearance on field to allow errors to focus as expected
@@ -43,10 +46,8 @@ export interface SubmissionTypeFormValues {
 }
 type SubmissionTypeProps = {
     showValidations?: boolean
-    draftSubmission?: DraftSubmission
-    updateDraft?: (
-        input: UpdateDraftSubmissionInput
-    ) => Promise<DraftSubmission | undefined>
+    draftSubmission?: DraftSubmissionType
+    updateDraft?: (input: DraftSubmissionType) => Promise<undefined | Error>
     formAlert?: React.ReactElement
 }
 
@@ -119,7 +120,7 @@ export const SubmissionType = ({
         setFocusErrorSummaryHeading(false)
     }, [focusErrorSummaryHeading])
 
-    if ((error) && !showFormAlert) {
+    if (error && !showFormAlert) {
         setShowFormAlert(true)
     }
 
@@ -185,19 +186,15 @@ export const SubmissionType = ({
                 )
                 return
             }
-            const updatedDraft = updatesFromSubmission(draftSubmission)
 
-            updatedDraft.programIDs = values.programIDs
-            updatedDraft.submissionType =
+            // set new values
+            draftSubmission.programIDs = values.programIDs
+            draftSubmission.submissionType =
                 values.submissionType as SubmissionTypeT
-            updatedDraft.submissionDescription = values.submissionDescription
+            draftSubmission.submissionDescription = values.submissionDescription
 
-            const cleanSubmission = cleanDraftSubmission(updatedDraft)
             try {
-                await updateDraft({
-                    submissionID: draftSubmission.id,
-                    draftSubmissionUpdates: cleanSubmission,
-                })
+                await updateDraft(draftSubmission)
 
                 history.push(
                     `/submissions/${draftSubmission.id}/contract-details`
@@ -230,8 +227,7 @@ export const SubmissionType = ({
                     >
                         <fieldset className="usa-fieldset">
                             <legend className="srOnly">Submission type</legend>
-                            {showFormAlert &&
-                                <GenericApiErrorBanner />}
+                            {showFormAlert && <GenericApiErrorBanner />}
                             <span id="form-guidance">
                                 All fields are required
                             </span>
@@ -255,15 +251,20 @@ export const SubmissionType = ({
                                 <Field name="programIDs">
                                     {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
                                     {/* @ts-ignore */}
-                                    {({ field, form }) => (
+                                    {({ _field, form }) => (
                                         <Select
                                             defaultValue={values.programIDs.map(
                                                 (programID) => {
-                                                    const program = programs.find(p => p.id === programID)
+                                                    const program =
+                                                        programs.find(
+                                                            (p) =>
+                                                                p.id ===
+                                                                programID
+                                                        )
                                                     if (!program) {
                                                         return {
                                                             value: programID,
-                                                            label: 'Unknown Program'
+                                                            label: 'Unknown Program',
                                                         }
                                                     }
                                                     return {
@@ -343,14 +344,17 @@ export const SubmissionType = ({
                                 id="submissionDescription"
                                 name="submissionDescription"
                                 aria-required
-                                aria-describedby='submissionDescriptionHelp'
+                                aria-describedby="submissionDescriptionHelp"
                                 showError={showFieldErrors(
                                     errors.submissionDescription
                                 )}
                                 hint={
                                     <>
                                         <p id="submissionDescriptionHelp">
-                                            Provide a 1-2 paragraph summary of your submission that highlights any important changes CMS reviewers will need to be aware of
+                                            Provide a 1-2 paragraph summary of
+                                            your submission that highlights any
+                                            important changes CMS reviewers will
+                                            need to be aware of
                                         </p>
                                         <Link
                                             variant="external"
