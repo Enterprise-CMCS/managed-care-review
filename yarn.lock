@@ -25882,9 +25882,9 @@ use@^3.1.0:
   integrity sha512-cwESVXlO3url9YWlFW/TA9cshCEhtu7IKJ/p5soJ/gGpj7vbvFrAY/eIioQ6Dw23KjZhYgiIo8HOs1nQ2vr/oQ==
 
 uswds@^2.12.1:
-  version "2.13.0"
-  resolved "https://registry.yarnpkg.com/uswds/-/uswds-2.13.0.tgz#7ad910d43f1ab4595664619dfb6f701f64de7193"
-  integrity sha512-DybO7wnczHtP5UXjRLHzVB3R4Dbl5hCIaONA4ctPoiof7FkEhST6zIveC2tUQNjmDiacbpvAtp9aNzEfxLCpcw==
+  version "2.13.2"
+  resolved "https://registry.yarnpkg.com/uswds/-/uswds-2.13.2.tgz#5567eb97c94546c670b7a2d085a13aa298398748"
+  integrity sha512-dhHH2SgFfZFQz7OckCig5oa/4AO0eYKWZM0pRLZUovbU5zwy1USsnjZkPhlVw9eKL6OG87mc1wuhj5Jbw28uvw==
   dependencies:
     classlist-polyfill "^1.0.3"
     domready "^1.0.8"
