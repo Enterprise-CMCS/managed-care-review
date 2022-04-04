@@ -61,6 +61,7 @@ function downloadFileFromS3(s3ObjectKey, s3ObjectBucket) {
     let options = {
         Bucket: s3ObjectBucket,
         Key: s3ObjectKey,
+        ServerSideEncryption: 'AES256',
     };
 
     return new Promise((resolve, reject) => {
