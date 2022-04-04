@@ -367,7 +367,11 @@ export const SubmissionSummary = (): React.ReactElement => {
                 className={styles.container}
             >
                 {pageLevelAlert && (
-                    <Alert type="error" heading="Unlock Error">
+                    <Alert
+                        type="error"
+                        heading="Unlock Error"
+                        className={styles.banner}
+                    >
                         {pageLevelAlert}
                     </Alert>
                 )}
@@ -382,6 +386,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                         unlockedBy={updateInfo.updatedBy}
                         unlockedOn={updateInfo.updatedAt}
                         reason={updateInfo.updatedReason}
+                        className={styles.banner}
                     />
                 )}
 
@@ -390,6 +395,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                         submittedBy={updateInfo.updatedBy}
                         updatedOn={updateInfo.updatedAt}
                         changesMade={updateInfo.updatedReason}
+                        className={styles.banner}
                     />
                 )}
 

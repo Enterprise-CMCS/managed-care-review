@@ -13,7 +13,9 @@ export const SubmissionUpdatedBanner = ({
     submittedBy,
     updatedOn,
     changesMade,
-}: UpdatedProps): React.ReactElement => {
+    className,
+    ...props
+}: UpdatedProps & React.HTMLAttributes<HTMLDivElement>): React.ReactElement => {
     return (
         <Alert
             role="alert"
@@ -21,6 +23,8 @@ export const SubmissionUpdatedBanner = ({
             heading="Submission updated"
             validation={true}
             data-testid="updatedSubmissionBanner"
+            className={className}
+            {...props}
         >
             <div className={styles.bannerBodyText}>
                 <p className="usa-alert__text">
