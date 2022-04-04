@@ -1,4 +1,4 @@
-import { Link } from '@trussworks/react-uswds'
+import { Link, Tag } from '@trussworks/react-uswds'
 import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import dayjs from 'dayjs'
@@ -14,6 +14,7 @@ export type UploadedDocumentsTableProps = {
     documentDateLookupTable?: DocumentDateLookupTable
     isSupportingDocuments?: boolean
     isEditing?: boolean
+    isCMSUser?: boolean
 }
 
 type DocumentWithLink = { url: string | null } & Document
@@ -29,6 +30,7 @@ export const UploadedDocumentsTable = ({
     documentDateLookupTable,
     isSupportingDocuments = false,
     isEditing = false,
+    isCMSUser,
 }: UploadedDocumentsTableProps): React.ReactElement => {
     const { getURL, getKey } = useS3()
     const [refreshedDocs, setRefreshedDocs] = useState<DocumentWithLink[]>([])
@@ -36,6 +38,14 @@ export const UploadedDocumentsTable = ({
     const shouldShowAsteriskExplainer = refreshedDocs.some((doc) =>
         isBothContractAndRateSupporting(doc)
     )
+    const shouldHaveNewTag = (doc: DocumentWithLink) => {
+        return (
+            isCMSUser &&
+            documentDateLookupTable &&
+            documentDateLookupTable[doc.name] >
+                documentDateLookupTable.previousSubmissionDate
+        )
+    }
     const borderTopGradientStyles = `borderTopLinearGradient ${styles.uploadedDocumentsTable}`
     const supportingDocsTopMarginStyles = isSupportingDocuments
         ? styles.withMarginTop
@@ -121,6 +131,11 @@ export const UploadedDocumentsTable = ({
                         <tr key={doc.name}>
                             {doc.url ? (
                                 <td>
+                                    {shouldHaveNewTag(doc) ? (
+                                        <Tag className={styles.newDocTag}>
+                                            NEW
+                                        </Tag>
+                                    ) : null}
                                     <Link
                                         aria-label={`${doc.name} (opens in new window)`}
                                         href={doc.url}
@@ -134,7 +149,14 @@ export const UploadedDocumentsTable = ({
                                     </Link>
                                 </td>
                             ) : (
-                                <td>{doc.name}</td>
+                                <td>
+                                    {shouldHaveNewTag(doc) ? (
+                                        <Tag className={styles.newDocTag}>
+                                            NEW
+                                        </Tag>
+                                    ) : null}{' '}
+                                    {doc.name}
+                                </td>
                             )}
                             <td>
                                 {documentDateLookupTable

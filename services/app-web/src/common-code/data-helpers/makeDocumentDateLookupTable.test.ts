@@ -18,6 +18,7 @@ describe('makeDateTable', () => {
                 '2022-03-25T21:14:43.057Z'
             ),
             'lifeofgalileo.pdf': new Date('2022-03-28T17:56:32.953Z'),
+            previousSubmissionDate: new Date('2022-03-25T21:14:43.057Z'),
         })
     })
 })

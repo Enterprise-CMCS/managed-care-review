@@ -23,6 +23,7 @@ export type ContractDetailsSummarySectionProps = {
     submission: DraftSubmission | StateSubmission
     navigateTo?: string
     documentDateLookupTable?: DocumentDateLookupTable
+    isCMSUser?: boolean
 }
 
 const createCheckboxList = ({
@@ -55,6 +56,7 @@ export const ContractDetailsSummarySection = ({
     submission,
     navigateTo,
     documentDateLookupTable,
+    isCMSUser,
 }: ContractDetailsSummarySectionProps): React.ReactElement => {
     //Checks if submission is a previous submission
     const isPreviousSubmission = usePreviousSubmission()
@@ -236,12 +238,14 @@ export const ContractDetailsSummarySection = ({
             <UploadedDocumentsTable
                 documents={submission.contractDocuments}
                 documentDateLookupTable={documentDateLookupTable}
+                isCMSUser={isCMSUser}
                 caption="Contract"
                 documentCategory="Contract"
             />
             <UploadedDocumentsTable
                 documents={contractSupportingDocuments}
                 documentDateLookupTable={documentDateLookupTable}
+                isCMSUser={isCMSUser}
                 caption="Contract supporting documents"
                 documentCategory="Contract-supporting"
                 isSupportingDocuments
