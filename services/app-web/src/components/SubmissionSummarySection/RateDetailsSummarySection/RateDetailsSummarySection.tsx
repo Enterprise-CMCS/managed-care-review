@@ -83,7 +83,7 @@ export const RateDetailsSummarySection = ({
                     )}
                 </SectionHeader>
 
-                <div aria-label="Rate ID" id="rateID">
+                <div aria-label="Rate ID" id="rateID" role="group">
                     <h4 role="definition" aria-labelledby="rateID">
                         {rateName}
                     </h4>
