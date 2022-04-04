@@ -131,7 +131,6 @@ describe('dashboard', () => {
 
                 // Login as CMS User
                 cy.findByRole('button', { name: 'Sign out' }).click()
-                cy.wait('@indexSubmissions2Query', { timeout: 50000 })
                 cy.findByText(
                     'Medicaid and CHIP Managed Care Reporting and Review System'
                 )
