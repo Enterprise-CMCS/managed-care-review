@@ -37,6 +37,9 @@ type Mutation {
     createSubmission2(
         input: CreateSubmission2Input!
     ): CreateSubmission2Payload!
+    updateHealthPlanFormData(
+        input: UpdateHealthPlanFormDataInput!
+    ): UpdateHealthPlanFormDataPayload!
 }
 
 input CreateDraftSubmissionInput {
@@ -124,6 +127,15 @@ input UnlockStateSubmissionInput {
 }
 
 type UnlockStateSubmissionPayload {
+    submission: Submission2!
+}
+
+input UpdateHealthPlanFormDataInput {
+    submissionID: ID!
+    healthPlanFormData: String!
+}
+
+type UpdateHealthPlanFormDataPayload {
     submission: Submission2!
 }
 

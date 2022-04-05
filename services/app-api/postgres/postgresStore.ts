@@ -19,6 +19,7 @@ import {
 import { insertSubmissionRevision } from './insertSubmissionRevision'
 import { StoreError } from './storeError'
 import { updateDraftSubmission } from './updateDraftSubmission'
+import { updateFormData } from './updateFormData'
 import { updateStateSubmission } from './updateStateSubmission'
 
 type Store = {
@@ -58,6 +59,12 @@ type Store = {
         draft: DraftSubmissionType
     ) => Promise<Submission2Type | StoreError>
 
+    updateFormData: (
+        submissionID: string,
+        revisionID: string,
+        formData: DraftSubmissionType
+    ) => Promise<Submission2Type | StoreError>
+
     findPrograms: (
         stateCode: string,
         programIDs: Array<string>
@@ -90,6 +97,8 @@ function NewPostgresStore(client: PrismaClient): Store {
         },
         updateDraftSubmission: (draftSubmission) =>
             updateDraftSubmission(client, draftSubmission),
+        updateFormData: (submissionID, revisionID, formData) =>
+            updateFormData(client, submissionID, revisionID, formData),
         updateStateSubmission: (submission, submitInfo) =>
             updateStateSubmission(client, submission, submitInfo),
         findStateSubmission: (submissionID) =>

@@ -16,6 +16,7 @@ import { submission2Resolver } from './submission2Resolver'
 import { submitDraftSubmissionResolver } from './submitDraftSubmission'
 import { unlockStateSubmissionResolver } from './unlockStateSubmission'
 import { updateDraftSubmissionResolver } from './updateDraftSubmission'
+import { updateHealthPlanFormDataResolver } from './updateHealthPlanFormData'
 import { stateUserResolver } from './userResolver'
 
 export function configureResolvers(store: Store, emailer: Emailer): Resolvers {
@@ -42,6 +43,7 @@ export function configureResolvers(store: Store, emailer: Emailer): Resolvers {
                 store,
                 emailer
             ),
+            updateHealthPlanFormData: updateHealthPlanFormDataResolver(store),
         },
         Submission: {
             // resolveType is required to differentiate Unions
