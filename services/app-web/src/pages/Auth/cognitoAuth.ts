@@ -162,6 +162,10 @@ export async function signOut(): Promise<null> {
         return null
     } catch (e) {
         console.log('error signing out: ', e)
-        throw e
+        const error = {
+            message: 'Sign out error',
+            error: e,
+        }
+        throw error
     }
 }
