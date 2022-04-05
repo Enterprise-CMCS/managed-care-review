@@ -8,6 +8,7 @@ export {
     resubmittedStateEmail,
     resubmittedCMSEmail,
     UpdatedEmailData,
+    generateRateName,
 } from './templates'
 
 export type { EmailConfiguration, EmailData, Emailer } from './emailer'

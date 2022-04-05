@@ -40,11 +40,11 @@ const generateRateName = (
     submissionName: string
 ): string => {
     const dateStr = (date: Date | undefined): string =>
-        date ? `${dayjs(date).format('YYYYMMDD')}-` : ''
+        date ? `${dayjs(date).format('YYYYMMDD')}` : ''
     const { rateDateStart, rateDateEnd, rateDateCertified } = submission
-    return `${submissionName}-RATE-${dateStr(rateDateStart)}${dateStr(
+    return `${submissionName}-RATE-${dateStr(rateDateStart)}-${dateStr(
         rateDateEnd
-    )}CERTIFICATION-${dateStr(rateDateCertified)}`
+    )}-CERTIFICATION-${dateStr(rateDateCertified)}`
 }
 
 const newPackageCMSEmail = (
@@ -336,4 +336,5 @@ export {
     resubmittedStateEmail,
     resubmittedCMSEmail,
     UpdatedEmailData,
+    generateRateName,
 }
