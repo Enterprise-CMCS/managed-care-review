@@ -152,6 +152,7 @@ describe('Email templates', () => {
                 'some-title',
                 testEmailConfig
             )
+            const rateName = generateRateName(sub, 'some-title')
 
             expect(template).toEqual(
                 expect.objectContaining({
@@ -175,6 +176,11 @@ describe('Email templates', () => {
                     ),
                 })
             )
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringContaining(rateName),
+                })
+            )
         })
 
         it('includes expected data summary for a rate amendment submission', () => {
@@ -195,6 +201,7 @@ describe('Email templates', () => {
                 'some-title',
                 testEmailConfig
             )
+            const rateName = generateRateName(sub, 'some-title')
 
             expect(template).toEqual(
                 expect.objectContaining({
@@ -208,6 +215,11 @@ describe('Email templates', () => {
                     bodyText: expect.stringContaining(
                         'Rate amendment effective dates: 06/05/2021 to 12/31/2021'
                     ),
+                })
+            )
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringContaining(rateName),
                 })
             )
         })
