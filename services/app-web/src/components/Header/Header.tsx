@@ -11,9 +11,6 @@ import styles from './Header.module.scss'
 import { PageHeadingRow } from './PageHeadingRow/PageHeadingRow'
 import { UserLoginInfo } from './UserLoginInfo/UserLoginInfo'
 
-
-
-
 export type HeaderProps = {
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
@@ -43,12 +40,15 @@ export const Header = ({
             console.log('Error with logout: ', e)
             setAlert &&
                 setAlert(
-                    <Alert
-                        data-testid="Error400"
-                        style={{ width: '600px', marginBottom: '5px' }}
-                        type="error"
-                        heading="Oops! Something went wrong"
-                    />
+                    <>
+                        <Alert
+                            data-testid="Error400"
+                            style={{ width: '600px', marginBottom: '5px' }}
+                            type="error"
+                            heading="Oops! Something went wrong"
+                        />
+                        <pre>e</pre>
+                    </>
                 )
         })
         history.push('/')
