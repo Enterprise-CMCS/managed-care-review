@@ -47,7 +47,7 @@ export const Header = ({
                             type="error"
                             heading="Oops! Something went wrong"
                         />
-                        <pre>{e}</pre>
+                        <pre>{JSON.stringify(e)}</pre>
                     </>
                 )
         })
