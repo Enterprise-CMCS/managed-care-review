@@ -47,15 +47,11 @@ const generateRateName = (
     )}-CERTIFICATION-${dateStr(rateDateCertified)}`
 }
 
-const newPackageCMSEmail = (
+const generateNewSubmissionData = (
     submission: StateSubmissionType,
     submissionName: string,
     config: EmailConfiguration
-): EmailData => {
-    // config
-    const isTestEnvironment = config.stage !== 'prod'
-    const reviewerEmails = config.cmsReviewSharedEmails
-
+): string => {
     // template
     const contractEffectiveDatesText = `${
         submission.contractType === 'AMENDMENT'
@@ -105,25 +101,42 @@ const newPackageCMSEmail = (
         `submissions/${submission.id}`,
         config.baseUrl
     ).href
+
+    return `
+        <b>Submission type</b>: ${
+            SubmissionTypeRecord[submission.submissionType]
+        }
+        <br />
+        ${contractEffectiveDatesText}
+        <br />
+        ${rateName}
+        ${rateRelatedDatesText}${
+        rateRelatedDatesText.length > 0 ? '<br />' : ''
+    }
+        <b>Submission description</b>: ${submission.submissionDescription}
+        <br />
+        <br />
+        <a href="${submissionURL}">View submission</a>
+    `
+}
+
+const newPackageCMSEmail = (
+    submission: StateSubmissionType,
+    submissionName: string,
+    config: EmailConfiguration
+): EmailData => {
+    // config
+    const isTestEnvironment = config.stage !== 'prod'
+    const reviewerEmails = config.cmsReviewSharedEmails
     const bodyHTML = `
             ${testEmailAlert}
             <br /><br />
             Managed Care submission: <b>${submissionName}</b> was received from <b>${
         submission.stateCode
-    }</b>.<br /><br />
-            <b>Submission type</b>: ${
-                SubmissionTypeRecord[submission.submissionType]
-            }<br />
-            ${contractEffectiveDatesText}
+    }</b>.
             <br />
-            ${rateName}
-            ${rateRelatedDatesText}${
-        rateRelatedDatesText.length > 0 ? '<br />' : ''
-    }
-            <b>Submission description</b>: ${
-                submission.submissionDescription
-            }<br /><br />
-            <a href="${submissionURL}">View submission</a>
+            <br />
+            ${generateNewSubmissionData(submission, submissionName, config)}
         `
     return {
         toAddresses: reviewerEmails,
@@ -142,10 +155,6 @@ const newPackageStateEmail = (
     user: CognitoUserType,
     config: EmailConfiguration
 ): EmailData => {
-    const submissionURL = new URL(
-        `submissions/${submission.id}`,
-        config.baseUrl
-    ).href
     const currentUserEmail = user.email
     const receiverEmails: string[] = [currentUserEmail].concat(
         submission.stateContacts.map((contact) => contact.email)
@@ -155,7 +164,7 @@ const newPackageStateEmail = (
             <br /><br />
             ${submissionName} was successfully submitted.
             <br /><br />
-            <a href="${submissionURL}">View submission</a>
+            ${generateNewSubmissionData(submission, submissionName, config)}
             <br /><br />
             If you need to make any changes, please contact CMS.
             <br /><br />
