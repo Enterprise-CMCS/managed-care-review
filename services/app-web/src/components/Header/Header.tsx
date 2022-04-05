@@ -40,15 +40,12 @@ export const Header = ({
             console.log('Error with logout: ', e)
             setAlert &&
                 setAlert(
-                    <>
-                        <Alert
-                            data-testid="Error400"
-                            style={{ width: '600px', marginBottom: '5px' }}
-                            type="error"
-                            heading="Oops! Something went wrong"
-                        />
-                        <pre>{JSON.stringify(e)}</pre>
-                    </>
+                    <Alert
+                        data-testid="Error400"
+                        style={{ width: '600px', marginBottom: '5px' }}
+                        type="error"
+                        heading="Oops! Something went wrong"
+                    />
                 )
         })
         history.push('/')
