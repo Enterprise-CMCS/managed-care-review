@@ -91,11 +91,12 @@ const newPackageCMSEmail = (
             : 'Rating Period Dates Not Found'
     }`
     const rateName =
-        submission.submissionType === 'CONTRACT_AND_RATES' &&
-        `<b>Rate name</b>: ${generateRateName(
-            submission,
-            submissionName
-        )}<br />`
+        submission.submissionType === 'CONTRACT_AND_RATES'
+            ? `<b>Rate name</b>: ${generateRateName(
+                  submission,
+                  submissionName
+              )}<br />`
+            : ''
     const rateRelatedDatesText =
         submission.submissionType === 'CONTRACT_AND_RATES'
             ? `${ratingPeriodText}: ${ratingPeriodDates}`
