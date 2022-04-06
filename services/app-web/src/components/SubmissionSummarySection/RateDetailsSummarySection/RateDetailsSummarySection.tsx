@@ -4,12 +4,11 @@ import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import { DocumentDateLookupTable } from '../../../pages/SubmissionSummary/SubmissionSummary'
 import { useS3 } from '../../../contexts/S3Context'
-import { formatCalendarDate } from '../../../dateHelpers'
+import { formatCalendarDate, formatRateNameDate } from '../../../dateHelpers'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
-import dayjs from 'dayjs'
 import styles from '../SubmissionSummarySection.module.scss'
 
 export type RateDetailsSummarySectionProps = {
@@ -18,9 +17,6 @@ export type RateDetailsSummarySectionProps = {
     documentDateLookupTable?: DocumentDateLookupTable
     isCMSUser?: boolean
 }
-
-export const rateDateString = (date: string | Date): string =>
-    dayjs(date).format('YYYYMMDD')
 
 export const RateDetailsSummarySection = ({
     submission,
@@ -48,9 +44,11 @@ export const RateDetailsSummarySection = ({
         certDate: Date,
         type: string
     ): string => {
-        return `${submissionName}-RATE-${rateDateString(
+        return `${submissionName}-RATE-${formatRateNameDate(
             startDate
-        )}-${rateDateString(endDate)}-${type}-${rateDateString(certDate)}`
+        )}-${formatRateNameDate(endDate)}-${type}-${formatRateNameDate(
+            certDate
+        )}`
     }
 
     if (submission.rateType === 'AMENDMENT') {
