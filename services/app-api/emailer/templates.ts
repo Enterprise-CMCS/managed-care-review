@@ -143,6 +143,10 @@ const newPackageStateEmail = (
     user: CognitoUserType,
     config: EmailConfiguration
 ): EmailData => {
+    const submissionURL = new URL(
+        `submissions/${submission.id}`,
+        config.baseUrl
+    ).href
     const currentUserEmail = user.email
     const receiverEmails: string[] = [currentUserEmail].concat(
         submission.stateContacts.map((contact) => contact.email)
@@ -152,7 +156,7 @@ const newPackageStateEmail = (
             <br /><br />
             ${submissionName} was successfully submitted.
             <br /><br />
-            ${generateNewSubmissionData(submission, submissionName, config)}
+            <a href="${submissionURL}">View submission</a>
             <br /><br />
             If you need to make any changes, please contact CMS.
             <br /><br />
