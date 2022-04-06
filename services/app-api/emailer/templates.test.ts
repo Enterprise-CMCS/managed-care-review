@@ -13,8 +13,8 @@ import {
     unlockPackageStateEmail,
     resubmittedCMSEmail,
     resubmittedStateEmail,
-    generateRateName,
 } from './'
+import { formatRateNameDate } from '../../app-web/src/dateHelpers'
 
 describe('Email templates', () => {
     describe('CMS email', () => {
@@ -109,7 +109,9 @@ describe('Email templates', () => {
                 'some-title',
                 testEmailConfig
             )
-            const rateName = generateRateName(sub, 'some-title')
+            const rateName = `some-title-RATE-20210101-20220101-CERTIFICATION-${formatRateNameDate(
+                new Date()
+            )}`
 
             expect(template).toEqual(
                 expect.objectContaining({
@@ -152,7 +154,9 @@ describe('Email templates', () => {
                 'some-title',
                 testEmailConfig
             )
-            const rateName = generateRateName(sub, 'some-title')
+            const rateName = `some-title-RATE-20210101-20220101-CERTIFICATION-${formatRateNameDate(
+                new Date()
+            )}`
 
             expect(template).toEqual(
                 expect.objectContaining({
@@ -201,7 +205,9 @@ describe('Email templates', () => {
                 'some-title',
                 testEmailConfig
             )
-            const rateName = generateRateName(sub, 'some-title')
+            const rateName = `some-title-RATE-20210605-20211231-AMENDMENT-${formatRateNameDate(
+                new Date()
+            )}`
 
             expect(template).toEqual(
                 expect.objectContaining({
