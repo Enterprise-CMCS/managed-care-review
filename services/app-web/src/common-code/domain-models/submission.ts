@@ -2,6 +2,8 @@ import { DraftSubmissionType } from './DraftSubmissionType'
 import { ProgramT } from './ProgramT'
 import { StateSubmissionType } from './StateSubmissionType'
 import { SubmissionUnionType } from './SubmissionUnionType'
+import { DraftSubmission, StateSubmission } from '../../gen/gqlClient'
+import { formatRateNameDate } from '../../dateHelpers'
 
 const isContractOnly = (
     sub: DraftSubmissionType | StateSubmissionType
@@ -133,6 +135,34 @@ function submissionName(
         )
         .join('-')
     return `MCR-${submission.stateCode.toUpperCase()}-${formattedProgramNames}-${padNumber}`
+}
+
+export const generateRateName = (
+    submission: StateSubmissionType | DraftSubmission | StateSubmission,
+    submissionName: string
+): string => {
+    const {
+        rateType,
+        rateAmendmentInfo,
+        rateDateCertified,
+        rateDateEnd,
+        rateDateStart,
+    } = submission
+    const startDate =
+        rateType === 'AMENDMENT'
+            ? rateAmendmentInfo?.effectiveDateStart
+            : rateDateStart
+    const endDate =
+        rateType === 'AMENDMENT'
+            ? rateAmendmentInfo?.effectiveDateEnd
+            : rateDateEnd
+    const type = rateType === 'AMENDMENT' ? rateType : 'CERTIFICATION'
+
+    return `${submissionName}-RATE-${formatRateNameDate(
+        startDate
+    )}-${formatRateNameDate(endDate)}-${type}-${
+        rateDateCertified ? formatRateNameDate(rateDateCertified) : ''
+    }`
 }
 
 export {
