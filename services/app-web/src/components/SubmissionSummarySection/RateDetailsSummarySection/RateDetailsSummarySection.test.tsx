@@ -8,7 +8,7 @@ import { RateDetailsSummarySection } from './RateDetailsSummarySection'
 import { createMemoryHistory } from 'history'
 import { Route } from 'react-router'
 import { RoutesRecord } from '../../../constants/routes'
-import { rateDateString } from './RateDetailsSummarySection'
+import { formatRateNameDate } from '../../../dateHelpers'
 
 describe('RateDetailsSummarySection', () => {
     const draftSubmission = mockContractAndRatesDraft()
@@ -91,9 +91,13 @@ describe('RateDetailsSummarySection', () => {
         )
         rateID.toBeInTheDocument()
         rateID.toHaveTextContent(
-            `MN-MSHO-0003-RATE-${rateDateString(new Date())}-${rateDateString(
-                new Date()
-            )}-CERTIFICATION-${rateDateString(new Date())}`
+            `MN-MSHO-0003-RATE-${formatRateNameDate(
+                submission.rateDateStart
+            )}-${formatRateNameDate(
+                submission.rateDateEnd
+            )}-CERTIFICATION-${formatRateNameDate(
+                submission.rateDateCertified
+            )}`
         )
     })
 
@@ -123,11 +127,11 @@ describe('RateDetailsSummarySection', () => {
         )
         rateID.toBeInTheDocument()
         rateID.toHaveTextContent(
-            `MN-PMAP-0001-RATE-${rateDateString(
+            `MN-PMAP-0001-RATE-${formatRateNameDate(
                 submission.rateAmendmentInfo.effectiveDateStart
-            )}-${rateDateString(
+            )}-${formatRateNameDate(
                 submission.rateAmendmentInfo.effectiveDateEnd
-            )}-AMENDMENT-${rateDateString(submission.rateDateCertified)}`
+            )}-AMENDMENT-${formatRateNameDate(submission.rateDateCertified)}`
         )
     })
 
