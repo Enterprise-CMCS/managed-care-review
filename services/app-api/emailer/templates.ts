@@ -6,7 +6,7 @@ import {
 } from '../../app-web/src/common-code/domain-models'
 import { formatCalendarDate } from '../../app-web/src/dateHelpers'
 import { EmailConfiguration, EmailData } from './'
-import dayjs from 'dayjs'
+import { generateRateName } from '../../app-web/src/common-code/domain-models/submission'
 
 const testEmailAlert = `<span style="color:#FF0000;font-weight:bold;">Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.</span>
 </br>
@@ -33,18 +33,6 @@ const stripHTMLFromTemplate = (template: string) => {
 
     // everything else
     return formatted.replace(/(<([^>]+)>)/gi, '')
-}
-
-const generateRateName = (
-    submission: StateSubmissionType,
-    submissionName: string
-): string => {
-    const dateStr = (date: Date | undefined): string =>
-        date ? `${dayjs(date).format('YYYYMMDD')}` : ''
-    const { rateDateStart, rateDateEnd, rateDateCertified } = submission
-    return `${submissionName}-RATE-${dateStr(rateDateStart)}-${dateStr(
-        rateDateEnd
-    )}-CERTIFICATION-${dateStr(rateDateCertified)}`
 }
 
 const generateNewSubmissionData = (
