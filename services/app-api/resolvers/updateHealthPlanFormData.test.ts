@@ -7,6 +7,11 @@ import { domainToBase64 } from '../../app-web/src/common-code/proto/stateSubmiss
 import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
 import { basicStateSubmission } from '../../app-web/src/common-code/domain-mocks'
 import { v4 as uuidv4 } from 'uuid'
+import {
+    mockStoreThatErrors,
+    sharedTestPrismaClient,
+} from '../testHelpers/storeHelpers'
+import { NewPostgresStore } from '../postgres'
 
 describe('updateHealthPlanFormData', () => {
     it('updates valid fields in the formData', async () => {
@@ -282,6 +287,52 @@ describe('updateHealthPlanFormData', () => {
         expect(updateResult.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
         expect(updateResult.errors[0].message).toBe(
             'Attempted to modify un-modifiable field(s): stateCode,stateNumber,createdAt,updatedAt'
+        )
+    })
+
+    it('errors if the update call to the db fails', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+        const failStore = mockStoreThatErrors()
+
+        // set our store to error on the updateFormData call, only
+        postgresStore.updateFormData = failStore.updateFormData
+
+        const server = await constructTestPostgresServer({
+            store: postgresStore,
+        })
+
+        const createdDraft = await createTestSubmission2(server)
+
+        const formData = latestFormData(createdDraft)
+
+        // update that draft.
+        formData.submissionDescription = 'UPDATED BY REVISION'
+
+        // convert to base64 proto
+        const updatedB64 = domainToBase64(formData)
+
+        const updateResult = await server.executeOperation({
+            query: UPDATE_HEALTH_PLAN_FORM_DATA,
+            variables: {
+                input: {
+                    submissionID: createdDraft.id,
+                    healthPlanFormData: updatedB64,
+                },
+            },
+        })
+
+        expect(updateResult.errors).toBeDefined()
+        if (updateResult.errors === undefined) {
+            throw new Error('type narrow')
+        }
+
+        expect(updateResult.errors[0].extensions?.code).toBe(
+            'INTERNAL_SERVER_ERROR'
+        )
+        expect(updateResult.errors[0].message).toContain('UNEXPECTED_EXCEPTION')
+        expect(updateResult.errors[0].message).toContain(
+            'Error updating form data'
         )
     })
 })
