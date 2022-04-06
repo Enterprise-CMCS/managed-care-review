@@ -98,7 +98,8 @@ describe('RateDetailsSummarySection', () => {
     })
 
     it('can render correct rate name for AMENDMENT rate submission', () => {
-        const rateData = {
+        const submission = {
+            ...mockContractAndRatesDraft(),
             rateDateStart: new Date('2022-01-25'),
             rateDateEnd: new Date('2023-01-25'),
             rateDateCertified: new Date('2022-01-26'),
@@ -106,10 +107,6 @@ describe('RateDetailsSummarySection', () => {
                 effectiveDateStart: new Date('2022-02-25'),
                 effectiveDateEnd: new Date('2023-02-26'),
             },
-        }
-        const submission = {
-            ...mockContractAndRatesDraft(),
-            ...rateData,
         }
 
         renderWithProviders(
@@ -127,10 +124,10 @@ describe('RateDetailsSummarySection', () => {
         rateID.toBeInTheDocument()
         rateID.toHaveTextContent(
             `MN-PMAP-0001-RATE-${rateDateString(
-                rateData.rateAmendmentInfo.effectiveDateStart
+                submission.rateAmendmentInfo.effectiveDateStart
             )}-${rateDateString(
-                rateData.rateAmendmentInfo.effectiveDateEnd
-            )}-AMENDMENT`
+                submission.rateAmendmentInfo.effectiveDateEnd
+            )}-AMENDMENT-${rateDateString(submission.rateDateCertified)}`
         )
     })
 

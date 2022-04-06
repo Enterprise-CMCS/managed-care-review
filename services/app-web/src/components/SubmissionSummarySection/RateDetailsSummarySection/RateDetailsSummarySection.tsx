@@ -50,9 +50,7 @@ export const RateDetailsSummarySection = ({
     ): string => {
         return `${submissionName}-RATE-${rateDateString(
             startDate
-        )}-${rateDateString(endDate)}-${type}${
-            type === 'CERTIFICATION' ? `-${rateDateString(certDate)}` : ''
-        }`
+        )}-${rateDateString(endDate)}-${type}-${rateDateString(certDate)}`
     }
 
     if (submission.rateType === 'AMENDMENT') {
