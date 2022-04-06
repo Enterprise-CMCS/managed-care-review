@@ -19,6 +19,9 @@ export type RateDetailsSummarySectionProps = {
     isCMSUser?: boolean
 }
 
+export const rateDateString = (date: string | Date): string =>
+    dayjs(date).format('YYYYMMDD')
+
 export const RateDetailsSummarySection = ({
     submission,
     navigateTo,
@@ -35,13 +38,40 @@ export const RateDetailsSummarySection = ({
     const rateSupportingDocuments = submission.documents.filter((doc) =>
         doc.documentCategories.includes('RATES_RELATED')
     )
-    const dateString = (date: string | Date): string =>
-        dayjs(date).format('YYYYMMDD')
-    const rateName = `${submission.name}-RATE-${dateString(
-        submission.rateDateStart
-    )}-${dateString(submission.rateDateEnd)}-CERTIFICATION-${dateString(
-        submission.rateDateCertified
-    )}`
+
+    let rateName: string
+
+    const generateRateName = (
+        submissionName: string,
+        startDate: Date,
+        endDate: Date,
+        certDate: Date,
+        type: string
+    ): string => {
+        return `${submissionName}-RATE-${rateDateString(
+            startDate
+        )}-${rateDateString(endDate)}-${type}${
+            type === 'CERTIFICATION' ? `-${rateDateString(certDate)}` : ''
+        }`
+    }
+
+    if (submission.rateType === 'AMENDMENT') {
+        rateName = generateRateName(
+            submission.name,
+            submission.rateAmendmentInfo?.effectiveDateStart,
+            submission.rateAmendmentInfo?.effectiveDateEnd,
+            submission.rateDateCertified,
+            'AMENDMENT'
+        )
+    } else {
+        rateName = generateRateName(
+            submission.name,
+            submission.rateDateStart,
+            submission.rateDateEnd,
+            submission.rateDateCertified,
+            'CERTIFICATION'
+        )
+    }
 
     useEffect(() => {
         // get all the keys for the documents we want to zip
