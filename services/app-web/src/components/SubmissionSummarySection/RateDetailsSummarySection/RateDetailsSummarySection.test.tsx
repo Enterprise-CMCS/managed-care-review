@@ -8,6 +8,7 @@ import { RateDetailsSummarySection } from './RateDetailsSummarySection'
 import { createMemoryHistory } from 'history'
 import { Route } from 'react-router'
 import { RoutesRecord } from '../../../constants/routes'
+import { rateDateString } from './RateDetailsSummarySection'
 
 describe('RateDetailsSummarySection', () => {
     const draftSubmission = mockContractAndRatesDraft()
@@ -75,6 +76,61 @@ describe('RateDetailsSummarySection', () => {
         ).toBeInTheDocument()
     })
 
+    it('can render correct rate name for new rate submission', () => {
+        const submission = mockStateSubmission()
+        renderWithProviders(
+            <RateDetailsSummarySection
+                submission={submission}
+                navigateTo="rate-details"
+            />
+        )
+        const rateID = expect(
+            screen.getByRole('definition', {
+                name: 'Rate ID',
+            })
+        )
+        rateID.toBeInTheDocument()
+        rateID.toHaveTextContent(
+            `MN-MSHO-0003-RATE-${rateDateString(new Date())}-${rateDateString(
+                new Date()
+            )}-CERTIFICATION-${rateDateString(new Date())}`
+        )
+    })
+
+    it('can render correct rate name for AMENDMENT rate submission', () => {
+        const submission = {
+            ...mockContractAndRatesDraft(),
+            rateDateStart: new Date('2022-01-25'),
+            rateDateEnd: new Date('2023-01-25'),
+            rateDateCertified: new Date('2022-01-26'),
+            rateAmendmentInfo: {
+                effectiveDateStart: new Date('2022-02-25'),
+                effectiveDateEnd: new Date('2023-02-26'),
+            },
+        }
+
+        renderWithProviders(
+            <RateDetailsSummarySection
+                submission={submission}
+                navigateTo="rate-details"
+            />
+        )
+
+        const rateID = expect(
+            screen.getByRole('definition', {
+                name: 'Rate ID',
+            })
+        )
+        rateID.toBeInTheDocument()
+        rateID.toHaveTextContent(
+            `MN-PMAP-0001-RATE-${rateDateString(
+                submission.rateAmendmentInfo.effectiveDateStart
+            )}-${rateDateString(
+                submission.rateAmendmentInfo.effectiveDateEnd
+            )}-AMENDMENT-${rateDateString(submission.rateDateCertified)}`
+        )
+    })
+
     it('can render all rate details fields for new rate certification submission', () => {
         renderWithProviders(
             <RateDetailsSummarySection submission={stateSubmission} />
@@ -88,6 +144,11 @@ describe('RateDetailsSummarySection', () => {
         ).toBeInTheDocument()
         expect(
             screen.getByRole('definition', { name: 'Date certified' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', {
+                name: 'Rate ID',
+            })
         ).toBeInTheDocument()
     })
 

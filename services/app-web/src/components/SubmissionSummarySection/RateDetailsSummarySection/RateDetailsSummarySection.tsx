@@ -9,6 +9,7 @@ import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
+import dayjs from 'dayjs'
 import styles from '../SubmissionSummarySection.module.scss'
 
 export type RateDetailsSummarySectionProps = {
@@ -17,6 +18,9 @@ export type RateDetailsSummarySectionProps = {
     documentDateLookupTable?: DocumentDateLookupTable
     isCMSUser?: boolean
 }
+
+export const rateDateString = (date: string | Date): string =>
+    dayjs(date).format('YYYYMMDD')
 
 export const RateDetailsSummarySection = ({
     submission,
@@ -34,6 +38,38 @@ export const RateDetailsSummarySection = ({
     const rateSupportingDocuments = submission.documents.filter((doc) =>
         doc.documentCategories.includes('RATES_RELATED')
     )
+
+    let rateName: string
+
+    const generateRateName = (
+        submissionName: string,
+        startDate: Date,
+        endDate: Date,
+        certDate: Date,
+        type: string
+    ): string => {
+        return `${submissionName}-RATE-${rateDateString(
+            startDate
+        )}-${rateDateString(endDate)}-${type}-${rateDateString(certDate)}`
+    }
+
+    if (submission.rateType === 'AMENDMENT') {
+        rateName = generateRateName(
+            submission.name,
+            submission.rateAmendmentInfo?.effectiveDateStart,
+            submission.rateAmendmentInfo?.effectiveDateEnd,
+            submission.rateDateCertified,
+            'AMENDMENT'
+        )
+    } else {
+        rateName = generateRateName(
+            submission.name,
+            submission.rateDateStart,
+            submission.rateDateEnd,
+            submission.rateDateCertified,
+            'CERTIFICATION'
+        )
+    }
 
     useEffect(() => {
         // get all the keys for the documents we want to zip
@@ -74,6 +110,12 @@ export const RateDetailsSummarySection = ({
                         />
                     )}
                 </SectionHeader>
+
+                <div aria-label="Rate ID" id="rateID" role="group">
+                    <h4 role="definition" aria-labelledby="rateID">
+                        {rateName}
+                    </h4>
+                </div>
 
                 <DoubleColumnGrid>
                     <DataDetail

@@ -11,9 +11,6 @@ import styles from './Header.module.scss'
 import { PageHeadingRow } from './PageHeadingRow/PageHeadingRow'
 import { UserLoginInfo } from './UserLoginInfo/UserLoginInfo'
 
-
-
-
 export type HeaderProps = {
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
