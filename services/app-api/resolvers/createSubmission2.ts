@@ -14,7 +14,6 @@ export function createSubmission2Resolver(
     store: Store
 ): MutationResolvers['createSubmission2'] {
     return async (_parent, { input }, context) => {
-        console.log('IN SUBMI T2')
         const { user, span } = context
         setResolverDetailsOnActiveSpan('createDraftSubmission', user, span)
 
