@@ -236,7 +236,7 @@ Cypress.Commands.add(
             aliasQuery(req, 'indexSubmissions2')
             aliasQuery(req, 'fetchSubmission2')
             aliasMutation(req, 'createSubmission2')
-            aliasMutation(req, 'updateDraftSubmission')
+            aliasMutation(req, 'updateHealthPlanFormData')
         })
 
         cy.findByRole('button', {
@@ -257,7 +257,7 @@ Cypress.Commands.add(
             ) 
         } else if (buttonKey === 'CONTINUE'){
             if (waitForLoad){
-                cy.wait('@updateDraftSubmissionMutation')
+                cy.wait('@updateHealthPlanFormDataMutation')
                 cy.wait('@fetchSubmission2Query')
             }
             cy.findByTestId('state-submission-form-page').should('exist')
