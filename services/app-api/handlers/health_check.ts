@@ -1,12 +1,15 @@
 import { APIGatewayProxyHandler } from 'aws-lambda'
 import LaunchDarkly from 'launchdarkly-node-server-sdk'
 
+const ldClientKey = process.env.LD_SDK_KEY ?? ''
+if (ldClientKey === '') {
+    throw new Error('LD_SDK_KEY environment variable is not set')
+}
+const ldClient = LaunchDarkly.init(ldClientKey)
+
 export const main: APIGatewayProxyHandler = async () => {
-    const ldClientKey = process.env.LD_SDK_KEY ?? ''
-    if (ldClientKey === '') {
-        throw new Error('LD_SDK_KEY environment variable is not set')
-    }
-    const ldClient = LaunchDarkly.init(ldClientKey)
+    const ready = await ldClient.waitForInitialization()
+    console.log(ready)
 
     // returns stage and version
     const health = {
@@ -18,8 +21,6 @@ export const main: APIGatewayProxyHandler = async () => {
     console.log({ name: 'healthcheck' }) // eslint-disable-line no-console
 
     try {
-        await ldClient.waitForInitialization()
-
         const changeHealthResponse = await ldClient.variation(
             'enable-health-endpoint',
             { key: 'mojo@truss.works' },
