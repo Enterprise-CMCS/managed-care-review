@@ -73,7 +73,7 @@ describe('dashboard', () => {
                 cy.logInAsStateUser()
 
                 // State user sees unlocked submission - check tag then submission link
-                cy.findByText('Dashboard').should('exist')
+                cy.findByText('Submissions').should('exist')
                 cy.get('table')
                     .should('exist')
                     .findByText(submissionName)

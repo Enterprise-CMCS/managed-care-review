@@ -36,22 +36,18 @@ export const Header = ({
             return
         }
 
-        logout()
-            .then(() => {
-                history.push('/')
-            })
-            .catch((e) => {
-                console.log('Error with logout: ', e)
-                setAlert &&
-                    setAlert(
-                        <Alert
-                            data-testid="Error400"
-                            style={{ width: '600px', marginBottom: '5px' }}
-                            type="error"
-                            heading="Oops! Something went wrong"
-                        />
-                    )
-            })
+        logout().catch((e) => {
+            console.log('Error with logout: ', e)
+            setAlert &&
+                setAlert(
+                    <Alert
+                        data-testid="Error400"
+                        style={{ width: '600px', marginBottom: '5px' }}
+                        type="error"
+                        heading="Oops! Something went wrong"
+                    />
+                )
+        })
     }
 
     return (

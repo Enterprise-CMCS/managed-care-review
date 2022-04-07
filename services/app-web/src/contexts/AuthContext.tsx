@@ -4,7 +4,6 @@ import { useFetchCurrentUserQuery, User as UserType } from '../gen/gqlClient'
 import { logoutLocalUser } from '../localAuth'
 import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
 
-
 type LogoutFn = () => Promise<null>
 
 export type LoginStatusType = 'LOADING' | 'LOGGED_OUT' | 'LOGGED_IN'
@@ -98,23 +97,12 @@ function AuthProvider({
         loggedInUser === undefined
             ? undefined
             : () => {
-                  return new Promise<void>((resolve, reject) => {
+                  return new Promise<void>((_resolve, reject) => {
                       realLogout()
                           .then(() => {
-                              refetch()
-                                  .then(() => {
-                                      // this would actually be unexpected.
-                                      console.log("Error: We fetched CurrentUser after logout")
-                                      reject(
-                                          new Error(
-                                              "Logout somehow didn't trigger a 403"
-                                          )
-                                      )
-                                  })
-                                  .catch(() => {
-                                      // we expect this to 403, but that's all the logout caller is waiting on
-                                      resolve()
-                                  })
+                              // Hard navigate back to /
+                              // this is more like how things work with IDM anyway.
+                              window.location.href = '/'
                           })
                           .catch((e) => {
                               console.log('Logout Failed.', e)
