@@ -109,7 +109,12 @@ export const RateDetailsSummarySection = ({
                     )}
                 </SectionHeader>
 
-                <h3 aria-label={`Rate ID: ${rateName}`}>{rateName}</h3>
+                <h3
+                    aria-label={`Rate ID: ${rateName}`}
+                    className={styles.rateName}
+                >
+                    {rateName}
+                </h3>
 
                 <DoubleColumnGrid>
                     <DataDetail
