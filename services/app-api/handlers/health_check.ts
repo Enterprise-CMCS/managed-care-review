@@ -8,8 +8,7 @@ if (ldClientKey === '') {
 const ldClient = LaunchDarkly.init(ldClientKey)
 
 export const main: APIGatewayProxyHandler = async () => {
-    const ready = await ldClient.waitForInitialization()
-    console.log(ready)
+    await ldClient.waitForInitialization()
 
     // returns stage and version
     const health = {
@@ -28,8 +27,7 @@ export const main: APIGatewayProxyHandler = async () => {
         )
         console.log(changeHealthResponse)
 
-        health.ld =
-            changeHealthResponse.variation === 'true' ? 'healthy' : 'unhealthy'
+        health.ld = changeHealthResponse === 'true' ? 'healthy' : 'unhealthy'
     } catch (err) {
         ldClient.close()
 
