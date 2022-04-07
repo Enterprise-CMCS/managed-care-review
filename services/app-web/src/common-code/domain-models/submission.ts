@@ -2,7 +2,7 @@ import { DraftSubmissionType } from './DraftSubmissionType'
 import { ProgramT } from './ProgramT'
 import { StateSubmissionType } from './StateSubmissionType'
 import { SubmissionUnionType } from './SubmissionUnionType'
-import { DraftSubmission, StateSubmission } from '../../gen/gqlClient'
+import { Submission } from '../../gen/gqlClient'
 import { formatRateNameDate } from '../../dateHelpers'
 
 const isContractOnly = (
@@ -138,7 +138,7 @@ function submissionName(
 }
 
 export const generateRateName = (
-    submission: StateSubmissionType | DraftSubmission | StateSubmission,
+    submission: Partial<StateSubmissionType> | Partial<Submission>,
     submissionName: string
 ): string => {
     const {
@@ -160,9 +160,9 @@ export const generateRateName = (
 
     return `${submissionName}-RATE-${formatRateNameDate(
         startDate
-    )}-${formatRateNameDate(endDate)}-${type}-${
-        rateDateCertified ? formatRateNameDate(rateDateCertified) : ''
-    }`
+    )}-${formatRateNameDate(endDate)}-${type}-${formatRateNameDate(
+        rateDateCertified
+    )}`
 }
 
 export {
