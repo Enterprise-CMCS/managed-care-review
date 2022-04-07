@@ -39,7 +39,7 @@ export const SubmissionTypeSummarySection = ({
             </SectionHeader>
 
             <dl>
-                {isStateSubmission(submission) && (
+                {isStateSubmission(submission) && !isPreviousSubmission && (
                     <DoubleColumnGrid>
                         <DataDetail
                             id="submitted"
@@ -52,21 +52,17 @@ export const SubmissionTypeSummarySection = ({
                                 </span>
                             }
                         />
-                        {!isPreviousSubmission ? (
-                            <DataDetail
-                                id="lastUpdated"
-                                label="Last updated"
-                                data={
-                                    <span>
-                                        {dayjs(submission.updatedAt).format(
-                                            'MM/DD/YY'
-                                        )}
-                                    </span>
-                                }
-                            />
-                        ) : (
-                            <></>
-                        )}
+                        <DataDetail
+                            id="lastUpdated"
+                            label="Last updated"
+                            data={
+                                <span>
+                                    {dayjs(submission.updatedAt).format(
+                                        'MM/DD/YY'
+                                    )}
+                                </span>
+                            }
+                        />
                     </DoubleColumnGrid>
                 )}
                 <DoubleColumnGrid>
