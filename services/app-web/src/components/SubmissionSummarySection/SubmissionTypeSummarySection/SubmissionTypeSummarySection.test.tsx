@@ -85,13 +85,10 @@ describe('SubmissionTypeSummarySection', () => {
             screen.getByRole('definition', { name: 'Submission description' })
         ).toBeInTheDocument()
         expect(
-            screen.queryByRole('definition', { name: 'Last updated' })
-        ).toBeInTheDocument()
-        expect(
             screen.queryByRole('definition', { name: 'Submitted' })
         ).toBeInTheDocument()
     })
-    it('does not render Last Updated and Submitted at fields', () => {
+    it('does not render Submitted at field', () => {
         renderWithProviders(
             <SubmissionTypeSummarySection
                 submission={draftSubmission}
@@ -99,9 +96,6 @@ describe('SubmissionTypeSummarySection', () => {
                 navigateTo="submission-type"
             />
         )
-        expect(
-            screen.queryByRole('definition', { name: 'Last updated' })
-        ).not.toBeInTheDocument()
         expect(
             screen.queryByRole('definition', { name: 'Submitted' })
         ).not.toBeInTheDocument()

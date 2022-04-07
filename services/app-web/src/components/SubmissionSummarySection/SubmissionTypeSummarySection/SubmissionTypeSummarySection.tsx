@@ -54,17 +54,7 @@ export const SubmissionTypeSummarySection = ({
                                 </span>
                             }
                         />
-                        <DataDetail
-                            id="lastUpdated"
-                            label="Last updated"
-                            data={
-                                <span>
-                                    {dayjs(submission.updatedAt).format(
-                                        'MM/DD/YY'
-                                    )}
-                                </span>
-                            }
-                        />
+                        <></>
                     </DoubleColumnGrid>
                 )}
                 <DoubleColumnGrid>
