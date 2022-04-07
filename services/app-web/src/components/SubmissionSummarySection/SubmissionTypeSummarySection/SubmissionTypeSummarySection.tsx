@@ -15,6 +15,7 @@ export type SubmissionTypeSummarySectionProps = {
     statePrograms: ProgramT[]
     navigateTo?: string
     headerChildComponent?: React.ReactElement
+    intiallySubmittedAt?: Date
 }
 
 export const SubmissionTypeSummarySection = ({
@@ -22,6 +23,7 @@ export const SubmissionTypeSummarySection = ({
     statePrograms,
     navigateTo,
     headerChildComponent,
+    intiallySubmittedAt,
 }: SubmissionTypeSummarySectionProps): React.ReactElement => {
     const isPreviousSubmission = usePreviousSubmission()
     const programNames = statePrograms
@@ -46,7 +48,7 @@ export const SubmissionTypeSummarySection = ({
                             label="Submitted"
                             data={
                                 <span>
-                                    {dayjs(submission.submittedAt).format(
+                                    {dayjs(intiallySubmittedAt).format(
                                         'MM/DD/YY'
                                     )}
                                 </span>
