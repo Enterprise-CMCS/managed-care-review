@@ -55,4 +55,31 @@ describe('createSubmission2', () => {
             'The program id xyz123 does not exist in state FL'
         )
     })
+
+    it('returns an error if a CMS user attempts to create', async () => {
+        const server = await constructTestPostgresServer({
+            context: {
+                user: {
+                    name: 'Zuko',
+                    role: 'CMS_USER',
+                    email: 'aang@va.gov',
+                },
+            },
+        })
+
+        const input: CreateSubmission2Input = {
+            programIDs: ['xyz123'],
+            submissionType: 'CONTRACT_ONLY',
+            submissionDescription: 'A real submission',
+        }
+        const res = await server.executeOperation({
+            query: CREATE_SUBMISSION_2,
+            variables: { input },
+        })
+
+        expect(res.errors).toBeDefined()
+        expect(res.errors && res.errors[0].message).toBe(
+            'user not authorized to create state data'
+        )
+    })
 })

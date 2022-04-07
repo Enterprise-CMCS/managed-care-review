@@ -111,7 +111,7 @@ export function updateHealthPlanFormDataResolver(
 
         // Can't update a submission that is locked or resubmitted
         if (!['DRAFT', 'UNLOCKED'].includes(planPackageStatus)) {
-            const errMessage = `Submission is not in editable state: ${input.submissionID} status: ${submissionStatus}`
+            const errMessage = `Submission is not in editable state: ${input.submissionID} status: ${planPackageStatus}`
             logError('updateHealthPlanFormData', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {

@@ -1,11 +1,15 @@
 import {
     constructTestPostgresServer,
+    createTestStateSubmission,
     createTestSubmission2,
 } from '../testHelpers/gqlHelpers'
 import UPDATE_HEALTH_PLAN_FORM_DATA from '../../app-graphql/src/mutations/updateHealthPlanFormData.graphql'
 import { domainToBase64 } from '../../app-web/src/common-code/proto/stateSubmission'
 import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
-import { basicStateSubmission } from '../../app-web/src/common-code/domain-mocks'
+import {
+    basicStateSubmission,
+    basicSubmission,
+} from '../../app-web/src/common-code/domain-mocks'
 import { v4 as uuidv4 } from 'uuid'
 import {
     mockStoreThatErrors,
@@ -194,18 +198,19 @@ describe('updateHealthPlanFormData', () => {
         )
     })
 
-    it('errors if the payload is already submitted', async () => {
+    it('errors if the Package is already submitted', async () => {
         const server = await constructTestPostgresServer()
-        const createdDraft = await createTestSubmission2(server)
-        const stateSubmission = basicStateSubmission()
-        const formData = domainToBase64(stateSubmission)
+        const createdSubmitted = await createTestStateSubmission(server)
+
+        const draftSubmission = basicSubmission()
+        const b64 = domainToBase64(draftSubmission)
 
         const updateResult = await server.executeOperation({
             query: UPDATE_HEALTH_PLAN_FORM_DATA,
             variables: {
                 input: {
-                    submissionID: createdDraft.id,
-                    healthPlanFormData: formData,
+                    submissionID: createdSubmitted.id,
+                    healthPlanFormData: b64,
                 },
             },
         })
@@ -217,8 +222,9 @@ describe('updateHealthPlanFormData', () => {
 
         expect(updateResult.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
         expect(updateResult.errors[0].message).toContain(
-            'Attempted to update with a StateSubmission'
+            'Submission is not in editable state'
         )
+        expect(updateResult.errors[0].message).toContain('status: SUBMITTED')
     })
 
     it('errors if the id doesnt match the db', async () => {
