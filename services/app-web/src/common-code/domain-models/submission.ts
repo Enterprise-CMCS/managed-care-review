@@ -2,7 +2,6 @@ import { DraftSubmissionType } from './DraftSubmissionType'
 import { ProgramT } from './ProgramT'
 import { StateSubmissionType } from './StateSubmissionType'
 import { SubmissionUnionType } from './SubmissionUnionType'
-import { Submission } from '../../gen/gqlClient'
 import { formatRateNameDate } from '../../dateHelpers'
 
 const isContractOnly = (
@@ -137,8 +136,19 @@ function submissionName(
     return `MCR-${submission.stateCode.toUpperCase()}-${formattedProgramNames}-${padNumber}`
 }
 
+export type RateDataType = {
+    rateType?: 'AMENDMENT' | 'NEW' | null
+    rateDateStart?: Date
+    rateDateEnd?: Date
+    rateDateCertified?: Date
+    rateAmendmentInfo?: {
+        effectiveDateEnd?: Date
+        effectiveDateStart?: Date
+    } | null
+}
+
 export const generateRateName = (
-    submission: Partial<StateSubmissionType> | Partial<Submission>,
+    rateData: Partial<RateDataType>,
     submissionName: string
 ): string => {
     const {
@@ -147,22 +157,41 @@ export const generateRateName = (
         rateDateCertified,
         rateDateEnd,
         rateDateStart,
-    } = submission
-    const startDate =
-        rateType === 'AMENDMENT'
-            ? rateAmendmentInfo?.effectiveDateStart
-            : rateDateStart
-    const endDate =
-        rateType === 'AMENDMENT'
-            ? rateAmendmentInfo?.effectiveDateEnd
-            : rateDateEnd
-    const type = rateType === 'AMENDMENT' ? rateType : 'CERTIFICATION'
+    } = rateData
+    let rateName = `${submissionName}-RATE`
 
-    return `${submissionName}-RATE-${formatRateNameDate(
-        startDate
-    )}-${formatRateNameDate(endDate)}-${type}-${formatRateNameDate(
-        rateDateCertified
-    )}`
+    if (rateType === 'AMENDMENT' && rateAmendmentInfo?.effectiveDateStart) {
+        rateName = rateName.concat(
+            '-',
+            formatRateNameDate(rateAmendmentInfo.effectiveDateStart)
+        )
+    } else if (rateDateStart) {
+        rateName = rateName.concat('-', formatRateNameDate(rateDateStart))
+    }
+
+    if (rateType === 'AMENDMENT' && rateAmendmentInfo?.effectiveDateEnd) {
+        rateName = rateName.concat(
+            '-',
+            formatRateNameDate(rateAmendmentInfo.effectiveDateEnd)
+        )
+    } else if (rateDateEnd) {
+        rateName = rateName.concat('-', formatRateNameDate(rateDateEnd))
+    }
+
+    if (rateType === 'AMENDMENT') {
+        rateName = rateName.concat('-', 'AMENDMENT')
+    } else if (rateType === 'NEW') {
+        rateName = rateName.concat('-', 'CERTIFICATION')
+    }
+
+    if (rateDateCertified) {
+        rateName = rateName = rateName.concat(
+            '-',
+            formatRateNameDate(rateDateCertified)
+        )
+    }
+
+    return rateName
 }
 
 export {
