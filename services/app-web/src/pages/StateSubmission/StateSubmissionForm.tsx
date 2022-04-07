@@ -269,6 +269,10 @@ export const StateSubmissionForm = (): React.ReactElement => {
     }
 
     if ((updateError || updateFormDataError) && !showPageErrorMessage) {
+        // This triggers if Apollo sets the error from our useQuery invocation
+        // we should already be setting this in our try {} block in the actual update handler, I think
+        // so this might be worth looking into.
+        console.log('Apollo Error reported: ', updateError, updateFormDataError)
         setShowPageErrorMessage(true)
     }
 

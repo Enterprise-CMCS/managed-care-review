@@ -235,7 +235,7 @@ Cypress.Commands.add(
         cy.intercept('POST', '*/graphql', (req) => {
             aliasQuery(req, 'indexSubmissions2')
             aliasQuery(req, 'fetchSubmission2')
-            aliasMutation(req, 'createDraftSubmission')
+            aliasMutation(req, 'createSubmission2')
             aliasMutation(req, 'updateDraftSubmission')
         })
 
@@ -249,7 +249,7 @@ Cypress.Commands.add(
 
         } else if (buttonKey === 'CONTINUE_FROM_START_NEW') {
                  if (waitForLoad){
-                    cy.wait('@createDraftSubmissionMutation', { timeout: 50000 })
+                    cy.wait('@createSubmission2Mutation', { timeout: 50000 })
                     cy.wait('@fetchSubmission2Query')
                  }
             cy.findByTestId('state-submission-form-page').should(
