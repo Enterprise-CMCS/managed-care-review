@@ -17,14 +17,32 @@ export const main: APIGatewayProxyHandler = async () => {
 
     console.log({ name: 'healthcheck' }) // eslint-disable-line no-console
 
-    await ldClient.waitForInitialization()
-    const changeHealthResponse = await ldClient.variation(
-        'enable-health-endpoint',
-        { key: 'mojo@truss.works' },
-        false
-    )
-    health.ld =
-        changeHealthResponse.variation === 'true' ? 'healthy' : 'unhealthy'
+    try {
+        await ldClient.waitForInitialization()
+
+        const changeHealthResponse = await ldClient.variation(
+            'enable-health-endpoint',
+            { key: 'mojo@truss.works' },
+            false
+        )
+        console.log(changeHealthResponse)
+
+        health.ld =
+            changeHealthResponse.variation === 'true' ? 'healthy' : 'unhealthy'
+    } catch (err) {
+        ldClient.close()
+
+        return {
+            statusCode: 500,
+            body: JSON.stringify(err),
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': true,
+            },
+        }
+    }
+
+    ldClient.close()
 
     return {
         statusCode: 200,
