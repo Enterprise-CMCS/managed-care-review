@@ -84,21 +84,12 @@ describe('RateDetailsSummarySection', () => {
                 navigateTo="rate-details"
             />
         )
-        const rateID = expect(
-            screen.getByRole('definition', {
-                name: 'Rate ID',
-            })
-        )
-        rateID.toBeInTheDocument()
-        rateID.toHaveTextContent(
-            `MN-MSHO-0003-RATE-${formatRateNameDate(
-                submission.rateDateStart
-            )}-${formatRateNameDate(
-                submission.rateDateEnd
-            )}-CERTIFICATION-${formatRateNameDate(
-                submission.rateDateCertified
-            )}`
-        )
+        const rateName = `MN-MSHO-0003-RATE-${formatRateNameDate(
+            submission.rateDateStart
+        )}-${formatRateNameDate(
+            submission.rateDateEnd
+        )}-CERTIFICATION-${formatRateNameDate(submission.rateDateCertified)}`
+        expect(screen.getByText(rateName)).toBeInTheDocument()
     })
 
     it('can render correct rate name for AMENDMENT rate submission', () => {
@@ -120,19 +111,13 @@ describe('RateDetailsSummarySection', () => {
             />
         )
 
-        const rateID = expect(
-            screen.getByRole('definition', {
-                name: 'Rate ID',
-            })
-        )
-        rateID.toBeInTheDocument()
-        rateID.toHaveTextContent(
-            `MN-PMAP-0001-RATE-${formatRateNameDate(
-                submission.rateAmendmentInfo.effectiveDateStart
-            )}-${formatRateNameDate(
-                submission.rateAmendmentInfo.effectiveDateEnd
-            )}-AMENDMENT-${formatRateNameDate(submission.rateDateCertified)}`
-        )
+        const rateName = `MN-PMAP-0001-RATE-${formatRateNameDate(
+            submission.rateAmendmentInfo.effectiveDateStart
+        )}-${formatRateNameDate(
+            submission.rateAmendmentInfo.effectiveDateEnd
+        )}-AMENDMENT-${formatRateNameDate(submission.rateDateCertified)}`
+
+        expect(screen.getByText(rateName)).toBeInTheDocument()
     })
 
     it('can render all rate details fields for new rate certification submission', () => {
@@ -140,6 +125,15 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection submission={stateSubmission} />
         )
 
+        const rateName = `MN-MSHO-0003-RATE-${formatRateNameDate(
+            stateSubmission.rateDateStart
+        )}-${formatRateNameDate(
+            stateSubmission.rateDateEnd
+        )}-CERTIFICATION-${formatRateNameDate(
+            stateSubmission.rateDateCertified
+        )}`
+
+        expect(screen.getByText(rateName)).toBeInTheDocument()
         expect(
             screen.getByRole('definition', { name: 'Rate certification type' })
         ).toBeInTheDocument()
@@ -148,11 +142,6 @@ describe('RateDetailsSummarySection', () => {
         ).toBeInTheDocument()
         expect(
             screen.getByRole('definition', { name: 'Date certified' })
-        ).toBeInTheDocument()
-        expect(
-            screen.getByRole('definition', {
-                name: 'Rate ID',
-            })
         ).toBeInTheDocument()
     })
 
