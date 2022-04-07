@@ -36,12 +36,8 @@ export const RateDetailsSummarySection = ({
         doc.documentCategories.includes('RATES_RELATED')
     )
     //Generate rate name
-    let rateName: string
-    if (submission.rateType === 'AMENDMENT') {
-        rateName = generateRateName(submission, submission.name)
-    } else {
-        rateName = generateRateName(submission, submission.name)
-    }
+
+    const rateName = generateRateName(submission, submission.name)
 
     useEffect(() => {
         // get all the keys for the documents we want to zip
