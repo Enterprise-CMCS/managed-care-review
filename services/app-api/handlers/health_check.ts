@@ -5,9 +5,9 @@ const ldClientKey = process.env.LD_SDK_KEY ?? ''
 if (ldClientKey === '') {
     throw new Error('LD_SDK_KEY environment variable is not set')
 }
-const ldClient = LaunchDarkly.init(ldClientKey)
 
 export const main: APIGatewayProxyHandler = async () => {
+    const ldClient = LaunchDarkly.init(ldClientKey)
     await ldClient.waitForInitialization()
 
     // returns stage and version
