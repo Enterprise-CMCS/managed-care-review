@@ -144,7 +144,7 @@ jobs:
       react_app_auth_mode: IDM
       react_app_otel_collector_url: ${{ secrets.REACT_APP_OTEL_COLLECTOR_URL }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
-      ld_sdk_key: ${{ secrets.LD_SDK_KEY }}
+      ld_sdk_key: ${{ secrets.DEV_LD_SDK_KEY }}
 
   dev-cypress:
     name: dev - cypress
@@ -222,7 +222,7 @@ jobs:
       ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       react_app_otel_collector_url: ${{ secrets.REACT_APP_OTEL_COLLECTOR_URL }}
-      ld_sdk_key: ${{ secrets.LD_SDK_KEY }}
+      ld_sdk_key: ${{ secrets.VAL_LD_SDK_KEY }}
 
   cypress-val:
     name: val - cypress
@@ -300,7 +300,7 @@ jobs:
       ses_review_team_email_addresses: ${{ secrets.PROD_SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       react_app_otel_collector_url: ${{ secrets.REACT_APP_OTEL_COLLECTOR_URL }}
-      ld_sdk_key: ${{ secrets.LD_SDK_KEY }}
+      ld_sdk_key: ${{ secrets.PROD_LD_SDK_KEY }}
 
   cypress-prod:
     name: prod - cypress

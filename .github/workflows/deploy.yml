@@ -229,7 +229,7 @@ jobs:
       react_app_auth_mode: AWS_COGNITO
       react_app_otel_collector_url: ${{ secrets.REACT_APP_OTEL_COLLECTOR_URL }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
-      ld_sdk_key: ${{ secrets.LD_SDK_KEY }}
+      ld_sdk_key: ${{ secrets.DEV_LD_SDK_KEY }}
 
   finishing-prep:
     name: Finishing Prep
