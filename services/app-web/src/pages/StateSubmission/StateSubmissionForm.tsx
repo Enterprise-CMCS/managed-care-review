@@ -16,7 +16,10 @@ import {
     STATE_SUBMISSION_FORM_ROUTES,
     RouteT,
 } from '../../constants/routes'
-import {getCurrentRevisionFromSubmission2, convertDomainModelFormDataToGQLSubmission} from '../../gqlHelpers'
+import {
+    getCurrentRevisionFromSubmission2,
+    convertDomainModelFormDataToGQLSubmission,
+} from '../../gqlHelpers'
 import { StateSubmissionContainer } from './StateSubmissionContainer'
 import { ContractDetails } from './ContractDetails'
 import { RateDetails } from './RateDetails'
@@ -30,23 +33,36 @@ import {
     UpdateDraftSubmissionInput,
     useUpdateDraftSubmissionMutation,
     useFetchSubmission2Query,
-    User
+    User,
 } from '../../gen/gqlClient'
-import {SubmissionUnlockedBanner} from '../../components/Banner'
-import {UpdateInfoType} from '../../common-code/domain-models/Submission2Type'
+import { SubmissionUnlockedBanner } from '../../components/Banner'
+import { UpdateInfoType } from '../../common-code/domain-models/Submission2Type'
 import { useAuth } from '../../contexts/AuthContext'
 import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
-import { DraftSubmissionType, submissionName } from '../../common-code/domain-models'
+import {
+    DraftSubmissionType,
+    submissionName,
+} from '../../common-code/domain-models'
+import {
+    cleanDraftSubmission,
+    updatesFromSubmission,
+} from './updateSubmissionTransform'
 
-const FormAlert = ({message}:{message?: string}): React.ReactElement => {return message? <Alert type="error">{message}</Alert> : <GenericApiErrorBanner />}
+const FormAlert = ({ message }: { message?: string }): React.ReactElement => {
+    return message ? (
+        <Alert type="error">{message}</Alert>
+    ) : (
+        <GenericApiErrorBanner />
+    )
+}
 
 const PageBannerAlerts = ({
     showPageErrorMessage,
     loggedInUser,
     unlockedInfo,
 }: {
-    showPageErrorMessage: string | boolean,
-    loggedInUser?: User,
+    showPageErrorMessage: string | boolean
+    loggedInUser?: User
     unlockedInfo?: UpdateInfoType | null
 }): JSX.Element => {
     const message =
@@ -82,7 +98,10 @@ const activeFormPages = (draft: DraftSubmission): RouteT[] => {
             )
     )
 }
-type FormDataError = 'NOT_FOUND' | 'MALFORMATTED_DATA' | 'WRONG_SUBMISSION_STATUS'
+type FormDataError =
+    | 'NOT_FOUND'
+    | 'MALFORMATTED_DATA'
+    | 'WRONG_SUBMISSION_STATUS'
 
 export const StateSubmissionForm = (): React.ReactElement => {
     const { id } = useParams<{ id: string }>()
@@ -95,8 +114,12 @@ export const StateSubmissionForm = (): React.ReactElement => {
         null
     )
     const { loggedInUser } = useAuth()
-    const [showPageErrorMessage, setShowPageErrorMessage] = useState<boolean | string>(false) // string is a custom error message, defaults to generic of true
-    const [unlockedInfo, setUnlockedInfo] = useState<UpdateInfoType | null>(null)
+    const [showPageErrorMessage, setShowPageErrorMessage] = useState<
+        boolean | string
+    >(false) // string is a custom error message, defaults to generic of true
+    const [unlockedInfo, setUnlockedInfo] = useState<UpdateInfoType | null>(
+        null
+    )
 
     // Set up graphql calls
     const {
@@ -125,9 +148,8 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     input: input,
                 },
                 update(cache) {
-                        cache.evict({ id: `Submission2:${id}` })
-                        cache.gc()
-                 
+                    cache.evict({ id: `Submission2:${id}` })
+                    cache.gc()
                 },
             })
             const updatedSubmission: DraftSubmission | undefined =
@@ -142,11 +164,57 @@ export const StateSubmissionForm = (): React.ReactElement => {
         }
     }
 
+    // When the new API is done, we'll call the new API here
+    const updateDraftSubmission2 = async (
+        input: DraftSubmissionType
+    ): Promise<undefined | Error> => {
+        // convert to GQL DraftSubmissionUpdates type
+
+        const draft = convertDomainModelFormDataToGQLSubmission(
+            input,
+            statePrograms
+        ) as DraftSubmission
+        const updatedDraft = updatesFromSubmission(draft)
+        const cleanSubmission = cleanDraftSubmission(updatedDraft)
+
+        setShowPageErrorMessage(false)
+        try {
+            const updateResult = await updateDraftSubmission({
+                variables: {
+                    input: {
+                        submissionID: input.id,
+                        draftSubmissionUpdates: cleanSubmission,
+                    },
+                },
+                update(cache) {
+                    cache.evict({ id: `Submission2:${id}` })
+                    cache.gc()
+                },
+            })
+            const updatedSubmission: DraftSubmission | undefined =
+                updateResult?.data?.updateDraftSubmission.draftSubmission
+
+            if (!updatedSubmission) setShowPageErrorMessage(true)
+
+            return undefined
+        } catch (serverError) {
+            setShowPageErrorMessage(true)
+            return serverError
+        }
+    }
+
     // Set up side effects
     useEffect(() => {
         if (formDataFromLatestRevision) {
-            const statePrograms = (loggedInUser && 'state' in loggedInUser && loggedInUser.state.programs) || []
-            const name = submissionName(formDataFromLatestRevision, statePrograms)
+            const statePrograms =
+                (loggedInUser &&
+                    'state' in loggedInUser &&
+                    loggedInUser.state.programs) ||
+                []
+            const name = submissionName(
+                formDataFromLatestRevision,
+                statePrograms
+            )
             updateHeading(pathname, name)
         }
     }, [updateHeading, pathname, formDataFromLatestRevision, loggedInUser])
@@ -160,13 +228,13 @@ export const StateSubmissionForm = (): React.ReactElement => {
             if (currentRevisionPackageOrError instanceof Error) {
                 setFormDataError('MALFORMATTED_DATA')
                 return
-            } 
+            }
 
             const [revision, planFormData] = currentRevisionPackageOrError
 
             if (planFormData.status !== 'DRAFT') {
                 setFormDataError('WRONG_SUBMISSION_STATUS')
-                return 
+                return
             }
 
             setFormDataFromLatestRevision(planFormData)
@@ -175,9 +243,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
             if (submissionAndRevisions.status === 'UNLOCKED') {
                 const unlockInfo = revision.unlockInfo
 
-                if (
-                    unlockInfo
-                ) {
+                if (unlockInfo) {
                     setUnlockedInfo({
                         updatedBy: unlockInfo.updatedBy,
                         updatedAt: unlockInfo.updatedAt,
@@ -189,7 +255,9 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         'ERROR: submission in summary has no revision with unlocked information',
                         submissionAndRevisions.revisions
                     )
-                    setShowPageErrorMessage('This may be an unlocked submission that is currently being edited. Please reload the page and try again.')
+                    setShowPageErrorMessage(
+                        'This may be an unlocked submission that is currently being edited. Please reload the page and try again.'
+                    )
                 }
             }
         }
@@ -229,7 +297,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
         return <Error404 />
     }
 
-
     if (formDataError === 'MALFORMATTED_DATA') {
         return <GenericErrorPage />
     }
@@ -242,9 +309,16 @@ export const StateSubmissionForm = (): React.ReactElement => {
         return <ErrorInvalidSubmissionStatus />
     }
 
-    // Hacky way to not have to change the individual pages yet. 
-    const statePrograms = (loggedInUser && 'state' in loggedInUser && loggedInUser.state.programs) || []
-    const draft = convertDomainModelFormDataToGQLSubmission(formDataFromLatestRevision, statePrograms) as DraftSubmission
+    // Hacky way to not have to change the individual pages yet.
+    const statePrograms =
+        (loggedInUser &&
+            'state' in loggedInUser &&
+            loggedInUser.state.programs) ||
+        []
+    const draft = convertDomainModelFormDataToGQLSubmission(
+        formDataFromLatestRevision,
+        statePrograms
+    ) as DraftSubmission
 
     return (
         <>
@@ -253,14 +327,18 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     formPages={activeFormPages(draft)}
                     currentFormPage={currentRoute}
                 />
-                <PageBannerAlerts loggedInUser={loggedInUser} unlockedInfo={unlockedInfo} showPageErrorMessage={showPageErrorMessage}/>
+                <PageBannerAlerts
+                    loggedInUser={loggedInUser}
+                    unlockedInfo={unlockedInfo}
+                    showPageErrorMessage={showPageErrorMessage}
+                />
             </div>
             <StateSubmissionContainer>
                 <Switch>
                     <Route path={RoutesRecord.SUBMISSIONS_TYPE}>
                         <SubmissionType
-                            draftSubmission={draft}
-                            updateDraft={updateDraft}
+                            draftSubmission={formDataFromLatestRevision}
+                            updateDraft={updateDraftSubmission2}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}>
@@ -288,7 +366,10 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}>
-                        <ReviewSubmit draftSubmission={draft} unlocked={!!unlockedInfo} />
+                        <ReviewSubmit
+                            draftSubmission={draft}
+                            unlocked={!!unlockedInfo}
+                        />
                     </Route>
                 </Switch>
             </StateSubmissionContainer>

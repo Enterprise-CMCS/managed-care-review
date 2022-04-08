@@ -82,7 +82,6 @@ describe('dashboard', () => {
                 name: `Minnesota ${submissionName}`,
             }).should('exist')
             cy.findByText('Submitted').should('exist')
-            cy.findByText('Last updated').should('exist')
             cy.findByText('Rate details').should('exist')
             cy.findByText('New rate certification').should('exist')
             cy.findByText('02/29/2024 to 02/28/2025').should('exist')

@@ -13,6 +13,7 @@
         "serverless-idempotency-helper": "CMSgov/serverless-idempotency-helper",
         "serverless-plugin-scripts": "^1.0.2",
         "serverless-s3-local": "^0.6.7",
+        "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",
         "serverless-stack-termination-protection": "^1.0.4"
     }
 }
