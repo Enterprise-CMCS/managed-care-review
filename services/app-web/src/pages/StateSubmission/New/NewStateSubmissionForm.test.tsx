@@ -1,4 +1,3 @@
-import React from 'react'
 import { screen } from '@testing-library/react'
 
 import { fetchCurrentUserMock } from '../../../testHelpers/apolloHelpers'
@@ -16,10 +15,9 @@ describe('NewStateSubmissionForm', () => {
             },
             routerProvider: { route: '/submissions/new' },
         })
-  
+
         expect(
             screen.getByRole('form', { name: 'New Submission Form' })
         ).toBeInTheDocument()
-
     })
 })

@@ -172,36 +172,5 @@ describe('Header', () => {
             await waitFor(() => expect(spy).toHaveBeenCalledTimes(1))
             await waitFor(() => expect(mockAlert).toHaveBeenCalled())
         })
-
-        it('shows signin link when logout is successful', async () => {
-            const spy = jest
-                .spyOn(CognitoAuthApi, 'signOut')
-                .mockResolvedValue(null)
-
-            renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        fetchCurrentUserMock({ statusCode: 403 }),
-                    ],
-                },
-            })
-
-            await waitFor(() => {
-                const signOutButton = screen.getByRole('button', {
-                    name: /Sign out/i,
-                })
-
-                expect(signOutButton).toBeInTheDocument()
-                userEvent.click(signOutButton)
-            })
-
-            await waitFor(() => {
-                expect(spy).toHaveBeenCalledTimes(1)
-                expect(
-                    screen.getByRole('link', { name: /Sign In/i })
-                ).toBeVisible()
-            })
-        })
     })
 })

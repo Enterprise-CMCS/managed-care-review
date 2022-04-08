@@ -3,6 +3,7 @@ import { Buffer } from 'buffer'
 import { v4 as uuidv4 } from 'uuid'
 import {
     DraftSubmissionType,
+    Submission2Type,
     SubmissionType,
 } from '../../app-web/src/common-code/domain-models'
 import { toProtoBuffer } from '../../app-web/src/common-code/proto/stateSubmission'
@@ -11,6 +12,7 @@ import {
     isStoreError,
     StoreError,
 } from './storeError'
+import { convertToSubmission2Type } from './submissionWithRevisionsHelpers'
 
 export type InsertDraftSubmissionArgsType = {
     stateCode: string
@@ -46,7 +48,7 @@ async function incrementAndGetStateNumber(
 export async function insertDraftSubmission(
     client: PrismaClient,
     args: InsertDraftSubmissionArgsType
-): Promise<DraftSubmissionType | StoreError> {
+): Promise<Submission2Type | StoreError> {
     const stateNumberResult = await incrementAndGetStateNumber(
         client,
         args.stateCode
@@ -85,25 +87,31 @@ export async function insertDraftSubmission(
     const buffer = Buffer.from(protobuf)
 
     try {
-        await client.stateSubmission.create({
+        const pkg = await client.stateSubmission.create({
             data: {
                 id: draft.id,
                 stateCode: draft.stateCode,
                 revisions: {
-                    create:
-                   { 
-                       id: uuidv4(),
-                       createdAt: new Date(),
-                       submissionFormProto: buffer
-                    }
-                }
+                    create: {
+                        id: uuidv4(),
+                        createdAt: new Date(),
+                        submissionFormProto: buffer,
+                    },
+                },
+            },
+            include: {
+                revisions: {
+                    orderBy: {
+                        createdAt: 'desc', // We expect our revisions most-recent-first
+                    },
+                },
             },
         })
+
+        return convertToSubmission2Type(pkg)
     } catch (e: unknown) {
         console.log('ERROR: inserting into to the database: ', e)
 
         return convertPrismaErrorToStoreError(e)
     }
-
-    return draft
 }
