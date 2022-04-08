@@ -20,10 +20,10 @@ import { SubmissionTypeRecord } from '../../../constants/submissions'
 import { useAuth } from '../../../contexts/AuthContext'
 import {
     CreateDraftSubmissionInput,
-    DraftSubmission,
     Program,
+    Submission2,
     SubmissionType as SubmissionTypeT,
-    useCreateDraftSubmissionMutation,
+    useCreateSubmission2Mutation,
 } from '../../../gen/gqlClient'
 import { PageActions } from '../PageActions'
 import styles from '../StateSubmissionForm.module.scss'
@@ -47,7 +47,7 @@ export interface SubmissionTypeFormValues {
 type SubmissionTypeProps = {
     showValidations?: boolean
     draftSubmission?: DraftSubmissionType
-    updateDraft?: (input: DraftSubmissionType) => Promise<undefined | Error>
+    updateDraft?: (input: DraftSubmissionType) => Promise<Submission2 | Error>
     formAlert?: React.ReactElement
 }
 
@@ -93,23 +93,21 @@ export const SubmissionType = ({
         return msg
     }
 
-    const [createDraftSubmission, { error }] = useCreateDraftSubmissionMutation(
-        {
-            // An alternative to messing with the cache like we do with create, just zero it out.
-            update(cache, { data }) {
-                if (data) {
-                    cache.modify({
-                        id: 'ROOT_QUERY',
-                        fields: {
-                            indexSubmissions2(_index, { DELETE }) {
-                                return DELETE
-                            },
+    const [createDraftSubmission, { error }] = useCreateSubmission2Mutation({
+        // An alternative to messing with the cache like we do with create, just zero it out.
+        update(cache, { data }) {
+            if (data) {
+                cache.modify({
+                    id: 'ROOT_QUERY',
+                    fields: {
+                        indexSubmissions2(_index, { DELETE }) {
+                            return DELETE
                         },
-                    })
-                }
-            },
-        }
-    )
+                    },
+                })
+            }
+        },
+    })
 
     useEffect(() => {
         // Focus the error summary heading only if we are displaying
@@ -162,8 +160,8 @@ export const SubmissionType = ({
                     variables: { input },
                 })
 
-                const draftSubmission: DraftSubmission | undefined =
-                    result?.data?.createDraftSubmission.draftSubmission
+                const draftSubmission: Submission2 | undefined =
+                    result?.data?.createSubmission2.submission
 
                 if (draftSubmission) {
                     history.push(
@@ -251,7 +249,7 @@ export const SubmissionType = ({
                                 <Field name="programIDs">
                                     {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
                                     {/* @ts-ignore */}
-                                    {({ _field, form }) => (
+                                    {({ form }) => (
                                         <Select
                                             defaultValue={values.programIDs.map(
                                                 (programID) => {

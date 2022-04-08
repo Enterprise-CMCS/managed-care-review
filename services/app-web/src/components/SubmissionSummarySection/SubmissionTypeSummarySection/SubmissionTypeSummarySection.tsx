@@ -15,6 +15,7 @@ export type SubmissionTypeSummarySectionProps = {
     statePrograms: ProgramT[]
     navigateTo?: string
     headerChildComponent?: React.ReactElement
+    intiallySubmittedAt?: Date
 }
 
 export const SubmissionTypeSummarySection = ({
@@ -22,6 +23,7 @@ export const SubmissionTypeSummarySection = ({
     statePrograms,
     navigateTo,
     headerChildComponent,
+    intiallySubmittedAt,
 }: SubmissionTypeSummarySectionProps): React.ReactElement => {
     const isPreviousSubmission = usePreviousSubmission()
     const programNames = statePrograms
@@ -39,34 +41,20 @@ export const SubmissionTypeSummarySection = ({
             </SectionHeader>
 
             <dl>
-                {isStateSubmission(submission) && (
+                {isStateSubmission(submission) && !isPreviousSubmission && (
                     <DoubleColumnGrid>
                         <DataDetail
                             id="submitted"
                             label="Submitted"
                             data={
                                 <span>
-                                    {dayjs(submission.submittedAt).format(
+                                    {dayjs(intiallySubmittedAt).format(
                                         'MM/DD/YY'
                                     )}
                                 </span>
                             }
                         />
-                        {!isPreviousSubmission ? (
-                            <DataDetail
-                                id="lastUpdated"
-                                label="Last updated"
-                                data={
-                                    <span>
-                                        {dayjs(submission.updatedAt).format(
-                                            'MM/DD/YY'
-                                        )}
-                                    </span>
-                                }
-                            />
-                        ) : (
-                            <></>
-                        )}
+                        <></>
                     </DoubleColumnGrid>
                 )}
                 <DoubleColumnGrid>

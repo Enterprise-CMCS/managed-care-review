@@ -220,10 +220,11 @@ Cypress.Commands.add('submitStateSubmissionForm', (success = true, resubmission 
     }
 })
 
-type FormButtonKey =  'CONTINUE_FROM_START_NEW'| 'CONTINUE' | 'SAVE_DRAFT' | 'BACK'
+type FormButtonKey =  'CONTINUE_FROM_START_NEW' | 'CONTINUE_WITH_NEW_UPDATE' | 'CONTINUE' | 'SAVE_DRAFT' | 'BACK'
 type FormButtons = { [key in FormButtonKey]: string }
 const buttonsWithLabels: FormButtons = {
     CONTINUE: 'Continue',
+    CONTINUE_WITH_NEW_UPDATE: 'Continue',
     CONTINUE_FROM_START_NEW: 'Continue',
     SAVE_DRAFT: 'Save as draft',
     BACK: 'Back',
@@ -235,8 +236,9 @@ Cypress.Commands.add(
         cy.intercept('POST', '*/graphql', (req) => {
             aliasQuery(req, 'indexSubmissions2')
             aliasQuery(req, 'fetchSubmission2')
-            aliasMutation(req, 'createDraftSubmission')
+            aliasMutation(req, 'createSubmission2')
             aliasMutation(req, 'updateDraftSubmission')
+            aliasMutation(req, 'updateHealthPlanFormData')
         })
 
         cy.findByRole('button', {
@@ -249,7 +251,7 @@ Cypress.Commands.add(
 
         } else if (buttonKey === 'CONTINUE_FROM_START_NEW') {
                  if (waitForLoad){
-                    cy.wait('@createDraftSubmissionMutation', { timeout: 50000 })
+                    cy.wait('@createSubmission2Mutation', { timeout: 50000 })
                     cy.wait('@fetchSubmission2Query')
                  }
             cy.findByTestId('state-submission-form-page').should(
@@ -258,6 +260,12 @@ Cypress.Commands.add(
         } else if (buttonKey === 'CONTINUE'){
             if (waitForLoad){
                 cy.wait('@updateDraftSubmissionMutation')
+                cy.wait('@fetchSubmission2Query')
+            }
+            cy.findByTestId('state-submission-form-page').should('exist')
+        } else if (buttonKey === 'CONTINUE_WITH_NEW_UPDATE'){
+            if (waitForLoad){
+                cy.wait('@updateHealthPlanFormDataMutation')
                 cy.wait('@fetchSubmission2Query')
             }
             cy.findByTestId('state-submission-form-page').should('exist')

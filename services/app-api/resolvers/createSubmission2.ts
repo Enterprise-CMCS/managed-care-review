@@ -9,11 +9,10 @@ import {
     setErrorAttributesOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from './attributeHelper'
-import { toDomain } from '../../app-web/src/common-code/proto/stateSubmission'
 
-export function createDraftSubmissionResolver(
+export function createSubmission2Resolver(
     store: Store
-): MutationResolvers['createDraftSubmission'] {
+): MutationResolvers['createSubmission2'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
         setResolverDetailsOnActiveSpan('createDraftSubmission', user, span)
@@ -76,28 +75,8 @@ export function createDraftSubmissionResolver(
         logSuccess('createDraftSubmission')
         setSuccessAttributesOnActiveSpan(span)
 
-        const revision = pkgResult.revisions[0]
-        const formDataResult = toDomain(revision.submissionFormProto)
-        if (formDataResult instanceof Error) {
-            const errMessage =
-                'Failed to deserialize form data after create' +
-                formDataResult.message
-            logError('createDraftSubmission', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw formDataResult
-        }
-
-        if (formDataResult.status === 'SUBMITTED') {
-            const errMessage =
-                'managed to get a submitted package after creation: ' +
-                formDataResult.id
-            logError('createDraftSubmission', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw formDataResult
-        }
-
         return {
-            draftSubmission: formDataResult,
+            submission: pkgResult,
         }
     }
 }

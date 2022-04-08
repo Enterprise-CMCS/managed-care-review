@@ -73,7 +73,7 @@ describe('dashboard', () => {
                 cy.logInAsStateUser()
 
                 // State user sees unlocked submission - check tag then submission link
-                cy.findByText('Dashboard').should('exist')
+                cy.findByText('Submissions').should('exist')
                 cy.get('table')
                     .should('exist')
                     .findByText(submissionName)
@@ -129,14 +129,19 @@ describe('dashboard', () => {
                 cy.wait('@fetchSubmission2Query', { timeout: 50000 })
                 cy.findByTestId('updatedSubmissionBanner').should('exist')
 
-                // Login as CMS User
+                cy.findByText('Back to state dashboard').click()
+                cy.wait('@indexSubmissions2Query')
+
+                //Sign out
                 cy.findByRole('button', { name: 'Sign out' }).click()
 
-                cy.wait(2000)
+                cy.wait(5000)
 
                 cy.findByText(
                     'Medicaid and CHIP Managed Care Reporting and Review System'
                 )
+
+                // Login as CMS User
                 cy.logInAsCMSUser({ initialURL: submissionURL })
 
                 //  CMS user sees resubmitted submission and active unlock button
