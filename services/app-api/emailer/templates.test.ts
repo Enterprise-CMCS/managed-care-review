@@ -96,7 +96,7 @@ describe('Email templates', () => {
                 })
             )
         })
-        it('includes expected data summary for a contract and rates submission', () => {
+        it('includes expected data summary for a contract and rates submission CMS email', () => {
             const sub: StateSubmissionType = {
                 ...mockContractAndRatesSubmission(),
                 contractDateStart: new Date('01/01/2021'),
@@ -187,7 +187,7 @@ describe('Email templates', () => {
             )
         })
 
-        it('includes expected data summary for a rate amendment submission', () => {
+        it('includes expected data summary for a rate amendment submission CMS email', () => {
             const sub: StateSubmissionType = {
                 ...mockContractAndRatesSubmission(),
                 rateType: 'AMENDMENT',
@@ -369,7 +369,7 @@ describe('Email templates', () => {
             )
         })
 
-        it('includes expected data summary for a contract and rates submission', () => {
+        it('includes expected data summary for a contract and rates submission State email', () => {
             const sub: StateSubmissionType = {
                 ...mockContractAndRatesSubmission(),
                 contractDateStart: new Date('01/01/2021'),
@@ -417,7 +417,7 @@ describe('Email templates', () => {
             )
         })
 
-        it('includes expected data summary for a rate amendment submission', () => {
+        it('includes expected data summary for a rate amendment submission State email', () => {
             const sub: StateSubmissionType = {
                 ...mockContractAndRatesSubmission(),
                 rateType: 'AMENDMENT',
