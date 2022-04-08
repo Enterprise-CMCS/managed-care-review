@@ -1,4 +1,5 @@
-import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
+import { Submission2Type } from '../../app-web/src/common-code/domain-models'
+import { toDomain } from '../../app-web/src/common-code/proto/stateSubmission'
 import { sharedTestPrismaClient } from '../testHelpers/storeHelpers'
 import { insertDraftSubmission } from './insertDraftSubmission'
 import { isStoreError } from './storeError'
@@ -32,11 +33,19 @@ describe('insertDraftSubmissionPostgres', () => {
 
         // Because we are erroring above if _any_ of our results are a store error
         // we can tell the type system that all of our results are DraftSubmissionType
-        const drafts = results as DraftSubmissionType[]
+        const drafts = results as Submission2Type[]
+
+        const formDatum = drafts.map((d) => {
+            const formDataResult = toDomain(d.revisions[0].submissionFormProto)
+            if (formDataResult instanceof Error) {
+                throw formDataResult
+            }
+            return formDataResult
+        })
 
         // Quick way to see if there are any duplicates, throw the state numbers into
         // a set and check that the set and the array have the same number of elements
-        const stateNumbers = drafts.map((draft) => draft.stateNumber)
+        const stateNumbers = formDatum.map((d) => d.stateNumber)
         const stateNumberSet = new Set(stateNumbers)
 
         if (stateNumbers.length !== stateNumberSet.size) {

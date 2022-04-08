@@ -48,7 +48,6 @@ export const Header = ({
                     />
                 )
         })
-        history.push('/')
     }
 
     return (

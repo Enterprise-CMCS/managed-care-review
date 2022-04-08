@@ -34,6 +34,8 @@ import {
     useUpdateDraftSubmissionMutation,
     useFetchSubmission2Query,
     User,
+    useUpdateHealthPlanFormDataMutation,
+    Submission2,
 } from '../../gen/gqlClient'
 import { SubmissionUnlockedBanner } from '../../components/Banner'
 import { UpdateInfoType } from '../../common-code/domain-models/Submission2Type'
@@ -43,10 +45,7 @@ import {
     DraftSubmissionType,
     submissionName,
 } from '../../common-code/domain-models'
-import {
-    cleanDraftSubmission,
-    updatesFromSubmission,
-} from './updateSubmissionTransform'
+import { domainToBase64 } from '../../common-code/proto/stateSubmission'
 
 const FormAlert = ({ message }: { message?: string }): React.ReactElement => {
     return message ? (
@@ -137,6 +136,8 @@ export const StateSubmissionForm = (): React.ReactElement => {
     const submissionAndRevisions = fetchData?.fetchSubmission2?.submission
     const [updateDraftSubmission, { error: updateError }] =
         useUpdateDraftSubmissionMutation()
+    const [updateFormData, { error: updateFormDataError }] =
+        useUpdateHealthPlanFormDataMutation()
 
     const updateDraft = async (
         input: UpdateDraftSubmissionInput
@@ -167,23 +168,16 @@ export const StateSubmissionForm = (): React.ReactElement => {
     // When the new API is done, we'll call the new API here
     const updateDraftSubmission2 = async (
         input: DraftSubmissionType
-    ): Promise<undefined | Error> => {
-        // convert to GQL DraftSubmissionUpdates type
-
-        const draft = convertDomainModelFormDataToGQLSubmission(
-            input,
-            statePrograms
-        ) as DraftSubmission
-        const updatedDraft = updatesFromSubmission(draft)
-        const cleanSubmission = cleanDraftSubmission(updatedDraft)
+    ): Promise<Submission2 | Error> => {
+        const base64Draft = domainToBase64(input)
 
         setShowPageErrorMessage(false)
         try {
-            const updateResult = await updateDraftSubmission({
+            const updateResult = await updateFormData({
                 variables: {
                     input: {
                         submissionID: input.id,
-                        draftSubmissionUpdates: cleanSubmission,
+                        healthPlanFormData: base64Draft,
                     },
                 },
                 update(cache) {
@@ -191,12 +185,15 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     cache.gc()
                 },
             })
-            const updatedSubmission: DraftSubmission | undefined =
-                updateResult?.data?.updateDraftSubmission.draftSubmission
+            const updatedSubmission: Submission2 | undefined =
+                updateResult?.data?.updateHealthPlanFormData.submission
 
-            if (!updatedSubmission) setShowPageErrorMessage(true)
+            if (!updatedSubmission) {
+                setShowPageErrorMessage(true)
+                return new Error('Failed to update form data')
+            }
 
-            return undefined
+            return updatedSubmission
         } catch (serverError) {
             setShowPageErrorMessage(true)
             return serverError
@@ -271,7 +268,11 @@ export const StateSubmissionForm = (): React.ReactElement => {
         )
     }
 
-    if (updateError && !showPageErrorMessage) {
+    if ((updateError || updateFormDataError) && !showPageErrorMessage) {
+        // This triggers if Apollo sets the error from our useQuery invocation
+        // we should already be setting this in our try {} block in the actual update handler, I think
+        // so this might be worth looking into.
+        console.log('Apollo Error reported: ', updateError, updateFormDataError)
         setShowPageErrorMessage(true)
     }
 
