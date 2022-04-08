@@ -21,10 +21,9 @@ export const main: APIGatewayProxyHandler = async () => {
 
     const changeHealthResponse = await ldClient.variation(
         'enable-health-endpoint',
-        { key: 'mojo@truss.works' },
+        { key: 'mc-review-team@truss.works' },
         false
     )
-    console.log(changeHealthResponse)
 
     if (changeHealthResponse) {
         health.ld = 'enabled'
