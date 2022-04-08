@@ -1,0 +1,35 @@
+mutation createSubmission2($input: CreateSubmission2Input!) {
+    createSubmission2(input: $input) {
+        submission {
+            id
+            stateCode
+            state {
+                code
+                name
+                programs {
+                    id
+                    name
+                }
+            }
+            status
+            intiallySubmittedAt
+            revisions {
+                revision {
+                    id
+                    unlockInfo {
+                        updatedAt
+                        updatedBy
+                        updatedReason
+                    }
+                    submitInfo {
+                        updatedAt
+                        updatedBy
+                        updatedReason
+                    }
+                    createdAt
+                    submissionData
+                }
+            }
+        }
+    }
+}
