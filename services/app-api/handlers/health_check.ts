@@ -8,7 +8,21 @@ if (ldClientKey === '') {
 
 export const main: APIGatewayProxyHandler = async () => {
     const ldClient = LaunchDarkly.init(ldClientKey)
-    await ldClient.waitForInitialization()
+    try {
+        await ldClient.waitForInitialization()
+    } catch (err) {
+        return {
+            statusCode: 500,
+            body: JSON.stringify({
+                code: 'LD_SDK_INIT_FAILED',
+                message: err.message,
+            }),
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': true,
+            },
+        }
+    }
 
     // returns stage and version
     const health = {
