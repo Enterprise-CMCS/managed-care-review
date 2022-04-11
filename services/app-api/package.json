@@ -37,6 +37,7 @@
         "axios": "^0.26.1",
         "graphql": "^16.2.0",
         "graphql-scalars": "^1.11.1",
+        "launchdarkly-node-server-sdk": "5.14.6",
         "neverthrow": "^4.2.2",
         "prisma": "^3.11.1",
         "protobufjs": "^6.11.2",

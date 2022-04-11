@@ -1,3 +1,5 @@
 {
-    "eslint.workingDirectories": ["services/app-web", "services/app-api"]
+    "eslint.workingDirectories": ["services/app-web", "services/app-api"],
+    "launchdarkly.project": "default",
+    "launchdarkly.env": "dev"
 }
