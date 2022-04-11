@@ -136,7 +136,7 @@ function submissionName(
     return `MCR-${submission.stateCode.toUpperCase()}-${formattedProgramNames}-${padNumber}`
 }
 
-export type RateDataType = {
+type RateDataType = {
     rateType?: 'AMENDMENT' | 'NEW' | null
     rateDateStart?: Date
     rateDateEnd?: Date
@@ -147,8 +147,8 @@ export type RateDataType = {
     } | null
 }
 
-export const generateRateName = (
-    rateData: Partial<RateDataType>,
+const generateRateName = (
+    rateData: RateDataType,
     submissionName: string
 ): string => {
     const {
@@ -205,4 +205,5 @@ export {
     isDraftSubmission,
     programNames,
     submissionName,
+    generateRateName,
 }
