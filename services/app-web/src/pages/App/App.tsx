@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react'
 import { BrowserRouter } from 'react-router-dom'
-import { CompatRouter } from 'react-router-dom-v5-compat'
 import { ErrorBoundary } from 'react-error-boundary'
 import {
     ApolloProvider,
@@ -53,21 +52,19 @@ function App({
     return (
         <ErrorBoundary FallbackComponent={ErrorFallback}>
             <BrowserRouter>
-                <CompatRouter>
-                    <TraceProvider>
-                        <ApolloProvider client={apolloClient}>
-                            <S3Provider client={s3Client}>
-                                <AuthProvider authMode={authMode}>
-                                    <PageProvider>
-                                        <>
-                                            <AppBody authMode={authMode} />
-                                        </>
-                                    </PageProvider>
-                                </AuthProvider>
-                            </S3Provider>
-                        </ApolloProvider>
-                    </TraceProvider>
-                </CompatRouter>
+                <TraceProvider>
+                    <ApolloProvider client={apolloClient}>
+                        <S3Provider client={s3Client}>
+                            <AuthProvider authMode={authMode}>
+                                <PageProvider>
+                                    <>
+                                        <AppBody authMode={authMode} />
+                                    </>
+                                </PageProvider>
+                            </AuthProvider>
+                        </S3Provider>
+                    </ApolloProvider>
+                </TraceProvider>
             </BrowserRouter>
         </ErrorBoundary>
     )
