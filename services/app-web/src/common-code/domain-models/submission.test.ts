@@ -5,9 +5,11 @@ import {
     mockMNState,
 } from '../../testHelpers/apolloHelpers'
 import {
+    generateRateName,
     hasValidSupportingDocumentCategories,
     StateSubmissionType,
     submissionName,
+    RateDataType,
 } from '.'
 import {
     hasValidContract,
@@ -359,4 +361,45 @@ describe('submission type assertions', () => {
 
         expect(submissionName(sub, programs)).toBe(expectedName)
     })
+
+    const rateNameTestArray: {
+        rateData: RateDataType
+        submissionName: string
+        expectedName: string
+    }[] = [
+        {
+            rateData: {
+                rateType: 'AMENDMENT',
+                rateDateStart: new Date('2021/05/21'),
+                rateDateEnd: new Date('2022/03/21'),
+                rateDateCertified: new Date('2021/04/23'),
+                rateAmendmentInfo: {
+                    effectiveDateStart: new Date('2022/05/21'),
+                    effectiveDateEnd: new Date('2022/09/21'),
+                },
+            },
+            submissionName: 'MN-TEST-NAME',
+            expectedName:
+                'MN-TEST-NAME-RATE-20220521-20220921-AMENDMENT-20210423',
+        },
+        {
+            rateData: {
+                rateType: 'NEW',
+                rateDateStart: new Date('2021/04/22'),
+                rateDateEnd: new Date('2022/03/29'),
+                rateDateCertified: new Date('2021/05/23'),
+            },
+            submissionName: 'OH-TEST-NAME',
+            expectedName:
+                'OH-TEST-NAME-RATE-20210422-20220329-CERTIFICATION-20210523',
+        },
+    ]
+    test.each(rateNameTestArray)(
+        'submission rate name is correct',
+        ({ rateData, submissionName, expectedName }) => {
+            expect(generateRateName(rateData, submissionName)).toMatch(
+                expectedName
+            )
+        }
+    )
 })
