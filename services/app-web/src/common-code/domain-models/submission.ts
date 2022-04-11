@@ -1,4 +1,4 @@
-import { DraftSubmissionType } from './DraftSubmissionType'
+import { DraftSubmissionType, RateDataType } from './DraftSubmissionType'
 import { ProgramT } from './ProgramT'
 import { StateSubmissionType } from './StateSubmissionType'
 import { SubmissionUnionType } from './SubmissionUnionType'
@@ -134,17 +134,6 @@ function submissionName(
         )
         .join('-')
     return `MCR-${submission.stateCode.toUpperCase()}-${formattedProgramNames}-${padNumber}`
-}
-
-type RateDataType = {
-    rateType?: 'AMENDMENT' | 'NEW' | null
-    rateDateStart?: Date
-    rateDateEnd?: Date
-    rateDateCertified?: Date
-    rateAmendmentInfo?: {
-        effectiveDateEnd?: Date
-        effectiveDateStart?: Date
-    } | null
 }
 
 const generateRateName = (
