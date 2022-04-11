@@ -6,7 +6,7 @@ import {
 } from '../../app-web/src/common-code/domain-models'
 import { formatCalendarDate } from '../../app-web/src/dateHelpers'
 import { EmailConfiguration, EmailData } from './'
-import { generateRateName } from '../../app-web/src/common-code/domain-models/submission'
+import { generateRateName } from '../../app-web/src/common-code/domain-models'
 
 const testEmailAlert = `<span style="color:#FF0000;font-weight:bold;">Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.</span>
 </br>
@@ -35,7 +35,7 @@ const stripHTMLFromTemplate = (template: string) => {
     return formatted.replace(/(<([^>]+)>)/gi, '')
 }
 
-const generateNewSubmissionData = (
+const generateNewSubmissionBody = (
     submission: StateSubmissionType,
     submissionName: string,
     config: EmailConfiguration
@@ -124,7 +124,7 @@ const newPackageCMSEmail = (
     }</b>.
             <br />
             <br />
-            ${generateNewSubmissionData(submission, submissionName, config)}
+            ${generateNewSubmissionBody(submission, submissionName, config)}
         `
     return {
         toAddresses: reviewerEmails,
@@ -152,7 +152,7 @@ const newPackageStateEmail = (
             <br /><br />
             ${submissionName} was successfully submitted.
             <br /><br />
-            ${generateNewSubmissionData(submission, submissionName, config)}
+            ${generateNewSubmissionBody(submission, submissionName, config)}
             <br /><br />
             If you need to make any changes, please contact CMS.
             <br /><br />
@@ -332,5 +332,4 @@ export {
     resubmittedStateEmail,
     resubmittedCMSEmail,
     UpdatedEmailData,
-    generateRateName,
 }
