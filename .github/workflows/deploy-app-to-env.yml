@@ -21,6 +21,8 @@ on:
         required: true
       iam_path:
         required: true
+      ld_sdk_key:
+        required: true
       full_iam_permissions_boundary_policy:
         required: true
       nr_license_key:
@@ -75,7 +77,7 @@ jobs:
       - name: Generate Code
         run: lerna run generate-code
 
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with:
           name: lambda-layers-prisma-client-migration
           path: ./services/app-api/lambda-layers-prisma-client-migration
@@ -102,6 +104,7 @@ jobs:
           SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.ses_source_email_address }}
           NR_LICENSE_KEY: ${{ secrets.nr_license_key}}
           REACT_APP_OTEL_COLLECTOR_URL: ${{ secrets.react_app_otel_collector_url }}
+          LD_SDK_KEY: ${{ secrets.ld_sdk_key }}
 
         run: |
           pushd services/app-api && npx serverless deploy --stage ${{ inputs.stage_name }}

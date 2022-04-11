@@ -179,7 +179,7 @@ jobs:
         working-directory: services/app-api
         run: ./scripts/prepare-prisma-layer.sh
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: lambda-layers-prisma-client-migration
           path: ./services/app-api/lambda-layers-prisma-client-migration
@@ -229,6 +229,7 @@ jobs:
       react_app_auth_mode: AWS_COGNITO
       react_app_otel_collector_url: ${{ secrets.REACT_APP_OTEL_COLLECTOR_URL }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
+      ld_sdk_key: ${{ secrets.DEV_LD_SDK_KEY }}
 
   finishing-prep:
     name: Finishing Prep
@@ -328,14 +329,14 @@ jobs:
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
 
       - name: Upload cypress screenshots
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v3
         if: failure() && steps.cypress.outcome == 'failure'
         with:
           name: cypress-screenshots
           path: tests/cypress/screenshots
 
       - name: Upload cypress video
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v3
         if: always() && steps.cypress.outcome != 'skipped'
         with:
           name: cypress-videos
