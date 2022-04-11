@@ -50,7 +50,10 @@ resources:
         WebsiteConfiguration:
           IndexDocument: index.html
           ErrorDocument: index.html
-      DeletionPolicy: Delete
+        BucketEncryption:
+          ServerSideEncryptionConfiguration:
+            - ServerSideEncryptionByDefault:
+                SSEAlgorithm: AES256
     BucketPolicy:
       Type: AWS::S3::BucketPolicy
       Properties:
@@ -59,11 +62,7 @@ resources:
           Statement:
             - Effect: Allow
               Action: 's3:GetObject'
-              Resource: !Join
-                - ''
-                - - 'arn:aws:s3:::'
-                  - !Ref S3Bucket
-                  - /*
+              Resource: !Sub ${S3Bucket.Arn}/*
               Principal:
                 CanonicalUser:
                   Fn::GetAtt:

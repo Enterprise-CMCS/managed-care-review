@@ -1,5 +1,6 @@
 import { ApolloServer } from 'apollo-server-lambda'
 import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
+import CREATE_SUBMISSION_2 from '../../app-graphql/src/mutations/createSubmission2.graphql'
 import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitDraftSubmission.graphql'
 import UNLOCK_STATE_SUBMISSION from '../../app-graphql/src/mutations/unlockStateSubmission.graphql'
 import UPDATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/updateDraftSubmission.graphql'
@@ -10,11 +11,12 @@ import { ProgramT } from '../../app-web/src/common-code/domain-models'
 import { Emailer, newLocalEmailer } from '../emailer'
 import {
     CreateDraftSubmissionInput,
+    CreateSubmission2Input,
     DraftSubmission,
     DraftSubmissionUpdates,
     StateSubmission,
     Submission2,
-    UpdateDraftSubmissionInput
+    UpdateDraftSubmissionInput,
 } from '../gen/gqlServer'
 import { Context } from '../handlers/apollo_gql'
 import { NewPostgresStore, Store } from '../postgres'
@@ -94,6 +96,33 @@ const createTestDraftSubmission = async (
     }
 
     return result.data.createDraftSubmission.draftSubmission
+}
+
+const createTestSubmission2 = async (
+    server: ApolloServer
+): Promise<Submission2> => {
+    const input: CreateSubmission2Input = {
+        programIDs: [defaultFloridaProgram().id],
+        submissionType: 'CONTRACT_ONLY' as const,
+        submissionDescription: 'A created submission',
+    }
+    const result = await server.executeOperation({
+        query: CREATE_SUBMISSION_2,
+        variables: { input },
+    })
+    if (result.errors) {
+        throw new Error(
+            `createTestDraftSubmission mutation failed with errors ${result.errors}`
+        )
+    }
+
+    if (!result.data) {
+        throw new Error('createTestDraftSubmission returned nothing')
+    }
+
+    console.log('GOT BACK DA', result.data)
+
+    return result.data.createSubmission2.submission
 }
 
 const updateTestDraftSubmission = async (
@@ -232,7 +261,7 @@ const resubmitTestDraftSubmission = async (
         variables: {
             input: {
                 submissionID,
-                submittedReason
+                submittedReason,
             },
         },
     })
@@ -254,14 +283,14 @@ const resubmitTestDraftSubmission = async (
 const unlockTestDraftSubmission = async (
     server: ApolloServer,
     submissionID: string,
-    unlockedReason: string,
+    unlockedReason: string
 ): Promise<Submission2> => {
     const updateResult = await server.executeOperation({
         query: UNLOCK_STATE_SUBMISSION,
         variables: {
             input: {
                 submissionID,
-                unlockedReason
+                unlockedReason,
             },
         },
     })
@@ -338,6 +367,7 @@ export {
     constructTestPostgresServer,
     createTestDraftSubmission,
     createTestStateSubmission,
+    createTestSubmission2,
     updateTestDraftSubmission,
     createAndUpdateTestDraftSubmission,
     fetchTestDraftSubmissionById,
@@ -345,6 +375,6 @@ export {
     unlockTestDraftSubmission,
     fetchTestStateSubmissionById,
     defaultContext,
-	defaultFloridaProgram,
-    resubmitTestDraftSubmission
+    defaultFloridaProgram,
+    resubmitTestDraftSubmission,
 }

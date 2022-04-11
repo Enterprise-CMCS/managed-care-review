@@ -4,7 +4,7 @@ import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import { DocumentDateLookupTable } from '../../../pages/SubmissionSummary/SubmissionSummary'
 import { useS3 } from '../../../contexts/S3Context'
-import { formatCalendarDate } from '../../../dateHelpers'
+import { formatCalendarDate, formatRateNameDate } from '../../../dateHelpers'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
@@ -34,6 +34,40 @@ export const RateDetailsSummarySection = ({
     const rateSupportingDocuments = submission.documents.filter((doc) =>
         doc.documentCategories.includes('RATES_RELATED')
     )
+
+    let rateName: string
+
+    const generateRateName = (
+        submissionName: string,
+        startDate: Date,
+        endDate: Date,
+        certDate: Date,
+        type: string
+    ): string => {
+        return `${submissionName}-RATE-${formatRateNameDate(
+            startDate
+        )}-${formatRateNameDate(endDate)}-${type}-${formatRateNameDate(
+            certDate
+        )}`
+    }
+
+    if (submission.rateType === 'AMENDMENT') {
+        rateName = generateRateName(
+            submission.name,
+            submission.rateAmendmentInfo?.effectiveDateStart,
+            submission.rateAmendmentInfo?.effectiveDateEnd,
+            submission.rateDateCertified,
+            'AMENDMENT'
+        )
+    } else {
+        rateName = generateRateName(
+            submission.name,
+            submission.rateDateStart,
+            submission.rateDateEnd,
+            submission.rateDateCertified,
+            'CERTIFICATION'
+        )
+    }
 
     useEffect(() => {
         // get all the keys for the documents we want to zip
@@ -74,6 +108,13 @@ export const RateDetailsSummarySection = ({
                         />
                     )}
                 </SectionHeader>
+
+                <h3
+                    aria-label={`Rate ID: ${rateName}`}
+                    className={styles.rateName}
+                >
+                    {rateName}
+                </h3>
 
                 <DoubleColumnGrid>
                     <DataDetail

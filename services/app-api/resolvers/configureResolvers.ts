@@ -3,6 +3,7 @@ import type { Emailer } from '../emailer'
 import { Resolvers } from '../gen/gqlServer'
 import type { Store } from '../postgres'
 import { createDraftSubmissionResolver } from './createDraftSubmission'
+import { createSubmission2Resolver } from './createSubmission2'
 import { draftSubmissionResolver } from './draftSubmissionResolver'
 import { fetchCurrentUserResolver } from './fetchCurrentUser'
 import { fetchDraftSubmissionResolver } from './fetchDraftSubmission'
@@ -15,6 +16,7 @@ import { submission2Resolver } from './submission2Resolver'
 import { submitDraftSubmissionResolver } from './submitDraftSubmission'
 import { unlockStateSubmissionResolver } from './unlockStateSubmission'
 import { updateDraftSubmissionResolver } from './updateDraftSubmission'
+import { updateHealthPlanFormDataResolver } from './updateHealthPlanFormData'
 import { stateUserResolver } from './userResolver'
 
 export function configureResolvers(store: Store, emailer: Emailer): Resolvers {
@@ -27,16 +29,21 @@ export function configureResolvers(store: Store, emailer: Emailer): Resolvers {
             fetchStateSubmission: fetchStateSubmissionResolver(store),
             fetchSubmission2: fetchSubmission2Resolver(store),
             indexSubmissions: indexSubmissionsResolver(store),
-            indexSubmissions2: indexSubmissions2Resolver(store)
+            indexSubmissions2: indexSubmissions2Resolver(store),
         },
         Mutation: {
             createDraftSubmission: createDraftSubmissionResolver(store),
+            createSubmission2: createSubmission2Resolver(store),
             updateDraftSubmission: updateDraftSubmissionResolver(store),
             submitDraftSubmission: submitDraftSubmissionResolver(
                 store,
                 emailer
             ),
-            unlockStateSubmission: unlockStateSubmissionResolver(store, emailer),
+            unlockStateSubmission: unlockStateSubmissionResolver(
+                store,
+                emailer
+            ),
+            updateHealthPlanFormData: updateHealthPlanFormDataResolver(store),
         },
         Submission: {
             // resolveType is required to differentiate Unions

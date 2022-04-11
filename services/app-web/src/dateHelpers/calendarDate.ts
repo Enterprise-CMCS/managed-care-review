@@ -6,6 +6,8 @@ function formatCalendarDate(date: Date): string {
     return dayjs(date).tz('UTC').format('MM/DD/YYYY')
 }
 
-export {
-    formatCalendarDate
+function formatRateNameDate(date: Date): string {
+    return dayjs(date).tz('UTC').format('YYYYMMDD')
 }
+
+export { formatCalendarDate, formatRateNameDate }

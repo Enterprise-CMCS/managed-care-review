@@ -171,9 +171,10 @@ const unlockPackageCMSEmail = (
     const bodyHTML = `
         ${testEmailAlert}
         <br /><br />
-        Submission ${unlockData.submissionName} was unlocked<br /><br />
-        <b>Unlocked by:</b> ${unlockData.updatedBy}<br /><br />
-        <b>Unlocked on:</b> ${formatCalendarDate(unlockData.updatedAt)}<br /><br />
+        Submission ${unlockData.submissionName} was unlocked<br />
+        <br />
+        <b>Unlocked by:</b> ${unlockData.updatedBy}<br />
+        <b>Unlocked on:</b> ${formatCalendarDate(unlockData.updatedAt)}<br />
         <b>Reason for unlock:</b> ${unlockData.updatedReason}<br /><br />
         You will receive another notification when the state resubmits.
     `
@@ -201,9 +202,10 @@ const unlockPackageStateEmail = (
     const bodyHTML = `
         ${testEmailAlert}
         <br /><br />
-        Submission ${unlockData.submissionName} was unlocked by CMS<br /><br /> 
-        <b>Unlocked by:</b> ${unlockData.updatedBy}<br /><br />
-        <b>Unlocked on:</b> ${formatCalendarDate(unlockData.updatedAt)}<br /><br />
+        Submission ${unlockData.submissionName} was unlocked by CMS<br />
+        <br />
+        <b>Unlocked by:</b> ${unlockData.updatedBy}<br />
+        <b>Unlocked on:</b> ${formatCalendarDate(unlockData.updatedAt)}<br />
         <b>Reason for unlock:</b> ${unlockData.updatedReason}<br /><br />
         <a href="${submissionURL}">Open the submission in MC-Review to make edits.</a>
     `

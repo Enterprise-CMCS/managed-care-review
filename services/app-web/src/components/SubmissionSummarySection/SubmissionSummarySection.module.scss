@@ -81,6 +81,16 @@
     }
 }
 
+.rateName {
+    display: block;
+    margin-block-start: 1.33em;
+    margin-block-end: 1.33em;
+    margin-inline-start: 0;
+    margin-inline-end: 0;
+    font-weight: bold;
+    font-size: 16px;
+}
+
 @media print {
     header,
     footer,

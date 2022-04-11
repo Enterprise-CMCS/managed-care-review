@@ -34,39 +34,42 @@ async function sharedTestPrismaClient(): Promise<PrismaClient> {
 function mockStoreThatErrors(): Store {
     const genericStoreError: StoreError = {
         code: 'UNEXPECTED_EXCEPTION',
-        message: 'this error came from the generic store with errors mock'
+        message: 'this error came from the generic store with errors mock',
     }
 
     return {
-        findAllSubmissions: async (stateCode) => {
+        findAllSubmissions: async (_stateCode) => {
             return genericStoreError
         },
-        findAllSubmissionsWithRevisions: async (stateCode) => {
+        findAllSubmissionsWithRevisions: async (_stateCode) => {
             return genericStoreError
         },
-        insertDraftSubmission: async (args) => {
+        insertDraftSubmission: async (_args) => {
             return genericStoreError
         },
-        findDraftSubmission: async (draftUUID) => {
+        findDraftSubmission: async (_draftUUID) => {
             return genericStoreError
         },
-        findSubmissionWithRevisions: async (draftUUID) => {
+        findSubmissionWithRevisions: async (_draftUUID) => {
             return genericStoreError
         },
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         findDraftSubmissionByStateNumber: async (_stateCode, _stateNumber) => {
             throw new Error('UNIMPLEMENTED')
         },
-        updateDraftSubmission: async (draftSubmission) => {
+        updateDraftSubmission: async (_draftSubmission) => {
             return genericStoreError
         },
-        updateStateSubmission: async (submission) => {
+        updateStateSubmission: async (_submission) => {
             return genericStoreError
         },
-        findStateSubmission: async (submissionID) => {
+        findStateSubmission: async (_submissionID) => {
             return genericStoreError
         },
-        insertNewRevision: async (submissionID, draft) => {
+        insertNewRevision: async (_submissionID, _draft) => {
+            return genericStoreError
+        },
+        updateFormData: async (_submissionID, _formData) => {
             return genericStoreError
         },
         findPrograms: () => {

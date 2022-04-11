@@ -403,6 +403,9 @@ export const SubmissionSummary = (): React.ReactElement => {
                         ) : undefined
                     }
                     statePrograms={statePrograms}
+                    intiallySubmittedAt={
+                        submissionAndRevisions.intiallySubmittedAt
+                    }
                 />
                 <ContractDetailsSummarySection
                     submission={submission}
