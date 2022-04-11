@@ -39,6 +39,7 @@ export {
     isStateSubmission,
     programNames,
     submissionName,
+    generateRateName,
 } from './submission'
 export {
     submissionCurrentRevision,
