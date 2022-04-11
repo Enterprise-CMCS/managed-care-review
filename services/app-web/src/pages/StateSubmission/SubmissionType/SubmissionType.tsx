@@ -240,7 +240,7 @@ export const SubmissionType = ({
                             <FormGroup
                                 error={showFieldErrors(errors.programIDs)}
                             >
-                                <Label htmlFor="programIDs">Program(s)</Label>
+                                <Label htmlFor="programIDs">Programs</Label>
                                 {showFieldErrors(errors.programIDs) && (
                                     <PoliteErrorMessage>
                                         {errors.programIDs}
@@ -300,7 +300,7 @@ export const SubmissionType = ({
                                     className={styles.radioGroup}
                                     role="radiogroup"
                                     aria-required
-                                    legend="Choose submission type"
+                                    legend="Submission type"
                                 >
                                     {showFieldErrors(errors.submissionType) && (
                                         <PoliteErrorMessage>
