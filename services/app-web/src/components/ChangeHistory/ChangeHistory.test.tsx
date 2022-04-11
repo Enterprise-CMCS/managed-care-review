@@ -7,9 +7,14 @@ const submissionData: Submission2 = {
     id: '440d6a53-bb0a-49ae-9a9c-da7c5352789f',
     stateCode: 'MN',
     state: {
-        name: 'Minnesota',
         code: 'MN',
-        programs: [],
+        name: 'Minnesota',
+        programs: [
+            {
+                id: 'd95394e5-44d1-45df-8151-1cc1ee66f100',
+                name: 'PMAP',
+            },
+        ],
     },
     status: 'RESUBMITTED',
     intiallySubmittedAt: '2022-03-23',
@@ -79,6 +84,14 @@ const submissionData: Submission2 = {
 const submissionDataInitialSubmission: Submission2 = {
     id: '440d6a53-bb0a-49ae-9a9c-da7c5352789f',
     stateCode: 'MN',
+    state: {
+        code: 'MN',
+        name: 'Minnesota',
+        programs: [{ 
+        "id": "d95394e5-44d1-45df-8151-1cc1ee66f100",
+          "name": "PMAP"
+        }]
+    },
     status: 'RESUBMITTED',
     intiallySubmittedAt: '2022-03-23',
     revisions: [
