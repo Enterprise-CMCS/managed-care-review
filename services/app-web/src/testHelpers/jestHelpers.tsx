@@ -1,6 +1,6 @@
 import { MockedProvider, MockedProviderProps } from '@apollo/client/testing'
-import { Router, RouterProps } from 'react-router-dom'
-import { createMemoryHistory } from 'history'
+import { MemoryRouter } from 'react-router-dom'
+// import { createMemoryHistory, MemoryHistory } from 'history'
 import {
     fireEvent,
     render,
@@ -21,34 +21,29 @@ import { testS3Client } from './s3Helpers'
 const renderWithProviders = (
     ui: React.ReactNode,
     options?: {
-        routerProvider?: { route?: string; routerProps?: RouterProps }
+        routerProvider?: { route?: string;  }
         apolloProvider?: MockedProviderProps
         authProvider?: Partial<AuthProviderProps>
     }
 ) => {
     const {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         routerProvider = {},
         apolloProvider = {},
         authProvider = {},
     } = options || {}
 
-    const { route, routerProps } = routerProvider
-    const testHistory = routerProps?.history
-        ? routerProps.history
-        : createMemoryHistory()
+// TODO: add back routing with react-router upgrade
 
-    if (route) {
-        testHistory.push(route)
-    }
     return render(
         <MockedProvider {...apolloProvider}>
-            <Router history={testHistory}>
+            <MemoryRouter >
                 <AuthProvider authMode={'AWS_COGNITO'} {...authProvider}>
                     <S3Provider client={testS3Client}>
                         <PageProvider>{ui}</PageProvider>
                     </S3Provider>
                 </AuthProvider>
-            </Router>
+            </MemoryRouter>
         </MockedProvider>
     )
 }
