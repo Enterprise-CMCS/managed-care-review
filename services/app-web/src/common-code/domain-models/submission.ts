@@ -154,7 +154,7 @@ const generateRateName = (
             '-',
             formatRateNameDate(rateAmendmentInfo.effectiveDateStart)
         )
-    } else if (rateDateStart) {
+    } else if ((rateType === 'NEW' || !rateType) && rateDateStart) {
         rateName = rateName.concat('-', formatRateNameDate(rateDateStart))
     }
 
@@ -163,7 +163,7 @@ const generateRateName = (
             '-',
             formatRateNameDate(rateAmendmentInfo.effectiveDateEnd)
         )
-    } else if (rateDateEnd) {
+    } else if ((rateType === 'NEW' || !rateType) && rateDateEnd) {
         rateName = rateName.concat('-', formatRateNameDate(rateDateEnd))
     }
 
