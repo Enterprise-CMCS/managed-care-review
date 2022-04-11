@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer'
 import { submissionStatus, submissionSubmittedAt } from './submission2'
 import { Submission2Status, Submission2Type } from './Submission2Type'
 
@@ -100,7 +101,6 @@ describe('submission 2 helpers', () => {
             ],
         ]
 
-
         for (const test of tests) {
             const [sub, expectedStatus] = test
 
@@ -111,15 +111,16 @@ describe('submission 2 helpers', () => {
     })
 
     it('status returns an error with an invalid submission', () => {
-
         const tests: [Submission2Type, Error][] = [
-            [{
-                id: 'foo',
-                stateCode: 'FL' as const,
-                revisions: []
-            }, new Error('No revisions on this submission')],
+            [
+                {
+                    id: 'foo',
+                    stateCode: 'FL' as const,
+                    revisions: [],
+                },
+                new Error('No revisions on this submission'),
+            ],
         ]
-
 
         for (const test of tests) {
             const [sub, expectedError] = test
@@ -215,7 +216,6 @@ describe('submission 2 helpers', () => {
             ],
         ]
 
-
         for (const test of tests) {
             const [sub, expectedDate] = test
 
@@ -224,5 +224,4 @@ describe('submission 2 helpers', () => {
             expect(testDate).toEqual(expectedDate)
         }
     })
-
 })

@@ -1,5 +1,6 @@
-import { toDomain, toProtoBuffer } from ".";
-import { SubmissionUnionType } from "../../domain-models";
+import { Buffer } from 'buffer'
+import { toDomain, toProtoBuffer } from '.'
+import { SubmissionUnionType } from '../../domain-models'
 
 function domainToBase64(submission: SubmissionUnionType): string {
     const proto = toProtoBuffer(submission)
@@ -15,8 +16,4 @@ function base64ToDomain(input: string): SubmissionUnionType | Error {
     return toDomain(protoBinData)
 }
 
-export {
-    domainToBase64,
-    protoToBase64,
-    base64ToDomain,
-}
+export { domainToBase64, protoToBase64, base64ToDomain }
