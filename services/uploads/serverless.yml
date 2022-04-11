@@ -166,6 +166,16 @@ resources:
                 - !Sub ${DocumentUploadsBucket.Arn}/*.xls
                 - !Sub ${DocumentUploadsBucket.Arn}/*.xlsx
                 - !Sub ${DocumentUploadsBucket.Arn}/*.zip
+            - Effect: Deny
+              Action:
+                - 's3:GetObject'
+                - 's3:PutObject'
+              Principal: '*'
+              Condition:
+                Bool:
+                  'aws:SecureTransport': false
+              Resource: !Sub ${DocumentUploadsBucket.Arn}/*
+              Sid: DenyUnencryptedConnections
 
     LambdaInvokePermission:
       Type: AWS::Lambda::Permission
@@ -175,6 +185,7 @@ resources:
         Principal: s3.amazonaws.com
         SourceAccount: !Sub ${AWS::AccountId}
         SourceArn: !Sub arn:aws:s3:::${self:service.name}-${self:custom.stage}-uploads-${AWS::AccountId}
+
     ClamDefsBucket:
       Type: AWS::S3::Bucket
       Properties:
@@ -184,6 +195,22 @@ resources:
             - ServerSideEncryptionByDefault:
                 SSEAlgorithm: AES256
         AccessControl: Private
+    ClamsDefsBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref ClamDefsBucket
+        PolicyDocument:
+          Statement:
+            - Effect: Deny
+              Action:
+                - 's3:GetObject'
+                - 's3:PutObject'
+              Principal: '*'
+              Condition:
+                Bool:
+                  'aws:SecureTransport': false
+              Resource: !Sub ${ClamDefsBucket.Arn}/*
+              Sid: DenyUnencryptedConnections
 
   Outputs:
     DocumentUploadsBucketName:
