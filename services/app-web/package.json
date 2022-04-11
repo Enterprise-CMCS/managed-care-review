@@ -106,11 +106,13 @@
         "zod": "^3.10.1"
     },
     "devDependencies": {
-        "@storybook/addon-a11y": "^6.4.8",
-        "@storybook/addon-essentials": "^6.4.8",
-        "@storybook/addon-links": "^6.4.8",
+        "@storybook/addon-a11y": "^6.4.21",
+        "@storybook/addon-essentials": "^6.4.21",
+        "@storybook/addon-links": "^6.4.21",
+        "@storybook/builder-webpack5": "^6.4.21",
+        "@storybook/manager-webpack5": "^6.4.21",
         "@storybook/preset-create-react-app": "4.1.0",
-        "@storybook/react": "^6.4.20",
+        "@storybook/react": "^6.4.21",
         "@testing-library/cypress": "^8.0.1",
         "@testing-library/jest-dom": "^5.11.4",
         "@testing-library/react": "^12.1.2",
@@ -139,7 +141,7 @@
         "serverless-plugin-scripts": "^1.0.2",
         "serverless-s3-sync": "^2.0.0",
         "serverless-stack-termination-protection": "^1.0.4",
-        "webpack": "4.44.2"
+        "webpack": "5"
     },
     "resolutions": {
         "react-router": "5.2.1",
