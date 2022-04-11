@@ -462,7 +462,7 @@ describe('submission type assertions', () => {
                 },
             },
             submissionName: 'MN-NO-TYPE',
-            expectedName: 'MN-NO-TYPE-RATE-20220521-20220921-20210523',
+            expectedName: 'MN-NO-TYPE-RATE-20210422-20220329-20210523',
         },
     ]
     test.each(rateNameTestArray)(
