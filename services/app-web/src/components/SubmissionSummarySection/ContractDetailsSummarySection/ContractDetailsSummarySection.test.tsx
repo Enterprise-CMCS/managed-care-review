@@ -5,9 +5,8 @@ import {
     mockContractAndRatesDraft,
     mockStateSubmission,
 } from '../../../testHelpers/apolloHelpers'
-// // import { createMemoryHistory } from 'history'
-// import { Route } from 'react-router'
-// import { RoutesRecord } from '../../../constants/routes'
+import { Route } from 'react-router'
+import { RoutesRecord } from '../../../constants/routes'
 
 describe('ContractDetailsSummarySection', () => {
     const draftContractAndRatesSubmission = mockContractAndRatesDraft()
@@ -253,29 +252,26 @@ describe('ContractDetailsSummarySection', () => {
         ).toBeNull()
     })
 
-    // TODO: react-router upgrade
-    // it('does not render download all button when on previous submission', () => {
-    //     const history = createMemoryHistory()
-    //     renderWithProviders(
-    //         <Route
-    //             path={RoutesRecord.SUBMISSIONS_REVISION}
-    //             component={() => (
-    //                 <ContractDetailsSummarySection
-    //                     submission={draftContractAndRatesSubmission}
-    //                 />
-    //             )}
-    //         />,
-    //         {
-    //             routerProvider: {
-    //                 route: '/submissions/15/revisions/2',
-    //                 routerProps: { history: history },
-    //             },
-    //         }
-    //     )
-    //     expect(
-    //         screen.queryByRole('button', {
-    //             name: 'Download all contract documents',
-    //         })
-    //     ).toBeNull()
-    // })
+    it('does not render download all button when on previous submission', () => {
+        renderWithProviders(
+            <Route
+                path={RoutesRecord.SUBMISSIONS_REVISION}
+                component={() => (
+                    <ContractDetailsSummarySection
+                        submission={draftContractAndRatesSubmission}
+                    />
+                )}
+            />,
+            {
+                routerProvider: {
+                    route: '/submissions/15/revisions/2',
+                },
+            }
+        )
+        expect(
+            screen.queryByRole('button', {
+                name: 'Download all contract documents',
+            })
+        ).toBeNull()
+    })
 })

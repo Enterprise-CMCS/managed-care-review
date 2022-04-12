@@ -1,5 +1,6 @@
 import { screen, waitFor } from '@testing-library/react'
-// import { createMemoryHistory } from 'history'
+import { Route } from 'react-router-dom'
+import { Location } from 'history'
 import {
     fetchCurrentUserMock,
     mockCompleteDraft,
@@ -195,53 +196,58 @@ describe('ReviewSubmit', () => {
         })
     })
 
-    // TODO: react-router upgrade
-    // it('redirects if submission succeeds', async () => {
-    //     const history = createMemoryHistory()
+    it('redirects if submission succeeds', async () => {
+        let testLocation: Location
 
-    //     renderWithProviders(
-    //         <ReviewSubmit
-    //             draftSubmission={mockCompleteDraft()}
-    //             unlocked={false}
-    //         />,
-    //         {
-    //             apolloProvider: {
-    //                 mocks: [
-    //                     fetchCurrentUserMock({ statusCode: 200 }),
-    //                     submitDraftSubmissionMockSuccess({
-    //                         id: mockCompleteDraft().id,
-    //                     }),
-    //                 ],
-    //             },
-    //             routerProvider: {
-    //                 route: `draftSubmission/${
-    //                     mockCompleteDraft().id
-    //                 }/review-and-submit`,
-    //                 routerProps: {
-    //                     history,
-    //                 },
-    //             },
-    //         }
-    //     )
+        renderWithProviders(
+            <>
+                <Route
+                    path="*"
+                    render={({ location }) => {
+                        testLocation = location as Location
+                        return null
+                    }}
+                />
+                <ReviewSubmit
+                    draftSubmission={mockCompleteDraft()}
+                    unlocked={false}
+                />
+            </>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        submitDraftSubmissionMockSuccess({
+                            id: mockCompleteDraft().id,
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: `draftSubmission/${
+                        mockCompleteDraft().id
+                    }/review-and-submit`,
+                },
+            }
+        )
 
-    //     const submit = screen.getByTestId('review-and-submit-modal-submit')
-    //     submit.click()
+        const submit = screen.getByTestId('review-and-submit-modal-submit')
+        submit.click()
 
-    //     await waitFor(() => {
-    //         const confirmSubmit = screen.getByTestId(
-    //             'review-and-submit-modal-submit'
-    //         )
-    //         expect(confirmSubmit).toBeInTheDocument()
-    //         confirmSubmit.click()
-    //     })
+        await waitFor(() => {
+            const confirmSubmit = screen.getByTestId(
+                'review-and-submit-modal-submit'
+            )
+            expect(confirmSubmit).toBeInTheDocument()
+            confirmSubmit.click()
+        })
 
-    //     await waitFor(() => {
-    //         expect(history.location.pathname).toBe(`/dashboard`)
-    //         expect(history.location.search).toBe(
-    //             `?justSubmitted=${mockCompleteDraft().name}`
-    //         )
-    //     })
-    // })
+        await waitFor(() => {
+            expect(testLocation.pathname).toBe(`/dashboard`)
+            expect(testLocation.search).toBe(
+                `?justSubmitted=${mockCompleteDraft().name}`
+            )
+        })
+    })
 
     it('displays an error if submission fails', async () => {
         renderWithProviders(
@@ -321,56 +327,61 @@ describe('Resubmitting plan packages', () => {
         })
     })
 
-    // TODO: react-router upgrade
-    // it('redirects if submission succeeds on unlocked plan package', async () => {
-    //     const history = createMemoryHistory()
+    it('redirects if submission succeeds on unlocked plan package', async () => {
+        let testLocation: Location
 
-    //     renderWithProviders(
-    //         <ReviewSubmit
-    //             draftSubmission={mockCompleteDraft()}
-    //             unlocked={true}
-    //         />,
-    //         {
-    //             apolloProvider: {
-    //                 mocks: [
-    //                     fetchCurrentUserMock({ statusCode: 200 }),
-    //                     submitDraftSubmissionMockSuccess({
-    //                         id: mockCompleteDraft().id,
-    //                         submittedReason: 'Test submission summary',
-    //                     }),
-    //                 ],
-    //             },
-    //             routerProvider: {
-    //                 route: `draftSubmission/${
-    //                     mockCompleteDraft().id
-    //                 }/review-and-submit`,
-    //                 routerProps: {
-    //                     history,
-    //                 },
-    //             },
-    //         }
-    //     )
-    //     screen.getByTestId('form-submit').click()
+        renderWithProviders(
+            <>
+                <Route
+                    path="*"
+                    render={({ location }) => {
+                        testLocation = location as Location
+                        return null
+                    }}
+                />
+                <ReviewSubmit
+                    draftSubmission={mockCompleteDraft()}
+                    unlocked={true}
+                />
+            </>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        submitDraftSubmissionMockSuccess({
+                            id: mockCompleteDraft().id,
+                            submittedReason: 'Test submission summary',
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: `draftSubmission/${
+                        mockCompleteDraft().id
+                    }/review-and-submit`,
+                },
+            }
+        )
+        screen.getByTestId('form-submit').click()
 
-    //     userEvent.type(
-    //         screen.getByTestId('submittedReason'),
-    //         'Test submission summary'
-    //     )
+        userEvent.type(
+            screen.getByTestId('submittedReason'),
+            'Test submission summary'
+        )
 
-    //     screen.getByTestId('review-and-submit-modal-submit').click()
+        screen.getByTestId('review-and-submit-modal-submit').click()
 
-    //     // the popup dialog should be hidden again
-    //     await waitFor(() => {
-    //         expect(screen.getByRole('dialog')).toHaveClass('is-hidden')
-    //     })
+        // the popup dialog should be hidden again
+        await waitFor(() => {
+            expect(screen.getByRole('dialog')).toHaveClass('is-hidden')
+        })
 
-    //     await waitFor(() => {
-    //         expect(history.location.pathname).toBe(`/dashboard`)
-    //         expect(history.location.search).toBe(
-    //             `?justSubmitted=${mockCompleteDraft().name}`
-    //         )
-    //     })
-    // })
+        await waitFor(() => {
+            expect(testLocation.pathname).toBe('/dashboard')
+            expect(testLocation.search).toBe(
+                `?justSubmitted=${mockCompleteDraft().name}`
+            )
+        })
+    })
 
     it('displays an error if submission fails on unlocked plan package', async () => {
         renderWithProviders(

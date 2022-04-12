@@ -376,6 +376,7 @@ describe('StateSubmissionForm', () => {
             const loading = await screen.findByText('System error')
             expect(loading).toBeInTheDocument()
         })
+
         it('shows a generic error fetching submission fails at contract details', async () => {
             renderWithProviders(
                 <Route

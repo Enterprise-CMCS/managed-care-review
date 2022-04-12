@@ -1,5 +1,4 @@
 import userEvent from '@testing-library/user-event'
-// import { createMemoryHistory } from 'history'
 import { screen, waitFor } from '@testing-library/react'
 import selectEvent from 'react-select-event'
 import { fetchCurrentUserMock } from '../../../testHelpers/apolloHelpers'
@@ -39,25 +38,22 @@ describe('SubmissionType', () => {
         )
     })
 
-    // TODO: react-router upgrade
-    // it('displays new submission form when expected', async () => {
-    //     const history = createMemoryHistory()
-    //     renderWithProviders(<SubmissionType />, {
-    //         apolloProvider: {
-    //             mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-    //         },
-    //         routerProvider: {
-    //             route: '/submissions/new',
-    //             routerProps: { history: history },
-    //         },
-    //     })
+    it('displays new submission form when expected', async () => {
+        renderWithProviders(<SubmissionType />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+            routerProvider: {
+                route: '/submissions/new',
+            },
+        })
 
-    //     await waitFor(() =>
-    //         expect(
-    //             screen.getByRole('form', { name: 'New Submission Form' })
-    //         ).toBeInTheDocument()
-    //     )
-    // })
+        await waitFor(() =>
+            expect(
+                screen.getByRole('form', { name: 'New Submission Form' })
+            ).toBeInTheDocument()
+        )
+    })
 
     it('displays with draft submission when expected', async () => {
         renderWithProviders(
