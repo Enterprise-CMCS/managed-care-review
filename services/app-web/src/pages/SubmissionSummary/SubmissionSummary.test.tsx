@@ -9,8 +9,8 @@ import {
     fetchStateHealthPlanPackageMockSuccess,
     mockUnlockedHealthPlanPackage,
     mockValidCMSUser,
-    unlockStateSubmissionMockError,
-    unlockStateSubmissionMockSuccess,
+    unlockHealthPlanPackageMockError,
+    unlockHealthPlanPackageMockSuccess,
     mockSubmittedHealthPlanPackageWithRevision,
 } from '../../testHelpers/apolloHelpers'
 import {
@@ -188,7 +188,7 @@ describe('SubmissionSummary', () => {
                             fetchStateHealthPlanPackageMockSuccess({
                                 id: '15',
                             }),
-                            unlockStateSubmissionMockSuccess({
+                            unlockHealthPlanPackageMockSuccess({
                                 id: '15',
                                 reason: 'Test unlock reason',
                             }),
@@ -357,7 +357,7 @@ describe('SubmissionSummary', () => {
                             fetchStateHealthPlanPackageMockSuccess({
                                 id: '15',
                             }),
-                            unlockStateSubmissionMockError({
+                            unlockHealthPlanPackageMockError({
                                 id: '15',
                                 reason: 'Test unlock reason',
                             }),
@@ -415,7 +415,7 @@ describe('SubmissionSummary', () => {
                             fetchStateHealthPlanPackageMockSuccess({
                                 id: '15',
                             }),
-                            unlockStateSubmissionMockSuccess({
+                            unlockHealthPlanPackageMockSuccess({
                                 id: '15',
                                 reason: 'Test unlock reason',
                             }),
@@ -464,7 +464,7 @@ describe('SubmissionSummary', () => {
                             fetchStateHealthPlanPackageMockSuccess({
                                 id: '15',
                             }),
-                            unlockStateSubmissionMockSuccess({
+                            unlockHealthPlanPackageMockSuccess({
                                 id: '15',
                                 reason: 'Test Reason',
                             }),
@@ -522,7 +522,7 @@ describe('SubmissionSummary', () => {
                             fetchStateHealthPlanPackageMockSuccess({
                                 id: '15',
                             }),
-                            unlockStateSubmissionMockSuccess({
+                            unlockHealthPlanPackageMockSuccess({
                                 id: '15',
                                 reason: 'Test Reason',
                             }),

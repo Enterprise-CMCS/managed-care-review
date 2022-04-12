@@ -25,6 +25,10 @@ import {
     UnlockHealthPlanPackageDocument,
     UpdateDraftSubmissionDocument,
     User as UserType,
+    UnlockHealthPlanPackageMutation,
+    SubmitHealthPlanPackageMutation,
+    IndexHealthPlanPackagesQuery,
+    FetchHealthPlanPackageQuery,
 } from '../gen/gqlClient'
 
 /* For use with Apollo MockedProvider in jest tests */
@@ -570,7 +574,7 @@ const createDraftSubmissionMock = ({
 }
 
 type fetchHealthPlanPackageMockProps = {
-    submission?: HealthPlanPackage | Partial<HealthPlanPackage>
+    submission?: HealthPlanPackage
     id: string
     statusCode: 200 | 403 | 500
 }
@@ -579,7 +583,7 @@ const fetchHealthPlanPackageMock = ({
     submission = mockDraftHealthPlanPackage(),
     id,
     statusCode, // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}: fetchHealthPlanPackageMockProps): MockedResponse<Record<string, any>> => {
+}: fetchHealthPlanPackageMockProps): MockedResponse<FetchHealthPlanPackageQuery> => {
     // override the ID of the returned draft to match the queried id.
     const mergedDraftSubmission = Object.assign({}, submission, { id })
 
@@ -588,12 +592,12 @@ const fetchHealthPlanPackageMock = ({
             return {
                 request: {
                     query: FetchHealthPlanPackageDocument,
-                    variables: { input: { submissionID: id } },
+                    variables: { input: { pkgID: id } },
                 },
                 result: {
                     data: {
                         fetchHealthPlanPackage: {
-                            submission: mergedDraftSubmission,
+                            pkg: mergedDraftSubmission,
                         },
                     },
                 },
@@ -635,12 +639,12 @@ const fetchStateHealthPlanPackageMockSuccess = ({
     return {
         request: {
             query: FetchHealthPlanPackageDocument,
-            variables: { input: { submissionID: id } },
+            variables: { input: { pkgID: id } },
         },
         result: {
             data: {
                 fetchHealthPlanPackage: {
-                    submission: mergedStateSubmission,
+                    pkg: mergedStateSubmission,
                 },
             },
         },
@@ -813,35 +817,32 @@ const updateDraftSubmissionMock = ({
     }
 }
 
-type submitDraftSubmissionMockSuccessProps = {
-    stateSubmission?: StateSubmission | Partial<StateSubmission>
+type submitHealthPlanPackageMockSuccessProps = {
+    stateSubmission?: HealthPlanPackage
     id: string
     submittedReason?: string
 }
 
-const submitDraftSubmissionMockSuccess = ({
+const submitHealthPlanPackageMockSuccess = ({
     stateSubmission,
     id,
     submittedReason,
-}: submitDraftSubmissionMockSuccessProps): MockedResponse<
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Record<string, any>
-> => {
-    const submission = stateSubmission ?? mockDraft()
+}: submitHealthPlanPackageMockSuccessProps): MockedResponse<SubmitHealthPlanPackageMutation> => {
+    const pkg = stateSubmission ?? mockDraftHealthPlanPackage()
     return {
         request: {
             query: SubmitHealthPlanPackageDocument,
-            variables: { input: { submissionID: id, submittedReason } },
+            variables: { input: { pkgID: id, submittedReason } },
         },
-        result: { data: { submitDraftSubmission: { submission: submission } } },
+        result: { data: { submitHealthPlanPackage: { pkg } } },
     }
 }
 
-const submitDraftSubmissionMockError = ({
+const submitHealthPlanPackageMockError = ({
     id,
 }: {
-    id: string // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}): MockedResponse<Record<string, any>> => {
+    id: string
+}): MockedResponse<SubmitHealthPlanPackageMutation> => {
     return {
         request: {
             query: SubmitHealthPlanPackageDocument,
@@ -855,41 +856,37 @@ const submitDraftSubmissionMockError = ({
     }
 }
 
-type unlockStateSubmissionMockSuccessProps = {
-    submission?: HealthPlanPackage | Partial<HealthPlanPackage>
+type unlockHealthPlanPackageMockSuccessProps = {
+    pkg?: HealthPlanPackage
     id: string
     reason: string
 }
 
-const unlockStateSubmissionMockSuccess = ({
-    submission = mockUnlockedHealthPlanPackage(),
+const unlockHealthPlanPackageMockSuccess = ({
+    pkg = mockUnlockedHealthPlanPackage(),
     id,
     reason,
-}: unlockStateSubmissionMockSuccessProps): MockedResponse<
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Record<string, any>
-> => {
+}: unlockHealthPlanPackageMockSuccessProps): MockedResponse<UnlockHealthPlanPackageMutation> => {
     return {
         request: {
             query: UnlockHealthPlanPackageDocument,
-            variables: { input: { submissionID: id, unlockedReason: reason } },
+            variables: { input: { pkgID: id, unlockedReason: reason } },
         },
-        result: { data: { unlockStateSubmission: { submission } } },
+        result: { data: { unlockHealthPlanPackage: { pkg } } },
     }
 }
 
-const unlockStateSubmissionMockError = ({
+const unlockHealthPlanPackageMockError = ({
     id,
     reason,
 }: {
     id: string
     reason: string
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}): MockedResponse<Record<string, any>> => {
+}): MockedResponse<UnlockHealthPlanPackageMutation> => {
     return {
         request: {
             query: UnlockHealthPlanPackageDocument,
-            variables: { input: { submissionID: id, unlockedReason: reason } },
+            variables: { input: { pkgID: id, unlockedReason: reason } },
         },
         result: {
             errors: [
@@ -929,8 +926,7 @@ const indexHealthPlanPackagesMockSuccess = (
         mockUnlockedHealthPlanPackage(),
         mockSubmittedHealthPlanPackage(),
     ]
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): MockedResponse<Record<string, any>> => {
+): MockedResponse<IndexHealthPlanPackagesQuery> => {
     const submissionEdges = submissions.map((sub) => {
         return {
             node: sub,
@@ -959,11 +955,11 @@ export {
     fetchStateSubmissionMock,
     fetchStateHealthPlanPackageMockSuccess,
     updateDraftSubmissionMock,
-    submitDraftSubmissionMockSuccess,
-    submitDraftSubmissionMockError,
+    submitHealthPlanPackageMockSuccess,
+    submitHealthPlanPackageMockError,
     indexSubmissionsMockSuccess,
     indexHealthPlanPackagesMockSuccess,
-    unlockStateSubmissionMockSuccess,
-    unlockStateSubmissionMockError,
+    unlockHealthPlanPackageMockSuccess,
+    unlockHealthPlanPackageMockError,
     mockSubmittedHealthPlanPackageWithRevision,
 }
