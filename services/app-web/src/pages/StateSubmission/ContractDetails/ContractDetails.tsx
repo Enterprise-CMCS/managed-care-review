@@ -50,7 +50,7 @@ import {
     RateChangeReasonRecord,
     ManagedCareEntityRecord,
     FederalAuthorityRecord,
-} from '../../../constants/submissions'
+} from '../../../constants/healthPlanPackages'
 import { PageActions } from '../PageActions'
 
 function formattedDatePlusOneDay(initialValue: string): string {

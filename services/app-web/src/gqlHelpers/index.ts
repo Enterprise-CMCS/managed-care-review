@@ -3,7 +3,7 @@ import { DraftSubmission, StateSubmission } from '../gen/gqlClient'
 import {
     getCurrentRevisionFromHealthPlanPackage,
     convertDomainModelFormDataToGQLSubmission,
-} from './submissionWithRevisions'
+} from './healthPlanPackages'
 const isStateSubmission = (
     submission: DraftSubmission | StateSubmission
 ): submission is StateSubmission => {

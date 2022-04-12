@@ -10,7 +10,7 @@ import {
 } from '../../common-code/domain-models'
 import { base64ToDomain } from '../../common-code/proto/stateSubmission'
 import { Loading } from '../../components/Loading'
-import { SubmissionStatusRecord } from '../../constants/submissions'
+import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
 import { useAuth } from '../../contexts/AuthContext'
 import {
     SubmissionType as GQLSubmissionType,

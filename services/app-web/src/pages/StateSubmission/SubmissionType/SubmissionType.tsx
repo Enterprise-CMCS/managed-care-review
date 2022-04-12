@@ -16,7 +16,7 @@ import {
     FieldTextarea,
     PoliteErrorMessage,
 } from '../../../components'
-import { SubmissionTypeRecord } from '../../../constants/submissions'
+import { SubmissionTypeRecord } from '../../../constants/healthPlanPackages'
 import { useAuth } from '../../../contexts/AuthContext'
 import {
     CreateDraftSubmissionInput,
