@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route } from 'react-router'
-import { basicStateSubmission } from '../../common-code/domain-mocks'
+import { basicLockedHealthPlanFormData } from '../../common-code/domain-mocks'
 import { domainToBase64 } from '../../common-code/proto/stateSubmission'
 import { RoutesRecord } from '../../constants/routes'
 import {
@@ -93,8 +93,8 @@ describe('SubmissionSummary', () => {
         it('renders the OLD data for an unlocked submission for CMS user, ignoring unsubmitted changes from state user', async () => {
             const submission2 = mockUnlockedSubmission2()
 
-            const oldPackageData = basicStateSubmission()
-            const newPackageData = basicStateSubmission()
+            const oldPackageData = basicLockedHealthPlanFormData()
+            const newPackageData = basicLockedHealthPlanFormData()
 
             oldPackageData.submissionDescription = 'OLD_DESCRIPTION'
             newPackageData.submissionDescription = 'NEW_DESCRIPTION'

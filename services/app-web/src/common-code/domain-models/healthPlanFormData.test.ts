@@ -6,7 +6,7 @@ import {
 } from '../../testHelpers/apolloHelpers'
 import {
     hasValidSupportingDocumentCategories,
-    StateSubmissionType,
+    LockedHealthPlanFormDataType,
     submissionName,
 } from '.'
 import {
@@ -15,10 +15,10 @@ import {
     hasValidRates,
     isContractOnly,
     isContractAndRates,
-    isStateSubmission,
-    isDraftSubmission,
+    isLockedHealthPlanFormData,
+    isUnlockedHealthPlanFormData,
 } from './'
-import { basicSubmission } from '../domain-mocks'
+import { basicHealthPlanFormData } from '../domain-mocks'
 
 describe('submission type assertions', () => {
     test.each([
@@ -37,7 +37,9 @@ describe('submission type assertions', () => {
         (submission, expectedResponse) => {
             // type coercion to allow us to test
             expect(
-                hasValidContract(submission as unknown as StateSubmissionType)
+                hasValidContract(
+                    submission as unknown as LockedHealthPlanFormDataType
+                )
             ).toEqual(expectedResponse)
         }
     )
@@ -143,7 +145,7 @@ describe('submission type assertions', () => {
             // type coercion to allow us to test
             expect(
                 hasValidSupportingDocumentCategories(
-                    submission as unknown as StateSubmissionType
+                    submission as unknown as LockedHealthPlanFormDataType
                 )
             ).toEqual(expectedResponse)
         }
@@ -174,7 +176,9 @@ describe('submission type assertions', () => {
         (submission, expectedResponse) => {
             // type coercion to allow us to test
             expect(
-                hasValidDocuments(submission as unknown as StateSubmissionType)
+                hasValidDocuments(
+                    submission as unknown as LockedHealthPlanFormDataType
+                )
             ).toEqual(expectedResponse)
         }
     )
@@ -231,7 +235,9 @@ describe('submission type assertions', () => {
         (submission, expectedResponse) => {
             // type coercion to allow us to test
             expect(
-                hasValidRates(submission as unknown as StateSubmissionType)
+                hasValidRates(
+                    submission as unknown as LockedHealthPlanFormDataType
+                )
             ).toEqual(expectedResponse)
         }
     )
@@ -250,7 +256,9 @@ describe('submission type assertions', () => {
         (submission, expectedResponse) => {
             // type coercion to allow us to test
             expect(
-                isContractOnly(submission as unknown as StateSubmissionType)
+                isContractOnly(
+                    submission as unknown as LockedHealthPlanFormDataType
+                )
             ).toEqual(expectedResponse)
         }
     )
@@ -272,7 +280,9 @@ describe('submission type assertions', () => {
         (submission, expectedResponse) => {
             // type coercion to allow us to test
             expect(
-                isContractAndRates(submission as unknown as StateSubmissionType)
+                isContractAndRates(
+                    submission as unknown as LockedHealthPlanFormDataType
+                )
             ).toEqual(expectedResponse)
         }
     )
@@ -285,7 +295,9 @@ describe('submission type assertions', () => {
         'isDraftSubmission evaluates as expected',
         (submission, expectedResponse) => {
             // type coercion to allow us to test
-            expect(isDraftSubmission(submission)).toEqual(expectedResponse)
+            expect(isUnlockedHealthPlanFormData(submission)).toEqual(
+                expectedResponse
+            )
         }
     )
 
@@ -319,7 +331,9 @@ describe('submission type assertions', () => {
         'isStateSubmission evaluates as expected',
         (submission, expectedResponse) => {
             // type coercion to allow us to test
-            expect(isStateSubmission(submission)).toEqual(expectedResponse)
+            expect(isLockedHealthPlanFormData(submission)).toEqual(
+                expectedResponse
+            )
         }
     )
 
@@ -354,7 +368,7 @@ describe('submission type assertions', () => {
         ],
     ])('submission name is correct', (programIDs, expectedName) => {
         const programs = mockMNState().programs
-        const sub = basicSubmission()
+        const sub = basicHealthPlanFormData()
         sub.programIDs = programIDs
 
         expect(submissionName(sub, programs)).toBe(expectedName)

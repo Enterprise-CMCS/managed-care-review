@@ -1,14 +1,23 @@
-import { submissionName, SubmissionUnionType, ProgramT } from '../common-code/domain-models'
+import {
+    submissionName,
+    HealthPlanFormDataType,
+    ProgramT,
+} from '../common-code/domain-models'
 import { base64ToDomain } from '../common-code/proto/stateSubmission'
-import { Revision, Submission2, Submission as GQLSubmissionUnionType} from '../gen/gqlClient'
+import {
+    Revision,
+    Submission2,
+    Submission as GQLSubmissionUnionType,
+} from '../gen/gqlClient'
 import { formatGQLDate } from '../dateHelpers'
-
 
 const isGQLDraftSubmission = (sub: GQLSubmissionUnionType): boolean => {
     return sub.__typename === 'DraftSubmission'
 }
 
-const getCurrentRevisionFromSubmission2 = (submissionAndRevisions: Submission2): [Revision, SubmissionUnionType] | Error => {
+const getCurrentRevisionFromSubmission2 = (
+    submissionAndRevisions: Submission2
+): [Revision, HealthPlanFormDataType] | Error => {
     // check that package and valid revisions exist
     if (submissionAndRevisions) {
         if (
@@ -51,13 +60,14 @@ const getCurrentRevisionFromSubmission2 = (submissionAndRevisions: Submission2):
         console.error('ERROR: no submission exists')
         return new Error('Error fetching the submission. Please try again.')
     }
+}
 
-    }
-    
 // This is more code that should go away when we finish the refactor
 // Because this sub-object has dates in it, we need to format those dates correctly.
 // we don't need to fix contacts or documents in the same way.
-function datesFromRateAmendmentInfo(rateInfo: SubmissionUnionType["rateAmendmentInfo"] | undefined): GQLSubmissionUnionType["rateAmendmentInfo"] {
+function datesFromRateAmendmentInfo(
+    rateInfo: HealthPlanFormDataType['rateAmendmentInfo'] | undefined
+): GQLSubmissionUnionType['rateAmendmentInfo'] {
     if (!rateInfo) {
         return undefined
     }
@@ -67,18 +77,26 @@ function datesFromRateAmendmentInfo(rateInfo: SubmissionUnionType["rateAmendment
     }
 }
 
-
-const convertDomainModelFormDataToGQLSubmission = (submissionDomainModel: SubmissionUnionType, statePrograms: ProgramT[]): GQLSubmissionUnionType => {
+const convertDomainModelFormDataToGQLSubmission = (
+    submissionDomainModel: HealthPlanFormDataType,
+    statePrograms: ProgramT[]
+): GQLSubmissionUnionType => {
     // convert from domain model back into GQL types
 
     // CalendarDates are Dates in the domain model, but strings in GQL
     const convertedDates = {
-        contractDateStart: formatGQLDate(submissionDomainModel.contractDateStart),
+        contractDateStart: formatGQLDate(
+            submissionDomainModel.contractDateStart
+        ),
         contractDateEnd: formatGQLDate(submissionDomainModel.contractDateEnd),
         rateDateStart: formatGQLDate(submissionDomainModel.rateDateStart),
         rateDateEnd: formatGQLDate(submissionDomainModel.rateDateEnd),
-        rateDateCertified: formatGQLDate(submissionDomainModel.rateDateCertified),
-        rateAmendmentInfo: datesFromRateAmendmentInfo(submissionDomainModel.rateAmendmentInfo),
+        rateDateCertified: formatGQLDate(
+            submissionDomainModel.rateDateCertified
+        ),
+        rateAmendmentInfo: datesFromRateAmendmentInfo(
+            submissionDomainModel.rateAmendmentInfo
+        ),
     }
 
     const GQLSubmission: GQLSubmissionUnionType =
@@ -94,7 +112,7 @@ const convertDomainModelFormDataToGQLSubmission = (submissionDomainModel: Submis
                   ...convertedDates,
                   __typename: 'StateSubmission' as const,
                   name: submissionName(submissionDomainModel, statePrograms),
-                  submittedAt:submissionDomainModel.submittedAt
+                  submittedAt: submissionDomainModel.submittedAt,
               }
 
     return GQLSubmission
@@ -106,5 +124,3 @@ export {
     isGQLDraftSubmission,
 }
 export type { GQLSubmissionUnionType }
-
-

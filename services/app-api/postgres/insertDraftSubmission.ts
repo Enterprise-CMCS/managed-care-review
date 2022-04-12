@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client'
 import { Buffer } from 'buffer'
 import { v4 as uuidv4 } from 'uuid'
 import {
-    DraftSubmissionType,
+    UnlockedHealthPlanFormDataType,
     Submission2Type,
     SubmissionType,
 } from '../../app-web/src/common-code/domain-models'
@@ -62,7 +62,7 @@ export async function insertDraftSubmission(
     const stateNumber: number = stateNumberResult
 
     // construct a new Draft Submission
-    const draft: DraftSubmissionType = {
+    const draft: UnlockedHealthPlanFormDataType = {
         id: uuidv4(),
         createdAt: new Date(),
         updatedAt: new Date(),

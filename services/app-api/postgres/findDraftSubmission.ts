@@ -1,17 +1,17 @@
 import { PrismaClient } from '@prisma/client'
 import {
-    DraftSubmissionType,
-    isDraftSubmission
+    UnlockedHealthPlanFormDataType,
+    isUnlockedHealthPlanFormData,
 } from '../../app-web/src/common-code/domain-models'
 import { toDomain } from '../../app-web/src/common-code/proto/stateSubmission'
 import {
     convertPrismaErrorToStoreError,
     isStoreError,
-    StoreError
+    StoreError,
 } from './storeError'
 import {
     getCurrentRevision,
-    StateSubmissionWithRevisions
+    StateSubmissionWithRevisions,
 } from './submissionWithRevisionsHelpers'
 
 export async function findUniqueSubmissionWrapper(
@@ -45,7 +45,7 @@ export async function findUniqueSubmissionWrapper(
 export async function findDraftSubmission(
     client: PrismaClient,
     draftUUID: string
-): Promise<DraftSubmissionType | undefined | StoreError> {
+): Promise<UnlockedHealthPlanFormDataType | undefined | StoreError> {
     const findResult = await findUniqueSubmissionWrapper(client, draftUUID)
 
     if (isStoreError(findResult)) {
@@ -59,7 +59,7 @@ export async function findDraftSubmission(
     const currentRevisionOrError = getCurrentRevision(draftUUID, findResult)
     if (isStoreError(currentRevisionOrError)) return currentRevisionOrError
     const currentRevision = currentRevisionOrError
-    
+
     const decodeResult = toDomain(currentRevision.submissionFormProto)
 
     if (decodeResult instanceof Error) {
@@ -70,14 +70,14 @@ export async function findDraftSubmission(
         }
     }
 
-    if (!isDraftSubmission(decodeResult)) {
+    if (!isUnlockedHealthPlanFormData(decodeResult)) {
         return {
             code: 'WRONG_STATUS',
             message: 'wrong type came out!',
         }
     }
 
-    const draft: DraftSubmissionType = decodeResult
+    const draft: UnlockedHealthPlanFormDataType = decodeResult
 
     return draft
 }

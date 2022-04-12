@@ -3,7 +3,7 @@ import { Alert, GridContainer } from '@trussworks/react-uswds'
 import { useLocation, useParams } from 'react-router-dom'
 import {
     submissionName,
-    SubmissionUnionType,
+    HealthPlanFormDataType,
     UpdateInfoType,
 } from '../../common-code/domain-models'
 import { makeDateTable } from '../../common-code/data-helpers/makeDocumentDateLookupTable'
@@ -41,7 +41,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
 
     // Api fetched data state
     const [packageData, setPackageData] = useState<
-        SubmissionUnionType | undefined
+        HealthPlanFormDataType | undefined
     >(undefined)
 
     // document date lookup state

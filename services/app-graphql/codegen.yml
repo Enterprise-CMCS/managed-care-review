@@ -18,9 +18,9 @@ generates:
         User: ../../app-web/src/common-code/domain-models#CognitoUserType
         StateUser: ../../app-web/src/common-code/domain-models#CognitoStateUserType
         CMSUser: ../../app-web/src/common-code/domain-models#CognitoCMSUserType
-        DraftSubmission: ../../app-web/src/common-code/domain-models#DraftSubmissionType
-        StateSubmission: ../../app-web/src/common-code/domain-models#StateSubmissionType
-        Submission: ../../app-web/src/common-code/domain-models#SubmissionUnionType
+        DraftSubmission: ../../app-web/src/common-code/domain-models#UnlockedHealthPlanFormDataType
+        StateSubmission: ../../app-web/src/common-code/domain-models#LockedHealthPlanFormDataType
+        Submission: ../../app-web/src/common-code/domain-models#HealthPlanFormDataType
         Submission2: ../../app-web/src/common-code/domain-models#Submission2Type
   ../app-web/src/gen/gqlClient.tsx:
     documents:

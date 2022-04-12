@@ -32,7 +32,7 @@ describe('insertDraftSubmissionPostgres', () => {
         }
 
         // Because we are erroring above if _any_ of our results are a store error
-        // we can tell the type system that all of our results are DraftSubmissionType
+        // we can tell the type system that all of our results are UnlockedHealthPlanFormDataType
         const drafts = results as Submission2Type[]
 
         const formDatum = drafts.map((d) => {

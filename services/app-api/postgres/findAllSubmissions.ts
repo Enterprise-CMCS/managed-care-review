@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import {
-    DraftSubmissionType,
-    StateSubmissionType,
+    UnlockedHealthPlanFormDataType,
+    LockedHealthPlanFormDataType,
 } from '../../app-web/src/common-code/domain-models'
 import { toDomain } from '../../app-web/src/common-code/proto/stateSubmission'
 import {
@@ -9,7 +9,10 @@ import {
     isStoreError,
     StoreError,
 } from './storeError'
-import { getCurrentRevision, StateSubmissionWithRevisions } from './submissionWithRevisionsHelpers'
+import {
+    getCurrentRevision,
+    StateSubmissionWithRevisions,
+} from './submissionWithRevisionsHelpers'
 
 export async function findAllSubmissionWrapper(
     client: PrismaClient,
@@ -40,22 +43,27 @@ export async function findAllSubmissionWrapper(
 export async function findAllSubmissions(
     client: PrismaClient,
     stateCode: string
-): Promise<(DraftSubmissionType | StateSubmissionType)[] | StoreError> {
+): Promise<
+    | (UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType)[]
+    | StoreError
+> {
     const result = await findAllSubmissionWrapper(client, stateCode)
 
     if (isStoreError(result)) {
         return result
     }
 
-    const drafts: (DraftSubmissionType | StateSubmissionType)[] = []
+    const drafts: (
+        | UnlockedHealthPlanFormDataType
+        | LockedHealthPlanFormDataType
+    )[] = []
     const errors: Error[] = []
     result.forEach((dbDraftSubmissionWithRevisions) => {
         const currentRevisionOrError = getCurrentRevision(
             dbDraftSubmissionWithRevisions.id,
             dbDraftSubmissionWithRevisions
         )
-        if (isStoreError(currentRevisionOrError))
-            return currentRevisionOrError
+        if (isStoreError(currentRevisionOrError)) return currentRevisionOrError
         const currentRevision = currentRevisionOrError
 
         const proto = currentRevision.submissionFormProto

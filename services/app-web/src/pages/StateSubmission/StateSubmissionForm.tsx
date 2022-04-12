@@ -42,7 +42,7 @@ import { UpdateInfoType } from '../../common-code/domain-models/Submission2Type'
 import { useAuth } from '../../contexts/AuthContext'
 import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import {
-    DraftSubmissionType,
+    UnlockedHealthPlanFormDataType,
     submissionName,
 } from '../../common-code/domain-models'
 import { domainToBase64 } from '../../common-code/proto/stateSubmission'
@@ -108,7 +108,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
     const currentRoute = getRouteName(pathname)
     const { updateHeading } = usePage()
     const [formDataFromLatestRevision, setFormDataFromLatestRevision] =
-        useState<DraftSubmissionType | null>(null)
+        useState<UnlockedHealthPlanFormDataType | null>(null)
     const [formDataError, setFormDataError] = useState<FormDataError | null>(
         null
     )
@@ -167,7 +167,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
     // When the new API is done, we'll call the new API here
     const updateDraftSubmission2 = async (
-        input: DraftSubmissionType
+        input: UnlockedHealthPlanFormDataType
     ): Promise<Submission2 | Error> => {
         const base64Draft = domainToBase64(input)
 

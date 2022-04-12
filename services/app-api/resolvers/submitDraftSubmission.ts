@@ -1,18 +1,18 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import {
-    DraftSubmissionType,
+    UnlockedHealthPlanFormDataType,
     hasValidContract,
     hasValidDocuments,
     hasValidRates,
     hasValidSupportingDocumentCategories,
     isContractAndRates,
-    isStateSubmission,
+    isLockedHealthPlanFormData,
     isStateUser,
-    StateSubmissionType,
+    LockedHealthPlanFormDataType,
     Submission2Type,
     submissionName,
     submissionStatus,
-    UpdateInfoType
+    UpdateInfoType,
 } from '../../app-web/src/common-code/domain-models'
 import { Emailer } from '../emailer'
 import { MutationResolvers, State } from '../gen/gqlServer'
@@ -21,7 +21,7 @@ import { isStoreError, Store } from '../postgres'
 import {
     setResolverDetailsOnActiveSpan,
     setErrorAttributesOnActiveSpan,
-    setSuccessAttributesOnActiveSpan
+    setSuccessAttributesOnActiveSpan,
 } from './attributeHelper'
 import { toDomain } from '../../app-web/src/common-code/proto/stateSubmission'
 
@@ -57,21 +57,25 @@ export function isSubmissionError(err: unknown): err is SubmissionError {
 // This strategy (returning a different type from validation) is taken from the
 // "parse, don't validate" article: https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/
 function submit(
-    draft: DraftSubmissionType
-): StateSubmissionType | SubmissionError {
+    draft: UnlockedHealthPlanFormDataType
+): LockedHealthPlanFormDataType | SubmissionError {
     const maybeStateSubmission: Record<string, unknown> = {
         ...draft,
         status: 'SUBMITTED',
         submittedAt: new Date(),
     }
-    if (isStateSubmission(maybeStateSubmission)) return maybeStateSubmission
-
-    else if (!hasValidContract(maybeStateSubmission as StateSubmissionType)) {
+    if (isLockedHealthPlanFormData(maybeStateSubmission))
+        return maybeStateSubmission
+    else if (
+        !hasValidContract(maybeStateSubmission as LockedHealthPlanFormDataType)
+    ) {
         return {
             code: 'INCOMPLETE',
             message: 'submissions is missing required contract fields',
         }
-    } else if (!hasValidRates(maybeStateSubmission as StateSubmissionType)) {
+    } else if (
+        !hasValidRates(maybeStateSubmission as LockedHealthPlanFormDataType)
+    ) {
         return isContractAndRates(draft)
             ? {
                   code: 'INCOMPLETE',
@@ -82,7 +86,7 @@ function submit(
                   message: 'submission includes invalid rate fields',
               }
     } else if (
-        !hasValidDocuments(maybeStateSubmission as StateSubmissionType)
+        !hasValidDocuments(maybeStateSubmission as LockedHealthPlanFormDataType)
     ) {
         return {
             code: 'INCOMPLETE',
@@ -90,15 +94,15 @@ function submit(
         }
     } else if (
         !hasValidSupportingDocumentCategories(
-            maybeStateSubmission as StateSubmissionType
+            maybeStateSubmission as LockedHealthPlanFormDataType
         )
     ) {
         return {
             code: 'INCOMPLETE',
-            message: 'submissions must have valid categories for supporting documents',
+            message:
+                'submissions must have valid categories for supporting documents',
         }
-    }
-    else
+    } else
         return {
             code: 'INCOMPLETE',
             message: 'submission is missing a required field',
@@ -122,12 +126,17 @@ export function submitDraftSubmissionResolver(
                 'submitDraftSubmission',
                 'user not authorized to fetch state data'
             )
-            setErrorAttributesOnActiveSpan('user not authorized to fetch state data', span)
+            setErrorAttributesOnActiveSpan(
+                'user not authorized to fetch state data',
+                span
+            )
             throw new ForbiddenError('user not authorized to fetch state data')
         }
 
         // fetch from the store
-        const result = await store.findSubmissionWithRevisions(input.submissionID)
+        const result = await store.findSubmissionWithRevisions(
+            input.submissionID
+        )
 
         if (isStoreError(result)) {
             const errMessage = `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
@@ -156,7 +165,10 @@ export function submitDraftSubmissionResolver(
                 'submitDraftSubmission',
                 'user not authorized to fetch data from a different state'
             )
-            setErrorAttributesOnActiveSpan('user not authorized to fetch data from a different state', span)
+            setErrorAttributesOnActiveSpan(
+                'user not authorized to fetch data from a different state',
+                span
+            )
             throw new ForbiddenError(
                 'user not authorized to fetch data from a different state'
             )
@@ -180,22 +192,30 @@ export function submitDraftSubmissionResolver(
         const submitInfo: UpdateInfoType = {
             updatedAt: new Date(),
             updatedBy: context.user.email,
-            updatedReason: 'Initial submission'
+            updatedReason: 'Initial submission',
         }
 
         //If submission is a resubmission set submitInfo updated reason to input.
-        if (planPackageStatus === 'UNLOCKED' && submittedReason ) {
+        if (planPackageStatus === 'UNLOCKED' && submittedReason) {
             submitInfo.updatedReason = submittedReason
-        //Throw error if resubmitted without reason. We want to require an input reason for resubmission, but not for
-        // initial submission
+            //Throw error if resubmitted without reason. We want to require an input reason for resubmission, but not for
+            // initial submission
         } else if (planPackageStatus === 'UNLOCKED' && !submittedReason) {
             logError(
                 'submitDraftSubmission',
                 'Incomplete submission cannot be submitted, resubmission reason is required'
             )
-            setErrorAttributesOnActiveSpan('Incomplete submission cannot be submitted', span)
-            throw new UserInputError('Incomplete submission cannot be submitted, resubmission reason is required',)
-        } else if (planPackageStatus === 'RESUBMITTED' || planPackageStatus === 'SUBMITTED') {
+            setErrorAttributesOnActiveSpan(
+                'Incomplete submission cannot be submitted',
+                span
+            )
+            throw new UserInputError(
+                'Incomplete submission cannot be submitted, resubmission reason is required'
+            )
+        } else if (
+            planPackageStatus === 'RESUBMITTED' ||
+            planPackageStatus === 'SUBMITTED'
+        ) {
             const errMessage = `Attempted to submit and already submitted package.`
             logError('submitDraftSubmission', errMessage)
             throw new Error(errMessage)
@@ -209,7 +229,10 @@ export function submitDraftSubmissionResolver(
                 'submitDraftSubmission',
                 'Incomplete submission cannot be submitted'
             )
-            setErrorAttributesOnActiveSpan('Incomplete submission cannot be submitted', span)
+            setErrorAttributesOnActiveSpan(
+                'Incomplete submission cannot be submitted',
+                span
+            )
             throw new UserInputError(
                 'Incomplete submission cannot be submitted',
                 {
@@ -218,10 +241,13 @@ export function submitDraftSubmissionResolver(
             )
         }
 
-        const stateSubmission: StateSubmissionType = submissionResult
+        const stateSubmission: LockedHealthPlanFormDataType = submissionResult
 
         // Save the submission!
-        const updateResult = await store.updateStateSubmission(stateSubmission, submitInfo)
+        const updateResult = await store.updateStateSubmission(
+            stateSubmission,
+            submitInfo
+        )
         if (isStoreError(updateResult)) {
             const errMessage = `Issue updating a state submission of type ${updateResult.code}. Message: ${updateResult.message}`
             logError('submitDraftSubmission', errMessage)
@@ -231,8 +257,14 @@ export function submitDraftSubmissionResolver(
 
         const updatedSubmission: Submission2Type = updateResult
 
-        const programs = store.findPrograms(updatedSubmission.stateCode, stateSubmission.programIDs)
-        if (!programs || programs.length !== stateSubmission.programIDs.length) {
+        const programs = store.findPrograms(
+            updatedSubmission.stateCode,
+            stateSubmission.programIDs
+        )
+        if (
+            !programs ||
+            programs.length !== stateSubmission.programIDs.length
+        ) {
             const errMessage = `Can't find programs ${stateSubmission.programIDs} from state ${stateSubmission.stateCode}, ${stateSubmission.id}`
             logError('unlockStateSubmission', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
@@ -242,7 +274,7 @@ export function submitDraftSubmissionResolver(
         // Send emails!
         const name = submissionName(stateSubmission, programs)
 
-		const status = submissionStatus(updatedSubmission)
+        const status = submissionStatus(updatedSubmission)
         let cmsPackageEmailResult
         let statePackageEmailResult
 
@@ -251,15 +283,27 @@ export function submitDraftSubmissionResolver(
             logSuccess('It was resubmitted')
             const updatedEmailData = {
                 ...submitInfo,
-                submissionName: name
+                submissionName: name,
             }
-            cmsPackageEmailResult = await emailer.sendResubmittedCMSEmail(stateSubmission, updatedEmailData)
-            statePackageEmailResult =
-                await emailer.sendResubmittedStateEmail(stateSubmission, updatedEmailData, user)
+            cmsPackageEmailResult = await emailer.sendResubmittedCMSEmail(
+                stateSubmission,
+                updatedEmailData
+            )
+            statePackageEmailResult = await emailer.sendResubmittedStateEmail(
+                stateSubmission,
+                updatedEmailData,
+                user
+            )
         } else if (status === 'SUBMITTED') {
-            cmsPackageEmailResult = await emailer.sendCMSNewPackage(stateSubmission, name)
-            statePackageEmailResult =
-                await emailer.sendStateNewPackage(stateSubmission, name, user)
+            cmsPackageEmailResult = await emailer.sendCMSNewPackage(
+                stateSubmission,
+                name
+            )
+            statePackageEmailResult = await emailer.sendStateNewPackage(
+                stateSubmission,
+                name,
+                user
+            )
         }
 
         if (cmsPackageEmailResult instanceof Error) {

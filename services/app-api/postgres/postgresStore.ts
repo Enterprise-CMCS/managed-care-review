@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client'
 import {
-    DraftSubmissionType,
+    UnlockedHealthPlanFormDataType,
     ProgramT,
-    StateSubmissionType,
+    LockedHealthPlanFormDataType,
     Submission2Type,
     UpdateInfoType,
 } from '../../app-web/src/common-code/domain-models'
@@ -29,40 +29,43 @@ type Store = {
 
     findAllSubmissions: (
         stateCode: string
-    ) => Promise<(DraftSubmissionType | StateSubmissionType)[] | StoreError>
+    ) => Promise<
+        | (UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType)[]
+        | StoreError
+    >
 
     findDraftSubmission: (
         draftUUID: string
-    ) => Promise<DraftSubmissionType | undefined | StoreError>
+    ) => Promise<UnlockedHealthPlanFormDataType | undefined | StoreError>
 
     findDraftSubmissionByStateNumber: (
         stateCoder: string,
         stateNumber: number
-    ) => Promise<DraftSubmissionType | undefined | StoreError>
+    ) => Promise<UnlockedHealthPlanFormDataType | undefined | StoreError>
 
     updateDraftSubmission: (
-        draftSubmission: DraftSubmissionType
-    ) => Promise<DraftSubmissionType | StoreError>
+        draftSubmission: UnlockedHealthPlanFormDataType
+    ) => Promise<UnlockedHealthPlanFormDataType | StoreError>
 
     findStateSubmission: (
         draftUUID: string
-    ) => Promise<StateSubmissionType | undefined | StoreError>
+    ) => Promise<LockedHealthPlanFormDataType | undefined | StoreError>
 
     updateStateSubmission: (
-        stateSubmission: StateSubmissionType,
+        stateSubmission: LockedHealthPlanFormDataType,
         submitInfo: UpdateInfoType
     ) => Promise<Submission2Type | StoreError>
 
     insertNewRevision: (
         submissionID: string,
         unlockInfo: UpdateInfoType,
-        draft: DraftSubmissionType
+        draft: UnlockedHealthPlanFormDataType
     ) => Promise<Submission2Type | StoreError>
 
     updateFormData: (
         submissionID: string,
         revisionID: string,
-        formData: DraftSubmissionType
+        formData: UnlockedHealthPlanFormDataType
     ) => Promise<Submission2Type | StoreError>
 
     findPrograms: (

@@ -7,8 +7,8 @@ import UPDATE_HEALTH_PLAN_FORM_DATA from '../../app-graphql/src/mutations/update
 import { domainToBase64 } from '../../app-web/src/common-code/proto/stateSubmission'
 import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
 import {
-    basicStateSubmission,
-    basicSubmission,
+    basicLockedHealthPlanFormData,
+    basicHealthPlanFormData,
 } from '../../app-web/src/common-code/domain-mocks'
 import { v4 as uuidv4 } from 'uuid'
 import {
@@ -173,7 +173,7 @@ describe('updateHealthPlanFormData', () => {
 
         const createdDraft = await createTestSubmission2(server)
 
-        const stateSubmission = basicStateSubmission()
+        const stateSubmission = basicLockedHealthPlanFormData()
 
         const formData = domainToBase64(stateSubmission)
 
@@ -202,7 +202,7 @@ describe('updateHealthPlanFormData', () => {
         const server = await constructTestPostgresServer()
         const createdSubmitted = await createTestStateSubmission(server)
 
-        const draftSubmission = basicSubmission()
+        const draftSubmission = basicHealthPlanFormData()
         const b64 = domainToBase64(draftSubmission)
 
         const updateResult = await server.executeOperation({

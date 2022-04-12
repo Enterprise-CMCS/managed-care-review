@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import {
-    DraftSubmissionType,
+    UnlockedHealthPlanFormDataType,
     Submission2Type,
 } from '../../app-web/src/common-code/domain-models'
 import { toProtoBuffer } from '../../app-web/src/common-code/proto/stateSubmission'
@@ -56,7 +56,7 @@ export async function updateFormData(
     client: PrismaClient,
     submissionID: string,
     revisionID: string,
-    formData: DraftSubmissionType
+    formData: UnlockedHealthPlanFormDataType
 ): Promise<Submission2Type | StoreError> {
     formData.updatedAt = new Date()
 

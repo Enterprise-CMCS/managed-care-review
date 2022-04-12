@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import {
-    DraftSubmissionType,
-    isDraftSubmission,
+    UnlockedHealthPlanFormDataType,
+    isUnlockedHealthPlanFormData,
 } from '../../app-web/src/common-code/domain-models'
 import {
     toDomain,
@@ -12,49 +12,48 @@ import {
     isStoreError,
     StoreError,
 } from './storeError'
-import {getCurrentRevision} from './submissionWithRevisionsHelpers'
+import { getCurrentRevision } from './submissionWithRevisionsHelpers'
 
 export async function updateSubmissionWrapper(
     client: PrismaClient,
     id: string,
     proto: Buffer
 ): Promise<Buffer | StoreError> {
-
     try {
         const findResult = await client.stateSubmission.findUnique({
             where: {
                 id: id,
             },
             include: {
-                revisions: true
+                revisions: true,
             },
         })
 
         const currentRevisionOrError = getCurrentRevision(id, findResult)
         if (isStoreError(currentRevisionOrError)) {
-             return currentRevisionOrError
-        } 
+            return currentRevisionOrError
+        }
 
         try {
             const currentRevision = currentRevisionOrError
-            const updateResult = await client.stateSubmission.update( {
+            const updateResult = await client.stateSubmission.update({
                 where: {
-                    id
+                    id,
                 },
                 data: {
                     revisions: {
                         update: {
                             where: {
-                                id:  currentRevision.id
+                                id: currentRevision.id,
                             },
                             data: {
-                                submissionFormProto: proto
-                            }
-                        }
-                    }
+                                submissionFormProto: proto,
+                            },
+                        },
+                    },
                 },
                 include: {
-                    revisions: true
+                    revisions: true,
                 },
             })
             const updatedRevisionOrError = getCurrentRevision(id, updateResult)
@@ -67,7 +66,6 @@ export async function updateSubmissionWrapper(
         } catch (updateError) {
             return convertPrismaErrorToStoreError(updateError)
         }
-        
     } catch (findError) {
         return convertPrismaErrorToStoreError(findError)
     }
@@ -75,8 +73,8 @@ export async function updateSubmissionWrapper(
 
 export async function updateDraftSubmission(
     client: PrismaClient,
-    draftSubmission: DraftSubmissionType
-): Promise<DraftSubmissionType | StoreError> {
+    draftSubmission: UnlockedHealthPlanFormDataType
+): Promise<UnlockedHealthPlanFormDataType | StoreError> {
     draftSubmission.updatedAt = new Date()
 
     const proto = toProtoBuffer(draftSubmission)
@@ -106,7 +104,7 @@ export async function updateDraftSubmission(
         }
     }
 
-    if (!isDraftSubmission(decodeUpdated)) {
+    if (!isUnlockedHealthPlanFormData(decodeUpdated)) {
         return {
             code: 'WRONG_STATUS',
             message: 'The updated submission is not a DraftSubmission',

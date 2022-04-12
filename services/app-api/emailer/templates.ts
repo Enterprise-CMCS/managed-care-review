@@ -1,7 +1,8 @@
 import { URL } from 'url'
 import {
-    CognitoUserType, StateSubmissionType,
-    SubmissionType, SubmissionUnionType
+    CognitoUserType,
+    LockedHealthPlanFormDataType,
+    SubmissionType,
 } from '../../app-web/src/common-code/domain-models'
 import { formatCalendarDate } from '../../app-web/src/dateHelpers'
 import { EmailConfiguration, EmailData } from './'
@@ -27,17 +28,14 @@ const stripHTMLFromTemplate = (template: string) => {
 
     // remove P and A tags but preserve what's inside of them
     formatted = formatted.replace(/<p.*>/gi, '\n')
-    formatted = formatted.replace(
-        /<a.*href="(.*?)".*>(.*?)<\/a>/gi,
-        ' $2 ($1)'
-    )
+    formatted = formatted.replace(/<a.*href="(.*?)".*>(.*?)<\/a>/gi, ' $2 ($1)')
 
     // everything else
-   return formatted.replace(/(<([^>]+)>)/gi, '')
+    return formatted.replace(/(<([^>]+)>)/gi, '')
 }
 
 const newPackageCMSEmail = (
-    submission: StateSubmissionType,
+    submission: LockedHealthPlanFormDataType,
     submissionName: string,
     config: EmailConfiguration
 ): EmailData => {
@@ -55,7 +53,7 @@ const newPackageCMSEmail = (
         ' to ' +
         formatCalendarDate(submission.contractDateEnd)
     }`
-    const ratingPeriodText= `${
+    const ratingPeriodText = `${
         submission.rateType === 'NEW'
             ? '<b>Rating period</b>'
             : '<b>Rate amendment effective dates</b>'
@@ -63,17 +61,26 @@ const newPackageCMSEmail = (
     const ratingPeriodDates = `${
         submission.rateType === 'AMENDMENT' && submission.rateAmendmentInfo
             ? `${
-                  formatCalendarDate(submission.rateAmendmentInfo.effectiveDateStart) +
+                  formatCalendarDate(
+                      submission.rateAmendmentInfo.effectiveDateStart
+                  ) +
                   ' to ' +
-                  formatCalendarDate(submission.rateAmendmentInfo.effectiveDateEnd)
+                  formatCalendarDate(
+                      submission.rateAmendmentInfo.effectiveDateEnd
+                  )
               }`
-            : submission.rateDateStart && submission.rateDateEnd ? `${
+            : submission.rateDateStart && submission.rateDateEnd
+            ? `${
                   formatCalendarDate(submission.rateDateStart) +
                   ' to ' +
                   formatCalendarDate(submission.rateDateEnd)
-              }` : 'Rating Period Dates Not Found'
+              }`
+            : 'Rating Period Dates Not Found'
     }`
-    const rateRelatedDatesText = submission.submissionType === 'CONTRACT_AND_RATES' ? `${ratingPeriodText}: ${ratingPeriodDates}` : '' // displays nothing if submission is CONTRACT_ONLY
+    const rateRelatedDatesText =
+        submission.submissionType === 'CONTRACT_AND_RATES'
+            ? `${ratingPeriodText}: ${ratingPeriodDates}`
+            : '' // displays nothing if submission is CONTRACT_ONLY
     const submissionURL = new URL(
         `submissions/${submission.id}`,
         config.baseUrl
@@ -81,13 +88,17 @@ const newPackageCMSEmail = (
     const bodyHTML = `
             ${testEmailAlert}
             <br /><br />
-            Managed Care submission: <b>${submissionName}</b> was received from <b>${submission.stateCode}</b>.<br /><br />
+            Managed Care submission: <b>${submissionName}</b> was received from <b>${
+        submission.stateCode
+    }</b>.<br /><br />
             <b>Submission type</b>: ${
                 SubmissionTypeRecord[submission.submissionType]
             }<br />
             ${contractEffectiveDatesText}
             <br />
-            ${rateRelatedDatesText}${rateRelatedDatesText.length > 0 ? '<br />' : ''}
+            ${rateRelatedDatesText}${
+        rateRelatedDatesText.length > 0 ? '<br />' : ''
+    }
             <b>Submission description</b>: ${
                 submission.submissionDescription
             }<br /><br />
@@ -105,7 +116,7 @@ const newPackageCMSEmail = (
 }
 
 const newPackageStateEmail = (
-    submission: StateSubmissionType,
+    submission: LockedHealthPlanFormDataType,
     submissionName: string,
     user: CognitoUserType,
     config: EmailConfiguration
@@ -118,7 +129,7 @@ const newPackageStateEmail = (
     const receiverEmails: string[] = [currentUserEmail].concat(
         submission.stateContacts.map((contact) => contact.email)
     )
-    const bodyHTML =  `
+    const bodyHTML = `
             ${testEmailAlert}
             <br /><br />
             ${submissionName} was successfully submitted.
@@ -181,16 +192,16 @@ const unlockPackageCMSEmail = (
     return {
         toAddresses: reviewerEmails,
         sourceEmail: config.emailSource,
-        subject: `${
-            isTestEnvironment ? `[${config.stage}] ` : ''
-        }TEST ${unlockData.submissionName} was unlocked`,
+        subject: `${isTestEnvironment ? `[${config.stage}] ` : ''}TEST ${
+            unlockData.submissionName
+        } was unlocked`,
         bodyText: stripHTMLFromTemplate(bodyHTML),
         bodyHTML: bodyHTML,
     }
 }
 
 const unlockPackageStateEmail = (
-    submission: StateSubmissionType,
+    submission: LockedHealthPlanFormDataType,
     unlockData: UpdatedEmailData,
     config: EmailConfiguration
 ): EmailData => {
@@ -198,7 +209,9 @@ const unlockPackageStateEmail = (
         `submissions/${submission.id}/review-and-submit`,
         config.baseUrl
     ).href
-    const receiverEmails: string[] = submission.stateContacts.map((contact) => contact.email)
+    const receiverEmails: string[] = submission.stateContacts.map(
+        (contact) => contact.email
+    )
     const bodyHTML = `
         ${testEmailAlert}
         <br /><br />
@@ -212,16 +225,16 @@ const unlockPackageStateEmail = (
     return {
         toAddresses: receiverEmails,
         sourceEmail: config.emailSource,
-        subject: `${
-            config.stage !== 'prod' ? `[${config.stage}] ` : ''
-        }TEST ${unlockData.submissionName} was unlocked by CMS`,
+        subject: `${config.stage !== 'prod' ? `[${config.stage}] ` : ''}TEST ${
+            unlockData.submissionName
+        } was unlocked by CMS`,
         bodyText: stripHTMLFromTemplate(bodyHTML),
         bodyHTML: bodyHTML,
     }
 }
 
 const resubmittedStateEmail = (
-    submission: StateSubmissionType,
+    submission: LockedHealthPlanFormDataType,
     user: CognitoUserType,
     resubmittedData: UpdatedEmailData,
     config: EmailConfiguration
@@ -233,10 +246,14 @@ const resubmittedStateEmail = (
     const bodyHTML = `
         ${testEmailAlert}<br />
         <br />
-        Submission ${resubmittedData.submissionName} was successfully resubmitted<br />
+        Submission ${
+            resubmittedData.submissionName
+        } was successfully resubmitted<br />
         <br />
         <b>Submitted by:</b> ${resubmittedData.updatedBy}<br />
-        <b>Updated on:</b> ${formatCalendarDate(resubmittedData.updatedAt)}<br />
+        <b>Updated on:</b> ${formatCalendarDate(
+            resubmittedData.updatedAt
+        )}<br />
         <b>Changes made:</b> ${resubmittedData.updatedReason}<br />
         <br />
         <p>If you need to make any further changes, please contact CMS.</p>
@@ -244,16 +261,16 @@ const resubmittedStateEmail = (
     return {
         toAddresses: receiverEmails,
         sourceEmail: config.emailSource,
-        subject: `${
-            config.stage !== 'prod' ? `[${config.stage}] ` : ''
-        }TEST ${resubmittedData.submissionName} was resubmitted`,
+        subject: `${config.stage !== 'prod' ? `[${config.stage}] ` : ''}TEST ${
+            resubmittedData.submissionName
+        } was resubmitted`,
         bodyText: stripHTMLFromTemplate(bodyHTML),
         bodyHTML: bodyHTML,
     }
 }
 
 const resubmittedCMSEmail = (
-    submission: StateSubmissionType,
+    submission: LockedHealthPlanFormDataType,
     resubmittedData: UpdatedEmailData,
     config: EmailConfiguration
 ): EmailData => {
@@ -266,10 +283,14 @@ const resubmittedCMSEmail = (
     const bodyHTML = `
         ${testEmailAlert}<br />
         <br />
-        The state completed their edits on submission ${resubmittedData.submissionName}<br />
+        The state completed their edits on submission ${
+            resubmittedData.submissionName
+        }<br />
         <br />
         <b>Submitted by:</b> ${resubmittedData.updatedBy}<br />
-        <b>Updated on:</b> ${formatCalendarDate(resubmittedData.updatedAt)}<br />
+        <b>Updated on:</b> ${formatCalendarDate(
+            resubmittedData.updatedAt
+        )}<br />
         <b>Changes made:</b> ${resubmittedData.updatedReason}<br />
         <br />
         <a href="${submissionURL}">View submission</a>
@@ -277,12 +298,20 @@ const resubmittedCMSEmail = (
     return {
         toAddresses: reviewerEmails,
         sourceEmail: config.emailSource,
-        subject: `${
-            config.stage !== 'prod' ? `[${config.stage}] ` : ''
-        }TEST ${resubmittedData.submissionName} was resubmitted`,
+        subject: `${config.stage !== 'prod' ? `[${config.stage}] ` : ''}TEST ${
+            resubmittedData.submissionName
+        } was resubmitted`,
         bodyText: stripHTMLFromTemplate(bodyHTML),
         bodyHTML: bodyHTML,
     }
 }
 
-export { newPackageCMSEmail, newPackageStateEmail, unlockPackageCMSEmail, unlockPackageStateEmail, resubmittedStateEmail, resubmittedCMSEmail, UpdatedEmailData }
+export {
+    newPackageCMSEmail,
+    newPackageStateEmail,
+    unlockPackageCMSEmail,
+    unlockPackageStateEmail,
+    resubmittedStateEmail,
+    resubmittedCMSEmail,
+    UpdatedEmailData,
+}

@@ -15,7 +15,7 @@ import { NavLink, useLocation, useParams } from 'react-router-dom'
 import sprite from 'uswds/src/img/sprite.svg'
 import {
     submissionName,
-    SubmissionUnionType,
+    HealthPlanFormDataType,
     UpdateInfoType,
 } from '../../common-code/domain-models'
 import { makeDateTable } from '../../common-code/data-helpers/makeDocumentDateLookupTable'
@@ -125,7 +125,7 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     // Api fetched data state
     const [packageData, setPackageData] = useState<
-        SubmissionUnionType | undefined
+        HealthPlanFormDataType | undefined
     >(undefined)
     const [updateInfo, setUpdateInfo] = useState<UpdateInfoType | null>(null)
     const [submissionStatus, setSubmissionStatus] =

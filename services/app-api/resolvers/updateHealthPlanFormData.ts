@@ -1,6 +1,6 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import {
-    DraftSubmissionType,
+    UnlockedHealthPlanFormDataType,
     isStateUser,
     Submission2Type,
     submissionStatus,
@@ -60,7 +60,7 @@ export function updateHealthPlanFormDataResolver(
             })
         }
 
-        const unlockedFormData: DraftSubmissionType = formDataResult
+        const unlockedFormData: UnlockedHealthPlanFormDataType = formDataResult
         const result = await store.findSubmissionWithRevisions(
             input.submissionID
         )
@@ -143,11 +143,12 @@ export function updateHealthPlanFormDataResolver(
             })
         }
 
-        const previousFormData: DraftSubmissionType = previousFormDataResult
+        const previousFormData: UnlockedHealthPlanFormDataType =
+            previousFormDataResult
 
         // Validate that none of these protected fields have been modified.
         // These fields should only be modified by the server, never by an update.
-        const fixedFields: (keyof DraftSubmissionType)[] = [
+        const fixedFields: (keyof UnlockedHealthPlanFormDataType)[] = [
             'id',
             'stateCode',
             'stateNumber',

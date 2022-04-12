@@ -28,7 +28,7 @@ import {
 import { PageActions } from '../PageActions'
 import styles from '../StateSubmissionForm.module.scss'
 import { GenericApiErrorBanner } from '../../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
-import { DraftSubmissionType } from '../../../common-code/domain-models'
+import { UnlockedHealthPlanFormDataType } from '../../../common-code/domain-models'
 
 // Formik setup
 // Should be listed in order of appearance on field to allow errors to focus as expected
@@ -46,8 +46,10 @@ export interface SubmissionTypeFormValues {
 }
 type SubmissionTypeProps = {
     showValidations?: boolean
-    draftSubmission?: DraftSubmissionType
-    updateDraft?: (input: DraftSubmissionType) => Promise<Submission2 | Error>
+    draftSubmission?: UnlockedHealthPlanFormDataType
+    updateDraft?: (
+        input: UnlockedHealthPlanFormDataType
+    ) => Promise<Submission2 | Error>
     formAlert?: React.ReactElement
 }
 

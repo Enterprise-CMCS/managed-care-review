@@ -1,64 +1,82 @@
 import { ZodError } from 'zod'
 import { statesubmission } from '../../../gen/stateSubmissionProto'
 import {
-    basicStateSubmission, basicSubmission,
-    contractOnly, draftWithALittleBitOfEverything, draftWithContacts,
-    draftWithDocuments, draftWithFullContracts, draftWithFullRates, newSubmission
+    basicLockedHealthPlanFormData,
+    basicHealthPlanFormData,
+    contractOnly,
+    unlockedWithALittleBitOfEverything,
+    unlockedWithContacts,
+    unlockedWithDocuments,
+    unlockedWithFullContracts,
+    unlockedWithFullRates,
+    newHealthPlanFormData,
 } from '../../domain-mocks'
 import {
-    DraftSubmissionType,
-    isStateSubmission,
-    StateSubmissionType
+    UnlockedHealthPlanFormDataType,
+    isLockedHealthPlanFormData,
+    LockedHealthPlanFormDataType,
 } from '../../domain-models'
 import { base64ToDomain, domainToBase64, protoToBase64 } from './protoBase64'
 import { toProtoBuffer } from './toProtoBuffer'
 
 describe('Validate encoding to base64 and decoding back to domain model', () => {
-    if (!isStateSubmission(basicStateSubmission())) {
+    if (!isLockedHealthPlanFormData(basicLockedHealthPlanFormData())) {
         throw new Error(
             'Bad test, the state submission is not a state submission'
         )
     }
 
     test.each([
-        newSubmission(),
-        basicSubmission(),
+        newHealthPlanFormData(),
+        basicHealthPlanFormData(),
         contractOnly(),
-        draftWithContacts(),
-        draftWithDocuments(),
-        draftWithFullRates(),
-        draftWithFullContracts(),
-        draftWithALittleBitOfEverything(),
-        basicStateSubmission()
+        unlockedWithContacts(),
+        unlockedWithDocuments(),
+        unlockedWithFullRates(),
+        unlockedWithFullContracts(),
+        unlockedWithALittleBitOfEverything(),
+        basicLockedHealthPlanFormData(),
     ])(
         'given valid domain model %j expect protobufs to be symmetric)',
-        (domainObject: DraftSubmissionType | StateSubmissionType) => {
-            expect(base64ToDomain(domainToBase64(domainObject))).toEqual(domainObject)
+        (
+            domainObject:
+                | UnlockedHealthPlanFormDataType
+                | LockedHealthPlanFormDataType
+        ) => {
+            expect(base64ToDomain(domainToBase64(domainObject))).toEqual(
+                domainObject
+            )
         }
     )
 })
 
 describe('Validate encoding to proto to base64 and decoding back to domain model', () => {
-    if (!isStateSubmission(basicStateSubmission())) {
+    if (!isLockedHealthPlanFormData(basicLockedHealthPlanFormData())) {
         throw new Error(
             'Bad test, the state submission is not a state submission'
         )
     }
 
     test.each([
-        newSubmission(),
-        basicSubmission(),
+        newHealthPlanFormData(),
+        basicHealthPlanFormData(),
         contractOnly(),
-        draftWithContacts(),
-        draftWithDocuments(),
-        draftWithFullRates(),
-        draftWithFullContracts(),
-        draftWithALittleBitOfEverything(),
-        basicStateSubmission()
+        unlockedWithContacts(),
+        unlockedWithDocuments(),
+        unlockedWithFullRates(),
+        unlockedWithFullContracts(),
+        unlockedWithALittleBitOfEverything(),
+        basicLockedHealthPlanFormData(),
     ])(
         'given valid domain model %j expect protobufs to be symmetric)',
-        (domainObject: DraftSubmissionType | StateSubmissionType) => {
-            expect(base64ToDomain(protoToBase64(toProtoBuffer(domainObject)))).toEqual(domainObject)
+        (
+            domainObject:
+                | UnlockedHealthPlanFormDataType
+                | LockedHealthPlanFormDataType
+        ) => {
+            expect(
+                base64ToDomain(protoToBase64(toProtoBuffer(domainObject)))
+            ).toEqual(domainObject)
         }
     )
 })
@@ -74,14 +92,14 @@ describe('handles invalid data as expected', () => {
         const maybeError = base64ToDomain(emptyBase64)
 
         expect(maybeError).toBeInstanceOf(Error)
-        expect(maybeError.toString()).toEqual(
+        expect(maybeError.toString()).toBe(
             'Error: Unknown or missing status on this proto. Cannot decode.'
         )
     })
 
     it('base64ToDomain returns a decode error when passed an invalid DraftSubmission', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const invalidDraft = Object.assign({}, basicSubmission()) as any
+        const invalidDraft = Object.assign({}, basicHealthPlanFormData()) as any
         delete invalidDraft.id
         delete invalidDraft.stateNumber
         invalidDraft.submissionType = 'nonsense'
@@ -103,7 +121,10 @@ describe('handles invalid data as expected', () => {
 
     it('base64ToDomain returns a decode error when passed an invalid StateSubmission', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const invalidSubmission = Object.assign({}, basicStateSubmission()) as any
+        const invalidSubmission = Object.assign(
+            {},
+            basicLockedHealthPlanFormData()
+        ) as any
         delete invalidSubmission.id
         delete invalidSubmission.stateNumber
         invalidSubmission.documents = []
@@ -114,7 +135,7 @@ describe('handles invalid data as expected', () => {
         const decodeErr = base64ToDomain(encodedBase64)
 
         expect(decodeErr).toBeInstanceOf(Error)
-        expect(decodeErr.toString()).toEqual(
+        expect(decodeErr.toString()).toBe(
             'Error: ERROR: attempting to parse state submission proto failed'
         )
     })

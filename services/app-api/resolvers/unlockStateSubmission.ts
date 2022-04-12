@@ -1,24 +1,32 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import {
-    DraftSubmissionType, isCMSUser, StateSubmissionType, UpdateInfoType, submissionName
+    UnlockedHealthPlanFormDataType,
+    isCMSUser,
+    LockedHealthPlanFormDataType,
+    UpdateInfoType,
+    submissionName,
 } from '../../app-web/src/common-code/domain-models'
 import { Emailer } from '../emailer'
 import { MutationResolvers } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
-import { setErrorAttributesOnActiveSpan, setResolverDetailsOnActiveSpan, setSuccessAttributesOnActiveSpan } from "./attributeHelper";
+import {
+    setErrorAttributesOnActiveSpan,
+    setResolverDetailsOnActiveSpan,
+    setSuccessAttributesOnActiveSpan,
+} from './attributeHelper'
 
 // unlock takes a state submission and casts it into a draft submission
 // Since draft submission is a strict subset of submitted submission, this can't error today.
-function unlock(submission: StateSubmissionType
-): DraftSubmissionType {
-
-    const draft: DraftSubmissionType = {
+function unlock(
+    submission: LockedHealthPlanFormDataType
+): UnlockedHealthPlanFormDataType {
+    const draft: UnlockedHealthPlanFormDataType = {
         ...submission,
         status: 'DRAFT',
     }
     // this method does persist the submittedAt field onto the draft, but typescript won't let
-    // us access it so that's fine. 
+    // us access it so that's fine.
 
     return draft
 }
@@ -30,7 +38,6 @@ export function unlockStateSubmissionResolver(
     emailer: Emailer
 ): MutationResolvers['unlockStateSubmission'] {
     return async (_parent, { input }, context) => {
-
         const { user, span } = context
         const { unlockedReason, submissionID } = input
         setResolverDetailsOnActiveSpan('createDraftSubmission', user, span)
@@ -40,7 +47,10 @@ export function unlockStateSubmissionResolver(
                 'unlockStateSubmission',
                 'user not authorized to unlock submission'
             )
-            setErrorAttributesOnActiveSpan('user not authorized to unlock submission', span)
+            setErrorAttributesOnActiveSpan(
+                'user not authorized to unlock submission',
+                span
+            )
             throw new ForbiddenError('user not authorized to unlock submission')
         }
 
@@ -52,8 +62,13 @@ export function unlockStateSubmissionResolver(
             logError('unlockStateSubmission', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             if (result.code === 'WRONG_STATUS') {
-                setErrorAttributesOnActiveSpan('Attempted to unlock submission with wrong status', span)
-                throw new UserInputError('Attempted to unlock submission with wrong status')
+                setErrorAttributesOnActiveSpan(
+                    'Attempted to unlock submission with wrong status',
+                    span
+                )
+                throw new UserInputError(
+                    'Attempted to unlock submission with wrong status'
+                )
             }
             throw new Error(errMessage)
         }
@@ -70,15 +85,19 @@ export function unlockStateSubmissionResolver(
         const unlockInfo: UpdateInfoType = {
             updatedAt: new Date(),
             updatedBy: context.user.email,
-            updatedReason: unlockedReason
+            updatedReason: unlockedReason,
         }
 
-        const submission: StateSubmissionType = result
+        const submission: LockedHealthPlanFormDataType = result
 
-        const draft: DraftSubmissionType = unlock(submission)
+        const draft: UnlockedHealthPlanFormDataType = unlock(submission)
 
         // Create a new revision with this draft in it
-        const revisionResult = await store.insertNewRevision(submissionID, unlockInfo, draft)
+        const revisionResult = await store.insertNewRevision(
+            submissionID,
+            unlockInfo,
+            draft
+        )
 
         // const updateResult = await store.updateStateSubmission(stateSubmission)
         if (isStoreError(revisionResult)) {
@@ -88,7 +107,10 @@ export function unlockStateSubmissionResolver(
             throw new Error(errMessage)
         }
 
-        const programs = store.findPrograms(submission.stateCode, submission.programIDs)
+        const programs = store.findPrograms(
+            submission.stateCode,
+            submission.programIDs
+        )
         if (!programs || programs.length !== submission.programIDs.length) {
             const errMessage = `Can't find programs ${submission.programIDs} from state ${submission.stateCode}, ${submission.id}`
             logError('unlockStateSubmission', errMessage)
@@ -100,14 +122,17 @@ export function unlockStateSubmissionResolver(
         const name = submissionName(submission, programs)
 
         const updatedEmailData = {
-            ...unlockInfo, 
-            submissionName: name
+            ...unlockInfo,
+            submissionName: name,
         }
-        const unlockPackageCMSEmailResult = await
-        emailer.sendUnlockPackageCMSEmail(updatedEmailData)
+        const unlockPackageCMSEmailResult =
+            await emailer.sendUnlockPackageCMSEmail(updatedEmailData)
 
-        const unlockPackageStateEmailResult = await
-        emailer.sendUnlockPackageStateEmail(submission, updatedEmailData)
+        const unlockPackageStateEmailResult =
+            await emailer.sendUnlockPackageStateEmail(
+                submission,
+                updatedEmailData
+            )
 
         if (unlockPackageCMSEmailResult instanceof Error) {
             logError(
@@ -129,6 +154,5 @@ export function unlockStateSubmissionResolver(
         setSuccessAttributesOnActiveSpan(span)
 
         return { submission: revisionResult }
-
     }
 }

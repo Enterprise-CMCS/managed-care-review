@@ -2,11 +2,11 @@ import { MockedResponse } from '@apollo/client/testing'
 import dayjs from 'dayjs'
 import { GraphQLError } from 'graphql'
 import {
-    basicStateSubmission,
-    basicSubmission,
-    draftWithALittleBitOfEverything,
+    basicLockedHealthPlanFormData,
+    basicHealthPlanFormData,
+    unlockedWithALittleBitOfEverything,
 } from '../common-code/domain-mocks'
-import { DraftSubmissionType } from '../common-code/domain-models'
+import { UnlockedHealthPlanFormDataType } from '../common-code/domain-models'
 import { domainToBase64 } from '../common-code/proto/stateSubmission'
 import {
     CreateDraftSubmissionDocument,
@@ -326,9 +326,9 @@ export function mockMNState(): State {
 }
 
 export function mockDraftSubmission2(
-    submissionData?: Partial<DraftSubmissionType>
+    submissionData?: Partial<UnlockedHealthPlanFormDataType>
 ): Submission2 {
-    const submission = { ...basicSubmission(), ...submissionData }
+    const submission = { ...basicHealthPlanFormData(), ...submissionData }
     const b64 = domainToBase64(submission)
 
     return {
@@ -355,7 +355,7 @@ export function mockDraftSubmission2(
 export function mockSubmittedSubmission2(): Submission2 {
     // get a submitted DomainModel submission
     // turn it into proto
-    const submission = basicStateSubmission()
+    const submission = basicLockedHealthPlanFormData()
     const b64 = domainToBase64(submission)
 
     return {
@@ -385,7 +385,7 @@ export function mockSubmittedSubmission2(): Submission2 {
 export function mockSubmittedSubmission2WithRevisions(): Submission2 {
     // get a submitted DomainModel submission
     // turn it into proto
-    const submission = basicStateSubmission()
+    const submission = basicLockedHealthPlanFormData()
     const b64 = domainToBase64(submission)
 
     return {
@@ -448,10 +448,10 @@ export function mockSubmittedSubmission2WithRevisions(): Submission2 {
 }
 
 export function mockUnlockedSubmission2(
-    submissionData?: Partial<DraftSubmissionType>
+    submissionData?: Partial<UnlockedHealthPlanFormDataType>
 ): Submission2 {
     const submission = {
-        ...draftWithALittleBitOfEverything(),
+        ...unlockedWithALittleBitOfEverything(),
         ...submissionData,
     }
     const b64 = domainToBase64(submission)
