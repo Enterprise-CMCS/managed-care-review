@@ -4,7 +4,7 @@ Cypress.Commands.add('logInAsStateUser', () => {
     // Set up gql intercept for requests on app load
     cy.intercept('POST', '*/graphql', (req) => {
         aliasQuery(req, 'fetchCurrentUser')
-        aliasQuery(req, 'indexSubmissions2')
+        aliasQuery(req, 'indexHealthPlanPackages')
     })
 
     cy.visit('/')
@@ -27,7 +27,7 @@ Cypress.Commands.add('logInAsStateUser', () => {
         throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
     }
     cy.wait('@fetchCurrentUserQuery', {timeout: 20000})
-    cy.wait('@indexSubmissions2Query', {timeout: 80000}) // this is the first request that engages the db, can take really long if its a fresh PR branch
+    cy.wait('@indexHealthPlanPackagesQuery', {timeout: 80000}) // this is the first request that engages the db, can take really long if its a fresh PR branch
 })
 
 Cypress.Commands.add(
@@ -35,7 +35,7 @@ Cypress.Commands.add(
     ({ initialURL } = { initialURL: '/' }) => {
         cy.intercept('POST', '*/graphql', (req) => {
             aliasQuery(req, 'fetchCurrentUser')
-            aliasQuery(req, 'fetchSubmission2')
+            aliasQuery(req, 'fetchHealthPlanPackage')
         })
 
 
@@ -59,6 +59,6 @@ Cypress.Commands.add(
             throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
         } 
         cy.wait('@fetchCurrentUserQuery', { timeout: 20000 })
-        cy.wait('@fetchSubmission2Query', { timeout: 20000 }) // we only allow CMS users to go to a specific submission on login
+        cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20000 }) // we only allow CMS users to go to a specific submission on login
     }
 )

@@ -294,7 +294,7 @@ describe('submission type assertions', () => {
         [{ ...mockContractAndRatesDraft(), status: 'DRAFT' }, true],
         [mockStateSubmission(), false],
     ])(
-        'isDraftSubmission evaluates as expected',
+        'isUnlockedHealthPlanFormData evaluates as expected',
         (submission, expectedResponse) => {
             // type coercion to allow us to test
             expect(isUnlockedHealthPlanFormData(submission)).toEqual(

@@ -4,6 +4,7 @@ import {
     getCurrentRevisionFromHealthPlanPackage,
     convertDomainModelFormDataToGQLSubmission,
 } from './healthPlanPackages'
+
 const isStateSubmission = (
     submission: DraftSubmission | StateSubmission
 ): submission is StateSubmission => {

@@ -97,7 +97,7 @@ describe('handles invalid data as expected', () => {
         )
     })
 
-    it('base64ToDomain returns a decode error when passed an invalid DraftSubmission', () => {
+    it('base64ToDomain returns a decode error when passed an invalid FormData', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const invalidDraft = Object.assign({}, basicHealthPlanFormData()) as any
         delete invalidDraft.id
@@ -120,11 +120,10 @@ describe('handles invalid data as expected', () => {
     })
 
     it('base64ToDomain returns a decode error when passed an invalid StateSubmission', () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const invalidSubmission = Object.assign(
             {},
             basicLockedHealthPlanFormData()
-        ) as any
+        ) as any // eslint-disable-line @typescript-eslint/no-explicit-any
         delete invalidSubmission.id
         delete invalidSubmission.stateNumber
         invalidSubmission.documents = []
