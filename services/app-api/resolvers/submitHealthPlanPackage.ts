@@ -11,7 +11,7 @@ import {
     LockedHealthPlanFormDataType,
     HealthPlanPackageType,
     submissionName,
-    submissionStatus,
+    packageStatus,
     UpdateInfoType,
 } from '../../app-web/src/common-code/domain-models'
 import { Emailer } from '../emailer'
@@ -153,7 +153,7 @@ export function submitHealthPlanPackageResolver(
         }
 
         const planPackage: HealthPlanPackageType = result
-        const planPackageStatus = submissionStatus(planPackage)
+        const planPackageStatus = packageStatus(planPackage)
         const currentRevision = planPackage.revisions[0]
 
         // Authorization
@@ -272,7 +272,7 @@ export function submitHealthPlanPackageResolver(
         // Send emails!
         const name = submissionName(stateSubmission, programs)
 
-        const status = submissionStatus(updatedSubmission)
+        const status = packageStatus(updatedSubmission)
         let cmsPackageEmailResult
         let statePackageEmailResult
 

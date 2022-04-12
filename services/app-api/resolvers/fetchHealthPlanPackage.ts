@@ -3,7 +3,7 @@ import {
     isCMSUser,
     isStateUser,
     HealthPlanPackageType,
-    submissionStatus,
+    packageStatus,
 } from '../../app-web/src/common-code/domain-models'
 import { QueryResolvers, State } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
@@ -56,7 +56,7 @@ export function fetchHealthPlanPackageResolver(
                 )
             }
         } else if (isCMSUser(context.user)) {
-            if (submissionStatus(submission) === 'DRAFT') {
+            if (packageStatus(submission) === 'DRAFT') {
                 logError(
                     'fetchHealthPlanPackage',
                     'CMS user not authorized to fetch a draft'

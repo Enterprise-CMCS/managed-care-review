@@ -7,20 +7,20 @@ import {
 // submissionStatus computes the current status of the submission based on
 // the submit/unlock info on its revisions.
 // These methods ASSUME that revisions are returned most-recent-first.
-function submissionStatus(
-    submission: HealthPlanPackageType
+function packageStatus(
+    pkg: HealthPlanPackageType
 ): HealthPlanPackageStatusType | Error {
     // Compute the current status of this submission based on the number of revisions.
-    const currentRev = submissionCurrentRevision(submission)
+    const currentRev = packageCurrentRevision(pkg)
 
     // draft - only one revision, no submission status
     // submitted - one revision with submission status
-    if (submission.revisions.length === 1) {
+    if (pkg.revisions.length === 1) {
         if (currentRev.submitInfo) {
             return 'SUBMITTED'
         }
         return 'DRAFT'
-    } else if (submission.revisions.length > 1) {
+    } else if (pkg.revisions.length > 1) {
         // unlocked - multiple revisions, latest revision has unlocked status and no submitted status
         // resubmitted - multiple revisions, latest revision has submitted status
         if (currentRev.submitInfo) {
@@ -35,20 +35,17 @@ function submissionStatus(
 // submissionSubmittedAt returns the INITIAL submission date. Even if the
 // submission has been unlocked and resubmitted the submission date is always the original submit date
 // This method relies on revisions always being presented in most-recent-first order
-function submissionSubmittedAt(
-    submission: HealthPlanPackageType
-): Date | undefined {
-    const lastSubmittedRev =
-        submission.revisions[submission.revisions.length - 1]
+function packageSubmittedAt(pkg: HealthPlanPackageType): Date | undefined {
+    const lastSubmittedRev = pkg.revisions[pkg.revisions.length - 1]
     return lastSubmittedRev?.submitInfo?.updatedAt
 }
 
 // submissionCurrentRevision returns the most recent revision
 // This method (and others here!) rely on revisions always being returned in most-recent-first order
-function submissionCurrentRevision(
-    submission: HealthPlanPackageType
+function packageCurrentRevision(
+    pkg: HealthPlanPackageType
 ): HealthPlanRevisionType {
-    return submission.revisions[0]
+    return pkg.revisions[0]
 }
 
-export { submissionCurrentRevision, submissionStatus, submissionSubmittedAt }
+export { packageCurrentRevision, packageStatus, packageSubmittedAt }

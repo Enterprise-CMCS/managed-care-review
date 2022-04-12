@@ -1,6 +1,6 @@
 import {
-    submissionStatus,
-    submissionSubmittedAt,
+    packageStatus,
+    packageSubmittedAt,
 } from '../../app-web/src/common-code/domain-models'
 import { protoToBase64 } from '../../app-web/src/common-code/proto/stateSubmission'
 import { Resolvers } from '../gen/gqlServer'
@@ -21,14 +21,14 @@ export const healthPlanPackageResolver: Resolvers['HealthPlanPackage'] = {
         })
     },
     status(parent) {
-        const status = submissionStatus(parent)
+        const status = packageStatus(parent)
         if (status instanceof Error) {
             throw status
         }
         return status
     },
     intiallySubmittedAt(parent) {
-        return submissionSubmittedAt(parent) || null
+        return packageSubmittedAt(parent) || null
     },
     state(parent) {
         const packageState = parent.stateCode

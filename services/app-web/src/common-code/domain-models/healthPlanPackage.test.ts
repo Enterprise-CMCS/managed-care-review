@@ -1,10 +1,10 @@
-import { submissionStatus, submissionSubmittedAt } from './submission2'
+import { packageStatus, packageSubmittedAt } from './healthPlanPackage'
 import {
     HealthPlanPackageStatusType,
     HealthPlanPackageType,
 } from './HealthPlanPackageType'
 
-describe('submission 2 helpers', () => {
+describe('HealthPlanPackage helpers', () => {
     it('status returns the expected status', () => {
         const tests: [HealthPlanPackageType, HealthPlanPackageStatusType][] = [
             [
@@ -106,7 +106,7 @@ describe('submission 2 helpers', () => {
         for (const test of tests) {
             const [sub, expectedStatus] = test
 
-            const testStatus = submissionStatus(sub)
+            const testStatus = packageStatus(sub)
 
             expect(testStatus).toEqual(expectedStatus)
         }
@@ -127,7 +127,7 @@ describe('submission 2 helpers', () => {
         for (const test of tests) {
             const [sub, expectedError] = test
 
-            const testStatus = submissionStatus(sub)
+            const testStatus = packageStatus(sub)
 
             expect(testStatus).toEqual(expectedError)
         }
@@ -221,7 +221,7 @@ describe('submission 2 helpers', () => {
         for (const test of tests) {
             const [sub, expectedDate] = test
 
-            const testDate = submissionSubmittedAt(sub)
+            const testDate = packageSubmittedAt(sub)
 
             expect(testDate).toEqual(expectedDate)
         }

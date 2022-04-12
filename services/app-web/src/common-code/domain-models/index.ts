@@ -44,10 +44,10 @@ export {
     generateRateName,
 } from './healthPlanFormData'
 export {
-    submissionCurrentRevision,
-    submissionStatus,
-    submissionSubmittedAt,
-} from './submission2'
+    packageCurrentRevision,
+    packageStatus,
+    packageSubmittedAt,
+} from './healthPlanPackage'
 export type {
     HealthPlanRevisionType,
     HealthPlanPackageType,

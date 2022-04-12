@@ -3,7 +3,7 @@ import {
     UnlockedHealthPlanFormDataType,
     isStateUser,
     HealthPlanPackageType,
-    submissionStatus,
+    packageStatus,
 } from '../../app-web/src/common-code/domain-models'
 import {
     base64ToDomain,
@@ -99,7 +99,7 @@ export function updateHealthPlanFormDataResolver(
         }
 
         // Check the package is in an updateable state
-        const planPackageStatus = submissionStatus(planPackage)
+        const planPackageStatus = packageStatus(planPackage)
         if (planPackageStatus instanceof Error) {
             const errMessage = `No revisions found on submission: ${input.pkgID}`
             logError('updateHealthPlanFormData', errMessage)
