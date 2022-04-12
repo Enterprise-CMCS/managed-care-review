@@ -35,7 +35,7 @@ describe('updateHealthPlanFormData', () => {
             query: UPDATE_HEALTH_PLAN_FORM_DATA,
             variables: {
                 input: {
-                    submissionID: createdDraft.id,
+                    pkgID: createdDraft.id,
                     healthPlanFormData: updatedB64,
                 },
             },
@@ -44,7 +44,7 @@ describe('updateHealthPlanFormData', () => {
         expect(updateResult.errors).toBeUndefined()
 
         const healthPlanPackage =
-            updateResult.data?.updateHealthPlanFormData.submission
+            updateResult.data?.updateHealthPlanFormData.pkg
 
         const updatedFormData = latestFormData(healthPlanPackage)
         expect(updatedFormData.submissionDescription).toBe(
@@ -79,7 +79,7 @@ describe('updateHealthPlanFormData', () => {
             query: UPDATE_HEALTH_PLAN_FORM_DATA,
             variables: {
                 input: {
-                    submissionID: createdDraft.id,
+                    pkgID: createdDraft.id,
                     healthPlanFormData: updatedB64,
                 },
             },
@@ -123,7 +123,7 @@ describe('updateHealthPlanFormData', () => {
             query: UPDATE_HEALTH_PLAN_FORM_DATA,
             variables: {
                 input: {
-                    submissionID: createdDraft.id,
+                    pkgID: createdDraft.id,
                     healthPlanFormData: updatedB64,
                 },
             },
@@ -151,7 +151,7 @@ describe('updateHealthPlanFormData', () => {
             query: UPDATE_HEALTH_PLAN_FORM_DATA,
             variables: {
                 input: {
-                    submissionID: createdDraft.id,
+                    pkgID: createdDraft.id,
                     healthPlanFormData: formData,
                 },
             },
@@ -181,7 +181,7 @@ describe('updateHealthPlanFormData', () => {
             query: UPDATE_HEALTH_PLAN_FORM_DATA,
             variables: {
                 input: {
-                    submissionID: createdDraft.id,
+                    pkgID: createdDraft.id,
                     healthPlanFormData: formData,
                 },
             },
@@ -209,7 +209,7 @@ describe('updateHealthPlanFormData', () => {
             query: UPDATE_HEALTH_PLAN_FORM_DATA,
             variables: {
                 input: {
-                    submissionID: createdSubmitted.id,
+                    pkgID: createdSubmitted.id,
                     healthPlanFormData: b64,
                 },
             },
@@ -245,7 +245,7 @@ describe('updateHealthPlanFormData', () => {
             query: UPDATE_HEALTH_PLAN_FORM_DATA,
             variables: {
                 input: {
-                    submissionID: createdDraft.id,
+                    pkgID: createdDraft.id,
                     healthPlanFormData: b64,
                 },
             },
@@ -279,7 +279,7 @@ describe('updateHealthPlanFormData', () => {
             query: UPDATE_HEALTH_PLAN_FORM_DATA,
             variables: {
                 input: {
-                    submissionID: createdDraft.id,
+                    pkgID: createdDraft.id,
                     healthPlanFormData: b64,
                 },
             },
@@ -322,7 +322,7 @@ describe('updateHealthPlanFormData', () => {
             query: UPDATE_HEALTH_PLAN_FORM_DATA,
             variables: {
                 input: {
-                    submissionID: createdDraft.id,
+                    pkgID: createdDraft.id,
                     healthPlanFormData: updatedB64,
                 },
             },

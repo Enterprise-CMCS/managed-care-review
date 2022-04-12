@@ -164,7 +164,7 @@ export const SubmissionType = ({
                 })
 
                 const draftSubmission: HealthPlanPackage | undefined =
-                    result?.data?.createHealthPlanPackage.submission
+                    result?.data?.createHealthPlanPackage.pkg
 
                 if (draftSubmission) {
                     history.push(

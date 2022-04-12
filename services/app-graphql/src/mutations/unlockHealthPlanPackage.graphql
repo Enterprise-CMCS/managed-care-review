@@ -1,6 +1,6 @@
 mutation unlockHealthPlanPackage($input: UnlockHealthPlanPackageInput!) {
     unlockHealthPlanPackage(input: $input) {
-        submission {
+        pkg {
             id
             stateCode
             state {

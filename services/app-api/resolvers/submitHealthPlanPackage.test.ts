@@ -27,14 +27,13 @@ describe('submitHealthPlanPackage', () => {
             query: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: draftID,
+                    pkgID: draftID,
                 },
             },
         })
 
         expect(submitResult.errors).toBeUndefined()
-        const createdID =
-            submitResult?.data?.submitHealthPlanPackage.submission.id
+        const createdID = submitResult?.data?.submitHealthPlanPackage.pkg.id
 
         // test result
         const resultDraft = await fetchTestStateSubmissionById(
@@ -90,7 +89,7 @@ describe('submitHealthPlanPackage', () => {
             query: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: draftID,
+                    pkgID: draftID,
                 },
             },
         })
@@ -118,7 +117,7 @@ describe('submitHealthPlanPackage', () => {
             query: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: draftID,
+                    pkgID: draftID,
                 },
             },
         })
@@ -147,7 +146,7 @@ describe('submitHealthPlanPackage', () => {
             query: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: draftID,
+                    pkgID: draftID,
                 },
             },
         })
@@ -175,7 +174,7 @@ describe('submitHealthPlanPackage', () => {
             query: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: draftID,
+                    pkgID: draftID,
                 },
             },
         })
@@ -203,7 +202,7 @@ describe('submitHealthPlanPackage', () => {
             query: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: draftID,
+                    pkgID: draftID,
                 },
             },
         })
@@ -227,14 +226,13 @@ describe('submitHealthPlanPackage', () => {
             query: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: draftID,
+                    pkgID: draftID,
                 },
             },
         })
 
         const currentRevision =
-            submitResult?.data?.submitHealthPlanPackage?.submission.revisions[0]
-                .revision
+            submitResult?.data?.submitHealthPlanPackage?.pkg.revisions[0].node
 
         const sub = base64ToDomain(currentRevision.submissionData)
         if (sub instanceof Error) {
@@ -274,7 +272,7 @@ describe('submitHealthPlanPackage', () => {
             query: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: draftID,
+                    pkgID: draftID,
                 },
             },
         })
@@ -282,8 +280,7 @@ describe('submitHealthPlanPackage', () => {
         expect(submitResult.errors).toBeUndefined()
 
         const currentRevision =
-            submitResult?.data?.submitHealthPlanPackage?.submission.revisions[0]
-                .revision
+            submitResult?.data?.submitHealthPlanPackage?.pkg.revisions[0].node
 
         const sub = base64ToDomain(currentRevision.submissionData)
         if (sub instanceof Error) {
@@ -317,7 +314,7 @@ describe('submitHealthPlanPackage', () => {
             query: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: draftID,
+                    pkgID: draftID,
                 },
             },
         })
@@ -325,8 +322,7 @@ describe('submitHealthPlanPackage', () => {
         expect(submitResult.errors).toBeUndefined()
 
         const currentRevision =
-            submitResult?.data?.submitHealthPlanPackage?.submission.revisions[0]
-                .revision
+            submitResult?.data?.submitHealthPlanPackage?.pkg.revisions[0].node
 
         const sub = base64ToDomain(currentRevision.submissionData)
         if (sub instanceof Error) {
@@ -377,15 +373,14 @@ describe('submitHealthPlanPackage', () => {
             query: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: stateSubmission.id,
+                    pkgID: stateSubmission.id,
                     submittedReason: 'Test resubmitted reason',
                 },
             },
         })
 
         const currentRevision =
-            submitResult?.data?.submitHealthPlanPackage?.submission.revisions[0]
-                .revision
+            submitResult?.data?.submitHealthPlanPackage?.pkg.revisions[0].node
 
         const sub = base64ToDomain(currentRevision.submissionData)
         if (sub instanceof Error) {
@@ -446,7 +441,7 @@ describe('submitHealthPlanPackage', () => {
             'Test resubmission reason'
         )
 
-        const currentRevision = submitResult?.revisions[0].revision
+        const currentRevision = submitResult?.revisions[0].node
 
         const sub = base64ToDomain(currentRevision.submissionData)
         if (sub instanceof Error) {
@@ -488,7 +483,7 @@ describe('submitHealthPlanPackage', () => {
             query: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: draftID,
+                    pkgID: draftID,
                 },
             },
         })

@@ -76,7 +76,7 @@ export function createHealthPlanPackageResolver(
         setSuccessAttributesOnActiveSpan(span)
 
         return {
-            submission: pkgResult,
+            pkg: pkgResult,
         }
     }
 }

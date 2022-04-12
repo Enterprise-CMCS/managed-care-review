@@ -134,9 +134,7 @@ export function submitHealthPlanPackageResolver(
         }
 
         // fetch from the store
-        const result = await store.findSubmissionWithRevisions(
-            input.submissionID
-        )
+        const result = await store.findSubmissionWithRevisions(input.pkgID)
 
         if (isStoreError(result)) {
             const errMessage = `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
@@ -146,11 +144,11 @@ export function submitHealthPlanPackageResolver(
         }
 
         if (result === undefined) {
-            const errMessage = `A draft must exist to be submitted: ${input.submissionID}`
+            const errMessage = `A draft must exist to be submitted: ${input.pkgID}`
             logError('submitHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
-                argumentName: 'submissionID',
+                argumentName: 'pkgID',
             })
         }
 
@@ -326,6 +324,6 @@ export function submitHealthPlanPackageResolver(
 
         logSuccess('submitHealthPlanPackage')
         setSuccessAttributesOnActiveSpan(span)
-        return { submission: updatedSubmission }
+        return { pkg: updatedSubmission }
     }
 }

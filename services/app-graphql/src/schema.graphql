@@ -60,7 +60,7 @@ input CreateHealthPlanPackageInput {
 }
 
 type CreateHealthPlanPackagePayload {
-    submission: HealthPlanPackage!
+    pkg: HealthPlanPackage!
 }
 
 input FetchDraftSubmissionInput {
@@ -80,11 +80,11 @@ type FetchStateSubmissionPayload {
 }
 
 input FetchHealthPlanPackageInput {
-    submissionID: ID!
+    pkgID: ID!
 }
 
 type FetchHealthPlanPackagePayload {
-    submission: HealthPlanPackage
+    pkg: HealthPlanPackage
 }
 
 type SubmissionEdge {
@@ -114,30 +114,30 @@ type UpdateDraftSubmissionPayload {
 }
 
 input SubmitHealthPlanPackageInput {
-    submissionID: ID!
+    pkgID: ID!
     submittedReason: String
 }
 
 type SubmitHealthPlanPackagePayload {
-    submission: HealthPlanPackage!
+    pkg: HealthPlanPackage!
 }
 
 input UnlockHealthPlanPackageInput {
-    submissionID: ID!
+    pkgID: ID!
     unlockedReason: String!
 }
 
 type UnlockHealthPlanPackagePayload {
-    submission: HealthPlanPackage!
+    pkg: HealthPlanPackage!
 }
 
 input UpdateHealthPlanFormDataInput {
-    submissionID: ID!
+    pkgID: ID!
     healthPlanFormData: String!
 }
 
 type UpdateHealthPlanFormDataPayload {
-    submission: HealthPlanPackage!
+    pkg: HealthPlanPackage!
 }
 
 scalar Date

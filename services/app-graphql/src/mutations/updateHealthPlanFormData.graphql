@@ -1,6 +1,6 @@
 mutation updateHealthPlanFormData($input: UpdateHealthPlanFormDataInput!) {
     updateHealthPlanFormData(input: $input) {
-        submission {
+        pkg {
             id
             stateCode
             state {

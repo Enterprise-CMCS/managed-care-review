@@ -21,9 +21,7 @@ export function fetchHealthPlanPackageResolver(
         const { user, span } = context
         setResolverDetailsOnActiveSpan('createDraftSubmission', user, span)
         // fetch from the store
-        const result = await store.findSubmissionWithRevisions(
-            input.submissionID
-        )
+        const result = await store.findSubmissionWithRevisions(input.pkgID)
 
         if (isStoreError(result)) {
             console.log('Error finding a submission', result)
@@ -79,6 +77,6 @@ export function fetchHealthPlanPackageResolver(
 
         logSuccess('fetchHealthPlanPackage')
         setSuccessAttributesOnActiveSpan(span)
-        return { submission }
+        return { pkg: submission }
     }
 }

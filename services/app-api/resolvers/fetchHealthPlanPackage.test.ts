@@ -20,7 +20,7 @@ describe('fetchHealthPlanPackage', () => {
 
         // then see if we can fetch that same submission
         const input = {
-            submissionID: createdID,
+            pkgID: createdID,
         }
 
         const result = await server.executeOperation({
@@ -30,11 +30,11 @@ describe('fetchHealthPlanPackage', () => {
 
         expect(result.errors).toBeUndefined()
 
-        const resultSub = result.data?.fetchHealthPlanPackage.submission
+        const resultSub = result.data?.fetchHealthPlanPackage.pkg
         expect(resultSub.id).toEqual(createdID)
         expect(resultSub.revisions).toHaveLength(1)
 
-        const revision = resultSub.revisions[0].revision
+        const revision = resultSub.revisions[0].node
 
         const subData = base64ToDomain(revision.submissionData)
         if (subData instanceof Error) {
@@ -61,7 +61,7 @@ describe('fetchHealthPlanPackage', () => {
 
         // then see if we can fetch that same submission
         const input = {
-            submissionID: 'BOGUS-ID',
+            pkgID: 'BOGUS-ID',
         }
 
         const result = await server.executeOperation({
@@ -71,7 +71,7 @@ describe('fetchHealthPlanPackage', () => {
 
         expect(result.errors).toBeUndefined()
 
-        const resultSub = result.data?.fetchHealthPlanPackage.submission
+        const resultSub = result.data?.fetchHealthPlanPackage.pkg
         expect(resultSub).toBeNull()
     })
 
@@ -101,7 +101,7 @@ describe('fetchHealthPlanPackage', () => {
 
         // then see if we can fetch that same submission
         const input = {
-            submissionID: createdID,
+            pkgID: createdID,
         }
 
         const result = await server.executeOperation({
@@ -111,7 +111,7 @@ describe('fetchHealthPlanPackage', () => {
 
         expect(result.errors).toBeUndefined()
 
-        const resultSub = result.data?.fetchHealthPlanPackage.submission
+        const resultSub = result.data?.fetchHealthPlanPackage.pkg
         expect(resultSub.id).toEqual(createdID)
         expect(resultSub.revisions).toHaveLength(2)
     })
@@ -135,7 +135,7 @@ describe('fetchHealthPlanPackage', () => {
 
         // DRAFT
         const fetchInput = {
-            submissionID: createdID,
+            pkgID: createdID,
         }
 
         const draftResult = await server.executeOperation({
@@ -145,7 +145,7 @@ describe('fetchHealthPlanPackage', () => {
 
         expect(draftResult.errors).toBeUndefined()
 
-        const resultSub = draftResult.data?.fetchHealthPlanPackage.submission
+        const resultSub = draftResult.data?.fetchHealthPlanPackage.pkg
 
         const today = todaysDate()
 
@@ -166,12 +166,11 @@ describe('fetchHealthPlanPackage', () => {
 
         expect(unlockResult.errors).toBeUndefined()
 
+        expect(unlockResult.data?.fetchHealthPlanPackage.pkg.status).toBe(
+            'UNLOCKED'
+        )
         expect(
-            unlockResult.data?.fetchHealthPlanPackage.submission.status
-        ).toBe('UNLOCKED')
-        expect(
-            unlockResult.data?.fetchHealthPlanPackage.submission
-                .intiallySubmittedAt
+            unlockResult.data?.fetchHealthPlanPackage.pkg.intiallySubmittedAt
         ).toEqual(today)
 
         // resubmit it
@@ -188,12 +187,11 @@ describe('fetchHealthPlanPackage', () => {
 
         expect(resubmitResult.errors).toBeUndefined()
 
+        expect(resubmitResult.data?.fetchHealthPlanPackage.pkg.status).toBe(
+            'RESUBMITTED'
+        )
         expect(
-            resubmitResult.data?.fetchHealthPlanPackage.submission.status
-        ).toBe('RESUBMITTED')
-        expect(
-            resubmitResult.data?.fetchHealthPlanPackage.submission
-                .intiallySubmittedAt
+            resubmitResult.data?.fetchHealthPlanPackage.pkg.intiallySubmittedAt
         ).toEqual(today)
     })
 
@@ -207,7 +205,7 @@ describe('fetchHealthPlanPackage', () => {
 
         // then see if we can fetch that same submission
         const input = {
-            submissionID: createdID,
+            pkgID: createdID,
         }
 
         // setup a server with a different user
@@ -229,8 +227,8 @@ describe('fetchHealthPlanPackage', () => {
 
         expect(result.errors).toBeUndefined()
 
-        expect(result.data?.fetchHealthPlanPackage.submission).toBeDefined()
-        expect(result.data?.fetchHealthPlanPackage.submission).not.toBeNull()
+        expect(result.data?.fetchHealthPlanPackage.pkg).toBeDefined()
+        expect(result.data?.fetchHealthPlanPackage.pkg).not.toBeNull()
     })
 
     it('returns an error if you are requesting for a different state (403)', async () => {
@@ -243,7 +241,7 @@ describe('fetchHealthPlanPackage', () => {
 
         // then see if we can fetch that same submission
         const input = {
-            submissionID: createdID,
+            pkgID: createdID,
         }
 
         // setup a server with a different user
@@ -295,7 +293,7 @@ describe('fetchHealthPlanPackage', () => {
 
         // then see if we can fetch that same submission
         const input = {
-            submissionID: createdID,
+            pkgID: createdID,
         }
 
         const result = await cmsServer.executeOperation({
@@ -363,7 +361,7 @@ describe('fetchHealthPlanPackage', () => {
         )
 
         const input = {
-            submissionID: stateSubmission.id,
+            pkgID: stateSubmission.id,
         }
 
         const result = await cmsServer.executeOperation({
@@ -375,15 +373,15 @@ describe('fetchHealthPlanPackage', () => {
 
         const maxDate = new Date(8640000000000000)
         let mostRecentDate = maxDate
-        const revs = result?.data?.fetchHealthPlanPackage.submission.revisions
+        const revs = result?.data?.fetchHealthPlanPackage.pkg.revisions
         if (!revs) {
             throw new Error('No revisions returned!')
         }
         for (const rev of revs) {
-            expect(rev.revision.createdAt.getTime()).toBeLessThan(
+            expect(rev.node.createdAt.getTime()).toBeLessThan(
                 mostRecentDate.getTime()
             )
-            mostRecentDate = rev.revision.createdAt
+            mostRecentDate = rev.node.createdAt
         }
     })
 })

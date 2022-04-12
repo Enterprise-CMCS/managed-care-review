@@ -52,12 +52,12 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
     const { loading, error, data } = useFetchHealthPlanPackageQuery({
         variables: {
             input: {
-                submissionID: id,
+                pkgID: id,
             },
         },
     })
 
-    const submissionAndRevisions = data?.fetchHealthPlanPackage.submission
+    const submissionAndRevisions = data?.fetchHealthPlanPackage.pkg
 
     // Pull out the correct revision form api request, display errors for bad dad
     useEffect(() => {
@@ -113,7 +113,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
 
     // Update header with submission name
     useEffect(() => {
-        const subWithRevisions = data?.fetchHealthPlanPackage.submission
+        const subWithRevisions = data?.fetchHealthPlanPackage.pkg
         if (packageData && subWithRevisions) {
             const programs = subWithRevisions.state.programs
             updateHeading(pathname, submissionName(packageData, programs))

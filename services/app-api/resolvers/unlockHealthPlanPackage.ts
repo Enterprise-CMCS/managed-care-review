@@ -39,7 +39,7 @@ export function unlockHealthPlanPackageResolver(
 ): MutationResolvers['unlockHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
-        const { unlockedReason, submissionID } = input
+        const { unlockedReason, pkgID } = input
         setResolverDetailsOnActiveSpan('createDraftSubmission', user, span)
         // This resolver is only callable by CMS users
         if (!isCMSUser(user)) {
@@ -55,7 +55,7 @@ export function unlockHealthPlanPackageResolver(
         }
 
         // fetch from the store
-        const result = await store.findStateSubmission(submissionID)
+        const result = await store.findStateSubmission(pkgID)
 
         if (isStoreError(result)) {
             const errMessage = `Issue finding a state submission of type ${result.code}. Message: ${result.message}`
@@ -74,11 +74,11 @@ export function unlockHealthPlanPackageResolver(
         }
 
         if (result === undefined) {
-            const errMessage = `A submission must exist to be unlocked: ${submissionID}`
+            const errMessage = `A submission must exist to be unlocked: ${pkgID}`
             logError('unlockHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
-                argumentName: 'submissionID',
+                argumentName: 'pkgID',
             })
         }
 
@@ -94,7 +94,7 @@ export function unlockHealthPlanPackageResolver(
 
         // Create a new revision with this draft in it
         const revisionResult = await store.insertNewRevision(
-            submissionID,
+            pkgID,
             unlockInfo,
             draft
         )
@@ -153,6 +153,6 @@ export function unlockHealthPlanPackageResolver(
         logSuccess('unlockHealthPlanPackage')
         setSuccessAttributesOnActiveSpan(span)
 
-        return { submission: revisionResult }
+        return { pkg: revisionResult }
     }
 }

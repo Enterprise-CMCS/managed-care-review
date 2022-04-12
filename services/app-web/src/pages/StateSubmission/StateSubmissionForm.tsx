@@ -128,12 +128,12 @@ export const StateSubmissionForm = (): React.ReactElement => {
     } = useFetchHealthPlanPackageQuery({
         variables: {
             input: {
-                submissionID: id,
+                pkgID: id,
             },
         },
     })
 
-    const submissionAndRevisions = fetchData?.fetchHealthPlanPackage?.submission
+    const submissionAndRevisions = fetchData?.fetchHealthPlanPackage?.pkg
     const [updateDraftSubmission, { error: updateError }] =
         useUpdateDraftSubmissionMutation()
     const [updateFormData, { error: updateFormDataError }] =
@@ -176,7 +176,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
             const updateResult = await updateFormData({
                 variables: {
                     input: {
-                        submissionID: input.id,
+                        pkgID: input.id,
                         healthPlanFormData: base64Draft,
                     },
                 },
@@ -186,7 +186,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                 },
             })
             const updatedSubmission: HealthPlanPackage | undefined =
-                updateResult?.data?.updateHealthPlanFormData.submission
+                updateResult?.data?.updateHealthPlanFormData.pkg
 
             if (!updatedSubmission) {
                 setShowPageErrorMessage(true)

@@ -89,7 +89,7 @@ async function unlockMutationWrapper(
         const result = await unlockHealthPlanPackage({
             variables: {
                 input: {
-                    submissionID: id,
+                    pkgID: id,
                     unlockedReason,
                 },
             },
@@ -99,8 +99,8 @@ async function unlockMutationWrapper(
             return result.errors
         }
 
-        if (result.data?.unlockHealthPlanPackage.submission) {
-            return result.data?.unlockHealthPlanPackage.submission
+        if (result.data?.unlockHealthPlanPackage.pkg) {
+            return result.data?.unlockHealthPlanPackage.pkg
         } else {
             return new Error('No errors, and no unlock result.')
         }
@@ -156,13 +156,13 @@ export const SubmissionSummary = (): React.ReactElement => {
     const { loading, error, data } = useFetchHealthPlanPackageQuery({
         variables: {
             input: {
-                submissionID: id,
+                pkgID: id,
             },
         },
     })
 
     const [unlockHealthPlanPackage] = useUnlockHealthPlanPackageMutation()
-    const submissionAndRevisions = data?.fetchHealthPlanPackage.submission
+    const submissionAndRevisions = data?.fetchHealthPlanPackage.pkg
 
     const isCMSUser = loggedInUser?.role === 'CMS_USER'
 
@@ -243,7 +243,7 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     // Update header with submission name
     useEffect(() => {
-        const subWithRevisions = data?.fetchHealthPlanPackage.submission
+        const subWithRevisions = data?.fetchHealthPlanPackage.pkg
         if (packageData && subWithRevisions) {
             const programs = subWithRevisions.state.programs
             updateHeading(pathname, submissionName(packageData, programs))

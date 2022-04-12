@@ -1,6 +1,6 @@
 mutation createHealthPlanPackage($input: CreateHealthPlanPackageInput!) {
     createHealthPlanPackage(input: $input) {
-        submission {
+        pkg {
             id
             stateCode
             state {

@@ -38,7 +38,7 @@ describe('unlockHealthPlanPackage', () => {
             query: UNLOCK_STATE_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: stateSubmission.id,
+                    pkgID: stateSubmission.id,
                     unlockedReason: 'Super duper good reason.',
                 },
             },
@@ -51,7 +51,7 @@ describe('unlockHealthPlanPackage', () => {
         }
 
         const unlockedSub: HealthPlanPackage =
-            unlockResult.data.unlockHealthPlanPackage.submission
+            unlockResult.data.unlockHealthPlanPackage.pkg
 
         // After unlock, we should get a draft submission back
         expect(unlockedSub.status).toBe('UNLOCKED')
@@ -106,15 +106,14 @@ describe('unlockHealthPlanPackage', () => {
             query: UNLOCK_STATE_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: stateSubmission.id,
+                    pkgID: stateSubmission.id,
                     unlockedReason: 'Super duper good reason.',
                 },
             },
         })
 
         expect(unlockResult.errors).toBeUndefined()
-        const unlockedSub =
-            unlockResult?.data?.unlockHealthPlanPackage.submission
+        const unlockedSub = unlockResult?.data?.unlockHealthPlanPackage.pkg
 
         // After unlock, we should get a draft submission back
         expect(unlockedSub.status).toBe('UNLOCKED')
@@ -235,7 +234,7 @@ describe('unlockHealthPlanPackage', () => {
             query: UNLOCK_STATE_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: stateSubmission.id,
+                    pkgID: stateSubmission.id,
                     unlockedReason: 'Super duper good reason.',
                 },
             },
@@ -270,7 +269,7 @@ describe('unlockHealthPlanPackage', () => {
             query: UNLOCK_STATE_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: stateSubmission.id,
+                    pkgID: stateSubmission.id,
                     unlockedReason: 'Super duper good reason.',
                 },
             },
@@ -298,7 +297,7 @@ describe('unlockHealthPlanPackage', () => {
             query: UNLOCK_STATE_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: stateSubmission.id,
+                    pkgID: stateSubmission.id,
                     unlockedReason: 'Super duper good reason.',
                 },
             },
@@ -333,7 +332,7 @@ describe('unlockHealthPlanPackage', () => {
             query: UNLOCK_STATE_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: 'foo-bar',
+                    pkgID: 'foo-bar',
                     unlockedReason: 'Super duper good reason.',
                 },
             },
@@ -368,7 +367,7 @@ describe('unlockHealthPlanPackage', () => {
             query: UNLOCK_STATE_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: 'foo-bar',
+                    pkgID: 'foo-bar',
                     unlockedReason: 'Super duper good reason.',
                 },
             },
@@ -404,7 +403,7 @@ describe('unlockHealthPlanPackage', () => {
             query: UNLOCK_STATE_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: stateSubmission.id,
+                    pkgID: stateSubmission.id,
                     unlockedReason: undefined,
                 },
             },

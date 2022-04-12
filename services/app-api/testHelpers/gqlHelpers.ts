@@ -122,7 +122,7 @@ const createTestHealthPlanPackage = async (
 
     console.log('GOT BACK DA', result.data)
 
-    return result.data.createHealthPlanPackage.submission
+    return result.data.createHealthPlanPackage.pkg
 }
 
 const updateTestDraftSubmission = async (
@@ -232,7 +232,7 @@ const submitTestDraftSubmission = async (
         query: SUBMIT_DRAFT_SUBMISSION,
         variables: {
             input: {
-                submissionID,
+                pkgID: submissionID,
             },
         },
     })
@@ -248,7 +248,7 @@ const submitTestDraftSubmission = async (
         throw new Error('updateTestDraftSubmission returned nothing')
     }
 
-    return updateResult.data.submitHealthPlanPackage.submission
+    return updateResult.data.submitHealthPlanPackage.pkg
 }
 
 const resubmitTestDraftSubmission = async (
@@ -260,7 +260,7 @@ const resubmitTestDraftSubmission = async (
         query: SUBMIT_DRAFT_SUBMISSION,
         variables: {
             input: {
-                submissionID,
+                pkgID: submissionID,
                 submittedReason,
             },
         },
@@ -277,7 +277,7 @@ const resubmitTestDraftSubmission = async (
         throw new Error('updateTestDraftSubmission returned nothing')
     }
 
-    return updateResult.data.submitHealthPlanPackage.submission
+    return updateResult.data.submitHealthPlanPackage.pkg
 }
 
 const unlockTestDraftSubmission = async (
@@ -289,7 +289,7 @@ const unlockTestDraftSubmission = async (
         query: UNLOCK_STATE_SUBMISSION,
         variables: {
             input: {
-                submissionID,
+                pkgID: submissionID,
                 unlockedReason,
             },
         },
@@ -306,7 +306,7 @@ const unlockTestDraftSubmission = async (
         throw new Error('updateTestDraftSubmission returned nothing')
     }
 
-    return updateResult.data.unlockHealthPlanPackage.submission
+    return updateResult.data.unlockHealthPlanPackage.pkg
 }
 
 const createTestStateSubmission = async (

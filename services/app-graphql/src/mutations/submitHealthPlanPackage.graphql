@@ -1,6 +1,6 @@
 mutation submitHealthPlanPackage($input: SubmitHealthPlanPackageInput!) {
     submitHealthPlanPackage(input: $input) {
-        submission {
+        pkg {
             id
             stateCode
             status

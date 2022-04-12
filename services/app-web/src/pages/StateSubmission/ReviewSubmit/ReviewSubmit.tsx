@@ -101,7 +101,7 @@ export const ReviewSubmit = ({
     const onSubmit = async (
         submittedReason: string | undefined
     ): Promise<void> => {
-        const input = { submissionID: draftSubmission.id }
+        const input = { pkgID: draftSubmission.id }
 
         if (unlocked) {
             Object.assign(input, {

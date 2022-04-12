@@ -155,7 +155,7 @@ describe('indexHealthPlanPackages', () => {
 
         // then see if we can fetch that same submission
         const input = {
-            submissionID: createdID,
+            pkgID: createdID,
         }
 
         // setup a server with a different user

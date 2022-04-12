@@ -22,7 +22,7 @@ describe('createHealthPlanPackage', () => {
 
         expect(res.errors).toBeUndefined()
 
-        const pkg = res.data?.createHealthPlanPackage.submission
+        const pkg = res.data?.createHealthPlanPackage.pkg
         const draft = latestFormData(pkg)
 
         expect(draft.submissionDescription).toBe('A real submission')

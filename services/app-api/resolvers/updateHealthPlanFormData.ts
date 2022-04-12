@@ -41,7 +41,7 @@ export function updateHealthPlanFormDataResolver(
         const formDataResult = base64ToDomain(input.healthPlanFormData)
         if (formDataResult instanceof Error) {
             const errMessage =
-                `Failed to parse out form data in request: ${input.submissionID}  ` +
+                `Failed to parse out form data in request: ${input.pkgID}  ` +
                 formDataResult.message
             logError('updateHealthPlanFormData', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
@@ -52,7 +52,7 @@ export function updateHealthPlanFormDataResolver(
 
         // don't send a StateSubmission to the update endpoint
         if (formDataResult.status === 'SUBMITTED') {
-            const errMessage = `Attempted to update with a StateSubmission: ${input.submissionID}`
+            const errMessage = `Attempted to update with a StateSubmission: ${input.pkgID}`
             logError('updateHealthPlanFormData', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
@@ -61,9 +61,7 @@ export function updateHealthPlanFormDataResolver(
         }
 
         const unlockedFormData: UnlockedHealthPlanFormDataType = formDataResult
-        const result = await store.findSubmissionWithRevisions(
-            input.submissionID
-        )
+        const result = await store.findSubmissionWithRevisions(input.pkgID)
 
         if (isStoreError(result)) {
             console.log('Error finding a submission', result)
@@ -74,7 +72,7 @@ export function updateHealthPlanFormDataResolver(
         }
 
         if (result === undefined) {
-            const errMessage = `No submission found to update with that ID: ${input.submissionID}`
+            const errMessage = `No submission found to update with that ID: ${input.pkgID}`
             logError('updateHealthPlanFormData', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
@@ -103,7 +101,7 @@ export function updateHealthPlanFormDataResolver(
         // Check the package is in an updateable state
         const planPackageStatus = submissionStatus(planPackage)
         if (planPackageStatus instanceof Error) {
-            const errMessage = `No revisions found on submission: ${input.submissionID}`
+            const errMessage = `No revisions found on submission: ${input.pkgID}`
             logError('updateHealthPlanFormData', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
@@ -111,7 +109,7 @@ export function updateHealthPlanFormDataResolver(
 
         // Can't update a submission that is locked or resubmitted
         if (!['DRAFT', 'UNLOCKED'].includes(planPackageStatus)) {
-            const errMessage = `Submission is not in editable state: ${input.submissionID} status: ${planPackageStatus}`
+            const errMessage = `Submission is not in editable state: ${input.pkgID} status: ${planPackageStatus}`
             logError('updateHealthPlanFormData', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
@@ -135,7 +133,7 @@ export function updateHealthPlanFormDataResolver(
 
         // Sanity check, Can't update a submission that is locked or resubmitted in the form data either
         if (previousFormDataResult.status === 'SUBMITTED') {
-            const errMessage = `Submission form data is not in editable state: ${input.submissionID}`
+            const errMessage = `Submission form data is not in editable state: ${input.pkgID}`
             logError('updateHealthPlanFormData', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
@@ -198,7 +196,7 @@ export function updateHealthPlanFormDataResolver(
         )
 
         if (isStoreError(updateResult)) {
-            const errMessage = `Error updating form data: ${input.submissionID}:: ${updateResult.code}: ${updateResult.message}`
+            const errMessage = `Error updating form data: ${input.pkgID}:: ${updateResult.code}: ${updateResult.message}`
             logError('updateHealthPlanFormData', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
@@ -208,7 +206,7 @@ export function updateHealthPlanFormDataResolver(
         setSuccessAttributesOnActiveSpan(span)
 
         return {
-            submission: updateResult,
+            pkg: updateResult,
         }
     }
 }
