@@ -2,6 +2,8 @@ import { UnlockedHealthPlanFormDataType } from './UnlockedHealthPlanFormDataType
 import { ProgramT } from './ProgramT'
 import { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 import { HealthPlanFormDataType } from './HealthPlanFormDataType'
+import { RateDataType } from '.'
+import { formatRateNameDate } from '../../dateHelpers'
 
 const isContractOnly = (
     sub: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
@@ -139,6 +141,53 @@ function submissionName(
     return `MCR-${submission.stateCode.toUpperCase()}-${formattedProgramNames}-${padNumber}`
 }
 
+const generateRateName = (
+    rateData: RateDataType,
+    submissionName: string
+): string => {
+    const {
+        rateType,
+        rateAmendmentInfo,
+        rateDateCertified,
+        rateDateEnd,
+        rateDateStart,
+    } = rateData
+    let rateName = `${submissionName}-RATE`
+
+    if (rateType === 'AMENDMENT' && rateAmendmentInfo?.effectiveDateStart) {
+        rateName = rateName.concat(
+            '-',
+            formatRateNameDate(rateAmendmentInfo.effectiveDateStart)
+        )
+    } else if ((rateType === 'NEW' || !rateType) && rateDateStart) {
+        rateName = rateName.concat('-', formatRateNameDate(rateDateStart))
+    }
+
+    if (rateType === 'AMENDMENT' && rateAmendmentInfo?.effectiveDateEnd) {
+        rateName = rateName.concat(
+            '-',
+            formatRateNameDate(rateAmendmentInfo.effectiveDateEnd)
+        )
+    } else if ((rateType === 'NEW' || !rateType) && rateDateEnd) {
+        rateName = rateName.concat('-', formatRateNameDate(rateDateEnd))
+    }
+
+    if (rateType === 'AMENDMENT') {
+        rateName = rateName.concat('-', 'AMENDMENT')
+    } else if (rateType === 'NEW') {
+        rateName = rateName.concat('-', 'CERTIFICATION')
+    }
+
+    if (rateDateCertified) {
+        rateName = rateName = rateName.concat(
+            '-',
+            formatRateNameDate(rateDateCertified)
+        )
+    }
+
+    return rateName
+}
+
 export {
     hasValidContract,
     hasValidDocuments,
@@ -150,4 +199,5 @@ export {
     isUnlockedHealthPlanFormData,
     programNames,
     submissionName,
+    generateRateName,
 }

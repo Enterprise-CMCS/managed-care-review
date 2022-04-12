@@ -4,11 +4,12 @@ import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import { DocumentDateLookupTable } from '../../../pages/SubmissionSummary/SubmissionSummary'
 import { useS3 } from '../../../contexts/S3Context'
-import { formatCalendarDate, formatRateNameDate } from '../../../dateHelpers'
+import { formatCalendarDate } from '../../../dateHelpers'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
+import { generateRateName } from '../../../common-code/domain-models/'
 import styles from '../SubmissionSummarySection.module.scss'
 
 export type RateDetailsSummarySectionProps = {
@@ -35,39 +36,7 @@ export const RateDetailsSummarySection = ({
         doc.documentCategories.includes('RATES_RELATED')
     )
 
-    let rateName: string
-
-    const generateRateName = (
-        submissionName: string,
-        startDate: Date,
-        endDate: Date,
-        certDate: Date,
-        type: string
-    ): string => {
-        return `${submissionName}-RATE-${formatRateNameDate(
-            startDate
-        )}-${formatRateNameDate(endDate)}-${type}-${formatRateNameDate(
-            certDate
-        )}`
-    }
-
-    if (submission.rateType === 'AMENDMENT') {
-        rateName = generateRateName(
-            submission.name,
-            submission.rateAmendmentInfo?.effectiveDateStart,
-            submission.rateAmendmentInfo?.effectiveDateEnd,
-            submission.rateDateCertified,
-            'AMENDMENT'
-        )
-    } else {
-        rateName = generateRateName(
-            submission.name,
-            submission.rateDateStart,
-            submission.rateDateEnd,
-            submission.rateDateCertified,
-            'CERTIFICATION'
-        )
-    }
+    const rateName = generateRateName(submission, submission.name)
 
     useEffect(() => {
         // get all the keys for the documents we want to zip

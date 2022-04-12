@@ -119,6 +119,17 @@ export type UnlockedHealthPlanFormDataType = {
     rateAmendmentInfo?: RateAmendmentInfo
 }
 
+type RateDataType = {
+    rateType?: 'AMENDMENT' | 'NEW' | null
+    rateDateStart?: Date
+    rateDateEnd?: Date
+    rateDateCertified?: Date
+    rateAmendmentInfo?: {
+        effectiveDateEnd?: Date
+        effectiveDateStart?: Date
+    } | null
+}
+
 export type {
     DocumentCategoryType,
     SubmissionType,
@@ -136,4 +147,5 @@ export type {
     AmendableItems,
     ContractAmendmentInfo,
     ContractExecutionStatus,
+    RateDataType,
 }

@@ -36,6 +36,7 @@ custom:
   reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
   reactAppOtelCollectorUrl: ${env:REACT_APP_OTEL_COLLECTOR_URL}
   dbURL: ${env:DATABASE_URL}
+  ldSDKKey: ${env:LD_SDK_KEY}
   webpack:
     webpackConfig: 'webpack.config.js'
     packager: 'yarn'
@@ -119,6 +120,7 @@ provider:
     APPLICATION_ENDPOINT: ${self:custom.applicationEndpoint}
     AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
     OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
+    LD_SDK_KEY: ${self:custom.ldSDKKey}
 
 layers:
   prismaClientMigration:

@@ -14,6 +14,7 @@ import {
     resubmittedCMSEmail,
     resubmittedStateEmail,
 } from './'
+import { formatRateNameDate } from '../../app-web/src/dateHelpers'
 
 describe('Email templates', () => {
     describe('CMS email', () => {
@@ -95,7 +96,7 @@ describe('Email templates', () => {
                 })
             )
         })
-        it('includes expected data summary for a contract and rates submission', () => {
+        it('includes expected data summary for a contract and rates submission CMS email', () => {
             const sub: LockedHealthPlanFormDataType = {
                 ...mockContractAndRatesSubmission(),
                 contractDateStart: new Date('01/01/2021'),
@@ -108,6 +109,9 @@ describe('Email templates', () => {
                 'some-title',
                 testEmailConfig
             )
+            const rateName = `some-title-RATE-20210101-20220101-CERTIFICATION-${formatRateNameDate(
+                new Date()
+            )}`
 
             expect(template).toEqual(
                 expect.objectContaining({
@@ -131,6 +135,11 @@ describe('Email templates', () => {
                     ),
                 })
             )
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringContaining(rateName),
+                })
+            )
         })
         it('includes expected data summary for a contract amendment submission', () => {
             const sub: LockedHealthPlanFormDataType = {
@@ -145,6 +154,9 @@ describe('Email templates', () => {
                 'some-title',
                 testEmailConfig
             )
+            const rateName = `some-title-RATE-20210101-20220101-CERTIFICATION-${formatRateNameDate(
+                new Date()
+            )}`
 
             expect(template).toEqual(
                 expect.objectContaining({
@@ -168,9 +180,14 @@ describe('Email templates', () => {
                     ),
                 })
             )
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringContaining(rateName),
+                })
+            )
         })
 
-        it('includes expected data summary for a rate amendment submission', () => {
+        it('includes expected data summary for a rate amendment submission CMS email', () => {
             const sub: LockedHealthPlanFormDataType = {
                 ...mockContractAndRatesSubmission(),
                 rateType: 'AMENDMENT',
@@ -188,6 +205,9 @@ describe('Email templates', () => {
                 'some-title',
                 testEmailConfig
             )
+            const rateName = `some-title-RATE-20210605-20211231-AMENDMENT-${formatRateNameDate(
+                new Date()
+            )}`
 
             expect(template).toEqual(
                 expect.objectContaining({
@@ -201,6 +221,11 @@ describe('Email templates', () => {
                     bodyText: expect.stringContaining(
                         'Rate amendment effective dates: 06/05/2021 to 12/31/2021'
                     ),
+                })
+            )
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringContaining(rateName),
                 })
             )
         })
@@ -340,6 +365,99 @@ describe('Email templates', () => {
             expect(template).toEqual(
                 expect.objectContaining({
                     bodyText: expect.stringContaining('What comes next:'),
+                })
+            )
+        })
+
+        it('includes expected data summary for a contract and rates submission State email', () => {
+            const sub: LockedHealthPlanFormDataType = {
+                ...mockContractAndRatesSubmission(),
+                contractDateStart: new Date('01/01/2021'),
+                contractDateEnd: new Date('01/01/2025'),
+                rateDateStart: new Date('01/01/2021'),
+                rateDateEnd: new Date('01/01/2022'),
+            }
+            const user = mockUser()
+            const template = newPackageStateEmail(
+                sub,
+                'some-title',
+                user,
+                testEmailConfig
+            )
+            const rateName = `some-title-RATE-20210101-20220101-CERTIFICATION-${formatRateNameDate(
+                new Date()
+            )}`
+
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringContaining(
+                        'Submission type: Contract action and rate certification'
+                    ),
+                })
+            )
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringContaining(
+                        'Rating period: 01/01/2021 to 01/01/2022'
+                    ),
+                })
+            )
+
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringContaining(
+                        'Contract effective dates: 01/01/2021 to 01/01/2025'
+                    ),
+                })
+            )
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringContaining(rateName),
+                })
+            )
+        })
+
+        it('includes expected data summary for a rate amendment submission State email', () => {
+            const sub: LockedHealthPlanFormDataType = {
+                ...mockContractAndRatesSubmission(),
+                rateType: 'AMENDMENT',
+                contractDateStart: new Date('01/01/2021'),
+                contractDateEnd: new Date('01/01/2025'),
+                rateDateStart: new Date('01/01/2021'),
+                rateDateEnd: new Date('01/01/2022'),
+                rateAmendmentInfo: {
+                    effectiveDateStart: new Date('06/05/2021'),
+                    effectiveDateEnd: new Date('12/31/2021'),
+                },
+            }
+            const user = mockUser()
+            const template = newPackageStateEmail(
+                sub,
+                'some-title',
+                user,
+                testEmailConfig
+            )
+            const rateName = `some-title-RATE-20210605-20211231-AMENDMENT-${formatRateNameDate(
+                new Date()
+            )}`
+
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringContaining(
+                        'Submission type: Contract action and rate certification'
+                    ),
+                })
+            )
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringContaining(
+                        'Rate amendment effective dates: 06/05/2021 to 12/31/2021'
+                    ),
+                })
+            )
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringContaining(rateName),
                 })
             )
         })

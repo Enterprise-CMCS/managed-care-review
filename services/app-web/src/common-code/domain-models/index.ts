@@ -26,6 +26,7 @@ export type {
     StateContact,
     SubmissionDocument,
     SubmissionType,
+    RateDataType,
 } from './UnlockedHealthPlanFormDataType'
 export type { ProgramT } from './ProgramT'
 export type { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
@@ -40,6 +41,7 @@ export {
     isLockedHealthPlanFormData,
     programNames,
     submissionName,
+    generateRateName,
 } from './healthPlanFormData'
 export {
     submissionCurrentRevision,

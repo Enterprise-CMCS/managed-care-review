@@ -5,9 +5,11 @@ import {
     mockMNState,
 } from '../../testHelpers/apolloHelpers'
 import {
+    generateRateName,
     hasValidSupportingDocumentCategories,
     LockedHealthPlanFormDataType,
     submissionName,
+    RateDataType,
 } from '.'
 import {
     hasValidContract,
@@ -373,4 +375,116 @@ describe('submission type assertions', () => {
 
         expect(submissionName(sub, programs)).toBe(expectedName)
     })
+
+    const rateNameTestArray: {
+        rateData: RateDataType
+        submissionName: string
+        expectedName: string
+    }[] = [
+        {
+            rateData: {
+                rateType: 'AMENDMENT',
+                rateDateStart: new Date('2021/04/22'),
+                rateDateEnd: new Date('2022/03/29'),
+                rateDateCertified: new Date('2021/05/23'),
+                rateAmendmentInfo: {
+                    effectiveDateStart: new Date('2022/05/21'),
+                    effectiveDateEnd: new Date('2022/09/21'),
+                },
+            },
+            submissionName: 'MN-TEST-AMENDMENT',
+            expectedName:
+                'MN-TEST-AMENDMENT-RATE-20220521-20220921-AMENDMENT-20210523',
+        },
+        {
+            rateData: {
+                rateType: 'NEW',
+                rateDateStart: new Date('2021/04/22'),
+                rateDateEnd: new Date('2022/03/29'),
+                rateDateCertified: new Date('2021/04/22'),
+            },
+            submissionName: 'OH-TEST-NAME',
+            expectedName:
+                'OH-TEST-NAME-RATE-20210422-20220329-CERTIFICATION-20210422',
+        },
+        {
+            rateData: {
+                rateType: 'NEW',
+                rateDateStart: new Date('2021/04/22'),
+                rateDateEnd: new Date('2022/03/29'),
+                rateDateCertified: new Date('2021/04/22'),
+                rateAmendmentInfo: {
+                    effectiveDateStart: new Date('2022/05/21'),
+                    effectiveDateEnd: new Date('2022/09/21'),
+                },
+            },
+            submissionName: 'MN-NEW-WITH-AMENDMENT-DATES',
+            expectedName:
+                'MN-NEW-WITH-AMENDMENT-DATES-RATE-20210422-20220329-CERTIFICATION-20210422',
+        },
+        {
+            rateData: {
+                rateType: 'NEW',
+                rateAmendmentInfo: {
+                    effectiveDateStart: new Date('2022/05/21'),
+                    effectiveDateEnd: new Date('2022/09/21'),
+                },
+            },
+            submissionName: 'MN-NEW-NO-DATES',
+            expectedName: 'MN-NEW-NO-DATES-RATE-CERTIFICATION',
+        },
+        {
+            rateData: {
+                rateType: 'AMENDMENT',
+                rateAmendmentInfo: {},
+            },
+            submissionName: 'MN-AMENDMENT-NO-DATES',
+            expectedName: 'MN-AMENDMENT-NO-DATES-RATE-AMENDMENT',
+        },
+        {
+            rateData: {
+                rateType: 'NEW',
+                rateDateStart: new Date('2021/04/22'),
+                rateAmendmentInfo: {
+                    effectiveDateStart: new Date('2022/05/21'),
+                    effectiveDateEnd: new Date('2022/09/21'),
+                },
+            },
+            submissionName: 'MN-NEW-INCOMPLETE-DATES',
+            expectedName: 'MN-NEW-INCOMPLETE-DATES-RATE-20210422-CERTIFICATION',
+        },
+        {
+            rateData: {
+                rateType: 'AMENDMENT',
+                rateDateStart: new Date('2021/04/22'),
+                rateDateEnd: new Date('2022/03/29'),
+                rateAmendmentInfo: {
+                    effectiveDateStart: new Date('2022/05/21'),
+                },
+            },
+            submissionName: 'MN-AMENDMENT-INCOMPLETE',
+            expectedName: 'MN-AMENDMENT-INCOMPLETE-RATE-20220521-AMENDMENT',
+        },
+        {
+            rateData: {
+                rateDateStart: new Date('2021/04/22'),
+                rateDateEnd: new Date('2022/03/29'),
+                rateDateCertified: new Date('2021/05/23'),
+                rateAmendmentInfo: {
+                    effectiveDateStart: new Date('2022/05/21'),
+                    effectiveDateEnd: new Date('2022/09/21'),
+                },
+            },
+            submissionName: 'MN-NO-TYPE',
+            expectedName: 'MN-NO-TYPE-RATE-20210422-20220329-20210523',
+        },
+    ]
+    test.each(rateNameTestArray)(
+        'submission rate name is correct',
+        ({ rateData, submissionName, expectedName }) => {
+            expect(generateRateName(rateData, submissionName)).toMatch(
+                expectedName
+            )
+        }
+    )
 })
