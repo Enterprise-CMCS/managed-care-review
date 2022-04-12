@@ -129,9 +129,6 @@ describe('dashboard', () => {
                 cy.wait('@fetchSubmission2Query', { timeout: 50000 })
                 cy.findByTestId('updatedSubmissionBanner').should('exist')
 
-                cy.findByText('Back to state dashboard').click()
-                cy.wait('@indexSubmissions2Query')
-
                 //Sign out
                 cy.findByRole('button', { name: 'Sign out' }).click()
 

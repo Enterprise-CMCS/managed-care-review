@@ -25,6 +25,7 @@ export type {
     StateContact,
     SubmissionDocument,
     SubmissionType,
+    RateDataType,
 } from './DraftSubmissionType'
 export type { ProgramT } from './ProgramT'
 export type { StateSubmissionType } from './StateSubmissionType'
@@ -39,6 +40,7 @@ export {
     isStateSubmission,
     programNames,
     submissionName,
+    generateRateName,
 } from './submission'
 export {
     submissionCurrentRevision,
