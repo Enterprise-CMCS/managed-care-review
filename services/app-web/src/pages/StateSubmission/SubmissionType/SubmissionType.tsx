@@ -21,9 +21,9 @@ import { useAuth } from '../../../contexts/AuthContext'
 import {
     CreateDraftSubmissionInput,
     Program,
-    Submission2,
+    HealthPlanPackage,
     SubmissionType as SubmissionTypeT,
-    useCreateSubmission2Mutation,
+    useCreateHealthPlanPackageMutation,
 } from '../../../gen/gqlClient'
 import { PageActions } from '../PageActions'
 import styles from '../StateSubmissionForm.module.scss'
@@ -49,7 +49,7 @@ type SubmissionTypeProps = {
     draftSubmission?: UnlockedHealthPlanFormDataType
     updateDraft?: (
         input: UnlockedHealthPlanFormDataType
-    ) => Promise<Submission2 | Error>
+    ) => Promise<HealthPlanPackage | Error>
     formAlert?: React.ReactElement
 }
 
@@ -95,21 +95,22 @@ export const SubmissionType = ({
         return msg
     }
 
-    const [createDraftSubmission, { error }] = useCreateSubmission2Mutation({
-        // An alternative to messing with the cache like we do with create, just zero it out.
-        update(cache, { data }) {
-            if (data) {
-                cache.modify({
-                    id: 'ROOT_QUERY',
-                    fields: {
-                        indexSubmissions2(_index, { DELETE }) {
-                            return DELETE
+    const [createDraftSubmission, { error }] =
+        useCreateHealthPlanPackageMutation({
+            // An alternative to messing with the cache like we do with create, just zero it out.
+            update(cache, { data }) {
+                if (data) {
+                    cache.modify({
+                        id: 'ROOT_QUERY',
+                        fields: {
+                            indexHealthPlanPackages(_index, { DELETE }) {
+                                return DELETE
+                            },
                         },
-                    },
-                })
-            }
-        },
-    })
+                    })
+                }
+            },
+        })
 
     useEffect(() => {
         // Focus the error summary heading only if we are displaying
@@ -162,8 +163,8 @@ export const SubmissionType = ({
                     variables: { input },
                 })
 
-                const draftSubmission: Submission2 | undefined =
-                    result?.data?.createSubmission2.submission
+                const draftSubmission: HealthPlanPackage | undefined =
+                    result?.data?.createHealthPlanPackage.submission
 
                 if (draftSubmission) {
                     history.push(

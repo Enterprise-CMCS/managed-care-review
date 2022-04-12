@@ -1,6 +1,6 @@
 import { GraphQLError } from 'graphql'
-import UNLOCK_STATE_SUBMISSION from '../../app-graphql/src/mutations/unlockStateSubmission.graphql'
-import { Submission2 } from '../gen/gqlServer'
+import UNLOCK_STATE_SUBMISSION from '../../app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
+import { HealthPlanPackage } from '../gen/gqlServer'
 import { todaysDate } from '../testHelpers/dateHelpers'
 import {
     constructTestPostgresServer,
@@ -15,8 +15,8 @@ import {
 } from '../testHelpers/gqlHelpers'
 import { mockStoreThatErrors } from '../testHelpers/storeHelpers'
 
-describe('unlockStateSubmission', () => {
-    it('returns a Submission2 with all revisions', async () => {
+describe('unlockHealthPlanPackage', () => {
+    it('returns a HealthPlanPackage with all revisions', async () => {
         const stateServer = await constructTestPostgresServer()
 
         // First, create a new submitted submission
@@ -50,37 +50,37 @@ describe('unlockStateSubmission', () => {
             throw new Error('this should never happen')
         }
 
-        const unlockedSub: Submission2 =
-            unlockResult.data.unlockStateSubmission.submission
+        const unlockedSub: HealthPlanPackage =
+            unlockResult.data.unlockHealthPlanPackage.submission
 
         // After unlock, we should get a draft submission back
         expect(unlockedSub.status).toBe('UNLOCKED')
 
         expect(unlockedSub.revisions).toHaveLength(2)
 
-        expect(unlockedSub.revisions[0].revision.submitInfo).toBeNull()
-        expect(unlockedSub.revisions[1].revision.submitInfo).toBeDefined()
+        expect(unlockedSub.revisions[0].node.submitInfo).toBeNull()
+        expect(unlockedSub.revisions[1].node.submitInfo).toBeDefined()
         expect(
-            unlockedSub.revisions[1].revision.submitInfo?.updatedAt.toISOString()
+            unlockedSub.revisions[1].node.submitInfo?.updatedAt.toISOString()
         ).toContain(todaysDate())
         // check that the date has full ISO time eg. 2022-03-25T03:09:54.864Z
         expect(
-            unlockedSub.revisions[1].revision.submitInfo?.updatedAt.toISOString()
+            unlockedSub.revisions[1].node.submitInfo?.updatedAt.toISOString()
         ).toContain('Z')
 
-        expect(unlockedSub.revisions[0].revision.unlockInfo).toBeDefined()
-        expect(unlockedSub.revisions[0].revision.unlockInfo?.updatedBy).toBe(
+        expect(unlockedSub.revisions[0].node.unlockInfo).toBeDefined()
+        expect(unlockedSub.revisions[0].node.unlockInfo?.updatedBy).toBe(
             'zuko@example.com'
         )
+        expect(unlockedSub.revisions[0].node.unlockInfo?.updatedReason).toBe(
+            'Super duper good reason.'
+        )
         expect(
-            unlockedSub.revisions[0].revision.unlockInfo?.updatedReason
-        ).toBe('Super duper good reason.')
-        expect(
-            unlockedSub.revisions[0].revision.unlockInfo?.updatedAt.toISOString()
+            unlockedSub.revisions[0].node.unlockInfo?.updatedAt.toISOString()
         ).toContain(todaysDate())
         // check that the date has full ISO time eg. 2022-03-25T03:09:54.864Z
         expect(
-            unlockedSub.revisions[0].revision.unlockInfo?.updatedAt.toISOString()
+            unlockedSub.revisions[0].node.unlockInfo?.updatedAt.toISOString()
         ).toContain('Z')
     })
 
@@ -113,23 +113,24 @@ describe('unlockStateSubmission', () => {
         })
 
         expect(unlockResult.errors).toBeUndefined()
-        const unlockedSub = unlockResult?.data?.unlockStateSubmission.submission
+        const unlockedSub =
+            unlockResult?.data?.unlockHealthPlanPackage.submission
 
         // After unlock, we should get a draft submission back
         expect(unlockedSub.status).toBe('UNLOCKED')
-        expect(unlockedSub.revisions[0].revision.unlockInfo).toBeDefined()
-        expect(unlockedSub.revisions[0].revision.unlockInfo?.updatedBy).toBe(
+        expect(unlockedSub.revisions[0].node.unlockInfo).toBeDefined()
+        expect(unlockedSub.revisions[0].node.unlockInfo?.updatedBy).toBe(
             'zuko@example.com'
         )
+        expect(unlockedSub.revisions[0].node.unlockInfo?.updatedReason).toBe(
+            'Super duper good reason.'
+        )
         expect(
-            unlockedSub.revisions[0].revision.unlockInfo?.updatedReason
-        ).toBe('Super duper good reason.')
-        expect(
-            unlockedSub.revisions[0].revision.unlockInfo?.updatedAt.toISOString()
+            unlockedSub.revisions[0].node.unlockInfo?.updatedAt.toISOString()
         ).toContain(todaysDate())
         // check that the date has full ISO time eg. 2022-03-25T03:09:54.864Z
         expect(
-            unlockedSub.revisions[0].revision.unlockInfo?.updatedAt.toISOString()
+            unlockedSub.revisions[0].node.unlockInfo?.updatedAt.toISOString()
         ).toContain('Z')
 
         // after unlock we should be able to update that draft submission and get the results
@@ -207,18 +208,18 @@ describe('unlockStateSubmission', () => {
             'Very super duper good reason.'
         )
         expect(draft.status).toBe('UNLOCKED')
-        expect(draft.revisions[0].revision.unlockInfo?.updatedBy).toBe(
+        expect(draft.revisions[0].node.unlockInfo?.updatedBy).toBe(
             'zuko@example.com'
         )
-        expect(draft.revisions[0].revision.unlockInfo?.updatedReason).toBe(
+        expect(draft.revisions[0].node.unlockInfo?.updatedReason).toBe(
             'Very super duper good reason.'
         )
         expect(
-            draft.revisions[0].revision.unlockInfo?.updatedAt.toISOString()
+            draft.revisions[0].node.unlockInfo?.updatedAt.toISOString()
         ).toContain(todaysDate())
         // check that the date has full ISO time eg. 2022-03-25T03:09:54.864Z
         expect(
-            draft.revisions[0].revision.unlockInfo?.updatedAt.toISOString()
+            draft.revisions[0].node.unlockInfo?.updatedAt.toISOString()
         ).toContain('Z')
     })
 

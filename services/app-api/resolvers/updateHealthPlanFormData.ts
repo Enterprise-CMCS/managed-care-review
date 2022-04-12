@@ -121,7 +121,7 @@ export function updateHealthPlanFormDataResolver(
 
         // Validate input against the db.
         // Having to crack this open to check on this is probably an indication that some of this info
-        // really belongs on the Submission2 itself instead of being inside form data, but this is where we are now.
+        // really belongs on the HealthPlanPackage itself instead of being inside form data, but this is where we are now.
 
         const previousFormDataResult = toDomain(
             planPackage.revisions[0].submissionFormProto

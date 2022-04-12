@@ -1,7 +1,7 @@
 import {
     constructTestPostgresServer,
     createTestStateSubmission,
-    createTestSubmission2,
+    createTestHealthPlanPackage,
 } from '../testHelpers/gqlHelpers'
 import UPDATE_HEALTH_PLAN_FORM_DATA from '../../app-graphql/src/mutations/updateHealthPlanFormData.graphql'
 import { domainToBase64 } from '../../app-web/src/common-code/proto/stateSubmission'
@@ -21,7 +21,7 @@ describe('updateHealthPlanFormData', () => {
     it('updates valid fields in the formData', async () => {
         const server = await constructTestPostgresServer()
 
-        const createdDraft = await createTestSubmission2(server)
+        const createdDraft = await createTestHealthPlanPackage(server)
 
         const formData = latestFormData(createdDraft)
 
@@ -55,7 +55,7 @@ describe('updateHealthPlanFormData', () => {
     it('errors if a CMS user calls it', async () => {
         const server = await constructTestPostgresServer()
 
-        const createdDraft = await createTestSubmission2(server)
+        const createdDraft = await createTestHealthPlanPackage(server)
 
         const formData = latestFormData(createdDraft)
 
@@ -98,7 +98,7 @@ describe('updateHealthPlanFormData', () => {
 
     it('errors if a state user from a different state calls it', async () => {
         const server = await constructTestPostgresServer()
-        const createdDraft = await createTestSubmission2(server)
+        const createdDraft = await createTestHealthPlanPackage(server)
         const formData = latestFormData(createdDraft)
 
         // update that draft.
@@ -143,7 +143,7 @@ describe('updateHealthPlanFormData', () => {
     it('errors if the payload isnt valid', async () => {
         const server = await constructTestPostgresServer()
 
-        const createdDraft = await createTestSubmission2(server)
+        const createdDraft = await createTestHealthPlanPackage(server)
 
         const formData = 'not-valid-proto'
 
@@ -171,7 +171,7 @@ describe('updateHealthPlanFormData', () => {
     it('errors if the payload is submitted', async () => {
         const server = await constructTestPostgresServer()
 
-        const createdDraft = await createTestSubmission2(server)
+        const createdDraft = await createTestHealthPlanPackage(server)
 
         const stateSubmission = basicLockedHealthPlanFormData()
 
@@ -233,7 +233,7 @@ describe('updateHealthPlanFormData', () => {
         //
 
         const server = await constructTestPostgresServer()
-        const createdDraft = await createTestSubmission2(server)
+        const createdDraft = await createTestHealthPlanPackage(server)
 
         const formData = latestFormData(createdDraft)
 
@@ -264,7 +264,7 @@ describe('updateHealthPlanFormData', () => {
 
     it('errors if the other payload values dont match the db', async () => {
         const server = await constructTestPostgresServer()
-        const createdDraft = await createTestSubmission2(server)
+        const createdDraft = await createTestHealthPlanPackage(server)
 
         const formData = latestFormData(createdDraft)
 
@@ -308,7 +308,7 @@ describe('updateHealthPlanFormData', () => {
             store: postgresStore,
         })
 
-        const createdDraft = await createTestSubmission2(server)
+        const createdDraft = await createTestHealthPlanPackage(server)
 
         const formData = latestFormData(createdDraft)
 

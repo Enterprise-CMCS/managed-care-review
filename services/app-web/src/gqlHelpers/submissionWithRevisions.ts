@@ -5,8 +5,8 @@ import {
 } from '../common-code/domain-models'
 import { base64ToDomain } from '../common-code/proto/stateSubmission'
 import {
-    Revision,
-    Submission2,
+    HealthPlanRevision,
+    HealthPlanPackage,
     Submission as GQLSubmissionUnionType,
 } from '../gen/gqlClient'
 import { formatGQLDate } from '../dateHelpers'
@@ -15,9 +15,9 @@ const isGQLDraftSubmission = (sub: GQLSubmissionUnionType): boolean => {
     return sub.__typename === 'DraftSubmission'
 }
 
-const getCurrentRevisionFromSubmission2 = (
-    submissionAndRevisions: Submission2
-): [Revision, HealthPlanFormDataType] | Error => {
+const getCurrentRevisionFromHealthPlanPackage = (
+    submissionAndRevisions: HealthPlanPackage
+): [HealthPlanRevision, HealthPlanFormDataType] | Error => {
     // check that package and valid revisions exist
     if (submissionAndRevisions) {
         if (
@@ -35,13 +35,13 @@ const getCurrentRevisionFromSubmission2 = (
 
         const newestRev = submissionAndRevisions.revisions.reduce(
             (acc, rev) => {
-                if (rev.revision.createdAt > acc.revision.createdAt) {
+                if (rev.node.createdAt > acc.node.createdAt) {
                     return rev
                 } else {
                     return acc
                 }
             }
-        ).revision
+        ).node
 
         // Decode form data submitted by the state
         const healthPlanPackageFormDataResult = base64ToDomain(
@@ -120,7 +120,7 @@ const convertDomainModelFormDataToGQLSubmission = (
 
 export {
     convertDomainModelFormDataToGQLSubmission,
-    getCurrentRevisionFromSubmission2,
+    getCurrentRevisionFromHealthPlanPackage,
     isGQLDraftSubmission,
 }
 export type { GQLSubmissionUnionType }

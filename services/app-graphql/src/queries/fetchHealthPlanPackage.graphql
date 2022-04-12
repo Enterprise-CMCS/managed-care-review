@@ -1,5 +1,5 @@
-query fetchSubmission2($input: FetchSubmission2Input!) {
-    fetchSubmission2(input: $input) {
+query fetchHealthPlanPackage($input: FetchHealthPlanPackageInput!) {
+    fetchHealthPlanPackage(input: $input) {
         submission {
             id
             stateCode
@@ -14,7 +14,7 @@ query fetchSubmission2($input: FetchSubmission2Input!) {
             status
             intiallySubmittedAt
             revisions {
-                revision {
+                node {
                     id
                     unlockInfo {
                         updatedAt

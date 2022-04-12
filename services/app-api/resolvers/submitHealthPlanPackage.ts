@@ -109,21 +109,21 @@ function submit(
         }
 }
 
-// submitDraftSubmissionResolver is a state machine transition for Submission,
+// submitHealthPlanPackageResolver is a state machine transition for Submission,
 // transforming it from a DraftSubmission to a StateSubmission
-export function submitDraftSubmissionResolver(
+export function submitHealthPlanPackageResolver(
     store: Store,
     emailer: Emailer
-): MutationResolvers['submitDraftSubmission'] {
+): MutationResolvers['submitHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
         const { submittedReason } = input
-        setResolverDetailsOnActiveSpan('submitDraftSubmission', user, span)
+        setResolverDetailsOnActiveSpan('submitHealthPlanPackage', user, span)
 
         // This resolver is only callable by state users
         if (!isStateUser(user)) {
             logError(
-                'submitDraftSubmission',
+                'submitHealthPlanPackage',
                 'user not authorized to fetch state data'
             )
             setErrorAttributesOnActiveSpan(
@@ -140,14 +140,14 @@ export function submitDraftSubmissionResolver(
 
         if (isStoreError(result)) {
             const errMessage = `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
-            logError('submitDraftSubmission', errMessage)
+            logError('submitHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
 
         if (result === undefined) {
             const errMessage = `A draft must exist to be submitted: ${input.submissionID}`
-            logError('submitDraftSubmission', errMessage)
+            logError('submitHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
                 argumentName: 'submissionID',
@@ -162,7 +162,7 @@ export function submitDraftSubmissionResolver(
         const stateFromCurrentUser: State['code'] = user.state_code
         if (planPackage.stateCode !== stateFromCurrentUser) {
             logError(
-                'submitDraftSubmission',
+                'submitHealthPlanPackage',
                 'user not authorized to fetch data from a different state'
             )
             setErrorAttributesOnActiveSpan(
@@ -178,13 +178,13 @@ export function submitDraftSubmissionResolver(
 
         if (draftResult instanceof Error) {
             const errMessage = `Failed to decode draft proto ${draftResult}.`
-            logError('submitDraftSubmission', errMessage)
+            logError('submitHealthPlanPackage', errMessage)
             throw new Error(errMessage)
         }
 
         if (draftResult.status === 'SUBMITTED') {
             const errMessage = `Attempted to submit and already submitted package.`
-            logError('submitDraftSubmission', errMessage)
+            logError('submitHealthPlanPackage', errMessage)
             throw new Error(errMessage)
         }
 
@@ -202,7 +202,7 @@ export function submitDraftSubmissionResolver(
             // initial submission
         } else if (planPackageStatus === 'UNLOCKED' && !submittedReason) {
             logError(
-                'submitDraftSubmission',
+                'submitHealthPlanPackage',
                 'Incomplete submission cannot be submitted, resubmission reason is required'
             )
             setErrorAttributesOnActiveSpan(
@@ -217,7 +217,7 @@ export function submitDraftSubmissionResolver(
             planPackageStatus === 'SUBMITTED'
         ) {
             const errMessage = `Attempted to submit and already submitted package.`
-            logError('submitDraftSubmission', errMessage)
+            logError('submitHealthPlanPackage', errMessage)
             throw new Error(errMessage)
         }
 
@@ -226,7 +226,7 @@ export function submitDraftSubmissionResolver(
 
         if (isSubmissionError(submissionResult)) {
             logError(
-                'submitDraftSubmission',
+                'submitHealthPlanPackage',
                 'Incomplete submission cannot be submitted'
             )
             setErrorAttributesOnActiveSpan(
@@ -250,7 +250,7 @@ export function submitDraftSubmissionResolver(
         )
         if (isStoreError(updateResult)) {
             const errMessage = `Issue updating a state submission of type ${updateResult.code}. Message: ${updateResult.message}`
-            logError('submitDraftSubmission', errMessage)
+            logError('submitHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
@@ -266,7 +266,7 @@ export function submitDraftSubmissionResolver(
             programs.length !== stateSubmission.programIDs.length
         ) {
             const errMessage = `Can't find programs ${stateSubmission.programIDs} from state ${stateSubmission.stateCode}, ${stateSubmission.id}`
-            logError('unlockStateSubmission', errMessage)
+            logError('unlockHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
@@ -308,7 +308,7 @@ export function submitDraftSubmissionResolver(
 
         if (cmsPackageEmailResult instanceof Error) {
             logError(
-                'submitDraftSubmission - CMS email failed',
+                'submitHealthPlanPackage - CMS email failed',
                 cmsPackageEmailResult
             )
             setErrorAttributesOnActiveSpan('CMS email failed', span)
@@ -317,14 +317,14 @@ export function submitDraftSubmissionResolver(
 
         if (statePackageEmailResult instanceof Error) {
             logError(
-                'submitDraftSubmission - state email failed',
+                'submitHealthPlanPackage - state email failed',
                 statePackageEmailResult
             )
             setErrorAttributesOnActiveSpan('state email failed', span)
             throw statePackageEmailResult
         }
 
-        logSuccess('submitDraftSubmission')
+        logSuccess('submitHealthPlanPackage')
         setSuccessAttributesOnActiveSpan(span)
         return { submission: updatedSubmission }
     }

@@ -14,7 +14,7 @@ mutation updateHealthPlanFormData($input: UpdateHealthPlanFormDataInput!) {
             status
             intiallySubmittedAt
             revisions {
-                revision {
+                node {
                     id
                     unlockInfo {
                         updatedAt

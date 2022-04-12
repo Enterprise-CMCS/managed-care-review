@@ -1,4 +1,4 @@
-import INDEX_SUBMISSIONS2 from '../../app-graphql/src/queries/indexSubmissions2.graphql'
+import INDEX_SUBMISSIONS2 from '../../app-graphql/src/queries/indexHealthPlanPackages.graphql'
 import {
     constructTestPostgresServer,
     createTestDraftSubmission,
@@ -6,22 +6,19 @@ import {
     unlockTestDraftSubmission,
     resubmitTestDraftSubmission,
 } from '../testHelpers/gqlHelpers'
-import {todaysDate} from '../testHelpers/dateHelpers'
-import {
-    Submission2Edge,
-    Submission2,
-} from '../gen/gqlServer'
+import { todaysDate } from '../testHelpers/dateHelpers'
+import { HealthPlanPackageEdge, HealthPlanPackage } from '../gen/gqlServer'
 import { base64ToDomain } from '../../app-web/src/common-code/proto/stateSubmission'
 
-const currentRevisionSubmissionFormData = (submission: Submission2) => {
-  const result =  base64ToDomain(submission.revisions[0].revision.submissionData)
-  if (result instanceof Error) {
-      console.error(result)
-      return undefined
-  }
-  return result
+const currentRevisionSubmissionFormData = (submission: HealthPlanPackage) => {
+    const result = base64ToDomain(submission.revisions[0].node.submissionData)
+    if (result instanceof Error) {
+        console.error(result)
+        return undefined
+    }
+    return result
 }
-describe('indexSubmissions2', () => {
+describe('indexHealthPlanPackages', () => {
     it('returns a list of submissions that includes newly created entries', async () => {
         const server = await constructTestPostgresServer()
 
@@ -30,12 +27,12 @@ describe('indexSubmissions2', () => {
         const stateSub = await createTestStateSubmission(server)
 
         // then see if we can get that same submission back from the index
-        const result  = await server.executeOperation({
+        const result = await server.executeOperation({
             query: INDEX_SUBMISSIONS2,
         })
 
         //Parse state submission proto data
-        const currentRevision = stateSub?.revisions[0]?.revision
+        const currentRevision = stateSub?.revisions[0]?.node
         const stateSubData = base64ToDomain(currentRevision.submissionData)
         if (stateSubData instanceof Error) {
             throw stateSubData
@@ -43,29 +40,28 @@ describe('indexSubmissions2', () => {
 
         expect(result.errors).toBeUndefined()
 
-        const submissionsIndex = result.data?.indexSubmissions2
+        const submissionsIndex = result.data?.indexHealthPlanPackages
 
         expect(submissionsIndex.totalCount).toBeGreaterThan(1)
 
         // Since we don't wipe the DB between tests,filter out extraneous submissions and grab new submissions by ID to confirm they are returned
-        const theseSubmissions: Submission2[] = submissionsIndex.edges
-            .map((edge: Submission2Edge) => edge.node)
-            .filter((sub: Submission2) =>
+        const theseSubmissions: HealthPlanPackage[] = submissionsIndex.edges
+            .map((edge: HealthPlanPackageEdge) => edge.node)
+            .filter((sub: HealthPlanPackage) =>
                 [draftSub.id, stateSub.id].includes(sub.id)
             )
         // specific submissions by id exist
-        expect(theseSubmissions.length).toBe(2)
+        expect(theseSubmissions).toHaveLength(2)
 
         // confirm some submission data is correct too, first in list will be draft, second is the submitted
-        expect(theseSubmissions[0].intiallySubmittedAt).toBe(null)
-          expect(theseSubmissions[0].status).toBe('DRAFT')
-        expect(currentRevisionSubmissionFormData(theseSubmissions[0])?.submissionDescription).toBe(
-            draftSub.submissionDescription
-        )
+        expect(theseSubmissions[0].intiallySubmittedAt).toBeNull()
+        expect(theseSubmissions[0].status).toBe('DRAFT')
+        expect(
+            currentRevisionSubmissionFormData(theseSubmissions[0])
+                ?.submissionDescription
+        ).toBe(draftSub.submissionDescription)
         expect(theseSubmissions[1].intiallySubmittedAt).toBe(todaysDate())
-        expect(theseSubmissions[1].status).toBe(
-            'SUBMITTED'
-        )
+        expect(theseSubmissions[1].status).toBe('SUBMITTED')
         expect(
             currentRevisionSubmissionFormData(theseSubmissions[1])
                 ?.submissionDescription
@@ -92,18 +88,30 @@ describe('indexSubmissions2', () => {
         const relockedSubmission = await createTestStateSubmission(server)
 
         // unlock two
-        await unlockTestDraftSubmission(cmsServer, unlockedSubmission.id, 'Test reason')
-        await unlockTestDraftSubmission(cmsServer, relockedSubmission.id, 'Test reason')
+        await unlockTestDraftSubmission(
+            cmsServer,
+            unlockedSubmission.id,
+            'Test reason'
+        )
+        await unlockTestDraftSubmission(
+            cmsServer,
+            relockedSubmission.id,
+            'Test reason'
+        )
 
         // resubmit one
-        await resubmitTestDraftSubmission(server, relockedSubmission.id, 'Test first resubmission')
+        await resubmitTestDraftSubmission(
+            server,
+            relockedSubmission.id,
+            'Test first resubmission'
+        )
 
         // index submissions api request
         const result = await server.executeOperation({
             query: INDEX_SUBMISSIONS2,
         })
-        const submissionsIndex = result.data?.indexSubmissions2
-        
+        const submissionsIndex = result.data?.indexHealthPlanPackages
+
         // pull out test related submissions and order them
         const testSubmissionIDs = [
             draftSubmission.id,
@@ -111,13 +119,15 @@ describe('indexSubmissions2', () => {
             unlockedSubmission.id,
             relockedSubmission.id,
         ]
-        const testSubmissions: Submission2[] = submissionsIndex.edges
-            .map((edge: Submission2Edge) => edge.node)
-            .filter((test: Submission2) => testSubmissionIDs.includes(test.id))
-        
-        expect(testSubmissions.length).toBe(4)
-            
-        // organize test submissions in a predictable order via testSubmissionsIds array 
+        const testSubmissions: HealthPlanPackage[] = submissionsIndex.edges
+            .map((edge: HealthPlanPackageEdge) => edge.node)
+            .filter((test: HealthPlanPackage) =>
+                testSubmissionIDs.includes(test.id)
+            )
+
+        expect(testSubmissions).toHaveLength(4)
+
+        // organize test submissions in a predictable order via testSubmissionsIds array
         testSubmissions.sort((a, b) => {
             if (
                 testSubmissionIDs.indexOf(a.id) >
@@ -135,45 +145,48 @@ describe('indexSubmissions2', () => {
         expect(testSubmissions[0].status).toBe('DRAFT')
     })
 
-
     it('a different user from the same state can index submissions', async () => {
-         const server = await constructTestPostgresServer()
+        const server = await constructTestPostgresServer()
 
-         // First, create a new submission
-         const stateSubmission = await createTestStateSubmission(server)
+        // First, create a new submission
+        const stateSubmission = await createTestStateSubmission(server)
 
-         const createdID = stateSubmission.id
+        const createdID = stateSubmission.id
 
-         // then see if we can fetch that same submission
-         const input = {
-             submissionID: createdID,
-         }
+        // then see if we can fetch that same submission
+        const input = {
+            submissionID: createdID,
+        }
 
-         // setup a server with a different user
-         const otherUserServer = await constructTestPostgresServer({
-             context: {
-                 user: {
-                     name: 'Aang',
-                     state_code: 'FL',
-                     role: 'STATE_USER',
-                     email: 'aang@mn.gov',
-                 },
-             },
-         })
+        // setup a server with a different user
+        const otherUserServer = await constructTestPostgresServer({
+            context: {
+                user: {
+                    name: 'Aang',
+                    state_code: 'FL',
+                    role: 'STATE_USER',
+                    email: 'aang@mn.gov',
+                },
+            },
+        })
 
-         const result = await otherUserServer.executeOperation({
-             query: INDEX_SUBMISSIONS2,
-             variables: { input },
-         })
+        const result = await otherUserServer.executeOperation({
+            query: INDEX_SUBMISSIONS2,
+            variables: { input },
+        })
 
         expect(result.errors).toBeUndefined()
-        const  submissions = result.data?.indexSubmissions2.edges.map((edge: Submission2Edge) => edge.node)
+        const submissions = result.data?.indexHealthPlanPackages.edges.map(
+            (edge: HealthPlanPackageEdge) => edge.node
+        )
         expect(submissions).not.toBeNull()
         expect(submissions.length).toBeGreaterThan(1)
 
-        const testSubmission =  submissions.filter((test: Submission2) => test.id === createdID)[0]
+        const testSubmission = submissions.filter(
+            (test: HealthPlanPackage) => test.id === createdID
+        )[0]
         expect(testSubmission.intiallySubmittedAt).toBe(todaysDate())
-     })
+    })
 
     it('returns no submissions for a different states user', async () => {
         const server = await constructTestPostgresServer()
@@ -196,9 +209,9 @@ describe('indexSubmissions2', () => {
             query: INDEX_SUBMISSIONS2,
         })
 
-        expect(result.errors).toBeUndefined() // Is this really what we want? I thought this would be 403 unauthorized 
+        expect(result.errors).toBeUndefined() // Is this really what we want? I thought this would be 403 unauthorized
 
-        const indexSubmissions2 = result.data?.indexSubmissions2
-        expect(indexSubmissions2).toEqual({ "edges": [], "totalCount": 0 })
+        const indexHealthPlanPackages = result.data?.indexHealthPlanPackages
+        expect(indexHealthPlanPackages).toEqual({ edges: [], totalCount: 0 })
     })
 })

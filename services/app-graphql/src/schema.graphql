@@ -4,7 +4,6 @@ schema {
 }
 
 type Query {
-    fetchCurrentUser: User!
     fetchDraftSubmission(
         input: FetchDraftSubmissionInput!
     ): FetchDraftSubmissionPayload!
@@ -14,8 +13,9 @@ type Query {
     indexSubmissions: IndexSubmissionsPayload!
 
     # new api
-    fetchSubmission2(input: FetchSubmission2Input!): FetchSubmission2Payload!
-    indexSubmissions2: IndexSubmissions2Payload!
+    fetchCurrentUser: User!
+    fetchHealthPlanPackage(input: FetchHealthPlanPackageInput!): FetchHealthPlanPackagePayload!
+    indexHealthPlanPackages: IndexHealthPlanPackagesPayload!
 }
 
 type Mutation {
@@ -25,21 +25,22 @@ type Mutation {
     updateDraftSubmission(
         input: UpdateDraftSubmissionInput!
     ): UpdateDraftSubmissionPayload!
-    submitDraftSubmission(
-        input: SubmitDraftSubmissionInput!
-    ): SubmitDraftSubmissionPayload!
-
-    unlockStateSubmission(
-        input: UnlockStateSubmissionInput!
-    ): UnlockStateSubmissionPayload!
 
     # new API
-    createSubmission2(
-        input: CreateSubmission2Input!
-    ): CreateSubmission2Payload!
+    createHealthPlanPackage(
+        input: CreateHealthPlanPackageInput!
+    ): CreateHealthPlanPackagePayload!
     updateHealthPlanFormData(
         input: UpdateHealthPlanFormDataInput!
     ): UpdateHealthPlanFormDataPayload!
+
+    unlockHealthPlanPackage(
+        input: UnlockHealthPlanPackageInput!
+    ): UnlockHealthPlanPackagePayload!
+    submitHealthPlanPackage(
+        input: SubmitHealthPlanPackageInput!
+    ): SubmitHealthPlanPackagePayload!
+
 }
 
 input CreateDraftSubmissionInput {
@@ -52,14 +53,14 @@ type CreateDraftSubmissionPayload {
     draftSubmission: DraftSubmission!
 }
 
-input CreateSubmission2Input {
+input CreateHealthPlanPackageInput {
     programIDs: [ID!]!
     submissionType: SubmissionType!
     submissionDescription: String!
 }
 
-type CreateSubmission2Payload {
-    submission: Submission2!
+type CreateHealthPlanPackagePayload {
+    submission: HealthPlanPackage!
 }
 
 input FetchDraftSubmissionInput {
@@ -78,29 +79,29 @@ type FetchStateSubmissionPayload {
     submission: StateSubmission
 }
 
-input FetchSubmission2Input {
+input FetchHealthPlanPackageInput {
     submissionID: ID!
 }
 
-type FetchSubmission2Payload {
-    submission: Submission2
+type FetchHealthPlanPackagePayload {
+    submission: HealthPlanPackage
 }
 
 type SubmissionEdge {
     node: Submission!
 }
 
-type Submission2Edge {
-    node: Submission2!
+type HealthPlanPackageEdge {
+    node: HealthPlanPackage!
 }
 type IndexSubmissionsPayload {
     totalCount: Int
     edges: [SubmissionEdge!]!
 }
 
-type IndexSubmissions2Payload {
+type IndexHealthPlanPackagesPayload {
     totalCount: Int
-    edges: [Submission2Edge!]!
+    edges: [HealthPlanPackageEdge!]!
 }
 
 input UpdateDraftSubmissionInput {
@@ -112,22 +113,22 @@ type UpdateDraftSubmissionPayload {
     draftSubmission: DraftSubmission!
 }
 
-input SubmitDraftSubmissionInput {
+input SubmitHealthPlanPackageInput {
     submissionID: ID!
     submittedReason: String
 }
 
-type SubmitDraftSubmissionPayload {
-    submission: Submission2!
+type SubmitHealthPlanPackagePayload {
+    submission: HealthPlanPackage!
 }
 
-input UnlockStateSubmissionInput {
+input UnlockHealthPlanPackageInput {
     submissionID: ID!
     unlockedReason: String!
 }
 
-type UnlockStateSubmissionPayload {
-    submission: Submission2!
+type UnlockHealthPlanPackagePayload {
+    submission: HealthPlanPackage!
 }
 
 input UpdateHealthPlanFormDataInput {
@@ -136,7 +137,7 @@ input UpdateHealthPlanFormDataInput {
 }
 
 type UpdateHealthPlanFormDataPayload {
-    submission: Submission2!
+    submission: HealthPlanPackage!
 }
 
 scalar Date
@@ -168,20 +169,20 @@ type Program {
     name: String!
 }
 
-enum Submission2Status {
+enum HealthPlanPackageStatus {
     DRAFT
     SUBMITTED
     UNLOCKED
     RESUBMITTED
 }
 
-type Submission2 {
+type HealthPlanPackage {
     id: ID!
-    status: Submission2Status!
+    status: HealthPlanPackageStatus!
     intiallySubmittedAt: Date
     stateCode: String!
     state: State!
-    revisions: [RevisionEdge!]!
+    revisions: [HealthPlanRevisionEdge!]!
 }
 
 type UpdateInformation {
@@ -190,7 +191,7 @@ type UpdateInformation {
     updatedReason: String!
 }
 
-type Revision {
+type HealthPlanRevision {
     id: ID!
     unlockInfo: UpdateInformation
     submitInfo: UpdateInformation
@@ -198,8 +199,8 @@ type Revision {
     submissionData: String!
 }
 
-type RevisionEdge {
-    revision: Revision!
+type HealthPlanRevisionEdge {
+    node: HealthPlanRevision!
 }
 
 type StateContact {

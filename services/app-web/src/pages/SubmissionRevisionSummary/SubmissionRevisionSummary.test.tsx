@@ -3,9 +3,9 @@ import { Route } from 'react-router'
 import { RoutesRecord } from '../../constants/routes'
 import {
     fetchCurrentUserMock,
-    fetchStateSubmission2MockSuccess,
+    fetchStateHealthPlanPackageMockSuccess,
     mockValidCMSUser,
-    mockSubmittedSubmission2WithRevisions,
+    mockSubmittedHealthPlanPackageWithRevisions,
 } from '../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { SubmissionRevisionSummary } from './SubmissionRevisionSummary'
@@ -25,9 +25,9 @@ describe('SubmissionRevisionSummary', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchStateSubmission2MockSuccess({
+                        fetchStateHealthPlanPackageMockSuccess({
                             stateSubmission:
-                                mockSubmittedSubmission2WithRevisions(),
+                                mockSubmittedHealthPlanPackageWithRevisions(),
                             id: '15',
                         }),
                     ],
@@ -63,9 +63,9 @@ describe('SubmissionRevisionSummary', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchStateSubmission2MockSuccess({
+                        fetchStateHealthPlanPackageMockSuccess({
                             stateSubmission:
-                                mockSubmittedSubmission2WithRevisions(),
+                                mockSubmittedHealthPlanPackageWithRevisions(),
                             id: '15',
                         }),
                     ],

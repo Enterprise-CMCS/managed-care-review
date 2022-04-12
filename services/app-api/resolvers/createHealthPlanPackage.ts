@@ -10,9 +10,9 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from './attributeHelper'
 
-export function createSubmission2Resolver(
+export function createHealthPlanPackageResolver(
     store: Store
-): MutationResolvers['createSubmission2'] {
+): MutationResolvers['createHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
         setResolverDetailsOnActiveSpan('createDraftSubmission', user, span)

@@ -37,11 +37,11 @@ import {
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
 import {
-    Submission2,
-    UnlockStateSubmissionMutationFn,
-    useFetchSubmission2Query,
-    useUnlockStateSubmissionMutation,
-    Submission2Status,
+    HealthPlanPackage,
+    UnlockHealthPlanPackageMutationFn,
+    useFetchHealthPlanPackageQuery,
+    useUnlockHealthPlanPackageMutation,
+    HealthPlanPackageStatus,
 } from '../../gen/gqlClient'
 import {
     convertDomainModelFormDataToGQLSubmission,
@@ -81,12 +81,12 @@ function UnlockModalButton({
 // for a more general and generic function so that we can get more sensible errors out of all of the
 // generated mutations.
 async function unlockMutationWrapper(
-    unlockStateSubmission: UnlockStateSubmissionMutationFn,
+    unlockHealthPlanPackage: UnlockHealthPlanPackageMutationFn,
     id: string,
     unlockedReason: string
-): Promise<Submission2 | GraphQLErrors | Error> {
+): Promise<HealthPlanPackage | GraphQLErrors | Error> {
     try {
-        const result = await unlockStateSubmission({
+        const result = await unlockHealthPlanPackage({
             variables: {
                 input: {
                     submissionID: id,
@@ -99,8 +99,8 @@ async function unlockMutationWrapper(
             return result.errors
         }
 
-        if (result.data?.unlockStateSubmission.submission) {
-            return result.data?.unlockStateSubmission.submission
+        if (result.data?.unlockHealthPlanPackage.submission) {
+            return result.data?.unlockHealthPlanPackage.submission
         } else {
             return new Error('No errors, and no unlock result.')
         }
@@ -129,7 +129,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     >(undefined)
     const [updateInfo, setUpdateInfo] = useState<UpdateInfoType | null>(null)
     const [submissionStatus, setSubmissionStatus] =
-        useState<Submission2Status | null>(null)
+        useState<HealthPlanPackageStatus | null>(null)
 
     // Unlock modal state
     const [focusErrorsInModal, setFocusErrorsInModal] = useState(true)
@@ -153,7 +153,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         onSubmit: (values) => onModalSubmit(values),
     })
 
-    const { loading, error, data } = useFetchSubmission2Query({
+    const { loading, error, data } = useFetchHealthPlanPackageQuery({
         variables: {
             input: {
                 submissionID: id,
@@ -161,8 +161,8 @@ export const SubmissionSummary = (): React.ReactElement => {
         },
     })
 
-    const [unlockStateSubmission] = useUnlockStateSubmissionMutation()
-    const submissionAndRevisions = data?.fetchSubmission2.submission
+    const [unlockHealthPlanPackage] = useUnlockHealthPlanPackageMutation()
+    const submissionAndRevisions = data?.fetchHealthPlanPackage.submission
 
     const isCMSUser = loggedInUser?.role === 'CMS_USER'
 
@@ -176,7 +176,7 @@ export const SubmissionSummary = (): React.ReactElement => {
             const currentRevision = submissionAndRevisions.revisions.find(
                 (rev) => {
                     // we want the most recent revision that has submission info.
-                    return rev.revision.submitInfo
+                    return rev.node.submitInfo
                 }
             )
 
@@ -192,7 +192,7 @@ export const SubmissionSummary = (): React.ReactElement => {
             }
 
             const submissionResult = base64ToDomain(
-                currentRevision.revision.submissionData
+                currentRevision.node.submissionData
             )
             if (submissionResult instanceof Error) {
                 console.error(
@@ -213,9 +213,9 @@ export const SubmissionSummary = (): React.ReactElement => {
                 const updateInfo =
                     submissionStatus === 'UNLOCKED'
                         ? submissionAndRevisions.revisions.find(
-                              (rev) => rev.revision.unlockInfo
-                          )?.revision.unlockInfo
-                        : currentRevision.revision.submitInfo
+                              (rev) => rev.node.unlockInfo
+                          )?.node.unlockInfo
+                        : currentRevision.node.submitInfo
 
                 if (updateInfo) {
                     setSubmissionStatus(submissionStatus)
@@ -243,7 +243,7 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     // Update header with submission name
     useEffect(() => {
-        const subWithRevisions = data?.fetchSubmission2.submission
+        const subWithRevisions = data?.fetchHealthPlanPackage.submission
         if (packageData && subWithRevisions) {
             const programs = subWithRevisions.state.programs
             updateHeading(pathname, submissionName(packageData, programs))
@@ -285,7 +285,7 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     const onUnlock = async (unlockReason: string) => {
         const result = await unlockMutationWrapper(
-            unlockStateSubmission,
+            unlockHealthPlanPackage,
             submissionAndRevisions.id,
             unlockReason
         )
@@ -310,7 +310,7 @@ export const SubmissionSummary = (): React.ReactElement => {
             }
             modalRef.current?.toggleModal(undefined, false)
         } else {
-            const unlockedSub: Submission2 = result
+            const unlockedSub: HealthPlanPackage = result
             modalRef.current?.toggleModal(undefined, false)
             console.log('Submission Unlocked', unlockedSub)
         }

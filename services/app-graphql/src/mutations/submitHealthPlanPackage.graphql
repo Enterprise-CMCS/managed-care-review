@@ -1,20 +1,12 @@
-mutation createSubmission2($input: CreateSubmission2Input!) {
-    createSubmission2(input: $input) {
+mutation submitHealthPlanPackage($input: SubmitHealthPlanPackageInput!) {
+    submitHealthPlanPackage(input: $input) {
         submission {
             id
             stateCode
-            state {
-                code
-                name
-                programs {
-                    id
-                    name
-                }
-            }
             status
             intiallySubmittedAt
             revisions {
-                revision {
+                node {
                     id
                     unlockInfo {
                         updatedAt

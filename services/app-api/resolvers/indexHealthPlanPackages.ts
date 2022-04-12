@@ -7,9 +7,9 @@ import { QueryResolvers } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
 
-export function indexSubmissions2Resolver(
+export function indexHealthPlanPackagesResolver(
     store: Store
-): QueryResolvers['indexSubmissions2'] {
+): QueryResolvers['indexHealthPlanPackages'] {
     return async (_parent, _args, context) => {
         // This resolver is only callable by state users
         if (!isStateUser(context.user)) {
@@ -27,7 +27,7 @@ export function indexSubmissions2Resolver(
 
         if (isStoreError(results)) {
             const errMessage = `Issue finding a draft submission of type ${results.code}. Message: ${results.message}`
-            logError('indexSubmissions2', errMessage)
+            logError('indexHealthPlanPackages', errMessage)
             throw new Error(errMessage)
         }
 
@@ -41,7 +41,7 @@ export function indexSubmissions2Resolver(
             }
         })
 
-        logSuccess('indexSubmissions2')
+        logSuccess('indexHealthPlanPackages')
         return { totalCount: edges.length, edges }
     }
 }

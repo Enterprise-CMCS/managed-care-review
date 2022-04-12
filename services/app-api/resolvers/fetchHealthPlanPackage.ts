@@ -14,9 +14,9 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from './attributeHelper'
 
-export function fetchSubmission2Resolver(
+export function fetchHealthPlanPackageResolver(
     store: Store
-): QueryResolvers['fetchSubmission2'] {
+): QueryResolvers['fetchHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
         setResolverDetailsOnActiveSpan('createDraftSubmission', user, span)
@@ -77,7 +77,7 @@ export function fetchSubmission2Resolver(
             throw new ForbiddenError(`unknown user type`)
         }
 
-        logSuccess('fetchSubmission2')
+        logSuccess('fetchHealthPlanPackage')
         setSuccessAttributesOnActiveSpan(span)
         return { submission }
     }

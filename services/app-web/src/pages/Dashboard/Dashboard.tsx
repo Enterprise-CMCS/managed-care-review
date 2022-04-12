@@ -14,7 +14,7 @@ import { SubmissionStatusRecord } from '../../constants/submissions'
 import { useAuth } from '../../contexts/AuthContext'
 import {
     SubmissionType as GQLSubmissionType,
-    useIndexSubmissions2Query,
+    useIndexHealthPlanPackagesQuery,
 } from '../../gen/gqlClient'
 import styles from './Dashboard.module.scss'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
@@ -68,7 +68,7 @@ export const Dashboard = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
     const location = useLocation()
 
-    const { loading, data, error } = useIndexSubmissions2Query()
+    const { loading, data, error } = useIndexHealthPlanPackagesQuery()
 
     if (error) {
         console.error('Error indexing submissions: ', error)
@@ -96,12 +96,12 @@ export const Dashboard = (): React.ReactElement => {
     const programs = loggedInUser.state.programs
     const submissionRows: SubmissionInDashboard[] = []
 
-    data?.indexSubmissions2.edges
+    data?.indexHealthPlanPackages.edges
         .map((edge) => edge.node)
         .forEach((sub) => {
             const currentRevision = sub.revisions[0]
             const currentSubmissionData = base64ToDomain(
-                currentRevision.revision.submissionData
+                currentRevision.node.submissionData
             )
             if (currentSubmissionData instanceof Error) {
                 console.error(

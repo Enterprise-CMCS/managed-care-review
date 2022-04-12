@@ -1,8 +1,8 @@
 import { ApolloServer } from 'apollo-server-lambda'
 import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
-import CREATE_SUBMISSION_2 from '../../app-graphql/src/mutations/createSubmission2.graphql'
-import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitDraftSubmission.graphql'
-import UNLOCK_STATE_SUBMISSION from '../../app-graphql/src/mutations/unlockStateSubmission.graphql'
+import CREATE_SUBMISSION_2 from '../../app-graphql/src/mutations/createHealthPlanPackage.graphql'
+import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitHealthPlanPackage.graphql'
+import UNLOCK_STATE_SUBMISSION from '../../app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
 import UPDATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/updateDraftSubmission.graphql'
 import FETCH_DRAFT_SUBMISSION from '../../app-graphql/src/queries/fetchDraftSubmission.graphql'
 import FETCH_STATE_SUBMISSION from '../../app-graphql/src/queries/fetchStateSubmission.graphql'
@@ -11,11 +11,11 @@ import { ProgramT } from '../../app-web/src/common-code/domain-models'
 import { Emailer, newLocalEmailer } from '../emailer'
 import {
     CreateDraftSubmissionInput,
-    CreateSubmission2Input,
+    CreateHealthPlanPackageInput,
     DraftSubmission,
     DraftSubmissionUpdates,
     StateSubmission,
-    Submission2,
+    HealthPlanPackage,
     UpdateDraftSubmissionInput,
 } from '../gen/gqlServer'
 import { Context } from '../handlers/apollo_gql'
@@ -98,10 +98,10 @@ const createTestDraftSubmission = async (
     return result.data.createDraftSubmission.draftSubmission
 }
 
-const createTestSubmission2 = async (
+const createTestHealthPlanPackage = async (
     server: ApolloServer
-): Promise<Submission2> => {
-    const input: CreateSubmission2Input = {
+): Promise<HealthPlanPackage> => {
+    const input: CreateHealthPlanPackageInput = {
         programIDs: [defaultFloridaProgram().id],
         submissionType: 'CONTRACT_ONLY' as const,
         submissionDescription: 'A created submission',
@@ -122,7 +122,7 @@ const createTestSubmission2 = async (
 
     console.log('GOT BACK DA', result.data)
 
-    return result.data.createSubmission2.submission
+    return result.data.createHealthPlanPackage.submission
 }
 
 const updateTestDraftSubmission = async (
@@ -248,7 +248,7 @@ const submitTestDraftSubmission = async (
         throw new Error('updateTestDraftSubmission returned nothing')
     }
 
-    return updateResult.data.submitDraftSubmission.submission
+    return updateResult.data.submitHealthPlanPackage.submission
 }
 
 const resubmitTestDraftSubmission = async (
@@ -277,14 +277,14 @@ const resubmitTestDraftSubmission = async (
         throw new Error('updateTestDraftSubmission returned nothing')
     }
 
-    return updateResult.data.submitDraftSubmission.submission
+    return updateResult.data.submitHealthPlanPackage.submission
 }
 
 const unlockTestDraftSubmission = async (
     server: ApolloServer,
     submissionID: string,
     unlockedReason: string
-): Promise<Submission2> => {
+): Promise<HealthPlanPackage> => {
     const updateResult = await server.executeOperation({
         query: UNLOCK_STATE_SUBMISSION,
         variables: {
@@ -306,12 +306,12 @@ const unlockTestDraftSubmission = async (
         throw new Error('updateTestDraftSubmission returned nothing')
     }
 
-    return updateResult.data.unlockStateSubmission.submission
+    return updateResult.data.unlockHealthPlanPackage.submission
 }
 
 const createTestStateSubmission = async (
     server: ApolloServer
-): Promise<Submission2> => {
+): Promise<HealthPlanPackage> => {
     const draft = await createAndUpdateTestDraftSubmission(server)
 
     const updatedSubmission = await submitTestDraftSubmission(server, draft.id)
@@ -367,7 +367,7 @@ export {
     constructTestPostgresServer,
     createTestDraftSubmission,
     createTestStateSubmission,
-    createTestSubmission2,
+    createTestHealthPlanPackage,
     updateTestDraftSubmission,
     createAndUpdateTestDraftSubmission,
     fetchTestDraftSubmissionById,

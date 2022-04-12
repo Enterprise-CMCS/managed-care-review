@@ -1,8 +1,8 @@
 import { base64ToDomain } from '../proto/stateSubmission'
-import { Submission2 } from '../../gen/gqlClient'
+import { HealthPlanPackage } from '../../gen/gqlClient'
 import { DocumentDateLookupTable } from '../../pages/SubmissionSummary/SubmissionSummary'
 export const makeDateTable = (
-    submissions: Submission2
+    submissions: HealthPlanPackage
 ): DocumentDateLookupTable | undefined => {
     const docBuckets = [
         'contractDocuments',
@@ -12,9 +12,7 @@ export const makeDateTable = (
     const lookupTable = {} as DocumentDateLookupTable
     if (submissions) {
         submissions.revisions.forEach((revision, index) => {
-            const revisionData = base64ToDomain(
-                revision.revision.submissionData
-            )
+            const revisionData = base64ToDomain(revision.node.submissionData)
 
             if (revisionData instanceof Error) {
                 console.error(

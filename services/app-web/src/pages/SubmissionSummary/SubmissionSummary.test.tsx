@@ -6,12 +6,12 @@ import { domainToBase64 } from '../../common-code/proto/stateSubmission'
 import { RoutesRecord } from '../../constants/routes'
 import {
     fetchCurrentUserMock,
-    fetchStateSubmission2MockSuccess,
-    mockUnlockedSubmission2,
+    fetchStateHealthPlanPackageMockSuccess,
+    mockUnlockedHealthPlanPackage,
     mockValidCMSUser,
     unlockStateSubmissionMockError,
     unlockStateSubmissionMockSuccess,
-    mockSubmittedSubmission2WithRevision,
+    mockSubmittedHealthPlanPackageWithRevision,
 } from '../../testHelpers/apolloHelpers'
 import {
     renderWithProviders,
@@ -33,7 +33,7 @@ describe('SubmissionSummary', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchStateSubmission2MockSuccess({
+                        fetchStateHealthPlanPackageMockSuccess({
                             id: '15',
                         }),
                     ],
@@ -50,7 +50,8 @@ describe('SubmissionSummary', () => {
     })
 
     it('renders submission updated banner', async () => {
-        const submissionsWithRevisions = mockSubmittedSubmission2WithRevision()
+        const submissionsWithRevisions =
+            mockSubmittedHealthPlanPackageWithRevision()
         renderWithProviders(
             <Route
                 path={RoutesRecord.SUBMISSIONS_FORM}
@@ -63,7 +64,7 @@ describe('SubmissionSummary', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchStateSubmission2MockSuccess({
+                        fetchStateHealthPlanPackageMockSuccess({
                             stateSubmission: submissionsWithRevisions,
                             id: '15',
                         }),
@@ -91,7 +92,7 @@ describe('SubmissionSummary', () => {
 
     describe('Submission package data display', () => {
         it('renders the OLD data for an unlocked submission for CMS user, ignoring unsubmitted changes from state user', async () => {
-            const submission2 = mockUnlockedSubmission2()
+            const submission2 = mockUnlockedHealthPlanPackage()
 
             const oldPackageData = basicLockedHealthPlanFormData()
             const newPackageData = basicLockedHealthPlanFormData()
@@ -99,9 +100,9 @@ describe('SubmissionSummary', () => {
             oldPackageData.submissionDescription = 'OLD_DESCRIPTION'
             newPackageData.submissionDescription = 'NEW_DESCRIPTION'
 
-            submission2.revisions[0].revision.submissionData =
+            submission2.revisions[0].node.submissionData =
                 domainToBase64(newPackageData)
-            submission2.revisions[1].revision.submissionData =
+            submission2.revisions[1].node.submissionData =
                 domainToBase64(oldPackageData)
 
             renderWithProviders(
@@ -116,7 +117,7 @@ describe('SubmissionSummary', () => {
                                 user: mockValidCMSUser(),
                                 statusCode: 200,
                             }),
-                            fetchStateSubmission2MockSuccess({
+                            fetchStateHealthPlanPackageMockSuccess({
                                 id: '15',
                                 stateSubmission: submission2,
                             }),
@@ -153,7 +154,7 @@ describe('SubmissionSummary', () => {
                                 user: mockValidCMSUser(),
                                 statusCode: 200,
                             }),
-                            fetchStateSubmission2MockSuccess({
+                            fetchStateHealthPlanPackageMockSuccess({
                                 id: '15',
                             }),
                         ],
@@ -184,7 +185,7 @@ describe('SubmissionSummary', () => {
                                 user: mockValidCMSUser(),
                                 statusCode: 200,
                             }),
-                            fetchStateSubmission2MockSuccess({
+                            fetchStateHealthPlanPackageMockSuccess({
                                 id: '15',
                             }),
                             unlockStateSubmissionMockSuccess({
@@ -242,10 +243,10 @@ describe('SubmissionSummary', () => {
                                 user: mockValidCMSUser(),
                                 statusCode: 200,
                             }),
-                            fetchStateSubmission2MockSuccess({
+                            fetchStateHealthPlanPackageMockSuccess({
                                 id: '15',
                                 stateSubmission:
-                                    mockSubmittedSubmission2WithRevision(),
+                                    mockSubmittedHealthPlanPackageWithRevision(),
                             }),
                         ],
                     },
@@ -282,9 +283,10 @@ describe('SubmissionSummary', () => {
                                 user: mockValidCMSUser(),
                                 statusCode: 200,
                             }),
-                            fetchStateSubmission2MockSuccess({
+                            fetchStateHealthPlanPackageMockSuccess({
                                 id: '15',
-                                stateSubmission: mockUnlockedSubmission2(),
+                                stateSubmission:
+                                    mockUnlockedHealthPlanPackage(),
                             }),
                         ],
                     },
@@ -316,9 +318,10 @@ describe('SubmissionSummary', () => {
                                 user: mockValidCMSUser(),
                                 statusCode: 200,
                             }),
-                            fetchStateSubmission2MockSuccess({
+                            fetchStateHealthPlanPackageMockSuccess({
                                 id: '15',
-                                stateSubmission: mockUnlockedSubmission2(),
+                                stateSubmission:
+                                    mockUnlockedHealthPlanPackage(),
                             }),
                         ],
                     },
@@ -351,7 +354,7 @@ describe('SubmissionSummary', () => {
                                 user: mockValidCMSUser(),
                                 statusCode: 200,
                             }),
-                            fetchStateSubmission2MockSuccess({
+                            fetchStateHealthPlanPackageMockSuccess({
                                 id: '15',
                             }),
                             unlockStateSubmissionMockError({
@@ -409,7 +412,7 @@ describe('SubmissionSummary', () => {
                                 user: mockValidCMSUser(),
                                 statusCode: 200,
                             }),
-                            fetchStateSubmission2MockSuccess({
+                            fetchStateHealthPlanPackageMockSuccess({
                                 id: '15',
                             }),
                             unlockStateSubmissionMockSuccess({
@@ -458,7 +461,7 @@ describe('SubmissionSummary', () => {
                                 user: mockValidCMSUser(),
                                 statusCode: 200,
                             }),
-                            fetchStateSubmission2MockSuccess({
+                            fetchStateHealthPlanPackageMockSuccess({
                                 id: '15',
                             }),
                             unlockStateSubmissionMockSuccess({
@@ -516,7 +519,7 @@ describe('SubmissionSummary', () => {
                                 user: mockValidCMSUser(),
                                 statusCode: 200,
                             }),
-                            fetchStateSubmission2MockSuccess({
+                            fetchStateHealthPlanPackageMockSuccess({
                                 id: '15',
                             }),
                             unlockStateSubmissionMockSuccess({

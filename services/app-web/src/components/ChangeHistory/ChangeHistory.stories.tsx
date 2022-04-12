@@ -1,12 +1,12 @@
 import { ChangeHistory } from './ChangeHistory'
-import { Submission2 } from '../../gen/gqlClient'
+import { HealthPlanPackage } from '../../gen/gqlClient'
 
 export default {
     title: 'Components/ChangeHistory',
     component: ChangeHistory,
 }
 
-const submissionData: Submission2 = {
+const submissionData: HealthPlanPackage = {
     id: '440d6a53-bb0a-49ae-9a9c-da7c5352789f',
     stateCode: 'MN',
     state: {
@@ -18,7 +18,7 @@ const submissionData: Submission2 = {
     intiallySubmittedAt: '2022-03-23',
     revisions: [
         {
-            revision: {
+            node: {
                 id: '26596de8-852d-4e42-bb0a-c9c9bf78c3de',
                 unlockInfo: {
                     updatedAt: '2022-03-24T01:18:44.663Z',
@@ -34,12 +34,12 @@ const submissionData: Submission2 = {
                 },
                 createdAt: '2022-03-24T01:18:44.665Z',
                 submissionData: 'alkdfjlasdjf',
-                __typename: 'Revision',
+                __typename: 'HealthPlanRevision',
             },
-            __typename: 'RevisionEdge',
+            __typename: 'HealthPlanRevisionEdge',
         },
         {
-            revision: {
+            node: {
                 id: 'e048cdcf-5b19-4acb-8ead-d7dc2fd6cd30',
                 unlockInfo: null,
                 submitInfo: {
@@ -50,12 +50,12 @@ const submissionData: Submission2 = {
                 },
                 createdAt: '2022-03-23T02:08:14.241Z',
                 submissionData: 'weoirna;dfkl',
-                __typename: 'Revision',
+                __typename: 'HealthPlanRevision',
             },
-            __typename: 'RevisionEdge',
+            __typename: 'HealthPlanRevisionEdge',
         },
     ],
-    __typename: 'Submission2',
+    __typename: 'HealthPlanPackage',
 }
 
 export const DemoListUploadSuccess = (): React.ReactElement => {

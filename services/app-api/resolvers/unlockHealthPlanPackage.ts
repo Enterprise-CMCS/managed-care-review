@@ -31,12 +31,12 @@ function unlock(
     return draft
 }
 
-// unlockStateSubmissionResolver is a state machine transition for Submission,
+// unlockHealthPlanPackageResolver is a state machine transition for Submission,
 // transforming it from a DraftSubmission to a StateSubmission
-export function unlockStateSubmissionResolver(
+export function unlockHealthPlanPackageResolver(
     store: Store,
     emailer: Emailer
-): MutationResolvers['unlockStateSubmission'] {
+): MutationResolvers['unlockHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
         const { unlockedReason, submissionID } = input
@@ -44,7 +44,7 @@ export function unlockStateSubmissionResolver(
         // This resolver is only callable by CMS users
         if (!isCMSUser(user)) {
             logError(
-                'unlockStateSubmission',
+                'unlockHealthPlanPackage',
                 'user not authorized to unlock submission'
             )
             setErrorAttributesOnActiveSpan(
@@ -59,7 +59,7 @@ export function unlockStateSubmissionResolver(
 
         if (isStoreError(result)) {
             const errMessage = `Issue finding a state submission of type ${result.code}. Message: ${result.message}`
-            logError('unlockStateSubmission', errMessage)
+            logError('unlockHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             if (result.code === 'WRONG_STATUS') {
                 setErrorAttributesOnActiveSpan(
@@ -75,7 +75,7 @@ export function unlockStateSubmissionResolver(
 
         if (result === undefined) {
             const errMessage = `A submission must exist to be unlocked: ${submissionID}`
-            logError('unlockStateSubmission', errMessage)
+            logError('unlockHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
                 argumentName: 'submissionID',
@@ -102,7 +102,7 @@ export function unlockStateSubmissionResolver(
         // const updateResult = await store.updateStateSubmission(stateSubmission)
         if (isStoreError(revisionResult)) {
             const errMessage = `Issue unlocking a state submission of type ${revisionResult.code}. Message: ${revisionResult.message}`
-            logError('unlockStateSubmission', errMessage)
+            logError('unlockHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
@@ -113,7 +113,7 @@ export function unlockStateSubmissionResolver(
         )
         if (!programs || programs.length !== submission.programIDs.length) {
             const errMessage = `Can't find programs ${submission.programIDs} from state ${submission.stateCode}, ${submission.id}`
-            logError('unlockStateSubmission', errMessage)
+            logError('unlockHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
@@ -150,7 +150,7 @@ export function unlockStateSubmissionResolver(
             throw unlockPackageStateEmailResult
         }
 
-        logSuccess('unlockStateSubmission')
+        logSuccess('unlockHealthPlanPackage')
         setSuccessAttributesOnActiveSpan(span)
 
         return { submission: revisionResult }
