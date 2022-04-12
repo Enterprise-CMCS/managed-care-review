@@ -100,9 +100,9 @@ describe('SubmissionSummary', () => {
             oldPackageData.submissionDescription = 'OLD_DESCRIPTION'
             newPackageData.submissionDescription = 'NEW_DESCRIPTION'
 
-            submission2.revisions[0].node.submissionData =
+            submission2.revisions[0].node.formDataProto =
                 domainToBase64(newPackageData)
-            submission2.revisions[1].node.submissionData =
+            submission2.revisions[1].node.formDataProto =
                 domainToBase64(oldPackageData)
 
             renderWithProviders(

@@ -36,7 +36,7 @@ describe('fetchHealthPlanPackage', () => {
 
         const revision = resultSub.revisions[0].node
 
-        const subData = base64ToDomain(revision.submissionData)
+        const subData = base64ToDomain(revision.formDataProto)
         if (subData instanceof Error) {
             throw subData
         }

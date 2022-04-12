@@ -27,7 +27,7 @@ mutation updateHealthPlanFormData($input: UpdateHealthPlanFormDataInput!) {
                         updatedReason
                     }
                     createdAt
-                    submissionData
+                    formDataProto
                 }
             }
         }

@@ -196,7 +196,7 @@ type HealthPlanRevision {
     unlockInfo: UpdateInformation
     submitInfo: UpdateInformation
     createdAt: DateTime!
-    submissionData: String!
+    formDataProto: String!
 }
 
 type HealthPlanRevisionEdge {

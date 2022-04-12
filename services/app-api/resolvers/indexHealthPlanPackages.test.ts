@@ -11,7 +11,7 @@ import { HealthPlanPackageEdge, HealthPlanPackage } from '../gen/gqlServer'
 import { base64ToDomain } from '../../app-web/src/common-code/proto/stateSubmission'
 
 const currentRevisionSubmissionFormData = (submission: HealthPlanPackage) => {
-    const result = base64ToDomain(submission.revisions[0].node.submissionData)
+    const result = base64ToDomain(submission.revisions[0].node.formDataProto)
     if (result instanceof Error) {
         console.error(result)
         return undefined
@@ -33,7 +33,7 @@ describe('indexHealthPlanPackages', () => {
 
         //Parse state submission proto data
         const currentRevision = stateSub?.revisions[0]?.node
-        const stateSubData = base64ToDomain(currentRevision.submissionData)
+        const stateSubData = base64ToDomain(currentRevision.formDataProto)
         if (stateSubData instanceof Error) {
             throw stateSubData
         }

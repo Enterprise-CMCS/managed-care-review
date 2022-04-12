@@ -27,7 +27,7 @@ mutation unlockHealthPlanPackage($input: UnlockHealthPlanPackageInput!) {
                         updatedReason
                     }
                     createdAt
-                    submissionData
+                    formDataProto
                 }
             }
         }

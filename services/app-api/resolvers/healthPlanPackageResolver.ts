@@ -15,7 +15,7 @@ export const healthPlanPackageResolver: Resolvers['HealthPlanPackage'] = {
                     unlockInfo: r.unlockInfo,
                     submitInfo: r.submitInfo,
                     createdAt: r.createdAt,
-                    submissionData: protoToBase64(r.submissionFormProto),
+                    formDataProto: protoToBase64(r.formDataProto),
                 },
             }
         })

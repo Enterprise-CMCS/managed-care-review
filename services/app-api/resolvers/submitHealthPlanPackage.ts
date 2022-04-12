@@ -172,7 +172,7 @@ export function submitHealthPlanPackageResolver(
             )
         }
 
-        const draftResult = toDomain(currentRevision.submissionFormProto)
+        const draftResult = toDomain(currentRevision.formDataProto)
 
         if (draftResult instanceof Error) {
             const errMessage = `Failed to decode draft proto ${draftResult}.`

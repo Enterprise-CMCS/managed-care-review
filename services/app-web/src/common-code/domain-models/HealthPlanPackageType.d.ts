@@ -21,7 +21,7 @@ type HealthPlanRevisionType = {
     unlockInfo?: UpdateInfoType
     submitInfo?: UpdateInfoType
     createdAt: Date
-    submissionFormProto: Uint8Array
+    formDataProto: Uint8Array
 }
 
 export {

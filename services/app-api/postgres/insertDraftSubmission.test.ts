@@ -36,7 +36,7 @@ describe('insertDraftSubmissionPostgres', () => {
         const drafts = results as HealthPlanPackageType[]
 
         const formDatum = drafts.map((d) => {
-            const formDataResult = toDomain(d.revisions[0].submissionFormProto)
+            const formDataResult = toDomain(d.revisions[0].formDataProto)
             if (formDataResult instanceof Error) {
                 throw formDataResult
             }

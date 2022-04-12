@@ -349,7 +349,7 @@ export function mockDraftHealthPlanPackage(
                     unlockInfo: null,
                     createdAt: '2019-01-01',
                     submitInfo: null,
-                    submissionData: b64,
+                    formDataProto: b64,
                 },
             },
         ],
@@ -379,7 +379,7 @@ export function mockSubmittedHealthPlanPackage(): HealthPlanPackage {
                         updatedBy: 'test@example.com',
                         updatedReason: 'Initial submit',
                     },
-                    submissionData: b64,
+                    formDataProto: b64,
                 },
             },
         ],
@@ -414,7 +414,7 @@ export function mockSubmittedHealthPlanPackageWithRevisions(): HealthPlanPackage
                         __typename: 'UpdateInformation',
                     },
                     createdAt: '2022-03-25T01:18:44.665Z',
-                    submissionData: b64,
+                    formDataProto: b64,
                 },
             },
             {
@@ -431,7 +431,7 @@ export function mockSubmittedHealthPlanPackageWithRevisions(): HealthPlanPackage
                         updatedReason: 'Placeholder resubmission reason',
                     },
                     createdAt: '2022-03-24T01:18:44.665Z',
-                    submissionData: b64,
+                    formDataProto: b64,
                 },
             },
             {
@@ -444,7 +444,7 @@ export function mockSubmittedHealthPlanPackageWithRevisions(): HealthPlanPackage
                         updatedReason: 'Initial submission',
                     },
                     createdAt: '2022-03-23T02:08:14.241Z',
-                    submissionData: b64,
+                    formDataProto: b64,
                 },
             },
         ],
@@ -477,7 +477,7 @@ export function mockUnlockedHealthPlanPackage(
                         updatedReason: 'Test unlock reason',
                     },
                     submitInfo: null,
-                    submissionData: b64,
+                    formDataProto: b64,
                 },
             },
             {
@@ -490,7 +490,7 @@ export function mockUnlockedHealthPlanPackage(
                         updatedBy: 'test@example.com',
                         updatedReason: 'Initial submit',
                     },
-                    submissionData: b64,
+                    formDataProto: b64,
                 },
             },
         ],
@@ -718,7 +718,7 @@ const mockSubmittedHealthPlanPackageWithRevision = (): HealthPlanPackage => {
                         updatedReason: 'Placeholder resubmission reason',
                     },
                     createdAt: '2022-03-28T17:54:39.175Z',
-                    submissionData:
+                    formDataProto:
                         'ChBTVEFURV9TVUJNSVNTSU9OEAEaJDA3ZjllZmJmLWQ0ZDEtNDRhZS04Njc0LTU2ZDlkNmI3NWNlNiIJU1VCTUlUVEVEKgcI5g8QAhgZMgwI0O2HkgYQwMC2xgM6DAjQ7YeSBhCAvPnFA0gYUBJaBHBtYXBgA2onZGVzY3JpcHRpb24gb2YgY29udHJhY3Qgb25seSBzdWJtaXNzaW9uchUKAWESAWEaDWFAZXhhbXBsZS5jb2168AEIARIHCOYPEAIYBRoHCOYPEAIYEyIBASoBATJ0ChlBbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmElRzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjYzMjE1Ny1BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmL0FtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYaAQEyXAoRbGlmZW9mZ2FsaWxlby5wZGYSRHMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4NDkwMTYyNjQxLWxpZmVvZmdhbGlsZW8ucGRmL2xpZmVvZmdhbGlsZW8ucGRmGgEBOAGCAYABCh1BbWVyaWdyb3VwIFRleGFzIEluYyBjb3B5LnBkZhJcczM6Ly9sb2NhbC11cGxvYWRzLzE2NDgyNDI3MTE0MjEtQW1lcmlncm91cCBUZXhhcyBJbmMgY29weS5wZGYvQW1lcmlncm91cCBUZXhhcyBJbmMgY29weS5wZGYaAQOCAbcBCi81MjktMTAtMDAyMC0wMDAwM19TdXBlcmlvcl9IZWFsdGggUGxhbiwgSW5jLnBkZhKAAXMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyNzExNDIxLTUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmLzUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmGgEEggGbAQomY292aWQtaWZjLTItZmx1LXJzdi1jb2RlcyA1LTUtMjAyMS5wZGYSbnMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyODczMjI5LWNvdmlkLWlmYy0yLWZsdS1yc3YtY29kZXMgNS01LTIwMjEucGRmL2NvdmlkLWlmYy0yLWZsdS1yc3YtY29kZXMgNS01LTIwMjEucGRmGgEEkgOyARABGgcI5g8QAhgZIgcI5g8QAhgaKgcI5g8QAhgZMhsKFQoBYhIBYhoNYkBleGFtcGxlLmNvbRABGgA4AUJ0ChlBbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmElRzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjY2NTYzNC1BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmL0FtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYaAQI=', //pragma: allowlist secret
                 },
             },
@@ -740,7 +740,7 @@ const mockSubmittedHealthPlanPackageWithRevision = (): HealthPlanPackage => {
                         updatedReason: 'Placeholder resubmission reason',
                     },
                     createdAt: '2022-03-25T21:13:56.176Z',
-                    submissionData:
+                    formDataProto:
                         'ChBTVEFURV9TVUJNSVNTSU9OEAEaJDA3ZjllZmJmLWQ0ZDEtNDRhZS04Njc0LTU2ZDlkNmI3NWNlNiIJU1VCTUlUVEVEKgcI5g8QAhgZMgsIw+H4kQYQwICXGzoLCMPh+JEGEMCAlxtIGFASWgRwbWFwYANqJ2Rlc2NyaXB0aW9uIG9mIGNvbnRyYWN0IG9ubHkgc3VibWlzc2lvbnIVCgFhEgFhGg1hQGV4YW1wbGUuY29tepIBCAESBwjmDxACGAUaBwjmDxACGBMiAQEqAQEydAoZQW1lcmlncm91cCBUZXhhcywgSW5jLnBkZhJUczM6Ly9sb2NhbC11cGxvYWRzLzE2NDgyNDI2MzIxNTctQW1lcmlncm91cCBUZXhhcywgSW5jLnBkZi9BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmGgEBOAGCAYABCh1BbWVyaWdyb3VwIFRleGFzIEluYyBjb3B5LnBkZhJcczM6Ly9sb2NhbC11cGxvYWRzLzE2NDgyNDI3MTE0MjEtQW1lcmlncm91cCBUZXhhcyBJbmMgY29weS5wZGYvQW1lcmlncm91cCBUZXhhcyBJbmMgY29weS5wZGYaAQOCAbcBCi81MjktMTAtMDAyMC0wMDAwM19TdXBlcmlvcl9IZWFsdGggUGxhbiwgSW5jLnBkZhKAAXMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyNzExNDIxLTUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmLzUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmGgEEggGbAQomY292aWQtaWZjLTItZmx1LXJzdi1jb2RlcyA1LTUtMjAyMS5wZGYSbnMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyODczMjI5LWNvdmlkLWlmYy0yLWZsdS1yc3YtY29kZXMgNS01LTIwMjEucGRmL2NvdmlkLWlmYy0yLWZsdS1yc3YtY29kZXMgNS01LTIwMjEucGRmGgEEkgOyARABGgcI5g8QAhgZIgcI5g8QAhgaKgcI5g8QAhgZMhsKFQoBYhIBYhoNYkBleGFtcGxlLmNvbRABGgA4AUJ0ChlBbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmElRzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjY2NTYzNC1BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmL0FtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYaAQI=', // pragma: allowlist secret
                 },
             },
@@ -757,7 +757,7 @@ const mockSubmittedHealthPlanPackageWithRevision = (): HealthPlanPackage => {
                         updatedReason: 'Initial submission',
                     },
                     createdAt: '2022-03-25T03:28:56.244Z',
-                    submissionData:
+                    formDataProto:
                         'ChBTVEFURV9TVUJNSVNTSU9OEAEaJDA3ZjllZmJmLWQ0ZDEtNDRhZS04Njc0LTU2ZDlkNmI3NWNlNiIJU1VCTUlUVEVEKgcI5g8QAhgZMgwI8OD4kQYQgOKiyAE6DAjw4PiRBhDA3eXHAUgYUBJaBHBtYXBgA2onZGVzY3JpcHRpb24gb2YgY29udHJhY3Qgb25seSBzdWJtaXNzaW9uchUKAWESAWEaDWFAZXhhbXBsZS5jb216kgEIARIHCOYPEAIYBRoHCOYPEAIYEyIBASoBATJ0ChlBbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmElRzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjYzMjE1Ny1BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmL0FtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYaAQE4AYIBgAEKHUFtZXJpZ3JvdXAgVGV4YXMgSW5jIGNvcHkucGRmElxzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjcxMTQyMS1BbWVyaWdyb3VwIFRleGFzIEluYyBjb3B5LnBkZi9BbWVyaWdyb3VwIFRleGFzIEluYyBjb3B5LnBkZhoBA4IBtwEKLzUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmEoABczM6Ly9sb2NhbC11cGxvYWRzLzE2NDgyNDI3MTE0MjEtNTI5LTEwLTAwMjAtMDAwMDNfU3VwZXJpb3JfSGVhbHRoIFBsYW4sIEluYy5wZGYvNTI5LTEwLTAwMjAtMDAwMDNfU3VwZXJpb3JfSGVhbHRoIFBsYW4sIEluYy5wZGYaAQSSA7IBEAEaBwjmDxACGBkiBwjmDxACGBoqBwjmDxACGBkyGwoVCgFiEgFiGg1iQGV4YW1wbGUuY29tEAEaADgBQnQKGUFtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYSVHMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyNjY1NjM0LUFtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYvQW1lcmlncm91cCBUZXhhcywgSW5jLnBkZhoBAg==', // pragma: allowlist secret
                 },
             },

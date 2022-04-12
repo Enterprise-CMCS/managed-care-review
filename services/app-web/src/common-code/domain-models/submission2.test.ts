@@ -15,7 +15,7 @@ describe('submission 2 helpers', () => {
                         {
                             id: 'bar',
                             createdAt: new Date(),
-                            submissionFormProto: Buffer.from([1, 2, 3]),
+                            formDataProto: Buffer.from([1, 2, 3]),
                         },
                     ],
                 },
@@ -34,7 +34,7 @@ describe('submission 2 helpers', () => {
                                 updatedBy: 'test@example.com',
                                 updatedReason: 'Initial submit',
                             },
-                            submissionFormProto: Buffer.from([1, 2, 3]),
+                            formDataProto: Buffer.from([1, 2, 3]),
                         },
                     ],
                 },
@@ -48,7 +48,7 @@ describe('submission 2 helpers', () => {
                         {
                             id: 'baz',
                             createdAt: new Date(),
-                            submissionFormProto: Buffer.from([1, 2, 3]),
+                            formDataProto: Buffer.from([1, 2, 3]),
                         },
                         {
                             id: 'bar',
@@ -59,7 +59,7 @@ describe('submission 2 helpers', () => {
                                 updatedReason:
                                     'This is the reason for unlocking',
                             },
-                            submissionFormProto: Buffer.from([1, 2, 3]),
+                            formDataProto: Buffer.from([1, 2, 3]),
                         },
                     ],
                 },
@@ -78,7 +78,7 @@ describe('submission 2 helpers', () => {
                                 updatedBy: 'test@example.com',
                                 updatedReason: 'Initial submit',
                             },
-                            submissionFormProto: Buffer.from([1, 2, 3]),
+                            formDataProto: Buffer.from([1, 2, 3]),
                         },
                         {
                             id: 'bar',
@@ -95,7 +95,7 @@ describe('submission 2 helpers', () => {
                                 updatedReason:
                                     'This is the reason for resubmitting',
                             },
-                            submissionFormProto: Buffer.from([1, 2, 3]),
+                            formDataProto: Buffer.from([1, 2, 3]),
                         },
                     ],
                 },
@@ -143,7 +143,7 @@ describe('submission 2 helpers', () => {
                         {
                             id: 'bar',
                             createdAt: new Date(),
-                            submissionFormProto: Buffer.from([1, 2, 3]),
+                            formDataProto: Buffer.from([1, 2, 3]),
                         },
                     ],
                 },
@@ -162,7 +162,7 @@ describe('submission 2 helpers', () => {
                                 updatedBy: 'test@example.com',
                                 updatedReason: 'Initial submit',
                             },
-                            submissionFormProto: Buffer.from([1, 2, 3]),
+                            formDataProto: Buffer.from([1, 2, 3]),
                         },
                     ],
                 },
@@ -176,7 +176,7 @@ describe('submission 2 helpers', () => {
                         {
                             id: 'baz',
                             createdAt: new Date(),
-                            submissionFormProto: Buffer.from([1, 2, 3]),
+                            formDataProto: Buffer.from([1, 2, 3]),
                         },
                         {
                             id: 'bar',
@@ -186,7 +186,7 @@ describe('submission 2 helpers', () => {
                                 updatedBy: 'test@example.com',
                                 updatedReason: 'Initial submit',
                             },
-                            submissionFormProto: Buffer.from([1, 2, 3]),
+                            formDataProto: Buffer.from([1, 2, 3]),
                         },
                     ],
                 },
@@ -200,7 +200,7 @@ describe('submission 2 helpers', () => {
                         {
                             id: 'baz',
                             createdAt: new Date(),
-                            submissionFormProto: Buffer.from([1, 2, 3]),
+                            formDataProto: Buffer.from([1, 2, 3]),
                         },
                         {
                             id: 'bar',
@@ -210,7 +210,7 @@ describe('submission 2 helpers', () => {
                                 updatedBy: 'test@example.com',
                                 updatedReason: 'Initial submit',
                             },
-                            submissionFormProto: Buffer.from([1, 2, 3]),
+                            formDataProto: Buffer.from([1, 2, 3]),
                         },
                     ],
                 },

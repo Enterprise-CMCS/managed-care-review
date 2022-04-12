@@ -105,7 +105,7 @@ export function updateDraftSubmissionResolver(
 ): MutationResolvers['updateDraftSubmission'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
-        setResolverDetailsOnActiveSpan('createDraftSubmission', user, span)
+        setResolverDetailsOnActiveSpan('updateDraftSubmission', user, span)
         // This resolver is only callable by state users
         if (!isStateUser(context.user)) {
             logError(

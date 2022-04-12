@@ -40,7 +40,7 @@ export function unlockHealthPlanPackageResolver(
     return async (_parent, { input }, context) => {
         const { user, span } = context
         const { unlockedReason, pkgID } = input
-        setResolverDetailsOnActiveSpan('createDraftSubmission', user, span)
+        setResolverDetailsOnActiveSpan('unlockHealthPlanPackage', user, span)
         // This resolver is only callable by CMS users
         if (!isCMSUser(user)) {
             logError(

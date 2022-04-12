@@ -9,7 +9,7 @@ export function latestFormData(pkg: HealthPlanPackage): HealthPlanFormDataType {
         throw new Error('no revisions found for package' + pkg.id)
     }
 
-    const unwrapResult = base64ToDomain(latestRevision.submissionData)
+    const unwrapResult = base64ToDomain(latestRevision.formDataProto)
     if (unwrapResult instanceof Error) {
         throw unwrapResult
     }

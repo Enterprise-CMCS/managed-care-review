@@ -234,7 +234,7 @@ describe('submitHealthPlanPackage', () => {
         const currentRevision =
             submitResult?.data?.submitHealthPlanPackage?.pkg.revisions[0].node
 
-        const sub = base64ToDomain(currentRevision.submissionData)
+        const sub = base64ToDomain(currentRevision.formDataProto)
         if (sub instanceof Error) {
             throw sub
         }
@@ -282,7 +282,7 @@ describe('submitHealthPlanPackage', () => {
         const currentRevision =
             submitResult?.data?.submitHealthPlanPackage?.pkg.revisions[0].node
 
-        const sub = base64ToDomain(currentRevision.submissionData)
+        const sub = base64ToDomain(currentRevision.formDataProto)
         if (sub instanceof Error) {
             throw sub
         }
@@ -324,7 +324,7 @@ describe('submitHealthPlanPackage', () => {
         const currentRevision =
             submitResult?.data?.submitHealthPlanPackage?.pkg.revisions[0].node
 
-        const sub = base64ToDomain(currentRevision.submissionData)
+        const sub = base64ToDomain(currentRevision.formDataProto)
         if (sub instanceof Error) {
             throw sub
         }
@@ -382,7 +382,7 @@ describe('submitHealthPlanPackage', () => {
         const currentRevision =
             submitResult?.data?.submitHealthPlanPackage?.pkg.revisions[0].node
 
-        const sub = base64ToDomain(currentRevision.submissionData)
+        const sub = base64ToDomain(currentRevision.formDataProto)
         if (sub instanceof Error) {
             throw sub
         }
@@ -443,7 +443,7 @@ describe('submitHealthPlanPackage', () => {
 
         const currentRevision = submitResult?.revisions[0].node
 
-        const sub = base64ToDomain(currentRevision.submissionData)
+        const sub = base64ToDomain(currentRevision.formDataProto)
         if (sub instanceof Error) {
             throw sub
         }

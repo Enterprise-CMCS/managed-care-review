@@ -77,7 +77,7 @@ export function createDraftSubmissionResolver(
         setSuccessAttributesOnActiveSpan(span)
 
         const revision = pkgResult.revisions[0]
-        const formDataResult = toDomain(revision.submissionFormProto)
+        const formDataResult = toDomain(revision.formDataProto)
         if (formDataResult instanceof Error) {
             const errMessage =
                 'Failed to deserialize form data after create' +

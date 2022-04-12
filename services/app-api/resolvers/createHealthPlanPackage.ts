@@ -15,12 +15,12 @@ export function createHealthPlanPackageResolver(
 ): MutationResolvers['createHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
-        setResolverDetailsOnActiveSpan('createDraftSubmission', user, span)
+        setResolverDetailsOnActiveSpan('createHealthPlanPackage', user, span)
 
         // This resolver is only callable by state users
         if (!isStateUser(user)) {
             logError(
-                'createDraftSubmission',
+                'createHealthPlanPackage',
                 'user not authorized to create state data'
             )
             setErrorAttributesOnActiveSpan(
@@ -49,7 +49,7 @@ export function createHealthPlanPackageResolver(
                 'does',
                 count
             )} not exist in state ${stateFromCurrentUser}`
-            logError('createDraftSubmission', errMessage)
+            logError('createHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
                 argumentName: 'programIDs',
@@ -67,12 +67,12 @@ export function createHealthPlanPackageResolver(
         const pkgResult = await store.insertDraftSubmission(dbDraftSubmission)
         if (isStoreError(pkgResult)) {
             const errMessage = `Issue creating a draft submission of type ${pkgResult.code}. Message: ${pkgResult.message}`
-            logError('createDraftSubmission', errMessage)
+            logError('createHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
 
-        logSuccess('createDraftSubmission')
+        logSuccess('createHealthPlanPackage')
         setSuccessAttributesOnActiveSpan(span)
 
         return {

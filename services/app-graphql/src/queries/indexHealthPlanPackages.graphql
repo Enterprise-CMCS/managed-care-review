@@ -17,7 +17,7 @@ query indexHealthPlanPackages {
                         submitInfo {
                             updatedAt
                         }
-                        submissionData
+                        formDataProto
                     }
                 }
             }

@@ -12,7 +12,7 @@ export const makeDateTable = (
     const lookupTable = {} as DocumentDateLookupTable
     if (submissions) {
         submissions.revisions.forEach((revision, index) => {
-            const revisionData = base64ToDomain(revision.node.submissionData)
+            const revisionData = base64ToDomain(revision.node.formDataProto)
 
             if (revisionData instanceof Error) {
                 console.error(

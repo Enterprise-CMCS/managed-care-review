@@ -70,7 +70,7 @@ function updatesFromSubmission(draft: DraftSubmission): DraftSubmissionUpdates {
 function updatesFromHealthPlanPackage(
     draft: HealthPlanPackage
 ): DraftSubmissionUpdates {
-    const formData = base64ToDomain(draft.revisions[0].node.submissionData)
+    const formData = base64ToDomain(draft.revisions[0].node.formDataProto)
     if (formData instanceof Error) throw Error
 
     return {

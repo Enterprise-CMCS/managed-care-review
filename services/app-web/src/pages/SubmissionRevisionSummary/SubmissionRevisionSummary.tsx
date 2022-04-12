@@ -82,9 +82,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                 return
             }
 
-            const submissionResult = base64ToDomain(
-                revision.node.submissionData
-            )
+            const submissionResult = base64ToDomain(revision.node.formDataProto)
 
             if (
                 submissionResult instanceof Error ||

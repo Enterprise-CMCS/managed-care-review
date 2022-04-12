@@ -27,7 +27,7 @@ mutation createHealthPlanPackage($input: CreateHealthPlanPackageInput!) {
                         updatedReason
                     }
                     createdAt
-                    submissionData
+                    formDataProto
                 }
             }
         }

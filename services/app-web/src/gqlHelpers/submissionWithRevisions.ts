@@ -45,7 +45,7 @@ const getCurrentRevisionFromHealthPlanPackage = (
 
         // Decode form data submitted by the state
         const healthPlanPackageFormDataResult = base64ToDomain(
-            newestRev.submissionData
+            newestRev.formDataProto
         )
         if (healthPlanPackageFormDataResult instanceof Error) {
             console.error(

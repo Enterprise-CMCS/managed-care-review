@@ -27,7 +27,7 @@ query fetchHealthPlanPackage($input: FetchHealthPlanPackageInput!) {
                         updatedReason
                     }
                     createdAt
-                    submissionData
+                    formDataProto
                 }
             }
         }

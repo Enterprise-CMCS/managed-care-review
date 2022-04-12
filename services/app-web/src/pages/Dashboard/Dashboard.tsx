@@ -101,7 +101,7 @@ export const Dashboard = (): React.ReactElement => {
         .forEach((sub) => {
             const currentRevision = sub.revisions[0]
             const currentSubmissionData = base64ToDomain(
-                currentRevision.node.submissionData
+                currentRevision.node.formDataProto
             )
             if (currentSubmissionData instanceof Error) {
                 console.error(

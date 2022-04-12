@@ -19,14 +19,14 @@ export function fetchHealthPlanPackageResolver(
 ): QueryResolvers['fetchHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
-        setResolverDetailsOnActiveSpan('createDraftSubmission', user, span)
+        setResolverDetailsOnActiveSpan('fetchHealthPlanPackage', user, span)
         // fetch from the store
         const result = await store.findSubmissionWithRevisions(input.pkgID)
 
         if (isStoreError(result)) {
             console.log('Error finding a submission', result)
             const errMessage = `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
-            logError('fetchStateSubmission', errMessage)
+            logError('fetchHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
@@ -44,7 +44,7 @@ export function fetchHealthPlanPackageResolver(
             const stateFromCurrentUser: State['code'] = context.user.state_code
             if (submission.stateCode !== stateFromCurrentUser) {
                 logError(
-                    'fetchStateSubmission',
+                    'fetchHealthPlanPackage',
                     'user not authorized to fetch data from a different state'
                 )
                 setErrorAttributesOnActiveSpan(
@@ -58,7 +58,7 @@ export function fetchHealthPlanPackageResolver(
         } else if (isCMSUser(context.user)) {
             if (submissionStatus(submission) === 'DRAFT') {
                 logError(
-                    'fetchStateSubmission',
+                    'fetchHealthPlanPackage',
                     'CMS user not authorized to fetch a draft'
                 )
                 setErrorAttributesOnActiveSpan(
@@ -70,7 +70,7 @@ export function fetchHealthPlanPackageResolver(
                 )
             }
         } else {
-            logError('fetchStateSubmission', 'unknown user type')
+            logError('fetchHealthPlanPackage', 'unknown user type')
             setErrorAttributesOnActiveSpan('unknown user type', span)
             throw new ForbiddenError(`unknown user type`)
         }

@@ -122,7 +122,7 @@ export function updateHealthPlanFormDataResolver(
         // really belongs on the HealthPlanPackage itself instead of being inside form data, but this is where we are now.
 
         const previousFormDataResult = toDomain(
-            planPackage.revisions[0].submissionFormProto
+            planPackage.revisions[0].formDataProto
         )
         if (previousFormDataResult instanceof Error) {
             const errMessage = `Issue deserializing old formData ${previousFormDataResult.message}`

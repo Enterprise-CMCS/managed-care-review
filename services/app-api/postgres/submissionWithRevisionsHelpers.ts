@@ -71,7 +71,7 @@ function convertToHealthPlanPackageType(
                 unlockInfo,
                 submitInfo,
                 createdAt: r.createdAt,
-                submissionFormProto: r.submissionFormProto,
+                formDataProto: r.submissionFormProto,
             }
         }),
     }
