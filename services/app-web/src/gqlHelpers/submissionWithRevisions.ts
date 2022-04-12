@@ -11,10 +11,6 @@ import {
 } from '../gen/gqlClient'
 import { formatGQLDate } from '../dateHelpers'
 
-const isGQLDraftSubmission = (sub: GQLSubmissionUnionType): boolean => {
-    return sub.__typename === 'DraftSubmission'
-}
-
 const getCurrentRevisionFromHealthPlanPackage = (
     submissionAndRevisions: HealthPlanPackage
 ): [HealthPlanRevision, HealthPlanFormDataType] | Error => {
@@ -121,6 +117,5 @@ const convertDomainModelFormDataToGQLSubmission = (
 export {
     convertDomainModelFormDataToGQLSubmission,
     getCurrentRevisionFromHealthPlanPackage,
-    isGQLDraftSubmission,
 }
 export type { GQLSubmissionUnionType }

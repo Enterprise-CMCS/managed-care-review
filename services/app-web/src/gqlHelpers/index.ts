@@ -2,7 +2,6 @@ import { GraphQLErrors } from '@apollo/client/errors'
 import { DraftSubmission, StateSubmission } from '../gen/gqlClient'
 import {
     getCurrentRevisionFromHealthPlanPackage,
-    isGQLDraftSubmission,
     convertDomainModelFormDataToGQLSubmission,
 } from './submissionWithRevisions'
 const isStateSubmission = (
@@ -27,5 +26,4 @@ export {
     getCurrentRevisionFromHealthPlanPackage,
     isStateSubmission,
     isGraphQLErrors,
-    isGQLDraftSubmission,
 }
