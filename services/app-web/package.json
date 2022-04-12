@@ -140,7 +140,7 @@
         "serverless-plugin-scripts": "^1.0.2",
         "serverless-s3-sync": "^2.0.0",
         "serverless-stack-termination-protection": "^1.0.4",
-        "webpack": "5"
+        "webpack": "^5.72.0"
     },
     "resolutions": {
         "react-router-dom": "5.3.0",
