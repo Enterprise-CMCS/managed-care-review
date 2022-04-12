@@ -17,6 +17,7 @@
         "serverless-stack-termination-protection": "^1.0.4"
     },
     "dependencies": {
+        "copy-webpack-plugin": "^10.2.4",
         "serverless-webpack": "^5.7.0"
     }
 }
