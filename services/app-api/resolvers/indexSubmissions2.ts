@@ -1,11 +1,11 @@
 import { ForbiddenError } from 'apollo-server-lambda'
 import {
     isStateUser,
-    Submission2Type
+    HealthPlanPackageType,
 } from '../../app-web/src/common-code/domain-models'
 import { QueryResolvers } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
-import { isStoreError, Store} from '../postgres'
+import { isStoreError, Store } from '../postgres'
 
 export function indexSubmissions2Resolver(
     store: Store
@@ -21,7 +21,9 @@ export function indexSubmissions2Resolver(
         }
 
         // fetch from the store
-        const results = await store.findAllSubmissionsWithRevisions(context.user.state_code)
+        const results = await store.findAllSubmissionsWithRevisions(
+            context.user.state_code
+        )
 
         if (isStoreError(results)) {
             const errMessage = `Issue finding a draft submission of type ${results.code}. Message: ${results.message}`
@@ -29,13 +31,13 @@ export function indexSubmissions2Resolver(
             throw new Error(errMessage)
         }
 
-        const submissions: Submission2Type[] = results
+        const submissions: HealthPlanPackageType[] = results
 
         const edges = submissions.map((sub) => {
             return {
                 node: {
                     ...sub,
-            },
+                },
             }
         })
 

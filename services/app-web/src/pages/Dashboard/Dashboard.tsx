@@ -3,8 +3,11 @@ import classnames from 'classnames'
 import dayjs from 'dayjs'
 import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { submissionName, programNames } from '../../common-code/domain-models'
-import { Submission2Status } from '../../common-code/domain-models/Submission2Type'
+import {
+    submissionName,
+    programNames,
+    HealthPlanPackageStatusType,
+} from '../../common-code/domain-models'
 import { base64ToDomain } from '../../common-code/proto/stateSubmission'
 import { Loading } from '../../components/Loading'
 import { SubmissionStatusRecord } from '../../constants/submissions'
@@ -24,11 +27,11 @@ type SubmissionInDashboard = {
     programIDs: Array<string>
     submittedAt?: string
     updatedAt: string
-    status: Submission2Status
+    status: HealthPlanPackageStatusType
     submissionType: GQLSubmissionType
 }
 
-const isSubmitted = (status: Submission2Status) =>
+const isSubmitted = (status: HealthPlanPackageStatusType) =>
     status === 'SUBMITTED' || status === 'RESUBMITTED'
 
 function submissionURL(
@@ -46,7 +49,7 @@ function submissionURL(
 const StatusTag = ({
     status,
 }: {
-    status: Submission2Status
+    status: HealthPlanPackageStatusType
 }): React.ReactElement => {
     const tagStyles = classnames('', {
         [styles.submittedTag]: isSubmitted(status),

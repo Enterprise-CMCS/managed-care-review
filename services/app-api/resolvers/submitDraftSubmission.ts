@@ -9,7 +9,7 @@ import {
     isLockedHealthPlanFormData,
     isStateUser,
     LockedHealthPlanFormDataType,
-    Submission2Type,
+    HealthPlanPackageType,
     submissionName,
     submissionStatus,
     UpdateInfoType,
@@ -154,7 +154,7 @@ export function submitDraftSubmissionResolver(
             })
         }
 
-        const planPackage: Submission2Type = result
+        const planPackage: HealthPlanPackageType = result
         const planPackageStatus = submissionStatus(planPackage)
         const currentRevision = planPackage.revisions[0]
 
@@ -255,7 +255,7 @@ export function submitDraftSubmissionResolver(
             throw new Error(errMessage)
         }
 
-        const updatedSubmission: Submission2Type = updateResult
+        const updatedSubmission: HealthPlanPackageType = updateResult
 
         const programs = store.findPrograms(
             updatedSubmission.stateCode,

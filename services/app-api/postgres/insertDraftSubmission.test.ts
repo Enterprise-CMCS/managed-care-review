@@ -1,4 +1,4 @@
-import { Submission2Type } from '../../app-web/src/common-code/domain-models'
+import { HealthPlanPackageType } from '../../app-web/src/common-code/domain-models'
 import { toDomain } from '../../app-web/src/common-code/proto/stateSubmission'
 import { sharedTestPrismaClient } from '../testHelpers/storeHelpers'
 import { insertDraftSubmission } from './insertDraftSubmission'
@@ -33,7 +33,7 @@ describe('insertDraftSubmissionPostgres', () => {
 
         // Because we are erroring above if _any_ of our results are a store error
         // we can tell the type system that all of our results are UnlockedHealthPlanFormDataType
-        const drafts = results as Submission2Type[]
+        const drafts = results as HealthPlanPackageType[]
 
         const formDatum = drafts.map((d) => {
             const formDataResult = toDomain(d.revisions[0].submissionFormProto)

@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import {
     LockedHealthPlanFormDataType,
-    Submission2Type,
+    HealthPlanPackageType,
     UpdateInfoType,
 } from '../../app-web/src/common-code/domain-models'
 import { toProtoBuffer } from '../../app-web/src/common-code/proto/stateSubmission'
@@ -12,7 +12,7 @@ import {
 } from './storeError'
 import {
     getCurrentRevision,
-    convertToSubmission2Type,
+    convertToHealthPlanPackageType,
 } from './submissionWithRevisionsHelpers'
 
 async function submitStateSubmissionWrapper(
@@ -20,7 +20,7 @@ async function submitStateSubmissionWrapper(
     id: string,
     submitInfo: UpdateInfoType,
     proto: Buffer
-): Promise<Submission2Type | StoreError> {
+): Promise<HealthPlanPackageType | StoreError> {
     try {
         const findResult = await client.stateSubmission.findUnique({
             where: {
@@ -65,7 +65,7 @@ async function submitStateSubmissionWrapper(
                     },
                 },
             })
-            return convertToSubmission2Type(submissionResult)
+            return convertToHealthPlanPackageType(submissionResult)
         } catch (updateError) {
             return convertPrismaErrorToStoreError(updateError)
         }
@@ -78,7 +78,7 @@ export async function updateStateSubmission(
     client: PrismaClient,
     stateSubmission: LockedHealthPlanFormDataType,
     submitInfo: UpdateInfoType
-): Promise<Submission2Type | StoreError> {
+): Promise<HealthPlanPackageType | StoreError> {
     stateSubmission.updatedAt = new Date()
 
     const proto = toProtoBuffer(stateSubmission)

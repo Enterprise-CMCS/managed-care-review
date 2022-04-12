@@ -1,9 +1,13 @@
-type Submission2Status = 'DRAFT' | 'SUBMITTED' | 'UNLOCKED' | 'RESUBMITTED'
+type HealthPlanPackageStatusType =
+    | 'DRAFT'
+    | 'SUBMITTED'
+    | 'UNLOCKED'
+    | 'RESUBMITTED'
 
-type Submission2Type = {
+type HealthPlanPackageType = {
     id: string
     stateCode: string
-    revisions: RevisionType[]
+    revisions: HealthPlanRevisionType[]
 }
 
 type UpdateInfoType = {
@@ -12,7 +16,7 @@ type UpdateInfoType = {
     updatedReason: string
 }
 
-type RevisionType = {
+type HealthPlanRevisionType = {
     id: string
     unlockInfo?: UpdateInfoType
     submitInfo?: UpdateInfoType
@@ -21,8 +25,8 @@ type RevisionType = {
 }
 
 export {
-    Submission2Status,
-    Submission2Type,
+    HealthPlanPackageStatusType,
+    HealthPlanPackageType,
     UpdateInfoType,
-    RevisionType,
+    HealthPlanRevisionType,
 }

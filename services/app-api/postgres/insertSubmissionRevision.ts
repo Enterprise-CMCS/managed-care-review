@@ -2,12 +2,12 @@ import { PrismaClient } from '@prisma/client'
 import { v4 as uuidv4 } from 'uuid'
 import {
     UnlockedHealthPlanFormDataType,
-    Submission2Type,
+    HealthPlanPackageType,
     UpdateInfoType,
 } from '../../app-web/src/common-code/domain-models'
 import { toProtoBuffer } from '../../app-web/src/common-code/proto/stateSubmission'
 import { convertPrismaErrorToStoreError, StoreError } from './storeError'
-import { convertToSubmission2Type } from './submissionWithRevisionsHelpers'
+import { convertToHealthPlanPackageType } from './submissionWithRevisionsHelpers'
 
 export type InsertSubmissionRevisionArgsType = {
     submissionID: string
@@ -18,7 +18,7 @@ export type InsertSubmissionRevisionArgsType = {
 export async function insertSubmissionRevision(
     client: PrismaClient,
     args: InsertSubmissionRevisionArgsType
-): Promise<Submission2Type | StoreError> {
+): Promise<HealthPlanPackageType | StoreError> {
     const protobuf = toProtoBuffer(args.draft)
 
     const buffer = Buffer.from(protobuf)
@@ -53,7 +53,7 @@ export async function insertSubmissionRevision(
             },
         })
 
-        return convertToSubmission2Type(submission)
+        return convertToHealthPlanPackageType(submission)
     } catch (e: unknown) {
         console.log('ERROR: inserting into to the database: ', e)
 

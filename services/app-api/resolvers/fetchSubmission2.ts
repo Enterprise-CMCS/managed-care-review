@@ -1,9 +1,18 @@
 import { ForbiddenError } from 'apollo-server-lambda'
-import { isCMSUser, isStateUser, Submission2Type, submissionStatus } from '../../app-web/src/common-code/domain-models'
+import {
+    isCMSUser,
+    isStateUser,
+    HealthPlanPackageType,
+    submissionStatus,
+} from '../../app-web/src/common-code/domain-models'
 import { QueryResolvers, State } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
-import { setErrorAttributesOnActiveSpan, setResolverDetailsOnActiveSpan, setSuccessAttributesOnActiveSpan } from "./attributeHelper";
+import {
+    setErrorAttributesOnActiveSpan,
+    setResolverDetailsOnActiveSpan,
+    setSuccessAttributesOnActiveSpan,
+} from './attributeHelper'
 
 export function fetchSubmission2Resolver(
     store: Store
@@ -12,7 +21,9 @@ export function fetchSubmission2Resolver(
         const { user, span } = context
         setResolverDetailsOnActiveSpan('createDraftSubmission', user, span)
         // fetch from the store
-        const result = await store.findSubmissionWithRevisions(input.submissionID)
+        const result = await store.findSubmissionWithRevisions(
+            input.submissionID
+        )
 
         if (isStoreError(result)) {
             console.log('Error finding a submission', result)
@@ -28,7 +39,7 @@ export function fetchSubmission2Resolver(
             }
         }
 
-        const submission: Submission2Type = result
+        const submission: HealthPlanPackageType = result
 
         // Authorization CMS users can view, state users can only view if the state matches
         if (isStateUser(context.user)) {
@@ -38,18 +49,24 @@ export function fetchSubmission2Resolver(
                     'fetchStateSubmission',
                     'user not authorized to fetch data from a different state'
                 )
-                setErrorAttributesOnActiveSpan('user not authorized to fetch data from a different state', span)
+                setErrorAttributesOnActiveSpan(
+                    'user not authorized to fetch data from a different state',
+                    span
+                )
                 throw new ForbiddenError(
                     'user not authorized to fetch data from a different state'
                 )
             }
         } else if (isCMSUser(context.user)) {
-            if (submissionStatus(submission) === 'DRAFT'){
+            if (submissionStatus(submission) === 'DRAFT') {
                 logError(
                     'fetchStateSubmission',
                     'CMS user not authorized to fetch a draft'
                 )
-                setErrorAttributesOnActiveSpan('CMS user not authorized to fetch a draft', span)
+                setErrorAttributesOnActiveSpan(
+                    'CMS user not authorized to fetch a draft',
+                    span
+                )
                 throw new ForbiddenError(
                     'CMS user not authorized to fetch a draft'
                 )

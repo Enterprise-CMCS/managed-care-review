@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import {
     UnlockedHealthPlanFormDataType,
-    Submission2Type,
+    HealthPlanPackageType,
 } from '../../app-web/src/common-code/domain-models'
 import { toProtoBuffer } from '../../app-web/src/common-code/proto/stateSubmission'
 import {
@@ -10,7 +10,7 @@ import {
     StoreError,
 } from './storeError'
 import {
-    convertToSubmission2Type,
+    convertToHealthPlanPackageType,
     StateSubmissionWithRevisions,
 } from './submissionWithRevisionsHelpers'
 
@@ -57,7 +57,7 @@ export async function updateFormData(
     submissionID: string,
     revisionID: string,
     formData: UnlockedHealthPlanFormDataType
-): Promise<Submission2Type | StoreError> {
+): Promise<HealthPlanPackageType | StoreError> {
     formData.updatedAt = new Date()
 
     const proto = toProtoBuffer(formData)
@@ -74,5 +74,5 @@ export async function updateFormData(
         return updateResult
     }
 
-    return convertToSubmission2Type(updateResult)
+    return convertToHealthPlanPackageType(updateResult)
 }

@@ -38,12 +38,12 @@ import {
     Submission2,
 } from '../../gen/gqlClient'
 import { SubmissionUnlockedBanner } from '../../components/Banner'
-import { UpdateInfoType } from '../../common-code/domain-models/Submission2Type'
 import { useAuth } from '../../contexts/AuthContext'
 import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import {
     UnlockedHealthPlanFormDataType,
     submissionName,
+    UpdateInfoType,
 } from '../../common-code/domain-models'
 import { domainToBase64 } from '../../common-code/proto/stateSubmission'
 

@@ -2,7 +2,7 @@ import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import {
     UnlockedHealthPlanFormDataType,
     isStateUser,
-    Submission2Type,
+    HealthPlanPackageType,
     submissionStatus,
 } from '../../app-web/src/common-code/domain-models'
 import {
@@ -82,7 +82,7 @@ export function updateHealthPlanFormDataResolver(
             })
         }
 
-        const planPackage: Submission2Type = result
+        const planPackage: HealthPlanPackageType = result
 
         // Authorize the update
         const stateFromCurrentUser = context.user.state_code

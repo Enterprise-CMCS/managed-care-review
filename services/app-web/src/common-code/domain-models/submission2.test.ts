@@ -1,9 +1,12 @@
 import { submissionStatus, submissionSubmittedAt } from './submission2'
-import { Submission2Status, Submission2Type } from './Submission2Type'
+import {
+    HealthPlanPackageStatusType,
+    HealthPlanPackageType,
+} from './HealthPlanPackageType'
 
 describe('submission 2 helpers', () => {
     it('status returns the expected status', () => {
-        const tests: [Submission2Type, Submission2Status][] = [
+        const tests: [HealthPlanPackageType, HealthPlanPackageStatusType][] = [
             [
                 {
                     id: 'foo',
@@ -100,7 +103,6 @@ describe('submission 2 helpers', () => {
             ],
         ]
 
-
         for (const test of tests) {
             const [sub, expectedStatus] = test
 
@@ -111,15 +113,16 @@ describe('submission 2 helpers', () => {
     })
 
     it('status returns an error with an invalid submission', () => {
-
-        const tests: [Submission2Type, Error][] = [
-            [{
-                id: 'foo',
-                stateCode: 'FL' as const,
-                revisions: []
-            }, new Error('No revisions on this submission')],
+        const tests: [HealthPlanPackageType, Error][] = [
+            [
+                {
+                    id: 'foo',
+                    stateCode: 'FL' as const,
+                    revisions: [],
+                },
+                new Error('No revisions on this submission'),
+            ],
         ]
-
 
         for (const test of tests) {
             const [sub, expectedError] = test
@@ -131,7 +134,7 @@ describe('submission 2 helpers', () => {
     })
 
     it('submittedAt returns the expected date', () => {
-        const tests: [Submission2Type, Date | undefined][] = [
+        const tests: [HealthPlanPackageType, Date | undefined][] = [
             [
                 {
                     id: 'foo',
@@ -215,7 +218,6 @@ describe('submission 2 helpers', () => {
             ],
         ]
 
-
         for (const test of tests) {
             const [sub, expectedDate] = test
 
@@ -224,5 +226,4 @@ describe('submission 2 helpers', () => {
             expect(testDate).toEqual(expectedDate)
         }
     })
-
 })

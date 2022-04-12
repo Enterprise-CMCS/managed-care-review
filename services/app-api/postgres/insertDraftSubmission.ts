@@ -3,7 +3,7 @@ import { Buffer } from 'buffer'
 import { v4 as uuidv4 } from 'uuid'
 import {
     UnlockedHealthPlanFormDataType,
-    Submission2Type,
+    HealthPlanPackageType,
     SubmissionType,
 } from '../../app-web/src/common-code/domain-models'
 import { toProtoBuffer } from '../../app-web/src/common-code/proto/stateSubmission'
@@ -12,7 +12,7 @@ import {
     isStoreError,
     StoreError,
 } from './storeError'
-import { convertToSubmission2Type } from './submissionWithRevisionsHelpers'
+import { convertToHealthPlanPackageType } from './submissionWithRevisionsHelpers'
 
 export type InsertDraftSubmissionArgsType = {
     stateCode: string
@@ -48,7 +48,7 @@ async function incrementAndGetStateNumber(
 export async function insertDraftSubmission(
     client: PrismaClient,
     args: InsertDraftSubmissionArgsType
-): Promise<Submission2Type | StoreError> {
+): Promise<HealthPlanPackageType | StoreError> {
     const stateNumberResult = await incrementAndGetStateNumber(
         client,
         args.stateCode
@@ -108,7 +108,7 @@ export async function insertDraftSubmission(
             },
         })
 
-        return convertToSubmission2Type(pkg)
+        return convertToHealthPlanPackageType(pkg)
     } catch (e: unknown) {
         console.log('ERROR: inserting into to the database: ', e)
 

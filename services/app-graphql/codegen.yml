@@ -21,7 +21,7 @@ generates:
         DraftSubmission: ../../app-web/src/common-code/domain-models#UnlockedHealthPlanFormDataType
         StateSubmission: ../../app-web/src/common-code/domain-models#LockedHealthPlanFormDataType
         Submission: ../../app-web/src/common-code/domain-models#HealthPlanFormDataType
-        Submission2: ../../app-web/src/common-code/domain-models#Submission2Type
+        Submission2: ../../app-web/src/common-code/domain-models#HealthPlanPackageType
   ../app-web/src/gen/gqlClient.tsx:
     documents:
       - src/queries/*.graphql

@@ -47,11 +47,11 @@ export {
     submissionSubmittedAt,
 } from './submission2'
 export type {
-    RevisionType,
-    Submission2Type,
-    Submission2Status,
+    HealthPlanRevisionType,
+    HealthPlanPackageType,
+    HealthPlanPackageStatusType,
     UpdateInfoType,
-} from './Submission2Type'
+} from './HealthPlanPackageType'
 export type { HealthPlanFormDataType } from './HealthPlanFormDataType'
 // Type checks and type guards
 export { isCMSUser, isCognitoUser, isStateUser } from './user'

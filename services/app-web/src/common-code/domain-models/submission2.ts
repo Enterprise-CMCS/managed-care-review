@@ -1,11 +1,15 @@
-import { RevisionType, Submission2Status, Submission2Type } from './Submission2Type'
+import {
+    HealthPlanRevisionType,
+    HealthPlanPackageStatusType,
+    HealthPlanPackageType,
+} from './HealthPlanPackageType'
 
-
-// submissionStatus computes the current status of the submission based on 
+// submissionStatus computes the current status of the submission based on
 // the submit/unlock info on its revisions.
 // These methods ASSUME that revisions are returned most-recent-first.
-function submissionStatus(submission: Submission2Type): Submission2Status | Error {
-
+function submissionStatus(
+    submission: HealthPlanPackageType
+): HealthPlanPackageStatusType | Error {
     // Compute the current status of this submission based on the number of revisions.
     const currentRev = submissionCurrentRevision(submission)
 
@@ -29,21 +33,22 @@ function submissionStatus(submission: Submission2Type): Submission2Status | Erro
 }
 
 // submissionSubmittedAt returns the INITIAL submission date. Even if the
-// submission has been unlocked and resubmitted the submission date is always the original submit date 
+// submission has been unlocked and resubmitted the submission date is always the original submit date
 // This method relies on revisions always being presented in most-recent-first order
-function submissionSubmittedAt(submission: Submission2Type): Date | undefined {
-    const lastSubmittedRev = submission.revisions[submission.revisions.length - 1]
+function submissionSubmittedAt(
+    submission: HealthPlanPackageType
+): Date | undefined {
+    const lastSubmittedRev =
+        submission.revisions[submission.revisions.length - 1]
     return lastSubmittedRev?.submitInfo?.updatedAt
 }
 
 // submissionCurrentRevision returns the most recent revision
 // This method (and others here!) rely on revisions always being returned in most-recent-first order
-function submissionCurrentRevision(submission: Submission2Type): RevisionType {
+function submissionCurrentRevision(
+    submission: HealthPlanPackageType
+): HealthPlanRevisionType {
     return submission.revisions[0]
 }
 
-export {
-    submissionCurrentRevision,
-    submissionStatus,
-    submissionSubmittedAt,
-}
+export { submissionCurrentRevision, submissionStatus, submissionSubmittedAt }

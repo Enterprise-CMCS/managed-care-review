@@ -7,7 +7,7 @@ import {
     ActuarialFirmType,
     ActuaryCommunicationType,
     ContractExecutionStatus,
-    Submission2Status,
+    HealthPlanPackageStatusType,
 } from '../common-code/domain-models'
 
 const SubmissionTypeRecord: Record<SubmissionType, string> = {
@@ -82,7 +82,7 @@ const RateChangeReasonRecord: Record<'ANNUAL' | 'MIDYEAR' | 'OTHER', string> = {
     OTHER: 'Other (please describe)',
 }
 
-const SubmissionStatusRecord: Record<Submission2Status, string> = {
+const SubmissionStatusRecord: Record<HealthPlanPackageStatusType, string> = {
     DRAFT: 'Draft',
     SUBMITTED: 'Submitted',
     UNLOCKED: 'Unlocked',
