@@ -52,8 +52,10 @@ async function configurePostgres(
     if (dbConnResult instanceof Error) {
         return dbConnResult
     }
+    console.log(dbConnResult)
 
     const prismaResult = await NewPrismaClient(dbConnResult)
+    console.log(prismaResult)
 
     if (prismaResult instanceof Error) {
         console.log('Error: attempting to create prisma client: ', prismaResult)
