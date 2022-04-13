@@ -6,12 +6,9 @@ import {
     AmendableItems,
     ActuarialFirmType,
     ActuaryCommunicationType,
-    ContractExecutionStatus
-} from '../common-code/domain-models/DraftSubmissionType'
-import {
-    Submission2Status
-} from '../common-code/domain-models/Submission2Type'
-
+    ContractExecutionStatus,
+    HealthPlanPackageStatusType,
+} from '../common-code/domain-models'
 
 const SubmissionTypeRecord: Record<SubmissionType, string> = {
     CONTRACT_ONLY: 'Contract action only',
@@ -25,7 +22,7 @@ const ContractTypeRecord: Record<ContractType, string> = {
 
 const ContractExecutionStatusRecord: Record<ContractExecutionStatus, string> = {
     EXECUTED: 'Fully executed',
-    UNEXECUTED: 'Unexecuted by some or all parties'
+    UNEXECUTED: 'Unexecuted by some or all parties',
 }
 
 const FederalAuthorityRecord: Record<FederalAuthority, string> = {
@@ -85,11 +82,11 @@ const RateChangeReasonRecord: Record<'ANNUAL' | 'MIDYEAR' | 'OTHER', string> = {
     OTHER: 'Other (please describe)',
 }
 
-const SubmissionStatusRecord: Record<Submission2Status, string> = {
+const SubmissionStatusRecord: Record<HealthPlanPackageStatusType, string> = {
     DRAFT: 'Draft',
     SUBMITTED: 'Submitted',
     UNLOCKED: 'Unlocked',
-    RESUBMITTED: 'Resubmitted'
+    RESUBMITTED: 'Resubmitted',
 }
 
 export {

@@ -18,7 +18,8 @@ export type {
     ContractExecutionStatus,
     ContractType,
     DocumentCategoryType,
-    DraftSubmissionType,
+    AmendableItems,
+    UnlockedHealthPlanFormDataType,
     FederalAuthority,
     ManagedCareEntity,
     RateType,
@@ -26,9 +27,9 @@ export type {
     SubmissionDocument,
     SubmissionType,
     RateDataType,
-} from './DraftSubmissionType'
+} from './UnlockedHealthPlanFormDataType'
 export type { ProgramT } from './ProgramT'
-export type { StateSubmissionType } from './StateSubmissionType'
+export type { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 export {
     hasValidContract,
     hasValidDocuments,
@@ -36,22 +37,23 @@ export {
     hasValidSupportingDocumentCategories,
     isContractAndRates,
     isContractOnly,
-    isDraftSubmission,
-    isStateSubmission,
+    isUnlockedHealthPlanFormData,
+    isLockedHealthPlanFormData,
     programNames,
     submissionName,
     generateRateName,
-} from './submission'
+} from './healthPlanFormData'
 export {
-    submissionCurrentRevision,
-    submissionStatus,
-    submissionSubmittedAt,
-} from './submission2'
+    packageCurrentRevision,
+    packageStatus,
+    packageSubmittedAt,
+} from './healthPlanPackage'
 export type {
-    RevisionType,
-    Submission2Type,
+    HealthPlanRevisionType,
+    HealthPlanPackageType,
+    HealthPlanPackageStatusType,
     UpdateInfoType,
-} from './Submission2Type'
-export type { SubmissionUnionType } from './SubmissionUnionType'
+} from './HealthPlanPackageType'
+export type { HealthPlanFormDataType } from './HealthPlanFormDataType'
 // Type checks and type guards
 export { isCMSUser, isCognitoUser, isStateUser } from './user'

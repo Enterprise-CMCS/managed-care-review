@@ -1,12 +1,20 @@
-mutation submitDraftSubmission($input: SubmitDraftSubmissionInput!) {
-    submitDraftSubmission(input: $input) {
-        submission {
+query fetchHealthPlanPackage($input: FetchHealthPlanPackageInput!) {
+    fetchHealthPlanPackage(input: $input) {
+        pkg {
             id
             stateCode
+            state {
+                code
+                name
+                programs {
+                    id
+                    name
+                }
+            }
             status
             intiallySubmittedAt
             revisions {
-                revision {
+                node {
                     id
                     unlockInfo {
                         updatedAt
@@ -19,7 +27,7 @@ mutation submitDraftSubmission($input: SubmitDraftSubmissionInput!) {
                         updatedReason
                     }
                     createdAt
-                    submissionData
+                    formDataProto
                 }
             }
         }

@@ -1,5 +1,8 @@
 import { StateSubmission, StateSubmissionRevision } from '@prisma/client'
-import { Submission2Type, UpdateInfoType } from '../../app-web/src/common-code/domain-models'
+import {
+    HealthPlanPackageType,
+    UpdateInfoType,
+} from '../../app-web/src/common-code/domain-models'
 import { StoreError } from './storeError'
 
 export type StateSubmissionWithRevisions = StateSubmission & {
@@ -24,7 +27,7 @@ const getCurrentRevision = (
             message: `No revisions found for submission id: ${submissionID}`,
         }
 
-    // run through the list of revisions, get the newest one. 
+    // run through the list of revisions, get the newest one.
     // If we ORDERED BY before getting these, we could probably simplify this.
     const newestRev = submissionResult.revisions.reduce((acc, revision) => {
         if (revision.createdAt > acc.createdAt) {
@@ -37,19 +40,20 @@ const getCurrentRevision = (
     return newestRev
 }
 
-
-// convertToSubmission2Type transforms the DB representation of StateSubmissionWithRevisions into our Submission2Type
-function convertToSubmission2Type(dbSub: StateSubmissionWithRevisions): Submission2Type {
+// convertToHealthPlanPackageType transforms the DB representation of StateSubmissionWithRevisions into our HealthPlanPackageType
+function convertToHealthPlanPackageType(
+    dbSub: StateSubmissionWithRevisions
+): HealthPlanPackageType {
     return {
         id: dbSub.id,
         stateCode: dbSub.stateCode,
-        revisions: dbSub.revisions.map(r => { 
+        revisions: dbSub.revisions.map((r) => {
             let submitInfo: UpdateInfoType | undefined = undefined
             if (r.submittedAt && r.submittedReason && r.submittedBy) {
                 submitInfo = {
                     updatedAt: r.submittedAt,
                     updatedReason: r.submittedReason,
-                    updatedBy: r.submittedBy
+                    updatedBy: r.submittedBy,
                 }
             }
 
@@ -67,14 +71,10 @@ function convertToSubmission2Type(dbSub: StateSubmissionWithRevisions): Submissi
                 unlockInfo,
                 submitInfo,
                 createdAt: r.createdAt,
-                submissionFormProto: r.submissionFormProto,
+                formDataProto: r.submissionFormProto,
             }
-        })
+        }),
     }
 }
 
-
-export {
-    getCurrentRevision,
-    convertToSubmission2Type,
-}
+export { getCurrentRevision, convertToHealthPlanPackageType }

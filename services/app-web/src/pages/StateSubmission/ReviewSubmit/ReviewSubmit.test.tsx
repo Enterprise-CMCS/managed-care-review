@@ -3,8 +3,8 @@ import { createMemoryHistory } from 'history'
 import {
     fetchCurrentUserMock,
     mockCompleteDraft,
-    submitDraftSubmissionMockError,
-    submitDraftSubmissionMockSuccess,
+    submitHealthPlanPackageMockError,
+    submitHealthPlanPackageMockSuccess,
 } from '../../../testHelpers/apolloHelpers'
 import {
     renderWithProviders,
@@ -207,7 +207,7 @@ describe('ReviewSubmit', () => {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({ statusCode: 200 }),
-                        submitDraftSubmissionMockSuccess({
+                        submitHealthPlanPackageMockSuccess({
                             id: mockCompleteDraft().id,
                         }),
                     ],
@@ -252,7 +252,7 @@ describe('ReviewSubmit', () => {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({ statusCode: 200 }),
-                        submitDraftSubmissionMockError({
+                        submitHealthPlanPackageMockError({
                             id: mockCompleteDraft().id,
                         }),
                     ],
@@ -289,7 +289,7 @@ describe('Resubmitting plan packages', () => {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({ statusCode: 200 }),
-                        submitDraftSubmissionMockError({
+                        submitHealthPlanPackageMockError({
                             id: mockCompleteDraft().id,
                         }),
                     ],
@@ -332,7 +332,7 @@ describe('Resubmitting plan packages', () => {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({ statusCode: 200 }),
-                        submitDraftSubmissionMockSuccess({
+                        submitHealthPlanPackageMockSuccess({
                             id: mockCompleteDraft().id,
                             submittedReason: 'Test submission summary',
                         }),
@@ -380,7 +380,7 @@ describe('Resubmitting plan packages', () => {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({ statusCode: 200 }),
-                        submitDraftSubmissionMockError({
+                        submitHealthPlanPackageMockError({
                             id: mockCompleteDraft().id,
                         }),
                     ],
@@ -417,7 +417,7 @@ describe('Resubmitting plan packages', () => {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({ statusCode: 200 }),
-                        submitDraftSubmissionMockSuccess({
+                        submitHealthPlanPackageMockSuccess({
                             id: mockCompleteDraft().id,
                             submittedReason: 'Test submission summary',
                         }),
@@ -455,7 +455,7 @@ describe('Resubmitting plan packages', () => {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({ statusCode: 200 }),
-                        submitDraftSubmissionMockSuccess({
+                        submitHealthPlanPackageMockSuccess({
                             id: mockCompleteDraft().id,
                             submittedReason: 'Test submission summary',
                         }),
@@ -487,7 +487,7 @@ describe('Resubmitting plan packages', () => {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({ statusCode: 200 }),
-                        submitDraftSubmissionMockSuccess({
+                        submitHealthPlanPackageMockSuccess({
                             id: mockCompleteDraft().id,
                         }),
                     ],

@@ -1,13 +1,13 @@
 import { statesubmission } from '../../../gen/stateSubmissionProto'
-import { draftSubmissionTypeSchema } from './draftSubmissionSchema'
+import { unlockedHealthPlanFormDataSchema } from './unlockedHealthPlanFormDataSchema'
 import {
-    DraftSubmissionType,
-    StateSubmissionType,
+    UnlockedHealthPlanFormDataType,
+    LockedHealthPlanFormDataType,
     DocumentCategoryType,
     ActuarialFirmType,
     ContractAmendmentInfo,
     FederalAuthority,
-    isStateSubmission,
+    isLockedHealthPlanFormData,
 } from '../../domain-models'
 
 /**
@@ -168,10 +168,10 @@ type RecursivePartial<T> = {
     [P in keyof T]?: RecursivePartial<T[P]>
 }
 
-// Parsers for each field of DraftSubmissionType
+// Parsers for each field of UnlockedHealthPlanFormDataType
 function parseProtoDocuments(
     docs: statesubmission.IDocument[] | null | undefined
-): RecursivePartial<DraftSubmissionType['documents']> {
+): RecursivePartial<UnlockedHealthPlanFormDataType['documents']> {
     if (docs === null || docs === undefined) {
         return []
     }
@@ -208,7 +208,7 @@ function parseCapitationRates(
 
 function parseContractAmendment(
     amendment: statesubmission.IContractInfo['contractAmendmentInfo']
-): RecursivePartial<DraftSubmissionType['contractAmendmentInfo']> {
+): RecursivePartial<UnlockedHealthPlanFormDataType['contractAmendmentInfo']> {
     if (!amendment) {
         return undefined
     }
@@ -233,7 +233,7 @@ function parseContractAmendment(
 
 function parseActuaryContacts(
     rateInfo: statesubmission.IRateInfo | null | undefined
-): RecursivePartial<DraftSubmissionType['actuaryContacts']> {
+): RecursivePartial<UnlockedHealthPlanFormDataType['actuaryContacts']> {
     if (!rateInfo?.actuaryContacts) {
         return []
     }
@@ -263,7 +263,7 @@ function parseProtoRateAmendment(
         | statesubmission.RateInfo['rateAmendmentInfo']
         | null
         | undefined
-): RecursivePartial<DraftSubmissionType['rateAmendmentInfo']> {
+): RecursivePartial<UnlockedHealthPlanFormDataType['rateAmendmentInfo']> {
     if (!rateAmendment) {
         return undefined
     }
@@ -278,7 +278,7 @@ function parseProtoRateAmendment(
 
 const toDomain = (
     buff: Uint8Array
-): DraftSubmissionType | StateSubmissionType | Error => {
+): UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType | Error => {
     const stateSubmissionMessage = decodeOrError(buff)
 
     if (stateSubmissionMessage instanceof Error) {
@@ -328,8 +328,8 @@ const toDomain = (
 
     // Since everything in proto-land is optional, we construct a RecursivePartial version of our domain models
     // and
-    const maybeDomainModel: RecursivePartial<DraftSubmissionType> &
-        RecursivePartial<StateSubmissionType> = {
+    const maybeDomainModel: RecursivePartial<UnlockedHealthPlanFormDataType> &
+        RecursivePartial<LockedHealthPlanFormDataType> = {
         id: id ?? undefined,
         createdAt: protoDateToDomain(createdAt),
         updatedAt: protoTimestampToDomain(updatedAt),
@@ -391,27 +391,28 @@ const toDomain = (
     }
 
     // Now that we've gotten things into our combined draft & state domain format.
-    // we confirm that all the required fields are present to turn this into a DraftSubmissionType or a StateSubmissionType
+    // we confirm that all the required fields are present to turn this into an UnlockedHealthPlanFormDataType or a LockedHealthPlanFormDataType
     if (status === 'DRAFT') {
         // cast so we can set status
         const maybeDraft =
-            maybeDomainModel as RecursivePartial<DraftSubmissionType>
+            maybeDomainModel as RecursivePartial<UnlockedHealthPlanFormDataType>
         maybeDraft.status = 'DRAFT'
 
-        // This parse returns an actual DraftSubmissionType, so all our partial & casting is put to rest
-        const parseResult = draftSubmissionTypeSchema.safeParse(maybeDraft)
+        // This parse returns an actual UnlockedHealthPlanFormDataType, so all our partial & casting is put to rest
+        const parseResult =
+            unlockedHealthPlanFormDataSchema.safeParse(maybeDraft)
 
         if (parseResult.success === false) {
             return parseResult.error
         }
 
-        return parseResult.data as DraftSubmissionType
+        return parseResult.data as UnlockedHealthPlanFormDataType
     } else if (status === 'SUBMITTED') {
         const maybeStateSubmission =
-            maybeDomainModel as RecursivePartial<StateSubmissionType>
+            maybeDomainModel as RecursivePartial<LockedHealthPlanFormDataType>
         maybeStateSubmission.status = 'SUBMITTED'
 
-        if (isStateSubmission(maybeStateSubmission)) {
+        if (isLockedHealthPlanFormData(maybeStateSubmission)) {
             return maybeStateSubmission
         } else {
             console.log(

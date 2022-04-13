@@ -1,19 +1,19 @@
-import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitDraftSubmission.graphql'
+import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitHealthPlanPackage.graphql'
 import {
     constructTestPostgresServer,
     createAndUpdateTestDraftSubmission,
     fetchTestStateSubmissionById,
     defaultContext,
     defaultFloridaProgram,
-	unlockTestDraftSubmission,
-	resubmitTestDraftSubmission,
-	createTestStateSubmission,
+    unlockTestDraftSubmission,
+    resubmitTestDraftSubmission,
+    createTestStateSubmission,
 } from '../testHelpers/gqlHelpers'
 import { testEmailConfig, testEmailer } from '../testHelpers/emailerHelpers'
 import { base64ToDomain } from '../../app-web/src/common-code/proto/stateSubmission'
 import { submissionName } from '../../app-web/src/common-code/domain-models'
 
-describe('submitDraftSubmission', () => {
+describe('submitHealthPlanPackage', () => {
     it('returns a StateSubmission if complete', async () => {
         const server = await constructTestPostgresServer()
 
@@ -27,14 +27,13 @@ describe('submitDraftSubmission', () => {
             query: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: draftID,
+                    pkgID: draftID,
                 },
             },
         })
 
         expect(submitResult.errors).toBeUndefined()
-        const createdID =
-            submitResult?.data?.submitDraftSubmission.submission.id
+        const createdID = submitResult?.data?.submitHealthPlanPackage.pkg.id
 
         // test result
         const resultDraft = await fetchTestStateSubmissionById(
@@ -44,18 +43,18 @@ describe('submitDraftSubmission', () => {
 
         // The submission fields should still be set
         expect(resultDraft.id).toEqual(createdID)
-        expect(resultDraft.submissionType).toEqual('CONTRACT_AND_RATES')
+        expect(resultDraft.submissionType).toBe('CONTRACT_AND_RATES')
         expect(resultDraft.programIDs).toEqual([defaultFloridaProgram().id])
         // check that the stateNumber is being returned the same
         expect(resultDraft.name.split('-')[2]).toEqual(draft.name.split('-')[2])
-        expect(resultDraft.submissionDescription).toEqual(
-            'An updated submission'
-        )
+        expect(resultDraft.submissionDescription).toBe('An updated submission')
         expect(resultDraft.documents).toEqual(draft.documents)
 
         // Contract details fields should still be set
         expect(resultDraft.contractType).toEqual(draft.contractType)
-        expect(resultDraft.contractExecutionStatus).toEqual(draft.contractExecutionStatus)
+        expect(resultDraft.contractExecutionStatus).toEqual(
+            draft.contractExecutionStatus
+        )
         expect(resultDraft.contractDateStart).toEqual(draft.contractDateStart)
         expect(resultDraft.contractDateEnd).toEqual(draft.contractDateEnd)
         expect(resultDraft.managedCareEntities).toEqual(
@@ -90,17 +89,15 @@ describe('submitDraftSubmission', () => {
             query: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: draftID,
+                    pkgID: draftID,
                 },
             },
         })
 
         expect(submitResult.errors).toBeDefined()
 
-        expect(submitResult.errors?.[0].extensions?.code).toEqual(
-            'BAD_USER_INPUT'
-        )
-        expect(submitResult.errors?.[0].extensions?.message).toEqual(
+        expect(submitResult.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(submitResult.errors?.[0].extensions?.message).toBe(
             'submissions must have valid documents'
         )
     })
@@ -120,17 +117,15 @@ describe('submitDraftSubmission', () => {
             query: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: draftID,
+                    pkgID: draftID,
                 },
             },
         })
 
         expect(submitResult.errors).toBeDefined()
 
-        expect(submitResult.errors?.[0].extensions?.code).toEqual(
-            'BAD_USER_INPUT'
-        )
-        expect(submitResult.errors?.[0].extensions?.message).toEqual(
+        expect(submitResult.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(submitResult.errors?.[0].extensions?.message).toBe(
             'submissions is missing required contract fields'
         )
     })
@@ -151,17 +146,15 @@ describe('submitDraftSubmission', () => {
             query: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: draftID,
+                    pkgID: draftID,
                 },
             },
         })
 
         expect(submitResult.errors).toBeDefined()
 
-        expect(submitResult.errors?.[0].extensions?.code).toEqual(
-            'BAD_USER_INPUT'
-        )
-        expect(submitResult.errors?.[0].extensions?.message).toEqual(
+        expect(submitResult.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(submitResult.errors?.[0].extensions?.message).toBe(
             'submission is missing required rate fields'
         )
     })
@@ -181,17 +174,15 @@ describe('submitDraftSubmission', () => {
             query: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: draftID,
+                    pkgID: draftID,
                 },
             },
         })
 
         expect(submitResult.errors).toBeDefined()
 
-        expect(submitResult.errors?.[0].extensions?.code).toEqual(
-            'BAD_USER_INPUT'
-        )
-        expect(submitResult.errors?.[0].extensions?.message).toEqual(
+        expect(submitResult.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(submitResult.errors?.[0].extensions?.message).toBe(
             'submission includes invalid rate fields'
         )
     })
@@ -211,7 +202,7 @@ describe('submitDraftSubmission', () => {
             query: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: draftID,
+                    pkgID: draftID,
                 },
             },
         })
@@ -235,15 +226,15 @@ describe('submitDraftSubmission', () => {
             query: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: draftID,
+                    pkgID: draftID,
                 },
             },
         })
 
-        const currentRevision = submitResult?.data?.submitDraftSubmission
-            ?.submission.revisions[0].revision
+        const currentRevision =
+            submitResult?.data?.submitHealthPlanPackage?.pkg.revisions[0].node
 
-        const sub = base64ToDomain(currentRevision.submissionData)
+        const sub = base64ToDomain(currentRevision.formDataProto)
         if (sub instanceof Error) {
             throw sub
         }
@@ -272,7 +263,7 @@ describe('submitDraftSubmission', () => {
             emailer: mockEmailer,
         })
 
-        const currentUser  = defaultContext().user // need this to reach into gql tests and understand who current user is
+        const currentUser = defaultContext().user // need this to reach into gql tests and understand who current user is
         const draft = await createAndUpdateTestDraftSubmission(server, {})
         const draftID = draft.id
 
@@ -281,17 +272,17 @@ describe('submitDraftSubmission', () => {
             query: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: draftID,
+                    pkgID: draftID,
                 },
             },
         })
 
         expect(submitResult.errors).toBeUndefined()
 
-        const currentRevision = submitResult?.data?.submitDraftSubmission
-            ?.submission.revisions[0].revision
+        const currentRevision =
+            submitResult?.data?.submitHealthPlanPackage?.pkg.revisions[0].node
 
-        const sub = base64ToDomain(currentRevision.submissionData)
+        const sub = base64ToDomain(currentRevision.formDataProto)
         if (sub instanceof Error) {
             throw sub
         }
@@ -305,9 +296,7 @@ describe('submitDraftSubmission', () => {
                     `TEST ${name} was sent to CMS`
                 ),
                 sourceEmail: config.emailSource,
-                toAddresses: expect.arrayContaining(
-                   [currentUser.email]
-                ),
+                toAddresses: expect.arrayContaining([currentUser.email]),
             })
         )
     })
@@ -325,17 +314,17 @@ describe('submitDraftSubmission', () => {
             query: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: draftID,
+                    pkgID: draftID,
                 },
             },
         })
 
         expect(submitResult.errors).toBeUndefined()
 
-        const currentRevision = submitResult?.data?.submitDraftSubmission
-            ?.submission.revisions[0].revision
+        const currentRevision =
+            submitResult?.data?.submitHealthPlanPackage?.pkg.revisions[0].node
 
-        const sub = base64ToDomain(currentRevision.submissionData)
+        const sub = base64ToDomain(currentRevision.formDataProto)
         if (sub instanceof Error) {
             throw sub
         }
@@ -348,7 +337,9 @@ describe('submitDraftSubmission', () => {
                 subject: expect.stringContaining(
                     `TEST ${name} was sent to CMS`
                 ),
-                toAddresses: expect.arrayContaining([sub.stateContacts[0].email])
+                toAddresses: expect.arrayContaining([
+                    sub.stateContacts[0].email,
+                ]),
             })
         )
     })
@@ -372,22 +363,26 @@ describe('submitDraftSubmission', () => {
             },
         })
 
-        await unlockTestDraftSubmission(cmsServer, stateSubmission.id, 'Test unlock reason.')
+        await unlockTestDraftSubmission(
+            cmsServer,
+            stateSubmission.id,
+            'Test unlock reason.'
+        )
 
         const submitResult = await stateServer.executeOperation({
             query: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: stateSubmission.id,
-                    submittedReason: 'Test resubmitted reason'
+                    pkgID: stateSubmission.id,
+                    submittedReason: 'Test resubmitted reason',
                 },
             },
         })
 
-        const currentRevision = submitResult?.data?.submitDraftSubmission
-            ?.submission.revisions[0].revision
+        const currentRevision =
+            submitResult?.data?.submitHealthPlanPackage?.pkg.revisions[0].node
 
-        const sub = base64ToDomain(currentRevision.submissionData)
+        const sub = base64ToDomain(currentRevision.formDataProto)
         if (sub instanceof Error) {
             throw sub
         }
@@ -402,7 +397,9 @@ describe('submitDraftSubmission', () => {
                     `TEST ${name} was resubmitted`
                 ),
                 sourceEmail: config.emailSource,
-                bodyText: expect.stringContaining(`The state completed their edits on submission ${name}`),
+                bodyText: expect.stringContaining(
+                    `The state completed their edits on submission ${name}`
+                ),
                 toAddresses: expect.arrayContaining(
                     Array.from(config.cmsReviewSharedEmails)
                 ),
@@ -418,7 +415,7 @@ describe('submitDraftSubmission', () => {
             emailer: mockEmailer,
         })
 
-        const currentUser  = defaultContext().user
+        const currentUser = defaultContext().user
 
         const stateSubmission = await createTestStateSubmission(stateServer)
 
@@ -432,13 +429,21 @@ describe('submitDraftSubmission', () => {
             },
         })
 
-        await  unlockTestDraftSubmission(cmsServer, stateSubmission.id, 'Test unlock reason.')
+        await unlockTestDraftSubmission(
+            cmsServer,
+            stateSubmission.id,
+            'Test unlock reason.'
+        )
 
-        const submitResult = await resubmitTestDraftSubmission(stateServer, stateSubmission.id, 'Test resubmission reason')
+        const submitResult = await resubmitTestDraftSubmission(
+            stateServer,
+            stateSubmission.id,
+            'Test resubmission reason'
+        )
 
-        const currentRevision = submitResult?.revisions[0].revision
+        const currentRevision = submitResult?.revisions[0].node
 
-        const sub = base64ToDomain(currentRevision.submissionData)
+        const sub = base64ToDomain(currentRevision.formDataProto)
         if (sub instanceof Error) {
             throw sub
         }
@@ -453,9 +458,10 @@ describe('submitDraftSubmission', () => {
                     `TEST ${name} was resubmitted`
                 ),
                 sourceEmail: config.emailSource,
-                toAddresses: expect.arrayContaining(
-                    [currentUser.email, sub.stateContacts[0].email]
-                ),
+                toAddresses: expect.arrayContaining([
+                    currentUser.email,
+                    sub.stateContacts[0].email,
+                ]),
             })
         )
     })
@@ -477,7 +483,7 @@ describe('submitDraftSubmission', () => {
             query: SUBMIT_DRAFT_SUBMISSION,
             variables: {
                 input: {
-                    submissionID: draftID,
+                    pkgID: draftID,
                 },
             },
         })

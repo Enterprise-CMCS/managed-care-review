@@ -1,6 +1,6 @@
 import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
 import UPDATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/updateDraftSubmission.graphql'
-import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
+import { UnlockedHealthPlanFormDataType } from '../../app-web/src/common-code/domain-models'
 import {
     CreateDraftSubmissionInput,
     DraftSubmissionUpdates,
@@ -18,7 +18,7 @@ describe('updateDraftSubmission', () => {
         it('correctly applies empty updates', () => {
             // table test, given different inputs do we get what we expect?
 
-            const baseDraft: DraftSubmissionType = {
+            const baseDraft: UnlockedHealthPlanFormDataType = {
                 id: 'foo-bar',
                 status: 'DRAFT',
                 stateCode: 'FL',
@@ -88,7 +88,7 @@ describe('updateDraftSubmission', () => {
         it('correctly applies empty amendment updates', () => {
             // table test, given different inputs do we get what we expect?
 
-            const baseDraft: DraftSubmissionType = {
+            const baseDraft: UnlockedHealthPlanFormDataType = {
                 id: 'foo-bar',
                 status: 'DRAFT',
                 stateCode: 'FL',
@@ -160,7 +160,7 @@ describe('updateDraftSubmission', () => {
         it('correctly applies empty capitationRates updates', () => {
             // table test, given different inputs do we get what we expect?
 
-            const baseDraft: DraftSubmissionType = {
+            const baseDraft: UnlockedHealthPlanFormDataType = {
                 id: 'foo-bar',
                 status: 'DRAFT',
                 stateCode: 'FL',
@@ -273,15 +273,13 @@ describe('updateDraftSubmission', () => {
         )
         // General
         expect(resultDraft.id).toEqual(createdID)
-        expect(resultDraft.submissionType).toEqual('CONTRACT_AND_RATES')
+        expect(resultDraft.submissionType).toBe('CONTRACT_AND_RATES')
         expect(resultDraft.programIDs).toEqual([defaultFloridaProgram().id])
         // check that the stateNumber is being returned the same
         expect(resultDraft.name.split('-')[3]).toEqual(
             createdDraft.name.split('-')[3]
         )
-        expect(resultDraft.submissionDescription).toEqual(
-            'An updated submission'
-        )
+        expect(resultDraft.submissionDescription).toBe('An updated submission')
 
         // updatedAt should be after the former updatedAt
         const resultUpdated = new Date(resultDraft.updatedAt)
@@ -291,9 +289,9 @@ describe('updateDraftSubmission', () => {
         ).toBeGreaterThan(0)
 
         // Contract details
-        expect(resultDraft.contractType).toEqual('BASE')
-        expect(resultDraft.contractExecutionStatus).toEqual('EXECUTED')
-        expect(resultDraft.contractDateStart).not.toBeUndefined()
+        expect(resultDraft.contractType).toBe('BASE')
+        expect(resultDraft.contractExecutionStatus).toBe('EXECUTED')
+        expect(resultDraft.contractDateStart).toBeDefined()
         expect(resultDraft.contractDateStart).toBe(startDate)
         expect(resultDraft.contractDateEnd).toBe(endDate)
         expect(resultDraft.managedCareEntities).toEqual(['MCO'])
@@ -486,16 +484,16 @@ describe('updateDraftSubmission', () => {
             updateResult2.data?.updateDraftSubmission.draftSubmission
 
         expect(updateResult2.errors).toBeUndefined()
-        expect(resultDraft2.documents.length).toEqual(2)
-        expect(resultDraft2.documents[0].name).toEqual('addendum.pdf')
+        expect(resultDraft2.documents).toHaveLength(2)
+        expect(resultDraft2.documents[0].name).toBe('addendum.pdf')
 
-        expect(resultDraft2.contractDocuments.length).toEqual(2)
-        expect(resultDraft2.contractDocuments[0].name).toEqual(
+        expect(resultDraft2.contractDocuments).toHaveLength(2)
+        expect(resultDraft2.contractDocuments[0].name).toBe(
             'contractDocument2.pdf'
         )
 
-        expect(resultDraft2.rateDocuments.length).toEqual(2)
-        expect(resultDraft2.rateDocuments[0].name).toEqual(
+        expect(resultDraft2.rateDocuments).toHaveLength(2)
+        expect(resultDraft2.rateDocuments[0].name).toBe(
             'rateDocumentUpdated.pdf'
         )
     })
@@ -638,12 +636,10 @@ describe('updateDraftSubmission', () => {
             'BENEFITS_PROVIDED',
             'LENGTH_OF_CONTRACT_PERIOD',
         ])
-        expect(resultDraft.contractAmendmentInfo.relatedToCovid19).toEqual(
-            false
-        )
-        expect(resultDraft.contractAmendmentInfo.relatedToVaccination).toEqual(
-            null
-        )
+        expect(resultDraft.contractAmendmentInfo.relatedToCovid19).toBe(false)
+        expect(
+            resultDraft.contractAmendmentInfo.relatedToVaccination
+        ).toBeNull()
     })
 
     it('updates a submission with conditionals in contract amendment details', async () => {
@@ -717,9 +713,9 @@ describe('updateDraftSubmission', () => {
                 'LENGTH_OF_CONTRACT_PERIOD',
                 'CAPITATION_RATES',
             ])
-            expect(info.otherItemBeingAmended).toEqual('just having a laugh')
-            expect(info.capitationRatesAmendedInfo.reason).toEqual('OTHER')
-            expect(info.capitationRatesAmendedInfo.otherReason).toEqual(
+            expect(info.otherItemBeingAmended).toBe('just having a laugh')
+            expect(info.capitationRatesAmendedInfo.reason).toBe('OTHER')
+            expect(info.capitationRatesAmendedInfo.otherReason).toBe(
                 'something for fun'
             )
         })
@@ -992,10 +988,8 @@ describe('updateDraftSubmission', () => {
             throw new Error('type narrow')
         }
 
-        expect(updateResult.errors[0].extensions?.code).toEqual(
-            'BAD_USER_INPUT'
-        )
-        expect(updateResult.errors[0].extensions?.argumentName).toEqual(
+        expect(updateResult.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(updateResult.errors[0].extensions?.argumentName).toBe(
             'submissionID'
         )
     })
@@ -1069,7 +1063,7 @@ describe('updateDraftSubmission', () => {
             throw new Error('type narrow')
         }
 
-        expect(updateResult.errors[0].extensions?.code).toEqual('FORBIDDEN')
+        expect(updateResult.errors[0].extensions?.code).toBe('FORBIDDEN')
     })
 
     it('returns an error if you try and set a programID thats not valid', async () => {
@@ -1113,8 +1107,6 @@ describe('updateDraftSubmission', () => {
             throw new Error('type narrow')
         }
 
-        expect(updateResult.errors[0].extensions?.code).toEqual(
-            'BAD_USER_INPUT'
-        )
+        expect(updateResult.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
     })
 })

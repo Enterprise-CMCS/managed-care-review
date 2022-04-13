@@ -1,5 +1,9 @@
 import { base64ToDomain } from '../../common-code/proto/stateSubmission'
-import { DraftSubmission, DraftSubmissionUpdates , Submission2} from '../../gen/gqlClient'
+import {
+    DraftSubmission,
+    DraftSubmissionUpdates,
+    HealthPlanPackage,
+} from '../../gen/gqlClient'
 /*
     Clean out _typename from submission
     If you pass gql __typename within a mutation input things break; however,  __typename comes down on cached queries by default
@@ -63,9 +67,11 @@ function updatesFromSubmission(draft: DraftSubmission): DraftSubmissionUpdates {
 }
 
 // this is needed as we change our api - right now only used in tests.
-function updatesFromSubmission2(draft: Submission2): DraftSubmissionUpdates {
-    const formData = base64ToDomain(draft.revisions[0].revision.submissionData)
-    if (formData instanceof Error) throw Error 
+function updatesFromHealthPlanPackage(
+    draft: HealthPlanPackage
+): DraftSubmissionUpdates {
+    const formData = base64ToDomain(draft.revisions[0].node.formDataProto)
+    if (formData instanceof Error) throw Error
 
     return {
         programIDs: formData.programIDs,
@@ -97,5 +103,5 @@ export {
     stripTypename,
     omitTypename,
     updatesFromSubmission,
-    updatesFromSubmission2
+    updatesFromHealthPlanPackage,
 }

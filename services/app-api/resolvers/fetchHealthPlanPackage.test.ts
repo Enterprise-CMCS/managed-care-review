@@ -1,4 +1,4 @@
-import FETCH_SUBMISSION_2 from '../../app-graphql/src/queries/fetchSubmission2.graphql'
+import FETCH_SUBMISSION_2 from '../../app-graphql/src/queries/fetchHealthPlanPackage.graphql'
 import { base64ToDomain } from '../../app-web/src/common-code/proto/stateSubmission'
 import { todaysDate } from '../testHelpers/dateHelpers'
 import {
@@ -6,10 +6,10 @@ import {
     createTestDraftSubmission,
     createTestStateSubmission,
     unlockTestDraftSubmission,
-    resubmitTestDraftSubmission
+    resubmitTestDraftSubmission,
 } from '../testHelpers/gqlHelpers'
 
-describe('fetchSubmission2', () => {
+describe('fetchHealthPlanPackage', () => {
     it('returns draft submission payload with one revision', async () => {
         const server = await constructTestPostgresServer()
 
@@ -20,7 +20,7 @@ describe('fetchSubmission2', () => {
 
         // then see if we can fetch that same submission
         const input = {
-            submissionID: createdID,
+            pkgID: createdID,
         }
 
         const result = await server.executeOperation({
@@ -30,20 +30,22 @@ describe('fetchSubmission2', () => {
 
         expect(result.errors).toBeUndefined()
 
-        const resultSub = result.data?.fetchSubmission2.submission
+        const resultSub = result.data?.fetchHealthPlanPackage.pkg
         expect(resultSub.id).toEqual(createdID)
-        expect(resultSub.revisions.length).toEqual(1)
+        expect(resultSub.revisions).toHaveLength(1)
 
-        const revision = resultSub.revisions[0].revision
+        const revision = resultSub.revisions[0].node
 
-        const subData = base64ToDomain(revision.submissionData)
+        const subData = base64ToDomain(revision.formDataProto)
         if (subData instanceof Error) {
             throw subData
-        } 
+        }
 
         expect(subData.id).toEqual(createdID)
-        expect(subData.programIDs).toEqual(['5c10fe9f-bec9-416f-a20c-718b152ad633'])
-        expect(subData.submissionDescription).toEqual('An updated submission')
+        expect(subData.programIDs).toEqual([
+            '5c10fe9f-bec9-416f-a20c-718b152ad633',
+        ])
+        expect(subData.submissionDescription).toBe('An updated submission')
         expect(subData.documents).toEqual([])
         expect(subData.contractDocuments).toEqual([
             {
@@ -59,7 +61,7 @@ describe('fetchSubmission2', () => {
 
         // then see if we can fetch that same submission
         const input = {
-            submissionID: 'BOGUS-ID',
+            pkgID: 'BOGUS-ID',
         }
 
         const result = await server.executeOperation({
@@ -69,7 +71,7 @@ describe('fetchSubmission2', () => {
 
         expect(result.errors).toBeUndefined()
 
-        const resultSub = result.data?.fetchSubmission2.submission
+        const resultSub = result.data?.fetchHealthPlanPackage.pkg
         expect(resultSub).toBeNull()
     })
 
@@ -91,11 +93,15 @@ describe('fetchSubmission2', () => {
         const createdID = stateSubmission.id
 
         // unlock it
-        await unlockTestDraftSubmission(cmsServer, createdID, 'Super duper good reason.')
+        await unlockTestDraftSubmission(
+            cmsServer,
+            createdID,
+            'Super duper good reason.'
+        )
 
         // then see if we can fetch that same submission
         const input = {
-            submissionID: createdID,
+            pkgID: createdID,
         }
 
         const result = await server.executeOperation({
@@ -105,9 +111,9 @@ describe('fetchSubmission2', () => {
 
         expect(result.errors).toBeUndefined()
 
-        const resultSub = result.data?.fetchSubmission2.submission
+        const resultSub = result.data?.fetchHealthPlanPackage.pkg
         expect(resultSub.id).toEqual(createdID)
-        expect(resultSub.revisions.length).toEqual(2)
+        expect(resultSub.revisions).toHaveLength(2)
     })
 
     it('synthesizes the right statuses as a submission is submitted/unlocked/etc', async () => {
@@ -129,7 +135,7 @@ describe('fetchSubmission2', () => {
 
         // DRAFT
         const fetchInput = {
-            submissionID: createdID,
+            pkgID: createdID,
         }
 
         const draftResult = await server.executeOperation({
@@ -139,16 +145,19 @@ describe('fetchSubmission2', () => {
 
         expect(draftResult.errors).toBeUndefined()
 
-        const resultSub = draftResult.data?.fetchSubmission2.submission
+        const resultSub = draftResult.data?.fetchHealthPlanPackage.pkg
 
         const today = todaysDate()
 
-        expect(resultSub.status).toEqual('SUBMITTED')
+        expect(resultSub.status).toBe('SUBMITTED')
         expect(resultSub.intiallySubmittedAt).toEqual(today)
 
-
         // unlock it
-        await unlockTestDraftSubmission(cmsServer, createdID, 'Super duper good reason.')
+        await unlockTestDraftSubmission(
+            cmsServer,
+            createdID,
+            'Super duper good reason.'
+        )
 
         const unlockResult = await server.executeOperation({
             query: FETCH_SUBMISSION_2,
@@ -157,12 +166,19 @@ describe('fetchSubmission2', () => {
 
         expect(unlockResult.errors).toBeUndefined()
 
-        expect(unlockResult.data?.fetchSubmission2.submission.status).toEqual('UNLOCKED')
-        expect(unlockResult.data?.fetchSubmission2.submission.intiallySubmittedAt).toEqual(today)
-
+        expect(unlockResult.data?.fetchHealthPlanPackage.pkg.status).toBe(
+            'UNLOCKED'
+        )
+        expect(
+            unlockResult.data?.fetchHealthPlanPackage.pkg.intiallySubmittedAt
+        ).toEqual(today)
 
         // resubmit it
-        await resubmitTestDraftSubmission(server, createdID, 'Test resubmission reason')
+        await resubmitTestDraftSubmission(
+            server,
+            createdID,
+            'Test resubmission reason'
+        )
 
         const resubmitResult = await server.executeOperation({
             query: FETCH_SUBMISSION_2,
@@ -171,8 +187,12 @@ describe('fetchSubmission2', () => {
 
         expect(resubmitResult.errors).toBeUndefined()
 
-        expect(resubmitResult.data?.fetchSubmission2.submission.status).toEqual('RESUBMITTED')
-        expect(resubmitResult.data?.fetchSubmission2.submission.intiallySubmittedAt).toEqual(today)
+        expect(resubmitResult.data?.fetchHealthPlanPackage.pkg.status).toBe(
+            'RESUBMITTED'
+        )
+        expect(
+            resubmitResult.data?.fetchHealthPlanPackage.pkg.intiallySubmittedAt
+        ).toEqual(today)
     })
 
     it('a different user from the same state can fetch the draft', async () => {
@@ -185,7 +205,7 @@ describe('fetchSubmission2', () => {
 
         // then see if we can fetch that same submission
         const input = {
-            submissionID: createdID,
+            pkgID: createdID,
         }
 
         // setup a server with a different user
@@ -207,8 +227,8 @@ describe('fetchSubmission2', () => {
 
         expect(result.errors).toBeUndefined()
 
-        expect(result.data?.fetchSubmission2.submission).toBeDefined()
-        expect(result.data?.fetchSubmission2.submission).not.toBeNull()
+        expect(result.data?.fetchHealthPlanPackage.pkg).toBeDefined()
+        expect(result.data?.fetchHealthPlanPackage.pkg).not.toBeNull()
     })
 
     it('returns an error if you are requesting for a different state (403)', async () => {
@@ -221,7 +241,7 @@ describe('fetchSubmission2', () => {
 
         // then see if we can fetch that same submission
         const input = {
-            submissionID: createdID,
+            pkgID: createdID,
         }
 
         // setup a server with a different user
@@ -245,13 +265,13 @@ describe('fetchSubmission2', () => {
         if (result.errors === undefined) {
             throw new Error('annoying jest typing behavior')
         }
-        expect(result.errors?.length).toEqual(1)
+        expect(result.errors?.length).toBe(1)
         const resultErr = result.errors[0]
 
-        expect(resultErr?.message).toEqual(
+        expect(resultErr?.message).toBe(
             'user not authorized to fetch data from a different state'
         )
-        expect(resultErr?.extensions?.code).toEqual('FORBIDDEN')
+        expect(resultErr?.extensions?.code).toBe('FORBIDDEN')
     })
 
     it('returns an error if you are a CMS user requesting a draft submission', async () => {
@@ -273,7 +293,7 @@ describe('fetchSubmission2', () => {
 
         // then see if we can fetch that same submission
         const input = {
-            submissionID: createdID,
+            pkgID: createdID,
         }
 
         const result = await cmsServer.executeOperation({
@@ -285,13 +305,13 @@ describe('fetchSubmission2', () => {
         if (result.errors === undefined) {
             throw new Error('annoying jest typing behavior')
         }
-        expect(result.errors?.length).toEqual(1)
+        expect(result.errors?.length).toBe(1)
         const resultErr = result.errors[0]
 
-        expect(resultErr?.message).toEqual(
+        expect(resultErr?.message).toBe(
             'CMS user not authorized to fetch a draft'
         )
-        expect(resultErr?.extensions?.code).toEqual('FORBIDDEN')
+        expect(resultErr?.extensions?.code).toBe('FORBIDDEN')
     })
 
     it('returns the revisions in the correct order', async () => {
@@ -310,18 +330,38 @@ describe('fetchSubmission2', () => {
             },
         })
 
-        await unlockTestDraftSubmission(cmsServer, stateSubmission.id, 'Super duper good reason.')
+        await unlockTestDraftSubmission(
+            cmsServer,
+            stateSubmission.id,
+            'Super duper good reason.'
+        )
 
-        await resubmitTestDraftSubmission(stateServer, stateSubmission.id, 'Test first resubmission')
+        await resubmitTestDraftSubmission(
+            stateServer,
+            stateSubmission.id,
+            'Test first resubmission'
+        )
 
-        await unlockTestDraftSubmission(cmsServer, stateSubmission.id, 'Super duper good reason.')
+        await unlockTestDraftSubmission(
+            cmsServer,
+            stateSubmission.id,
+            'Super duper good reason.'
+        )
 
-        await resubmitTestDraftSubmission(stateServer, stateSubmission.id, 'Test second resubmission')
+        await resubmitTestDraftSubmission(
+            stateServer,
+            stateSubmission.id,
+            'Test second resubmission'
+        )
 
-        await unlockTestDraftSubmission(cmsServer, stateSubmission.id, 'Super duper good reason.')
+        await unlockTestDraftSubmission(
+            cmsServer,
+            stateSubmission.id,
+            'Super duper good reason.'
+        )
 
         const input = {
-            submissionID: stateSubmission.id,
+            pkgID: stateSubmission.id,
         }
 
         const result = await cmsServer.executeOperation({
@@ -331,13 +371,17 @@ describe('fetchSubmission2', () => {
 
         expect(result.errors).toBeUndefined()
 
-        let maxDate = new Date(8640000000000000);
+        const maxDate = new Date(8640000000000000)
         let mostRecentDate = maxDate
-        for (const rev of result?.data?.fetchSubmission2.submission.revisions) {
-            expect(rev.revision.createdAt.getTime()).toBeLessThan(mostRecentDate.getTime())
-            mostRecentDate = rev.revision.createdAt
+        const revs = result?.data?.fetchHealthPlanPackage.pkg.revisions
+        if (!revs) {
+            throw new Error('No revisions returned!')
         }
-
+        for (const rev of revs) {
+            expect(rev.node.createdAt.getTime()).toBeLessThan(
+                mostRecentDate.getTime()
+            )
+            mostRecentDate = rev.node.createdAt
+        }
     })
-
 })

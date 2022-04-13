@@ -3,18 +3,18 @@ import type { Emailer } from '../emailer'
 import { Resolvers } from '../gen/gqlServer'
 import type { Store } from '../postgres'
 import { createDraftSubmissionResolver } from './createDraftSubmission'
-import { createSubmission2Resolver } from './createSubmission2'
+import { createHealthPlanPackageResolver } from './createHealthPlanPackage'
 import { draftSubmissionResolver } from './draftSubmissionResolver'
 import { fetchCurrentUserResolver } from './fetchCurrentUser'
 import { fetchDraftSubmissionResolver } from './fetchDraftSubmission'
 import { fetchStateSubmissionResolver } from './fetchStateSubmission'
-import { fetchSubmission2Resolver } from './fetchSubmission2'
+import { fetchHealthPlanPackageResolver } from './fetchHealthPlanPackage'
 import { indexSubmissionsResolver } from './indexSubmissions'
-import { indexSubmissions2Resolver } from './indexSubmissions2'
+import { indexHealthPlanPackagesResolver } from './indexHealthPlanPackages'
 import { stateSubmissionResolver } from './stateSubmissionResolver'
-import { submission2Resolver } from './submission2Resolver'
-import { submitDraftSubmissionResolver } from './submitDraftSubmission'
-import { unlockStateSubmissionResolver } from './unlockStateSubmission'
+import { healthPlanPackageResolver } from './healthPlanPackageResolver'
+import { submitHealthPlanPackageResolver } from './submitHealthPlanPackage'
+import { unlockHealthPlanPackageResolver } from './unlockHealthPlanPackage'
 import { updateDraftSubmissionResolver } from './updateDraftSubmission'
 import { updateHealthPlanFormDataResolver } from './updateHealthPlanFormData'
 import { stateUserResolver } from './userResolver'
@@ -27,19 +27,19 @@ export function configureResolvers(store: Store, emailer: Emailer): Resolvers {
             fetchCurrentUser: fetchCurrentUserResolver(),
             fetchDraftSubmission: fetchDraftSubmissionResolver(store),
             fetchStateSubmission: fetchStateSubmissionResolver(store),
-            fetchSubmission2: fetchSubmission2Resolver(store),
+            fetchHealthPlanPackage: fetchHealthPlanPackageResolver(store),
             indexSubmissions: indexSubmissionsResolver(store),
-            indexSubmissions2: indexSubmissions2Resolver(store),
+            indexHealthPlanPackages: indexHealthPlanPackagesResolver(store),
         },
         Mutation: {
             createDraftSubmission: createDraftSubmissionResolver(store),
-            createSubmission2: createSubmission2Resolver(store),
+            createHealthPlanPackage: createHealthPlanPackageResolver(store),
             updateDraftSubmission: updateDraftSubmissionResolver(store),
-            submitDraftSubmission: submitDraftSubmissionResolver(
+            submitHealthPlanPackage: submitHealthPlanPackageResolver(
                 store,
                 emailer
             ),
-            unlockStateSubmission: unlockStateSubmissionResolver(
+            unlockHealthPlanPackage: unlockHealthPlanPackageResolver(
                 store,
                 emailer
             ),
@@ -66,7 +66,7 @@ export function configureResolvers(store: Store, emailer: Emailer): Resolvers {
             },
         },
         StateUser: stateUserResolver,
-        Submission2: submission2Resolver,
+        HealthPlanPackage: healthPlanPackageResolver,
         DraftSubmission: draftSubmissionResolver(store),
         StateSubmission: stateSubmissionResolver(store),
     }

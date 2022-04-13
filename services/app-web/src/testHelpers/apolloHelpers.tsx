@@ -2,11 +2,11 @@ import { MockedResponse } from '@apollo/client/testing'
 import dayjs from 'dayjs'
 import { GraphQLError } from 'graphql'
 import {
-    basicStateSubmission,
-    basicSubmission,
-    draftWithALittleBitOfEverything,
+    basicLockedHealthPlanFormData,
+    basicHealthPlanFormData,
+    unlockedWithALittleBitOfEverything,
 } from '../common-code/domain-mocks'
-import { DraftSubmissionType } from '../common-code/domain-models'
+import { UnlockedHealthPlanFormDataType } from '../common-code/domain-models'
 import { domainToBase64 } from '../common-code/proto/stateSubmission'
 import {
     CreateDraftSubmissionDocument,
@@ -14,17 +14,21 @@ import {
     DraftSubmissionUpdates,
     FetchCurrentUserDocument,
     FetchStateSubmissionDocument,
-    FetchSubmission2Document,
-    IndexSubmissions2Document,
+    FetchHealthPlanPackageDocument,
+    IndexHealthPlanPackagesDocument,
     IndexSubmissionsDocument,
     State,
     StateSubmission,
     Submission,
-    Submission2,
-    SubmitDraftSubmissionDocument,
-    UnlockStateSubmissionDocument,
+    HealthPlanPackage,
+    SubmitHealthPlanPackageDocument,
+    UnlockHealthPlanPackageDocument,
     UpdateDraftSubmissionDocument,
     User as UserType,
+    UnlockHealthPlanPackageMutation,
+    SubmitHealthPlanPackageMutation,
+    IndexHealthPlanPackagesQuery,
+    FetchHealthPlanPackageQuery,
 } from '../gen/gqlClient'
 
 /* For use with Apollo MockedProvider in jest tests */
@@ -325,14 +329,14 @@ export function mockMNState(): State {
     }
 }
 
-export function mockDraftSubmission2(
-    submissionData?: Partial<DraftSubmissionType>
-): Submission2 {
-    const submission = { ...basicSubmission(), ...submissionData }
+export function mockDraftHealthPlanPackage(
+    submissionData?: Partial<UnlockedHealthPlanFormDataType>
+): HealthPlanPackage {
+    const submission = { ...basicHealthPlanFormData(), ...submissionData }
     const b64 = domainToBase64(submission)
 
     return {
-        __typename: 'Submission2',
+        __typename: 'HealthPlanPackage',
         id: 'test-id-123',
         status: 'DRAFT',
         intiallySubmittedAt: '2022-01-01',
@@ -340,22 +344,22 @@ export function mockDraftSubmission2(
         state: mockMNState(),
         revisions: [
             {
-                revision: {
+                node: {
                     id: 'revision1',
                     unlockInfo: null,
                     createdAt: '2019-01-01',
                     submitInfo: null,
-                    submissionData: b64,
+                    formDataProto: b64,
                 },
             },
         ],
     }
 }
 
-export function mockSubmittedSubmission2(): Submission2 {
+export function mockSubmittedHealthPlanPackage(): HealthPlanPackage {
     // get a submitted DomainModel submission
     // turn it into proto
-    const submission = basicStateSubmission()
+    const submission = basicLockedHealthPlanFormData()
     const b64 = domainToBase64(submission)
 
     return {
@@ -366,7 +370,7 @@ export function mockSubmittedSubmission2(): Submission2 {
         state: mockMNState(),
         revisions: [
             {
-                revision: {
+                node: {
                     id: 'revision1',
                     createdAt: new Date(),
                     unlockInfo: null,
@@ -375,17 +379,17 @@ export function mockSubmittedSubmission2(): Submission2 {
                         updatedBy: 'test@example.com',
                         updatedReason: 'Initial submit',
                     },
-                    submissionData: b64,
+                    formDataProto: b64,
                 },
             },
         ],
     }
 }
 
-export function mockSubmittedSubmission2WithRevisions(): Submission2 {
+export function mockSubmittedHealthPlanPackageWithRevisions(): HealthPlanPackage {
     // get a submitted DomainModel submission
     // turn it into proto
-    const submission = basicStateSubmission()
+    const submission = basicLockedHealthPlanFormData()
     const b64 = domainToBase64(submission)
 
     return {
@@ -396,7 +400,7 @@ export function mockSubmittedSubmission2WithRevisions(): Submission2 {
         state: mockMNState(),
         revisions: [
             {
-                revision: {
+                node: {
                     id: 'sd596de8-852d-4e42-ab0a-c9c9bf78c3c1',
                     unlockInfo: {
                         updatedAt: '2022-03-25T01:18:44.663Z',
@@ -410,11 +414,11 @@ export function mockSubmittedSubmission2WithRevisions(): Submission2 {
                         __typename: 'UpdateInformation',
                     },
                     createdAt: '2022-03-25T01:18:44.665Z',
-                    submissionData: b64,
+                    formDataProto: b64,
                 },
             },
             {
-                revision: {
+                node: {
                     id: '26596de8-852d-4e42-bb0a-c9c9bf78c3de',
                     unlockInfo: {
                         updatedAt: '2022-03-24T01:18:44.663Z',
@@ -427,11 +431,11 @@ export function mockSubmittedSubmission2WithRevisions(): Submission2 {
                         updatedReason: 'Placeholder resubmission reason',
                     },
                     createdAt: '2022-03-24T01:18:44.665Z',
-                    submissionData: b64,
+                    formDataProto: b64,
                 },
             },
             {
-                revision: {
+                node: {
                     id: 'e048cdcf-5b19-4acb-8ead-d7dc2fd6cd30',
                     unlockInfo: null,
                     submitInfo: {
@@ -440,18 +444,18 @@ export function mockSubmittedSubmission2WithRevisions(): Submission2 {
                         updatedReason: 'Initial submission',
                     },
                     createdAt: '2022-03-23T02:08:14.241Z',
-                    submissionData: b64,
+                    formDataProto: b64,
                 },
             },
         ],
     }
 }
 
-export function mockUnlockedSubmission2(
-    submissionData?: Partial<DraftSubmissionType>
-): Submission2 {
+export function mockUnlockedHealthPlanPackage(
+    submissionData?: Partial<UnlockedHealthPlanFormDataType>
+): HealthPlanPackage {
     const submission = {
-        ...draftWithALittleBitOfEverything(),
+        ...unlockedWithALittleBitOfEverything(),
         ...submissionData,
     }
     const b64 = domainToBase64(submission)
@@ -464,7 +468,7 @@ export function mockUnlockedSubmission2(
         state: mockMNState(),
         revisions: [
             {
-                revision: {
+                node: {
                     id: 'revision2',
                     createdAt: new Date(),
                     unlockInfo: {
@@ -473,11 +477,11 @@ export function mockUnlockedSubmission2(
                         updatedReason: 'Test unlock reason',
                     },
                     submitInfo: null,
-                    submissionData: b64,
+                    formDataProto: b64,
                 },
             },
             {
-                revision: {
+                node: {
                     id: 'revision1',
                     createdAt: new Date('2020-01-01'),
                     unlockInfo: null,
@@ -486,7 +490,7 @@ export function mockUnlockedSubmission2(
                         updatedBy: 'test@example.com',
                         updatedReason: 'Initial submit',
                     },
-                    submissionData: b64,
+                    formDataProto: b64,
                 },
             },
         ],
@@ -569,17 +573,17 @@ const createDraftSubmissionMock = ({
     }
 }
 
-type fetchSubmission2MockProps = {
-    submission?: Submission2 | Partial<Submission2>
+type fetchHealthPlanPackageMockProps = {
+    submission?: HealthPlanPackage
     id: string
     statusCode: 200 | 403 | 500
 }
 
-const fetchSubmission2Mock = ({
-    submission = mockDraftSubmission2(),
+const fetchHealthPlanPackageMock = ({
+    submission = mockDraftHealthPlanPackage(),
     id,
     statusCode, // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}: fetchSubmission2MockProps): MockedResponse<Record<string, any>> => {
+}: fetchHealthPlanPackageMockProps): MockedResponse<FetchHealthPlanPackageQuery> => {
     // override the ID of the returned draft to match the queried id.
     const mergedDraftSubmission = Object.assign({}, submission, { id })
 
@@ -587,25 +591,25 @@ const fetchSubmission2Mock = ({
         case 200:
             return {
                 request: {
-                    query: FetchSubmission2Document,
-                    variables: { input: { submissionID: id } },
+                    query: FetchHealthPlanPackageDocument,
+                    variables: { input: { pkgID: id } },
                 },
                 result: {
                     data: {
-                        fetchSubmission2: {
-                            submission: mergedDraftSubmission,
+                        fetchHealthPlanPackage: {
+                            pkg: mergedDraftSubmission,
                         },
                     },
                 },
             }
         case 403:
             return {
-                request: { query: FetchSubmission2Document },
+                request: { query: FetchHealthPlanPackageDocument },
                 error: new Error('You are not logged in'),
             }
         default:
             return {
-                request: { query: FetchSubmission2Document },
+                request: { query: FetchHealthPlanPackageDocument },
                 error: new Error('A network error occurred'),
             }
     }
@@ -617,15 +621,15 @@ type fetchStateSubmissionMockProps = {
     statusCode: 200 | 403 | 500
 }
 
-type fetchStateSubmission2MockSuccessProps = {
-    stateSubmission?: Submission2 | Partial<Submission2>
+type fetchStateHealthPlanPackageMockSuccessProps = {
+    stateSubmission?: HealthPlanPackage | Partial<HealthPlanPackage>
     id: string
 }
 
-const fetchStateSubmission2MockSuccess = ({
-    stateSubmission = mockSubmittedSubmission2(),
+const fetchStateHealthPlanPackageMockSuccess = ({
+    stateSubmission = mockSubmittedHealthPlanPackage(),
     id,
-}: fetchStateSubmission2MockSuccessProps): MockedResponse<
+}: fetchStateHealthPlanPackageMockSuccessProps): MockedResponse<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Record<string, any>
 > => {
@@ -634,13 +638,13 @@ const fetchStateSubmission2MockSuccess = ({
 
     return {
         request: {
-            query: FetchSubmission2Document,
-            variables: { input: { submissionID: id } },
+            query: FetchHealthPlanPackageDocument,
+            variables: { input: { pkgID: id } },
         },
         result: {
             data: {
-                fetchSubmission2: {
-                    submission: mergedStateSubmission,
+                fetchHealthPlanPackage: {
+                    pkg: mergedStateSubmission,
                 },
             },
         },
@@ -672,20 +676,20 @@ const fetchStateSubmissionMock = ({
             }
         case 403:
             return {
-                request: { query: FetchSubmission2Document },
+                request: { query: FetchHealthPlanPackageDocument },
                 error: new Error('You are not logged in'),
             }
         default:
             return {
-                request: { query: FetchSubmission2Document },
+                request: { query: FetchHealthPlanPackageDocument },
                 error: new Error('A network error occurred'),
             }
     }
 }
 
-const mockSubmittedSubmission2WithRevision = (): Submission2 => {
+const mockSubmittedHealthPlanPackageWithRevision = (): HealthPlanPackage => {
     return {
-        __typename: 'Submission2',
+        __typename: 'HealthPlanPackage',
         id: '07f9efbf-d4d1-44ae-8674-56d9d6b75ce6',
         stateCode: 'MN',
         state: {
@@ -697,9 +701,9 @@ const mockSubmittedSubmission2WithRevision = (): Submission2 => {
         intiallySubmittedAt: '2022-03-25',
         revisions: [
             {
-                __typename: 'RevisionEdge',
-                revision: {
-                    __typename: 'Revision',
+                __typename: 'HealthPlanRevisionEdge',
+                node: {
+                    __typename: 'HealthPlanRevision',
                     id: '135972bf-e056-40d3-859c-6a69d9c982ad',
                     unlockInfo: {
                         __typename: 'UpdateInformation',
@@ -714,14 +718,14 @@ const mockSubmittedSubmission2WithRevision = (): Submission2 => {
                         updatedReason: 'Placeholder resubmission reason',
                     },
                     createdAt: '2022-03-28T17:54:39.175Z',
-                    submissionData:
+                    formDataProto:
                         'ChBTVEFURV9TVUJNSVNTSU9OEAEaJDA3ZjllZmJmLWQ0ZDEtNDRhZS04Njc0LTU2ZDlkNmI3NWNlNiIJU1VCTUlUVEVEKgcI5g8QAhgZMgwI0O2HkgYQwMC2xgM6DAjQ7YeSBhCAvPnFA0gYUBJaBHBtYXBgA2onZGVzY3JpcHRpb24gb2YgY29udHJhY3Qgb25seSBzdWJtaXNzaW9uchUKAWESAWEaDWFAZXhhbXBsZS5jb2168AEIARIHCOYPEAIYBRoHCOYPEAIYEyIBASoBATJ0ChlBbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmElRzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjYzMjE1Ny1BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmL0FtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYaAQEyXAoRbGlmZW9mZ2FsaWxlby5wZGYSRHMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4NDkwMTYyNjQxLWxpZmVvZmdhbGlsZW8ucGRmL2xpZmVvZmdhbGlsZW8ucGRmGgEBOAGCAYABCh1BbWVyaWdyb3VwIFRleGFzIEluYyBjb3B5LnBkZhJcczM6Ly9sb2NhbC11cGxvYWRzLzE2NDgyNDI3MTE0MjEtQW1lcmlncm91cCBUZXhhcyBJbmMgY29weS5wZGYvQW1lcmlncm91cCBUZXhhcyBJbmMgY29weS5wZGYaAQOCAbcBCi81MjktMTAtMDAyMC0wMDAwM19TdXBlcmlvcl9IZWFsdGggUGxhbiwgSW5jLnBkZhKAAXMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyNzExNDIxLTUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmLzUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmGgEEggGbAQomY292aWQtaWZjLTItZmx1LXJzdi1jb2RlcyA1LTUtMjAyMS5wZGYSbnMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyODczMjI5LWNvdmlkLWlmYy0yLWZsdS1yc3YtY29kZXMgNS01LTIwMjEucGRmL2NvdmlkLWlmYy0yLWZsdS1yc3YtY29kZXMgNS01LTIwMjEucGRmGgEEkgOyARABGgcI5g8QAhgZIgcI5g8QAhgaKgcI5g8QAhgZMhsKFQoBYhIBYhoNYkBleGFtcGxlLmNvbRABGgA4AUJ0ChlBbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmElRzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjY2NTYzNC1BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmL0FtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYaAQI=', //pragma: allowlist secret
                 },
             },
             {
-                __typename: 'RevisionEdge',
-                revision: {
-                    __typename: 'Revision',
+                __typename: 'HealthPlanRevisionEdge',
+                node: {
+                    __typename: 'HealthPlanRevision',
                     id: '9aa14122-2d37-462a-b788-e25c1c30e8dc',
                     unlockInfo: {
                         __typename: 'UpdateInformation',
@@ -736,14 +740,14 @@ const mockSubmittedSubmission2WithRevision = (): Submission2 => {
                         updatedReason: 'Placeholder resubmission reason',
                     },
                     createdAt: '2022-03-25T21:13:56.176Z',
-                    submissionData:
+                    formDataProto:
                         'ChBTVEFURV9TVUJNSVNTSU9OEAEaJDA3ZjllZmJmLWQ0ZDEtNDRhZS04Njc0LTU2ZDlkNmI3NWNlNiIJU1VCTUlUVEVEKgcI5g8QAhgZMgsIw+H4kQYQwICXGzoLCMPh+JEGEMCAlxtIGFASWgRwbWFwYANqJ2Rlc2NyaXB0aW9uIG9mIGNvbnRyYWN0IG9ubHkgc3VibWlzc2lvbnIVCgFhEgFhGg1hQGV4YW1wbGUuY29tepIBCAESBwjmDxACGAUaBwjmDxACGBMiAQEqAQEydAoZQW1lcmlncm91cCBUZXhhcywgSW5jLnBkZhJUczM6Ly9sb2NhbC11cGxvYWRzLzE2NDgyNDI2MzIxNTctQW1lcmlncm91cCBUZXhhcywgSW5jLnBkZi9BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmGgEBOAGCAYABCh1BbWVyaWdyb3VwIFRleGFzIEluYyBjb3B5LnBkZhJcczM6Ly9sb2NhbC11cGxvYWRzLzE2NDgyNDI3MTE0MjEtQW1lcmlncm91cCBUZXhhcyBJbmMgY29weS5wZGYvQW1lcmlncm91cCBUZXhhcyBJbmMgY29weS5wZGYaAQOCAbcBCi81MjktMTAtMDAyMC0wMDAwM19TdXBlcmlvcl9IZWFsdGggUGxhbiwgSW5jLnBkZhKAAXMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyNzExNDIxLTUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmLzUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmGgEEggGbAQomY292aWQtaWZjLTItZmx1LXJzdi1jb2RlcyA1LTUtMjAyMS5wZGYSbnMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyODczMjI5LWNvdmlkLWlmYy0yLWZsdS1yc3YtY29kZXMgNS01LTIwMjEucGRmL2NvdmlkLWlmYy0yLWZsdS1yc3YtY29kZXMgNS01LTIwMjEucGRmGgEEkgOyARABGgcI5g8QAhgZIgcI5g8QAhgaKgcI5g8QAhgZMhsKFQoBYhIBYhoNYkBleGFtcGxlLmNvbRABGgA4AUJ0ChlBbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmElRzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjY2NTYzNC1BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmL0FtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYaAQI=', // pragma: allowlist secret
                 },
             },
             {
-                __typename: 'RevisionEdge',
-                revision: {
-                    __typename: 'Revision',
+                __typename: 'HealthPlanRevisionEdge',
+                node: {
+                    __typename: 'HealthPlanRevision',
                     id: '95fa29ec-c8b1-4195-82c1-5615bcda7bac',
                     unlockInfo: null,
                     submitInfo: {
@@ -753,7 +757,7 @@ const mockSubmittedSubmission2WithRevision = (): Submission2 => {
                         updatedReason: 'Initial submission',
                     },
                     createdAt: '2022-03-25T03:28:56.244Z',
-                    submissionData:
+                    formDataProto:
                         'ChBTVEFURV9TVUJNSVNTSU9OEAEaJDA3ZjllZmJmLWQ0ZDEtNDRhZS04Njc0LTU2ZDlkNmI3NWNlNiIJU1VCTUlUVEVEKgcI5g8QAhgZMgwI8OD4kQYQgOKiyAE6DAjw4PiRBhDA3eXHAUgYUBJaBHBtYXBgA2onZGVzY3JpcHRpb24gb2YgY29udHJhY3Qgb25seSBzdWJtaXNzaW9uchUKAWESAWEaDWFAZXhhbXBsZS5jb216kgEIARIHCOYPEAIYBRoHCOYPEAIYEyIBASoBATJ0ChlBbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmElRzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjYzMjE1Ny1BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmL0FtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYaAQE4AYIBgAEKHUFtZXJpZ3JvdXAgVGV4YXMgSW5jIGNvcHkucGRmElxzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjcxMTQyMS1BbWVyaWdyb3VwIFRleGFzIEluYyBjb3B5LnBkZi9BbWVyaWdyb3VwIFRleGFzIEluYyBjb3B5LnBkZhoBA4IBtwEKLzUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmEoABczM6Ly9sb2NhbC11cGxvYWRzLzE2NDgyNDI3MTE0MjEtNTI5LTEwLTAwMjAtMDAwMDNfU3VwZXJpb3JfSGVhbHRoIFBsYW4sIEluYy5wZGYvNTI5LTEwLTAwMjAtMDAwMDNfU3VwZXJpb3JfSGVhbHRoIFBsYW4sIEluYy5wZGYaAQSSA7IBEAEaBwjmDxACGBkiBwjmDxACGBoqBwjmDxACGBkyGwoVCgFiEgFiGg1iQGV4YW1wbGUuY29tEAEaADgBQnQKGUFtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYSVHMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyNjY1NjM0LUFtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYvQW1lcmlncm91cCBUZXhhcywgSW5jLnBkZhoBAg==', // pragma: allowlist secret
                 },
             },
@@ -813,38 +817,35 @@ const updateDraftSubmissionMock = ({
     }
 }
 
-type submitDraftSubmissionMockSuccessProps = {
-    stateSubmission?: StateSubmission | Partial<StateSubmission>
+type submitHealthPlanPackageMockSuccessProps = {
+    stateSubmission?: HealthPlanPackage
     id: string
     submittedReason?: string
 }
 
-const submitDraftSubmissionMockSuccess = ({
+const submitHealthPlanPackageMockSuccess = ({
     stateSubmission,
     id,
     submittedReason,
-}: submitDraftSubmissionMockSuccessProps): MockedResponse<
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Record<string, any>
-> => {
-    const submission = stateSubmission ?? mockDraft()
+}: submitHealthPlanPackageMockSuccessProps): MockedResponse<SubmitHealthPlanPackageMutation> => {
+    const pkg = stateSubmission ?? mockDraftHealthPlanPackage()
     return {
         request: {
-            query: SubmitDraftSubmissionDocument,
-            variables: { input: { submissionID: id, submittedReason } },
+            query: SubmitHealthPlanPackageDocument,
+            variables: { input: { pkgID: id, submittedReason } },
         },
-        result: { data: { submitDraftSubmission: { submission: submission } } },
+        result: { data: { submitHealthPlanPackage: { pkg } } },
     }
 }
 
-const submitDraftSubmissionMockError = ({
+const submitHealthPlanPackageMockError = ({
     id,
 }: {
-    id: string // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}): MockedResponse<Record<string, any>> => {
+    id: string
+}): MockedResponse<SubmitHealthPlanPackageMutation> => {
     return {
         request: {
-            query: SubmitDraftSubmissionDocument,
+            query: SubmitHealthPlanPackageDocument,
             variables: { input: { submissionID: id } },
         },
         result: {
@@ -855,41 +856,37 @@ const submitDraftSubmissionMockError = ({
     }
 }
 
-type unlockStateSubmissionMockSuccessProps = {
-    submission?: Submission2 | Partial<Submission2>
+type unlockHealthPlanPackageMockSuccessProps = {
+    pkg?: HealthPlanPackage
     id: string
     reason: string
 }
 
-const unlockStateSubmissionMockSuccess = ({
-    submission = mockUnlockedSubmission2(),
+const unlockHealthPlanPackageMockSuccess = ({
+    pkg = mockUnlockedHealthPlanPackage(),
     id,
     reason,
-}: unlockStateSubmissionMockSuccessProps): MockedResponse<
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Record<string, any>
-> => {
+}: unlockHealthPlanPackageMockSuccessProps): MockedResponse<UnlockHealthPlanPackageMutation> => {
     return {
         request: {
-            query: UnlockStateSubmissionDocument,
-            variables: { input: { submissionID: id, unlockedReason: reason } },
+            query: UnlockHealthPlanPackageDocument,
+            variables: { input: { pkgID: id, unlockedReason: reason } },
         },
-        result: { data: { unlockStateSubmission: { submission } } },
+        result: { data: { unlockHealthPlanPackage: { pkg } } },
     }
 }
 
-const unlockStateSubmissionMockError = ({
+const unlockHealthPlanPackageMockError = ({
     id,
     reason,
 }: {
     id: string
     reason: string
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}): MockedResponse<Record<string, any>> => {
+}): MockedResponse<UnlockHealthPlanPackageMutation> => {
     return {
         request: {
-            query: UnlockStateSubmissionDocument,
-            variables: { input: { submissionID: id, unlockedReason: reason } },
+            query: UnlockHealthPlanPackageDocument,
+            variables: { input: { pkgID: id, unlockedReason: reason } },
         },
         result: {
             errors: [
@@ -924,13 +921,12 @@ const indexSubmissionsMockSuccess = (
     }
 }
 
-const indexSubmissions2MockSuccess = (
-    submissions: Submission2[] = [
-        mockUnlockedSubmission2(),
-        mockSubmittedSubmission2(),
+const indexHealthPlanPackagesMockSuccess = (
+    submissions: HealthPlanPackage[] = [
+        mockUnlockedHealthPlanPackage(),
+        mockSubmittedHealthPlanPackage(),
     ]
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): MockedResponse<Record<string, any>> => {
+): MockedResponse<IndexHealthPlanPackagesQuery> => {
     const submissionEdges = submissions.map((sub) => {
         return {
             node: sub,
@@ -938,11 +934,11 @@ const indexSubmissions2MockSuccess = (
     })
     return {
         request: {
-            query: IndexSubmissions2Document,
+            query: IndexHealthPlanPackagesDocument,
         },
         result: {
             data: {
-                indexSubmissions2: {
+                indexHealthPlanPackages: {
                     totalCount: submissionEdges.length,
                     edges: submissionEdges,
                 },
@@ -955,15 +951,15 @@ export {
     fetchCurrentUserMock,
     mockValidCMSUser,
     createDraftSubmissionMock,
-    fetchSubmission2Mock,
+    fetchHealthPlanPackageMock,
     fetchStateSubmissionMock,
-    fetchStateSubmission2MockSuccess,
+    fetchStateHealthPlanPackageMockSuccess,
     updateDraftSubmissionMock,
-    submitDraftSubmissionMockSuccess,
-    submitDraftSubmissionMockError,
+    submitHealthPlanPackageMockSuccess,
+    submitHealthPlanPackageMockError,
     indexSubmissionsMockSuccess,
-    indexSubmissions2MockSuccess,
-    unlockStateSubmissionMockSuccess,
-    unlockStateSubmissionMockError,
-    mockSubmittedSubmission2WithRevision,
+    indexHealthPlanPackagesMockSuccess,
+    unlockHealthPlanPackageMockSuccess,
+    unlockHealthPlanPackageMockError,
+    mockSubmittedHealthPlanPackageWithRevision,
 }

@@ -3,7 +3,7 @@ import { Alert, GridContainer } from '@trussworks/react-uswds'
 import { useLocation, useParams } from 'react-router-dom'
 import {
     submissionName,
-    SubmissionUnionType,
+    HealthPlanFormDataType,
     UpdateInfoType,
 } from '../../common-code/domain-models'
 import { makeDateTable } from '../../common-code/data-helpers/makeDocumentDateLookupTable'
@@ -17,7 +17,7 @@ import {
     SupportingDocumentsSummarySection,
 } from '../../components/SubmissionSummarySection'
 import { usePage } from '../../contexts/PageContext'
-import { useFetchSubmission2Query } from '../../gen/gqlClient'
+import { useFetchHealthPlanPackageQuery } from '../../gen/gqlClient'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404'
 import { dayjs } from '../../dateHelpers'
@@ -41,7 +41,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
 
     // Api fetched data state
     const [packageData, setPackageData] = useState<
-        SubmissionUnionType | undefined
+        HealthPlanFormDataType | undefined
     >(undefined)
 
     // document date lookup state
@@ -49,15 +49,15 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         DocumentDateLookupTable | undefined
     >({})
 
-    const { loading, error, data } = useFetchSubmission2Query({
+    const { loading, error, data } = useFetchHealthPlanPackageQuery({
         variables: {
             input: {
-                submissionID: id,
+                pkgID: id,
             },
         },
     })
 
-    const submissionAndRevisions = data?.fetchSubmission2.submission
+    const submissionAndRevisions = data?.fetchHealthPlanPackage.pkg
 
     // Pull out the correct revision form api request, display errors for bad dad
     useEffect(() => {
@@ -69,7 +69,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
             const revisionIndex = Number(revisionVersion) - 1
             const revision = [...submissionAndRevisions.revisions]
                 .reverse() //Reversing revisions to get correct submission order
-                .find((revision, index) => index === revisionIndex)
+                .find((_revision, index) => index === revisionIndex)
 
             if (!revision) {
                 console.error(
@@ -82,13 +82,11 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                 return
             }
 
-            const submissionResult = base64ToDomain(
-                revision.revision.submissionData
-            )
+            const submissionResult = base64ToDomain(revision.node.formDataProto)
 
             if (
                 submissionResult instanceof Error ||
-                !revision.revision.submitInfo
+                !revision.node.submitInfo
             ) {
                 console.error(
                     'ERROR: got a proto decoding error',
@@ -100,11 +98,8 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                 return
             }
             console.log('submissionResult', submissionResult)
-            console.log(
-                'revision.revision.submitInfo',
-                revision.revision.submitInfo
-            )
-            setSubmitInfo(revision.revision.submitInfo)
+            console.log('revision.node.submitInfo', revision.node.submitInfo)
+            setSubmitInfo(revision.node.submitInfo)
             setPackageData(submissionResult)
         }
     }, [
@@ -116,7 +111,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
 
     // Update header with submission name
     useEffect(() => {
-        const subWithRevisions = data?.fetchSubmission2.submission
+        const subWithRevisions = data?.fetchHealthPlanPackage.pkg
         if (packageData && subWithRevisions) {
             const programs = subWithRevisions.state.programs
             updateHeading(pathname, submissionName(packageData, programs))

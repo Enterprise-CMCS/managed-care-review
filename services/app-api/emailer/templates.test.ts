@@ -5,7 +5,7 @@ import {
     mockContractAndRatesSubmission,
     mockUser,
 } from '../testHelpers/emailerHelpers'
-import { StateSubmissionType } from '../../app-web/src/common-code/domain-models'
+import { LockedHealthPlanFormDataType } from '../../app-web/src/common-code/domain-models'
 import {
     newPackageCMSEmail,
     newPackageStateEmail,
@@ -65,7 +65,7 @@ describe('Email templates', () => {
         })
 
         it('includes expected data summary for a contract only submission', () => {
-            const sub: StateSubmissionType = {
+            const sub: LockedHealthPlanFormDataType = {
                 ...mockContractOnlySubmission(),
                 contractDateStart: new Date('01/01/2021'),
                 contractDateEnd: new Date('01/01/2025'),
@@ -97,7 +97,7 @@ describe('Email templates', () => {
             )
         })
         it('includes expected data summary for a contract and rates submission CMS email', () => {
-            const sub: StateSubmissionType = {
+            const sub: LockedHealthPlanFormDataType = {
                 ...mockContractAndRatesSubmission(),
                 contractDateStart: new Date('01/01/2021'),
                 contractDateEnd: new Date('01/01/2025'),
@@ -142,7 +142,7 @@ describe('Email templates', () => {
             )
         })
         it('includes expected data summary for a contract amendment submission', () => {
-            const sub: StateSubmissionType = {
+            const sub: LockedHealthPlanFormDataType = {
                 ...mockContractAmendmentSubmission(),
                 contractDateStart: new Date('01/01/2021'),
                 contractDateEnd: new Date('01/01/2025'),
@@ -188,7 +188,7 @@ describe('Email templates', () => {
         })
 
         it('includes expected data summary for a rate amendment submission CMS email', () => {
-            const sub: StateSubmissionType = {
+            const sub: LockedHealthPlanFormDataType = {
                 ...mockContractAndRatesSubmission(),
                 rateType: 'AMENDMENT',
                 contractDateStart: new Date('01/01/2021'),
@@ -263,7 +263,7 @@ describe('Email templates', () => {
         })
 
         it('to addresses list includes all state contacts on submission', () => {
-            const sub: StateSubmissionType = {
+            const sub: LockedHealthPlanFormDataType = {
                 ...mockContractOnlySubmission(),
                 stateContacts: [
                     {
@@ -370,7 +370,7 @@ describe('Email templates', () => {
         })
 
         it('includes expected data summary for a contract and rates submission State email', () => {
-            const sub: StateSubmissionType = {
+            const sub: LockedHealthPlanFormDataType = {
                 ...mockContractAndRatesSubmission(),
                 contractDateStart: new Date('01/01/2021'),
                 contractDateEnd: new Date('01/01/2025'),
@@ -418,7 +418,7 @@ describe('Email templates', () => {
         })
 
         it('includes expected data summary for a rate amendment submission State email', () => {
-            const sub: StateSubmissionType = {
+            const sub: LockedHealthPlanFormDataType = {
                 ...mockContractAndRatesSubmission(),
                 rateType: 'AMENDMENT',
                 contractDateStart: new Date('01/01/2021'),

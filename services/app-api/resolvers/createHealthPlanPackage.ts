@@ -10,17 +10,17 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from './attributeHelper'
 
-export function createSubmission2Resolver(
+export function createHealthPlanPackageResolver(
     store: Store
-): MutationResolvers['createSubmission2'] {
+): MutationResolvers['createHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
-        setResolverDetailsOnActiveSpan('createDraftSubmission', user, span)
+        setResolverDetailsOnActiveSpan('createHealthPlanPackage', user, span)
 
         // This resolver is only callable by state users
         if (!isStateUser(user)) {
             logError(
-                'createDraftSubmission',
+                'createHealthPlanPackage',
                 'user not authorized to create state data'
             )
             setErrorAttributesOnActiveSpan(
@@ -49,7 +49,7 @@ export function createSubmission2Resolver(
                 'does',
                 count
             )} not exist in state ${stateFromCurrentUser}`
-            logError('createDraftSubmission', errMessage)
+            logError('createHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
                 argumentName: 'programIDs',
@@ -67,16 +67,16 @@ export function createSubmission2Resolver(
         const pkgResult = await store.insertDraftSubmission(dbDraftSubmission)
         if (isStoreError(pkgResult)) {
             const errMessage = `Issue creating a draft submission of type ${pkgResult.code}. Message: ${pkgResult.message}`
-            logError('createDraftSubmission', errMessage)
+            logError('createHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
 
-        logSuccess('createDraftSubmission')
+        logSuccess('createHealthPlanPackage')
         setSuccessAttributesOnActiveSpan(span)
 
         return {
-            submission: pkgResult,
+            pkg: pkgResult,
         }
     }
 }

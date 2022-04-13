@@ -1,6 +1,9 @@
-import { DraftSubmissionType, StateSubmissionType } from "../domain-models"
+import {
+    UnlockedHealthPlanFormDataType,
+    LockedHealthPlanFormDataType,
+} from '../domain-models'
 
-function newSubmission(): DraftSubmissionType {
+function newHealthPlanFormData(): UnlockedHealthPlanFormDataType {
     return {
         createdAt: new Date(Date.UTC(2021, 4, 10)),
         updatedAt: new Date(),
@@ -21,7 +24,7 @@ function newSubmission(): DraftSubmissionType {
     }
 }
 
-function basicSubmission(): DraftSubmissionType {
+function basicHealthPlanFormData(): UnlockedHealthPlanFormDataType {
     return {
         createdAt: new Date(Date.UTC(2021, 4, 10)),
         updatedAt: new Date(),
@@ -46,7 +49,7 @@ function basicSubmission(): DraftSubmissionType {
     }
 }
 
-function contractOnly(): DraftSubmissionType {
+function contractOnly(): UnlockedHealthPlanFormDataType {
     return {
         createdAt: new Date(Date.UTC(2021, 4, 10)),
         updatedAt: new Date(),
@@ -71,7 +74,7 @@ function contractOnly(): DraftSubmissionType {
     }
 }
 
-function draftWithContacts(): DraftSubmissionType {
+function unlockedWithContacts(): UnlockedHealthPlanFormDataType {
     return {
         createdAt: new Date(Date.UTC(2021, 4, 10)),
         updatedAt: new Date(),
@@ -121,7 +124,7 @@ function draftWithContacts(): DraftSubmissionType {
     }
 }
 
-function draftWithDocuments(): DraftSubmissionType {
+function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
     return {
         createdAt: new Date(Date.UTC(2021, 4, 10)),
         updatedAt: new Date(),
@@ -188,7 +191,7 @@ function draftWithDocuments(): DraftSubmissionType {
     }
 }
 
-function draftWithFullRates(): DraftSubmissionType {
+function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
     return {
         createdAt: new Date(Date.UTC(2021, 4, 10)),
         updatedAt: new Date(),
@@ -258,7 +261,7 @@ function draftWithFullRates(): DraftSubmissionType {
     }
 }
 
-function draftWithFullContracts(): DraftSubmissionType {
+function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
     return {
         createdAt: new Date(Date.UTC(2021, 4, 10)),
         updatedAt: new Date(),
@@ -355,7 +358,7 @@ function draftWithFullContracts(): DraftSubmissionType {
     }
 }
 
-function draftWithALittleBitOfEverything(): DraftSubmissionType {
+function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
     return {
         id: 'test-abc-123',
         createdAt: new Date(Date.UTC(2021, 4, 10)),
@@ -446,7 +449,7 @@ function draftWithALittleBitOfEverything(): DraftSubmissionType {
     }
 }
 
-function basicStateSubmission(): StateSubmissionType {
+function basicLockedHealthPlanFormData(): LockedHealthPlanFormDataType {
     return {
         createdAt: new Date(Date.UTC(2021, 4, 10)),
         updatedAt: new Date(),
@@ -492,13 +495,13 @@ function basicStateSubmission(): StateSubmissionType {
 }
 
 export {
-    newSubmission,
-    basicSubmission,
+    newHealthPlanFormData,
+    basicHealthPlanFormData,
     contractOnly,
-    draftWithContacts,
-    draftWithDocuments,
-    draftWithFullRates,
-    draftWithFullContracts,
-    draftWithALittleBitOfEverything,
-    basicStateSubmission,
+    unlockedWithContacts,
+    unlockedWithDocuments,
+    unlockedWithFullRates,
+    unlockedWithFullContracts,
+    unlockedWithALittleBitOfEverything,
+    basicLockedHealthPlanFormData,
 }

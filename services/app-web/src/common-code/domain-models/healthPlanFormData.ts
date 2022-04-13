@@ -1,22 +1,23 @@
-import { DraftSubmissionType, RateDataType } from './DraftSubmissionType'
+import { UnlockedHealthPlanFormDataType } from './UnlockedHealthPlanFormDataType'
 import { ProgramT } from './ProgramT'
-import { StateSubmissionType } from './StateSubmissionType'
-import { SubmissionUnionType } from './SubmissionUnionType'
+import { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
+import { HealthPlanFormDataType } from './HealthPlanFormDataType'
+import { RateDataType } from '.'
 import { formatRateNameDate } from '../../dateHelpers'
 
 const isContractOnly = (
-    sub: DraftSubmissionType | StateSubmissionType
+    sub: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
 ): boolean => sub.submissionType === 'CONTRACT_ONLY'
 
 const isContractAndRates = (
-    sub: DraftSubmissionType | StateSubmissionType
+    sub: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
 ): boolean => sub.submissionType === 'CONTRACT_AND_RATES'
 
 const isRateAmendment = (
-    sub: DraftSubmissionType | StateSubmissionType
+    sub: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
 ): boolean => sub.rateType === 'AMENDMENT'
 
-const hasValidContract = (sub: StateSubmissionType): boolean =>
+const hasValidContract = (sub: LockedHealthPlanFormDataType): boolean =>
     sub.contractType !== undefined &&
     sub.contractExecutionStatus !== undefined &&
     sub.contractDateStart !== undefined &&
@@ -24,7 +25,7 @@ const hasValidContract = (sub: StateSubmissionType): boolean =>
     sub.managedCareEntities.length !== 0 &&
     sub.federalAuthorities.length !== 0
 
-const hasValidRates = (sub: StateSubmissionType): boolean => {
+const hasValidRates = (sub: LockedHealthPlanFormDataType): boolean => {
     const validBaseRate =
         sub.rateType !== undefined &&
         sub.rateDateCertified !== undefined &&
@@ -46,7 +47,7 @@ const hasValidRates = (sub: StateSubmissionType): boolean => {
     }
 }
 
-const hasValidDocuments = (sub: StateSubmissionType): boolean => {
+const hasValidDocuments = (sub: LockedHealthPlanFormDataType): boolean => {
     const validRateDocuments =
         sub.submissionType === 'CONTRACT_AND_RATES'
             ? sub.rateDocuments?.length !== 0
@@ -57,7 +58,7 @@ const hasValidDocuments = (sub: StateSubmissionType): boolean => {
 }
 
 const hasValidSupportingDocumentCategories = (
-    sub: StateSubmissionType
+    sub: LockedHealthPlanFormDataType
 ): boolean => {
     // every document must have a category
     if (!sub.documents.every((doc) => doc.documentCategories.length > 0)) {
@@ -76,9 +77,11 @@ const hasValidSupportingDocumentCategories = (
     return true
 }
 
-const isStateSubmission = (sub: unknown): sub is StateSubmissionType => {
+const isLockedHealthPlanFormData = (
+    sub: unknown
+): sub is LockedHealthPlanFormDataType => {
     if (sub && typeof sub === 'object' && 'status' in sub) {
-        const maybeStateSub = sub as StateSubmissionType
+        const maybeStateSub = sub as LockedHealthPlanFormDataType
         return (
             maybeStateSub.status === 'SUBMITTED' &&
             hasValidContract(maybeStateSub) &&
@@ -89,7 +92,9 @@ const isStateSubmission = (sub: unknown): sub is StateSubmissionType => {
     return false
 }
 
-const isDraftSubmission = (sub: unknown): sub is DraftSubmissionType => {
+const isUnlockedHealthPlanFormData = (
+    sub: unknown
+): sub is UnlockedHealthPlanFormDataType => {
     if (sub && typeof sub === 'object') {
         if ('status' in sub) {
             const maybeDraft = sub as { status: unknown }
@@ -119,7 +124,7 @@ function programNames(programs: ProgramT[], programIDs: string[]): string[] {
 }
 
 function submissionName(
-    submission: SubmissionUnionType,
+    submission: HealthPlanFormDataType,
     statePrograms: ProgramT[]
 ): string {
     const padNumber = submission.stateNumber.toString().padStart(4, '0')
@@ -190,8 +195,8 @@ export {
     hasValidRates,
     isContractOnly,
     isContractAndRates,
-    isStateSubmission,
-    isDraftSubmission,
+    isLockedHealthPlanFormData,
+    isUnlockedHealthPlanFormData,
     programNames,
     submissionName,
     generateRateName,

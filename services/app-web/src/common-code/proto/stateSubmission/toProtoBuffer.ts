@@ -1,8 +1,8 @@
 import { statesubmission, google } from '../../../gen/stateSubmissionProto'
 import {
-    DraftSubmissionType,
-    StateSubmissionType,
-    isStateSubmission,
+    UnlockedHealthPlanFormDataType,
+    LockedHealthPlanFormDataType,
+    isLockedHealthPlanFormData,
 } from '../../domain-models'
 
 /*
@@ -98,7 +98,7 @@ const getEnumPrefix = (defaultValue: string) => {
 
 // MAIN
 const toProtoBuffer = (
-    domainData: DraftSubmissionType | StateSubmissionType
+    domainData: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
 ): Uint8Array => {
     const { contractAmendmentInfo, rateAmendmentInfo } = domainData
 
@@ -116,7 +116,7 @@ const toProtoBuffer = (
 
         // submittedAt is the only field that exists on StateSubmission but not on DraftSubmission.
         submittedAt:
-            (isStateSubmission(domainData) &&
+            (isLockedHealthPlanFormData(domainData) &&
                 domainDateToProtoTimestamp(domainData.submittedAt)) ||
             undefined,
 

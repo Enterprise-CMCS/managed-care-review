@@ -1,9 +1,9 @@
 import { makeDateTable } from './makeDocumentDateLookupTable'
-import { mockSubmittedSubmission2WithRevision } from '../../testHelpers/apolloHelpers'
+import { mockSubmittedHealthPlanPackageWithRevision } from '../../testHelpers/apolloHelpers'
 
 describe('makeDateTable', () => {
     it('should make a proper lookup table', () => {
-        const submissions = mockSubmittedSubmission2WithRevision()
+        const submissions = mockSubmittedHealthPlanPackageWithRevision()
         const lookupTable = makeDateTable(submissions)
 
         expect(lookupTable).toEqual({
