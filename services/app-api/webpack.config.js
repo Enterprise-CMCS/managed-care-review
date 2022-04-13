@@ -78,6 +78,9 @@ module.exports = {
                     ),
                 },
                 {
+                    from: path.resolve(__dirname, 'prisma'),
+                },
+                {
                     from: path.resolve(__dirname, 'collector.yml'),
                     transform(content) {
                         return content
