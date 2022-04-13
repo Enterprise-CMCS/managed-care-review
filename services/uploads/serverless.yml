@@ -167,14 +167,14 @@ resources:
                 - !Sub ${DocumentUploadsBucket.Arn}/*.xlsx
                 - !Sub ${DocumentUploadsBucket.Arn}/*.zip
             - Effect: Deny
-              Action:
-                - 's3:GetObject'
-                - 's3:PutObject'
+              Action: 's3:*'
               Principal: '*'
               Condition:
                 Bool:
                   'aws:SecureTransport': false
-              Resource: !Sub ${DocumentUploadsBucket.Arn}/*
+              Resource:
+                - !Sub ${DocumentUploadsBucket.Arn}
+                - !Sub ${DocumentUploadsBucket.Arn}/*
               Sid: DenyUnencryptedConnections
 
     LambdaInvokePermission:
@@ -202,14 +202,14 @@ resources:
         PolicyDocument:
           Statement:
             - Effect: Deny
-              Action:
-                - 's3:GetObject'
-                - 's3:PutObject'
+              Action: 's3:*'
               Principal: '*'
               Condition:
                 Bool:
                   'aws:SecureTransport': false
-              Resource: !Sub ${ClamDefsBucket.Arn}/*
+              Resource:
+                - !Sub ${ClamDefsBucket.Arn}
+                - !Sub ${ClamDefsBucket.Arn}/*
               Sid: DenyUnencryptedConnections
 
   Outputs:

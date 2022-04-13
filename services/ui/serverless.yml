@@ -66,14 +66,14 @@ resources:
               Principal:
                 CanonicalUser: !GetAtt CloudFrontOriginAccessIdentity.S3CanonicalUserId
             - Effect: Deny
-              Action:
-                - 's3:GetObject'
-                - 's3:PutObject'
+              Action: 's3:*'
               Principal: '*'
               Condition:
                 Bool:
                   'aws:SecureTransport': false
-              Resource: !Sub ${S3Bucket.Arn}/*
+              Resource:
+                - !Sub ${S3Bucket.Arn}
+                - !Sub ${S3Bucket.Arn}/*
               Sid: DenyUnencryptedConnections
         Bucket: !Ref S3Bucket
     CloudFrontWebAcl:
