@@ -344,8 +344,8 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}>
                         <ContractDetails
-                            draftSubmission={draft}
-                            updateDraft={updateDraft}
+                            draftSubmission={formDataFromLatestRevision}
+                            updateDraft={updateDraftHealthPlanPackage}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}>
