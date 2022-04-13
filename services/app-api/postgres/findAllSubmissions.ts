@@ -11,15 +11,15 @@ import {
 } from './storeError'
 import {
     getCurrentRevision,
-    StateSubmissionWithRevisions,
+    HealthPlanPackageWithRevisionsTable,
 } from './submissionWithRevisionsHelpers'
 
 export async function findAllSubmissionWrapper(
     client: PrismaClient,
     stateCode: string
-): Promise<StateSubmissionWithRevisions[] | StoreError> {
+): Promise<HealthPlanPackageWithRevisionsTable[] | StoreError> {
     try {
-        const result = await client.stateSubmission.findMany({
+        const result = await client.healthPlanPackageTable.findMany({
             where: {
                 stateCode: {
                     equals: stateCode,
@@ -66,7 +66,7 @@ export async function findAllSubmissions(
         if (isStoreError(currentRevisionOrError)) return currentRevisionOrError
         const currentRevision = currentRevisionOrError
 
-        const proto = currentRevision.submissionFormProto
+        const proto = currentRevision.formDataProto
 
         const decodeResult = toDomain(proto)
 

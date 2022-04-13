@@ -1,30 +1,30 @@
-import { StateSubmission, StateSubmissionRevision } from '@prisma/client'
+import { HealthPlanPackageTable, HealthPlanRevisionTable } from '@prisma/client'
 import {
     HealthPlanPackageType,
     UpdateInfoType,
 } from '../../app-web/src/common-code/domain-models'
 import { StoreError } from './storeError'
 
-export type StateSubmissionWithRevisions = StateSubmission & {
-    revisions: StateSubmissionRevision[]
+export type HealthPlanPackageWithRevisionsTable = HealthPlanPackageTable & {
+    revisions: HealthPlanRevisionTable[]
 }
 
 // Return first revision associated with a submission or return a StoreError if there is submission or revisions
 // used validate prisma results have useable submission
 const getCurrentRevision = (
     submissionID: string,
-    submissionResult: StateSubmissionWithRevisions | null
-): StateSubmissionRevision | StoreError => {
+    submissionResult: HealthPlanPackageWithRevisionsTable | null
+): HealthPlanRevisionTable | StoreError => {
     if (!submissionResult)
         return {
             code: 'UNEXPECTED_EXCEPTION' as const,
-            message: `No submission found for id: ${submissionID}`,
+            message: `No package found for id: ${submissionID}`,
         }
 
     if (!submissionResult.revisions || submissionResult.revisions.length < 1)
         return {
             code: 'UNEXPECTED_EXCEPTION' as const,
-            message: `No revisions found for submission id: ${submissionID}`,
+            message: `No revisions found for package id: ${submissionID}`,
         }
 
     // run through the list of revisions, get the newest one.
@@ -42,7 +42,7 @@ const getCurrentRevision = (
 
 // convertToHealthPlanPackageType transforms the DB representation of StateSubmissionWithRevisions into our HealthPlanPackageType
 function convertToHealthPlanPackageType(
-    dbSub: StateSubmissionWithRevisions
+    dbSub: HealthPlanPackageWithRevisionsTable
 ): HealthPlanPackageType {
     return {
         id: dbSub.id,
@@ -71,7 +71,7 @@ function convertToHealthPlanPackageType(
                 unlockInfo,
                 submitInfo,
                 createdAt: r.createdAt,
-                formDataProto: r.submissionFormProto,
+                formDataProto: r.formDataProto,
             }
         }),
     }

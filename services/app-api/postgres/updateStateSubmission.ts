@@ -22,7 +22,7 @@ async function submitStateSubmissionWrapper(
     proto: Buffer
 ): Promise<HealthPlanPackageType | StoreError> {
     try {
-        const findResult = await client.stateSubmission.findUnique({
+        const findResult = await client.healthPlanPackageTable.findUnique({
             where: {
                 id: id,
             },
@@ -38,33 +38,35 @@ async function submitStateSubmissionWrapper(
 
         try {
             const currentRevision = currentRevisionOrError
-            const submissionResult = await client.stateSubmission.update({
-                where: {
-                    id,
-                },
-                data: {
-                    revisions: {
-                        update: {
-                            where: {
-                                id: currentRevision.id,
-                            },
-                            data: {
-                                submissionFormProto: proto,
-                                submittedAt: submitInfo.updatedAt,
-                                submittedBy: submitInfo.updatedBy,
-                                submittedReason: submitInfo.updatedReason,
+            const submissionResult = await client.healthPlanPackageTable.update(
+                {
+                    where: {
+                        id,
+                    },
+                    data: {
+                        revisions: {
+                            update: {
+                                where: {
+                                    id: currentRevision.id,
+                                },
+                                data: {
+                                    formDataProto: proto,
+                                    submittedAt: submitInfo.updatedAt,
+                                    submittedBy: submitInfo.updatedBy,
+                                    submittedReason: submitInfo.updatedReason,
+                                },
                             },
                         },
                     },
-                },
-                include: {
-                    revisions: {
-                        orderBy: {
-                            createdAt: 'desc', // We expect our revisions most-recent-first
+                    include: {
+                        revisions: {
+                            orderBy: {
+                                createdAt: 'desc', // We expect our revisions most-recent-first
+                            },
                         },
                     },
-                },
-            })
+                }
+            )
             return convertToHealthPlanPackageType(submissionResult)
         } catch (updateError) {
             return convertPrismaErrorToStoreError(updateError)

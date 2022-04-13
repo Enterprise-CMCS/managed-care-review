@@ -87,7 +87,7 @@ export async function insertDraftSubmission(
     const buffer = Buffer.from(protobuf)
 
     try {
-        const pkg = await client.stateSubmission.create({
+        const pkg = await client.healthPlanPackageTable.create({
             data: {
                 id: draft.id,
                 stateCode: draft.stateCode,
@@ -95,7 +95,7 @@ export async function insertDraftSubmission(
                     create: {
                         id: uuidv4(),
                         createdAt: new Date(),
-                        submissionFormProto: buffer,
+                        formDataProto: buffer,
                     },
                 },
             },

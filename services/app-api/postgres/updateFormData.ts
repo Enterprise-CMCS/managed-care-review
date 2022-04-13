@@ -11,7 +11,7 @@ import {
 } from './storeError'
 import {
     convertToHealthPlanPackageType,
-    StateSubmissionWithRevisions,
+    HealthPlanPackageWithRevisionsTable,
 } from './submissionWithRevisionsHelpers'
 
 export async function updateRevisionWrapper(
@@ -19,9 +19,9 @@ export async function updateRevisionWrapper(
     submissionID: string,
     revisionID: string,
     proto: Buffer
-): Promise<StateSubmissionWithRevisions | StoreError> {
+): Promise<HealthPlanPackageWithRevisionsTable | StoreError> {
     try {
-        const updateResult = await client.stateSubmission.update({
+        const updateResult = await client.healthPlanPackageTable.update({
             where: {
                 id: submissionID,
             },
@@ -32,7 +32,7 @@ export async function updateRevisionWrapper(
                             id: revisionID,
                         },
                         data: {
-                            submissionFormProto: proto,
+                            formDataProto: proto,
                         },
                     },
                 },

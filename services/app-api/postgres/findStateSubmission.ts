@@ -26,7 +26,7 @@ export async function findStateSubmission(
     if (isStoreError(currentRevisionOrError)) return currentRevisionOrError
     const currentRevision = currentRevisionOrError
 
-    const decodeResult = toDomain(currentRevision.submissionFormProto)
+    const decodeResult = toDomain(currentRevision.formDataProto)
 
     if (decodeResult instanceof Error) {
         console.log('ERROR: decoding protobuf; id: ', id, decodeResult)

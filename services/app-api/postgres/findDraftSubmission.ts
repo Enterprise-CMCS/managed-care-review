@@ -11,15 +11,15 @@ import {
 } from './storeError'
 import {
     getCurrentRevision,
-    StateSubmissionWithRevisions,
+    HealthPlanPackageWithRevisionsTable,
 } from './submissionWithRevisionsHelpers'
 
 export async function findUniqueSubmissionWrapper(
     client: PrismaClient,
     id: string
-): Promise<StateSubmissionWithRevisions | StoreError | undefined> {
+): Promise<HealthPlanPackageWithRevisionsTable | StoreError | undefined> {
     try {
-        const findResult = await client.stateSubmission.findUnique({
+        const findResult = await client.healthPlanPackageTable.findUnique({
             where: {
                 id: id,
             },
@@ -60,7 +60,7 @@ export async function findDraftSubmission(
     if (isStoreError(currentRevisionOrError)) return currentRevisionOrError
     const currentRevision = currentRevisionOrError
 
-    const decodeResult = toDomain(currentRevision.submissionFormProto)
+    const decodeResult = toDomain(currentRevision.formDataProto)
 
     if (decodeResult instanceof Error) {
         console.log('ERROR: decoding protobuf; id: ', draftUUID, decodeResult)

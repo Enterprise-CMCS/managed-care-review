@@ -20,7 +20,7 @@ export async function updateSubmissionWrapper(
     proto: Buffer
 ): Promise<Buffer | StoreError> {
     try {
-        const findResult = await client.stateSubmission.findUnique({
+        const findResult = await client.healthPlanPackageTable.findUnique({
             where: {
                 id: id,
             },
@@ -36,7 +36,7 @@ export async function updateSubmissionWrapper(
 
         try {
             const currentRevision = currentRevisionOrError
-            const updateResult = await client.stateSubmission.update({
+            const updateResult = await client.healthPlanPackageTable.update({
                 where: {
                     id,
                 },
@@ -47,7 +47,7 @@ export async function updateSubmissionWrapper(
                                 id: currentRevision.id,
                             },
                             data: {
-                                submissionFormProto: proto,
+                                formDataProto: proto,
                             },
                         },
                     },
@@ -61,7 +61,7 @@ export async function updateSubmissionWrapper(
                 return updatedRevisionOrError
             } else {
                 const updatedRevision = updatedRevisionOrError
-                return updatedRevision.submissionFormProto
+                return updatedRevision.formDataProto
             }
         } catch (updateError) {
             return convertPrismaErrorToStoreError(updateError)

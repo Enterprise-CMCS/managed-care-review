@@ -26,7 +26,7 @@ export async function insertSubmissionRevision(
     const { unlockInfo, submissionID } = args
 
     try {
-        const submission = await client.stateSubmission.update({
+        const submission = await client.healthPlanPackageTable.update({
             where: {
                 id: submissionID,
             },
@@ -36,7 +36,7 @@ export async function insertSubmissionRevision(
                         {
                             id: uuidv4(),
                             createdAt: new Date(),
-                            submissionFormProto: buffer,
+                            formDataProto: buffer,
                             unlockedAt: unlockInfo.updatedAt,
                             unlockedBy: unlockInfo.updatedBy,
                             unlockedReason: unlockInfo.updatedReason,
