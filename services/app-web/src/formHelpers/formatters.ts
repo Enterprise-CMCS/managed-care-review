@@ -34,7 +34,7 @@ const formatFormDateForDomain = (attribute: string): Date | undefined => {
     if (attribute === '') {
         return undefined
     }
-    return dayjs(attribute).toDate()
+    return dayjs.utc(attribute).toDate()
 }
 
 export {
