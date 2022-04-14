@@ -12,6 +12,7 @@ import {
 import {
     LockedHealthPlanFormDataType,
     CognitoUserType,
+    UnlockedHealthPlanFormDataType,
 } from '../../app-web/src/common-code/domain-models'
 
 type EmailConfiguration = {
@@ -48,7 +49,7 @@ type Emailer = {
         updatedEmailData: UpdatedEmailData
     ) => Promise<void | Error>
     sendUnlockPackageStateEmail: (
-        submission: LockedHealthPlanFormDataType,
+        submission: UnlockedHealthPlanFormDataType,
         updatedEmailData: UpdatedEmailData
     ) => Promise<void | Error>
     sendResubmittedStateEmail: (
@@ -183,7 +184,7 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
             localEmailerLogger(emailData)
         },
         sendUnlockPackageStateEmail: async (
-            submission: LockedHealthPlanFormDataType,
+            submission: UnlockedHealthPlanFormDataType,
             updatedEmailData: UpdatedEmailData
         ) => {
             const emailData = unlockPackageStateEmail(

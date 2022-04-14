@@ -1,5 +1,5 @@
 import { GraphQLError } from 'graphql'
-import UNLOCK_STATE_SUBMISSION from '../../app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
+import UNLOCK_HEALTH_PLAN_PACKAGE from '../../app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
 import { HealthPlanPackage } from '../gen/gqlServer'
 import { todaysDate } from '../testHelpers/dateHelpers'
 import {
@@ -8,10 +8,10 @@ import {
     createAndSubmitTestHealthPlanPackage,
     defaultFloridaProgram,
     fetchTestHealthPlanPackageById,
-    submitTestDraftSubmission,
-    unlockTestDraftSubmission,
+    submitTestHealthPlanPackage,
+    unlockTestHealthPlanPackage,
     updateTestHealthPlanFormData,
-    resubmitTestDraftSubmission,
+    resubmitTestHealthPlanPackage,
 } from '../testHelpers/gqlHelpers'
 import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
 import { mockStoreThatErrors } from '../testHelpers/storeHelpers'
@@ -38,7 +38,7 @@ describe('unlockHealthPlanPackage', () => {
         // Unlock
         await new Promise((resolve) => setTimeout(resolve, 2000))
         const unlockResult = await cmsServer.executeOperation({
-            query: UNLOCK_STATE_SUBMISSION,
+            query: UNLOCK_HEALTH_PLAN_PACKAGE,
             variables: {
                 input: {
                     pkgID: stateSubmission.id,
@@ -108,7 +108,7 @@ describe('unlockHealthPlanPackage', () => {
         // Unlock
         await new Promise((resolve) => setTimeout(resolve, 2000))
         const unlockResult = await cmsServer.executeOperation({
-            query: UNLOCK_STATE_SUBMISSION,
+            query: UNLOCK_HEALTH_PLAN_PACKAGE,
             variables: {
                 input: {
                     pkgID: stateSubmission.id,
@@ -184,31 +184,31 @@ describe('unlockHealthPlanPackage', () => {
             },
         })
 
-        await unlockTestDraftSubmission(
+        await unlockTestHealthPlanPackage(
             cmsServer,
             stateSubmission.id,
             'Super duper good reason.'
         )
 
-        await resubmitTestDraftSubmission(
+        await resubmitTestHealthPlanPackage(
             stateServer,
             stateSubmission.id,
             'Test first resubmission reason'
         )
 
-        await unlockTestDraftSubmission(
+        await unlockTestHealthPlanPackage(
             cmsServer,
             stateSubmission.id,
             'Super duper duper good reason.'
         )
 
-        await resubmitTestDraftSubmission(
+        await resubmitTestHealthPlanPackage(
             stateServer,
             stateSubmission.id,
             'Test second resubmission reason'
         )
 
-        const draft = await unlockTestDraftSubmission(
+        const draft = await unlockTestHealthPlanPackage(
             cmsServer,
             stateSubmission.id,
             'Very super duper good reason.'
@@ -240,7 +240,7 @@ describe('unlockHealthPlanPackage', () => {
         // Unlock
         await new Promise((resolve) => setTimeout(resolve, 2000))
         const unlockResult = await stateServer.executeOperation({
-            query: UNLOCK_STATE_SUBMISSION,
+            query: UNLOCK_HEALTH_PLAN_PACKAGE,
             variables: {
                 input: {
                     pkgID: stateSubmission.id,
@@ -275,7 +275,7 @@ describe('unlockHealthPlanPackage', () => {
 
         // Attempt Unlock Draft
         const unlockDraftResult = await cmsServer.executeOperation({
-            query: UNLOCK_STATE_SUBMISSION,
+            query: UNLOCK_HEALTH_PLAN_PACKAGE,
             variables: {
                 input: {
                     pkgID: stateSubmission.id,
@@ -292,10 +292,10 @@ describe('unlockHealthPlanPackage', () => {
             'Attempted to unlock submission with wrong status'
         )
 
-        await submitTestDraftSubmission(stateServer, stateSubmission.id)
+        await submitTestHealthPlanPackage(stateServer, stateSubmission.id)
 
         // Unlock Submission
-        await unlockTestDraftSubmission(
+        await unlockTestHealthPlanPackage(
             cmsServer,
             stateSubmission.id,
             'Super duper good reason.'
@@ -303,7 +303,7 @@ describe('unlockHealthPlanPackage', () => {
 
         // Attempt Unlock Unlocked
         const unlockUnlockedResult = await cmsServer.executeOperation({
-            query: UNLOCK_STATE_SUBMISSION,
+            query: UNLOCK_HEALTH_PLAN_PACKAGE,
             variables: {
                 input: {
                     pkgID: stateSubmission.id,
@@ -338,7 +338,7 @@ describe('unlockHealthPlanPackage', () => {
         // Unlock
         await new Promise((resolve) => setTimeout(resolve, 2000))
         const unlockResult = await cmsServer.executeOperation({
-            query: UNLOCK_STATE_SUBMISSION,
+            query: UNLOCK_HEALTH_PLAN_PACKAGE,
             variables: {
                 input: {
                     pkgID: 'foo-bar',
@@ -373,7 +373,7 @@ describe('unlockHealthPlanPackage', () => {
         // Unlock
         await new Promise((resolve) => setTimeout(resolve, 2000))
         const unlockResult = await cmsServer.executeOperation({
-            query: UNLOCK_STATE_SUBMISSION,
+            query: UNLOCK_HEALTH_PLAN_PACKAGE,
             variables: {
                 input: {
                     pkgID: 'foo-bar',
@@ -411,7 +411,7 @@ describe('unlockHealthPlanPackage', () => {
 
         // Attempt Unlock Draft
         const unlockedResult = await cmsServer.executeOperation({
-            query: UNLOCK_STATE_SUBMISSION,
+            query: UNLOCK_HEALTH_PLAN_PACKAGE,
             variables: {
                 input: {
                     pkgID: stateSubmission.id,

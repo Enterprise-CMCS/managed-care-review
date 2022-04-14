@@ -1,5 +1,5 @@
 import { CreateHealthPlanPackageInput } from '../gen/gqlServer'
-import CREATE_SUBMISSION_2 from '../../app-graphql/src/mutations/createHealthPlanPackage.graphql'
+import CREATE_HEALTH_PLAN_PACKAGE from '../../app-graphql/src/mutations/createHealthPlanPackage.graphql'
 import { constructTestPostgresServer } from '../testHelpers/gqlHelpers'
 import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
 
@@ -16,7 +16,7 @@ describe('createHealthPlanPackage', () => {
             submissionDescription: 'A real submission',
         }
         const res = await server.executeOperation({
-            query: CREATE_SUBMISSION_2,
+            query: CREATE_HEALTH_PLAN_PACKAGE,
             variables: { input },
         })
 
@@ -46,7 +46,7 @@ describe('createHealthPlanPackage', () => {
             submissionDescription: 'A real submission',
         }
         const res = await server.executeOperation({
-            query: CREATE_SUBMISSION_2,
+            query: CREATE_HEALTH_PLAN_PACKAGE,
             variables: { input },
         })
 
@@ -73,7 +73,7 @@ describe('createHealthPlanPackage', () => {
             submissionDescription: 'A real submission',
         }
         const res = await server.executeOperation({
-            query: CREATE_SUBMISSION_2,
+            query: CREATE_HEALTH_PLAN_PACKAGE,
             variables: { input },
         })
 

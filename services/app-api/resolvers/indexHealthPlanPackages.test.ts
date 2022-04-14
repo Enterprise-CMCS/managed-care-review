@@ -1,10 +1,10 @@
-import INDEX_SUBMISSIONS2 from '../../app-graphql/src/queries/indexHealthPlanPackages.graphql'
+import INDEX_HEALTH_PLAN_PACKAGES from '../../app-graphql/src/queries/indexHealthPlanPackages.graphql'
 import {
     constructTestPostgresServer,
     createTestHealthPlanPackage,
     createAndSubmitTestHealthPlanPackage,
-    unlockTestDraftSubmission,
-    resubmitTestDraftSubmission,
+    unlockTestHealthPlanPackage,
+    resubmitTestHealthPlanPackage,
 } from '../testHelpers/gqlHelpers'
 import { todaysDate } from '../testHelpers/dateHelpers'
 import { HealthPlanPackageEdge, HealthPlanPackage } from '../gen/gqlServer'
@@ -23,7 +23,7 @@ describe('indexHealthPlanPackages', () => {
 
         // then see if we can get that same submission back from the index
         const result = await server.executeOperation({
-            query: INDEX_SUBMISSIONS2,
+            query: INDEX_HEALTH_PLAN_PACKAGES,
         })
 
         expect(result.errors).toBeUndefined()
@@ -80,19 +80,19 @@ describe('indexHealthPlanPackages', () => {
         )
 
         // unlock two
-        await unlockTestDraftSubmission(
+        await unlockTestHealthPlanPackage(
             cmsServer,
             unlockedSubmission.id,
             'Test reason'
         )
-        await unlockTestDraftSubmission(
+        await unlockTestHealthPlanPackage(
             cmsServer,
             relockedSubmission.id,
             'Test reason'
         )
 
         // resubmit one
-        await resubmitTestDraftSubmission(
+        await resubmitTestHealthPlanPackage(
             server,
             relockedSubmission.id,
             'Test first resubmission'
@@ -100,7 +100,7 @@ describe('indexHealthPlanPackages', () => {
 
         // index submissions api request
         const result = await server.executeOperation({
-            query: INDEX_SUBMISSIONS2,
+            query: INDEX_HEALTH_PLAN_PACKAGES,
         })
         const submissionsIndex = result.data?.indexHealthPlanPackages
 
@@ -165,7 +165,7 @@ describe('indexHealthPlanPackages', () => {
         })
 
         const result = await otherUserServer.executeOperation({
-            query: INDEX_SUBMISSIONS2,
+            query: INDEX_HEALTH_PLAN_PACKAGES,
             variables: { input },
         })
 
@@ -200,7 +200,7 @@ describe('indexHealthPlanPackages', () => {
         })
 
         const result = await otherUserServer.executeOperation({
-            query: INDEX_SUBMISSIONS2,
+            query: INDEX_HEALTH_PLAN_PACKAGES,
         })
 
         expect(result.errors).toBeUndefined() // Is this really what we want? I thought this would be 403 unauthorized

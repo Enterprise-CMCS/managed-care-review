@@ -1,12 +1,12 @@
-import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitHealthPlanPackage.graphql'
+import SUBMIT_HEALTH_PLAN_PACKAGE from '../../app-graphql/src/mutations/submitHealthPlanPackage.graphql'
 import {
     constructTestPostgresServer,
     createAndUpdateTestDraftSubmission,
     fetchTestHealthPlanPackageById,
     defaultContext,
     defaultFloridaProgram,
-    unlockTestDraftSubmission,
-    resubmitTestDraftSubmission,
+    unlockTestHealthPlanPackage,
+    resubmitTestHealthPlanPackage,
     createAndSubmitTestHealthPlanPackage,
 } from '../testHelpers/gqlHelpers'
 import { testEmailConfig, testEmailer } from '../testHelpers/emailerHelpers'
@@ -26,7 +26,7 @@ describe('submitHealthPlanPackage', () => {
         // submit
         await new Promise((resolve) => setTimeout(resolve, 2000))
         const submitResult = await server.executeOperation({
-            query: SUBMIT_DRAFT_SUBMISSION,
+            query: SUBMIT_HEALTH_PLAN_PACKAGE,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -92,7 +92,7 @@ describe('submitHealthPlanPackage', () => {
         const draftID = draft.id
 
         const submitResult = await server.executeOperation({
-            query: SUBMIT_DRAFT_SUBMISSION,
+            query: SUBMIT_HEALTH_PLAN_PACKAGE,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -120,7 +120,7 @@ describe('submitHealthPlanPackage', () => {
 
         const draftID = draft.id
         const submitResult = await server.executeOperation({
-            query: SUBMIT_DRAFT_SUBMISSION,
+            query: SUBMIT_HEALTH_PLAN_PACKAGE,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -149,7 +149,7 @@ describe('submitHealthPlanPackage', () => {
 
         const draftID = draft.id
         const submitResult = await server.executeOperation({
-            query: SUBMIT_DRAFT_SUBMISSION,
+            query: SUBMIT_HEALTH_PLAN_PACKAGE,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -177,7 +177,7 @@ describe('submitHealthPlanPackage', () => {
 
         const draftID = draft.id
         const submitResult = await server.executeOperation({
-            query: SUBMIT_DRAFT_SUBMISSION,
+            query: SUBMIT_HEALTH_PLAN_PACKAGE,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -205,7 +205,7 @@ describe('submitHealthPlanPackage', () => {
 
         await new Promise((resolve) => setTimeout(resolve, 2000)) // TODO: why is this here in other tests??
         const submitResult = await server.executeOperation({
-            query: SUBMIT_DRAFT_SUBMISSION,
+            query: SUBMIT_HEALTH_PLAN_PACKAGE,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -229,7 +229,7 @@ describe('submitHealthPlanPackage', () => {
 
         await new Promise((resolve) => setTimeout(resolve, 2000)) // TODO: why is this here in other tests??
         const submitResult = await server.executeOperation({
-            query: SUBMIT_DRAFT_SUBMISSION,
+            query: SUBMIT_HEALTH_PLAN_PACKAGE,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -275,7 +275,7 @@ describe('submitHealthPlanPackage', () => {
 
         await new Promise((resolve) => setTimeout(resolve, 2000)) // TODO: why is this here in other tests??
         const submitResult = await server.executeOperation({
-            query: SUBMIT_DRAFT_SUBMISSION,
+            query: SUBMIT_HEALTH_PLAN_PACKAGE,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -317,7 +317,7 @@ describe('submitHealthPlanPackage', () => {
 
         await new Promise((resolve) => setTimeout(resolve, 2000)) // TODO: why is this here in other tests??
         const submitResult = await server.executeOperation({
-            query: SUBMIT_DRAFT_SUBMISSION,
+            query: SUBMIT_HEALTH_PLAN_PACKAGE,
             variables: {
                 input: {
                     pkgID: draftID,
@@ -371,14 +371,14 @@ describe('submitHealthPlanPackage', () => {
             },
         })
 
-        await unlockTestDraftSubmission(
+        await unlockTestHealthPlanPackage(
             cmsServer,
             stateSubmission.id,
             'Test unlock reason.'
         )
 
         const submitResult = await stateServer.executeOperation({
-            query: SUBMIT_DRAFT_SUBMISSION,
+            query: SUBMIT_HEALTH_PLAN_PACKAGE,
             variables: {
                 input: {
                     pkgID: stateSubmission.id,
@@ -439,13 +439,13 @@ describe('submitHealthPlanPackage', () => {
             },
         })
 
-        await unlockTestDraftSubmission(
+        await unlockTestHealthPlanPackage(
             cmsServer,
             stateSubmission.id,
             'Test unlock reason.'
         )
 
-        const submitResult = await resubmitTestDraftSubmission(
+        const submitResult = await resubmitTestHealthPlanPackage(
             stateServer,
             stateSubmission.id,
             'Test resubmission reason'
@@ -490,7 +490,7 @@ describe('submitHealthPlanPackage', () => {
         const draftID = draft.id
 
         const submitResult = await server.executeOperation({
-            query: SUBMIT_DRAFT_SUBMISSION,
+            query: SUBMIT_HEALTH_PLAN_PACKAGE,
             variables: {
                 input: {
                     pkgID: draftID,

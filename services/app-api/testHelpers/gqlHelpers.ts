@@ -1,7 +1,7 @@
 import { ApolloServer } from 'apollo-server-lambda'
-import CREATE_SUBMISSION_2 from '../../app-graphql/src/mutations/createHealthPlanPackage.graphql'
+import CREATE_HEALTH_PLAN_PACKAGE from '../../app-graphql/src/mutations/createHealthPlanPackage.graphql'
 import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitHealthPlanPackage.graphql'
-import UNLOCK_STATE_SUBMISSION from '../../app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
+import UNLOCK_HEALTH_PLAN_PACKAGE from '../../app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
 import FETCH_HEALTH_PLAN_PACKAGE from '../../app-graphql/src/queries/fetchHealthPlanPackage.graphql'
 import UPDATE_HEALTH_PLAN_FORM_DATA from '../../app-graphql/src/mutations/updateHealthPlanFormData.graphql'
 import typeDefs from '../../app-graphql/src/schema.graphql'
@@ -81,7 +81,7 @@ const createTestHealthPlanPackage = async (
         submissionDescription: 'A created submission',
     }
     const result = await server.executeOperation({
-        query: CREATE_SUBMISSION_2,
+        query: CREATE_HEALTH_PLAN_PACKAGE,
         variables: { input },
     })
     if (result.errors) {
@@ -187,18 +187,18 @@ const createAndUpdateTestDraftSubmission = async (
 
 const createAndSubmitTestHealthPlanPackage = async (server: ApolloServer) => {
     const pkg = await createAndUpdateTestDraftSubmission(server)
-    return await submitTestDraftSubmission(server, pkg.id)
+    return await submitTestHealthPlanPackage(server, pkg.id)
 }
 
-const submitTestDraftSubmission = async (
+const submitTestHealthPlanPackage = async (
     server: ApolloServer,
-    submissionID: string
+    pkgID: string
 ) => {
     const updateResult = await server.executeOperation({
         query: SUBMIT_DRAFT_SUBMISSION,
         variables: {
             input: {
-                pkgID: submissionID,
+                pkgID,
             },
         },
     })
@@ -206,27 +206,27 @@ const submitTestDraftSubmission = async (
     if (updateResult.errors) {
         console.log('errors', updateResult.errors)
         throw new Error(
-            `submitTestDraftSubmission mutation failed with errors ${updateResult.errors}`
+            `submitTestHealthPlanPackage mutation failed with errors ${updateResult.errors}`
         )
     }
 
     if (updateResult.data === undefined || updateResult.data === null) {
-        throw new Error('submitTestDraftSubmission returned nothing')
+        throw new Error('submitTestHealthPlanPackage returned nothing')
     }
 
     return updateResult.data.submitHealthPlanPackage.pkg
 }
 
-const resubmitTestDraftSubmission = async (
+const resubmitTestHealthPlanPackage = async (
     server: ApolloServer,
-    submissionID: string,
+    pkgID: string,
     submittedReason: string
 ) => {
     const updateResult = await server.executeOperation({
         query: SUBMIT_DRAFT_SUBMISSION,
         variables: {
             input: {
-                pkgID: submissionID,
+                pkgID,
                 submittedReason,
             },
         },
@@ -246,13 +246,13 @@ const resubmitTestDraftSubmission = async (
     return updateResult.data.submitHealthPlanPackage.pkg
 }
 
-const unlockTestDraftSubmission = async (
+const unlockTestHealthPlanPackage = async (
     server: ApolloServer,
     submissionID: string,
     unlockedReason: string
 ): Promise<HealthPlanPackage> => {
     const updateResult = await server.executeOperation({
-        query: UNLOCK_STATE_SUBMISSION,
+        query: UNLOCK_HEALTH_PLAN_PACKAGE,
         variables: {
             input: {
                 pkgID: submissionID,
@@ -304,9 +304,9 @@ export {
     createAndSubmitTestHealthPlanPackage,
     updateTestHealthPlanFormData,
     fetchTestHealthPlanPackageById,
-    submitTestDraftSubmission,
-    unlockTestDraftSubmission,
-    resubmitTestDraftSubmission,
+    submitTestHealthPlanPackage,
+    unlockTestHealthPlanPackage,
+    resubmitTestHealthPlanPackage,
     defaultContext,
     defaultFloridaProgram,
 }

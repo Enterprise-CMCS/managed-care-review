@@ -3,6 +3,7 @@ import {
     CognitoUserType,
     LockedHealthPlanFormDataType,
     SubmissionType,
+    UnlockedHealthPlanFormDataType,
 } from '../../app-web/src/common-code/domain-models'
 import { formatCalendarDate } from '../../app-web/src/dateHelpers'
 import { EmailConfiguration, EmailData } from './'
@@ -219,7 +220,7 @@ const unlockPackageCMSEmail = (
 }
 
 const unlockPackageStateEmail = (
-    submission: LockedHealthPlanFormDataType,
+    submission: UnlockedHealthPlanFormDataType,
     unlockData: UpdatedEmailData,
     config: EmailConfiguration
 ): EmailData => {

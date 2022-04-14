@@ -1,11 +1,41 @@
 import { PrismaClient } from '@prisma/client'
 import { HealthPlanPackageType } from '../../app-web/src/common-code/domain-models'
-import { findAllSubmissionWrapper } from './findAllSubmissions'
-import { isStoreError, StoreError } from './storeError'
+import {
+    convertPrismaErrorToStoreError,
+    isStoreError,
+    StoreError,
+} from './storeError'
 import {
     convertToHealthPlanPackageType,
     getCurrentRevision,
+    HealthPlanPackageWithRevisionsTable,
 } from './submissionWithRevisionsHelpers'
+
+export async function findAllSubmissionWrapper(
+    client: PrismaClient,
+    stateCode: string
+): Promise<HealthPlanPackageWithRevisionsTable[] | StoreError> {
+    try {
+        const result = await client.healthPlanPackageTable.findMany({
+            where: {
+                stateCode: {
+                    equals: stateCode,
+                },
+            },
+            include: {
+                revisions: {
+                    orderBy: {
+                        createdAt: 'desc', // We expect our revisions most-recent-first
+                    },
+                },
+            },
+        })
+        return result
+    } catch (e: unknown) {
+        console.log('failed to findAll', e)
+        return convertPrismaErrorToStoreError(e)
+    }
+}
 
 export async function findAllSubmissionsWithRevisions(
     client: PrismaClient,
