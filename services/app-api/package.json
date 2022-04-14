@@ -9,7 +9,8 @@
         "test": "jest --watch",
         "test:once": "jest --runInBand --ci",
         "lint": "tsc --noEmit && eslint . --max-warnings=0",
-        "clean": "rm -rf node_modules && yarn cache clean"
+        "clean": "rm -rf node_modules && yarn cache clean",
+        "generate-code": "yarn prisma generate"
     },
     "lint-staged": {
         "*.{js,ts}": [
