@@ -55,7 +55,6 @@ module.exports = {
                         options: {
                             projectReferences: true,
                             configFile: tsConfigPath,
-                            experimentalWatchApi: true,
                         },
                     },
                 ],
