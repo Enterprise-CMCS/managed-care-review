@@ -70,6 +70,12 @@ module.exports = {
         new CopyWebpackPlugin({
             patterns: [
                 {
+                    from: path.resolve(
+                        __dirname,
+                        '../../node_modules/.prisma/client/schema.prisma'
+                    ),
+                },
+                {
                     from: path.resolve(__dirname, 'collector.yml'),
                     transform(content) {
                         return content
