@@ -3,8 +3,8 @@ import { base64ToDomain } from '../../app-web/src/common-code/proto/stateSubmiss
 import { todaysDate } from '../testHelpers/dateHelpers'
 import {
     constructTestPostgresServer,
-    createTestDraftSubmission,
-    createTestStateSubmission,
+    createTestHealthPlanPackage,
+    createAndSubmitTestHealthPlanPackage,
     unlockTestDraftSubmission,
     resubmitTestDraftSubmission,
 } from '../testHelpers/gqlHelpers'
@@ -14,7 +14,9 @@ describe('fetchHealthPlanPackage', () => {
         const server = await constructTestPostgresServer()
 
         // First, create a new submission
-        const stateSubmission = await createTestStateSubmission(server)
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            server
+        )
 
         const createdID = stateSubmission.id
 
@@ -89,7 +91,9 @@ describe('fetchHealthPlanPackage', () => {
         })
 
         // First, create a new submission
-        const stateSubmission = await createTestStateSubmission(server)
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            server
+        )
         const createdID = stateSubmission.id
 
         // unlock it
@@ -130,7 +134,9 @@ describe('fetchHealthPlanPackage', () => {
         })
 
         // First, create a new submission
-        const stateSubmission = await createTestStateSubmission(server)
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            server
+        )
         const createdID = stateSubmission.id
 
         // DRAFT
@@ -199,7 +205,9 @@ describe('fetchHealthPlanPackage', () => {
         const server = await constructTestPostgresServer()
 
         // First, create a new submission
-        const stateSubmission = await createTestStateSubmission(server)
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            server
+        )
 
         const createdID = stateSubmission.id
 
@@ -235,7 +243,9 @@ describe('fetchHealthPlanPackage', () => {
         const server = await constructTestPostgresServer()
 
         // First, create a new submission
-        const stateSubmission = await createTestStateSubmission(server)
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            server
+        )
 
         const createdID = stateSubmission.id
 
@@ -287,7 +297,7 @@ describe('fetchHealthPlanPackage', () => {
         })
 
         // First, create a new submission
-        const stateSubmission = await createTestDraftSubmission(server)
+        const stateSubmission = await createTestHealthPlanPackage(server)
 
         const createdID = stateSubmission.id
 
@@ -318,7 +328,9 @@ describe('fetchHealthPlanPackage', () => {
         const stateServer = await constructTestPostgresServer()
 
         // First, create a new submitted submission
-        const stateSubmission = await createTestStateSubmission(stateServer)
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            stateServer
+        )
 
         const cmsServer = await constructTestPostgresServer({
             context: {

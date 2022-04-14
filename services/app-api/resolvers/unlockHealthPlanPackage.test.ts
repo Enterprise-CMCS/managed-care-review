@@ -5,14 +5,15 @@ import { todaysDate } from '../testHelpers/dateHelpers'
 import {
     constructTestPostgresServer,
     createAndUpdateTestDraftSubmission,
-    createTestStateSubmission,
+    createAndSubmitTestHealthPlanPackage,
     defaultFloridaProgram,
-    fetchTestDraftSubmissionById,
+    fetchTestHealthPlanPackageById,
     submitTestDraftSubmission,
     unlockTestDraftSubmission,
-    updateTestDraftSubmission,
+    updateTestHealthPlanFormData,
     resubmitTestDraftSubmission,
 } from '../testHelpers/gqlHelpers'
+import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
 import { mockStoreThatErrors } from '../testHelpers/storeHelpers'
 
 describe('unlockHealthPlanPackage', () => {
@@ -20,7 +21,9 @@ describe('unlockHealthPlanPackage', () => {
         const stateServer = await constructTestPostgresServer()
 
         // First, create a new submitted submission
-        const stateSubmission = await createTestStateSubmission(stateServer)
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            stateServer
+        )
 
         const cmsServer = await constructTestPostgresServer({
             context: {
@@ -88,7 +91,9 @@ describe('unlockHealthPlanPackage', () => {
         const stateServer = await constructTestPostgresServer()
 
         // First, create a new submitted submission
-        const stateSubmission = await createTestStateSubmission(stateServer)
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            stateServer
+        )
 
         const cmsServer = await constructTestPostgresServer({
             context: {
@@ -132,40 +137,42 @@ describe('unlockHealthPlanPackage', () => {
             unlockedSub.revisions[0].node.unlockInfo?.updatedAt.toISOString()
         ).toContain('Z')
 
+        const formData = latestFormData(unlockedSub)
+
         // after unlock we should be able to update that draft submission and get the results
-        const updates = {
-            programIDs: [defaultFloridaProgram().id],
-            submissionType: 'CONTRACT_AND_RATES' as const,
-            submissionDescription: 'UPDATED_AFTER_UNLOCK',
-            documents: [],
-            contractType: 'BASE' as const,
-            contractDocuments: [],
-            managedCareEntities: ['MCO'],
-            federalAuthorities: ['VOLUNTARY' as const],
-            rateDocuments: [],
-            stateContacts: [],
-            actuaryContacts: [],
-        }
+        formData.programIDs = [defaultFloridaProgram().id]
+        formData.submissionType = 'CONTRACT_AND_RATES' as const
+        formData.submissionDescription = 'UPDATED_AFTER_UNLOCK'
+        formData.documents = []
+        formData.contractType = 'BASE' as const
+        formData.contractDocuments = []
+        formData.managedCareEntities = ['MCO']
+        formData.federalAuthorities = ['VOLUNTARY' as const]
+        formData.rateDocuments = []
+        formData.stateContacts = []
+        formData.actuaryContacts = []
 
-        await updateTestDraftSubmission(
-            stateServer,
-            stateSubmission.id,
-            updates
-        )
+        await updateTestHealthPlanFormData(stateServer, formData)
 
-        const refetched = await fetchTestDraftSubmissionById(
+        const refetched = await fetchTestHealthPlanPackageById(
             stateServer,
             stateSubmission.id
         )
 
-        expect(refetched.submissionDescription).toBe('UPDATED_AFTER_UNLOCK')
+        const refetchedFormData = latestFormData(refetched)
+
+        expect(refetchedFormData.submissionDescription).toBe(
+            'UPDATED_AFTER_UNLOCK'
+        )
     })
 
     it('can be unlocked repeatedly', async () => {
         const stateServer = await constructTestPostgresServer()
 
         // First, create a new submitted submission
-        const stateSubmission = await createTestStateSubmission(stateServer)
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            stateServer
+        )
 
         const cmsServer = await constructTestPostgresServer({
             context: {
@@ -226,7 +233,9 @@ describe('unlockHealthPlanPackage', () => {
         const stateServer = await constructTestPostgresServer()
 
         // First, create a new submitted submission
-        const stateSubmission = await createTestStateSubmission(stateServer)
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            stateServer
+        )
 
         // Unlock
         await new Promise((resolve) => setTimeout(resolve, 2000))
@@ -324,7 +333,7 @@ describe('unlockHealthPlanPackage', () => {
         })
 
         // First, create a new submitted submission
-        // const stateSubmission = await createTestStateSubmission(stateServer)
+        // const stateSubmission = await createAndSubmitTestHealthPlanPackage(stateServer)
 
         // Unlock
         await new Promise((resolve) => setTimeout(resolve, 2000))
@@ -386,7 +395,9 @@ describe('unlockHealthPlanPackage', () => {
         const stateServer = await constructTestPostgresServer()
 
         // First, create a new submitted submission
-        const stateSubmission = await createTestStateSubmission(stateServer)
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            stateServer
+        )
 
         const cmsServer = await constructTestPostgresServer({
             context: {

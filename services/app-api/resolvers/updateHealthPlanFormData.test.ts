@@ -1,6 +1,6 @@
 import {
     constructTestPostgresServer,
-    createTestStateSubmission,
+    createAndSubmitTestHealthPlanPackage,
     createTestHealthPlanPackage,
 } from '../testHelpers/gqlHelpers'
 import UPDATE_HEALTH_PLAN_FORM_DATA from '../../app-graphql/src/mutations/updateHealthPlanFormData.graphql'
@@ -200,7 +200,9 @@ describe('updateHealthPlanFormData', () => {
 
     it('errors if the Package is already submitted', async () => {
         const server = await constructTestPostgresServer()
-        const createdSubmitted = await createTestStateSubmission(server)
+        const createdSubmitted = await createAndSubmitTestHealthPlanPackage(
+            server
+        )
 
         const draftSubmission = basicHealthPlanFormData()
         const b64 = domainToBase64(draftSubmission)

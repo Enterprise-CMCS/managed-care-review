@@ -2,23 +2,25 @@ import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitHealt
 import {
     constructTestPostgresServer,
     createAndUpdateTestDraftSubmission,
-    fetchTestStateSubmissionById,
+    fetchTestHealthPlanPackageById,
     defaultContext,
     defaultFloridaProgram,
     unlockTestDraftSubmission,
     resubmitTestDraftSubmission,
-    createTestStateSubmission,
+    createAndSubmitTestHealthPlanPackage,
 } from '../testHelpers/gqlHelpers'
 import { testEmailConfig, testEmailer } from '../testHelpers/emailerHelpers'
 import { base64ToDomain } from '../../app-web/src/common-code/proto/stateSubmission'
 import { submissionName } from '../../app-web/src/common-code/domain-models'
+import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
 
 describe('submitHealthPlanPackage', () => {
     it('returns a StateSubmission if complete', async () => {
         const server = await constructTestPostgresServer()
 
         // setup
-        const draft = await createAndUpdateTestDraftSubmission(server, {})
+        const initialPkg = await createAndUpdateTestDraftSubmission(server, {})
+        const draft = latestFormData(initialPkg)
         const draftID = draft.id
 
         // submit
@@ -36,17 +38,16 @@ describe('submitHealthPlanPackage', () => {
         const createdID = submitResult?.data?.submitHealthPlanPackage.pkg.id
 
         // test result
-        const resultDraft = await fetchTestStateSubmissionById(
-            server,
-            createdID
-        )
+        const pkg = await fetchTestHealthPlanPackageById(server, createdID)
+
+        const resultDraft = latestFormData(pkg)
 
         // The submission fields should still be set
         expect(resultDraft.id).toEqual(createdID)
         expect(resultDraft.submissionType).toBe('CONTRACT_AND_RATES')
         expect(resultDraft.programIDs).toEqual([defaultFloridaProgram().id])
         // check that the stateNumber is being returned the same
-        expect(resultDraft.name.split('-')[2]).toEqual(draft.name.split('-')[2])
+        expect(resultDraft.stateNumber).toEqual(draft.stateNumber)
         expect(resultDraft.submissionDescription).toBe('An updated submission')
         expect(resultDraft.documents).toEqual(draft.documents)
 
@@ -63,10 +64,15 @@ describe('submitHealthPlanPackage', () => {
         expect(resultDraft.contractDocuments).toEqual(draft.contractDocuments)
 
         expect(resultDraft.federalAuthorities).toEqual(draft.federalAuthorities)
+
+        if (resultDraft.status == 'DRAFT') {
+            throw new Error('Not a locked submission')
+        }
+
         // submittedAt should be set to today's date
         const today = new Date()
         const expectedDate = today.toISOString().split('T')[0]
-        expect(resultDraft.submittedAt).toEqual(expectedDate)
+        expect(pkg.intiallySubmittedAt).toEqual(expectedDate)
 
         // UpdatedAt should be after the former updatedAt
         const resultUpdated = new Date(resultDraft.updatedAt)
@@ -164,9 +170,9 @@ describe('submitHealthPlanPackage', () => {
 
         const draft = await createAndUpdateTestDraftSubmission(server, {
             submissionType: 'CONTRACT_ONLY',
-            rateDateStart: '2025-05-01',
-            rateDateEnd: '2026-04-30',
-            rateDateCertified: '2025-03-15',
+            rateDateStart: new Date(Date.UTC(2025, 5, 1)),
+            rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
+            rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
         })
 
         const draftID = draft.id
@@ -352,7 +358,9 @@ describe('submitHealthPlanPackage', () => {
             emailer: mockEmailer,
         })
 
-        const stateSubmission = await createTestStateSubmission(stateServer)
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            stateServer
+        )
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: {
@@ -417,7 +425,9 @@ describe('submitHealthPlanPackage', () => {
 
         const currentUser = defaultContext().user
 
-        const stateSubmission = await createTestStateSubmission(stateServer)
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            stateServer
+        )
 
         const cmsServer = await constructTestPostgresServer({
             context: {
@@ -473,9 +483,9 @@ describe('submitHealthPlanPackage', () => {
         })
         const draft = await createAndUpdateTestDraftSubmission(server, {
             submissionType: 'CONTRACT_ONLY',
-            rateDateStart: '2025-05-01',
-            rateDateEnd: '2026-04-30',
-            rateDateCertified: '2025-03-15',
+            rateDateStart: new Date(Date.UTC(2025, 5, 1)),
+            rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
+            rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
         })
         const draftID = draft.id
 

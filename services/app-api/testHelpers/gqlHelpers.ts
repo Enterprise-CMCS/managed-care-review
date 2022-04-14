@@ -1,27 +1,26 @@
 import { ApolloServer } from 'apollo-server-lambda'
-import CREATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/createDraftSubmission.graphql'
 import CREATE_SUBMISSION_2 from '../../app-graphql/src/mutations/createHealthPlanPackage.graphql'
 import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitHealthPlanPackage.graphql'
 import UNLOCK_STATE_SUBMISSION from '../../app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
-import UPDATE_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/updateDraftSubmission.graphql'
-import FETCH_DRAFT_SUBMISSION from '../../app-graphql/src/queries/fetchDraftSubmission.graphql'
-import FETCH_STATE_SUBMISSION from '../../app-graphql/src/queries/fetchStateSubmission.graphql'
+import FETCH_HEALTH_PLAN_PACKAGE from '../../app-graphql/src/queries/fetchHealthPlanPackage.graphql'
+import UPDATE_HEALTH_PLAN_FORM_DATA from '../../app-graphql/src/mutations/updateHealthPlanFormData.graphql'
 import typeDefs from '../../app-graphql/src/schema.graphql'
-import { ProgramT } from '../../app-web/src/common-code/domain-models'
+import {
+    HealthPlanFormDataType,
+    ProgramT,
+    UnlockedHealthPlanFormDataType,
+} from '../../app-web/src/common-code/domain-models'
 import { Emailer, newLocalEmailer } from '../emailer'
 import {
-    CreateDraftSubmissionInput,
     CreateHealthPlanPackageInput,
-    DraftSubmission,
-    DraftSubmissionUpdates,
-    StateSubmission,
     HealthPlanPackage,
-    UpdateDraftSubmissionInput,
 } from '../gen/gqlServer'
 import { Context } from '../handlers/apollo_gql'
 import { NewPostgresStore, Store } from '../postgres'
 import { configureResolvers } from '../resolvers'
+import { latestFormData } from './healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from './storeHelpers'
+import { domainToBase64 } from '../../app-web/src/common-code/proto/stateSubmission'
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
@@ -73,31 +72,6 @@ const constructTestEmailer = (): Emailer => {
     return newLocalEmailer(config)
 }
 
-const createTestDraftSubmission = async (
-    server: ApolloServer
-): Promise<DraftSubmission> => {
-    const input: CreateDraftSubmissionInput = {
-        programIDs: [defaultFloridaProgram().id],
-        submissionType: 'CONTRACT_ONLY' as const,
-        submissionDescription: 'A created submission',
-    }
-    const result = await server.executeOperation({
-        query: CREATE_DRAFT_SUBMISSION,
-        variables: { input },
-    })
-    if (result.errors) {
-        throw new Error(
-            `createTestDraftSubmission mutation failed with errors ${result.errors}`
-        )
-    }
-
-    if (!result.data) {
-        throw new Error('createTestDraftSubmission returned nothing')
-    }
-
-    return result.data.createDraftSubmission.draftSubmission
-}
-
 const createTestHealthPlanPackage = async (
     server: ApolloServer
 ): Promise<HealthPlanPackage> => {
@@ -117,25 +91,24 @@ const createTestHealthPlanPackage = async (
     }
 
     if (!result.data) {
-        throw new Error('createTestDraftSubmission returned nothing')
+        throw new Error('CreateHealthPlanPackage returned nothing')
     }
-
-    console.log('GOT BACK DA', result.data)
 
     return result.data.createHealthPlanPackage.pkg
 }
 
-const updateTestDraftSubmission = async (
+const updateTestHealthPlanFormData = async (
     server: ApolloServer,
-    id: string,
-    updates: DraftSubmissionUpdates
-): Promise<DraftSubmission> => {
+    updatedFormData: HealthPlanFormDataType
+): Promise<HealthPlanPackage> => {
+    const updatedB64 = domainToBase64(updatedFormData)
+
     const updateResult = await server.executeOperation({
-        query: UPDATE_DRAFT_SUBMISSION,
+        query: UPDATE_HEALTH_PLAN_FORM_DATA,
         variables: {
             input: {
-                submissionID: id,
-                draftSubmissionUpdates: updates,
+                pkgID: updatedFormData.id,
+                healthPlanFormData: updatedB64,
             },
         },
     })
@@ -143,85 +116,78 @@ const updateTestDraftSubmission = async (
     if (updateResult.errors) {
         console.log('errors', updateResult.errors)
         throw new Error(
-            `updateTestDraftSubmission mutation failed with errors ${updateResult.errors}`
+            `updateTestHealthPlanFormData mutation failed with errors ${updateResult.errors}`
         )
     }
 
     if (!updateResult.data) {
-        throw new Error('updateTestDraftSubmission returned nothing')
+        throw new Error('updateTestHealthPlanFormData returned nothing')
     }
 
-    return updateResult.data.updateDraftSubmission.draftSubmission
+    return updateResult.data.updateHealthPlanFormData.pkg
 }
 
 const createAndUpdateTestDraftSubmission = async (
     server: ApolloServer,
-    partialDraftSubmissionUpdates?: Partial<
-        UpdateDraftSubmissionInput['draftSubmissionUpdates']
-    >
-): Promise<DraftSubmission> => {
-    const draft = await createTestDraftSubmission(server)
-    const startDate = '2025-05-01'
-    const endDate = '2026-04-30'
-    const dateCertified = '2025-03-15'
+    partialDraftSubmissionUpdates?: Partial<UnlockedHealthPlanFormDataType>
+): Promise<HealthPlanPackage> => {
+    const pkg = await createTestHealthPlanPackage(server)
+    const draft = latestFormData(pkg)
 
-    const updates = {
-        programIDs: [defaultFloridaProgram().id],
-        submissionType: 'CONTRACT_AND_RATES' as const,
-        submissionDescription: 'An updated submission',
-        documents: [],
+    ;(draft.submissionType = 'CONTRACT_AND_RATES' as const),
+        (draft.submissionDescription = 'An updated submission')
+    draft.stateContacts = [
+        {
+            name: 'test name',
+            titleRole: 'test title',
+            email: 'email@test.com',
+        },
+    ]
+    draft.actuaryContacts = [
+        {
+            name: 'test name',
+            titleRole: 'test title',
+            email: 'email@test.com',
+            actuarialFirm: 'MERCER' as const,
+            actuarialFirmOther: '',
+        },
+    ]
+    ;(draft.actuaryCommunicationPreference = 'OACT_TO_ACTUARY' as const),
+        (draft.contractType = 'BASE' as const)
+    draft.contractExecutionStatus = 'EXECUTED' as const
+    draft.contractDateStart = new Date(Date.UTC(2025, 5, 1))
+    draft.contractDateEnd = new Date(Date.UTC(2026, 4, 30))
+    draft.contractDocuments = [
+        {
+            name: 'contractDocument.pdf',
+            s3URL: 'fakeS3URL',
+            documentCategories: ['CONTRACT' as const],
+        },
+    ]
+    draft.managedCareEntities = ['MCO']
+    draft.federalAuthorities = ['STATE_PLAN' as const]
+    draft.rateType = 'NEW' as const
+    draft.rateDateStart = new Date(Date.UTC(2025, 5, 1))
+    draft.rateDateEnd = new Date(Date.UTC(2026, 4, 30))
+    draft.rateDateCertified = new Date(Date.UTC(2025, 3, 15))
+    draft.rateDocuments = [
+        {
+            name: 'rateDocument.pdf',
+            s3URL: 'fakeS3URL',
+            documentCategories: ['RATES' as const],
+        },
+    ]
 
-        stateContacts: [
-            {
-                name: 'test name',
-                titleRole: 'test title',
-                email: 'email@test.com',
-            },
-        ],
-        actuaryContacts: [
-            {
-                name: 'test name',
-                titleRole: 'test title',
-                email: 'email@test.com',
-                actuarialFirm: 'MERCER' as const,
-                actuarialFirmOther: '',
-            },
-        ],
-        actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
-        contractType: 'BASE' as const,
-        contractExecutionStatus: 'EXECUTED' as const,
-        contractDateStart: startDate,
-        contractDateEnd: endDate,
-        contractDocuments: [
-            {
-                name: 'contractDocument.pdf',
-                s3URL: 'fakeS3URL',
-                documentCategories: ['CONTRACT' as const],
-            },
-        ],
-        managedCareEntities: ['MCO'],
-        federalAuthorities: ['STATE_PLAN' as const],
-        rateType: 'NEW' as const,
-        rateDateStart: startDate,
-        rateDateEnd: endDate,
-        rateDateCertified: dateCertified,
-        rateDocuments: [
-            {
-                name: 'rateDocument.pdf',
-                s3URL: 'fakeS3URL',
-                documentCategories: ['RATES' as const],
-            },
-        ],
-        ...partialDraftSubmissionUpdates,
-    }
+    Object.assign(draft, partialDraftSubmissionUpdates)
 
-    const updatedDraft = await updateTestDraftSubmission(
-        server,
-        draft.id,
-        updates
-    )
+    const updatedDraft = await updateTestHealthPlanFormData(server, draft)
 
     return updatedDraft
+}
+
+const createAndSubmitTestHealthPlanPackage = async (server: ApolloServer) => {
+    const pkg = await createAndUpdateTestDraftSubmission(server)
+    return await submitTestDraftSubmission(server, pkg.id)
 }
 
 const submitTestDraftSubmission = async (
@@ -240,12 +206,12 @@ const submitTestDraftSubmission = async (
     if (updateResult.errors) {
         console.log('errors', updateResult.errors)
         throw new Error(
-            `updateTestDraftSubmission mutation failed with errors ${updateResult.errors}`
+            `submitTestDraftSubmission mutation failed with errors ${updateResult.errors}`
         )
     }
 
     if (updateResult.data === undefined || updateResult.data === null) {
-        throw new Error('updateTestDraftSubmission returned nothing')
+        throw new Error('submitTestDraftSubmission returned nothing')
     }
 
     return updateResult.data.submitHealthPlanPackage.pkg
@@ -269,12 +235,12 @@ const resubmitTestDraftSubmission = async (
     if (updateResult.errors) {
         console.log('errors', updateResult.errors)
         throw new Error(
-            `updateTestDraftSubmission mutation failed with errors ${updateResult.errors}`
+            `resubmitTestDraftSubmission mutation failed with errors ${updateResult.errors}`
         )
     }
 
     if (updateResult.data === undefined || updateResult.data === null) {
-        throw new Error('updateTestDraftSubmission returned nothing')
+        throw new Error('resubmitTestDraftSubmission returned nothing')
     }
 
     return updateResult.data.submitHealthPlanPackage.pkg
@@ -298,83 +264,49 @@ const unlockTestDraftSubmission = async (
     if (updateResult.errors) {
         console.log('errors', updateResult.errors)
         throw new Error(
-            `updateTestDraftSubmission mutation failed with errors ${updateResult.errors}`
+            `unlockTestDraftSubmission mutation failed with errors ${updateResult.errors}`
         )
     }
 
     if (updateResult.data === undefined || updateResult.data === null) {
-        throw new Error('updateTestDraftSubmission returned nothing')
+        throw new Error('unlockTestDraftSubmission returned nothing')
     }
 
     return updateResult.data.unlockHealthPlanPackage.pkg
 }
 
-const createTestStateSubmission = async (
-    server: ApolloServer
-): Promise<HealthPlanPackage> => {
-    const draft = await createAndUpdateTestDraftSubmission(server)
-
-    const updatedSubmission = await submitTestDraftSubmission(server, draft.id)
-
-    return updatedSubmission
-}
-
-const fetchTestDraftSubmissionById = async (
+const fetchTestHealthPlanPackageById = async (
     server: ApolloServer,
-    submissionID: string
-): Promise<DraftSubmission> => {
-    const input = { submissionID }
+    pkgID: string
+): Promise<HealthPlanPackage> => {
+    const input = { pkgID }
     const result = await server.executeOperation({
-        query: FETCH_DRAFT_SUBMISSION,
+        query: FETCH_HEALTH_PLAN_PACKAGE,
         variables: { input },
     })
 
     if (result.errors)
         throw new Error(
-            `fetchTestDraftSubmission query failed with errors ${result.errors}`
+            `fetchTestHealthPlanPackageById query failed with errors ${result.errors}`
         )
 
     if (!result.data) {
-        throw new Error('fetchTestDraftSubmission returned nothing')
+        throw new Error('fetchTestHealthPlanPackageById returned nothing')
     }
 
-    return result.data.fetchDraftSubmission.draftSubmission
-}
-
-const fetchTestStateSubmissionById = async (
-    server: ApolloServer,
-    submissionID: string
-): Promise<StateSubmission> => {
-    const input = { submissionID }
-    const result = await server.executeOperation({
-        query: FETCH_STATE_SUBMISSION,
-        variables: { input },
-    })
-
-    if (result.errors) {
-        console.log('err fetching state submission: ', result.errors)
-        throw new Error('fetchTestStateSubmissionById query failed with errors')
-    }
-
-    if (!result.data) {
-        throw new Error('fetchTestStateSubmissionById returned nothing')
-    }
-
-    return result.data.fetchStateSubmission.submission
+    return result.data.fetchHealthPlanPackage.pkg
 }
 
 export {
     constructTestPostgresServer,
-    createTestDraftSubmission,
-    createTestStateSubmission,
     createTestHealthPlanPackage,
-    updateTestDraftSubmission,
     createAndUpdateTestDraftSubmission,
-    fetchTestDraftSubmissionById,
+    createAndSubmitTestHealthPlanPackage,
+    updateTestHealthPlanFormData,
+    fetchTestHealthPlanPackageById,
     submitTestDraftSubmission,
     unlockTestDraftSubmission,
-    fetchTestStateSubmissionById,
+    resubmitTestDraftSubmission,
     defaultContext,
     defaultFloridaProgram,
-    resubmitTestDraftSubmission,
 }
