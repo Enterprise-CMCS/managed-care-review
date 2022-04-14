@@ -26,12 +26,9 @@ module.exports = {
         hints: false,
     },
     externals: [
-        nodeExternals({
-            allowlist: ['@prisma/client'],
-        }),
+        nodeExternals(),
         nodeExternals({
             modulesDir: path.resolve(__dirname, '../../node_modules'),
-            allowlist: ['@prisma/client'],
         }),
         'aws-sdk',
     ],
@@ -73,15 +70,6 @@ module.exports = {
     plugins: [
         new CopyWebpackPlugin({
             patterns: [
-                {
-                    from: path.resolve(
-                        __dirname,
-                        '../../node_modules/.prisma/client/schema.prisma'
-                    ),
-                },
-                {
-                    from: path.resolve(__dirname, 'prisma'),
-                },
                 {
                     from: path.resolve(__dirname, 'collector.yml'),
                     transform(content) {
