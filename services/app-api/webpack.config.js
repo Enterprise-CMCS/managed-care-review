@@ -31,6 +31,7 @@ module.exports = {
             modulesDir: path.resolve(__dirname, '../../node_modules'),
         }),
         'aws-sdk',
+        '@prisma/client',
     ],
     devtool: 'source-map',
     resolve: {
