@@ -45,7 +45,7 @@ custom:
     excludeRegex: 'darwin|debian'
     packagerOptions:
       scripts:
-        - prisma generate
+        - yarn prisma generate
   serverlessTerminationProtection:
     stages:
       - dev
