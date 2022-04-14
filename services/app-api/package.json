@@ -74,6 +74,7 @@
         "serverless-idempotency-helper": "CMSgov/serverless-idempotency-helper",
         "serverless-offline": "^8.0.0",
         "serverless-online": "CMSgov/serverless-online",
+        "serverless-plugin-monorepo": "^0.11.0",
         "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",
         "serverless-stack-termination-protection": "^1.0.4",
         "serverless-webpack": "^5.7.0",
@@ -82,7 +83,7 @@
         "ts-loader": "~8.3.0",
         "tsconfig-paths-webpack-plugin": "^3.5.1",
         "typescript": "4.5.3",
-        "webpack-node-externals": "^3.0.0",
-        "webpack": "^5.72.0"
+        "webpack": "^5.72.0",
+        "webpack-node-externals": "^3.0.0"
     }
 }
