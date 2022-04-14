@@ -15,7 +15,7 @@ export type InsertSubmissionRevisionArgsType = {
     draft: UnlockedHealthPlanFormDataType
 }
 
-export async function insertSubmissionRevision(
+export async function insertHealthPlanRevision(
     client: PrismaClient,
     args: InsertSubmissionRevisionArgsType
 ): Promise<HealthPlanPackageType | StoreError> {

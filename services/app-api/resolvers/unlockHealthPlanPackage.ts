@@ -59,7 +59,7 @@ export function unlockHealthPlanPackageResolver(
         }
 
         // fetch from the store
-        const result = await store.findSubmissionWithRevisions(pkgID)
+        const result = await store.findHealthPlanPackage(pkgID)
 
         if (isStoreError(result)) {
             const errMessage = `Issue finding a state submission of type ${result.code}. Message: ${result.message}`
@@ -113,7 +113,7 @@ export function unlockHealthPlanPackageResolver(
             updatedReason: unlockedReason,
         }
 
-        const revisionResult = await store.insertNewRevision(
+        const revisionResult = await store.insertHealthPlanRevision(
             pkgID,
             unlockInfo,
             draft

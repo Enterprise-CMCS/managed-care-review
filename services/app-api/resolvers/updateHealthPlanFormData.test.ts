@@ -304,7 +304,8 @@ describe('updateHealthPlanFormData', () => {
         const failStore = mockStoreThatErrors()
 
         // set our store to error on the updateFormData call, only
-        postgresStore.updateFormData = failStore.updateFormData
+        postgresStore.updateHealthPlanRevision =
+            failStore.updateHealthPlanRevision
 
         const server = await constructTestPostgresServer({
             store: postgresStore,

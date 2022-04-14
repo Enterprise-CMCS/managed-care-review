@@ -61,7 +61,7 @@ export function updateHealthPlanFormDataResolver(
         }
 
         const unlockedFormData: UnlockedHealthPlanFormDataType = formDataResult
-        const result = await store.findSubmissionWithRevisions(input.pkgID)
+        const result = await store.findHealthPlanPackage(input.pkgID)
 
         if (isStoreError(result)) {
             console.log('Error finding a submission', result)
@@ -189,7 +189,7 @@ export function updateHealthPlanFormDataResolver(
         const editableRevision = planPackage.revisions[0]
 
         // save the new form data to the db
-        const updateResult = await store.updateFormData(
+        const updateResult = await store.updateHealthPlanRevision(
             planPackage.id,
             editableRevision.id,
             unlockedFormData

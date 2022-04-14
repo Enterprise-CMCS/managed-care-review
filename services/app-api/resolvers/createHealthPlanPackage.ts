@@ -2,7 +2,11 @@ import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { isStateUser } from '../../app-web/src/common-code/domain-models'
 import { MutationResolvers, State } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
-import { InsertDraftSubmissionArgsType, isStoreError, Store } from '../postgres'
+import {
+    InsertHealthPlanPackageArgsType,
+    isStoreError,
+    Store,
+} from '../postgres'
 import { pluralize } from '../../app-web/src/common-code/formatters'
 import {
     setResolverDetailsOnActiveSpan,
@@ -56,15 +60,15 @@ export function createHealthPlanPackageResolver(
             })
         }
 
-        const dbDraftSubmission: InsertDraftSubmissionArgsType = {
+        const dbDraftSubmission: InsertHealthPlanPackageArgsType = {
             stateCode: stateFromCurrentUser,
             programIDs: input.programIDs,
             submissionDescription: input.submissionDescription,
             submissionType:
-                input.submissionType as InsertDraftSubmissionArgsType['submissionType'],
+                input.submissionType as InsertHealthPlanPackageArgsType['submissionType'],
         }
 
-        const pkgResult = await store.insertDraftSubmission(dbDraftSubmission)
+        const pkgResult = await store.insertHealthPlanPackage(dbDraftSubmission)
         if (isStoreError(pkgResult)) {
             const errMessage = `Issue creating a draft submission of type ${pkgResult.code}. Message: ${pkgResult.message}`
             logError('createHealthPlanPackage', errMessage)

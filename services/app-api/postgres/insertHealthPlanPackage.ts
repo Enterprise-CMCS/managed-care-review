@@ -14,7 +14,7 @@ import {
 } from './storeError'
 import { convertToHealthPlanPackageType } from './submissionWithRevisionsHelpers'
 
-export type InsertDraftSubmissionArgsType = {
+export type InsertHealthPlanPackageArgsType = {
     stateCode: string
     programIDs: string[]
     submissionType: SubmissionType
@@ -45,9 +45,9 @@ async function incrementAndGetStateNumber(
     }
 }
 
-export async function insertDraftSubmission(
+export async function insertHealthPlanPackage(
     client: PrismaClient,
-    args: InsertDraftSubmissionArgsType
+    args: InsertHealthPlanPackageArgsType
 ): Promise<HealthPlanPackageType | StoreError> {
     const stateNumberResult = await incrementAndGetStateNumber(
         client,

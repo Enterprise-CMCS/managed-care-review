@@ -134,7 +134,7 @@ export function submitHealthPlanPackageResolver(
         }
 
         // fetch from the store
-        const result = await store.findSubmissionWithRevisions(input.pkgID)
+        const result = await store.findHealthPlanPackage(input.pkgID)
 
         if (isStoreError(result)) {
             const errMessage = `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
@@ -239,11 +239,13 @@ export function submitHealthPlanPackageResolver(
             )
         }
 
-        const stateSubmission: LockedHealthPlanFormDataType = submissionResult
+        const lockedFormData: LockedHealthPlanFormDataType = submissionResult
 
         // Save the submission!
-        const updateResult = await store.updateStateSubmission(
-            stateSubmission,
+        const updateResult = await store.updateHealthPlanRevision(
+            planPackage.id,
+            currentRevision.id,
+            lockedFormData,
             submitInfo
         )
         if (isStoreError(updateResult)) {
@@ -257,20 +259,17 @@ export function submitHealthPlanPackageResolver(
 
         const programs = store.findPrograms(
             updatedSubmission.stateCode,
-            stateSubmission.programIDs
+            lockedFormData.programIDs
         )
-        if (
-            !programs ||
-            programs.length !== stateSubmission.programIDs.length
-        ) {
-            const errMessage = `Can't find programs ${stateSubmission.programIDs} from state ${stateSubmission.stateCode}, ${stateSubmission.id}`
+        if (!programs || programs.length !== lockedFormData.programIDs.length) {
+            const errMessage = `Can't find programs ${lockedFormData.programIDs} from state ${lockedFormData.stateCode}, ${lockedFormData.id}`
             logError('unlockHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
 
         // Send emails!
-        const name = submissionName(stateSubmission, programs)
+        const name = submissionName(lockedFormData, programs)
 
         const status = packageStatus(updatedSubmission)
         let cmsPackageEmailResult
@@ -284,21 +283,21 @@ export function submitHealthPlanPackageResolver(
                 submissionName: name,
             }
             cmsPackageEmailResult = await emailer.sendResubmittedCMSEmail(
-                stateSubmission,
+                lockedFormData,
                 updatedEmailData
             )
             statePackageEmailResult = await emailer.sendResubmittedStateEmail(
-                stateSubmission,
+                lockedFormData,
                 updatedEmailData,
                 user
             )
         } else if (status === 'SUBMITTED') {
             cmsPackageEmailResult = await emailer.sendCMSNewPackage(
-                stateSubmission,
+                lockedFormData,
                 name
             )
             statePackageEmailResult = await emailer.sendStateNewPackage(
-                stateSubmission,
+                lockedFormData,
                 name,
                 user
             )

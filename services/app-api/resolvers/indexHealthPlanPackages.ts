@@ -27,9 +27,7 @@ export function indexHealthPlanPackagesResolver(
         }
 
         // fetch from the store
-        const results = await store.findAllSubmissionsWithRevisions(
-            user.state_code
-        )
+        const results = await store.findAllHealthPlanPackages(user.state_code)
 
         if (isStoreError(results)) {
             const errMessage = `Issue finding a draft submission of type ${results.code}. Message: ${results.message}`

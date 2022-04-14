@@ -37,7 +37,7 @@ export async function findAllSubmissionWrapper(
     }
 }
 
-export async function findAllSubmissionsWithRevisions(
+export async function findAllHealthPlanPackages(
     client: PrismaClient,
     stateCode: string
 ): Promise<HealthPlanPackageType[] | StoreError> {

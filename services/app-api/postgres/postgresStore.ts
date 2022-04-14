@@ -2,71 +2,75 @@ import { PrismaClient } from '@prisma/client'
 import {
     UnlockedHealthPlanFormDataType,
     ProgramT,
-    LockedHealthPlanFormDataType,
     HealthPlanPackageType,
     UpdateInfoType,
+    HealthPlanFormDataType,
 } from '../../app-web/src/common-code/domain-models'
 import { findPrograms } from '../postgres'
-import { findAllSubmissionsWithRevisions } from './findAllSubmissionsWithRevisions'
-import { findSubmissionWithRevisions } from './findSubmissionWithRevisions'
+import { findAllHealthPlanPackages } from './findAllHealthPlanPackages'
+import { findHealthPlanPackage } from './findHealthPlanPackage'
 import {
-    insertDraftSubmission,
-    InsertDraftSubmissionArgsType,
-} from './insertDraftSubmission'
-import { insertSubmissionRevision } from './insertSubmissionRevision'
+    insertHealthPlanPackage,
+    InsertHealthPlanPackageArgsType,
+} from './insertHealthPlanPackage'
+import { insertHealthPlanRevision } from './insertHealthPlanRevision'
 import { StoreError } from './storeError'
-import { updateFormData } from './updateFormData'
-import { updateStateSubmission } from './updateStateSubmission'
+import { updateHealthPlanRevision } from './updateHealthPlanRevision'
 
 type Store = {
-    insertDraftSubmission: (
-        args: InsertDraftSubmissionArgsType
-    ) => Promise<HealthPlanPackageType | StoreError>
-
-    updateStateSubmission: (
-        stateSubmission: LockedHealthPlanFormDataType,
-        submitInfo: UpdateInfoType
-    ) => Promise<HealthPlanPackageType | StoreError>
-
-    insertNewRevision: (
-        submissionID: string,
-        unlockInfo: UpdateInfoType,
-        draft: UnlockedHealthPlanFormDataType
-    ) => Promise<HealthPlanPackageType | StoreError>
-
-    updateFormData: (
-        submissionID: string,
-        revisionID: string,
-        formData: UnlockedHealthPlanFormDataType
-    ) => Promise<HealthPlanPackageType | StoreError>
-
     findPrograms: (
         stateCode: string,
         programIDs: Array<string>
     ) => ProgramT[] | undefined
 
-    findSubmissionWithRevisions: (
+    findHealthPlanPackage: (
         draftUUID: string
     ) => Promise<HealthPlanPackageType | undefined | StoreError>
 
-    findAllSubmissionsWithRevisions: (
+    findAllHealthPlanPackages: (
         stateCode: string
     ) => Promise<HealthPlanPackageType[] | StoreError>
+
+    insertHealthPlanPackage: (
+        args: InsertHealthPlanPackageArgsType
+    ) => Promise<HealthPlanPackageType | StoreError>
+
+    updateHealthPlanRevision: (
+        submissionID: string,
+        revisionID: string,
+        formData: HealthPlanFormDataType,
+        submitInfo?: UpdateInfoType
+    ) => Promise<HealthPlanPackageType | StoreError>
+
+    insertHealthPlanRevision: (
+        submissionID: string,
+        unlockInfo: UpdateInfoType,
+        draft: UnlockedHealthPlanFormDataType
+    ) => Promise<HealthPlanPackageType | StoreError>
 }
 
 function NewPostgresStore(client: PrismaClient): Store {
     return {
-        insertDraftSubmission: (args) => insertDraftSubmission(client, args),
-        findSubmissionWithRevisions: (id) =>
-            findSubmissionWithRevisions(client, id),
-        findAllSubmissionsWithRevisions: (stateCode) =>
-            findAllSubmissionsWithRevisions(client, stateCode),
-        updateFormData: (submissionID, revisionID, formData) =>
-            updateFormData(client, submissionID, revisionID, formData),
-        updateStateSubmission: (submission, submitInfo) =>
-            updateStateSubmission(client, submission, submitInfo),
-        insertNewRevision: (submissionID, unlockInfo, draft) =>
-            insertSubmissionRevision(client, {
+        insertHealthPlanPackage: (args) =>
+            insertHealthPlanPackage(client, args),
+        findHealthPlanPackage: (id) => findHealthPlanPackage(client, id),
+        findAllHealthPlanPackages: (stateCode) =>
+            findAllHealthPlanPackages(client, stateCode),
+        updateHealthPlanRevision: (
+            submissionID,
+            revisionID,
+            formData,
+            submitInfo
+        ) =>
+            updateHealthPlanRevision(
+                client,
+                submissionID,
+                revisionID,
+                formData,
+                submitInfo
+            ),
+        insertHealthPlanRevision: (submissionID, unlockInfo, draft) =>
+            insertHealthPlanRevision(client, {
                 submissionID,
                 unlockInfo,
                 draft,

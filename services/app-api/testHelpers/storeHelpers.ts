@@ -38,22 +38,19 @@ function mockStoreThatErrors(): Store {
     }
 
     return {
-        findAllSubmissionsWithRevisions: async (_stateCode) => {
+        findAllHealthPlanPackages: async (_stateCode) => {
             return genericStoreError
         },
-        insertDraftSubmission: async (_args) => {
+        insertHealthPlanPackage: async (_args) => {
             return genericStoreError
         },
-        findSubmissionWithRevisions: async (_draftUUID) => {
+        findHealthPlanPackage: async (_draftUUID) => {
             return genericStoreError
         },
-        updateStateSubmission: async (_submission) => {
+        insertHealthPlanRevision: async (_submissionID, _draft) => {
             return genericStoreError
         },
-        insertNewRevision: async (_submissionID, _draft) => {
-            return genericStoreError
-        },
-        updateFormData: async (_submissionID, _formData) => {
+        updateHealthPlanRevision: async (_submissionID, _formData) => {
             return genericStoreError
         },
         findPrograms: () => {

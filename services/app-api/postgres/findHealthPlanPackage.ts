@@ -38,7 +38,7 @@ export async function findUniqueSubmissionWrapper(
     }
 }
 
-export async function findSubmissionWithRevisions(
+export async function findHealthPlanPackage(
     client: PrismaClient,
     id: string
 ): Promise<HealthPlanPackageType | undefined | StoreError> {

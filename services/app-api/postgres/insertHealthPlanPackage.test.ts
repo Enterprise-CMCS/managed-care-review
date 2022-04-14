@@ -1,7 +1,7 @@
 import { HealthPlanPackageType } from '../../app-web/src/common-code/domain-models'
 import { toDomain } from '../../app-web/src/common-code/proto/stateSubmission'
 import { sharedTestPrismaClient } from '../testHelpers/storeHelpers'
-import { insertDraftSubmission } from './insertDraftSubmission'
+import { insertHealthPlanPackage } from './insertHealthPlanPackage'
 import { isStoreError } from './storeError'
 
 describe('insertDraftSubmissionPostgres', () => {
@@ -22,7 +22,7 @@ describe('insertDraftSubmissionPostgres', () => {
 
         const resultPromises = []
         for (let i = 0; i < 30; i++) {
-            resultPromises.push(insertDraftSubmission(client, args))
+            resultPromises.push(insertHealthPlanPackage(client, args))
         }
 
         const results = await Promise.all(resultPromises)
