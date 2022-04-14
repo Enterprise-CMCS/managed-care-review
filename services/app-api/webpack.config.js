@@ -19,16 +19,19 @@ const extensions = [
 
 module.exports = {
     entry: slsw.lib.entries,
-    target: 'node',
+    externalsPresets: { node: true },
     context: __dirname,
     mode: isLocal ? 'development' : 'production',
     performance: {
         hints: false,
     },
     externals: [
-        nodeExternals(),
+        nodeExternals({
+            allowlist: ['@prisma/client'],
+        }),
         nodeExternals({
             modulesDir: path.resolve(__dirname, '../../node_modules'),
+            allowlist: ['@prisma/client'],
         }),
         'aws-sdk',
     ],
