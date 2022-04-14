@@ -43,6 +43,9 @@ custom:
     includeModules:
       nodeModulesRelativeDir: '../../'
     excludeRegex: 'darwin|debian'
+    packagerOptions:
+      scripts:
+        - prisma generate
   serverlessTerminationProtection:
     stages:
       - dev

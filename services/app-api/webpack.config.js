@@ -16,7 +16,6 @@ const extensions = [
     '.graphql',
     '.gql',
 ];
-const servicePath = '';
 
 module.exports = {
     entry: slsw.lib.entries,
