@@ -31,7 +31,6 @@ import { SubmissionType } from './SubmissionType'
 import {
     DraftSubmission,
     UpdateDraftSubmissionInput,
-    useUpdateDraftSubmissionMutation,
     useFetchHealthPlanPackageQuery,
     User,
     useUpdateHealthPlanFormDataMutation,
@@ -46,6 +45,7 @@ import {
     UpdateInfoType,
 } from '../../common-code/domain-models'
 import { domainToBase64 } from '../../common-code/proto/stateSubmission'
+import { applyUpdates } from './tmpApplyUpdates'
 
 const FormAlert = ({ message }: { message?: string }): React.ReactElement => {
     return message ? (
@@ -134,8 +134,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
     })
 
     const submissionAndRevisions = fetchData?.fetchHealthPlanPackage?.pkg
-    const [updateDraftSubmission, { error: updateError }] =
-        useUpdateDraftSubmissionMutation()
     const [updateFormData, { error: updateFormDataError }] =
         useUpdateHealthPlanFormDataMutation()
 
@@ -144,21 +142,25 @@ export const StateSubmissionForm = (): React.ReactElement => {
     ): Promise<DraftSubmission | undefined> => {
         setShowPageErrorMessage(false)
         try {
-            const updateResult = await updateDraftSubmission({
-                variables: {
-                    input: input,
-                },
-                update(cache) {
-                    cache.evict({ id: `HealthPlanPackage:${id}` })
-                    cache.gc()
-                },
-            })
-            const updatedSubmission: DraftSubmission | undefined =
-                updateResult?.data?.updateDraftSubmission.draftSubmission
+            const currentFormData = formDataFromLatestRevision
+            if (!currentFormData) {
+                throw new Error('no local data for update')
+            }
 
-            if (!updatedSubmission) setShowPageErrorMessage(true)
+            // apply all the fields
+            const updates = input.draftSubmissionUpdates
 
-            return updatedSubmission
+            applyUpdates(currentFormData, updates)
+
+            const updateResult = await updateDraftHealthPlanPackage(
+                currentFormData
+            )
+
+            if (updateResult instanceof Error) {
+                setShowPageErrorMessage(true)
+            }
+
+            return undefined
         } catch (serverError) {
             setShowPageErrorMessage(true)
             return undefined
@@ -268,11 +270,11 @@ export const StateSubmissionForm = (): React.ReactElement => {
         )
     }
 
-    if ((updateError || updateFormDataError) && !showPageErrorMessage) {
+    if (updateFormDataError && !showPageErrorMessage) {
         // This triggers if Apollo sets the error from our useQuery invocation
         // we should already be setting this in our try {} block in the actual update handler, I think
         // so this might be worth looking into.
-        console.log('Apollo Error reported: ', updateError, updateFormDataError)
+        console.log('Apollo Error reported: ', updateFormDataError)
         setShowPageErrorMessage(true)
     }
 
