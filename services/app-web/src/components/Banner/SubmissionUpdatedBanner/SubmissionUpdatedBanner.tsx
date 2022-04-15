@@ -42,10 +42,10 @@ export const SubmissionUpdatedBanner = ({
                 </p>
                 <ExpandableText
                     clamp={
-                        <p>
+                        <>
                             <b>Changes made:&nbsp;</b>
                             {changesMade}
-                        </p>
+                        </>
                     }
                 />
             </div>

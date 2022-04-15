@@ -34,7 +34,7 @@ ExpandableTextClampedToTwoLines.args = {
 export const ExpandableTextClampedToFourLines = Template.bind({})
 ExpandableTextClampedToFourLines.args = {
     clamp: longText,
-    clampedLines: '4',
+    clampedLines: 4,
 }
 
 //On Firefox this storybook will always render the "Show More"/"Show Less" button. Because the offsetHeight is 1 less
@@ -44,21 +44,12 @@ ExpandableTextNoClamp.args = {
     clamp: shortText,
 }
 
-export const ExpandableTextWithinElement = Template.bind({})
-ExpandableTextWithinElement.args = {
+export const ExpandableTextWithPrefix = Template.bind({})
+ExpandableTextWithPrefix.args = {
     clamp: (
-        <div
-            style={{
-                borderStyle: 'dotted',
-                borderWidth: 2,
-                margin: 0,
-                backgroundColor: 'salmon',
-            }}
-        >
-            <p>
-                <b>Some bold header:&nbsp;</b>
-                {shortText}
-            </p>
-        </div>
+        <>
+            <span className="text-bold">Some bold header:&nbsp; </span>
+            {longText}
+        </>
     ),
 }

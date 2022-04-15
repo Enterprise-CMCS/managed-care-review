@@ -3,10 +3,7 @@
 
 .textExpanded {
     height: auto;
-    p {
-        margin-block-end: 0;
-        margin-block-start: 0;
-    }
+    display: -webkit-box;
 }
 
 .textContracted {
@@ -14,10 +11,6 @@
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
-    p {
-        margin-block-end: 0;
-        margin-block-start: 0;
-    }
 }
 
 .showMoreButton {

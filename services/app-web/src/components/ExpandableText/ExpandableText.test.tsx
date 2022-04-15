@@ -73,7 +73,16 @@ describe('ExpandableText', () => {
 
     it('can render react elements and clamp long text correctly', () => {
         setMockRefElement(clamped2Lines)
-        render(<ExpandableText clamp={<p>longText</p>} />)
+        render(
+            <ExpandableText
+                clamp={
+                    <>
+                        <span>Some header</span>
+                        <span>longText</span>
+                    </>
+                }
+            />
+        )
         expect(screen.getByTestId('clampElement')).toBeInTheDocument()
         expect(screen.getByTestId('clampElement')).toHaveClass('textContracted')
         expect(screen.getByText('Show More')).toBeInTheDocument()
@@ -84,10 +93,10 @@ describe('ExpandableText', () => {
         render(
             <ExpandableText
                 clamp={
-                    <p>
+                    <span>
                         <b>Some Styling</b>
                         {longText}
-                    </p>
+                    </span>
                 }
             />
         )
