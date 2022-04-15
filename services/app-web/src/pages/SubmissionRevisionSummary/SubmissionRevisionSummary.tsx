@@ -158,8 +158,9 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                 <PreviousSubmissionBanner link={`/submissions/${id}`} />
 
                 <SubmissionTypeSummarySection
-                    submission={submission}
+                    submission={packageData}
                     statePrograms={statePrograms}
+                    submissionName={submissionName(packageData, statePrograms)}
                     headerChildComponent={
                         submitInfo && (
                             <p
@@ -176,20 +177,24 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                 />
 
                 <ContractDetailsSummarySection
-                    submission={submission}
+                    submission={packageData}
                     documentDateLookupTable={documentDates}
                 />
 
                 {isContractActionAndRateCertification && (
                     <RateDetailsSummarySection
-                        submission={submission}
+                        submission={packageData}
                         documentDateLookupTable={documentDates}
+                        submissionName={submissionName(
+                            packageData,
+                            statePrograms
+                        )}
                     />
                 )}
 
-                <ContactsSummarySection submission={submission} />
+                <ContactsSummarySection submission={packageData} />
 
-                <SupportingDocumentsSummarySection submission={submission} />
+                <SupportingDocumentsSummarySection submission={packageData} />
             </GridContainer>
         </div>
     )

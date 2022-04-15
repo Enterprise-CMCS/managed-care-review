@@ -7,6 +7,7 @@ import {
     unlockedWithALittleBitOfEverything,
 } from '../common-code/domain-mocks'
 import {
+    HealthPlanFormDataType,
     LockedHealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
 } from '../common-code/domain-models'
@@ -22,7 +23,6 @@ import {
     IndexSubmissionsDocument,
     State,
     StateSubmission,
-    Submission,
     HealthPlanPackage,
     SubmitHealthPlanPackageDocument,
     UnlockHealthPlanPackageDocument,
@@ -903,7 +903,7 @@ const unlockHealthPlanPackageMockError = ({
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const indexSubmissionsMockSuccess = (
-    submissions: Submission[] = [mockDraft(), mockStateSubmission()]
+    submissions: HealthPlanFormDataType[] = [mockDraft(), mockStateSubmission()]
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): MockedResponse<Record<string, any>> => {
     const submissionEdges = submissions.map((sub) => {
