@@ -13,17 +13,18 @@ import {
 } from '../../../constants/healthPlanPackages'
 import { useS3 } from '../../../contexts/S3Context'
 import { formatCalendarDate } from '../../../dateHelpers'
-import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../SubmissionSummarySection.module.scss'
+import { HealthPlanFormDataType } from '../../../common-code/domain-models'
 
 export type ContractDetailsSummarySectionProps = {
-    submission: DraftSubmission | StateSubmission
+    submission: HealthPlanFormDataType
     navigateTo?: string
     documentDateLookupTable?: DocumentDateLookupTable
     isCMSUser?: boolean
+    submissionName?: string
 }
 
 const createCheckboxList = ({
@@ -57,6 +58,7 @@ export const ContractDetailsSummarySection = ({
     navigateTo,
     documentDateLookupTable,
     isCMSUser,
+    submissionName,
 }: ContractDetailsSummarySectionProps): React.ReactElement => {
     //Checks if submission is a previous submission
     const isPreviousSubmission = usePreviousSubmission()
@@ -66,7 +68,7 @@ export const ContractDetailsSummarySection = ({
     const contractSupportingDocuments = submission.documents.filter((doc) =>
         doc.documentCategories.includes('CONTRACT_RELATED' as const)
     )
-    const isSubmitted = submission.__typename === 'StateSubmission'
+    const isSubmitted = submission.status === 'SUBMITTED'
     const isEditing = !isSubmitted && navigateTo !== undefined
 
     useEffect(() => {
@@ -84,7 +86,7 @@ export const ContractDetailsSummarySection = ({
             // call the lambda to zip the files and get the url
             const zippedURL = await getBulkDlURL(
                 keysFromDocs,
-                submission.name + '-contract-details.zip'
+                submissionName + '-contract-details.zip'
             )
             if (zippedURL instanceof Error) {
                 console.log('ERROR: TODO: DISPLAY AN ERROR MESSAGE')
@@ -95,7 +97,13 @@ export const ContractDetailsSummarySection = ({
         }
 
         void fetchZipUrl()
-    }, [getKey, getBulkDlURL, submission, contractSupportingDocuments])
+    }, [
+        getKey,
+        getBulkDlURL,
+        submission,
+        contractSupportingDocuments,
+        submissionName,
+    ])
 
     // Array of values from a checkbox field is displayed in an unordered list
     const capitationRateChangeReason = (): string | null => {

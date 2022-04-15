@@ -4,11 +4,7 @@ import { useHistory } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
 import styles from '../StateSubmissionForm.module.scss'
-import {
-    DraftSubmission,
-    UpdateDraftSubmissionInput,
-    Document,
-} from '../../../gen/gqlClient'
+import { Document, HealthPlanPackage } from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
 import {
@@ -16,16 +12,16 @@ import {
     S3FileData,
     FileItemT,
 } from '../../../components/FileUpload'
-import { updatesFromSubmission } from '../updateSubmissionTransform'
 import { PageActions } from '../PageActions'
 import classNames from 'classnames'
 import { ErrorSummary } from '../../../components/Form'
+import { UnlockedHealthPlanFormDataType } from '../../../common-code/domain-models'
 
 type DocumentProps = {
-    draftSubmission: DraftSubmission
+    draftSubmission: UnlockedHealthPlanFormDataType
     updateDraft: (
-        input: UpdateDraftSubmissionInput
-    ) => Promise<DraftSubmission | undefined>
+        input: UnlockedHealthPlanFormDataType
+    ) => Promise<HealthPlanPackage | Error>
 }
 
 export const Documents = ({
@@ -227,14 +223,10 @@ export const Documents = ({
                 [] as Document[]
             )
 
-            const updatedDraft = updatesFromSubmission(draftSubmission)
-            updatedDraft.documents = documents
+            draftSubmission.documents = documents
 
             try {
-                const updatedSubmission = await updateDraft({
-                    submissionID: draftSubmission.id,
-                    draftSubmissionUpdates: updatedDraft,
-                })
+                const updatedSubmission = await updateDraft(draftSubmission)
                 if (updatedSubmission) {
                     history.push(redirectPath)
                 }
@@ -242,7 +234,7 @@ export const Documents = ({
                 onUpdateDraftSubmissionError()
             }
         }
-   
+
     return (
         <>
             <UswdsForm
@@ -299,7 +291,11 @@ export const Documents = ({
                         deleteFile={handleDeleteFile}
                         onFileItemsUpdate={onFileItemsUpdate}
                         isContractOnly={isContractOnly}
-                        shouldDisplayMissingCategoriesError={!isContractOnly && shouldValidate && hasMissingCategories}
+                        shouldDisplayMissingCategoriesError={
+                            !isContractOnly &&
+                            shouldValidate &&
+                            hasMissingCategories
+                        }
                     />
                 </fieldset>
                 <PageActions

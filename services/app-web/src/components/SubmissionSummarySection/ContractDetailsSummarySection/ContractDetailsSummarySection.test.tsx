@@ -64,7 +64,10 @@ describe('ContractDetailsSummarySection', () => {
     it('can render state submission on summary page without errors (submission summary behavior)', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
-                submission={stateBaseContractOnlySubmission}
+                submission={{
+                    ...stateBaseContractOnlySubmission,
+                    status: 'SUBMITTED',
+                }}
             />
         )
 

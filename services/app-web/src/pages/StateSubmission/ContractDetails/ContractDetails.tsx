@@ -24,7 +24,6 @@ import {
     PoliteErrorMessage,
 } from '../../../components'
 import {
-    // formatForApi,
     formatForForm,
     formatFormDateForDomain,
     formatUserInputDate,
@@ -32,13 +31,10 @@ import {
 } from '../../../formHelpers'
 import {
     Document,
-    // DraftSubmission,
     ContractType,
     ContractExecutionStatus,
     FederalAuthority,
-    // CapitationRatesAmendedInfo,
     CapitationRatesAmendmentReason,
-    // UpdateDraftSubmissionInput,
     HealthPlanPackage,
 } from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
@@ -50,7 +46,6 @@ import {
     UnlockedHealthPlanFormDataType,
     CapitationRatesAmendedReason,
 } from '../../../common-code/domain-models'
-// import { updatesFromSubmission } from '../updateSubmissionTransform'
 import {
     AmendableItemsRecord,
     RateChangeReasonRecord,
@@ -306,7 +301,6 @@ export const ContractDetails = ({
             [] as Document[]
         )
 
-        // const updatedDraft = updatesFromSubmission(draftSubmission)
         draftSubmission.contractType = values.contractType
         draftSubmission.contractExecutionStatus = values.contractExecutionStatus
         draftSubmission.contractDateStart = formatFormDateForDomain(

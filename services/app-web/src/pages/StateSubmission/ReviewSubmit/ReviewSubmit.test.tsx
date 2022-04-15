@@ -19,6 +19,7 @@ describe('ReviewSubmit', () => {
             <ReviewSubmit
                 draftSubmission={mockCompleteDraft()}
                 unlocked={false}
+                submissionName="MN-PMAP-0001"
             />,
             {
                 apolloProvider: {
@@ -36,6 +37,7 @@ describe('ReviewSubmit', () => {
             <ReviewSubmit
                 draftSubmission={mockCompleteDraft()}
                 unlocked={false}
+                submissionName="MN-PMAP-0001"
             />,
             {
                 apolloProvider: {
@@ -62,6 +64,7 @@ describe('ReviewSubmit', () => {
             <ReviewSubmit
                 draftSubmission={mockCompleteDraft()}
                 unlocked={false}
+                submissionName="MN-PMAP-0001"
             />,
             {
                 apolloProvider: {
@@ -83,6 +86,7 @@ describe('ReviewSubmit', () => {
             <ReviewSubmit
                 draftSubmission={mockCompleteDraft()}
                 unlocked={false}
+                submissionName="MN-PMAP-0001"
             />,
             {
                 apolloProvider: {
@@ -121,6 +125,7 @@ describe('ReviewSubmit', () => {
             <ReviewSubmit
                 draftSubmission={mockCompleteDraft()}
                 unlocked={false}
+                submissionName="MN-PMAP-0001"
             />,
             {
                 apolloProvider: {
@@ -150,6 +155,7 @@ describe('ReviewSubmit', () => {
             <ReviewSubmit
                 draftSubmission={mockCompleteDraft()}
                 unlocked={false}
+                submissionName="MN-PMAP-0001"
             />,
             {
                 apolloProvider: {
@@ -168,6 +174,7 @@ describe('ReviewSubmit', () => {
             <ReviewSubmit
                 draftSubmission={mockCompleteDraft()}
                 unlocked={false}
+                submissionName="MN-PMAP-0001"
             />,
             {
                 apolloProvider: {
@@ -202,6 +209,7 @@ describe('ReviewSubmit', () => {
             <ReviewSubmit
                 draftSubmission={mockCompleteDraft()}
                 unlocked={false}
+                submissionName="MN-MSHO-0001"
             />,
             {
                 apolloProvider: {
@@ -236,9 +244,7 @@ describe('ReviewSubmit', () => {
 
         await waitFor(() => {
             expect(history.location.pathname).toBe(`/dashboard`)
-            expect(history.location.search).toBe(
-                `?justSubmitted=${mockCompleteDraft().name}`
-            )
+            expect(history.location.search).toBe('?justSubmitted=MN-MSHO-0001')
         })
     })
 
@@ -247,6 +253,7 @@ describe('ReviewSubmit', () => {
             <ReviewSubmit
                 draftSubmission={mockCompleteDraft()}
                 unlocked={false}
+                submissionName="MN-MSHO-0001"
             />,
             {
                 apolloProvider: {
@@ -284,6 +291,7 @@ describe('Resubmitting plan packages', () => {
             <ReviewSubmit
                 draftSubmission={mockCompleteDraft()}
                 unlocked={true}
+                submissionName="MN-MSHO-0001"
             />,
             {
                 apolloProvider: {
@@ -327,6 +335,7 @@ describe('Resubmitting plan packages', () => {
             <ReviewSubmit
                 draftSubmission={mockCompleteDraft()}
                 unlocked={true}
+                submissionName="MN-MSHO-0001"
             />,
             {
                 apolloProvider: {
@@ -364,9 +373,7 @@ describe('Resubmitting plan packages', () => {
 
         await waitFor(() => {
             expect(history.location.pathname).toBe(`/dashboard`)
-            expect(history.location.search).toBe(
-                `?justSubmitted=${mockCompleteDraft().name}`
-            )
+            expect(history.location.search).toBe('?justSubmitted=MN-MSHO-0001')
         })
     })
 
@@ -375,6 +382,7 @@ describe('Resubmitting plan packages', () => {
             <ReviewSubmit
                 draftSubmission={mockCompleteDraft()}
                 unlocked={true}
+                submissionName="MN-MSHO-0001"
             />,
             {
                 apolloProvider: {
@@ -412,6 +420,7 @@ describe('Resubmitting plan packages', () => {
             <ReviewSubmit
                 draftSubmission={mockCompleteDraft()}
                 unlocked={true}
+                submissionName="MN-MSHO-0001"
             />,
             {
                 apolloProvider: {
@@ -450,6 +459,7 @@ describe('Resubmitting plan packages', () => {
             <ReviewSubmit
                 draftSubmission={mockCompleteDraft()}
                 unlocked={true}
+                submissionName="MN-MSHO-0001"
             />,
             {
                 apolloProvider: {
@@ -482,6 +492,7 @@ describe('Resubmitting plan packages', () => {
             <ReviewSubmit
                 draftSubmission={mockCompleteDraft()}
                 unlocked={true}
+                submissionName="MN-MSHO-0001"
             />,
             {
                 apolloProvider: {

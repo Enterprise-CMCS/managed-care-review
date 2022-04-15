@@ -6,7 +6,10 @@ import {
     basicHealthPlanFormData,
     unlockedWithALittleBitOfEverything,
 } from '../common-code/domain-mocks'
-import { UnlockedHealthPlanFormDataType } from '../common-code/domain-models'
+import {
+    LockedHealthPlanFormDataType,
+    UnlockedHealthPlanFormDataType,
+} from '../common-code/domain-models'
 import { domainToBase64 } from '../common-code/proto/stateSubmission'
 import {
     CreateDraftSubmissionDocument,
@@ -51,15 +54,15 @@ function mockValidCMSUser(): UserType {
     }
 }
 
-export function mockDraft(): DraftSubmission {
+export function mockDraft(): UnlockedHealthPlanFormDataType {
     return {
-        __typename: 'DraftSubmission',
+        status: 'DRAFT',
+        stateNumber: 5,
         createdAt: new Date(),
         updatedAt: new Date(),
         id: 'test-abc-123',
         stateCode: 'MN',
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-        name: 'MN-MSHO-0001',
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A real submission',
         documents: [],
@@ -68,30 +71,28 @@ export function mockDraft(): DraftSubmission {
         contractDocuments: [],
         contractDateStart: new Date(),
         contractDateEnd: dayjs().add(2, 'days').toDate(),
-        contractAmendmentInfo: null,
+        contractAmendmentInfo: undefined,
         managedCareEntities: [],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
-        rateType: null,
+        rateType: undefined,
         rateDocuments: [],
-        rateDateStart: null,
-        rateDateEnd: null,
-        rateDateCertified: null,
-        rateAmendmentInfo: null,
+        rateDateStart: undefined,
+        rateDateEnd: undefined,
+        rateDateCertified: undefined,
+        rateAmendmentInfo: undefined,
         stateContacts: [],
         actuaryContacts: [],
-        actuaryCommunicationPreference: null,
+        actuaryCommunicationPreference: undefined,
     }
 }
 
-export function mockContactAndRatesDraft(): DraftSubmission {
+export function mockContactAndRatesDraft(): UnlockedHealthPlanFormDataType {
     return {
-        __typename: 'DraftSubmission',
         createdAt: new Date(),
         updatedAt: new Date(),
         id: 'test-abc-123',
         stateCode: 'MN',
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-        name: 'MN-MSHO-0001',
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A real submission',
         documents: [],
@@ -100,29 +101,32 @@ export function mockContactAndRatesDraft(): DraftSubmission {
         contractDocuments: [],
         contractDateStart: new Date(),
         contractDateEnd: dayjs().add(2, 'days').toDate(),
-        contractAmendmentInfo: null,
+        contractAmendmentInfo: undefined,
         managedCareEntities: [],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
-        rateType: null,
+        rateType: undefined,
         rateDocuments: [],
-        rateDateStart: null,
-        rateDateEnd: null,
-        rateDateCertified: null,
-        rateAmendmentInfo: null,
+        rateDateStart: undefined,
+        rateDateEnd: undefined,
+        rateDateCertified: undefined,
+        rateAmendmentInfo: undefined,
         stateContacts: [],
         actuaryContacts: [],
-        actuaryCommunicationPreference: null,
+        actuaryCommunicationPreference: undefined,
+        status: 'DRAFT',
+        stateNumber: 5,
     }
 }
 
-export function mockCompleteDraft(): DraftSubmission {
+export function mockCompleteDraft(): UnlockedHealthPlanFormDataType {
     return {
+        status: 'DRAFT',
+        stateNumber: 5,
         createdAt: new Date(),
         updatedAt: new Date(),
         id: 'test-abc-123',
         stateCode: 'MN',
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-        name: 'MN-MSHO-0001',
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A real submission',
         documents: [],
@@ -131,7 +135,7 @@ export function mockCompleteDraft(): DraftSubmission {
         contractDocuments: [],
         contractDateStart: new Date(),
         contractDateEnd: new Date(),
-        contractAmendmentInfo: null,
+        contractAmendmentInfo: undefined,
         managedCareEntities: [],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateType: 'NEW',
@@ -139,7 +143,7 @@ export function mockCompleteDraft(): DraftSubmission {
         rateDateStart: new Date(),
         rateDateEnd: new Date(),
         rateDateCertified: new Date(),
-        rateAmendmentInfo: null,
+        rateAmendmentInfo: undefined,
         stateContacts: [
             {
                 name: 'Test Person',
@@ -148,18 +152,19 @@ export function mockCompleteDraft(): DraftSubmission {
             },
         ],
         actuaryContacts: [],
-        actuaryCommunicationPreference: null,
+        actuaryCommunicationPreference: undefined,
     }
 }
 
-export function mockContractAndRatesDraft(): DraftSubmission {
+export function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
     return {
+        status: 'DRAFT',
+        stateNumber: 5,
         createdAt: new Date(),
         updatedAt: new Date(),
         id: 'test-abc-123',
         stateCode: 'MN',
         programIDs: ['pmap'],
-        name: 'MN-PMAP-0001',
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A real submission',
         documents: [],
@@ -247,15 +252,15 @@ function mockNewDraft(): DraftSubmission {
     }
 }
 
-export function mockStateSubmission(): StateSubmission {
+export function mockStateSubmission(): LockedHealthPlanFormDataType {
     return {
-        __typename: 'StateSubmission',
+        status: 'SUBMITTED',
+        stateNumber: 5,
         createdAt: new Date(),
         updatedAt: new Date(),
         id: 'test-abc-125',
         stateCode: 'MN',
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-        name: 'MN-MSHO-0003',
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A submitted submission',
         submittedAt: new Date(),
@@ -277,7 +282,7 @@ export function mockStateSubmission(): StateSubmission {
         ],
         contractDateStart: new Date(),
         contractDateEnd: new Date(),
-        contractAmendmentInfo: null,
+        contractAmendmentInfo: undefined,
         managedCareEntities: ['ENROLLMENT_PROCESS'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateType: 'NEW',
@@ -300,7 +305,7 @@ export function mockStateSubmission(): StateSubmission {
             },
         ],
         actuaryContacts: [],
-        actuaryCommunicationPreference: null,
+        actuaryCommunicationPreference: undefined,
     }
 }
 

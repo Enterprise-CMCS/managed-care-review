@@ -19,6 +19,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 submission={draftSubmission}
                 navigateTo="rate-details"
+                submissionName="MN-PMAP-0001"
             />
         )
 
@@ -35,7 +36,10 @@ describe('RateDetailsSummarySection', () => {
 
     it('can render state submission without errors', () => {
         renderWithProviders(
-            <RateDetailsSummarySection submission={stateSubmission} />
+            <RateDetailsSummarySection
+                submission={stateSubmission}
+                submissionName="MN-MSHO-0003"
+            />
         )
 
         expect(
@@ -53,6 +57,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 submission={draftSubmission}
                 navigateTo="rate-details"
+                submissionName="MN-PMAP-0001"
             />
         )
 
@@ -82,6 +87,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 submission={submission}
                 navigateTo="rate-details"
+                submissionName="MN-MSHO-0003"
             />
         )
         const rateName = `MN-MSHO-0003-RATE-${formatRateNameDate(
@@ -108,6 +114,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 submission={submission}
                 navigateTo="rate-details"
+                submissionName="MN-PMAP-0001"
             />
         )
 
@@ -122,7 +129,10 @@ describe('RateDetailsSummarySection', () => {
 
     it('can render all rate details fields for new rate certification submission', () => {
         renderWithProviders(
-            <RateDetailsSummarySection submission={stateSubmission} />
+            <RateDetailsSummarySection
+                submission={stateSubmission}
+                submissionName="MN-MSHO-0003"
+            />
         )
 
         const rateName = `MN-MSHO-0003-RATE-${formatRateNameDate(
@@ -180,6 +190,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 submission={testSubmission}
                 navigateTo={'/rate-details'}
+                submissionName="MN-PMAP-0001"
             />
         )
 
@@ -225,7 +236,10 @@ describe('RateDetailsSummarySection', () => {
 
     it('does not render supporting rate documents when they do not exist', () => {
         renderWithProviders(
-            <RateDetailsSummarySection submission={draftSubmission} />
+            <RateDetailsSummarySection
+                submission={draftSubmission}
+                submissionName="MN-PMAP-0001"
+            />
         )
 
         expect(
@@ -241,7 +255,10 @@ describe('RateDetailsSummarySection', () => {
             <Route
                 path={RoutesRecord.SUBMISSIONS_REVISION}
                 component={() => (
-                    <RateDetailsSummarySection submission={stateSubmission} />
+                    <RateDetailsSummarySection
+                        submission={stateSubmission}
+                        submissionName="MN-PMAP-0001"
+                    />
                 )}
             />,
             {

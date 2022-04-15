@@ -16,9 +16,10 @@ import styles from '../StateSubmissionForm.module.scss'
 
 import {
     Document,
-    DraftSubmission,
+    // DraftSubmission,
     RateType,
-    UpdateDraftSubmissionInput,
+    // UpdateDraftSubmissionInput,
+    HealthPlanPackage,
 } from '../../../gen/gqlClient'
 
 import {
@@ -33,12 +34,14 @@ import {
     formatForForm,
     isDateRangeEmpty,
     formatUserInputDate,
+    formatFormDateForDomain,
 } from '../../../formHelpers'
 import { isS3Error } from '../../../s3'
 import { RateDetailsFormSchema } from './RateDetailsSchema'
-import { updatesFromSubmission } from '../updateSubmissionTransform'
+// import { updatesFromSubmission } from '../updateSubmissionTransform'
 import { useS3 } from '../../../contexts/S3Context'
 import { PageActions } from '../PageActions'
+import { UnlockedHealthPlanFormDataType } from '../../../common-code/domain-models'
 type FormError =
     FormikErrors<RateDetailsFormValues>[keyof FormikErrors<RateDetailsFormValues>]
 
@@ -70,11 +73,11 @@ export const RateDetails = ({
     showValidations = false,
     updateDraft,
 }: {
-    draftSubmission: DraftSubmission
+    draftSubmission: UnlockedHealthPlanFormDataType
     showValidations?: boolean
     updateDraft: (
-        input: UpdateDraftSubmissionInput
-    ) => Promise<DraftSubmission | undefined>
+        input: UnlockedHealthPlanFormDataType
+    ) => Promise<HealthPlanPackage | Error>
 }): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const history = useHistory()
@@ -263,27 +266,34 @@ export const RateDetails = ({
             [] as Document[]
         )
 
-        const updatedDraft = updatesFromSubmission(draftSubmission)
-        updatedDraft.rateType = values.rateType
-        updatedDraft.rateDateStart = values.rateDateStart || null
-        updatedDraft.rateDateEnd = values.rateDateEnd || null
-        updatedDraft.rateDateCertified = values.rateDateCertified || null
-        updatedDraft.rateDocuments = rateDocuments
+        // const updatedDraft = updatesFromSubmission(draftSubmission)
+        draftSubmission.rateType = values.rateType
+        draftSubmission.rateDateStart = formatFormDateForDomain(
+            values.rateDateStart
+        )
+        draftSubmission.rateDateEnd = formatFormDateForDomain(
+            values.rateDateEnd
+        )
+        draftSubmission.rateDateCertified = formatFormDateForDomain(
+            values.rateDateCertified
+        )
+        draftSubmission.rateDocuments = rateDocuments
 
         if (values.rateType === 'AMENDMENT') {
-            updatedDraft.rateAmendmentInfo = {
-                effectiveDateStart: values.effectiveDateStart,
-                effectiveDateEnd: values.effectiveDateEnd,
+            draftSubmission.rateAmendmentInfo = {
+                effectiveDateStart: formatFormDateForDomain(
+                    values.effectiveDateStart
+                ),
+                effectiveDateEnd: formatFormDateForDomain(
+                    values.effectiveDateEnd
+                ),
             }
         } else {
-            updatedDraft.rateAmendmentInfo = null
+            draftSubmission.rateAmendmentInfo = undefined
         }
 
         try {
-            const updatedSubmission = await updateDraft({
-                submissionID: draftSubmission.id,
-                draftSubmissionUpdates: updatedDraft,
-            })
+            const updatedSubmission = await updateDraft(draftSubmission)
             if (updatedSubmission) {
                 history.push(options.redirectPath)
             }
@@ -396,7 +406,9 @@ export const RateDetails = ({
                                         )}
                                         <Link
                                             aria-label="Rate certification type defintions (opens in new window)"
-                                            href={'/help#rate-cert-type-definitions'}
+                                            href={
+                                                '/help#rate-cert-type-definitions'
+                                            }
                                             variant="external"
                                             target="_blank"
                                         >
