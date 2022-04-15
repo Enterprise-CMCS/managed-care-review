@@ -265,7 +265,7 @@ describe('fetchHealthPlanPackage', () => {
         if (result.errors === undefined) {
             throw new Error('annoying jest typing behavior')
         }
-        expect(result.errors?.length).toBe(1)
+        expect(result.errors).toHaveLength(1)
         const resultErr = result.errors[0]
 
         expect(resultErr?.message).toBe(
@@ -305,7 +305,7 @@ describe('fetchHealthPlanPackage', () => {
         if (result.errors === undefined) {
             throw new Error('annoying jest typing behavior')
         }
-        expect(result.errors?.length).toBe(1)
+        expect(result.errors).toHaveLength(1)
         const resultErr = result.errors[0]
 
         expect(resultErr?.message).toBe(
