@@ -1,0 +1,32 @@
+@import '../../styles/uswdsImports.scss';
+@import '../../styles/custom.scss';
+
+.textExpanded {
+    height: auto;
+    p {
+        margin-block-end: 0;
+        margin-block-start: 0;
+    }
+}
+
+.textContracted {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    p {
+        margin-block-end: 0;
+        margin-block-start: 0;
+    }
+}
+
+.showMoreButton {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.container {
+    max-width: $width-max-contained;
+}
