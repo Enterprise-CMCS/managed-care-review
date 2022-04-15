@@ -14,7 +14,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import { NavLink, useLocation, useParams } from 'react-router-dom'
 import sprite from 'uswds/src/img/sprite.svg'
 import {
-    submissionName,
+    packageName,
     HealthPlanFormDataType,
     UpdateInfoType,
 } from '../../common-code/domain-models'
@@ -246,7 +246,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         const subWithRevisions = data?.fetchHealthPlanPackage.pkg
         if (packageData && subWithRevisions) {
             const programs = subWithRevisions.state.programs
-            updateHeading(pathname, submissionName(packageData, programs))
+            updateHeading(pathname, packageName(packageData, programs))
         }
     }, [updateHeading, pathname, packageData, data])
 

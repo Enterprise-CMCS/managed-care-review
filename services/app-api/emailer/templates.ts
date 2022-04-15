@@ -186,7 +186,7 @@ const newPackageStateEmail = (
 }
 
 type UpdatedEmailData = {
-    submissionName: string
+    packageName: string
     updatedBy: string
     updatedAt: Date
     updatedReason: string
@@ -201,7 +201,7 @@ const unlockPackageCMSEmail = (
     const bodyHTML = `
         ${testEmailAlert}
         <br /><br />
-        Submission ${unlockData.submissionName} was unlocked<br />
+        Submission ${unlockData.packageName} was unlocked<br />
         <br />
         <b>Unlocked by:</b> ${unlockData.updatedBy}<br />
         <b>Unlocked on:</b> ${formatCalendarDate(unlockData.updatedAt)}<br />
@@ -212,7 +212,7 @@ const unlockPackageCMSEmail = (
         toAddresses: reviewerEmails,
         sourceEmail: config.emailSource,
         subject: `${isTestEnvironment ? `[${config.stage}] ` : ''}TEST ${
-            unlockData.submissionName
+            unlockData.packageName
         } was unlocked`,
         bodyText: stripHTMLFromTemplate(bodyHTML),
         bodyHTML: bodyHTML,
@@ -234,7 +234,7 @@ const unlockPackageStateEmail = (
     const bodyHTML = `
         ${testEmailAlert}
         <br /><br />
-        Submission ${unlockData.submissionName} was unlocked by CMS<br />
+        Submission ${unlockData.packageName} was unlocked by CMS<br />
         <br />
         <b>Unlocked by:</b> ${unlockData.updatedBy}<br />
         <b>Unlocked on:</b> ${formatCalendarDate(unlockData.updatedAt)}<br />
@@ -245,7 +245,7 @@ const unlockPackageStateEmail = (
         toAddresses: receiverEmails,
         sourceEmail: config.emailSource,
         subject: `${config.stage !== 'prod' ? `[${config.stage}] ` : ''}TEST ${
-            unlockData.submissionName
+            unlockData.packageName
         } was unlocked by CMS`,
         bodyText: stripHTMLFromTemplate(bodyHTML),
         bodyHTML: bodyHTML,
@@ -266,7 +266,7 @@ const resubmittedStateEmail = (
         ${testEmailAlert}<br />
         <br />
         Submission ${
-            resubmittedData.submissionName
+            resubmittedData.packageName
         } was successfully resubmitted<br />
         <br />
         <b>Submitted by:</b> ${resubmittedData.updatedBy}<br />
@@ -281,7 +281,7 @@ const resubmittedStateEmail = (
         toAddresses: receiverEmails,
         sourceEmail: config.emailSource,
         subject: `${config.stage !== 'prod' ? `[${config.stage}] ` : ''}TEST ${
-            resubmittedData.submissionName
+            resubmittedData.packageName
         } was resubmitted`,
         bodyText: stripHTMLFromTemplate(bodyHTML),
         bodyHTML: bodyHTML,
@@ -303,7 +303,7 @@ const resubmittedCMSEmail = (
         ${testEmailAlert}<br />
         <br />
         The state completed their edits on submission ${
-            resubmittedData.submissionName
+            resubmittedData.packageName
         }<br />
         <br />
         <b>Submitted by:</b> ${resubmittedData.updatedBy}<br />
@@ -318,7 +318,7 @@ const resubmittedCMSEmail = (
         toAddresses: reviewerEmails,
         sourceEmail: config.emailSource,
         subject: `${config.stage !== 'prod' ? `[${config.stage}] ` : ''}TEST ${
-            resubmittedData.submissionName
+            resubmittedData.packageName
         } was resubmitted`,
         bodyText: stripHTMLFromTemplate(bodyHTML),
         bodyHTML: bodyHTML,

@@ -12,7 +12,7 @@ import {
     isStoreError,
     StoreError,
 } from './storeError'
-import { convertToHealthPlanPackageType } from './submissionWithRevisionsHelpers'
+import { convertToHealthPlanPackageType } from './healthPlanPackageHelpers'
 
 export type InsertHealthPlanPackageArgsType = {
     stateCode: string

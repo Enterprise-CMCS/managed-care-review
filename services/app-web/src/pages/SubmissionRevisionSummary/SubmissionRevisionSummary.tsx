@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Alert, GridContainer } from '@trussworks/react-uswds'
 import { useLocation, useParams } from 'react-router-dom'
 import {
-    submissionName,
+    packageName,
     HealthPlanFormDataType,
     UpdateInfoType,
 } from '../../common-code/domain-models'
@@ -114,7 +114,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         const subWithRevisions = data?.fetchHealthPlanPackage.pkg
         if (packageData && subWithRevisions) {
             const programs = subWithRevisions.state.programs
-            updateHeading(pathname, submissionName(packageData, programs))
+            updateHeading(pathname, packageName(packageData, programs))
         }
     }, [updateHeading, pathname, packageData, data])
 

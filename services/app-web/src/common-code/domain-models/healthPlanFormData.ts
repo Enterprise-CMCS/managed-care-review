@@ -123,7 +123,7 @@ function programNames(programs: ProgramT[], programIDs: string[]): string[] {
     })
 }
 
-function submissionName(
+function packageName(
     submission: HealthPlanFormDataType,
     statePrograms: ProgramT[]
 ): string {
@@ -198,6 +198,6 @@ export {
     isLockedHealthPlanFormData,
     isUnlockedHealthPlanFormData,
     programNames,
-    submissionName,
+    packageName,
     generateRateName,
 }

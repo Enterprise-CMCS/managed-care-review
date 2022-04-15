@@ -36,14 +36,14 @@ type Store = {
     ) => Promise<HealthPlanPackageType | StoreError>
 
     updateHealthPlanRevision: (
-        submissionID: string,
+        pkgID: string,
         revisionID: string,
         formData: HealthPlanFormDataType,
         submitInfo?: UpdateInfoType
     ) => Promise<HealthPlanPackageType | StoreError>
 
     insertHealthPlanRevision: (
-        submissionID: string,
+        pkgID: string,
         unlockInfo: UpdateInfoType,
         draft: UnlockedHealthPlanFormDataType
     ) => Promise<HealthPlanPackageType | StoreError>
@@ -56,22 +56,17 @@ function NewPostgresStore(client: PrismaClient): Store {
         findHealthPlanPackage: (id) => findHealthPlanPackage(client, id),
         findAllHealthPlanPackages: (stateCode) =>
             findAllHealthPlanPackages(client, stateCode),
-        updateHealthPlanRevision: (
-            submissionID,
-            revisionID,
-            formData,
-            submitInfo
-        ) =>
+        updateHealthPlanRevision: (pkgID, revisionID, formData, submitInfo) =>
             updateHealthPlanRevision(
                 client,
-                submissionID,
+                pkgID,
                 revisionID,
                 formData,
                 submitInfo
             ),
-        insertHealthPlanRevision: (submissionID, unlockInfo, draft) =>
+        insertHealthPlanRevision: (pkgID, unlockInfo, draft) =>
             insertHealthPlanRevision(client, {
-                submissionID,
+                pkgID,
                 unlockInfo,
                 draft,
             }),

@@ -14,6 +14,7 @@ import {
     LockedHealthPlanFormDataType,
     CognitoUserType,
     CognitoStateUserType,
+    UnlockedHealthPlanFormDataType,
 } from '../../app-web/src/common-code/domain-models'
 
 const testEmailConfig: EmailConfiguration = {
@@ -62,7 +63,7 @@ const testEmailer = (customConfig?: EmailConfiguration): Emailer => {
             return this.sendEmail(emailData)
         },
         sendUnlockPackageStateEmail: function async(
-            submission: LockedHealthPlanFormDataType,
+            submission: UnlockedHealthPlanFormDataType,
             updatedEmailData: UpdatedEmailData
         ): Promise<void | Error> {
             const emailData = unlockPackageStateEmail(
@@ -108,7 +109,7 @@ const mockUser = (): CognitoStateUserType => {
     }
 }
 
-const mockContractAndRatesSubmission = (
+const mockContractAndRatesFormData = (
     submissionPartial?: Partial<LockedHealthPlanFormDataType>
 ): LockedHealthPlanFormDataType => {
     return {
@@ -166,7 +167,7 @@ const mockContractAndRatesSubmission = (
     }
 }
 
-const mockContractOnlySubmission = (
+const mockContractOnlyFormData = (
     submissionPartial?: Partial<LockedHealthPlanFormDataType>
 ): LockedHealthPlanFormDataType => {
     return {
@@ -213,7 +214,7 @@ const mockContractOnlySubmission = (
     }
 }
 
-const mockContractAmendmentSubmission = (
+const mockContractAmendmentFormData = (
     submissionPartial?: Partial<LockedHealthPlanFormDataType>
 ): LockedHealthPlanFormDataType => {
     return {
@@ -273,9 +274,9 @@ const mockContractAmendmentSubmission = (
 
 export {
     testEmailConfig,
-    mockContractAmendmentSubmission,
-    mockContractOnlySubmission,
-    mockContractAndRatesSubmission,
+    mockContractAmendmentFormData,
+    mockContractOnlyFormData,
+    mockContractAndRatesFormData,
     mockUser,
     testEmailer,
 }

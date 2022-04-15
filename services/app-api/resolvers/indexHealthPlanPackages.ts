@@ -21,7 +21,7 @@ export function indexHealthPlanPackagesResolver(
         setResolverDetailsOnActiveSpan('fetchHealthPlanPackage', user, span)
         if (!isStateUser(user)) {
             const errMsg = 'user not authorized to fetch state data'
-            logError('indexSubmissions', errMsg)
+            logError('indexHealthPlanPackages', errMsg)
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw new ForbiddenError(errMsg)
         }
@@ -30,15 +30,15 @@ export function indexHealthPlanPackagesResolver(
         const results = await store.findAllHealthPlanPackages(user.state_code)
 
         if (isStoreError(results)) {
-            const errMessage = `Issue finding a draft submission of type ${results.code}. Message: ${results.message}`
+            const errMessage = `Issue finding packages of type ${results.code}. Message: ${results.message}`
             logError('indexHealthPlanPackages', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
 
-        const submissions: HealthPlanPackageType[] = results
+        const pacakges: HealthPlanPackageType[] = results
 
-        const edges = submissions.map((sub) => {
+        const edges = pacakges.map((sub) => {
             return {
                 node: {
                     ...sub,

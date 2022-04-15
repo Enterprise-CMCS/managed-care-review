@@ -10,7 +10,7 @@ import {
 } from '../testHelpers/gqlHelpers'
 
 describe('fetchHealthPlanPackage', () => {
-    it('returns draft submission payload with one revision', async () => {
+    it('returns package with one revision', async () => {
         const server = await constructTestPostgresServer()
 
         // First, create a new submission

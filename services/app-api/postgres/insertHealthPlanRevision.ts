@@ -7,28 +7,28 @@ import {
 } from '../../app-web/src/common-code/domain-models'
 import { toProtoBuffer } from '../../app-web/src/common-code/proto/stateSubmission'
 import { convertPrismaErrorToStoreError, StoreError } from './storeError'
-import { convertToHealthPlanPackageType } from './submissionWithRevisionsHelpers'
+import { convertToHealthPlanPackageType } from './healthPlanPackageHelpers'
 
-export type InsertSubmissionRevisionArgsType = {
-    submissionID: string
+export type InsertHealthPlanRevisionArgsType = {
+    pkgID: string
     unlockInfo: UpdateInfoType
     draft: UnlockedHealthPlanFormDataType
 }
 
 export async function insertHealthPlanRevision(
     client: PrismaClient,
-    args: InsertSubmissionRevisionArgsType
+    args: InsertHealthPlanRevisionArgsType
 ): Promise<HealthPlanPackageType | StoreError> {
     const protobuf = toProtoBuffer(args.draft)
 
     const buffer = Buffer.from(protobuf)
 
-    const { unlockInfo, submissionID } = args
+    const { unlockInfo, pkgID } = args
 
     try {
         const submission = await client.healthPlanPackageTable.update({
             where: {
-                id: submissionID,
+                id: pkgID,
             },
             data: {
                 revisions: {

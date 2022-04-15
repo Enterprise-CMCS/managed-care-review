@@ -1,6 +1,6 @@
 import { ApolloServer } from 'apollo-server-lambda'
 import CREATE_HEALTH_PLAN_PACKAGE from '../../app-graphql/src/mutations/createHealthPlanPackage.graphql'
-import SUBMIT_DRAFT_SUBMISSION from '../../app-graphql/src/mutations/submitHealthPlanPackage.graphql'
+import SUBMIT_HEALTH_PLAN_PACKAGE from '../../app-graphql/src/mutations/submitHealthPlanPackage.graphql'
 import UNLOCK_HEALTH_PLAN_PACKAGE from '../../app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
 import FETCH_HEALTH_PLAN_PACKAGE from '../../app-graphql/src/queries/fetchHealthPlanPackage.graphql'
 import UPDATE_HEALTH_PLAN_FORM_DATA from '../../app-graphql/src/mutations/updateHealthPlanFormData.graphql'
@@ -86,7 +86,7 @@ const createTestHealthPlanPackage = async (
     })
     if (result.errors) {
         throw new Error(
-            `createTestDraftSubmission mutation failed with errors ${result.errors}`
+            `createTestHealthPlanPackage mutation failed with errors ${result.errors}`
         )
     }
 
@@ -127,9 +127,9 @@ const updateTestHealthPlanFormData = async (
     return updateResult.data.updateHealthPlanFormData.pkg
 }
 
-const createAndUpdateTestDraftSubmission = async (
+const createAndUpdateTestHealthPlanPackage = async (
     server: ApolloServer,
-    partialDraftSubmissionUpdates?: Partial<UnlockedHealthPlanFormDataType>
+    partialUpdates?: Partial<UnlockedHealthPlanFormDataType>
 ): Promise<HealthPlanPackage> => {
     const pkg = await createTestHealthPlanPackage(server)
     const draft = latestFormData(pkg)
@@ -178,7 +178,7 @@ const createAndUpdateTestDraftSubmission = async (
         },
     ]
 
-    Object.assign(draft, partialDraftSubmissionUpdates)
+    Object.assign(draft, partialUpdates)
 
     const updatedDraft = await updateTestHealthPlanFormData(server, draft)
 
@@ -186,7 +186,7 @@ const createAndUpdateTestDraftSubmission = async (
 }
 
 const createAndSubmitTestHealthPlanPackage = async (server: ApolloServer) => {
-    const pkg = await createAndUpdateTestDraftSubmission(server)
+    const pkg = await createAndUpdateTestHealthPlanPackage(server)
     return await submitTestHealthPlanPackage(server, pkg.id)
 }
 
@@ -195,7 +195,7 @@ const submitTestHealthPlanPackage = async (
     pkgID: string
 ) => {
     const updateResult = await server.executeOperation({
-        query: SUBMIT_DRAFT_SUBMISSION,
+        query: SUBMIT_HEALTH_PLAN_PACKAGE,
         variables: {
             input: {
                 pkgID,
@@ -223,7 +223,7 @@ const resubmitTestHealthPlanPackage = async (
     submittedReason: string
 ) => {
     const updateResult = await server.executeOperation({
-        query: SUBMIT_DRAFT_SUBMISSION,
+        query: SUBMIT_HEALTH_PLAN_PACKAGE,
         variables: {
             input: {
                 pkgID,
@@ -235,12 +235,12 @@ const resubmitTestHealthPlanPackage = async (
     if (updateResult.errors) {
         console.log('errors', updateResult.errors)
         throw new Error(
-            `resubmitTestDraftSubmission mutation failed with errors ${updateResult.errors}`
+            `resubmitTestHealthPlanPackage mutation failed with errors ${updateResult.errors}`
         )
     }
 
     if (updateResult.data === undefined || updateResult.data === null) {
-        throw new Error('resubmitTestDraftSubmission returned nothing')
+        throw new Error('resubmitTestHealthPlanPackage returned nothing')
     }
 
     return updateResult.data.submitHealthPlanPackage.pkg
@@ -248,14 +248,14 @@ const resubmitTestHealthPlanPackage = async (
 
 const unlockTestHealthPlanPackage = async (
     server: ApolloServer,
-    submissionID: string,
+    pkgID: string,
     unlockedReason: string
 ): Promise<HealthPlanPackage> => {
     const updateResult = await server.executeOperation({
         query: UNLOCK_HEALTH_PLAN_PACKAGE,
         variables: {
             input: {
-                pkgID: submissionID,
+                pkgID: pkgID,
                 unlockedReason,
             },
         },
@@ -264,12 +264,12 @@ const unlockTestHealthPlanPackage = async (
     if (updateResult.errors) {
         console.log('errors', updateResult.errors)
         throw new Error(
-            `unlockTestDraftSubmission mutation failed with errors ${updateResult.errors}`
+            `unlockTestHealthPlanPackage mutation failed with errors ${updateResult.errors}`
         )
     }
 
     if (updateResult.data === undefined || updateResult.data === null) {
-        throw new Error('unlockTestDraftSubmission returned nothing')
+        throw new Error('unlockTestHealthPlanPackage returned nothing')
     }
 
     return updateResult.data.unlockHealthPlanPackage.pkg
@@ -300,7 +300,7 @@ const fetchTestHealthPlanPackageById = async (
 export {
     constructTestPostgresServer,
     createTestHealthPlanPackage,
-    createAndUpdateTestDraftSubmission,
+    createAndUpdateTestHealthPlanPackage,
     createAndSubmitTestHealthPlanPackage,
     updateTestHealthPlanFormData,
     fetchTestHealthPlanPackageById,

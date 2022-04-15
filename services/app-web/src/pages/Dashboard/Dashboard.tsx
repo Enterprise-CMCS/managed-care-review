@@ -4,7 +4,7 @@ import dayjs from 'dayjs'
 import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import {
-    submissionName,
+    packageName,
     programNames,
     HealthPlanPackageStatusType,
 } from '../../common-code/domain-models'
@@ -113,7 +113,7 @@ export const Dashboard = (): React.ReactElement => {
 
             submissionRows.push({
                 id: sub.id,
-                name: submissionName(currentSubmissionData, programs),
+                name: packageName(currentSubmissionData, programs),
                 programIDs: programNames(
                     programs,
                     currentSubmissionData.programIDs

@@ -9,45 +9,44 @@ export type HealthPlanPackageWithRevisionsTable = HealthPlanPackageTable & {
     revisions: HealthPlanRevisionTable[]
 }
 
-// Return first revision associated with a submission or return a StoreError if there is submission or revisions
-// used validate prisma results have useable submission
+// getCurrentRevision returns the first revision associated with a package
 const getCurrentRevision = (
-    submissionID: string,
-    submissionResult: HealthPlanPackageWithRevisionsTable | null
+    pkgID: string,
+    pkg: HealthPlanPackageWithRevisionsTable | null
 ): HealthPlanRevisionTable | StoreError => {
-    if (!submissionResult)
+    if (!pkg)
         return {
             code: 'UNEXPECTED_EXCEPTION' as const,
-            message: `No package found for id: ${submissionID}`,
+            message: `No package found for id: ${pkgID}`,
         }
 
-    if (!submissionResult.revisions || submissionResult.revisions.length < 1)
+    if (!pkg.revisions || pkg.revisions.length < 1)
         return {
             code: 'UNEXPECTED_EXCEPTION' as const,
-            message: `No revisions found for package id: ${submissionID}`,
+            message: `No revisions found for package id: ${pkgID}`,
         }
 
     // run through the list of revisions, get the newest one.
     // If we ORDERED BY before getting these, we could probably simplify this.
-    const newestRev = submissionResult.revisions.reduce((acc, revision) => {
+    const newestRev = pkg.revisions.reduce((acc, revision) => {
         if (revision.createdAt > acc.createdAt) {
             return revision
         } else {
             return acc
         }
-    }, submissionResult.revisions[0])
+    }, pkg.revisions[0])
 
     return newestRev
 }
 
 // convertToHealthPlanPackageType transforms the DB representation of StateSubmissionWithRevisions into our HealthPlanPackageType
 function convertToHealthPlanPackageType(
-    dbSub: HealthPlanPackageWithRevisionsTable
+    dbPkg: HealthPlanPackageWithRevisionsTable
 ): HealthPlanPackageType {
     return {
-        id: dbSub.id,
-        stateCode: dbSub.stateCode,
-        revisions: dbSub.revisions.map((r) => {
+        id: dbPkg.id,
+        stateCode: dbPkg.stateCode,
+        revisions: dbPkg.revisions.map((r) => {
             let submitInfo: UpdateInfoType | undefined = undefined
             if (r.submittedAt && r.submittedReason && r.submittedBy) {
                 submitInfo = {

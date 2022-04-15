@@ -1,7 +1,7 @@
 import SUBMIT_HEALTH_PLAN_PACKAGE from '../../app-graphql/src/mutations/submitHealthPlanPackage.graphql'
 import {
     constructTestPostgresServer,
-    createAndUpdateTestDraftSubmission,
+    createAndUpdateTestHealthPlanPackage,
     fetchTestHealthPlanPackageById,
     defaultContext,
     defaultFloridaProgram,
@@ -11,7 +11,7 @@ import {
 } from '../testHelpers/gqlHelpers'
 import { testEmailConfig, testEmailer } from '../testHelpers/emailerHelpers'
 import { base64ToDomain } from '../../app-web/src/common-code/proto/stateSubmission'
-import { submissionName } from '../../app-web/src/common-code/domain-models'
+import { packageName } from '../../app-web/src/common-code/domain-models'
 import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
 
 describe('submitHealthPlanPackage', () => {
@@ -19,7 +19,10 @@ describe('submitHealthPlanPackage', () => {
         const server = await constructTestPostgresServer()
 
         // setup
-        const initialPkg = await createAndUpdateTestDraftSubmission(server, {})
+        const initialPkg = await createAndUpdateTestHealthPlanPackage(
+            server,
+            {}
+        )
         const draft = latestFormData(initialPkg)
         const draftID = draft.id
 
@@ -85,7 +88,7 @@ describe('submitHealthPlanPackage', () => {
     it('returns an error if there are no contract documents attached', async () => {
         const server = await constructTestPostgresServer()
 
-        const draft = await createAndUpdateTestDraftSubmission(server, {
+        const draft = await createAndUpdateTestHealthPlanPackage(server, {
             documents: [],
             contractDocuments: [],
         })
@@ -104,14 +107,14 @@ describe('submitHealthPlanPackage', () => {
 
         expect(submitResult.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
         expect(submitResult.errors?.[0].extensions?.message).toBe(
-            'submissions must have valid documents'
+            'formData must have valid documents'
         )
     })
 
     it('returns an error if there are no contract details fields', async () => {
         const server = await constructTestPostgresServer()
 
-        const draft = await createAndUpdateTestDraftSubmission(server, {
+        const draft = await createAndUpdateTestHealthPlanPackage(server, {
             contractType: undefined,
             contractExecutionStatus: undefined,
             managedCareEntities: [],
@@ -132,14 +135,14 @@ describe('submitHealthPlanPackage', () => {
 
         expect(submitResult.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
         expect(submitResult.errors?.[0].extensions?.message).toBe(
-            'submissions is missing required contract fields'
+            'formData is missing required contract fields'
         )
     })
 
     it('returns an error if there are missing rate details fields for submission type', async () => {
         const server = await constructTestPostgresServer()
 
-        const draft = await createAndUpdateTestDraftSubmission(server, {
+        const draft = await createAndUpdateTestHealthPlanPackage(server, {
             submissionType: 'CONTRACT_AND_RATES',
             rateType: undefined,
             rateDateStart: undefined,
@@ -161,14 +164,14 @@ describe('submitHealthPlanPackage', () => {
 
         expect(submitResult.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
         expect(submitResult.errors?.[0].extensions?.message).toBe(
-            'submission is missing required rate fields'
+            'formData is missing required rate fields'
         )
     })
 
     it('returns an error if there are invalid rate details fields for submission type', async () => {
         const server = await constructTestPostgresServer()
 
-        const draft = await createAndUpdateTestDraftSubmission(server, {
+        const draft = await createAndUpdateTestHealthPlanPackage(server, {
             submissionType: 'CONTRACT_ONLY',
             rateDateStart: new Date(Date.UTC(2025, 5, 1)),
             rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
@@ -189,7 +192,7 @@ describe('submitHealthPlanPackage', () => {
 
         expect(submitResult.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
         expect(submitResult.errors?.[0].extensions?.message).toBe(
-            'submission includes invalid rate fields'
+            'formData includes invalid rate fields'
         )
     })
 
@@ -200,7 +203,7 @@ describe('submitHealthPlanPackage', () => {
         const server = await constructTestPostgresServer({
             emailer: mockEmailer,
         })
-        const draft = await createAndUpdateTestDraftSubmission(server, {})
+        const draft = await createAndUpdateTestHealthPlanPackage(server, {})
         const draftID = draft.id
 
         await new Promise((resolve) => setTimeout(resolve, 2000)) // TODO: why is this here in other tests??
@@ -224,7 +227,7 @@ describe('submitHealthPlanPackage', () => {
         const server = await constructTestPostgresServer({
             emailer: mockEmailer,
         })
-        const draft = await createAndUpdateTestDraftSubmission(server, {})
+        const draft = await createAndUpdateTestHealthPlanPackage(server, {})
         const draftID = draft.id
 
         await new Promise((resolve) => setTimeout(resolve, 2000)) // TODO: why is this here in other tests??
@@ -246,7 +249,7 @@ describe('submitHealthPlanPackage', () => {
         }
 
         const programs = [defaultFloridaProgram()]
-        const name = submissionName(sub, programs)
+        const name = packageName(sub, programs)
 
         // email subject line is correct for CMS email
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
@@ -270,7 +273,7 @@ describe('submitHealthPlanPackage', () => {
         })
 
         const currentUser = defaultContext().user // need this to reach into gql tests and understand who current user is
-        const draft = await createAndUpdateTestDraftSubmission(server, {})
+        const draft = await createAndUpdateTestHealthPlanPackage(server, {})
         const draftID = draft.id
 
         await new Promise((resolve) => setTimeout(resolve, 2000)) // TODO: why is this here in other tests??
@@ -294,7 +297,7 @@ describe('submitHealthPlanPackage', () => {
         }
 
         const programs = [defaultFloridaProgram()]
-        const name = submissionName(sub, programs)
+        const name = packageName(sub, programs)
 
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -312,7 +315,7 @@ describe('submitHealthPlanPackage', () => {
         const server = await constructTestPostgresServer({
             emailer: mockEmailer,
         })
-        const draft = await createAndUpdateTestDraftSubmission(server, {})
+        const draft = await createAndUpdateTestHealthPlanPackage(server, {})
         const draftID = draft.id
 
         await new Promise((resolve) => setTimeout(resolve, 2000)) // TODO: why is this here in other tests??
@@ -336,7 +339,7 @@ describe('submitHealthPlanPackage', () => {
         }
 
         const programs = [defaultFloridaProgram()]
-        const name = submissionName(sub, programs)
+        const name = packageName(sub, programs)
 
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -396,7 +399,7 @@ describe('submitHealthPlanPackage', () => {
         }
 
         const programs = [defaultFloridaProgram()]
-        const name = submissionName(sub, programs)
+        const name = packageName(sub, programs)
 
         // email subject line is correct for CMS email and contains correct email body text
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
@@ -459,7 +462,7 @@ describe('submitHealthPlanPackage', () => {
         }
 
         const programs = [defaultFloridaProgram()]
-        const name = submissionName(sub, programs)
+        const name = packageName(sub, programs)
 
         // email subject line is correct for CMS email and contains correct email body text
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
@@ -481,7 +484,7 @@ describe('submitHealthPlanPackage', () => {
         const server = await constructTestPostgresServer({
             emailer: mockEmailer,
         })
-        const draft = await createAndUpdateTestDraftSubmission(server, {
+        const draft = await createAndUpdateTestHealthPlanPackage(server, {
             submissionType: 'CONTRACT_ONLY',
             rateDateStart: new Date(Date.UTC(2025, 5, 1)),
             rateDateEnd: new Date(Date.UTC(2026, 4, 30)),

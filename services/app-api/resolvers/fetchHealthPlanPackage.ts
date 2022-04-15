@@ -24,8 +24,7 @@ export function fetchHealthPlanPackageResolver(
         const result = await store.findHealthPlanPackage(input.pkgID)
 
         if (isStoreError(result)) {
-            console.log('Error finding a submission', result)
-            const errMessage = `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
+            const errMessage = `Issue finding a package of type ${result.code}. Message: ${result.message}`
             logError('fetchHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
@@ -33,16 +32,16 @@ export function fetchHealthPlanPackageResolver(
 
         if (result === undefined) {
             return {
-                submission: undefined,
+                pkg: undefined,
             }
         }
 
-        const submission: HealthPlanPackageType = result
+        const pkg: HealthPlanPackageType = result
 
         // Authorization CMS users can view, state users can only view if the state matches
         if (isStateUser(context.user)) {
             const stateFromCurrentUser: State['code'] = context.user.state_code
-            if (submission.stateCode !== stateFromCurrentUser) {
+            if (pkg.stateCode !== stateFromCurrentUser) {
                 logError(
                     'fetchHealthPlanPackage',
                     'user not authorized to fetch data from a different state'
@@ -56,7 +55,7 @@ export function fetchHealthPlanPackageResolver(
                 )
             }
         } else if (isCMSUser(context.user)) {
-            if (packageStatus(submission) === 'DRAFT') {
+            if (packageStatus(pkg) === 'DRAFT') {
                 logError(
                     'fetchHealthPlanPackage',
                     'CMS user not authorized to fetch a draft'
@@ -77,6 +76,6 @@ export function fetchHealthPlanPackageResolver(
 
         logSuccess('fetchHealthPlanPackage')
         setSuccessAttributesOnActiveSpan(span)
-        return { pkg: submission }
+        return { pkg }
     }
 }

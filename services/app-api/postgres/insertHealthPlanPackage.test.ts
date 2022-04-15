@@ -4,7 +4,7 @@ import { sharedTestPrismaClient } from '../testHelpers/storeHelpers'
 import { insertHealthPlanPackage } from './insertHealthPlanPackage'
 import { isStoreError } from './storeError'
 
-describe('insertDraftSubmissionPostgres', () => {
+describe('insertHealthPlanPackage', () => {
     // TODO this test needs to be improved its not testing anything
     // eslint-disable-next-line jest/expect-expect
     it('increases state number with every insertion', async () => {

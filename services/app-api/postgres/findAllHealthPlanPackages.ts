@@ -9,9 +9,9 @@ import {
     convertToHealthPlanPackageType,
     getCurrentRevision,
     HealthPlanPackageWithRevisionsTable,
-} from './submissionWithRevisionsHelpers'
+} from './healthPlanPackageHelpers'
 
-export async function findAllSubmissionWrapper(
+export async function findAllPackagesWrapper(
     client: PrismaClient,
     stateCode: string
 ): Promise<HealthPlanPackageWithRevisionsTable[] | StoreError> {
@@ -41,7 +41,7 @@ export async function findAllHealthPlanPackages(
     client: PrismaClient,
     stateCode: string
 ): Promise<HealthPlanPackageType[] | StoreError> {
-    const findResult = await findAllSubmissionWrapper(client, stateCode)
+    const findResult = await findAllPackagesWrapper(client, stateCode)
 
     if (isStoreError(findResult)) {
         return findResult

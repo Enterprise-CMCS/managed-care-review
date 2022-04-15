@@ -204,8 +204,8 @@ describe('updateHealthPlanFormData', () => {
             server
         )
 
-        const draftSubmission = basicHealthPlanFormData()
-        const b64 = domainToBase64(draftSubmission)
+        const draft = basicHealthPlanFormData()
+        const b64 = domainToBase64(draft)
 
         const updateResult = await server.executeOperation({
             query: UPDATE_HEALTH_PLAN_FORM_DATA,
@@ -224,7 +224,7 @@ describe('updateHealthPlanFormData', () => {
 
         expect(updateResult.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
         expect(updateResult.errors[0].message).toContain(
-            'Submission is not in editable state'
+            'Package is not in editable state:'
         )
         expect(updateResult.errors[0].message).toContain('status: SUBMITTED')
     })

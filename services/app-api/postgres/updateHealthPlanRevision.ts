@@ -13,11 +13,11 @@ import {
 import {
     convertToHealthPlanPackageType,
     HealthPlanPackageWithRevisionsTable,
-} from './submissionWithRevisionsHelpers'
+} from './healthPlanPackageHelpers'
 
 export async function updateRevisionWrapper(
     client: PrismaClient,
-    submissionID: string,
+    pkgID: string,
     revisionID: string,
     proto: Buffer,
     submitInfo?: UpdateInfoType
@@ -35,7 +35,7 @@ export async function updateRevisionWrapper(
     try {
         const updateResult = await client.healthPlanPackageTable.update({
             where: {
-                id: submissionID,
+                id: pkgID,
             },
             data: {
                 revisions: {
@@ -64,7 +64,7 @@ export async function updateRevisionWrapper(
 
 export async function updateHealthPlanRevision(
     client: PrismaClient,
-    submissionID: string,
+    pkgID: string,
     revisionID: string,
     formData: HealthPlanFormDataType,
     submitInfo?: UpdateInfoType
@@ -76,7 +76,7 @@ export async function updateHealthPlanRevision(
 
     const updateResult = await updateRevisionWrapper(
         client,
-        submissionID,
+        pkgID,
         revisionID,
         buffer,
         submitInfo

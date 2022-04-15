@@ -4,7 +4,7 @@ import { constructTestPostgresServer } from '../testHelpers/gqlHelpers'
 import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
 
 describe('createHealthPlanPackage', () => {
-    it('returns draft submission payload with a draft submission', async () => {
+    it('returns package with unlocked form data', async () => {
         const server = await constructTestPostgresServer()
 
         const input: CreateHealthPlanPackageInput = {

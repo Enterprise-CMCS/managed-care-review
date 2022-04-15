@@ -60,7 +60,7 @@ export function createHealthPlanPackageResolver(
             })
         }
 
-        const dbDraftSubmission: InsertHealthPlanPackageArgsType = {
+        const insertArgs: InsertHealthPlanPackageArgsType = {
             stateCode: stateFromCurrentUser,
             programIDs: input.programIDs,
             submissionDescription: input.submissionDescription,
@@ -68,9 +68,9 @@ export function createHealthPlanPackageResolver(
                 input.submissionType as InsertHealthPlanPackageArgsType['submissionType'],
         }
 
-        const pkgResult = await store.insertHealthPlanPackage(dbDraftSubmission)
+        const pkgResult = await store.insertHealthPlanPackage(insertArgs)
         if (isStoreError(pkgResult)) {
-            const errMessage = `Issue creating a draft submission of type ${pkgResult.code}. Message: ${pkgResult.message}`
+            const errMessage = `Error creating a package of type ${pkgResult.code}. Message: ${pkgResult.message}`
             logError('createHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)

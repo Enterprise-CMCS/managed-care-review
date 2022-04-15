@@ -4,7 +4,7 @@ import {
     isCMSUser,
     LockedHealthPlanFormDataType,
     UpdateInfoType,
-    submissionName,
+    packageName,
     HealthPlanPackageType,
     packageStatus,
 } from '../../app-web/src/common-code/domain-models'
@@ -19,8 +19,8 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from './attributeHelper'
 
-// unlock takes a state submission and casts it into a draft submission
-// Since draft submission is a strict subset of submitted submission, this can't error today.
+// unlock is a state machine transforming a LockedFormDatya and turning it into UnlockedFormData
+// Since Unlocked is a strict subset of Locked, this can't error today.
 function unlock(
     submission: LockedHealthPlanFormDataType
 ): UnlockedHealthPlanFormDataType {
@@ -34,8 +34,7 @@ function unlock(
     return draft
 }
 
-// unlockHealthPlanPackageResolver is a state machine transition for Submission,
-// transforming it from a DraftSubmission to a StateSubmission
+// unlockHealthPlanPackageResolver is a state machine transition for HealthPlanPackage
 export function unlockHealthPlanPackageResolver(
     store: Store,
     emailer: Emailer
@@ -49,27 +48,27 @@ export function unlockHealthPlanPackageResolver(
         if (!isCMSUser(user)) {
             logError(
                 'unlockHealthPlanPackage',
-                'user not authorized to unlock submission'
+                'user not authorized to unlock package'
             )
             setErrorAttributesOnActiveSpan(
-                'user not authorized to unlock submission',
+                'user not authorized to unlock package',
                 span
             )
-            throw new ForbiddenError('user not authorized to unlock submission')
+            throw new ForbiddenError('user not authorized to unlock package')
         }
 
         // fetch from the store
         const result = await store.findHealthPlanPackage(pkgID)
 
         if (isStoreError(result)) {
-            const errMessage = `Issue finding a state submission of type ${result.code}. Message: ${result.message}`
+            const errMessage = `Issue finding a package of type ${result.code}. Message: ${result.message}`
             logError('unlockHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
 
         if (result === undefined) {
-            const errMessage = `A submission must exist to be unlocked: ${pkgID}`
+            const errMessage = `A package must exist to be unlocked: ${pkgID}`
             logError('unlockHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
@@ -83,8 +82,7 @@ export function unlockHealthPlanPackageResolver(
 
         // Check that the package is in an unlockable state
         if (pkgStatus === 'UNLOCKED' || pkgStatus === 'DRAFT') {
-            const errMessage =
-                'Attempted to unlock submission with wrong status'
+            const errMessage = 'Attempted to unlock package with wrong status'
             logError('unlockHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage)
@@ -99,7 +97,7 @@ export function unlockHealthPlanPackageResolver(
         }
 
         if (formDataResult.status !== 'SUBMITTED') {
-            const errMessage = `A locked submission had unlocked formData.`
+            const errMessage = `A locked package had unlocked formData.`
             logError('unlockHealthPlanPackage', errMessage)
             throw new Error(errMessage)
         }
@@ -120,7 +118,7 @@ export function unlockHealthPlanPackageResolver(
         )
 
         if (isStoreError(revisionResult)) {
-            const errMessage = `Issue unlocking a state submission of type ${revisionResult.code}. Message: ${revisionResult.message}`
+            const errMessage = `Issue unlocking a package of type ${revisionResult.code}. Message: ${revisionResult.message}`
             logError('unlockHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
@@ -135,11 +133,11 @@ export function unlockHealthPlanPackageResolver(
         }
 
         // Send emails!
-        const name = submissionName(draft, programs)
+        const name = packageName(draft, programs)
 
         const updatedEmailData = {
             ...unlockInfo,
-            submissionName: name,
+            packageName: name,
         }
         const unlockPackageCMSEmailResult =
             await emailer.sendUnlockPackageCMSEmail(updatedEmailData)

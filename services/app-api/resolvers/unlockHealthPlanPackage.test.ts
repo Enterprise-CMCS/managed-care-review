@@ -4,7 +4,7 @@ import { HealthPlanPackage } from '../gen/gqlServer'
 import { todaysDate } from '../testHelpers/dateHelpers'
 import {
     constructTestPostgresServer,
-    createAndUpdateTestDraftSubmission,
+    createAndUpdateTestHealthPlanPackage,
     createAndSubmitTestHealthPlanPackage,
     defaultFloridaProgram,
     fetchTestHealthPlanPackageById,
@@ -87,7 +87,7 @@ describe('unlockHealthPlanPackage', () => {
         ).toContain('Z')
     })
 
-    it('returns a DraftSubmission that can be updated without errors', async () => {
+    it('returns a package that can be updated without errors', async () => {
         const stateServer = await constructTestPostgresServer()
 
         // First, create a new submitted submission
@@ -253,7 +253,7 @@ describe('unlockHealthPlanPackage', () => {
         const err = (unlockResult.errors as GraphQLError[])[0]
 
         expect(err.extensions['code']).toBe('FORBIDDEN')
-        expect(err.message).toBe('user not authorized to unlock submission')
+        expect(err.message).toBe('user not authorized to unlock package')
     })
 
     it('returns errors if unlocked from the wrong state', async () => {
@@ -269,7 +269,7 @@ describe('unlockHealthPlanPackage', () => {
         })
 
         // First, create a new draft submission
-        const stateSubmission = await createAndUpdateTestDraftSubmission(
+        const stateSubmission = await createAndUpdateTestHealthPlanPackage(
             stateServer
         )
 
@@ -289,7 +289,7 @@ describe('unlockHealthPlanPackage', () => {
 
         expect(err.extensions['code']).toBe('BAD_USER_INPUT')
         expect(err.message).toBe(
-            'Attempted to unlock submission with wrong status'
+            'Attempted to unlock package with wrong status'
         )
 
         await submitTestHealthPlanPackage(stateServer, stateSubmission.id)
@@ -317,7 +317,7 @@ describe('unlockHealthPlanPackage', () => {
 
         expect(unlockErr.extensions['code']).toBe('BAD_USER_INPUT')
         expect(unlockErr.message).toBe(
-            'Attempted to unlock submission with wrong status'
+            'Attempted to unlock package with wrong status'
         )
     })
 
@@ -351,9 +351,7 @@ describe('unlockHealthPlanPackage', () => {
         const err = (unlockResult.errors as GraphQLError[])[0]
 
         expect(err.extensions['code']).toBe('BAD_USER_INPUT')
-        expect(err.message).toBe(
-            'A submission must exist to be unlocked: foo-bar'
-        )
+        expect(err.message).toBe('A package must exist to be unlocked: foo-bar')
     })
 
     it('returns an error if the DB errors', async () => {
@@ -387,7 +385,7 @@ describe('unlockHealthPlanPackage', () => {
 
         expect(err.extensions['code']).toBe('INTERNAL_SERVER_ERROR')
         expect(err.message).toBe(
-            'Issue finding a state submission of type UNEXPECTED_EXCEPTION. Message: this error came from the generic store with errors mock'
+            'Issue finding a package of type UNEXPECTED_EXCEPTION. Message: this error came from the generic store with errors mock'
         )
     })
 

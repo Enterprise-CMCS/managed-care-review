@@ -8,7 +8,7 @@ import {
 import {
     convertToHealthPlanPackageType,
     HealthPlanPackageWithRevisionsTable,
-} from './submissionWithRevisionsHelpers'
+} from './healthPlanPackageHelpers'
 
 export async function findUniqueSubmissionWrapper(
     client: PrismaClient,

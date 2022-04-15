@@ -47,10 +47,10 @@ function mockStoreThatErrors(): Store {
         findHealthPlanPackage: async (_draftUUID) => {
             return genericStoreError
         },
-        insertHealthPlanRevision: async (_submissionID, _draft) => {
+        insertHealthPlanRevision: async (_pkgID, _draft) => {
             return genericStoreError
         },
-        updateHealthPlanRevision: async (_submissionID, _formData) => {
+        updateHealthPlanRevision: async (_pkgID, _formData) => {
             return genericStoreError
         },
         findPrograms: () => {
