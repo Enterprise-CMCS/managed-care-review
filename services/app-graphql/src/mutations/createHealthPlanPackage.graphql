@@ -1,6 +1,6 @@
-query fetchSubmission2($input: FetchSubmission2Input!) {
-    fetchSubmission2(input: $input) {
-        submission {
+mutation createHealthPlanPackage($input: CreateHealthPlanPackageInput!) {
+    createHealthPlanPackage(input: $input) {
+        pkg {
             id
             stateCode
             state {
@@ -14,7 +14,7 @@ query fetchSubmission2($input: FetchSubmission2Input!) {
             status
             intiallySubmittedAt
             revisions {
-                revision {
+                node {
                     id
                     unlockInfo {
                         updatedAt
@@ -27,7 +27,7 @@ query fetchSubmission2($input: FetchSubmission2Input!) {
                         updatedReason
                     }
                     createdAt
-                    submissionData
+                    formDataProto
                 }
             }
         }

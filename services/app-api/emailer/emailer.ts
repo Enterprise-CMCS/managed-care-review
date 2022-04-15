@@ -7,9 +7,12 @@ import {
     unlockPackageStateEmail,
     resubmittedStateEmail,
     resubmittedCMSEmail,
-    UpdatedEmailData
+    UpdatedEmailData,
 } from './'
-import { StateSubmissionType, CognitoUserType } from '../../app-web/src/common-code/domain-models'
+import {
+    LockedHealthPlanFormDataType,
+    CognitoUserType,
+} from '../../app-web/src/common-code/domain-models'
 
 type EmailConfiguration = {
     stage: string
@@ -33,11 +36,11 @@ type EmailData = {
 type Emailer = {
     sendEmail: (emailData: EmailData) => Promise<void | Error>
     sendCMSNewPackage: (
-        submission: StateSubmissionType,
-        submissionName: string,
+        submission: LockedHealthPlanFormDataType,
+        submissionName: string
     ) => Promise<void | Error>
     sendStateNewPackage: (
-        submission: StateSubmissionType,
+        submission: LockedHealthPlanFormDataType,
         submissionName: string,
         user: CognitoUserType
     ) => Promise<void | Error>
@@ -45,16 +48,16 @@ type Emailer = {
         updatedEmailData: UpdatedEmailData
     ) => Promise<void | Error>
     sendUnlockPackageStateEmail: (
-        submission: StateSubmissionType,
+        submission: LockedHealthPlanFormDataType,
         updatedEmailData: UpdatedEmailData
     ) => Promise<void | Error>
     sendResubmittedStateEmail: (
-        submission: StateSubmissionType,
+        submission: LockedHealthPlanFormDataType,
         updatedEmailData: UpdatedEmailData,
         user: CognitoUserType
     ) => Promise<void | Error>
     sendResubmittedCMSEmail: (
-        submission: StateSubmissionType,
+        submission: LockedHealthPlanFormDataType,
         updatedEmailData: UpdatedEmailData
     ) => Promise<void | Error>
 }
@@ -70,18 +73,25 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
             }
 
             try {
-                const sesResult = await lambda.invoke(lambdaParams).promise()
+                await lambda.invoke(lambdaParams).promise()
                 return
             } catch (err) {
                 return new Error('SES email send failed. ' + err)
             }
         },
-        sendCMSNewPackage: async function (submission: StateSubmissionType, submissionName: string) {
-            const emailData = newPackageCMSEmail(submission, submissionName, config)
+        sendCMSNewPackage: async function (
+            submission: LockedHealthPlanFormDataType,
+            submissionName: string
+        ) {
+            const emailData = newPackageCMSEmail(
+                submission,
+                submissionName,
+                config
+            )
             return await this.sendEmail(emailData)
         },
         sendStateNewPackage: async function (
-            submission: StateSubmissionType,
+            submission: LockedHealthPlanFormDataType,
             submissionName: string,
             user: CognitoUserType
         ) {
@@ -93,29 +103,42 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
             )
             return await this.sendEmail(emailData)
         },
-        sendUnlockPackageCMSEmail: async function (updatedEmailData){
+        sendUnlockPackageCMSEmail: async function (updatedEmailData) {
             const emailData = unlockPackageCMSEmail(updatedEmailData, config)
             return await this.sendEmail(emailData)
         },
-        sendUnlockPackageStateEmail: async function (submission, updatedEmailData){
+        sendUnlockPackageStateEmail: async function (
+            submission,
+            updatedEmailData
+        ) {
             const emailData = unlockPackageStateEmail(
                 submission,
                 updatedEmailData,
-                config)
+                config
+            )
             return await this.sendEmail(emailData)
         },
         sendResubmittedStateEmail: async function (
             submission,
             updatedEmailData,
             user: CognitoUserType
-        ){
-            const emailData = resubmittedStateEmail(submission, user, updatedEmailData, config)
+        ) {
+            const emailData = resubmittedStateEmail(
+                submission,
+                user,
+                updatedEmailData,
+                config
+            )
             return await this.sendEmail(emailData)
         },
-        sendResubmittedCMSEmail: async function (submission, updatedEmailData){
-            const emailData = resubmittedCMSEmail(submission, updatedEmailData, config)
+        sendResubmittedCMSEmail: async function (submission, updatedEmailData) {
+            const emailData = resubmittedCMSEmail(
+                submission,
+                updatedEmailData,
+                config
+            )
             return await this.sendEmail(emailData)
-        }
+        },
     }
 }
 
@@ -127,18 +150,21 @@ const localEmailerLogger = (emailData: EmailData) =>
         ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
     `)
 
-
 function newLocalEmailer(config: EmailConfiguration): Emailer {
     return {
         sendEmail: async (emailData: EmailData): Promise<void | Error> => {
             localEmailerLogger(emailData)
         },
-        sendCMSNewPackage: async (submission: StateSubmissionType) => {
-            const emailData = newPackageCMSEmail(submission, 'some-title', config)
+        sendCMSNewPackage: async (submission: LockedHealthPlanFormDataType) => {
+            const emailData = newPackageCMSEmail(
+                submission,
+                'some-title',
+                config
+            )
             localEmailerLogger(emailData)
         },
         sendStateNewPackage: async (
-            submission: StateSubmissionType,
+            submission: LockedHealthPlanFormDataType,
             submissionName: string,
             user: CognitoUserType
         ) => {
@@ -157,25 +183,38 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
             localEmailerLogger(emailData)
         },
         sendUnlockPackageStateEmail: async (
-            submission: StateSubmissionType,
+            submission: LockedHealthPlanFormDataType,
             updatedEmailData: UpdatedEmailData
         ) => {
-            const emailData = unlockPackageStateEmail(submission, updatedEmailData, config)
+            const emailData = unlockPackageStateEmail(
+                submission,
+                updatedEmailData,
+                config
+            )
             localEmailerLogger(emailData)
         },
         sendResubmittedStateEmail: async (
-            submission: StateSubmissionType,
+            submission: LockedHealthPlanFormDataType,
             updatedEmailData: UpdatedEmailData,
             user: CognitoUserType
         ) => {
-            const emailData = resubmittedStateEmail(submission, user, updatedEmailData, config)
+            const emailData = resubmittedStateEmail(
+                submission,
+                user,
+                updatedEmailData,
+                config
+            )
             localEmailerLogger(emailData)
         },
         sendResubmittedCMSEmail: async (
-            submission: StateSubmissionType,
+            submission: LockedHealthPlanFormDataType,
             updatedEmailData: UpdatedEmailData
         ) => {
-            const emailData = resubmittedCMSEmail(submission, updatedEmailData, config)
+            const emailData = resubmittedCMSEmail(
+                submission,
+                updatedEmailData,
+                config
+            )
             localEmailerLogger(emailData)
         },
     }

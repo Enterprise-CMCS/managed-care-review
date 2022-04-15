@@ -1,6 +1,6 @@
-mutation unlockStateSubmission($input: UnlockStateSubmissionInput!) {
-    unlockStateSubmission(input: $input) {
-        submission {
+mutation unlockHealthPlanPackage($input: UnlockHealthPlanPackageInput!) {
+    unlockHealthPlanPackage(input: $input) {
+        pkg {
             id
             stateCode
             state {
@@ -14,7 +14,7 @@ mutation unlockStateSubmission($input: UnlockStateSubmissionInput!) {
             status
             intiallySubmittedAt
             revisions {
-                revision {
+                node {
                     id
                     unlockInfo {
                         updatedAt
@@ -27,7 +27,7 @@ mutation unlockStateSubmission($input: UnlockStateSubmissionInput!) {
                         updatedReason
                     }
                     createdAt
-                    submissionData
+                    formDataProto
                 }
             }
         }

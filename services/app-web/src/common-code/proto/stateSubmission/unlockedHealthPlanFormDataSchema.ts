@@ -52,7 +52,10 @@ const rateAmendmentInfoSchema = z.object({
 
 const contractTypeSchema = z.union([z.literal('BASE'), z.literal('AMENDMENT')])
 
-const contractExecutionStatusSchema = z.union([z.literal('EXECUTED'), z.literal('UNEXECUTED')])
+const contractExecutionStatusSchema = z.union([
+    z.literal('EXECUTED'),
+    z.literal('UNEXECUTED'),
+])
 
 const actuarialFirmTypeSchema = z.union([
     z.literal('MERCER'),
@@ -118,7 +121,7 @@ const rateTypeSchema = z.union([z.literal('NEW'), z.literal('AMENDMENT')])
 //     z.literal('RISK_SHARING_MECHANISM'),
 // ])
 
-export const draftSubmissionTypeSchema = z.object({
+export const unlockedHealthPlanFormDataSchema = z.object({
     id: z.string(),
     createdAt: z.date(),
     updatedAt: z.date(),

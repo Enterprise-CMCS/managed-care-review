@@ -1,6 +1,6 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import {
-    DraftSubmissionType,
+    UnlockedHealthPlanFormDataType,
     isStateUser,
 } from '../../app-web/src/common-code/domain-models'
 import {
@@ -11,11 +11,15 @@ import {
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
 import { pluralize } from '../../app-web/src/common-code/formatters'
-import { setErrorAttributesOnActiveSpan, setResolverDetailsOnActiveSpan, setSuccessAttributesOnActiveSpan } from "./attributeHelper";
+import {
+    setErrorAttributesOnActiveSpan,
+    setResolverDetailsOnActiveSpan,
+    setSuccessAttributesOnActiveSpan,
+} from './attributeHelper'
 
 // This MUTATES the passed in draft, overwriting all the current fields with the updated fields
 export function applyUpdates(
-    draft: DraftSubmissionType,
+    draft: UnlockedHealthPlanFormDataType,
     updates: DraftSubmissionUpdates
 ): void {
     const capitationRatesUpdates = updates.contractAmendmentInfo
@@ -101,14 +105,17 @@ export function updateDraftSubmissionResolver(
 ): MutationResolvers['updateDraftSubmission'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
-        setResolverDetailsOnActiveSpan('createDraftSubmission', user, span)
+        setResolverDetailsOnActiveSpan('updateDraftSubmission', user, span)
         // This resolver is only callable by state users
         if (!isStateUser(context.user)) {
             logError(
                 'updateDraftSubmission',
                 'user not authorized to modify state data'
             )
-            setErrorAttributesOnActiveSpan('user not authorized to modify state data', span)
+            setErrorAttributesOnActiveSpan(
+                'user not authorized to modify state data',
+                span
+            )
             throw new ForbiddenError('user not authorized to modify state data')
         }
 
@@ -129,7 +136,7 @@ export function updateDraftSubmissionResolver(
                 argumentName: 'submissionID',
             })
         }
-        const draft: DraftSubmissionType = result
+        const draft: UnlockedHealthPlanFormDataType = result
 
         // Authorize the update
         const stateFromCurrentUser: State['code'] = context.user.state_code
@@ -138,7 +145,10 @@ export function updateDraftSubmissionResolver(
                 'updateDraftSubmission',
                 'user not authorized to fetch data from a different state'
             )
-            setErrorAttributesOnActiveSpan('user not authorized to fetch data from a different state', span)
+            setErrorAttributesOnActiveSpan(
+                'user not authorized to fetch data from a different state',
+                span
+            )
             throw new ForbiddenError(
                 'user not authorized to fetch data from a different state'
             )
@@ -150,9 +160,19 @@ export function updateDraftSubmissionResolver(
             input.draftSubmissionUpdates.programIDs
         )
 
-        if (programs?.length !== input.draftSubmissionUpdates.programIDs.length) {
+        if (
+            programs?.length !== input.draftSubmissionUpdates.programIDs.length
+        ) {
             const count = input.draftSubmissionUpdates.programIDs.length
-            const errMessage = `The programs ${(pluralize('id', count))} ${input.draftSubmissionUpdates.programIDs.join(', ')} ${(pluralize('does', count))} not exist in state ${stateFromCurrentUser}`
+            const errMessage = `The programs ${pluralize(
+                'id',
+                count
+            )} ${input.draftSubmissionUpdates.programIDs.join(
+                ', '
+            )} ${pluralize(
+                'does',
+                count
+            )} not exist in state ${stateFromCurrentUser}`
             logError('updateDraftSubmission', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
@@ -170,7 +190,7 @@ export function updateDraftSubmissionResolver(
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
-        const updatedDraft: DraftSubmissionType = updateResult
+        const updatedDraft: UnlockedHealthPlanFormDataType = updateResult
 
         logSuccess('updateDraftSubmission')
         setSuccessAttributesOnActiveSpan(span)

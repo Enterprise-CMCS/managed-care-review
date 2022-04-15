@@ -2,11 +2,11 @@ import React from 'react'
 import { dayjs } from '../../dateHelpers/dayjs'
 import { SectionHeader } from '../SectionHeader'
 import { Accordion, Link } from '@trussworks/react-uswds'
-import { Submission2 } from '../../gen/gqlClient'
+import { HealthPlanPackage } from '../../gen/gqlClient'
 import { UpdateInfoType } from '../../common-code/domain-models'
 import styles from './ChangeHistory.module.scss'
 type ChangeHistoryProps = {
-    submission: Submission2
+    submission: HealthPlanPackage
 }
 
 type flatRevisions = UpdateInfoType & {
@@ -23,16 +23,16 @@ export const ChangeHistory = ({
         // submission & resubmission.
         const reversedRevisions = [...submission.revisions].reverse()
         reversedRevisions.forEach((r, index) => {
-            if (r.revision.unlockInfo) {
+            if (r.node.unlockInfo) {
                 const newUnlock: flatRevisions = {} as flatRevisions
-                newUnlock.updatedAt = r.revision.unlockInfo.updatedAt
-                newUnlock.updatedBy = r.revision.unlockInfo.updatedBy
-                newUnlock.updatedReason = r.revision.unlockInfo.updatedReason
+                newUnlock.updatedAt = r.node.unlockInfo.updatedAt
+                newUnlock.updatedBy = r.node.unlockInfo.updatedBy
+                newUnlock.updatedReason = r.node.unlockInfo.updatedReason
                 newUnlock.kind = 'unlock'
                 //Use unshift to push the latest revision unlock info to the beginning of the array
                 result.unshift(newUnlock)
             }
-            if (r.revision.submitInfo) {
+            if (r.node.submitInfo) {
                 const newSubmit: flatRevisions = {} as flatRevisions
 
                 //Only set revisionVersion if not the latest revision.
@@ -41,9 +41,9 @@ export const ChangeHistory = ({
                         ? String(index + 1) //Offset version, we want to start at 1
                         : undefined
 
-                newSubmit.updatedAt = r.revision.submitInfo.updatedAt
-                newSubmit.updatedBy = r.revision.submitInfo.updatedBy
-                newSubmit.updatedReason = r.revision.submitInfo.updatedReason
+                newSubmit.updatedAt = r.node.submitInfo.updatedAt
+                newSubmit.updatedBy = r.node.submitInfo.updatedBy
+                newSubmit.updatedReason = r.node.submitInfo.updatedReason
                 newSubmit.kind = 'submit'
                 newSubmit.revisionVersion = revisionVersion
                 //Use unshift to push the latest revision submit info to the beginning of the array

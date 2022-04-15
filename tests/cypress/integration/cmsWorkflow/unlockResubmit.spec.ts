@@ -90,7 +90,7 @@ describe('dashboard', () => {
                 cy.visit(reviewURL)
 
                 // State user can resubmit and see resubmitted package in dashboard
-                cy.wait('@fetchSubmission2Query')
+                cy.wait('@fetchHealthPlanPackageQuery')
 
                 //Unlock banner for state user to be present with correct data.
                  cy.findByRole('heading', {level: 2, name: /Review and submit/})
@@ -126,7 +126,7 @@ describe('dashboard', () => {
                 cy.get('table')
                     .findByText(submissionName)
                     .click()
-                cy.wait('@fetchSubmission2Query', { timeout: 50000 })
+                cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
                 cy.findByTestId('updatedSubmissionBanner').should('exist')
 
                 //Sign out

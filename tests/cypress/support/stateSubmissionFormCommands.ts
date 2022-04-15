@@ -198,8 +198,8 @@ Cypress.Commands.add('verifyDocumentsHaveNoErrors', () => {
 
 Cypress.Commands.add('submitStateSubmissionForm', (success = true, resubmission = false) => {
       cy.intercept('POST', '*/graphql', (req) => {
-          aliasMutation(req, 'submitDraftSubmission')
-          aliasQuery(req, 'indexSubmissions2')
+          aliasMutation(req, 'submitHealthPlanPackage')
+          aliasQuery(req, 'indexHealthPlanPackages')
       })
     cy.findByRole('heading', { level: 2, name: /Review and submit/ })
     cy.findByRole('button', {
@@ -214,9 +214,9 @@ Cypress.Commands.add('submitStateSubmissionForm', (success = true, resubmission 
             }
             cy.findByTestId('review-and-submit-modal-submit').click()
         })
-    cy.wait('@submitDraftSubmissionMutation', { timeout: 50000 })
+    cy.wait('@submitHealthPlanPackageMutation', { timeout: 50000 })
     if (success) {
-        cy.wait('@indexSubmissions2Query', { timeout: 50000 })
+        cy.wait('@indexHealthPlanPackagesQuery', { timeout: 50000 })
     }
 })
 
@@ -234,9 +234,9 @@ Cypress.Commands.add(
     'navigateForm',
     (buttonKey: FormButtonKey, waitForLoad = true) => {
         cy.intercept('POST', '*/graphql', (req) => {
-            aliasQuery(req, 'indexSubmissions2')
-            aliasQuery(req, 'fetchSubmission2')
-            aliasMutation(req, 'createSubmission2')
+            aliasQuery(req, 'indexHealthPlanPackages')
+            aliasQuery(req, 'fetchHealthPlanPackage')
+            aliasMutation(req, 'createHealthPlanPackage')
             aliasMutation(req, 'updateDraftSubmission')
             aliasMutation(req, 'updateHealthPlanFormData')
         })
@@ -246,13 +246,13 @@ Cypress.Commands.add(
         }).safeClick()
 
         if (buttonKey === 'SAVE_DRAFT') {
-            if (waitForLoad) cy.wait('@indexSubmissions2Query', { timeout: 20000 })
+            if (waitForLoad) cy.wait('@indexHealthPlanPackagesQuery', { timeout: 20000 })
             cy.findByTestId('dashboard-page').should('exist')
 
         } else if (buttonKey === 'CONTINUE_FROM_START_NEW') {
                  if (waitForLoad){
-                    cy.wait('@createSubmission2Mutation', { timeout: 50000 })
-                    cy.wait('@fetchSubmission2Query')
+                    cy.wait('@createHealthPlanPackageMutation', { timeout: 50000 })
+                    cy.wait('@fetchHealthPlanPackageQuery')
                  }
             cy.findByTestId('state-submission-form-page').should(
                 'exist'
@@ -260,13 +260,13 @@ Cypress.Commands.add(
         } else if (buttonKey === 'CONTINUE'){
             if (waitForLoad){
                 cy.wait('@updateDraftSubmissionMutation')
-                cy.wait('@fetchSubmission2Query')
+                cy.wait('@fetchHealthPlanPackageQuery')
             }
             cy.findByTestId('state-submission-form-page').should('exist')
         } else if (buttonKey === 'CONTINUE_WITH_NEW_UPDATE'){
             if (waitForLoad){
                 cy.wait('@updateHealthPlanFormDataMutation')
-                cy.wait('@fetchSubmission2Query')
+                cy.wait('@fetchHealthPlanPackageQuery')
             }
             cy.findByTestId('state-submission-form-page').should('exist')
         } else {

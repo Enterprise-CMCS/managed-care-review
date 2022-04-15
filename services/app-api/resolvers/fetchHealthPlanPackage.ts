@@ -1,23 +1,32 @@
 import { ForbiddenError } from 'apollo-server-lambda'
-import { isCMSUser, isStateUser, Submission2Type, submissionStatus } from '../../app-web/src/common-code/domain-models'
+import {
+    isCMSUser,
+    isStateUser,
+    HealthPlanPackageType,
+    packageStatus,
+} from '../../app-web/src/common-code/domain-models'
 import { QueryResolvers, State } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
-import { setErrorAttributesOnActiveSpan, setResolverDetailsOnActiveSpan, setSuccessAttributesOnActiveSpan } from "./attributeHelper";
+import {
+    setErrorAttributesOnActiveSpan,
+    setResolverDetailsOnActiveSpan,
+    setSuccessAttributesOnActiveSpan,
+} from './attributeHelper'
 
-export function fetchSubmission2Resolver(
+export function fetchHealthPlanPackageResolver(
     store: Store
-): QueryResolvers['fetchSubmission2'] {
+): QueryResolvers['fetchHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
-        setResolverDetailsOnActiveSpan('createDraftSubmission', user, span)
+        setResolverDetailsOnActiveSpan('fetchHealthPlanPackage', user, span)
         // fetch from the store
-        const result = await store.findSubmissionWithRevisions(input.submissionID)
+        const result = await store.findSubmissionWithRevisions(input.pkgID)
 
         if (isStoreError(result)) {
             console.log('Error finding a submission', result)
             const errMessage = `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
-            logError('fetchStateSubmission', errMessage)
+            logError('fetchHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
@@ -28,40 +37,46 @@ export function fetchSubmission2Resolver(
             }
         }
 
-        const submission: Submission2Type = result
+        const submission: HealthPlanPackageType = result
 
         // Authorization CMS users can view, state users can only view if the state matches
         if (isStateUser(context.user)) {
             const stateFromCurrentUser: State['code'] = context.user.state_code
             if (submission.stateCode !== stateFromCurrentUser) {
                 logError(
-                    'fetchStateSubmission',
+                    'fetchHealthPlanPackage',
                     'user not authorized to fetch data from a different state'
                 )
-                setErrorAttributesOnActiveSpan('user not authorized to fetch data from a different state', span)
+                setErrorAttributesOnActiveSpan(
+                    'user not authorized to fetch data from a different state',
+                    span
+                )
                 throw new ForbiddenError(
                     'user not authorized to fetch data from a different state'
                 )
             }
         } else if (isCMSUser(context.user)) {
-            if (submissionStatus(submission) === 'DRAFT'){
+            if (packageStatus(submission) === 'DRAFT') {
                 logError(
-                    'fetchStateSubmission',
+                    'fetchHealthPlanPackage',
                     'CMS user not authorized to fetch a draft'
                 )
-                setErrorAttributesOnActiveSpan('CMS user not authorized to fetch a draft', span)
+                setErrorAttributesOnActiveSpan(
+                    'CMS user not authorized to fetch a draft',
+                    span
+                )
                 throw new ForbiddenError(
                     'CMS user not authorized to fetch a draft'
                 )
             }
         } else {
-            logError('fetchStateSubmission', 'unknown user type')
+            logError('fetchHealthPlanPackage', 'unknown user type')
             setErrorAttributesOnActiveSpan('unknown user type', span)
             throw new ForbiddenError(`unknown user type`)
         }
 
-        logSuccess('fetchSubmission2')
+        logSuccess('fetchHealthPlanPackage')
         setSuccessAttributesOnActiveSpan(span)
-        return { submission }
+        return { pkg: submission }
     }
 }

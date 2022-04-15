@@ -1,18 +1,16 @@
 import { PrismaClient } from '@prisma/client'
-import { Submission2Type } from '../../app-web/src/common-code/domain-models'
+import { HealthPlanPackageType } from '../../app-web/src/common-code/domain-models'
 import { findAllSubmissionWrapper } from './findAllSubmissions'
+import { isStoreError, StoreError } from './storeError'
 import {
-    isStoreError,
-    StoreError
-} from './storeError'
-import { convertToSubmission2Type, getCurrentRevision } from './submissionWithRevisionsHelpers'
-
-
+    convertToHealthPlanPackageType,
+    getCurrentRevision,
+} from './submissionWithRevisionsHelpers'
 
 export async function findAllSubmissionsWithRevisions(
     client: PrismaClient,
     stateCode: string
-): Promise<Submission2Type[] | StoreError> {
+): Promise<HealthPlanPackageType[] | StoreError> {
     const findResult = await findAllSubmissionWrapper(client, stateCode)
 
     if (isStoreError(findResult)) {
@@ -23,7 +21,7 @@ export async function findAllSubmissionsWithRevisions(
         return findResult
     }
 
-    const submissions: Submission2Type[] = []
+    const submissions: HealthPlanPackageType[] = []
     const errors: Error | StoreError[] = []
     findResult.forEach((submissionWithRevisions) => {
         // check for current revision, if it doesn't exist, log an error
@@ -32,13 +30,17 @@ export async function findAllSubmissionsWithRevisions(
             submissionWithRevisions
         )
         if (isStoreError(currentRevisionOrError)) {
-             console.log(
-                 `ERROR submission ${submissionWithRevisions.id} does not have a current revision`
-             )
-            console.log(`ERROR findAllSubmissionsWithRevisions for ${stateCode} has ${errors.length} error(s)`)
+            console.log(
+                `ERROR submission ${submissionWithRevisions.id} does not have a current revision`
+            )
+            console.log(
+                `ERROR findAllSubmissionsWithRevisions for ${stateCode} has ${errors.length} error(s)`
+            )
             return
         }
-        const submission = convertToSubmission2Type(submissionWithRevisions)
+        const submission = convertToHealthPlanPackageType(
+            submissionWithRevisions
+        )
         submissions.push(submission)
     })
     // only return packages with valid revisions

@@ -10,10 +10,10 @@ import type {
     SubmissionType,
     ContractType,
     RateType,
-    ContractExecutionStatus
-} from './DraftSubmissionType'
+    ContractExecutionStatus,
+} from './UnlockedHealthPlanFormDataType'
 
-export type StateSubmissionType = {
+export type LockedHealthPlanFormDataType = {
     submittedAt: Date
     id: string
     status: 'SUBMITTED'

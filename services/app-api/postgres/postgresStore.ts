@@ -1,9 +1,9 @@
 import { PrismaClient } from '@prisma/client'
 import {
-    DraftSubmissionType,
+    UnlockedHealthPlanFormDataType,
     ProgramT,
-    StateSubmissionType,
-    Submission2Type,
+    LockedHealthPlanFormDataType,
+    HealthPlanPackageType,
     UpdateInfoType,
 } from '../../app-web/src/common-code/domain-models'
 import { findPrograms } from '../postgres'
@@ -25,45 +25,48 @@ import { updateStateSubmission } from './updateStateSubmission'
 type Store = {
     insertDraftSubmission: (
         args: InsertDraftSubmissionArgsType
-    ) => Promise<Submission2Type | StoreError>
+    ) => Promise<HealthPlanPackageType | StoreError>
 
     findAllSubmissions: (
         stateCode: string
-    ) => Promise<(DraftSubmissionType | StateSubmissionType)[] | StoreError>
+    ) => Promise<
+        | (UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType)[]
+        | StoreError
+    >
 
     findDraftSubmission: (
         draftUUID: string
-    ) => Promise<DraftSubmissionType | undefined | StoreError>
+    ) => Promise<UnlockedHealthPlanFormDataType | undefined | StoreError>
 
     findDraftSubmissionByStateNumber: (
         stateCoder: string,
         stateNumber: number
-    ) => Promise<DraftSubmissionType | undefined | StoreError>
+    ) => Promise<UnlockedHealthPlanFormDataType | undefined | StoreError>
 
     updateDraftSubmission: (
-        draftSubmission: DraftSubmissionType
-    ) => Promise<DraftSubmissionType | StoreError>
+        draftSubmission: UnlockedHealthPlanFormDataType
+    ) => Promise<UnlockedHealthPlanFormDataType | StoreError>
 
     findStateSubmission: (
         draftUUID: string
-    ) => Promise<StateSubmissionType | undefined | StoreError>
+    ) => Promise<LockedHealthPlanFormDataType | undefined | StoreError>
 
     updateStateSubmission: (
-        stateSubmission: StateSubmissionType,
+        stateSubmission: LockedHealthPlanFormDataType,
         submitInfo: UpdateInfoType
-    ) => Promise<Submission2Type | StoreError>
+    ) => Promise<HealthPlanPackageType | StoreError>
 
     insertNewRevision: (
         submissionID: string,
         unlockInfo: UpdateInfoType,
-        draft: DraftSubmissionType
-    ) => Promise<Submission2Type | StoreError>
+        draft: UnlockedHealthPlanFormDataType
+    ) => Promise<HealthPlanPackageType | StoreError>
 
     updateFormData: (
         submissionID: string,
         revisionID: string,
-        formData: DraftSubmissionType
-    ) => Promise<Submission2Type | StoreError>
+        formData: UnlockedHealthPlanFormDataType
+    ) => Promise<HealthPlanPackageType | StoreError>
 
     findPrograms: (
         stateCode: string,
@@ -73,11 +76,11 @@ type Store = {
     // new api
     findSubmissionWithRevisions: (
         draftUUID: string
-    ) => Promise<Submission2Type | undefined | StoreError>
+    ) => Promise<HealthPlanPackageType | undefined | StoreError>
 
     findAllSubmissionsWithRevisions: (
         stateCode: string
-    ) => Promise<Submission2Type[] | StoreError>
+    ) => Promise<HealthPlanPackageType[] | StoreError>
 }
 
 function NewPostgresStore(client: PrismaClient): Store {

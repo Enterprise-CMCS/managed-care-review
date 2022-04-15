@@ -19,7 +19,7 @@ import {
 import { useAuth } from '../../../contexts/AuthContext'
 import {
     DraftSubmission,
-    useSubmitDraftSubmissionMutation,
+    useSubmitHealthPlanPackageMutation,
 } from '../../../gen/gqlClient'
 import { PageActionsContainer } from '../PageActions'
 import { Modal } from '../../../components/Modal'
@@ -50,14 +50,14 @@ export const ReviewSubmit = ({
             loggedInUser.state.programs) ||
         []
 
-    const [submitDraftSubmission] = useSubmitDraftSubmissionMutation({
+    const [submitDraftSubmission] = useSubmitHealthPlanPackageMutation({
         // An alternative to messing with the cache like we do with create, just zero it out.
         update(cache, { data }) {
             if (data) {
                 cache.modify({
                     id: 'ROOT_QUERY',
                     fields: {
-                        indexSubmissions2(_index, { DELETE }) {
+                        indexHealthPlanPackages(_index, { DELETE }) {
                             return DELETE
                         },
                     },
@@ -101,7 +101,7 @@ export const ReviewSubmit = ({
     const onSubmit = async (
         submittedReason: string | undefined
     ): Promise<void> => {
-        const input = { submissionID: draftSubmission.id }
+        const input = { pkgID: draftSubmission.id }
 
         if (unlocked) {
             Object.assign(input, {
@@ -121,7 +121,7 @@ export const ReviewSubmit = ({
                 modalRef.current?.toggleModal(undefined, false)
             }
 
-            if (data.data?.submitDraftSubmission) {
+            if (data.data?.submitHealthPlanPackage) {
                 modalRef.current?.toggleModal(undefined, false)
                 history.push(`/dashboard?justSubmitted=${draftSubmission.name}`)
             } else {

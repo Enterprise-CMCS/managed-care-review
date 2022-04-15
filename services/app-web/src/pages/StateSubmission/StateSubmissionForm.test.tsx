@@ -6,15 +6,15 @@ import { Document } from '../../gen/gqlClient'
 import { RoutesRecord } from '../../constants/routes'
 import {
     fetchCurrentUserMock,
-    fetchSubmission2Mock,
+    fetchHealthPlanPackageMock,
     updateDraftSubmissionMock,
-    mockDraftSubmission2,
-    mockUnlockedSubmission2,
+    mockDraftHealthPlanPackage,
+    mockUnlockedHealthPlanPackage,
 } from '../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
 import { StateSubmissionForm } from './StateSubmissionForm'
-import { updatesFromSubmission2 } from './updateSubmissionTransform'
+import { updatesFromHealthPlanPackage } from './updateSubmissionTransform'
 
 describe('StateSubmissionForm', () => {
     describe('loads draft submission', () => {
@@ -28,7 +28,7 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchSubmission2Mock({
+                            fetchHealthPlanPackageMock({
                                 id: '15',
                                 statusCode: 200,
                             }),
@@ -46,7 +46,7 @@ describe('StateSubmissionForm', () => {
         })
 
         it('loads submission type fields for /submissions/:id/type', async () => {
-            const mockSubmission = mockDraftSubmission2({
+            const mockSubmission = mockDraftHealthPlanPackage({
                 submissionDescription: 'A real submission',
                 submissionType: 'CONTRACT_ONLY',
                 programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
@@ -60,7 +60,7 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchSubmission2Mock({
+                            fetchHealthPlanPackageMock({
                                 id: '15',
                                 statusCode: 200,
                                 submission: mockSubmission,
@@ -88,7 +88,7 @@ describe('StateSubmissionForm', () => {
         })
 
         it('loads contract details fields for /submissions/:id/contract-details with amendments', async () => {
-            const mockAmendment = mockDraftSubmission2({
+            const mockAmendment = mockDraftHealthPlanPackage({
                 contractType: 'AMENDMENT',
                 contractAmendmentInfo: {
                     itemsBeingAmended: [
@@ -114,7 +114,7 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchSubmission2Mock({
+                            fetchHealthPlanPackageMock({
                                 id: '12',
                                 statusCode: 200,
                                 submission: mockAmendment,
@@ -176,7 +176,7 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchSubmission2Mock({
+                            fetchHealthPlanPackageMock({
                                 id: '12',
                                 statusCode: 200,
                             }),
@@ -210,10 +210,10 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchSubmission2Mock({
+                            fetchHealthPlanPackageMock({
                                 id: '15',
                                 statusCode: 200,
-                                submission: mockUnlockedSubmission2(),
+                                submission: mockUnlockedHealthPlanPackage(),
                             }),
                         ],
                     },
@@ -236,11 +236,11 @@ describe('StateSubmissionForm', () => {
 
     describe('when user edits submission', () => {
         it('change draft submission description and navigate to contract details', async () => {
-            const mockSubmission = mockDraftSubmission2({
+            const mockSubmission = mockDraftHealthPlanPackage({
                 submissionDescription:
                     'A real submission but updated something',
             })
-            const mockUpdate = updatesFromSubmission2(mockSubmission)
+            const mockUpdate = updatesFromHealthPlanPackage(mockSubmission)
             mockUpdate.submissionDescription =
                 'A real submission but updated something'
 
@@ -253,7 +253,7 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchSubmission2Mock({
+                            fetchHealthPlanPackageMock({
                                 submission: mockSubmission,
                                 id: '15',
                                 statusCode: 200,
@@ -263,7 +263,7 @@ describe('StateSubmissionForm', () => {
                                 updates: mockUpdate,
                                 statusCode: 200,
                             }),
-                            fetchSubmission2Mock({
+                            fetchHealthPlanPackageMock({
                                 id: '15',
                                 statusCode: 200,
                             }),
@@ -297,12 +297,12 @@ describe('StateSubmissionForm', () => {
                     documentCategories: ['CONTRACT_RELATED'],
                 },
             ]
-            const mockSubmission = mockDraftSubmission2({
+            const mockSubmission = mockDraftHealthPlanPackage({
                 id: '15',
                 documents: mockDocs,
             })
 
-            const mockUpdate = updatesFromSubmission2(mockSubmission)
+            const mockUpdate = updatesFromHealthPlanPackage(mockSubmission)
             mockUpdate.submissionDescription =
                 'A real submission but updated something'
 
@@ -315,7 +315,7 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchSubmission2Mock({
+                            fetchHealthPlanPackageMock({
                                 id: '15',
                                 submission: mockSubmission,
                                 statusCode: 200,
@@ -325,7 +325,7 @@ describe('StateSubmissionForm', () => {
                                 updates: mockUpdate,
                                 statusCode: 200,
                             }),
-                            fetchSubmission2Mock({
+                            fetchHealthPlanPackageMock({
                                 id: '15',
                                 statusCode: 200,
                             }),
@@ -363,7 +363,7 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchSubmission2Mock({
+                            fetchHealthPlanPackageMock({
                                 id: '15',
                                 statusCode: 403,
                             }),
@@ -386,7 +386,7 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchSubmission2Mock({
+                            fetchHealthPlanPackageMock({
                                 id: '15',
                                 statusCode: 403,
                             }),
@@ -412,7 +412,7 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchSubmission2Mock({
+                            fetchHealthPlanPackageMock({
                                 id: '15',
                                 statusCode: 403,
                             }),

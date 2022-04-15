@@ -9,7 +9,7 @@ import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
-import { generateRateName } from '../../../common-code/domain-models/submission'
+import { generateRateName } from '../../../common-code/domain-models/'
 import styles from '../SubmissionSummarySection.module.scss'
 
 export type RateDetailsSummarySectionProps = {
