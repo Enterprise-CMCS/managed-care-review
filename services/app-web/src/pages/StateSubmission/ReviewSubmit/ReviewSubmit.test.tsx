@@ -407,44 +407,6 @@ describe('Resubmitting plan packages', () => {
         ).toBeInTheDocument()
     })
 
-    it('displays form validation error when summary for submission is over 300 characters', async () => {
-        renderWithProviders(
-            <ReviewSubmit
-                draftSubmission={mockCompleteDraft()}
-                unlocked={true}
-            />,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        submitDraftSubmissionMockSuccess({
-                            id: mockCompleteDraft().id,
-                            submittedReason: 'Test submission summary',
-                        }),
-                    ],
-                },
-            }
-        )
-        screen.getByTestId('form-submit').click()
-
-        await waitFor(() => {
-            expect(screen.getByRole('dialog')).toHaveClass('is-visible')
-            expect(screen.getByText('Summarize changes')).toBeInTheDocument()
-        })
-
-        // Don't use userEvent.type here because it messes with jest timers with this length of content
-        userEvent.paste(
-            screen.getByTestId('submittedReason'),
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin vulputate ultricies suscipit. Suspendisse consequat at mauris a iaculis. Praesent lorem massa, pellentesque et tempor et, laoreet quis lectus. Vestibulum finibus condimentum nulla, vel tristique tellus pretium sollicitudin. Curabitur velit enim, pulvinar eu fermentum vel, fringilla quis leo.'
-        )
-
-        screen.getByTestId('review-and-submit-modal-submit').click()
-
-        expect(
-            await screen.findByText('Summary for submission is too long')
-        ).toBeInTheDocument()
-    })
-
     it('displays form validation error when submitting without an submission summary', async () => {
         renderWithProviders(
             <ReviewSubmit
