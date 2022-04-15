@@ -19,8 +19,6 @@ export const ExpandableText = ({
 
     useLayoutEffect(() => {
         const ref = textRef?.current
-        console.log(ref?.offsetWidth, ref?.scrollWidth)
-        console.log(ref?.offsetHeight, ref?.scrollHeight)
         if (
             ref &&
             (ref.offsetHeight < ref.scrollHeight ||
@@ -29,7 +27,6 @@ export const ExpandableText = ({
             if (clampedLines) {
                 ref.style.webkitLineClamp = clampedLines
             }
-            console.log('True that')
             setShowMoreButton(true)
         }
     }, [showMoreButton, clampedLines, setShowMoreButton])
