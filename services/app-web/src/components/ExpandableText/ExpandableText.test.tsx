@@ -25,9 +25,9 @@ describe('ExpandableText', () => {
         jest.spyOn(React, 'useRef').mockReturnValue(mockRef)
     }
 
-    const longReason =
+    const longText =
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet.'
-    const shortReason =
+    const shortText =
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur.'
     const clamped2Lines = {
         offsetWidth: 100,
@@ -46,7 +46,7 @@ describe('ExpandableText', () => {
 
     it('renders without errors and clamps long text', () => {
         setMockRefElement(clamped2Lines)
-        render(<ExpandableText clamp={longReason} />)
+        render(<ExpandableText clamp={longText} />)
         expect(screen.getByTestId('clampElement')).toBeInTheDocument()
         expect(screen.getByTestId('clampElement')).toHaveClass('textContracted')
         expect(screen.getByText('Show More')).toBeInTheDocument()
@@ -54,7 +54,7 @@ describe('ExpandableText', () => {
 
     it('can expand and contract clamped text to show more or less text', () => {
         setMockRefElement(clamped2Lines)
-        render(<ExpandableText clamp={longReason} />)
+        render(<ExpandableText clamp={longText} />)
         expect(screen.getByText('Show More')).toBeInTheDocument()
         expect(screen.getByTestId('clampElement')).toBeInTheDocument()
         expect(screen.getByTestId('clampElement')).toHaveClass('textContracted')
@@ -65,7 +65,7 @@ describe('ExpandableText', () => {
 
     it('renders short text without errors and not clamped', () => {
         setMockRefElement(notClamped)
-        render(<ExpandableText clamp={shortReason} />)
+        render(<ExpandableText clamp={shortText} />)
         expect(screen.queryByText('Show More')).toBeNull()
         expect(screen.getByTestId('clampElement')).toBeInTheDocument()
         expect(screen.getByTestId('clampElement')).toHaveClass('textContracted')
@@ -73,7 +73,7 @@ describe('ExpandableText', () => {
 
     it('can render react elements and clamp long text correctly', () => {
         setMockRefElement(clamped2Lines)
-        render(<ExpandableText clamp={<p>longReason</p>} />)
+        render(<ExpandableText clamp={<p>longText</p>} />)
         expect(screen.getByTestId('clampElement')).toBeInTheDocument()
         expect(screen.getByTestId('clampElement')).toHaveClass('textContracted')
         expect(screen.getByText('Show More')).toBeInTheDocument()
@@ -85,7 +85,8 @@ describe('ExpandableText', () => {
             <ExpandableText
                 clamp={
                     <p>
-                        <b>Some Styling</b>longReason
+                        <b>Some Styling</b>
+                        {longText}
                     </p>
                 }
             />

@@ -9,7 +9,7 @@ export default {
     component: ExpandableText,
 }
 
-const longReason =
+const longText =
     'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet.' +
     'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet.' +
     'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet.' +
@@ -18,7 +18,7 @@ const longReason =
     'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet.' +
     'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum.'
 
-const shortReason = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
+const shortText = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
 
 const Template: Story<ExpandableTextProps> = (args) => (
     <GridContainer className={styles.container}>
@@ -28,12 +28,12 @@ const Template: Story<ExpandableTextProps> = (args) => (
 
 export const ExpandableTextClampedToTwoLines = Template.bind({})
 ExpandableTextClampedToTwoLines.args = {
-    clamp: longReason,
+    clamp: longText,
 }
 
 export const ExpandableTextClampedToFourLines = Template.bind({})
 ExpandableTextClampedToFourLines.args = {
-    clamp: longReason,
+    clamp: longText,
     clampedLines: '4',
 }
 
@@ -41,7 +41,7 @@ ExpandableTextClampedToFourLines.args = {
 // than scrollHeight. No clue why. This does not happen on the banner storybook components.
 export const ExpandableTextNoClamp = Template.bind({})
 ExpandableTextNoClamp.args = {
-    clamp: shortReason,
+    clamp: shortText,
 }
 
 export const ExpandableTextWithinElement = Template.bind({})
@@ -57,7 +57,7 @@ ExpandableTextWithinElement.args = {
         >
             <p>
                 <b>Some bold header:&nbsp;</b>
-                {longReason}
+                {shortText}
             </p>
         </div>
     ),
