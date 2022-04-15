@@ -303,9 +303,11 @@ export const ContractDetails = ({
 
         draftSubmission.contractType = values.contractType
         draftSubmission.contractExecutionStatus = values.contractExecutionStatus
+        console.log('PREDATE: ', values.contractDateStart)
         draftSubmission.contractDateStart = formatFormDateForDomain(
             values.contractDateStart
         )
+        console.log('POSTDATE: ', draftSubmission.contractDateStart)
         draftSubmission.contractDateEnd = formatFormDateForDomain(
             values.contractDateEnd
         )

@@ -16,10 +16,7 @@ import {
     STATE_SUBMISSION_FORM_ROUTES,
     RouteT,
 } from '../../constants/routes'
-import {
-    getCurrentRevisionFromHealthPlanPackage,
-    convertDomainModelFormDataToGQLSubmission,
-} from '../../gqlHelpers'
+import { getCurrentRevisionFromHealthPlanPackage } from '../../gqlHelpers'
 import { StateSubmissionContainer } from './StateSubmissionContainer'
 import { ContractDetails } from './ContractDetails'
 import { RateDetails } from './RateDetails'
@@ -29,7 +26,6 @@ import { ReviewSubmit } from './ReviewSubmit'
 import { SubmissionType } from './SubmissionType'
 
 import {
-    DraftSubmission,
     useFetchHealthPlanPackageQuery,
     User,
     useUpdateHealthPlanFormDataMutation,
@@ -85,7 +81,7 @@ const PageBannerAlerts = ({
     )
 }
 
-const activeFormPages = (draft: DraftSubmission): RouteT[] => {
+const activeFormPages = (draft: UnlockedHealthPlanFormDataType): RouteT[] => {
     // If submission type is contract only, rate details is left out of the step indicator
     return STATE_SUBMISSION_FORM_ROUTES.filter(
         (formPage) =>
@@ -184,7 +180,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
                 formDataFromLatestRevision,
                 statePrograms
             )
-            console.log('THENAME', name)
             setComputedSubmissionName(name)
             updateHeading(pathname, name)
         }
@@ -284,22 +279,11 @@ export const StateSubmissionForm = (): React.ReactElement => {
         return <ErrorInvalidSubmissionStatus />
     }
 
-    // Hacky way to not have to change the individual pages yet.
-    const statePrograms =
-        (loggedInUser &&
-            'state' in loggedInUser &&
-            loggedInUser.state.programs) ||
-        []
-    const draft = convertDomainModelFormDataToGQLSubmission(
-        formDataFromLatestRevision,
-        statePrograms
-    ) as DraftSubmission
-
     return (
         <>
             <div className={styles.stepIndicator}>
                 <DynamicStepIndicator
-                    formPages={activeFormPages(draft)}
+                    formPages={activeFormPages(formDataFromLatestRevision)}
                     currentFormPage={currentRoute}
                 />
                 <PageBannerAlerts

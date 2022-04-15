@@ -69,7 +69,7 @@ describe('FileUpload component', () => {
 
         // check for initial items
         const items = screen.getAllByRole('listitem')
-        expect(items.length).toBe(1)
+        expect(items).toHaveLength(1)
         expect(
             screen.getByText('Trussel Guide to Truss - trussels-guide.pdf')
         ).toBeInTheDocument()
@@ -78,7 +78,7 @@ describe('FileUpload component', () => {
         const inputEl = screen.getByTestId('file-input-input')
         userEvent.upload(inputEl, TEST_PDF_FILE)
 
-        expect(screen.getAllByRole('listitem').length).toBe(2)
+        expect(screen.getAllByRole('listitem')).toHaveLength(2)
         expect(
             screen.getByText('Trussel Guide to Truss - trussels-guide.pdf')
         ).toBeInTheDocument()
@@ -142,7 +142,7 @@ describe('FileUpload component', () => {
         )
 
         await waitFor(() => {
-            expect(screen.getAllByRole('listitem').length).toBe(2)
+            expect(screen.getAllByRole('listitem')).toHaveLength(2)
             expect(
                 screen.queryByTestId('file-input-error')
             ).not.toBeInTheDocument()
@@ -184,9 +184,11 @@ describe('FileUpload component', () => {
         userEvent.upload(input, [TEST_DOC_FILE])
 
         await waitFor(() => {
-            expect(screen.queryAllByText(TEST_PDF_FILE.name).length).toBe(1)
-            expect(screen.queryAllByText(TEST_DOC_FILE.name).length).toBe(2)
-            expect(screen.queryAllByText('Duplicate file, please remove').length).toBe(1)
+            expect(screen.queryAllByText(TEST_PDF_FILE.name)).toHaveLength(1)
+            expect(screen.queryAllByText(TEST_DOC_FILE.name)).toHaveLength(2)
+            expect(
+                screen.queryAllByText('Duplicate file, please remove')
+            ).toHaveLength(1)
         })
     })
 
@@ -284,17 +286,22 @@ describe('FileUpload component', () => {
             )
         })
 
-        it('displays error count when scan error occurs' ,async  () => {
-             await render(<FileUpload {...testProps}  scanFile={jest.fn().mockRejectedValue(new Error('failed'))} accept=".pdf,.txt" />)
+        it('displays error count when scan error occurs', async () => {
+            await render(
+                <FileUpload
+                    {...testProps}
+                    scanFile={jest.fn().mockRejectedValue(new Error('failed'))}
+                    accept=".pdf,.txt"
+                />
+            )
 
             const input = screen.getByTestId('file-input-input')
             userEvent.upload(input, [TEST_DOC_FILE])
-            await waitFor(() =>{
+            await waitFor(() => {
                 expect(screen.getByText(/1 file added/)).toBeInTheDocument()
                 expect(screen.getByText(/1 error/)).toBeInTheDocument()
             })
         })
-
 
         it('displays error count when duplicate name occurs', async () => {
             await render(
@@ -314,14 +321,8 @@ describe('FileUpload component', () => {
             })
         })
 
-
         it('displays complete count when file upload completes without issue', async () => {
-            await render(
-                <FileUpload
-                    {...testProps}
-                    accept=".pdf,.txt"
-                />
-            )
+            await render(<FileUpload {...testProps} accept=".pdf,.txt" />)
 
             const input = screen.getByTestId('file-input-input')
             userEvent.upload(input, [TEST_DOC_FILE])
@@ -334,20 +335,15 @@ describe('FileUpload component', () => {
                 expect(screen.queryByText(/Scanning/)).toBeNull()
             )
             await waitFor(() => {
-                 expect(
-                     screen.getByTestId('file-input-preview-image')
-                 ).not.toHaveClass('is-loading')
-                 expect(screen.getByText(/1 complete/)).toBeInTheDocument()
+                expect(
+                    screen.getByTestId('file-input-preview-image')
+                ).not.toHaveClass('is-loading')
+                expect(screen.getByText(/1 complete/)).toBeInTheDocument()
             })
         })
 
         it('displays pending count when file upload is still in progress', async () => {
-            await render(
-                <FileUpload
-                    {...testProps}
-                    accept=".pdf,.txt"
-                />
-            )
+            await render(<FileUpload {...testProps} accept=".pdf,.txt" />)
 
             const input = screen.getByTestId('file-input-input')
             userEvent.upload(input, [TEST_DOC_FILE])
@@ -356,7 +352,6 @@ describe('FileUpload component', () => {
                 expect(screen.getByText(/1 pending/)).toBeInTheDocument()
             })
         })
-
     })
     describe('drag and drop behavior', () => {
         it('does not accept a drop file that has an invalid type', async () => {
