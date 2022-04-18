@@ -352,7 +352,13 @@ export const ContractDetails = ({
 
         try {
             const updatedSubmission = await updateDraft(draftSubmission)
-            if (updatedSubmission) {
+            if (updatedSubmission instanceof Error) {
+                setSubmitting(false)
+                console.log(
+                    'Error updating draft submission: ',
+                    updatedSubmission
+                )
+            } else if (updatedSubmission) {
                 history.push(options.redirectPath)
             }
         } catch (serverError) {

@@ -278,7 +278,14 @@ export const Contacts = ({
 
         try {
             const updatedSubmission = await updateDraft(draftSubmission)
-            if (updatedSubmission) {
+            if (updatedSubmission instanceof Error) {
+                formikHelpers.setSubmitting(false)
+                redirectToDashboard.current = false
+                console.log(
+                    'Error updating draft submission: ',
+                    updatedSubmission
+                )
+            } else if (updatedSubmission) {
                 if (redirectToDashboard.current) {
                     history.push(`/dashboard`)
                 } else {
