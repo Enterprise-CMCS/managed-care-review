@@ -347,7 +347,7 @@ export const Contacts = ({
                                         >
                                             {values.stateContacts.length > 0 &&
                                                 values.stateContacts.map(
-                                                    (stateContact, index) => (
+                                                    (_stateContact, index) => (
                                                         <div
                                                             className={
                                                                 styles.stateContact

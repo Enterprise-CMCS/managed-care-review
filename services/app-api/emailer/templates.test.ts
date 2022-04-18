@@ -1,8 +1,8 @@
 import {
     testEmailConfig,
-    mockContractAmendmentSubmission,
-    mockContractOnlySubmission,
-    mockContractAndRatesSubmission,
+    mockContractAmendmentFormData,
+    mockContractOnlyFormData,
+    mockContractAndRatesFormData,
     mockUser,
 } from '../testHelpers/emailerHelpers'
 import { LockedHealthPlanFormDataType } from '../../app-web/src/common-code/domain-models'
@@ -15,11 +15,12 @@ import {
     resubmittedStateEmail,
 } from './'
 import { formatRateNameDate } from '../../app-web/src/dateHelpers'
+import { unlockedWithFullContracts } from '../../app-web/src/common-code/domain-mocks'
 
 describe('Email templates', () => {
     describe('CMS email', () => {
         it('to addresses list includes review email addresses from email config', () => {
-            const sub = mockContractOnlySubmission()
+            const sub = mockContractOnlyFormData()
             const template = newPackageCMSEmail(
                 sub,
                 'some-title',
@@ -35,7 +36,7 @@ describe('Email templates', () => {
         })
 
         it('subject line is correct', () => {
-            const sub = mockContractOnlySubmission()
+            const sub = mockContractOnlyFormData()
             const name = 'FL-MMA-001'
             const template = newPackageCMSEmail(sub, name, testEmailConfig)
 
@@ -49,7 +50,7 @@ describe('Email templates', () => {
         })
 
         it('includes warning about unofficial submission', () => {
-            const sub = mockContractOnlySubmission()
+            const sub = mockContractOnlyFormData()
             const template = newPackageCMSEmail(
                 sub,
                 'some-title',
@@ -66,7 +67,7 @@ describe('Email templates', () => {
 
         it('includes expected data summary for a contract only submission', () => {
             const sub: LockedHealthPlanFormDataType = {
-                ...mockContractOnlySubmission(),
+                ...mockContractOnlyFormData(),
                 contractDateStart: new Date('01/01/2021'),
                 contractDateEnd: new Date('01/01/2025'),
             }
@@ -98,7 +99,7 @@ describe('Email templates', () => {
         })
         it('includes expected data summary for a contract and rates submission CMS email', () => {
             const sub: LockedHealthPlanFormDataType = {
-                ...mockContractAndRatesSubmission(),
+                ...mockContractAndRatesFormData(),
                 contractDateStart: new Date('01/01/2021'),
                 contractDateEnd: new Date('01/01/2025'),
                 rateDateStart: new Date('01/01/2021'),
@@ -143,7 +144,7 @@ describe('Email templates', () => {
         })
         it('includes expected data summary for a contract amendment submission', () => {
             const sub: LockedHealthPlanFormDataType = {
-                ...mockContractAmendmentSubmission(),
+                ...mockContractAmendmentFormData(),
                 contractDateStart: new Date('01/01/2021'),
                 contractDateEnd: new Date('01/01/2025'),
                 rateDateStart: new Date('01/01/2021'),
@@ -189,7 +190,7 @@ describe('Email templates', () => {
 
         it('includes expected data summary for a rate amendment submission CMS email', () => {
             const sub: LockedHealthPlanFormDataType = {
-                ...mockContractAndRatesSubmission(),
+                ...mockContractAndRatesFormData(),
                 rateType: 'AMENDMENT',
                 contractDateStart: new Date('01/01/2021'),
                 contractDateEnd: new Date('01/01/2025'),
@@ -230,7 +231,7 @@ describe('Email templates', () => {
             )
         })
         it('includes link to submission', () => {
-            const sub = mockContractAmendmentSubmission()
+            const sub = mockContractAmendmentFormData()
             const template = newPackageCMSEmail(
                 sub,
                 'some-title',
@@ -247,7 +248,7 @@ describe('Email templates', () => {
     })
     describe('State email', () => {
         it('to addresses list includes current user', () => {
-            const sub = mockContractOnlySubmission()
+            const sub = mockContractOnlyFormData()
             const user = mockUser()
             const template = newPackageStateEmail(
                 sub,
@@ -264,7 +265,7 @@ describe('Email templates', () => {
 
         it('to addresses list includes all state contacts on submission', () => {
             const sub: LockedHealthPlanFormDataType = {
-                ...mockContractOnlySubmission(),
+                ...mockContractOnlyFormData(),
                 stateContacts: [
                     {
                         name: 'test1',
@@ -295,7 +296,7 @@ describe('Email templates', () => {
         })
 
         it('subject line is correct and clearly states submission is complete', () => {
-            const sub = mockContractOnlySubmission()
+            const sub = mockContractOnlyFormData()
             const name = 'FL-MMA-001'
             const user = mockUser()
             const template = newPackageStateEmail(
@@ -318,7 +319,7 @@ describe('Email templates', () => {
         })
 
         it('includes warning about unofficial submission', () => {
-            const sub = mockContractOnlySubmission()
+            const sub = mockContractOnlyFormData()
             const user = mockUser()
             const template = newPackageStateEmail(
                 sub,
@@ -336,7 +337,7 @@ describe('Email templates', () => {
         })
 
         it('includes link to submission', () => {
-            const sub = mockContractAmendmentSubmission()
+            const sub = mockContractAmendmentFormData()
             const user = mockUser()
             const template = newPackageStateEmail(
                 sub,
@@ -354,7 +355,7 @@ describe('Email templates', () => {
         })
 
         it('includes information about what is next', () => {
-            const sub = mockContractAmendmentSubmission()
+            const sub = mockContractAmendmentFormData()
             const user = mockUser()
             const template = newPackageStateEmail(
                 sub,
@@ -371,7 +372,7 @@ describe('Email templates', () => {
 
         it('includes expected data summary for a contract and rates submission State email', () => {
             const sub: LockedHealthPlanFormDataType = {
-                ...mockContractAndRatesSubmission(),
+                ...mockContractAndRatesFormData(),
                 contractDateStart: new Date('01/01/2021'),
                 contractDateEnd: new Date('01/01/2025'),
                 rateDateStart: new Date('01/01/2021'),
@@ -419,7 +420,7 @@ describe('Email templates', () => {
 
         it('includes expected data summary for a rate amendment submission State email', () => {
             const sub: LockedHealthPlanFormDataType = {
-                ...mockContractAndRatesSubmission(),
+                ...mockContractAndRatesFormData(),
                 rateType: 'AMENDMENT',
                 contractDateStart: new Date('01/01/2021'),
                 contractDateEnd: new Date('01/01/2025'),
@@ -464,7 +465,7 @@ describe('Email templates', () => {
     })
     describe('CMS unlock email', () => {
         const unlockData = {
-            submissionName: 'MCR-VA-CCCPLUS-0001',
+            packageName: 'MCR-VA-CCCPLUS-0001',
             updatedBy: 'leslie@example.com',
             updatedAt: new Date('01/01/2022'),
             updatedReason: 'Adding rate development guide.',
@@ -474,7 +475,7 @@ describe('Email templates', () => {
             expect(template).toEqual(
                 expect.objectContaining({
                     subject: expect.stringContaining(
-                        `${unlockData.submissionName} was unlocked`
+                        `${unlockData.packageName} was unlocked`
                     ),
                 })
             )
@@ -514,12 +515,12 @@ describe('Email templates', () => {
     })
     describe('State unlock email', () => {
         const unlockData = {
-            submissionName: 'MCR-VA-CCCPLUS-0002',
+            packageName: 'MCR-VA-CCCPLUS-0002',
             updatedBy: 'josh@example.com',
             updatedAt: new Date('02/01/2022'),
             updatedReason: 'Adding rate certification.',
         }
-        const sub = mockContractOnlySubmission()
+        const sub = unlockedWithFullContracts()
         const template = unlockPackageStateEmail(
             sub,
             unlockData,
@@ -529,7 +530,7 @@ describe('Email templates', () => {
             expect(template).toEqual(
                 expect.objectContaining({
                     subject: expect.stringContaining(
-                        `${unlockData.submissionName} was unlocked by CMS`
+                        `${unlockData.packageName} was unlocked by CMS`
                     ),
                 })
             )
@@ -569,13 +570,13 @@ describe('Email templates', () => {
     })
     describe('State resubmission email', () => {
         const resubmitData = {
-            submissionName: 'MCR-VA-CCCPLUS-0002',
+            packageName: 'MCR-VA-CCCPLUS-0002',
             updatedBy: 'bob@example.com',
             updatedAt: new Date('02/01/2022'),
             updatedReason: 'Added rate certification.',
         }
         const user = mockUser()
-        const submission = mockContractOnlySubmission()
+        const submission = mockContractOnlyFormData()
         const template = resubmittedStateEmail(
             submission,
             user,
@@ -586,10 +587,10 @@ describe('Email templates', () => {
             expect(template).toEqual(
                 expect.objectContaining({
                     subject: expect.stringContaining(
-                        `${resubmitData.submissionName} was resubmitted`
+                        `${resubmitData.packageName} was resubmitted`
                     ),
                     bodyText: expect.stringMatching(
-                        `${resubmitData.submissionName} was successfully resubmitted`
+                        `${resubmitData.packageName} was successfully resubmitted`
                     ),
                 })
             )
@@ -638,12 +639,12 @@ describe('Email templates', () => {
     })
     describe('CMS resubmission email', () => {
         const resubmitData = {
-            submissionName: 'MCR-VA-CCCPLUS-0002',
+            packageName: 'MCR-VA-CCCPLUS-0002',
             updatedBy: 'bob@example.com',
             updatedAt: new Date('02/01/2022'),
             updatedReason: 'Added rate certification.',
         }
-        const submission = mockContractOnlySubmission()
+        const submission = mockContractOnlyFormData()
         const template = resubmittedCMSEmail(
             submission,
             resubmitData,
@@ -653,10 +654,10 @@ describe('Email templates', () => {
             expect(template).toEqual(
                 expect.objectContaining({
                     subject: expect.stringContaining(
-                        `${resubmitData.submissionName} was resubmitted`
+                        `${resubmitData.packageName} was resubmitted`
                     ),
                     bodyText: expect.stringMatching(
-                        `The state completed their edits on submission ${resubmitData.submissionName}`
+                        `The state completed their edits on submission ${resubmitData.packageName}`
                     ),
                 })
             )

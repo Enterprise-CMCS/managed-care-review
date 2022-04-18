@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Alert, GridContainer } from '@trussworks/react-uswds'
 import { useLocation, useParams } from 'react-router-dom'
 import {
-    submissionName,
+    packageName,
     HealthPlanFormDataType,
     UpdateInfoType,
 } from '../../common-code/domain-models'
@@ -115,7 +115,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         const subWithRevisions = data?.fetchHealthPlanPackage.pkg
         if (packageData && subWithRevisions) {
             const programs = subWithRevisions.state.programs
-            updateHeading(pathname, submissionName(packageData, programs))
+            updateHeading(pathname, packageName(packageData, programs))
         }
     }, [updateHeading, pathname, packageData, data])
 
@@ -153,7 +153,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                 <SubmissionTypeSummarySection
                     submission={packageData}
                     statePrograms={statePrograms}
-                    submissionName={submissionName(packageData, statePrograms)}
+                    submissionName={packageName(packageData, statePrograms)}
                     headerChildComponent={
                         submitInfo && (
                             <p
@@ -172,17 +172,14 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                 <ContractDetailsSummarySection
                     submission={packageData}
                     documentDateLookupTable={documentDates}
-                    submissionName={submissionName(packageData, statePrograms)}
+                    submissionName={packageName(packageData, statePrograms)}
                 />
 
                 {isContractActionAndRateCertification && (
                     <RateDetailsSummarySection
                         submission={packageData}
                         documentDateLookupTable={documentDates}
-                        submissionName={submissionName(
-                            packageData,
-                            statePrograms
-                        )}
+                        submissionName={packageName(packageData, statePrograms)}
                     />
                 )}
 

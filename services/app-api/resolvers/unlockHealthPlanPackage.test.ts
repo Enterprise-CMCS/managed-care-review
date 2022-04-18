@@ -1,18 +1,19 @@
 import { GraphQLError } from 'graphql'
-import UNLOCK_STATE_SUBMISSION from '../../app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
+import UNLOCK_HEALTH_PLAN_PACKAGE from '../../app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
 import { HealthPlanPackage } from '../gen/gqlServer'
 import { todaysDate } from '../testHelpers/dateHelpers'
 import {
     constructTestPostgresServer,
-    createAndUpdateTestDraftSubmission,
-    createTestStateSubmission,
+    createAndUpdateTestHealthPlanPackage,
+    createAndSubmitTestHealthPlanPackage,
     defaultFloridaProgram,
-    fetchTestDraftSubmissionById,
-    submitTestDraftSubmission,
-    unlockTestDraftSubmission,
-    updateTestDraftSubmission,
-    resubmitTestDraftSubmission,
+    fetchTestHealthPlanPackageById,
+    submitTestHealthPlanPackage,
+    unlockTestHealthPlanPackage,
+    updateTestHealthPlanFormData,
+    resubmitTestHealthPlanPackage,
 } from '../testHelpers/gqlHelpers'
+import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
 import { mockStoreThatErrors } from '../testHelpers/storeHelpers'
 
 describe('unlockHealthPlanPackage', () => {
@@ -20,7 +21,9 @@ describe('unlockHealthPlanPackage', () => {
         const stateServer = await constructTestPostgresServer()
 
         // First, create a new submitted submission
-        const stateSubmission = await createTestStateSubmission(stateServer)
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            stateServer
+        )
 
         const cmsServer = await constructTestPostgresServer({
             context: {
@@ -35,7 +38,7 @@ describe('unlockHealthPlanPackage', () => {
         // Unlock
         await new Promise((resolve) => setTimeout(resolve, 2000))
         const unlockResult = await cmsServer.executeOperation({
-            query: UNLOCK_STATE_SUBMISSION,
+            query: UNLOCK_HEALTH_PLAN_PACKAGE,
             variables: {
                 input: {
                     pkgID: stateSubmission.id,
@@ -84,11 +87,13 @@ describe('unlockHealthPlanPackage', () => {
         ).toContain('Z')
     })
 
-    it('returns a DraftSubmission that can be updated without errors', async () => {
+    it('returns a package that can be updated without errors', async () => {
         const stateServer = await constructTestPostgresServer()
 
         // First, create a new submitted submission
-        const stateSubmission = await createTestStateSubmission(stateServer)
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            stateServer
+        )
 
         const cmsServer = await constructTestPostgresServer({
             context: {
@@ -103,7 +108,7 @@ describe('unlockHealthPlanPackage', () => {
         // Unlock
         await new Promise((resolve) => setTimeout(resolve, 2000))
         const unlockResult = await cmsServer.executeOperation({
-            query: UNLOCK_STATE_SUBMISSION,
+            query: UNLOCK_HEALTH_PLAN_PACKAGE,
             variables: {
                 input: {
                     pkgID: stateSubmission.id,
@@ -132,40 +137,42 @@ describe('unlockHealthPlanPackage', () => {
             unlockedSub.revisions[0].node.unlockInfo?.updatedAt.toISOString()
         ).toContain('Z')
 
+        const formData = latestFormData(unlockedSub)
+
         // after unlock we should be able to update that draft submission and get the results
-        const updates = {
-            programIDs: [defaultFloridaProgram().id],
-            submissionType: 'CONTRACT_AND_RATES' as const,
-            submissionDescription: 'UPDATED_AFTER_UNLOCK',
-            documents: [],
-            contractType: 'BASE' as const,
-            contractDocuments: [],
-            managedCareEntities: ['MCO'],
-            federalAuthorities: ['VOLUNTARY' as const],
-            rateDocuments: [],
-            stateContacts: [],
-            actuaryContacts: [],
-        }
+        formData.programIDs = [defaultFloridaProgram().id]
+        formData.submissionType = 'CONTRACT_AND_RATES' as const
+        formData.submissionDescription = 'UPDATED_AFTER_UNLOCK'
+        formData.documents = []
+        formData.contractType = 'BASE' as const
+        formData.contractDocuments = []
+        formData.managedCareEntities = ['MCO']
+        formData.federalAuthorities = ['VOLUNTARY' as const]
+        formData.rateDocuments = []
+        formData.stateContacts = []
+        formData.actuaryContacts = []
 
-        await updateTestDraftSubmission(
-            stateServer,
-            stateSubmission.id,
-            updates
-        )
+        await updateTestHealthPlanFormData(stateServer, formData)
 
-        const refetched = await fetchTestDraftSubmissionById(
+        const refetched = await fetchTestHealthPlanPackageById(
             stateServer,
             stateSubmission.id
         )
 
-        expect(refetched.submissionDescription).toBe('UPDATED_AFTER_UNLOCK')
+        const refetchedFormData = latestFormData(refetched)
+
+        expect(refetchedFormData.submissionDescription).toBe(
+            'UPDATED_AFTER_UNLOCK'
+        )
     })
 
     it('can be unlocked repeatedly', async () => {
         const stateServer = await constructTestPostgresServer()
 
         // First, create a new submitted submission
-        const stateSubmission = await createTestStateSubmission(stateServer)
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            stateServer
+        )
 
         const cmsServer = await constructTestPostgresServer({
             context: {
@@ -177,31 +184,31 @@ describe('unlockHealthPlanPackage', () => {
             },
         })
 
-        await unlockTestDraftSubmission(
+        await unlockTestHealthPlanPackage(
             cmsServer,
             stateSubmission.id,
             'Super duper good reason.'
         )
 
-        await resubmitTestDraftSubmission(
+        await resubmitTestHealthPlanPackage(
             stateServer,
             stateSubmission.id,
             'Test first resubmission reason'
         )
 
-        await unlockTestDraftSubmission(
+        await unlockTestHealthPlanPackage(
             cmsServer,
             stateSubmission.id,
             'Super duper duper good reason.'
         )
 
-        await resubmitTestDraftSubmission(
+        await resubmitTestHealthPlanPackage(
             stateServer,
             stateSubmission.id,
             'Test second resubmission reason'
         )
 
-        const draft = await unlockTestDraftSubmission(
+        const draft = await unlockTestHealthPlanPackage(
             cmsServer,
             stateSubmission.id,
             'Very super duper good reason.'
@@ -226,12 +233,14 @@ describe('unlockHealthPlanPackage', () => {
         const stateServer = await constructTestPostgresServer()
 
         // First, create a new submitted submission
-        const stateSubmission = await createTestStateSubmission(stateServer)
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            stateServer
+        )
 
         // Unlock
         await new Promise((resolve) => setTimeout(resolve, 2000))
         const unlockResult = await stateServer.executeOperation({
-            query: UNLOCK_STATE_SUBMISSION,
+            query: UNLOCK_HEALTH_PLAN_PACKAGE,
             variables: {
                 input: {
                     pkgID: stateSubmission.id,
@@ -244,7 +253,7 @@ describe('unlockHealthPlanPackage', () => {
         const err = (unlockResult.errors as GraphQLError[])[0]
 
         expect(err.extensions['code']).toBe('FORBIDDEN')
-        expect(err.message).toBe('user not authorized to unlock submission')
+        expect(err.message).toBe('user not authorized to unlock package')
     })
 
     it('returns errors if unlocked from the wrong state', async () => {
@@ -260,13 +269,13 @@ describe('unlockHealthPlanPackage', () => {
         })
 
         // First, create a new draft submission
-        const stateSubmission = await createAndUpdateTestDraftSubmission(
+        const stateSubmission = await createAndUpdateTestHealthPlanPackage(
             stateServer
         )
 
         // Attempt Unlock Draft
         const unlockDraftResult = await cmsServer.executeOperation({
-            query: UNLOCK_STATE_SUBMISSION,
+            query: UNLOCK_HEALTH_PLAN_PACKAGE,
             variables: {
                 input: {
                     pkgID: stateSubmission.id,
@@ -280,13 +289,13 @@ describe('unlockHealthPlanPackage', () => {
 
         expect(err.extensions['code']).toBe('BAD_USER_INPUT')
         expect(err.message).toBe(
-            'Attempted to unlock submission with wrong status'
+            'Attempted to unlock package with wrong status'
         )
 
-        await submitTestDraftSubmission(stateServer, stateSubmission.id)
+        await submitTestHealthPlanPackage(stateServer, stateSubmission.id)
 
         // Unlock Submission
-        await unlockTestDraftSubmission(
+        await unlockTestHealthPlanPackage(
             cmsServer,
             stateSubmission.id,
             'Super duper good reason.'
@@ -294,7 +303,7 @@ describe('unlockHealthPlanPackage', () => {
 
         // Attempt Unlock Unlocked
         const unlockUnlockedResult = await cmsServer.executeOperation({
-            query: UNLOCK_STATE_SUBMISSION,
+            query: UNLOCK_HEALTH_PLAN_PACKAGE,
             variables: {
                 input: {
                     pkgID: stateSubmission.id,
@@ -308,7 +317,7 @@ describe('unlockHealthPlanPackage', () => {
 
         expect(unlockErr.extensions['code']).toBe('BAD_USER_INPUT')
         expect(unlockErr.message).toBe(
-            'Attempted to unlock submission with wrong status'
+            'Attempted to unlock package with wrong status'
         )
     })
 
@@ -324,12 +333,12 @@ describe('unlockHealthPlanPackage', () => {
         })
 
         // First, create a new submitted submission
-        // const stateSubmission = await createTestStateSubmission(stateServer)
+        // const stateSubmission = await createAndSubmitTestHealthPlanPackage(stateServer)
 
         // Unlock
         await new Promise((resolve) => setTimeout(resolve, 2000))
         const unlockResult = await cmsServer.executeOperation({
-            query: UNLOCK_STATE_SUBMISSION,
+            query: UNLOCK_HEALTH_PLAN_PACKAGE,
             variables: {
                 input: {
                     pkgID: 'foo-bar',
@@ -342,9 +351,7 @@ describe('unlockHealthPlanPackage', () => {
         const err = (unlockResult.errors as GraphQLError[])[0]
 
         expect(err.extensions['code']).toBe('BAD_USER_INPUT')
-        expect(err.message).toBe(
-            'A submission must exist to be unlocked: foo-bar'
-        )
+        expect(err.message).toBe('A package must exist to be unlocked: foo-bar')
     })
 
     it('returns an error if the DB errors', async () => {
@@ -364,7 +371,7 @@ describe('unlockHealthPlanPackage', () => {
         // Unlock
         await new Promise((resolve) => setTimeout(resolve, 2000))
         const unlockResult = await cmsServer.executeOperation({
-            query: UNLOCK_STATE_SUBMISSION,
+            query: UNLOCK_HEALTH_PLAN_PACKAGE,
             variables: {
                 input: {
                     pkgID: 'foo-bar',
@@ -378,7 +385,7 @@ describe('unlockHealthPlanPackage', () => {
 
         expect(err.extensions['code']).toBe('INTERNAL_SERVER_ERROR')
         expect(err.message).toBe(
-            'Issue finding a state submission of type UNEXPECTED_EXCEPTION. Message: this error came from the generic store with errors mock'
+            'Issue finding a package of type UNEXPECTED_EXCEPTION. Message: this error came from the generic store with errors mock'
         )
     })
 
@@ -386,7 +393,9 @@ describe('unlockHealthPlanPackage', () => {
         const stateServer = await constructTestPostgresServer()
 
         // First, create a new submitted submission
-        const stateSubmission = await createTestStateSubmission(stateServer)
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            stateServer
+        )
 
         const cmsServer = await constructTestPostgresServer({
             context: {
@@ -400,7 +409,7 @@ describe('unlockHealthPlanPackage', () => {
 
         // Attempt Unlock Draft
         const unlockedResult = await cmsServer.executeOperation({
-            query: UNLOCK_STATE_SUBMISSION,
+            query: UNLOCK_HEALTH_PLAN_PACKAGE,
             variables: {
                 input: {
                     pkgID: stateSubmission.id,

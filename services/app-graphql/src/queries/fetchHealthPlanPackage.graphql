@@ -12,7 +12,7 @@ query fetchHealthPlanPackage($input: FetchHealthPlanPackageInput!) {
                 }
             }
             status
-            intiallySubmittedAt
+            initiallySubmittedAt
             revisions {
                 node {
                     id

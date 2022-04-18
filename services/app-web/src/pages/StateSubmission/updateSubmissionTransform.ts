@@ -1,9 +1,4 @@
-import { base64ToDomain } from '../../common-code/proto/stateSubmission'
-import {
-    DraftSubmission,
-    DraftSubmissionUpdates,
-    HealthPlanPackage,
-} from '../../gen/gqlClient'
+import { DraftSubmission, DraftSubmissionUpdates } from '../../gen/gqlClient'
 /*
     Clean out _typename from submission
     If you pass gql __typename within a mutation input things break; however,  __typename comes down on cached queries by default
@@ -66,42 +61,9 @@ function updatesFromSubmission(draft: DraftSubmission): DraftSubmissionUpdates {
     }
 }
 
-// this is needed as we change our api - right now only used in tests.
-function updatesFromHealthPlanPackage(
-    draft: HealthPlanPackage
-): DraftSubmissionUpdates {
-    const formData = base64ToDomain(draft.revisions[0].node.formDataProto)
-    if (formData instanceof Error) throw Error
-
-    return {
-        programIDs: formData.programIDs,
-        submissionType: formData.submissionType,
-        submissionDescription: formData.submissionDescription,
-        documents: formData.documents,
-        contractType: formData.contractType,
-        contractExecutionStatus: formData.contractExecutionStatus,
-        contractDocuments: formData.contractDocuments,
-        contractDateStart: formData.contractDateStart,
-        contractDateEnd: formData.contractDateEnd,
-        federalAuthorities: formData.federalAuthorities,
-        managedCareEntities: formData.managedCareEntities,
-        contractAmendmentInfo: formData.contractAmendmentInfo,
-        rateType: formData.rateType,
-        rateDocuments: formData.rateDocuments,
-        rateDateStart: formData.rateDateStart,
-        rateDateEnd: formData.rateDateEnd,
-        rateDateCertified: formData.rateDateCertified,
-        rateAmendmentInfo: formData.rateAmendmentInfo,
-        stateContacts: formData.stateContacts,
-        actuaryContacts: formData.actuaryContacts,
-        actuaryCommunicationPreference: formData.actuaryCommunicationPreference,
-    }
-}
-
 export {
     cleanDraftSubmission,
     stripTypename,
     omitTypename,
     updatesFromSubmission,
-    updatesFromHealthPlanPackage,
 }

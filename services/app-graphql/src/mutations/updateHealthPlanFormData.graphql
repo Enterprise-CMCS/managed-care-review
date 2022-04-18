@@ -12,7 +12,7 @@ mutation updateHealthPlanFormData($input: UpdateHealthPlanFormDataInput!) {
                 }
             }
             status
-            intiallySubmittedAt
+            initiallySubmittedAt
             revisions {
                 node {
                     id

@@ -1,42 +1,30 @@
-import INDEX_SUBMISSIONS2 from '../../app-graphql/src/queries/indexHealthPlanPackages.graphql'
+import INDEX_HEALTH_PLAN_PACKAGES from '../../app-graphql/src/queries/indexHealthPlanPackages.graphql'
 import {
     constructTestPostgresServer,
-    createTestDraftSubmission,
-    createTestStateSubmission,
-    unlockTestDraftSubmission,
-    resubmitTestDraftSubmission,
+    createTestHealthPlanPackage,
+    createAndSubmitTestHealthPlanPackage,
+    unlockTestHealthPlanPackage,
+    resubmitTestHealthPlanPackage,
 } from '../testHelpers/gqlHelpers'
 import { todaysDate } from '../testHelpers/dateHelpers'
 import { HealthPlanPackageEdge, HealthPlanPackage } from '../gen/gqlServer'
-import { base64ToDomain } from '../../app-web/src/common-code/proto/stateSubmission'
+import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
 
-const currentRevisionSubmissionFormData = (submission: HealthPlanPackage) => {
-    const result = base64ToDomain(submission.revisions[0].node.formDataProto)
-    if (result instanceof Error) {
-        console.error(result)
-        return undefined
-    }
-    return result
-}
 describe('indexHealthPlanPackages', () => {
     it('returns a list of submissions that includes newly created entries', async () => {
         const server = await constructTestPostgresServer()
 
         // First, create a new submission
-        const draftSub = await createTestDraftSubmission(server)
-        const stateSub = await createTestStateSubmission(server)
+        const draftPkg = await createTestHealthPlanPackage(server)
+        const draftFormData = latestFormData(draftPkg)
+
+        const submittedPkg = await createAndSubmitTestHealthPlanPackage(server)
+        const submittedFormData = latestFormData(submittedPkg)
 
         // then see if we can get that same submission back from the index
         const result = await server.executeOperation({
-            query: INDEX_SUBMISSIONS2,
+            query: INDEX_HEALTH_PLAN_PACKAGES,
         })
-
-        //Parse state submission proto data
-        const currentRevision = stateSub?.revisions[0]?.node
-        const stateSubData = base64ToDomain(currentRevision.formDataProto)
-        if (stateSubData instanceof Error) {
-            throw stateSubData
-        }
 
         expect(result.errors).toBeUndefined()
 
@@ -48,24 +36,22 @@ describe('indexHealthPlanPackages', () => {
         const theseSubmissions: HealthPlanPackage[] = submissionsIndex.edges
             .map((edge: HealthPlanPackageEdge) => edge.node)
             .filter((sub: HealthPlanPackage) =>
-                [draftSub.id, stateSub.id].includes(sub.id)
+                [draftPkg.id, submittedPkg.id].includes(sub.id)
             )
         // specific submissions by id exist
         expect(theseSubmissions).toHaveLength(2)
 
         // confirm some submission data is correct too, first in list will be draft, second is the submitted
-        expect(theseSubmissions[0].intiallySubmittedAt).toBeNull()
+        expect(theseSubmissions[0].initiallySubmittedAt).toBeNull()
         expect(theseSubmissions[0].status).toBe('DRAFT')
-        expect(
-            currentRevisionSubmissionFormData(theseSubmissions[0])
-                ?.submissionDescription
-        ).toBe(draftSub.submissionDescription)
-        expect(theseSubmissions[1].intiallySubmittedAt).toBe(todaysDate())
+        expect(latestFormData(theseSubmissions[0]).submissionDescription).toBe(
+            draftFormData.submissionDescription
+        )
+        expect(theseSubmissions[1].initiallySubmittedAt).toBe(todaysDate())
         expect(theseSubmissions[1].status).toBe('SUBMITTED')
-        expect(
-            currentRevisionSubmissionFormData(theseSubmissions[1])
-                ?.submissionDescription
-        ).toBe(stateSubData.submissionDescription)
+        expect(latestFormData(theseSubmissions[1]).submissionDescription).toBe(
+            submittedFormData.submissionDescription
+        )
     })
 
     it('synthesizes the right statuses as a submission is submitted/unlocked/etc', async () => {
@@ -82,25 +68,31 @@ describe('indexHealthPlanPackages', () => {
         })
 
         // First, create new submissions
-        const draftSubmission = await createTestDraftSubmission(server)
-        const submittedSubmission = await createTestStateSubmission(server)
-        const unlockedSubmission = await createTestStateSubmission(server)
-        const relockedSubmission = await createTestStateSubmission(server)
+        const draftSubmission = await createTestHealthPlanPackage(server)
+        const submittedSubmission = await createAndSubmitTestHealthPlanPackage(
+            server
+        )
+        const unlockedSubmission = await createAndSubmitTestHealthPlanPackage(
+            server
+        )
+        const relockedSubmission = await createAndSubmitTestHealthPlanPackage(
+            server
+        )
 
         // unlock two
-        await unlockTestDraftSubmission(
+        await unlockTestHealthPlanPackage(
             cmsServer,
             unlockedSubmission.id,
             'Test reason'
         )
-        await unlockTestDraftSubmission(
+        await unlockTestHealthPlanPackage(
             cmsServer,
             relockedSubmission.id,
             'Test reason'
         )
 
         // resubmit one
-        await resubmitTestDraftSubmission(
+        await resubmitTestHealthPlanPackage(
             server,
             relockedSubmission.id,
             'Test first resubmission'
@@ -108,7 +100,7 @@ describe('indexHealthPlanPackages', () => {
 
         // index submissions api request
         const result = await server.executeOperation({
-            query: INDEX_SUBMISSIONS2,
+            query: INDEX_HEALTH_PLAN_PACKAGES,
         })
         const submissionsIndex = result.data?.indexHealthPlanPackages
 
@@ -149,7 +141,9 @@ describe('indexHealthPlanPackages', () => {
         const server = await constructTestPostgresServer()
 
         // First, create a new submission
-        const stateSubmission = await createTestStateSubmission(server)
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            server
+        )
 
         const createdID = stateSubmission.id
 
@@ -171,7 +165,7 @@ describe('indexHealthPlanPackages', () => {
         })
 
         const result = await otherUserServer.executeOperation({
-            query: INDEX_SUBMISSIONS2,
+            query: INDEX_HEALTH_PLAN_PACKAGES,
             variables: { input },
         })
 
@@ -185,14 +179,14 @@ describe('indexHealthPlanPackages', () => {
         const testSubmission = submissions.filter(
             (test: HealthPlanPackage) => test.id === createdID
         )[0]
-        expect(testSubmission.intiallySubmittedAt).toBe(todaysDate())
+        expect(testSubmission.initiallySubmittedAt).toBe(todaysDate())
     })
 
     it('returns no submissions for a different states user', async () => {
         const server = await constructTestPostgresServer()
 
-        await createTestDraftSubmission(server)
-        await createTestStateSubmission(server)
+        await createTestHealthPlanPackage(server)
+        await createAndSubmitTestHealthPlanPackage(server)
 
         const otherUserServer = await constructTestPostgresServer({
             context: {
@@ -206,7 +200,7 @@ describe('indexHealthPlanPackages', () => {
         })
 
         const result = await otherUserServer.executeOperation({
-            query: INDEX_SUBMISSIONS2,
+            query: INDEX_HEALTH_PLAN_PACKAGES,
         })
 
         expect(result.errors).toBeUndefined() // Is this really what we want? I thought this would be 403 unauthorized

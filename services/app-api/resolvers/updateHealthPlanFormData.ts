@@ -50,7 +50,7 @@ export function updateHealthPlanFormDataResolver(
             })
         }
 
-        // don't send a StateSubmission to the update endpoint
+        // don't send a LockedFormData to the update endpoint
         if (formDataResult.status === 'SUBMITTED') {
             const errMessage = `Attempted to update with a StateSubmission: ${input.pkgID}`
             logError('updateHealthPlanFormData', errMessage)
@@ -61,22 +61,22 @@ export function updateHealthPlanFormDataResolver(
         }
 
         const unlockedFormData: UnlockedHealthPlanFormDataType = formDataResult
-        const result = await store.findSubmissionWithRevisions(input.pkgID)
+        const result = await store.findHealthPlanPackage(input.pkgID)
 
         if (isStoreError(result)) {
-            console.log('Error finding a submission', result)
-            const errMessage = `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
+            console.log('Error finding a package', result)
+            const errMessage = `Issue finding a package of type ${result.code}. Message: ${result.message}`
             logError('updateHealthPlanFormData', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
 
         if (result === undefined) {
-            const errMessage = `No submission found to update with that ID: ${input.pkgID}`
+            const errMessage = `No package found to update with that ID: ${input.pkgID}`
             logError('updateHealthPlanFormData', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
-                argumentName: 'submissionID',
+                argumentName: 'pgkID',
             })
         }
 
@@ -101,7 +101,7 @@ export function updateHealthPlanFormDataResolver(
         // Check the package is in an updateable state
         const planPackageStatus = packageStatus(planPackage)
         if (planPackageStatus instanceof Error) {
-            const errMessage = `No revisions found on submission: ${input.pkgID}`
+            const errMessage = `No revisions found on package: ${input.pkgID}`
             logError('updateHealthPlanFormData', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
@@ -109,11 +109,11 @@ export function updateHealthPlanFormDataResolver(
 
         // Can't update a submission that is locked or resubmitted
         if (!['DRAFT', 'UNLOCKED'].includes(planPackageStatus)) {
-            const errMessage = `Submission is not in editable state: ${input.pkgID} status: ${planPackageStatus}`
+            const errMessage = `Package is not in editable state: ${input.pkgID} status: ${planPackageStatus}`
             logError('updateHealthPlanFormData', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
-                argumentName: 'submissionID',
+                argumentName: 'pkg',
             })
         }
 
@@ -131,13 +131,13 @@ export function updateHealthPlanFormDataResolver(
             throw new Error(errMessage)
         }
 
-        // Sanity check, Can't update a submission that is locked or resubmitted in the form data either
+        // Sanity check, Can't update a package that is locked or resubmitted in the form data either
         if (previousFormDataResult.status === 'SUBMITTED') {
-            const errMessage = `Submission form data is not in editable state: ${input.pkgID}`
+            const errMessage = `Package form data is not in editable state: ${input.pkgID}`
             logError('updateHealthPlanFormData', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
-                argumentName: 'submissionID',
+                argumentName: 'pgkID',
             })
         }
 
@@ -189,7 +189,7 @@ export function updateHealthPlanFormDataResolver(
         const editableRevision = planPackage.revisions[0]
 
         // save the new form data to the db
-        const updateResult = await store.updateFormData(
+        const updateResult = await store.updateHealthPlanRevision(
             planPackage.id,
             editableRevision.id,
             unlockedFormData

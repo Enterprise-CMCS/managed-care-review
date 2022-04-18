@@ -7,14 +7,17 @@ import { RoutesRecord } from '../../constants/routes'
 import {
     fetchCurrentUserMock,
     fetchHealthPlanPackageMock,
-    updateDraftSubmissionMock,
     mockDraftHealthPlanPackage,
     mockUnlockedHealthPlanPackage,
+    updateHealthPlanFormDataMockSuccess,
 } from '../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
 import { StateSubmissionForm } from './StateSubmissionForm'
-import { updatesFromHealthPlanPackage } from './updateSubmissionTransform'
+import {
+    base64ToDomain,
+    domainToBase64,
+} from '../../common-code/proto/stateSubmission'
 
 describe('StateSubmissionForm', () => {
     describe('loads draft submission', () => {
@@ -240,9 +243,15 @@ describe('StateSubmissionForm', () => {
                 submissionDescription:
                     'A real submission but updated something',
             })
-            const mockUpdate = updatesFromHealthPlanPackage(mockSubmission)
-            mockUpdate.submissionDescription =
+            const formData = base64ToDomain(
+                mockSubmission.revisions[0].node.formDataProto
+            )
+            if (formData instanceof Error) throw Error
+
+            formData.submissionDescription =
                 'A real submission but updated something'
+
+            const updatedFormData = domainToBase64(formData)
 
             renderWithProviders(
                 <Route
@@ -258,10 +267,10 @@ describe('StateSubmissionForm', () => {
                                 id: '15',
                                 statusCode: 200,
                             }),
-                            updateDraftSubmissionMock({
+                            updateHealthPlanFormDataMockSuccess({
                                 id: '15',
-                                updates: mockUpdate,
-                                statusCode: 200,
+                                pkg: mockSubmission,
+                                updatedFormData,
                             }),
                             fetchHealthPlanPackageMock({
                                 id: '15',
@@ -302,9 +311,15 @@ describe('StateSubmissionForm', () => {
                 documents: mockDocs,
             })
 
-            const mockUpdate = updatesFromHealthPlanPackage(mockSubmission)
-            mockUpdate.submissionDescription =
+            const formData = base64ToDomain(
+                mockSubmission.revisions[0].node.formDataProto
+            )
+            if (formData instanceof Error) throw Error
+
+            formData.submissionDescription =
                 'A real submission but updated something'
+
+            const updatedFormData = domainToBase64(formData)
 
             renderWithProviders(
                 <Route
@@ -320,10 +335,10 @@ describe('StateSubmissionForm', () => {
                                 submission: mockSubmission,
                                 statusCode: 200,
                             }),
-                            updateDraftSubmissionMock({
+                            updateHealthPlanFormDataMockSuccess({
                                 id: '15',
-                                updates: mockUpdate,
-                                statusCode: 200,
+                                pkg: mockSubmission,
+                                updatedFormData,
                             }),
                             fetchHealthPlanPackageMock({
                                 id: '15',

@@ -40,7 +40,7 @@ export {
     isUnlockedHealthPlanFormData,
     isLockedHealthPlanFormData,
     programNames,
-    submissionName,
+    packageName,
     generateRateName,
 } from './healthPlanFormData'
 export {
