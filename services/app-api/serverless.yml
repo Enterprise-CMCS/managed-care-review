@@ -42,6 +42,8 @@ custom:
     webpackConfig: 'webpack.config.js'
     packager: 'yarn'
     includeModules:
+      forceExclude:
+        - '@prisma/client'
       nodeModulesRelativeDir: '../../'
     excludeRegex: 'darwin|debian'
   serverlessTerminationProtection:
