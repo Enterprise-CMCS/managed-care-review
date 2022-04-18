@@ -401,6 +401,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                     submission={packageData}
                     documentDateLookupTable={documentDates}
                     isCMSUser={isCMSUser}
+                    submissionName={submissionName(packageData, statePrograms)}
                 />
 
                 {isContractActionAndRateCertification && (

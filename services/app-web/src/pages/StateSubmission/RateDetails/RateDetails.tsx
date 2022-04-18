@@ -14,13 +14,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 import styles from '../StateSubmissionForm.module.scss'
 
-import {
-    Document,
-    // DraftSubmission,
-    RateType,
-    // UpdateDraftSubmissionInput,
-    HealthPlanPackage,
-} from '../../../gen/gqlClient'
+import { Document, RateType, HealthPlanPackage } from '../../../gen/gqlClient'
 
 import {
     FileUpload,
