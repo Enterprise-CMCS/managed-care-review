@@ -24,7 +24,7 @@ export type ContractDetailsSummarySectionProps = {
     navigateTo?: string
     documentDateLookupTable?: DocumentDateLookupTable
     isCMSUser?: boolean
-    submissionName?: string
+    submissionName: string
 }
 
 const createCheckboxList = ({

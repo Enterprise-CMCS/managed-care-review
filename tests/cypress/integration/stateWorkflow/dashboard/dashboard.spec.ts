@@ -19,7 +19,7 @@ describe('dashboard', () => {
         })
     })
 
-    it('can see submission summary', () => {
+    it.only('can see submission summary', () => {
         cy.logInAsStateUser()
 
         // add a draft submission

@@ -170,6 +170,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                 <ContractDetailsSummarySection
                     submission={packageData}
                     documentDateLookupTable={documentDates}
+                    submissionName={submissionName(packageData, statePrograms)}
                 />
 
                 {isContractActionAndRateCertification && (

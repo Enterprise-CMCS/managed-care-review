@@ -227,7 +227,10 @@ export const Documents = ({
 
             try {
                 const updatedSubmission = await updateDraft(draftSubmission)
-                if (updatedSubmission) {
+                if (updatedSubmission instanceof Error) {
+                    console.log('UPDATE ERROR')
+                    onUpdateDraftSubmissionError()
+                } else if (updatedSubmission) {
                     history.push(redirectPath)
                 }
             } catch (error) {
