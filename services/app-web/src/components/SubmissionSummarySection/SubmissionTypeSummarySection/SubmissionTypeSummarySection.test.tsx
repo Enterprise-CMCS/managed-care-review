@@ -16,13 +16,14 @@ describe('SubmissionTypeSummarySection', () => {
                 submission={draftSubmission}
                 statePrograms={mockMNState().programs}
                 navigateTo="submission-type"
+                submissionName="MN-PMAP-0001"
             />
         )
 
         expect(
             screen.getByRole('heading', {
                 level: 2,
-                name: draftSubmission.name,
+                name: 'MN-PMAP-0001',
             })
         ).toBeInTheDocument()
         expect(
@@ -35,13 +36,14 @@ describe('SubmissionTypeSummarySection', () => {
             <SubmissionTypeSummarySection
                 submission={stateSubmission}
                 statePrograms={mockMNState().programs}
+                submissionName="MN-MSHO-0003"
             />
         )
 
         expect(
             screen.getByRole('heading', {
                 level: 2,
-                name: stateSubmission.name,
+                name: 'MN-MSHO-0003',
             })
         ).toBeInTheDocument()
         expect(screen.queryByRole('link', { name: 'Edit' })).toBeNull()
@@ -53,6 +55,7 @@ describe('SubmissionTypeSummarySection', () => {
                 submission={draftSubmission}
                 statePrograms={mockMNState().programs}
                 navigateTo="submission-type"
+                submissionName="MN-PMAP-0001"
             />
         )
 
@@ -69,12 +72,12 @@ describe('SubmissionTypeSummarySection', () => {
     it('can render all state submission type fields', () => {
         renderWithProviders(
             <SubmissionTypeSummarySection
-                submission={stateSubmission}
+                submission={{ ...stateSubmission, status: 'SUBMITTED' }}
                 statePrograms={mockMNState().programs}
                 navigateTo="submission-type"
+                submissionName="MN-MSHO-0003"
             />
         )
-
         expect(
             screen.getByRole('definition', { name: 'Program(s)' })
         ).toBeInTheDocument()
@@ -94,6 +97,7 @@ describe('SubmissionTypeSummarySection', () => {
                 submission={draftSubmission}
                 statePrograms={mockMNState().programs}
                 navigateTo="submission-type"
+                submissionName="MN-PMAP-0001"
             />
         )
         expect(
@@ -107,6 +111,7 @@ describe('SubmissionTypeSummarySection', () => {
                 statePrograms={mockMNState().programs}
                 navigateTo="submission-type"
                 headerChildComponent={<button>Test button</button>}
+                submissionName="MN-PMAP-0001"
             />
         )
         expect(

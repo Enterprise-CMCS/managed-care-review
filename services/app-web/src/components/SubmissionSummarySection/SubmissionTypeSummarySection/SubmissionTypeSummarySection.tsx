@@ -1,21 +1,23 @@
 import { Grid } from '@trussworks/react-uswds'
 import dayjs from 'dayjs'
-import { ProgramT } from '../../../common-code/domain-models'
+import {
+    ProgramT,
+    HealthPlanFormDataType,
+} from '../../../common-code/domain-models'
 import { DataDetail } from '../../../components/DataDetail'
 import { DoubleColumnGrid } from '../../../components/DoubleColumnGrid'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { SubmissionTypeRecord } from '../../../constants/healthPlanPackages'
-import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
-import { isStateSubmission } from '../../../gqlHelpers'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../SubmissionSummarySection.module.scss'
 
 export type SubmissionTypeSummarySectionProps = {
-    submission: DraftSubmission | StateSubmission
+    submission: HealthPlanFormDataType
     statePrograms: ProgramT[]
     navigateTo?: string
     headerChildComponent?: React.ReactElement
     intiallySubmittedAt?: Date
+    submissionName: string
 }
 
 export const SubmissionTypeSummarySection = ({
@@ -24,16 +26,18 @@ export const SubmissionTypeSummarySection = ({
     navigateTo,
     headerChildComponent,
     intiallySubmittedAt,
+    submissionName,
 }: SubmissionTypeSummarySectionProps): React.ReactElement => {
     const isPreviousSubmission = usePreviousSubmission()
     const programNames = statePrograms
         .filter((p) => submission.programIDs.includes(p.id))
         .map((p) => p.name)
+    const isSubmitted = submission.status === 'SUBMITTED'
 
     return (
         <section id="submissionTypeSection" className={styles.summarySection}>
             <SectionHeader
-                header={submission.name}
+                header={submissionName}
                 navigateTo={navigateTo}
                 headerId={'submissionName'}
             >
@@ -41,7 +45,7 @@ export const SubmissionTypeSummarySection = ({
             </SectionHeader>
 
             <dl>
-                {isStateSubmission(submission) && !isPreviousSubmission && (
+                {isSubmitted && !isPreviousSubmission && (
                     <DoubleColumnGrid>
                         <DataDetail
                             id="submitted"

@@ -37,6 +37,7 @@ describe('ContractDetailsSummarySection', () => {
             <ContractDetailsSummarySection
                 submission={testSubmission}
                 navigateTo="contract-details"
+                submissionName="MN-PMAP-0001"
             />
         )
 
@@ -64,7 +65,11 @@ describe('ContractDetailsSummarySection', () => {
     it('can render state submission on summary page without errors (submission summary behavior)', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
-                submission={stateBaseContractOnlySubmission}
+                submission={{
+                    ...stateBaseContractOnlySubmission,
+                    status: 'SUBMITTED',
+                }}
+                submissionName="MN-PMAP-0001"
             />
         )
 
@@ -87,6 +92,7 @@ describe('ContractDetailsSummarySection', () => {
             <ContractDetailsSummarySection
                 submission={draftContractAndRatesSubmission}
                 navigateTo="contract-details"
+                submissionName="MN-PMAP-0001"
             />
         )
 
@@ -130,6 +136,7 @@ describe('ContractDetailsSummarySection', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
                 submission={stateBaseContractOnlySubmission}
+                submissionName="MN-PMAP-0001"
             />
         )
         expect(screen.getByText('Contract effective dates')).toBeInTheDocument()
@@ -152,6 +159,7 @@ describe('ContractDetailsSummarySection', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
                 submission={draftContractAndRatesSubmission}
+                submissionName="MN-PMAP-0001"
             />
         )
         expect(
@@ -203,7 +211,10 @@ describe('ContractDetailsSummarySection', () => {
             ],
         }
         renderWithProviders(
-            <ContractDetailsSummarySection submission={testSubmission} />
+            <ContractDetailsSummarySection
+                submission={testSubmission}
+                submissionName="MN-PMAP-0001"
+            />
         )
 
         await waitFor(() => {
@@ -243,6 +254,7 @@ describe('ContractDetailsSummarySection', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
                 submission={draftContractAndRatesSubmission}
+                submissionName="MN-PMAP-0001"
             />
         )
 
@@ -261,6 +273,7 @@ describe('ContractDetailsSummarySection', () => {
                 component={() => (
                     <ContractDetailsSummarySection
                         submission={draftContractAndRatesSubmission}
+                        submissionName="MN-PMAP-0001"
                     />
                 )}
             />,

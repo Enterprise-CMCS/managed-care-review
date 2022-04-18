@@ -21,19 +21,16 @@ import styles from '../StateSubmissionForm.module.scss'
 import {
     ActuarialFirmType,
     ActuaryCommunicationType,
-    DraftSubmission,
-    UpdateDraftSubmissionInput,
+    HealthPlanPackage,
 } from '../../../gen/gqlClient'
 
 import { ErrorSummary, FieldRadio } from '../../../components/Form'
 
-import {
-    updatesFromSubmission,
-    stripTypename,
-} from '../updateSubmissionTransform'
+import { stripTypename } from '../updateSubmissionTransform'
 
 import { useFocus } from '../../../hooks/useFocus'
 import { PageActions } from '../PageActions'
+import { UnlockedHealthPlanFormDataType } from '../../../common-code/domain-models'
 export interface ContactsFormValues {
     stateContacts: stateContactValue[]
     actuaryContacts: actuaryContactValue[]
@@ -50,8 +47,8 @@ export interface actuaryContactValue {
     name: string
     titleRole: string
     email: string
-    actuarialFirm?: ActuarialFirmType | null | undefined
-    actuarialFirmOther?: string | null
+    actuarialFirm?: ActuarialFirmType | undefined
+    actuarialFirmOther?: string | undefined
 }
 
 const yupValidation = (submissionType: string) => {
@@ -163,11 +160,11 @@ export const Contacts = ({
     showValidations = false,
     updateDraft,
 }: {
-    draftSubmission: DraftSubmission
+    draftSubmission: UnlockedHealthPlanFormDataType
     showValidations?: boolean
     updateDraft: (
-        input: UpdateDraftSubmissionInput
-    ) => Promise<DraftSubmission | undefined>
+        input: UnlockedHealthPlanFormDataType
+    ) => Promise<HealthPlanPackage | Error>
 }): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const [focusNewContact, setFocusNewContact] = React.useState(false)
@@ -234,7 +231,7 @@ export const Contacts = ({
         name: '',
         titleRole: '',
         email: '',
-        actuarialFirm: null,
+        actuarialFirm: undefined,
         actuarialFirmOther: '',
     }
 
@@ -273,18 +270,22 @@ export const Contacts = ({
         values: ContactsFormValues,
         formikHelpers: FormikHelpers<ContactsFormValues>
     ) => {
-        const updatedDraft = updatesFromSubmission(draftSubmission)
-        updatedDraft.stateContacts = values.stateContacts
-        updatedDraft.actuaryContacts = values.actuaryContacts
-        updatedDraft.actuaryCommunicationPreference =
+        // const updatedDraft = updatesFromSubmission(draftSubmission)
+        draftSubmission.stateContacts = values.stateContacts
+        draftSubmission.actuaryContacts = values.actuaryContacts
+        draftSubmission.actuaryCommunicationPreference =
             values.actuaryCommunicationPreference
 
         try {
-            const updatedSubmission = await updateDraft({
-                submissionID: draftSubmission.id,
-                draftSubmissionUpdates: updatedDraft,
-            })
-            if (updatedSubmission) {
+            const updatedSubmission = await updateDraft(draftSubmission)
+            if (updatedSubmission instanceof Error) {
+                formikHelpers.setSubmitting(false)
+                redirectToDashboard.current = false
+                console.log(
+                    'Error updating draft submission: ',
+                    updatedSubmission
+                )
+            } else if (updatedSubmission) {
                 if (redirectToDashboard.current) {
                     history.push(`/dashboard`)
                 } else {
@@ -306,7 +307,7 @@ export const Contacts = ({
                 onSubmit={handleFormSubmit}
                 validationSchema={contactSchema}
             >
-                {({ values, errors, dirty, handleSubmit }) => (
+                {({ values, errors, dirty, handleSubmit, isSubmitting }) => (
                     <>
                         <UswdsForm
                             className={styles.formContainer}
@@ -538,7 +539,7 @@ export const Contacts = ({
                                                     0 &&
                                                     values.actuaryContacts.map(
                                                         (
-                                                            _actuaryContact,
+                                                            actuaryContact,
                                                             index
                                                         ) => (
                                                             <div

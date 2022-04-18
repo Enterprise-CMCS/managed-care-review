@@ -19,10 +19,10 @@ import { RateDetails } from './RateDetails'
 describe('RateDetails', () => {
     const emptyRateDetailsDraft = {
         ...mockDraft(),
-        rateType: null,
-        rateDateStart: null,
-        rateDateEnd: null,
-        rateDateCertified: null,
+        rateType: undefined,
+        rateDateStart: undefined,
+        rateDateEnd: undefined,
+        rateDateCertified: undefined,
     }
 
     afterEach(() => jest.clearAllMocks())
@@ -50,7 +50,6 @@ describe('RateDetails', () => {
             screen.getByRole('button', { name: 'Continue' })
         ).not.toBeDisabled()
     })
-
 
     it('displays correct form guidance', async () => {
         renderWithProviders(
@@ -94,8 +93,8 @@ describe('RateDetails', () => {
         expect(
             within(
                 screen.getByTestId('file-input-preview-list')
-            ).queryAllByRole('listitem').length
-        ).toBe(0)
+            ).queryAllByRole('listitem')
+        ).toHaveLength(0)
 
         // should not be able to find hidden things
         expect(screen.queryByText('Start date')).toBeNull()
@@ -178,7 +177,7 @@ describe('RateDetails', () => {
             expect(screen.queryByText('Start date')).toBeInTheDocument()
             expect(screen.queryByText('End date')).toBeInTheDocument()
             expect(screen.queryByText('Date certified')).toBeInTheDocument()
-            expect(screen.queryAllByTestId('errorMessage').length).toBe(0)
+            expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
         })
         // click "continue"
         const continueButton = screen.getByRole('button', { name: 'Continue' })
@@ -187,7 +186,7 @@ describe('RateDetails', () => {
 
         // check for expected errors
         await waitFor(() => {
-            expect(screen.queryAllByTestId('errorMessage').length).toBe(2)
+            expect(screen.queryAllByTestId('errorMessage')).toHaveLength(2)
             expect(
                 screen.queryAllByText(
                     'You must enter the date the document was certified'
@@ -203,7 +202,7 @@ describe('RateDetails', () => {
         userEvent.type(screen.getByText('End date'), '12/31/2022')
         userEvent.type(screen.getByText('Date certified'), '12/01/2021')
         await waitFor(() =>
-            expect(screen.queryAllByTestId('errorMessage').length).toBe(0)
+            expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
         )
     })
 
@@ -232,8 +231,8 @@ describe('RateDetails', () => {
                 expect(
                     within(
                         screen.getByTestId('file-input-preview-list')
-                    ).queryAllByRole('listitem').length
-                ).toBe(0)
+                    ).queryAllByRole('listitem')
+                ).toHaveLength(0)
             })
         })
 
@@ -439,54 +438,56 @@ describe('RateDetails', () => {
             continueButton.click()
 
             expect(
-                await screen.findAllByText('You must upload at least one document')
+                await screen.findAllByText(
+                    'You must upload at least one document'
+                )
             ).toHaveLength(2)
 
             expect(continueButton).toBeDisabled()
         })
-         it('disabled with alert when trying to continue while a file is still uploading', async () => {
-             renderWithProviders(
-                 <RateDetails
-                     draftSubmission={emptyRateDetailsDraft}
-                     updateDraft={jest.fn()}
-                 />,
-                 {
-                     apolloProvider: {
-                         mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                     },
-                 }
-             )
-             const continueButton = screen.getByRole('button', {
-                 name: 'Continue',
-             })
-             const targetEl = screen.getByTestId('file-input-droptarget')
+        it('disabled with alert when trying to continue while a file is still uploading', async () => {
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={emptyRateDetailsDraft}
+                    updateDraft={jest.fn()}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+            const targetEl = screen.getByTestId('file-input-droptarget')
 
-             // upload one file
-             dragAndDrop(targetEl, [TEST_PDF_FILE])
-             const imageElFile1 = screen.getByTestId('file-input-preview-image')
-             expect(imageElFile1).toHaveClass('is-loading')
-             await waitFor(() =>
-                 expect(imageElFile1).not.toHaveClass('is-loading')
-             )
+            // upload one file
+            dragAndDrop(targetEl, [TEST_PDF_FILE])
+            const imageElFile1 = screen.getByTestId('file-input-preview-image')
+            expect(imageElFile1).toHaveClass('is-loading')
+            await waitFor(() =>
+                expect(imageElFile1).not.toHaveClass('is-loading')
+            )
 
-             // upload second file
-             dragAndDrop(targetEl, [TEST_DOC_FILE])
+            // upload second file
+            dragAndDrop(targetEl, [TEST_DOC_FILE])
 
-             const imageElFile2 = screen.getAllByTestId(
-                 'file-input-preview-image'
-             )[1]
-             expect(imageElFile2).toHaveClass('is-loading')
+            const imageElFile2 = screen.getAllByTestId(
+                'file-input-preview-image'
+            )[1]
+            expect(imageElFile2).toHaveClass('is-loading')
 
-             // click continue while file 2 still loading
-             continueButton.click()
-             expect(continueButton).toBeDisabled()
+            // click continue while file 2 still loading
+            continueButton.click()
+            expect(continueButton).toBeDisabled()
 
-             expect(
-                 screen.getAllByText(
-                     'You must wait for all documents to finish uploading before continuing'
-                 ).length
-             ).toBe(2)
-         })
+            expect(
+                screen.getAllByText(
+                    'You must wait for all documents to finish uploading before continuing'
+                )
+            ).toHaveLength(2)
+        })
     })
 
     describe('Save as draft button', () => {
@@ -581,10 +582,10 @@ describe('RateDetails', () => {
                         documentCategories: ['RATES' as const],
                     },
                 ],
-                rateType: null,
-                rateDateStart: null,
-                rateDateEnd: null,
-                rateDateCertified: null,
+                rateType: undefined,
+                rateDateStart: undefined,
+                rateDateEnd: undefined,
+                rateDateCertified: undefined,
             }
             renderWithProviders(
                 <RateDetails
@@ -633,7 +634,9 @@ describe('RateDetails', () => {
             userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
-                expect(screen.queryAllByText('Duplicate file, please remove').length).toBe(1)
+                expect(
+                    screen.queryAllByText('Duplicate file, please remove')
+                ).toHaveLength(1)
             })
             userEvent.click(saveAsDraftButton)
             await waitFor(() => {
@@ -750,26 +753,26 @@ describe('RateDetails', () => {
             userEvent.upload(input, [TEST_DOC_FILE])
             await waitFor(() => {
                 expect(backButton).not.toBeDisabled()
-                expect(screen.queryAllByText('Duplicate file, please remove').length).toBe(1)
+                expect(
+                    screen.queryAllByText('Duplicate file, please remove')
+                ).toHaveLength(1)
             })
             userEvent.click(backButton)
             expect(screen.queryByText('Remove files with errors')).toBeNull()
             expect(mockUpdateDraftFn).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    draftSubmissionUpdates: expect.objectContaining({
-                        rateDocuments: [
-                            {
-                                name: 'testFile.doc',
-                                s3URL: expect.any(String),
-                                documentCategories: ['RATES'],
-                            },
-                            {
-                                name: 'testFile.pdf',
-                                s3URL: expect.any(String),
-                                documentCategories: ['RATES'],
-                            },
-                        ],
-                    }),
+                    rateDocuments: [
+                        {
+                            name: 'testFile.doc',
+                            s3URL: expect.any(String),
+                            documentCategories: ['RATES'],
+                        },
+                        {
+                            name: 'testFile.pdf',
+                            s3URL: expect.any(String),
+                            documentCategories: ['RATES'],
+                        },
+                    ],
                 })
             )
         })

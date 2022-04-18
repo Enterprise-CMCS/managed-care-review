@@ -25,7 +25,6 @@ describe('ContractDetails', () => {
     }
     afterEach(() => jest.clearAllMocks())
 
-
     it('displays correct form guidance', async () => {
         renderWithProviders(
             <ContractDetails
@@ -165,7 +164,7 @@ describe('ContractDetails', () => {
         userEvent.click(continueButton)
 
         await waitFor(() => {
-            expect(screen.queryAllByTestId('errorMessage').length).toBe(0)
+            expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
         })
     })
 
@@ -274,7 +273,7 @@ describe('ContractDetails', () => {
             screen.queryAllByText(
                 'You must indicate whether or not this contract action is related to COVID-19'
             )
-        ).toHaveLength(2);
+        ).toHaveLength(2)
 
         // click other
         await act(async () => {
@@ -332,8 +331,8 @@ describe('ContractDetails', () => {
                 expect(
                     within(
                         screen.getByTestId('file-input-preview-list')
-                    ).queryAllByRole('listitem').length
-                ).toBe(0)
+                    ).queryAllByRole('listitem')
+                ).toHaveLength(0)
             })
         })
 
@@ -470,7 +469,7 @@ describe('ContractDetails', () => {
             await waitFor(() => {
                 expect(
                     screen.getAllByText('You must upload at least one document')
-                ).toHaveLength(2);
+                ).toHaveLength(2)
 
                 expect(continueButton).toBeDisabled()
             })
@@ -585,8 +584,8 @@ describe('ContractDetails', () => {
             expect(
                 screen.getAllByText(
                     'You must wait for all documents to finish uploading before continuing'
-                ).length
-            ).toBe(2)
+                )
+            ).toHaveLength(2)
         })
     })
 
@@ -730,7 +729,9 @@ describe('ContractDetails', () => {
             userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
-                expect(screen.queryAllByText('Duplicate file, please remove').length).toBe(1)
+                expect(
+                    screen.queryAllByText('Duplicate file, please remove')
+                ).toHaveLength(1)
             })
             userEvent.click(saveAsDraftButton)
             await waitFor(() => {
@@ -847,26 +848,26 @@ describe('ContractDetails', () => {
             userEvent.upload(input, [TEST_DOC_FILE])
             await waitFor(() => {
                 expect(backButton).not.toBeDisabled()
-                expect(screen.queryAllByText('Duplicate file, please remove').length).toBe(1)
+                expect(
+                    screen.queryAllByText('Duplicate file, please remove')
+                ).toHaveLength(1)
             })
             userEvent.click(backButton)
             expect(screen.queryByText('Remove files with errors')).toBeNull()
             expect(mockUpdateDraftFn).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    draftSubmissionUpdates: expect.objectContaining({
-                        contractDocuments: [
-                            {
-                                name: 'testFile.doc',
-                                s3URL: expect.any(String),
-                                documentCategories: ['CONTRACT'],
-                            },
-                            {
-                                name: 'testFile.pdf',
-                                s3URL: expect.any(String),
-                                documentCategories: ['CONTRACT'],
-                            },
-                        ],
-                    }),
+                    contractDocuments: [
+                        {
+                            name: 'testFile.doc',
+                            s3URL: expect.any(String),
+                            documentCategories: ['CONTRACT'],
+                        },
+                        {
+                            name: 'testFile.pdf',
+                            s3URL: expect.any(String),
+                            documentCategories: ['CONTRACT'],
+                        },
+                    ],
                 })
             )
         })
