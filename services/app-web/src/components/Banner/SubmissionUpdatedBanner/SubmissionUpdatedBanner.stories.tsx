@@ -14,16 +14,16 @@ const Template: Story<UpdatedProps> = (args) => (
     <SubmissionUpdatedBanner {...args} />
 )
 
-export const SubmissionUnlockedBannerLongText = Template.bind({})
-SubmissionUnlockedBannerLongText.args = {
+export const SubmissionUpdatedBannerLongText = Template.bind({})
+SubmissionUpdatedBannerLongText.args = {
     submittedBy: 'Loremipsum@email.com',
     updatedOn: new Date(),
     changesMade:
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut justo non nisl congue efficitur. Praesent porta condimentum imperdiet.',
 }
 
-export const SubmissionUnlockedBannerShortText = Template.bind({})
-SubmissionUnlockedBannerShortText.args = {
+export const SubmissionUpdatedBannerShortText = Template.bind({})
+SubmissionUpdatedBannerShortText.args = {
     submittedBy: 'Loremipsum@email.com',
     updatedOn: new Date(),
     changesMade:

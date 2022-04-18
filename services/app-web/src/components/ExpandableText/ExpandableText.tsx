@@ -12,14 +12,15 @@ export const ExpandableText = ({
     clampedLines = 2,
     ...props
 }: ExpandableTextProps &
-    React.HTMLAttributes<HTMLDivElement>): React.ReactElement => {
+    React.HTMLAttributes<HTMLParagraphElement>): React.ReactElement => {
     //We are using React.useRef because jest spyOn useRef only works like this.
-    const textRef = React.useRef<HTMLDivElement>(null)
+    const textRef = React.useRef<HTMLSpanElement>(null)
     const [showMore, setShowMore] = useState<boolean>(false)
     const [showMoreButton, setShowMoreButton] = useState<boolean>(false)
 
     useLayoutEffect(() => {
         const ref = textRef?.current
+
         if (
             ref &&
             (ref.offsetHeight < ref.scrollHeight ||
@@ -42,11 +43,11 @@ export const ExpandableText = ({
                     showMore ? styles.textExpanded : styles.textContracted
                 }`}
             >
-                {typeof clamp === 'string' ? <span>{clamp}</span> : clamp}
+                {clamp}
             </span>
             {showMoreButton && (
                 <Button
-                    aria-hidden // hide from screenreaders
+                    aria-hidden // hide from screenreaders, they will read all the content by default and users can choose to skip ahead
                     type="button"
                     unstyled
                     tabIndex={-1}
