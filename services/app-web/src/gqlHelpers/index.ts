@@ -1,17 +1,5 @@
 import { GraphQLErrors } from '@apollo/client/errors'
-import { DraftSubmission, StateSubmission } from '../gen/gqlClient'
-import {
-    getCurrentRevisionFromHealthPlanPackage,
-    convertDomainModelFormDataToGQLSubmission,
-} from './healthPlanPackages'
-
-const isStateSubmission = (
-    submission: DraftSubmission | StateSubmission
-): submission is StateSubmission => {
-    if (submission.__typename === 'StateSubmission') {
-        return true
-    } else return false
-}
+import { getCurrentRevisionFromHealthPlanPackage } from './healthPlanPackages'
 
 const isGraphQLErrors = (input: unknown): input is GraphQLErrors => {
     if (Array.isArray(input)) {
@@ -22,9 +10,4 @@ const isGraphQLErrors = (input: unknown): input is GraphQLErrors => {
     return false
 }
 
-export {
-    convertDomainModelFormDataToGQLSubmission,
-    getCurrentRevisionFromHealthPlanPackage,
-    isStateSubmission,
-    isGraphQLErrors,
-}
+export { getCurrentRevisionFromHealthPlanPackage, isGraphQLErrors }

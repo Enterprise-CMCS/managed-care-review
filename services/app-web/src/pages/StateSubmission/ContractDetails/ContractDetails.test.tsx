@@ -851,20 +851,18 @@ describe('ContractDetails', () => {
             expect(screen.queryByText('Remove files with errors')).toBeNull()
             expect(mockUpdateDraftFn).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    draftSubmissionUpdates: expect.objectContaining({
-                        contractDocuments: [
-                            {
-                                name: 'testFile.doc',
-                                s3URL: expect.any(String),
-                                documentCategories: ['CONTRACT'],
-                            },
-                            {
-                                name: 'testFile.pdf',
-                                s3URL: expect.any(String),
-                                documentCategories: ['CONTRACT'],
-                            },
-                        ],
-                    }),
+                    contractDocuments: [
+                        {
+                            name: 'testFile.doc',
+                            s3URL: expect.any(String),
+                            documentCategories: ['CONTRACT'],
+                        },
+                        {
+                            name: 'testFile.pdf',
+                            s3URL: expect.any(String),
+                            documentCategories: ['CONTRACT'],
+                        },
+                    ],
                 })
             )
         })

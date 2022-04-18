@@ -13,7 +13,7 @@ describe('PageActions', () => {
                 />
             )
             const buttons = screen.getAllByRole('button')
-            expect(buttons.length).toBe(3)
+            expect(buttons).toHaveLength(3)
 
             buttons.forEach((button: HTMLElement) =>
                 expect(button).not.toBeDisabled()
@@ -95,7 +95,7 @@ describe('PageActions', () => {
                 />
             )
             const buttons = screen.getAllByRole('button')
-            expect(buttons.length).toBe(2)
+            expect(buttons).toHaveLength(2)
             buttons.forEach((button: HTMLElement) =>
                 expect(button).not.toBeDisabled()
             )
@@ -117,7 +117,7 @@ describe('PageActions', () => {
                 />
             )
             const buttons = screen.getAllByRole('button')
-            expect(buttons.length).toBe(3)
+            expect(buttons).toHaveLength(3)
             buttons.forEach((button: HTMLElement) =>
                 expect(button).not.toBeDisabled()
             )

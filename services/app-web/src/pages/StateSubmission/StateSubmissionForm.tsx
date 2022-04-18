@@ -16,10 +16,7 @@ import {
     STATE_SUBMISSION_FORM_ROUTES,
     RouteT,
 } from '../../constants/routes'
-import {
-    getCurrentRevisionFromHealthPlanPackage,
-    convertDomainModelFormDataToGQLSubmission,
-} from '../../gqlHelpers'
+import { getCurrentRevisionFromHealthPlanPackage } from '../../gqlHelpers'
 import { StateSubmissionContainer } from './StateSubmissionContainer'
 import { ContractDetails } from './ContractDetails'
 import { RateDetails } from './RateDetails'
@@ -29,9 +26,6 @@ import { ReviewSubmit } from './ReviewSubmit'
 import { SubmissionType } from './SubmissionType'
 
 import {
-    DraftSubmission,
-    UpdateDraftSubmissionInput,
-    useUpdateDraftSubmissionMutation,
     useFetchHealthPlanPackageQuery,
     User,
     useUpdateHealthPlanFormDataMutation,
@@ -87,7 +81,7 @@ const PageBannerAlerts = ({
     )
 }
 
-const activeFormPages = (draft: DraftSubmission): RouteT[] => {
+const activeFormPages = (draft: UnlockedHealthPlanFormDataType): RouteT[] => {
     // If submission type is contract only, rate details is left out of the step indicator
     return STATE_SUBMISSION_FORM_ROUTES.filter(
         (formPage) =>
@@ -119,6 +113,8 @@ export const StateSubmissionForm = (): React.ReactElement => {
     const [unlockedInfo, setUnlockedInfo] = useState<UpdateInfoType | null>(
         null
     )
+    const [computedSubmissionName, setComputedSubmissionName] =
+        useState<string>('')
 
     // Set up graphql calls
     const {
@@ -134,36 +130,8 @@ export const StateSubmissionForm = (): React.ReactElement => {
     })
 
     const submissionAndRevisions = fetchData?.fetchHealthPlanPackage?.pkg
-    const [updateDraftSubmission, { error: updateError }] =
-        useUpdateDraftSubmissionMutation()
     const [updateFormData, { error: updateFormDataError }] =
         useUpdateHealthPlanFormDataMutation()
-
-    const updateDraft = async (
-        input: UpdateDraftSubmissionInput
-    ): Promise<DraftSubmission | undefined> => {
-        setShowPageErrorMessage(false)
-        try {
-            const updateResult = await updateDraftSubmission({
-                variables: {
-                    input: input,
-                },
-                update(cache) {
-                    cache.evict({ id: `HealthPlanPackage:${id}` })
-                    cache.gc()
-                },
-            })
-            const updatedSubmission: DraftSubmission | undefined =
-                updateResult?.data?.updateDraftSubmission.draftSubmission
-
-            if (!updatedSubmission) setShowPageErrorMessage(true)
-
-            return updatedSubmission
-        } catch (serverError) {
-            setShowPageErrorMessage(true)
-            return undefined
-        }
-    }
 
     // When the new API is done, we'll call the new API here
     const updateDraftHealthPlanPackage = async (
@@ -192,6 +160,33 @@ export const StateSubmissionForm = (): React.ReactElement => {
                 setShowPageErrorMessage(true)
                 return new Error('Failed to update form data')
             }
+            // Apollo is letting us load new pages without having finished re-fetching the new data
+            // and isn't updating the cache the way I expected here, so for now, we set our current
+            // revision manually when update returns.
+            const protoResult =
+                getCurrentRevisionFromHealthPlanPackage(updatedSubmission)
+            if (protoResult instanceof Error) {
+                console.log(
+                    'Proto returned by update mutation is invalid',
+                    protoResult
+                )
+                setFormDataError('MALFORMATTED_DATA')
+                return protoResult
+            }
+            const planFormData = protoResult[1]
+
+            if (planFormData.status !== 'DRAFT') {
+                console.log(
+                    'Proto returned by update mutation is wrong state',
+                    protoResult
+                )
+                setFormDataError('WRONG_SUBMISSION_STATUS')
+                return new Error(
+                    'Proto returned by update mutation is wrong state'
+                )
+            }
+
+            setFormDataFromLatestRevision(planFormData)
 
             return updatedSubmission
         } catch (serverError) {
@@ -212,6 +207,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                 formDataFromLatestRevision,
                 statePrograms
             )
+            setComputedSubmissionName(name)
             updateHeading(pathname, name)
         }
     }, [updateHeading, pathname, formDataFromLatestRevision, loggedInUser])
@@ -268,11 +264,11 @@ export const StateSubmissionForm = (): React.ReactElement => {
         )
     }
 
-    if ((updateError || updateFormDataError) && !showPageErrorMessage) {
+    if (updateFormDataError && !showPageErrorMessage) {
         // This triggers if Apollo sets the error from our useQuery invocation
         // we should already be setting this in our try {} block in the actual update handler, I think
         // so this might be worth looking into.
-        console.log('Apollo Error reported: ', updateError, updateFormDataError)
+        console.log('Apollo Error reported: ', updateFormDataError)
         setShowPageErrorMessage(true)
     }
 
@@ -310,22 +306,11 @@ export const StateSubmissionForm = (): React.ReactElement => {
         return <ErrorInvalidSubmissionStatus />
     }
 
-    // Hacky way to not have to change the individual pages yet.
-    const statePrograms =
-        (loggedInUser &&
-            'state' in loggedInUser &&
-            loggedInUser.state.programs) ||
-        []
-    const draft = convertDomainModelFormDataToGQLSubmission(
-        formDataFromLatestRevision,
-        statePrograms
-    ) as DraftSubmission
-
     return (
         <>
             <div className={styles.stepIndicator}>
                 <DynamicStepIndicator
-                    formPages={activeFormPages(draft)}
+                    formPages={activeFormPages(formDataFromLatestRevision)}
                     currentFormPage={currentRoute}
                 />
                 <PageBannerAlerts
@@ -344,32 +329,33 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}>
                         <ContractDetails
-                            draftSubmission={draft}
-                            updateDraft={updateDraft}
+                            draftSubmission={formDataFromLatestRevision}
+                            updateDraft={updateDraftHealthPlanPackage}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}>
                         <RateDetails
-                            draftSubmission={draft}
-                            updateDraft={updateDraft}
+                            draftSubmission={formDataFromLatestRevision}
+                            updateDraft={updateDraftHealthPlanPackage}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_CONTACTS}>
                         <Contacts
-                            draftSubmission={draft}
-                            updateDraft={updateDraft}
+                            draftSubmission={formDataFromLatestRevision}
+                            updateDraft={updateDraftHealthPlanPackage}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_DOCUMENTS}>
                         <Documents
-                            draftSubmission={draft}
-                            updateDraft={updateDraft}
+                            draftSubmission={formDataFromLatestRevision}
+                            updateDraft={updateDraftHealthPlanPackage}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}>
                         <ReviewSubmit
-                            draftSubmission={draft}
+                            draftSubmission={formDataFromLatestRevision}
                             unlocked={!!unlockedInfo}
+                            submissionName={computedSubmissionName}
                         />
                     </Route>
                 </Switch>

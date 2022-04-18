@@ -22,7 +22,6 @@ import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404'
 import { dayjs } from '../../dateHelpers'
 import styles from './SubmissionRevisionSummary.module.scss'
-import { convertDomainModelFormDataToGQLSubmission } from '../../gqlHelpers'
 import { PreviousSubmissionBanner } from '../../components'
 import { DocumentDateLookupTable } from '../SubmissionSummary/SubmissionSummary'
 
@@ -134,16 +133,8 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
 
     const statePrograms = submissionAndRevisions.state.programs
 
-    // temporary kludge while the display data is expecting the wrong format.
-    // This is turning our domain model into the GraphQL model which is what
-    // all our frontend stuff expects right now.
-    const submission = convertDomainModelFormDataToGQLSubmission(
-        packageData,
-        statePrograms
-    )
-
     const isContractActionAndRateCertification =
-        submission.submissionType === 'CONTRACT_AND_RATES'
+        packageData.submissionType === 'CONTRACT_AND_RATES'
 
     return (
         <div className={styles.background}>
@@ -160,8 +151,9 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                 <PreviousSubmissionBanner link={`/submissions/${id}`} />
 
                 <SubmissionTypeSummarySection
-                    submission={submission}
+                    submission={packageData}
                     statePrograms={statePrograms}
+                    submissionName={submissionName(packageData, statePrograms)}
                     headerChildComponent={
                         submitInfo && (
                             <p
@@ -178,20 +170,25 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                 />
 
                 <ContractDetailsSummarySection
-                    submission={submission}
+                    submission={packageData}
                     documentDateLookupTable={documentDates}
+                    submissionName={submissionName(packageData, statePrograms)}
                 />
 
                 {isContractActionAndRateCertification && (
                     <RateDetailsSummarySection
-                        submission={submission}
+                        submission={packageData}
                         documentDateLookupTable={documentDates}
+                        submissionName={submissionName(
+                            packageData,
+                            statePrograms
+                        )}
                     />
                 )}
 
-                <ContactsSummarySection submission={submission} />
+                <ContactsSummarySection submission={packageData} />
 
-                <SupportingDocumentsSummarySection submission={submission} />
+                <SupportingDocumentsSummarySection submission={packageData} />
             </GridContainer>
         </div>
     )

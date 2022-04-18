@@ -7,7 +7,10 @@ describe('createDraftSubmission', () => {
         const server = await constructTestPostgresServer()
 
         const input: CreateDraftSubmissionInput = {
-            programIDs: ['5c10fe9f-bec9-416f-a20c-718b152ad633', '037af66b-81eb-4472-8b80-01edf17d12d9'],
+            programIDs: [
+                '5c10fe9f-bec9-416f-a20c-718b152ad633',
+                '037af66b-81eb-4472-8b80-01edf17d12d9',
+            ],
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
         }
@@ -21,19 +24,22 @@ describe('createDraftSubmission', () => {
         const draft = res.data?.createDraftSubmission.draftSubmission
         expect(draft.submissionDescription).toBe('A real submission')
         expect(draft.submissionType).toBe('CONTRACT_ONLY')
-        expect(draft.programIDs).toEqual(['5c10fe9f-bec9-416f-a20c-718b152ad633', '037af66b-81eb-4472-8b80-01edf17d12d9'])
+        expect(draft.programIDs).toEqual([
+            '5c10fe9f-bec9-416f-a20c-718b152ad633',
+            '037af66b-81eb-4472-8b80-01edf17d12d9',
+        ])
         expect(draft.name).toContain('FL-MMA')
-        expect(draft.documents.length).toBe(0)
-        expect(draft.managedCareEntities.length).toBe(0)
-        expect(draft.federalAuthorities.length).toBe(0)
-        expect(draft.contractDateStart).toBe(null)
-        expect(draft.contractDateEnd).toBe(null)
+        expect(draft.documents).toHaveLength(0)
+        expect(draft.managedCareEntities).toHaveLength(0)
+        expect(draft.federalAuthorities).toHaveLength(0)
+        expect(draft.contractDateStart).toBeNull()
+        expect(draft.contractDateEnd).toBeNull()
         // test the proper construction of the submission name (sorted, includes all program ids)
         expect(draft.name).toContain('MMA')
         expect(draft.name).toContain('PCCME')
-        expect(draft.name.indexOf('MMA'))
-            .toBeLessThan(draft.name.indexOf('PCCME'))
-    
+        expect(draft.name.indexOf('MMA')).toBeLessThan(
+            draft.name.indexOf('PCCME')
+        )
     })
 
     it('returns an error if the program id is not in valid', async () => {

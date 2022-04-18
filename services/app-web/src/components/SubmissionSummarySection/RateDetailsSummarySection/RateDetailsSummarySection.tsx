@@ -5,18 +5,19 @@ import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySec
 import { DocumentDateLookupTable } from '../../../pages/SubmissionSummary/SubmissionSummary'
 import { useS3 } from '../../../contexts/S3Context'
 import { formatCalendarDate } from '../../../dateHelpers'
-import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import { generateRateName } from '../../../common-code/domain-models/'
 import styles from '../SubmissionSummarySection.module.scss'
+import { HealthPlanFormDataType } from '../../../common-code/domain-models'
 
 export type RateDetailsSummarySectionProps = {
-    submission: DraftSubmission | StateSubmission
+    submission: HealthPlanFormDataType
     navigateTo?: string
     documentDateLookupTable?: DocumentDateLookupTable
     isCMSUser?: boolean
+    submissionName: string
 }
 
 export const RateDetailsSummarySection = ({
@@ -24,8 +25,9 @@ export const RateDetailsSummarySection = ({
     navigateTo,
     documentDateLookupTable,
     isCMSUser,
+    submissionName,
 }: RateDetailsSummarySectionProps): React.ReactElement => {
-    const isSubmitted = submission.__typename === 'StateSubmission'
+    const isSubmitted = submission.status === 'SUBMITTED'
     const isEditing = !isSubmitted && navigateTo !== undefined
     //Checks if submission is a previous submission
     const isPreviousSubmission = usePreviousSubmission()
@@ -36,7 +38,7 @@ export const RateDetailsSummarySection = ({
         doc.documentCategories.includes('RATES_RELATED')
     )
 
-    const rateName = generateRateName(submission, submission.name)
+    const rateName = generateRateName(submission, submissionName)
 
     useEffect(() => {
         // get all the keys for the documents we want to zip
@@ -53,7 +55,7 @@ export const RateDetailsSummarySection = ({
             // call the lambda to zip the files and get the url
             const zippedURL = await getBulkDlURL(
                 keysFromDocs,
-                submission.name + '-rate-details.zip'
+                submissionName + '-rate-details.zip'
             )
             if (zippedURL instanceof Error) {
                 console.log('ERROR: TODO: DISPLAY AN ERROR MESSAGE')
@@ -64,7 +66,13 @@ export const RateDetailsSummarySection = ({
         }
 
         void fetchZipUrl()
-    }, [getKey, getBulkDlURL, submission, rateSupportingDocuments])
+    }, [
+        getKey,
+        getBulkDlURL,
+        submission,
+        rateSupportingDocuments,
+        submissionName,
+    ])
 
     return (
         <section id="rateDetails" className={styles.summarySection}>

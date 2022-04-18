@@ -69,7 +69,6 @@ describe('Contacts', () => {
         ).toBeInTheDocument()
     })
 
-
     it('checks saved mocked state contacts correctly', async () => {
         const mockUpdateDraftFn = jest.fn()
 
@@ -122,9 +121,9 @@ describe('Contacts', () => {
         continueButton.click()
 
         await waitFor(() => {
-            expect(
-                screen.getAllByText('You must provide a name')
-            ).toHaveLength(2)
+            expect(screen.getAllByText('You must provide a name')).toHaveLength(
+                2
+            )
             expect(
                 screen.getAllByText('You must provide a title/role')
             ).toHaveLength(2)
@@ -157,7 +156,7 @@ describe('Contacts', () => {
         addStateContactButton.click()
 
         await waitFor(() => {
-            expect(screen.getAllByLabelText('Name').length).toBe(2)
+            expect(screen.getAllByLabelText('Name')).toHaveLength(2)
             const secondContactName = screen.getAllByLabelText('Name')[1]
             expect(firstContactName).toHaveValue('First person')
             expect(firstContactName).not.toHaveFocus()
@@ -191,9 +190,11 @@ describe('Contacts', () => {
         addActuaryContactButton.click()
 
         await waitFor(() => {
-            expect(screen.getByText('Add another actuary contact')).toBeInTheDocument()
+            expect(
+                screen.getByText('Add another actuary contact')
+            ).toBeInTheDocument()
 
-            expect(screen.getAllByLabelText('Name').length).toBe(3)
+            expect(screen.getAllByLabelText('Name')).toHaveLength(3)
 
             const secondActuaryContactName = screen.getAllByLabelText('Name')[2]
             expect(firstActuaryContactName).toHaveValue('First actuary person')
@@ -337,7 +338,7 @@ describe('Contacts', () => {
             screen.getAllByLabelText('Email')[0],
             'statecontact@test.com'
         )
-        expect(screen.queryAllByTestId('errorMessage').length).toBe(0)
+        expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
 
         // add actuary contact
         userEvent.type(
@@ -361,7 +362,7 @@ describe('Contacts', () => {
             )
         )
 
-        expect(screen.queryAllByTestId('errorMessage').length).toBe(0)
+        expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
 
         // Add additional state contact
         userEvent.click(
@@ -369,7 +370,6 @@ describe('Contacts', () => {
                 name: /Add another state contact/,
             })
         )
-
 
         userEvent.type(
             screen.getAllByLabelText('Name')[1],
@@ -383,7 +383,7 @@ describe('Contacts', () => {
             screen.getAllByLabelText('Email')[1],
             'statecontact2@test.com'
         )
-        expect(screen.queryAllByTestId('errorMessage').length).toBe(0)
+        expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
 
         // Add additional actuary contact
         userEvent.click(
@@ -409,8 +409,8 @@ describe('Contacts', () => {
 
         // Remove additional state contact
         expect(
-            screen.getAllByRole('button', { name: /Remove contact/ }).length
-        ).toBe(2) // there are two remove contact buttons on screen, one for state one for actuary
+            screen.getAllByRole('button', { name: /Remove contact/ })
+        ).toHaveLength(2) // there are two remove contact buttons on screen, one for state one for actuary
         userEvent.click(
             screen.getAllByRole('button', { name: /Remove contact/ })[0]
         )
@@ -419,14 +419,13 @@ describe('Contacts', () => {
 
         // Remove additional actuary contact
         expect(
-            screen.getAllByRole('button', { name: /Remove contact/ }).length
-        ).toBe(1) // there is only 1 button on screen, for actuary 
+            screen.getAllByRole('button', { name: /Remove contact/ })
+        ).toHaveLength(1) // there is only 1 button on screen, for actuary
 
         userEvent.click(
             screen.getAllByRole('button', { name: /Remove contact/ })[0]
         )
 
-       expect(screen.queryByText('Additional actuary contact 1')).toBeNull()
-       
+        expect(screen.queryByText('Additional actuary contact 1')).toBeNull()
     })
 })
