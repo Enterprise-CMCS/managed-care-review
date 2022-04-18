@@ -32,6 +32,8 @@ module.exports = {
         }),
         path.resolve(__dirname, '../../node_modules/@prisma/client'),
         path.resolve(__dirname, 'node_modules/@prisma/client'),
+        'prisma',
+        '@prisma/client',
     ],
     devtool: 'source-map',
     resolve: {
