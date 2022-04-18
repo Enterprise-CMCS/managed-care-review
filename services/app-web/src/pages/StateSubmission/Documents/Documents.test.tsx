@@ -941,7 +941,7 @@ describe('Documents', () => {
                 screen.getByRole('button', { name: 'Continue' }).click()
                 // TODO: check if we have a small loop here, expecting 1 call but consistently getting 10+ calls after button click
                 const call = mockUpdateDraftFn.mock.calls[0][0]
-                const documents = call.draftSubmissionUpdates.documents
+                const documents = call.documents
 
                 expect(documents).toHaveLength(1)
                 expect(documents[0].documentCategories).toContain(

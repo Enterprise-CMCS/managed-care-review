@@ -38,7 +38,7 @@ describe('indexDraftSubmission', () => {
             .filter((sub: Submission) =>
                 [draftSub.id, stateSub.id].includes(sub.id)
             )
-        expect(theseSubmissions.length).toBe(2)
+        expect(theseSubmissions).toHaveLength(2)
 
         let draftResult: DraftSubmission | undefined = undefined
         let stateResult: StateSubmission | undefined = undefined
@@ -97,6 +97,6 @@ describe('indexDraftSubmission', () => {
             .filter((sub: Submission) =>
                 [draftSub.id, stateSub.id].includes(sub.id)
             )
-        expect(theseSubmissions.length).toBe(0)
+        expect(theseSubmissions).toHaveLength(0)
     })
 })

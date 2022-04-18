@@ -259,7 +259,6 @@ Cypress.Commands.add(
             ) 
         } else if (buttonKey === 'CONTINUE'){
             if (waitForLoad){
-                cy.wait('@updateDraftSubmissionMutation')
                 cy.wait('@fetchHealthPlanPackageQuery')
             }
             cy.findByTestId('state-submission-form-page').should('exist')

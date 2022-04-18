@@ -14,7 +14,7 @@ describe('DynamicStepIndicator', () => {
         expect(screen.getByRole('heading', { level: 2 })).toBeInTheDocument()
         const steps = screen.getAllByRole('listitem')
 
-        expect(steps.length).toBe(STATE_SUBMISSION_FORM_ROUTES.length)
+        expect(steps).toHaveLength(STATE_SUBMISSION_FORM_ROUTES.length)
 
         expect(steps[1]).toHaveClass('usa-step-indicator__segment--complete')
         expect(steps[2]).toHaveClass('usa-step-indicator__segment--current')

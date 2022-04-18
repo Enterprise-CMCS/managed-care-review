@@ -42,7 +42,7 @@ describe('FieldDropdown component', () => {
             screen.getByRole('combobox', { name: 'Program' })
         ).toBeInTheDocument()
         const programOptions = screen.getAllByRole('option')
-        expect(programOptions.length).toBe(3)
+        expect(programOptions).toHaveLength(3)
     })
 
     it('handles custom aria attributes', () => {

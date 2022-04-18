@@ -24,27 +24,28 @@ import {
     PoliteErrorMessage,
 } from '../../../components'
 import {
-    formatForApi,
     formatForForm,
+    formatFormDateForDomain,
     formatUserInputDate,
     isDateRangeEmpty,
 } from '../../../formHelpers'
 import {
     Document,
-    DraftSubmission,
     ContractType,
     ContractExecutionStatus,
     FederalAuthority,
-    CapitationRatesAmendedInfo,
     CapitationRatesAmendmentReason,
-    UpdateDraftSubmissionInput,
+    HealthPlanPackage,
 } from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
 
 import { ContractDetailsFormSchema } from './ContractDetailsSchema'
-import { ManagedCareEntity } from '../../../common-code/domain-models'
-import { updatesFromSubmission } from '../updateSubmissionTransform'
+import {
+    ManagedCareEntity,
+    UnlockedHealthPlanFormDataType,
+    CapitationRatesAmendedReason,
+} from '../../../common-code/domain-models'
 import {
     AmendableItemsRecord,
     RateChangeReasonRecord,
@@ -103,11 +104,11 @@ export const ContractDetails = ({
     showValidations = false,
     updateDraft,
 }: {
-    draftSubmission: DraftSubmission
+    draftSubmission: UnlockedHealthPlanFormDataType
     showValidations?: boolean
     updateDraft: (
-        input: UpdateDraftSubmissionInput
-    ) => Promise<DraftSubmission | undefined>
+        input: UnlockedHealthPlanFormDataType
+    ) => Promise<HealthPlanPackage | Error>
 }): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const history = useHistory()
@@ -300,49 +301,64 @@ export const ContractDetails = ({
             [] as Document[]
         )
 
-        const updatedDraft = updatesFromSubmission(draftSubmission)
-        updatedDraft.contractType = values.contractType
-        updatedDraft.contractExecutionStatus = values.contractExecutionStatus
-        updatedDraft.contractDateStart = values.contractDateStart || null
-        updatedDraft.contractDateEnd = values.contractDateEnd || null
-        updatedDraft.managedCareEntities = values.managedCareEntities
-        updatedDraft.federalAuthorities = values.federalAuthorities
-        updatedDraft.contractDocuments = contractDocuments
+        draftSubmission.contractType = values.contractType
+        draftSubmission.contractExecutionStatus = values.contractExecutionStatus
+        console.log('PREDATE: ', values.contractDateStart)
+        draftSubmission.contractDateStart = formatFormDateForDomain(
+            values.contractDateStart
+        )
+        console.log('POSTDATE: ', draftSubmission.contractDateStart)
+        draftSubmission.contractDateEnd = formatFormDateForDomain(
+            values.contractDateEnd
+        )
+        draftSubmission.managedCareEntities = values.managedCareEntities
+        draftSubmission.federalAuthorities = values.federalAuthorities
+        draftSubmission.contractDocuments = contractDocuments
 
         if (values.contractType === 'AMENDMENT') {
             const relatedToCovid = values.relatedToCovid19 === 'YES'
             const relatedToVaccine = relatedToCovid
                 ? values.relatedToVaccination === 'YES'
-                : null
+                : undefined
 
-            const amendedOther = formatForApi(values.otherItemAmended)
+            // const amendedOther = formatForApi(values.otherItemAmended)
 
-            let capitationInfo: CapitationRatesAmendedInfo | undefined =
-                undefined
+            let capitationInfo:
+                | {
+                      reason: CapitationRatesAmendedReason | undefined
+                      otherReason: string
+                  }
+                | undefined = undefined
+
+            // let capitationInfo: CapitationRatesAmendedInfo | undefined =
+            //     undefined
             if (values.itemsAmended.includes('CAPITATION_RATES')) {
                 capitationInfo = {
                     reason: values.capitationRates,
-                    otherReason: formatForApi(values.capitationRatesOther),
+                    otherReason: values.capitationRatesOther,
                 }
             }
 
-            updatedDraft.contractAmendmentInfo = {
+            draftSubmission.contractAmendmentInfo = {
                 itemsBeingAmended: values.itemsAmended,
-                otherItemBeingAmended: amendedOther,
+                otherItemBeingAmended: values.otherItemAmended,
                 capitationRatesAmendedInfo: capitationInfo,
                 relatedToCovid19: relatedToCovid,
                 relatedToVaccination: relatedToVaccine,
             }
         } else {
-            updatedDraft.contractAmendmentInfo = null
+            draftSubmission.contractAmendmentInfo = undefined
         }
 
         try {
-            const updatedSubmission = await updateDraft({
-                submissionID: draftSubmission.id,
-                draftSubmissionUpdates: updatedDraft,
-            })
-            if (updatedSubmission) {
+            const updatedSubmission = await updateDraft(draftSubmission)
+            if (updatedSubmission instanceof Error) {
+                setSubmitting(false)
+                console.log(
+                    'Error updating draft submission: ',
+                    updatedSubmission
+                )
+            } else if (updatedSubmission) {
                 history.push(options.redirectPath)
             }
         } catch (serverError) {
