@@ -2,7 +2,6 @@ import React from 'react'
 import { Story } from '@storybook/react'
 import { ExpandableText, ExpandableTextProps } from './ExpandableText'
 import { GridContainer } from '@trussworks/react-uswds'
-import styles from './ExpandableText.module.scss'
 
 export default {
     title: 'Components/ExpandableText',
@@ -21,7 +20,7 @@ const longText =
 const shortText = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
 
 const Template: Story<ExpandableTextProps> = (args) => (
-    <GridContainer className={styles.container}>
+    <GridContainer className="app-container-horizontal-pad">
         <ExpandableText {...args} />
     </GridContainer>
 )

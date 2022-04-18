@@ -33,7 +33,7 @@ export const ExpandableText = ({
     }, [clampedLines, setShowMoreButton])
 
     return (
-        <p {...props}>
+        <p {...props} className={styles.expandableBlock}>
             <span
                 ref={textRef}
                 data-testid="clampElement"

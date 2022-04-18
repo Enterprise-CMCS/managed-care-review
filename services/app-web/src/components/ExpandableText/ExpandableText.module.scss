@@ -1,6 +1,10 @@
 @import '../../styles/uswdsImports.scss';
 @import '../../styles/custom.scss';
 
+.expandableBlock {
+    line-height: initial;
+}
+
 .textExpanded {
     height: auto;
     display: -webkit-box;
@@ -18,8 +22,4 @@
     border: none;
     cursor: pointer;
     margin-top: 0.50rem;
-}
-
-.container {
-    max-width: $width-max-contained;
 }
