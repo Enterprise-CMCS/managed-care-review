@@ -30,7 +30,7 @@ export const ExpandableText = ({
             }
             setShowMoreButton(true)
         }
-    }, [showMoreButton, clampedLines, setShowMoreButton])
+    }, [clampedLines, setShowMoreButton])
 
     return (
         <p {...props}>
