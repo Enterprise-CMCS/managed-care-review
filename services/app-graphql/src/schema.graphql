@@ -4,29 +4,12 @@ schema {
 }
 
 type Query {
-    fetchDraftSubmission(
-        input: FetchDraftSubmissionInput!
-    ): FetchDraftSubmissionPayload!
-    fetchStateSubmission(
-        input: FetchStateSubmissionInput!
-    ): FetchStateSubmissionPayload!
-    indexSubmissions: IndexSubmissionsPayload!
-
-    # new api
     fetchCurrentUser: User!
     fetchHealthPlanPackage(input: FetchHealthPlanPackageInput!): FetchHealthPlanPackagePayload!
     indexHealthPlanPackages: IndexHealthPlanPackagesPayload!
 }
 
 type Mutation {
-    createDraftSubmission(
-        input: CreateDraftSubmissionInput!
-    ): CreateDraftSubmissionPayload!
-    updateDraftSubmission(
-        input: UpdateDraftSubmissionInput!
-    ): UpdateDraftSubmissionPayload!
-
-    # new API
     createHealthPlanPackage(
         input: CreateHealthPlanPackageInput!
     ): CreateHealthPlanPackagePayload!
@@ -43,16 +26,6 @@ type Mutation {
 
 }
 
-input CreateDraftSubmissionInput {
-    programIDs: [ID!]!
-    submissionType: SubmissionType!
-    submissionDescription: String!
-}
-
-type CreateDraftSubmissionPayload {
-    draftSubmission: DraftSubmission!
-}
-
 input CreateHealthPlanPackageInput {
     programIDs: [ID!]!
     submissionType: SubmissionType!
@@ -63,22 +36,6 @@ type CreateHealthPlanPackagePayload {
     pkg: HealthPlanPackage!
 }
 
-input FetchDraftSubmissionInput {
-    submissionID: ID!
-}
-
-type FetchDraftSubmissionPayload {
-    draftSubmission: DraftSubmission
-}
-
-input FetchStateSubmissionInput {
-    submissionID: ID!
-}
-
-type FetchStateSubmissionPayload {
-    submission: StateSubmission
-}
-
 input FetchHealthPlanPackageInput {
     pkgID: ID!
 }
@@ -87,30 +44,13 @@ type FetchHealthPlanPackagePayload {
     pkg: HealthPlanPackage
 }
 
-type SubmissionEdge {
-    node: Submission!
-}
-
 type HealthPlanPackageEdge {
     node: HealthPlanPackage!
-}
-type IndexSubmissionsPayload {
-    totalCount: Int
-    edges: [SubmissionEdge!]!
 }
 
 type IndexHealthPlanPackagesPayload {
     totalCount: Int
     edges: [HealthPlanPackageEdge!]!
-}
-
-input UpdateDraftSubmissionInput {
-    submissionID: ID!
-    draftSubmissionUpdates: DraftSubmissionUpdates!
-}
-
-type UpdateDraftSubmissionPayload {
-    draftSubmission: DraftSubmission!
 }
 
 input SubmitHealthPlanPackageInput {
@@ -179,7 +119,7 @@ enum HealthPlanPackageStatus {
 type HealthPlanPackage {
     id: ID!
     status: HealthPlanPackageStatus!
-    intiallySubmittedAt: Date
+    initiallySubmittedAt: Date
     stateCode: String!
     state: State!
     revisions: [HealthPlanRevisionEdge!]!
@@ -197,6 +137,12 @@ type HealthPlanRevision {
     submitInfo: UpdateInformation
     createdAt: DateTime!
     formDataProto: String!
+}
+
+# Old Types
+input UpdateDraftSubmissionInput {
+    submissionID: ID!
+    draftSubmissionUpdates: DraftSubmissionUpdates!
 }
 
 type HealthPlanRevisionEdge {

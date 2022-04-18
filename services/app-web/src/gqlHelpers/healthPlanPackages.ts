@@ -1,5 +1,5 @@
 import {
-    submissionName,
+    packageName,
     HealthPlanFormDataType,
     ProgramT,
 } from '../common-code/domain-models'
@@ -101,13 +101,13 @@ const convertDomainModelFormDataToGQLSubmission = (
                   ...submissionDomainModel,
                   ...convertedDates,
                   __typename: 'DraftSubmission' as const,
-                  name: submissionName(submissionDomainModel, statePrograms),
+                  name: packageName(submissionDomainModel, statePrograms),
               }
             : {
                   ...submissionDomainModel,
                   ...convertedDates,
                   __typename: 'StateSubmission' as const,
-                  name: submissionName(submissionDomainModel, statePrograms),
+                  name: packageName(submissionDomainModel, statePrograms),
                   submittedAt: submissionDomainModel.submittedAt,
               }
 

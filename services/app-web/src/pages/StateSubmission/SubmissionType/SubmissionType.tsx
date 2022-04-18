@@ -19,11 +19,11 @@ import {
 import { SubmissionTypeRecord } from '../../../constants/healthPlanPackages'
 import { useAuth } from '../../../contexts/AuthContext'
 import {
-    CreateDraftSubmissionInput,
     Program,
     HealthPlanPackage,
     SubmissionType as SubmissionTypeT,
     useCreateHealthPlanPackageMutation,
+    CreateHealthPlanPackageInput,
 } from '../../../gen/gqlClient'
 import { PageActions } from '../PageActions'
 import styles from '../StateSubmissionForm.module.scss'
@@ -95,7 +95,7 @@ export const SubmissionType = ({
         return msg
     }
 
-    const [createDraftSubmission, { error }] =
+    const [createHealthPlanPackage, { error }] =
         useCreateHealthPlanPackageMutation({
             // An alternative to messing with the cache like we do with create, just zero it out.
             update(cache, { data }) {
@@ -153,13 +153,13 @@ export const SubmissionType = ({
                     return
                 }
 
-                const input: CreateDraftSubmissionInput = {
+                const input: CreateHealthPlanPackageInput = {
                     programIDs: values.programIDs,
                     submissionType: values.submissionType,
                     submissionDescription: values.submissionDescription,
                 }
 
-                const result = await createDraftSubmission({
+                const result = await createHealthPlanPackage({
                     variables: { input },
                 })
 

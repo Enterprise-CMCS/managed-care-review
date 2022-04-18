@@ -12,7 +12,7 @@ const submissionData: HealthPlanPackage = {
         programs: [],
     },
     status: 'RESUBMITTED',
-    intiallySubmittedAt: '2022-03-23',
+    initiallySubmittedAt: '2022-03-23',
     revisions: [
         {
             node: {
@@ -85,7 +85,7 @@ const submissionDataInitialSubmission: HealthPlanPackage = {
         programs: [],
     },
     status: 'RESUBMITTED',
-    intiallySubmittedAt: '2022-03-23',
+    initiallySubmittedAt: '2022-03-23',
     revisions: [
         {
             node: {

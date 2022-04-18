@@ -36,7 +36,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import {
     UnlockedHealthPlanFormDataType,
-    submissionName,
+    packageName,
     UpdateInfoType,
 } from '../../common-code/domain-models'
 import { domainToBase64 } from '../../common-code/proto/stateSubmission'
@@ -203,10 +203,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     'state' in loggedInUser &&
                     loggedInUser.state.programs) ||
                 []
-            const name = submissionName(
-                formDataFromLatestRevision,
-                statePrograms
-            )
+            const name = packageName(formDataFromLatestRevision, statePrograms)
             setComputedSubmissionName(name)
             updateHeading(pathname, name)
         }

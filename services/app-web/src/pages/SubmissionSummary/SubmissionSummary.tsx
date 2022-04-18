@@ -14,7 +14,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import { NavLink, useLocation, useParams } from 'react-router-dom'
 import sprite from 'uswds/src/img/sprite.svg'
 import {
-    submissionName,
+    packageName,
     HealthPlanFormDataType,
     UpdateInfoType,
 } from '../../common-code/domain-models'
@@ -243,7 +243,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         const subWithRevisions = data?.fetchHealthPlanPackage.pkg
         if (packageData && subWithRevisions) {
             const programs = subWithRevisions.state.programs
-            updateHeading(pathname, submissionName(packageData, programs))
+            updateHeading(pathname, packageName(packageData, programs))
         }
     }, [updateHeading, pathname, packageData, data])
 
@@ -383,7 +383,7 @@ export const SubmissionSummary = (): React.ReactElement => {
 
                 <SubmissionTypeSummarySection
                     submission={packageData}
-                    submissionName={submissionName(packageData, statePrograms)}
+                    submissionName={packageName(packageData, statePrograms)}
                     headerChildComponent={
                         isCMSUser ? (
                             <UnlockModalButton
@@ -393,24 +393,21 @@ export const SubmissionSummary = (): React.ReactElement => {
                         ) : undefined
                     }
                     statePrograms={statePrograms}
-                    intiallySubmittedAt={
-                        submissionAndRevisions.intiallySubmittedAt
+                    initiallySubmittedAt={
+                        submissionAndRevisions.initiallySubmittedAt
                     }
                 />
                 <ContractDetailsSummarySection
                     submission={packageData}
                     documentDateLookupTable={documentDates}
                     isCMSUser={isCMSUser}
-                    submissionName={submissionName(packageData, statePrograms)}
+                    submissionName={packageName(packageData, statePrograms)}
                 />
 
                 {isContractActionAndRateCertification && (
                     <RateDetailsSummarySection
                         submission={packageData}
-                        submissionName={submissionName(
-                            packageData,
-                            statePrograms
-                        )}
+                        submissionName={packageName(packageData, statePrograms)}
                         documentDateLookupTable={documentDates}
                         isCMSUser={isCMSUser}
                     />

@@ -17,7 +17,7 @@ describe('storeError', () => {
         })
 
         try {
-            await badPrismaClient.stateSubmission.findFirst()
+            await badPrismaClient.healthPlanPackageTable.findFirst()
 
             throw new Error('should not be able to connect to bad port')
         } catch (e: unknown) {
@@ -37,7 +37,7 @@ describe('storeError', () => {
         })
 
         try {
-            await badPrismaClient.stateSubmission.findFirst()
+            await badPrismaClient.healthPlanPackageTable.findFirst()
 
             throw new Error('should not be able to connect to bad port')
         } catch (e: unknown) {
@@ -78,7 +78,7 @@ describe('storeError', () => {
         const buffer = Buffer.from(protobuf)
 
         try {
-            await client.stateSubmission.create({
+            await client.healthPlanPackageTable.create({
                 data: {
                     id: draft.id,
                     stateCode: draft.stateCode,
@@ -86,13 +86,13 @@ describe('storeError', () => {
                         create: {
                             id: uuidv4(),
                             createdAt: new Date(),
-                            submissionFormProto: buffer,
+                            formDataProto: buffer,
                         },
                     },
                 },
             })
 
-            await client.stateSubmission.create({
+            await client.healthPlanPackageTable.create({
                 data: {
                     id: draft.id,
                     stateCode: draft.stateCode,
@@ -100,7 +100,7 @@ describe('storeError', () => {
                         create: {
                             id: uuidv4(),
                             createdAt: new Date(),
-                            submissionFormProto: buffer,
+                            formDataProto: buffer,
                         },
                     },
                 },
