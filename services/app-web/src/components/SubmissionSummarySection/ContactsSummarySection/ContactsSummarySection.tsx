@@ -4,7 +4,7 @@ import { SectionHeader } from '../../SectionHeader'
 import {
     ActuaryFirmsRecord,
     ActuaryCommunicationRecord,
-} from '../../../constants/submissions'
+} from '../../../constants/healthPlanPackages'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
 
 export type ContactsSummarySectionProps = {

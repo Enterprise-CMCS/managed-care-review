@@ -43,14 +43,14 @@ import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
 
 import { ContractDetailsFormSchema } from './ContractDetailsSchema'
-import { ManagedCareEntity } from '../../../common-code/domain-models/DraftSubmissionType'
+import { ManagedCareEntity } from '../../../common-code/domain-models'
 import { updatesFromSubmission } from '../updateSubmissionTransform'
 import {
     AmendableItemsRecord,
     RateChangeReasonRecord,
     ManagedCareEntityRecord,
     FederalAuthorityRecord,
-} from '../../../constants/submissions'
+} from '../../../constants/healthPlanPackages'
 import { PageActions } from '../PageActions'
 
 function formattedDatePlusOneDay(initialValue: string): string {
@@ -211,7 +211,8 @@ export const ContractDetails = ({
 
     const contractDetailsInitialValues: ContractDetailsFormValues = {
         contractType: draftSubmission?.contractType ?? undefined,
-        contractExecutionStatus: draftSubmission?.contractExecutionStatus ?? undefined,
+        contractExecutionStatus:
+            draftSubmission?.contractExecutionStatus ?? undefined,
         contractDateStart:
             (draftSubmission &&
                 formatForForm(draftSubmission.contractDateStart)) ??
@@ -472,7 +473,9 @@ export const ContractDetails = ({
                                 </Fieldset>
                             </FormGroup>
                             <FormGroup
-                                error={showFieldErrors(errors.contractExecutionStatus)}
+                                error={showFieldErrors(
+                                    errors.contractExecutionStatus
+                                )}
                             >
                                 <Fieldset
                                     role="radiogroup"
@@ -480,7 +483,9 @@ export const ContractDetails = ({
                                     className={styles.radioGroup}
                                     legend="Contract status"
                                 >
-                                    {showFieldErrors(errors.contractExecutionStatus) && (
+                                    {showFieldErrors(
+                                        errors.contractExecutionStatus
+                                    ) && (
                                         <PoliteErrorMessage>
                                             {errors.contractExecutionStatus}
                                         </PoliteErrorMessage>
@@ -491,7 +496,10 @@ export const ContractDetails = ({
                                         label="Fully executed"
                                         aria-required
                                         value={'EXECUTED'}
-                                        checked={values.contractExecutionStatus === 'EXECUTED'}
+                                        checked={
+                                            values.contractExecutionStatus ===
+                                            'EXECUTED'
+                                        }
                                     />
                                     <FieldRadio
                                         id="unexecutedContract"
@@ -499,7 +507,10 @@ export const ContractDetails = ({
                                         label="Unexecuted by some or all parties"
                                         aria-required
                                         value={'UNEXECUTED'}
-                                        checked={values.contractExecutionStatus === 'UNEXECUTED'}
+                                        checked={
+                                            values.contractExecutionStatus ===
+                                            'UNEXECUTED'
+                                        }
                                     />
                                 </Fieldset>
                             </FormGroup>
@@ -540,7 +551,9 @@ export const ContractDetails = ({
                                             )}
                                             <Link
                                                 aria-label="Effective date guidance (opens in new window)"
-                                                href={'/help#effective-date-guidance'}
+                                                href={
+                                                    '/help#effective-date-guidance'
+                                                }
                                                 variant="external"
                                                 target="_blank"
                                             >

@@ -1,7 +1,7 @@
 import { URL } from 'url'
 import {
     CognitoUserType,
-    StateSubmissionType,
+    LockedHealthPlanFormDataType,
     SubmissionType,
 } from '../../app-web/src/common-code/domain-models'
 import { formatCalendarDate } from '../../app-web/src/dateHelpers'
@@ -36,7 +36,7 @@ const stripHTMLFromTemplate = (template: string) => {
 }
 
 const generateNewSubmissionBody = (
-    submission: StateSubmissionType,
+    submission: LockedHealthPlanFormDataType,
     submissionName: string,
     config: EmailConfiguration
 ): string => {
@@ -109,7 +109,7 @@ const generateNewSubmissionBody = (
 }
 
 const newPackageCMSEmail = (
-    submission: StateSubmissionType,
+    submission: LockedHealthPlanFormDataType,
     submissionName: string,
     config: EmailConfiguration
 ): EmailData => {
@@ -138,7 +138,7 @@ const newPackageCMSEmail = (
 }
 
 const newPackageStateEmail = (
-    submission: StateSubmissionType,
+    submission: LockedHealthPlanFormDataType,
     submissionName: string,
     user: CognitoUserType,
     config: EmailConfiguration
@@ -219,7 +219,7 @@ const unlockPackageCMSEmail = (
 }
 
 const unlockPackageStateEmail = (
-    submission: StateSubmissionType,
+    submission: LockedHealthPlanFormDataType,
     unlockData: UpdatedEmailData,
     config: EmailConfiguration
 ): EmailData => {
@@ -252,7 +252,7 @@ const unlockPackageStateEmail = (
 }
 
 const resubmittedStateEmail = (
-    submission: StateSubmissionType,
+    submission: LockedHealthPlanFormDataType,
     user: CognitoUserType,
     resubmittedData: UpdatedEmailData,
     config: EmailConfiguration
@@ -288,7 +288,7 @@ const resubmittedStateEmail = (
 }
 
 const resubmittedCMSEmail = (
-    submission: StateSubmissionType,
+    submission: LockedHealthPlanFormDataType,
     resubmittedData: UpdatedEmailData,
     config: EmailConfiguration
 ): EmailData => {

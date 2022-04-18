@@ -1,14 +1,14 @@
 import {
     constructTestPostgresServer,
     createTestStateSubmission,
-    createTestSubmission2,
+    createTestHealthPlanPackage,
 } from '../testHelpers/gqlHelpers'
 import UPDATE_HEALTH_PLAN_FORM_DATA from '../../app-graphql/src/mutations/updateHealthPlanFormData.graphql'
 import { domainToBase64 } from '../../app-web/src/common-code/proto/stateSubmission'
 import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
 import {
-    basicStateSubmission,
-    basicSubmission,
+    basicLockedHealthPlanFormData,
+    basicHealthPlanFormData,
 } from '../../app-web/src/common-code/domain-mocks'
 import { v4 as uuidv4 } from 'uuid'
 import {
@@ -21,7 +21,7 @@ describe('updateHealthPlanFormData', () => {
     it('updates valid fields in the formData', async () => {
         const server = await constructTestPostgresServer()
 
-        const createdDraft = await createTestSubmission2(server)
+        const createdDraft = await createTestHealthPlanPackage(server)
 
         const formData = latestFormData(createdDraft)
 
@@ -35,7 +35,7 @@ describe('updateHealthPlanFormData', () => {
             query: UPDATE_HEALTH_PLAN_FORM_DATA,
             variables: {
                 input: {
-                    submissionID: createdDraft.id,
+                    pkgID: createdDraft.id,
                     healthPlanFormData: updatedB64,
                 },
             },
@@ -44,7 +44,7 @@ describe('updateHealthPlanFormData', () => {
         expect(updateResult.errors).toBeUndefined()
 
         const healthPlanPackage =
-            updateResult.data?.updateHealthPlanFormData.submission
+            updateResult.data?.updateHealthPlanFormData.pkg
 
         const updatedFormData = latestFormData(healthPlanPackage)
         expect(updatedFormData.submissionDescription).toBe(
@@ -55,7 +55,7 @@ describe('updateHealthPlanFormData', () => {
     it('errors if a CMS user calls it', async () => {
         const server = await constructTestPostgresServer()
 
-        const createdDraft = await createTestSubmission2(server)
+        const createdDraft = await createTestHealthPlanPackage(server)
 
         const formData = latestFormData(createdDraft)
 
@@ -79,7 +79,7 @@ describe('updateHealthPlanFormData', () => {
             query: UPDATE_HEALTH_PLAN_FORM_DATA,
             variables: {
                 input: {
-                    submissionID: createdDraft.id,
+                    pkgID: createdDraft.id,
                     healthPlanFormData: updatedB64,
                 },
             },
@@ -98,7 +98,7 @@ describe('updateHealthPlanFormData', () => {
 
     it('errors if a state user from a different state calls it', async () => {
         const server = await constructTestPostgresServer()
-        const createdDraft = await createTestSubmission2(server)
+        const createdDraft = await createTestHealthPlanPackage(server)
         const formData = latestFormData(createdDraft)
 
         // update that draft.
@@ -123,7 +123,7 @@ describe('updateHealthPlanFormData', () => {
             query: UPDATE_HEALTH_PLAN_FORM_DATA,
             variables: {
                 input: {
-                    submissionID: createdDraft.id,
+                    pkgID: createdDraft.id,
                     healthPlanFormData: updatedB64,
                 },
             },
@@ -143,7 +143,7 @@ describe('updateHealthPlanFormData', () => {
     it('errors if the payload isnt valid', async () => {
         const server = await constructTestPostgresServer()
 
-        const createdDraft = await createTestSubmission2(server)
+        const createdDraft = await createTestHealthPlanPackage(server)
 
         const formData = 'not-valid-proto'
 
@@ -151,7 +151,7 @@ describe('updateHealthPlanFormData', () => {
             query: UPDATE_HEALTH_PLAN_FORM_DATA,
             variables: {
                 input: {
-                    submissionID: createdDraft.id,
+                    pkgID: createdDraft.id,
                     healthPlanFormData: formData,
                 },
             },
@@ -171,9 +171,9 @@ describe('updateHealthPlanFormData', () => {
     it('errors if the payload is submitted', async () => {
         const server = await constructTestPostgresServer()
 
-        const createdDraft = await createTestSubmission2(server)
+        const createdDraft = await createTestHealthPlanPackage(server)
 
-        const stateSubmission = basicStateSubmission()
+        const stateSubmission = basicLockedHealthPlanFormData()
 
         const formData = domainToBase64(stateSubmission)
 
@@ -181,7 +181,7 @@ describe('updateHealthPlanFormData', () => {
             query: UPDATE_HEALTH_PLAN_FORM_DATA,
             variables: {
                 input: {
-                    submissionID: createdDraft.id,
+                    pkgID: createdDraft.id,
                     healthPlanFormData: formData,
                 },
             },
@@ -202,14 +202,14 @@ describe('updateHealthPlanFormData', () => {
         const server = await constructTestPostgresServer()
         const createdSubmitted = await createTestStateSubmission(server)
 
-        const draftSubmission = basicSubmission()
+        const draftSubmission = basicHealthPlanFormData()
         const b64 = domainToBase64(draftSubmission)
 
         const updateResult = await server.executeOperation({
             query: UPDATE_HEALTH_PLAN_FORM_DATA,
             variables: {
                 input: {
-                    submissionID: createdSubmitted.id,
+                    pkgID: createdSubmitted.id,
                     healthPlanFormData: b64,
                 },
             },
@@ -233,7 +233,7 @@ describe('updateHealthPlanFormData', () => {
         //
 
         const server = await constructTestPostgresServer()
-        const createdDraft = await createTestSubmission2(server)
+        const createdDraft = await createTestHealthPlanPackage(server)
 
         const formData = latestFormData(createdDraft)
 
@@ -245,7 +245,7 @@ describe('updateHealthPlanFormData', () => {
             query: UPDATE_HEALTH_PLAN_FORM_DATA,
             variables: {
                 input: {
-                    submissionID: createdDraft.id,
+                    pkgID: createdDraft.id,
                     healthPlanFormData: b64,
                 },
             },
@@ -264,7 +264,7 @@ describe('updateHealthPlanFormData', () => {
 
     it('errors if the other payload values dont match the db', async () => {
         const server = await constructTestPostgresServer()
-        const createdDraft = await createTestSubmission2(server)
+        const createdDraft = await createTestHealthPlanPackage(server)
 
         const formData = latestFormData(createdDraft)
 
@@ -279,7 +279,7 @@ describe('updateHealthPlanFormData', () => {
             query: UPDATE_HEALTH_PLAN_FORM_DATA,
             variables: {
                 input: {
-                    submissionID: createdDraft.id,
+                    pkgID: createdDraft.id,
                     healthPlanFormData: b64,
                 },
             },
@@ -308,7 +308,7 @@ describe('updateHealthPlanFormData', () => {
             store: postgresStore,
         })
 
-        const createdDraft = await createTestSubmission2(server)
+        const createdDraft = await createTestHealthPlanPackage(server)
 
         const formData = latestFormData(createdDraft)
 
@@ -322,7 +322,7 @@ describe('updateHealthPlanFormData', () => {
             query: UPDATE_HEALTH_PLAN_FORM_DATA,
             variables: {
                 input: {
-                    submissionID: createdDraft.id,
+                    pkgID: createdDraft.id,
                     healthPlanFormData: updatedB64,
                 },
             },

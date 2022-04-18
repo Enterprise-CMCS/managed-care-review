@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ChangeHistory } from './ChangeHistory'
-import { Submission2 } from '../../gen/gqlClient'
+import { HealthPlanPackage } from '../../gen/gqlClient'
 
-const submissionData: Submission2 = {
+const submissionData: HealthPlanPackage = {
     id: '440d6a53-bb0a-49ae-9a9c-da7c5352789f',
     stateCode: 'MN',
     state: {
@@ -20,7 +20,7 @@ const submissionData: Submission2 = {
     intiallySubmittedAt: '2022-03-23',
     revisions: [
         {
-            revision: {
+            node: {
                 id: 'sd596de8-852d-4e42-ab0a-c9c9bf78c3c1',
                 unlockInfo: {
                     updatedAt: '2022-03-25T01:18:44.663Z',
@@ -36,12 +36,12 @@ const submissionData: Submission2 = {
                 },
                 createdAt: '2022-03-25T01:18:44.665Z',
                 submissionData: 'qpoiuenad',
-                __typename: 'Revision',
+                __typename: 'HealthPlanRevision',
             },
-            __typename: 'RevisionEdge',
+            __typename: 'HealthPlanRevisionEdge',
         },
         {
-            revision: {
+            node: {
                 id: '26596de8-852d-4e42-bb0a-c9c9bf78c3de',
                 unlockInfo: {
                     updatedAt: '2022-03-24T01:18:44.663Z',
@@ -57,12 +57,12 @@ const submissionData: Submission2 = {
                 },
                 createdAt: '2022-03-24T01:18:44.665Z',
                 submissionData: 'qpoiuenad',
-                __typename: 'Revision',
+                __typename: 'HealthPlanRevision',
             },
-            __typename: 'RevisionEdge',
+            __typename: 'HealthPlanRevisionEdge',
         },
         {
-            revision: {
+            node: {
                 id: 'e048cdcf-5b19-4acb-8ead-d7dc2fd6cd30',
                 unlockInfo: null,
                 submitInfo: {
@@ -73,30 +73,27 @@ const submissionData: Submission2 = {
                 },
                 createdAt: '2022-03-23T02:08:14.241Z',
                 submissionData: 'nmzxcv;lasf',
-                __typename: 'Revision',
+                __typename: 'HealthPlanRevision',
             },
-            __typename: 'RevisionEdge',
+            __typename: 'HealthPlanRevisionEdge',
         },
     ],
-    __typename: 'Submission2',
+    __typename: 'HealthPlanPackage',
 }
 
-const submissionDataInitialSubmission: Submission2 = {
+const submissionDataInitialSubmission: HealthPlanPackage = {
     id: '440d6a53-bb0a-49ae-9a9c-da7c5352789f',
     stateCode: 'MN',
     state: {
-        code: 'MN',
         name: 'Minnesota',
-        programs: [{ 
-        "id": "d95394e5-44d1-45df-8151-1cc1ee66f100",
-          "name": "PMAP"
-        }]
+        code: 'MN',
+        programs: [],
     },
     status: 'RESUBMITTED',
     intiallySubmittedAt: '2022-03-23',
     revisions: [
         {
-            revision: {
+            node: {
                 id: 'e048cdcf-5b19-4acb-8ead-d7dc2fd6cd30',
                 unlockInfo: null,
                 submitInfo: {
@@ -107,12 +104,12 @@ const submissionDataInitialSubmission: Submission2 = {
                 },
                 createdAt: '2022-03-23T02:08:14.241Z',
                 submissionData: 'nmzxcv;lasf',
-                __typename: 'Revision',
+                __typename: 'HealthPlanRevision',
             },
-            __typename: 'RevisionEdge',
+            __typename: 'HealthPlanRevisionEdge',
         },
     ],
-    __typename: 'Submission2',
+    __typename: 'HealthPlanPackage',
 }
 
 describe('Change History', () => {

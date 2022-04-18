@@ -10,7 +10,7 @@ import {
     FederalAuthorityRecord,
     ManagedCareEntityRecord,
     RateChangeReasonRecord,
-} from '../../../constants/submissions'
+} from '../../../constants/healthPlanPackages'
 import { useS3 } from '../../../contexts/S3Context'
 import { formatCalendarDate } from '../../../dateHelpers'
 import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'

@@ -89,7 +89,7 @@ type AmendableItems =
     | 'RISK_SHARING_MECHANISM'
 
 // MAIN
-export type DraftSubmissionType = {
+export type UnlockedHealthPlanFormDataType = {
     id: string
     createdAt: Date
     updatedAt: Date
@@ -143,7 +143,7 @@ export type {
     ContractType,
     FederalAuthority,
     ManagedCareEntity,
-    DraftSubmissionType,
+    UnlockedHealthPlanFormDataType,
     AmendableItems,
     ContractAmendmentInfo,
     ContractExecutionStatus,

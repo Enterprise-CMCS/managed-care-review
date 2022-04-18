@@ -1,13 +1,13 @@
-import { CreateSubmission2Input } from '../gen/gqlServer'
-import CREATE_SUBMISSION_2 from '../../app-graphql/src/mutations/createSubmission2.graphql'
+import { CreateHealthPlanPackageInput } from '../gen/gqlServer'
+import CREATE_SUBMISSION_2 from '../../app-graphql/src/mutations/createHealthPlanPackage.graphql'
 import { constructTestPostgresServer } from '../testHelpers/gqlHelpers'
 import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
 
-describe('createSubmission2', () => {
+describe('createHealthPlanPackage', () => {
     it('returns draft submission payload with a draft submission', async () => {
         const server = await constructTestPostgresServer()
 
-        const input: CreateSubmission2Input = {
+        const input: CreateHealthPlanPackageInput = {
             programIDs: [
                 '5c10fe9f-bec9-416f-a20c-718b152ad633',
                 '037af66b-81eb-4472-8b80-01edf17d12d9',
@@ -22,7 +22,7 @@ describe('createSubmission2', () => {
 
         expect(res.errors).toBeUndefined()
 
-        const pkg = res.data?.createSubmission2.submission
+        const pkg = res.data?.createHealthPlanPackage.pkg
         const draft = latestFormData(pkg)
 
         expect(draft.submissionDescription).toBe('A real submission')
@@ -40,7 +40,7 @@ describe('createSubmission2', () => {
 
     it('returns an error if the program id is not in valid', async () => {
         const server = await constructTestPostgresServer()
-        const input: CreateSubmission2Input = {
+        const input: CreateHealthPlanPackageInput = {
             programIDs: ['xyz123'],
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
@@ -67,7 +67,7 @@ describe('createSubmission2', () => {
             },
         })
 
-        const input: CreateSubmission2Input = {
+        const input: CreateHealthPlanPackageInput = {
             programIDs: ['xyz123'],
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',

@@ -11,16 +11,16 @@ import {
     resubmittedCMSEmail,
 } from '../emailer'
 import {
-    StateSubmissionType,
+    LockedHealthPlanFormDataType,
     CognitoUserType,
-    CognitoStateUserType
+    CognitoStateUserType,
 } from '../../app-web/src/common-code/domain-models'
 
 const testEmailConfig: EmailConfiguration = {
     stage: 'LOCAL',
     baseUrl: 'http://localhost',
     emailSource: 'emailSource@example.com',
-    cmsReviewSharedEmails: ['cmsreview1@example.com', 'cmsreview2@example.com']
+    cmsReviewSharedEmails: ['cmsreview1@example.com', 'cmsreview2@example.com'],
 }
 
 const testEmailer = (customConfig?: EmailConfiguration): Emailer => {
@@ -32,14 +32,18 @@ const testEmailer = (customConfig?: EmailConfiguration): Emailer => {
             }
         ),
         sendCMSNewPackage: function async(
-            submission: StateSubmissionType,
-            submissionName: string,
+            submission: LockedHealthPlanFormDataType,
+            submissionName: string
         ): Promise<void | Error> {
-            const emailData = newPackageCMSEmail(submission, submissionName, config)
+            const emailData = newPackageCMSEmail(
+                submission,
+                submissionName,
+                config
+            )
             return this.sendEmail(emailData)
         },
         sendStateNewPackage: function async(
-            submission: StateSubmissionType,
+            submission: LockedHealthPlanFormDataType,
             submissionName: string,
             user: CognitoUserType
         ): Promise<void | Error> {
@@ -54,14 +58,11 @@ const testEmailer = (customConfig?: EmailConfiguration): Emailer => {
         sendUnlockPackageCMSEmail: function async(
             updatedEmailData: UpdatedEmailData
         ): Promise<void | Error> {
-            const emailData = unlockPackageCMSEmail(
-                updatedEmailData,
-                config
-            )
+            const emailData = unlockPackageCMSEmail(updatedEmailData, config)
             return this.sendEmail(emailData)
         },
         sendUnlockPackageStateEmail: function async(
-            submission: StateSubmissionType,
+            submission: LockedHealthPlanFormDataType,
             updatedEmailData: UpdatedEmailData
         ): Promise<void | Error> {
             const emailData = unlockPackageStateEmail(
@@ -72,7 +73,7 @@ const testEmailer = (customConfig?: EmailConfiguration): Emailer => {
             return this.sendEmail(emailData)
         },
         sendResubmittedStateEmail: function async(
-            submission: StateSubmissionType,
+            submission: LockedHealthPlanFormDataType,
             updatedEmailData: UpdatedEmailData,
             user: CognitoUserType
         ): Promise<void | Error> {
@@ -85,7 +86,7 @@ const testEmailer = (customConfig?: EmailConfiguration): Emailer => {
             return this.sendEmail(emailData)
         },
         sendResubmittedCMSEmail: function async(
-            submission: StateSubmissionType,
+            submission: LockedHealthPlanFormDataType,
             updatedEmailData: UpdatedEmailData
         ): Promise<void | Error> {
             const emailData = resubmittedCMSEmail(
@@ -94,127 +95,127 @@ const testEmailer = (customConfig?: EmailConfiguration): Emailer => {
                 config
             )
             return this.sendEmail(emailData)
-        }
+        },
     }
 }
-    
-const mockUser = (): CognitoStateUserType  => {
+
+const mockUser = (): CognitoStateUserType => {
     return {
         role: 'STATE_USER',
         email: 'test+state+user@example.com',
         name: 'Test State User',
         state_code: 'MN',
-        }
+    }
 }
-   
+
 const mockContractAndRatesSubmission = (
-   submissionPartial?: Partial<StateSubmissionType>
-): StateSubmissionType => {
-   return {
-       createdAt: new Date(),
-       updatedAt: new Date(),
-       status: 'SUBMITTED',
-       stateNumber: 3,
-       id: 'test-abc-125',
-       stateCode: 'MN',
-       programIDs: ['snbc'],
-       submissionType: 'CONTRACT_AND_RATES',
-       submissionDescription: 'A submitted submission',
-       submittedAt: new Date(),
-       documents: [
-           {
-               s3URL: 'bar',
-               name: 'foo',
-               documentCategories: ['RATES_RELATED' as const],
-           },
-       ],
-       contractType: 'BASE',
-       contractExecutionStatus: 'EXECUTED',
-       contractDocuments: [
-           {
-               s3URL: 'bar',
-               name: 'foo',
-               documentCategories: ['CONTRACT' as const],
-           },
-       ],
-       contractDateStart: new Date(),
-       contractDateEnd: new Date(),
-       managedCareEntities: ['ENROLLMENT_PROCESS'],
-       federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
-       rateType: 'NEW',
-       rateDocuments: [
-           {
-               s3URL: 'bar',
-               name: 'foo',
-               documentCategories: ['RATES' as const],
-           },
-       ],
-       rateDateStart: new Date(),
-       rateDateEnd: new Date(),
-       rateDateCertified: new Date(),
-       rateAmendmentInfo: null,
-       stateContacts: [
-           {
-               name: 'Test Person',
-               titleRole: 'A Role',
-               email: 'test+state+contact@example.com',
-           },
-       ],
-       actuaryContacts: [],
-       ...submissionPartial
-   }
+    submissionPartial?: Partial<LockedHealthPlanFormDataType>
+): LockedHealthPlanFormDataType => {
+    return {
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        status: 'SUBMITTED',
+        stateNumber: 3,
+        id: 'test-abc-125',
+        stateCode: 'MN',
+        programIDs: ['snbc'],
+        submissionType: 'CONTRACT_AND_RATES',
+        submissionDescription: 'A submitted submission',
+        submittedAt: new Date(),
+        documents: [
+            {
+                s3URL: 'bar',
+                name: 'foo',
+                documentCategories: ['RATES_RELATED' as const],
+            },
+        ],
+        contractType: 'BASE',
+        contractExecutionStatus: 'EXECUTED',
+        contractDocuments: [
+            {
+                s3URL: 'bar',
+                name: 'foo',
+                documentCategories: ['CONTRACT' as const],
+            },
+        ],
+        contractDateStart: new Date(),
+        contractDateEnd: new Date(),
+        managedCareEntities: ['ENROLLMENT_PROCESS'],
+        federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
+        rateType: 'NEW',
+        rateDocuments: [
+            {
+                s3URL: 'bar',
+                name: 'foo',
+                documentCategories: ['RATES' as const],
+            },
+        ],
+        rateDateStart: new Date(),
+        rateDateEnd: new Date(),
+        rateDateCertified: new Date(),
+        rateAmendmentInfo: null,
+        stateContacts: [
+            {
+                name: 'Test Person',
+                titleRole: 'A Role',
+                email: 'test+state+contact@example.com',
+            },
+        ],
+        actuaryContacts: [],
+        ...submissionPartial,
+    }
 }
-   
+
 const mockContractOnlySubmission = (
-   submissionPartial?: Partial<StateSubmissionType>
-): StateSubmissionType => {
-   return {
-       createdAt: new Date(),
-       updatedAt: new Date(),
-       status: 'SUBMITTED',
-       stateNumber: 3,
-       id: 'test-abc-125',
-       stateCode: 'MN',
-       programIDs: ['snbc'],
-       submissionType: 'CONTRACT_ONLY',
-       submissionDescription: 'A submitted submission',
-       submittedAt: new Date(),
-       documents: [
-           {
-               s3URL: 'bar',
-               name: 'foo',
-               documentCategories: ['RATES_RELATED' as const],
-           },
-       ],
-       contractType: 'BASE',
-       contractExecutionStatus: 'EXECUTED',
-       contractDocuments: [
-           {
-               s3URL: 'bar',
-               name: 'foo',
-               documentCategories: ['CONTRACT' as const],
-           },
-       ],
-       contractDateStart: new Date(),
-       contractDateEnd: new Date(),
-       managedCareEntities: ['ENROLLMENT_PROCESS'],
-       federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
-       rateDocuments: [],
-       stateContacts: [
-           {
-               name: 'Test Person',
-               titleRole: 'A Role',
-               email: 'test+state+contact@example.com',
-           },
-       ],
-       actuaryContacts: [],
-       ...submissionPartial,
-   }
+    submissionPartial?: Partial<LockedHealthPlanFormDataType>
+): LockedHealthPlanFormDataType => {
+    return {
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        status: 'SUBMITTED',
+        stateNumber: 3,
+        id: 'test-abc-125',
+        stateCode: 'MN',
+        programIDs: ['snbc'],
+        submissionType: 'CONTRACT_ONLY',
+        submissionDescription: 'A submitted submission',
+        submittedAt: new Date(),
+        documents: [
+            {
+                s3URL: 'bar',
+                name: 'foo',
+                documentCategories: ['RATES_RELATED' as const],
+            },
+        ],
+        contractType: 'BASE',
+        contractExecutionStatus: 'EXECUTED',
+        contractDocuments: [
+            {
+                s3URL: 'bar',
+                name: 'foo',
+                documentCategories: ['CONTRACT' as const],
+            },
+        ],
+        contractDateStart: new Date(),
+        contractDateEnd: new Date(),
+        managedCareEntities: ['ENROLLMENT_PROCESS'],
+        federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
+        rateDocuments: [],
+        stateContacts: [
+            {
+                name: 'Test Person',
+                titleRole: 'A Role',
+                email: 'test+state+contact@example.com',
+            },
+        ],
+        actuaryContacts: [],
+        ...submissionPartial,
+    }
 }
 
 const mockContractAmendmentSubmission = (
-    submissionPartial?: Partial<StateSubmissionType>
-): StateSubmissionType => {
+    submissionPartial?: Partial<LockedHealthPlanFormDataType>
+): LockedHealthPlanFormDataType => {
     return {
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -270,4 +271,11 @@ const mockContractAmendmentSubmission = (
     }
 }
 
-export { testEmailConfig, mockContractAmendmentSubmission, mockContractOnlySubmission, mockContractAndRatesSubmission, mockUser, testEmailer }
+export {
+    testEmailConfig,
+    mockContractAmendmentSubmission,
+    mockContractOnlySubmission,
+    mockContractAndRatesSubmission,
+    mockUser,
+    testEmailer,
+}

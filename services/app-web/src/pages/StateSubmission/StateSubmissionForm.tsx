@@ -17,7 +17,7 @@ import {
     RouteT,
 } from '../../constants/routes'
 import {
-    getCurrentRevisionFromSubmission2,
+    getCurrentRevisionFromHealthPlanPackage,
     convertDomainModelFormDataToGQLSubmission,
 } from '../../gqlHelpers'
 import { StateSubmissionContainer } from './StateSubmissionContainer'
@@ -32,18 +32,18 @@ import {
     DraftSubmission,
     UpdateDraftSubmissionInput,
     useUpdateDraftSubmissionMutation,
-    useFetchSubmission2Query,
+    useFetchHealthPlanPackageQuery,
     User,
     useUpdateHealthPlanFormDataMutation,
-    Submission2,
+    HealthPlanPackage,
 } from '../../gen/gqlClient'
 import { SubmissionUnlockedBanner } from '../../components/Banner'
-import { UpdateInfoType } from '../../common-code/domain-models/Submission2Type'
 import { useAuth } from '../../contexts/AuthContext'
 import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import {
-    DraftSubmissionType,
+    UnlockedHealthPlanFormDataType,
     submissionName,
+    UpdateInfoType,
 } from '../../common-code/domain-models'
 import { domainToBase64 } from '../../common-code/proto/stateSubmission'
 
@@ -108,7 +108,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
     const currentRoute = getRouteName(pathname)
     const { updateHeading } = usePage()
     const [formDataFromLatestRevision, setFormDataFromLatestRevision] =
-        useState<DraftSubmissionType | null>(null)
+        useState<UnlockedHealthPlanFormDataType | null>(null)
     const [formDataError, setFormDataError] = useState<FormDataError | null>(
         null
     )
@@ -125,15 +125,15 @@ export const StateSubmissionForm = (): React.ReactElement => {
         data: fetchData,
         loading,
         error: fetchError,
-    } = useFetchSubmission2Query({
+    } = useFetchHealthPlanPackageQuery({
         variables: {
             input: {
-                submissionID: id,
+                pkgID: id,
             },
         },
     })
 
-    const submissionAndRevisions = fetchData?.fetchSubmission2?.submission
+    const submissionAndRevisions = fetchData?.fetchHealthPlanPackage?.pkg
     const [updateDraftSubmission, { error: updateError }] =
         useUpdateDraftSubmissionMutation()
     const [updateFormData, { error: updateFormDataError }] =
@@ -149,7 +149,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     input: input,
                 },
                 update(cache) {
-                    cache.evict({ id: `Submission2:${id}` })
+                    cache.evict({ id: `HealthPlanPackage:${id}` })
                     cache.gc()
                 },
             })
@@ -166,9 +166,9 @@ export const StateSubmissionForm = (): React.ReactElement => {
     }
 
     // When the new API is done, we'll call the new API here
-    const updateDraftSubmission2 = async (
-        input: DraftSubmissionType
-    ): Promise<Submission2 | Error> => {
+    const updateDraftHealthPlanPackage = async (
+        input: UnlockedHealthPlanFormDataType
+    ): Promise<HealthPlanPackage | Error> => {
         const base64Draft = domainToBase64(input)
 
         setShowPageErrorMessage(false)
@@ -176,17 +176,17 @@ export const StateSubmissionForm = (): React.ReactElement => {
             const updateResult = await updateFormData({
                 variables: {
                     input: {
-                        submissionID: input.id,
+                        pkgID: input.id,
                         healthPlanFormData: base64Draft,
                     },
                 },
                 update(cache) {
-                    cache.evict({ id: `Submission2:${id}` })
+                    cache.evict({ id: `HealthPlanPackage:${id}` })
                     cache.gc()
                 },
             })
-            const updatedSubmission: Submission2 | undefined =
-                updateResult?.data?.updateHealthPlanFormData.submission
+            const updatedSubmission: HealthPlanPackage | undefined =
+                updateResult?.data?.updateHealthPlanFormData.pkg
 
             if (!updatedSubmission) {
                 setShowPageErrorMessage(true)
@@ -219,7 +219,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
     useEffect(() => {
         if (submissionAndRevisions) {
             const currentRevisionPackageOrError =
-                getCurrentRevisionFromSubmission2(submissionAndRevisions)
+                getCurrentRevisionFromHealthPlanPackage(submissionAndRevisions)
 
             // set form data
             if (currentRevisionPackageOrError instanceof Error) {
@@ -339,7 +339,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     <Route path={RoutesRecord.SUBMISSIONS_TYPE}>
                         <SubmissionType
                             draftSubmission={formDataFromLatestRevision}
-                            updateDraft={updateDraftSubmission2}
+                            updateDraft={updateDraftHealthPlanPackage}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}>

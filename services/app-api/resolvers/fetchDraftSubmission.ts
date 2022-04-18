@@ -1,12 +1,16 @@
 import { ApolloError, ForbiddenError } from 'apollo-server-lambda'
 import {
-    DraftSubmissionType,
+    UnlockedHealthPlanFormDataType,
     isStateUser,
 } from '../../app-web/src/common-code/domain-models'
 import { QueryResolvers, State } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
-import { setErrorAttributesOnActiveSpan, setResolverDetailsOnActiveSpan, setSuccessAttributesOnActiveSpan } from "./attributeHelper";
+import {
+    setErrorAttributesOnActiveSpan,
+    setResolverDetailsOnActiveSpan,
+    setSuccessAttributesOnActiveSpan,
+} from './attributeHelper'
 
 export function fetchDraftSubmissionResolver(
     store: Store
@@ -31,7 +35,10 @@ export function fetchDraftSubmissionResolver(
                     'fetchDraftSubmission',
                     'Submission is not a DraftSubmission'
                 )
-                setErrorAttributesOnActiveSpan('Submission is not a DraftSubmission', span)
+                setErrorAttributesOnActiveSpan(
+                    'Submission is not a DraftSubmission',
+                    span
+                )
                 throw new ApolloError(
                     `Submission is not a DraftSubmission`,
                     'WRONG_STATUS',
@@ -52,7 +59,7 @@ export function fetchDraftSubmissionResolver(
             }
         }
 
-        const draft: DraftSubmissionType = result
+        const draft: UnlockedHealthPlanFormDataType = result
 
         // Authorization
         const stateFromCurrentUser: State['code'] = context.user.state_code
@@ -61,7 +68,10 @@ export function fetchDraftSubmissionResolver(
                 'fetchDraftSubmission',
                 'user not authorized to fetch data from a different state'
             )
-            setErrorAttributesOnActiveSpan('user not authorized to fetch data from a different state', span)
+            setErrorAttributesOnActiveSpan(
+                'user not authorized to fetch data from a different state',
+                span
+            )
             throw new ForbiddenError(
                 'user not authorized to fetch data from a different state'
             )

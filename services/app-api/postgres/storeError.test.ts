@@ -1,7 +1,7 @@
 /* eslint-disable jest/no-conditional-expect */
 import { v4 as uuidv4 } from 'uuid'
 import { PrismaClient } from '@prisma/client'
-import { DraftSubmissionType } from '../../app-web/src/common-code/domain-models'
+import { UnlockedHealthPlanFormDataType } from '../../app-web/src/common-code/domain-models'
 import { toProtoBuffer } from '../../app-web/src/common-code/proto/stateSubmission'
 import { sharedTestPrismaClient } from '../testHelpers/storeHelpers'
 import { convertPrismaErrorToStoreError } from './storeError'
@@ -23,7 +23,7 @@ describe('storeError', () => {
         } catch (e: unknown) {
             const storeErr = convertPrismaErrorToStoreError(e)
 
-            expect(storeErr.code).toEqual('CONNECTION_ERROR')
+            expect(storeErr.code).toBe('CONNECTION_ERROR')
         }
     })
 
@@ -43,7 +43,7 @@ describe('storeError', () => {
         } catch (e: unknown) {
             const storeErr = convertPrismaErrorToStoreError(e)
 
-            expect(storeErr.code).toEqual('CONNECTION_ERROR')
+            expect(storeErr.code).toBe('CONNECTION_ERROR')
         }
     })
 
@@ -52,7 +52,7 @@ describe('storeError', () => {
 
         const doubledID = uuidv4()
 
-        const draft: DraftSubmissionType = {
+        const draft: UnlockedHealthPlanFormDataType = {
             id: doubledID,
             createdAt: new Date(),
             updatedAt: new Date(),
