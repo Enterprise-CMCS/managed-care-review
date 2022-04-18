@@ -42,12 +42,12 @@ describe('indexHealthPlanPackages', () => {
         expect(theseSubmissions).toHaveLength(2)
 
         // confirm some submission data is correct too, first in list will be draft, second is the submitted
-        expect(theseSubmissions[0].intiallySubmittedAt).toBeNull()
+        expect(theseSubmissions[0].initiallySubmittedAt).toBeNull()
         expect(theseSubmissions[0].status).toBe('DRAFT')
         expect(latestFormData(theseSubmissions[0]).submissionDescription).toBe(
             draftFormData.submissionDescription
         )
-        expect(theseSubmissions[1].intiallySubmittedAt).toBe(todaysDate())
+        expect(theseSubmissions[1].initiallySubmittedAt).toBe(todaysDate())
         expect(theseSubmissions[1].status).toBe('SUBMITTED')
         expect(latestFormData(theseSubmissions[1]).submissionDescription).toBe(
             submittedFormData.submissionDescription
@@ -179,7 +179,7 @@ describe('indexHealthPlanPackages', () => {
         const testSubmission = submissions.filter(
             (test: HealthPlanPackage) => test.id === createdID
         )[0]
-        expect(testSubmission.intiallySubmittedAt).toBe(todaysDate())
+        expect(testSubmission.initiallySubmittedAt).toBe(todaysDate())
     })
 
     it('returns no submissions for a different states user', async () => {

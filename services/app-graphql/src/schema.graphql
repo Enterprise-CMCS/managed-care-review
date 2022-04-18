@@ -119,7 +119,7 @@ enum HealthPlanPackageStatus {
 type HealthPlanPackage {
     id: ID!
     status: HealthPlanPackageStatus!
-    intiallySubmittedAt: Date
+    initiallySubmittedAt: Date
     stateCode: String!
     state: State!
     revisions: [HealthPlanRevisionEdge!]!

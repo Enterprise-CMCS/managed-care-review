@@ -75,7 +75,7 @@ describe('submitHealthPlanPackage', () => {
         // submittedAt should be set to today's date
         const today = new Date()
         const expectedDate = today.toISOString().split('T')[0]
-        expect(pkg.intiallySubmittedAt).toEqual(expectedDate)
+        expect(pkg.initiallySubmittedAt).toEqual(expectedDate)
 
         // UpdatedAt should be after the former updatedAt
         const resultUpdated = new Date(resultDraft.updatedAt)

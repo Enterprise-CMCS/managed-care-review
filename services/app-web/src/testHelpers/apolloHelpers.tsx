@@ -307,7 +307,7 @@ export function mockDraftHealthPlanPackage(
         __typename: 'HealthPlanPackage',
         id: 'test-id-123',
         status: 'DRAFT',
-        intiallySubmittedAt: '2022-01-01',
+        initiallySubmittedAt: '2022-01-01',
         stateCode: 'MN',
         state: mockMNState(),
         revisions: [
@@ -333,7 +333,7 @@ export function mockSubmittedHealthPlanPackage(): HealthPlanPackage {
     return {
         id: 'test-id-123',
         status: 'SUBMITTED',
-        intiallySubmittedAt: '2022-01-01',
+        initiallySubmittedAt: '2022-01-01',
         stateCode: 'MN',
         state: mockMNState(),
         revisions: [
@@ -363,7 +363,7 @@ export function mockSubmittedHealthPlanPackageWithRevisions(): HealthPlanPackage
     return {
         id: 'test-id-123',
         status: 'RESUBMITTED',
-        intiallySubmittedAt: '2022-01-01',
+        initiallySubmittedAt: '2022-01-01',
         stateCode: 'MN',
         state: mockMNState(),
         revisions: [
@@ -431,7 +431,7 @@ export function mockUnlockedHealthPlanPackage(
     return {
         id: 'test-id-123',
         status: 'UNLOCKED',
-        intiallySubmittedAt: '2020-01-01',
+        initiallySubmittedAt: '2020-01-01',
         stateCode: 'MN',
         state: mockMNState(),
         revisions: [
@@ -586,7 +586,7 @@ const mockSubmittedHealthPlanPackageWithRevision = (): HealthPlanPackage => {
             programs: [],
         },
         status: 'RESUBMITTED',
-        intiallySubmittedAt: '2022-03-25',
+        initiallySubmittedAt: '2022-03-25',
         revisions: [
             {
                 __typename: 'HealthPlanRevisionEdge',

@@ -118,7 +118,7 @@ export const Dashboard = (): React.ReactElement => {
                     programs,
                     currentSubmissionData.programIDs
                 ),
-                submittedAt: sub.intiallySubmittedAt,
+                submittedAt: sub.initiallySubmittedAt,
                 status: sub.status,
                 updatedAt: currentSubmissionData.updatedAt,
                 submissionType: currentSubmissionData.submissionType,

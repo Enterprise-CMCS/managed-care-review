@@ -156,7 +156,7 @@ describe('fetchHealthPlanPackage', () => {
         const today = todaysDate()
 
         expect(resultSub.status).toBe('SUBMITTED')
-        expect(resultSub.intiallySubmittedAt).toEqual(today)
+        expect(resultSub.initiallySubmittedAt).toEqual(today)
 
         // unlock it
         await unlockTestHealthPlanPackage(
@@ -176,7 +176,7 @@ describe('fetchHealthPlanPackage', () => {
             'UNLOCKED'
         )
         expect(
-            unlockResult.data?.fetchHealthPlanPackage.pkg.intiallySubmittedAt
+            unlockResult.data?.fetchHealthPlanPackage.pkg.initiallySubmittedAt
         ).toEqual(today)
 
         // resubmit it
@@ -197,7 +197,7 @@ describe('fetchHealthPlanPackage', () => {
             'RESUBMITTED'
         )
         expect(
-            resubmitResult.data?.fetchHealthPlanPackage.pkg.intiallySubmittedAt
+            resubmitResult.data?.fetchHealthPlanPackage.pkg.initiallySubmittedAt
         ).toEqual(today)
     })
 

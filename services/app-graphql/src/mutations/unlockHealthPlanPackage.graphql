@@ -12,7 +12,7 @@ mutation unlockHealthPlanPackage($input: UnlockHealthPlanPackageInput!) {
                 }
             }
             status
-            intiallySubmittedAt
+            initiallySubmittedAt
             revisions {
                 node {
                     id

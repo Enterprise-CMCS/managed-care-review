@@ -36,9 +36,9 @@ export function indexHealthPlanPackagesResolver(
             throw new Error(errMessage)
         }
 
-        const pacakges: HealthPlanPackageType[] = results
+        const packages: HealthPlanPackageType[] = results
 
-        const edges = pacakges.map((sub) => {
+        const edges = packages.map((sub) => {
             return {
                 node: {
                     ...sub,

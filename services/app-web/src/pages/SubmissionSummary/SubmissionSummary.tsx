@@ -393,8 +393,8 @@ export const SubmissionSummary = (): React.ReactElement => {
                         ) : undefined
                     }
                     statePrograms={statePrograms}
-                    intiallySubmittedAt={
-                        submissionAndRevisions.intiallySubmittedAt
+                    initiallySubmittedAt={
+                        submissionAndRevisions.initiallySubmittedAt
                     }
                 />
                 <ContractDetailsSummarySection

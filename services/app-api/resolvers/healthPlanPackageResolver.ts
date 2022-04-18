@@ -27,7 +27,7 @@ export const healthPlanPackageResolver: Resolvers['HealthPlanPackage'] = {
         }
         return status
     },
-    intiallySubmittedAt(parent) {
+    initiallySubmittedAt(parent) {
         return packageSubmittedAt(parent) || null
     },
     state(parent) {
