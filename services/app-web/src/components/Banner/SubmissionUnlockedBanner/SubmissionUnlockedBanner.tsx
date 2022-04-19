@@ -17,7 +17,6 @@ export const SubmissionUnlockedBanner = ({
     unlockedOn,
     reason,
     className,
-    ...props
 }: UnlockedProps &
     React.HTMLAttributes<HTMLDivElement>): React.ReactElement => {
     return (
@@ -28,7 +27,6 @@ export const SubmissionUnlockedBanner = ({
             validation={true}
             data-testid="unlockedBanner"
             className={className}
-            {...props}
         >
             <div className={styles.bannerBodyText}>
                 <p className="usa-alert__text">

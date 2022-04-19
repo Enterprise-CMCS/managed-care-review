@@ -10,7 +10,6 @@ export type ExpandableTextProps = {
 export const ExpandableText = ({
     clamp,
     clampedLines = 2,
-    ...props
 }: ExpandableTextProps &
     React.HTMLAttributes<HTMLParagraphElement>): React.ReactElement => {
     //We are using React.useRef because jest spyOn useRef only works like this.
@@ -34,7 +33,7 @@ export const ExpandableText = ({
     }, [clampedLines, setShowMoreButton])
 
     return (
-        <p {...props} className={styles.expandableBlock}>
+        <p className={styles.expandableBlock}>
             <span
                 ref={textRef}
                 data-testid="clampElement"
