@@ -10,7 +10,7 @@ import {
     isStateUser,
     LockedHealthPlanFormDataType,
     HealthPlanPackageType,
-    submissionName,
+    packageName,
     packageStatus,
     UpdateInfoType,
 } from '../../app-web/src/common-code/domain-models'
@@ -52,8 +52,8 @@ export function isSubmissionError(err: unknown): err is SubmissionError {
     return false
 }
 
-// This is a state machine transition to turn a draft into a StateSubmission
-// It will return an error if there are any missing fields that are required by the state submission
+// This is a state machine transition to turn an Unlocked to Locked Form Data
+// It will return an error if there are any missing fields that are required to submit
 // This strategy (returning a different type from validation) is taken from the
 // "parse, don't validate" article: https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/
 function submit(
@@ -71,7 +71,7 @@ function submit(
     ) {
         return {
             code: 'INCOMPLETE',
-            message: 'submissions is missing required contract fields',
+            message: 'formData is missing required contract fields',
         }
     } else if (
         !hasValidRates(maybeStateSubmission as LockedHealthPlanFormDataType)
@@ -79,18 +79,18 @@ function submit(
         return isContractAndRates(draft)
             ? {
                   code: 'INCOMPLETE',
-                  message: 'submission is missing required rate fields',
+                  message: 'formData is missing required rate fields',
               }
             : {
                   code: 'INVALID',
-                  message: 'submission includes invalid rate fields',
+                  message: 'formData includes invalid rate fields',
               }
     } else if (
         !hasValidDocuments(maybeStateSubmission as LockedHealthPlanFormDataType)
     ) {
         return {
             code: 'INCOMPLETE',
-            message: 'submissions must have valid documents',
+            message: 'formData must have valid documents',
         }
     } else if (
         !hasValidSupportingDocumentCategories(
@@ -100,17 +100,16 @@ function submit(
         return {
             code: 'INCOMPLETE',
             message:
-                'submissions must have valid categories for supporting documents',
+                'formData must have valid categories for supporting documents',
         }
     } else
         return {
             code: 'INCOMPLETE',
-            message: 'submission is missing a required field',
+            message: 'formData is missing a required field',
         }
 }
 
-// submitHealthPlanPackageResolver is a state machine transition for Submission,
-// transforming it from a DraftSubmission to a StateSubmission
+// submitHealthPlanPackageResolver is a state machine transition for HealthPlanPackage
 export function submitHealthPlanPackageResolver(
     store: Store,
     emailer: Emailer
@@ -134,10 +133,10 @@ export function submitHealthPlanPackageResolver(
         }
 
         // fetch from the store
-        const result = await store.findSubmissionWithRevisions(input.pkgID)
+        const result = await store.findHealthPlanPackage(input.pkgID)
 
         if (isStoreError(result)) {
-            const errMessage = `Issue finding a draft submission of type ${result.code}. Message: ${result.message}`
+            const errMessage = `Issue finding a package of type ${result.code}. Message: ${result.message}`
             logError('submitHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
@@ -193,86 +192,70 @@ export function submitHealthPlanPackageResolver(
             updatedReason: 'Initial submission',
         }
 
-        //If submission is a resubmission set submitInfo updated reason to input.
+        //If this is a resubmission set submitInfo updated reason to input.
         if (planPackageStatus === 'UNLOCKED' && submittedReason) {
             submitInfo.updatedReason = submittedReason
             //Throw error if resubmitted without reason. We want to require an input reason for resubmission, but not for
             // initial submission
         } else if (planPackageStatus === 'UNLOCKED' && !submittedReason) {
-            logError(
-                'submitHealthPlanPackage',
-                'Incomplete submission cannot be submitted, resubmission reason is required'
-            )
-            setErrorAttributesOnActiveSpan(
-                'Incomplete submission cannot be submitted',
-                span
-            )
-            throw new UserInputError(
-                'Incomplete submission cannot be submitted, resubmission reason is required'
-            )
+            const errMessage = 'Resubmission requires a reason'
+            logError('submitHealthPlanPackage', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new UserInputError(errMessage)
         } else if (
             planPackageStatus === 'RESUBMITTED' ||
             planPackageStatus === 'SUBMITTED'
         ) {
             const errMessage = `Attempted to submit and already submitted package.`
             logError('submitHealthPlanPackage', errMessage)
-            throw new Error(errMessage)
+            throw new UserInputError(errMessage)
         }
 
         // attempt to parse into a StateSubmission
         const submissionResult = submit(draftResult)
 
         if (isSubmissionError(submissionResult)) {
-            logError(
-                'submitHealthPlanPackage',
-                'Incomplete submission cannot be submitted'
-            )
-            setErrorAttributesOnActiveSpan(
-                'Incomplete submission cannot be submitted',
-                span
-            )
-            throw new UserInputError(
-                'Incomplete submission cannot be submitted',
-                {
-                    message: submissionResult.message,
-                }
-            )
+            const errMessage = 'Incomplete package cannot be submitted'
+            logError('submitHealthPlanPackage', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new UserInputError(errMessage, {
+                message: submissionResult.message,
+            })
         }
 
-        const stateSubmission: LockedHealthPlanFormDataType = submissionResult
+        const lockedFormData: LockedHealthPlanFormDataType = submissionResult
 
-        // Save the submission!
-        const updateResult = await store.updateStateSubmission(
-            stateSubmission,
+        // Save the package!
+        const updateResult = await store.updateHealthPlanRevision(
+            planPackage.id,
+            currentRevision.id,
+            lockedFormData,
             submitInfo
         )
         if (isStoreError(updateResult)) {
-            const errMessage = `Issue updating a state submission of type ${updateResult.code}. Message: ${updateResult.message}`
+            const errMessage = `Issue updating a package of type ${updateResult.code}. Message: ${updateResult.message}`
             logError('submitHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
 
-        const updatedSubmission: HealthPlanPackageType = updateResult
+        const updatedPackage: HealthPlanPackageType = updateResult
 
         const programs = store.findPrograms(
-            updatedSubmission.stateCode,
-            stateSubmission.programIDs
+            updatedPackage.stateCode,
+            lockedFormData.programIDs
         )
-        if (
-            !programs ||
-            programs.length !== stateSubmission.programIDs.length
-        ) {
-            const errMessage = `Can't find programs ${stateSubmission.programIDs} from state ${stateSubmission.stateCode}, ${stateSubmission.id}`
+        if (!programs || programs.length !== lockedFormData.programIDs.length) {
+            const errMessage = `Can't find programs ${lockedFormData.programIDs} from state ${lockedFormData.stateCode}, ${lockedFormData.id}`
             logError('unlockHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
 
         // Send emails!
-        const name = submissionName(stateSubmission, programs)
+        const name = packageName(lockedFormData, programs)
 
-        const status = packageStatus(updatedSubmission)
+        const status = packageStatus(updatedPackage)
         let cmsPackageEmailResult
         let statePackageEmailResult
 
@@ -281,24 +264,24 @@ export function submitHealthPlanPackageResolver(
             logSuccess('It was resubmitted')
             const updatedEmailData = {
                 ...submitInfo,
-                submissionName: name,
+                packageName: name,
             }
             cmsPackageEmailResult = await emailer.sendResubmittedCMSEmail(
-                stateSubmission,
+                lockedFormData,
                 updatedEmailData
             )
             statePackageEmailResult = await emailer.sendResubmittedStateEmail(
-                stateSubmission,
+                lockedFormData,
                 updatedEmailData,
                 user
             )
         } else if (status === 'SUBMITTED') {
             cmsPackageEmailResult = await emailer.sendCMSNewPackage(
-                stateSubmission,
+                lockedFormData,
                 name
             )
             statePackageEmailResult = await emailer.sendStateNewPackage(
-                stateSubmission,
+                lockedFormData,
                 name,
                 user
             )
@@ -324,6 +307,6 @@ export function submitHealthPlanPackageResolver(
 
         logSuccess('submitHealthPlanPackage')
         setSuccessAttributesOnActiveSpan(span)
-        return { pkg: updatedSubmission }
+        return { pkg: updatedPackage }
     }
 }

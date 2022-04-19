@@ -40,6 +40,6 @@ describe('DataDetail', () => {
             })
         ).toBeInTheDocument()
         expect(screen.getByText('Mickey Mouse')).toBeInTheDocument()
-        expect(screen.getAllByRole('link').length).toBe(2)
+        expect(screen.getAllByRole('link')).toHaveLength(2)
     })
 })

@@ -38,38 +38,19 @@ function mockStoreThatErrors(): Store {
     }
 
     return {
-        findAllSubmissions: async (_stateCode) => {
+        findAllHealthPlanPackages: async (_stateCode) => {
             return genericStoreError
         },
-        findAllSubmissionsWithRevisions: async (_stateCode) => {
+        insertHealthPlanPackage: async (_args) => {
             return genericStoreError
         },
-        insertDraftSubmission: async (_args) => {
+        findHealthPlanPackage: async (_draftUUID) => {
             return genericStoreError
         },
-        findDraftSubmission: async (_draftUUID) => {
+        insertHealthPlanRevision: async (_pkgID, _draft) => {
             return genericStoreError
         },
-        findSubmissionWithRevisions: async (_draftUUID) => {
-            return genericStoreError
-        },
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        findDraftSubmissionByStateNumber: async (_stateCode, _stateNumber) => {
-            throw new Error('UNIMPLEMENTED')
-        },
-        updateDraftSubmission: async (_draftSubmission) => {
-            return genericStoreError
-        },
-        updateStateSubmission: async (_submission) => {
-            return genericStoreError
-        },
-        findStateSubmission: async (_submissionID) => {
-            return genericStoreError
-        },
-        insertNewRevision: async (_submissionID, _draft) => {
-            return genericStoreError
-        },
-        updateFormData: async (_submissionID, _formData) => {
+        updateHealthPlanRevision: async (_pkgID, _formData) => {
             return genericStoreError
         },
         findPrograms: () => {

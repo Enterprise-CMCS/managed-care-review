@@ -14,7 +14,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import { NavLink, useLocation, useParams } from 'react-router-dom'
 import sprite from 'uswds/src/img/sprite.svg'
 import {
-    submissionName,
+    packageName,
     HealthPlanFormDataType,
     UpdateInfoType,
 } from '../../common-code/domain-models'
@@ -43,10 +43,7 @@ import {
     useUnlockHealthPlanPackageMutation,
     HealthPlanPackageStatus,
 } from '../../gen/gqlClient'
-import {
-    convertDomainModelFormDataToGQLSubmission,
-    isGraphQLErrors,
-} from '../../gqlHelpers'
+import { isGraphQLErrors } from '../../gqlHelpers'
 import { Error404 } from '../Errors/Error404'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './SubmissionSummary.module.scss'
@@ -246,7 +243,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         const subWithRevisions = data?.fetchHealthPlanPackage.pkg
         if (packageData && subWithRevisions) {
             const programs = subWithRevisions.state.programs
-            updateHeading(pathname, submissionName(packageData, programs))
+            updateHeading(pathname, packageName(packageData, programs))
         }
     }, [updateHeading, pathname, packageData, data])
 
@@ -318,20 +315,12 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     const statePrograms = submissionAndRevisions.state.programs
 
-    // temporary kludge while the display data is expecting the wrong format.
-    // This is turning our domain model into the GraphQL model which is what
-    // all our frontend stuff expects right now.
-    const submission = convertDomainModelFormDataToGQLSubmission(
-        packageData,
-        statePrograms
-    )
-
     const disableUnlockButton = ['DRAFT', 'UNLOCKED'].includes(
         submissionAndRevisions.status
     )
 
     const isContractActionAndRateCertification =
-        submission.submissionType === 'CONTRACT_AND_RATES'
+        packageData.submissionType === 'CONTRACT_AND_RATES'
 
     return (
         <div className={styles.background}>
@@ -393,7 +382,8 @@ export const SubmissionSummary = (): React.ReactElement => {
                 ) : null}
 
                 <SubmissionTypeSummarySection
-                    submission={submission}
+                    submission={packageData}
+                    submissionName={packageName(packageData, statePrograms)}
                     headerChildComponent={
                         isCMSUser ? (
                             <UnlockModalButton
@@ -403,27 +393,29 @@ export const SubmissionSummary = (): React.ReactElement => {
                         ) : undefined
                     }
                     statePrograms={statePrograms}
-                    intiallySubmittedAt={
-                        submissionAndRevisions.intiallySubmittedAt
+                    initiallySubmittedAt={
+                        submissionAndRevisions.initiallySubmittedAt
                     }
                 />
                 <ContractDetailsSummarySection
-                    submission={submission}
+                    submission={packageData}
                     documentDateLookupTable={documentDates}
                     isCMSUser={isCMSUser}
+                    submissionName={packageName(packageData, statePrograms)}
                 />
 
                 {isContractActionAndRateCertification && (
                     <RateDetailsSummarySection
-                        submission={submission}
+                        submission={packageData}
+                        submissionName={packageName(packageData, statePrograms)}
                         documentDateLookupTable={documentDates}
                         isCMSUser={isCMSUser}
                     />
                 )}
 
-                <ContactsSummarySection submission={submission} />
+                <ContactsSummarySection submission={packageData} />
 
-                <SupportingDocumentsSummarySection submission={submission} />
+                <SupportingDocumentsSummarySection submission={packageData} />
 
                 <ChangeHistory submission={submissionAndRevisions} />
 

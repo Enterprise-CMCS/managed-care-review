@@ -14,7 +14,7 @@ import './commands'
 import './loginCommands'
 import './stateSubmissionFormCommands'
 import './submissionCommands'
-type FormButtonKey = 'CONTINUE_FROM_START_NEW' | 'CONTINUE_WITH_NEW_UPDATE' | 'CONTINUE' | 'SAVE_DRAFT' | 'BACK' 
+type FormButtonKey = 'CONTINUE_FROM_START_NEW' | 'CONTINUE' | 'SAVE_DRAFT' | 'BACK' 
 
 declare global {
     namespace Cypress {

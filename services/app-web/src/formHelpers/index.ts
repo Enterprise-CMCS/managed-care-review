@@ -1,4 +1,9 @@
-export { formatForApi, formatForForm, formatUserInputDate } from './formatters'
+export {
+    formatForApi,
+    formatForForm,
+    formatUserInputDate,
+    formatFormDateForDomain,
+} from './formatters'
 export {
     isDateRangeEmpty,
     validateDateFormat,

@@ -1,4 +1,4 @@
-import dayjs from 'dayjs'
+import { dayjs } from '../../../app-web/src/dateHelpers'
 
 const formatUserInputDate = (initialValue?: string): string | undefined => {
     const dayjsValue = dayjs(initialValue)
@@ -16,8 +16,10 @@ const formatForApi = (attribute: string): string | null => {
 
 // Convert api data for use in form.  Form fields must be a string.
 // Empty values as an empty string, dates in date picker as YYYY-MM-DD, boolean as "Yes" "No" values
-const formatForForm = (attribute: boolean | Date | string | null): string => {
-    if (attribute === null) {
+const formatForForm = (
+    attribute: boolean | Date | string | null | undefined
+): string => {
+    if (attribute === null || attribute === undefined) {
         return ''
     } else if (attribute instanceof Date) {
         return dayjs(attribute).format('YYYY-MM-DD')
@@ -28,4 +30,16 @@ const formatForForm = (attribute: boolean | Date | string | null): string => {
     }
 }
 
-export { formatForApi, formatForForm, formatUserInputDate }
+const formatFormDateForDomain = (attribute: string): Date | undefined => {
+    if (attribute === '') {
+        return undefined
+    }
+    return dayjs.utc(attribute).toDate()
+}
+
+export {
+    formatForApi,
+    formatForForm,
+    formatUserInputDate,
+    formatFormDateForDomain,
+}

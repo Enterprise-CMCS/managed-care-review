@@ -5,10 +5,10 @@ import {
     ActuaryFirmsRecord,
     ActuaryCommunicationRecord,
 } from '../../../constants/healthPlanPackages'
-import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
+import { HealthPlanFormDataType } from '../../../common-code/domain-models'
 
 export type ContactsSummarySectionProps = {
-    submission: DraftSubmission | StateSubmission
+    submission: HealthPlanFormDataType
     navigateTo?: string
 }
 

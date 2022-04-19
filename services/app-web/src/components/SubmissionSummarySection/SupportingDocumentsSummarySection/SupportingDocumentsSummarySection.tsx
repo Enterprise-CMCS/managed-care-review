@@ -5,32 +5,36 @@ import { SectionHeader } from '../../SectionHeader'
 import { DownloadButton } from '../../DownloadButton'
 import { Link } from '@trussworks/react-uswds'
 import { useS3 } from '../../../contexts/S3Context'
-import { DraftSubmission, StateSubmission } from '../../../gen/gqlClient'
+import { HealthPlanFormDataType } from '../../../common-code/domain-models'
 
 type DocumentWithLink = { url: string | null } & Document
 
 export type SupportingDocumentsSummarySectionProps = {
-    submission: DraftSubmission | StateSubmission
+    submission: HealthPlanFormDataType
     navigateTo?: string
+    submissionName?: string
 }
 const getUncategorizedDocuments = (documents: Document[]): Document[] =>
-    documents.filter((doc) => ! doc.documentCategories || doc.documentCategories.length === 0)
+    documents.filter(
+        (doc) => !doc.documentCategories || doc.documentCategories.length === 0
+    )
 // This component is only used for supporting docs that are not categorized (not expected behavior but still possible)
 // since supporting documents are now displayed in the rate and contract sections
 export const SupportingDocumentsSummarySection = ({
     submission,
     navigateTo,
+    submissionName,
 }: SupportingDocumentsSummarySectionProps): React.ReactElement | null => {
     const { getURL, getKey, getBulkDlURL } = useS3()
     const [refreshedDocs, setRefreshedDocs] = useState<DocumentWithLink[]>([])
     const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
-    const isSubmitted = submission.__typename === 'StateSubmission'
+    const isSubmitted = submission.status === 'SUBMITTED'
     useEffect(() => {
         const refreshDocuments = async () => {
             const uncategorizedDocuments = getUncategorizedDocuments(
                 submission.documents
             )
-                
+
             const newDocuments = await Promise.all(
                 uncategorizedDocuments.map(async (doc) => {
                     const key = getKey(doc.s3URL)
@@ -59,8 +63,10 @@ export const SupportingDocumentsSummarySection = ({
 
     useEffect(() => {
         // get all the keys for the documents we want to zip
-        const uncategorizedDocuments = getUncategorizedDocuments(submission.documents)
-      
+        const uncategorizedDocuments = getUncategorizedDocuments(
+            submission.documents
+        )
+
         async function fetchZipUrl() {
             const keysFromDocs = uncategorizedDocuments
                 .map((doc) => {
@@ -73,7 +79,7 @@ export const SupportingDocumentsSummarySection = ({
             // call the lambda to zip the files and get the url
             const zippedURL = await getBulkDlURL(
                 keysFromDocs,
-                submission.name + '-supporting-documents.zip'
+                submissionName + '-supporting-documents.zip'
             )
             if (zippedURL instanceof Error) {
                 console.log('ERROR: TODO: DISPLAY AN ERROR MESSAGE')
@@ -84,7 +90,7 @@ export const SupportingDocumentsSummarySection = ({
         }
 
         void fetchZipUrl()
-    }, [getKey, getBulkDlURL, submission])
+    }, [getKey, getBulkDlURL, submission, submissionName])
 
     const documentsSummary = `${refreshedDocs.length} ${
         refreshedDocs.length === 1 ? 'file' : 'files'

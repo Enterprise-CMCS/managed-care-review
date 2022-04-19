@@ -12,7 +12,7 @@ mutation createHealthPlanPackage($input: CreateHealthPlanPackageInput!) {
                 }
             }
             status
-            intiallySubmittedAt
+            initiallySubmittedAt
             revisions {
                 node {
                     id

@@ -17,23 +17,23 @@ import {
     SupportingDocumentsSummarySection,
 } from '../../../components/SubmissionSummarySection'
 import { useAuth } from '../../../contexts/AuthContext'
-import {
-    DraftSubmission,
-    useSubmitHealthPlanPackageMutation,
-} from '../../../gen/gqlClient'
+import { useSubmitHealthPlanPackageMutation } from '../../../gen/gqlClient'
 import { PageActionsContainer } from '../PageActions'
 import { Modal } from '../../../components/Modal'
 import styles from './ReviewSubmit.module.scss'
 import { PoliteErrorMessage } from '../../../components'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
+import { UnlockedHealthPlanFormDataType } from '../../../common-code/domain-models'
 
 export const ReviewSubmit = ({
     draftSubmission,
     unlocked,
+    submissionName,
 }: {
-    draftSubmission: DraftSubmission
+    draftSubmission: UnlockedHealthPlanFormDataType
     unlocked: boolean
+    submissionName: string
 }): React.ReactElement => {
     const [userVisibleError, setUserVisibleError] = useState<
         string | undefined
@@ -123,7 +123,7 @@ export const ReviewSubmit = ({
 
             if (data.data?.submitHealthPlanPackage) {
                 modalRef.current?.toggleModal(undefined, false)
-                history.push(`/dashboard?justSubmitted=${draftSubmission.name}`)
+                history.push(`/dashboard?justSubmitted=${submissionName}`)
             } else {
                 console.error('Got nothing back from submit')
                 showError('Error attempting to submit. Please try again.')
@@ -164,6 +164,7 @@ export const ReviewSubmit = ({
 
             <SubmissionTypeSummarySection
                 submission={draftSubmission}
+                submissionName={submissionName}
                 navigateTo="type"
                 statePrograms={statePrograms}
             />
@@ -171,12 +172,14 @@ export const ReviewSubmit = ({
             <ContractDetailsSummarySection
                 submission={draftSubmission}
                 navigateTo="contract-details"
+                submissionName={submissionName}
             />
 
             {isContractActionAndRateCertification && (
                 <RateDetailsSummarySection
                     submission={draftSubmission}
                     navigateTo="rate-details"
+                    submissionName={submissionName}
                 />
             )}
 

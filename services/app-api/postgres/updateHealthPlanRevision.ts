@@ -1,7 +1,8 @@
-import { PrismaClient } from '@prisma/client'
+import { HealthPlanRevisionTable, PrismaClient } from '@prisma/client'
 import {
-    UnlockedHealthPlanFormDataType,
     HealthPlanPackageType,
+    HealthPlanFormDataType,
+    UpdateInfoType,
 } from '../../app-web/src/common-code/domain-models'
 import { toProtoBuffer } from '../../app-web/src/common-code/proto/stateSubmission'
 import {
@@ -11,19 +12,30 @@ import {
 } from './storeError'
 import {
     convertToHealthPlanPackageType,
-    StateSubmissionWithRevisions,
-} from './submissionWithRevisionsHelpers'
+    HealthPlanPackageWithRevisionsTable,
+} from './healthPlanPackageHelpers'
 
 export async function updateRevisionWrapper(
     client: PrismaClient,
-    submissionID: string,
+    pkgID: string,
     revisionID: string,
-    proto: Buffer
-): Promise<StateSubmissionWithRevisions | StoreError> {
+    proto: Buffer,
+    submitInfo?: UpdateInfoType
+): Promise<HealthPlanPackageWithRevisionsTable | StoreError> {
+    const revisionBody: Partial<HealthPlanRevisionTable> = {
+        formDataProto: proto,
+    }
+
+    if (submitInfo) {
+        revisionBody.submittedAt = submitInfo.updatedAt
+        revisionBody.submittedBy = submitInfo.updatedBy
+        revisionBody.submittedReason = submitInfo.updatedReason
+    }
+
     try {
-        const updateResult = await client.stateSubmission.update({
+        const updateResult = await client.healthPlanPackageTable.update({
             where: {
-                id: submissionID,
+                id: pkgID,
             },
             data: {
                 revisions: {
@@ -31,9 +43,7 @@ export async function updateRevisionWrapper(
                         where: {
                             id: revisionID,
                         },
-                        data: {
-                            submissionFormProto: proto,
-                        },
+                        data: revisionBody,
                     },
                 },
             },
@@ -52,11 +62,12 @@ export async function updateRevisionWrapper(
     }
 }
 
-export async function updateFormData(
+export async function updateHealthPlanRevision(
     client: PrismaClient,
-    submissionID: string,
+    pkgID: string,
     revisionID: string,
-    formData: UnlockedHealthPlanFormDataType
+    formData: HealthPlanFormDataType,
+    submitInfo?: UpdateInfoType
 ): Promise<HealthPlanPackageType | StoreError> {
     formData.updatedAt = new Date()
 
@@ -65,9 +76,10 @@ export async function updateFormData(
 
     const updateResult = await updateRevisionWrapper(
         client,
-        submissionID,
+        pkgID,
         revisionID,
-        buffer
+        buffer,
+        submitInfo
     )
 
     if (isStoreError(updateResult)) {

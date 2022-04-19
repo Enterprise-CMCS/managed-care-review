@@ -6,29 +6,26 @@ import {
     basicHealthPlanFormData,
     unlockedWithALittleBitOfEverything,
 } from '../common-code/domain-mocks'
-import { UnlockedHealthPlanFormDataType } from '../common-code/domain-models'
+import {
+    LockedHealthPlanFormDataType,
+    UnlockedHealthPlanFormDataType,
+} from '../common-code/domain-models'
 import { domainToBase64 } from '../common-code/proto/stateSubmission'
 import {
-    CreateDraftSubmissionDocument,
-    DraftSubmission,
-    DraftSubmissionUpdates,
     FetchCurrentUserDocument,
-    FetchStateSubmissionDocument,
     FetchHealthPlanPackageDocument,
+    UpdateHealthPlanFormDataDocument,
     IndexHealthPlanPackagesDocument,
-    IndexSubmissionsDocument,
     State,
-    StateSubmission,
-    Submission,
     HealthPlanPackage,
     SubmitHealthPlanPackageDocument,
     UnlockHealthPlanPackageDocument,
-    UpdateDraftSubmissionDocument,
     User as UserType,
     UnlockHealthPlanPackageMutation,
     SubmitHealthPlanPackageMutation,
     IndexHealthPlanPackagesQuery,
     FetchHealthPlanPackageQuery,
+    UpdateHealthPlanFormDataMutation,
 } from '../gen/gqlClient'
 
 /* For use with Apollo MockedProvider in jest tests */
@@ -51,15 +48,15 @@ function mockValidCMSUser(): UserType {
     }
 }
 
-export function mockDraft(): DraftSubmission {
+export function mockDraft(): UnlockedHealthPlanFormDataType {
     return {
-        __typename: 'DraftSubmission',
+        status: 'DRAFT',
+        stateNumber: 5,
         createdAt: new Date(),
         updatedAt: new Date(),
         id: 'test-abc-123',
         stateCode: 'MN',
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-        name: 'MN-MSHO-0001',
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A real submission',
         documents: [],
@@ -68,30 +65,28 @@ export function mockDraft(): DraftSubmission {
         contractDocuments: [],
         contractDateStart: new Date(),
         contractDateEnd: dayjs().add(2, 'days').toDate(),
-        contractAmendmentInfo: null,
+        contractAmendmentInfo: undefined,
         managedCareEntities: [],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
-        rateType: null,
+        rateType: undefined,
         rateDocuments: [],
-        rateDateStart: null,
-        rateDateEnd: null,
-        rateDateCertified: null,
-        rateAmendmentInfo: null,
+        rateDateStart: undefined,
+        rateDateEnd: undefined,
+        rateDateCertified: undefined,
+        rateAmendmentInfo: undefined,
         stateContacts: [],
         actuaryContacts: [],
-        actuaryCommunicationPreference: null,
+        actuaryCommunicationPreference: undefined,
     }
 }
 
-export function mockContactAndRatesDraft(): DraftSubmission {
+export function mockContactAndRatesDraft(): UnlockedHealthPlanFormDataType {
     return {
-        __typename: 'DraftSubmission',
         createdAt: new Date(),
         updatedAt: new Date(),
         id: 'test-abc-123',
         stateCode: 'MN',
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-        name: 'MN-MSHO-0001',
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A real submission',
         documents: [],
@@ -100,29 +95,32 @@ export function mockContactAndRatesDraft(): DraftSubmission {
         contractDocuments: [],
         contractDateStart: new Date(),
         contractDateEnd: dayjs().add(2, 'days').toDate(),
-        contractAmendmentInfo: null,
+        contractAmendmentInfo: undefined,
         managedCareEntities: [],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
-        rateType: null,
+        rateType: undefined,
         rateDocuments: [],
-        rateDateStart: null,
-        rateDateEnd: null,
-        rateDateCertified: null,
-        rateAmendmentInfo: null,
+        rateDateStart: undefined,
+        rateDateEnd: undefined,
+        rateDateCertified: undefined,
+        rateAmendmentInfo: undefined,
         stateContacts: [],
         actuaryContacts: [],
-        actuaryCommunicationPreference: null,
+        actuaryCommunicationPreference: undefined,
+        status: 'DRAFT',
+        stateNumber: 5,
     }
 }
 
-export function mockCompleteDraft(): DraftSubmission {
+export function mockCompleteDraft(): UnlockedHealthPlanFormDataType {
     return {
+        status: 'DRAFT',
+        stateNumber: 5,
         createdAt: new Date(),
         updatedAt: new Date(),
         id: 'test-abc-123',
         stateCode: 'MN',
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-        name: 'MN-MSHO-0001',
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A real submission',
         documents: [],
@@ -131,7 +129,7 @@ export function mockCompleteDraft(): DraftSubmission {
         contractDocuments: [],
         contractDateStart: new Date(),
         contractDateEnd: new Date(),
-        contractAmendmentInfo: null,
+        contractAmendmentInfo: undefined,
         managedCareEntities: [],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateType: 'NEW',
@@ -139,7 +137,7 @@ export function mockCompleteDraft(): DraftSubmission {
         rateDateStart: new Date(),
         rateDateEnd: new Date(),
         rateDateCertified: new Date(),
-        rateAmendmentInfo: null,
+        rateAmendmentInfo: undefined,
         stateContacts: [
             {
                 name: 'Test Person',
@@ -148,18 +146,19 @@ export function mockCompleteDraft(): DraftSubmission {
             },
         ],
         actuaryContacts: [],
-        actuaryCommunicationPreference: null,
+        actuaryCommunicationPreference: undefined,
     }
 }
 
-export function mockContractAndRatesDraft(): DraftSubmission {
+export function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
     return {
+        status: 'DRAFT',
+        stateNumber: 5,
         createdAt: new Date(),
         updatedAt: new Date(),
         id: 'test-abc-123',
         stateCode: 'MN',
         programIDs: ['pmap'],
-        name: 'MN-PMAP-0001',
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A real submission',
         documents: [],
@@ -216,46 +215,15 @@ export function mockContractAndRatesDraft(): DraftSubmission {
     }
 }
 
-function mockNewDraft(): DraftSubmission {
+export function mockStateSubmission(): LockedHealthPlanFormDataType {
     return {
-        __typename: 'DraftSubmission',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        id: 'test-abc-124',
-        stateCode: 'MN',
-        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-        name: 'MN-MSHO-0002',
-        submissionType: 'CONTRACT_ONLY',
-        submissionDescription: 'A real submission',
-        documents: [],
-        contractType: null,
-        contractExecutionStatus: null,
-        contractDocuments: [],
-        contractDateStart: null,
-        contractDateEnd: null,
-        contractAmendmentInfo: null,
-        managedCareEntities: [],
-        federalAuthorities: [],
-        rateType: null,
-        rateDocuments: [],
-        rateDateStart: null,
-        rateDateEnd: null,
-        rateDateCertified: null,
-        stateContacts: [],
-        actuaryContacts: [],
-        actuaryCommunicationPreference: null,
-    }
-}
-
-export function mockStateSubmission(): StateSubmission {
-    return {
-        __typename: 'StateSubmission',
+        status: 'SUBMITTED',
+        stateNumber: 5,
         createdAt: new Date(),
         updatedAt: new Date(),
         id: 'test-abc-125',
         stateCode: 'MN',
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-        name: 'MN-MSHO-0003',
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A submitted submission',
         submittedAt: new Date(),
@@ -277,7 +245,7 @@ export function mockStateSubmission(): StateSubmission {
         ],
         contractDateStart: new Date(),
         contractDateEnd: new Date(),
-        contractAmendmentInfo: null,
+        contractAmendmentInfo: undefined,
         managedCareEntities: ['ENROLLMENT_PROCESS'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateType: 'NEW',
@@ -300,7 +268,7 @@ export function mockStateSubmission(): StateSubmission {
             },
         ],
         actuaryContacts: [],
-        actuaryCommunicationPreference: null,
+        actuaryCommunicationPreference: undefined,
     }
 }
 
@@ -339,7 +307,7 @@ export function mockDraftHealthPlanPackage(
         __typename: 'HealthPlanPackage',
         id: 'test-id-123',
         status: 'DRAFT',
-        intiallySubmittedAt: '2022-01-01',
+        initiallySubmittedAt: '2022-01-01',
         stateCode: 'MN',
         state: mockMNState(),
         revisions: [
@@ -365,7 +333,7 @@ export function mockSubmittedHealthPlanPackage(): HealthPlanPackage {
     return {
         id: 'test-id-123',
         status: 'SUBMITTED',
-        intiallySubmittedAt: '2022-01-01',
+        initiallySubmittedAt: '2022-01-01',
         stateCode: 'MN',
         state: mockMNState(),
         revisions: [
@@ -395,7 +363,7 @@ export function mockSubmittedHealthPlanPackageWithRevisions(): HealthPlanPackage
     return {
         id: 'test-id-123',
         status: 'RESUBMITTED',
-        intiallySubmittedAt: '2022-01-01',
+        initiallySubmittedAt: '2022-01-01',
         stateCode: 'MN',
         state: mockMNState(),
         revisions: [
@@ -463,7 +431,7 @@ export function mockUnlockedHealthPlanPackage(
     return {
         id: 'test-id-123',
         status: 'UNLOCKED',
-        intiallySubmittedAt: '2020-01-01',
+        initiallySubmittedAt: '2020-01-01',
         stateCode: 'MN',
         state: mockMNState(),
         revisions: [
@@ -529,50 +497,6 @@ fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
     }
 }
 
-type createDraftSubmissionMockProps = {
-    input: {
-        programIDs: string[]
-        submissionType: string
-        submissionDescription: string
-    }
-    draftSubmission?: DraftSubmission | Partial<DraftSubmission>
-    statusCode: 200 | 403 | 500
-}
-
-const createDraftSubmissionMock = ({
-    input,
-    draftSubmission = mockNewDraft(),
-    statusCode, // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}: createDraftSubmissionMockProps): MockedResponse<Record<string, any>> => {
-    const mergedDraftSubmission = Object.assign({}, draftSubmission, input)
-    switch (statusCode) {
-        case 200:
-            return {
-                request: {
-                    query: CreateDraftSubmissionDocument,
-                    variables: { input },
-                },
-                result: {
-                    data: {
-                        createDraftSubmission: {
-                            draftSubmission: mergedDraftSubmission,
-                        },
-                    },
-                },
-            }
-        case 403:
-            return {
-                request: { query: CreateDraftSubmissionDocument },
-                error: new Error('You are not logged in'),
-            }
-        default:
-            return {
-                request: { query: CreateDraftSubmissionDocument },
-                error: new Error('A network error occurred'),
-            }
-    }
-}
-
 type fetchHealthPlanPackageMockProps = {
     submission?: HealthPlanPackage
     id: string
@@ -615,11 +539,11 @@ const fetchHealthPlanPackageMock = ({
     }
 }
 
-type fetchStateSubmissionMockProps = {
-    stateSubmission?: StateSubmission | Partial<StateSubmission>
-    id: string
-    statusCode: 200 | 403 | 500
-}
+// type fetchStateSubmissionMockProps = {
+//     stateSubmission?: StateSubmission | Partial<StateSubmission>
+//     id: string
+//     statusCode: 200 | 403 | 500
+// }
 
 type fetchStateHealthPlanPackageMockSuccessProps = {
     stateSubmission?: HealthPlanPackage | Partial<HealthPlanPackage>
@@ -651,42 +575,6 @@ const fetchStateHealthPlanPackageMockSuccess = ({
     }
 }
 
-const fetchStateSubmissionMock = ({
-    stateSubmission = mockStateSubmission(),
-    id,
-    statusCode, // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}: fetchStateSubmissionMockProps): MockedResponse<Record<string, any>> => {
-    // override the ID of the returned draft to match the queried id.
-    console.log('MOCKING', id)
-    const mergedStateSubmission = Object.assign({}, stateSubmission, { id })
-    switch (statusCode) {
-        case 200:
-            return {
-                request: {
-                    query: FetchStateSubmissionDocument,
-                    variables: { input: { submissionID: id } },
-                },
-                result: {
-                    data: {
-                        fetchStateSubmission: {
-                            submission: mergedStateSubmission,
-                        },
-                    },
-                },
-            }
-        case 403:
-            return {
-                request: { query: FetchHealthPlanPackageDocument },
-                error: new Error('You are not logged in'),
-            }
-        default:
-            return {
-                request: { query: FetchHealthPlanPackageDocument },
-                error: new Error('A network error occurred'),
-            }
-    }
-}
-
 const mockSubmittedHealthPlanPackageWithRevision = (): HealthPlanPackage => {
     return {
         __typename: 'HealthPlanPackage',
@@ -698,7 +586,7 @@ const mockSubmittedHealthPlanPackageWithRevision = (): HealthPlanPackage => {
             programs: [],
         },
         status: 'RESUBMITTED',
-        intiallySubmittedAt: '2022-03-25',
+        initiallySubmittedAt: '2022-03-25',
         revisions: [
             {
                 __typename: 'HealthPlanRevisionEdge',
@@ -765,55 +653,25 @@ const mockSubmittedHealthPlanPackageWithRevision = (): HealthPlanPackage => {
     }
 }
 
-type updateDraftSubmissionMockProps = {
-    draftSubmission?: DraftSubmission | Partial<DraftSubmission>
+type updateHealthPlanFormDataMockSuccessProps = {
+    pkg?: HealthPlanPackage
+    updatedFormData: string
     id: string
-    updates: DraftSubmissionUpdates | Partial<DraftSubmissionUpdates>
-    statusCode: 200 | 403 | 500
 }
 
-const updateDraftSubmissionMock = ({
+const updateHealthPlanFormDataMockSuccess = ({
+    pkg = mockUnlockedHealthPlanPackage(),
+    updatedFormData,
     id,
-    updates,
-    statusCode, // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}: updateDraftSubmissionMockProps): MockedResponse<Record<string, any>> => {
-    const mergedDraftSubmission = Object.assign(
-        {},
-        mockDraft(),
-        updates,
-        { id } // make sure the id matches what we queried
-    )
-    switch (statusCode) {
-        case 200:
-            return {
-                request: {
-                    query: UpdateDraftSubmissionDocument,
-                    variables: {
-                        input: {
-                            submissionID: id,
-                            draftSubmissionUpdates: updates,
-                        },
-                    },
-                },
-                // error: new Error('You are not logged in'),
-                result: {
-                    data: {
-                        updateDraftSubmission: {
-                            draftSubmission: mergedDraftSubmission,
-                        },
-                    },
-                },
-            }
-        case 403:
-            return {
-                request: { query: UpdateDraftSubmissionDocument },
-                error: new Error('You are not logged in'),
-            }
-        default:
-            return {
-                request: { query: UpdateDraftSubmissionDocument },
-                error: new Error('A network error occurred'),
-            }
+}: updateHealthPlanFormDataMockSuccessProps): MockedResponse<UpdateHealthPlanFormDataMutation> => {
+    return {
+        request: {
+            query: UpdateHealthPlanFormDataDocument,
+            variables: {
+                input: { pkgID: id, healthPlanFormData: updatedFormData },
+            },
+        },
+        result: { data: { updateHealthPlanFormData: { pkg } } },
     }
 }
 
@@ -896,31 +754,6 @@ const unlockHealthPlanPackageMockError = ({
     }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const indexSubmissionsMockSuccess = (
-    submissions: Submission[] = [mockDraft(), mockStateSubmission()]
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): MockedResponse<Record<string, any>> => {
-    const submissionEdges = submissions.map((sub) => {
-        return {
-            node: sub,
-        }
-    })
-    return {
-        request: {
-            query: IndexSubmissionsDocument,
-        },
-        result: {
-            data: {
-                indexSubmissions: {
-                    totalCount: submissionEdges.length,
-                    edges: submissionEdges,
-                },
-            },
-        },
-    }
-}
-
 const indexHealthPlanPackagesMockSuccess = (
     submissions: HealthPlanPackage[] = [
         mockUnlockedHealthPlanPackage(),
@@ -950,14 +783,11 @@ const indexHealthPlanPackagesMockSuccess = (
 export {
     fetchCurrentUserMock,
     mockValidCMSUser,
-    createDraftSubmissionMock,
     fetchHealthPlanPackageMock,
-    fetchStateSubmissionMock,
     fetchStateHealthPlanPackageMockSuccess,
-    updateDraftSubmissionMock,
+    updateHealthPlanFormDataMockSuccess,
     submitHealthPlanPackageMockSuccess,
     submitHealthPlanPackageMockError,
-    indexSubmissionsMockSuccess,
     indexHealthPlanPackagesMockSuccess,
     unlockHealthPlanPackageMockSuccess,
     unlockHealthPlanPackageMockError,
