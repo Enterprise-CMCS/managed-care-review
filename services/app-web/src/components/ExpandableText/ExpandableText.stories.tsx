@@ -19,33 +19,38 @@ const longText =
 
 const shortText = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
 
-const Template: Story<ExpandableTextProps> = (args) => (
-    <GridContainer className="app-container-horizontal-pad">
-        <ExpandableText {...args} />
-    </GridContainer>
-)
+const Template: Story<
+    ExpandableTextProps & React.HTMLAttributes<HTMLParagraphElement>
+> = (args) => {
+    const { children, clampedLines } = args
+    return (
+        <GridContainer className="app-container-horizontal-pad">
+            <ExpandableText clampedLines={clampedLines}>
+                {children}
+            </ExpandableText>
+        </GridContainer>
+    )
+}
 
 export const ExpandableTextClampedToTwoLines = Template.bind({})
 ExpandableTextClampedToTwoLines.args = {
-    clamp: longText,
+    children: <>{longText}</>,
 }
 
 export const ExpandableTextClampedToFourLines = Template.bind({})
 ExpandableTextClampedToFourLines.args = {
-    clamp: longText,
     clampedLines: 4,
+    children: <>{longText}</>,
 }
 
-//On Firefox this storybook will always render the "Show More"/"Show Less" button. Because the offsetHeight is 1 less
-// than scrollHeight. No clue why. This does not happen on the banner storybook components.
 export const ExpandableTextNoClamp = Template.bind({})
 ExpandableTextNoClamp.args = {
-    clamp: shortText,
+    children: <>{shortText}</>,
 }
 
 export const ExpandableTextWithPrefix = Template.bind({})
 ExpandableTextWithPrefix.args = {
-    clamp: (
+    children: (
         <>
             <span className="text-bold">Some bold header:&nbsp; </span>
             {longText}

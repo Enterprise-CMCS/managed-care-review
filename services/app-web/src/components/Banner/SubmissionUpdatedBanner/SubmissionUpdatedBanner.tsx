@@ -38,14 +38,12 @@ export const SubmissionUpdatedBanner = ({
                         .format('MM/DD/YY h:mma')}
                     &nbsp;ET
                 </p>
-                <ExpandableText
-                    clamp={
-                        <>
-                            <b>Changes made:&nbsp;</b>
-                            {changesMade}
-                        </>
-                    }
-                />
+                <ExpandableText>
+                    <>
+                        <b>Changes made:&nbsp;</b>
+                        {changesMade}
+                    </>
+                </ExpandableText>
             </div>
         </Alert>
     )

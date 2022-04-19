@@ -41,15 +41,12 @@ export const SubmissionUnlockedBanner = ({
                         .format('MM/DD/YY h:mma')}
                     &nbsp;ET
                 </p>
-
-                <ExpandableText
-                    clamp={
-                        <>
-                            <b>Reason for unlock:&nbsp;</b>
-                            {reason}
-                        </>
-                    }
-                />
+                <ExpandableText>
+                    <>
+                        <b>Reason for unlock:&nbsp;</b>
+                        {reason}
+                    </>
+                </ExpandableText>
             </div>
         </Alert>
     )

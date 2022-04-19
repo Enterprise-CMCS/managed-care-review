@@ -3,13 +3,12 @@ import { Button } from '@trussworks/react-uswds'
 import styles from './ExpandableText.module.scss'
 
 export type ExpandableTextProps = {
-    clamp: React.ReactElement | string // you can pass in an element with nested <span> or simple string
     clampedLines?: number
 }
 
 export const ExpandableText = ({
-    clamp,
     clampedLines = 2,
+    children,
 }: ExpandableTextProps &
     React.HTMLAttributes<HTMLParagraphElement>): React.ReactElement => {
     //We are using React.useRef because jest spyOn useRef only works like this.
@@ -42,7 +41,7 @@ export const ExpandableText = ({
                     showMore ? styles.textExpanded : styles.textContracted
                 }`}
             >
-                {clamp}
+                {children}
             </span>
             {showMoreButton && (
                 <Button

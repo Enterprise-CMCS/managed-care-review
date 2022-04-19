@@ -46,7 +46,11 @@ describe('ExpandableText', () => {
 
     it('renders without errors and clamps long text', () => {
         setMockRefElement(clamped2Lines)
-        render(<ExpandableText clamp={longText} />)
+        render(
+            <ExpandableText>
+                <>{longText}</>
+            </ExpandableText>
+        )
         expect(screen.getByTestId('clampElement')).toBeInTheDocument()
         expect(screen.getByTestId('clampElement')).toHaveClass('textContracted')
         expect(screen.getByText('Show More')).toBeInTheDocument()
@@ -54,7 +58,11 @@ describe('ExpandableText', () => {
 
     it('can expand and contract clamped text to show more or less text', () => {
         setMockRefElement(clamped2Lines)
-        render(<ExpandableText clamp={longText} />)
+        render(
+            <ExpandableText>
+                <>{longText}</>
+            </ExpandableText>
+        )
         expect(screen.getByText('Show More')).toBeInTheDocument()
         expect(screen.getByTestId('clampElement')).toBeInTheDocument()
         expect(screen.getByTestId('clampElement')).toHaveClass('textContracted')
@@ -65,7 +73,11 @@ describe('ExpandableText', () => {
 
     it('renders short text without errors and not clamped', () => {
         setMockRefElement(notClamped)
-        render(<ExpandableText clamp={shortText} />)
+        render(
+            <ExpandableText>
+                <>{shortText}</>
+            </ExpandableText>
+        )
         expect(screen.queryByText('Show More')).toBeNull()
         expect(screen.getByTestId('clampElement')).toBeInTheDocument()
         expect(screen.getByTestId('clampElement')).toHaveClass('textContracted')
@@ -74,14 +86,12 @@ describe('ExpandableText', () => {
     it('can render react elements and clamp long text correctly', () => {
         setMockRefElement(clamped2Lines)
         render(
-            <ExpandableText
-                clamp={
-                    <>
-                        <span>Some header</span>
-                        <span>longText</span>
-                    </>
-                }
-            />
+            <ExpandableText>
+                <>
+                    <span>Some header</span>
+                    <span>longText</span>
+                </>
+            </ExpandableText>
         )
         expect(screen.getByTestId('clampElement')).toBeInTheDocument()
         expect(screen.getByTestId('clampElement')).toHaveClass('textContracted')
@@ -91,14 +101,12 @@ describe('ExpandableText', () => {
     it('can expand and contract clamped text inside react element to show more or less text', () => {
         setMockRefElement(clamped2Lines)
         render(
-            <ExpandableText
-                clamp={
-                    <span>
-                        <b>Some Styling</b>
-                        {longText}
-                    </span>
-                }
-            />
+            <ExpandableText>
+                <span>
+                    <b>Some Styling</b>
+                    {longText}
+                </span>
+            </ExpandableText>
         )
         expect(screen.getByText('Show More')).toBeInTheDocument()
         expect(screen.getByTestId('clampElement')).toBeInTheDocument()
