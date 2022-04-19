@@ -50,21 +50,7 @@ export const ReviewSubmit = ({
             loggedInUser.state.programs) ||
         []
 
-    const [submitDraftSubmission] = useSubmitHealthPlanPackageMutation({
-        // An alternative to messing with the cache like we do with create, just zero it out.
-        update(cache, { data }) {
-            if (data) {
-                cache.modify({
-                    id: 'ROOT_QUERY',
-                    fields: {
-                        indexHealthPlanPackages(_index, { DELETE }) {
-                            return DELETE
-                        },
-                    },
-                })
-            }
-        },
-    })
+    const [submitDraftSubmission] = useSubmitHealthPlanPackageMutation()
 
     const showError = (error: string) => {
         setUserVisibleError(error)

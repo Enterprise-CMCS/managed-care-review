@@ -97,14 +97,33 @@ export const SubmissionType = ({
 
     const [createHealthPlanPackage, { error }] =
         useCreateHealthPlanPackageMutation({
-            // An alternative to messing with the cache like we do with create, just zero it out.
+            // This function updates the Apollo Client Cache after we create a new DraftSubmission
+            // Without it, we wouldn't show this newly created submission on the dashboard page
+            // without a refresh. Anytime a mutation does more than "modify an existing object"
+            // you'll need to handle the cache.
             update(cache, { data }) {
                 if (data) {
                     cache.modify({
-                        id: 'ROOT_QUERY',
                         fields: {
-                            indexHealthPlanPackages(_index, { DELETE }) {
-                                return DELETE
+                            indexHealthPlanPackages(
+                                index = { totalCount: 0, edges: [] }
+                            ) {
+                                const newID = cache.identify(
+                                    data.createHealthPlanPackage.pkg
+                                )
+                                // This isn't quite what is documented, but it's clear this
+                                // is how things work from looking at the dev-tools
+                                const newRef = { __ref: newID }
+
+                                return {
+                                    totalCount: index.totalCount + 1,
+                                    edges: [
+                                        {
+                                            node: newRef,
+                                        },
+                                        ...index.edges,
+                                    ],
+                                }
                             },
                         },
                     })
