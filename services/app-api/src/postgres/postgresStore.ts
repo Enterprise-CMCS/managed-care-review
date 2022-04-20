@@ -4,7 +4,7 @@ import {
     HealthPlanFormDataType,
 } from '../../../app-web/src/common-code/domain-models'
 import {
-    ProgramT,
+    ProgramType,
     HealthPlanPackageType,
     UpdateInfoType,
 } from '../domain-models'
@@ -23,7 +23,7 @@ type Store = {
     findPrograms: (
         stateCode: string,
         programIDs: Array<string>
-    ) => ProgramT[] | undefined
+    ) => ProgramType[] | undefined
 
     findHealthPlanPackage: (
         draftUUID: string

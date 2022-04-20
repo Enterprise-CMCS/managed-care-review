@@ -4,7 +4,7 @@ import {
     SubmissionType,
     UnlockedHealthPlanFormDataType,
 } from '../../../app-web/src/common-code/domain-models'
-import { CognitoUserType } from '../domain-models'
+import { UserType } from '../domain-models'
 import { formatCalendarDate } from '../../../app-web/src/common-code/dateHelpers'
 import { EmailConfiguration, EmailData } from './'
 import { generateRateName } from '../../../app-web/src/common-code/domain-models'
@@ -141,7 +141,7 @@ const newPackageCMSEmail = (
 const newPackageStateEmail = (
     submission: LockedHealthPlanFormDataType,
     submissionName: string,
-    user: CognitoUserType,
+    user: UserType,
     config: EmailConfiguration
 ): EmailData => {
     const currentUserEmail = user.email
@@ -254,7 +254,7 @@ const unlockPackageStateEmail = (
 
 const resubmittedStateEmail = (
     submission: LockedHealthPlanFormDataType,
-    user: CognitoUserType,
+    user: UserType,
     resubmittedData: UpdatedEmailData,
     config: EmailConfiguration
 ): EmailData => {

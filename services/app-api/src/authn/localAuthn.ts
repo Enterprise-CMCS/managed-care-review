@@ -1,9 +1,9 @@
 import { Result, ok, err } from 'neverthrow'
-import { CognitoUserType } from '../domain-models/index'
+import { UserType } from '../domain-models/index'
 
 export async function userFromLocalAuthProvider(
     authProvider: string
-): Promise<Result<CognitoUserType, Error>> {
+): Promise<Result<UserType, Error>> {
     try {
         const localUser = JSON.parse(authProvider)
         return ok(localUser)

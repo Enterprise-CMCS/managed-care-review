@@ -13,7 +13,7 @@ import {
     LockedHealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
 } from '../../../app-web/src/common-code/domain-models'
-import { CognitoUserType } from '../domain-models'
+import { UserType } from '../domain-models'
 
 type EmailConfiguration = {
     stage: string
@@ -43,7 +43,7 @@ type Emailer = {
     sendStateNewPackage: (
         submission: LockedHealthPlanFormDataType,
         submissionName: string,
-        user: CognitoUserType
+        user: UserType
     ) => Promise<void | Error>
     sendUnlockPackageCMSEmail: (
         updatedEmailData: UpdatedEmailData
@@ -55,7 +55,7 @@ type Emailer = {
     sendResubmittedStateEmail: (
         submission: LockedHealthPlanFormDataType,
         updatedEmailData: UpdatedEmailData,
-        user: CognitoUserType
+        user: UserType
     ) => Promise<void | Error>
     sendResubmittedCMSEmail: (
         submission: LockedHealthPlanFormDataType,
@@ -94,7 +94,7 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
         sendStateNewPackage: async function (
             submission: LockedHealthPlanFormDataType,
             submissionName: string,
-            user: CognitoUserType
+            user: UserType
         ) {
             const emailData = newPackageStateEmail(
                 submission,
@@ -122,7 +122,7 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
         sendResubmittedStateEmail: async function (
             submission,
             updatedEmailData,
-            user: CognitoUserType
+            user: UserType
         ) {
             const emailData = resubmittedStateEmail(
                 submission,
@@ -167,7 +167,7 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
         sendStateNewPackage: async (
             submission: LockedHealthPlanFormDataType,
             submissionName: string,
-            user: CognitoUserType
+            user: UserType
         ) => {
             const emailData = newPackageStateEmail(
                 submission,
@@ -197,7 +197,7 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
         sendResubmittedStateEmail: async (
             submission: LockedHealthPlanFormDataType,
             updatedEmailData: UpdatedEmailData,
-            user: CognitoUserType
+            user: UserType
         ) => {
             const emailData = resubmittedStateEmail(
                 submission,

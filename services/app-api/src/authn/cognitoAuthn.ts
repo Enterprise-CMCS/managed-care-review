@@ -1,6 +1,6 @@
 import { Result, ok, err } from 'neverthrow'
 import { CognitoIdentityServiceProvider } from 'aws-sdk'
-import { CognitoUserType } from '../domain-models'
+import { UserType } from '../domain-models'
 import { performance } from 'perf_hooks'
 
 export function parseAuthProvider(
@@ -79,7 +79,7 @@ const STATE_ROLE_ATTRIBUTE = 'macmcrrs-state-user'
 
 export function userTypeFromAttributes(attributes: {
     [key: string]: string
-}): Result<CognitoUserType, Error> {
+}): Result<UserType, Error> {
     // check for all the shared attrs here
     if (
         !(
@@ -135,7 +135,7 @@ export function userTypeFromAttributes(attributes: {
 // userFromCognitoAuthProvider hits the Cogntio API to get the information in the authProvider
 export async function userFromCognitoAuthProvider(
     authProvider: string
-): Promise<Result<CognitoUserType, Error>> {
+): Promise<Result<UserType, Error>> {
     const parseResult = parseAuthProvider(authProvider)
     if (parseResult.isErr()) {
         return err(parseResult.error)

@@ -7,7 +7,7 @@ import {
 } from 'aws-lambda'
 import typeDefs from '../../../app-graphql/src/schema.graphql'
 import { assertIsAuthMode } from '../../../app-web/src/common-code/domain-models'
-import { CognitoUserType } from '../domain-models'
+import { UserType } from '../domain-models'
 import {
     userFromAuthProvider,
     userFromCognitoAuthProvider,
@@ -24,7 +24,7 @@ let tracer: Tracer
 
 // The Context type passed to all of our GraphQL resolvers
 export interface Context {
-    user: CognitoUserType
+    user: UserType
     span?: Span
 }
 

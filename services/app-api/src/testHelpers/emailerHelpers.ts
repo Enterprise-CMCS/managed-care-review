@@ -14,7 +14,7 @@ import {
     LockedHealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
 } from '../../../app-web/src/common-code/domain-models'
-import { CognitoUserType, CognitoStateUserType } from '../domain-models'
+import { UserType, StateUserType } from '../domain-models'
 
 const testEmailConfig: EmailConfiguration = {
     stage: 'LOCAL',
@@ -45,7 +45,7 @@ const testEmailer = (customConfig?: EmailConfiguration): Emailer => {
         sendStateNewPackage: function async(
             submission: LockedHealthPlanFormDataType,
             submissionName: string,
-            user: CognitoUserType
+            user: UserType
         ): Promise<void | Error> {
             const emailData = newPackageStateEmail(
                 submission,
@@ -75,7 +75,7 @@ const testEmailer = (customConfig?: EmailConfiguration): Emailer => {
         sendResubmittedStateEmail: function async(
             submission: LockedHealthPlanFormDataType,
             updatedEmailData: UpdatedEmailData,
-            user: CognitoUserType
+            user: UserType
         ): Promise<void | Error> {
             const emailData = resubmittedStateEmail(
                 submission,
@@ -99,7 +99,7 @@ const testEmailer = (customConfig?: EmailConfiguration): Emailer => {
     }
 }
 
-const mockUser = (): CognitoStateUserType => {
+const mockUser = (): StateUserType => {
     return {
         role: 'STATE_USER',
         email: 'test+state+user@example.com',

@@ -9,7 +9,7 @@ import {
     HealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
 } from '../../../app-web/src/common-code/domain-models'
-import { ProgramT } from '../domain-models'
+import { ProgramType } from '../domain-models'
 import { Emailer, newLocalEmailer } from '../emailer'
 import {
     CreateHealthPlanPackageInput,
@@ -24,7 +24,7 @@ import { domainToBase64 } from '../../../app-web/src/common-code/proto/stateSubm
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
-function defaultFloridaProgram(): ProgramT {
+function defaultFloridaProgram(): ProgramType {
     return {
         id: '5c10fe9f-bec9-416f-a20c-718b152ad633',
         name: 'MMA',

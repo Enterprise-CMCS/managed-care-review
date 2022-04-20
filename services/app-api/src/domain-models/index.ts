@@ -1,12 +1,8 @@
-export type {
-    CognitoCMSUserType,
-    CognitoStateUserType,
-    CognitoUserType,
-} from './cognitoUserType'
+export type { CMSUserType, StateUserType, UserType } from './UserType'
 
-export type { ProgramT } from './ProgramT'
+export type { ProgramType } from './ProgramType'
 
-export { isCMSUser, isCognitoUser, isStateUser } from './user'
+export { isCMSUser, isUser, isStateUser } from './user'
 
 export {
     packageCurrentRevision,

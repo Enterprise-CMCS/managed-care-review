@@ -1,10 +1,6 @@
-import {
-    CognitoStateUserType,
-    CognitoCMSUserType,
-    CognitoUserType,
-} from './cognitoUserType'
+import { StateUserType, CMSUserType, UserType } from './UserType'
 
-function isCognitoUser(user: unknown): user is CognitoUserType {
+function isUser(user: unknown): user is UserType {
     if (user && typeof user === 'object') {
         if ('role' in user) {
             const roleUser = user as { role: unknown }
@@ -22,12 +18,12 @@ function isCognitoUser(user: unknown): user is CognitoUserType {
     return false
 }
 
-function isStateUser(user: CognitoUserType): user is CognitoStateUserType {
+function isStateUser(user: UserType): user is StateUserType {
     return user.role === 'STATE_USER'
 }
 
-function isCMSUser(user: CognitoUserType): user is CognitoCMSUserType {
+function isCMSUser(user: UserType): user is CMSUserType {
     return user.role === 'CMS_USER'
 }
 
-export { isCognitoUser, isCMSUser, isStateUser }
+export { isUser, isCMSUser, isStateUser }

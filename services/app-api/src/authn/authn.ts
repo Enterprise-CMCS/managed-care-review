@@ -1,6 +1,6 @@
 import { Result } from 'neverthrow'
-import { CognitoUserType } from '../domain-models'
+import { UserType } from '../domain-models'
 
 export type userFromAuthProvider = (
     authProvider: string
-) => Promise<Result<CognitoUserType, Error>>
+) => Promise<Result<UserType, Error>>

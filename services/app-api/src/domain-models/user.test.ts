@@ -1,16 +1,16 @@
-import { isCognitoUser, isCMSUser, isStateUser } from './'
+import { isUser, isCMSUser, isStateUser } from './'
 
 describe('user type assertions', () => {
-    it('isCognitoUser returns as expected', () => {
+    it('isUser returns as expected', () => {
         expect(
-            isCognitoUser({
+            isUser({
                 name: 'Margaret',
                 email: 'burroughs@dusable.org',
                 role: 'CMS_USER',
             })
         ).toBe(true)
         expect(
-            isCognitoUser({
+            isUser({
                 name: 'Margaret',
                 email: 'burroughs@dusable.org',
                 role: 'OTHER_OTHER_USER',
@@ -18,7 +18,7 @@ describe('user type assertions', () => {
             })
         ).toBe(false)
         expect(
-            isCognitoUser({
+            isUser({
                 name: 'Margaret',
                 email: 'burroughs@dusable.org',
             })

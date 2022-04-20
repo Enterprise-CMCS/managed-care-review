@@ -1,6 +1,6 @@
 import { Result, ok, err } from 'neverthrow'
 import { parseAuthProvider, userTypeFromAttributes } from './cognitoAuthn'
-import { CognitoUserType } from '../domain-models'
+import { UserType } from '../domain-models'
 
 describe('cognitoAuthn', () => {
     describe('parseAuthProvider', () => {
@@ -42,7 +42,7 @@ describe('cognitoAuthn', () => {
         it('parses SAML attributes as expected', () => {
             type samlAttrTest = {
                 attributes: { [name: string]: string }
-                expectedResult: Result<CognitoUserType, Error>
+                expectedResult: Result<UserType, Error>
             }
 
             const tests: samlAttrTest[] = [

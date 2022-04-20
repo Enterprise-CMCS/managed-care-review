@@ -1,4 +1,4 @@
-export type ProgramT = {
+export type ProgramType = {
     id: string
     name: string
 }
