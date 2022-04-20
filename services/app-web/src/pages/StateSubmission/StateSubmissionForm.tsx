@@ -298,12 +298,14 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         <ContractDetails
                             draftSubmission={formDataFromLatestRevision}
                             updateDraft={updateDraftHealthPlanPackage}
+                            planPackageStatus={submissionAndRevisions?.status}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}>
                         <RateDetails
                             draftSubmission={formDataFromLatestRevision}
                             updateDraft={updateDraftHealthPlanPackage}
+                            planPackageStatus={submissionAndRevisions?.status}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_CONTACTS}>
@@ -316,6 +318,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         <Documents
                             draftSubmission={formDataFromLatestRevision}
                             updateDraft={updateDraftHealthPlanPackage}
+                            planPackageStatus={submissionAndRevisions?.status}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}>
