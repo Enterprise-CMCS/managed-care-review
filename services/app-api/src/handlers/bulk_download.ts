@@ -3,7 +3,7 @@ import { APIGatewayProxyHandler } from 'aws-lambda'
 import Archiver from 'archiver'
 import { Readable, Stream } from 'stream'
 
-import { assertIsAuthMode } from '../../../app-web/src/common-code/domain-models'
+import { assertIsAuthMode } from '../../../app-web/src/common-code/config'
 
 const s3 = new S3({ region: 'us-east-1' })
 const authMode = process.env.REACT_APP_AUTH_MODE

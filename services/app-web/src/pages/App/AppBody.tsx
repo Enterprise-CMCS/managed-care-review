@@ -7,7 +7,7 @@ import { Footer } from '../../components/Footer'
 import { Header } from '../../components/Header'
 import { Loading } from '../../components/Loading'
 
-import { AuthModeType } from '../../common-code/domain-models'
+import { AuthModeType } from '../../common-code/config'
 import { useAuth } from '../../contexts/AuthContext'
 
 export function AppBody({

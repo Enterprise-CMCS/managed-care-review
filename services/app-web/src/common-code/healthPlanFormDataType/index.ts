@@ -2,8 +2,6 @@
 // CRA prevents you from importing code outside of /src
 // The fix is to use yarn workspaces to allow us to import shared packages
 // Domain Types
-export { assertIsAuthMode, assertNever } from './config'
-export type { AuthModeType } from './config'
 export type {
     ActuarialFirmType,
     ActuaryCommunicationType,

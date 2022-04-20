@@ -5,7 +5,7 @@ import {
     userFromLocalAuthProvider,
 } from '../authn'
 
-import { assertIsAuthMode } from '../../../app-web/src/common-code/domain-models'
+import { assertIsAuthMode } from '../../../app-web/src/common-code/config'
 
 const authMode = process.env.REACT_APP_AUTH_MODE
 assertIsAuthMode(authMode)

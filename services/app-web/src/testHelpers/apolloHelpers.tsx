@@ -5,11 +5,11 @@ import {
     basicLockedHealthPlanFormData,
     basicHealthPlanFormData,
     unlockedWithALittleBitOfEverything,
-} from '../common-code/domain-mocks'
+} from '../common-code/healthPlanFormDataMocks'
 import {
     LockedHealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
-} from '../common-code/domain-models'
+} from '../common-code/healthPlanFormDataType'
 import { domainToBase64 } from '../common-code/proto/stateSubmission'
 import {
     FetchCurrentUserDocument,

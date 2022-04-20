@@ -10,12 +10,12 @@ import {
     unlockedWithFullContracts,
     unlockedWithFullRates,
     newHealthPlanFormData,
-} from '../../domain-mocks'
+} from '../../healthPlanFormDataMocks'
 import {
     UnlockedHealthPlanFormDataType,
     isLockedHealthPlanFormData,
     LockedHealthPlanFormDataType,
-} from '../../domain-models'
+} from '../../healthPlanFormDataType'
 import { toDomain } from './toDomain'
 import { toProtoBuffer } from './toProtoBuffer'
 

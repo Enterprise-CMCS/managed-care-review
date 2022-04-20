@@ -20,7 +20,7 @@ import {
     isLockedHealthPlanFormData,
     isUnlockedHealthPlanFormData,
 } from './'
-import { basicHealthPlanFormData } from '../domain-mocks'
+import { basicHealthPlanFormData } from '../HealthPlanFormDataMocks'
 
 describe('submission type assertions', () => {
     test.each([

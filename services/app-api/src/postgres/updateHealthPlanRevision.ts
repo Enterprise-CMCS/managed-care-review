@@ -1,5 +1,5 @@
 import { HealthPlanRevisionTable, PrismaClient } from '@prisma/client'
-import { HealthPlanFormDataType } from '../../../app-web/src/common-code/domain-models'
+import { HealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { toProtoBuffer } from '../../../app-web/src/common-code/proto/stateSubmission'
 import { UpdateInfoType, HealthPlanPackageType } from '../domain-models'
 import {

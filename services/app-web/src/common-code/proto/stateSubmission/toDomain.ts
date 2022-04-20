@@ -8,7 +8,7 @@ import {
     ContractAmendmentInfo,
     FederalAuthority,
     isLockedHealthPlanFormData,
-} from '../../domain-models'
+} from '../../healthPlanFormDataType'
 
 /**
  * Recursively replaces all nulls with undefineds.

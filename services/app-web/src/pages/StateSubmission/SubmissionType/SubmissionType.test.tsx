@@ -6,7 +6,7 @@ import { fetchCurrentUserMock } from '../../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { SubmissionType, SubmissionTypeFormValues } from './'
 import { Formik } from 'formik'
-import { contractOnly } from '../../../common-code/domain-mocks'
+import { contractOnly } from '../../../common-code/healthPlanFormDataMocks'
 
 describe('SubmissionType', () => {
     const SubmissionTypeInitialValues: SubmissionTypeFormValues = {

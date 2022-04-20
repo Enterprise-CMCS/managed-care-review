@@ -3,7 +3,7 @@ import {
     UnlockedHealthPlanFormDataType,
     LockedHealthPlanFormDataType,
     isLockedHealthPlanFormData,
-} from '../../domain-models'
+} from '../../healthPlanFormDataType'
 
 /*
     Convert domain date to proto timestamp

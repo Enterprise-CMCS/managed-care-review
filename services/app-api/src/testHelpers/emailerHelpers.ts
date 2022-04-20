@@ -13,7 +13,7 @@ import {
 import {
     LockedHealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
-} from '../../../app-web/src/common-code/domain-models'
+} from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { UserType, StateUserType } from '../domain-models'
 
 const testEmailConfig: EmailConfiguration = {

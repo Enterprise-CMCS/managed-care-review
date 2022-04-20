@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { AuthModeType } from '../common-code/domain-models'
+import { AuthModeType } from '../common-code/config'
 import { useFetchCurrentUserQuery, User as UserType } from '../gen/gqlClient'
 import { logoutLocalUser } from '../localAuth'
 import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'

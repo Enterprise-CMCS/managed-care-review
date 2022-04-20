@@ -9,7 +9,7 @@ import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
 import {
     basicLockedHealthPlanFormData,
     basicHealthPlanFormData,
-} from '../../../app-web/src/common-code/domain-mocks'
+} from '../../../app-web/src/common-code/healthPlanFormDataMocks'
 import { v4 as uuidv4 } from 'uuid'
 import {
     mockStoreThatErrors,

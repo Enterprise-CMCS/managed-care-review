@@ -8,7 +8,7 @@ import typeDefs from '../../../app-graphql/src/schema.graphql'
 import {
     HealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
-} from '../../../app-web/src/common-code/domain-models'
+} from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { ProgramType } from '../domain-models'
 import { Emailer, newLocalEmailer } from '../emailer'
 import {

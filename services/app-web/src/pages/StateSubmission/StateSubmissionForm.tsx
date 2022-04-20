@@ -38,7 +38,7 @@ import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBa
 import {
     UnlockedHealthPlanFormDataType,
     packageName,
-} from '../../common-code/domain-models'
+} from '../../common-code/healthPlanFormDataType'
 import { domainToBase64 } from '../../common-code/proto/stateSubmission'
 
 const FormAlert = ({ message }: { message?: string }): React.ReactElement => {

@@ -3,11 +3,11 @@ import {
     LockedHealthPlanFormDataType,
     SubmissionType,
     UnlockedHealthPlanFormDataType,
-} from '../../../app-web/src/common-code/domain-models'
+} from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { UserType } from '../domain-models'
 import { formatCalendarDate } from '../../../app-web/src/common-code/dateHelpers'
 import { EmailConfiguration, EmailData } from './'
-import { generateRateName } from '../../../app-web/src/common-code/domain-models'
+import { generateRateName } from '../../../app-web/src/common-code/healthPlanFormDataType'
 
 const testEmailAlert = `<span style="color:#FF0000;font-weight:bold;">Note: This submission is part of the MC-Review testing process. This is NOT an official submission and will only be used for testing purposes.</span>
 </br>

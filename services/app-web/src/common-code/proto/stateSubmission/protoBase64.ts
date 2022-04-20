@@ -1,5 +1,5 @@
 import { toDomain, toProtoBuffer } from '.'
-import { HealthPlanFormDataType } from '../../domain-models'
+import { HealthPlanFormDataType } from '../../healthPlanFormDataType'
 
 function domainToBase64(submission: HealthPlanFormDataType): string {
     const proto = toProtoBuffer(submission)

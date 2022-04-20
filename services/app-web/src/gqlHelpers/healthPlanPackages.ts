@@ -1,4 +1,4 @@
-import { HealthPlanFormDataType } from '../common-code/domain-models'
+import { HealthPlanFormDataType } from '../common-code/healthPlanFormDataType'
 import { base64ToDomain } from '../common-code/proto/stateSubmission'
 import {
     HealthPlanRevision,

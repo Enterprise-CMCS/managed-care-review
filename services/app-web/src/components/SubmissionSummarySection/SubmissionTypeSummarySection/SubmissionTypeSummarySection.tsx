@@ -1,6 +1,6 @@
 import { Grid } from '@trussworks/react-uswds'
 import dayjs from 'dayjs'
-import { HealthPlanFormDataType } from '../../../common-code/domain-models'
+import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 import { DataDetail } from '../../../components/DataDetail'
 import { DoubleColumnGrid } from '../../../components/DoubleColumnGrid'
 import { SectionHeader } from '../../../components/SectionHeader'

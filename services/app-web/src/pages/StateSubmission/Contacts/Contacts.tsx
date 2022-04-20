@@ -30,7 +30,7 @@ import { stripTypename } from '../updateSubmissionTransform'
 
 import { useFocus } from '../../../hooks/useFocus'
 import { PageActions } from '../PageActions'
-import { UnlockedHealthPlanFormDataType } from '../../../common-code/domain-models'
+import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 export interface ContactsFormValues {
     stateContacts: stateContactValue[]
     actuaryContacts: actuaryContactValue[]

@@ -1,5 +1,5 @@
 import { loginLocalUser, getLoggedInUser, logoutLocalUser } from '.'
-import { CognitoUserType } from '../common-code/domain-models/cognitoUserType'
+import { CognitoUserType } from '../common-code/healthPlanFormDataType/cognitoUserType'
 
 describe('localLogin', () => {
     it('returns empty on empty', async () => {

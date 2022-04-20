@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client'
 import {
     UnlockedHealthPlanFormDataType,
     HealthPlanFormDataType,
-} from '../../../app-web/src/common-code/domain-models'
+} from '../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     ProgramType,
     HealthPlanPackageType,

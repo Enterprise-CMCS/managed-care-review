@@ -4,7 +4,7 @@ import { useLocation, useParams } from 'react-router-dom'
 import {
     packageName,
     HealthPlanFormDataType,
-} from '../../common-code/domain-models'
+} from '../../common-code/healthPlanFormDataType'
 import { makeDateTable } from '../../common-code/data-helpers/makeDocumentDateLookupTable'
 import { base64ToDomain } from '../../common-code/proto/stateSubmission'
 import { Loading } from '../../components/Loading'

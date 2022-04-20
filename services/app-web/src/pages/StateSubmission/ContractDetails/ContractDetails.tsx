@@ -45,7 +45,7 @@ import {
     ManagedCareEntity,
     UnlockedHealthPlanFormDataType,
     CapitationRatesAmendedReason,
-} from '../../../common-code/domain-models'
+} from '../../../common-code/healthPlanFormDataType'
 import {
     AmendableItemsRecord,
     RateChangeReasonRecord,

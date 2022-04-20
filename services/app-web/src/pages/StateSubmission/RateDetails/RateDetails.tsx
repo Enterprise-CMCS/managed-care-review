@@ -35,7 +35,7 @@ import { RateDetailsFormSchema } from './RateDetailsSchema'
 // import { updatesFromSubmission } from '../updateSubmissionTransform'
 import { useS3 } from '../../../contexts/S3Context'
 import { PageActions } from '../PageActions'
-import { UnlockedHealthPlanFormDataType } from '../../../common-code/domain-models'
+import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 type FormError =
     FormikErrors<RateDetailsFormValues>[keyof FormikErrors<RateDetailsFormValues>]
 

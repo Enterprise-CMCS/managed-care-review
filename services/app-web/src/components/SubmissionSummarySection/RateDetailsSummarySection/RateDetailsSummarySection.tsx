@@ -8,9 +8,9 @@ import { formatCalendarDate } from '../../../common-code/dateHelpers'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
-import { generateRateName } from '../../../common-code/domain-models/'
+import { generateRateName } from '../../../common-code/healthPlanFormDataType/'
 import styles from '../SubmissionSummarySection.module.scss'
-import { HealthPlanFormDataType } from '../../../common-code/domain-models'
+import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 
 export type RateDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType

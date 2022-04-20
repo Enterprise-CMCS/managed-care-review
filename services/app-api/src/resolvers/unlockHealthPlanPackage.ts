@@ -3,7 +3,7 @@ import {
     UnlockedHealthPlanFormDataType,
     LockedHealthPlanFormDataType,
     packageName,
-} from '../../../app-web/src/common-code/domain-models'
+} from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { toDomain } from '../../../app-web/src/common-code/proto/stateSubmission'
 import {
     isCMSUser,

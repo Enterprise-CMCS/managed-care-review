@@ -1,7 +1,7 @@
 import {
     UnlockedHealthPlanFormDataType,
     LockedHealthPlanFormDataType,
-} from '../domain-models'
+} from '../healthPlanFormDataType'
 
 function newHealthPlanFormData(): UnlockedHealthPlanFormDataType {
     return {

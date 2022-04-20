@@ -11,7 +11,7 @@ import {
 } from '../testHelpers/gqlHelpers'
 import { testEmailConfig, testEmailer } from '../testHelpers/emailerHelpers'
 import { base64ToDomain } from '../../../app-web/src/common-code/proto/stateSubmission'
-import { packageName } from '../../../app-web/src/common-code/domain-models'
+import { packageName } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
 
 describe('submitHealthPlanPackage', () => {

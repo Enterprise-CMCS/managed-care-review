@@ -7,7 +7,7 @@ import {
     ActuarialFirmType,
     ActuaryCommunicationType,
     ContractExecutionStatus,
-} from '../common-code/domain-models'
+} from '../common-code/healthPlanFormDataType'
 import { HealthPlanPackageStatus } from '../gen/gqlClient'
 
 const SubmissionTypeRecord: Record<SubmissionType, string> = {

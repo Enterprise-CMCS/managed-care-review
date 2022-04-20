@@ -5,7 +5,7 @@ import {
     mockContractAndRatesFormData,
     mockUser,
 } from '../testHelpers/emailerHelpers'
-import { LockedHealthPlanFormDataType } from '../../../app-web/src/common-code/domain-models'
+import { LockedHealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     newPackageCMSEmail,
     newPackageStateEmail,
@@ -15,7 +15,7 @@ import {
     resubmittedStateEmail,
 } from './'
 import { formatRateNameDate } from '../../../app-web/src/common-code/dateHelpers'
-import { unlockedWithFullContracts } from '../../../app-web/src/common-code/domain-mocks'
+import { unlockedWithFullContracts } from '../../../app-web/src/common-code/healthPlanFormDataMocks'
 
 describe('Email templates', () => {
     describe('CMS email', () => {

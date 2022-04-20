@@ -1,4 +1,4 @@
-import { HealthPlanFormDataType } from '../../../app-web/src/common-code/domain-models'
+import { HealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { base64ToDomain } from '../../../app-web/src/common-code/proto/stateSubmission'
 import { HealthPlanPackage } from '../gen/gqlServer'
 

@@ -5,7 +5,7 @@ import {
     ActuaryFirmsRecord,
     ActuaryCommunicationRecord,
 } from '../../../constants/healthPlanPackages'
-import { HealthPlanFormDataType } from '../../../common-code/domain-models'
+import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 
 export type ContactsSummarySectionProps = {
     submission: HealthPlanFormDataType
