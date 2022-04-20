@@ -12,7 +12,7 @@ import {
     RateChangeReasonRecord,
 } from '../../../constants/healthPlanPackages'
 import { useS3 } from '../../../contexts/S3Context'
-import { formatCalendarDate } from '../../../dateHelpers'
+import { formatCalendarDate } from '../../../common-code/dateHelpers'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'

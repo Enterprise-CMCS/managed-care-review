@@ -1,9 +1,8 @@
 import { UnlockedHealthPlanFormDataType } from './UnlockedHealthPlanFormDataType'
-import { ProgramT } from './ProgramT'
 import { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 import { HealthPlanFormDataType } from './HealthPlanFormDataType'
 import { RateDataType } from '.'
-import { formatRateNameDate } from '../../dateHelpers'
+import { formatRateNameDate } from '../../common-code/dateHelpers'
 
 const isContractOnly = (
     sub: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
@@ -112,8 +111,19 @@ const naturalSort = (a: string, b: string): number => {
     return a.localeCompare(b, 'en', { numeric: true })
 }
 
+// Since these functions are in common code, we don't want to rely on the api or gql program types
+// instead we create an interface with what is required for these functions, since both those types
+// implement it, we can use it interchangeably
+interface ProgramArgType {
+    id: string
+    name: string
+}
+
 // Pull out the programs names for display from the program IDs
-function programNames(programs: ProgramT[], programIDs: string[]): string[] {
+function programNames(
+    programs: ProgramArgType[],
+    programIDs: string[]
+): string[] {
     return programIDs.map((id) => {
         const program = programs.find((p) => p.id === id)
         if (!program) {
@@ -125,7 +135,7 @@ function programNames(programs: ProgramT[], programIDs: string[]): string[] {
 
 function packageName(
     submission: HealthPlanFormDataType,
-    statePrograms: ProgramT[]
+    statePrograms: ProgramArgType[]
 ): string {
     const padNumber = submission.stateNumber.toString().padStart(4, '0')
     const pNames = programNames(statePrograms, submission.programIDs)

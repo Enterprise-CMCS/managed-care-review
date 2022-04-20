@@ -4,7 +4,6 @@ import { useLocation, useParams } from 'react-router-dom'
 import {
     packageName,
     HealthPlanFormDataType,
-    UpdateInfoType,
 } from '../../common-code/domain-models'
 import { makeDateTable } from '../../common-code/data-helpers/makeDocumentDateLookupTable'
 import { base64ToDomain } from '../../common-code/proto/stateSubmission'
@@ -17,10 +16,13 @@ import {
     SupportingDocumentsSummarySection,
 } from '../../components/SubmissionSummarySection'
 import { usePage } from '../../contexts/PageContext'
-import { useFetchHealthPlanPackageQuery } from '../../gen/gqlClient'
+import {
+    UpdateInformation,
+    useFetchHealthPlanPackageQuery,
+} from '../../gen/gqlClient'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404'
-import { dayjs } from '../../dateHelpers'
+import { dayjs } from '../../common-code/dateHelpers'
 import styles from './SubmissionRevisionSummary.module.scss'
 import { PreviousSubmissionBanner } from '../../components'
 import { DocumentDateLookupTable } from '../SubmissionSummary/SubmissionSummary'
@@ -34,7 +36,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
     const [pageLevelAlert, setPageLevelAlert] = useState<string | undefined>(
         undefined
     )
-    const [submitInfo, setSubmitInfo] = useState<UpdateInfoType | undefined>(
+    const [submitInfo, setSubmitInfo] = useState<UpdateInformation | undefined>(
         undefined
     )
 

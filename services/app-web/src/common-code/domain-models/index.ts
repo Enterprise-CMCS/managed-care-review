@@ -2,11 +2,6 @@
 // CRA prevents you from importing code outside of /src
 // The fix is to use yarn workspaces to allow us to import shared packages
 // Domain Types
-export type {
-    CognitoCMSUserType,
-    CognitoStateUserType,
-    CognitoUserType,
-} from './cognitoUserType'
 export { assertIsAuthMode, assertNever } from './config'
 export type { AuthModeType } from './config'
 export type {
@@ -28,7 +23,7 @@ export type {
     SubmissionType,
     RateDataType,
 } from './UnlockedHealthPlanFormDataType'
-export type { ProgramT } from './ProgramT'
+
 export type { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 export {
     hasValidContract,
@@ -43,17 +38,5 @@ export {
     packageName,
     generateRateName,
 } from './healthPlanFormData'
-export {
-    packageCurrentRevision,
-    packageStatus,
-    packageSubmittedAt,
-} from './healthPlanPackage'
-export type {
-    HealthPlanRevisionType,
-    HealthPlanPackageType,
-    HealthPlanPackageStatusType,
-    UpdateInfoType,
-} from './HealthPlanPackageType'
+
 export type { HealthPlanFormDataType } from './HealthPlanFormDataType'
-// Type checks and type guards
-export { isCMSUser, isCognitoUser, isStateUser } from './user'

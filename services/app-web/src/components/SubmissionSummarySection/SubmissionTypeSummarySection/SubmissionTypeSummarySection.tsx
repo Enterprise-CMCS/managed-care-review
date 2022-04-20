@@ -1,19 +1,17 @@
 import { Grid } from '@trussworks/react-uswds'
 import dayjs from 'dayjs'
-import {
-    ProgramT,
-    HealthPlanFormDataType,
-} from '../../../common-code/domain-models'
+import { HealthPlanFormDataType } from '../../../common-code/domain-models'
 import { DataDetail } from '../../../components/DataDetail'
 import { DoubleColumnGrid } from '../../../components/DoubleColumnGrid'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { SubmissionTypeRecord } from '../../../constants/healthPlanPackages'
+import { Program } from '../../../gen/gqlClient'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../SubmissionSummarySection.module.scss'
 
 export type SubmissionTypeSummarySectionProps = {
     submission: HealthPlanFormDataType
-    statePrograms: ProgramT[]
+    statePrograms: Program[]
     navigateTo?: string
     headerChildComponent?: React.ReactElement
     initiallySubmittedAt?: Date

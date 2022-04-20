@@ -7,8 +7,8 @@ import {
     ActuarialFirmType,
     ActuaryCommunicationType,
     ContractExecutionStatus,
-    HealthPlanPackageStatusType,
 } from '../common-code/domain-models'
+import { HealthPlanPackageStatus } from '../gen/gqlClient'
 
 const SubmissionTypeRecord: Record<SubmissionType, string> = {
     CONTRACT_ONLY: 'Contract action only',
@@ -82,7 +82,7 @@ const RateChangeReasonRecord: Record<'ANNUAL' | 'MIDYEAR' | 'OTHER', string> = {
     OTHER: 'Other (please describe)',
 }
 
-const SubmissionStatusRecord: Record<HealthPlanPackageStatusType, string> = {
+const SubmissionStatusRecord: Record<HealthPlanPackageStatus, string> = {
     DRAFT: 'Draft',
     SUBMITTED: 'Submitted',
     UNLOCKED: 'Unlocked',

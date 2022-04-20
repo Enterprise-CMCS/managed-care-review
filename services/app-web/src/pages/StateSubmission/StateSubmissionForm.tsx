@@ -30,6 +30,7 @@ import {
     User,
     useUpdateHealthPlanFormDataMutation,
     HealthPlanPackage,
+    UpdateInformation,
 } from '../../gen/gqlClient'
 import { SubmissionUnlockedBanner } from '../../components/Banner'
 import { useAuth } from '../../contexts/AuthContext'
@@ -37,7 +38,6 @@ import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBa
 import {
     UnlockedHealthPlanFormDataType,
     packageName,
-    UpdateInfoType,
 } from '../../common-code/domain-models'
 import { domainToBase64 } from '../../common-code/proto/stateSubmission'
 
@@ -56,7 +56,7 @@ const PageBannerAlerts = ({
 }: {
     showPageErrorMessage: string | boolean
     loggedInUser?: User
-    unlockedInfo?: UpdateInfoType | null
+    unlockedInfo?: UpdateInformation | null
 }): JSX.Element => {
     const message =
         typeof showPageErrorMessage !== 'boolean'
@@ -110,7 +110,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
     const [showPageErrorMessage, setShowPageErrorMessage] = useState<
         boolean | string
     >(false) // string is a custom error message, defaults to generic of true
-    const [unlockedInfo, setUnlockedInfo] = useState<UpdateInfoType | null>(
+    const [unlockedInfo, setUnlockedInfo] = useState<UpdateInformation | null>(
         null
     )
     const [computedSubmissionName, setComputedSubmissionName] =

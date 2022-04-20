@@ -1,4 +1,4 @@
-import { dayjs } from '../../../app-web/src/dateHelpers'
+import { dayjs } from '../../../app-web/src/common-code/dateHelpers'
 
 const formatUserInputDate = (initialValue?: string): string | undefined => {
     const dayjsValue = dayjs(initialValue)
