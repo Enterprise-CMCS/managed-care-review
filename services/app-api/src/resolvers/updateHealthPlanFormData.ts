@@ -3,7 +3,7 @@ import { UnlockedHealthPlanFormDataType } from '../../../app-web/src/common-code
 import {
     base64ToDomain,
     toDomain,
-} from '../../../app-web/src/common-code/proto/stateSubmission'
+} from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import {
     isStateUser,
     HealthPlanPackageType,

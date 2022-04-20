@@ -18,7 +18,7 @@ import {
     HealthPlanFormDataType,
 } from '../../common-code/healthPlanFormDataType'
 import { makeDateTable } from '../../common-code/data-helpers/makeDocumentDateLookupTable'
-import { base64ToDomain } from '../../common-code/proto/stateSubmission'
+import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
 import { Loading } from '../../components/Loading'
 import {
     ContactsSummarySection,

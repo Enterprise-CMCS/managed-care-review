@@ -4,7 +4,7 @@ import {
     createTestHealthPlanPackage,
 } from '../testHelpers/gqlHelpers'
 import UPDATE_HEALTH_PLAN_FORM_DATA from '../../../app-graphql/src/mutations/updateHealthPlanFormData.graphql'
-import { domainToBase64 } from '../../../app-web/src/common-code/proto/stateSubmission'
+import { domainToBase64 } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
 import {
     basicLockedHealthPlanFormData,

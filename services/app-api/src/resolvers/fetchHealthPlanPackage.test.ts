@@ -1,5 +1,5 @@
 import FETCH_HEALTH_PLAN_PACKAGE from '../../../app-graphql/src/queries/fetchHealthPlanPackage.graphql'
-import { base64ToDomain } from '../../../app-web/src/common-code/proto/stateSubmission'
+import { base64ToDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import { todaysDate } from '../testHelpers/dateHelpers'
 import {
     constructTestPostgresServer,

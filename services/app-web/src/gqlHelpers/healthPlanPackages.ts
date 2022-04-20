@@ -1,5 +1,5 @@
 import { HealthPlanFormDataType } from '../common-code/healthPlanFormDataType'
-import { base64ToDomain } from '../common-code/proto/stateSubmission'
+import { base64ToDomain } from '../common-code/proto/healthPlanFormDataProto'
 import {
     HealthPlanRevision,
     HealthPlanPackage,

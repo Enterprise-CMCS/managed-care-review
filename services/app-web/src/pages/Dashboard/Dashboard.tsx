@@ -7,7 +7,7 @@ import {
     packageName,
     programNames,
 } from '../../common-code/healthPlanFormDataType'
-import { base64ToDomain } from '../../common-code/proto/stateSubmission'
+import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
 import { Loading } from '../../components/Loading'
 import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
 import { useAuth } from '../../contexts/AuthContext'

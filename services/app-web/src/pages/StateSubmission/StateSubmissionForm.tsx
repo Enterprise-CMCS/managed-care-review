@@ -39,7 +39,7 @@ import {
     UnlockedHealthPlanFormDataType,
     packageName,
 } from '../../common-code/healthPlanFormDataType'
-import { domainToBase64 } from '../../common-code/proto/stateSubmission'
+import { domainToBase64 } from '../../common-code/proto/healthPlanFormDataProto'
 
 const FormAlert = ({ message }: { message?: string }): React.ReactElement => {
     return message ? (

@@ -12,4 +12,4 @@ In short: our submission form data is complex nested data that is slowly changin
 
 We use [protobuf.js](https://github.com/protobufjs/protobuf.js) to generate javascript code for reading and writing protobufs based on the schema defined in /src/state_submission.proto
 
-To read about the code we wrote that converts our domain models to and from protobuf, check out the [stateSubmission package](https://github.com/CMSgov/managed-care-review/tree/main/services/app-web/src/common-code/proto/stateSubmission)
+To read about the code we wrote that converts our domain models to and from protobuf, check out the [stateSubmission package](https://github.com/CMSgov/managed-care-review/tree/main/services/app-web/src/common-code/proto/healthPlanFormDataProto)

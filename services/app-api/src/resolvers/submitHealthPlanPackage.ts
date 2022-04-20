@@ -25,7 +25,7 @@ import {
     setErrorAttributesOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from './attributeHelper'
-import { toDomain } from '../../../app-web/src/common-code/proto/stateSubmission'
+import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = typeof SubmissionErrorCodes[number] // iterable union type

@@ -4,7 +4,7 @@ import {
     LockedHealthPlanFormDataType,
     packageName,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
-import { toDomain } from '../../../app-web/src/common-code/proto/stateSubmission'
+import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import {
     isCMSUser,
     UpdateInfoType,

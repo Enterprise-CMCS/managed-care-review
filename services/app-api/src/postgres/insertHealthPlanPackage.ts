@@ -6,7 +6,7 @@ import {
     SubmissionType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { HealthPlanPackageType } from '../domain-models'
-import { toProtoBuffer } from '../../../app-web/src/common-code/proto/stateSubmission'
+import { toProtoBuffer } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import {
     convertPrismaErrorToStoreError,
     isStoreError,

@@ -10,7 +10,7 @@ import {
     LockedHealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
 } from '../common-code/healthPlanFormDataType'
-import { domainToBase64 } from '../common-code/proto/stateSubmission'
+import { domainToBase64 } from '../common-code/proto/healthPlanFormDataProto'
 import {
     FetchCurrentUserDocument,
     FetchHealthPlanPackageDocument,

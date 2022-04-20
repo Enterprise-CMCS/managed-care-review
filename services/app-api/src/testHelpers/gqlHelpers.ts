@@ -20,7 +20,7 @@ import { NewPostgresStore, Store } from '../postgres'
 import { configureResolvers } from '../resolvers'
 import { latestFormData } from './healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from './storeHelpers'
-import { domainToBase64 } from '../../../app-web/src/common-code/proto/stateSubmission'
+import { domainToBase64 } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
