@@ -45,6 +45,7 @@ import {
     ManagedCareEntity,
     UnlockedHealthPlanFormDataType,
     CapitationRatesAmendedReason,
+    HealthPlanPackageStatusType,
 } from '../../../common-code/domain-models'
 import {
     AmendableItemsRecord,
@@ -102,10 +103,12 @@ type FormError =
 export const ContractDetails = ({
     draftSubmission,
     showValidations = false,
+    planPackageStatus,
     updateDraft,
 }: {
     draftSubmission: UnlockedHealthPlanFormDataType
     showValidations?: boolean
+    planPackageStatus?: HealthPlanPackageStatusType
     updateDraft: (
         input: UnlockedHealthPlanFormDataType
     ) => Promise<HealthPlanPackage | Error>
@@ -180,7 +183,11 @@ export const ContractDetails = ({
         setFileItems(fileItems)
     }
     const handleDeleteFile = async (key: string) => {
-        const result = await deleteFile(key)
+        const result = await deleteFile(
+            key,
+            planPackageStatus,
+            fileItemsFromDraftSubmission
+        )
         if (isS3Error(result)) {
             throw new Error(`Error in S3 key: ${key}`)
         }

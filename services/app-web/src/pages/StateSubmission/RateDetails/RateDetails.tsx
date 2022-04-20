@@ -35,7 +35,10 @@ import { RateDetailsFormSchema } from './RateDetailsSchema'
 // import { updatesFromSubmission } from '../updateSubmissionTransform'
 import { useS3 } from '../../../contexts/S3Context'
 import { PageActions } from '../PageActions'
-import { UnlockedHealthPlanFormDataType } from '../../../common-code/domain-models'
+import {
+    UnlockedHealthPlanFormDataType,
+    HealthPlanPackageStatusType,
+} from '../../../common-code/domain-models'
 type FormError =
     FormikErrors<RateDetailsFormValues>[keyof FormikErrors<RateDetailsFormValues>]
 
@@ -65,10 +68,12 @@ export interface RateDetailsFormValues {
 export const RateDetails = ({
     draftSubmission,
     showValidations = false,
+    planPackageStatus,
     updateDraft,
 }: {
     draftSubmission: UnlockedHealthPlanFormDataType
     showValidations?: boolean
+    planPackageStatus?: HealthPlanPackageStatusType
     updateDraft: (
         input: UnlockedHealthPlanFormDataType
     ) => Promise<HealthPlanPackage | Error>
@@ -137,7 +142,11 @@ export const RateDetails = ({
         setFileItems(fileItems)
     }
     const handleDeleteFile = async (key: string) => {
-        const result = await deleteFile(key)
+        const result = await deleteFile(
+            key,
+            planPackageStatus,
+            fileItemsFromDraftSubmission
+        )
         if (isS3Error(result)) {
             throw new Error(`Error in S3 key: ${key}`)
         }

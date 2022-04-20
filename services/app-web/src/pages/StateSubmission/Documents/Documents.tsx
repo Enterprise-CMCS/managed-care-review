@@ -15,10 +15,14 @@ import {
 import { PageActions } from '../PageActions'
 import classNames from 'classnames'
 import { ErrorSummary } from '../../../components/Form'
-import { UnlockedHealthPlanFormDataType } from '../../../common-code/domain-models'
+import {
+    UnlockedHealthPlanFormDataType,
+    HealthPlanPackageStatusType,
+} from '../../../common-code/domain-models'
 
 type DocumentProps = {
     draftSubmission: UnlockedHealthPlanFormDataType
+    planPackageStatus?: HealthPlanPackageStatusType
     updateDraft: (
         input: UnlockedHealthPlanFormDataType
     ) => Promise<HealthPlanPackage | Error>
@@ -26,6 +30,7 @@ type DocumentProps = {
 
 export const Documents = ({
     draftSubmission,
+    planPackageStatus,
     updateDraft,
 }: DocumentProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = useState(false)
@@ -132,7 +137,11 @@ export const Documents = ({
         setFileItems(fileItems)
     }
     const handleDeleteFile = async (key: string) => {
-        const result = await deleteFile(key)
+        const result = await deleteFile(
+            key,
+            planPackageStatus,
+            fileItemsFromDraftSubmission
+        )
         if (isS3Error(result)) {
             throw new Error(`Error in S3 key: ${key}`)
         }
