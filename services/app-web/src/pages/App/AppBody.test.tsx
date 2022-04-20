@@ -9,17 +9,22 @@ import {
     fetchCurrentUserMock,
     indexHealthPlanPackagesMockSuccess,
 } from '../../testHelpers/apolloHelpers'
-test('App renders without errors', () => {
-    renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
-    const mainElement = screen.getByRole('main')
-    expect(mainElement).toBeInTheDocument()
-})
 
 test.todo(
     'App displays ErrorBoundary fallback component when there is JS error on page'
 )
 
 describe('App Body and routes', () => {
+    afterEach(() => {
+        jest.clearAllMocks()
+    })
+
+    it('App renders without errors', () => {
+        renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
+        const mainElement = screen.getByRole('main')
+        expect(mainElement).toBeInTheDocument()
+    })
+
     describe('/', () => {
         it('display dashboard when logged in', async () => {
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
@@ -129,6 +134,13 @@ describe('App Body and routes', () => {
         })
     })
 
+    describe('page scrolling', () => {
+        it('scroll top on page load', () => {
+            renderWithProviders(<AppBody authMode={'LOCAL'} />)
+            window.scrollTo = jest.fn()
+            expect(window.scrollTo).toHaveBeenCalledWith(0, 0)
+        })
+    })
     describe('invalid routes', () => {
         it('redirect to landing page when logged out', async () => {
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
