@@ -20,6 +20,7 @@ import {
     FieldRadio,
     FieldCheckbox,
     FieldTextInput,
+    FieldPreserveScrollPosition,
     ErrorSummary,
     PoliteErrorMessage,
 } from '../../../components'
@@ -81,7 +82,6 @@ const ContractDatesErrorMessage = ({
             : validationErrorMessage}
     </PoliteErrorMessage>
 )
-
 export interface ContractDetailsFormValues {
     contractType: ContractType | undefined
     contractExecutionStatus: ContractExecutionStatus | undefined
@@ -457,6 +457,11 @@ export const ContractDetails = ({
                             <FormGroup
                                 error={showFieldErrors(errors.contractType)}
                             >
+                                <FieldPreserveScrollPosition
+                                    fieldName={
+                                        'contractType' as keyof ContractDetailsFormValues
+                                    }
+                                />
                                 <Fieldset
                                     role="radiogroup"
                                     aria-required
