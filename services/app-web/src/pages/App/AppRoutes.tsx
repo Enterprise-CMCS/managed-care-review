@@ -22,7 +22,7 @@ import { Landing } from '../Landing/Landing'
 import { NewStateSubmissionForm, StateSubmissionForm } from '../StateSubmission'
 import { SubmissionSummary } from '../SubmissionSummary'
 import { SubmissionRevisionSummary } from '../SubmissionRevisionSummary'
-import { useScrollTop } from '../../hooks/useScrollTop'
+import { useScrollToPageTop } from '../../hooks/useScrollToPageTop'
 
 const LOGIN_REDIRECT_STORAGE_KEY = 'LOGIN_REDIRECT'
 const LocalStorage = window.localStorage
@@ -180,7 +180,7 @@ export const AppRoutes = ({
             : PageTitlesRecord[route]
 
     useTitle(title)
-    useScrollTop()
+    useScrollToPageTop()
     useEffect(() => {
         updateHeading(pathname)
     }, [pathname, updateHeading])
