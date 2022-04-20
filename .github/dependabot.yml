@@ -8,8 +8,8 @@ updates:
   - package-ecosystem: 'npm'
     directory: '/'
     schedule:
-      interval: 'weekly'
-    open-pull-requests-limit: 6
+      interval: 'daily'
+    open-pull-requests-limit: 4
     ignore:
       - dependency-name: '@types/node'
         versions: ['>14.999'] # I think this is how we don't ever go above 14?
