@@ -5,7 +5,7 @@ import {
     packageName,
     HealthPlanFormDataType,
 } from '../../common-code/healthPlanFormDataType'
-import { makeDateTable } from '../../common-code/data-helpers/makeDocumentDateLookupTable'
+import { makeDateTable } from '../SubmissionSummary/makeDocumentDateLookupTable'
 import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
 import { Loading } from '../../components/Loading'
 import {
