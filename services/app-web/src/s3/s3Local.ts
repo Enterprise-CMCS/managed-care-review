@@ -3,6 +3,8 @@ import AWS from 'aws-sdk'
 import { parseKey } from '../common-code/s3URLEncoding'
 import { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
+import { HealthPlanPackageStatusType } from '../common-code/domain-models'
+import { FileItemT } from '../components'
 
 export function newLocalS3Client(
     endpoint: string,
@@ -51,26 +53,41 @@ export function newLocalS3Client(
             }
         },
 
-        deleteFile: async (s3Key: string): Promise<void | S3Error> => {
-            try {
-                await s3Client
-                    .deleteObject({
-                        Bucket: bucketName,
-                        Key: s3Key,
-                    })
-                    .promise()
+        deleteFile: async (
+            s3Key: string,
+            planPackageStatus?: HealthPlanPackageStatusType,
+            fileItems?: FileItemT[]
+        ): Promise<void | S3Error> => {
+            // Only delete files from S3 bucket if submission status is DRAFT or if file has NOT been submitted before. Meaning it was uploaded, but health plan package was not submitted/resubmitted yet.
+            const isSubmittedFile =
+                fileItems &&
+                Boolean(fileItems.some((item) => item.key === s3Key))
+            if (planPackageStatus === 'DRAFT' || !isSubmittedFile) {
+                try {
+                    await s3Client
+                        .deleteObject({
+                            Bucket: bucketName,
+                            Key: s3Key,
+                        })
+                        .promise()
 
-                return
-            } catch (err) {
-                if (err.code === 'NetworkingError') {
-                    return {
-                        code: 'NETWORK_ERROR',
-                        message: 'Error saving file to the cloud.',
+                    return
+                } catch (err) {
+                    if (err.code === 'NetworkingError') {
+                        return {
+                            code: 'NETWORK_ERROR',
+                            message: 'Error saving file to the cloud.',
+                        }
                     }
-                }
 
-                console.log('Log: Unexpected Error deleting file on S3', err)
-                return err
+                    console.log(
+                        'Log: Unexpected Error deleting file on S3',
+                        err
+                    )
+                    return err
+                }
+            } else {
+                return
             }
         },
         scanFile: async (s3Key: string): Promise<void | S3Error> => {
