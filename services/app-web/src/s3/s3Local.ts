@@ -58,7 +58,8 @@ export function newLocalS3Client(
             planPackageStatus?: HealthPlanPackageStatusType,
             fileItems?: FileItemT[]
         ): Promise<void | S3Error> => {
-            // Only delete files from S3 bucket if submission status is DRAFT or if file has NOT been submitted before. Meaning it was uploaded, but health plan package was not submitted/resubmitted yet.
+            // Only delete file from S3 bucket if submission status is DRAFT or if file has NOT been submitted before.
+            // Meaning it was uploaded, but health plan package has not been submitted/resubmitted yet.
             const isSubmittedFile =
                 fileItems &&
                 Boolean(fileItems.some((item) => item.key === s3Key))
