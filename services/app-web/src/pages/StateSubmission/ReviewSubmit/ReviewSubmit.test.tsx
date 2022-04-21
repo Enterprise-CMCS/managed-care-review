@@ -5,6 +5,8 @@ import {
     submitHealthPlanPackageMockError,
     submitHealthPlanPackageMockSuccess,
 } from '../../../testHelpers/apolloHelpers'
+import { Route } from 'react-router-dom'
+import { Location } from 'history'
 import {
     renderWithProviders,
     userClickByTestId,
@@ -202,12 +204,22 @@ describe('ReviewSubmit', () => {
     })
 
     it('redirects if submission succeeds', async () => {
+        let testLocation: Location
         renderWithProviders(
-            <ReviewSubmit
-                draftSubmission={mockCompleteDraft()}
-                unlocked={false}
-                submissionName="MN-MSHO-0001"
-            />,
+            <>
+                <Route
+                    path="*"
+                    render={({ location }) => {
+                        testLocation = location as Location
+                        return null
+                    }}
+                ></Route>
+                <ReviewSubmit
+                    draftSubmission={mockCompleteDraft()}
+                    unlocked={false}
+                    submissionName="MN-MSHO-0001"
+                />
+            </>,
             {
                 apolloProvider: {
                     mocks: [
@@ -236,12 +248,10 @@ describe('ReviewSubmit', () => {
             confirmSubmit.click()
         })
 
-        /* history.location is throwing errors
         await waitFor(() => {
-            expect(history.location.pathname).toBe(`/dashboard`)
-            expect(history.location.search).toBe('?justSubmitted=MN-MSHO-0001')
+            expect(testLocation.pathname).toBe(`/dashboard`)
+            expect(testLocation.search).toBe(`?justSubmitted=MN-MSHO-0001`)
         })
-        */
     })
 
     it('displays an error if submission fails', async () => {
