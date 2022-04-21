@@ -1,4 +1,4 @@
-import { statesubmission, google } from '../../../gen/stateSubmissionProto'
+import { mcreviewproto, google } from '../../../gen/healthPlanFormDataProto'
 import {
     UnlockedHealthPlanFormDataType,
     LockedHealthPlanFormDataType,
@@ -10,7 +10,7 @@ import {
 */
 const domainDateToProtoDate = (
     domainDate: Date | undefined
-): statesubmission.IStateSubmissionInfo['createdAt'] => {
+): mcreviewproto.IHealthPlanFormData['createdAt'] => {
     if (!domainDate) {
         return undefined
     }
@@ -24,7 +24,7 @@ const domainDateToProtoDate = (
 
 const domainDateToProtoTimestamp = (
     domainDate: Date | undefined
-): statesubmission.IStateSubmissionInfo['updatedAt'] => {
+): mcreviewproto.IHealthPlanFormData['updatedAt'] => {
     if (!domainDate) {
         return undefined
     }
@@ -104,7 +104,7 @@ const toProtoBuffer = (
 
     // The difference between DraftSubmission and StateSubmission is currently very small
     // only status and submittedAt differ from the perspective of the all-optional protobuf
-    const literalMessage: statesubmission.IStateSubmissionInfo = {
+    const literalMessage: mcreviewproto.IHealthPlanFormData = {
         // protoName and Version are for internal proto use only
         // We aren't really using them yet but in the future it will be possible
         // to differentiate between different versions of different messages
@@ -124,12 +124,12 @@ const toProtoBuffer = (
         updatedAt: domainDateToProtoTimestamp(domainData.updatedAt),
         submissionType: domainEnumToProto(
             domainData.submissionType,
-            statesubmission.SubmissionType
+            mcreviewproto.SubmissionType
         ),
 
         stateCode: domainEnumToProto(
             domainData.stateCode,
-            statesubmission.StateCode
+            mcreviewproto.StateCode
         ),
 
         stateNumber: domainData.stateNumber,
@@ -138,29 +138,29 @@ const toProtoBuffer = (
         contractInfo: {
             contractType: domainEnumToProto(
                 domainData.contractType,
-                statesubmission.ContractType
+                mcreviewproto.ContractType
             ),
             contractExecutionStatus: domainEnumToProto(
                 domainData.contractExecutionStatus,
-                statesubmission.ContractExecutionStatus
+                mcreviewproto.ContractExecutionStatus
             ),
             contractDateStart: domainDateToProtoDate(
                 domainData.contractDateStart
             ),
             contractDateEnd: domainDateToProtoDate(domainData.contractDateEnd),
             managedCareEntities: domainEnumArrayToProto(
-                statesubmission.ManagedCareEntity,
+                mcreviewproto.ManagedCareEntity,
                 domainData.managedCareEntities
             ),
             federalAuthorities: domainEnumArrayToProto(
-                statesubmission.FederalAuthority,
+                mcreviewproto.FederalAuthority,
                 domainData.federalAuthorities
             ),
             contractDocuments: domainData.contractDocuments.map((doc) => ({
                 s3Url: doc.s3URL,
                 name: doc.name,
                 documentCategories: domainEnumArrayToProto(
-                    statesubmission.DocumentCategory,
+                    mcreviewproto.DocumentCategory,
                     doc.documentCategories
                 ),
             })),
@@ -172,7 +172,7 @@ const toProtoBuffer = (
                       otherAmendableItem:
                           contractAmendmentInfo?.otherItemBeingAmended,
                       amendableItems: domainEnumArrayToProto(
-                          statesubmission.AmendedItem,
+                          mcreviewproto.AmendedItem,
                           contractAmendmentInfo?.itemsBeingAmended
                       ),
                       capitationRatesAmendedInfo: {
@@ -180,7 +180,7 @@ const toProtoBuffer = (
                           reason: domainEnumToProto(
                               contractAmendmentInfo?.capitationRatesAmendedInfo
                                   ?.reason,
-                              statesubmission.CapitationRateAmendmentReason
+                              mcreviewproto.CapitationRateAmendmentReason
                           ),
                       },
                   }
@@ -191,7 +191,7 @@ const toProtoBuffer = (
             {
                 rateType: domainEnumToProto(
                     domainData.rateType,
-                    statesubmission.RateType
+                    mcreviewproto.RateType
                 ),
                 rateDateStart: domainDateToProtoDate(domainData.rateDateStart),
                 rateDateEnd: domainDateToProtoDate(domainData.rateDateEnd),
@@ -202,7 +202,7 @@ const toProtoBuffer = (
                     s3Url: doc.s3URL,
                     name: doc.name,
                     documentCategories: domainEnumArrayToProto(
-                        statesubmission.DocumentCategory,
+                        mcreviewproto.DocumentCategory,
                         doc.documentCategories
                     ),
                 })),
@@ -210,7 +210,7 @@ const toProtoBuffer = (
                     (actuaryContact) => {
                         const firmType = domainEnumToProto(
                             actuaryContact.actuarialFirm,
-                            statesubmission.ActuarialFirmType
+                            mcreviewproto.ActuarialFirmType
                         )
 
                         return {
@@ -235,7 +235,7 @@ const toProtoBuffer = (
                 },
                 actuaryCommunicationPreference: domainEnumToProto(
                     domainData.actuaryCommunicationPreference,
-                    statesubmission.ActuaryCommunicationType
+                    mcreviewproto.ActuaryCommunicationType
                 ),
             },
         ],
@@ -243,15 +243,15 @@ const toProtoBuffer = (
             s3Url: doc.s3URL,
             name: doc.name,
             documentCategories: domainEnumArrayToProto(
-                statesubmission.DocumentCategory,
+                mcreviewproto.DocumentCategory,
                 doc.documentCategories
             ),
         })),
     }
 
     // turn the above literal into a byte array.
-    const protoMessage = new statesubmission.StateSubmissionInfo(literalMessage)
+    const protoMessage = new mcreviewproto.HealthPlanFormData(literalMessage)
 
-    return statesubmission.StateSubmissionInfo.encode(protoMessage).finish()
+    return mcreviewproto.HealthPlanFormData.encode(protoMessage).finish()
 }
 export { toProtoBuffer }

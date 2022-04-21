@@ -1,5 +1,5 @@
 import { ZodError } from 'zod'
-import { statesubmission } from '../../../gen/stateSubmissionProto'
+import { mcreviewproto } from '../../../gen/healthPlanFormDataProto'
 import {
     basicLockedHealthPlanFormData,
     basicHealthPlanFormData,
@@ -50,9 +50,9 @@ describe('Validate encoding to protobuf and decoding back to domain model', () =
 
 describe('handles invalid data as expected', () => {
     it('toDomain errors when passed an empty proto message', () => {
-        const protoMessage = new statesubmission.StateSubmissionInfo({})
+        const protoMessage = new mcreviewproto.HealthPlanFormData({})
         const encodedEmpty =
-            statesubmission.StateSubmissionInfo.encode(protoMessage).finish()
+            mcreviewproto.HealthPlanFormData.encode(protoMessage).finish()
 
         const maybeError = toDomain(encodedEmpty)
 

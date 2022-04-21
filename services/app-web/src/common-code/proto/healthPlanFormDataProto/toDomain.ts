@@ -1,4 +1,4 @@
-import { statesubmission } from '../../../gen/stateSubmissionProto'
+import { mcreviewproto } from '../../../gen/healthPlanFormDataProto'
 import { unlockedHealthPlanFormDataSchema } from './unlockedHealthPlanFormDataSchema'
 import {
     UnlockedHealthPlanFormDataType,
@@ -49,7 +49,7 @@ export function replaceNullsWithUndefineds<T>(
     Convert proto timestamp to domain Date
 */
 const protoTimestampToDomain = (
-    protoDateTime: statesubmission.IStateSubmissionInfo['updatedAt']
+    protoDateTime: mcreviewproto.IHealthPlanFormData['updatedAt']
 ): Date | undefined => {
     if (!protoDateTime) {
         return undefined
@@ -77,7 +77,7 @@ const protoTimestampToDomain = (
     Convert proto CalendarDate (year/month/day) to domain Date
 */
 const protoDateToDomain = (
-    protoDate: statesubmission.IDate | null | undefined
+    protoDate: mcreviewproto.IDate | null | undefined
 ): Date | undefined => {
     if (!protoDate) {
         return undefined
@@ -154,9 +154,9 @@ function removeEnumPrefix(defaultValue: string, protoEnum: string): string {
 
 function decodeOrError(
     buff: Uint8Array
-): statesubmission.StateSubmissionInfo | Error {
+): mcreviewproto.HealthPlanFormData | Error {
     try {
-        const message = statesubmission.StateSubmissionInfo.decode(buff)
+        const message = mcreviewproto.HealthPlanFormData.decode(buff)
         return message
     } catch (e) {
         return new Error(`${e}`)
@@ -170,7 +170,7 @@ type RecursivePartial<T> = {
 
 // Parsers for each field of UnlockedHealthPlanFormDataType
 function parseProtoDocuments(
-    docs: statesubmission.IDocument[] | null | undefined
+    docs: mcreviewproto.IDocument[] | null | undefined
 ): RecursivePartial<UnlockedHealthPlanFormDataType['documents']> {
     if (docs === null || docs === undefined) {
         return []
@@ -180,7 +180,7 @@ function parseProtoDocuments(
         s3URL: doc.s3Url,
         name: doc.name,
         documentCategories: protoEnumArrayToDomain(
-            statesubmission.DocumentCategory,
+            mcreviewproto.DocumentCategory,
             doc.documentCategories
         ) as DocumentCategoryType[],
     }))
@@ -188,7 +188,7 @@ function parseProtoDocuments(
 
 // Just pulling this type out of the hierarchy
 type CapitationRateI =
-    statesubmission.ContractInfo.IContractAmendmentInfo['capitationRatesAmendedInfo']
+    mcreviewproto.ContractInfo.IContractAmendmentInfo['capitationRatesAmendedInfo']
 
 function parseCapitationRates(
     capRates: CapitationRateI | null | undefined
@@ -199,7 +199,7 @@ function parseCapitationRates(
 
     return {
         reason: enumToDomain(
-            statesubmission.CapitationRateAmendmentReason,
+            mcreviewproto.CapitationRateAmendmentReason,
             capRates.reason
         ),
         otherReason: capRates.otherReason ?? undefined,
@@ -207,7 +207,7 @@ function parseCapitationRates(
 }
 
 function parseContractAmendment(
-    amendment: statesubmission.IContractInfo['contractAmendmentInfo']
+    amendment: mcreviewproto.IContractInfo['contractAmendmentInfo']
 ): RecursivePartial<UnlockedHealthPlanFormDataType['contractAmendmentInfo']> {
     if (!amendment) {
         return undefined
@@ -218,7 +218,7 @@ function parseContractAmendment(
     return {
         // items being amended are an enum in proto but not in domain
         itemsBeingAmended: protoEnumArrayToDomain(
-            statesubmission.AmendedItem,
+            mcreviewproto.AmendedItem,
             amendment.amendableItems
         ),
 
@@ -232,7 +232,7 @@ function parseContractAmendment(
 }
 
 function parseActuaryContacts(
-    rateInfo: statesubmission.IRateInfo | null | undefined
+    rateInfo: mcreviewproto.IRateInfo | null | undefined
 ): RecursivePartial<UnlockedHealthPlanFormDataType['actuaryContacts']> {
     if (!rateInfo?.actuaryContacts) {
         return []
@@ -248,7 +248,7 @@ function parseActuaryContacts(
             titleRole: cleanContact?.contact?.titleRole,
             email: cleanContact?.contact?.email,
             actuarialFirm: enumToDomain(
-                statesubmission.ActuarialFirmType,
+                mcreviewproto.ActuarialFirmType,
                 aContact.actuarialFirmType
             ) as ActuarialFirmType,
             actuarialFirmOther: cleanContact.actuarialFirmOther,
@@ -260,7 +260,7 @@ function parseActuaryContacts(
 
 function parseProtoRateAmendment(
     rateAmendment:
-        | statesubmission.RateInfo['rateAmendmentInfo']
+        | mcreviewproto.RateInfo['rateAmendmentInfo']
         | null
         | undefined
 ): RecursivePartial<UnlockedHealthPlanFormDataType['rateAmendmentInfo']> {
@@ -279,10 +279,10 @@ function parseProtoRateAmendment(
 const toDomain = (
     buff: Uint8Array
 ): UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType | Error => {
-    const stateSubmissionMessage = decodeOrError(buff)
+    const formDataMessage = decodeOrError(buff)
 
-    if (stateSubmissionMessage instanceof Error) {
-        return stateSubmissionMessage
+    if (formDataMessage instanceof Error) {
+        return formDataMessage
     }
 
     const {
@@ -301,7 +301,7 @@ const toDomain = (
         stateContacts,
         contractInfo,
         rateInfos,
-    } = stateSubmissionMessage
+    } = formDataMessage
 
     // First things first, let's check the protoName and protoVersion
     if (protoName !== 'STATE_SUBMISSION' && protoVersion !== 1) {
@@ -316,7 +316,7 @@ const toDomain = (
 
     // Protos support multiple rate infos for now, but we only support one in our domain models
     // so if there are multiple we'll drop the extras.
-    let rateInfo: statesubmission.IRateInfo | undefined = undefined
+    let rateInfo: mcreviewproto.IRateInfo | undefined = undefined
     if (rateInfos.length > 0) {
         rateInfo = rateInfos[0]
     }
@@ -328,66 +328,66 @@ const toDomain = (
 
     // Since everything in proto-land is optional, we construct a RecursivePartial version of our domain models
     // and
-    const maybeDomainModel: RecursivePartial<UnlockedHealthPlanFormDataType> &
+    const maybeUnlockedFormData: RecursivePartial<UnlockedHealthPlanFormDataType> &
         RecursivePartial<LockedHealthPlanFormDataType> = {
         id: id ?? undefined,
         createdAt: protoDateToDomain(createdAt),
         updatedAt: protoTimestampToDomain(updatedAt),
         submittedAt: protoTimestampToDomain(submittedAt),
         submissionType: enumToDomain(
-            statesubmission.SubmissionType,
+            mcreviewproto.SubmissionType,
             submissionType
         ),
-        stateCode: enumToDomain(statesubmission.StateCode, stateCode),
+        stateCode: enumToDomain(mcreviewproto.StateCode, stateCode),
         submissionDescription: submissionDescription ?? undefined,
         stateNumber: stateNumber ?? undefined,
 
         programIDs: programIds,
 
         contractType: enumToDomain(
-            statesubmission.ContractType,
-            stateSubmissionMessage?.contractInfo?.contractType
+            mcreviewproto.ContractType,
+            formDataMessage?.contractInfo?.contractType
         ),
 
         contractExecutionStatus: enumToDomain(
-            statesubmission.ContractExecutionStatus,
-            stateSubmissionMessage?.contractInfo?.contractExecutionStatus
+            mcreviewproto.ContractExecutionStatus,
+            formDataMessage?.contractInfo?.contractExecutionStatus
         ),
 
         contractDateStart: protoDateToDomain(
-            stateSubmissionMessage.contractInfo?.contractDateStart
+            formDataMessage.contractInfo?.contractDateStart
         ),
         contractDateEnd: protoDateToDomain(
-            stateSubmissionMessage.contractInfo?.contractDateEnd
+            formDataMessage.contractInfo?.contractDateEnd
         ),
         contractDocuments: parseProtoDocuments(
-            stateSubmissionMessage.contractInfo?.contractDocuments
+            formDataMessage.contractInfo?.contractDocuments
         ),
         managedCareEntities: protoEnumArrayToDomain(
-            statesubmission.ManagedCareEntity,
-            stateSubmissionMessage?.contractInfo?.managedCareEntities
+            mcreviewproto.ManagedCareEntity,
+            formDataMessage?.contractInfo?.managedCareEntities
         ),
         federalAuthorities: protoEnumArrayToDomain(
-            statesubmission.FederalAuthority,
-            stateSubmissionMessage?.contractInfo?.federalAuthorities
+            mcreviewproto.FederalAuthority,
+            formDataMessage?.contractInfo?.federalAuthorities
         ) as Partial<FederalAuthority[]>,
 
         contractAmendmentInfo: parseContractAmendment(
             contractInfo?.contractAmendmentInfo
         ),
         rateAmendmentInfo: parseProtoRateAmendment(rateInfo?.rateAmendmentInfo),
-        rateType: enumToDomain(statesubmission.RateType, rateInfo?.rateType),
+        rateType: enumToDomain(mcreviewproto.RateType, rateInfo?.rateType),
         rateDocuments: parseProtoDocuments(rateInfo?.rateDocuments),
         rateDateStart: protoDateToDomain(rateInfo?.rateDateStart),
         rateDateEnd: protoDateToDomain(rateInfo?.rateDateEnd),
         rateDateCertified: protoDateToDomain(rateInfo?.rateDateCertified),
         actuaryCommunicationPreference: enumToDomain(
-            statesubmission.ActuaryCommunicationType,
+            mcreviewproto.ActuaryCommunicationType,
             rateInfo?.actuaryCommunicationPreference
         ),
         stateContacts: cleanedStateContacts,
         actuaryContacts: parseActuaryContacts(rateInfo),
-        documents: parseProtoDocuments(stateSubmissionMessage.documents),
+        documents: parseProtoDocuments(formDataMessage.documents),
     }
 
     // Now that we've gotten things into our combined draft & state domain format.
@@ -395,7 +395,7 @@ const toDomain = (
     if (status === 'DRAFT') {
         // cast so we can set status
         const maybeDraft =
-            maybeDomainModel as RecursivePartial<UnlockedHealthPlanFormDataType>
+            maybeUnlockedFormData as RecursivePartial<UnlockedHealthPlanFormDataType>
         maybeDraft.status = 'DRAFT'
 
         // This parse returns an actual UnlockedHealthPlanFormDataType, so all our partial & casting is put to rest
@@ -408,12 +408,12 @@ const toDomain = (
 
         return parseResult.data as UnlockedHealthPlanFormDataType
     } else if (status === 'SUBMITTED') {
-        const maybeStateSubmission =
-            maybeDomainModel as RecursivePartial<LockedHealthPlanFormDataType>
-        maybeStateSubmission.status = 'SUBMITTED'
+        const maybeLockedFormData =
+            maybeUnlockedFormData as RecursivePartial<LockedHealthPlanFormDataType>
+        maybeLockedFormData.status = 'SUBMITTED'
 
-        if (isLockedHealthPlanFormData(maybeStateSubmission)) {
-            return maybeStateSubmission
+        if (isLockedHealthPlanFormData(maybeLockedFormData)) {
+            return maybeLockedFormData
         } else {
             console.log(
                 'ERROR: attempting to parse state submission proto failed.',
