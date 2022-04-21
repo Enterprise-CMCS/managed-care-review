@@ -1,0 +1,25 @@
+@import '../../styles/uswdsImports.scss';
+@import '../../styles/custom.scss';
+
+.expandableBlock {
+    line-height: initial;
+}
+
+.textExpanded {
+    height: auto;
+    display: -webkit-box;
+}
+
+.textContracted {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.showMoreButton {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    margin-top: 0.50rem;
+}

@@ -35,7 +35,7 @@ const submissionData: HealthPlanPackage = {
                     __typename: 'UpdateInformation',
                 },
                 createdAt: '2022-03-25T01:18:44.665Z',
-                submissionData: 'qpoiuenad',
+                formDataProto: 'qpoiuenad',
                 __typename: 'HealthPlanRevision',
             },
             __typename: 'HealthPlanRevisionEdge',
@@ -56,7 +56,7 @@ const submissionData: HealthPlanPackage = {
                     __typename: 'UpdateInformation',
                 },
                 createdAt: '2022-03-24T01:18:44.665Z',
-                submissionData: 'qpoiuenad',
+                formDataProto: 'qpoiuenad',
                 __typename: 'HealthPlanRevision',
             },
             __typename: 'HealthPlanRevisionEdge',
@@ -72,7 +72,7 @@ const submissionData: HealthPlanPackage = {
                     __typename: 'UpdateInformation',
                 },
                 createdAt: '2022-03-23T02:08:14.241Z',
-                submissionData: 'nmzxcv;lasf',
+                formDataProto: 'nmzxcv;lasf',
                 __typename: 'HealthPlanRevision',
             },
             __typename: 'HealthPlanRevisionEdge',
@@ -81,7 +81,7 @@ const submissionData: HealthPlanPackage = {
     __typename: 'HealthPlanPackage',
 }
 
-const submissionDataInitialSubmission: HealthPlanPackage = {
+const formDataProtoInitialSubmission: HealthPlanPackage = {
     id: '440d6a53-bb0a-49ae-9a9c-da7c5352789f',
     stateCode: 'MN',
     state: {
@@ -103,7 +103,7 @@ const submissionDataInitialSubmission: HealthPlanPackage = {
                     __typename: 'UpdateInformation',
                 },
                 createdAt: '2022-03-23T02:08:14.241Z',
-                submissionData: 'nmzxcv;lasf',
+                formDataProto: 'nmzxcv;lasf',
                 __typename: 'HealthPlanRevision',
             },
             __typename: 'HealthPlanRevisionEdge',
@@ -209,7 +209,7 @@ describe('Change History', () => {
         ).toHaveTextContent('View past submission version')
     })
     it('should not list links for initial submission without revisions', () => {
-        render(<ChangeHistory submission={submissionDataInitialSubmission} />)
+        render(<ChangeHistory submission={formDataProtoInitialSubmission} />)
         //Initial submission should not have a link
         expect(
             screen.getByTestId('accordionItem_2022-03-23T02:08:52.259Z')

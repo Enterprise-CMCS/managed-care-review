@@ -8,14 +8,8 @@ updates:
   - package-ecosystem: 'npm'
     directory: '/'
     schedule:
-      interval: 'weekly'
+      interval: 'daily'
     open-pull-requests-limit: 4
     ignore:
       - dependency-name: '@types/node'
         versions: ['>14.999'] # I think this is how we don't ever go above 14?
-
-  - package-ecosystem: 'npm'
-    directory: '/tests/nightwatch'
-    schedule:
-      interval: 'weekly'
-    open-pull-requests-limit: 2

@@ -1,11 +1,11 @@
 import {
     Alert,
     Button,
-    CharacterCount,
     FormGroup,
     GridContainer,
     ModalRef,
     ModalToggleButton,
+    Textarea,
 } from '@trussworks/react-uswds'
 import React, { useEffect, useRef, useState } from 'react'
 import { useHistory } from 'react-router-dom'
@@ -50,21 +50,7 @@ export const ReviewSubmit = ({
             loggedInUser.state.programs) ||
         []
 
-    const [submitDraftSubmission] = useSubmitHealthPlanPackageMutation({
-        // An alternative to messing with the cache like we do with create, just zero it out.
-        update(cache, { data }) {
-            if (data) {
-                cache.modify({
-                    id: 'ROOT_QUERY',
-                    fields: {
-                        indexHealthPlanPackages(_index, { DELETE }) {
-                            return DELETE
-                        },
-                    },
-                })
-            }
-        },
-    })
+    const [submitDraftSubmission] = useSubmitHealthPlanPackageMutation()
 
     const showError = (error: string) => {
         setUserVisibleError(error)
@@ -77,9 +63,9 @@ export const ReviewSubmit = ({
     const formik = useFormik({
         initialValues: modalFormInitialValues,
         validationSchema: Yup.object().shape({
-            submittedReason: Yup.string()
-                .max(300, 'Summary for submission is too long')
-                .defined('Summary for submission is required'),
+            submittedReason: Yup.string().defined(
+                'Summary for submission is required'
+            ),
         }),
         onSubmit: (values) => onModalSubmit(values),
     })
@@ -250,11 +236,9 @@ export const ReviewSubmit = ({
                                 Provide summary of all changes made to this
                                 submission
                             </span>
-                            <CharacterCount
+                            <Textarea
                                 id="submittedReasonCharacterCount"
                                 name="submittedReason"
-                                maxLength={300}
-                                isTextArea
                                 data-testid="submittedReason"
                                 aria-labelledby="submittedReason-hint"
                                 className={styles.submittedReasonTextarea}

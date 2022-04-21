@@ -3,10 +3,10 @@ import {
     Alert,
     GridContainer,
     Link,
-    CharacterCount,
     ModalRef,
     ModalToggleButton,
     FormGroup,
+    Textarea,
 } from '@trussworks/react-uswds'
 import * as Yup from 'yup'
 import { useFormik } from 'formik'
@@ -143,9 +143,9 @@ export const SubmissionSummary = (): React.ReactElement => {
     const formik = useFormik({
         initialValues: modalFormInitialValues,
         validationSchema: Yup.object().shape({
-            unlockReason: Yup.string()
-                .max(300, 'Reason for unlocking submission is too long')
-                .defined('Reason for unlocking submission is required'),
+            unlockReason: Yup.string().defined(
+                'Reason for unlocking submission is required'
+            ),
         }),
         onSubmit: (values) => onModalSubmit(values),
     })
@@ -438,12 +438,9 @@ export const SubmissionSummary = (): React.ReactElement => {
                             <span id="unlockReason-hint" role="note">
                                 Provide reason for unlocking
                             </span>
-
-                            <CharacterCount
+                            <Textarea
                                 id="unlockReasonCharacterCount"
                                 name="unlockReason"
-                                maxLength={300}
-                                isTextArea
                                 data-testid="unlockReason"
                                 aria-labelledby="unlockReason-hint"
                                 className={styles.unlockReasonTextarea}

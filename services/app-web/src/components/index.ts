@@ -49,3 +49,5 @@ export {
 } from './Banner'
 
 export { Modal } from './Modal'
+
+export { ExpandableText } from './ExpandableText'

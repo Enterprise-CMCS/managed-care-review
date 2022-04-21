@@ -2,6 +2,7 @@ import React from 'react'
 import styles from '../Banner.module.scss'
 import { Alert } from '@trussworks/react-uswds'
 import { dayjs } from '../../../dateHelpers'
+import { ExpandableText } from '../../'
 
 export type UnlockedProps = {
     userType: 'STATE_USER' | 'CMS_USER'
@@ -16,7 +17,6 @@ export const SubmissionUnlockedBanner = ({
     unlockedOn,
     reason,
     className,
-    ...props
 }: UnlockedProps &
     React.HTMLAttributes<HTMLDivElement>): React.ReactElement => {
     return (
@@ -27,7 +27,6 @@ export const SubmissionUnlockedBanner = ({
             validation={true}
             data-testid="unlockedBanner"
             className={className}
-            {...props}
         >
             <div className={styles.bannerBodyText}>
                 <p className="usa-alert__text">
@@ -42,10 +41,12 @@ export const SubmissionUnlockedBanner = ({
                         .format('MM/DD/YY h:mma')}
                     &nbsp;ET
                 </p>
-                <p className="usa-alert__text">
-                    <b>Reason for unlock:&nbsp;</b>
-                    {reason}
-                </p>
+                <ExpandableText>
+                    <>
+                        <b>Reason for unlock:&nbsp;</b>
+                        {reason}
+                    </>
+                </ExpandableText>
             </div>
         </Alert>
     )
