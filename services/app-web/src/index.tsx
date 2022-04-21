@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom'
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'
 import { Amplify } from 'aws-amplify'
 import { loader } from 'graphql.macro'
+import { asyncWithLDProvider } from 'launchdarkly-react-client-sdk'
 
 import './index.scss'
 
@@ -101,13 +102,25 @@ if (otelCollectorUrl === undefined) {
     )
 }
 
+const ldClientId = process.env.LD_REACT_CLIENT_ID
+if (ldClientId === undefined) {
+    throw new Error(
+        'To configure LaunchDarkly, you must set LD_REACT_CLIENT_ID'
+    )
+}
+const LDProvider = await asyncWithLDProvider({
+    clientSideID: ldClientId,
+})
+
 ReactDOM.render(
     <React.StrictMode>
-        <App
-            authMode={authMode}
-            apolloClient={apolloClient}
-            s3Client={s3Client}
-        />
+        <LDProvider>
+            <App
+                authMode={authMode}
+                apolloClient={apolloClient}
+                s3Client={s3Client}
+            />
+        </LDProvider>
     </React.StrictMode>,
     document.getElementById('root')
 )
