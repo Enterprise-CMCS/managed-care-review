@@ -23,7 +23,7 @@ on:
         required: true
       ld_sdk_key:
         required: true
-      ld_react_client_id:
+      react_app_ld_client_id:
         required: true
       full_iam_permissions_boundary_policy:
         required: true
@@ -62,7 +62,7 @@ jobs:
           IAM_PATH: ${{ secrets.iam_path }}
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
           NR_LICENSE_KEY: ${{ secrets.nr_license_key}}
-          LD_REACT_CLIENT_ID: ${{ secrets.ld_react_client_id }}
+          REACT_APP_LD_CLIENT_ID: ${{ secrets.react_app_ld_client_id }}
 
         run: |
           pushd services/app-web && npx serverless deploy --stage ${{ inputs.stage_name }}

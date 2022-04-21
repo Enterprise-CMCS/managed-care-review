@@ -18,6 +18,8 @@ import { S3Provider } from '../../contexts/S3Context'
 import { useScript } from '../../hooks/useScript'
 import type { S3ClientT } from '../../s3'
 
+import { withLDProvider } from 'launchdarkly-react-client-sdk'
+
 function ErrorFallback({
     error,
 }: {
@@ -28,15 +30,17 @@ function ErrorFallback({
     return <GenericErrorPage />
 }
 
+type AppProps = {
+    authMode: AuthModeType
+    apolloClient: ApolloClient<NormalizedCacheObject>
+    s3Client: S3ClientT
+}
+
 function App({
     authMode,
     apolloClient,
     s3Client,
-}: {
-    authMode: AuthModeType
-    apolloClient: ApolloClient<NormalizedCacheObject>
-    s3Client: S3ClientT
-}): React.ReactElement {
+}: AppProps): React.ReactElement {
     useEffect(() => {
         logEvent('on_load', { success: true })
     }, [])
@@ -68,5 +72,18 @@ function App({
         </ErrorBoundary>
     )
 }
-
-export default App
+export default withLDProvider<AppProps>({
+    clientSideID: process.env.REACT_APP_LD_CLIENT_ID || '',
+    options: {
+        // OTEL tracing relies on this header, which is added on every request
+        // Launch Darkly rejects any requests that come in with this header, so
+        // we need to remove it.
+        sendLDHeaders: false,
+        requestHeaderTransform: (headers: Map<string, string>) => {
+            return {
+                ...headers,
+                'x-amzn-trace-id': undefined,
+            }
+        },
+    },
+})(App)
