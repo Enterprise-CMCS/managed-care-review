@@ -427,6 +427,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                         formik.handleSubmit()
                     }}
                     modalRef={modalRef}
+                    onSubmitText="Unlock"
                 >
                     <form>
                         <FormGroup error={Boolean(formik.errors.unlockReason)}>
