@@ -19,11 +19,11 @@ import {
 import { SubmissionTypeRecord } from '../../../constants/healthPlanPackages'
 import { useAuth } from '../../../contexts/AuthContext'
 import {
-    CreateDraftSubmissionInput,
     Program,
     HealthPlanPackage,
     SubmissionType as SubmissionTypeT,
     useCreateHealthPlanPackageMutation,
+    CreateHealthPlanPackageInput,
 } from '../../../gen/gqlClient'
 import { PageActions } from '../PageActions'
 import styles from '../StateSubmissionForm.module.scss'
@@ -95,16 +95,35 @@ export const SubmissionType = ({
         return msg
     }
 
-    const [createDraftSubmission, { error }] =
+    const [createHealthPlanPackage, { error }] =
         useCreateHealthPlanPackageMutation({
-            // An alternative to messing with the cache like we do with create, just zero it out.
+            // This function updates the Apollo Client Cache after we create a new DraftSubmission
+            // Without it, we wouldn't show this newly created submission on the dashboard page
+            // without a refresh. Anytime a mutation does more than "modify an existing object"
+            // you'll need to handle the cache.
             update(cache, { data }) {
                 if (data) {
                     cache.modify({
-                        id: 'ROOT_QUERY',
                         fields: {
-                            indexHealthPlanPackages(_index, { DELETE }) {
-                                return DELETE
+                            indexHealthPlanPackages(
+                                index = { totalCount: 0, edges: [] }
+                            ) {
+                                const newID = cache.identify(
+                                    data.createHealthPlanPackage.pkg
+                                )
+                                // This isn't quite what is documented, but it's clear this
+                                // is how things work from looking at the dev-tools
+                                const newRef = { __ref: newID }
+
+                                return {
+                                    totalCount: index.totalCount + 1,
+                                    edges: [
+                                        {
+                                            node: newRef,
+                                        },
+                                        ...index.edges,
+                                    ],
+                                }
                             },
                         },
                     })
@@ -153,13 +172,13 @@ export const SubmissionType = ({
                     return
                 }
 
-                const input: CreateDraftSubmissionInput = {
+                const input: CreateHealthPlanPackageInput = {
                     programIDs: values.programIDs,
                     submissionType: values.submissionType,
                     submissionDescription: values.submissionDescription,
                 }
 
-                const result = await createDraftSubmission({
+                const result = await createHealthPlanPackage({
                     variables: { input },
                 })
 

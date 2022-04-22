@@ -199,7 +199,6 @@ Cypress.Commands.add('verifyDocumentsHaveNoErrors', () => {
 Cypress.Commands.add('submitStateSubmissionForm', (success = true, resubmission = false) => {
       cy.intercept('POST', '*/graphql', (req) => {
           aliasMutation(req, 'submitHealthPlanPackage')
-          aliasQuery(req, 'indexHealthPlanPackages')
       })
     cy.findByRole('heading', { level: 2, name: /Review and submit/ })
     cy.findByRole('button', {
@@ -215,16 +214,12 @@ Cypress.Commands.add('submitStateSubmissionForm', (success = true, resubmission 
             cy.findByTestId('review-and-submit-modal-submit').click()
         })
     cy.wait('@submitHealthPlanPackageMutation', { timeout: 50000 })
-    if (success) {
-        cy.wait('@indexHealthPlanPackagesQuery', { timeout: 50000 })
-    }
 })
 
-type FormButtonKey =  'CONTINUE_FROM_START_NEW' | 'CONTINUE_WITH_NEW_UPDATE' | 'CONTINUE' | 'SAVE_DRAFT' | 'BACK'
+type FormButtonKey =  'CONTINUE_FROM_START_NEW' | 'CONTINUE' | 'SAVE_DRAFT' | 'BACK'
 type FormButtons = { [key in FormButtonKey]: string }
 const buttonsWithLabels: FormButtons = {
     CONTINUE: 'Continue',
-    CONTINUE_WITH_NEW_UPDATE: 'Continue',
     CONTINUE_FROM_START_NEW: 'Continue',
     SAVE_DRAFT: 'Save as draft',
     BACK: 'Back',
@@ -237,7 +232,6 @@ Cypress.Commands.add(
             aliasQuery(req, 'indexHealthPlanPackages')
             aliasQuery(req, 'fetchHealthPlanPackage')
             aliasMutation(req, 'createHealthPlanPackage')
-            aliasMutation(req, 'updateDraftSubmission')
             aliasMutation(req, 'updateHealthPlanFormData')
         })
 
@@ -246,7 +240,6 @@ Cypress.Commands.add(
         }).safeClick()
 
         if (buttonKey === 'SAVE_DRAFT') {
-            if (waitForLoad) cy.wait('@indexHealthPlanPackagesQuery', { timeout: 20000 })
             cy.findByTestId('dashboard-page').should('exist')
 
         } else if (buttonKey === 'CONTINUE_FROM_START_NEW') {
@@ -259,13 +252,7 @@ Cypress.Commands.add(
             ) 
         } else if (buttonKey === 'CONTINUE'){
             if (waitForLoad){
-                cy.wait('@fetchHealthPlanPackageQuery')
-            }
-            cy.findByTestId('state-submission-form-page').should('exist')
-        } else if (buttonKey === 'CONTINUE_WITH_NEW_UPDATE'){
-            if (waitForLoad){
                 cy.wait('@updateHealthPlanFormDataMutation')
-                cy.wait('@fetchHealthPlanPackageQuery')
             }
             cy.findByTestId('state-submission-form-page').should('exist')
         } else {

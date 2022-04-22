@@ -1,6 +1,6 @@
 import {
     constructTestPostgresServer,
-    createTestStateSubmission,
+    createAndSubmitTestHealthPlanPackage,
     createTestHealthPlanPackage,
 } from '../testHelpers/gqlHelpers'
 import UPDATE_HEALTH_PLAN_FORM_DATA from '../../app-graphql/src/mutations/updateHealthPlanFormData.graphql'
@@ -200,10 +200,12 @@ describe('updateHealthPlanFormData', () => {
 
     it('errors if the Package is already submitted', async () => {
         const server = await constructTestPostgresServer()
-        const createdSubmitted = await createTestStateSubmission(server)
+        const createdSubmitted = await createAndSubmitTestHealthPlanPackage(
+            server
+        )
 
-        const draftSubmission = basicHealthPlanFormData()
-        const b64 = domainToBase64(draftSubmission)
+        const draft = basicHealthPlanFormData()
+        const b64 = domainToBase64(draft)
 
         const updateResult = await server.executeOperation({
             query: UPDATE_HEALTH_PLAN_FORM_DATA,
@@ -222,7 +224,7 @@ describe('updateHealthPlanFormData', () => {
 
         expect(updateResult.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
         expect(updateResult.errors[0].message).toContain(
-            'Submission is not in editable state'
+            'Package is not in editable state:'
         )
         expect(updateResult.errors[0].message).toContain('status: SUBMITTED')
     })
@@ -302,7 +304,8 @@ describe('updateHealthPlanFormData', () => {
         const failStore = mockStoreThatErrors()
 
         // set our store to error on the updateFormData call, only
-        postgresStore.updateFormData = failStore.updateFormData
+        postgresStore.updateHealthPlanRevision =
+            failStore.updateHealthPlanRevision
 
         const server = await constructTestPostgresServer({
             store: postgresStore,

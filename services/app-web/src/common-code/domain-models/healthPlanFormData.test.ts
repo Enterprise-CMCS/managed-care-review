@@ -8,7 +8,7 @@ import {
     generateRateName,
     hasValidSupportingDocumentCategories,
     LockedHealthPlanFormDataType,
-    submissionName,
+    packageName,
     RateDataType,
 } from '.'
 import {
@@ -373,7 +373,7 @@ describe('submission type assertions', () => {
         const sub = basicHealthPlanFormData()
         sub.programIDs = programIDs
 
-        expect(submissionName(sub, programs)).toBe(expectedName)
+        expect(packageName(sub, programs)).toBe(expectedName)
     })
 
     const rateNameTestArray: {

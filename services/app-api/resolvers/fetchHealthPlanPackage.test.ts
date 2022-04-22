@@ -1,20 +1,22 @@
-import FETCH_SUBMISSION_2 from '../../app-graphql/src/queries/fetchHealthPlanPackage.graphql'
+import FETCH_HEALTH_PLAN_PACKAGE from '../../app-graphql/src/queries/fetchHealthPlanPackage.graphql'
 import { base64ToDomain } from '../../app-web/src/common-code/proto/stateSubmission'
 import { todaysDate } from '../testHelpers/dateHelpers'
 import {
     constructTestPostgresServer,
-    createTestDraftSubmission,
-    createTestStateSubmission,
-    unlockTestDraftSubmission,
-    resubmitTestDraftSubmission,
+    createTestHealthPlanPackage,
+    createAndSubmitTestHealthPlanPackage,
+    unlockTestHealthPlanPackage,
+    resubmitTestHealthPlanPackage,
 } from '../testHelpers/gqlHelpers'
 
 describe('fetchHealthPlanPackage', () => {
-    it('returns draft submission payload with one revision', async () => {
+    it('returns package with one revision', async () => {
         const server = await constructTestPostgresServer()
 
         // First, create a new submission
-        const stateSubmission = await createTestStateSubmission(server)
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            server
+        )
 
         const createdID = stateSubmission.id
 
@@ -24,7 +26,7 @@ describe('fetchHealthPlanPackage', () => {
         }
 
         const result = await server.executeOperation({
-            query: FETCH_SUBMISSION_2,
+            query: FETCH_HEALTH_PLAN_PACKAGE,
             variables: { input },
         })
 
@@ -65,7 +67,7 @@ describe('fetchHealthPlanPackage', () => {
         }
 
         const result = await server.executeOperation({
-            query: FETCH_SUBMISSION_2,
+            query: FETCH_HEALTH_PLAN_PACKAGE,
             variables: { input },
         })
 
@@ -89,11 +91,13 @@ describe('fetchHealthPlanPackage', () => {
         })
 
         // First, create a new submission
-        const stateSubmission = await createTestStateSubmission(server)
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            server
+        )
         const createdID = stateSubmission.id
 
         // unlock it
-        await unlockTestDraftSubmission(
+        await unlockTestHealthPlanPackage(
             cmsServer,
             createdID,
             'Super duper good reason.'
@@ -105,7 +109,7 @@ describe('fetchHealthPlanPackage', () => {
         }
 
         const result = await server.executeOperation({
-            query: FETCH_SUBMISSION_2,
+            query: FETCH_HEALTH_PLAN_PACKAGE,
             variables: { input },
         })
 
@@ -130,7 +134,9 @@ describe('fetchHealthPlanPackage', () => {
         })
 
         // First, create a new submission
-        const stateSubmission = await createTestStateSubmission(server)
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            server
+        )
         const createdID = stateSubmission.id
 
         // DRAFT
@@ -139,7 +145,7 @@ describe('fetchHealthPlanPackage', () => {
         }
 
         const draftResult = await server.executeOperation({
-            query: FETCH_SUBMISSION_2,
+            query: FETCH_HEALTH_PLAN_PACKAGE,
             variables: { input: fetchInput },
         })
 
@@ -150,17 +156,17 @@ describe('fetchHealthPlanPackage', () => {
         const today = todaysDate()
 
         expect(resultSub.status).toBe('SUBMITTED')
-        expect(resultSub.intiallySubmittedAt).toEqual(today)
+        expect(resultSub.initiallySubmittedAt).toEqual(today)
 
         // unlock it
-        await unlockTestDraftSubmission(
+        await unlockTestHealthPlanPackage(
             cmsServer,
             createdID,
             'Super duper good reason.'
         )
 
         const unlockResult = await server.executeOperation({
-            query: FETCH_SUBMISSION_2,
+            query: FETCH_HEALTH_PLAN_PACKAGE,
             variables: { input: fetchInput },
         })
 
@@ -170,18 +176,18 @@ describe('fetchHealthPlanPackage', () => {
             'UNLOCKED'
         )
         expect(
-            unlockResult.data?.fetchHealthPlanPackage.pkg.intiallySubmittedAt
+            unlockResult.data?.fetchHealthPlanPackage.pkg.initiallySubmittedAt
         ).toEqual(today)
 
         // resubmit it
-        await resubmitTestDraftSubmission(
+        await resubmitTestHealthPlanPackage(
             server,
             createdID,
             'Test resubmission reason'
         )
 
         const resubmitResult = await server.executeOperation({
-            query: FETCH_SUBMISSION_2,
+            query: FETCH_HEALTH_PLAN_PACKAGE,
             variables: { input: fetchInput },
         })
 
@@ -191,7 +197,7 @@ describe('fetchHealthPlanPackage', () => {
             'RESUBMITTED'
         )
         expect(
-            resubmitResult.data?.fetchHealthPlanPackage.pkg.intiallySubmittedAt
+            resubmitResult.data?.fetchHealthPlanPackage.pkg.initiallySubmittedAt
         ).toEqual(today)
     })
 
@@ -199,7 +205,9 @@ describe('fetchHealthPlanPackage', () => {
         const server = await constructTestPostgresServer()
 
         // First, create a new submission
-        const stateSubmission = await createTestStateSubmission(server)
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            server
+        )
 
         const createdID = stateSubmission.id
 
@@ -221,7 +229,7 @@ describe('fetchHealthPlanPackage', () => {
         })
 
         const result = await otherUserServer.executeOperation({
-            query: FETCH_SUBMISSION_2,
+            query: FETCH_HEALTH_PLAN_PACKAGE,
             variables: { input },
         })
 
@@ -235,7 +243,9 @@ describe('fetchHealthPlanPackage', () => {
         const server = await constructTestPostgresServer()
 
         // First, create a new submission
-        const stateSubmission = await createTestStateSubmission(server)
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            server
+        )
 
         const createdID = stateSubmission.id
 
@@ -257,7 +267,7 @@ describe('fetchHealthPlanPackage', () => {
         })
 
         const result = await otherUserServer.executeOperation({
-            query: FETCH_SUBMISSION_2,
+            query: FETCH_HEALTH_PLAN_PACKAGE,
             variables: { input },
         })
 
@@ -287,7 +297,7 @@ describe('fetchHealthPlanPackage', () => {
         })
 
         // First, create a new submission
-        const stateSubmission = await createTestDraftSubmission(server)
+        const stateSubmission = await createTestHealthPlanPackage(server)
 
         const createdID = stateSubmission.id
 
@@ -297,7 +307,7 @@ describe('fetchHealthPlanPackage', () => {
         }
 
         const result = await cmsServer.executeOperation({
-            query: FETCH_SUBMISSION_2,
+            query: FETCH_HEALTH_PLAN_PACKAGE,
             variables: { input },
         })
 
@@ -318,7 +328,9 @@ describe('fetchHealthPlanPackage', () => {
         const stateServer = await constructTestPostgresServer()
 
         // First, create a new submitted submission
-        const stateSubmission = await createTestStateSubmission(stateServer)
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            stateServer
+        )
 
         const cmsServer = await constructTestPostgresServer({
             context: {
@@ -330,31 +342,31 @@ describe('fetchHealthPlanPackage', () => {
             },
         })
 
-        await unlockTestDraftSubmission(
+        await unlockTestHealthPlanPackage(
             cmsServer,
             stateSubmission.id,
             'Super duper good reason.'
         )
 
-        await resubmitTestDraftSubmission(
+        await resubmitTestHealthPlanPackage(
             stateServer,
             stateSubmission.id,
             'Test first resubmission'
         )
 
-        await unlockTestDraftSubmission(
+        await unlockTestHealthPlanPackage(
             cmsServer,
             stateSubmission.id,
             'Super duper good reason.'
         )
 
-        await resubmitTestDraftSubmission(
+        await resubmitTestHealthPlanPackage(
             stateServer,
             stateSubmission.id,
             'Test second resubmission'
         )
 
-        await unlockTestDraftSubmission(
+        await unlockTestHealthPlanPackage(
             cmsServer,
             stateSubmission.id,
             'Super duper good reason.'
@@ -365,7 +377,7 @@ describe('fetchHealthPlanPackage', () => {
         }
 
         const result = await cmsServer.executeOperation({
-            query: FETCH_SUBMISSION_2,
+            query: FETCH_HEALTH_PLAN_PACKAGE,
             variables: { input },
         })
 

@@ -2,6 +2,7 @@ import React from 'react'
 import styles from '../Banner.module.scss'
 import { Alert } from '@trussworks/react-uswds'
 import { dayjs } from '../../../dateHelpers'
+import { ExpandableText } from '../../'
 
 export type UpdatedProps = {
     submittedBy: string
@@ -14,7 +15,6 @@ export const SubmissionUpdatedBanner = ({
     updatedOn,
     changesMade,
     className,
-    ...props
 }: UpdatedProps & React.HTMLAttributes<HTMLDivElement>): React.ReactElement => {
     return (
         <Alert
@@ -24,7 +24,6 @@ export const SubmissionUpdatedBanner = ({
             validation={true}
             data-testid="updatedSubmissionBanner"
             className={className}
-            {...props}
         >
             <div className={styles.bannerBodyText}>
                 <p className="usa-alert__text">
@@ -39,10 +38,12 @@ export const SubmissionUpdatedBanner = ({
                         .format('MM/DD/YY h:mma')}
                     &nbsp;ET
                 </p>
-                <p className="usa-alert__text">
-                    <b>Changes made:&nbsp;</b>
-                    {changesMade}
-                </p>
+                <ExpandableText>
+                    <>
+                        <b>Changes made:&nbsp;</b>
+                        {changesMade}
+                    </>
+                </ExpandableText>
             </div>
         </Alert>
     )

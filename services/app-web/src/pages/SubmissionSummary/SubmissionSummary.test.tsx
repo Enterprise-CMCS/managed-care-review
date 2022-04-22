@@ -92,7 +92,7 @@ describe('SubmissionSummary', () => {
 
     describe('Submission package data display', () => {
         it('renders the OLD data for an unlocked submission for CMS user, ignoring unsubmitted changes from state user', async () => {
-            const submission2 = mockUnlockedHealthPlanPackage()
+            const pkg = mockUnlockedHealthPlanPackage()
 
             const oldPackageData = basicLockedHealthPlanFormData()
             const newPackageData = basicLockedHealthPlanFormData()
@@ -100,10 +100,8 @@ describe('SubmissionSummary', () => {
             oldPackageData.submissionDescription = 'OLD_DESCRIPTION'
             newPackageData.submissionDescription = 'NEW_DESCRIPTION'
 
-            submission2.revisions[0].node.formDataProto =
-                domainToBase64(newPackageData)
-            submission2.revisions[1].node.formDataProto =
-                domainToBase64(oldPackageData)
+            pkg.revisions[0].node.formDataProto = domainToBase64(newPackageData)
+            pkg.revisions[1].node.formDataProto = domainToBase64(oldPackageData)
 
             renderWithProviders(
                 <Route
@@ -119,7 +117,7 @@ describe('SubmissionSummary', () => {
                             }),
                             fetchStateHealthPlanPackageMockSuccess({
                                 id: '15',
-                                stateSubmission: submission2,
+                                stateSubmission: pkg,
                             }),
                         ],
                     },
@@ -444,64 +442,6 @@ describe('SubmissionSummary', () => {
             expect(
                 await screen.findByText(
                     'Reason for unlocking submission is required'
-                )
-            ).toBeInTheDocument()
-        })
-
-        it('displays form validation error when submitting unlock reason over 300 characters', async () => {
-            renderWithProviders(
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={SubmissionSummary}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                user: mockValidCMSUser(),
-                                statusCode: 200,
-                            }),
-                            fetchStateHealthPlanPackageMockSuccess({
-                                id: '15',
-                            }),
-                            unlockHealthPlanPackageMockSuccess({
-                                id: '15',
-                                reason: 'Test Reason',
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15',
-                    },
-                }
-            )
-
-            const unlockModalButton = await screen.findByRole('button', {
-                name: 'Unlock submission',
-            })
-            userEvent.click(unlockModalButton)
-
-            // the popup dialog should be visible now
-            await waitFor(() => {
-                expect(screen.getByRole('dialog')).toHaveClass('is-visible')
-                expect(
-                    screen.getByText('Provide reason for unlocking')
-                ).toBeInTheDocument()
-            })
-
-            const textbox = screen.getByTestId('unlockReason')
-            // Don't use userEvent.type here because it messes with jest timers with this length of content
-            userEvent.paste(
-                textbox,
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin vulputate ultricies suscipit. Suspendisse consequat at mauris a iaculis. Praesent lorem massa, pellentesque et tempor et, laoreet quis lectus. Vestibulum finibus condimentum nulla, vel tristique tellus pretium sollicitudin. Curabitur velit enim, pulvinar eu fermentum vel, fringilla quis leo.'
-            )
-
-            const unlockButton = screen.getByTestId('unlockReason-modal-submit')
-            userEvent.click(unlockButton)
-
-            expect(
-                await screen.findByText(
-                    'Reason for unlocking submission is too long'
                 )
             ).toBeInTheDocument()
         })

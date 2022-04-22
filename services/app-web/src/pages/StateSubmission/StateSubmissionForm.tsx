@@ -36,7 +36,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import {
     UnlockedHealthPlanFormDataType,
-    submissionName,
+    packageName,
     UpdateInfoType,
 } from '../../common-code/domain-models'
 import { domainToBase64 } from '../../common-code/proto/stateSubmission'
@@ -148,45 +148,15 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         healthPlanFormData: base64Draft,
                     },
                 },
-                update(cache) {
-                    cache.evict({ id: `HealthPlanPackage:${id}` })
-                    cache.gc()
-                },
             })
             const updatedSubmission: HealthPlanPackage | undefined =
                 updateResult?.data?.updateHealthPlanFormData.pkg
 
             if (!updatedSubmission) {
                 setShowPageErrorMessage(true)
+                console.log('Failed to update form data', updateResult)
                 return new Error('Failed to update form data')
             }
-            // Apollo is letting us load new pages without having finished re-fetching the new data
-            // and isn't updating the cache the way I expected here, so for now, we set our current
-            // revision manually when update returns.
-            const protoResult =
-                getCurrentRevisionFromHealthPlanPackage(updatedSubmission)
-            if (protoResult instanceof Error) {
-                console.log(
-                    'Proto returned by update mutation is invalid',
-                    protoResult
-                )
-                setFormDataError('MALFORMATTED_DATA')
-                return protoResult
-            }
-            const planFormData = protoResult[1]
-
-            if (planFormData.status !== 'DRAFT') {
-                console.log(
-                    'Proto returned by update mutation is wrong state',
-                    protoResult
-                )
-                setFormDataError('WRONG_SUBMISSION_STATUS')
-                return new Error(
-                    'Proto returned by update mutation is wrong state'
-                )
-            }
-
-            setFormDataFromLatestRevision(planFormData)
 
             return updatedSubmission
         } catch (serverError) {
@@ -203,10 +173,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     'state' in loggedInUser &&
                     loggedInUser.state.programs) ||
                 []
-            const name = submissionName(
-                formDataFromLatestRevision,
-                statePrograms
-            )
+            const name = packageName(formDataFromLatestRevision, statePrograms)
             setComputedSubmissionName(name)
             updateHeading(pathname, name)
         }

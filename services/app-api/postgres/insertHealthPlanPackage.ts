@@ -12,9 +12,9 @@ import {
     isStoreError,
     StoreError,
 } from './storeError'
-import { convertToHealthPlanPackageType } from './submissionWithRevisionsHelpers'
+import { convertToHealthPlanPackageType } from './healthPlanPackageHelpers'
 
-export type InsertDraftSubmissionArgsType = {
+export type InsertHealthPlanPackageArgsType = {
     stateCode: string
     programIDs: string[]
     submissionType: SubmissionType
@@ -45,9 +45,9 @@ async function incrementAndGetStateNumber(
     }
 }
 
-export async function insertDraftSubmission(
+export async function insertHealthPlanPackage(
     client: PrismaClient,
-    args: InsertDraftSubmissionArgsType
+    args: InsertHealthPlanPackageArgsType
 ): Promise<HealthPlanPackageType | StoreError> {
     const stateNumberResult = await incrementAndGetStateNumber(
         client,
@@ -87,7 +87,7 @@ export async function insertDraftSubmission(
     const buffer = Buffer.from(protobuf)
 
     try {
-        const pkg = await client.stateSubmission.create({
+        const pkg = await client.healthPlanPackageTable.create({
             data: {
                 id: draft.id,
                 stateCode: draft.stateCode,
@@ -95,7 +95,7 @@ export async function insertDraftSubmission(
                     create: {
                         id: uuidv4(),
                         createdAt: new Date(),
-                        submissionFormProto: buffer,
+                        formDataProto: buffer,
                     },
                 },
             },

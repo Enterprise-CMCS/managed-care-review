@@ -3,6 +3,14 @@
 @import 'theme/_color';
 
 // Custom app wide styles
+
+// containers
+$width-max-contained: 50rem;
+.app-container-horizontal-pad {
+    max-width: $width-max-contained;
+}
+
+// accessibility
 .srOnly {
     position: absolute;
     left: -1000px;
@@ -66,8 +74,6 @@ h3 {
     // The default spacing between checkboxes and radio buttons in USWDS feels too small, would like to increase this across the app.
     margin-top: 1rem;
 }
-
-$width-max-contained: 50rem;
 
 // Remove link styles from button-styled links
 a[class^='usa-button usa-button--outline'] {
