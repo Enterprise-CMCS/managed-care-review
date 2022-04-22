@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useLayoutEffect } from 'react'
 import { useFormikContext } from 'formik'
 
 /**
@@ -17,7 +17,7 @@ export function FieldPreserveScrollPosition<T>({
 }): null {
     const { values } = useFormikContext<T>()
     const fieldValue = values[fieldName]
-    useEffect(() => {
+    useLayoutEffect(() => {
         document.querySelector(`#${fieldName}`)?.scrollIntoView()
     }, [fieldValue, fieldName])
     return null
