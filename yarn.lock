@@ -4165,18 +4165,18 @@
   dependencies:
     postcss-value-parser "^4.2.0"
 
-"@cypress-audit/pa11y@^1.1.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@cypress-audit/pa11y/-/pa11y-1.2.0.tgz#44e952c651a8e7915885a753b4ea15dd3e7ef203"
-  integrity sha512-w0neqTTS0T3ubwSJ4Xm0mx4Mq9g4YJ2fgwNQUq1Gd8cJUdRcq9K0LL60HfoUCFAkBCHLBEZWzTvMms9kI1Ns+w==
+"@cypress-audit/pa11y@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@cypress-audit/pa11y/-/pa11y-1.3.0.tgz#ee01c59f93ee0ef151d29c32d8e57de8727027d3"
+  integrity sha512-37Wu4991pq4NxiIWmlhvA11fOa7Egf3j501T2NkQ9Fe15YQtVfPUsieuWqO8xYGJX/wRJTm3mX5PX4kQKBww7g==
   dependencies:
-    "@cypress-audit/shared" "^1.2.0"
-    pa11y "^6.0.1"
+    "@cypress-audit/shared" "^1.3.0"
+    pa11y "^6.2.3"
 
-"@cypress-audit/shared@^1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@cypress-audit/shared/-/shared-1.2.0.tgz#63f9d008c95234364d02f32ed92a60752e1f3856"
-  integrity sha512-mrBiF8TjMMEyeqjltKlcRqRl0rqydKdkcsEL5vB4c74KsKLH3g1+5l33Y46wvMP3rK40XZLNBEy4z+FQnvmlhg==
+"@cypress-audit/shared@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@cypress-audit/shared/-/shared-1.3.0.tgz#3b0494659691599e103e7b78564e4d2311353eec"
+  integrity sha512-krMqiNL2NdNueenXqB1sC/Ic18pgCiBVIZa9S4cyXTTTpcR01gbeYkJ6kloex+WyTwrEaUSHp/1TeCFRIsj+sw==
 
 "@cypress/request@^2.88.10":
   version "2.88.10"
@@ -17579,6 +17579,11 @@ jest@^27.4.3, jest@^27.5.1:
     import-local "^3.0.2"
     jest-cli "^27.5.1"
 
+jmespath@0.15.0:
+  version "0.15.0"
+  resolved "https://registry.yarnpkg.com/jmespath/-/jmespath-0.15.0.tgz#a3f222a9aae9f966f5d27c796510e28091764217"
+  integrity sha1-o/Iiqarp+Wb10nx5ZRDigJF2Qhc=
+
 jmespath@0.16.0:
   version "0.16.0"
   resolved "https://registry.yarnpkg.com/jmespath/-/jmespath-0.16.0.tgz#b15b0a85dfd4d930d43e69ed605943c802785076"
@@ -20312,10 +20317,10 @@ p-waterfall@^2.1.1:
   dependencies:
     p-reduce "^2.0.0"
 
-pa11y@^6.0.1:
-  version "6.2.0"
-  resolved "https://registry.yarnpkg.com/pa11y/-/pa11y-6.2.0.tgz#bb8fbc9f556fdc3b9814881d7c811454b261e2e8"
-  integrity sha512-p0EwAP7lt4VA23TMwcmImC2rtyzk78cJc7wQudvnIydsXAO8MLFVAb705CKx+4gse7pPYzUouwbCXSEqJvUmJw==
+pa11y@^6.2.3:
+  version "6.2.3"
+  resolved "https://registry.yarnpkg.com/pa11y/-/pa11y-6.2.3.tgz#920de467a9fa0d52c80e07ae910ea98b167b7336"
+  integrity sha512-69JoUlfW2QVmrgQAm+17XBxIvmd1u0ImFBYIHPyjC61CzAkmxO3kkbqDVxIcl0OKLvAMYSMbvfCH8kMFE9xsbg==
   dependencies:
     axe-core "~4.2.1"
     bfj "~7.0.2"
