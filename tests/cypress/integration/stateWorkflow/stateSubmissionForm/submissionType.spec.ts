@@ -9,6 +9,7 @@ describe('submission type', () => {
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[2]
             cy.visit(`/submissions/${draftSubmissionId}/type`)
+            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
             cy.findByRole('heading', { level: 2, name: /Submission type/, timeout: 10000 })
 
             // Navigate to dashboard page by clicking cancel
