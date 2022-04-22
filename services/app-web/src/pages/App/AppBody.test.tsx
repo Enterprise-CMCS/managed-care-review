@@ -14,8 +14,13 @@ test.todo(
     'App displays ErrorBoundary fallback component when there is JS error on page'
 )
 
+window.scrollTo = jest.fn()
+
 describe('App Body and routes', () => {
     afterEach(() => {
+        jest.resetAllMocks()
+    })
+    afterAll(() => {
         jest.clearAllMocks()
     })
 
@@ -135,12 +140,15 @@ describe('App Body and routes', () => {
     })
 
     describe('page scrolling', () => {
-        it('scroll top on page load', () => {
+        it('scroll top on page load', async () => {
             renderWithProviders(<AppBody authMode={'LOCAL'} />)
-            window.scrollTo = jest.fn()
+            await waitFor(() => {
+                userClickSignIn(screen)
+            })
             expect(window.scrollTo).toHaveBeenCalledWith(0, 0)
         })
     })
+
     describe('invalid routes', () => {
         it('redirect to landing page when logged out', async () => {
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
