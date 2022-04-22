@@ -1,6 +1,7 @@
 import React from 'react'
 import userEvent from '@testing-library/user-event'
-import { createMemoryHistory } from 'history'
+import { Route } from 'react-router-dom'
+import { Location } from 'history'
 import { screen, waitFor, Screen, queries } from '@testing-library/react'
 import { CognitoUser, CognitoUserPool } from 'amazon-cognito-identity-js'
 
@@ -84,46 +85,69 @@ describe('Auth', () => {
                         Pool: { getClientId: () => '7' } as CognitoUserPool,
                     })
                 )
-            const history = createMemoryHistory()
 
-            renderWithProviders(<CognitoLogin />, {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 403 }),
-                        fetchCurrentUserMock({ statusCode: 403 }),
-                    ],
-                },
-                routerProvider: { routerProps: { history: history } },
-            })
+            let testLocation: Location
+
+            renderWithProviders(
+                <>
+                    <Route
+                        path="*"
+                        render={({ location }) => {
+                            testLocation = location as Location
+                            return null
+                        }}
+                    />
+                    (<CognitoLogin />
+                </>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 403 }),
+                            fetchCurrentUserMock({ statusCode: 403 }),
+                        ],
+                    },
+                }
+            )
 
             await userLogin(screen)
 
             await waitFor(() => expect(loginSpy).toHaveBeenCalledTimes(1))
-            await waitFor(() => expect(history.location.pathname).toBe('/'))
+            await waitFor(() => expect(testLocation.pathname).toBe('/'))
         })
 
         it('when login fails, stay on page and display error alert', async () => {
             const loginSpy = jest.spyOn(CognitoAuthApi, 'signIn')
-            const history = createMemoryHistory()
+            let testLocation: Location
 
-            renderWithProviders(<CognitoLogin />, {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 403 }),
-                        fetchCurrentUserMock({ statusCode: 403 }),
-                        fetchCurrentUserMock({ statusCode: 403 }),
-                    ],
-                },
-                routerProvider: {
-                    route: '/auth',
-                    routerProps: { history: history },
-                },
-            })
+            renderWithProviders(
+                <>
+                    <Route
+                        path="*"
+                        render={({ location }) => {
+                            testLocation = location as Location
+                            return null
+                        }}
+                    />
+                    <CognitoLogin />
+                </>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 403 }),
+                            fetchCurrentUserMock({ statusCode: 403 }),
+                            fetchCurrentUserMock({ statusCode: 403 }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/auth',
+                    },
+                }
+            )
 
             await userLogin(screen)
             await waitFor(() => {
                 expect(loginSpy).toHaveBeenCalledTimes(1)
-                expect(history.location.pathname).toBe('/auth')
+                expect(testLocation.pathname).toBe('/auth')
             })
         })
     })
@@ -161,23 +185,33 @@ describe('Auth', () => {
             expect(
                 screen.getAllByRole('button', {
                     name: /Login/i,
-                }).length
-            ).toBe(3)
+                })
+            ).toHaveLength(3)
         })
 
         it('when login is successful, redirect to dashboard', async () => {
-            const history = createMemoryHistory()
-
-            renderWithProviders(<LocalLogin />, {
-                routerProvider: { routerProps: { history: history } },
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 403 }),
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                    ],
-                },
-            })
+            let testLocation: Location
+            renderWithProviders(
+                <>
+                    <Route
+                        path="*"
+                        render={({ location }) => {
+                            testLocation = location as Location
+                            return null
+                        }}
+                    />
+                    <LocalLogin />
+                </>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 403 }),
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                        ],
+                    },
+                }
+            )
 
             const tophButton = screen.getByTestId('TophButton')
 
@@ -188,29 +222,40 @@ describe('Auth', () => {
             userClickByTestId(screen, 'TophButton')
 
             await waitFor(() => {
-                expect(history.location.pathname).toBe('/')
+                expect(testLocation.pathname).toBe('/')
             })
         })
 
         it('when login fails, stay on page and display error alert', async () => {
-            const history = createMemoryHistory()
+            let testLocation: Location
 
-            renderWithProviders(<LocalLogin />, {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 403 }),
-                        fetchCurrentUserMock({ statusCode: 403 }),
-                    ],
-                },
-                routerProvider: {
-                    route: '/auth',
-                    routerProps: { history: history },
-                },
-            })
+            renderWithProviders(
+                <>
+                    <Route
+                        path="*"
+                        render={({ location }) => {
+                            testLocation = location as Location
+                            return null
+                        }}
+                    />
+                    <LocalLogin />/
+                </>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 403 }),
+                            fetchCurrentUserMock({ statusCode: 403 }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/auth',
+                    },
+                }
+            )
 
             userClickByTestId(screen, 'TophButton')
             await waitFor(() => {
-                expect(history.location.pathname).toBe('/auth')
+                expect(testLocation.pathname).toBe('/auth')
             })
         })
     })

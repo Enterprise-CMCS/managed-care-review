@@ -1,5 +1,5 @@
 @import '../../styles/uswdsImports.scss';
-@import '../../styles/custom';
+@import '../../styles/custom.scss';
 .row {
     @include at-media(tablet) {
         margin-bottom: units(2);

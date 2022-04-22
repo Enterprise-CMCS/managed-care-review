@@ -19,7 +19,7 @@ export function CheckAuth(): React.ReactElement {
         event.preventDefault()
         console.log('checking auth')
 
-        checkAuth()
+        await checkAuth()
         if (data?.fetchCurrentUser) {
             setAuthStatus('Authenticated')
         } else {
