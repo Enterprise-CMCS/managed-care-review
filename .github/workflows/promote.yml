@@ -107,6 +107,11 @@ jobs:
           name: lambda-layers-prisma-client-migration
           path: ./services/app-api/lambda-layers-prisma-client-migration
 
+      - uses: actions/upload-artifact@v3
+        with:
+          name: lambda-layers-prisma-client-engine
+          path: ./services/app-api/lambda-layers-prisma-client-engine
+
   promote-infra-dev:
     needs: [build-prisma-client-lambda-layer, unit-tests]
     uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
