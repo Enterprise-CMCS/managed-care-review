@@ -465,6 +465,7 @@ export const ContractDetails = ({
                                     aria-required
                                     className={styles.radioGroup}
                                     legend="Contract action type"
+                                    id="contractType"
                                 >
                                     {showFieldErrors(errors.contractType) && (
                                         <PoliteErrorMessage>
