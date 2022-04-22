@@ -1,5 +1,5 @@
 import { loginLocalUser, getLoggedInUser, logoutLocalUser } from '.'
-import { CognitoUserType } from '../common-code/domain-models/cognitoUserType'
+import { LocalUserType } from './LocalUserType'
 
 describe('localLogin', () => {
     it('returns empty on empty', async () => {
@@ -7,7 +7,7 @@ describe('localLogin', () => {
     })
 
     it('loads as expected', async () => {
-        const testUser: CognitoUserType = {
+        const testUser: LocalUserType = {
             email: 'toph@dmas.virginia.gov',
             name: 'Toph',
             role: 'STATE_USER',
@@ -20,7 +20,7 @@ describe('localLogin', () => {
     })
 
     it('logs out correctly', async () => {
-        const testUser: CognitoUserType = {
+        const testUser: LocalUserType = {
             email: 'toph@dmas.virginia.gov',
             name: 'Toph',
             role: 'STATE_USER',

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useHistory, useLocation } from 'react-router'
 import { Route, Switch } from 'react-router-dom'
-import { assertNever, AuthModeType } from '../../common-code/domain-models'
+import { assertNever, AuthModeType } from '../../common-code/config'
 import {
     getRouteName,
     PageTitlesRecord,

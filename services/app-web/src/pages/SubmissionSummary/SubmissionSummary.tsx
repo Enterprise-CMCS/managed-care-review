@@ -16,10 +16,9 @@ import sprite from 'uswds/src/img/sprite.svg'
 import {
     packageName,
     HealthPlanFormDataType,
-    UpdateInfoType,
-} from '../../common-code/domain-models'
-import { makeDateTable } from '../../common-code/data-helpers/makeDocumentDateLookupTable'
-import { base64ToDomain } from '../../common-code/proto/stateSubmission'
+} from '../../common-code/healthPlanFormDataType'
+import { makeDateTable } from './makeDocumentDateLookupTable'
+import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
 import { Loading } from '../../components/Loading'
 import {
     ContactsSummarySection,
@@ -42,6 +41,7 @@ import {
     useFetchHealthPlanPackageQuery,
     useUnlockHealthPlanPackageMutation,
     HealthPlanPackageStatus,
+    UpdateInformation,
 } from '../../gen/gqlClient'
 import { isGraphQLErrors } from '../../gqlHelpers'
 import { Error404 } from '../Errors/Error404'
@@ -124,7 +124,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     const [packageData, setPackageData] = useState<
         HealthPlanFormDataType | undefined
     >(undefined)
-    const [updateInfo, setUpdateInfo] = useState<UpdateInfoType | null>(null)
+    const [updateInfo, setUpdateInfo] = useState<UpdateInformation | null>(null)
     const [submissionStatus, setSubmissionStatus] =
         useState<HealthPlanPackageStatus | null>(null)
 

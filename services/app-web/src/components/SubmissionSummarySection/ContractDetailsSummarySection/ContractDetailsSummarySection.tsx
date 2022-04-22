@@ -12,12 +12,12 @@ import {
     RateChangeReasonRecord,
 } from '../../../constants/healthPlanPackages'
 import { useS3 } from '../../../contexts/S3Context'
-import { formatCalendarDate } from '../../../dateHelpers'
+import { formatCalendarDate } from '../../../common-code/dateHelpers'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../SubmissionSummarySection.module.scss'
-import { HealthPlanFormDataType } from '../../../common-code/domain-models'
+import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 
 export type ContractDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
