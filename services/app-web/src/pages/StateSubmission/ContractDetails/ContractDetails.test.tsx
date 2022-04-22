@@ -1,6 +1,5 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import { act } from 'react-dom/test-utils'
-import { createMemoryHistory } from 'history'
 import userEvent from '@testing-library/user-event'
 
 import {
@@ -46,7 +45,6 @@ describe('ContractDetails', () => {
 
         const emptyDraft = mockDraft()
         emptyDraft.id = '12'
-        const history = createMemoryHistory()
 
         renderWithProviders(
             <ContractDetails
@@ -59,7 +57,6 @@ describe('ContractDetails', () => {
                 },
                 routerProvider: {
                     route: '/submissions/12/contract-details',
-                    routerProps: { history: history },
                 },
             }
         )
@@ -229,7 +226,6 @@ describe('ContractDetails', () => {
 
         const emptyDraft = mockDraft()
         emptyDraft.id = '12'
-        const history = createMemoryHistory()
         const mockUpdateDraftFn = jest.fn()
 
         renderWithProviders(
@@ -243,7 +239,6 @@ describe('ContractDetails', () => {
                 },
                 routerProvider: {
                     route: '/submissions/12/contract-details',
-                    routerProps: { history: history },
                 },
             }
         )

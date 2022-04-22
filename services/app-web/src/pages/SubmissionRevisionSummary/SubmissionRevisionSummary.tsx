@@ -29,8 +29,10 @@ import { DocumentDateLookupTable } from '../SubmissionSummary/SubmissionSummary'
 
 export const SubmissionRevisionSummary = (): React.ReactElement => {
     // Page level state
-    const { id, revisionVersion } =
-        useParams<{ id: string; revisionVersion: string }>()
+    const { id, revisionVersion } = useParams<{
+        id: string
+        revisionVersion: string
+    }>()
     const { pathname } = useLocation()
     const { updateHeading } = usePage()
     const [pageLevelAlert, setPageLevelAlert] = useState<string | undefined>(

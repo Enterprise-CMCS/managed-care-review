@@ -135,6 +135,7 @@ jobs:
 
       - name: API Unit Tests
         env:
+          NODE_OPTIONS: --max_old_space_size=6000
           REACT_APP_AUTH_MODE: AWS_COGNITO
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         run: ./dev test api --unit
@@ -184,6 +185,11 @@ jobs:
           name: lambda-layers-prisma-client-migration
           path: ./services/app-api/lambda-layers-prisma-client-migration
 
+      - uses: actions/upload-artifact@v3
+        with:
+          name: lambda-layers-prisma-client-engine
+          path: ./services/app-api/lambda-layers-prisma-client-engine
+
   deploy-infra:
     needs: [begin-deployment]
     uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
@@ -213,7 +219,7 @@ jobs:
       always() &&
       (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped')
 
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@hw-upgrade-react-scripts
     with:
       stage_name: ${{ needs.begin-deployment.outputs.stage-name }}
       app_version: ${{ needs.begin-deployment.outputs.app-version }}

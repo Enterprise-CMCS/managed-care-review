@@ -1,9 +1,9 @@
 /* USWDS settings */
-@import 'styles/uswdsSettings';
+@import 'styles/uswdsSettings.scss';
 
 /* Vendor styles (direct source) */
-@import 'uswds';
+@import 'uswds/scss/uswds.scss';
 @import '@trussworks/react-uswds/lib/index.css';
 
 /* Project styles */
-@import 'styles/custom';
+@import 'styles/custom.scss';

@@ -11,6 +11,7 @@ package:
 
 plugins:
   - serverless-webpack
+  - serverless-plugin-monorepo
   - serverless-offline
   - serverless-online
   - serverless-stack-termination-protection
@@ -41,6 +42,8 @@ custom:
     webpackConfig: 'webpack.config.js'
     packager: 'yarn'
     includeModules:
+      forceExclude:
+        - '@prisma/client'
       nodeModulesRelativeDir: '../../'
     excludeRegex: 'darwin|debian'
   serverlessTerminationProtection:
@@ -125,6 +128,8 @@ provider:
 layers:
   prismaClientMigration:
     path: lambda-layers-prisma-client-migration
+  prismaClientEngine:
+    path: lambda-layers-prisma-client-engine
 
 functions:
   email_submit:
@@ -216,6 +221,9 @@ functions:
       securityGroupIds:
         - ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
+    layers:
+      - !Ref PrismaClientEngineLambdaLayer
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-0-1:1
 
   hello:
     handler: src/handlers/hello.main

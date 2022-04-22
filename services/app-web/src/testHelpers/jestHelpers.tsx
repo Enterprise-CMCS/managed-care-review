@@ -1,6 +1,5 @@
 import { MockedProvider, MockedProviderProps } from '@apollo/client/testing'
-import { Router, RouterProps } from 'react-router-dom'
-import { createMemoryHistory } from 'history'
+import { MemoryRouter } from 'react-router-dom'
 import {
     fireEvent,
     render,
@@ -21,7 +20,7 @@ import { testS3Client } from './s3Helpers'
 const renderWithProviders = (
     ui: React.ReactNode,
     options?: {
-        routerProvider?: { route?: string; routerProps?: RouterProps }
+        routerProvider?: { route?: string }
         apolloProvider?: MockedProviderProps
         authProvider?: Partial<AuthProviderProps>
     }
@@ -32,23 +31,17 @@ const renderWithProviders = (
         authProvider = {},
     } = options || {}
 
-    const { route, routerProps } = routerProvider
-    const testHistory = routerProps?.history
-        ? routerProps.history
-        : createMemoryHistory()
+    const { route } = routerProvider
 
-    if (route) {
-        testHistory.push(route)
-    }
     return render(
         <MockedProvider {...apolloProvider}>
-            <Router history={testHistory}>
+            <MemoryRouter initialEntries={[route || '']}>
                 <AuthProvider authMode={'AWS_COGNITO'} {...authProvider}>
                     <S3Provider client={testS3Client}>
                         <PageProvider>{ui}</PageProvider>
                     </S3Provider>
                 </AuthProvider>
-            </Router>
+            </MemoryRouter>
         </MockedProvider>
     )
 }

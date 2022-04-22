@@ -5,7 +5,6 @@ import {
     mockContractAndRatesDraft,
     mockStateSubmission,
 } from '../../../testHelpers/apolloHelpers'
-import { createMemoryHistory } from 'history'
 import { Route } from 'react-router'
 import { RoutesRecord } from '../../../constants/routes'
 
@@ -266,7 +265,6 @@ describe('ContractDetailsSummarySection', () => {
     })
 
     it('does not render download all button when on previous submission', () => {
-        const history = createMemoryHistory()
         renderWithProviders(
             <Route
                 path={RoutesRecord.SUBMISSIONS_REVISION}
@@ -280,7 +278,6 @@ describe('ContractDetailsSummarySection', () => {
             {
                 routerProvider: {
                     route: '/submissions/15/revisions/2',
-                    routerProps: { history: history },
                 },
             }
         )
