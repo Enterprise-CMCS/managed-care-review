@@ -11,6 +11,7 @@ describe('submission type', () => {
             cy.visit(`/submissions/${draftSubmissionId}/type`)
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
             cy.findByRole('heading', { level: 2, name: /Submission type/, timeout: 10000 })
+            cy.wait(500) // WEIRD flake here where we click the cancel button but the page doesn't navigate back
 
             // Navigate to dashboard page by clicking cancel
             cy.findByRole('button', { name: /Cancel/ }).click()
