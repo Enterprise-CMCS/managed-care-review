@@ -708,7 +708,10 @@ const submitHealthPlanPackageMockError = ({
         },
         result: {
             errors: [
-                new GraphQLError('Incomplete submission cannot be submitted'),
+                new GraphQLError(
+                    'Incomplete submission cannot be submitted',
+                    {}
+                ),
             ],
         },
     }
@@ -748,7 +751,10 @@ const unlockHealthPlanPackageMockError = ({
         },
         result: {
             errors: [
-                new GraphQLError('Incomplete submission cannot be submitted'),
+                new GraphQLError(
+                    'Incomplete submission cannot be submitted',
+                    {}
+                ),
             ],
         },
     }
