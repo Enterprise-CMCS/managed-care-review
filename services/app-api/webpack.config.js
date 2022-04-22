@@ -16,11 +16,10 @@ const extensions = [
     '.graphql',
     '.gql',
 ];
-const servicePath = '';
 
 module.exports = {
     entry: slsw.lib.entries,
-    target: 'node',
+    externalsPresets: { node: true },
     context: __dirname,
     mode: isLocal ? 'development' : 'production',
     performance: {
@@ -31,7 +30,8 @@ module.exports = {
         nodeExternals({
             modulesDir: path.resolve(__dirname, '../../node_modules'),
         }),
-        'aws-sdk',
+        'prisma',
+        '@prisma/client',
     ],
     devtool: 'source-map',
     resolve: {
@@ -55,7 +55,6 @@ module.exports = {
                         options: {
                             projectReferences: true,
                             configFile: tsConfigPath,
-                            experimentalWatchApi: true,
                         },
                     },
                 ],

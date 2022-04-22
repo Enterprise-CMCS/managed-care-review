@@ -10,7 +10,7 @@ export const main: APIGatewayProxyHandler = async () => {
         throw new Error('Init Error: DATABASE_URL is required to run app-api')
     }
 
-    let dbConnResult = await getPostgresURL(dbURL, secretsManagerSecret)
+    const dbConnResult = await getPostgresURL(dbURL, secretsManagerSecret)
     if (dbConnResult instanceof Error) {
         console.error('Init Error: failed to get pg URL', dbConnResult)
         throw dbConnResult

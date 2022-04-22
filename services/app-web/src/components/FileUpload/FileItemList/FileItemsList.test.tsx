@@ -86,7 +86,7 @@ describe('FileItemList component', () => {
             />
         )
 
-        expect(screen.getAllByRole('listitem').length).toEqual(fileItems.length)
+        expect(screen.getAllByRole('listitem')).toHaveLength(fileItems.length)
         expect(screen.getByText(/testFile.pdf/)).toBeInTheDocument()
         expect(screen.getByText('testFile2.pdf')).toBeInTheDocument()
     })
@@ -102,7 +102,7 @@ describe('FileItemList component', () => {
             />
         )
         // the table has a header row so we need to add 1 to the length
-        expect(screen.getAllByRole('row').length).toEqual(fileItems.length + 1)
+        expect(screen.getAllByRole('row')).toHaveLength(fileItems.length + 1)
         expect(screen.getByText(/testFile.pdf/)).toBeInTheDocument()
         expect(screen.getByText('testFile2.pdf')).toBeInTheDocument()
     })

@@ -1,6 +1,7 @@
 import React from 'react'
 import userEvent from '@testing-library/user-event'
-import { createMemoryHistory } from 'history'
+import { Route } from 'react-router-dom'
+import { Location } from 'history'
 import { screen, waitFor, Screen, queries } from '@testing-library/react'
 import { CognitoUser, CognitoUserPool } from 'amazon-cognito-identity-js'
 
@@ -124,17 +125,28 @@ describe('Cognito Login', () => {
             })
         )
 
-        const history = createMemoryHistory()
+        let testLocation: Location
 
-        renderWithProviders(<Login />, {
-            apolloProvider: { mocks: [failedAuthMock, successfulAuthMock] },
-            routerProvider: { routerProps: { history: history } },
-        })
+        renderWithProviders(
+            <>
+                <Route
+                    path="*"
+                    render={({ location }) => {
+                        testLocation = location as Location
+                        return null
+                    }}
+                />
+                <Login />
+            </>,
+            {
+                apolloProvider: { mocks: [failedAuthMock, successfulAuthMock] },
+            }
+        )
 
         await userLogin(screen)
 
         await waitFor(() => expect(loginSpy).toHaveBeenCalledTimes(1))
-        await waitFor(() => expect(history.location.pathname).toBe('/'))
+        await waitFor(() => expect(testLocation.pathname).toBe('/'))
     })
 
     it('when login fails, stay on page and display error alert', async () => {
@@ -142,20 +154,31 @@ describe('Cognito Login', () => {
             .spyOn(CognitoAuthApi, 'signIn')
             .mockRejectedValue('Error has occurred')
 
-        const history = createMemoryHistory()
+        let testLocation: Location
 
-        renderWithProviders(<Login />, {
-            apolloProvider: { mocks: [failedAuthMock, failedAuthMock] },
-            routerProvider: {
-                route: '/auth',
-                routerProps: { history: history },
-            },
-        })
+        renderWithProviders(
+            <>
+                <Route
+                    path="*"
+                    render={({ location }) => {
+                        testLocation = location as Location
+                        return null
+                    }}
+                />
+                <Login />
+            </>,
+            {
+                apolloProvider: { mocks: [failedAuthMock, failedAuthMock] },
+                routerProvider: {
+                    route: '/auth',
+                },
+            }
+        )
 
         await userLogin(screen)
         await waitFor(() => {
             expect(loginSpy).toHaveBeenCalledTimes(1)
-            expect(history.location.pathname).toBe('/auth')
+            expect(testLocation.pathname).toBe('/auth')
         })
     })
 

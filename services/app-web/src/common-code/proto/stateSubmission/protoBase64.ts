@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer'
 import { toDomain, toProtoBuffer } from '.'
 import { HealthPlanFormDataType } from '../../domain-models'
 

@@ -8,7 +8,7 @@ describe('user type assertions', () => {
                 email: 'burroughs@dusable.org',
                 role: 'CMS_USER',
             })
-        ).toEqual(true)
+        ).toBe(true)
         expect(
             isCognitoUser({
                 name: 'Margaret',
@@ -16,13 +16,13 @@ describe('user type assertions', () => {
                 role: 'OTHER_OTHER_USER',
                 state_code: 'IL',
             })
-        ).toEqual(false)
+        ).toBe(false)
         expect(
             isCognitoUser({
                 name: 'Margaret',
                 email: 'burroughs@dusable.org',
             })
-        ).toEqual(false)
+        ).toBe(false)
     })
 
     it('isCMSUser returns as expected', () => {
@@ -32,7 +32,7 @@ describe('user type assertions', () => {
                 email: 'burroughs@dusable.org',
                 role: 'CMS_USER',
             })
-        ).toEqual(true)
+        ).toBe(true)
         expect(
             isCMSUser({
                 name: 'Margaret',
@@ -40,7 +40,7 @@ describe('user type assertions', () => {
                 role: 'STATE_USER',
                 state_code: 'IL',
             })
-        ).toEqual(false)
+        ).toBe(false)
     })
 
     it('isStateUser returns as expected', () => {
@@ -51,13 +51,13 @@ describe('user type assertions', () => {
                 role: 'STATE_USER',
                 state_code: 'IL',
             })
-        ).toEqual(true)
+        ).toBe(true)
         expect(
             isStateUser({
                 name: 'Margaret',
                 email: 'burroughs@dusable.org',
                 role: 'CMS_USER',
             })
-        ).toEqual(false)
+        ).toBe(false)
     })
 })
