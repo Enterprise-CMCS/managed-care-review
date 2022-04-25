@@ -6,7 +6,7 @@ import {
     HealthPlanFormDataType,
     UpdateInfoType,
 } from '../../common-code/domain-models'
-import { makeDateTable } from '../../common-code/data-helpers/makeDocumentDateLookupTable'
+import { makeDateTable } from '../../documentHelpers/makeDocumentDateLookupTable'
 import { base64ToDomain } from '../../common-code/proto/stateSubmission'
 import { Loading } from '../../components/Loading'
 import {
