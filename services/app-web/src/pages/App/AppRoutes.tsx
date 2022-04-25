@@ -22,6 +22,7 @@ import { Landing } from '../Landing/Landing'
 import { NewStateSubmissionForm, StateSubmissionForm } from '../StateSubmission'
 import { SubmissionSummary } from '../SubmissionSummary'
 import { SubmissionRevisionSummary } from '../SubmissionRevisionSummary'
+import { useScrollToPageTop } from '../../hooks/useScrollToPageTop'
 
 const LOGIN_REDIRECT_STORAGE_KEY = 'LOGIN_REDIRECT'
 const LocalStorage = window.localStorage
@@ -171,14 +172,15 @@ export const AppRoutes = ({
     }, [initialPath, loggedInUser, history, authMode])
 
     /*
-        Add page titles and headings throughout the application
+        Side effects that happen on page change
     */
     const title =
         route === 'ROOT' && loggedInUser
             ? PageTitlesRecord['DASHBOARD']
             : PageTitlesRecord[route]
-    useTitle(title)
 
+    useTitle(title)
+    useScrollToPageTop()
     useEffect(() => {
         updateHeading(pathname)
     }, [pathname, updateHeading])
