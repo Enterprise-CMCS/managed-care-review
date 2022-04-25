@@ -40,9 +40,7 @@ import {
     UpdateInfoType,
 } from '../../common-code/domain-models'
 import { domainToBase64 } from '../../common-code/proto/stateSubmission'
-import { makeDocumentList } from '../../common-code/data-helpers/makeDocumentKeyLookupList'
-import { useS3 } from '../../contexts/S3Context'
-import { isS3Error } from '../../s3'
+import { makeDocumentList } from '../../documentHelpers/makeDocumentKeyLookupList'
 
 const FormAlert = ({ message }: { message?: string }): React.ReactElement => {
     return message ? (
@@ -119,7 +117,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
     const [computedSubmissionName, setComputedSubmissionName] =
         useState<string>('')
     const [previousDocuments, setPreviousDocuments] = useState<string[]>([])
-    const { deleteFile } = useS3()
 
     // Set up graphql calls
     const {
@@ -170,23 +167,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
         }
     }
 
-    //Delete file from S3 if file has not been submitted
-    const handleDeleteFile = async (key: string) => {
-        const isSubmittedFile =
-            previousDocuments &&
-            Boolean(
-                previousDocuments.some((previousKey) => previousKey === key)
-            )
-
-        if (!isSubmittedFile) {
-            const result = await deleteFile(key)
-            if (isS3Error(result)) {
-                throw new Error(`Error in S3 key: ${key}`)
-            }
-        }
-        return
-    }
-
     // Setup side effects
     useEffect(() => {
         if (formDataFromLatestRevision) {
@@ -223,7 +203,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
             //set previous submitted files
             const documentList = makeDocumentList(submissionAndRevisions)
-            if (!documentList) {
+            if (documentList instanceof Error) {
                 //Maybe a different error message here.
                 setFormDataError('MALFORMATTED_DATA')
                 return
@@ -329,14 +309,14 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         <ContractDetails
                             draftSubmission={formDataFromLatestRevision}
                             updateDraft={updateDraftHealthPlanPackage}
-                            handleDeleteFile={handleDeleteFile}
+                            previousDocuments={previousDocuments}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}>
                         <RateDetails
                             draftSubmission={formDataFromLatestRevision}
                             updateDraft={updateDraftHealthPlanPackage}
-                            handleDeleteFile={handleDeleteFile}
+                            previousDocuments={previousDocuments}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_CONTACTS}>
@@ -349,7 +329,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         <Documents
                             draftSubmission={formDataFromLatestRevision}
                             updateDraft={updateDraftHealthPlanPackage}
-                            handleDeleteFile={handleDeleteFile}
+                            previousDocuments={previousDocuments}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}>
