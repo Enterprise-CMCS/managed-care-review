@@ -119,7 +119,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
     const [computedSubmissionName, setComputedSubmissionName] =
         useState<string>('')
     const [previousDocuments, setPreviousDocuments] = useState<string[]>([])
-    const { getKey, deleteFile } = useS3()
+    const { deleteFile } = useS3()
 
     // Set up graphql calls
     const {
@@ -252,7 +252,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                 }
             }
         }
-    }, [submissionAndRevisions, getKey])
+    }, [submissionAndRevisions])
 
     if (loading) {
         return (
