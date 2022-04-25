@@ -16,10 +16,6 @@ import {
 } from '../../../testHelpers/jestHelpers'
 import { RateDetails } from './RateDetails'
 
-const fakeFileDeletion = async (x: string) => {
-    return
-}
-
 describe('RateDetails', () => {
     const emptyRateDetailsDraft = {
         ...mockDraft(),
@@ -38,7 +34,7 @@ describe('RateDetails', () => {
             <RateDetails
                 draftSubmission={emptyRateDetailsDraft}
                 updateDraft={mockUpdateDraftFn}
-                handleDeleteFile={fakeFileDeletion}
+                previousDocuments={[]}
             />,
             {
                 apolloProvider: {
@@ -61,7 +57,7 @@ describe('RateDetails', () => {
             <RateDetails
                 draftSubmission={emptyRateDetailsDraft}
                 updateDraft={jest.fn()}
-                handleDeleteFile={fakeFileDeletion}
+                previousDocuments={[]}
             />,
             {
                 apolloProvider: {
@@ -79,7 +75,7 @@ describe('RateDetails', () => {
             <RateDetails
                 draftSubmission={emptyRateDetailsDraft}
                 updateDraft={mockUpdateDraftFn}
-                handleDeleteFile={fakeFileDeletion}
+                previousDocuments={[]}
             />,
             {
                 apolloProvider: {
@@ -116,7 +112,7 @@ describe('RateDetails', () => {
             <RateDetails
                 draftSubmission={emptyRateDetailsDraft}
                 updateDraft={mockUpdateDraftFn}
-                handleDeleteFile={fakeFileDeletion}
+                previousDocuments={[]}
             />,
             {
                 apolloProvider: {
@@ -141,7 +137,7 @@ describe('RateDetails', () => {
             <RateDetails
                 draftSubmission={emptyRateDetailsDraft}
                 updateDraft={mockUpdateDraftFn}
-                handleDeleteFile={fakeFileDeletion}
+                previousDocuments={[]}
             />,
             {
                 apolloProvider: {
@@ -167,7 +163,7 @@ describe('RateDetails', () => {
             <RateDetails
                 draftSubmission={emptyRateDetailsDraft}
                 updateDraft={jest.fn()}
-                handleDeleteFile={fakeFileDeletion}
+                previousDocuments={[]}
             />,
             {
                 apolloProvider: {
@@ -222,7 +218,7 @@ describe('RateDetails', () => {
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft}
                     updateDraft={jest.fn()}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -252,7 +248,7 @@ describe('RateDetails', () => {
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft}
                     updateDraft={jest.fn()}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -275,7 +271,7 @@ describe('RateDetails', () => {
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft}
                     updateDraft={jest.fn()}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -309,7 +305,7 @@ describe('RateDetails', () => {
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft}
                     updateDraft={jest.fn()}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -335,7 +331,7 @@ describe('RateDetails', () => {
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft}
                     updateDraft={jest.fn()}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -366,7 +362,7 @@ describe('RateDetails', () => {
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft}
                     updateDraft={jest.fn()}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -396,7 +392,7 @@ describe('RateDetails', () => {
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft}
                     updateDraft={jest.fn()}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -433,7 +429,7 @@ describe('RateDetails', () => {
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft}
                     updateDraft={jest.fn()}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -468,7 +464,7 @@ describe('RateDetails', () => {
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft}
                     updateDraft={jest.fn()}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -516,7 +512,7 @@ describe('RateDetails', () => {
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -543,7 +539,7 @@ describe('RateDetails', () => {
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -572,7 +568,7 @@ describe('RateDetails', () => {
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -613,7 +609,7 @@ describe('RateDetails', () => {
                 <RateDetails
                     draftSubmission={hasDocsDetailsDraft}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -640,7 +636,7 @@ describe('RateDetails', () => {
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -680,7 +676,7 @@ describe('RateDetails', () => {
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft}
                     updateDraft={jest.fn()}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -706,7 +702,7 @@ describe('RateDetails', () => {
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft}
                     updateDraft={jest.fn()}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -735,7 +731,7 @@ describe('RateDetails', () => {
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -762,7 +758,7 @@ describe('RateDetails', () => {
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {

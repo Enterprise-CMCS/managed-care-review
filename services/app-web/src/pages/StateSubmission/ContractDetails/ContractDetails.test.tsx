@@ -19,10 +19,6 @@ import {
 
 import { ContractDetails } from './'
 
-const fakeFileDeletion = async (x: string) => {
-    return
-}
-
 describe('ContractDetails', () => {
     const emptyContractDetailsDraft = {
         ...mockDraft(),
@@ -34,7 +30,7 @@ describe('ContractDetails', () => {
             <ContractDetails
                 draftSubmission={mockDraft()}
                 updateDraft={jest.fn()}
-                handleDeleteFile={fakeFileDeletion}
+                previousDocuments={[]}
             />,
             {
                 apolloProvider: {
@@ -57,7 +53,7 @@ describe('ContractDetails', () => {
             <ContractDetails
                 draftSubmission={emptyDraft}
                 updateDraft={jest.fn()}
-                handleDeleteFile={fakeFileDeletion}
+                previousDocuments={[]}
             />,
             {
                 apolloProvider: {
@@ -183,7 +179,7 @@ describe('ContractDetails', () => {
             <ContractDetails
                 draftSubmission={emptyDraft}
                 updateDraft={mockUpdateDraftFn}
-                handleDeleteFile={fakeFileDeletion}
+                previousDocuments={[]}
             />,
             {
                 apolloProvider: {
@@ -243,7 +239,7 @@ describe('ContractDetails', () => {
             <ContractDetails
                 draftSubmission={emptyDraft}
                 updateDraft={mockUpdateDraftFn}
-                handleDeleteFile={fakeFileDeletion}
+                previousDocuments={[]}
             />,
             {
                 apolloProvider: {
@@ -320,7 +316,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={jest.fn()}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -350,7 +346,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={jest.fn()}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -373,7 +369,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={jest.fn()}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -407,7 +403,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={jest.fn()}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -433,7 +429,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={jest.fn()}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -464,7 +460,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={jest.fn()}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -494,7 +490,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={jest.fn()}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -530,7 +526,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={jest.fn()}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -565,7 +561,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={jest.fn()}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -613,7 +609,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -640,7 +636,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -669,7 +665,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -706,7 +702,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={hasDocsDetailsDraft}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -733,7 +729,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -773,7 +769,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={jest.fn()}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -799,7 +795,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={jest.fn()}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -828,7 +824,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -855,7 +851,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
