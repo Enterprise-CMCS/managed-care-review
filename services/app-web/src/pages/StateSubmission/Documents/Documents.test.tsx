@@ -12,9 +12,21 @@ import {
 } from '../../../testHelpers/jestHelpers'
 import {
     fetchCurrentUserMock,
+    fetchHealthPlanPackageMock,
     mockDraft,
+    mockUnlockedHealthPlanPackage,
 } from '../../../testHelpers/apolloHelpers'
 import { Documents } from './Documents'
+import { Route } from 'react-router'
+import { RoutesRecord } from '../../../constants/routes'
+import { StateSubmissionForm } from '..'
+import { testS3Client } from '../../../testHelpers/s3Helpers'
+import {
+    basicHealthPlanFormData,
+    basicLockedHealthPlanFormData,
+} from '../../../common-code/domain-mocks'
+import { SubmissionDocument } from '../../../common-code/domain-models'
+import { domainToBase64 } from '../../../common-code/proto/stateSubmission'
 
 describe('Documents', () => {
     it('renders without errors', async () => {
@@ -354,6 +366,125 @@ describe('Documents', () => {
                     )
                 ).toHaveLength(1)
             })
+        })
+    })
+
+    describe('the delete button', () => {
+        it('does not delete files from past revisions', async () => {
+            // SETUP
+            // for this test we want to have a package with a few different revisions
+            // with different documents setup.
+            const docs1: SubmissionDocument[] = [
+                {
+                    s3URL: 's3://bucketname/one-one/one-one.png',
+                    name: 'one one',
+                    documentCategories: ['CONTRACT_RELATED'],
+                },
+                {
+                    s3URL: 's3://bucketname/one-two/one-two.png',
+                    name: 'one two',
+                    documentCategories: ['CONTRACT_RELATED'],
+                },
+                {
+                    s3URL: 's3://bucketname/one-three/one-three.png',
+                    name: 'one three',
+                    documentCategories: ['CONTRACT_RELATED'],
+                },
+            ]
+            const docs2: SubmissionDocument[] = [
+                {
+                    s3URL: 's3://bucketname/one-two/one-two.png',
+                    name: 'one two',
+                    documentCategories: ['CONTRACT_RELATED'],
+                },
+                {
+                    s3URL: 's3://bucketname/one-three/one-three.png',
+                    name: 'one three',
+                    documentCategories: ['CONTRACT_RELATED'],
+                },
+                {
+                    s3URL: 's3://bucketname/two-one/two-one.png',
+                    name: 'two one',
+                    documentCategories: ['CONTRACT_RELATED'],
+                },
+            ]
+            const docs3: SubmissionDocument[] = [
+                {
+                    s3URL: 's3://bucketname/one-two/one-two.png',
+                    name: 'one two',
+                    documentCategories: ['CONTRACT_RELATED'],
+                },
+                {
+                    s3URL: 's3://bucketname/two-one/two-one.png',
+                    name: 'two one',
+                    documentCategories: ['CONTRACT_RELATED'],
+                },
+                {
+                    s3URL: 's3://bucketname/three-one/three-one.png',
+                    name: 'three one',
+                    documentCategories: ['CONTRACT_RELATED'],
+                },
+            ]
+
+            const baseFormData = basicLockedHealthPlanFormData()
+            baseFormData.documents = docs1
+            const b64one = domainToBase64(baseFormData)
+
+            baseFormData.documents = docs2
+            const b64two = domainToBase64(baseFormData)
+
+            const unlockedFormData = basicHealthPlanFormData()
+            unlockedFormData.documents = docs3
+            const b64three = domainToBase64(unlockedFormData)
+
+            // set our form data for each of these revisions.
+            const testPackage = mockUnlockedHealthPlanPackage()
+            testPackage.revisions[2].node.formDataProto = b64one
+            testPackage.revisions[1].node.formDataProto = b64two
+            testPackage.revisions[0].node.formDataProto = b64three
+
+            // For this test, we want to mock the call to deleteFile to see when it gets called
+            const mockS3 = testS3Client()
+            const deleteCallKeys: string[] = []
+            mockS3.deleteFile = async (key) => {
+                console.log('MOCK DELETE CALLED', key)
+                deleteCallKeys.push(key)
+            }
+
+            renderWithProviders(
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_FORM}
+                    component={StateSubmissionForm}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchHealthPlanPackageMock({
+                                id: '15',
+                                statusCode: 200,
+                                submission: testPackage,
+                            }),
+                        ],
+                    },
+                    routerProvider: { route: '/submissions/15/documents' },
+                    s3Provider: mockS3,
+                }
+            )
+
+            // PERFORM
+
+            // we should be able to find delete buttons for each of the three recent files.
+            // the aria label for each button is a lifesaver here.
+            const removeOneOTwo = await screen.findByLabelText(
+                'Remove one two document'
+            )
+            userEvent.click(removeOneOTwo)
+
+            // ASSERT
+            // when deleting a file that exists in a previous revision, we should not see it's key
+            // in the deleteCallKeys array.
+            expect(deleteCallKeys).toEqual([])
         })
     })
 
