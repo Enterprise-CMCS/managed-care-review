@@ -12,20 +12,9 @@ import {
 } from '../../../testHelpers/jestHelpers'
 import {
     fetchCurrentUserMock,
-    fetchHealthPlanPackageMock,
     mockDraft,
-    mockUnlockedHealthPlanPackageWithDocuments,
 } from '../../../testHelpers/apolloHelpers'
 import { Documents } from './Documents'
-import { Route } from 'react-router'
-import { RoutesRecord } from '../../../constants/routes'
-import { StateSubmissionForm } from '..'
-import { testS3Client } from '../../../testHelpers/s3Helpers'
-import { isS3Error } from '../../../s3'
-
-const fakeFileDeletion = async (x: string) => {
-    return
-}
 
 describe('Documents', () => {
     it('renders without errors', async () => {
@@ -34,7 +23,7 @@ describe('Documents', () => {
             <Documents
                 draftSubmission={mockDraft()}
                 updateDraft={mockUpdateDraftFn}
-                handleDeleteFile={fakeFileDeletion}
+                previousDocuments={[]}
             />,
             {
                 apolloProvider: {
@@ -64,7 +53,7 @@ describe('Documents', () => {
             <Documents
                 draftSubmission={mockDraft()}
                 updateDraft={mockUpdateDraftFn}
-                handleDeleteFile={fakeFileDeletion}
+                previousDocuments={[]}
             />,
             {
                 apolloProvider: {
@@ -88,7 +77,7 @@ describe('Documents', () => {
             <Documents
                 draftSubmission={mockDraft()}
                 updateDraft={mockUpdateDraftFn}
-                handleDeleteFile={fakeFileDeletion}
+                previousDocuments={[]}
             />,
             {
                 apolloProvider: {
@@ -119,7 +108,7 @@ describe('Documents', () => {
             <Documents
                 draftSubmission={mockDraft()}
                 updateDraft={mockUpdateDraftFn}
-                handleDeleteFile={fakeFileDeletion}
+                previousDocuments={[]}
             />,
             {
                 apolloProvider: {
@@ -160,7 +149,7 @@ describe('Documents', () => {
                         ...mockDraft(),
                     }}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -194,13 +183,7 @@ describe('Documents', () => {
                         ...mockDraft(),
                     }}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={async (x) => {
-                        if (isS3Error(x)) {
-                            throw new Error(`Error in S3 key: ${x}`)
-                        }
-                        console.log(x)
-                        return
-                    }}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -236,7 +219,7 @@ describe('Documents', () => {
                         ...mockDraft(),
                     }}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -286,7 +269,7 @@ describe('Documents', () => {
                         ...mockDraft(),
                     }}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -332,7 +315,7 @@ describe('Documents', () => {
                         submissionType: 'CONTRACT_AND_RATES',
                     }}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -385,85 +368,6 @@ describe('Documents', () => {
         })
     })
 
-    describe('the delete button', () => {
-        // For this test, we want to mock the call to deleteFile to see when it gets called
-        const mockS3 = testS3Client()
-        const deleteCallKeys: string[] = []
-        mockS3.deleteFile = async (key) => {
-            console.log('MOCK DELETE CALLED', key)
-            deleteCallKeys.push(key)
-        }
-
-        it('does not delete files from past revisions', async () => {
-            const submission = mockUnlockedHealthPlanPackageWithDocuments()
-            renderWithProviders(
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={StateSubmissionForm}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchHealthPlanPackageMock({
-                                id: '15',
-                                statusCode: 200,
-                                submission,
-                            }),
-                        ],
-                    },
-                    routerProvider: { route: '/submissions/15/documents' },
-                    s3Provider: mockS3,
-                }
-            )
-
-            // PERFORM
-
-            // we should be able to find delete buttons for each of the three recent files.
-            // the aria label for each button is a lifesaver here.
-            const removeOneTwo = await screen.findByLabelText(
-                'Remove one two document'
-            )
-            userEvent.click(removeOneTwo)
-
-            // ASSERT
-            // When deleting a file that exists in a previous revision, we should not see it's key
-            // in the deleteCallKeys array.
-            expect(deleteCallKeys).toEqual([])
-        })
-        it('does delete files not in previous revisions', async () => {
-            const submission = mockUnlockedHealthPlanPackageWithDocuments()
-            renderWithProviders(
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={StateSubmissionForm}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchHealthPlanPackageMock({
-                                id: '15',
-                                statusCode: 200,
-                                submission,
-                            }),
-                        ],
-                    },
-                    routerProvider: { route: '/submissions/15/documents' },
-                    s3Provider: mockS3,
-                }
-            )
-
-            // When deleting a file that do not exist in a previous revision, we should see it's key
-            // in the deleteCallKeys array.
-            const removeThreeOne = await screen.findByLabelText(
-                'Remove three one document'
-            )
-            userEvent.click(removeThreeOne)
-            expect(deleteCallKeys).toEqual(['three-one'])
-        })
-    })
-
     describe('error summary at top of page', () => {
         it('displayed as expected', async () => {
             const mockUpdateDraftFn = jest.fn()
@@ -474,7 +378,7 @@ describe('Documents', () => {
                         submissionType: 'CONTRACT_AND_RATES',
                     }}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -525,7 +429,7 @@ describe('Documents', () => {
                         submissionType: 'CONTRACT_AND_RATES',
                     }}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -557,7 +461,7 @@ describe('Documents', () => {
                         submissionType: 'CONTRACT_AND_RATES',
                     }}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -594,7 +498,7 @@ describe('Documents', () => {
                         submissionType: 'CONTRACT_AND_RATES',
                     }}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -642,7 +546,7 @@ describe('Documents', () => {
                         submissionType: 'CONTRACT_AND_RATES',
                     }}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -672,7 +576,7 @@ describe('Documents', () => {
                         submissionType: 'CONTRACT_ONLY',
                     }}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -715,7 +619,7 @@ describe('Documents', () => {
                         ...mockDraft(),
                     }}
                     updateDraft={jest.fn()}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -763,7 +667,7 @@ describe('Documents', () => {
                         submissionType: 'CONTRACT_AND_RATES',
                     }}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -795,7 +699,7 @@ describe('Documents', () => {
                         submissionType: 'CONTRACT_AND_RATES',
                     }}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -829,7 +733,7 @@ describe('Documents', () => {
                         submissionType: 'CONTRACT_AND_RATES',
                     }}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -858,7 +762,7 @@ describe('Documents', () => {
                         submissionType: 'CONTRACT_AND_RATES',
                     }}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -907,7 +811,7 @@ describe('Documents', () => {
                         submissionType: 'CONTRACT_AND_RATES',
                     }}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -939,7 +843,7 @@ describe('Documents', () => {
                         submissionType: 'CONTRACT_AND_RATES',
                     }}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -973,7 +877,7 @@ describe('Documents', () => {
                         submissionType: 'CONTRACT_AND_RATES',
                     }}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -1003,7 +907,7 @@ describe('Documents', () => {
                         submissionType: 'CONTRACT_AND_RATES',
                     }}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -1043,7 +947,7 @@ describe('Documents', () => {
                         submissionType: 'CONTRACT_ONLY',
                     }}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -1089,7 +993,7 @@ describe('Documents', () => {
                         ],
                     }}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -1123,7 +1027,7 @@ describe('Documents', () => {
                         ],
                     }}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -1173,7 +1077,7 @@ describe('Documents', () => {
                         submissionType: 'CONTRACT_AND_RATES',
                     }}
                     updateDraft={mockUpdateDraftFn}
-                    handleDeleteFile={fakeFileDeletion}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
