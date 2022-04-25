@@ -1,5 +1,14 @@
 .disabled {
   cursor: not-allowed;
+}
+
+.disabledButtonStyle {
   background-color: #c9c9c9;
   color: #fff;
+  outline: none;
+}
+
+.disabledOutlineStyle {
+  background-color: transparent;
+  color: #c9c9c9;
 }

@@ -11,24 +11,26 @@ Main application-wide action button.
 
 */
 type ButtonProps = {
-    variant: 'primary' | 'secondary' | 'outline' | 'linkStyle' // subset react-uswds, plus new variant "linkStyle" that emulates link styles
-    hintText?: string
+    variant: 'primary' | 'secondary' | 'outline' | 'linkStyle' | 'loading'
 } & ComponentProps<typeof UswdsButton>
 
 export const Button = ({
     disabled,
     children,
     className,
-    hintText, // sr only hint text, used for disabled buttons
     variant,
     ...inheritedProps
 }: ButtonProps): React.ReactElement => {
     const isDisabled = disabled || inheritedProps['aria-disabled']
     const isLinkStyled = variant === 'linkStyle'
+    const isOutline = variant === 'outline'
 
     const classes = classnames(
         {
             [styles.disabled]: isDisabled,
+            [styles.disabledButtonStyle]: isDisabled && !isLinkStyled,
+            [`usa-button--outline-disabled ${styles.disabledOutlineStyle}`]:
+                isDisabled && isOutline,
         },
         className
     )
@@ -41,12 +43,15 @@ export const Button = ({
     }
 
     // prefer aria attributes to HTML disabled attribute
+    const ariaLabel = inheritedProps['aria-label']
     const accessibilityProps = {
         ariaDisabled: isDisabled,
         disabled: false,
         ariaLabel: isDisabled
-            ? `${inheritedProps['aria-label']} (disabled)`
-            : inheritedProps['aria-label'],
+            ? ariaLabel
+                ? `${ariaLabel} (disabled)`
+                : '(disabled)'
+            : inheritedProps['aria-label'] || '',
     }
 
     return (
