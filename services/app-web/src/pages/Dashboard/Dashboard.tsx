@@ -6,13 +6,13 @@ import { NavLink, useLocation } from 'react-router-dom'
 import {
     packageName,
     programNames,
-    HealthPlanPackageStatusType,
-} from '../../common-code/domain-models'
-import { base64ToDomain } from '../../common-code/proto/stateSubmission'
+} from '../../common-code/healthPlanFormDataType'
+import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
 import { Loading } from '../../components/Loading'
 import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
 import { useAuth } from '../../contexts/AuthContext'
 import {
+    HealthPlanPackageStatus,
     SubmissionType as GQLSubmissionType,
     useIndexHealthPlanPackagesQuery,
 } from '../../gen/gqlClient'
@@ -30,11 +30,11 @@ type SubmissionInDashboard = {
     programIDs: Array<string>
     submittedAt?: string
     updatedAt: string
-    status: HealthPlanPackageStatusType
+    status: HealthPlanPackageStatus
     submissionType: GQLSubmissionType
 }
 
-const isSubmitted = (status: HealthPlanPackageStatusType) =>
+const isSubmitted = (status: HealthPlanPackageStatus) =>
     status === 'SUBMITTED' || status === 'RESUBMITTED'
 
 function submissionURL(
@@ -52,7 +52,7 @@ function submissionURL(
 const StatusTag = ({
     status,
 }: {
-    status: HealthPlanPackageStatusType
+    status: HealthPlanPackageStatus
 }): React.ReactElement => {
     const tagStyles = classnames('', {
         [styles.submittedTag]: isSubmitted(status),

@@ -5,7 +5,7 @@ hooks:
     # Forgive me. This hook passes the edited files in as argv, so we && echo to make them harmless
     - cp src/schema.graphql ../app-web/src/gen/ && echo "HI"
 generates:
-  ../app-api/gen/gqlServer.d.ts:
+  ../app-api/src/gen/gqlServer.d.ts:
     plugins:
       - 'typescript'
       - 'typescript-resolvers'
@@ -15,13 +15,10 @@ generates:
       defaultMapper: Partial<{T}>
       enumsAsTypes: true
       mappers:
-        User: ../../app-web/src/common-code/domain-models#CognitoUserType
-        StateUser: ../../app-web/src/common-code/domain-models#CognitoStateUserType
-        CMSUser: ../../app-web/src/common-code/domain-models#CognitoCMSUserType
-        DraftSubmission: ../../app-web/src/common-code/domain-models#UnlockedHealthPlanFormDataType
-        StateSubmission: ../../app-web/src/common-code/domain-models#LockedHealthPlanFormDataType
-        Submission: ../../app-web/src/common-code/domain-models#HealthPlanFormDataType
-        HealthPlanPackage: ../../app-web/src/common-code/domain-models#HealthPlanPackageType
+        User: ../domain-models#CognitoUserType
+        StateUser: ../domain-models#CognitoStateUserType
+        CMSUser: ../domain-models#CognitoCMSUserType
+        HealthPlanPackage: ../domain-models#HealthPlanPackageType
   ../app-web/src/gen/gqlClient.tsx:
     documents:
       - src/queries/*.graphql

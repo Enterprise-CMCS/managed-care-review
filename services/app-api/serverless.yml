@@ -133,10 +133,10 @@ layers:
 
 functions:
   email_submit:
-    handler: handlers/email_submit.main
+    handler: src/handlers/email_submit.main
 
   health:
-    handler: handlers/health_check.main
+    handler: src/handlers/health_check.main
     events:
       - http:
           path: health_check
@@ -144,7 +144,7 @@ functions:
           cors: true
 
   log_event:
-    handler: handlers/log_event.main
+    handler: src/handlers/log_event.main
     events:
       - http:
           path: log_event
@@ -163,7 +163,7 @@ functions:
               - traceparent
 
   otel:
-    handler: handlers/otel_proxy.main
+    handler: src/handlers/otel_proxy.main
     events:
       - http:
           path: otel
@@ -182,7 +182,7 @@ functions:
               - traceparent
 
   graphql:
-    handler: handlers/apollo_gql.graphqlHandler
+    handler: src/handlers/apollo_gql.graphqlHandler
     events:
       - http:
           path: graphql
@@ -226,7 +226,7 @@ functions:
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-0-1:1
 
   hello:
-    handler: handlers/hello.main
+    handler: src/handlers/hello.main
     events:
       - http:
           path: hello
@@ -235,7 +235,7 @@ functions:
           authorizer: aws_iam
 
   migrate:
-    handler: handlers/postgres_migrate.main
+    handler: src/handlers/postgres_migrate.main
     timeout: 60 # aurora cold start can be long
     vpc:
       securityGroupIds:
@@ -246,7 +246,7 @@ functions:
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-0-1:1
 
   zip_keys:
-    handler: handlers/bulk_download.main
+    handler: src/handlers/bulk_download.main
     events:
       - http:
           path: zip

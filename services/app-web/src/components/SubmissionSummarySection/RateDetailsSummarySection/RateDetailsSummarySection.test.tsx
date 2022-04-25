@@ -7,7 +7,7 @@ import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'
 import { Route } from 'react-router'
 import { RoutesRecord } from '../../../constants/routes'
-import { formatRateNameDate } from '../../../dateHelpers'
+import { formatRateNameDate } from '../../../common-code/dateHelpers'
 
 describe('RateDetailsSummarySection', () => {
     const draftSubmission = mockContractAndRatesDraft()

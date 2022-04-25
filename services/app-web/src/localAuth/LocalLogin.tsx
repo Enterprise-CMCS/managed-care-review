@@ -19,9 +19,9 @@ import tophAvatar from '../assets/images/toph.png'
 import zukoAvatar from '../assets/images/zuko.png'
 
 import { useAuth } from '../contexts/AuthContext'
-import { CognitoUserType } from '../common-code/domain-models'
+import { LocalUserType } from './LocalUserType'
 
-const localUsers: CognitoUserType[] = [
+const localUsers: LocalUserType[] = [
     {
         email: 'aang@example.com',
         name: 'Aang',
@@ -52,7 +52,7 @@ export function LocalLogin(): React.ReactElement {
     const history = useHistory()
     const { checkAuth, loginStatus } = useAuth()
 
-    async function login(user: CognitoUserType) {
+    async function login(user: LocalUserType) {
         loginLocalUser(user)
 
         try {

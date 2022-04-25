@@ -18,7 +18,17 @@ import {
 
 import { ContractDetails } from './'
 
+const scrollIntoViewMock = jest.fn()
+HTMLElement.prototype.scrollIntoView = scrollIntoViewMock
+
 describe('ContractDetails', () => {
+    afterEach(() => {
+        jest.resetAllMocks()
+    })
+    afterAll(() => {
+        jest.clearAllMocks()
+    })
+
     const emptyContractDetailsDraft = {
         ...mockDraft(),
     }
@@ -75,6 +85,7 @@ describe('ContractDetails', () => {
             'Amendment to base contract'
         )
         amendmentRadio.click()
+
         const input = screen.getByLabelText('Upload contract')
         userEvent.upload(input, [TEST_DOC_FILE])
 
@@ -187,6 +198,7 @@ describe('ContractDetails', () => {
             'Amendment to base contract'
         )
         amendmentRadio.click()
+        expect(scrollIntoViewMock).toHaveBeenCalled()
 
         // click "next"
         const continueButton = screen.getByRole('button', { name: 'Continue' })

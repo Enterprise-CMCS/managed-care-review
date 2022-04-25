@@ -1,26 +1,27 @@
 import * as Yup from 'yup'
-import { dayjs } from '../../../dateHelpers'
+import { dayjs } from '../../../common-code/dateHelpers'
 import { validateDateFormat } from '../../../formHelpers'
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
 const RateDetailsFormSchema = Yup.object().shape({
     rateType: Yup.string().defined('You must choose a rate certification type'),
-    rateDateStart: Yup.date()
-        .when("rateType", (contractType) => {
-            if (contractType) {
-                return Yup.date()
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore-next-line
-                .validateDateFormat('YYYY-MM-DD', true)
-                .defined('You must enter a start date')
-                .typeError('The start date must be in MM/DD/YYYY format');
-            }
-        }),
-    rateDateEnd: Yup.date()
-        .when("rateType", (rateType) => {
-            if (rateType) {
-                return Yup.date()
+    rateDateStart: Yup.date().when('rateType', (contractType) => {
+        if (contractType) {
+            return (
+                Yup.date()
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore-next-line
+                    .validateDateFormat('YYYY-MM-DD', true)
+                    .defined('You must enter a start date')
+                    .typeError('The start date must be in MM/DD/YYYY format')
+            )
+        }
+    }),
+    rateDateEnd: Yup.date().when('rateType', (rateType) => {
+        if (rateType) {
+            return (
+                Yup.date()
                     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                     // @ts-ignore-next-line
                     .validateDateFormat('YYYY-MM-DD', true)
@@ -39,19 +40,25 @@ const RateDetailsFormSchema = Yup.object().shape({
                             }
                         }
                     )
-            }
-        }),
-    rateDateCertified: Yup.date()
-        .when("rateType", (rateType) => {
-            if (rateType) {
-                return Yup.date()
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore-next-line
-                .validateDateFormat('YYYY-MM-DD', true)
-                .defined('You must enter the date the document was certified')
-                .typeError('The certified date must be in MM/DD/YYYY format');
-            }
-        }),
+            )
+        }
+    }),
+    rateDateCertified: Yup.date().when('rateType', (rateType) => {
+        if (rateType) {
+            return (
+                Yup.date()
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore-next-line
+                    .validateDateFormat('YYYY-MM-DD', true)
+                    .defined(
+                        'You must enter the date the document was certified'
+                    )
+                    .typeError(
+                        'The certified date must be in MM/DD/YYYY format'
+                    )
+            )
+        }
+    }),
     effectiveDateStart: Yup.date().when('rateType', {
         is: 'AMENDMENT',
         then: Yup.date()

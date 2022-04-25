@@ -1,14 +1,14 @@
-import { isCognitoUser } from '../common-code/domain-models'
-import { CognitoUserType } from '../common-code/domain-models'
+import { isLocalUser, LocalUserType } from './LocalUserType'
+
 const localUserKey = 'localUser'
 
 // loginLocalUser stores a local user in local storage
-function loginLocalUser(user: CognitoUserType): void {
+function loginLocalUser(user: LocalUserType): void {
     const store = window.localStorage
     store.setItem(localUserKey, JSON.stringify(user))
 }
 
-// Matching the signature for cognito signout for now.
+// Matching the signature for Local signout for now.
 async function logoutLocalUser(): Promise<null> {
     const store = window.localStorage
     store.removeItem(localUserKey)
@@ -16,7 +16,7 @@ async function logoutLocalUser(): Promise<null> {
 }
 
 // getLoggedInUser retrieves a local user if one is logged in
-function getLoggedInUser(): Promise<CognitoUserType | null> {
+function getLoggedInUser(): Promise<LocalUserType | null> {
     const store = window.localStorage
     const storedUserString = store.getItem(localUserKey)
 
@@ -28,7 +28,7 @@ function getLoggedInUser(): Promise<CognitoUserType | null> {
         try {
             const storedUser = JSON.parse(storedUserString)
 
-            if (isCognitoUser(storedUser)) {
+            if (isLocalUser(storedUser)) {
                 accept(storedUser)
                 return
             } else {

@@ -28,7 +28,7 @@ import {
 import { PageActions } from '../PageActions'
 import styles from '../StateSubmissionForm.module.scss'
 import { GenericApiErrorBanner } from '../../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
-import { UnlockedHealthPlanFormDataType } from '../../../common-code/domain-models'
+import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 
 // Formik setup
 // Should be listed in order of appearance on field to allow errors to focus as expected

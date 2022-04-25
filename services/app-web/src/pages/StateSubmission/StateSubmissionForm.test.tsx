@@ -17,7 +17,7 @@ import { StateSubmissionForm } from './StateSubmissionForm'
 import {
     base64ToDomain,
     domainToBase64,
-} from '../../common-code/proto/stateSubmission'
+} from '../../common-code/proto/healthPlanFormDataProto'
 
 describe('StateSubmissionForm', () => {
     describe('loads draft submission', () => {

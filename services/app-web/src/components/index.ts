@@ -15,7 +15,9 @@ export {
     FieldRadio,
     FieldTextarea,
     FieldTextInput,
+    FieldPreserveScrollPosition,
 } from './Form'
+
 export { Footer } from './Footer'
 
 export { Header } from './Header'
