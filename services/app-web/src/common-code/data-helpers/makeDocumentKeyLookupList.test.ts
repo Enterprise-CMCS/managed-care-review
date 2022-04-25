@@ -8,7 +8,6 @@ describe('makeDocumentList', () => {
     it('should make two lists with document s3 keys', () => {
         const submissions = mockSubmittedHealthPlanPackageWithRevision()
         const lookupTable = makeDocumentList(submissions)
-        console.log(lookupTable)
 
         expect(lookupTable).toEqual({
             currentDocuments: [
