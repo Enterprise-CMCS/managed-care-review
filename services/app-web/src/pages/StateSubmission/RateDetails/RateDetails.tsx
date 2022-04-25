@@ -35,10 +35,7 @@ import { RateDetailsFormSchema } from './RateDetailsSchema'
 // import { updatesFromSubmission } from '../updateSubmissionTransform'
 import { useS3 } from '../../../contexts/S3Context'
 import { PageActions } from '../PageActions'
-import {
-    UnlockedHealthPlanFormDataType,
-    HealthPlanPackageStatusType,
-} from '../../../common-code/domain-models'
+import { UnlockedHealthPlanFormDataType } from '../../../common-code/domain-models'
 type FormError =
     FormikErrors<RateDetailsFormValues>[keyof FormikErrors<RateDetailsFormValues>]
 
@@ -68,12 +65,12 @@ export interface RateDetailsFormValues {
 export const RateDetails = ({
     draftSubmission,
     showValidations = false,
-    planPackageStatus,
+    handleDeleteFile,
     updateDraft,
 }: {
     draftSubmission: UnlockedHealthPlanFormDataType
     showValidations?: boolean
-    planPackageStatus?: HealthPlanPackageStatusType
+    handleDeleteFile: (key: string) => Promise<void>
     updateDraft: (
         input: UnlockedHealthPlanFormDataType
     ) => Promise<HealthPlanPackage | Error>
@@ -82,7 +79,7 @@ export const RateDetails = ({
     const history = useHistory()
 
     // Rate documents state management
-    const { deleteFile, getKey, getS3URL, scanFile, uploadFile } = useS3()
+    const { getKey, getS3URL, scanFile, uploadFile } = useS3()
     const [fileItems, setFileItems] = React.useState<FileItemT[]>([])
     const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
         React.useState(false)
@@ -140,18 +137,6 @@ export const RateDetails = ({
         fileItems: FileItemT[]
     }) => {
         setFileItems(fileItems)
-    }
-    const handleDeleteFile = async (key: string) => {
-        const result = await deleteFile(
-            key,
-            planPackageStatus,
-            fileItemsFromDraftSubmission
-        )
-        if (isS3Error(result)) {
-            throw new Error(`Error in S3 key: ${key}`)
-        }
-
-        return
     }
 
     const handleUploadFile = async (file: File): Promise<S3FileData> => {

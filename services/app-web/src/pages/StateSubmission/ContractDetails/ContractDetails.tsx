@@ -45,7 +45,6 @@ import {
     ManagedCareEntity,
     UnlockedHealthPlanFormDataType,
     CapitationRatesAmendedReason,
-    HealthPlanPackageStatusType,
 } from '../../../common-code/domain-models'
 import {
     AmendableItemsRecord,
@@ -103,12 +102,12 @@ type FormError =
 export const ContractDetails = ({
     draftSubmission,
     showValidations = false,
-    planPackageStatus,
+    handleDeleteFile,
     updateDraft,
 }: {
     draftSubmission: UnlockedHealthPlanFormDataType
     showValidations?: boolean
-    planPackageStatus?: HealthPlanPackageStatusType
+    handleDeleteFile: (key: string) => Promise<void>
     updateDraft: (
         input: UnlockedHealthPlanFormDataType
     ) => Promise<HealthPlanPackage | Error>
@@ -117,7 +116,7 @@ export const ContractDetails = ({
     const history = useHistory()
 
     // Contract documents state management
-    const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
+    const { uploadFile, scanFile, getKey, getS3URL } = useS3()
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
     const hasValidFiles =
         fileItems.length > 0 &&
@@ -181,18 +180,6 @@ export const ContractDetails = ({
         fileItems: FileItemT[]
     }) => {
         setFileItems(fileItems)
-    }
-    const handleDeleteFile = async (key: string) => {
-        const result = await deleteFile(
-            key,
-            planPackageStatus,
-            fileItemsFromDraftSubmission
-        )
-        if (isS3Error(result)) {
-            throw new Error(`Error in S3 key: ${key}`)
-        }
-
-        return
     }
 
     const handleUploadFile = async (file: File): Promise<S3FileData> => {
