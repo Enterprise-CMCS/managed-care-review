@@ -2,7 +2,7 @@ import { makeDocumentList } from './makeDocumentKeyLookupList'
 import {
     mockSubmittedHealthPlanPackage,
     mockSubmittedHealthPlanPackageWithRevision,
-} from '../../testHelpers/apolloHelpers'
+} from '../testHelpers/apolloHelpers'
 
 describe('makeDocumentList', () => {
     it('should make two lists with document s3 keys', () => {
@@ -33,6 +33,16 @@ describe('makeDocumentList', () => {
     })
 
     it('should return empty arrays for no documents in submission', () => {
+        const submissions = mockSubmittedHealthPlanPackage()
+        const lookupTable = makeDocumentList(submissions)
+
+        expect(lookupTable).toEqual({
+            currentDocuments: [],
+            previousDocuments: [],
+        })
+    })
+
+    it('should return error if any revisions does not decode', () => {
         const submissions = mockSubmittedHealthPlanPackage()
         const lookupTable = makeDocumentList(submissions)
 

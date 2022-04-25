@@ -1,5 +1,5 @@
 import { makeDateTable } from './makeDocumentDateLookupTable'
-import { mockSubmittedHealthPlanPackageWithRevision } from '../../testHelpers/apolloHelpers'
+import { mockSubmittedHealthPlanPackageWithRevision } from '../testHelpers/apolloHelpers'
 
 describe('makeDateTable', () => {
     it('should make a proper lookup table', () => {

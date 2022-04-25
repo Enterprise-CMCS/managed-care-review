@@ -1,6 +1,6 @@
-import { base64ToDomain } from '../proto/stateSubmission'
-import { HealthPlanPackage } from '../../gen/gqlClient'
-import { DocumentDateLookupTable } from '../../pages/SubmissionSummary/SubmissionSummary'
+import { base64ToDomain } from '../common-code/proto/stateSubmission'
+import { HealthPlanPackage } from '../gen/gqlClient'
+import { DocumentDateLookupTable } from '../pages/SubmissionSummary/SubmissionSummary'
 export const makeDateTable = (
     submissions: HealthPlanPackage
 ): DocumentDateLookupTable | undefined => {

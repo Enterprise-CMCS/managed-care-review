@@ -1,6 +1,6 @@
-import { base64ToDomain } from '../proto/stateSubmission'
-import { HealthPlanPackage } from '../../gen/gqlClient'
-import { parseKey } from '../s3URLEncoding'
+import { base64ToDomain } from '../common-code/proto/stateSubmission'
+import { HealthPlanPackage } from '../gen/gqlClient'
+import { parseKey } from '../common-code/s3URLEncoding'
 
 type LookupListType = {
     currentDocuments: string[]
