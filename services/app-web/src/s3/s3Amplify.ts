@@ -4,8 +4,6 @@ import { v4 as uuidv4 } from 'uuid'
 
 import type { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
-import { HealthPlanPackageStatusType } from '../common-code/domain-models'
-import { FileItemT } from '../components'
 
 // TYPES AND TYPE GUARDS
 type s3PutError = {
@@ -64,38 +62,22 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
             }
         },
 
-        deleteFile: async (
-            filename: string,
-            planPackageStatus?: HealthPlanPackageStatusType,
-            fileItems?: FileItemT[]
-        ): Promise<void | S3Error> => {
-            // Only delete file from S3 bucket if submission status is DRAFT or if file has NOT been submitted before.
-            // Meaning it was uploaded, but health plan package has not been submitted/resubmitted yet.
-            const isSubmittedFile =
-                fileItems &&
-                Boolean(fileItems.some((item) => item.key === filename))
-            if (planPackageStatus === 'DRAFT' || !isSubmittedFile) {
-                try {
-                    await Storage.remove(filename)
-                    return
-                } catch (err) {
-                    assertIsS3PutError(err)
-                    if (
-                        err.name === 'Error' &&
-                        err.message === 'Network Error'
-                    ) {
-                        console.log('Error deleting file', err)
-                        return {
-                            code: 'NETWORK_ERROR',
-                            message: 'Error deleting file from the cloud.',
-                        }
-                    }
-
-                    console.log('Unexpected Error deleting file from S3', err)
-                    throw err
-                }
-            } else {
+        deleteFile: async (filename: string): Promise<void | S3Error> => {
+            try {
+                await Storage.remove(filename)
                 return
+            } catch (err) {
+                assertIsS3PutError(err)
+                if (err.name === 'Error' && err.message === 'Network Error') {
+                    console.log('Error deleting file', err)
+                    return {
+                        code: 'NETWORK_ERROR',
+                        message: 'Error deleting file from the cloud.',
+                    }
+                }
+
+                console.log('Unexpected Error deleting file from S3', err)
+                throw err
             }
         },
         /*  
