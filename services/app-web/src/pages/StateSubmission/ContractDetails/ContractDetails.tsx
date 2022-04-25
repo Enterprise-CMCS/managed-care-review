@@ -102,12 +102,12 @@ type FormError =
 export const ContractDetails = ({
     draftSubmission,
     showValidations = false,
-    handleDeleteFile,
+    previousDocuments,
     updateDraft,
 }: {
     draftSubmission: UnlockedHealthPlanFormDataType
+    previousDocuments: string[]
     showValidations?: boolean
-    handleDeleteFile: (key: string) => Promise<void>
     updateDraft: (
         input: UnlockedHealthPlanFormDataType
     ) => Promise<HealthPlanPackage | Error>
@@ -116,7 +116,7 @@ export const ContractDetails = ({
     const history = useHistory()
 
     // Contract documents state management
-    const { uploadFile, scanFile, getKey, getS3URL } = useS3()
+    const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
     const hasValidFiles =
         fileItems.length > 0 &&
@@ -180,6 +180,22 @@ export const ContractDetails = ({
         fileItems: FileItemT[]
     }) => {
         setFileItems(fileItems)
+    }
+
+    const handleDeleteFile = async (key: string) => {
+        const isSubmittedFile =
+            previousDocuments &&
+            Boolean(
+                previousDocuments.some((previousKey) => previousKey === key)
+            )
+
+        if (!isSubmittedFile) {
+            const result = await deleteFile(key)
+            if (isS3Error(result)) {
+                throw new Error(`Error in S3 key: ${key}`)
+            }
+        }
+        return
     }
 
     const handleUploadFile = async (file: File): Promise<S3FileData> => {

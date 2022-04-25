@@ -19,7 +19,7 @@ import { UnlockedHealthPlanFormDataType } from '../../../common-code/domain-mode
 
 type DocumentProps = {
     draftSubmission: UnlockedHealthPlanFormDataType
-    handleDeleteFile: (key: string) => Promise<void>
+    previousDocuments: string[]
     updateDraft: (
         input: UnlockedHealthPlanFormDataType
     ) => Promise<HealthPlanPackage | Error>
@@ -27,7 +27,7 @@ type DocumentProps = {
 
 export const Documents = ({
     draftSubmission,
-    handleDeleteFile,
+    previousDocuments,
     updateDraft,
 }: DocumentProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = useState(false)
@@ -35,7 +35,7 @@ export const Documents = ({
     const history = useHistory()
 
     // Documents state management
-    const { uploadFile, scanFile, getKey, getS3URL } = useS3()
+    const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
     const [fileItems, setFileItems] = useState<FileItemT[]>([])
     const hasValidFiles = fileItems.every(
         (item) => item.status === 'UPLOAD_COMPLETE'
@@ -132,6 +132,22 @@ export const Documents = ({
         fileItems: FileItemT[]
     }) => {
         setFileItems(fileItems)
+    }
+
+    const handleDeleteFile = async (key: string) => {
+        const isSubmittedFile =
+            previousDocuments &&
+            Boolean(
+                previousDocuments.some((previousKey) => previousKey === key)
+            )
+
+        if (!isSubmittedFile) {
+            const result = await deleteFile(key)
+            if (isS3Error(result)) {
+                throw new Error(`Error in S3 key: ${key}`)
+            }
+        }
+        return
     }
 
     const handleUploadFile = async (file: File): Promise<S3FileData> => {

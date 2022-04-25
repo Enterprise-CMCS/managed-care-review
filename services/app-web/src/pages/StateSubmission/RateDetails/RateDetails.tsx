@@ -64,13 +64,13 @@ export interface RateDetailsFormValues {
 }
 export const RateDetails = ({
     draftSubmission,
+    previousDocuments,
     showValidations = false,
-    handleDeleteFile,
     updateDraft,
 }: {
     draftSubmission: UnlockedHealthPlanFormDataType
+    previousDocuments: string[]
     showValidations?: boolean
-    handleDeleteFile: (key: string) => Promise<void>
     updateDraft: (
         input: UnlockedHealthPlanFormDataType
     ) => Promise<HealthPlanPackage | Error>
@@ -79,7 +79,7 @@ export const RateDetails = ({
     const history = useHistory()
 
     // Rate documents state management
-    const { getKey, getS3URL, scanFile, uploadFile } = useS3()
+    const { deleteFile, getKey, getS3URL, scanFile, uploadFile } = useS3()
     const [fileItems, setFileItems] = React.useState<FileItemT[]>([])
     const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
         React.useState(false)
@@ -137,6 +137,22 @@ export const RateDetails = ({
         fileItems: FileItemT[]
     }) => {
         setFileItems(fileItems)
+    }
+
+    const handleDeleteFile = async (key: string) => {
+        const isSubmittedFile =
+            previousDocuments &&
+            Boolean(
+                previousDocuments.some((previousKey) => previousKey === key)
+            )
+
+        if (!isSubmittedFile) {
+            const result = await deleteFile(key)
+            if (isS3Error(result)) {
+                throw new Error(`Error in S3 key: ${key}`)
+            }
+        }
+        return
     }
 
     const handleUploadFile = async (file: File): Promise<S3FileData> => {
