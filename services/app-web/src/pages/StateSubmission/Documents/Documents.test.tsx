@@ -498,15 +498,24 @@ describe('Documents', () => {
 
             // we should be able to find delete buttons for each of the three recent files.
             // the aria label for each button is a lifesaver here.
-            const removeOneOTwo = await screen.findByLabelText(
+            const removeOneTwo = await screen.findByLabelText(
                 'Remove one two document'
             )
-            userEvent.click(removeOneOTwo)
+            userEvent.click(removeOneTwo)
 
             // ASSERT
             // when deleting a file that exists in a previous revision, we should not see it's key
             // in the deleteCallKeys array.
             expect(deleteCallKeys).toEqual([])
+
+            const removeThreeOne = await screen.findByLabelText(
+                'Remove three one document'
+            )
+            userEvent.click(removeThreeOne)
+            // ASSERT
+            // when deleting a file that do not exist in a previous revision, we should see it's key
+            // in the deleteCallKeys array.
+            expect(deleteCallKeys).toEqual(['three-one'])
         })
     })
 
