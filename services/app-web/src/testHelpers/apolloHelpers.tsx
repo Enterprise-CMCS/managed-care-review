@@ -8,6 +8,7 @@ import {
 } from '../common-code/domain-mocks'
 import {
     LockedHealthPlanFormDataType,
+    SubmissionDocument,
     UnlockedHealthPlanFormDataType,
 } from '../common-code/domain-models'
 import { domainToBase64 } from '../common-code/proto/stateSubmission'
@@ -480,6 +481,82 @@ export function mockUnlockedHealthPlanPackage(
             },
         ],
     }
+}
+
+export function mockUnlockedHealthPlanPackageWithDocuments(): HealthPlanPackage {
+    // SETUP
+    // for this test we want to have a package with a few different revisions
+    // with different documents setup.
+    const docs1: SubmissionDocument[] = [
+        {
+            s3URL: 's3://bucketname/one-one/one-one.png',
+            name: 'one one',
+            documentCategories: ['CONTRACT_RELATED'],
+        },
+        {
+            s3URL: 's3://bucketname/one-two/one-two.png',
+            name: 'one two',
+            documentCategories: ['CONTRACT_RELATED'],
+        },
+        {
+            s3URL: 's3://bucketname/one-three/one-three.png',
+            name: 'one three',
+            documentCategories: ['CONTRACT_RELATED'],
+        },
+    ]
+    const docs2: SubmissionDocument[] = [
+        {
+            s3URL: 's3://bucketname/one-two/one-two.png',
+            name: 'one two',
+            documentCategories: ['CONTRACT_RELATED'],
+        },
+        {
+            s3URL: 's3://bucketname/one-three/one-three.png',
+            name: 'one three',
+            documentCategories: ['CONTRACT_RELATED'],
+        },
+        {
+            s3URL: 's3://bucketname/two-one/two-one.png',
+            name: 'two one',
+            documentCategories: ['CONTRACT_RELATED'],
+        },
+    ]
+    const docs3: SubmissionDocument[] = [
+        {
+            s3URL: 's3://bucketname/one-two/one-two.png',
+            name: 'one two',
+            documentCategories: ['CONTRACT_RELATED'],
+        },
+        {
+            s3URL: 's3://bucketname/two-one/two-one.png',
+            name: 'two one',
+            documentCategories: ['CONTRACT_RELATED'],
+        },
+        {
+            s3URL: 's3://bucketname/three-one/three-one.png',
+            name: 'three one',
+            documentCategories: ['CONTRACT_RELATED'],
+        },
+    ]
+
+    const baseFormData = basicLockedHealthPlanFormData()
+    baseFormData.documents = docs1
+    const b64one = domainToBase64(baseFormData)
+
+    baseFormData.documents = docs2
+    const b64two = domainToBase64(baseFormData)
+
+    const unlockedFormData = basicHealthPlanFormData()
+    unlockedFormData.documents = docs3
+    const b64three = domainToBase64(unlockedFormData)
+
+    // set our form data for each of these revisions.
+    const testPackage = mockUnlockedHealthPlanPackage()
+    testPackage.revisions[2].node.formDataProto = b64one
+    testPackage.revisions[1].node.formDataProto = b64two
+    testPackage.revisions[0].node.formDataProto = b64three
+
+    return testPackage
 }
 
 type fetchCurrentUserMockProps = {
