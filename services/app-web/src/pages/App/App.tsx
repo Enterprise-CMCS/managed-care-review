@@ -72,14 +72,15 @@ function App({
         </ErrorBoundary>
     )
 }
+
 export default withLDProvider<AppProps>({
     clientSideID: process.env.REACT_APP_LD_CLIENT_ID || '',
     options: {
         // OTEL tracing relies on this header, which is added on every request
         // Launch Darkly rejects any requests that come in with this header, so
         // we need to remove it.
-        sendLDHeaders: false,
         requestHeaderTransform: (headers: Map<string, string>) => {
+            console.log(headers)
             return {
                 ...headers,
                 'x-amzn-trace-id': undefined,
